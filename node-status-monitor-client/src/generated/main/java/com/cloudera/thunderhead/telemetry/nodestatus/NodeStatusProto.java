@@ -1921,6 +1921,24 @@ public final class NodeStatusProto {
      * <code>int64 timestamp = 3;</code>
      */
     long getTimestamp();
+
+    /**
+     * <pre>
+     * Version of the cdp-telemetry binary
+     * </pre>
+     *
+     * <code>string cdpTelemetryVersion = 4;</code>
+     */
+    java.lang.String getCdpTelemetryVersion();
+    /**
+     * <pre>
+     * Version of the cdp-telemetry binary
+     * </pre>
+     *
+     * <code>string cdpTelemetryVersion = 4;</code>
+     */
+    com.google.protobuf.ByteString
+        getCdpTelemetryVersionBytes();
   }
   /**
    * <pre>
@@ -1941,6 +1959,7 @@ public final class NodeStatusProto {
     private NodeStatusReport() {
       nodes_ = java.util.Collections.emptyList();
       timestamp_ = 0L;
+      cdpTelemetryVersion_ = "";
     }
 
     @java.lang.Override
@@ -1992,6 +2011,12 @@ public final class NodeStatusProto {
             case 24: {
 
               timestamp_ = input.readInt64();
+              break;
+            }
+            case 34: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              cdpTelemetryVersion_ = s;
               break;
             }
             default: {
@@ -2131,6 +2156,48 @@ public final class NodeStatusProto {
       return timestamp_;
     }
 
+    public static final int CDPTELEMETRYVERSION_FIELD_NUMBER = 4;
+    private volatile java.lang.Object cdpTelemetryVersion_;
+    /**
+     * <pre>
+     * Version of the cdp-telemetry binary
+     * </pre>
+     *
+     * <code>string cdpTelemetryVersion = 4;</code>
+     */
+    public java.lang.String getCdpTelemetryVersion() {
+      java.lang.Object ref = cdpTelemetryVersion_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        cdpTelemetryVersion_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Version of the cdp-telemetry binary
+     * </pre>
+     *
+     * <code>string cdpTelemetryVersion = 4;</code>
+     */
+    public com.google.protobuf.ByteString
+        getCdpTelemetryVersionBytes() {
+      java.lang.Object ref = cdpTelemetryVersion_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        cdpTelemetryVersion_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -2154,6 +2221,9 @@ public final class NodeStatusProto {
       if (timestamp_ != 0L) {
         output.writeInt64(3, timestamp_);
       }
+      if (!getCdpTelemetryVersionBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, cdpTelemetryVersion_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -2174,6 +2244,9 @@ public final class NodeStatusProto {
       if (timestamp_ != 0L) {
         size += com.google.protobuf.CodedOutputStream
           .computeInt64Size(3, timestamp_);
+      }
+      if (!getCdpTelemetryVersionBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, cdpTelemetryVersion_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -2200,6 +2273,8 @@ public final class NodeStatusProto {
       }
       result = result && (getTimestamp()
           == other.getTimestamp());
+      result = result && getCdpTelemetryVersion()
+          .equals(other.getCdpTelemetryVersion());
       result = result && unknownFields.equals(other.unknownFields);
       return result;
     }
@@ -2222,6 +2297,8 @@ public final class NodeStatusProto {
       hash = (37 * hash) + TIMESTAMP_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           getTimestamp());
+      hash = (37 * hash) + CDPTELEMETRYVERSION_FIELD_NUMBER;
+      hash = (53 * hash) + getCdpTelemetryVersion().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -2374,6 +2451,8 @@ public final class NodeStatusProto {
         }
         timestamp_ = 0L;
 
+        cdpTelemetryVersion_ = "";
+
         return this;
       }
 
@@ -2417,6 +2496,7 @@ public final class NodeStatusProto {
           result.clusterDetails_ = clusterDetailsBuilder_.build();
         }
         result.timestamp_ = timestamp_;
+        result.cdpTelemetryVersion_ = cdpTelemetryVersion_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -2497,6 +2577,10 @@ public final class NodeStatusProto {
         }
         if (other.getTimestamp() != 0L) {
           setTimestamp(other.getTimestamp());
+        }
+        if (!other.getCdpTelemetryVersion().isEmpty()) {
+          cdpTelemetryVersion_ = other.cdpTelemetryVersion_;
+          onChanged();
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -3027,6 +3111,95 @@ public final class NodeStatusProto {
       public Builder clearTimestamp() {
         
         timestamp_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object cdpTelemetryVersion_ = "";
+      /**
+       * <pre>
+       * Version of the cdp-telemetry binary
+       * </pre>
+       *
+       * <code>string cdpTelemetryVersion = 4;</code>
+       */
+      public java.lang.String getCdpTelemetryVersion() {
+        java.lang.Object ref = cdpTelemetryVersion_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          cdpTelemetryVersion_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Version of the cdp-telemetry binary
+       * </pre>
+       *
+       * <code>string cdpTelemetryVersion = 4;</code>
+       */
+      public com.google.protobuf.ByteString
+          getCdpTelemetryVersionBytes() {
+        java.lang.Object ref = cdpTelemetryVersion_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          cdpTelemetryVersion_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Version of the cdp-telemetry binary
+       * </pre>
+       *
+       * <code>string cdpTelemetryVersion = 4;</code>
+       */
+      public Builder setCdpTelemetryVersion(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        cdpTelemetryVersion_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Version of the cdp-telemetry binary
+       * </pre>
+       *
+       * <code>string cdpTelemetryVersion = 4;</code>
+       */
+      public Builder clearCdpTelemetryVersion() {
+        
+        cdpTelemetryVersion_ = getDefaultInstance().getCdpTelemetryVersion();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Version of the cdp-telemetry binary
+       * </pre>
+       *
+       * <code>string cdpTelemetryVersion = 4;</code>
+       */
+      public Builder setCdpTelemetryVersionBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        cdpTelemetryVersion_ = value;
         onChanged();
         return this;
       }
@@ -3995,6 +4168,24 @@ public final class NodeStatusProto {
      * <code>int64 timestamp = 5;</code>
      */
     long getTimestamp();
+
+    /**
+     * <pre>
+     * Version of the cdp-telemetry binary
+     * </pre>
+     *
+     * <code>string cdpTelemetryVersion = 6;</code>
+     */
+    java.lang.String getCdpTelemetryVersion();
+    /**
+     * <pre>
+     * Version of the cdp-telemetry binary
+     * </pre>
+     *
+     * <code>string cdpTelemetryVersion = 6;</code>
+     */
+    com.google.protobuf.ByteString
+        getCdpTelemetryVersionBytes();
   }
   /**
    * <pre>
@@ -4018,6 +4209,7 @@ public final class NodeStatusProto {
       cmServices_ = java.util.Collections.emptyList();
       freeipaServices_ = java.util.Collections.emptyList();
       timestamp_ = 0L;
+      cdpTelemetryVersion_ = "";
     }
 
     @java.lang.Override
@@ -4083,6 +4275,12 @@ public final class NodeStatusProto {
             case 40: {
 
               timestamp_ = input.readInt64();
+              break;
+            }
+            case 50: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              cdpTelemetryVersion_ = s;
               break;
             }
             default: {
@@ -4363,6 +4561,48 @@ public final class NodeStatusProto {
       return timestamp_;
     }
 
+    public static final int CDPTELEMETRYVERSION_FIELD_NUMBER = 6;
+    private volatile java.lang.Object cdpTelemetryVersion_;
+    /**
+     * <pre>
+     * Version of the cdp-telemetry binary
+     * </pre>
+     *
+     * <code>string cdpTelemetryVersion = 6;</code>
+     */
+    public java.lang.String getCdpTelemetryVersion() {
+      java.lang.Object ref = cdpTelemetryVersion_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        cdpTelemetryVersion_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Version of the cdp-telemetry binary
+     * </pre>
+     *
+     * <code>string cdpTelemetryVersion = 6;</code>
+     */
+    public com.google.protobuf.ByteString
+        getCdpTelemetryVersionBytes() {
+      java.lang.Object ref = cdpTelemetryVersion_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        cdpTelemetryVersion_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -4391,6 +4631,9 @@ public final class NodeStatusProto {
       }
       if (timestamp_ != 0L) {
         output.writeInt64(5, timestamp_);
+      }
+      if (!getCdpTelemetryVersionBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 6, cdpTelemetryVersion_);
       }
       unknownFields.writeTo(output);
     }
@@ -4421,6 +4664,9 @@ public final class NodeStatusProto {
         size += com.google.protobuf.CodedOutputStream
           .computeInt64Size(5, timestamp_);
       }
+      if (!getCdpTelemetryVersionBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, cdpTelemetryVersion_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -4447,6 +4693,8 @@ public final class NodeStatusProto {
           .equals(other.getFreeipaServicesList());
       result = result && (getTimestamp()
           == other.getTimestamp());
+      result = result && getCdpTelemetryVersion()
+          .equals(other.getCdpTelemetryVersion());
       result = result && unknownFields.equals(other.unknownFields);
       return result;
     }
@@ -4477,6 +4725,8 @@ public final class NodeStatusProto {
       hash = (37 * hash) + TIMESTAMP_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           getTimestamp());
+      hash = (37 * hash) + CDPTELEMETRYVERSION_FIELD_NUMBER;
+      hash = (53 * hash) + getCdpTelemetryVersion().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -4644,6 +4894,8 @@ public final class NodeStatusProto {
         }
         timestamp_ = 0L;
 
+        cdpTelemetryVersion_ = "";
+
         return this;
       }
 
@@ -4709,6 +4961,7 @@ public final class NodeStatusProto {
           result.freeipaServices_ = freeipaServicesBuilder_.build();
         }
         result.timestamp_ = timestamp_;
+        result.cdpTelemetryVersion_ = cdpTelemetryVersion_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -4864,6 +5117,10 @@ public final class NodeStatusProto {
         }
         if (other.getTimestamp() != 0L) {
           setTimestamp(other.getTimestamp());
+        }
+        if (!other.getCdpTelemetryVersion().isEmpty()) {
+          cdpTelemetryVersion_ = other.cdpTelemetryVersion_;
+          onChanged();
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -6177,6 +6434,95 @@ public final class NodeStatusProto {
       public Builder clearTimestamp() {
         
         timestamp_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object cdpTelemetryVersion_ = "";
+      /**
+       * <pre>
+       * Version of the cdp-telemetry binary
+       * </pre>
+       *
+       * <code>string cdpTelemetryVersion = 6;</code>
+       */
+      public java.lang.String getCdpTelemetryVersion() {
+        java.lang.Object ref = cdpTelemetryVersion_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          cdpTelemetryVersion_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Version of the cdp-telemetry binary
+       * </pre>
+       *
+       * <code>string cdpTelemetryVersion = 6;</code>
+       */
+      public com.google.protobuf.ByteString
+          getCdpTelemetryVersionBytes() {
+        java.lang.Object ref = cdpTelemetryVersion_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          cdpTelemetryVersion_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Version of the cdp-telemetry binary
+       * </pre>
+       *
+       * <code>string cdpTelemetryVersion = 6;</code>
+       */
+      public Builder setCdpTelemetryVersion(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        cdpTelemetryVersion_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Version of the cdp-telemetry binary
+       * </pre>
+       *
+       * <code>string cdpTelemetryVersion = 6;</code>
+       */
+      public Builder clearCdpTelemetryVersion() {
+        
+        cdpTelemetryVersion_ = getDefaultInstance().getCdpTelemetryVersion();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Version of the cdp-telemetry binary
+       * </pre>
+       *
+       * <code>string cdpTelemetryVersion = 6;</code>
+       */
+      public Builder setCdpTelemetryVersionBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        cdpTelemetryVersion_ = value;
         onChanged();
         return this;
       }
@@ -8213,6 +8559,1544 @@ public final class NodeStatusProto {
 
   }
 
+  public interface SaltKeysOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:cdp.telemetry.SaltKeys)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * Unaccepted salt keys that are waiting to be accepted
+     * </pre>
+     *
+     * <code>repeated string unaccepted = 1;</code>
+     */
+    java.util.List<java.lang.String>
+        getUnacceptedList();
+    /**
+     * <pre>
+     * Unaccepted salt keys that are waiting to be accepted
+     * </pre>
+     *
+     * <code>repeated string unaccepted = 1;</code>
+     */
+    int getUnacceptedCount();
+    /**
+     * <pre>
+     * Unaccepted salt keys that are waiting to be accepted
+     * </pre>
+     *
+     * <code>repeated string unaccepted = 1;</code>
+     */
+    java.lang.String getUnaccepted(int index);
+    /**
+     * <pre>
+     * Unaccepted salt keys that are waiting to be accepted
+     * </pre>
+     *
+     * <code>repeated string unaccepted = 1;</code>
+     */
+    com.google.protobuf.ByteString
+        getUnacceptedBytes(int index);
+
+    /**
+     * <pre>
+     * Accepted salt keys
+     * </pre>
+     *
+     * <code>repeated string accepted = 2;</code>
+     */
+    java.util.List<java.lang.String>
+        getAcceptedList();
+    /**
+     * <pre>
+     * Accepted salt keys
+     * </pre>
+     *
+     * <code>repeated string accepted = 2;</code>
+     */
+    int getAcceptedCount();
+    /**
+     * <pre>
+     * Accepted salt keys
+     * </pre>
+     *
+     * <code>repeated string accepted = 2;</code>
+     */
+    java.lang.String getAccepted(int index);
+    /**
+     * <pre>
+     * Accepted salt keys
+     * </pre>
+     *
+     * <code>repeated string accepted = 2;</code>
+     */
+    com.google.protobuf.ByteString
+        getAcceptedBytes(int index);
+
+    /**
+     * <pre>
+     * Rejected salt keys, minion does not recive any communication from salt server
+     * </pre>
+     *
+     * <code>repeated string rejected = 3;</code>
+     */
+    java.util.List<java.lang.String>
+        getRejectedList();
+    /**
+     * <pre>
+     * Rejected salt keys, minion does not recive any communication from salt server
+     * </pre>
+     *
+     * <code>repeated string rejected = 3;</code>
+     */
+    int getRejectedCount();
+    /**
+     * <pre>
+     * Rejected salt keys, minion does not recive any communication from salt server
+     * </pre>
+     *
+     * <code>repeated string rejected = 3;</code>
+     */
+    java.lang.String getRejected(int index);
+    /**
+     * <pre>
+     * Rejected salt keys, minion does not recive any communication from salt server
+     * </pre>
+     *
+     * <code>repeated string rejected = 3;</code>
+     */
+    com.google.protobuf.ByteString
+        getRejectedBytes(int index);
+
+    /**
+     * <pre>
+     * Keys that are rejected automatically by master. (minions with duplicated ID, rebuilt minion or new keys were generated but old ones are not deleted yet)
+     * </pre>
+     *
+     * <code>repeated string denied = 4;</code>
+     */
+    java.util.List<java.lang.String>
+        getDeniedList();
+    /**
+     * <pre>
+     * Keys that are rejected automatically by master. (minions with duplicated ID, rebuilt minion or new keys were generated but old ones are not deleted yet)
+     * </pre>
+     *
+     * <code>repeated string denied = 4;</code>
+     */
+    int getDeniedCount();
+    /**
+     * <pre>
+     * Keys that are rejected automatically by master. (minions with duplicated ID, rebuilt minion or new keys were generated but old ones are not deleted yet)
+     * </pre>
+     *
+     * <code>repeated string denied = 4;</code>
+     */
+    java.lang.String getDenied(int index);
+    /**
+     * <pre>
+     * Keys that are rejected automatically by master. (minions with duplicated ID, rebuilt minion or new keys were generated but old ones are not deleted yet)
+     * </pre>
+     *
+     * <code>repeated string denied = 4;</code>
+     */
+    com.google.protobuf.ByteString
+        getDeniedBytes(int index);
+
+    /**
+     * <pre>
+     * Timestamp of the salt keys report.
+     * </pre>
+     *
+     * <code>int64 timestamp = 5;</code>
+     */
+    long getTimestamp();
+  }
+  /**
+   * <pre>
+   * Holds salt server public keys that are used for authentication.
+   * </pre>
+   *
+   * Protobuf type {@code cdp.telemetry.SaltKeys}
+   */
+  public  static final class SaltKeys extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:cdp.telemetry.SaltKeys)
+      SaltKeysOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use SaltKeys.newBuilder() to construct.
+    private SaltKeys(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private SaltKeys() {
+      unaccepted_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+      accepted_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+      rejected_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+      denied_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+      timestamp_ = 0L;
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private SaltKeys(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+                unaccepted_ = new com.google.protobuf.LazyStringArrayList();
+                mutable_bitField0_ |= 0x00000001;
+              }
+              unaccepted_.add(s);
+              break;
+            }
+            case 18: {
+              java.lang.String s = input.readStringRequireUtf8();
+              if (!((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+                accepted_ = new com.google.protobuf.LazyStringArrayList();
+                mutable_bitField0_ |= 0x00000002;
+              }
+              accepted_.add(s);
+              break;
+            }
+            case 26: {
+              java.lang.String s = input.readStringRequireUtf8();
+              if (!((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
+                rejected_ = new com.google.protobuf.LazyStringArrayList();
+                mutable_bitField0_ |= 0x00000004;
+              }
+              rejected_.add(s);
+              break;
+            }
+            case 34: {
+              java.lang.String s = input.readStringRequireUtf8();
+              if (!((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
+                denied_ = new com.google.protobuf.LazyStringArrayList();
+                mutable_bitField0_ |= 0x00000008;
+              }
+              denied_.add(s);
+              break;
+            }
+            case 40: {
+
+              timestamp_ = input.readInt64();
+              break;
+            }
+            default: {
+              if (!parseUnknownFieldProto3(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+          unaccepted_ = unaccepted_.getUnmodifiableView();
+        }
+        if (((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+          accepted_ = accepted_.getUnmodifiableView();
+        }
+        if (((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
+          rejected_ = rejected_.getUnmodifiableView();
+        }
+        if (((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
+          denied_ = denied_.getUnmodifiableView();
+        }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.internal_static_cdp_telemetry_SaltKeys_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.internal_static_cdp_telemetry_SaltKeys_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys.class, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys.Builder.class);
+    }
+
+    private int bitField0_;
+    public static final int UNACCEPTED_FIELD_NUMBER = 1;
+    private com.google.protobuf.LazyStringList unaccepted_;
+    /**
+     * <pre>
+     * Unaccepted salt keys that are waiting to be accepted
+     * </pre>
+     *
+     * <code>repeated string unaccepted = 1;</code>
+     */
+    public com.google.protobuf.ProtocolStringList
+        getUnacceptedList() {
+      return unaccepted_;
+    }
+    /**
+     * <pre>
+     * Unaccepted salt keys that are waiting to be accepted
+     * </pre>
+     *
+     * <code>repeated string unaccepted = 1;</code>
+     */
+    public int getUnacceptedCount() {
+      return unaccepted_.size();
+    }
+    /**
+     * <pre>
+     * Unaccepted salt keys that are waiting to be accepted
+     * </pre>
+     *
+     * <code>repeated string unaccepted = 1;</code>
+     */
+    public java.lang.String getUnaccepted(int index) {
+      return unaccepted_.get(index);
+    }
+    /**
+     * <pre>
+     * Unaccepted salt keys that are waiting to be accepted
+     * </pre>
+     *
+     * <code>repeated string unaccepted = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getUnacceptedBytes(int index) {
+      return unaccepted_.getByteString(index);
+    }
+
+    public static final int ACCEPTED_FIELD_NUMBER = 2;
+    private com.google.protobuf.LazyStringList accepted_;
+    /**
+     * <pre>
+     * Accepted salt keys
+     * </pre>
+     *
+     * <code>repeated string accepted = 2;</code>
+     */
+    public com.google.protobuf.ProtocolStringList
+        getAcceptedList() {
+      return accepted_;
+    }
+    /**
+     * <pre>
+     * Accepted salt keys
+     * </pre>
+     *
+     * <code>repeated string accepted = 2;</code>
+     */
+    public int getAcceptedCount() {
+      return accepted_.size();
+    }
+    /**
+     * <pre>
+     * Accepted salt keys
+     * </pre>
+     *
+     * <code>repeated string accepted = 2;</code>
+     */
+    public java.lang.String getAccepted(int index) {
+      return accepted_.get(index);
+    }
+    /**
+     * <pre>
+     * Accepted salt keys
+     * </pre>
+     *
+     * <code>repeated string accepted = 2;</code>
+     */
+    public com.google.protobuf.ByteString
+        getAcceptedBytes(int index) {
+      return accepted_.getByteString(index);
+    }
+
+    public static final int REJECTED_FIELD_NUMBER = 3;
+    private com.google.protobuf.LazyStringList rejected_;
+    /**
+     * <pre>
+     * Rejected salt keys, minion does not recive any communication from salt server
+     * </pre>
+     *
+     * <code>repeated string rejected = 3;</code>
+     */
+    public com.google.protobuf.ProtocolStringList
+        getRejectedList() {
+      return rejected_;
+    }
+    /**
+     * <pre>
+     * Rejected salt keys, minion does not recive any communication from salt server
+     * </pre>
+     *
+     * <code>repeated string rejected = 3;</code>
+     */
+    public int getRejectedCount() {
+      return rejected_.size();
+    }
+    /**
+     * <pre>
+     * Rejected salt keys, minion does not recive any communication from salt server
+     * </pre>
+     *
+     * <code>repeated string rejected = 3;</code>
+     */
+    public java.lang.String getRejected(int index) {
+      return rejected_.get(index);
+    }
+    /**
+     * <pre>
+     * Rejected salt keys, minion does not recive any communication from salt server
+     * </pre>
+     *
+     * <code>repeated string rejected = 3;</code>
+     */
+    public com.google.protobuf.ByteString
+        getRejectedBytes(int index) {
+      return rejected_.getByteString(index);
+    }
+
+    public static final int DENIED_FIELD_NUMBER = 4;
+    private com.google.protobuf.LazyStringList denied_;
+    /**
+     * <pre>
+     * Keys that are rejected automatically by master. (minions with duplicated ID, rebuilt minion or new keys were generated but old ones are not deleted yet)
+     * </pre>
+     *
+     * <code>repeated string denied = 4;</code>
+     */
+    public com.google.protobuf.ProtocolStringList
+        getDeniedList() {
+      return denied_;
+    }
+    /**
+     * <pre>
+     * Keys that are rejected automatically by master. (minions with duplicated ID, rebuilt minion or new keys were generated but old ones are not deleted yet)
+     * </pre>
+     *
+     * <code>repeated string denied = 4;</code>
+     */
+    public int getDeniedCount() {
+      return denied_.size();
+    }
+    /**
+     * <pre>
+     * Keys that are rejected automatically by master. (minions with duplicated ID, rebuilt minion or new keys were generated but old ones are not deleted yet)
+     * </pre>
+     *
+     * <code>repeated string denied = 4;</code>
+     */
+    public java.lang.String getDenied(int index) {
+      return denied_.get(index);
+    }
+    /**
+     * <pre>
+     * Keys that are rejected automatically by master. (minions with duplicated ID, rebuilt minion or new keys were generated but old ones are not deleted yet)
+     * </pre>
+     *
+     * <code>repeated string denied = 4;</code>
+     */
+    public com.google.protobuf.ByteString
+        getDeniedBytes(int index) {
+      return denied_.getByteString(index);
+    }
+
+    public static final int TIMESTAMP_FIELD_NUMBER = 5;
+    private long timestamp_;
+    /**
+     * <pre>
+     * Timestamp of the salt keys report.
+     * </pre>
+     *
+     * <code>int64 timestamp = 5;</code>
+     */
+    public long getTimestamp() {
+      return timestamp_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      for (int i = 0; i < unaccepted_.size(); i++) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, unaccepted_.getRaw(i));
+      }
+      for (int i = 0; i < accepted_.size(); i++) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, accepted_.getRaw(i));
+      }
+      for (int i = 0; i < rejected_.size(); i++) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, rejected_.getRaw(i));
+      }
+      for (int i = 0; i < denied_.size(); i++) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, denied_.getRaw(i));
+      }
+      if (timestamp_ != 0L) {
+        output.writeInt64(5, timestamp_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      {
+        int dataSize = 0;
+        for (int i = 0; i < unaccepted_.size(); i++) {
+          dataSize += computeStringSizeNoTag(unaccepted_.getRaw(i));
+        }
+        size += dataSize;
+        size += 1 * getUnacceptedList().size();
+      }
+      {
+        int dataSize = 0;
+        for (int i = 0; i < accepted_.size(); i++) {
+          dataSize += computeStringSizeNoTag(accepted_.getRaw(i));
+        }
+        size += dataSize;
+        size += 1 * getAcceptedList().size();
+      }
+      {
+        int dataSize = 0;
+        for (int i = 0; i < rejected_.size(); i++) {
+          dataSize += computeStringSizeNoTag(rejected_.getRaw(i));
+        }
+        size += dataSize;
+        size += 1 * getRejectedList().size();
+      }
+      {
+        int dataSize = 0;
+        for (int i = 0; i < denied_.size(); i++) {
+          dataSize += computeStringSizeNoTag(denied_.getRaw(i));
+        }
+        size += dataSize;
+        size += 1 * getDeniedList().size();
+      }
+      if (timestamp_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(5, timestamp_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys other = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys) obj;
+
+      boolean result = true;
+      result = result && getUnacceptedList()
+          .equals(other.getUnacceptedList());
+      result = result && getAcceptedList()
+          .equals(other.getAcceptedList());
+      result = result && getRejectedList()
+          .equals(other.getRejectedList());
+      result = result && getDeniedList()
+          .equals(other.getDeniedList());
+      result = result && (getTimestamp()
+          == other.getTimestamp());
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (getUnacceptedCount() > 0) {
+        hash = (37 * hash) + UNACCEPTED_FIELD_NUMBER;
+        hash = (53 * hash) + getUnacceptedList().hashCode();
+      }
+      if (getAcceptedCount() > 0) {
+        hash = (37 * hash) + ACCEPTED_FIELD_NUMBER;
+        hash = (53 * hash) + getAcceptedList().hashCode();
+      }
+      if (getRejectedCount() > 0) {
+        hash = (37 * hash) + REJECTED_FIELD_NUMBER;
+        hash = (53 * hash) + getRejectedList().hashCode();
+      }
+      if (getDeniedCount() > 0) {
+        hash = (37 * hash) + DENIED_FIELD_NUMBER;
+        hash = (53 * hash) + getDeniedList().hashCode();
+      }
+      hash = (37 * hash) + TIMESTAMP_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getTimestamp());
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Holds salt server public keys that are used for authentication.
+     * </pre>
+     *
+     * Protobuf type {@code cdp.telemetry.SaltKeys}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:cdp.telemetry.SaltKeys)
+        com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeysOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.internal_static_cdp_telemetry_SaltKeys_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.internal_static_cdp_telemetry_SaltKeys_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys.class, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        unaccepted_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        accepted_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000002);
+        rejected_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000004);
+        denied_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000008);
+        timestamp_ = 0L;
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.internal_static_cdp_telemetry_SaltKeys_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys build() {
+        com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys buildPartial() {
+        com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys result = new com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          unaccepted_ = unaccepted_.getUnmodifiableView();
+          bitField0_ = (bitField0_ & ~0x00000001);
+        }
+        result.unaccepted_ = unaccepted_;
+        if (((bitField0_ & 0x00000002) == 0x00000002)) {
+          accepted_ = accepted_.getUnmodifiableView();
+          bitField0_ = (bitField0_ & ~0x00000002);
+        }
+        result.accepted_ = accepted_;
+        if (((bitField0_ & 0x00000004) == 0x00000004)) {
+          rejected_ = rejected_.getUnmodifiableView();
+          bitField0_ = (bitField0_ & ~0x00000004);
+        }
+        result.rejected_ = rejected_;
+        if (((bitField0_ & 0x00000008) == 0x00000008)) {
+          denied_ = denied_.getUnmodifiableView();
+          bitField0_ = (bitField0_ & ~0x00000008);
+        }
+        result.denied_ = denied_;
+        result.timestamp_ = timestamp_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys) {
+          return mergeFrom((com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys other) {
+        if (other == com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys.getDefaultInstance()) return this;
+        if (!other.unaccepted_.isEmpty()) {
+          if (unaccepted_.isEmpty()) {
+            unaccepted_ = other.unaccepted_;
+            bitField0_ = (bitField0_ & ~0x00000001);
+          } else {
+            ensureUnacceptedIsMutable();
+            unaccepted_.addAll(other.unaccepted_);
+          }
+          onChanged();
+        }
+        if (!other.accepted_.isEmpty()) {
+          if (accepted_.isEmpty()) {
+            accepted_ = other.accepted_;
+            bitField0_ = (bitField0_ & ~0x00000002);
+          } else {
+            ensureAcceptedIsMutable();
+            accepted_.addAll(other.accepted_);
+          }
+          onChanged();
+        }
+        if (!other.rejected_.isEmpty()) {
+          if (rejected_.isEmpty()) {
+            rejected_ = other.rejected_;
+            bitField0_ = (bitField0_ & ~0x00000004);
+          } else {
+            ensureRejectedIsMutable();
+            rejected_.addAll(other.rejected_);
+          }
+          onChanged();
+        }
+        if (!other.denied_.isEmpty()) {
+          if (denied_.isEmpty()) {
+            denied_ = other.denied_;
+            bitField0_ = (bitField0_ & ~0x00000008);
+          } else {
+            ensureDeniedIsMutable();
+            denied_.addAll(other.denied_);
+          }
+          onChanged();
+        }
+        if (other.getTimestamp() != 0L) {
+          setTimestamp(other.getTimestamp());
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      private com.google.protobuf.LazyStringList unaccepted_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+      private void ensureUnacceptedIsMutable() {
+        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
+          unaccepted_ = new com.google.protobuf.LazyStringArrayList(unaccepted_);
+          bitField0_ |= 0x00000001;
+         }
+      }
+      /**
+       * <pre>
+       * Unaccepted salt keys that are waiting to be accepted
+       * </pre>
+       *
+       * <code>repeated string unaccepted = 1;</code>
+       */
+      public com.google.protobuf.ProtocolStringList
+          getUnacceptedList() {
+        return unaccepted_.getUnmodifiableView();
+      }
+      /**
+       * <pre>
+       * Unaccepted salt keys that are waiting to be accepted
+       * </pre>
+       *
+       * <code>repeated string unaccepted = 1;</code>
+       */
+      public int getUnacceptedCount() {
+        return unaccepted_.size();
+      }
+      /**
+       * <pre>
+       * Unaccepted salt keys that are waiting to be accepted
+       * </pre>
+       *
+       * <code>repeated string unaccepted = 1;</code>
+       */
+      public java.lang.String getUnaccepted(int index) {
+        return unaccepted_.get(index);
+      }
+      /**
+       * <pre>
+       * Unaccepted salt keys that are waiting to be accepted
+       * </pre>
+       *
+       * <code>repeated string unaccepted = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getUnacceptedBytes(int index) {
+        return unaccepted_.getByteString(index);
+      }
+      /**
+       * <pre>
+       * Unaccepted salt keys that are waiting to be accepted
+       * </pre>
+       *
+       * <code>repeated string unaccepted = 1;</code>
+       */
+      public Builder setUnaccepted(
+          int index, java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureUnacceptedIsMutable();
+        unaccepted_.set(index, value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Unaccepted salt keys that are waiting to be accepted
+       * </pre>
+       *
+       * <code>repeated string unaccepted = 1;</code>
+       */
+      public Builder addUnaccepted(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureUnacceptedIsMutable();
+        unaccepted_.add(value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Unaccepted salt keys that are waiting to be accepted
+       * </pre>
+       *
+       * <code>repeated string unaccepted = 1;</code>
+       */
+      public Builder addAllUnaccepted(
+          java.lang.Iterable<java.lang.String> values) {
+        ensureUnacceptedIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, unaccepted_);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Unaccepted salt keys that are waiting to be accepted
+       * </pre>
+       *
+       * <code>repeated string unaccepted = 1;</code>
+       */
+      public Builder clearUnaccepted() {
+        unaccepted_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Unaccepted salt keys that are waiting to be accepted
+       * </pre>
+       *
+       * <code>repeated string unaccepted = 1;</code>
+       */
+      public Builder addUnacceptedBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        ensureUnacceptedIsMutable();
+        unaccepted_.add(value);
+        onChanged();
+        return this;
+      }
+
+      private com.google.protobuf.LazyStringList accepted_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+      private void ensureAcceptedIsMutable() {
+        if (!((bitField0_ & 0x00000002) == 0x00000002)) {
+          accepted_ = new com.google.protobuf.LazyStringArrayList(accepted_);
+          bitField0_ |= 0x00000002;
+         }
+      }
+      /**
+       * <pre>
+       * Accepted salt keys
+       * </pre>
+       *
+       * <code>repeated string accepted = 2;</code>
+       */
+      public com.google.protobuf.ProtocolStringList
+          getAcceptedList() {
+        return accepted_.getUnmodifiableView();
+      }
+      /**
+       * <pre>
+       * Accepted salt keys
+       * </pre>
+       *
+       * <code>repeated string accepted = 2;</code>
+       */
+      public int getAcceptedCount() {
+        return accepted_.size();
+      }
+      /**
+       * <pre>
+       * Accepted salt keys
+       * </pre>
+       *
+       * <code>repeated string accepted = 2;</code>
+       */
+      public java.lang.String getAccepted(int index) {
+        return accepted_.get(index);
+      }
+      /**
+       * <pre>
+       * Accepted salt keys
+       * </pre>
+       *
+       * <code>repeated string accepted = 2;</code>
+       */
+      public com.google.protobuf.ByteString
+          getAcceptedBytes(int index) {
+        return accepted_.getByteString(index);
+      }
+      /**
+       * <pre>
+       * Accepted salt keys
+       * </pre>
+       *
+       * <code>repeated string accepted = 2;</code>
+       */
+      public Builder setAccepted(
+          int index, java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureAcceptedIsMutable();
+        accepted_.set(index, value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Accepted salt keys
+       * </pre>
+       *
+       * <code>repeated string accepted = 2;</code>
+       */
+      public Builder addAccepted(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureAcceptedIsMutable();
+        accepted_.add(value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Accepted salt keys
+       * </pre>
+       *
+       * <code>repeated string accepted = 2;</code>
+       */
+      public Builder addAllAccepted(
+          java.lang.Iterable<java.lang.String> values) {
+        ensureAcceptedIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, accepted_);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Accepted salt keys
+       * </pre>
+       *
+       * <code>repeated string accepted = 2;</code>
+       */
+      public Builder clearAccepted() {
+        accepted_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000002);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Accepted salt keys
+       * </pre>
+       *
+       * <code>repeated string accepted = 2;</code>
+       */
+      public Builder addAcceptedBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        ensureAcceptedIsMutable();
+        accepted_.add(value);
+        onChanged();
+        return this;
+      }
+
+      private com.google.protobuf.LazyStringList rejected_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+      private void ensureRejectedIsMutable() {
+        if (!((bitField0_ & 0x00000004) == 0x00000004)) {
+          rejected_ = new com.google.protobuf.LazyStringArrayList(rejected_);
+          bitField0_ |= 0x00000004;
+         }
+      }
+      /**
+       * <pre>
+       * Rejected salt keys, minion does not recive any communication from salt server
+       * </pre>
+       *
+       * <code>repeated string rejected = 3;</code>
+       */
+      public com.google.protobuf.ProtocolStringList
+          getRejectedList() {
+        return rejected_.getUnmodifiableView();
+      }
+      /**
+       * <pre>
+       * Rejected salt keys, minion does not recive any communication from salt server
+       * </pre>
+       *
+       * <code>repeated string rejected = 3;</code>
+       */
+      public int getRejectedCount() {
+        return rejected_.size();
+      }
+      /**
+       * <pre>
+       * Rejected salt keys, minion does not recive any communication from salt server
+       * </pre>
+       *
+       * <code>repeated string rejected = 3;</code>
+       */
+      public java.lang.String getRejected(int index) {
+        return rejected_.get(index);
+      }
+      /**
+       * <pre>
+       * Rejected salt keys, minion does not recive any communication from salt server
+       * </pre>
+       *
+       * <code>repeated string rejected = 3;</code>
+       */
+      public com.google.protobuf.ByteString
+          getRejectedBytes(int index) {
+        return rejected_.getByteString(index);
+      }
+      /**
+       * <pre>
+       * Rejected salt keys, minion does not recive any communication from salt server
+       * </pre>
+       *
+       * <code>repeated string rejected = 3;</code>
+       */
+      public Builder setRejected(
+          int index, java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureRejectedIsMutable();
+        rejected_.set(index, value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Rejected salt keys, minion does not recive any communication from salt server
+       * </pre>
+       *
+       * <code>repeated string rejected = 3;</code>
+       */
+      public Builder addRejected(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureRejectedIsMutable();
+        rejected_.add(value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Rejected salt keys, minion does not recive any communication from salt server
+       * </pre>
+       *
+       * <code>repeated string rejected = 3;</code>
+       */
+      public Builder addAllRejected(
+          java.lang.Iterable<java.lang.String> values) {
+        ensureRejectedIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, rejected_);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Rejected salt keys, minion does not recive any communication from salt server
+       * </pre>
+       *
+       * <code>repeated string rejected = 3;</code>
+       */
+      public Builder clearRejected() {
+        rejected_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000004);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Rejected salt keys, minion does not recive any communication from salt server
+       * </pre>
+       *
+       * <code>repeated string rejected = 3;</code>
+       */
+      public Builder addRejectedBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        ensureRejectedIsMutable();
+        rejected_.add(value);
+        onChanged();
+        return this;
+      }
+
+      private com.google.protobuf.LazyStringList denied_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+      private void ensureDeniedIsMutable() {
+        if (!((bitField0_ & 0x00000008) == 0x00000008)) {
+          denied_ = new com.google.protobuf.LazyStringArrayList(denied_);
+          bitField0_ |= 0x00000008;
+         }
+      }
+      /**
+       * <pre>
+       * Keys that are rejected automatically by master. (minions with duplicated ID, rebuilt minion or new keys were generated but old ones are not deleted yet)
+       * </pre>
+       *
+       * <code>repeated string denied = 4;</code>
+       */
+      public com.google.protobuf.ProtocolStringList
+          getDeniedList() {
+        return denied_.getUnmodifiableView();
+      }
+      /**
+       * <pre>
+       * Keys that are rejected automatically by master. (minions with duplicated ID, rebuilt minion or new keys were generated but old ones are not deleted yet)
+       * </pre>
+       *
+       * <code>repeated string denied = 4;</code>
+       */
+      public int getDeniedCount() {
+        return denied_.size();
+      }
+      /**
+       * <pre>
+       * Keys that are rejected automatically by master. (minions with duplicated ID, rebuilt minion or new keys were generated but old ones are not deleted yet)
+       * </pre>
+       *
+       * <code>repeated string denied = 4;</code>
+       */
+      public java.lang.String getDenied(int index) {
+        return denied_.get(index);
+      }
+      /**
+       * <pre>
+       * Keys that are rejected automatically by master. (minions with duplicated ID, rebuilt minion or new keys were generated but old ones are not deleted yet)
+       * </pre>
+       *
+       * <code>repeated string denied = 4;</code>
+       */
+      public com.google.protobuf.ByteString
+          getDeniedBytes(int index) {
+        return denied_.getByteString(index);
+      }
+      /**
+       * <pre>
+       * Keys that are rejected automatically by master. (minions with duplicated ID, rebuilt minion or new keys were generated but old ones are not deleted yet)
+       * </pre>
+       *
+       * <code>repeated string denied = 4;</code>
+       */
+      public Builder setDenied(
+          int index, java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureDeniedIsMutable();
+        denied_.set(index, value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Keys that are rejected automatically by master. (minions with duplicated ID, rebuilt minion or new keys were generated but old ones are not deleted yet)
+       * </pre>
+       *
+       * <code>repeated string denied = 4;</code>
+       */
+      public Builder addDenied(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureDeniedIsMutable();
+        denied_.add(value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Keys that are rejected automatically by master. (minions with duplicated ID, rebuilt minion or new keys were generated but old ones are not deleted yet)
+       * </pre>
+       *
+       * <code>repeated string denied = 4;</code>
+       */
+      public Builder addAllDenied(
+          java.lang.Iterable<java.lang.String> values) {
+        ensureDeniedIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, denied_);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Keys that are rejected automatically by master. (minions with duplicated ID, rebuilt minion or new keys were generated but old ones are not deleted yet)
+       * </pre>
+       *
+       * <code>repeated string denied = 4;</code>
+       */
+      public Builder clearDenied() {
+        denied_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000008);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Keys that are rejected automatically by master. (minions with duplicated ID, rebuilt minion or new keys were generated but old ones are not deleted yet)
+       * </pre>
+       *
+       * <code>repeated string denied = 4;</code>
+       */
+      public Builder addDeniedBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        ensureDeniedIsMutable();
+        denied_.add(value);
+        onChanged();
+        return this;
+      }
+
+      private long timestamp_ ;
+      /**
+       * <pre>
+       * Timestamp of the salt keys report.
+       * </pre>
+       *
+       * <code>int64 timestamp = 5;</code>
+       */
+      public long getTimestamp() {
+        return timestamp_;
+      }
+      /**
+       * <pre>
+       * Timestamp of the salt keys report.
+       * </pre>
+       *
+       * <code>int64 timestamp = 5;</code>
+       */
+      public Builder setTimestamp(long value) {
+        
+        timestamp_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Timestamp of the salt keys report.
+       * </pre>
+       *
+       * <code>int64 timestamp = 5;</code>
+       */
+      public Builder clearTimestamp() {
+        
+        timestamp_ = 0L;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFieldsProto3(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:cdp.telemetry.SaltKeys)
+    }
+
+    // @@protoc_insertion_point(class_scope:cdp.telemetry.SaltKeys)
+    private static final com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys();
+    }
+
+    public static com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<SaltKeys>
+        PARSER = new com.google.protobuf.AbstractParser<SaltKeys>() {
+      @java.lang.Override
+      public SaltKeys parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new SaltKeys(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<SaltKeys> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<SaltKeys> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   public interface SaltHealthReportOrBuilder extends
       // @@protoc_insertion_point(interface_extends:cdp.telemetry.SaltHealthReport)
       com.google.protobuf.MessageOrBuilder {
@@ -8275,6 +10159,49 @@ public final class NodeStatusProto {
      * <code>int64 timestamp = 3;</code>
      */
     long getTimestamp();
+
+    /**
+     * <pre>
+     * Salt public keys - hold by salt master for minions.
+     * </pre>
+     *
+     * <code>.cdp.telemetry.SaltKeys keys = 4;</code>
+     */
+    boolean hasKeys();
+    /**
+     * <pre>
+     * Salt public keys - hold by salt master for minions.
+     * </pre>
+     *
+     * <code>.cdp.telemetry.SaltKeys keys = 4;</code>
+     */
+    com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys getKeys();
+    /**
+     * <pre>
+     * Salt public keys - hold by salt master for minions.
+     * </pre>
+     *
+     * <code>.cdp.telemetry.SaltKeys keys = 4;</code>
+     */
+    com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeysOrBuilder getKeysOrBuilder();
+
+    /**
+     * <pre>
+     * Version of the cdp-telemetry binary
+     * </pre>
+     *
+     * <code>string cdpTelemetryVersion = 5;</code>
+     */
+    java.lang.String getCdpTelemetryVersion();
+    /**
+     * <pre>
+     * Version of the cdp-telemetry binary
+     * </pre>
+     *
+     * <code>string cdpTelemetryVersion = 5;</code>
+     */
+    com.google.protobuf.ByteString
+        getCdpTelemetryVersionBytes();
   }
   /**
    * <pre>
@@ -8294,6 +10221,7 @@ public final class NodeStatusProto {
     }
     private SaltHealthReport() {
       timestamp_ = 0L;
+      cdpTelemetryVersion_ = "";
     }
 
     @java.lang.Override
@@ -8349,6 +10277,25 @@ public final class NodeStatusProto {
             case 24: {
 
               timestamp_ = input.readInt64();
+              break;
+            }
+            case 34: {
+              com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys.Builder subBuilder = null;
+              if (keys_ != null) {
+                subBuilder = keys_.toBuilder();
+              }
+              keys_ = input.readMessage(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(keys_);
+                keys_ = subBuilder.buildPartial();
+              }
+
+              break;
+            }
+            case 42: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              cdpTelemetryVersion_ = s;
               break;
             }
             default: {
@@ -8462,6 +10409,81 @@ public final class NodeStatusProto {
       return timestamp_;
     }
 
+    public static final int KEYS_FIELD_NUMBER = 4;
+    private com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys keys_;
+    /**
+     * <pre>
+     * Salt public keys - hold by salt master for minions.
+     * </pre>
+     *
+     * <code>.cdp.telemetry.SaltKeys keys = 4;</code>
+     */
+    public boolean hasKeys() {
+      return keys_ != null;
+    }
+    /**
+     * <pre>
+     * Salt public keys - hold by salt master for minions.
+     * </pre>
+     *
+     * <code>.cdp.telemetry.SaltKeys keys = 4;</code>
+     */
+    public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys getKeys() {
+      return keys_ == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys.getDefaultInstance() : keys_;
+    }
+    /**
+     * <pre>
+     * Salt public keys - hold by salt master for minions.
+     * </pre>
+     *
+     * <code>.cdp.telemetry.SaltKeys keys = 4;</code>
+     */
+    public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeysOrBuilder getKeysOrBuilder() {
+      return getKeys();
+    }
+
+    public static final int CDPTELEMETRYVERSION_FIELD_NUMBER = 5;
+    private volatile java.lang.Object cdpTelemetryVersion_;
+    /**
+     * <pre>
+     * Version of the cdp-telemetry binary
+     * </pre>
+     *
+     * <code>string cdpTelemetryVersion = 5;</code>
+     */
+    public java.lang.String getCdpTelemetryVersion() {
+      java.lang.Object ref = cdpTelemetryVersion_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        cdpTelemetryVersion_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Version of the cdp-telemetry binary
+     * </pre>
+     *
+     * <code>string cdpTelemetryVersion = 5;</code>
+     */
+    public com.google.protobuf.ByteString
+        getCdpTelemetryVersionBytes() {
+      java.lang.Object ref = cdpTelemetryVersion_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        cdpTelemetryVersion_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -8485,6 +10507,12 @@ public final class NodeStatusProto {
       if (timestamp_ != 0L) {
         output.writeInt64(3, timestamp_);
       }
+      if (keys_ != null) {
+        output.writeMessage(4, getKeys());
+      }
+      if (!getCdpTelemetryVersionBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 5, cdpTelemetryVersion_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -8505,6 +10533,13 @@ public final class NodeStatusProto {
       if (timestamp_ != 0L) {
         size += com.google.protobuf.CodedOutputStream
           .computeInt64Size(3, timestamp_);
+      }
+      if (keys_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(4, getKeys());
+      }
+      if (!getCdpTelemetryVersionBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, cdpTelemetryVersion_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -8534,6 +10569,13 @@ public final class NodeStatusProto {
       }
       result = result && (getTimestamp()
           == other.getTimestamp());
+      result = result && (hasKeys() == other.hasKeys());
+      if (hasKeys()) {
+        result = result && getKeys()
+            .equals(other.getKeys());
+      }
+      result = result && getCdpTelemetryVersion()
+          .equals(other.getCdpTelemetryVersion());
       result = result && unknownFields.equals(other.unknownFields);
       return result;
     }
@@ -8556,6 +10598,12 @@ public final class NodeStatusProto {
       hash = (37 * hash) + TIMESTAMP_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           getTimestamp());
+      if (hasKeys()) {
+        hash = (37 * hash) + KEYS_FIELD_NUMBER;
+        hash = (53 * hash) + getKeys().hashCode();
+      }
+      hash = (37 * hash) + CDPTELEMETRYVERSION_FIELD_NUMBER;
+      hash = (53 * hash) + getCdpTelemetryVersion().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -8707,6 +10755,14 @@ public final class NodeStatusProto {
         }
         timestamp_ = 0L;
 
+        if (keysBuilder_ == null) {
+          keys_ = null;
+        } else {
+          keys_ = null;
+          keysBuilder_ = null;
+        }
+        cdpTelemetryVersion_ = "";
+
         return this;
       }
 
@@ -8744,6 +10800,12 @@ public final class NodeStatusProto {
           result.minions_ = minionsBuilder_.build();
         }
         result.timestamp_ = timestamp_;
+        if (keysBuilder_ == null) {
+          result.keys_ = keys_;
+        } else {
+          result.keys_ = keysBuilder_.build();
+        }
+        result.cdpTelemetryVersion_ = cdpTelemetryVersion_;
         onBuilt();
         return result;
       }
@@ -8800,6 +10862,13 @@ public final class NodeStatusProto {
         }
         if (other.getTimestamp() != 0L) {
           setTimestamp(other.getTimestamp());
+        }
+        if (other.hasKeys()) {
+          mergeKeys(other.getKeys());
+        }
+        if (!other.getCdpTelemetryVersion().isEmpty()) {
+          cdpTelemetryVersion_ = other.cdpTelemetryVersion_;
+          onChanged();
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -9170,6 +11239,248 @@ public final class NodeStatusProto {
       public Builder clearTimestamp() {
         
         timestamp_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys keys_ = null;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys.Builder, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeysOrBuilder> keysBuilder_;
+      /**
+       * <pre>
+       * Salt public keys - hold by salt master for minions.
+       * </pre>
+       *
+       * <code>.cdp.telemetry.SaltKeys keys = 4;</code>
+       */
+      public boolean hasKeys() {
+        return keysBuilder_ != null || keys_ != null;
+      }
+      /**
+       * <pre>
+       * Salt public keys - hold by salt master for minions.
+       * </pre>
+       *
+       * <code>.cdp.telemetry.SaltKeys keys = 4;</code>
+       */
+      public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys getKeys() {
+        if (keysBuilder_ == null) {
+          return keys_ == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys.getDefaultInstance() : keys_;
+        } else {
+          return keysBuilder_.getMessage();
+        }
+      }
+      /**
+       * <pre>
+       * Salt public keys - hold by salt master for minions.
+       * </pre>
+       *
+       * <code>.cdp.telemetry.SaltKeys keys = 4;</code>
+       */
+      public Builder setKeys(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys value) {
+        if (keysBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          keys_ = value;
+          onChanged();
+        } else {
+          keysBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Salt public keys - hold by salt master for minions.
+       * </pre>
+       *
+       * <code>.cdp.telemetry.SaltKeys keys = 4;</code>
+       */
+      public Builder setKeys(
+          com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys.Builder builderForValue) {
+        if (keysBuilder_ == null) {
+          keys_ = builderForValue.build();
+          onChanged();
+        } else {
+          keysBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Salt public keys - hold by salt master for minions.
+       * </pre>
+       *
+       * <code>.cdp.telemetry.SaltKeys keys = 4;</code>
+       */
+      public Builder mergeKeys(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys value) {
+        if (keysBuilder_ == null) {
+          if (keys_ != null) {
+            keys_ =
+              com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys.newBuilder(keys_).mergeFrom(value).buildPartial();
+          } else {
+            keys_ = value;
+          }
+          onChanged();
+        } else {
+          keysBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Salt public keys - hold by salt master for minions.
+       * </pre>
+       *
+       * <code>.cdp.telemetry.SaltKeys keys = 4;</code>
+       */
+      public Builder clearKeys() {
+        if (keysBuilder_ == null) {
+          keys_ = null;
+          onChanged();
+        } else {
+          keys_ = null;
+          keysBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Salt public keys - hold by salt master for minions.
+       * </pre>
+       *
+       * <code>.cdp.telemetry.SaltKeys keys = 4;</code>
+       */
+      public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys.Builder getKeysBuilder() {
+        
+        onChanged();
+        return getKeysFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * Salt public keys - hold by salt master for minions.
+       * </pre>
+       *
+       * <code>.cdp.telemetry.SaltKeys keys = 4;</code>
+       */
+      public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeysOrBuilder getKeysOrBuilder() {
+        if (keysBuilder_ != null) {
+          return keysBuilder_.getMessageOrBuilder();
+        } else {
+          return keys_ == null ?
+              com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys.getDefaultInstance() : keys_;
+        }
+      }
+      /**
+       * <pre>
+       * Salt public keys - hold by salt master for minions.
+       * </pre>
+       *
+       * <code>.cdp.telemetry.SaltKeys keys = 4;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys.Builder, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeysOrBuilder> 
+          getKeysFieldBuilder() {
+        if (keysBuilder_ == null) {
+          keysBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys.Builder, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeysOrBuilder>(
+                  getKeys(),
+                  getParentForChildren(),
+                  isClean());
+          keys_ = null;
+        }
+        return keysBuilder_;
+      }
+
+      private java.lang.Object cdpTelemetryVersion_ = "";
+      /**
+       * <pre>
+       * Version of the cdp-telemetry binary
+       * </pre>
+       *
+       * <code>string cdpTelemetryVersion = 5;</code>
+       */
+      public java.lang.String getCdpTelemetryVersion() {
+        java.lang.Object ref = cdpTelemetryVersion_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          cdpTelemetryVersion_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Version of the cdp-telemetry binary
+       * </pre>
+       *
+       * <code>string cdpTelemetryVersion = 5;</code>
+       */
+      public com.google.protobuf.ByteString
+          getCdpTelemetryVersionBytes() {
+        java.lang.Object ref = cdpTelemetryVersion_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          cdpTelemetryVersion_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Version of the cdp-telemetry binary
+       * </pre>
+       *
+       * <code>string cdpTelemetryVersion = 5;</code>
+       */
+      public Builder setCdpTelemetryVersion(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        cdpTelemetryVersion_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Version of the cdp-telemetry binary
+       * </pre>
+       *
+       * <code>string cdpTelemetryVersion = 5;</code>
+       */
+      public Builder clearCdpTelemetryVersion() {
+        
+        cdpTelemetryVersion_ = getDefaultInstance().getCdpTelemetryVersion();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Version of the cdp-telemetry binary
+       * </pre>
+       *
+       * <code>string cdpTelemetryVersion = 5;</code>
+       */
+      public Builder setCdpTelemetryVersionBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        cdpTelemetryVersion_ = value;
         onChanged();
         return this;
       }
@@ -10456,6 +12767,24 @@ public final class NodeStatusProto {
      * <code>int64 timestamp = 12;</code>
      */
     long getTimestamp();
+
+    /**
+     * <pre>
+     * Version of the cdp-telemetry binary
+     * </pre>
+     *
+     * <code>string cdpTelemetryVersion = 13;</code>
+     */
+    java.lang.String getCdpTelemetryVersion();
+    /**
+     * <pre>
+     * Version of the cdp-telemetry binary
+     * </pre>
+     *
+     * <code>string cdpTelemetryVersion = 13;</code>
+     */
+    com.google.protobuf.ByteString
+        getCdpTelemetryVersionBytes();
   }
   /**
    * <pre>
@@ -10484,6 +12813,7 @@ public final class NodeStatusProto {
       loggingAgentConfig_ = 0;
       loggingServiceRunning_ = 0;
       timestamp_ = 0L;
+      cdpTelemetryVersion_ = "";
     }
 
     @java.lang.Override
@@ -10590,6 +12920,12 @@ public final class NodeStatusProto {
             case 96: {
 
               timestamp_ = input.readInt64();
+              break;
+            }
+            case 106: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              cdpTelemetryVersion_ = s;
               break;
             }
             default: {
@@ -11025,6 +13361,48 @@ public final class NodeStatusProto {
       return timestamp_;
     }
 
+    public static final int CDPTELEMETRYVERSION_FIELD_NUMBER = 13;
+    private volatile java.lang.Object cdpTelemetryVersion_;
+    /**
+     * <pre>
+     * Version of the cdp-telemetry binary
+     * </pre>
+     *
+     * <code>string cdpTelemetryVersion = 13;</code>
+     */
+    public java.lang.String getCdpTelemetryVersion() {
+      java.lang.Object ref = cdpTelemetryVersion_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        cdpTelemetryVersion_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Version of the cdp-telemetry binary
+     * </pre>
+     *
+     * <code>string cdpTelemetryVersion = 13;</code>
+     */
+    public com.google.protobuf.ByteString
+        getCdpTelemetryVersionBytes() {
+      java.lang.Object ref = cdpTelemetryVersion_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        cdpTelemetryVersion_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -11080,6 +13458,9 @@ public final class NodeStatusProto {
       }
       if (timestamp_ != 0L) {
         output.writeInt64(12, timestamp_);
+      }
+      if (!getCdpTelemetryVersionBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 13, cdpTelemetryVersion_);
       }
       unknownFields.writeTo(output);
     }
@@ -11150,6 +13531,9 @@ public final class NodeStatusProto {
         size += com.google.protobuf.CodedOutputStream
           .computeInt64Size(12, timestamp_);
       }
+      if (!getCdpTelemetryVersionBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(13, cdpTelemetryVersion_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -11184,6 +13568,8 @@ public final class NodeStatusProto {
       result = result && loggingServiceRunning_ == other.loggingServiceRunning_;
       result = result && (getTimestamp()
           == other.getTimestamp());
+      result = result && getCdpTelemetryVersion()
+          .equals(other.getCdpTelemetryVersion());
       result = result && unknownFields.equals(other.unknownFields);
       return result;
     }
@@ -11226,6 +13612,8 @@ public final class NodeStatusProto {
       hash = (37 * hash) + TIMESTAMP_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           getTimestamp());
+      hash = (37 * hash) + CDPTELEMETRYVERSION_FIELD_NUMBER;
+      hash = (53 * hash) + getCdpTelemetryVersion().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -11411,6 +13799,8 @@ public final class NodeStatusProto {
 
         timestamp_ = 0L;
 
+        cdpTelemetryVersion_ = "";
+
         return this;
       }
 
@@ -11453,6 +13843,7 @@ public final class NodeStatusProto {
         result.loggingAgentConfig_ = loggingAgentConfig_;
         result.loggingServiceRunning_ = loggingServiceRunning_;
         result.timestamp_ = timestamp_;
+        result.cdpTelemetryVersion_ = cdpTelemetryVersion_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -11535,6 +13926,10 @@ public final class NodeStatusProto {
         }
         if (other.getTimestamp() != 0L) {
           setTimestamp(other.getTimestamp());
+        }
+        if (!other.getCdpTelemetryVersion().isEmpty()) {
+          cdpTelemetryVersion_ = other.cdpTelemetryVersion_;
+          onChanged();
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -12409,6 +14804,95 @@ public final class NodeStatusProto {
         onChanged();
         return this;
       }
+
+      private java.lang.Object cdpTelemetryVersion_ = "";
+      /**
+       * <pre>
+       * Version of the cdp-telemetry binary
+       * </pre>
+       *
+       * <code>string cdpTelemetryVersion = 13;</code>
+       */
+      public java.lang.String getCdpTelemetryVersion() {
+        java.lang.Object ref = cdpTelemetryVersion_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          cdpTelemetryVersion_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Version of the cdp-telemetry binary
+       * </pre>
+       *
+       * <code>string cdpTelemetryVersion = 13;</code>
+       */
+      public com.google.protobuf.ByteString
+          getCdpTelemetryVersionBytes() {
+        java.lang.Object ref = cdpTelemetryVersion_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          cdpTelemetryVersion_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Version of the cdp-telemetry binary
+       * </pre>
+       *
+       * <code>string cdpTelemetryVersion = 13;</code>
+       */
+      public Builder setCdpTelemetryVersion(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        cdpTelemetryVersion_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Version of the cdp-telemetry binary
+       * </pre>
+       *
+       * <code>string cdpTelemetryVersion = 13;</code>
+       */
+      public Builder clearCdpTelemetryVersion() {
+        
+        cdpTelemetryVersion_ = getDefaultInstance().getCdpTelemetryVersion();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Version of the cdp-telemetry binary
+       * </pre>
+       *
+       * <code>string cdpTelemetryVersion = 13;</code>
+       */
+      public Builder setCdpTelemetryVersionBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        cdpTelemetryVersion_ = value;
+        onChanged();
+        return this;
+      }
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -12759,6 +15243,24 @@ public final class NodeStatusProto {
      * <code>.cdp.telemetry.HealthStatus azureManagementAccessible = 17;</code>
      */
     com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getAzureManagementAccessible();
+
+    /**
+     * <pre>
+     * Version of the cdp-telemetry binary
+     * </pre>
+     *
+     * <code>string cdpTelemetryVersion = 18;</code>
+     */
+    java.lang.String getCdpTelemetryVersion();
+    /**
+     * <pre>
+     * Version of the cdp-telemetry binary
+     * </pre>
+     *
+     * <code>string cdpTelemetryVersion = 18;</code>
+     */
+    com.google.protobuf.ByteString
+        getCdpTelemetryVersionBytes();
   }
   /**
    * <pre>
@@ -12794,6 +15296,7 @@ public final class NodeStatusProto {
       gcsAccessible_ = 0;
       stsAccessible_ = 0;
       azureManagementAccessible_ = 0;
+      cdpTelemetryVersion_ = "";
     }
 
     @java.lang.Override
@@ -12922,6 +15425,12 @@ public final class NodeStatusProto {
               int rawValue = input.readEnum();
 
               azureManagementAccessible_ = rawValue;
+              break;
+            }
+            case 146: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              cdpTelemetryVersion_ = s;
               break;
             }
             default: {
@@ -13397,6 +15906,48 @@ public final class NodeStatusProto {
       return result == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.UNRECOGNIZED : result;
     }
 
+    public static final int CDPTELEMETRYVERSION_FIELD_NUMBER = 18;
+    private volatile java.lang.Object cdpTelemetryVersion_;
+    /**
+     * <pre>
+     * Version of the cdp-telemetry binary
+     * </pre>
+     *
+     * <code>string cdpTelemetryVersion = 18;</code>
+     */
+    public java.lang.String getCdpTelemetryVersion() {
+      java.lang.Object ref = cdpTelemetryVersion_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        cdpTelemetryVersion_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Version of the cdp-telemetry binary
+     * </pre>
+     *
+     * <code>string cdpTelemetryVersion = 18;</code>
+     */
+    public com.google.protobuf.ByteString
+        getCdpTelemetryVersionBytes() {
+      java.lang.Object ref = cdpTelemetryVersion_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        cdpTelemetryVersion_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -13461,6 +16012,9 @@ public final class NodeStatusProto {
       }
       if (azureManagementAccessible_ != com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.UNKNOWN.getNumber()) {
         output.writeEnum(17, azureManagementAccessible_);
+      }
+      if (!getCdpTelemetryVersionBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 18, cdpTelemetryVersion_);
       }
       unknownFields.writeTo(output);
     }
@@ -13546,6 +16100,9 @@ public final class NodeStatusProto {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(17, azureManagementAccessible_);
       }
+      if (!getCdpTelemetryVersionBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(18, cdpTelemetryVersion_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -13586,6 +16143,8 @@ public final class NodeStatusProto {
       result = result && gcsAccessible_ == other.gcsAccessible_;
       result = result && stsAccessible_ == other.stsAccessible_;
       result = result && azureManagementAccessible_ == other.azureManagementAccessible_;
+      result = result && getCdpTelemetryVersion()
+          .equals(other.getCdpTelemetryVersion());
       result = result && unknownFields.equals(other.unknownFields);
       return result;
     }
@@ -13638,6 +16197,8 @@ public final class NodeStatusProto {
       hash = (53 * hash) + stsAccessible_;
       hash = (37 * hash) + AZUREMANAGEMENTACCESSIBLE_FIELD_NUMBER;
       hash = (53 * hash) + azureManagementAccessible_;
+      hash = (37 * hash) + CDPTELEMETRYVERSION_FIELD_NUMBER;
+      hash = (53 * hash) + getCdpTelemetryVersion().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -13809,6 +16370,8 @@ public final class NodeStatusProto {
 
         azureManagementAccessible_ = 0;
 
+        cdpTelemetryVersion_ = "";
+
         return this;
       }
 
@@ -13862,6 +16425,7 @@ public final class NodeStatusProto {
         result.gcsAccessible_ = gcsAccessible_;
         result.stsAccessible_ = stsAccessible_;
         result.azureManagementAccessible_ = azureManagementAccessible_;
+        result.cdpTelemetryVersion_ = cdpTelemetryVersion_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -13976,6 +16540,10 @@ public final class NodeStatusProto {
         }
         if (other.azureManagementAccessible_ != 0) {
           setAzureManagementAccessibleValue(other.getAzureManagementAccessibleValue());
+        }
+        if (!other.getCdpTelemetryVersion().isEmpty()) {
+          cdpTelemetryVersion_ = other.cdpTelemetryVersion_;
+          onChanged();
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -15157,6 +17725,95 @@ public final class NodeStatusProto {
         onChanged();
         return this;
       }
+
+      private java.lang.Object cdpTelemetryVersion_ = "";
+      /**
+       * <pre>
+       * Version of the cdp-telemetry binary
+       * </pre>
+       *
+       * <code>string cdpTelemetryVersion = 18;</code>
+       */
+      public java.lang.String getCdpTelemetryVersion() {
+        java.lang.Object ref = cdpTelemetryVersion_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          cdpTelemetryVersion_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Version of the cdp-telemetry binary
+       * </pre>
+       *
+       * <code>string cdpTelemetryVersion = 18;</code>
+       */
+      public com.google.protobuf.ByteString
+          getCdpTelemetryVersionBytes() {
+        java.lang.Object ref = cdpTelemetryVersion_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          cdpTelemetryVersion_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Version of the cdp-telemetry binary
+       * </pre>
+       *
+       * <code>string cdpTelemetryVersion = 18;</code>
+       */
+      public Builder setCdpTelemetryVersion(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        cdpTelemetryVersion_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Version of the cdp-telemetry binary
+       * </pre>
+       *
+       * <code>string cdpTelemetryVersion = 18;</code>
+       */
+      public Builder clearCdpTelemetryVersion() {
+        
+        cdpTelemetryVersion_ = getDefaultInstance().getCdpTelemetryVersion();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Version of the cdp-telemetry binary
+       * </pre>
+       *
+       * <code>string cdpTelemetryVersion = 18;</code>
+       */
+      public Builder setCdpTelemetryVersionBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        cdpTelemetryVersion_ = value;
+        onChanged();
+        return this;
+      }
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -15347,6 +18004,24 @@ public final class NodeStatusProto {
      * <code>.cdp.telemetry.ClusterDetails clusterDetails = 6;</code>
      */
     com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetailsOrBuilder getClusterDetailsOrBuilder();
+
+    /**
+     * <pre>
+     * Version of the cdp-telemetry binary
+     * </pre>
+     *
+     * <code>string cdpTelemetryVersion = 7;</code>
+     */
+    java.lang.String getCdpTelemetryVersion();
+    /**
+     * <pre>
+     * Version of the cdp-telemetry binary
+     * </pre>
+     *
+     * <code>string cdpTelemetryVersion = 7;</code>
+     */
+    com.google.protobuf.ByteString
+        getCdpTelemetryVersionBytes();
   }
   /**
    * <pre>
@@ -15366,6 +18041,7 @@ public final class NodeStatusProto {
     }
     private SystemMetrics() {
       timestamp_ = 0L;
+      cdpTelemetryVersion_ = "";
     }
 
     @java.lang.Override
@@ -15460,6 +18136,12 @@ public final class NodeStatusProto {
                 clusterDetails_ = subBuilder.buildPartial();
               }
 
+              break;
+            }
+            case 58: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              cdpTelemetryVersion_ = s;
               break;
             }
             default: {
@@ -15672,6 +18354,48 @@ public final class NodeStatusProto {
       return getClusterDetails();
     }
 
+    public static final int CDPTELEMETRYVERSION_FIELD_NUMBER = 7;
+    private volatile java.lang.Object cdpTelemetryVersion_;
+    /**
+     * <pre>
+     * Version of the cdp-telemetry binary
+     * </pre>
+     *
+     * <code>string cdpTelemetryVersion = 7;</code>
+     */
+    public java.lang.String getCdpTelemetryVersion() {
+      java.lang.Object ref = cdpTelemetryVersion_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        cdpTelemetryVersion_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Version of the cdp-telemetry binary
+     * </pre>
+     *
+     * <code>string cdpTelemetryVersion = 7;</code>
+     */
+    public com.google.protobuf.ByteString
+        getCdpTelemetryVersionBytes() {
+      java.lang.Object ref = cdpTelemetryVersion_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        cdpTelemetryVersion_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -15703,6 +18427,9 @@ public final class NodeStatusProto {
       }
       if (clusterDetails_ != null) {
         output.writeMessage(6, getClusterDetails());
+      }
+      if (!getCdpTelemetryVersionBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 7, cdpTelemetryVersion_);
       }
       unknownFields.writeTo(output);
     }
@@ -15736,6 +18463,9 @@ public final class NodeStatusProto {
       if (clusterDetails_ != null) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(6, getClusterDetails());
+      }
+      if (!getCdpTelemetryVersionBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, cdpTelemetryVersion_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -15780,6 +18510,8 @@ public final class NodeStatusProto {
         result = result && getClusterDetails()
             .equals(other.getClusterDetails());
       }
+      result = result && getCdpTelemetryVersion()
+          .equals(other.getCdpTelemetryVersion());
       result = result && unknownFields.equals(other.unknownFields);
       return result;
     }
@@ -15814,6 +18546,8 @@ public final class NodeStatusProto {
         hash = (37 * hash) + CLUSTERDETAILS_FIELD_NUMBER;
         hash = (53 * hash) + getClusterDetails().hashCode();
       }
+      hash = (37 * hash) + CDPTELEMETRYVERSION_FIELD_NUMBER;
+      hash = (53 * hash) + getCdpTelemetryVersion().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -15983,6 +18717,8 @@ public final class NodeStatusProto {
           clusterDetails_ = null;
           clusterDetailsBuilder_ = null;
         }
+        cdpTelemetryVersion_ = "";
+
         return this;
       }
 
@@ -16035,6 +18771,7 @@ public final class NodeStatusProto {
         } else {
           result.clusterDetails_ = clusterDetailsBuilder_.build();
         }
+        result.cdpTelemetryVersion_ = cdpTelemetryVersion_;
         onBuilt();
         return result;
       }
@@ -16100,6 +18837,10 @@ public final class NodeStatusProto {
         }
         if (other.hasClusterDetails()) {
           mergeClusterDetails(other.getClusterDetails());
+        }
+        if (!other.getCdpTelemetryVersion().isEmpty()) {
+          cdpTelemetryVersion_ = other.cdpTelemetryVersion_;
+          onChanged();
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -16932,6 +19673,95 @@ public final class NodeStatusProto {
         }
         return clusterDetailsBuilder_;
       }
+
+      private java.lang.Object cdpTelemetryVersion_ = "";
+      /**
+       * <pre>
+       * Version of the cdp-telemetry binary
+       * </pre>
+       *
+       * <code>string cdpTelemetryVersion = 7;</code>
+       */
+      public java.lang.String getCdpTelemetryVersion() {
+        java.lang.Object ref = cdpTelemetryVersion_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          cdpTelemetryVersion_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Version of the cdp-telemetry binary
+       * </pre>
+       *
+       * <code>string cdpTelemetryVersion = 7;</code>
+       */
+      public com.google.protobuf.ByteString
+          getCdpTelemetryVersionBytes() {
+        java.lang.Object ref = cdpTelemetryVersion_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          cdpTelemetryVersion_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Version of the cdp-telemetry binary
+       * </pre>
+       *
+       * <code>string cdpTelemetryVersion = 7;</code>
+       */
+      public Builder setCdpTelemetryVersion(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        cdpTelemetryVersion_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Version of the cdp-telemetry binary
+       * </pre>
+       *
+       * <code>string cdpTelemetryVersion = 7;</code>
+       */
+      public Builder clearCdpTelemetryVersion() {
+        
+        cdpTelemetryVersion_ = getDefaultInstance().getCdpTelemetryVersion();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Version of the cdp-telemetry binary
+       * </pre>
+       *
+       * <code>string cdpTelemetryVersion = 7;</code>
+       */
+      public Builder setCdpTelemetryVersionBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        cdpTelemetryVersion_ = value;
+        onChanged();
+        return this;
+      }
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -17057,6 +19887,24 @@ public final class NodeStatusProto {
      * <code>.cdp.telemetry.ClusterDetails clusterDetails = 2;</code>
      */
     com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetailsOrBuilder getClusterDetailsOrBuilder();
+
+    /**
+     * <pre>
+     * Version of the cdp-telemetry binary
+     * </pre>
+     *
+     * <code>string cdpTelemetryVersion = 3;</code>
+     */
+    java.lang.String getCdpTelemetryVersion();
+    /**
+     * <pre>
+     * Version of the cdp-telemetry binary
+     * </pre>
+     *
+     * <code>string cdpTelemetryVersion = 3;</code>
+     */
+    com.google.protobuf.ByteString
+        getCdpTelemetryVersionBytes();
   }
   /**
    * <pre>
@@ -17076,6 +19924,7 @@ public final class NodeStatusProto {
     }
     private CmMetricsReport() {
       metrics_ = java.util.Collections.emptyList();
+      cdpTelemetryVersion_ = "";
     }
 
     @java.lang.Override
@@ -17122,6 +19971,12 @@ public final class NodeStatusProto {
                 clusterDetails_ = subBuilder.buildPartial();
               }
 
+              break;
+            }
+            case 26: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              cdpTelemetryVersion_ = s;
               break;
             }
             default: {
@@ -17248,6 +20103,48 @@ public final class NodeStatusProto {
       return getClusterDetails();
     }
 
+    public static final int CDPTELEMETRYVERSION_FIELD_NUMBER = 3;
+    private volatile java.lang.Object cdpTelemetryVersion_;
+    /**
+     * <pre>
+     * Version of the cdp-telemetry binary
+     * </pre>
+     *
+     * <code>string cdpTelemetryVersion = 3;</code>
+     */
+    public java.lang.String getCdpTelemetryVersion() {
+      java.lang.Object ref = cdpTelemetryVersion_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        cdpTelemetryVersion_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Version of the cdp-telemetry binary
+     * </pre>
+     *
+     * <code>string cdpTelemetryVersion = 3;</code>
+     */
+    public com.google.protobuf.ByteString
+        getCdpTelemetryVersionBytes() {
+      java.lang.Object ref = cdpTelemetryVersion_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        cdpTelemetryVersion_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -17268,6 +20165,9 @@ public final class NodeStatusProto {
       if (clusterDetails_ != null) {
         output.writeMessage(2, getClusterDetails());
       }
+      if (!getCdpTelemetryVersionBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, cdpTelemetryVersion_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -17284,6 +20184,9 @@ public final class NodeStatusProto {
       if (clusterDetails_ != null) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(2, getClusterDetails());
+      }
+      if (!getCdpTelemetryVersionBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, cdpTelemetryVersion_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -17308,6 +20211,8 @@ public final class NodeStatusProto {
         result = result && getClusterDetails()
             .equals(other.getClusterDetails());
       }
+      result = result && getCdpTelemetryVersion()
+          .equals(other.getCdpTelemetryVersion());
       result = result && unknownFields.equals(other.unknownFields);
       return result;
     }
@@ -17327,6 +20232,8 @@ public final class NodeStatusProto {
         hash = (37 * hash) + CLUSTERDETAILS_FIELD_NUMBER;
         hash = (53 * hash) + getClusterDetails().hashCode();
       }
+      hash = (37 * hash) + CDPTELEMETRYVERSION_FIELD_NUMBER;
+      hash = (53 * hash) + getCdpTelemetryVersion().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -17477,6 +20384,8 @@ public final class NodeStatusProto {
           clusterDetails_ = null;
           clusterDetailsBuilder_ = null;
         }
+        cdpTelemetryVersion_ = "";
+
         return this;
       }
 
@@ -17519,6 +20428,7 @@ public final class NodeStatusProto {
         } else {
           result.clusterDetails_ = clusterDetailsBuilder_.build();
         }
+        result.cdpTelemetryVersion_ = cdpTelemetryVersion_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -17596,6 +20506,10 @@ public final class NodeStatusProto {
         }
         if (other.hasClusterDetails()) {
           mergeClusterDetails(other.getClusterDetails());
+        }
+        if (!other.getCdpTelemetryVersion().isEmpty()) {
+          cdpTelemetryVersion_ = other.cdpTelemetryVersion_;
+          onChanged();
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -18091,6 +21005,95 @@ public final class NodeStatusProto {
         }
         return clusterDetailsBuilder_;
       }
+
+      private java.lang.Object cdpTelemetryVersion_ = "";
+      /**
+       * <pre>
+       * Version of the cdp-telemetry binary
+       * </pre>
+       *
+       * <code>string cdpTelemetryVersion = 3;</code>
+       */
+      public java.lang.String getCdpTelemetryVersion() {
+        java.lang.Object ref = cdpTelemetryVersion_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          cdpTelemetryVersion_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Version of the cdp-telemetry binary
+       * </pre>
+       *
+       * <code>string cdpTelemetryVersion = 3;</code>
+       */
+      public com.google.protobuf.ByteString
+          getCdpTelemetryVersionBytes() {
+        java.lang.Object ref = cdpTelemetryVersion_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          cdpTelemetryVersion_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Version of the cdp-telemetry binary
+       * </pre>
+       *
+       * <code>string cdpTelemetryVersion = 3;</code>
+       */
+      public Builder setCdpTelemetryVersion(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        cdpTelemetryVersion_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Version of the cdp-telemetry binary
+       * </pre>
+       *
+       * <code>string cdpTelemetryVersion = 3;</code>
+       */
+      public Builder clearCdpTelemetryVersion() {
+        
+        cdpTelemetryVersion_ = getDefaultInstance().getCdpTelemetryVersion();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Version of the cdp-telemetry binary
+       * </pre>
+       *
+       * <code>string cdpTelemetryVersion = 3;</code>
+       */
+      public Builder setCdpTelemetryVersionBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        cdpTelemetryVersion_ = value;
+        onChanged();
+        return this;
+      }
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -18216,6 +21219,24 @@ public final class NodeStatusProto {
      * <code>.cdp.telemetry.ClusterDetails clusterDetails = 2;</code>
      */
     com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetailsOrBuilder getClusterDetailsOrBuilder();
+
+    /**
+     * <pre>
+     * Version of the cdp-telemetry binary
+     * </pre>
+     *
+     * <code>string cdpTelemetryVersion = 3;</code>
+     */
+    java.lang.String getCdpTelemetryVersion();
+    /**
+     * <pre>
+     * Version of the cdp-telemetry binary
+     * </pre>
+     *
+     * <code>string cdpTelemetryVersion = 3;</code>
+     */
+    com.google.protobuf.ByteString
+        getCdpTelemetryVersionBytes();
   }
   /**
    * <pre>
@@ -18235,6 +21256,7 @@ public final class NodeStatusProto {
     }
     private CmHealthChecksReport() {
       healthChecks_ = java.util.Collections.emptyList();
+      cdpTelemetryVersion_ = "";
     }
 
     @java.lang.Override
@@ -18281,6 +21303,12 @@ public final class NodeStatusProto {
                 clusterDetails_ = subBuilder.buildPartial();
               }
 
+              break;
+            }
+            case 26: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              cdpTelemetryVersion_ = s;
               break;
             }
             default: {
@@ -18407,6 +21435,48 @@ public final class NodeStatusProto {
       return getClusterDetails();
     }
 
+    public static final int CDPTELEMETRYVERSION_FIELD_NUMBER = 3;
+    private volatile java.lang.Object cdpTelemetryVersion_;
+    /**
+     * <pre>
+     * Version of the cdp-telemetry binary
+     * </pre>
+     *
+     * <code>string cdpTelemetryVersion = 3;</code>
+     */
+    public java.lang.String getCdpTelemetryVersion() {
+      java.lang.Object ref = cdpTelemetryVersion_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        cdpTelemetryVersion_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Version of the cdp-telemetry binary
+     * </pre>
+     *
+     * <code>string cdpTelemetryVersion = 3;</code>
+     */
+    public com.google.protobuf.ByteString
+        getCdpTelemetryVersionBytes() {
+      java.lang.Object ref = cdpTelemetryVersion_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        cdpTelemetryVersion_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -18427,6 +21497,9 @@ public final class NodeStatusProto {
       if (clusterDetails_ != null) {
         output.writeMessage(2, getClusterDetails());
       }
+      if (!getCdpTelemetryVersionBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, cdpTelemetryVersion_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -18443,6 +21516,9 @@ public final class NodeStatusProto {
       if (clusterDetails_ != null) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(2, getClusterDetails());
+      }
+      if (!getCdpTelemetryVersionBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, cdpTelemetryVersion_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -18467,6 +21543,8 @@ public final class NodeStatusProto {
         result = result && getClusterDetails()
             .equals(other.getClusterDetails());
       }
+      result = result && getCdpTelemetryVersion()
+          .equals(other.getCdpTelemetryVersion());
       result = result && unknownFields.equals(other.unknownFields);
       return result;
     }
@@ -18486,6 +21564,8 @@ public final class NodeStatusProto {
         hash = (37 * hash) + CLUSTERDETAILS_FIELD_NUMBER;
         hash = (53 * hash) + getClusterDetails().hashCode();
       }
+      hash = (37 * hash) + CDPTELEMETRYVERSION_FIELD_NUMBER;
+      hash = (53 * hash) + getCdpTelemetryVersion().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -18636,6 +21716,8 @@ public final class NodeStatusProto {
           clusterDetails_ = null;
           clusterDetailsBuilder_ = null;
         }
+        cdpTelemetryVersion_ = "";
+
         return this;
       }
 
@@ -18678,6 +21760,7 @@ public final class NodeStatusProto {
         } else {
           result.clusterDetails_ = clusterDetailsBuilder_.build();
         }
+        result.cdpTelemetryVersion_ = cdpTelemetryVersion_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -18755,6 +21838,10 @@ public final class NodeStatusProto {
         }
         if (other.hasClusterDetails()) {
           mergeClusterDetails(other.getClusterDetails());
+        }
+        if (!other.getCdpTelemetryVersion().isEmpty()) {
+          cdpTelemetryVersion_ = other.cdpTelemetryVersion_;
+          onChanged();
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -19249,6 +22336,95 @@ public final class NodeStatusProto {
           clusterDetails_ = null;
         }
         return clusterDetailsBuilder_;
+      }
+
+      private java.lang.Object cdpTelemetryVersion_ = "";
+      /**
+       * <pre>
+       * Version of the cdp-telemetry binary
+       * </pre>
+       *
+       * <code>string cdpTelemetryVersion = 3;</code>
+       */
+      public java.lang.String getCdpTelemetryVersion() {
+        java.lang.Object ref = cdpTelemetryVersion_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          cdpTelemetryVersion_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Version of the cdp-telemetry binary
+       * </pre>
+       *
+       * <code>string cdpTelemetryVersion = 3;</code>
+       */
+      public com.google.protobuf.ByteString
+          getCdpTelemetryVersionBytes() {
+        java.lang.Object ref = cdpTelemetryVersion_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          cdpTelemetryVersion_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Version of the cdp-telemetry binary
+       * </pre>
+       *
+       * <code>string cdpTelemetryVersion = 3;</code>
+       */
+      public Builder setCdpTelemetryVersion(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        cdpTelemetryVersion_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Version of the cdp-telemetry binary
+       * </pre>
+       *
+       * <code>string cdpTelemetryVersion = 3;</code>
+       */
+      public Builder clearCdpTelemetryVersion() {
+        
+        cdpTelemetryVersion_ = getDefaultInstance().getCdpTelemetryVersion();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Version of the cdp-telemetry binary
+       * </pre>
+       *
+       * <code>string cdpTelemetryVersion = 3;</code>
+       */
+      public Builder setCdpTelemetryVersionBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        cdpTelemetryVersion_ = value;
+        onChanged();
+        return this;
       }
       @java.lang.Override
       public final Builder setUnknownFields(
@@ -39686,6 +42862,11 @@ public final class NodeStatusProto {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_cdp_telemetry_SaltMinionsHealth_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_cdp_telemetry_SaltKeys_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_cdp_telemetry_SaltKeys_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_cdp_telemetry_SaltHealthReport_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -39837,146 +43018,156 @@ public final class NodeStatusProto {
       "etworkDetails\0227\n\017meteringDetails\030\004 \001(\0132\036" +
       ".cdp.telemetry.MeteringDetails\0223\n\rsystem" +
       "Metrics\030\005 \001(\0132\034.cdp.telemetry.SystemMetr" +
-      "ics\"\206\001\n\020NodeStatusReport\022(\n\005nodes\030\001 \003(\0132" +
+      "ics\"\243\001\n\020NodeStatusReport\022(\n\005nodes\030\001 \003(\0132" +
       "\031.cdp.telemetry.NodeStatus\0225\n\016clusterDet" +
       "ails\030\002 \001(\0132\035.cdp.telemetry.ClusterDetail" +
-      "s\022\021\n\ttimestamp\030\003 \001(\003\"J\n\rServiceStatus\022\014\n" +
-      "\004name\030\001 \001(\t\022+\n\006status\030\002 \001(\0162\033.cdp.teleme" +
-      "try.HealthStatus\"\362\001\n\017ServicesDetails\022.\n\010" +
-      "services\030\001 \003(\0132\034.cdp.telemetry.ServiceSt" +
-      "atus\0223\n\rinfraServices\030\002 \003(\0132\034.cdp.teleme" +
-      "try.ServiceStatus\0220\n\ncmServices\030\003 \003(\0132\034." +
-      "cdp.telemetry.ServiceStatus\0225\n\017freeipaSe" +
-      "rvices\030\004 \003(\0132\034.cdp.telemetry.ServiceStat" +
-      "us\022\021\n\ttimestamp\030\005 \001(\003\"U\n\020SaltMasterHealt" +
-      "h\022.\n\010services\030\001 \003(\0132\034.cdp.telemetry.Serv" +
-      "iceStatus\022\021\n\ttimestamp\030\002 \001(\003\"[\n\021SaltMini" +
-      "onsHealth\0223\n\rpingResponses\030\001 \003(\0132\034.cdp.t" +
-      "elemetry.StatusDetails\022\021\n\ttimestamp\030\002 \001(" +
-      "\003\"\211\001\n\020SaltHealthReport\022/\n\006master\030\001 \001(\0132\037" +
-      ".cdp.telemetry.SaltMasterHealth\0221\n\007minio" +
-      "ns\030\002 \001(\0132 .cdp.telemetry.SaltMinionsHeal" +
-      "th\022\021\n\ttimestamp\030\003 \001(\003\"s\n\rStatusDetails\022\014" +
-      "\n\004host\030\001 \001(\t\022+\n\006status\030\002 \001(\0162\033.cdp.telem" +
-      "etry.HealthStatus\022\024\n\014statusReason\030\003 \001(\t\022" +
-      "\021\n\ttimestamp\030\004 \001(\003\"\334\005\n\017MeteringDetails\022J" +
-      "\n\016databusDetails\030\001 \003(\01322.cdp.telemetry.M" +
-      "eteringDetails.DatabusDetailsEntry\022F\n\014ev" +
-      "entDetails\030\002 \003(\01320.cdp.telemetry.Meterin" +
-      "gDetails.EventDetailsEntry\022$\n\034firstHeart" +
-      "beatEventTimestamp\030\003 \001(\003\022\033\n\023systemBootTi" +
-      "mestamp\030\004 \001(\003\022\033\n\023heartbeatEventCount\030\005 \001" +
-      "(\005\022:\n\025heartbeatAgentRunning\030\006 \001(\0162\033.cdp." +
-      "telemetry.HealthStatus\0224\n\017heartbeatConfi" +
-      "g\030\007 \001(\0162\033.cdp.telemetry.HealthStatus\0225\n\020" +
-      "databusReachable\030\010 \001(\0162\033.cdp.telemetry.H" +
-      "ealthStatus\0228\n\023databusTestResponse\030\t \001(\016" +
-      "2\033.cdp.telemetry.HealthStatus\0227\n\022logging" +
-      "AgentConfig\030\n \001(\0162\033.cdp.telemetry.Health" +
-      "Status\022:\n\025loggingServiceRunning\030\013 \001(\0162\033." +
-      "cdp.telemetry.HealthStatus\022\021\n\ttimestamp\030" +
-      "\014 \001(\003\0325\n\023DatabusDetailsEntry\022\013\n\003key\030\001 \001(" +
-      "\t\022\r\n\005value\030\002 \001(\t:\0028\001\0323\n\021EventDetailsEntr" +
-      "y\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\"\324\005\n\016Ne" +
-      "tworkDetails\022\014\n\004host\030\001 \001(\t\022\022\n\nccmEnabled" +
-      "\030\002 \001(\010\022\024\n\014dnsResolvers\030\003 \003(\t\022\025\n\rneighbou" +
-      "rScan\030\004 \001(\010\022\022\n\nneighbours\030\005 \003(\t\022<\n\027anyNe" +
-      "ighboursAccessible\030\006 \001(\0162\033.cdp.telemetry" +
-      ".HealthStatus\022\032\n\022numberOfNeighbours\030\007 \001(" +
-      "\005\022\021\n\ttimestamp\030\010 \001(\003\0222\n\rccmAccessible\030\t " +
-      "\001(\0162\033.cdp.telemetry.HealthStatus\022:\n\025clou" +
-      "deraComAccessible\030\n \001(\0162\033.cdp.telemetry." +
-      "HealthStatus\0226\n\021databusAccessible\030\013 \001(\0162" +
-      "\033.cdp.telemetry.HealthStatus\0228\n\023databusS" +
-      "3Accessible\030\014 \001(\0162\033.cdp.telemetry.Health" +
-      "Status\0221\n\014s3Accessible\030\r \001(\0162\033.cdp.telem" +
-      "etry.HealthStatus\0225\n\020adlsV2Accessible\030\016 " +
-      "\001(\0162\033.cdp.telemetry.HealthStatus\0222\n\rgcsA" +
-      "ccessible\030\017 \001(\0162\033.cdp.telemetry.HealthSt" +
-      "atus\0222\n\rstsAccessible\030\020 \001(\0162\033.cdp.teleme" +
-      "try.HealthStatus\022>\n\031azureManagementAcces" +
-      "sible\030\021 \001(\0162\033.cdp.telemetry.HealthStatus" +
-      "\"\211\002\n\rSystemMetrics\022&\n\003cpu\030\001 \001(\0132\031.cdp.te" +
-      "lemetry.CpuMetrics\022(\n\004disk\030\002 \001(\0132\032.cdp.t" +
-      "elemetry.DiskMetrics\022,\n\006memory\030\003 \001(\0132\034.c" +
-      "dp.telemetry.MemoryMetrics\022.\n\007network\030\004 " +
-      "\001(\0132\035.cdp.telemetry.NetworkMetrics\022\021\n\tti" +
-      "mestamp\030\005 \001(\003\0225\n\016clusterDetails\030\006 \001(\0132\035." +
-      "cdp.telemetry.ClusterDetails\"~\n\017CmMetric" +
-      "sReport\0224\n\007metrics\030\001 \003(\0132#.cdp.telemetry" +
-      ".CmServiceMetricEvent\0225\n\016clusterDetails\030" +
-      "\002 \001(\0132\035.cdp.telemetry.ClusterDetails\"\215\001\n" +
-      "\024CmHealthChecksReport\022>\n\014healthChecks\030\001 " +
-      "\003(\0132(.cdp.telemetry.CmServiceHealthCheck" +
-      "Event\0225\n\016clusterDetails\030\002 \001(\0132\035.cdp.tele" +
-      "metry.ClusterDetails\"\277\001\n\nCpuMetrics\022\r\n\005c" +
-      "ount\030\001 \001(\005\022\025\n\rlogical_count\030\002 \001(\005\022\020\n\010loa" +
-      "d_avg\030\003 \003(\002\022&\n\005times\030\004 \001(\0132\027.cdp.telemet" +
-      "ry.CpuTimes\022&\n\005stats\030\005 \001(\0132\027.cdp.telemet" +
-      "ry.CpuStats\022)\n\004freq\030\006 \001(\0132\033.cdp.telemetr" +
-      "y.CpuFrequency\"_\n\010CpuStats\022\024\n\014ctx_switch" +
-      "es\030\001 \001(\003\022\022\n\ninterrupts\030\002 \001(\003\022\027\n\017soft_int" +
-      "errupts\030\003 \001(\003\022\020\n\010syscalls\030\004 \001(\003\"D\n\010CpuTi" +
-      "mes\022\014\n\004idle\030\001 \001(\001\022\014\n\004nice\030\002 \001(\001\022\016\n\006syste" +
-      "m\030\003 \001(\001\022\014\n\004user\030\004 \001(\001\"9\n\014CpuFrequency\022\017\n" +
-      "\007current\030\001 \001(\003\022\013\n\003min\030\002 \001(\003\022\013\n\003max\030\003 \001(\003" +
-      "\"\214\001\n\013DiskMetrics\0220\n\npartitions\030\001 \003(\0132\034.c" +
-      "dp.telemetry.DiskPartition\022(\n\ntop_varlog" +
-      "\030\002 \003(\0132\024.cdp.telemetry.VmLog\022!\n\002io\030\003 \001(\013" +
-      "2\025.cdp.telemetry.DiskIO\"#\n\005VmLog\022\014\n\004path" +
-      "\030\001 \001(\t\022\014\n\004size\030\002 \001(\t\"\234\001\n\rDiskPartition\022\'" +
-      "\n\005usage\030\001 \001(\0132\030.cdp.telemetry.DiskUsage\022" +
-      "\016\n\006device\030\002 \001(\t\022\016\n\006fstype\030\003 \001(\t\022\017\n\007maxfi" +
-      "le\030\004 \001(\005\022\017\n\007maxpath\030\005 \001(\005\022\022\n\nmountpoint\030" +
-      "\006 \001(\t\022\014\n\004opts\030\007 \001(\t\"G\n\tDiskUsage\022\014\n\004free" +
-      "\030\001 \001(\003\022\r\n\005total\030\002 \001(\003\022\014\n\004used\030\003 \001(\003\022\017\n\007p" +
-      "ercent\030\004 \001(\001\"\201\001\n\006DiskIO\022\022\n\nread_bytes\030\001 " +
-      "\001(\003\022\022\n\nread_count\030\002 \001(\003\022\021\n\tread_time\030\003 \001" +
-      "(\003\022\023\n\013write_bytes\030\004 \001(\003\022\023\n\013write_count\030\005" +
-      " \001(\003\022\022\n\nwrite_time\030\006 \001(\003\"n\n\016NetworkMetri" +
-      "cs\0226\n\013connections\030\001 \001(\0132!.cdp.telemetry." +
-      "NetworkConnections\022$\n\002io\030\002 \001(\0132\030.cdp.tel" +
-      "emetry.NetworkIO\"\237\001\n\tNetworkIO\022\022\n\nbytes_" +
-      "recv\030\001 \001(\003\022\022\n\nbytes_sent\030\002 \001(\003\022\016\n\006dropin" +
-      "\030\003 \001(\003\022\017\n\007dropout\030\004 \001(\003\022\r\n\005errin\030\005 \001(\003\022\016" +
-      "\n\006errout\030\006 \001(\003\022\024\n\014packets_recv\030\007 \001(\003\022\024\n\014" +
-      "packets_sent\030\010 \001(\003\"\322\001\n\022NetworkConnection" +
-      "s\022\016\n\006LISTEN\030\001 \001(\005\022\023\n\013ESTABLISHED\030\002 \001(\005\022\021" +
-      "\n\tTIME_WAIT\030\003 \001(\005\022\022\n\nCLOSE_WAIT\030\004 \001(\005\022\016\n" +
-      "\006CLOSED\030\005 \001(\005\022\020\n\010SYN_SEND\030\006 \001(\005\022\024\n\014SYN_R" +
-      "ECEIVED\030\007 \001(\005\022\022\n\nFIN_WAIT_1\030\010 \001(\005\022\022\n\nFIN" +
-      "_WAIT_2\030\t \001(\005\022\020\n\010LAST_ACK\030\n \001(\005\"u\n\rMemor" +
-      "yMetrics\0224\n\016virtual_memory\030\001 \001(\0132\034.cdp.t" +
-      "elemetry.VirtualMemory\022.\n\013swap_memory\030\002 " +
-      "\001(\0132\031.cdp.telemetry.SwapMemory\"\277\001\n\rVirtu" +
-      "alMemory\022\r\n\005total\030\001 \001(\003\022\014\n\004used\030\002 \001(\003\022\014\n" +
-      "\004free\030\003 \001(\003\022\017\n\007percent\030\004 \001(\001\022\021\n\tavailabl" +
-      "e\030\005 \001(\003\022\016\n\006active\030\006 \001(\003\022\020\n\010inactive\030\007 \001(" +
-      "\003\022\017\n\007buffers\030\010 \001(\003\022\016\n\006cached\030\t \001(\003\022\016\n\006sh" +
-      "ared\030\n \001(\003\022\014\n\004slab\030\013 \001(\003\"c\n\nSwapMemory\022\014" +
-      "\n\004free\030\001 \001(\003\022\017\n\007percent\030\002 \001(\001\022\013\n\003sin\030\003 \001" +
-      "(\003\022\014\n\004sout\030\004 \001(\003\022\r\n\005total\030\005 \001(\003\022\014\n\004used\030" +
-      "\006 \001(\003\"\301\001\n\031CmServiceHealthCheckEvent\022\023\n\013s" +
-      "erviceName\030\001 \001(\t\022\023\n\013serviceType\030\002 \001(\t\022\014\n" +
-      "\004name\030\003 \001(\t\022\r\n\005value\030\004 \001(\t\022\023\n\013explanatio" +
-      "n\030\005 \001(\t\022\021\n\ttimestamp\030\006 \001(\003\0225\n\016clusterDet" +
-      "ails\030\007 \001(\0132\035.cdp.telemetry.ClusterDetail" +
-      "s\"\247\001\n\024CmServiceMetricEvent\022\023\n\013serviceNam" +
-      "e\030\001 \001(\t\022\023\n\013serviceType\030\002 \001(\t\022\014\n\004name\030\003 \001" +
-      "(\t\022\r\n\005value\030\004 \001(\001\022\021\n\ttimestamp\030\005 \001(\003\0225\n\016" +
-      "clusterDetails\030\006 \001(\0132\035.cdp.telemetry.Clu" +
-      "sterDetails\"\262\002\n\016ClusterDetails\022\013\n\003crn\030\001 " +
-      "\001(\t\022\014\n\004name\030\002 \001(\t\022\017\n\007version\030\003 \001(\t\0227\n\004ty" +
-      "pe\030\004 \001(\0162).cdp.telemetry.ClusterDetails." +
-      "ClusterType\022=\n\010platform\030\005 \001(\0162+.cdp.tele" +
-      "metry.ClusterDetails.CloudPlatform\"5\n\013Cl" +
-      "usterType\022\013\n\007DATAHUB\020\000\022\014\n\010DATALAKE\020\001\022\013\n\007" +
-      "FREEIPA\020\002\"E\n\rCloudPlatform\022\013\n\007UNKNOWN\020\000\022" +
-      "\007\n\003AWS\020\001\022\t\n\005AZURE\020\002\022\007\n\003GCP\020\003\022\n\n\006YCLOUD\020\004" +
-      "*,\n\014HealthStatus\022\013\n\007UNKNOWN\020\000\022\006\n\002OK\020\001\022\007\n" +
-      "\003NOK\020\002B[\n-com.cloudera.thunderhead.telem" +
-      "etry.nodestatusB\017NodeStatusProtoZ\031com/cl" +
-      "oudera/cdp/protobufb\006proto3"
+      "s\022\021\n\ttimestamp\030\003 \001(\003\022\033\n\023cdpTelemetryVers" +
+      "ion\030\004 \001(\t\"J\n\rServiceStatus\022\014\n\004name\030\001 \001(\t" +
+      "\022+\n\006status\030\002 \001(\0162\033.cdp.telemetry.HealthS" +
+      "tatus\"\217\002\n\017ServicesDetails\022.\n\010services\030\001 " +
+      "\003(\0132\034.cdp.telemetry.ServiceStatus\0223\n\rinf" +
+      "raServices\030\002 \003(\0132\034.cdp.telemetry.Service" +
+      "Status\0220\n\ncmServices\030\003 \003(\0132\034.cdp.telemet" +
+      "ry.ServiceStatus\0225\n\017freeipaServices\030\004 \003(" +
+      "\0132\034.cdp.telemetry.ServiceStatus\022\021\n\ttimes" +
+      "tamp\030\005 \001(\003\022\033\n\023cdpTelemetryVersion\030\006 \001(\t\"" +
+      "U\n\020SaltMasterHealth\022.\n\010services\030\001 \003(\0132\034." +
+      "cdp.telemetry.ServiceStatus\022\021\n\ttimestamp" +
+      "\030\002 \001(\003\"[\n\021SaltMinionsHealth\0223\n\rpingRespo" +
+      "nses\030\001 \003(\0132\034.cdp.telemetry.StatusDetails" +
+      "\022\021\n\ttimestamp\030\002 \001(\003\"e\n\010SaltKeys\022\022\n\nunacc" +
+      "epted\030\001 \003(\t\022\020\n\010accepted\030\002 \003(\t\022\020\n\010rejecte" +
+      "d\030\003 \003(\t\022\016\n\006denied\030\004 \003(\t\022\021\n\ttimestamp\030\005 \001" +
+      "(\003\"\315\001\n\020SaltHealthReport\022/\n\006master\030\001 \001(\0132" +
+      "\037.cdp.telemetry.SaltMasterHealth\0221\n\007mini" +
+      "ons\030\002 \001(\0132 .cdp.telemetry.SaltMinionsHea" +
+      "lth\022\021\n\ttimestamp\030\003 \001(\003\022%\n\004keys\030\004 \001(\0132\027.c" +
+      "dp.telemetry.SaltKeys\022\033\n\023cdpTelemetryVer" +
+      "sion\030\005 \001(\t\"s\n\rStatusDetails\022\014\n\004host\030\001 \001(" +
+      "\t\022+\n\006status\030\002 \001(\0162\033.cdp.telemetry.Health" +
+      "Status\022\024\n\014statusReason\030\003 \001(\t\022\021\n\ttimestam" +
+      "p\030\004 \001(\003\"\371\005\n\017MeteringDetails\022J\n\016databusDe" +
+      "tails\030\001 \003(\01322.cdp.telemetry.MeteringDeta" +
+      "ils.DatabusDetailsEntry\022F\n\014eventDetails\030" +
+      "\002 \003(\01320.cdp.telemetry.MeteringDetails.Ev" +
+      "entDetailsEntry\022$\n\034firstHeartbeatEventTi" +
+      "mestamp\030\003 \001(\003\022\033\n\023systemBootTimestamp\030\004 \001" +
+      "(\003\022\033\n\023heartbeatEventCount\030\005 \001(\005\022:\n\025heart" +
+      "beatAgentRunning\030\006 \001(\0162\033.cdp.telemetry.H" +
+      "ealthStatus\0224\n\017heartbeatConfig\030\007 \001(\0162\033.c" +
+      "dp.telemetry.HealthStatus\0225\n\020databusReac" +
+      "hable\030\010 \001(\0162\033.cdp.telemetry.HealthStatus" +
+      "\0228\n\023databusTestResponse\030\t \001(\0162\033.cdp.tele" +
+      "metry.HealthStatus\0227\n\022loggingAgentConfig" +
+      "\030\n \001(\0162\033.cdp.telemetry.HealthStatus\022:\n\025l" +
+      "oggingServiceRunning\030\013 \001(\0162\033.cdp.telemet" +
+      "ry.HealthStatus\022\021\n\ttimestamp\030\014 \001(\003\022\033\n\023cd" +
+      "pTelemetryVersion\030\r \001(\t\0325\n\023DatabusDetail" +
+      "sEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\0323" +
+      "\n\021EventDetailsEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005valu" +
+      "e\030\002 \001(\t:\0028\001\"\361\005\n\016NetworkDetails\022\014\n\004host\030\001" +
+      " \001(\t\022\022\n\nccmEnabled\030\002 \001(\010\022\024\n\014dnsResolvers" +
+      "\030\003 \003(\t\022\025\n\rneighbourScan\030\004 \001(\010\022\022\n\nneighbo" +
+      "urs\030\005 \003(\t\022<\n\027anyNeighboursAccessible\030\006 \001" +
+      "(\0162\033.cdp.telemetry.HealthStatus\022\032\n\022numbe" +
+      "rOfNeighbours\030\007 \001(\005\022\021\n\ttimestamp\030\010 \001(\003\0222" +
+      "\n\rccmAccessible\030\t \001(\0162\033.cdp.telemetry.He" +
+      "althStatus\022:\n\025clouderaComAccessible\030\n \001(" +
+      "\0162\033.cdp.telemetry.HealthStatus\0226\n\021databu" +
+      "sAccessible\030\013 \001(\0162\033.cdp.telemetry.Health" +
+      "Status\0228\n\023databusS3Accessible\030\014 \001(\0162\033.cd" +
+      "p.telemetry.HealthStatus\0221\n\014s3Accessible" +
+      "\030\r \001(\0162\033.cdp.telemetry.HealthStatus\0225\n\020a" +
+      "dlsV2Accessible\030\016 \001(\0162\033.cdp.telemetry.He" +
+      "althStatus\0222\n\rgcsAccessible\030\017 \001(\0162\033.cdp." +
+      "telemetry.HealthStatus\0222\n\rstsAccessible\030" +
+      "\020 \001(\0162\033.cdp.telemetry.HealthStatus\022>\n\031az" +
+      "ureManagementAccessible\030\021 \001(\0162\033.cdp.tele" +
+      "metry.HealthStatus\022\033\n\023cdpTelemetryVersio" +
+      "n\030\022 \001(\t\"\246\002\n\rSystemMetrics\022&\n\003cpu\030\001 \001(\0132\031" +
+      ".cdp.telemetry.CpuMetrics\022(\n\004disk\030\002 \001(\0132" +
+      "\032.cdp.telemetry.DiskMetrics\022,\n\006memory\030\003 " +
+      "\001(\0132\034.cdp.telemetry.MemoryMetrics\022.\n\007net" +
+      "work\030\004 \001(\0132\035.cdp.telemetry.NetworkMetric" +
+      "s\022\021\n\ttimestamp\030\005 \001(\003\0225\n\016clusterDetails\030\006" +
+      " \001(\0132\035.cdp.telemetry.ClusterDetails\022\033\n\023c" +
+      "dpTelemetryVersion\030\007 \001(\t\"\233\001\n\017CmMetricsRe" +
+      "port\0224\n\007metrics\030\001 \003(\0132#.cdp.telemetry.Cm" +
+      "ServiceMetricEvent\0225\n\016clusterDetails\030\002 \001" +
+      "(\0132\035.cdp.telemetry.ClusterDetails\022\033\n\023cdp" +
+      "TelemetryVersion\030\003 \001(\t\"\252\001\n\024CmHealthCheck" +
+      "sReport\022>\n\014healthChecks\030\001 \003(\0132(.cdp.tele" +
+      "metry.CmServiceHealthCheckEvent\0225\n\016clust" +
+      "erDetails\030\002 \001(\0132\035.cdp.telemetry.ClusterD" +
+      "etails\022\033\n\023cdpTelemetryVersion\030\003 \001(\t\"\277\001\n\n" +
+      "CpuMetrics\022\r\n\005count\030\001 \001(\005\022\025\n\rlogical_cou" +
+      "nt\030\002 \001(\005\022\020\n\010load_avg\030\003 \003(\002\022&\n\005times\030\004 \001(" +
+      "\0132\027.cdp.telemetry.CpuTimes\022&\n\005stats\030\005 \001(" +
+      "\0132\027.cdp.telemetry.CpuStats\022)\n\004freq\030\006 \001(\013" +
+      "2\033.cdp.telemetry.CpuFrequency\"_\n\010CpuStat" +
+      "s\022\024\n\014ctx_switches\030\001 \001(\003\022\022\n\ninterrupts\030\002 " +
+      "\001(\003\022\027\n\017soft_interrupts\030\003 \001(\003\022\020\n\010syscalls" +
+      "\030\004 \001(\003\"D\n\010CpuTimes\022\014\n\004idle\030\001 \001(\001\022\014\n\004nice" +
+      "\030\002 \001(\001\022\016\n\006system\030\003 \001(\001\022\014\n\004user\030\004 \001(\001\"9\n\014" +
+      "CpuFrequency\022\017\n\007current\030\001 \001(\003\022\013\n\003min\030\002 \001" +
+      "(\003\022\013\n\003max\030\003 \001(\003\"\214\001\n\013DiskMetrics\0220\n\nparti" +
+      "tions\030\001 \003(\0132\034.cdp.telemetry.DiskPartitio" +
+      "n\022(\n\ntop_varlog\030\002 \003(\0132\024.cdp.telemetry.Vm" +
+      "Log\022!\n\002io\030\003 \001(\0132\025.cdp.telemetry.DiskIO\"#" +
+      "\n\005VmLog\022\014\n\004path\030\001 \001(\t\022\014\n\004size\030\002 \001(\t\"\234\001\n\r" +
+      "DiskPartition\022\'\n\005usage\030\001 \001(\0132\030.cdp.telem" +
+      "etry.DiskUsage\022\016\n\006device\030\002 \001(\t\022\016\n\006fstype" +
+      "\030\003 \001(\t\022\017\n\007maxfile\030\004 \001(\005\022\017\n\007maxpath\030\005 \001(\005" +
+      "\022\022\n\nmountpoint\030\006 \001(\t\022\014\n\004opts\030\007 \001(\t\"G\n\tDi" +
+      "skUsage\022\014\n\004free\030\001 \001(\003\022\r\n\005total\030\002 \001(\003\022\014\n\004" +
+      "used\030\003 \001(\003\022\017\n\007percent\030\004 \001(\001\"\201\001\n\006DiskIO\022\022" +
+      "\n\nread_bytes\030\001 \001(\003\022\022\n\nread_count\030\002 \001(\003\022\021" +
+      "\n\tread_time\030\003 \001(\003\022\023\n\013write_bytes\030\004 \001(\003\022\023" +
+      "\n\013write_count\030\005 \001(\003\022\022\n\nwrite_time\030\006 \001(\003\"" +
+      "n\n\016NetworkMetrics\0226\n\013connections\030\001 \001(\0132!" +
+      ".cdp.telemetry.NetworkConnections\022$\n\002io\030" +
+      "\002 \001(\0132\030.cdp.telemetry.NetworkIO\"\237\001\n\tNetw" +
+      "orkIO\022\022\n\nbytes_recv\030\001 \001(\003\022\022\n\nbytes_sent\030" +
+      "\002 \001(\003\022\016\n\006dropin\030\003 \001(\003\022\017\n\007dropout\030\004 \001(\003\022\r" +
+      "\n\005errin\030\005 \001(\003\022\016\n\006errout\030\006 \001(\003\022\024\n\014packets" +
+      "_recv\030\007 \001(\003\022\024\n\014packets_sent\030\010 \001(\003\"\322\001\n\022Ne" +
+      "tworkConnections\022\016\n\006LISTEN\030\001 \001(\005\022\023\n\013ESTA" +
+      "BLISHED\030\002 \001(\005\022\021\n\tTIME_WAIT\030\003 \001(\005\022\022\n\nCLOS" +
+      "E_WAIT\030\004 \001(\005\022\016\n\006CLOSED\030\005 \001(\005\022\020\n\010SYN_SEND" +
+      "\030\006 \001(\005\022\024\n\014SYN_RECEIVED\030\007 \001(\005\022\022\n\nFIN_WAIT" +
+      "_1\030\010 \001(\005\022\022\n\nFIN_WAIT_2\030\t \001(\005\022\020\n\010LAST_ACK" +
+      "\030\n \001(\005\"u\n\rMemoryMetrics\0224\n\016virtual_memor" +
+      "y\030\001 \001(\0132\034.cdp.telemetry.VirtualMemory\022.\n" +
+      "\013swap_memory\030\002 \001(\0132\031.cdp.telemetry.SwapM" +
+      "emory\"\277\001\n\rVirtualMemory\022\r\n\005total\030\001 \001(\003\022\014" +
+      "\n\004used\030\002 \001(\003\022\014\n\004free\030\003 \001(\003\022\017\n\007percent\030\004 " +
+      "\001(\001\022\021\n\tavailable\030\005 \001(\003\022\016\n\006active\030\006 \001(\003\022\020" +
+      "\n\010inactive\030\007 \001(\003\022\017\n\007buffers\030\010 \001(\003\022\016\n\006cac" +
+      "hed\030\t \001(\003\022\016\n\006shared\030\n \001(\003\022\014\n\004slab\030\013 \001(\003\"" +
+      "c\n\nSwapMemory\022\014\n\004free\030\001 \001(\003\022\017\n\007percent\030\002" +
+      " \001(\001\022\013\n\003sin\030\003 \001(\003\022\014\n\004sout\030\004 \001(\003\022\r\n\005total" +
+      "\030\005 \001(\003\022\014\n\004used\030\006 \001(\003\"\301\001\n\031CmServiceHealth" +
+      "CheckEvent\022\023\n\013serviceName\030\001 \001(\t\022\023\n\013servi" +
+      "ceType\030\002 \001(\t\022\014\n\004name\030\003 \001(\t\022\r\n\005value\030\004 \001(" +
+      "\t\022\023\n\013explanation\030\005 \001(\t\022\021\n\ttimestamp\030\006 \001(" +
+      "\003\0225\n\016clusterDetails\030\007 \001(\0132\035.cdp.telemetr" +
+      "y.ClusterDetails\"\247\001\n\024CmServiceMetricEven" +
+      "t\022\023\n\013serviceName\030\001 \001(\t\022\023\n\013serviceType\030\002 " +
+      "\001(\t\022\014\n\004name\030\003 \001(\t\022\r\n\005value\030\004 \001(\001\022\021\n\ttime" +
+      "stamp\030\005 \001(\003\0225\n\016clusterDetails\030\006 \001(\0132\035.cd" +
+      "p.telemetry.ClusterDetails\"\262\002\n\016ClusterDe" +
+      "tails\022\013\n\003crn\030\001 \001(\t\022\014\n\004name\030\002 \001(\t\022\017\n\007vers" +
+      "ion\030\003 \001(\t\0227\n\004type\030\004 \001(\0162).cdp.telemetry." +
+      "ClusterDetails.ClusterType\022=\n\010platform\030\005" +
+      " \001(\0162+.cdp.telemetry.ClusterDetails.Clou" +
+      "dPlatform\"5\n\013ClusterType\022\013\n\007DATAHUB\020\000\022\014\n" +
+      "\010DATALAKE\020\001\022\013\n\007FREEIPA\020\002\"E\n\rCloudPlatfor" +
+      "m\022\013\n\007UNKNOWN\020\000\022\007\n\003AWS\020\001\022\t\n\005AZURE\020\002\022\007\n\003GC" +
+      "P\020\003\022\n\n\006YCLOUD\020\004*,\n\014HealthStatus\022\013\n\007UNKNO" +
+      "WN\020\000\022\006\n\002OK\020\001\022\007\n\003NOK\020\002B[\n-com.cloudera.th" +
+      "underhead.telemetry.nodestatusB\017NodeStat" +
+      "usProtoZ\031com/cloudera/cdp/protobufb\006prot" +
+      "o3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -40001,7 +43192,7 @@ public final class NodeStatusProto {
     internal_static_cdp_telemetry_NodeStatusReport_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdp_telemetry_NodeStatusReport_descriptor,
-        new java.lang.String[] { "Nodes", "ClusterDetails", "Timestamp", });
+        new java.lang.String[] { "Nodes", "ClusterDetails", "Timestamp", "CdpTelemetryVersion", });
     internal_static_cdp_telemetry_ServiceStatus_descriptor =
       getDescriptor().getMessageTypes().get(2);
     internal_static_cdp_telemetry_ServiceStatus_fieldAccessorTable = new
@@ -40013,7 +43204,7 @@ public final class NodeStatusProto {
     internal_static_cdp_telemetry_ServicesDetails_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdp_telemetry_ServicesDetails_descriptor,
-        new java.lang.String[] { "Services", "InfraServices", "CmServices", "FreeipaServices", "Timestamp", });
+        new java.lang.String[] { "Services", "InfraServices", "CmServices", "FreeipaServices", "Timestamp", "CdpTelemetryVersion", });
     internal_static_cdp_telemetry_SaltMasterHealth_descriptor =
       getDescriptor().getMessageTypes().get(4);
     internal_static_cdp_telemetry_SaltMasterHealth_fieldAccessorTable = new
@@ -40026,24 +43217,30 @@ public final class NodeStatusProto {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdp_telemetry_SaltMinionsHealth_descriptor,
         new java.lang.String[] { "PingResponses", "Timestamp", });
-    internal_static_cdp_telemetry_SaltHealthReport_descriptor =
+    internal_static_cdp_telemetry_SaltKeys_descriptor =
       getDescriptor().getMessageTypes().get(6);
+    internal_static_cdp_telemetry_SaltKeys_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_cdp_telemetry_SaltKeys_descriptor,
+        new java.lang.String[] { "Unaccepted", "Accepted", "Rejected", "Denied", "Timestamp", });
+    internal_static_cdp_telemetry_SaltHealthReport_descriptor =
+      getDescriptor().getMessageTypes().get(7);
     internal_static_cdp_telemetry_SaltHealthReport_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdp_telemetry_SaltHealthReport_descriptor,
-        new java.lang.String[] { "Master", "Minions", "Timestamp", });
+        new java.lang.String[] { "Master", "Minions", "Timestamp", "Keys", "CdpTelemetryVersion", });
     internal_static_cdp_telemetry_StatusDetails_descriptor =
-      getDescriptor().getMessageTypes().get(7);
+      getDescriptor().getMessageTypes().get(8);
     internal_static_cdp_telemetry_StatusDetails_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdp_telemetry_StatusDetails_descriptor,
         new java.lang.String[] { "Host", "Status", "StatusReason", "Timestamp", });
     internal_static_cdp_telemetry_MeteringDetails_descriptor =
-      getDescriptor().getMessageTypes().get(8);
+      getDescriptor().getMessageTypes().get(9);
     internal_static_cdp_telemetry_MeteringDetails_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdp_telemetry_MeteringDetails_descriptor,
-        new java.lang.String[] { "DatabusDetails", "EventDetails", "FirstHeartbeatEventTimestamp", "SystemBootTimestamp", "HeartbeatEventCount", "HeartbeatAgentRunning", "HeartbeatConfig", "DatabusReachable", "DatabusTestResponse", "LoggingAgentConfig", "LoggingServiceRunning", "Timestamp", });
+        new java.lang.String[] { "DatabusDetails", "EventDetails", "FirstHeartbeatEventTimestamp", "SystemBootTimestamp", "HeartbeatEventCount", "HeartbeatAgentRunning", "HeartbeatConfig", "DatabusReachable", "DatabusTestResponse", "LoggingAgentConfig", "LoggingServiceRunning", "Timestamp", "CdpTelemetryVersion", });
     internal_static_cdp_telemetry_MeteringDetails_DatabusDetailsEntry_descriptor =
       internal_static_cdp_telemetry_MeteringDetails_descriptor.getNestedTypes().get(0);
     internal_static_cdp_telemetry_MeteringDetails_DatabusDetailsEntry_fieldAccessorTable = new
@@ -40057,133 +43254,133 @@ public final class NodeStatusProto {
         internal_static_cdp_telemetry_MeteringDetails_EventDetailsEntry_descriptor,
         new java.lang.String[] { "Key", "Value", });
     internal_static_cdp_telemetry_NetworkDetails_descriptor =
-      getDescriptor().getMessageTypes().get(9);
+      getDescriptor().getMessageTypes().get(10);
     internal_static_cdp_telemetry_NetworkDetails_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdp_telemetry_NetworkDetails_descriptor,
-        new java.lang.String[] { "Host", "CcmEnabled", "DnsResolvers", "NeighbourScan", "Neighbours", "AnyNeighboursAccessible", "NumberOfNeighbours", "Timestamp", "CcmAccessible", "ClouderaComAccessible", "DatabusAccessible", "DatabusS3Accessible", "S3Accessible", "AdlsV2Accessible", "GcsAccessible", "StsAccessible", "AzureManagementAccessible", });
+        new java.lang.String[] { "Host", "CcmEnabled", "DnsResolvers", "NeighbourScan", "Neighbours", "AnyNeighboursAccessible", "NumberOfNeighbours", "Timestamp", "CcmAccessible", "ClouderaComAccessible", "DatabusAccessible", "DatabusS3Accessible", "S3Accessible", "AdlsV2Accessible", "GcsAccessible", "StsAccessible", "AzureManagementAccessible", "CdpTelemetryVersion", });
     internal_static_cdp_telemetry_SystemMetrics_descriptor =
-      getDescriptor().getMessageTypes().get(10);
+      getDescriptor().getMessageTypes().get(11);
     internal_static_cdp_telemetry_SystemMetrics_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdp_telemetry_SystemMetrics_descriptor,
-        new java.lang.String[] { "Cpu", "Disk", "Memory", "Network", "Timestamp", "ClusterDetails", });
+        new java.lang.String[] { "Cpu", "Disk", "Memory", "Network", "Timestamp", "ClusterDetails", "CdpTelemetryVersion", });
     internal_static_cdp_telemetry_CmMetricsReport_descriptor =
-      getDescriptor().getMessageTypes().get(11);
+      getDescriptor().getMessageTypes().get(12);
     internal_static_cdp_telemetry_CmMetricsReport_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdp_telemetry_CmMetricsReport_descriptor,
-        new java.lang.String[] { "Metrics", "ClusterDetails", });
+        new java.lang.String[] { "Metrics", "ClusterDetails", "CdpTelemetryVersion", });
     internal_static_cdp_telemetry_CmHealthChecksReport_descriptor =
-      getDescriptor().getMessageTypes().get(12);
+      getDescriptor().getMessageTypes().get(13);
     internal_static_cdp_telemetry_CmHealthChecksReport_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdp_telemetry_CmHealthChecksReport_descriptor,
-        new java.lang.String[] { "HealthChecks", "ClusterDetails", });
+        new java.lang.String[] { "HealthChecks", "ClusterDetails", "CdpTelemetryVersion", });
     internal_static_cdp_telemetry_CpuMetrics_descriptor =
-      getDescriptor().getMessageTypes().get(13);
+      getDescriptor().getMessageTypes().get(14);
     internal_static_cdp_telemetry_CpuMetrics_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdp_telemetry_CpuMetrics_descriptor,
         new java.lang.String[] { "Count", "LogicalCount", "LoadAvg", "Times", "Stats", "Freq", });
     internal_static_cdp_telemetry_CpuStats_descriptor =
-      getDescriptor().getMessageTypes().get(14);
+      getDescriptor().getMessageTypes().get(15);
     internal_static_cdp_telemetry_CpuStats_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdp_telemetry_CpuStats_descriptor,
         new java.lang.String[] { "CtxSwitches", "Interrupts", "SoftInterrupts", "Syscalls", });
     internal_static_cdp_telemetry_CpuTimes_descriptor =
-      getDescriptor().getMessageTypes().get(15);
+      getDescriptor().getMessageTypes().get(16);
     internal_static_cdp_telemetry_CpuTimes_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdp_telemetry_CpuTimes_descriptor,
         new java.lang.String[] { "Idle", "Nice", "System", "User", });
     internal_static_cdp_telemetry_CpuFrequency_descriptor =
-      getDescriptor().getMessageTypes().get(16);
+      getDescriptor().getMessageTypes().get(17);
     internal_static_cdp_telemetry_CpuFrequency_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdp_telemetry_CpuFrequency_descriptor,
         new java.lang.String[] { "Current", "Min", "Max", });
     internal_static_cdp_telemetry_DiskMetrics_descriptor =
-      getDescriptor().getMessageTypes().get(17);
+      getDescriptor().getMessageTypes().get(18);
     internal_static_cdp_telemetry_DiskMetrics_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdp_telemetry_DiskMetrics_descriptor,
         new java.lang.String[] { "Partitions", "TopVarlog", "Io", });
     internal_static_cdp_telemetry_VmLog_descriptor =
-      getDescriptor().getMessageTypes().get(18);
+      getDescriptor().getMessageTypes().get(19);
     internal_static_cdp_telemetry_VmLog_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdp_telemetry_VmLog_descriptor,
         new java.lang.String[] { "Path", "Size", });
     internal_static_cdp_telemetry_DiskPartition_descriptor =
-      getDescriptor().getMessageTypes().get(19);
+      getDescriptor().getMessageTypes().get(20);
     internal_static_cdp_telemetry_DiskPartition_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdp_telemetry_DiskPartition_descriptor,
         new java.lang.String[] { "Usage", "Device", "Fstype", "Maxfile", "Maxpath", "Mountpoint", "Opts", });
     internal_static_cdp_telemetry_DiskUsage_descriptor =
-      getDescriptor().getMessageTypes().get(20);
+      getDescriptor().getMessageTypes().get(21);
     internal_static_cdp_telemetry_DiskUsage_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdp_telemetry_DiskUsage_descriptor,
         new java.lang.String[] { "Free", "Total", "Used", "Percent", });
     internal_static_cdp_telemetry_DiskIO_descriptor =
-      getDescriptor().getMessageTypes().get(21);
+      getDescriptor().getMessageTypes().get(22);
     internal_static_cdp_telemetry_DiskIO_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdp_telemetry_DiskIO_descriptor,
         new java.lang.String[] { "ReadBytes", "ReadCount", "ReadTime", "WriteBytes", "WriteCount", "WriteTime", });
     internal_static_cdp_telemetry_NetworkMetrics_descriptor =
-      getDescriptor().getMessageTypes().get(22);
+      getDescriptor().getMessageTypes().get(23);
     internal_static_cdp_telemetry_NetworkMetrics_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdp_telemetry_NetworkMetrics_descriptor,
         new java.lang.String[] { "Connections", "Io", });
     internal_static_cdp_telemetry_NetworkIO_descriptor =
-      getDescriptor().getMessageTypes().get(23);
+      getDescriptor().getMessageTypes().get(24);
     internal_static_cdp_telemetry_NetworkIO_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdp_telemetry_NetworkIO_descriptor,
         new java.lang.String[] { "BytesRecv", "BytesSent", "Dropin", "Dropout", "Errin", "Errout", "PacketsRecv", "PacketsSent", });
     internal_static_cdp_telemetry_NetworkConnections_descriptor =
-      getDescriptor().getMessageTypes().get(24);
+      getDescriptor().getMessageTypes().get(25);
     internal_static_cdp_telemetry_NetworkConnections_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdp_telemetry_NetworkConnections_descriptor,
         new java.lang.String[] { "LISTEN", "ESTABLISHED", "TIMEWAIT", "CLOSEWAIT", "CLOSED", "SYNSEND", "SYNRECEIVED", "FINWAIT1", "FINWAIT2", "LASTACK", });
     internal_static_cdp_telemetry_MemoryMetrics_descriptor =
-      getDescriptor().getMessageTypes().get(25);
+      getDescriptor().getMessageTypes().get(26);
     internal_static_cdp_telemetry_MemoryMetrics_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdp_telemetry_MemoryMetrics_descriptor,
         new java.lang.String[] { "VirtualMemory", "SwapMemory", });
     internal_static_cdp_telemetry_VirtualMemory_descriptor =
-      getDescriptor().getMessageTypes().get(26);
+      getDescriptor().getMessageTypes().get(27);
     internal_static_cdp_telemetry_VirtualMemory_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdp_telemetry_VirtualMemory_descriptor,
         new java.lang.String[] { "Total", "Used", "Free", "Percent", "Available", "Active", "Inactive", "Buffers", "Cached", "Shared", "Slab", });
     internal_static_cdp_telemetry_SwapMemory_descriptor =
-      getDescriptor().getMessageTypes().get(27);
+      getDescriptor().getMessageTypes().get(28);
     internal_static_cdp_telemetry_SwapMemory_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdp_telemetry_SwapMemory_descriptor,
         new java.lang.String[] { "Free", "Percent", "Sin", "Sout", "Total", "Used", });
     internal_static_cdp_telemetry_CmServiceHealthCheckEvent_descriptor =
-      getDescriptor().getMessageTypes().get(28);
+      getDescriptor().getMessageTypes().get(29);
     internal_static_cdp_telemetry_CmServiceHealthCheckEvent_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdp_telemetry_CmServiceHealthCheckEvent_descriptor,
         new java.lang.String[] { "ServiceName", "ServiceType", "Name", "Value", "Explanation", "Timestamp", "ClusterDetails", });
     internal_static_cdp_telemetry_CmServiceMetricEvent_descriptor =
-      getDescriptor().getMessageTypes().get(29);
+      getDescriptor().getMessageTypes().get(30);
     internal_static_cdp_telemetry_CmServiceMetricEvent_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdp_telemetry_CmServiceMetricEvent_descriptor,
         new java.lang.String[] { "ServiceName", "ServiceType", "Name", "Value", "Timestamp", "ClusterDetails", });
     internal_static_cdp_telemetry_ClusterDetails_descriptor =
-      getDescriptor().getMessageTypes().get(30);
+      getDescriptor().getMessageTypes().get(31);
     internal_static_cdp_telemetry_ClusterDetails_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdp_telemetry_ClusterDetails_descriptor,

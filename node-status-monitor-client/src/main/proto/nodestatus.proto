@@ -28,6 +28,8 @@ message NodeStatusReport {
     ClusterDetails clusterDetails = 2;
     // Timestaamp of the service status report.
     int64 timestamp = 3;
+    // Version of the cdp-telemetry binary
+    string cdpTelemetryVersion = 4;
 }
 
 // Represents status of any kind of component.
@@ -60,6 +62,8 @@ message ServicesDetails {
     repeated ServiceStatus freeipaServices = 4;
     // Timestamp of service status report.
     int64 timestamp = 5;
+    // Version of the cdp-telemetry binary
+    string cdpTelemetryVersion = 6;
 }
 
 // Holds salt master health details .
@@ -79,6 +83,20 @@ message SaltMinionsHealth {
     int64 timestamp = 2;
 }
 
+// Holds salt server public keys that are used for authentication.
+message SaltKeys {
+    // Unaccepted salt keys that are waiting to be accepted
+    repeated string unaccepted = 1;
+    // Accepted salt keys
+    repeated string accepted = 2;
+    // Rejected salt keys, minion does not recive any communication from salt server
+    repeated string rejected = 3;
+    // Keys that are rejected automatically by master. (minions with duplicated ID, rebuilt minion or new keys were generated but old ones are not deleted yet)
+    repeated string denied = 4;
+    // Timestamp of the salt keys report.
+    int64 timestamp = 5;
+}
+
 // Holds both salt master and salt minions health data.
 message SaltHealthReport {
     // Represents salt master health (salt services) response.
@@ -87,6 +105,10 @@ message SaltHealthReport {
     SaltMinionsHealth minions = 2;
     // Timestam of the salt health report.
     int64 timestamp = 3;
+    // Salt public keys - hold by salt master for minions.
+    SaltKeys keys = 4;
+    // Version of the cdp-telemetry binary
+    string cdpTelemetryVersion = 5;
 }
 
 // Holds common node status fields
@@ -127,6 +149,8 @@ message MeteringDetails {
     HealthStatus loggingServiceRunning = 11;
     // Timestamp of metering status report.
     int64 timestamp = 12;
+    // Version of the cdp-telemetry binary
+    string cdpTelemetryVersion = 13;
 }
 
 // CDP VM network related details.
@@ -165,6 +189,8 @@ message NetworkDetails {
     HealthStatus stsAccessible = 16;
     // Azure management endpoint - management.azure.com availability.
     HealthStatus azureManagementAccessible = 17;
+    // Version of the cdp-telemetry binary
+    string cdpTelemetryVersion = 18;
 }
 
 // System host metrics that is collected periodically by nodestatus monitor.
@@ -181,6 +207,8 @@ message SystemMetrics {
     int64 timestamp = 5;
     // Common cluster related data (optional - can be filled from NodeStatusReport as well).
     ClusterDetails clusterDetails = 6;
+    // Version of the cdp-telemetry binary
+    string cdpTelemetryVersion = 7;
 }
 
 // Holds Cloudera Manager service level metrics.
@@ -189,6 +217,8 @@ message CmMetricsReport {
     repeated CmServiceMetricEvent metrics = 1;
     // Common cluster related data.
     ClusterDetails clusterDetails = 2;
+    // Version of the cdp-telemetry binary
+    string cdpTelemetryVersion = 3;
 }
 
 // Holds Cloudera Manager service health details.
@@ -197,6 +227,8 @@ message CmHealthChecksReport {
     repeated CmServiceHealthCheckEvent healthChecks = 1;
     // Common cluster related data.
     ClusterDetails clusterDetails = 2;
+    // Version of the cdp-telemetry binary
+    string cdpTelemetryVersion = 3;
 }
 
 // Holds CPU related system metrics.
