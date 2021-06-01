@@ -22,6 +22,7 @@ import com.amazonaws.services.dynamodbv2.model.DescribeTableResult;
 import com.amazonaws.services.dynamodbv2.model.ResourceNotFoundException;
 import com.amazonaws.services.dynamodbv2.model.TableDescription;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonDynamoDBClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.base.ResponseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.NoSqlTableDeleteRequest;
@@ -118,6 +119,6 @@ public class AwsNoSqlConnectorTest {
 
     @Test
     public void variant() {
-        assertEquals(AwsConstants.AWS_VARIANT, underTest.variant());
+        assertEquals(AwsConstants.AWS_DEFAULT_VARIANT, underTest.variant());
     }
 }

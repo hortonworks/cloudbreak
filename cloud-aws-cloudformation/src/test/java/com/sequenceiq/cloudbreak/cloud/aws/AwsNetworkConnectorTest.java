@@ -49,6 +49,7 @@ import com.amazonaws.waiters.WaiterTimedOutException;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonEc2Client;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.cloud.aws.service.subnetselector.SubnetFilterStrategy;
 import com.sequenceiq.cloudbreak.cloud.aws.service.subnetselector.SubnetFilterStrategyType;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
@@ -162,7 +163,7 @@ public class AwsNetworkConnectorTest {
     public void testVariantShouldReturnAwsPlatform() {
         Variant actual = underTest.variant();
 
-        assertEquals(AwsConstants.AWS_VARIANT, actual);
+        assertEquals(AwsConstants.AWS_DEFAULT_VARIANT, actual);
     }
 
     @Test

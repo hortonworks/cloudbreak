@@ -22,6 +22,7 @@ import com.amazonaws.services.ec2.model.DeleteKeyPairRequest;
 import com.amazonaws.services.ec2.model.DescribeKeyPairsResult;
 import com.amazonaws.services.ec2.model.ImportKeyPairRequest;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonEc2Client;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.publickey.PublicKeyRegisterRequest;
@@ -112,7 +113,7 @@ class AwsPublicKeyConnectorTest {
     @Test
     @MockitoSettings(strictness = Strictness.LENIENT)
     void variant() {
-        assertThat(underTest.variant()).isEqualTo(AwsConstants.AWS_VARIANT);
+        assertThat(underTest.variant()).isEqualTo(AwsConstants.AWS_DEFAULT_VARIANT);
     }
 
     private PublicKeyRegisterRequest generateRegisterRequest() {
