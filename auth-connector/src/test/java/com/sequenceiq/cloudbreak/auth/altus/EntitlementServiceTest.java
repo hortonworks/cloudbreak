@@ -122,8 +122,8 @@ class EntitlementServiceTest {
                 {"CDP_DATA_LAKE_LOAD_BALANCER", (EntitlementCheckFunction) EntitlementService::datalakeLoadBalancerEnabled, false},
                 {"CDP_DATA_LAKE_LOAD_BALANCER", (EntitlementCheckFunction) EntitlementService::datalakeLoadBalancerEnabled, true},
 
-                {"CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY", (EntitlementCheckFunction) EntitlementService::publicEndpointAccessGatewayEnabled, false},
-                {"CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY", (EntitlementCheckFunction) EntitlementService::publicEndpointAccessGatewayEnabled, true},
+                {"CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_AZURE", (EntitlementCheckFunction) EntitlementService::azureEndpointGatewayEnabled, false},
+                {"CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_AZURE", (EntitlementCheckFunction) EntitlementService::azureEndpointGatewayEnabled, true},
 
                 {"CDP_CB_AZURE_DISK_SSE_WITH_CMK", (EntitlementCheckFunction) EntitlementService::isAzureDiskSSEWithCMKEnabled, false},
                 {"CDP_CB_AZURE_DISK_SSE_WITH_CMK", (EntitlementCheckFunction) EntitlementService::isAzureDiskSSEWithCMKEnabled, true},

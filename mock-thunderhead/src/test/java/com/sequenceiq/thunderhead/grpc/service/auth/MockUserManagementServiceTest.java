@@ -237,8 +237,8 @@ public class MockUserManagementServiceTest {
                 {"datalakeLoadBalancerEnabled false", "datalakeLoadBalancerEnabled", false, "CDP_DATA_LAKE_LOAD_BALANCER", false},
                 {"datalakeLoadBalancerEnabled true", "datalakeLoadBalancerEnabled", true, "CDP_DATA_LAKE_LOAD_BALANCER", true},
 
-                {"publicEndpointAccessGatewayEnabled false", "publicEndpointAccessGatewayEnabled", false, "CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY", false},
-                {"publicEndpointAccessGatewayEnabled true", "publicEndpointAccessGatewayEnabled", true, "CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY", true},
+                {"azureEndpointGatewayEnabled false", "azureEndpointGatewayEnabled", false, "CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_AZURE", false},
+                {"azureEndpointGatewayEnabled true", "azureEndpointGatewayEnabled", true, "CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_AZURE", true},
 
                 {"enableAzureDiskSSEWithCMK false", "enableAzureDiskSSEWithCMK", false, "CDP_CB_AZURE_DISK_SSE_WITH_CMK", false},
                 {"enableAzureDiskSSEWithCMK true", "enableAzureDiskSSEWithCMK", true, "CDP_CB_AZURE_DISK_SSE_WITH_CMK", true},

@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
+import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
@@ -31,6 +32,7 @@ import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry
 import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
 import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
 import com.sequenceiq.environment.network.dto.NetworkDto;
+import com.sequenceiq.environment.network.service.LoadBalancerEntitlementService;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
 import com.sequenceiq.environment.parameters.service.ParametersService;
 import com.sequenceiq.environment.proxy.domain.ProxyConfig;
@@ -56,6 +58,8 @@ public class EnvironmentCreationService {
 
     private final EntitlementService entitlementService;
 
+    private final LoadBalancerEntitlementService loadBalancerEntitlementService;
+
     @Value("${info.app.version}")
     private String environmentServiceVersion;
 
@@ -67,7 +71,8 @@ public class EnvironmentCreationService {
             EnvironmentReactorFlowManager reactorFlowManager,
             AuthenticationDtoConverter authenticationDtoConverter,
             ParametersService parametersService,
-            EntitlementService entitlementService) {
+            EntitlementService entitlementService,
+            LoadBalancerEntitlementService loadBalancerEntitlementService) {
         this.environmentService = environmentService;
         validatorService = environmentValidatorService;
         this.environmentResourceService = environmentResourceService;
@@ -76,10 +81,17 @@ public class EnvironmentCreationService {
         this.authenticationDtoConverter = authenticationDtoConverter;
         this.parametersService = parametersService;
         this.entitlementService = entitlementService;
+        this.loadBalancerEntitlementService = loadBalancerEntitlementService;
     }
 
     public EnvironmentDto create(EnvironmentCreationDto creationDto) {
         LOGGER.info("Environment creation initiated.");
+
+        PublicEndpointAccessGateway endpointAccessGateway = creationDto.getNetwork() == null ?
+            null : creationDto.getNetwork().getPublicEndpointAccessGateway();
+        loadBalancerEntitlementService.validateNetworkForEndpointGateway(creationDto.getCloudPlatform(), creationDto.getName(),
+            endpointAccessGateway);
+
         if (environmentService.isNameOccupied(creationDto.getName(), creationDto.getAccountId())) {
             throw new BadRequestException(String.format("Environment with name '%s' already exists in account '%s'.",
                     creationDto.getName(), creationDto.getAccountId()));

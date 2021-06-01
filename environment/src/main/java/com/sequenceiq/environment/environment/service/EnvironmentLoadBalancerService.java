@@ -17,6 +17,7 @@ import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentLoadBalancerDto;
 import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
+import com.sequenceiq.environment.network.service.LoadBalancerEntitlementService;
 
 @Service
 public class EnvironmentLoadBalancerService {
@@ -29,18 +30,26 @@ public class EnvironmentLoadBalancerService {
 
     private final EntitlementService entitlementService;
 
+    private final LoadBalancerEntitlementService loadBalancerEntitlementService;
+
     public EnvironmentLoadBalancerService(
             EnvironmentService environmentService,
             EnvironmentReactorFlowManager reactorFlowManager,
-            EntitlementService entitlementService) {
+            EntitlementService entitlementService,
+            LoadBalancerEntitlementService loadBalancerEntitlementService) {
         this.environmentService = environmentService;
         this.reactorFlowManager = reactorFlowManager;
         this.entitlementService = entitlementService;
+        this.loadBalancerEntitlementService = loadBalancerEntitlementService;
     }
 
     public void updateLoadBalancerInEnvironmentAndStacks(EnvironmentDto environmentDto, EnvironmentLoadBalancerDto environmentLbDto) {
         requireNonNull(environmentDto);
         requireNonNull(environmentLbDto);
+
+        loadBalancerEntitlementService.validateNetworkForEndpointGateway(environmentDto.getCloudPlatform(), environmentDto.getName(),
+            environmentLbDto.getEndpointAccessGateway());
+
         if (!isLoadBalancerEnabledForDatalake(ThreadBasedUserCrnProvider.getAccountId(), environmentDto.getCloudPlatform(),
             environmentLbDto.getEndpointAccessGateway())) {
             throw new BadRequestException("Neither Endpoint Gateway nor Data Lake load balancer is enabled. Nothing to do.");

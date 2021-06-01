@@ -51,6 +51,7 @@ import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager
 import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
 import com.sequenceiq.environment.network.CloudNetworkService;
 import com.sequenceiq.environment.network.NetworkService;
+import com.sequenceiq.environment.network.service.LoadBalancerEntitlementService;
 import com.sequenceiq.environment.parameter.dto.AwsParametersDto;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
 import com.sequenceiq.environment.parameters.service.ParametersService;
@@ -94,6 +95,9 @@ class EnvironmentCreationServiceTest {
 
     @MockBean
     private CloudNetworkService cloudNetworkService;
+
+    @MockBean
+    private LoadBalancerEntitlementService loadBalancerEntitlementService;
 
     @Inject
     private EnvironmentCreationService environmentCreationServiceUnderTest;
