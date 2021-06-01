@@ -1,6 +1,5 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.l0promotion;
 
-import static com.sequenceiq.it.cloudbreak.context.RunningParameter.expectedMessage;
 import static java.lang.String.format;
 
 import java.util.HashMap;
@@ -19,9 +18,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
 import com.sequenceiq.cloudbreak.logger.MDCUtils;
-import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.it.cloudbreak.UmsClient;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
@@ -151,6 +150,7 @@ public class BasicEnvironmentVirtualGroupTest extends AbstractE2ETest {
         AtomicReference<Map<UmsRight, String>> environmentVirtualGroups = new AtomicReference<>();
         CloudbreakUser userEnvAdminA = testContext.getRealUmsUserByKey(L0UserKeys.ENV_ADMIN_A);
         CloudbreakUser userEnvCreatorB =  testContext.getRealUmsUserByKey(L0UserKeys.ENV_CREATOR_B);
+        CloudbreakUser userEnvCreatorA =  testContext.getRealUmsUserByKey(L0UserKeys.ENV_CREATOR_A);
 
         useRealUmsUser(testContext, L0UserKeys.ENV_CREATOR_A);
 
@@ -164,9 +164,11 @@ public class BasicEnvironmentVirtualGroupTest extends AbstractE2ETest {
                 .assignTargetByCrn(ADMIN_GROUP_CRN)
                 .withGroupAdmin()
                 .when(umsTestClient.assignResourceRole(L0UserKeys.ENV_CREATOR_A))
+                .then((tc, dto, client) -> validateAssignedResourceRoles(tc, dto, client, userEnvCreatorA, true))
                 .assignTargetByCrn(USER_GROUP_CRN)
                 .withGroupAdmin()
                 .when(umsTestClient.assignResourceRole(L0UserKeys.ENV_CREATOR_A))
+                .then((tc, dto, client) -> validateAssignedResourceRoles(tc, dto, client, userEnvCreatorA, true))
                 .given(UmsGroupTestDto.class)
                 .when(umsTestClient.addUserToGroup(ADMIN_GROUP_NAME, userEnvAdminA.getCrn()))
                 .when(umsTestClient.addUserToGroup(USER_GROUP_NAME, userEnvCreatorB.getCrn()))
@@ -202,12 +204,6 @@ public class BasicEnvironmentVirtualGroupTest extends AbstractE2ETest {
                 .validate();
 
         testContext
-                .given(EnvironmentTestDto.class)
-                .when(environmentTestClient.delete())
-                .await(EnvironmentStatus.ARCHIVED)
-                .validate();
-
-        testContext
                 .given(UmsGroupTestDto.class)
                 .when(umsTestClient.removeUserFromGroup(ADMIN_GROUP_NAME, userEnvAdminA.getCrn()))
                 .when(umsTestClient.removeUserFromGroup(USER_GROUP_NAME, userEnvCreatorB.getCrn()))
@@ -220,23 +216,12 @@ public class BasicEnvironmentVirtualGroupTest extends AbstractE2ETest {
                 .assignTargetByCrn(ADMIN_GROUP_CRN)
                 .withGroupAdmin()
                 .when(umsTestClient.unAssignResourceRole(L0UserKeys.ENV_CREATOR_A))
+                .then((tc, dto, client) -> validateAssignedResourceRoles(tc, dto, client, userEnvCreatorA, false))
                 .assignTargetByCrn(USER_GROUP_CRN)
                 .withGroupAdmin()
                 .when(umsTestClient.unAssignResourceRole(L0UserKeys.ENV_CREATOR_A))
-                .given(UmsGroupTestDto.class)
-                .whenException(umsTestClient.addUserToGroup(ADMIN_GROUP_NAME, userEnvAdminA.getCrn()), StatusRuntimeException.class,
-                        expectedMessage(iamAddMemberToGroupErrorMessage() + iamAddMemberToGroupPattern()))
-                .whenException(umsTestClient.addUserToGroup(USER_GROUP_NAME, userEnvCreatorB.getCrn()), StatusRuntimeException.class,
-                        expectedMessage(iamAddMemberToGroupErrorMessage() + iamAddMemberToGroupPattern()))
+                .then((tc, dto, client) -> validateAssignedResourceRoles(tc, dto, client, userEnvCreatorA, false))
                 .validate();
-    }
-
-    private String iamAddMemberToGroupErrorMessage() {
-        return "PERMISSION_DENIED: This operation requires the right 'iam/addMemberToGroup' for resource ";
-    }
-
-    private String iamAddMemberToGroupPattern() {
-        return "'crn:altus:iam:us-west-1:.*:group:.*'";
     }
 
     private Map<UmsRight, String> getEnvironmentVirtualGroups(TestContext testContext, UmsClient client) {
@@ -304,6 +289,7 @@ public class BasicEnvironmentVirtualGroupTest extends AbstractE2ETest {
         List<String> groupMembers = client.getDefaultClient().listMembersFromGroup(accountId, groupName,
                 Optional.of(""));
         boolean memberPresent = groupMembers.stream().anyMatch(memberCrn -> groupMember.getCrn().equals(memberCrn));
+        LOGGER.info("Member is present '{}' at group '{}', group members: [{}]", memberPresent, groupName, groupMembers);
         if (expectedPresence) {
             if (memberPresent) {
                 LOGGER.info("User '{}' have been assigned successfully to group {}.", groupMember.getDisplayName(), groupName);
@@ -319,7 +305,38 @@ public class BasicEnvironmentVirtualGroupTest extends AbstractE2ETest {
                 throw new TestFailException(String.format(" User '%s' is still member of group '%s'! ", groupMember.getDisplayName(), groupName));
             }
         }
-
         return umsGroupTestDto;
+    }
+
+    private UmsTestDto validateAssignedResourceRoles(TestContext testContext, UmsTestDto umsTestDto, UmsClient client, CloudbreakUser assignee,
+            boolean expectedPresence) {
+        String resourceRole = umsTestDto.getRequest().getRoleCrn();
+        String resourceCrn = umsTestDto.getRequest().getResourceCrn();
+
+        Multimap<String, String> assignedResourceRoles = client.getDefaultClient().listAssignedResourceRoles(assignee.getCrn(), Optional.of(""));
+        boolean resourceRoleAssigned = assignedResourceRoles.get(resourceCrn).contains(resourceRole);
+        LOGGER.info(format(" Assigned resource roles ['%s'] are present to user '%s' ", assignedResourceRoles, assignee.getCrn()));
+        if (expectedPresence) {
+            if (resourceRoleAssigned) {
+                LOGGER.info(format(" Resource role '%s' has successfully been assigned to user '%s' at resource '%s' ", resourceRole, assignee.getCrn(),
+                        resourceCrn));
+                Log.then(LOGGER, format(" Resource role '%s' has successfully been assigned to user '%s' at resource '%s' ", resourceRole, assignee.getCrn(),
+                        resourceCrn));
+            } else {
+                throw new TestFailException(String.format(" Resource role '%s' has not been assigned to user '%s' at resource '%s'! ", resourceRole,
+                        assignee.getCrn(), resourceCrn));
+            }
+        } else {
+            if (!resourceRoleAssigned) {
+                LOGGER.info(format(" Resource role '%s' has successfully been unassigned from user '%s' at resource '%s' ", resourceRole, assignee.getCrn(),
+                        resourceCrn));
+                Log.then(LOGGER, format(" Resource role '%s' has successfully been unassigned from user '%s' at resource '%s' ", resourceRole,
+                        assignee.getCrn(), resourceCrn));
+            } else {
+                throw new TestFailException(String.format(" Resource role '%s' has not been unassigned to user '%s' at resource '%s'! ", resourceRole,
+                        assignee.getCrn(), resourceCrn));
+            }
+        }
+        return umsTestDto;
     }
 }
