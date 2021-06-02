@@ -37,7 +37,7 @@ public class TelemetryConverterTest {
         AltusDatabusConfiguration altusDatabusConfiguration = new AltusDatabusConfiguration(DATABUS_ENDPOINT, false, "", null);
         MeteringConfiguration meteringConfiguration = new MeteringConfiguration(false, null, null);
         ClusterLogsCollectionConfiguration logCollectionConfig = new ClusterLogsCollectionConfiguration(true, null, null);
-        MonitoringConfiguration monitoringConfig = new MonitoringConfiguration(false, null, null);
+        MonitoringConfiguration monitoringConfig = new MonitoringConfiguration(true, null, null);
         TelemetryConfiguration telemetryConfiguration =
                 new TelemetryConfiguration(altusDatabusConfiguration, meteringConfiguration, logCollectionConfig, monitoringConfig, null);
         underTest = new TelemetryConverter(telemetryConfiguration, true);
@@ -59,6 +59,7 @@ public class TelemetryConverterTest {
         assertThat(result.getFeatures().getWorkloadAnalytics(), nullValue());
         assertThat(result.getFeatures().getClusterLogsCollection().isEnabled(), is(false));
         assertThat(result.getFeatures().getCloudStorageLogging().isEnabled(), is(true));
+        assertThat(result.getFeatures().getMonitoring().isEnabled(), is(true));
         assertThat(result.getDatabusEndpoint(), is(DATABUS_ENDPOINT));
     }
 

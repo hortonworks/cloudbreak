@@ -274,7 +274,7 @@ cb:
 
 cluster:
   monitoring:
-    enabled: false
+    enabled: true
     databus:
       processing:
         workers: 1

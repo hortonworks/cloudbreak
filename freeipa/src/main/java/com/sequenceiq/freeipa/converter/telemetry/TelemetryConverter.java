@@ -139,6 +139,11 @@ public class TelemetryConverter {
         } else {
             features.addCloudStorageLogging(true);
         }
+        if (featuresRequest != null && featuresRequest.getMonitoring() != null) {
+            features.setMonitoring(featuresRequest.getMonitoring());
+        } else {
+            features.addMonitoring(true);
+        }
         return features;
     }
 
@@ -152,6 +157,11 @@ public class TelemetryConverter {
                 featuresResponse.setCloudStorageLogging(features.getCloudStorageLogging());
             } else {
                 featuresResponse.addCloudStorageLogging(true);
+            }
+            if (features.getMonitoring() != null) {
+                featuresResponse.setMonitoring(features.getMonitoring());
+            } else {
+                featuresResponse.addMonitoring(true);
             }
         }
         return featuresResponse;
