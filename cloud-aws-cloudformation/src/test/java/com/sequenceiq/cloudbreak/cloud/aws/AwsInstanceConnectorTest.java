@@ -54,11 +54,16 @@ import com.amazonaws.services.ec2.model.StartInstancesResult;
 import com.amazonaws.services.ec2.model.StopInstancesRequest;
 import com.amazonaws.services.ec2.model.StopInstancesResult;
 import com.dyngr.exception.PollerStoppedException;
-import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonEc2Client;
-import com.sequenceiq.cloudbreak.cloud.aws.mapper.SdkClientExceptionMapper;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsAuthenticator;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsDefaultZoneProvider;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsEnvironmentVariableChecker;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsSessionCredentialClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
+import com.sequenceiq.cloudbreak.cloud.aws.common.mapper.SdkClientExceptionMapper;
+import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsInstanceStatusMapper;
+import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.poller.PollerUtil;
-import com.sequenceiq.cloudbreak.cloud.aws.util.AwsInstanceStatusMapper;
-import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -73,6 +78,7 @@ import com.sequenceiq.cloudbreak.service.RetryService;
 import io.opentracing.Tracer;
 
 @ExtendWith(SpringExtension.class)
+
 @TestPropertySource(properties = {
         "cb.aws.hostkey.verify=true",
         "cb.vm.status.polling.interval=1",
@@ -92,8 +98,8 @@ public class AwsInstanceConnectorTest {
     @Inject
     private AwsAuthenticator awsAuthenticator;
 
-    @SpyBean
-    private AwsClient awsClient;
+    @MockBean
+    private LegacyAwsClient legacyAwsClient;
 
     @MockBean
     private AwsEnvironmentVariableChecker awsEnvironmentVariableChecker;
@@ -107,6 +113,9 @@ public class AwsInstanceConnectorTest {
     @MockBean
     private Tracer tracer;
 
+    @SpyBean
+    private CommonAwsClient commonAwsClient;
+
     @MockBean
     private SdkClientExceptionMapper sdkClientExceptionMapper;
 
@@ -116,9 +125,8 @@ public class AwsInstanceConnectorTest {
 
     @BeforeEach
     public void awsClientSetup() {
-        doReturn(amazonEC2Client).when(awsClient).createEc2Client(any(AwsCredentialView.class));
-        doReturn(amazonEC2Client).when(awsClient).createEc2Client(any(AwsCredentialView.class), anyString());
-        doReturn(instanceProfileCredentialsProvider).when(awsClient).getInstanceProfileProvider();
+        doReturn(amazonEC2Client).when(commonAwsClient).createEc2Client(any(AwsCredentialView.class));
+        doReturn(amazonEC2Client).when(commonAwsClient).createEc2Client(any(AwsCredentialView.class), anyString());
 
         CloudContext context = CloudContext.Builder.builder()
                 .withId(1L)
@@ -459,7 +467,7 @@ public class AwsInstanceConnectorTest {
     @EnableRetry(proxyTargetClass = true)
     @Import({AwsInstanceConnector.class,
             AwsAuthenticator.class,
-            AwsClient.class,
+            LegacyAwsClient.class,
             PollerUtil.class,
             AwsSessionCredentialClient.class,
             AwsDefaultZoneProvider.class,

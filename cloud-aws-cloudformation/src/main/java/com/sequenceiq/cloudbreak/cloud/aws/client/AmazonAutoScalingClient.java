@@ -22,6 +22,7 @@ import com.amazonaws.services.autoscaling.model.TerminateInstanceInAutoScalingGr
 import com.amazonaws.services.autoscaling.model.UpdateAutoScalingGroupRequest;
 import com.amazonaws.services.autoscaling.model.UpdateAutoScalingGroupResult;
 import com.amazonaws.services.autoscaling.waiters.AmazonAutoScalingWaiters;
+import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonClient;
 import com.sequenceiq.cloudbreak.service.Retry;
 
 public class AmazonAutoScalingClient extends AmazonClient {

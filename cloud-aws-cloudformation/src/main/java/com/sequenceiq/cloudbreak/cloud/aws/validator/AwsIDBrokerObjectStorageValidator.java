@@ -12,8 +12,8 @@ import org.springframework.stereotype.Component;
 
 import com.amazonaws.services.identitymanagement.model.InstanceProfile;
 import com.amazonaws.services.identitymanagement.model.Role;
-import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonIdentityManagementClient;
-import com.sequenceiq.cloudbreak.cloud.aws.util.AwsIamService;
+import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonIdentityManagementClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsIamService;
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudS3View;

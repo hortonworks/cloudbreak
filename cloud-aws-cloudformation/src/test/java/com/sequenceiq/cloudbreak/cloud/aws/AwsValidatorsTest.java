@@ -37,10 +37,17 @@ import com.amazonaws.AmazonServiceException;
 import com.amazonaws.SdkClientException;
 import com.amazonaws.services.cloudformation.AmazonCloudFormation;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsAuthenticator;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsDefaultZoneProvider;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsEnvironmentVariableChecker;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPlatformParameters;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsSessionCredentialClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTagValidator;
+import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.mapper.SdkClientExceptionMapper;
+import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsEncodedAuthorizationFailureMessageDecoder;
 import com.sequenceiq.cloudbreak.cloud.aws.conf.AwsConfig;
 import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.converter.LoadBalancerTypeConverter;
-import com.sequenceiq.cloudbreak.cloud.aws.mapper.SdkClientExceptionMapper;
-import com.sequenceiq.cloudbreak.cloud.aws.util.AwsEncodedAuthorizationFailureMessageDecoder;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -82,7 +89,7 @@ public class AwsValidatorsTest {
     private Retry retry;
 
     @SpyBean
-    private AwsClient awsClient;
+    private LegacyAwsClient awsClient;
 
     @MockBean
     private Tracer tracer;
@@ -216,7 +223,7 @@ public class AwsValidatorsTest {
             CloudbreakResourceReaderService.class,
             AwsConfig.class,
             AwsAuthenticator.class,
-            AwsClient.class,
+            CommonAwsClient.class,
             AwsSessionCredentialClient.class,
             AwsDefaultZoneProvider.class,
             AwsEnvironmentVariableChecker.class,

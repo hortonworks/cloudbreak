@@ -20,8 +20,8 @@ import org.springframework.stereotype.Component;
 
 import com.amazonaws.services.ec2.model.ServiceDetail;
 import com.google.common.base.Strings;
-import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonEc2Client;
-import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
+import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
+import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsServiceEndpointView;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
@@ -55,7 +55,7 @@ public class AwsNetworkCfTemplateProvider {
     private FreeMarkerTemplateUtils freeMarkerTemplateUtils;
 
     @Inject
-    private AwsClient awsClient;
+    private LegacyAwsClient awsClient;
 
     public String provide(NetworkCreationRequest networkCreationRequest, List<SubnetRequest> subnets) {
 

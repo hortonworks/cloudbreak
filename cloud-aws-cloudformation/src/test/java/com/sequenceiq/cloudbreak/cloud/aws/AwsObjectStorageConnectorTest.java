@@ -16,9 +16,9 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.amazonaws.services.s3.model.AmazonS3Exception;
-import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonS3Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
-import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
+import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonS3Client;
+import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.base.ResponseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadataRequest;
@@ -38,7 +38,7 @@ public class AwsObjectStorageConnectorTest {
     public final ExpectedException thrown = ExpectedException.none();
 
     @Mock
-    private AwsClient awsClient;
+    private LegacyAwsClient awsClient;
 
     @Mock
     private AmazonS3Client s3Client;

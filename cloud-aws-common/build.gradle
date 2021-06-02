@@ -1,5 +1,5 @@
 plugins {
-    id 'java'
+  id 'java'
 }
 
 repositories {
@@ -9,16 +9,46 @@ repositories {
 }
 
 repositories {
-    mavenCentral()
+  mavenCentral()
 }
 
 dependencies {
   compile project(':cloud-api')
   compile project(':cloud-common')
+  compile project(':cloud-reactor-api')
+  compile project(':template-manager-tag')
 
-  testImplementation group: 'org.junit.jupiter',  name: 'junit-jupiter-migrationsupport', version: junitJupiterVersion
+  compile(group: 'com.amazonaws', name: 'aws-java-sdk-core', version: awsSdkVersion) {
+    exclude group: 'commons-logging'
+  }
+  compile group: 'com.amazonaws', name: 'aws-java-sdk-ec2', version: awsSdkVersion
+  compile group: 'com.amazonaws', name: 'aws-java-sdk-dynamodb', version: awsSdkVersion
+  compile group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: awsSdkVersion
+  compile group: 'com.amazonaws', name: 'aws-java-sdk-iam', version: awsSdkVersion
+  compile group: 'com.amazonaws', name: 'aws-java-sdk-kms', version: awsSdkVersion
+  compile group: 'com.amazonaws', name: 'aws-java-sdk-rds', version: awsSdkVersion
+  compile group: 'com.amazonaws', name: 'aws-java-sdk-sts', version: awsSdkVersion
+  compile group: 'com.amazonaws', name: 'aws-java-sdk-cloudwatch', version: awsSdkVersion
+  compile group: 'com.amazonaws', name: 'aws-java-sdk-elasticloadbalancingv2', version: awsSdkVersion
+  compile group: 'com.amazonaws', name: 'aws-java-sdk-efs', version: awsSdkVersion
+  compile group: 'com.amazonaws', name: 'aws-java-sdk-networkfirewall', version: awsSdkVersion
+
+  // legacy
+  compile group: 'com.amazonaws', name: 'aws-java-sdk-autoscaling', version: awsSdkVersion
+  compile group: 'com.amazonaws', name: 'aws-java-sdk-cloudformation', version: awsSdkVersion
+
+  testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-migrationsupport', version: junitJupiterVersion
+  testImplementation group: 'org.hamcrest', name: 'hamcrest', version: hamcrestVersion
+  testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: springBootVersion
+  testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-freemarker', version: springBootVersion
+  testImplementation group: 'org.powermock', name: 'powermock-module-junit4', version: powermockVersion
+  testImplementation group: 'org.powermock', name: 'powermock-api-mockito2', version: powermockVersion
+  testImplementation(group: 'org.mockito', name: 'mockito-core', version: mockitoVersion) {
+    exclude group: 'org.hamcrest'
+  }
+  testImplementation group: 'org.assertj', name: 'assertj-core', version: assertjVersion
 }
 
 test {
-    useJUnitPlatform()
+  useJUnitPlatform()
 }

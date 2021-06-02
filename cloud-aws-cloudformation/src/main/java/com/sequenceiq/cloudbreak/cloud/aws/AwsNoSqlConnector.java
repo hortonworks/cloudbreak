@@ -11,9 +11,9 @@ import com.amazonaws.services.dynamodbv2.model.ResourceNotFoundException;
 import com.amazonaws.services.dynamodbv2.model.TableDescription;
 import com.sequenceiq.cloudbreak.cloud.NoSqlConnector;
 import com.sequenceiq.cloudbreak.cloud.RegionAware;
-import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonDynamoDBClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
-import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
+import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonDynamoDBClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
@@ -29,9 +29,9 @@ public class AwsNoSqlConnector implements NoSqlConnector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsNoSqlConnector.class);
 
-    private final AwsClient awsClient;
+    private final LegacyAwsClient awsClient;
 
-    public AwsNoSqlConnector(AwsClient awsClient) {
+    public AwsNoSqlConnector(LegacyAwsClient awsClient) {
         this.awsClient = awsClient;
     }
 

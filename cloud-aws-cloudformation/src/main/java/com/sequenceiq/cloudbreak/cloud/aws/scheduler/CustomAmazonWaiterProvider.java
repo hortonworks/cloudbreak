@@ -23,7 +23,7 @@ import com.amazonaws.waiters.WaiterBuilder;
 import com.amazonaws.waiters.WaiterExecutorServiceFactory;
 import com.amazonaws.waiters.WaiterState;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
-import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonRdsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonRdsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.scheduler.acceptor.DescribeDbInstanceForModifyFailureAcceptor;
 import com.sequenceiq.cloudbreak.cloud.aws.scheduler.acceptor.DescribeDbInstanceForModifySuccessAcceptor;
 

@@ -25,14 +25,14 @@ import com.amazonaws.services.cloudformation.model.ResourceStatus;
 import com.amazonaws.services.ec2.model.DeleteKeyPairRequest;
 import com.amazonaws.waiters.Waiter;
 import com.amazonaws.waiters.WaiterParameters;
-import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
-import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonEc2Client;
+import com.sequenceiq.cloudbreak.cloud.aws.LegacyAwsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
+import com.sequenceiq.cloudbreak.cloud.aws.common.view.AuthenticatedContextView;
+import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.util.AwsCloudFormationErrorMessageProvider;
-import com.sequenceiq.cloudbreak.cloud.aws.view.AuthenticatedContextView;
-import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -53,7 +53,7 @@ public class AwsTerminateService {
     private AwsComputeResourceService awsComputeResourceService;
 
     @Inject
-    private AwsClient awsClient;
+    private LegacyAwsClient awsClient;
 
     @Inject
     private CloudFormationStackUtil cfStackUtil;
@@ -148,7 +148,7 @@ public class AwsTerminateService {
         try {
             LOGGER.debug("Waiting for final state of CloudFormation deletion attempt.");
             WaiterParameters<DescribeStacksRequest> describeStacksRequestWaiterParameters = new WaiterParameters<>(describeStacksRequest)
-                .withPollingStrategy(getBackoffCancellablePollingStrategy(null));
+                    .withPollingStrategy(getBackoffCancellablePollingStrategy(null));
             stackDeleteCompleteWaiter.run(describeStacksRequestWaiterParameters);
         } catch (Exception e) {
             LOGGER.debug("CloudFormation stack delete ended in failed state. Delete operation will be retried.");

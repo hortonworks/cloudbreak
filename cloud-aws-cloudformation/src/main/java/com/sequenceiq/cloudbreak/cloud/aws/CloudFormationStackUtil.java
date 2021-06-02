@@ -43,12 +43,12 @@ import com.amazonaws.services.elasticloadbalancingv2.model.TargetHealthDescripti
 import com.google.common.base.Splitter;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
-import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonEfsClient;
-import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonElasticLoadBalancingClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEfsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonElasticLoadBalancingClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.AwsLoadBalancerScheme;
 import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.AwsTargetGroup;
 import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.converter.LoadBalancerTypeConverter;
-import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
@@ -67,7 +67,7 @@ public class CloudFormationStackUtil {
     private int maxResourceNameLength;
 
     @Inject
-    private AwsClient awsClient;
+    private LegacyAwsClient awsClient;
 
     @Inject
     private LoadBalancerTypeConverter loadBalancerTypeConverter;
@@ -180,12 +180,12 @@ public class CloudFormationStackUtil {
     public LoadBalancer getLoadBalancerByLogicalId(AuthenticatedContext ac, String logicalId) {
         String region = ac.getCloudContext().getLocation().getRegion().value();
         AmazonElasticLoadBalancingClient amazonElbClient =
-            awsClient.createElasticLoadBalancingClient(new AwsCredentialView(ac.getCloudCredential()), region);
+                awsClient.createElasticLoadBalancingClient(new AwsCredentialView(ac.getCloudCredential()), region);
 
         String loadBalancerArn = getResourceArnByLogicalId(ac, logicalId, region);
 
         DescribeLoadBalancersResult loadBalancersResult = amazonElbClient.describeLoadBalancers(new DescribeLoadBalancersRequest()
-            .withLoadBalancerArns(Collections.singletonList(loadBalancerArn)));
+                .withLoadBalancerArns(Collections.singletonList(loadBalancerArn)));
 
         return loadBalancersResult.getLoadBalancers().get(0);
     }
@@ -193,7 +193,7 @@ public class CloudFormationStackUtil {
     public void addLoadBalancerTargets(AuthenticatedContext ac, CloudLoadBalancer loadBalancer, List<CloudResource> resourcesToAdd) {
         String region = ac.getCloudContext().getLocation().getRegion().value();
         AmazonElasticLoadBalancingClient amazonElbClient =
-            awsClient.createElasticLoadBalancingClient(new AwsCredentialView(ac.getCloudCredential()), region);
+                awsClient.createElasticLoadBalancingClient(new AwsCredentialView(ac.getCloudCredential()), region);
 
         for (Map.Entry<TargetGroupPortPair, Set<Group>> entry : loadBalancer.getPortToTargetGroupMapping().entrySet()) {
             // Get a list of the new instances in the target groups
@@ -205,13 +205,13 @@ public class CloudFormationStackUtil {
 
             // Use ARN to fetch a list of current targets
             DescribeTargetHealthResult targetHealthResult = amazonElbClient.describeTargetHealth(new DescribeTargetHealthRequest()
-                .withTargetGroupArn(targetGroupArn));
+                    .withTargetGroupArn(targetGroupArn));
             List<TargetDescription> targetDescriptions = targetHealthResult.getTargetHealthDescriptions().stream()
-                .map(TargetHealthDescription::getTarget)
-                .collect(Collectors.toList());
+                    .map(TargetHealthDescription::getTarget)
+                    .collect(Collectors.toList());
             Set<String> alreadyRegisteredInstanceIds = targetDescriptions.stream()
-                .map(TargetDescription::getId)
-                .collect(Collectors.toSet());
+                    .map(TargetDescription::getId)
+                    .collect(Collectors.toSet());
 
             // Remove any targets that have already been registered from the list being processed
             updatedInstanceIds.removeAll(alreadyRegisteredInstanceIds);
@@ -219,11 +219,11 @@ public class CloudFormationStackUtil {
             // Register any new instances
             if (!updatedInstanceIds.isEmpty()) {
                 List<TargetDescription> targetsToAdd = updatedInstanceIds.stream()
-                    .map(instanceId -> new TargetDescription().withId(instanceId))
-                    .collect(Collectors.toList());
+                        .map(instanceId -> new TargetDescription().withId(instanceId))
+                        .collect(Collectors.toList());
                 RegisterTargetsResult registerTargetsResult = amazonElbClient.registerTargets(new RegisterTargetsRequest()
-                    .withTargetGroupArn(targetGroupArn)
-                    .withTargets(targetsToAdd));
+                        .withTargetGroupArn(targetGroupArn)
+                        .withTargets(targetsToAdd));
             }
         }
     }
@@ -231,7 +231,7 @@ public class CloudFormationStackUtil {
     public void removeLoadBalancerTargets(AuthenticatedContext ac, CloudLoadBalancer loadBalancer, List<CloudResource> resourcesToRemove) {
         String region = ac.getCloudContext().getLocation().getRegion().value();
         AmazonElasticLoadBalancingClient amazonElbClient =
-            awsClient.createElasticLoadBalancingClient(new AwsCredentialView(ac.getCloudCredential()), region);
+                awsClient.createElasticLoadBalancingClient(new AwsCredentialView(ac.getCloudCredential()), region);
 
         for (Map.Entry<TargetGroupPortPair, Set<Group>> entry : loadBalancer.getPortToTargetGroupMapping().entrySet()) {
             // Get a list of the instance ids to remove
@@ -245,11 +245,11 @@ public class CloudFormationStackUtil {
             if (!instancesToRemove.isEmpty()) {
                 try {
                     List<TargetDescription> targetsToRemove = instancesToRemove.stream()
-                        .map(instanceId -> new TargetDescription().withId(instanceId))
-                        .collect(Collectors.toList());
+                            .map(instanceId -> new TargetDescription().withId(instanceId))
+                            .collect(Collectors.toList());
                     DeregisterTargetsResult deregisterTargetsResult = amazonElbClient.deregisterTargets(new DeregisterTargetsRequest()
-                        .withTargetGroupArn(targetGroupArn)
-                        .withTargets(targetsToRemove));
+                            .withTargetGroupArn(targetGroupArn)
+                            .withTargets(targetsToRemove));
                 } catch (InvalidTargetException ignored) {
                     // no-op - we tried to remove a target that wasn't in the target group, which is fine
                 }
