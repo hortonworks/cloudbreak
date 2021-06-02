@@ -9,7 +9,7 @@ import com.sequenceiq.cloudbreak.telemetry.databus.AbstractDatabusStreamConfigur
 public class MonitoringConfiguration extends AbstractDatabusStreamConfiguration {
 
     public MonitoringConfiguration(
-            @Value("${cluster.monitoring.enabled:false}") boolean enabled,
+            @Value("${cluster.monitoring.enabled:true}") boolean enabled,
             @Value("${cluster.monitoring.dbus.app.name:CdpVmMetrics}") String dbusAppName,
             @Value("${cluster.monitoring.dbus.stream.name:CdpVmMetrics}") String dbusStreamName) {
         super(enabled, dbusAppName, dbusStreamName);

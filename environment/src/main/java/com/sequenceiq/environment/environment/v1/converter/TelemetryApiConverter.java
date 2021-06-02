@@ -96,6 +96,7 @@ public class TelemetryApiConverter {
             featuresRequest.setClusterLogsCollection(features.getClusterLogsCollection());
             featuresRequest.setMonitoring(features.getMonitoring());
             setCloudStorageLoggingOnFeaturesModel(features, featuresRequest);
+            setMonitoringOnFeaturesModel(features, featuresRequest);
         }
         return featuresRequest;
     }
@@ -105,10 +106,10 @@ public class TelemetryApiConverter {
         if (features != null) {
             featuresResponse = new FeaturesResponse();
             featuresResponse.setClusterLogsCollection(features.getClusterLogsCollection());
-            featuresResponse.setMonitoring(features.getMonitoring());
             featuresResponse.setWorkloadAnalytics(features.getWorkloadAnalytics());
             featuresResponse.setUseSharedAltusCredential(features.getUseSharedAltusCredential());
             setCloudStorageLoggingOnFeaturesModel(features, featuresResponse);
+            setMonitoringOnFeaturesModel(features, featuresResponse);
         }
         return featuresResponse;
     }
@@ -178,7 +179,17 @@ public class TelemetryApiConverter {
             if (featuresRequest.getMonitoring() != null) {
                 features.setMonitoring(featuresRequest.getMonitoring());
             } else {
-                features.addMonitoring(false);
+                features.addMonitoring(true);
+            }
+        }
+    }
+
+    private void setMonitoringOnFeaturesModel(EnvironmentFeatures features, FeaturesBase featureModel) {
+        if (monitoringEnabled) {
+            if (features.getMonitoring() != null) {
+                featureModel.setMonitoring(features.getMonitoring());
+            } else {
+                featureModel.addMonitoring(true);
             }
         }
     }

@@ -390,7 +390,7 @@ public class TelemetryConverter {
                 features.setMonitoring(request.getFeatures().getMonitoring());
             } else {
                 LOGGER.debug("Auto-filling cluster monitoring telemetry settings as it is set, but missing from the request.");
-                features.addMonitoring(false);
+                features.addMonitoring(true);
             }
         } else {
             LOGGER.debug("Cluster monitoring feature is disabled. Set feature as false.");
