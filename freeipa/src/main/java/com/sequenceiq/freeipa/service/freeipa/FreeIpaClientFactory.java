@@ -1,6 +1,5 @@
 package com.sequenceiq.freeipa.service.freeipa;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -117,11 +116,7 @@ public class FreeIpaClientFactory {
             try {
                 Optional<FreeIpaClient> client = Optional.empty();
                 if (clusterProxyService.isCreateConfigForClusterProxy(stack)) {
-                    try {
-                        return getFreeIpaClientBuilderForClusterProxy(stack, freeIpaFqdn).build(withPing);
-                    } catch (IOException e) {
-                        throw new RetryableFreeIpaClientException("Unable to connect to FreeIPA using cluster proxy", e);
-                    }
+                    return getFreeIpaClientBuilderForClusterProxy(stack, freeIpaFqdn).build(withPing);
                 } else {
                     List<InstanceMetaData> instanceMetaDatas = getPriorityOrderedFreeIpaInstances(stack, forceCheckUnreachable).stream()
                             .filter(instanceMetaData -> freeIpaFqdn.isEmpty() || freeIpaFqdn.get().equals(instanceMetaData.getDiscoveryFQDN()))
@@ -150,8 +145,6 @@ public class FreeIpaClientFactory {
             client = Optional.of(getFreeIpaClientBuilderForDirectMode(stack, instanceMetaData).build(withPing));
         } catch (FreeIpaClientException e) {
             handleException(instanceMetaData, e, () -> canTryAnotherInstance(lastInstance, e));
-        } catch (IOException e) {
-            handleException(instanceMetaData, e, () -> canTryAnotherInstance(lastInstance, e));
         }
         return client;
     }
@@ -165,12 +158,8 @@ public class FreeIpaClientFactory {
 
     private boolean canTryAnotherInstance(boolean lastInstance, FreeIpaClientException e) {
         return !lastInstance &&
-                e.getStatusCode().isPresent() &&
-                e.getStatusCode().getAsInt() != HttpStatus.UNAUTHORIZED.value();
-    }
-
-    private boolean canTryAnotherInstance(boolean lastInstance, IOException e) {
-        return !lastInstance;
+                (!e.getStatusCode().isPresent() ||
+                        e.getStatusCode().getAsInt() != HttpStatus.UNAUTHORIZED.value());
     }
 
     private List<InstanceMetaData> getPriorityOrderedFreeIpaInstances(Stack stack, boolean forceCheckUnreachable) {

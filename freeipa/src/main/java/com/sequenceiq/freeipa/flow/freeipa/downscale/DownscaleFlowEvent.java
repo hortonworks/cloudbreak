@@ -18,6 +18,7 @@ import com.sequenceiq.freeipa.flow.freeipa.provision.event.clusterproxy.ClusterP
 public enum DownscaleFlowEvent implements FlowEvent {
     DOWNSCALE_EVENT("DOWNSCALE_EVENT"),
     STARTING_DOWNSCALE_FINISHED_EVENT("STARTING_DOWNSCALE_FINISHED_EVENT"),
+    UPDATE_METADATA_FOR_DELETION_REQUEST_FINISHED_EVENT("UPDATE_METADATA_FOR_DELETION_REQUEST_FINISHED_EVENT"),
     CLUSTERPROXY_REGISTRATION_FINISHED_EVENT(EventSelectorUtil.selector(ClusterProxyUpdateRegistrationSuccess.class)),
     CLUSTERPROXY_REGISTRATION_FAILED_EVENT(EventSelectorUtil.selector(ClusterProxyUpdateRegistrationFailed.class)),
     DOWNSCALE_COLLECT_ADDITIONAL_HOSTNAMES_FINISHED_EVENT(EventSelectorUtil.selector(CollectAdditionalHostnamesResponse.class)),

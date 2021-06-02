@@ -32,6 +32,7 @@ import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.R
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.STARTING_DOWNSCALE_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.STOP_TELEMETRY_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.UPDATE_METADATA_FINISHED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.UPDATE_METADATA_FOR_DELETION_REQUEST_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_ADD_ADDITIONAL_HOSTNAMES_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_CLUSTERPROXY_REGISTRATION_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_COLLECT_ADDITIONAL_HOSTNAMES_STATE;
@@ -48,6 +49,7 @@ import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNS
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_UPDATE_DNS_SOA_RECORDS_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_UPDATE_KERBEROS_NAMESERVERS_CONFIG_STATE;
+import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_UPDATE_METADATA_FOR_DELETION_REQUEST_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_UPDATE_METADATA_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.FINAL_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.INIT_STATE;
@@ -69,8 +71,12 @@ public class DownscaleFlowConfig extends AbstractFlowConfiguration<DownscaleStat
                     .event(DOWNSCALE_EVENT)
                     .defaultFailureEvent()
 
-                    .from(STARTING_DOWNSCALE_STATE).to(DOWNSCALE_CLUSTERPROXY_REGISTRATION_STATE)
+                    .from(STARTING_DOWNSCALE_STATE).to(DOWNSCALE_UPDATE_METADATA_FOR_DELETION_REQUEST_STATE)
                     .event(STARTING_DOWNSCALE_FINISHED_EVENT)
+                    .defaultFailureEvent()
+
+                    .from(DOWNSCALE_UPDATE_METADATA_FOR_DELETION_REQUEST_STATE).to(DOWNSCALE_CLUSTERPROXY_REGISTRATION_STATE)
+                    .event(UPDATE_METADATA_FOR_DELETION_REQUEST_FINISHED_EVENT)
                     .defaultFailureEvent()
 
                     .from(DOWNSCALE_CLUSTERPROXY_REGISTRATION_STATE).to(DOWNSCALE_COLLECT_ADDITIONAL_HOSTNAMES_STATE)

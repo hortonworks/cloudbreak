@@ -96,6 +96,30 @@ public class TerminationService {
         terminateInstancesWithoutInstanceIds(stack);
     }
 
+    public void requestDeletion(Long stackId, List<String> instanceIds) {
+        try {
+            transactionService.required(() -> {
+                Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+                requestDeletionForInstances(stack, instanceIds);
+            });
+        } catch (TransactionExecutionException ex) {
+            LOGGER.info("Failed to request deletion for cluster infrastructure.");
+            throw new TerminationFailedException(ex);
+        }
+    }
+
+    void requestDeletionForInstances(Stack stack, List<String> instanceIds) {
+        List<InstanceMetaData> instanceMetaDatas = new ArrayList<>();
+        stack.getAllInstanceMetaDataList().stream()
+                .filter(not(InstanceMetaData::isTerminated))
+                .filter(metaData -> Objects.isNull(instanceIds) || instanceIds.contains(metaData.getInstanceId()))
+                .forEach(metaData -> {
+                    metaData.setInstanceStatus(InstanceStatus.DELETE_REQUESTED);
+                    instanceMetaDatas.add(metaData);
+                });
+        instanceMetaDataService.saveAll(instanceMetaDatas);
+    }
+
     private void terminateInstanceGroups(Stack stack) {
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
             instanceGroup.setSecurityGroup(null);
