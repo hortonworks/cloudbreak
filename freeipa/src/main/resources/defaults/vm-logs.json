@@ -83,7 +83,11 @@
     "label": "ipa_replica_install"
   },
   {
-    "path": "/var/log/ccmv2-inverting-proxy-agent.log",
-    "label": "ccmv2_inverting_proxy_agent"
+    "path": "/var/log/jumpgate/access.log",
+    "label": "jumpgate_agent_access"
+  },
+  {
+    "path": "/var/log/jumpgate/out.log",
+    "label": "jumpgate_agent_out"
   }
 ]
