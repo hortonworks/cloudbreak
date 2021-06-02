@@ -11,7 +11,6 @@ import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
-import com.sequenceiq.authorization.annotation.AccountIdNotNeeded;
 import com.sequenceiq.cloudbreak.service.image.DefaultImageCatalogService;
 import org.springframework.stereotype.Controller;
 
@@ -191,25 +190,25 @@ public class ImageCatalogV4Controller extends NotificationController implements 
     }
 
     @Override
-    @AccountIdNotNeeded
     @DisableCheckPermissions
-    public ImageV4Response getImageFromDefaultById(Long workspaceId, @ResourceName String imageId) throws Exception {
+    public ImageV4Response getImageFromDefaultById(Long workspaceId, @ResourceName String imageId,
+            @AccountId String accountId) throws Exception {
         StatedImage statedImage = defaultImageCatalogService.getImageFromDefaultCatalog(imageId);
         return converterUtil.convert(statedImage.getImage(), ImageV4Response.class);
     }
 
     @Override
-    @AccountIdNotNeeded
     @DisableCheckPermissions
-    public ImageV4Response getImageFromDefault(Long workspaceId, String type, String provider, String runtime) throws Exception {
+    public ImageV4Response getImageFromDefault(Long workspaceId, String type, String provider, String runtime,
+            @AccountId String accountId) throws Exception {
         StatedImage statedImage = defaultImageCatalogService.getImageFromDefaultCatalog(type, provider, runtime);
         return converterUtil.convert(statedImage.getImage(), ImageV4Response.class);
     }
 
     @Override
-    @AccountIdNotNeeded
     @DisableCheckPermissions
-    public ImageV4Response getImageFromDefault(Long workspaceId, String type, String provider) throws Exception {
+    public ImageV4Response getImageFromDefault(Long workspaceId, String type, String provider,
+            @AccountId String accountId) throws Exception {
         StatedImage statedImage = defaultImageCatalogService.getImageFromDefaultCatalog(type, provider);
         return converterUtil.convert(statedImage.getImage(), ImageV4Response.class);
     }
