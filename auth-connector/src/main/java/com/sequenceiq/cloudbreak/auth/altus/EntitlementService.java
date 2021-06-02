@@ -53,6 +53,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_AWS
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_AZURE_AUTOSCALING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_GCP_AUTOSCALING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DEACTIVATE_USER;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.EPHEMERAL_DISKS_FOR_TEMP_DATA;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.FMS_FREEIPA_BATCH_CALL;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.LOCAL_DEV;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.PERSONAL_VIEW_CB_BY_RIGHT;
@@ -304,6 +305,10 @@ public class EntitlementService {
 
     public boolean deactivateUserEnabled(String accountId) {
         return isEntitlementRegistered(accountId, DEACTIVATE_USER);
+    }
+
+    public boolean ephemeralDisksForTempDataEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, EPHEMERAL_DISKS_FOR_TEMP_DATA);
     }
 
     public List<String> getEntitlements(String accountId) {

@@ -51,6 +51,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_FLO
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_GCP_AUTOSCALING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_STREAMING_SCALING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DEACTIVATE_USER;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.EPHEMERAL_DISKS_FOR_TEMP_DATA;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.FMS_FREEIPA_BATCH_CALL;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.LOCAL_DEV;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_DISK_SSE_WITH_CMK;
@@ -364,6 +365,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.nodestatus.salt.ping.enable}")
     private boolean nodestatusSaltPingEnabled;
+
+    @Value("${auth.mock.ephemeral.disks.for.temp.data.enable}")
+    private boolean ephemeralDisksForTempDataEnabled;
 
     private String cbLicense;
 
@@ -731,6 +735,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (nodestatusSaltPingEnabled) {
             builder.addEntitlements(createEntitlement(CDP_NODESTATUS_ENABLE_SALT_PING));
+        }
+        if (ephemeralDisksForTempDataEnabled) {
+            builder.addEntitlements(createEntitlement(EPHEMERAL_DISKS_FOR_TEMP_DATA));
         }
         if (enableAzureDiskSSEWithCMK) {
             builder.addEntitlements(createEntitlement(CDP_CB_AZURE_DISK_SSE_WITH_CMK));
