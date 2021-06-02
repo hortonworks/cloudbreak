@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.quartz.metric;
 
+import static com.sequenceiq.cloudbreak.quartz.metric.QuartzMetricTag.JOB_GROUP;
+
 import java.time.Duration;
 
 import javax.inject.Inject;
@@ -33,17 +35,18 @@ public class JobMetricsListener extends JobListenerSupport {
         LOGGER.trace("Job will be executed with group: {}, name: {}, class: {}",
                 jobKey.getGroup(), jobKey.getName(), context.getJobDetail().getJobClass().getName());
         metricService.incrementMetricCounter(QuartzMetricType.JOB_TRIGGERED,
-                "group", jobKey.getGroup());
+                JOB_GROUP.name(), jobKey.getGroup());
     }
 
     @Override
     public void jobWasExecuted(JobExecutionContext context, JobExecutionException jobException) {
         JobKey jobKey = context.getJobDetail().getKey();
-        LOGGER.trace("Job was executed with group: {}, name: {}, class: {} in {} ms",
-                jobKey.getGroup(), jobKey.getName(), context.getJobDetail().getJobClass().getName(), context.getJobRunTime());
+        LOGGER.debug("Job was executed with group: {}, name: {}, class: {} in {} ms, exception: {}",
+                jobKey.getGroup(), jobKey.getName(), context.getJobDetail().getJobClass().getName(), context.getJobRunTime(),
+                jobException == null ? "without exception" : jobException.getMessage());
         QuartzMetricType metricType = jobException == null ? QuartzMetricType.JOB_FINISHED : QuartzMetricType.JOB_FAILED;
         Duration jobRunTime = Duration.ofMillis(context.getJobRunTime());
         metricService.recordTimerMetric(metricType, jobRunTime,
-                "group", jobKey.getGroup());
+                JOB_GROUP.name(), jobKey.getGroup());
     }
 }

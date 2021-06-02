@@ -1,7 +1,10 @@
 package com.sequenceiq.cloudbreak.quartz.metric;
 
+import static com.sequenceiq.cloudbreak.quartz.metric.QuartzMetricTag.TRIGGER_GROUP;
+
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Date;
 
 import javax.inject.Inject;
 
@@ -32,13 +35,14 @@ public class TriggerMetricsListener extends TriggerListenerSupport {
     @Override
     public void triggerFired(Trigger trigger, JobExecutionContext context) {
         TriggerKey triggerKey = trigger.getKey();
-        Duration triggerDelay = Duration.between(trigger.getStartTime().toInstant(), Instant.now());
-        LOGGER.trace("Trigger fired with group: {}, name: {}, delay: {} ms", triggerKey.getGroup(), triggerKey.getName(), triggerDelay.toMillis());
+        Date triggerTime = trigger.getPreviousFireTime() == null ? trigger.getStartTime() : trigger.getPreviousFireTime();
+        Duration triggerDelay = Duration.between(triggerTime.toInstant(), Instant.now());
+        LOGGER.debug("Trigger fired with group: {}, name: {}, delay: {} ms", triggerKey.getGroup(), triggerKey.getName(), triggerDelay.toMillis());
         metricService.incrementMetricCounter(QuartzMetricType.TRIGGER_FIRED,
-                "group", triggerKey.getGroup());
+                TRIGGER_GROUP.name(), triggerKey.getGroup());
 
         metricService.recordTimerMetric(QuartzMetricType.TRIGGER_DELAYED, triggerDelay,
-                "group", triggerKey.getGroup());
+                TRIGGER_GROUP.name(), triggerKey.getGroup());
     }
 
     @Override
@@ -46,7 +50,7 @@ public class TriggerMetricsListener extends TriggerListenerSupport {
         TriggerKey triggerKey = trigger.getKey();
         LOGGER.warn("Trigger misfired with group: {}, name: {}", triggerKey.getGroup(), triggerKey.getName());
         metricService.incrementMetricCounter(QuartzMetricType.TRIGGER_MISFIRED,
-                "group", triggerKey.getGroup());
+                TRIGGER_GROUP.name(), triggerKey.getGroup());
     }
 
     @Override
@@ -55,6 +59,6 @@ public class TriggerMetricsListener extends TriggerListenerSupport {
         LOGGER.debug("Trigger completed with group: {}, name: {}, triggerInstructionCode: {}",
                 triggerKey.getGroup(), triggerKey.getName(), triggerInstructionCode);
         metricService.incrementMetricCounter(QuartzMetricType.TRIGGER_COMPLETED,
-                "group", triggerKey.getGroup());
+                TRIGGER_GROUP.name(), triggerKey.getGroup());
     }
 }

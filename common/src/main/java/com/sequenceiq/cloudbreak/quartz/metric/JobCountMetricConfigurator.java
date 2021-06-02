@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.quartz.metric;
 
+import static com.sequenceiq.cloudbreak.quartz.metric.QuartzMetricTag.JOB_GROUP;
+
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
@@ -32,7 +34,7 @@ public class JobCountMetricConfigurator {
         try {
             for (String groupName : scheduler.getJobGroupNames()) {
                 metricService.registerGaugeMetric(QuartzMetricType.JOB_COUNT, groupName, groupNameToJobCountFunction,
-                        Map.of("group", groupName));
+                        Map.of(JOB_GROUP.name(), groupName));
             }
         } catch (SchedulerException e) {
             LOGGER.error("Cannot create job count metrics", e);
