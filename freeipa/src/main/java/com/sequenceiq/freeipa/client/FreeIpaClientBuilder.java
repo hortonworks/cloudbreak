@@ -178,23 +178,29 @@ public class FreeIpaClientBuilder {
                 throw new RetryableFreeIpaClientException(msg, new FreeIpaHostNotAvailableException(msg, e));
             }
         }
-        CookieAndStickyId cookieAndStickyId = connect(user, pass, clientConfig.getApiAddress(), port, stickyIdHeader, stickyId);
-        String sessionCookie = cookieAndStickyId.getCookie();
-        stickyId = cookieAndStickyId.getStickyId();
+        try {
+            CookieAndStickyId cookieAndStickyId = connect(user, pass, clientConfig.getApiAddress(), port, stickyIdHeader, stickyId);
+            String sessionCookie = cookieAndStickyId.getCookie();
+            stickyId = cookieAndStickyId.getStickyId();
 
-        Map<String, String> headers = buildHeaders(sessionCookie, stickyId);
+            Map<String, String> headers = buildHeaders(sessionCookie, stickyId);
 
-        JsonRpcHttpClient jsonRpcHttpClient = new JsonRpcHttpClient(ObjectMapperBuilder.getObjectMapper(),
-                getIpaUrl(clientConfig.getApiAddress(), port, basePath, "/session/json"), headers);
+            JsonRpcHttpClient jsonRpcHttpClient = new JsonRpcHttpClient(ObjectMapperBuilder.getObjectMapper(),
+                    getIpaUrl(clientConfig.getApiAddress(), port, basePath, "/session/json"), headers);
 
-        if (sslContext != null) {
-            jsonRpcHttpClient.setSslContext(sslContext);
+            if (sslContext != null) {
+                jsonRpcHttpClient.setSslContext(sslContext);
+            }
+
+            jsonRpcHttpClient.setHostNameVerifier(hostnameVerifier());
+            jsonRpcHttpClient.setReadTimeoutMillis(READ_TIMEOUT_MILLIS);
+            jsonRpcHttpClient.setRequestListener(rpcRequestListener);
+            return new FreeIpaClient(jsonRpcHttpClient, clientConfig.getApiAddress(), hostname, tracer);
+        } catch (IOException e) {
+            String msg = "Unable to connect to FreeIPA";
+            LOGGER.debug(msg, e);
+            throw new RetryableFreeIpaClientException(msg, e);
         }
-
-        jsonRpcHttpClient.setHostNameVerifier(hostnameVerifier());
-        jsonRpcHttpClient.setReadTimeoutMillis(READ_TIMEOUT_MILLIS);
-        jsonRpcHttpClient.setRequestListener(rpcRequestListener);
-        return new FreeIpaClient(jsonRpcHttpClient, clientConfig.getApiAddress(), hostname, tracer);
     }
 
     private CookieAndStickyId connect(String user, String pass, String apiAddress, int port, Optional<String> stickyIdHeader, Optional<String> stickyId)

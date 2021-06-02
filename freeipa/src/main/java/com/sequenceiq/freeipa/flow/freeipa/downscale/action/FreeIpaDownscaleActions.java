@@ -9,6 +9,7 @@ import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.D
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.FAIL_HANDLED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.STARTING_DOWNSCALE_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.UPDATE_METADATA_FINISHED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.UPDATE_METADATA_FOR_DELETION_REQUEST_FINISHED_EVENT;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -118,6 +119,20 @@ public class FreeIpaDownscaleActions {
                 LOGGER.info("Starting downscale {}", payload);
                 stackUpdater.updateStackStatus(stack.getId(), getInProgressStatus(variables), "Starting downscale");
                 sendEvent(context, STARTING_DOWNSCALE_FINISHED_EVENT.selector(), new StackEvent(stack.getId()));
+            }
+        };
+    }
+
+    @Bean(name = "DOWNSCALE_UPDATE_METADATA_FOR_DELETION_REQUEST_STATE")
+    public Action<?, ?> updateMetadataForDeletionRequestAction() {
+        return new AbstractDownscaleAction<>(StackEvent.class) {
+            @Override
+            protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
+                Stack stack = context.getStack();
+                stackUpdater.updateStackStatus(stack.getId(), getInProgressStatus(variables), "Updating metadata for deletion request");
+                List<String> repairInstanceIds = getInstanceIds(variables);
+                terminationService.requestDeletion(stack.getId(), repairInstanceIds);
+                sendEvent(context, UPDATE_METADATA_FOR_DELETION_REQUEST_FINISHED_EVENT.selector(), new StackEvent(stack.getId()));
             }
         };
     }
