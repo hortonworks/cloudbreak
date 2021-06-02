@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt.states;
 
+import static com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates.RUNNING_HIGHSTATE_JID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.hasItem;
@@ -7,12 +8,14 @@ import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.hasValue;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
@@ -86,6 +89,19 @@ public class JidInfoResponseTransformerTest {
     }
 
     @Test
+    public void testSaltHighstateAlreadyRunning() throws IOException {
+        SaltExecutionWentWrongException execEx = assertThrows(SaltExecutionWentWrongException.class, () -> {
+            try (InputStream responseStream = JidInfoResponseTransformerTest.class.getResourceAsStream("/jid_highstate_already_running_response.json")) {
+                JidInfoResponse saltResponseData = JsonUtil.readValue(IOUtils.toString(responseStream), JidInfoResponse.class);
+                JidInfoResponseTransformer.getHighStates(saltResponseData);
+            }
+        });
+        Matcher matcher = RUNNING_HIGHSTATE_JID.matcher(execEx.getMessage());
+        assertTrue(matcher.matches());
+        assertEquals(matcher.group(1), "123456");
+    }
+
+    @Test
     public void testInvalidStateResponse() throws IOException {
         try (InputStream responseStream = JidInfoResponseTransformerTest.class.getResourceAsStream("/jid_invalid_response1.json")) {
             saltResponseData = JsonUtil.readValue(IOUtils.toString(responseStream), JidInfoResponse.class);
@@ -113,7 +129,7 @@ public class JidInfoResponseTransformerTest {
         assertEquals(0, result.size());
     }
 
-    @Test(expected = UnsupportedOperationException.class)
+    @Test(expected = SaltExecutionWentWrongException.class)
     public void testInvalidHighStateJidResponseWithWrongObjects() throws IOException {
         try (InputStream responseStream = JidInfoResponseTransformerTest.class.getResourceAsStream("/jid_invalid_response1.json")) {
             JidInfoResponse saltResponseData = JsonUtil.readValue(IOUtils.toString(responseStream), JidInfoResponse.class);
