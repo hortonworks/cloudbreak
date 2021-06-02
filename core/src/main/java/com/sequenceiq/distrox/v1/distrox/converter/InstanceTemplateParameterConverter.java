@@ -4,6 +4,8 @@ import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsEncryptionV4Parameters;
@@ -28,6 +30,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 
 @Component
 public class InstanceTemplateParameterConverter {
+    private static final Logger LOGGER = LoggerFactory.getLogger(InstanceTemplateParameterConverter.class);
 
     public AwsInstanceTemplateV4Parameters convert(AwsInstanceTemplateV1Parameters source) {
         AwsInstanceTemplateV4Parameters response = new AwsInstanceTemplateV4Parameters();
@@ -81,10 +84,13 @@ public class InstanceTemplateParameterConverter {
                 .map(AzureResourceEncryptionParameters::getDiskEncryptionSetId)
                 .orElse(null);
         if (diskEncryptionSetId != null) {
+            LOGGER.info("Applying SSE with CMK for Azure managed disks as per environment.");
             AzureEncryptionV4Parameters encryption = new AzureEncryptionV4Parameters();
             encryption.setType(EncryptionType.CUSTOM);
             encryption.setDiskEncryptionSetId(diskEncryptionSetId);
             response.setEncryption(encryption);
+        } else {
+            LOGGER.info("Environment has not requested for SSE with CMK for Azure managed disks.");
         }
     }
 

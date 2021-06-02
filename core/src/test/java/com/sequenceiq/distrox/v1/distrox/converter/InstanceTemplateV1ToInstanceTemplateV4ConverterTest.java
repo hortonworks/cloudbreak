@@ -1,6 +1,8 @@
 package com.sequenceiq.distrox.v1.distrox.converter;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -43,13 +45,18 @@ class InstanceTemplateV1ToInstanceTemplateV4ConverterTest {
     @Test
     void convertTestInstanceTemplateV1RequestToInstanceTemplateV4RequestWhenMinimal() {
         InstanceTemplateV1Request source = new InstanceTemplateV1Request();
+        source.setAzure(null);
         source.setInstanceType(INSTANCE_TYPE);
+
+        AzureInstanceTemplateV4Parameters azureInstanceTemplateV4Parameters = new AzureInstanceTemplateV4Parameters();
+        when(instanceTemplateParameterConverter.convert(any(AzureInstanceTemplateV1Parameters.class), eq(environment)))
+                .thenReturn(azureInstanceTemplateV4Parameters);
 
         InstanceTemplateV4Request instanceTemplateV4Request = underTest.convert(source, environment);
 
         assertThat(instanceTemplateV4Request).isNotNull();
         assertThat(instanceTemplateV4Request.getRootVolume()).isNull();
-        assertThat(instanceTemplateV4Request.getAzure()).isNull();
+        assertThat(instanceTemplateV4Request.getAzure()).isSameAs(azureInstanceTemplateV4Parameters);
         assertThat(instanceTemplateV4Request.getCloudPlatform()).isNull();
         assertThat(instanceTemplateV4Request.getInstanceType()).isEqualTo(INSTANCE_TYPE);
     }
