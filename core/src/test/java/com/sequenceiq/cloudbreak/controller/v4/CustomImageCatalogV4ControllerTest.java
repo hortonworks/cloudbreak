@@ -14,7 +14,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.customimage.response.CustomImag
 import com.sequenceiq.cloudbreak.api.endpoint.v4.customimage.response.CustomImageCatalogV4UpdateImageResponse;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
+import com.sequenceiq.cloudbreak.authorization.ImageCatalogFiltering;
 import com.sequenceiq.cloudbreak.domain.CustomImage;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.service.image.CustomImageCatalogService;

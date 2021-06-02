@@ -155,7 +155,7 @@ public interface ImageCatalogV4Endpoint {
     @ApiOperation(value = ImageCatalogOpDescription.GET_IMAGE_FROM_DEFAULT_BY_ID, produces = MediaType.APPLICATION_JSON,
             notes = IMAGE_CATALOG_NOTES, nickname = "getImageFromDefaultById")
     ImageV4Response getImageFromDefaultById(@PathParam("workspaceId") Long workspaceId,
-            @PathParam("imageId") String imageId, @AccountId String accountId) throws Exception;
+            @PathParam("imageId") String imageId) throws Exception;
 
     @GET
     @Path("image/type/{type}/provider/{provider}/runtime/{runtime}")
@@ -165,7 +165,7 @@ public interface ImageCatalogV4Endpoint {
     ImageV4Response getImageFromDefault(@PathParam("workspaceId") Long workspaceId,
             @PathParam("type") String type,
             @PathParam("provider") String provider,
-            @PathParam("runtime") String runtime, @AccountId String accountId) throws Exception;
+            @PathParam("runtime") String runtime) throws Exception;
 
     @GET
     @Path("image/type/{type}/provider/{provider}")
@@ -174,5 +174,5 @@ public interface ImageCatalogV4Endpoint {
             notes = IMAGE_CATALOG_NOTES, nickname = "getImageFromDefault")
     ImageV4Response getImageFromDefault(@PathParam("workspaceId") Long workspaceId,
             @PathParam("type") String type,
-            @PathParam("provider") String provider, @AccountId String accountId) throws Exception;
+            @PathParam("provider") String provider) throws Exception;
 }
