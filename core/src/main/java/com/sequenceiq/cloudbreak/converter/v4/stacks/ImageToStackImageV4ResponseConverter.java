@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.converter.v4.stacks;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
@@ -9,13 +11,17 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.StackImag
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
-import com.sequenceiq.cloudbreak.workspace.model.User;
-import com.sequenceiq.cloudbreak.structuredevent.LegacyRestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
+import com.sequenceiq.cloudbreak.structuredevent.LegacyRestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.workspace.model.User;
 
 @Component
 public class ImageToStackImageV4ResponseConverter extends AbstractConversionServiceAwareConverter<Image, StackImageV4Response> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ImageToStackImageV4ResponseConverter.class);
 
     @Inject
     private ImageCatalogService imageCatalogService;
@@ -25,6 +31,9 @@ public class ImageToStackImageV4ResponseConverter extends AbstractConversionServ
 
     @Inject
     private LegacyRestRequestThreadLocalService legacyRestRequestThreadLocalService;
+
+    @Inject
+    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
     @Override
     public StackImageV4Response convert(Image source) {
@@ -39,12 +48,30 @@ public class ImageToStackImageV4ResponseConverter extends AbstractConversionServ
 
     private void decorateWithImageCatalogUrl(Image source, StackImageV4Response image) {
         if (Strings.isNullOrEmpty(source.getImageCatalogUrl())) {
-            CloudbreakUser cloudbreakUser = legacyRestRequestThreadLocalService.getCloudbreakUser();
-            User user = userService.getOrCreate(cloudbreakUser);
-            image.setCatalogUrl(imageCatalogService.getImageDefaultCatalogUrl(user));
+            LOGGER.debug(String.format("Persisted image catalog url is null for image catalog '%s'", source.getImageCatalogName()));
+            ImageCatalog imageCatalog = null;
+            if (source.getImageCatalogName() != null) {
+                try {
+                    LOGGER.debug(String.format("Try to lookup image catalog '%s' from workspace %d",
+                            source.getImageCatalogName(), restRequestThreadLocalService.getRequestedWorkspaceId()));
+                    imageCatalog = imageCatalogService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), source.getImageCatalogName());
+                } catch (Exception ex) {
+                    LOGGER.debug(String.format("Failed to lookup image catalog '%s' from workspace %d",
+                            source.getImageCatalogName(), restRequestThreadLocalService.getRequestedWorkspaceId()));
+                }
+            }
+            if (shouldLookupImageCatalogUrlByCloudbreakUser(imageCatalog)) {
+                CloudbreakUser cloudbreakUser = legacyRestRequestThreadLocalService.getCloudbreakUser();
+                LOGGER.debug(String.format("Lookup the url of '%s' user's image catalog.", cloudbreakUser == null ? null : cloudbreakUser.getUserCrn()));
+                User user = userService.getOrCreate(cloudbreakUser);
+                image.setCatalogUrl(imageCatalogService.getImageDefaultCatalogUrl(user));
+            }
         } else {
             image.setCatalogUrl(source.getImageCatalogUrl());
         }
     }
 
+    private boolean shouldLookupImageCatalogUrlByCloudbreakUser(ImageCatalog imageCatalog) {
+        return imageCatalog == null || imageCatalog.getImageCatalogUrl() != null;
+    }
 }
