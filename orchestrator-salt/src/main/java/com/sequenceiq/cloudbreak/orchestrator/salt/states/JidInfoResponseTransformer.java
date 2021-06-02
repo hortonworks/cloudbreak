@@ -152,7 +152,7 @@ public class JidInfoResponseTransformer {
             String internalFieldNameStr = internalFieldName.next();
             JsonNode internalJsonField = returnFieldNode.get(internalFieldNameStr);
             if (internalJsonField.isArray()) {
-                throw new UnsupportedOperationException("Not supported Salt highstate response: " + internalJsonField);
+                throw new SaltExecutionWentWrongException("Salt execution went wrong:: " + internalJsonField);
             }
             if (internalJsonField.isTextual()) {
                 LOGGER.debug("Found textual salt minion response for '{}' node: {}", internalFieldNameStr, internalJsonField);

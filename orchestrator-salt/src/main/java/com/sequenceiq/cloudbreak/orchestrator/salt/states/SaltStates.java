@@ -50,9 +50,9 @@ import com.sequenceiq.cloudbreak.service.Retry;
 
 public class SaltStates {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SaltStates.class);
+    public static final Pattern RUNNING_HIGHSTATE_JID = Pattern.compile(".*The function .*state\\.highstate.* is running as PID.*with jid (\\d+).*");
 
-    private static final Pattern RUNNING_HIGHSTATE_JID = Pattern.compile(".*The function \"state\\.highstate\" is running as PID.*with jid (\\d+)");
+    private static final Logger LOGGER = LoggerFactory.getLogger(SaltStates.class);
 
     private SaltStates() {
     }
