@@ -67,6 +67,10 @@ public class CommonClusterManagerProperties {
         this.internalDistroXBlueprintName = internalDistroXBlueprintName;
     }
 
+    public String getInternalDistroXBlueprintType() {
+        return internalDistroXBlueprintName;
+    }
+
     public UpgradeProperties getUpgrade() {
         return upgrade;
     }
@@ -109,6 +113,10 @@ public class CommonClusterManagerProperties {
 
         private String targetRuntimeVersion;
 
+        private String distroXUpgradeCurrentVersion;
+
+        private String distroXUpgradeTargetVersion;
+
         public String getCurrentRuntimeVersion() {
             return currentRuntimeVersion;
         }
@@ -123,6 +131,22 @@ public class CommonClusterManagerProperties {
 
         public void setTargetRuntimeVersion(String targetRuntimeVersion) {
             this.targetRuntimeVersion = targetRuntimeVersion;
+        }
+
+        public String getDistroXUpgradeCurrentVersion() {
+            return distroXUpgradeCurrentVersion;
+        }
+
+        public void setDistroXUpgradeCurrentVersion(String distroXUpgradeCurrentVersion) {
+            this.distroXUpgradeCurrentVersion = distroXUpgradeCurrentVersion;
+        }
+
+        public String getDistroXUpgradeTargetVersion() {
+            return distroXUpgradeTargetVersion;
+        }
+
+        public void setDistroXUpgradeTargetVersion(String distroXUpgradeTargetVersion) {
+            this.distroXUpgradeTargetVersion = distroXUpgradeTargetVersion;
         }
     }
 }
