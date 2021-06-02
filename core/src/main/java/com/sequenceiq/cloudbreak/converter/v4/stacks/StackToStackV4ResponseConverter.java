@@ -52,6 +52,7 @@ import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 
@@ -84,10 +85,16 @@ public class StackToStackV4ResponseConverter extends AbstractConversionServiceAw
     @Inject
     private ServiceEndpointCollector serviceEndpointCollector;
 
+    @Inject
+    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
+
     @Override
     public StackV4Response convert(Stack source) {
         StackV4Response response = new StackV4Response();
         try {
+            if (restRequestThreadLocalService.getRequestedWorkspaceId() == null && source.getWorkspace() != null) {
+                restRequestThreadLocalService.setRequestedWorkspaceId(source.getWorkspace().getId());
+            }
             Image image = imageService.getImage(source.getId());
             response.setImage(getConversionService().convert(image, StackImageV4Response.class));
         } catch (CloudbreakImageNotFoundException exc) {
