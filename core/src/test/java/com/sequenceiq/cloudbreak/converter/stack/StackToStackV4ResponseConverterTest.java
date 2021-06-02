@@ -16,10 +16,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.core.convert.ConversionService;
 
@@ -98,6 +100,9 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
     @Mock
     private ServiceEndpointCollector serviceEndpointCollector;
 
+    @Mock
+    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
+
     private CredentialResponse credentialResponse;
 
     @Before
@@ -140,6 +145,32 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("gcp", "mock", "openstack", "aws", "yarn", "azure",
                 "environmentName", "credentialName", "credentialCrn", "telemetry", "flowIdentifier"));
+    }
+
+    @Test
+    public void testConvertWithMissingThreadLocalWorkspaceId() throws CloudbreakImageNotFoundException {
+
+        Stack source = getSource();
+        // GIVEN
+        given(restRequestThreadLocalService.getRequestedWorkspaceId()).willReturn(null);
+        given(imageService.getImage(source.getId())).willReturn(mock(Image.class));
+        given(conversionService.convert(any(Image.class), eq(StackImageV4Response.class))).willReturn(new StackImageV4Response());
+        given(conversionService.convert(any(), eq(StackAuthenticationV4Response.class))).willReturn(new StackAuthenticationV4Response());
+        given(conversionService.convert(any(), eq(CustomDomainSettingsV4Response.class))).willReturn(new CustomDomainSettingsV4Response());
+        given(conversionService.convert(any(), eq(ClusterV4Response.class))).willReturn(new ClusterV4Response());
+        given(conversionService.convert(any(), eq(NetworkV4Response.class))).willReturn(new NetworkV4Response());
+        given(conversionService.convert(any(), eq(WorkspaceResourceV4Response.class))).willReturn(new WorkspaceResourceV4Response());
+        given(conversionService.convert(any(), eq(CloudbreakDetailsV4Response.class))).willReturn(new CloudbreakDetailsV4Response());
+        given(conversionService.convert(any(), eq(PlacementSettingsV4Response.class))).willReturn(new PlacementSettingsV4Response());
+        given(conversionService.convert(any(), eq(TelemetryResponse.class))).willReturn(new TelemetryResponse());
+        given(converterUtil.convertAll(source.getInstanceGroups(), InstanceGroupV4Response.class)).willReturn(new ArrayList<>());
+        given(conversionService.convert(any(), eq(DatabaseResponse.class))).willReturn(new DatabaseResponse());
+        // WHEN
+        StackV4Response result = underTest.convert(source);
+        // THEN
+        assertAllFieldsNotNull(result, Arrays.asList("gcp", "mock", "openstack", "aws", "yarn", "azure",
+                "environmentName", "credentialName", "credentialCrn", "telemetry", "flowIdentifier"));
+        Mockito.verify(restRequestThreadLocalService).setRequestedWorkspaceId(source.getWorkspace().getId());
     }
 
     @Test
