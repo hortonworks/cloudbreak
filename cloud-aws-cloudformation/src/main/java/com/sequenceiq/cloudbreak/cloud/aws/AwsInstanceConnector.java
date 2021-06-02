@@ -34,10 +34,10 @@ import com.amazonaws.services.ec2.model.StartInstancesRequest;
 import com.amazonaws.services.ec2.model.StopInstancesRequest;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
-import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonEc2Client;
+import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
+import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsInstanceStatusMapper;
+import com.sequenceiq.cloudbreak.cloud.aws.common.view.AuthenticatedContextView;
 import com.sequenceiq.cloudbreak.cloud.aws.poller.PollerUtil;
-import com.sequenceiq.cloudbreak.cloud.aws.util.AwsInstanceStatusMapper;
-import com.sequenceiq.cloudbreak.cloud.aws.view.AuthenticatedContextView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudOperationNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -166,7 +166,7 @@ public class AwsInstanceConnector implements InstanceConnector {
 
     private List<CloudVmInstanceStatus> doStart(AuthenticatedContext ac, List<CloudInstance> instances) {
         List<CloudVmInstanceStatus> rebootedVmsStatus = new ArrayList<>();
-        for (CloudInstance instance: instances) {
+        for (CloudInstance instance : instances) {
             try {
                 rebootedVmsStatus.addAll(start(ac, null, List.of(instance)));
             } catch (AmazonEC2Exception e) {
@@ -177,7 +177,7 @@ public class AwsInstanceConnector implements InstanceConnector {
     }
 
     private void doStop(AuthenticatedContext ac, List<CloudInstance> instances) {
-        for (CloudInstance instance: instances) {
+        for (CloudInstance instance : instances) {
             try {
                 stop(ac, null, List.of(instance));
             } catch (AmazonEC2Exception e) {

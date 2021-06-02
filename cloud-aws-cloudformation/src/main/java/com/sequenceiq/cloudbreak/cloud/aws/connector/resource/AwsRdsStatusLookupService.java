@@ -9,9 +9,9 @@ import org.springframework.stereotype.Service;
 import com.amazonaws.services.rds.model.DBInstanceNotFoundException;
 import com.amazonaws.services.rds.model.DescribeDBInstancesRequest;
 import com.amazonaws.services.rds.model.DescribeDBInstancesResult;
-import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
-import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonRdsClient;
-import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
+import com.sequenceiq.cloudbreak.cloud.aws.LegacyAwsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonRdsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
@@ -25,7 +25,7 @@ public class AwsRdsStatusLookupService {
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsRdsStatusLookupService.class);
 
     @Inject
-    private AwsClient awsClient;
+    private LegacyAwsClient awsClient;
 
     public ExternalDatabaseStatus getStatus(AuthenticatedContext ac, DatabaseStack dbStack) {
         DescribeDBInstancesResult describeDBInstancesResult = getDescribeDBInstancesResultInternal(ac, dbStack, "RDS Querying ExternalDatabaseStatus",
@@ -96,12 +96,18 @@ public class AwsRdsStatusLookupService {
 
     private ExternalDatabaseStatus getExternalDatabaseStatus(String dbInstanceStatus) {
         switch (dbInstanceStatus.toLowerCase()) {
-            case "starting": return ExternalDatabaseStatus.START_IN_PROGRESS;
-            case "available": return ExternalDatabaseStatus.STARTED;
-            case "stopping": return ExternalDatabaseStatus.STOP_IN_PROGRESS;
-            case "stopped": return ExternalDatabaseStatus.STOPPED;
-            case "deleting": return ExternalDatabaseStatus.DELETE_IN_PROGRESS;
-            default: return ExternalDatabaseStatus.UPDATE_IN_PROGRESS;
+            case "starting":
+                return ExternalDatabaseStatus.START_IN_PROGRESS;
+            case "available":
+                return ExternalDatabaseStatus.STARTED;
+            case "stopping":
+                return ExternalDatabaseStatus.STOP_IN_PROGRESS;
+            case "stopped":
+                return ExternalDatabaseStatus.STOPPED;
+            case "deleting":
+                return ExternalDatabaseStatus.DELETE_IN_PROGRESS;
+            default:
+                return ExternalDatabaseStatus.UPDATE_IN_PROGRESS;
         }
     }
 

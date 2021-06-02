@@ -12,6 +12,12 @@
         <file name="AwsClient">
             <allow pkg="(?!.*model)com\.amazonaws\.services.*" regex="true"/>
         </file>
+        <file name="LegacyAwsClient">
+            <allow pkg="(?!.*model)com\.amazonaws\.services.*" regex="true"/>
+        </file>
+        <file name="CommonAwsClient">
+            <allow pkg="(?!.*model)com\.amazonaws\.services.*" regex="true"/>
+        </file>
         <file name="AwsSessionCredentialClient">
             <allow pkg="(?!.*model)com\.amazonaws\.services.*" regex="true"/>
         </file>

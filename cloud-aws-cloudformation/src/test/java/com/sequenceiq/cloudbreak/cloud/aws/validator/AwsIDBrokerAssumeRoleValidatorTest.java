@@ -21,8 +21,8 @@ import com.amazonaws.services.identitymanagement.model.PolicyEvaluationDecisionT
 import com.amazonaws.services.identitymanagement.model.Role;
 import com.amazonaws.services.identitymanagement.model.SimulatePrincipalPolicyRequest;
 import com.amazonaws.services.identitymanagement.model.SimulatePrincipalPolicyResult;
-import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonIdentityManagementClient;
-import com.sequenceiq.cloudbreak.cloud.aws.util.AwsIamService;
+import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonIdentityManagementClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsIamService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 

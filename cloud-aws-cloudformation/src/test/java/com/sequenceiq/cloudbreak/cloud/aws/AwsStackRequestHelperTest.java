@@ -32,8 +32,9 @@ import com.amazonaws.services.cloudformation.model.Tag;
 import com.amazonaws.services.ec2.model.DescribeImagesRequest;
 import com.amazonaws.services.ec2.model.DescribeImagesResult;
 import com.google.common.collect.Lists;
-import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonEc2Client;
-import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
+import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
+import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
@@ -57,7 +58,7 @@ public class AwsStackRequestHelperTest {
     private AwsTaggingService awsTaggingService;
 
     @Mock
-    private AwsClient awsClient;
+    private LegacyAwsClient awsClient;
 
     @Mock
     private AuthenticatedContext authenticatedContext;
@@ -88,6 +89,26 @@ public class AwsStackRequestHelperTest {
 
     @InjectMocks
     private AwsStackRequestHelper underTest;
+
+    static Object[][] testGetStackParametersDbDataProvider() {
+        return new Object[][]{
+                // testCaseName sslCertificateIdentifier sslCertificateIdentifierParameterDefinedExpected sslCertificateIdentifierParameterExpected
+                // engineVersion expectedEngineVersion
+                {"sslCertificateIdentifier=null", null, false, null, "10.6", "10.6", "postgres10"},
+                {"sslCertificateIdentifier=null, only major version", null, false, null, "10", "10", "postgres10"},
+                {"sslCertificateIdentifier=empty", "", false, null, "10.6", "10.6", "postgres10"},
+                {"sslCertificateIdentifier=mycert", SSL_CERTIFICATE_IDENTIFIER, true, SSL_CERTIFICATE_IDENTIFIER, "10.6", "10.6", "postgres10"},
+        };
+    }
+
+    static Object[][] testGetMinimalStackParametersDbDataProvider() {
+        return new Object[][]{
+                // testCaseName sslCertificateIdentifier
+                {"sslCertificateIdentifier=null", null},
+                {"sslCertificateIdentifier=empty", ""},
+                {"sslCertificateIdentifier=mycert", SSL_CERTIFICATE_IDENTIFIER},
+        };
+    }
 
     @BeforeEach
     public void setUp() {
@@ -140,17 +161,6 @@ public class AwsStackRequestHelperTest {
         assertEquals(tags, createStackRequest.getTags());
     }
 
-    static Object[][] testGetStackParametersDbDataProvider() {
-        return new Object[][]{
-                // testCaseName sslCertificateIdentifier sslCertificateIdentifierParameterDefinedExpected sslCertificateIdentifierParameterExpected
-                // engineVersion expectedEngineVersion
-                {"sslCertificateIdentifier=null", null, false, null, "10.6", "10.6", "postgres10"},
-                {"sslCertificateIdentifier=null, only major version", null, false, null, "10", "10", "postgres10"},
-                {"sslCertificateIdentifier=empty", "", false, null, "10.6", "10.6", "postgres10"},
-                {"sslCertificateIdentifier=mycert", SSL_CERTIFICATE_IDENTIFIER, true, SSL_CERTIFICATE_IDENTIFIER, "10.6", "10.6", "postgres10"},
-        };
-    }
-
     @ParameterizedTest(name = "{0}")
     @MethodSource("testGetStackParametersDbDataProvider")
     public void testGetStackParametersDb(String testCaseName, String sslCertificateIdentifier, boolean sslCertificateIdentifierParameterDefinedExpected,
@@ -201,15 +211,6 @@ public class AwsStackRequestHelperTest {
 
         parameters = underTest.getStackParameters(authenticatedContext, databaseStack, true);
         assertContainsParameter(parameters, "DeletionProtectionParameter", "true");
-    }
-
-    static Object[][] testGetMinimalStackParametersDbDataProvider() {
-        return new Object[][]{
-                // testCaseName sslCertificateIdentifier
-                {"sslCertificateIdentifier=null", null},
-                {"sslCertificateIdentifier=empty", ""},
-                {"sslCertificateIdentifier=mycert", SSL_CERTIFICATE_IDENTIFIER},
-        };
     }
 
     @ParameterizedTest(name = "{0}")

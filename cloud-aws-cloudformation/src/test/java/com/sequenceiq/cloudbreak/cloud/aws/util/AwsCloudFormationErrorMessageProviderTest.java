@@ -23,9 +23,10 @@ import com.amazonaws.services.cloudformation.model.ResourceStatus;
 import com.amazonaws.services.cloudformation.model.Stack;
 import com.amazonaws.services.cloudformation.model.StackEvent;
 import com.amazonaws.services.cloudformation.model.StackResource;
-import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
-import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
+import com.sequenceiq.cloudbreak.cloud.aws.LegacyAwsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsEncodedAuthorizationFailureMessageDecoder;
+import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 
 @ExtendWith(MockitoExtension.class)
 class AwsCloudFormationErrorMessageProviderTest {
@@ -35,7 +36,7 @@ class AwsCloudFormationErrorMessageProviderTest {
     private static final String STACK_NAME = "cf-stack";
 
     @Mock
-    private AwsClient awsClient;
+    private LegacyAwsClient awsClient;
 
     @Mock
     private AmazonCloudFormationClient cfRetryClient;

@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.context;
 
-import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
+import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 
 public class VirtualMachineCheckerContext extends AwsStatusCheckerContext {
 

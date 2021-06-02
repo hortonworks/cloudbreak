@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws.validator;
 
-import static com.sequenceiq.cloudbreak.cloud.aws.AwsAccessConfigType.INSTANCE_PROFILE;
-import static com.sequenceiq.cloudbreak.cloud.aws.util.AwsValidationMessageUtil.getAdviceMessage;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsAccessConfigType.INSTANCE_PROFILE;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsValidationMessageUtil.getAdviceMessage;
 
 import java.util.List;
 
@@ -17,7 +17,7 @@ import com.amazonaws.auth.policy.Statement;
 import com.amazonaws.auth.policy.actions.SecurityTokenServiceActions;
 import com.amazonaws.services.identitymanagement.model.InstanceProfile;
 import com.amazonaws.services.identitymanagement.model.Role;
-import com.sequenceiq.cloudbreak.cloud.aws.util.AwsIamService;
+import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsIamService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.common.model.CloudIdentityType;
 

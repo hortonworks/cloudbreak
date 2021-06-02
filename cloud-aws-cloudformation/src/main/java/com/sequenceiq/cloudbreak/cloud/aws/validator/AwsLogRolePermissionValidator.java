@@ -18,8 +18,8 @@ import com.amazonaws.services.identitymanagement.model.AmazonIdentityManagementE
 import com.amazonaws.services.identitymanagement.model.EvaluationResult;
 import com.amazonaws.services.identitymanagement.model.InstanceProfile;
 import com.amazonaws.services.identitymanagement.model.Role;
-import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonIdentityManagementClient;
-import com.sequenceiq.cloudbreak.cloud.aws.util.AwsIamService;
+import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonIdentityManagementClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsIamService;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudS3View;
 import com.sequenceiq.cloudbreak.cloud.storage.LocationHelper;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;

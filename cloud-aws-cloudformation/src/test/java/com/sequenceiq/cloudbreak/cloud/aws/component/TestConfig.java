@@ -22,9 +22,9 @@ import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import com.sequenceiq.cloudbreak.cloud.aws.AwsPlatformParameters;
-import com.sequenceiq.cloudbreak.cloud.aws.AwsPlatformResources;
-import com.sequenceiq.cloudbreak.cloud.aws.AwsTagValidator;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPlatformParameters;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPlatformResources;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTagValidator;
 import com.sequenceiq.cloudbreak.cloud.notification.ResourceNotifier;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.template.GroupResourceBuilder;
@@ -36,9 +36,12 @@ import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 
 import freemarker.template.TemplateException;
+import io.opentracing.Tracer;
 
 @TestConfiguration
-@ComponentScan(basePackages = {"com.sequenceiq.cloudbreak.cloud.aws", "com.sequenceiq.cloudbreak.cloud.template"})
+@ComponentScan(basePackages = {
+        "com.sequenceiq.cloudbreak.cloud.aws",
+        "com.sequenceiq.cloudbreak.cloud.template"})
 @Import(ComponentTestUtil.class)
 @TestPropertySource(properties = {
         "cb.max.aws.resource.name.length=200",
@@ -77,6 +80,17 @@ public class TestConfig {
 
     @MockBean
     private FreeMarkerTemplateUtils freeMarkerTemplateUtils;
+
+    @MockBean
+    private Tracer tracer;
+
+    static Answer<?> getAnswer() {
+        return invocation -> {
+            Object[] args = invocation.getArguments();
+            Callable<?> task = (Callable<?>) args[0];
+            return task.call();
+        };
+    }
 
     @Bean
     public freemarker.template.Configuration configurationProvider() throws IOException, TemplateException {
@@ -128,13 +142,5 @@ public class TestConfig {
     @Bean
     public CloudResourceHelper cloudResourceHelper() {
         return new CloudResourceHelper();
-    }
-
-    static Answer<?> getAnswer() {
-        return (Answer<?>) invocation -> {
-            Object[] args = invocation.getArguments();
-            Callable<?> task = (Callable<?>) args[0];
-            return task.call();
-        };
     }
 }

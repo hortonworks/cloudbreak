@@ -31,7 +31,7 @@ import com.amazonaws.services.ec2.model.DescribeVpcEndpointServicesResult;
 import com.amazonaws.services.ec2.model.ServiceDetail;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonEc2Client;
+import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
@@ -56,7 +56,112 @@ public class AwsNetworkCfTemplateProviderTest {
     private FreeMarkerTemplateUtils freeMarkerTemplateUtils;
 
     @Mock
-    private AwsClient awsClient;
+    private LegacyAwsClient awsClient;
+
+    private static Stream<Arguments> privateSubnetArguments() {
+        return Stream.of(
+                Arguments.of("src/test/resources/json/aws-cf-network-privatesubnet-onlygatewayvpcendpoints.json", List.of("gateway1", "gateway2"),
+                        List.of("interface1", "interface2"), new DescribeVpcEndpointServicesResult()),
+                Arguments.of("src/test/resources/json/aws-cf-network-privatesubnet-onlyinterfacevpcendpoints.json", List.of(),
+                        List.of("interface1", "interface2"), createDescribeVpcEndpointServicesResult("interface1", "interface2")),
+                Arguments.of("src/test/resources/json/aws-cf-network-privatesubnet-novpcendpoints.json", List.of(), List.of("interface1", "interface2"),
+                        new DescribeVpcEndpointServicesResult()),
+                Arguments.of("src/test/resources/json/aws-cf-network-privatesubnet-vpcendpoints.json", List.of("gateway1", "gateway2"),
+                        List.of("interface1", "interface2"), createDescribeVpcEndpointServicesResult("interface1", "interface2")),
+                Arguments.of("src/test/resources/json/aws-cf-network-privatesubnet-vpcendpoints-templatenamechange.json", List.of("gateway-1", "gateway.2"),
+                        List.of("interface-1", "interface.2"), createDescribeVpcEndpointServicesResult("interface-1", "interface.2")),
+                Arguments.of("src/test/resources/json/aws-cf-network-privatesubnet-missingvpcendpoints.json", List.of("gateway1", "gateway2"),
+                        List.of("interface1", "interface2"), createDescribeVpcEndpointServicesResult("interface1"))
+        );
+    }
+
+    private static List<SubnetRequest> createPrivateAndPublicSubnetRequestList() {
+        SubnetRequest subnetRequest1 = new SubnetRequest();
+        subnetRequest1.setPublicSubnetCidr("2.2.2.2/24");
+        subnetRequest1.setIndex(0);
+        subnetRequest1.setSubnetGroup(0);
+        subnetRequest1.setAvailabilityZone("az1");
+
+        SubnetRequest subnetRequest2 = new SubnetRequest();
+        subnetRequest2.setPublicSubnetCidr("2.2.2.2/24");
+        subnetRequest2.setIndex(1);
+        subnetRequest2.setSubnetGroup(1);
+        subnetRequest2.setAvailabilityZone("az2");
+
+        SubnetRequest subnetRequest3 = new SubnetRequest();
+        subnetRequest3.setPrivateSubnetCidr("2.2.2.2/24");
+        subnetRequest3.setIndex(2);
+        subnetRequest3.setSubnetGroup(2);
+        subnetRequest3.setAvailabilityZone("az1");
+
+        SubnetRequest subnetRequest4 = new SubnetRequest();
+        subnetRequest4.setPrivateSubnetCidr("2.2.2.2/24");
+        subnetRequest4.setIndex(3);
+        subnetRequest4.setSubnetGroup(3);
+        subnetRequest4.setAvailabilityZone("az2");
+
+        return List.of(subnetRequest1, subnetRequest2, subnetRequest3, subnetRequest4);
+    }
+
+    private static List<SubnetRequest> createPublicSubnetRequestList() {
+        SubnetRequest subnetRequest1 = new SubnetRequest();
+        subnetRequest1.setPublicSubnetCidr("2.2.2.2/24");
+        subnetRequest1.setIndex(0);
+        subnetRequest1.setSubnetGroup(0);
+        subnetRequest1.setAvailabilityZone("az1");
+
+        SubnetRequest subnetRequest2 = new SubnetRequest();
+        subnetRequest2.setPublicSubnetCidr("2.2.2.2/24");
+        subnetRequest2.setIndex(1);
+        subnetRequest2.setSubnetGroup(1);
+        subnetRequest2.setAvailabilityZone("az2");
+
+        SubnetRequest subnetRequest3 = new SubnetRequest();
+        subnetRequest3.setPublicSubnetCidr("2.2.2.2/24");
+        subnetRequest3.setIndex(2);
+        subnetRequest3.setSubnetGroup(2);
+        subnetRequest3.setAvailabilityZone("az3");
+
+        SubnetRequest subnetRequest4 = new SubnetRequest();
+        subnetRequest4.setPublicSubnetCidr("2.2.2.2/24");
+        subnetRequest4.setIndex(3);
+        subnetRequest4.setSubnetGroup(3);
+        subnetRequest4.setAvailabilityZone("az4");
+
+        return List.of(subnetRequest1, subnetRequest2, subnetRequest3, subnetRequest4);
+    }
+
+    private static DescribeVpcEndpointServicesResult createDescribeVpcEndpointServicesResult(String... services) {
+        DescribeVpcEndpointServicesResult describeVpcEndpointServicesResult = new DescribeVpcEndpointServicesResult();
+        List<ServiceDetail> serviceDetails = new ArrayList<>();
+        for (String service : services) {
+            ServiceDetail serviceDetail = new ServiceDetail().withServiceName(
+                    String.format(AwsNetworkCfTemplateProvider.VPC_INTERFACE_SERVICE_ENDPOINT_NAME_PATTERN, "region", service));
+            serviceDetail.setAvailabilityZones(List.of("az1", "az2"));
+            serviceDetails.add(serviceDetail);
+        }
+        describeVpcEndpointServicesResult.setServiceDetails(serviceDetails);
+        return describeVpcEndpointServicesResult;
+    }
+
+    private static DescribeVpcEndpointServicesResult createDescribeVpcEndpointServicesResultWithDifferentAzs() {
+        DescribeVpcEndpointServicesResult describeVpcEndpointServicesResult = new DescribeVpcEndpointServicesResult();
+        List<ServiceDetail> serviceDetails = new ArrayList<>();
+        ServiceDetail serviceDetail1 = new ServiceDetail().withServiceName(
+                String.format(AwsNetworkCfTemplateProvider.VPC_INTERFACE_SERVICE_ENDPOINT_NAME_PATTERN, "region", "interface1"));
+        serviceDetail1.setAvailabilityZones(List.of("az1"));
+        serviceDetails.add(serviceDetail1);
+        ServiceDetail serviceDetail2 = new ServiceDetail().withServiceName(
+                String.format(AwsNetworkCfTemplateProvider.VPC_INTERFACE_SERVICE_ENDPOINT_NAME_PATTERN, "region", "interface2"));
+        serviceDetail2.setAvailabilityZones(List.of("az2", "az3"));
+        serviceDetails.add(serviceDetail2);
+        ServiceDetail serviceDetail3 = new ServiceDetail().withServiceName(String.format(
+                AwsNetworkCfTemplateProvider.VPC_INTERFACE_SERVICE_ENDPOINT_NAME_PATTERN, "region", "interface3"));
+        serviceDetail3.setAvailabilityZones(List.of("az5", "az6"));
+        serviceDetails.add(serviceDetail3);
+        describeVpcEndpointServicesResult.setServiceDetails(serviceDetails);
+        return describeVpcEndpointServicesResult;
+    }
 
     @BeforeEach
     public void before() throws IOException, TemplateException {
@@ -193,113 +298,8 @@ public class AwsNetworkCfTemplateProviderTest {
         verify(freeMarkerTemplateUtils).processTemplateIntoString(any(Template.class), anyMap());
     }
 
-    private static Stream<Arguments> privateSubnetArguments() {
-        return Stream.of(
-                Arguments.of("src/test/resources/json/aws-cf-network-privatesubnet-onlygatewayvpcendpoints.json", List.of("gateway1", "gateway2"),
-                        List.of("interface1", "interface2"), new DescribeVpcEndpointServicesResult()),
-                Arguments.of("src/test/resources/json/aws-cf-network-privatesubnet-onlyinterfacevpcendpoints.json", List.of(),
-                        List.of("interface1", "interface2"), createDescribeVpcEndpointServicesResult("interface1", "interface2")),
-                Arguments.of("src/test/resources/json/aws-cf-network-privatesubnet-novpcendpoints.json", List.of(), List.of("interface1", "interface2"),
-                        new DescribeVpcEndpointServicesResult()),
-                Arguments.of("src/test/resources/json/aws-cf-network-privatesubnet-vpcendpoints.json", List.of("gateway1", "gateway2"),
-                        List.of("interface1", "interface2"), createDescribeVpcEndpointServicesResult("interface1", "interface2")),
-                Arguments.of("src/test/resources/json/aws-cf-network-privatesubnet-vpcendpoints-templatenamechange.json", List.of("gateway-1", "gateway.2"),
-                        List.of("interface-1", "interface.2"), createDescribeVpcEndpointServicesResult("interface-1", "interface.2")),
-                Arguments.of("src/test/resources/json/aws-cf-network-privatesubnet-missingvpcendpoints.json", List.of("gateway1", "gateway2"),
-                        List.of("interface1", "interface2"), createDescribeVpcEndpointServicesResult("interface1"))
-        );
-    }
-
-    private static List<SubnetRequest> createPrivateAndPublicSubnetRequestList() {
-        SubnetRequest subnetRequest1 = new SubnetRequest();
-        subnetRequest1.setPublicSubnetCidr("2.2.2.2/24");
-        subnetRequest1.setIndex(0);
-        subnetRequest1.setSubnetGroup(0);
-        subnetRequest1.setAvailabilityZone("az1");
-
-        SubnetRequest subnetRequest2 = new SubnetRequest();
-        subnetRequest2.setPublicSubnetCidr("2.2.2.2/24");
-        subnetRequest2.setIndex(1);
-        subnetRequest2.setSubnetGroup(1);
-        subnetRequest2.setAvailabilityZone("az2");
-
-        SubnetRequest subnetRequest3 = new SubnetRequest();
-        subnetRequest3.setPrivateSubnetCidr("2.2.2.2/24");
-        subnetRequest3.setIndex(2);
-        subnetRequest3.setSubnetGroup(2);
-        subnetRequest3.setAvailabilityZone("az1");
-
-        SubnetRequest subnetRequest4 = new SubnetRequest();
-        subnetRequest4.setPrivateSubnetCidr("2.2.2.2/24");
-        subnetRequest4.setIndex(3);
-        subnetRequest4.setSubnetGroup(3);
-        subnetRequest4.setAvailabilityZone("az2");
-
-        return List.of(subnetRequest1, subnetRequest2, subnetRequest3, subnetRequest4);
-    }
-
-    private static List<SubnetRequest> createPublicSubnetRequestList() {
-        SubnetRequest subnetRequest1 = new SubnetRequest();
-        subnetRequest1.setPublicSubnetCidr("2.2.2.2/24");
-        subnetRequest1.setIndex(0);
-        subnetRequest1.setSubnetGroup(0);
-        subnetRequest1.setAvailabilityZone("az1");
-
-        SubnetRequest subnetRequest2 = new SubnetRequest();
-        subnetRequest2.setPublicSubnetCidr("2.2.2.2/24");
-        subnetRequest2.setIndex(1);
-        subnetRequest2.setSubnetGroup(1);
-        subnetRequest2.setAvailabilityZone("az2");
-
-        SubnetRequest subnetRequest3 = new SubnetRequest();
-        subnetRequest3.setPublicSubnetCidr("2.2.2.2/24");
-        subnetRequest3.setIndex(2);
-        subnetRequest3.setSubnetGroup(2);
-        subnetRequest3.setAvailabilityZone("az3");
-
-        SubnetRequest subnetRequest4 = new SubnetRequest();
-        subnetRequest4.setPublicSubnetCidr("2.2.2.2/24");
-        subnetRequest4.setIndex(3);
-        subnetRequest4.setSubnetGroup(3);
-        subnetRequest4.setAvailabilityZone("az4");
-
-        return List.of(subnetRequest1, subnetRequest2, subnetRequest3, subnetRequest4);
-    }
-
     private NetworkCreationRequest createNetworkRequest(boolean privateSubnetEnabled, PrivateEndpointType privateEndpointType) {
         return new NetworkCreationRequest.Builder().withEnvName("envName").withEnvId(1L).withNetworkCidr(VPC_CIDR).withRegion(Region.region("region"))
                 .withPrivateSubnetEnabled(privateSubnetEnabled).withEndpointType(privateEndpointType).build();
-    }
-
-    private static DescribeVpcEndpointServicesResult createDescribeVpcEndpointServicesResult(String... services) {
-        DescribeVpcEndpointServicesResult describeVpcEndpointServicesResult = new DescribeVpcEndpointServicesResult();
-        List<ServiceDetail> serviceDetails = new ArrayList<>();
-        for (String service : services) {
-            ServiceDetail serviceDetail = new ServiceDetail().withServiceName(
-                    String.format(AwsNetworkCfTemplateProvider.VPC_INTERFACE_SERVICE_ENDPOINT_NAME_PATTERN, "region", service));
-            serviceDetail.setAvailabilityZones(List.of("az1", "az2"));
-            serviceDetails.add(serviceDetail);
-        }
-        describeVpcEndpointServicesResult.setServiceDetails(serviceDetails);
-        return describeVpcEndpointServicesResult;
-    }
-
-    private static DescribeVpcEndpointServicesResult createDescribeVpcEndpointServicesResultWithDifferentAzs() {
-        DescribeVpcEndpointServicesResult describeVpcEndpointServicesResult = new DescribeVpcEndpointServicesResult();
-        List<ServiceDetail> serviceDetails = new ArrayList<>();
-        ServiceDetail serviceDetail1 = new ServiceDetail().withServiceName(
-                String.format(AwsNetworkCfTemplateProvider.VPC_INTERFACE_SERVICE_ENDPOINT_NAME_PATTERN, "region", "interface1"));
-        serviceDetail1.setAvailabilityZones(List.of("az1"));
-        serviceDetails.add(serviceDetail1);
-        ServiceDetail serviceDetail2 = new ServiceDetail().withServiceName(
-                String.format(AwsNetworkCfTemplateProvider.VPC_INTERFACE_SERVICE_ENDPOINT_NAME_PATTERN, "region", "interface2"));
-        serviceDetail2.setAvailabilityZones(List.of("az2", "az3"));
-        serviceDetails.add(serviceDetail2);
-        ServiceDetail serviceDetail3 = new ServiceDetail().withServiceName(String.format(
-                AwsNetworkCfTemplateProvider.VPC_INTERFACE_SERVICE_ENDPOINT_NAME_PATTERN, "region", "interface3"));
-        serviceDetail3.setAvailabilityZones(List.of("az5", "az6"));
-        serviceDetails.add(serviceDetail3);
-        describeVpcEndpointServicesResult.setServiceDetails(serviceDetails);
-        return describeVpcEndpointServicesResult;
     }
 }

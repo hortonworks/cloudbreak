@@ -32,13 +32,15 @@ import com.amazonaws.services.ec2.model.VpcCidrBlockAssociation;
 import com.amazonaws.waiters.Waiter;
 import com.sequenceiq.cloudbreak.cloud.DefaultNetworkConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
-import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsSubnetRequestProvider;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
+import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
+import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.scheduler.EnvironmentCancellationCheck;
 import com.sequenceiq.cloudbreak.cloud.aws.service.subnetselector.SubnetFilterStrategy;
 import com.sequenceiq.cloudbreak.cloud.aws.service.subnetselector.SubnetFilterStrategyType;
 import com.sequenceiq.cloudbreak.cloud.aws.util.AwsCloudFormationErrorMessageProvider;
-import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -77,7 +79,7 @@ public class AwsNetworkConnector implements DefaultNetworkConnector {
     private CloudFormationStackUtil cfStackUtil;
 
     @Inject
-    private AwsClient awsClient;
+    private LegacyAwsClient awsClient;
 
     @Inject
     private AwsSubnetRequestProvider awsSubnetRequestProvider;
@@ -204,7 +206,7 @@ public class AwsNetworkConnector implements DefaultNetworkConnector {
     }
 
     private CreatedCloudNetwork getCreatedNetworkWithPolling(NetworkCreationRequest networkRequest, AwsCredentialView credentialView,
-        AmazonCloudFormationClient cloudFormationRetryClient, List<SubnetRequest> subnetRequests) {
+            AmazonCloudFormationClient cloudFormationRetryClient, List<SubnetRequest> subnetRequests) {
 
         String regionName = networkRequest.getRegion().value();
         Waiter<DescribeStacksRequest> creationWaiter = cloudFormationRetryClient.waiters().stackCreateComplete();
@@ -220,7 +222,7 @@ public class AwsNetworkConnector implements DefaultNetworkConnector {
     }
 
     private CreatedCloudNetwork getCreatedCloudNetwork(AmazonCloudFormationClient cloudFormationRetryClient, NetworkCreationRequest networkRequest,
-        List<SubnetRequest> subnetRequests) {
+            List<SubnetRequest> subnetRequests) {
         Map<String, String> output = cfStackUtil.getOutputs(networkRequest.getStackName(), cloudFormationRetryClient);
         String vpcId = getCreatedVpc(output);
         Set<CreatedSubnet> subnets = awsCreatedSubnetProvider.provide(output, subnetRequests, networkRequest.isPrivateSubnetEnabled());

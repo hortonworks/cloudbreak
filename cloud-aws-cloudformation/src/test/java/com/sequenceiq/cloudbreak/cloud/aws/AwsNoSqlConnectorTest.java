@@ -21,8 +21,8 @@ import com.amazonaws.services.dynamodbv2.model.DeleteTableResult;
 import com.amazonaws.services.dynamodbv2.model.DescribeTableResult;
 import com.amazonaws.services.dynamodbv2.model.ResourceNotFoundException;
 import com.amazonaws.services.dynamodbv2.model.TableDescription;
-import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonDynamoDBClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
+import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonDynamoDBClient;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.base.ResponseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.NoSqlTableDeleteRequest;
@@ -43,7 +43,7 @@ public class AwsNoSqlConnectorTest {
     public final ExpectedException thrown = ExpectedException.none();
 
     @Mock
-    private AwsClient awsClient;
+    private LegacyAwsClient awsClient;
 
     @Mock
     private AmazonDynamoDBClient dynamoDb;

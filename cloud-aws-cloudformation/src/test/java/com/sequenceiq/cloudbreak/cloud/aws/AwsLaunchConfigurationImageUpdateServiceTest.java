@@ -22,7 +22,7 @@ import com.amazonaws.services.autoscaling.model.LaunchConfiguration;
 import com.amazonaws.services.cloudformation.model.GetTemplateResult;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
-import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
+import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -42,7 +42,7 @@ public class AwsLaunchConfigurationImageUpdateServiceTest {
     private static final String IMAGE_NAME = "imageName";
 
     @Mock
-    private AwsClient awsClient;
+    private LegacyAwsClient awsClient;
 
     @Mock
     private LaunchConfigurationHandler launchConfigurationHandler;

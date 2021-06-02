@@ -19,11 +19,11 @@ import org.springframework.stereotype.Component;
 import com.amazonaws.services.ec2.model.AttachVolumeRequest;
 import com.amazonaws.services.ec2.model.DescribeVolumesRequest;
 import com.amazonaws.services.ec2.model.DescribeVolumesResult;
-import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
-import com.sequenceiq.cloudbreak.cloud.aws.AwsPlatformParameters.AwsDiskType;
-import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonEc2Client;
+import com.sequenceiq.cloudbreak.cloud.aws.LegacyAwsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPlatformParameters.AwsDiskType;
+import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
+import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.context.AwsContext;
-import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
@@ -46,7 +46,7 @@ public class AwsAttachmentResourceBuilder extends AbstractAwsComputeBuilder {
     private AsyncTaskExecutor intermediateBuilderExecutor;
 
     @Inject
-    private AwsClient awsClient;
+    private LegacyAwsClient awsClient;
 
     @Inject
     private VolumeResourceCollector volumeResourceCollector;

@@ -33,11 +33,11 @@ import com.amazonaws.services.elasticfilesystem.model.DescribeMountTargetsResult
 import com.amazonaws.services.elasticfilesystem.model.FileSystemDescription;
 import com.amazonaws.services.elasticfilesystem.model.MountTargetDescription;
 import com.amazonaws.services.elasticfilesystem.model.Tag;
-import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
-import com.sequenceiq.cloudbreak.cloud.aws.AwsTaggingService;
-import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonEfsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.LegacyAwsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
+import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEfsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.context.AwsContext;
-import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEfsAttributes;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -61,7 +61,7 @@ public class AwsEfsResourceBuilder extends AbstractAwsComputeBuilder {
     private AwsTaggingService awsTaggingService;
 
     @Inject
-    private AwsClient awsClient;
+    private LegacyAwsClient awsClient;
 
     @Override
     public List<CloudResource> create(AwsContext context, long privateId, AuthenticatedContext auth, Group group, Image image) {

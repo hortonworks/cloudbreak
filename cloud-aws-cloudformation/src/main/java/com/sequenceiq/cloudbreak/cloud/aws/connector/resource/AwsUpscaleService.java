@@ -21,14 +21,14 @@ import org.springframework.stereotype.Service;
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup;
 import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsRequest;
 import com.amazonaws.services.autoscaling.model.Instance;
-import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsMetadataCollector;
-import com.sequenceiq.cloudbreak.cloud.aws.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
-import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonEc2Client;
-import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
+import com.sequenceiq.cloudbreak.cloud.aws.LegacyAwsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
+import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
+import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -53,7 +53,7 @@ public class AwsUpscaleService {
     private AwsNetworkService awsNetworkService;
 
     @Inject
-    private AwsClient awsClient;
+    private LegacyAwsClient awsClient;
 
     @Inject
     private CloudFormationStackUtil cfStackUtil;
@@ -134,7 +134,7 @@ public class AwsUpscaleService {
         } catch (RuntimeException runtimeException) {
             recoverOriginalState(ac, stack, amazonASClient, desiredAutoscalingGroupsByName, originalAutoScalingGroupsBySize, runtimeException);
             throw new CloudConnectorException(String.format("Failed to create some resource on AWS for upscaled nodes, please check your quotas on AWS. " +
-                            "Original autoscaling group state has been recovered. Exception: %s", runtimeException.getMessage()), runtimeException);
+                    "Original autoscaling group state has been recovered. Exception: %s", runtimeException.getMessage()), runtimeException);
         }
         return singletonList(new CloudResourceStatus(cfStackUtil.getCloudFormationStackResource(resources), ResourceStatus.UPDATED));
     }
@@ -170,8 +170,8 @@ public class AwsUpscaleService {
             Map<String, Group> desiredAutoscalingGroupsByName,
             Map<String, Integer> originalAutoScalingGroupsBySize,
             Exception originalException) {
-            LOGGER.info("Recover original state of the autoscaling group", originalException);
-            LOGGER.debug("Collecting info about desired and achieved instance counts");
+        LOGGER.info("Recover original state of the autoscaling group", originalException);
+        LOGGER.debug("Collecting info about desired and achieved instance counts");
 
         try {
             awsAutoScalingService.suspendAutoScaling(ac, stack);
@@ -217,17 +217,17 @@ public class AwsUpscaleService {
 
     private List<String> getUnknownInstancesFromASGs(List<Instance> instancesFromASGs, List<String> knownInstanceIdsByCloudbreak) {
         return instancesFromASGs.stream()
-                        .filter(instance -> !knownInstanceIdsByCloudbreak.contains(instance.getInstanceId()))
-                        .map(Instance::getInstanceId)
-                        .collect(Collectors.toList());
+                .filter(instance -> !knownInstanceIdsByCloudbreak.contains(instance.getInstanceId()))
+                .map(Instance::getInstanceId)
+                .collect(Collectors.toList());
     }
 
     private List<String> getKnownInstancesByCloudbreak(CloudStack stack) {
         return stack.getGroups()
-                        .stream()
-                        .flatMap(group -> group.getInstances().stream())
-                        .map(CloudInstance::getInstanceId)
-                        .collect(Collectors.toList());
+                .stream()
+                .flatMap(group -> group.getInstances().stream())
+                .map(CloudInstance::getInstanceId)
+                .collect(Collectors.toList());
     }
 
     private List<Instance> getInstancesInAutoscalingGroups(AmazonAutoScalingClient amazonASClient, Set<String> autoscalingGroupNames) {

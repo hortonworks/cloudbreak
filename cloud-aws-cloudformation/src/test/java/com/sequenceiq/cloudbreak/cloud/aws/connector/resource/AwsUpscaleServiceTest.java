@@ -37,14 +37,14 @@ import com.amazonaws.services.autoscaling.model.AutoScalingGroup;
 import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsRequest;
 import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsResult;
 import com.amazonaws.services.autoscaling.model.Instance;
-import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsMetadataCollector;
-import com.sequenceiq.cloudbreak.cloud.aws.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
-import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonEc2Client;
-import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
+import com.sequenceiq.cloudbreak.cloud.aws.LegacyAwsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
+import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
+import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -74,7 +74,7 @@ class AwsUpscaleServiceTest {
     private CloudResourceHelper cloudResourceHelper;
 
     @Mock
-    private AwsClient awsClient;
+    private LegacyAwsClient awsClient;
 
     @Mock
     private AwsAutoScalingService awsAutoScalingService;
@@ -471,15 +471,15 @@ class AwsUpscaleServiceTest {
 
         describeAutoScalingGroupsResult.setAutoScalingGroups(autoScalingGroups);
         when(amazonAutoScalingClient.describeAutoScalingGroups(any(DescribeAutoScalingGroupsRequest.class)))
-            .thenReturn(describeAutoScalingGroupsResult);
+                .thenReturn(describeAutoScalingGroupsResult);
         when(awsClient.createAutoScalingClient(any(AwsCredentialView.class), anyString())).thenReturn(amazonAutoScalingClient);
         when(awsClient.createCloudFormationClient(any(AwsCredentialView.class), anyString())).thenReturn(amazonCloudFormationClient);
         when(awsClient.createEc2Client(any(), any())).thenReturn(mock(AmazonEc2Client.class));
 
         when(cfStackUtil.getAutoscalingGroupName(any(AuthenticatedContext.class), any(AmazonCloudFormationClient.class), eq("worker")))
-            .thenReturn("workerASG");
+                .thenReturn("workerASG");
         when(cfStackUtil.getAutoscalingGroupName(any(AuthenticatedContext.class), any(AmazonCloudFormationClient.class), eq("master")))
-            .thenReturn("masterASG");
+                .thenReturn("masterASG");
 
         CloudContext cloudContext = CloudContext.Builder.builder()
                 .withId(1L)
@@ -495,27 +495,27 @@ class AwsUpscaleServiceTest {
 
         ArrayList<CloudResource> allInstances = new ArrayList<>();
         allInstances.add(CloudResource.builder().type(ResourceType.AWS_INSTANCE).status(CommonStatus.CREATED)
-            .name("worker1").group("worker").instanceId("i-worker1").build());
+                .name("worker1").group("worker").instanceId("i-worker1").build());
         allInstances.add(CloudResource.builder().type(ResourceType.AWS_INSTANCE).status(CommonStatus.CREATED)
-            .name("worker2").group("worker").instanceId("i-worker2").build());
+                .name("worker2").group("worker").instanceId("i-worker2").build());
         allInstances.add(CloudResource.builder().type(ResourceType.AWS_INSTANCE).status(CommonStatus.CREATED)
-            .name("worker3").group("worker").instanceId("i-worker3").build());
+                .name("worker3").group("worker").instanceId("i-worker3").build());
         CloudResource workerInstance4 = CloudResource.builder().type(ResourceType.AWS_INSTANCE).status(CommonStatus.CREATED)
-            .name("worker4").group("worker").instanceId("i-worker4").build();
+                .name("worker4").group("worker").instanceId("i-worker4").build();
         allInstances.add(workerInstance4);
         CloudResource workerInstance5 = CloudResource.builder().type(ResourceType.AWS_INSTANCE).status(CommonStatus.CREATED)
-            .name("worker5").group("worker").instanceId("i-worker5").build();
+                .name("worker5").group("worker").instanceId("i-worker5").build();
         allInstances.add(workerInstance5);
         when(cfStackUtil.getInstanceCloudResources(eq(authenticatedContext), eq(amazonCloudFormationClient), eq(amazonAutoScalingClient), anyList()))
-            .thenReturn(allInstances);
+                .thenReturn(allInstances);
         doNothing().when(cfStackUtil).addLoadBalancerTargets(any(), any(), any());
 
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         List<Group> groups = new ArrayList<>();
 
         List<CloudLoadBalancer> loadBalancers = List.of(
-            new CloudLoadBalancer(LoadBalancerType.PRIVATE),
-            new CloudLoadBalancer(LoadBalancerType.PUBLIC)
+                new CloudLoadBalancer(LoadBalancerType.PRIVATE),
+                new CloudLoadBalancer(LoadBalancerType.PUBLIC)
         );
 
         Group master = getMasterGroup(instanceAuthentication);
@@ -528,7 +528,7 @@ class AwsUpscaleServiceTest {
         tags.put("owner", "cbuser");
         tags.put("created", "yesterday");
         CloudStack cloudStack = new CloudStack(groups, getNetwork(), null, emptyMap(), tags, null,
-            instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null, loadBalancers);
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null, loadBalancers);
 
         List<CloudResource> cloudResourceList = Collections.emptyList();
         awsUpscaleService.upscale(authenticatedContext, cloudStack, cloudResourceList);

@@ -22,12 +22,12 @@ import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
-import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonEc2Client;
+import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
+import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsLifeCycleMapper;
+import com.sequenceiq.cloudbreak.cloud.aws.common.view.AuthenticatedContextView;
+import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.AwsLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.converter.LoadBalancerTypeConverter;
-import com.sequenceiq.cloudbreak.cloud.aws.util.AwsLifeCycleMapper;
-import com.sequenceiq.cloudbreak.cloud.aws.view.AuthenticatedContextView;
-import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -44,7 +44,7 @@ public class AwsMetadataCollector implements MetadataCollector {
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsMetadataCollector.class);
 
     @Inject
-    private AwsClient awsClient;
+    private LegacyAwsClient awsClient;
 
     @Inject
     private CloudFormationStackUtil cloudFormationStackUtil;

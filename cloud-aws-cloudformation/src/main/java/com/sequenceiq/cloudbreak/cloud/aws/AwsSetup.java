@@ -31,9 +31,10 @@ import com.amazonaws.services.ec2.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
-import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonEc2Client;
-import com.sequenceiq.cloudbreak.cloud.aws.view.AuthenticatedContextView;
-import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPlatformResources;
+import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
+import com.sequenceiq.cloudbreak.cloud.aws.common.view.AuthenticatedContextView;
+import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsInstanceView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -85,7 +86,7 @@ public class AwsSetup implements Setup {
     private CloudFormationStackUtil cfStackUtil;
 
     @Inject
-    private AwsClient awsClient;
+    private LegacyAwsClient awsClient;
 
     @Inject
     private AwsPlatformResources awsPlatformResources;
@@ -212,8 +213,8 @@ public class AwsSetup implements Setup {
             if (!keyPairIsPresentOnEC2) {
                 throw new CloudConnectorException(
                         String.format("The key pair '%s' could not be found in the '%s' region of EC2. " +
-                                "Please check AWS EC2 console because probably you are using a wrong key or " +
-                                "refer to Cloudera documentation at %s for the required setup",
+                                        "Please check AWS EC2 console because probably you are using a wrong key or " +
+                                        "refer to Cloudera documentation at %s for the required setup",
                                 keyPairName,
                                 region,
                                 DocumentationLinkProvider.awsSshKeySetupLink()));

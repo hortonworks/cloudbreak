@@ -42,13 +42,13 @@ import com.amazonaws.services.ec2.model.ModifyInstanceAttributeRequest;
 import com.amazonaws.services.ec2.model.ModifyInstanceAttributeResult;
 import com.amazonaws.services.ec2.model.Subnet;
 import com.amazonaws.services.ec2.model.TagSpecification;
-import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
-import com.sequenceiq.cloudbreak.cloud.aws.AwsPlatformParameters.AwsDiskType;
-import com.sequenceiq.cloudbreak.cloud.aws.AwsTaggingService;
-import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonEc2Client;
+import com.sequenceiq.cloudbreak.cloud.aws.LegacyAwsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPlatformParameters.AwsDiskType;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
+import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
+import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.context.AwsContext;
 import com.sequenceiq.cloudbreak.cloud.aws.service.AwsResourceNameService;
-import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsInstanceView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -87,7 +87,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
     private AwsTaggingService awsTaggingService;
 
     @Inject
-    private AwsClient awsClient;
+    private LegacyAwsClient awsClient;
 
     @Inject
     private VolumeResourceCollector volumeResourceCollector;
@@ -241,7 +241,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
     private Function<Volume, Pair<CreateVolumeRequest, CloudVolumeUsageType>> createVolumeRequest(boolean encryptedVolume,
             String volumeEncryptionKey, TagSpecification tagSpecification, VolumeSetAttributes volumeSet) {
         return volume -> {
-            CreateVolumeRequest createVolumeRequest =  new CreateVolumeRequest()
+            CreateVolumeRequest createVolumeRequest = new CreateVolumeRequest()
                     .withAvailabilityZone(volumeSet.getAvailabilityZone())
                     .withSize(volume.getSize())
                     .withSnapshotId(null)
@@ -343,7 +343,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
                     .reduce(ATTACHED, resourceStatusReducer());
         } catch (AmazonEC2Exception e) {
             LOGGER.debug("Obtaining volume status was not successful due to the following error: " + e.getErrorCode(), e);
-            return "InvalidVolume.NotFound".equals(e.getErrorCode()) ? DELETED :  FAILED;
+            return "InvalidVolume.NotFound".equals(e.getErrorCode()) ? DELETED : FAILED;
         }
     }
 

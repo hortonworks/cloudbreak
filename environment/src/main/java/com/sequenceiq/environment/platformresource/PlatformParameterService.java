@@ -1,7 +1,7 @@
 package com.sequenceiq.environment.platformresource;
 
-import static com.sequenceiq.cloudbreak.cloud.service.CloudParameterService.ACCESS_CONFIG_TYPE;
-import static com.sequenceiq.cloudbreak.cloud.service.CloudParameterService.SHARED_PROJECT_ID;
+import static com.sequenceiq.cloudbreak.cloud.CloudParameterConst.ACCESS_CONFIG_TYPE;
+import static com.sequenceiq.cloudbreak.cloud.CloudParameterConst.SHARED_PROJECT_ID;
 import static com.sequenceiq.common.model.CredentialType.AUDIT;
 import static com.sequenceiq.common.model.CredentialType.ENVIRONMENT;
 
@@ -210,7 +210,7 @@ public class PlatformParameterService {
             Map<String, String> filter,
             AccessConfigTypeQueryParam accessConfigType,
             CdpResourceType cdpResourceType) {
-    //CHECKSTYLE:ON
+        //CHECKSTYLE:ON
         PlatformResourceRequest platformResourceRequest = new PlatformResourceRequest();
 
         if (!Strings.isNullOrEmpty(credentialName)) {
