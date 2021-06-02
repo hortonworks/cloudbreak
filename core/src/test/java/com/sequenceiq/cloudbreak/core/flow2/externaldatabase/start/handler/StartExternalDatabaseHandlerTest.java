@@ -29,13 +29,13 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
-import com.sequenceiq.cloudbreak.conf.ExternalDatabaseConfig;
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.ExternalDatabaseService;
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.StackUpdaterService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
+import com.sequenceiq.cloudbreak.platform.ExternalDatabasePlatformConfig;
 import com.sequenceiq.cloudbreak.reactor.api.event.externaldatabase.StartExternalDatabaseFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.externaldatabase.StartExternalDatabaseRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.externaldatabase.StartExternalDatabaseResult;
@@ -69,7 +69,7 @@ class StartExternalDatabaseHandlerTest {
     private EnvironmentClientService environmentClientService;
 
     @Mock
-    private ExternalDatabaseConfig externalDatabaseConfig;
+    private ExternalDatabasePlatformConfig externalDatabasePlatformConfig;
 
     @InjectMocks
     private StartExternalDatabaseHandler underTest;
@@ -89,7 +89,7 @@ class StartExternalDatabaseHandlerTest {
         DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
         environment.setCloudPlatform("AWS");
         when(environmentClientService.getByCrn(anyString())).thenReturn(environment);
-        when(externalDatabaseConfig.isExternalDatabasePauseSupportedFor(any())).thenReturn(true);
+        when(externalDatabasePlatformConfig.isPauseSupportedForExternalDatabase(any())).thenReturn(true);
 
         Stack stack = buildStack(DatabaseAvailabilityType.HA);
         stack.setType(StackType.WORKLOAD);
@@ -159,7 +159,7 @@ class StartExternalDatabaseHandlerTest {
         DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
         environment.setCloudPlatform("AWS");
         when(environmentClientService.getByCrn(anyString())).thenReturn(environment);
-        when(externalDatabaseConfig.isExternalDatabasePauseSupportedFor(any())).thenReturn(false);
+        when(externalDatabasePlatformConfig.isPauseSupportedForExternalDatabase(any())).thenReturn(false);
 
         Stack stack = buildStack(DatabaseAvailabilityType.HA);
         stack.setType(StackType.WORKLOAD);
@@ -180,7 +180,7 @@ class StartExternalDatabaseHandlerTest {
         DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
         environment.setCloudPlatform("AWS");
         when(environmentClientService.getByCrn(anyString())).thenReturn(environment);
-        when(externalDatabaseConfig.isExternalDatabasePauseSupportedFor(any())).thenReturn(true);
+        when(externalDatabasePlatformConfig.isPauseSupportedForExternalDatabase(any())).thenReturn(true);
 
         Stack stack = buildStack(DatabaseAvailabilityType.HA);
         stack.setType(StackType.WORKLOAD);

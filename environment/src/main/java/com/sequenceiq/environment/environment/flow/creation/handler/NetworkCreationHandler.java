@@ -63,7 +63,7 @@ public class NetworkCreationHandler extends EventSenderAwareHandler<EnvironmentD
             EnvironmentNetworkService environmentNetworkService,
             CloudNetworkService cloudNetworkService,
             EnvironmentResourceService environmentResourceService,
-            @Value("${environment.enabledplatforms}") Set<String> enabledPlatforms,
+            @Value("${cdp.platforms.supportedPlatforms}") Set<String> enabledPlatforms,
             EventBus eventBus,
             NetworkMetadataValidationService networkValidationService) {
         super(eventSender);

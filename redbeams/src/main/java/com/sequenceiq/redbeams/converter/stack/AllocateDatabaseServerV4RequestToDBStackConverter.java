@@ -12,7 +12,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -72,7 +71,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
 
     private static final String DBSTACK_NAME_PREFIX = "dbstck";
 
-    @Value("${cb.enabledplatforms:}")
+    @Value("${cdp.platforms.supportedFeature.externalDatabase}")
     private Set<String> dbServiceSupportedPlatforms;
 
     @Value("${redbeams.ssl.enabled:}")
@@ -131,13 +130,6 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
 
     @Inject
     private DatabaseServerSslCertificateConfig databaseServerSslCertificateConfig;
-
-    @PostConstruct
-    public void initSupportedPlatforms() {
-        if (dbServiceSupportedPlatforms.isEmpty()) {
-            dbServiceSupportedPlatforms = Set.of(CloudPlatform.AWS.toString(), CloudPlatform.AZURE.toString(), CloudPlatform.MOCK.toString());
-        }
-    }
 
     public DBStack convert(AllocateDatabaseServerV4Request source, String ownerCrnString) {
         Crn ownerCrn = Crn.safeFromString(ownerCrnString);

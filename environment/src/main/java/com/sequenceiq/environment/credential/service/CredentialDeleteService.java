@@ -40,7 +40,7 @@ public class CredentialDeleteService extends AbstractCredentialService {
             CloudbreakMessagesService messagesService,
             EnvironmentViewService environmentViewService,
             OwnerAssignmentService ownerAssignmentService,
-            @Value("${environment.enabledplatforms}") Set<String> enabledPlatforms) {
+            @Value("${cdp.platforms.supportedPlatforms}") Set<String> enabledPlatforms) {
         super(notificationSender, messagesService, enabledPlatforms);
         this.credentialService = credentialService;
         this.environmentViewService = environmentViewService;

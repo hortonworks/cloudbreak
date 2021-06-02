@@ -83,8 +83,8 @@ public class EnvironmentValidatorService {
             EnvironmentResourceService environmentResourceService,
             CredentialService credentialService,
             PublicKeyValidator publicKeyValidator,
-            @Value("${environment.enabledParentPlatforms}") Set<String> enabledParentPlatforms,
-            @Value("${environment.enabledChildPlatforms}") Set<String> enabledChildPlatforms,
+            @Value("${cdp.platforms.supportedFeature.parentPlatforms}") Set<String> enabledParentPlatforms,
+            @Value("${cdp.platforms.supportedFeature.childPlatforms}") Set<String> enabledChildPlatforms,
             TagValidator tagValidator,
             EncryptionKeyUrlValidator encryptionKeyUrlValidator,
             EntitlementService entitlementService) {

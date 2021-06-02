@@ -18,7 +18,8 @@ public class ClusterTemplateCloudPlatformValidator {
 
     private final EntitlementService entitlementService;
 
-    public ClusterTemplateCloudPlatformValidator(@Value("${cb.enabledplatforms:}") Set<String> enabledPlatforms, EntitlementService entitlementService) {
+    public ClusterTemplateCloudPlatformValidator(@Value("${cdp.platforms.supportedPlatforms}") Set<String> enabledPlatforms,
+            EntitlementService entitlementService) {
         this.enabledPlatforms = enabledPlatforms;
         this.entitlementService = entitlementService;
     }

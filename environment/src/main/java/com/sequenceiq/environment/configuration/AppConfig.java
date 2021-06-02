@@ -70,10 +70,10 @@ public class AppConfig {
     @Named("redbeamsServerUrl")
     private String redbeamsServerUrl;
 
-    @Value("${environment.redbeams.supportedPlatforms:}")
+    @Value("${cdp.platforms.supportedFeature.externalDatabase}")
     private String supportedRedbeamsPlatforms;
 
-    @Value("${environment.freeipa.supportedPlatforms:}")
+    @Value("${cdp.platforms.supportedFeature.freeIpaProvision}")
     private String supportedFreeIpaPlatforms;
 
     @Bean

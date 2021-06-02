@@ -1,20 +1,21 @@
 package com.sequenceiq.datalake.service.pause;
 
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.datalake.configuration.PlatformConfig;
-import com.sequenceiq.datalake.entity.SdxCluster;
-import com.sequenceiq.datalake.service.EnvironmentClientService;
-import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.mockito.Mockito.when;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.platform.ExternalDatabasePlatformConfig;
+import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.service.EnvironmentClientService;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @ExtendWith(MockitoExtension.class)
 public class DatabasePauseSupportServiceTest {
@@ -33,7 +34,7 @@ public class DatabasePauseSupportServiceTest {
     private DetailedEnvironmentResponse detailedEnvironmentResponse;
 
     @Mock
-    private PlatformConfig platformConfig;
+    private ExternalDatabasePlatformConfig externalDatabasePlatformConfig;
 
     @InjectMocks
     private DatabasePauseSupportService victim;
@@ -64,7 +65,7 @@ public class DatabasePauseSupportServiceTest {
         when(sdxCluster.getEnvCrn()).thenReturn(ENVIRONMENT_CRN);
         when(environmentClientService.getByCrn(ENVIRONMENT_CRN)).thenReturn(detailedEnvironmentResponse);
         when(detailedEnvironmentResponse.getCloudPlatform()).thenReturn(CloudPlatform.AZURE.name());
-        when(platformConfig.isExternalDatabasePauseSupportedFor(CloudPlatform.AZURE)).thenReturn(false);
+        when(externalDatabasePlatformConfig.isPauseSupportedForExternalDatabase(CloudPlatform.AZURE)).thenReturn(false);
         assertFalse(victim.isDatabasePauseSupported(sdxCluster));
     }
 
@@ -75,7 +76,7 @@ public class DatabasePauseSupportServiceTest {
         when(sdxCluster.getEnvCrn()).thenReturn(ENVIRONMENT_CRN);
         when(environmentClientService.getByCrn(ENVIRONMENT_CRN)).thenReturn(detailedEnvironmentResponse);
         when(detailedEnvironmentResponse.getCloudPlatform()).thenReturn(CloudPlatform.AWS.name());
-        when(platformConfig.isExternalDatabasePauseSupportedFor(CloudPlatform.AWS)).thenReturn(true);
+        when(externalDatabasePlatformConfig.isPauseSupportedForExternalDatabase(CloudPlatform.AWS)).thenReturn(true);
 
         assertTrue(victim.isDatabasePauseSupported(sdxCluster));
     }

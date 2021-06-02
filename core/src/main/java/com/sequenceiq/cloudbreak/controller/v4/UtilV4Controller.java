@@ -114,7 +114,7 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
         Set<SupportedExternalDatabaseServiceEntryV4Response> supportedExternalDatabases =
                 converterUtil.convertAllAsSet(SupportedDatabaseProvider.supportedExternalDatabases(), SupportedExternalDatabaseServiceEntryV4Response.class);
         response.setSupportedExternalDatabases(supportedExternalDatabases);
-        response.setPlatformSelectionDisabled(preferencesService.isPlatformSelectionDisabled());
+        response.setPlatformSelectionDisabled(true);
         response.setPlatformEnablement(preferencesService.platformEnablement());
         return response;
     }

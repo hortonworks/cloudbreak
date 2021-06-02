@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak;
 
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import org.hamcrest.Matchers;
 import org.junit.Test;
@@ -19,14 +19,14 @@ import com.sequenceiq.cloudbreak.PropertiesTest.TestAppContext;
 @SpringBootTest(classes = TestAppContext.class)
 public class PropertiesTest {
 
-    @Value("${cb.enabledplatforms}")
+    @Value("${cdp.platforms.supportedPlatforms}")
     private String enabledPlatforms;
 
     @Test
     public void testEnabledPlatforms() {
         String[] platforms = enabledPlatforms.split(",");
 
-        assertThat(platforms, Matchers.arrayContainingInAnyOrder("AWS", "GCP", "OPENSTACK", "AZURE"));
+        assertThat(platforms, Matchers.arrayContainingInAnyOrder("AWS", "GCP", "AZURE"));
     }
 
     @Configuration
@@ -37,7 +37,7 @@ public class PropertiesTest {
             ))
     @PropertySource("classpath:application.yml")
     static class TestAppContext {
-        @Value("cb.enabledplatforms")
+        @Value("cdp.platforms.supportedPlatforms")
         private String enabledPlatforms;
 
         public String getVar() {
