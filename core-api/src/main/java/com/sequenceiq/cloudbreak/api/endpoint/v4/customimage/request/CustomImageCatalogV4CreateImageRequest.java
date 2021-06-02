@@ -26,14 +26,13 @@ public class CustomImageCatalogV4CreateImageRequest {
     private String imageType;
 
     @Size(max = 255, min = 1, message = "The length of the sourceImageId must be between 1 and 255")
-    @Pattern(regexp = "(^[a-z][-a-z0-9]*[a-z0-9]$)",
+    @Pattern(regexp = "(^[a-z0-9][-a-z0-9]*[a-z0-9]$)",
             message = "The sourceImageId can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
     @NotNull
     @ApiModelProperty(value = SOURCE_IMAGE_ID, required = true)
     private String sourceImageId;
 
     @Size(max = 255, min = 1, message = "The length of the baseParcelUrl must be between 1 and 255")
-    @NotNull
     @ApiModelProperty(value = BASE_PARCEL_URL, required = true)
     private String baseParcelUrl;
 

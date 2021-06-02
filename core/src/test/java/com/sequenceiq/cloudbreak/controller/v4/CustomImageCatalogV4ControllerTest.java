@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -136,11 +137,15 @@ public class CustomImageCatalogV4ControllerTest {
     @Test
     public void testGetCustomImage() {
         CustomImage customImage = new CustomImage();
+        Image sourceImage = createTestImage();
+
         CustomImageCatalogV4GetImageResponse expected = new CustomImageCatalogV4GetImageResponse();
+        expected.setSourceImageDate(12345L);
 
         when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(WORKSPACE_ID);
         when(customImageCatalogService.getCustomImage(WORKSPACE_ID, IMAGE_CATALOG_NAME, IMAGE_ID)).thenReturn(customImage);
         when(converterUtil.convert(customImage, CustomImageCatalogV4GetImageResponse.class)).thenReturn(expected);
+        when(customImageCatalogService.getSourceImage(customImage)).thenReturn(sourceImage);
 
         CustomImageCatalogV4GetImageResponse actual = victim.getCustomImage(IMAGE_CATALOG_NAME, IMAGE_ID, ACCOUNT_ID);
 
@@ -199,5 +204,9 @@ public class CustomImageCatalogV4ControllerTest {
         CustomImageCatalogV4DeleteImageResponse actual = victim.deleteCustomImage(IMAGE_CATALOG_NAME, IMAGE_ID, ACCOUNT_ID);
 
         assertEquals(expected, actual);
+    }
+
+    private static Image createTestImage() {
+        return new Image(null, 12345L, null, null, null, null, null, null, null, null, null, null, null, null, true, null, null);
     }
 }
