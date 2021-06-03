@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.aws;
+package com.sequenceiq.cloudbreak.cloud.aws.common;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -16,7 +16,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.amazonaws.services.s3.model.AmazonS3Exception;
-import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonS3Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -38,7 +37,7 @@ public class AwsObjectStorageConnectorTest {
     public final ExpectedException thrown = ExpectedException.none();
 
     @Mock
-    private LegacyAwsClient awsClient;
+    private CommonAwsClient awsClient;
 
     @Mock
     private AmazonS3Client s3Client;

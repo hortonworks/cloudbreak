@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.aws;
+package com.sequenceiq.cloudbreak.cloud.aws.common;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -21,7 +21,6 @@ import com.amazonaws.services.dynamodbv2.model.DeleteTableResult;
 import com.amazonaws.services.dynamodbv2.model.DescribeTableResult;
 import com.amazonaws.services.dynamodbv2.model.ResourceNotFoundException;
 import com.amazonaws.services.dynamodbv2.model.TableDescription;
-import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonDynamoDBClient;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.base.ResponseStatus;
@@ -43,7 +42,7 @@ public class AwsNoSqlConnectorTest {
     public final ExpectedException thrown = ExpectedException.none();
 
     @Mock
-    private LegacyAwsClient awsClient;
+    private CommonAwsClient awsClient;
 
     @Mock
     private AmazonDynamoDBClient dynamoDb;

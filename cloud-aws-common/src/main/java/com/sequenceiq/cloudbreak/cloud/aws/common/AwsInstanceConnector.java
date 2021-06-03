@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.aws;
+package com.sequenceiq.cloudbreak.cloud.aws.common;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -37,7 +37,7 @@ import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsInstanceStatusMapper;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AuthenticatedContextView;
-import com.sequenceiq.cloudbreak.cloud.aws.poller.PollerUtil;
+import com.sequenceiq.cloudbreak.cloud.aws.common.poller.PollerUtil;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudOperationNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;

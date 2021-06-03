@@ -23,7 +23,16 @@ import com.sequenceiq.cloudbreak.cloud.PublicKeyConnector;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.Validator;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsAuthenticator;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsCredentialConnector;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsIdentityService;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsInstanceConnector;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsNoSqlConnector;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsObjectStorageConnector;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPlatformParameters;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPlatformResources;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPublicKeyConnector;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
@@ -34,9 +43,36 @@ public class AwsNativeConnector implements CloudConnector<List<CloudResource>> {
     @Inject
     private AwsConstants awsConstants;
 
+    @Inject
+    private AwsCredentialConnector awsCredentialConnector;
+
+    @Inject
+    private AwsPlatformResources awsPlatformResources;
+
+    @Inject
+    private AwsPlatformParameters awsPlatformParameters;
+
+    @Inject
+    private AwsIdentityService awsIdentityService;
+
+    @Inject
+    private AwsObjectStorageConnector awsObjectStorageConnector;
+
+    @Inject
+    private AwsPublicKeyConnector awsPublicKeyConnector;
+
+    @Inject
+    private AwsNoSqlConnector awsNoSqlConnector;
+
+    @Inject
+    private AwsAuthenticator awsAuthenticator;
+
+    @Inject
+    private AwsInstanceConnector awsInstanceConnector;
+
     @Override
     public Authenticator authentication() {
-        return null;
+        return awsAuthenticator;
     }
 
     @Override
@@ -51,7 +87,7 @@ public class AwsNativeConnector implements CloudConnector<List<CloudResource>> {
 
     @Override
     public CredentialConnector credentials() {
-        return null;
+        return awsCredentialConnector;
     }
 
     @Override
@@ -61,7 +97,7 @@ public class AwsNativeConnector implements CloudConnector<List<CloudResource>> {
 
     @Override
     public InstanceConnector instances() {
-        return null;
+        return awsInstanceConnector;
     }
 
     @Override
@@ -71,17 +107,17 @@ public class AwsNativeConnector implements CloudConnector<List<CloudResource>> {
 
     @Override
     public PlatformParameters parameters() {
-        return null;
+        return awsPlatformParameters;
     }
 
     @Override
     public PlatformResources platformResources() {
-        return null;
+        return awsPlatformResources;
     }
 
     @Override
     public CloudConstant cloudConstant() {
-        return null;
+        return awsConstants;
     }
 
     @Override
@@ -95,33 +131,23 @@ public class AwsNativeConnector implements CloudConnector<List<CloudResource>> {
     }
 
     @Override
-    public String regionToDisplayName(String region) {
-        return CloudConnector.super.regionToDisplayName(region);
-    }
-
-    @Override
-    public String displayNameToRegion(String displayName) {
-        return CloudConnector.super.displayNameToRegion(displayName);
-    }
-
-    @Override
     public IdentityService identityService() {
-        return CloudConnector.super.identityService();
+        return awsIdentityService;
     }
 
     @Override
     public ObjectStorageConnector objectStorage() {
-        return CloudConnector.super.objectStorage();
+        return awsObjectStorageConnector;
     }
 
     @Override
     public NoSqlConnector noSql() {
-        return CloudConnector.super.noSql();
+        return awsNoSqlConnector;
     }
 
     @Override
     public PublicKeyConnector publicKey() {
-        return CloudConnector.super.publicKey();
+        return awsPublicKeyConnector;
     }
 
     @Override

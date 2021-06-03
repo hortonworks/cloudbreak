@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.aws;
+package com.sequenceiq.cloudbreak.cloud.aws.common;
 
 import javax.inject.Inject;
 
@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import com.amazonaws.services.securitytoken.model.GetCallerIdentityRequest;
 import com.amazonaws.services.securitytoken.model.GetCallerIdentityResult;
 import com.sequenceiq.cloudbreak.cloud.IdentityService;
-import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonSecurityTokenServiceClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.Arn;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
@@ -19,7 +18,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Variant;
 public class AwsIdentityService implements IdentityService {
 
     @Inject
-    private LegacyAwsClient awsClient;
+    private CommonAwsClient awsClient;
 
     @Override
     public String getAccountId(String region, CloudCredential cloudCredential) {

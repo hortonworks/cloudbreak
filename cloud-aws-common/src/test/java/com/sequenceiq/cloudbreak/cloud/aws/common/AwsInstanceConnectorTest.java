@@ -1,6 +1,6 @@
-package com.sequenceiq.cloudbreak.cloud.aws;
+package com.sequenceiq.cloudbreak.cloud.aws.common;
 
-import static com.sequenceiq.cloudbreak.cloud.aws.AwsInstanceConnector.INSTANCE_NOT_FOUND_ERROR_CODE;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsInstanceConnector.INSTANCE_NOT_FOUND_ERROR_CODE;
 import static java.util.stream.Collectors.toCollection;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.everyItem;
@@ -54,16 +54,11 @@ import com.amazonaws.services.ec2.model.StartInstancesResult;
 import com.amazonaws.services.ec2.model.StopInstancesRequest;
 import com.amazonaws.services.ec2.model.StopInstancesResult;
 import com.dyngr.exception.PollerStoppedException;
-import com.sequenceiq.cloudbreak.cloud.aws.common.AwsAuthenticator;
-import com.sequenceiq.cloudbreak.cloud.aws.common.AwsDefaultZoneProvider;
-import com.sequenceiq.cloudbreak.cloud.aws.common.AwsEnvironmentVariableChecker;
-import com.sequenceiq.cloudbreak.cloud.aws.common.AwsSessionCredentialClient;
-import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.mapper.SdkClientExceptionMapper;
+import com.sequenceiq.cloudbreak.cloud.aws.common.poller.PollerUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsInstanceStatusMapper;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
-import com.sequenceiq.cloudbreak.cloud.aws.poller.PollerUtil;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -97,9 +92,6 @@ public class AwsInstanceConnectorTest {
 
     @Inject
     private AwsAuthenticator awsAuthenticator;
-
-    @MockBean
-    private LegacyAwsClient legacyAwsClient;
 
     @MockBean
     private AwsEnvironmentVariableChecker awsEnvironmentVariableChecker;
@@ -467,7 +459,7 @@ public class AwsInstanceConnectorTest {
     @EnableRetry(proxyTargetClass = true)
     @Import({AwsInstanceConnector.class,
             AwsAuthenticator.class,
-            LegacyAwsClient.class,
+            CommonAwsClient.class,
             PollerUtil.class,
             AwsSessionCredentialClient.class,
             AwsDefaultZoneProvider.class,

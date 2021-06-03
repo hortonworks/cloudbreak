@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.aws.validator;
+package com.sequenceiq.cloudbreak.cloud.aws.common.validator;
 
 import java.util.ArrayList;
 import java.util.Collection;

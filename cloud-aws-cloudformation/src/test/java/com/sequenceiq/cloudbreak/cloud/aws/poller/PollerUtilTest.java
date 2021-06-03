@@ -19,7 +19,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.dyngr.exception.PollerStoppedException;
-import com.sequenceiq.cloudbreak.cloud.aws.AwsInstanceConnector;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsInstanceConnector;
+import com.sequenceiq.cloudbreak.cloud.aws.common.poller.PollerUtil;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;

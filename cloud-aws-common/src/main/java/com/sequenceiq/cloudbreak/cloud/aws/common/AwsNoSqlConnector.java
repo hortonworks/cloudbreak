@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.aws;
+package com.sequenceiq.cloudbreak.cloud.aws.common;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +11,6 @@ import com.amazonaws.services.dynamodbv2.model.ResourceNotFoundException;
 import com.amazonaws.services.dynamodbv2.model.TableDescription;
 import com.sequenceiq.cloudbreak.cloud.NoSqlConnector;
 import com.sequenceiq.cloudbreak.cloud.RegionAware;
-import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonDynamoDBClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -29,9 +28,9 @@ public class AwsNoSqlConnector implements NoSqlConnector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsNoSqlConnector.class);
 
-    private final LegacyAwsClient awsClient;
+    private final CommonAwsClient awsClient;
 
-    public AwsNoSqlConnector(LegacyAwsClient awsClient) {
+    public AwsNoSqlConnector(CommonAwsClient awsClient) {
         this.awsClient = awsClient;
     }
 

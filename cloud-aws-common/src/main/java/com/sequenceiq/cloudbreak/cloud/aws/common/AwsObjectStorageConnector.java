@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.aws;
+package com.sequenceiq.cloudbreak.cloud.aws.common;
 
 import javax.inject.Inject;
 
@@ -10,11 +10,10 @@ import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.ObjectStorageConnector;
-import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonIdentityManagementClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonS3Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
-import com.sequenceiq.cloudbreak.cloud.aws.validator.AwsIDBrokerObjectStorageValidator;
+import com.sequenceiq.cloudbreak.cloud.aws.common.validator.AwsIDBrokerObjectStorageValidator;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
@@ -37,7 +36,7 @@ public class AwsObjectStorageConnector implements ObjectStorageConnector {
     private static final int ACCESS_DENIED_ERROR_CODE = 403;
 
     @Inject
-    private LegacyAwsClient awsClient;
+    private CommonAwsClient awsClient;
 
     @Inject
     private AwsIDBrokerObjectStorageValidator awsIDBrokerObjectStorageValidator;
