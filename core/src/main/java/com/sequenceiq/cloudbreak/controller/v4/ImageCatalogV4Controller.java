@@ -15,7 +15,6 @@ import com.sequenceiq.authorization.annotation.AccountIdNotNeeded;
 import com.sequenceiq.cloudbreak.service.image.DefaultImageCatalogService;
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.authorization.annotation.AccountIdNotNeeded;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
