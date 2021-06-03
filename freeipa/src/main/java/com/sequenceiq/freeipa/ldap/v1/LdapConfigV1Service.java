@@ -207,6 +207,10 @@ public class LdapConfigV1Service {
         return convertLdapConfigToDescribeLdapConfigResponse(ldapConfig);
     }
 
+    @Retryable(value = RetryableFreeIpaClientException.class,
+            maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
+            backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
+                    multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
     public LdapConfig createNewLdapConfig(String environmentCrn, String clusterName, Stack stack, boolean ignoreExistingUser) throws FreeIpaClientException {
         LOGGER.debug("Create new LDAP config for environment in FreeIPA");
         FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStack(stack);

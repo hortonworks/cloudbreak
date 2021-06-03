@@ -125,6 +125,10 @@ public class KerberosConfigV1Service {
         return convertKerberosConfigToDescribeKerberosConfigResponse(kerberosConfig);
     }
 
+    @Retryable(value = RetryableFreeIpaClientException.class,
+            maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
+            backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
+                    multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
     public KerberosConfig createNewKerberosConfig(String environmentCrn, String clusterName, Stack existingStack, boolean ignoreExistingUser)
             throws FreeIpaClientException {
         LOGGER.debug("Kerberos config doesn't exists for cluster [{}] in env [{}]. Creating new in FreeIPA", clusterName, environmentCrn);
