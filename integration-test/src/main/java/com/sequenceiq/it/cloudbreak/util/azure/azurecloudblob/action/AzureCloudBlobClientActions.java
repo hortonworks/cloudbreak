@@ -181,13 +181,12 @@ public class AzureCloudBlobClientActions extends AzureCloudBlobClient {
     }
 
     public void createCloudBlobContainer() {
-        CloudBlobContainer cloudBlobContainer = null;
+        CloudBlobContainer cloudBlobContainer;
         String containerName = getContainerName();
 
         try {
             int limit = 0;
             do {
-                Thread.sleep(6000);
                 try {
                     cloudBlobContainer = createCloudBlobClient().getContainerReference(containerName);
                     if (cloudBlobContainer.createIfNotExists()) {
@@ -198,10 +197,11 @@ public class AzureCloudBlobClientActions extends AzureCloudBlobClient {
                     limit = 60;
                 } catch (StorageException | URISyntaxException createAfterWaitException) {
                     limit++;
-                    if (limit >= 60) {
-                        LOGGER.error("Azure Adls Gen2 Blob Storage Container: {} create cannot be succeed during 360000 ms!\n",
+                    if (limit >= 10) {
+                        LOGGER.error("Azure Adls Gen2 Blob Storage Container: {} create cannot be succeed during 60000 ms!\n",
                                 containerName, createAfterWaitException);
                     }
+                    Thread.sleep(6000);
                 }
             } while (limit < 60);
         } catch (InterruptedException waitException) {
