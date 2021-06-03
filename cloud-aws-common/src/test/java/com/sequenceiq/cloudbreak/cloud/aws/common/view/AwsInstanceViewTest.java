@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.aws.view;
+package com.sequenceiq.cloudbreak.cloud.aws.common.view;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;

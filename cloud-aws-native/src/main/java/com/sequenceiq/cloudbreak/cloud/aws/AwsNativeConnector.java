@@ -70,6 +70,9 @@ public class AwsNativeConnector implements CloudConnector<List<CloudResource>> {
     @Inject
     private AwsInstanceConnector awsInstanceConnector;
 
+    @Inject
+    private AwsNativeSetup awsNativeSetup;
+
     @Override
     public Authenticator authentication() {
         return awsAuthenticator;
@@ -77,7 +80,7 @@ public class AwsNativeConnector implements CloudConnector<List<CloudResource>> {
 
     @Override
     public Setup setup() {
-        return null;
+        return awsNativeSetup;
     }
 
     @Override
