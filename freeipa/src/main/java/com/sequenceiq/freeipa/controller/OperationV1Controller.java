@@ -28,7 +28,7 @@ public class OperationV1Controller implements OperationV1Endpoint {
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.GET_OPERATION_STATUS)
     public OperationStatus getOperationStatus(@NotNull String operationId, @AccountId String accountId) {
-        String currentAccountId = Optional.of(accountId).orElse(ThreadBasedUserCrnProvider.getAccountId());
+        String currentAccountId = Optional.ofNullable(accountId).orElseGet(ThreadBasedUserCrnProvider::getAccountId);
         return operationToOperationStatusConverter.convert(operationService.getOperationForAccountIdAndOperationId(currentAccountId, operationId));
     }
 }
