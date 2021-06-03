@@ -11,6 +11,12 @@
       "Resource": "arn:aws:s3:::${STORAGE_LOCATION_BASE}/ranger/audit/*"
     },
     {
+      "Sid": "AccessToDatalakeBackupRestoreDirectory",
+      "Effect": "Allow",
+      "Action": ["s3:PutObject"],
+      "Resource": "arn:aws:s3:::${LOGS_LOCATION_BASE}/*"
+    },
+    {
       "Sid": "LimitedAccessToDataLakeBucket",
       "Effect": "Allow",
       "Action": [
