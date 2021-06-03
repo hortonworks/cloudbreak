@@ -328,6 +328,43 @@ public final class UserManagementGrpc {
      return getVerifyInteractiveUserSessionTokenMethod;
   }
   @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @java.lang.Deprecated // Use {@link #getVerifyAccessTokenMethod()} instead. 
+  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyAccessTokenRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyAccessTokenResponse> METHOD_VERIFY_ACCESS_TOKEN = getVerifyAccessTokenMethodHelper();
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyAccessTokenRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyAccessTokenResponse> getVerifyAccessTokenMethod;
+
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyAccessTokenRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyAccessTokenResponse> getVerifyAccessTokenMethod() {
+    return getVerifyAccessTokenMethodHelper();
+  }
+
+  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyAccessTokenRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyAccessTokenResponse> getVerifyAccessTokenMethodHelper() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyAccessTokenRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyAccessTokenResponse> getVerifyAccessTokenMethod;
+    if ((getVerifyAccessTokenMethod = UserManagementGrpc.getVerifyAccessTokenMethod) == null) {
+      synchronized (UserManagementGrpc.class) {
+        if ((getVerifyAccessTokenMethod = UserManagementGrpc.getVerifyAccessTokenMethod) == null) {
+          UserManagementGrpc.getVerifyAccessTokenMethod = getVerifyAccessTokenMethod = 
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyAccessTokenRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyAccessTokenResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(
+                  "usermanagement.UserManagement", "VerifyAccessToken"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyAccessTokenRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyAccessTokenResponse.getDefaultInstance()))
+                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("VerifyAccessToken"))
+                  .build();
+          }
+        }
+     }
+     return getVerifyAccessTokenMethod;
+  }
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
   @java.lang.Deprecated // Use {@link #getAuthenticateMethod()} instead. 
   public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AuthenticateRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AuthenticateResponse> METHOD_AUTHENTICATE = getAuthenticateMethodHelper();
@@ -770,6 +807,265 @@ public final class UserManagementGrpc {
         }
      }
      return getListAccessKeysMethod;
+  }
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @java.lang.Deprecated // Use {@link #getCreateAccessTokenMethod()} instead. 
+  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessTokenRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessTokenResponse> METHOD_CREATE_ACCESS_TOKEN = getCreateAccessTokenMethodHelper();
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessTokenRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessTokenResponse> getCreateAccessTokenMethod;
+
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessTokenRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessTokenResponse> getCreateAccessTokenMethod() {
+    return getCreateAccessTokenMethodHelper();
+  }
+
+  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessTokenRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessTokenResponse> getCreateAccessTokenMethodHelper() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessTokenRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessTokenResponse> getCreateAccessTokenMethod;
+    if ((getCreateAccessTokenMethod = UserManagementGrpc.getCreateAccessTokenMethod) == null) {
+      synchronized (UserManagementGrpc.class) {
+        if ((getCreateAccessTokenMethod = UserManagementGrpc.getCreateAccessTokenMethod) == null) {
+          UserManagementGrpc.getCreateAccessTokenMethod = getCreateAccessTokenMethod = 
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessTokenRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessTokenResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(
+                  "usermanagement.UserManagement", "CreateAccessToken"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessTokenRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessTokenResponse.getDefaultInstance()))
+                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("CreateAccessToken"))
+                  .build();
+          }
+        }
+     }
+     return getCreateAccessTokenMethod;
+  }
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @java.lang.Deprecated // Use {@link #getDeleteAccessTokenMethod()} instead. 
+  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessTokenRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessTokenResponse> METHOD_DELETE_ACCESS_TOKEN = getDeleteAccessTokenMethodHelper();
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessTokenRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessTokenResponse> getDeleteAccessTokenMethod;
+
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessTokenRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessTokenResponse> getDeleteAccessTokenMethod() {
+    return getDeleteAccessTokenMethodHelper();
+  }
+
+  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessTokenRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessTokenResponse> getDeleteAccessTokenMethodHelper() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessTokenRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessTokenResponse> getDeleteAccessTokenMethod;
+    if ((getDeleteAccessTokenMethod = UserManagementGrpc.getDeleteAccessTokenMethod) == null) {
+      synchronized (UserManagementGrpc.class) {
+        if ((getDeleteAccessTokenMethod = UserManagementGrpc.getDeleteAccessTokenMethod) == null) {
+          UserManagementGrpc.getDeleteAccessTokenMethod = getDeleteAccessTokenMethod = 
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessTokenRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessTokenResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(
+                  "usermanagement.UserManagement", "DeleteAccessToken"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessTokenRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessTokenResponse.getDefaultInstance()))
+                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("DeleteAccessToken"))
+                  .build();
+          }
+        }
+     }
+     return getDeleteAccessTokenMethod;
+  }
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @java.lang.Deprecated // Use {@link #getGetAccessTokenMethod()} instead. 
+  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessTokenRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessTokenResponse> METHOD_GET_ACCESS_TOKEN = getGetAccessTokenMethodHelper();
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessTokenRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessTokenResponse> getGetAccessTokenMethod;
+
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessTokenRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessTokenResponse> getGetAccessTokenMethod() {
+    return getGetAccessTokenMethodHelper();
+  }
+
+  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessTokenRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessTokenResponse> getGetAccessTokenMethodHelper() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessTokenRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessTokenResponse> getGetAccessTokenMethod;
+    if ((getGetAccessTokenMethod = UserManagementGrpc.getGetAccessTokenMethod) == null) {
+      synchronized (UserManagementGrpc.class) {
+        if ((getGetAccessTokenMethod = UserManagementGrpc.getGetAccessTokenMethod) == null) {
+          UserManagementGrpc.getGetAccessTokenMethod = getGetAccessTokenMethod = 
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessTokenRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessTokenResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(
+                  "usermanagement.UserManagement", "GetAccessToken"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessTokenRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessTokenResponse.getDefaultInstance()))
+                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("GetAccessToken"))
+                  .build();
+          }
+        }
+     }
+     return getGetAccessTokenMethod;
+  }
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @java.lang.Deprecated // Use {@link #getListAccessTokensMethod()} instead. 
+  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessTokensRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessTokensResponse> METHOD_LIST_ACCESS_TOKENS = getListAccessTokensMethodHelper();
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessTokensRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessTokensResponse> getListAccessTokensMethod;
+
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessTokensRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessTokensResponse> getListAccessTokensMethod() {
+    return getListAccessTokensMethodHelper();
+  }
+
+  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessTokensRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessTokensResponse> getListAccessTokensMethodHelper() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessTokensRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessTokensResponse> getListAccessTokensMethod;
+    if ((getListAccessTokensMethod = UserManagementGrpc.getListAccessTokensMethod) == null) {
+      synchronized (UserManagementGrpc.class) {
+        if ((getListAccessTokensMethod = UserManagementGrpc.getListAccessTokensMethod) == null) {
+          UserManagementGrpc.getListAccessTokensMethod = getListAccessTokensMethod = 
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessTokensRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessTokensResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(
+                  "usermanagement.UserManagement", "ListAccessTokens"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessTokensRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessTokensResponse.getDefaultInstance()))
+                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ListAccessTokens"))
+                  .build();
+          }
+        }
+     }
+     return getListAccessTokensMethod;
+  }
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @java.lang.Deprecated // Use {@link #getCreateScimAccessTokenMethod()} instead. 
+  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateScimAccessTokenRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateScimAccessTokenResponse> METHOD_CREATE_SCIM_ACCESS_TOKEN = getCreateScimAccessTokenMethodHelper();
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateScimAccessTokenRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateScimAccessTokenResponse> getCreateScimAccessTokenMethod;
+
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateScimAccessTokenRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateScimAccessTokenResponse> getCreateScimAccessTokenMethod() {
+    return getCreateScimAccessTokenMethodHelper();
+  }
+
+  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateScimAccessTokenRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateScimAccessTokenResponse> getCreateScimAccessTokenMethodHelper() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateScimAccessTokenRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateScimAccessTokenResponse> getCreateScimAccessTokenMethod;
+    if ((getCreateScimAccessTokenMethod = UserManagementGrpc.getCreateScimAccessTokenMethod) == null) {
+      synchronized (UserManagementGrpc.class) {
+        if ((getCreateScimAccessTokenMethod = UserManagementGrpc.getCreateScimAccessTokenMethod) == null) {
+          UserManagementGrpc.getCreateScimAccessTokenMethod = getCreateScimAccessTokenMethod = 
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateScimAccessTokenRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateScimAccessTokenResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(
+                  "usermanagement.UserManagement", "CreateScimAccessToken"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateScimAccessTokenRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateScimAccessTokenResponse.getDefaultInstance()))
+                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("CreateScimAccessToken"))
+                  .build();
+          }
+        }
+     }
+     return getCreateScimAccessTokenMethod;
+  }
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @java.lang.Deprecated // Use {@link #getDeleteScimAccessTokenMethod()} instead. 
+  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteScimAccessTokenRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteScimAccessTokenResponse> METHOD_DELETE_SCIM_ACCESS_TOKEN = getDeleteScimAccessTokenMethodHelper();
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteScimAccessTokenRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteScimAccessTokenResponse> getDeleteScimAccessTokenMethod;
+
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteScimAccessTokenRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteScimAccessTokenResponse> getDeleteScimAccessTokenMethod() {
+    return getDeleteScimAccessTokenMethodHelper();
+  }
+
+  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteScimAccessTokenRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteScimAccessTokenResponse> getDeleteScimAccessTokenMethodHelper() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteScimAccessTokenRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteScimAccessTokenResponse> getDeleteScimAccessTokenMethod;
+    if ((getDeleteScimAccessTokenMethod = UserManagementGrpc.getDeleteScimAccessTokenMethod) == null) {
+      synchronized (UserManagementGrpc.class) {
+        if ((getDeleteScimAccessTokenMethod = UserManagementGrpc.getDeleteScimAccessTokenMethod) == null) {
+          UserManagementGrpc.getDeleteScimAccessTokenMethod = getDeleteScimAccessTokenMethod = 
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteScimAccessTokenRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteScimAccessTokenResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(
+                  "usermanagement.UserManagement", "DeleteScimAccessToken"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteScimAccessTokenRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteScimAccessTokenResponse.getDefaultInstance()))
+                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("DeleteScimAccessToken"))
+                  .build();
+          }
+        }
+     }
+     return getDeleteScimAccessTokenMethod;
+  }
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @java.lang.Deprecated // Use {@link #getListScimAccessTokensMethod()} instead. 
+  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListScimAccessTokensRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListScimAccessTokensResponse> METHOD_LIST_SCIM_ACCESS_TOKENS = getListScimAccessTokensMethodHelper();
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListScimAccessTokensRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListScimAccessTokensResponse> getListScimAccessTokensMethod;
+
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListScimAccessTokensRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListScimAccessTokensResponse> getListScimAccessTokensMethod() {
+    return getListScimAccessTokensMethodHelper();
+  }
+
+  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListScimAccessTokensRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListScimAccessTokensResponse> getListScimAccessTokensMethodHelper() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListScimAccessTokensRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListScimAccessTokensResponse> getListScimAccessTokensMethod;
+    if ((getListScimAccessTokensMethod = UserManagementGrpc.getListScimAccessTokensMethod) == null) {
+      synchronized (UserManagementGrpc.class) {
+        if ((getListScimAccessTokensMethod = UserManagementGrpc.getListScimAccessTokensMethod) == null) {
+          UserManagementGrpc.getListScimAccessTokensMethod = getListScimAccessTokensMethod = 
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListScimAccessTokensRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListScimAccessTokensResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(
+                  "usermanagement.UserManagement", "ListScimAccessTokens"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListScimAccessTokensRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListScimAccessTokensResponse.getDefaultInstance()))
+                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ListScimAccessTokens"))
+                  .build();
+          }
+        }
+     }
+     return getListScimAccessTokensMethod;
   }
   @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
   @java.lang.Deprecated // Use {@link #getGetVersionMethod()} instead. 
@@ -2215,6 +2511,43 @@ public final class UserManagementGrpc {
      return getDeleteGroupMethod;
   }
   @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @java.lang.Deprecated // Use {@link #getGetGroupMethod()} instead. 
+  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetGroupRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetGroupResponse> METHOD_GET_GROUP = getGetGroupMethodHelper();
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetGroupRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetGroupResponse> getGetGroupMethod;
+
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetGroupRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetGroupResponse> getGetGroupMethod() {
+    return getGetGroupMethodHelper();
+  }
+
+  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetGroupRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetGroupResponse> getGetGroupMethodHelper() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetGroupRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetGroupResponse> getGetGroupMethod;
+    if ((getGetGroupMethod = UserManagementGrpc.getGetGroupMethod) == null) {
+      synchronized (UserManagementGrpc.class) {
+        if ((getGetGroupMethod = UserManagementGrpc.getGetGroupMethod) == null) {
+          UserManagementGrpc.getGetGroupMethod = getGetGroupMethod = 
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetGroupRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetGroupResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(
+                  "usermanagement.UserManagement", "GetGroup"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetGroupRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetGroupResponse.getDefaultInstance()))
+                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("GetGroup"))
+                  .build();
+          }
+        }
+     }
+     return getGetGroupMethod;
+  }
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
   @java.lang.Deprecated // Use {@link #getListGroupsMethod()} instead. 
   public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsResponse> METHOD_LIST_GROUPS = getListGroupsMethodHelper();
@@ -3547,6 +3880,43 @@ public final class UserManagementGrpc {
      return getUnsetWorkloadPasswordPolicyMethod;
   }
   @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @java.lang.Deprecated // Use {@link #getSetAuthenticationPolicyMethod()} instead. 
+  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAuthenticationPolicyRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAuthenticationPolicyResponse> METHOD_SET_AUTHENTICATION_POLICY = getSetAuthenticationPolicyMethodHelper();
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAuthenticationPolicyRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAuthenticationPolicyResponse> getSetAuthenticationPolicyMethod;
+
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAuthenticationPolicyRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAuthenticationPolicyResponse> getSetAuthenticationPolicyMethod() {
+    return getSetAuthenticationPolicyMethodHelper();
+  }
+
+  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAuthenticationPolicyRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAuthenticationPolicyResponse> getSetAuthenticationPolicyMethodHelper() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAuthenticationPolicyRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAuthenticationPolicyResponse> getSetAuthenticationPolicyMethod;
+    if ((getSetAuthenticationPolicyMethod = UserManagementGrpc.getSetAuthenticationPolicyMethod) == null) {
+      synchronized (UserManagementGrpc.class) {
+        if ((getSetAuthenticationPolicyMethod = UserManagementGrpc.getSetAuthenticationPolicyMethod) == null) {
+          UserManagementGrpc.getSetAuthenticationPolicyMethod = getSetAuthenticationPolicyMethod = 
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAuthenticationPolicyRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAuthenticationPolicyResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(
+                  "usermanagement.UserManagement", "SetAuthenticationPolicy"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAuthenticationPolicyRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAuthenticationPolicyResponse.getDefaultInstance()))
+                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("SetAuthenticationPolicy"))
+                  .build();
+          }
+        }
+     }
+     return getSetAuthenticationPolicyMethod;
+  }
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
   @java.lang.Deprecated // Use {@link #getAssignCloudIdentityMethod()} instead. 
   public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityResponse> METHOD_ASSIGN_CLOUD_IDENTITY = getAssignCloudIdentityMethodHelper();
@@ -3769,6 +4139,43 @@ public final class UserManagementGrpc {
      return getGetDefaultIdentityProviderConnectorMethod;
   }
   @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @java.lang.Deprecated // Use {@link #getSetDefaultIdentityProviderConnectorMethod()} instead. 
+  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetDefaultIdentityProviderConnectorRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetDefaultIdentityProviderConnectorResponse> METHOD_SET_DEFAULT_IDENTITY_PROVIDER_CONNECTOR = getSetDefaultIdentityProviderConnectorMethodHelper();
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetDefaultIdentityProviderConnectorRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetDefaultIdentityProviderConnectorResponse> getSetDefaultIdentityProviderConnectorMethod;
+
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetDefaultIdentityProviderConnectorRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetDefaultIdentityProviderConnectorResponse> getSetDefaultIdentityProviderConnectorMethod() {
+    return getSetDefaultIdentityProviderConnectorMethodHelper();
+  }
+
+  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetDefaultIdentityProviderConnectorRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetDefaultIdentityProviderConnectorResponse> getSetDefaultIdentityProviderConnectorMethodHelper() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetDefaultIdentityProviderConnectorRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetDefaultIdentityProviderConnectorResponse> getSetDefaultIdentityProviderConnectorMethod;
+    if ((getSetDefaultIdentityProviderConnectorMethod = UserManagementGrpc.getSetDefaultIdentityProviderConnectorMethod) == null) {
+      synchronized (UserManagementGrpc.class) {
+        if ((getSetDefaultIdentityProviderConnectorMethod = UserManagementGrpc.getSetDefaultIdentityProviderConnectorMethod) == null) {
+          UserManagementGrpc.getSetDefaultIdentityProviderConnectorMethod = getSetDefaultIdentityProviderConnectorMethod = 
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetDefaultIdentityProviderConnectorRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetDefaultIdentityProviderConnectorResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(
+                  "usermanagement.UserManagement", "SetDefaultIdentityProviderConnector"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetDefaultIdentityProviderConnectorRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetDefaultIdentityProviderConnectorResponse.getDefaultInstance()))
+                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("SetDefaultIdentityProviderConnector"))
+                  .build();
+          }
+        }
+     }
+     return getSetDefaultIdentityProviderConnectorMethod;
+  }
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
   @java.lang.Deprecated // Use {@link #getGetUserSyncStateModelMethod()} instead. 
   public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelResponse> METHOD_GET_USER_SYNC_STATE_MODEL = getGetUserSyncStateModelMethodHelper();
@@ -3916,6 +4323,43 @@ public final class UserManagementGrpc {
      }
      return getGetWorkloadAuthConfigurationMethod;
   }
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @java.lang.Deprecated // Use {@link #getUpdateUserMethod()} instead. 
+  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserResponse> METHOD_UPDATE_USER = getUpdateUserMethodHelper();
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserResponse> getUpdateUserMethod;
+
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserResponse> getUpdateUserMethod() {
+    return getUpdateUserMethodHelper();
+  }
+
+  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserResponse> getUpdateUserMethodHelper() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserResponse> getUpdateUserMethod;
+    if ((getUpdateUserMethod = UserManagementGrpc.getUpdateUserMethod) == null) {
+      synchronized (UserManagementGrpc.class) {
+        if ((getUpdateUserMethod = UserManagementGrpc.getUpdateUserMethod) == null) {
+          UserManagementGrpc.getUpdateUserMethod = getUpdateUserMethod = 
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(
+                  "usermanagement.UserManagement", "UpdateUser"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserResponse.getDefaultInstance()))
+                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("UpdateUser"))
+                  .build();
+          }
+        }
+     }
+     return getUpdateUserMethod;
+  }
 
   /**
    * Creates a new async stub that supports all call types for the service
@@ -4034,6 +4478,18 @@ public final class UserManagementGrpc {
     public void verifyInteractiveUserSessionToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyInteractiveUserSessionTokenRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyInteractiveUserSessionTokenResponse> responseObserver) {
       asyncUnimplementedUnaryCall(getVerifyInteractiveUserSessionTokenMethodHelper(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Verifies an access token. If the access token is invalid (not found, expired, doesn't match),
+     * an exception is thrown. If the access token is valid, information about the actor and their
+     * account is returned.
+     * </pre>
+     */
+    public void verifyAccessToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyAccessTokenRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyAccessTokenResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getVerifyAccessTokenMethodHelper(), responseObserver);
     }
 
     /**
@@ -4157,6 +4613,76 @@ public final class UserManagementGrpc {
     public void listAccessKeys(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessKeysRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessKeysResponse> responseObserver) {
       asyncUnimplementedUnaryCall(getListAccessKeysMethodHelper(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Creates a new access token.
+     * </pre>
+     */
+    public void createAccessToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessTokenRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessTokenResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getCreateAccessTokenMethodHelper(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Deletes an access token.
+     * </pre>
+     */
+    public void deleteAccessToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessTokenRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessTokenResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getDeleteAccessTokenMethodHelper(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Get an access token.
+     * </pre>
+     */
+    public void getAccessToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessTokenRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessTokenResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getGetAccessTokenMethodHelper(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     * List access tokens.
+     * </pre>
+     */
+    public void listAccessTokens(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessTokensRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessTokensResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getListAccessTokensMethodHelper(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Creates a new SCIM access token.
+     * </pre>
+     */
+    public void createScimAccessToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateScimAccessTokenRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateScimAccessTokenResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getCreateScimAccessTokenMethodHelper(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Deletes a SCIM access token.
+     * </pre>
+     */
+    public void deleteScimAccessToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteScimAccessTokenRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteScimAccessTokenResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getDeleteScimAccessTokenMethodHelper(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     * List SCIM access tokens.
+     * </pre>
+     */
+    public void listScimAccessTokens(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListScimAccessTokensRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListScimAccessTokensResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getListScimAccessTokensMethodHelper(), responseObserver);
     }
 
     /**
@@ -4551,6 +5077,16 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
+     * Get groups
+     * </pre>
+     */
+    public void getGroup(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetGroupRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetGroupResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getGetGroupMethodHelper(), responseObserver);
+    }
+
+    /**
+     * <pre>
      * List groups
      * </pre>
      */
@@ -4938,6 +5474,16 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
+     * Sets the authentication policy for an account.
+     * </pre>
+     */
+    public void setAuthenticationPolicy(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAuthenticationPolicyRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAuthenticationPolicyResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getSetAuthenticationPolicyMethodHelper(), responseObserver);
+    }
+
+    /**
+     * <pre>
      * Assign a cloud identity to an actor or group.
      * </pre>
      */
@@ -4988,12 +5534,22 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
-     * Retrieves the CRN of identity provider connector used for CDP initiated logins.
+     * Retrieves the CRN of the default identity provider connector used for CDP initiated logins.
      * </pre>
      */
     public void getDefaultIdentityProviderConnector(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorResponse> responseObserver) {
       asyncUnimplementedUnaryCall(getGetDefaultIdentityProviderConnectorMethodHelper(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Sets the CRN of the default identity provider connector used for CDP initiated logins.
+     * </pre>
+     */
+    public void setDefaultIdentityProviderConnector(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetDefaultIdentityProviderConnectorRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetDefaultIdentityProviderConnectorResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getSetDefaultIdentityProviderConnectorMethodHelper(), responseObserver);
     }
 
     /**
@@ -5034,6 +5590,16 @@ public final class UserManagementGrpc {
     public void getWorkloadAuthConfiguration(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationResponse> responseObserver) {
       asyncUnimplementedUnaryCall(getGetWorkloadAuthConfigurationMethodHelper(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Update user.
+     * </pre>
+     */
+    public void updateUser(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getUpdateUserMethodHelper(), responseObserver);
     }
 
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
@@ -5094,6 +5660,13 @@ public final class UserManagementGrpc {
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyInteractiveUserSessionTokenRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyInteractiveUserSessionTokenResponse>(
                   this, METHODID_VERIFY_INTERACTIVE_USER_SESSION_TOKEN)))
+          .addMethod(
+            getVerifyAccessTokenMethodHelper(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyAccessTokenRequest,
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyAccessTokenResponse>(
+                  this, METHODID_VERIFY_ACCESS_TOKEN)))
           .addMethod(
             getAuthenticateMethodHelper(),
             asyncUnaryCall(
@@ -5178,6 +5751,55 @@ public final class UserManagementGrpc {
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessKeysRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessKeysResponse>(
                   this, METHODID_LIST_ACCESS_KEYS)))
+          .addMethod(
+            getCreateAccessTokenMethodHelper(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessTokenRequest,
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessTokenResponse>(
+                  this, METHODID_CREATE_ACCESS_TOKEN)))
+          .addMethod(
+            getDeleteAccessTokenMethodHelper(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessTokenRequest,
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessTokenResponse>(
+                  this, METHODID_DELETE_ACCESS_TOKEN)))
+          .addMethod(
+            getGetAccessTokenMethodHelper(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessTokenRequest,
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessTokenResponse>(
+                  this, METHODID_GET_ACCESS_TOKEN)))
+          .addMethod(
+            getListAccessTokensMethodHelper(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessTokensRequest,
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessTokensResponse>(
+                  this, METHODID_LIST_ACCESS_TOKENS)))
+          .addMethod(
+            getCreateScimAccessTokenMethodHelper(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateScimAccessTokenRequest,
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateScimAccessTokenResponse>(
+                  this, METHODID_CREATE_SCIM_ACCESS_TOKEN)))
+          .addMethod(
+            getDeleteScimAccessTokenMethodHelper(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteScimAccessTokenRequest,
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteScimAccessTokenResponse>(
+                  this, METHODID_DELETE_SCIM_ACCESS_TOKEN)))
+          .addMethod(
+            getListScimAccessTokensMethodHelper(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListScimAccessTokensRequest,
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListScimAccessTokensResponse>(
+                  this, METHODID_LIST_SCIM_ACCESS_TOKENS)))
           .addMethod(
             getGetVersionMethodHelper(),
             asyncUnaryCall(
@@ -5452,6 +6074,13 @@ public final class UserManagementGrpc {
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteGroupResponse>(
                   this, METHODID_DELETE_GROUP)))
           .addMethod(
+            getGetGroupMethodHelper(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetGroupRequest,
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetGroupResponse>(
+                  this, METHODID_GET_GROUP)))
+          .addMethod(
             getListGroupsMethodHelper(),
             asyncUnaryCall(
               new MethodHandlers<
@@ -5704,6 +6333,13 @@ public final class UserManagementGrpc {
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordPolicyResponse>(
                   this, METHODID_UNSET_WORKLOAD_PASSWORD_POLICY)))
           .addMethod(
+            getSetAuthenticationPolicyMethodHelper(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAuthenticationPolicyRequest,
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAuthenticationPolicyResponse>(
+                  this, METHODID_SET_AUTHENTICATION_POLICY)))
+          .addMethod(
             getAssignCloudIdentityMethodHelper(),
             asyncUnaryCall(
               new MethodHandlers<
@@ -5746,6 +6382,13 @@ public final class UserManagementGrpc {
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorResponse>(
                   this, METHODID_GET_DEFAULT_IDENTITY_PROVIDER_CONNECTOR)))
           .addMethod(
+            getSetDefaultIdentityProviderConnectorMethodHelper(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetDefaultIdentityProviderConnectorRequest,
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetDefaultIdentityProviderConnectorResponse>(
+                  this, METHODID_SET_DEFAULT_IDENTITY_PROVIDER_CONNECTOR)))
+          .addMethod(
             getGetUserSyncStateModelMethodHelper(),
             asyncUnaryCall(
               new MethodHandlers<
@@ -5773,6 +6416,13 @@ public final class UserManagementGrpc {
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationResponse>(
                   this, METHODID_GET_WORKLOAD_AUTH_CONFIGURATION)))
+          .addMethod(
+            getUpdateUserMethodHelper(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserRequest,
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserResponse>(
+                  this, METHODID_UPDATE_USER)))
           .build();
     }
   }
@@ -5893,6 +6543,19 @@ public final class UserManagementGrpc {
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyInteractiveUserSessionTokenResponse> responseObserver) {
       asyncUnaryCall(
           getChannel().newCall(getVerifyInteractiveUserSessionTokenMethodHelper(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Verifies an access token. If the access token is invalid (not found, expired, doesn't match),
+     * an exception is thrown. If the access token is valid, information about the actor and their
+     * account is returned.
+     * </pre>
+     */
+    public void verifyAccessToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyAccessTokenRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyAccessTokenResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getVerifyAccessTokenMethodHelper(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -6028,6 +6691,83 @@ public final class UserManagementGrpc {
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessKeysResponse> responseObserver) {
       asyncUnaryCall(
           getChannel().newCall(getListAccessKeysMethodHelper(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Creates a new access token.
+     * </pre>
+     */
+    public void createAccessToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessTokenRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessTokenResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getCreateAccessTokenMethodHelper(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Deletes an access token.
+     * </pre>
+     */
+    public void deleteAccessToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessTokenRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessTokenResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getDeleteAccessTokenMethodHelper(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Get an access token.
+     * </pre>
+     */
+    public void getAccessToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessTokenRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessTokenResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getGetAccessTokenMethodHelper(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     * List access tokens.
+     * </pre>
+     */
+    public void listAccessTokens(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessTokensRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessTokensResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getListAccessTokensMethodHelper(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Creates a new SCIM access token.
+     * </pre>
+     */
+    public void createScimAccessToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateScimAccessTokenRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateScimAccessTokenResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getCreateScimAccessTokenMethodHelper(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Deletes a SCIM access token.
+     * </pre>
+     */
+    public void deleteScimAccessToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteScimAccessTokenRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteScimAccessTokenResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getDeleteScimAccessTokenMethodHelper(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     * List SCIM access tokens.
+     * </pre>
+     */
+    public void listScimAccessTokens(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListScimAccessTokensRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListScimAccessTokensResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getListScimAccessTokensMethodHelper(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -6461,6 +7201,17 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
+     * Get groups
+     * </pre>
+     */
+    public void getGroup(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetGroupRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetGroupResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getGetGroupMethodHelper(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
      * List groups
      * </pre>
      */
@@ -6884,6 +7635,17 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
+     * Sets the authentication policy for an account.
+     * </pre>
+     */
+    public void setAuthenticationPolicy(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAuthenticationPolicyRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAuthenticationPolicyResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getSetAuthenticationPolicyMethodHelper(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
      * Assign a cloud identity to an actor or group.
      * </pre>
      */
@@ -6939,13 +7701,24 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
-     * Retrieves the CRN of identity provider connector used for CDP initiated logins.
+     * Retrieves the CRN of the default identity provider connector used for CDP initiated logins.
      * </pre>
      */
     public void getDefaultIdentityProviderConnector(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorResponse> responseObserver) {
       asyncUnaryCall(
           getChannel().newCall(getGetDefaultIdentityProviderConnectorMethodHelper(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Sets the CRN of the default identity provider connector used for CDP initiated logins.
+     * </pre>
+     */
+    public void setDefaultIdentityProviderConnector(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetDefaultIdentityProviderConnectorRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetDefaultIdentityProviderConnectorResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getSetDefaultIdentityProviderConnectorMethodHelper(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -6990,6 +7763,17 @@ public final class UserManagementGrpc {
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationResponse> responseObserver) {
       asyncUnaryCall(
           getChannel().newCall(getGetWorkloadAuthConfigurationMethodHelper(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Update user.
+     * </pre>
+     */
+    public void updateUser(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getUpdateUserMethodHelper(), getCallOptions()), request, responseObserver);
     }
   }
 
@@ -7101,6 +7885,18 @@ public final class UserManagementGrpc {
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyInteractiveUserSessionTokenResponse verifyInteractiveUserSessionToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyInteractiveUserSessionTokenRequest request) {
       return blockingUnaryCall(
           getChannel(), getVerifyInteractiveUserSessionTokenMethodHelper(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Verifies an access token. If the access token is invalid (not found, expired, doesn't match),
+     * an exception is thrown. If the access token is valid, information about the actor and their
+     * account is returned.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyAccessTokenResponse verifyAccessToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyAccessTokenRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getVerifyAccessTokenMethodHelper(), getCallOptions(), request);
     }
 
     /**
@@ -7224,6 +8020,76 @@ public final class UserManagementGrpc {
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessKeysResponse listAccessKeys(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessKeysRequest request) {
       return blockingUnaryCall(
           getChannel(), getListAccessKeysMethodHelper(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Creates a new access token.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessTokenResponse createAccessToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessTokenRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getCreateAccessTokenMethodHelper(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Deletes an access token.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessTokenResponse deleteAccessToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessTokenRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getDeleteAccessTokenMethodHelper(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Get an access token.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessTokenResponse getAccessToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessTokenRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getGetAccessTokenMethodHelper(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * List access tokens.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessTokensResponse listAccessTokens(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessTokensRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getListAccessTokensMethodHelper(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Creates a new SCIM access token.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateScimAccessTokenResponse createScimAccessToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateScimAccessTokenRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getCreateScimAccessTokenMethodHelper(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Deletes a SCIM access token.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteScimAccessTokenResponse deleteScimAccessToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteScimAccessTokenRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getDeleteScimAccessTokenMethodHelper(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * List SCIM access tokens.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListScimAccessTokensResponse listScimAccessTokens(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListScimAccessTokensRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getListScimAccessTokensMethodHelper(), getCallOptions(), request);
     }
 
     /**
@@ -7618,6 +8484,16 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
+     * Get groups
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetGroupResponse getGroup(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetGroupRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getGetGroupMethodHelper(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
      * List groups
      * </pre>
      */
@@ -8005,6 +8881,16 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
+     * Sets the authentication policy for an account.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAuthenticationPolicyResponse setAuthenticationPolicy(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAuthenticationPolicyRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getSetAuthenticationPolicyMethodHelper(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
      * Assign a cloud identity to an actor or group.
      * </pre>
      */
@@ -8055,12 +8941,22 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
-     * Retrieves the CRN of identity provider connector used for CDP initiated logins.
+     * Retrieves the CRN of the default identity provider connector used for CDP initiated logins.
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorResponse getDefaultIdentityProviderConnector(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorRequest request) {
       return blockingUnaryCall(
           getChannel(), getGetDefaultIdentityProviderConnectorMethodHelper(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Sets the CRN of the default identity provider connector used for CDP initiated logins.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetDefaultIdentityProviderConnectorResponse setDefaultIdentityProviderConnector(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetDefaultIdentityProviderConnectorRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getSetDefaultIdentityProviderConnectorMethodHelper(), getCallOptions(), request);
     }
 
     /**
@@ -8101,6 +8997,16 @@ public final class UserManagementGrpc {
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationResponse getWorkloadAuthConfiguration(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationRequest request) {
       return blockingUnaryCall(
           getChannel(), getGetWorkloadAuthConfigurationMethodHelper(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Update user.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserResponse updateUser(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getUpdateUserMethodHelper(), getCallOptions(), request);
     }
   }
 
@@ -8220,6 +9126,19 @@ public final class UserManagementGrpc {
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyInteractiveUserSessionTokenRequest request) {
       return futureUnaryCall(
           getChannel().newCall(getVerifyInteractiveUserSessionTokenMethodHelper(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
+     * Verifies an access token. If the access token is invalid (not found, expired, doesn't match),
+     * an exception is thrown. If the access token is valid, information about the actor and their
+     * account is returned.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyAccessTokenResponse> verifyAccessToken(
+        com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyAccessTokenRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getVerifyAccessTokenMethodHelper(), getCallOptions()), request);
     }
 
     /**
@@ -8355,6 +9274,83 @@ public final class UserManagementGrpc {
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessKeysRequest request) {
       return futureUnaryCall(
           getChannel().newCall(getListAccessKeysMethodHelper(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
+     * Creates a new access token.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessTokenResponse> createAccessToken(
+        com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessTokenRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getCreateAccessTokenMethodHelper(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
+     * Deletes an access token.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessTokenResponse> deleteAccessToken(
+        com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessTokenRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getDeleteAccessTokenMethodHelper(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
+     * Get an access token.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessTokenResponse> getAccessToken(
+        com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessTokenRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getGetAccessTokenMethodHelper(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
+     * List access tokens.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessTokensResponse> listAccessTokens(
+        com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessTokensRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getListAccessTokensMethodHelper(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
+     * Creates a new SCIM access token.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateScimAccessTokenResponse> createScimAccessToken(
+        com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateScimAccessTokenRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getCreateScimAccessTokenMethodHelper(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
+     * Deletes a SCIM access token.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteScimAccessTokenResponse> deleteScimAccessToken(
+        com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteScimAccessTokenRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getDeleteScimAccessTokenMethodHelper(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
+     * List SCIM access tokens.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListScimAccessTokensResponse> listScimAccessTokens(
+        com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListScimAccessTokensRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getListScimAccessTokensMethodHelper(), getCallOptions()), request);
     }
 
     /**
@@ -8788,6 +9784,17 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
+     * Get groups
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetGroupResponse> getGroup(
+        com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetGroupRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getGetGroupMethodHelper(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
      * List groups
      * </pre>
      */
@@ -9211,6 +10218,17 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
+     * Sets the authentication policy for an account.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAuthenticationPolicyResponse> setAuthenticationPolicy(
+        com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAuthenticationPolicyRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getSetAuthenticationPolicyMethodHelper(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
      * Assign a cloud identity to an actor or group.
      * </pre>
      */
@@ -9266,13 +10284,24 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
-     * Retrieves the CRN of identity provider connector used for CDP initiated logins.
+     * Retrieves the CRN of the default identity provider connector used for CDP initiated logins.
      * </pre>
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorResponse> getDefaultIdentityProviderConnector(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorRequest request) {
       return futureUnaryCall(
           getChannel().newCall(getGetDefaultIdentityProviderConnectorMethodHelper(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
+     * Sets the CRN of the default identity provider connector used for CDP initiated logins.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetDefaultIdentityProviderConnectorResponse> setDefaultIdentityProviderConnector(
+        com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetDefaultIdentityProviderConnectorRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getSetDefaultIdentityProviderConnectorMethodHelper(), getCallOptions()), request);
     }
 
     /**
@@ -9318,6 +10347,17 @@ public final class UserManagementGrpc {
       return futureUnaryCall(
           getChannel().newCall(getGetWorkloadAuthConfigurationMethodHelper(), getCallOptions()), request);
     }
+
+    /**
+     * <pre>
+     * Update user.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserResponse> updateUser(
+        com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getUpdateUserMethodHelper(), getCallOptions()), request);
+    }
   }
 
   private static final int METHODID_INTERACTIVE_LOGIN = 0;
@@ -9328,103 +10368,115 @@ public final class UserManagementGrpc {
   private static final int METHODID_DELETE_TRIAL_USER = 5;
   private static final int METHODID_GET_ACCESS_KEY_VERIFICATION_DATA = 6;
   private static final int METHODID_VERIFY_INTERACTIVE_USER_SESSION_TOKEN = 7;
-  private static final int METHODID_AUTHENTICATE = 8;
-  private static final int METHODID_ACCESS_KEY_USAGE = 9;
-  private static final int METHODID_CREATE_USER = 10;
-  private static final int METHODID_GET_USER = 11;
-  private static final int METHODID_LIST_USERS = 12;
-  private static final int METHODID_FIND_USERS_BY_EMAIL = 13;
-  private static final int METHODID_FIND_USERS = 14;
-  private static final int METHODID_CREATE_ACCESS_KEY = 15;
-  private static final int METHODID_UPDATE_ACCESS_KEY = 16;
-  private static final int METHODID_DELETE_ACCESS_KEY = 17;
-  private static final int METHODID_GET_ACCESS_KEY = 18;
-  private static final int METHODID_LIST_ACCESS_KEYS = 19;
-  private static final int METHODID_GET_VERSION = 20;
-  private static final int METHODID_GET_ACCOUNT = 21;
-  private static final int METHODID_LIST_ACCOUNTS = 22;
-  private static final int METHODID_GET_RIGHTS = 23;
-  private static final int METHODID_CHECK_RIGHTS = 24;
-  private static final int METHODID_CREATE_ACCOUNT = 25;
-  private static final int METHODID_CREATE_TRIAL_ACCOUNT = 26;
-  private static final int METHODID_CREATE_C1CACCOUNT = 27;
-  private static final int METHODID_VERIFY_C1CEMAIL = 28;
-  private static final int METHODID_GRANT_ENTITLEMENT = 29;
-  private static final int METHODID_REVOKE_ENTITLEMENT = 30;
-  private static final int METHODID_ENSURE_DEFAULT_ENTITLEMENTS_GRANTED = 31;
-  private static final int METHODID_ASSIGN_ROLE = 32;
-  private static final int METHODID_UNASSIGN_ROLE = 33;
-  private static final int METHODID_LIST_ASSIGNED_ROLES = 34;
-  private static final int METHODID_ASSIGN_RESOURCE_ROLE = 35;
-  private static final int METHODID_UNASSIGN_RESOURCE_ROLE = 36;
-  private static final int METHODID_LIST_ASSIGNED_RESOURCE_ROLES = 37;
-  private static final int METHODID_LIST_ROLES = 38;
-  private static final int METHODID_LIST_RESOURCE_ROLES = 39;
-  private static final int METHODID_LIST_RESOURCE_ASSIGNEES = 40;
-  private static final int METHODID_UPDATE_CLOUDERA_MANAGER_LICENSE_KEY = 41;
-  private static final int METHODID_INITIATE_SUPPORT_CASE = 42;
-  private static final int METHODID_NOTIFY_RESOURCE_DELETED = 43;
-  private static final int METHODID_CREATE_MACHINE_USER = 44;
-  private static final int METHODID_LIST_MACHINE_USERS = 45;
-  private static final int METHODID_DELETE_MACHINE_USER = 46;
-  private static final int METHODID_LIST_RESOURCE_ROLE_ASSIGNMENTS = 47;
-  private static final int METHODID_SET_ACCOUNT_MESSAGES = 48;
-  private static final int METHODID_ACCEPT_TERMS = 49;
-  private static final int METHODID_CLEAR_ACCEPTED_TERMS = 50;
-  private static final int METHODID_DESCRIBE_TERMS = 51;
-  private static final int METHODID_LIST_TERMS = 52;
-  private static final int METHODID_LIST_ENTITLEMENTS = 53;
-  private static final int METHODID_SET_TERMS_ACCEPTANCE_EXPIRY = 54;
-  private static final int METHODID_CONFIRM_AZURE_SUBSCRIPTION_VERIFIED = 55;
-  private static final int METHODID_INSERT_AZURE_SUBSCRIPTION = 56;
-  private static final int METHODID_CREATE_GROUP = 57;
-  private static final int METHODID_DELETE_GROUP = 58;
-  private static final int METHODID_LIST_GROUPS = 59;
-  private static final int METHODID_UPDATE_GROUP = 60;
-  private static final int METHODID_ADD_MEMBER_TO_GROUP = 61;
-  private static final int METHODID_REMOVE_MEMBER_FROM_GROUP = 62;
-  private static final int METHODID_LIST_GROUP_MEMBERS = 63;
-  private static final int METHODID_LIST_GROUPS_FOR_MEMBER = 64;
-  private static final int METHODID_LIST_WORKLOAD_ADMINISTRATION_GROUPS_FOR_MEMBER = 65;
-  private static final int METHODID_CREATE_CLUSTER_SSH_PRIVATE_KEY = 66;
-  private static final int METHODID_GET_CLUSTER_SSH_PRIVATE_KEY = 67;
-  private static final int METHODID_GET_ASSIGNEE_AUTHORIZATION_INFORMATION = 68;
-  private static final int METHODID_CREATE_IDENTITY_PROVIDER_CONNECTOR = 69;
-  private static final int METHODID_LIST_IDENTITY_PROVIDER_CONNECTORS = 70;
-  private static final int METHODID_DELETE_IDENTITY_PROVIDER_CONNECTOR = 71;
-  private static final int METHODID_DESCRIBE_IDENTITY_PROVIDER_CONNECTOR = 72;
-  private static final int METHODID_UPDATE_IDENTITY_PROVIDER_CONNECTOR = 73;
-  private static final int METHODID_SET_CLOUDERA_SSOLOGIN_ENABLED = 74;
-  private static final int METHODID_GET_ID_PMETADATA_FOR_WORKLOAD_SSO = 75;
-  private static final int METHODID_PROCESS_WORKLOAD_SSOAUTHN_REQ = 76;
-  private static final int METHODID_GENERATE_CONTROL_PLANE_SSOAUTHN_REQ = 77;
-  private static final int METHODID_SET_WORKLOAD_SUBDOMAIN = 78;
-  private static final int METHODID_CREATE_WORKLOAD_MACHINE_USER = 79;
-  private static final int METHODID_DELETE_WORKLOAD_MACHINE_USER = 80;
-  private static final int METHODID_GET_WORKLOAD_ADMINISTRATION_GROUP_NAME = 81;
-  private static final int METHODID_SET_WORKLOAD_ADMINISTRATION_GROUP_NAME = 82;
-  private static final int METHODID_DELETE_WORKLOAD_ADMINISTRATION_GROUP_NAME = 83;
-  private static final int METHODID_LIST_WORKLOAD_ADMINISTRATION_GROUPS = 84;
-  private static final int METHODID_SET_ACTOR_WORKLOAD_CREDENTIALS = 85;
-  private static final int METHODID_VALIDATE_ACTOR_WORKLOAD_CREDENTIALS = 86;
-  private static final int METHODID_GET_ACTOR_WORKLOAD_CREDENTIALS = 87;
-  private static final int METHODID_GET_EVENT_GENERATION_IDS = 88;
-  private static final int METHODID_ADD_ACTOR_SSH_PUBLIC_KEY = 89;
-  private static final int METHODID_LIST_ACTOR_SSH_PUBLIC_KEYS = 90;
-  private static final int METHODID_DESCRIBE_ACTOR_SSH_PUBLIC_KEY = 91;
-  private static final int METHODID_DELETE_ACTOR_SSH_PUBLIC_KEY = 92;
-  private static final int METHODID_SET_WORKLOAD_PASSWORD_POLICY = 93;
-  private static final int METHODID_UNSET_WORKLOAD_PASSWORD_POLICY = 94;
-  private static final int METHODID_ASSIGN_CLOUD_IDENTITY = 95;
-  private static final int METHODID_UNASSIGN_CLOUD_IDENTITY = 96;
-  private static final int METHODID_ASSIGN_SERVICE_PRINCIPAL_CLOUD_IDENTITY = 97;
-  private static final int METHODID_UNASSIGN_SERVICE_PRINCIPAL_CLOUD_IDENTITY = 98;
-  private static final int METHODID_LIST_SERVICE_PRINCIPAL_CLOUD_IDENTITIES = 99;
-  private static final int METHODID_GET_DEFAULT_IDENTITY_PROVIDER_CONNECTOR = 100;
-  private static final int METHODID_GET_USER_SYNC_STATE_MODEL = 101;
-  private static final int METHODID_LIST_ROLE_ASSIGNMENTS = 102;
-  private static final int METHODID_GENERATE_WORKLOAD_AUTH_TOKEN = 103;
-  private static final int METHODID_GET_WORKLOAD_AUTH_CONFIGURATION = 104;
+  private static final int METHODID_VERIFY_ACCESS_TOKEN = 8;
+  private static final int METHODID_AUTHENTICATE = 9;
+  private static final int METHODID_ACCESS_KEY_USAGE = 10;
+  private static final int METHODID_CREATE_USER = 11;
+  private static final int METHODID_GET_USER = 12;
+  private static final int METHODID_LIST_USERS = 13;
+  private static final int METHODID_FIND_USERS_BY_EMAIL = 14;
+  private static final int METHODID_FIND_USERS = 15;
+  private static final int METHODID_CREATE_ACCESS_KEY = 16;
+  private static final int METHODID_UPDATE_ACCESS_KEY = 17;
+  private static final int METHODID_DELETE_ACCESS_KEY = 18;
+  private static final int METHODID_GET_ACCESS_KEY = 19;
+  private static final int METHODID_LIST_ACCESS_KEYS = 20;
+  private static final int METHODID_CREATE_ACCESS_TOKEN = 21;
+  private static final int METHODID_DELETE_ACCESS_TOKEN = 22;
+  private static final int METHODID_GET_ACCESS_TOKEN = 23;
+  private static final int METHODID_LIST_ACCESS_TOKENS = 24;
+  private static final int METHODID_CREATE_SCIM_ACCESS_TOKEN = 25;
+  private static final int METHODID_DELETE_SCIM_ACCESS_TOKEN = 26;
+  private static final int METHODID_LIST_SCIM_ACCESS_TOKENS = 27;
+  private static final int METHODID_GET_VERSION = 28;
+  private static final int METHODID_GET_ACCOUNT = 29;
+  private static final int METHODID_LIST_ACCOUNTS = 30;
+  private static final int METHODID_GET_RIGHTS = 31;
+  private static final int METHODID_CHECK_RIGHTS = 32;
+  private static final int METHODID_CREATE_ACCOUNT = 33;
+  private static final int METHODID_CREATE_TRIAL_ACCOUNT = 34;
+  private static final int METHODID_CREATE_C1CACCOUNT = 35;
+  private static final int METHODID_VERIFY_C1CEMAIL = 36;
+  private static final int METHODID_GRANT_ENTITLEMENT = 37;
+  private static final int METHODID_REVOKE_ENTITLEMENT = 38;
+  private static final int METHODID_ENSURE_DEFAULT_ENTITLEMENTS_GRANTED = 39;
+  private static final int METHODID_ASSIGN_ROLE = 40;
+  private static final int METHODID_UNASSIGN_ROLE = 41;
+  private static final int METHODID_LIST_ASSIGNED_ROLES = 42;
+  private static final int METHODID_ASSIGN_RESOURCE_ROLE = 43;
+  private static final int METHODID_UNASSIGN_RESOURCE_ROLE = 44;
+  private static final int METHODID_LIST_ASSIGNED_RESOURCE_ROLES = 45;
+  private static final int METHODID_LIST_ROLES = 46;
+  private static final int METHODID_LIST_RESOURCE_ROLES = 47;
+  private static final int METHODID_LIST_RESOURCE_ASSIGNEES = 48;
+  private static final int METHODID_UPDATE_CLOUDERA_MANAGER_LICENSE_KEY = 49;
+  private static final int METHODID_INITIATE_SUPPORT_CASE = 50;
+  private static final int METHODID_NOTIFY_RESOURCE_DELETED = 51;
+  private static final int METHODID_CREATE_MACHINE_USER = 52;
+  private static final int METHODID_LIST_MACHINE_USERS = 53;
+  private static final int METHODID_DELETE_MACHINE_USER = 54;
+  private static final int METHODID_LIST_RESOURCE_ROLE_ASSIGNMENTS = 55;
+  private static final int METHODID_SET_ACCOUNT_MESSAGES = 56;
+  private static final int METHODID_ACCEPT_TERMS = 57;
+  private static final int METHODID_CLEAR_ACCEPTED_TERMS = 58;
+  private static final int METHODID_DESCRIBE_TERMS = 59;
+  private static final int METHODID_LIST_TERMS = 60;
+  private static final int METHODID_LIST_ENTITLEMENTS = 61;
+  private static final int METHODID_SET_TERMS_ACCEPTANCE_EXPIRY = 62;
+  private static final int METHODID_CONFIRM_AZURE_SUBSCRIPTION_VERIFIED = 63;
+  private static final int METHODID_INSERT_AZURE_SUBSCRIPTION = 64;
+  private static final int METHODID_CREATE_GROUP = 65;
+  private static final int METHODID_DELETE_GROUP = 66;
+  private static final int METHODID_GET_GROUP = 67;
+  private static final int METHODID_LIST_GROUPS = 68;
+  private static final int METHODID_UPDATE_GROUP = 69;
+  private static final int METHODID_ADD_MEMBER_TO_GROUP = 70;
+  private static final int METHODID_REMOVE_MEMBER_FROM_GROUP = 71;
+  private static final int METHODID_LIST_GROUP_MEMBERS = 72;
+  private static final int METHODID_LIST_GROUPS_FOR_MEMBER = 73;
+  private static final int METHODID_LIST_WORKLOAD_ADMINISTRATION_GROUPS_FOR_MEMBER = 74;
+  private static final int METHODID_CREATE_CLUSTER_SSH_PRIVATE_KEY = 75;
+  private static final int METHODID_GET_CLUSTER_SSH_PRIVATE_KEY = 76;
+  private static final int METHODID_GET_ASSIGNEE_AUTHORIZATION_INFORMATION = 77;
+  private static final int METHODID_CREATE_IDENTITY_PROVIDER_CONNECTOR = 78;
+  private static final int METHODID_LIST_IDENTITY_PROVIDER_CONNECTORS = 79;
+  private static final int METHODID_DELETE_IDENTITY_PROVIDER_CONNECTOR = 80;
+  private static final int METHODID_DESCRIBE_IDENTITY_PROVIDER_CONNECTOR = 81;
+  private static final int METHODID_UPDATE_IDENTITY_PROVIDER_CONNECTOR = 82;
+  private static final int METHODID_SET_CLOUDERA_SSOLOGIN_ENABLED = 83;
+  private static final int METHODID_GET_ID_PMETADATA_FOR_WORKLOAD_SSO = 84;
+  private static final int METHODID_PROCESS_WORKLOAD_SSOAUTHN_REQ = 85;
+  private static final int METHODID_GENERATE_CONTROL_PLANE_SSOAUTHN_REQ = 86;
+  private static final int METHODID_SET_WORKLOAD_SUBDOMAIN = 87;
+  private static final int METHODID_CREATE_WORKLOAD_MACHINE_USER = 88;
+  private static final int METHODID_DELETE_WORKLOAD_MACHINE_USER = 89;
+  private static final int METHODID_GET_WORKLOAD_ADMINISTRATION_GROUP_NAME = 90;
+  private static final int METHODID_SET_WORKLOAD_ADMINISTRATION_GROUP_NAME = 91;
+  private static final int METHODID_DELETE_WORKLOAD_ADMINISTRATION_GROUP_NAME = 92;
+  private static final int METHODID_LIST_WORKLOAD_ADMINISTRATION_GROUPS = 93;
+  private static final int METHODID_SET_ACTOR_WORKLOAD_CREDENTIALS = 94;
+  private static final int METHODID_VALIDATE_ACTOR_WORKLOAD_CREDENTIALS = 95;
+  private static final int METHODID_GET_ACTOR_WORKLOAD_CREDENTIALS = 96;
+  private static final int METHODID_GET_EVENT_GENERATION_IDS = 97;
+  private static final int METHODID_ADD_ACTOR_SSH_PUBLIC_KEY = 98;
+  private static final int METHODID_LIST_ACTOR_SSH_PUBLIC_KEYS = 99;
+  private static final int METHODID_DESCRIBE_ACTOR_SSH_PUBLIC_KEY = 100;
+  private static final int METHODID_DELETE_ACTOR_SSH_PUBLIC_KEY = 101;
+  private static final int METHODID_SET_WORKLOAD_PASSWORD_POLICY = 102;
+  private static final int METHODID_UNSET_WORKLOAD_PASSWORD_POLICY = 103;
+  private static final int METHODID_SET_AUTHENTICATION_POLICY = 104;
+  private static final int METHODID_ASSIGN_CLOUD_IDENTITY = 105;
+  private static final int METHODID_UNASSIGN_CLOUD_IDENTITY = 106;
+  private static final int METHODID_ASSIGN_SERVICE_PRINCIPAL_CLOUD_IDENTITY = 107;
+  private static final int METHODID_UNASSIGN_SERVICE_PRINCIPAL_CLOUD_IDENTITY = 108;
+  private static final int METHODID_LIST_SERVICE_PRINCIPAL_CLOUD_IDENTITIES = 109;
+  private static final int METHODID_GET_DEFAULT_IDENTITY_PROVIDER_CONNECTOR = 110;
+  private static final int METHODID_SET_DEFAULT_IDENTITY_PROVIDER_CONNECTOR = 111;
+  private static final int METHODID_GET_USER_SYNC_STATE_MODEL = 112;
+  private static final int METHODID_LIST_ROLE_ASSIGNMENTS = 113;
+  private static final int METHODID_GENERATE_WORKLOAD_AUTH_TOKEN = 114;
+  private static final int METHODID_GET_WORKLOAD_AUTH_CONFIGURATION = 115;
+  private static final int METHODID_UPDATE_USER = 116;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -9475,6 +10527,10 @@ public final class UserManagementGrpc {
           serviceImpl.verifyInteractiveUserSessionToken((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyInteractiveUserSessionTokenRequest) request,
               (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyInteractiveUserSessionTokenResponse>) responseObserver);
           break;
+        case METHODID_VERIFY_ACCESS_TOKEN:
+          serviceImpl.verifyAccessToken((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyAccessTokenRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyAccessTokenResponse>) responseObserver);
+          break;
         case METHODID_AUTHENTICATE:
           serviceImpl.authenticate((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AuthenticateRequest) request,
               (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AuthenticateResponse>) responseObserver);
@@ -9522,6 +10578,34 @@ public final class UserManagementGrpc {
         case METHODID_LIST_ACCESS_KEYS:
           serviceImpl.listAccessKeys((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessKeysRequest) request,
               (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessKeysResponse>) responseObserver);
+          break;
+        case METHODID_CREATE_ACCESS_TOKEN:
+          serviceImpl.createAccessToken((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessTokenRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessTokenResponse>) responseObserver);
+          break;
+        case METHODID_DELETE_ACCESS_TOKEN:
+          serviceImpl.deleteAccessToken((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessTokenRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessTokenResponse>) responseObserver);
+          break;
+        case METHODID_GET_ACCESS_TOKEN:
+          serviceImpl.getAccessToken((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessTokenRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessTokenResponse>) responseObserver);
+          break;
+        case METHODID_LIST_ACCESS_TOKENS:
+          serviceImpl.listAccessTokens((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessTokensRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessTokensResponse>) responseObserver);
+          break;
+        case METHODID_CREATE_SCIM_ACCESS_TOKEN:
+          serviceImpl.createScimAccessToken((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateScimAccessTokenRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateScimAccessTokenResponse>) responseObserver);
+          break;
+        case METHODID_DELETE_SCIM_ACCESS_TOKEN:
+          serviceImpl.deleteScimAccessToken((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteScimAccessTokenRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteScimAccessTokenResponse>) responseObserver);
+          break;
+        case METHODID_LIST_SCIM_ACCESS_TOKENS:
+          serviceImpl.listScimAccessTokens((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListScimAccessTokensRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListScimAccessTokensResponse>) responseObserver);
           break;
         case METHODID_GET_VERSION:
           serviceImpl.getVersion((com.cloudera.thunderhead.service.common.version.Version.VersionRequest) request,
@@ -9679,6 +10763,10 @@ public final class UserManagementGrpc {
           serviceImpl.deleteGroup((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteGroupRequest) request,
               (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteGroupResponse>) responseObserver);
           break;
+        case METHODID_GET_GROUP:
+          serviceImpl.getGroup((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetGroupRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetGroupResponse>) responseObserver);
+          break;
         case METHODID_LIST_GROUPS:
           serviceImpl.listGroups((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsRequest) request,
               (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsResponse>) responseObserver);
@@ -9823,6 +10911,10 @@ public final class UserManagementGrpc {
           serviceImpl.unsetWorkloadPasswordPolicy((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordPolicyRequest) request,
               (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordPolicyResponse>) responseObserver);
           break;
+        case METHODID_SET_AUTHENTICATION_POLICY:
+          serviceImpl.setAuthenticationPolicy((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAuthenticationPolicyRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAuthenticationPolicyResponse>) responseObserver);
+          break;
         case METHODID_ASSIGN_CLOUD_IDENTITY:
           serviceImpl.assignCloudIdentity((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityRequest) request,
               (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityResponse>) responseObserver);
@@ -9847,6 +10939,10 @@ public final class UserManagementGrpc {
           serviceImpl.getDefaultIdentityProviderConnector((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorRequest) request,
               (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorResponse>) responseObserver);
           break;
+        case METHODID_SET_DEFAULT_IDENTITY_PROVIDER_CONNECTOR:
+          serviceImpl.setDefaultIdentityProviderConnector((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetDefaultIdentityProviderConnectorRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetDefaultIdentityProviderConnectorResponse>) responseObserver);
+          break;
         case METHODID_GET_USER_SYNC_STATE_MODEL:
           serviceImpl.getUserSyncStateModel((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelRequest) request,
               (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelResponse>) responseObserver);
@@ -9862,6 +10958,10 @@ public final class UserManagementGrpc {
         case METHODID_GET_WORKLOAD_AUTH_CONFIGURATION:
           serviceImpl.getWorkloadAuthConfiguration((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationRequest) request,
               (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationResponse>) responseObserver);
+          break;
+        case METHODID_UPDATE_USER:
+          serviceImpl.updateUser((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserResponse>) responseObserver);
           break;
         default:
           throw new AssertionError();
@@ -9932,6 +11032,7 @@ public final class UserManagementGrpc {
               .addMethod(getDeleteTrialUserMethodHelper())
               .addMethod(getGetAccessKeyVerificationDataMethodHelper())
               .addMethod(getVerifyInteractiveUserSessionTokenMethodHelper())
+              .addMethod(getVerifyAccessTokenMethodHelper())
               .addMethod(getAuthenticateMethodHelper())
               .addMethod(getAccessKeyUsageMethodHelper())
               .addMethod(getCreateUserMethodHelper())
@@ -9944,6 +11045,13 @@ public final class UserManagementGrpc {
               .addMethod(getDeleteAccessKeyMethodHelper())
               .addMethod(getGetAccessKeyMethodHelper())
               .addMethod(getListAccessKeysMethodHelper())
+              .addMethod(getCreateAccessTokenMethodHelper())
+              .addMethod(getDeleteAccessTokenMethodHelper())
+              .addMethod(getGetAccessTokenMethodHelper())
+              .addMethod(getListAccessTokensMethodHelper())
+              .addMethod(getCreateScimAccessTokenMethodHelper())
+              .addMethod(getDeleteScimAccessTokenMethodHelper())
+              .addMethod(getListScimAccessTokensMethodHelper())
               .addMethod(getGetVersionMethodHelper())
               .addMethod(getGetAccountMethodHelper())
               .addMethod(getListAccountsMethodHelper())
@@ -9983,6 +11091,7 @@ public final class UserManagementGrpc {
               .addMethod(getInsertAzureSubscriptionMethodHelper())
               .addMethod(getCreateGroupMethodHelper())
               .addMethod(getDeleteGroupMethodHelper())
+              .addMethod(getGetGroupMethodHelper())
               .addMethod(getListGroupsMethodHelper())
               .addMethod(getUpdateGroupMethodHelper())
               .addMethod(getAddMemberToGroupMethodHelper())
@@ -10019,16 +11128,19 @@ public final class UserManagementGrpc {
               .addMethod(getDeleteActorSshPublicKeyMethodHelper())
               .addMethod(getSetWorkloadPasswordPolicyMethodHelper())
               .addMethod(getUnsetWorkloadPasswordPolicyMethodHelper())
+              .addMethod(getSetAuthenticationPolicyMethodHelper())
               .addMethod(getAssignCloudIdentityMethodHelper())
               .addMethod(getUnassignCloudIdentityMethodHelper())
               .addMethod(getAssignServicePrincipalCloudIdentityMethodHelper())
               .addMethod(getUnassignServicePrincipalCloudIdentityMethodHelper())
               .addMethod(getListServicePrincipalCloudIdentitiesMethodHelper())
               .addMethod(getGetDefaultIdentityProviderConnectorMethodHelper())
+              .addMethod(getSetDefaultIdentityProviderConnectorMethodHelper())
               .addMethod(getGetUserSyncStateModelMethodHelper())
               .addMethod(getListRoleAssignmentsMethodHelper())
               .addMethod(getGenerateWorkloadAuthTokenMethodHelper())
               .addMethod(getGetWorkloadAuthConfigurationMethodHelper())
+              .addMethod(getUpdateUserMethodHelper())
               .build();
         }
       }
