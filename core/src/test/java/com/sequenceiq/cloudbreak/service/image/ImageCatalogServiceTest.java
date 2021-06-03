@@ -31,6 +31,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
+import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Rule;
@@ -217,6 +218,9 @@ public class ImageCatalogServiceTest {
 
     @Captor
     private ArgumentCaptor<StatedImage> sourceImageCaptor;
+
+    @Mock
+    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
     @Before
     public void beforeTest() throws Exception {
@@ -847,6 +851,24 @@ public class ImageCatalogServiceTest {
         StatedImages actual = underTest.getImages(WORKSPACE_ID, CUSTOM_CATALOG_NAME, Set.of("AWS"));
         assertEquals(statedImage.getImage(), actual.getImages().getFreeIpaImages().stream().findFirst().get());
 
+    }
+
+    @Test
+    public void testGetImageShouldLookupCustomImageInCaseOfNullImageCatalogUrl()
+            throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException, IOException {
+        ImageCatalog imageCatalog = new ImageCatalog();
+        CustomImage customImage = getCustomImage(ImageType.DATALAKE, "5b60b723-4beb-40b0-5cba-47ea9c9b6e53", CUSTOM_BASE_PARCEL_URL);
+        imageCatalog.setCustomImages(Set.of(customImage));
+        StatedImage statedImage = StatedImage.statedImage(getImage(), CUSTOM_IMAGE_CATALOG_URL, CUSTOM_CATALOG_NAME);
+
+        setupImageCatalogProvider(DEFAULT_CATALOG_URL, DEV_CATALOG_FILE);
+        when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(WORKSPACE_ID);
+        when(imageCatalogRepository.findByNameAndWorkspaceId(CUSTOM_CATALOG_NAME, WORKSPACE_ID)).thenReturn(Optional.of(imageCatalog));
+        when(customImageProvider.mergeSourceImageAndCustomImageProperties(any(), any(), any(), any())).thenReturn(statedImage);
+
+        StatedImage actual = underTest.getImage(null, CUSTOM_CATALOG_NAME, CUSTOM_IMAGE_ID);
+
+        assertEquals(statedImage.getImage(), actual.getImage());
     }
 
     private void setupImageCatalogProvider(String catalogUrl, String catalogFile) throws IOException, CloudbreakImageCatalogException {
