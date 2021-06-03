@@ -29,6 +29,8 @@ public class User {
     @JsonDeserialize(using = ListFlatteningDeserializer.class)
     private String title;
 
+    private Boolean nsAccountLock;
+
     public String getDn() {
         return dn;
     }
@@ -85,6 +87,14 @@ public class User {
         this.title = title;
     }
 
+    public Boolean getNsAccountLock() {
+        return nsAccountLock;
+    }
+
+    public void setNsAccountLock(Boolean nsAccountLock) {
+        this.nsAccountLock = nsAccountLock;
+    }
+
     @Override
     public String toString() {
         return "User{"
@@ -95,6 +105,7 @@ public class User {
                 + ", memberOfGroup='" + memberOfGroup + '\''
                 + ", krbPasswordExpiration='" + krbPasswordExpiration + '\''
                 + ", title='" + title + '\''
+                + ", nsaccountlock='" + nsAccountLock + '\''
                 + '}';
     }
 }
