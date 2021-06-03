@@ -146,7 +146,7 @@
               },
               {
                 "name": "rlimit_fds",
-                "value": "50000"
+                "value": "500000"
               }
             ]
           }
