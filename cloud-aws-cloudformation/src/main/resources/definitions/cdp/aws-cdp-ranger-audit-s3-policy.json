@@ -1,0 +1,24 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "FullObjectAccessUnderAuditDir",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:PutObject"
+      ],
+      "Resource": "arn:aws:s3:::${STORAGE_LOCATION_BASE}/ranger/audit/*"
+    },
+    {
+      "Sid": "LimitedAccessToDataLakeBucket",
+      "Effect": "Allow",
+      "Action": [
+        "s3:AbortMultipartUpload",
+        "s3:ListBucket",
+        "s3:ListBucketMultipartUploads"
+      ],
+      "Resource": "arn:aws:s3:::${DATALAKE_BUCKET}"
+    }
+  ]
+}

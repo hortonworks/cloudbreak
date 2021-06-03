@@ -1,0 +1,79 @@
+{
+  "AWS GovCloud (US)": {
+    "zoneid": "govcloud-us",
+    "defaultvm": "i2.4xlarge"
+  },
+  "Asia Pacific (Mumbai)": {
+    "zoneid": "ap-south-1",
+    "defaultvm": "i2.4xlarge"
+  },
+  "Asia Pacific (Seoul)": {
+    "zoneid": "ap-northeast-2",
+    "defaultvm": "i2.4xlarge"
+  },
+  "Asia Pacific (Singapore)": {
+    "zoneid": "ap-southeast-1",
+    "defaultvm": "i2.4xlarge"
+  },
+  "Asia Pacific (Sydney)": {
+    "zoneid": "ap-southeast-2",
+    "defaultvm": "i2.4xlarge"
+  },
+  "Asia Pacific (Tokyo)": {
+    "zoneid": "ap-northeast-1",
+    "defaultvm": "i2.4xlarge"
+  },
+  "Canada (Central)": {
+    "zoneid": "ca-central-1",
+    "defaultvm": "m4.4xlarge"
+  },
+  "EU (Frankfurt)": {
+    "zoneid": "eu-central-1",
+    "defaultvm": "i2.4xlarge"
+  },
+  "EU (Ireland)": {
+    "zoneid": "eu-west-1",
+    "defaultvm": "i2.4xlarge"
+  },
+  "EU (Stockholm)": {
+    "zoneid": "eu-north-1",
+    "defaultvm": "i3.4xlarge"
+  },
+  "EU (Paris)": {
+    "zoneid": "eu-west-3",
+    "defaultvm": "m5.xlarge"
+  },
+  "EU (London)": {
+    "zoneid": "eu-west-2",
+    "defaultvm": "m4.4xlarge"
+  },
+  "South America (Sao Paulo)": {
+    "zoneid": "sa-east-1",
+    "defaultvm": "i2.4xlarge"
+  },
+  "US East (N. Virginia)": {
+    "zoneid": "us-east-1",
+    "defaultvm": "i2.4xlarge"
+  },
+  "US East (Ohio)": {
+    "zoneid": "us-east-2",
+    "defaultvm": "i2.4xlarge"
+  },
+  "US West (N. California)": {
+    "zoneid": "us-west-1",
+    "defaultvm": "i2.4xlarge"
+  },
+  "US West (Oregon)": {
+    "zoneid": "us-west-2",
+    "defaultvm": "i2.4xlarge"
+  },
+  "Africa (Cape Town)": {
+    "zoneid": "af-south-1",
+    "defaultvm": "i2.4xlarge"
+  },
+  "EU (Milan)": {
+    "zoneid": "eu-south-1",
+    "defaultvm": "i2.4xlarge"
+  }
+
+}
