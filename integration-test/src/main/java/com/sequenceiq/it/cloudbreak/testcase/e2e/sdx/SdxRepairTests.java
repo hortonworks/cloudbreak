@@ -23,9 +23,10 @@ import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
-import com.sequenceiq.it.cloudbreak.util.VolumeUtils;
 import com.sequenceiq.it.cloudbreak.util.SdxUtil;
+import com.sequenceiq.it.cloudbreak.util.VolumeUtils;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
+import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 public class SdxRepairTests extends PreconditionSdxE2ETest {
@@ -119,6 +120,28 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                     return testDto;
                 })
                 .validate();
+    }
+
+    @Test(dataProvider = TEST_CONTEXT)
+    @Description(
+            given = "there is a running Cloudbreak, and an SDX medium Duty cluster in available state",
+            when = "",
+            then = "SDX creation should be successful, the cluster should be up and running"
+    )
+    public void testSDXMediumDutyCreation(TestContext testContext) {
+        String sdx = resourcePropertyProvider().getName();
+
+        testContext.given(FreeIpaTestDto.class)
+                .when(freeIpaTestClient.describe())
+                .getResponse();
+
+        testContext
+                .given(sdx, SdxTestDto.class).withCloudStorage()
+                .withClusterShape(SdxClusterShape.MEDIUM_DUTY_HA)
+                .when(sdxTestClient.create(), key(sdx))
+                .await(SdxClusterStatusResponse.RUNNING, key(sdx))
+                .awaitForInstance(getSdxInstancesHealthyState());
+        // once fix HA salt been implemented CB-12410, we will add the repair part
     }
 
     private void repair(SdxTestDto sdxTestDto, String sdx, HostGroupType hostGroupType) {
