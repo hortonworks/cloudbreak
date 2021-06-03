@@ -45,7 +45,7 @@ public class AwsCredentialVerifier {
     @Cacheable(value = AwsCredentialCachingConfig.TEMPORARY_AWS_CREDENTIAL_VERIFIER_CACHE,
             unless = "#awsCredential == null")
     public void validateAws(AwsCredentialView awsCredential) throws AwsPermissionMissingException {
-        String policies = new String(Base64.getDecoder().decode(awsPlatformParameters.getCredentialPoliciesJson()));
+        String policies = new String(Base64.getDecoder().decode(awsPlatformParameters.getEnvironmentMinimalPoliciesJson()));
         try {
             Map<String, List<String>> resourcesWithActions = getRequiredActions(policies);
             AmazonIdentityManagementClient amazonIdentityManagement = awsClient.createAmazonIdentityManagement(awsCredential);
