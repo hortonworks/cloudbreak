@@ -89,7 +89,7 @@ public class AzureCredentialConnectorTest {
 
         assertEquals(PLATFORM, result.getCloudPlatform());
         assertEquals(expectedCommand, new String(Base64.decodeBase64(result.getAzure().getAppCreationCommand())));
-        assertEquals(expectedRoleDef, result.getAzure().getRoleDefinitionJson());
+        assertEquals(expectedRoleDef, result.getAzure().getRoleDefitionJson());
     }
 
     @Test

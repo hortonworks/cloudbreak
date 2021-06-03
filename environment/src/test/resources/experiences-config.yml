@@ -1,5 +1,6 @@
 environment:
   experience:
+    scan.enabled: true
     liftie:
       workloads:
         - name: mon-platform
