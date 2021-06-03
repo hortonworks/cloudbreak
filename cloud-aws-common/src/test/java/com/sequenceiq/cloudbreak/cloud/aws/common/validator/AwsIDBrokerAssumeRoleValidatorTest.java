@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.aws.validator;
+package com.sequenceiq.cloudbreak.cloud.aws.common.validator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;

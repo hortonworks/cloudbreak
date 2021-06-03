@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.aws.poller;
+package com.sequenceiq.cloudbreak.cloud.aws.common.poller;
 
 import java.util.List;
 import java.util.Set;
@@ -15,7 +15,7 @@ import com.dyngr.Polling;
 import com.dyngr.core.AttemptResult;
 import com.dyngr.core.AttemptResults;
 import com.dyngr.exception.PollerStoppedException;
-import com.sequenceiq.cloudbreak.cloud.aws.AwsInstanceConnector;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsInstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;

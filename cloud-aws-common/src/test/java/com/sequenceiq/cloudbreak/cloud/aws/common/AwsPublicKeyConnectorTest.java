@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.aws;
+package com.sequenceiq.cloudbreak.cloud.aws.common;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -21,7 +21,6 @@ import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.ec2.model.DeleteKeyPairRequest;
 import com.amazonaws.services.ec2.model.DescribeKeyPairsResult;
 import com.amazonaws.services.ec2.model.ImportKeyPairRequest;
-import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -38,7 +37,7 @@ class AwsPublicKeyConnectorTest {
     private static final String RUNTIME_EXCEPTION = "runtime exception";
 
     @Mock
-    private LegacyAwsClient awsClient;
+    private CommonAwsClient awsClient;
 
     @Mock
     private AmazonEc2Client ec2client;

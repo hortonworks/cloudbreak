@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.aws;
+package com.sequenceiq.cloudbreak.cloud.aws.common;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -10,7 +10,6 @@ import com.amazonaws.services.ec2.model.DeleteKeyPairRequest;
 import com.amazonaws.services.ec2.model.DescribeKeyPairsRequest;
 import com.amazonaws.services.ec2.model.ImportKeyPairRequest;
 import com.sequenceiq.cloudbreak.cloud.PublicKeyConnector;
-import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -25,9 +24,9 @@ public class AwsPublicKeyConnector implements PublicKeyConnector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsPublicKeyConnector.class);
 
-    private final LegacyAwsClient awsClient;
+    private final CommonAwsClient awsClient;
 
-    public AwsPublicKeyConnector(LegacyAwsClient awsClient) {
+    public AwsPublicKeyConnector(CommonAwsClient awsClient) {
         this.awsClient = awsClient;
     }
 

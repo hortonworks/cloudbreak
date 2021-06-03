@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.aws.poller;
+package com.sequenceiq.cloudbreak.cloud.aws.common.poller;
 
 import static com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup.CANCELLED;
 
