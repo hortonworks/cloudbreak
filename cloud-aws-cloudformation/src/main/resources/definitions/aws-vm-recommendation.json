@@ -1,0 +1,34 @@
+{
+  "master": {
+    "type": "master",
+    "flavor": "m5.2xlarge",
+    "cardinality": 1,
+    "volumeType": "SSD",
+    "volumeCount": 1,
+    "volumeSizeGB": 32
+  },
+  "worker": {
+    "type": "worker",
+    "flavor": "m5.2xlarge",
+    "cardinality": 3,
+    "volumeType": "MAGNETIC",
+    "volumeCount": 1,
+    "volumeSizeGB": 100
+  },
+  "broker": {
+    "type": "broker",
+    "flavor": "m5.2xlarge",
+    "cardinality": 3,
+    "volumeType": "ST1",
+    "volumeCount": 1,
+    "volumeSizeGB": 500
+  },
+  "quorum": {
+    "type": "quorum",
+    "flavor": "m5.2xlarge",
+    "cardinality": 3,
+    "volumeType": "MAGNETIC",
+    "volumeCount": 1,
+    "volumeSizeGB": 100
+  }
+}
