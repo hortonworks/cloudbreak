@@ -97,6 +97,8 @@ public class ImageCatalogServiceTest {
 
     private static final String DEFAULT_CATALOG_URL = "http://localhost/imagecatalog-url";
 
+    private static final String DEFAULT_FREEIPA_CATALOG_URL = "http://localhost/freeipaimagecatalog-url";
+
     private static final String CUSTOM_IMAGE_CATALOG_URL = "http://localhost/custom-imagecatalog-url";
 
     private static final String V2_CB_CATALOG_FILE = "com/sequenceiq/cloudbreak/service/image/cb-image-catalog-v2.json";
@@ -228,6 +230,7 @@ public class ImageCatalogServiceTest {
         constants.addAll(Collections.singletonList(new AwsCloudConstant()));
 
         ReflectionTestUtils.setField(underTest, ImageCatalogService.class, "defaultCatalogUrl", DEFAULT_CATALOG_URL, null);
+        ReflectionTestUtils.setField(underTest, ImageCatalogService.class, "defaultFreeIpaCatalogUrl", DEFAULT_FREEIPA_CATALOG_URL, null);
         setMockedCbVersion("cbVersion", "unspecified");
 
         ReflectionTestUtils.setField(underTest, "imageCatalogServiceProxy", imageCatalogServiceProxy);
@@ -511,15 +514,13 @@ public class ImageCatalogServiceTest {
     @Test
     public void testGetImagesWhenCustomImageCatalogExists() throws Exception {
         ImageCatalog ret = new ImageCatalog();
-        ret.setImageCatalogUrl("");
+        ret.setImageCatalogUrl(null);
+        ret.setName(CUSTOM_CATALOG_NAME);
         when(imageCatalogRepository.findByNameAndWorkspaceId("name", ORG_ID)).thenReturn(Optional.of(ret));
-        when(imageCatalogProvider.getImageCatalogV3("")).thenReturn(null);
-        underTest.getImages(ORG_ID, "name", "aws");
 
-        verify(entitlementService, times(1)).baseImageEnabled(Objects.requireNonNull(Crn.fromString(user.getUserCrn())).getAccountId());
-        verify(entitlementService, never()).baseImageEnabled(user.getUserCrn());
-        verify(imageCatalogProvider, times(1)).getImageCatalogV3("");
-
+        StatedImages actual = underTest.getImages(ORG_ID, "name", "aws");
+        assertEquals(CUSTOM_CATALOG_NAME, actual.getImageCatalogName());
+        assertNull(actual.getImageCatalogUrl());
     }
 
     @Test
@@ -675,7 +676,10 @@ public class ImageCatalogServiceTest {
     public void testGetImagesWithPlatform() throws CloudbreakImageCatalogException, IOException {
         setupUserProfileService();
         setupImageCatalogProvider(DEFAULT_CATALOG_URL, V2_CB_CATALOG_FILE);
-        when(imageCatalogRepository.findByNameAndWorkspaceId(anyString(), anyLong())).thenReturn(Optional.of(new ImageCatalog()));
+        ImageCatalog imageCatalog = new ImageCatalog();
+        imageCatalog.setImageCatalogUrl(DEFAULT_CATALOG_URL);
+
+        when(imageCatalogRepository.findByNameAndWorkspaceId(anyString(), anyLong())).thenReturn(Optional.of(imageCatalog));
 
         underTest.getImagesByCatalogName(ORG_ID, "catalog", null, "AWS");
 
@@ -813,6 +817,36 @@ public class ImageCatalogServiceTest {
         underTest.getImageByCatalogName(WORKSPACE_ID, CUSTOM_IMAGE_ID, CUSTOM_CATALOG_NAME);
 
         thrown.expectMessage("Image type is not supported.");
+    }
+
+    @Test
+    public void testGetDatalakeImagesByFromCustomImageCatalogByImageCatalogName() throws CloudbreakImageCatalogException, IOException {
+        ImageCatalog imageCatalog = new ImageCatalog();
+        imageCatalog.setCustomImages(Set.of(getCustomImage(ImageType.DATALAKE, "5b60b723-4beb-40b0-5cba-47ea9c9b6e53", CUSTOM_BASE_PARCEL_URL)));
+        StatedImage statedImage = StatedImage.statedImage(getImage(), CUSTOM_IMAGE_CATALOG_URL, CUSTOM_CATALOG_NAME);
+
+        setupImageCatalogProvider(DEFAULT_CATALOG_URL, DEV_CATALOG_FILE);
+        when(imageCatalogRepository.findByNameAndWorkspaceId(CUSTOM_CATALOG_NAME, WORKSPACE_ID)).thenReturn(Optional.of(imageCatalog));
+        when(customImageProvider.mergeSourceImageAndCustomImageProperties(any(), any(), any(), any())).thenReturn(statedImage);
+
+        StatedImages actual = underTest.getImages(WORKSPACE_ID, CUSTOM_CATALOG_NAME, Set.of("AWS"));
+        assertEquals(statedImage.getImage(), actual.getImages().getCdhImages().stream().findFirst().get());
+
+    }
+
+    @Test
+    public void testGetFreeipaImagesByFromCustomImageCatalogByImageCatalogName() throws CloudbreakImageCatalogException, IOException {
+        ImageCatalog imageCatalog = new ImageCatalog();
+        imageCatalog.setCustomImages(Set.of(getCustomImage(ImageType.FREEIPA, "cc7f487a-c992-400a-85ed-aae5f73ca4d2", CUSTOM_BASE_PARCEL_URL)));
+        StatedImage statedImage = StatedImage.statedImage(getImage(), CUSTOM_IMAGE_CATALOG_URL, CUSTOM_CATALOG_NAME);
+
+        setupImageCatalogProvider(DEFAULT_FREEIPA_CATALOG_URL, V3_FREEIPA_CATALOG_FILE);
+        when(imageCatalogRepository.findByNameAndWorkspaceId(CUSTOM_CATALOG_NAME, WORKSPACE_ID)).thenReturn(Optional.of(imageCatalog));
+        when(customImageProvider.mergeSourceImageAndCustomImageProperties(any(), any(), any(), any())).thenReturn(statedImage);
+
+        StatedImages actual = underTest.getImages(WORKSPACE_ID, CUSTOM_CATALOG_NAME, Set.of("AWS"));
+        assertEquals(statedImage.getImage(), actual.getImages().getFreeIpaImages().stream().findFirst().get());
+
     }
 
     private void setupImageCatalogProvider(String catalogUrl, String catalogFile) throws IOException, CloudbreakImageCatalogException {

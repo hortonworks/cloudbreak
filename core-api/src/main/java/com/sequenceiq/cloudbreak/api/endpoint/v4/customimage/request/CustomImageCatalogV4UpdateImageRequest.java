@@ -24,7 +24,7 @@ public class CustomImageCatalogV4UpdateImageRequest {
     private String imageType;
 
     @Size(max = 255, message = "The length of the sourceImageId must be less than 255")
-    @Pattern(regexp = "(^[a-z][-a-z0-9]*[a-z0-9]$)",
+    @Pattern(regexp = "(^[a-z0-9][-a-z0-9]*[a-z0-9]$)",
             message = "The sourceImageId can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
     @ApiModelProperty(value = SOURCE_IMAGE_ID)
     private String sourceImageId;
