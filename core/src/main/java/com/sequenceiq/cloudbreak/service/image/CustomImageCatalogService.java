@@ -1,10 +1,14 @@
 package com.sequenceiq.cloudbreak.service.image;
 
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.CustomImage;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.VmImage;
@@ -36,7 +40,13 @@ public class CustomImageCatalogService {
 
     public ImageCatalog getImageCatalog(Long workspaceId, String imageCatalogName) {
         LOGGER.debug(String.format("Get custom image catalog '%s' from workspace '%d'", imageCatalogName, workspaceId));
-        return imageCatalogService.get(workspaceId, imageCatalogName);
+        ImageCatalog imageCatalog = imageCatalogService.get(workspaceId, imageCatalogName);
+
+        if (Strings.isNullOrEmpty(imageCatalog.getImageCatalogUrl())) {
+            return imageCatalog;
+        } else {
+            throw new BadRequestException(String.format("'%s' is not a custom image catalog.", imageCatalog.getName()));
+        }
     }
 
     public ImageCatalog create(ImageCatalog imageCatalog, Long workspaceId, String accountId, String creator) {
@@ -52,7 +62,12 @@ public class CustomImageCatalogService {
 
     public ImageCatalog delete(Long workspaceId, String imageCatalogName) {
         LOGGER.debug(String.format("Delete custom image catalog '%s' in workspace '%d'", imageCatalogName, workspaceId));
-        return imageCatalogService.delete(workspaceId, imageCatalogName);
+        ImageCatalog imageCatalog = imageCatalogService.get(workspaceId, imageCatalogName);
+        if (Strings.isNullOrEmpty(imageCatalog.getImageCatalogUrl())) {
+            return imageCatalogService.delete(workspaceId, imageCatalogName);
+        } else {
+            throw new BadRequestException(String.format("'%s' is not a custom image catalog.", imageCatalog.getName()));
+        }
     }
 
     public CustomImage getCustomImage(Long workspaceId, String imageCatalogName, String imageId) {
@@ -61,13 +76,24 @@ public class CustomImageCatalogService {
         return getCustomImageFromCatalog(imageCatalog, imageId);
     }
 
+    public Image getSourceImage(CustomImage image) {
+        String imageId = image.getCustomizedImageId();
+        LOGGER.debug(String.format("Get source image '%s' from default catalog", imageId));
+        try {
+            StatedImage sourceStatedImage = imageCatalogService.getSourceImageByImageType(image);
+            return sourceStatedImage.getImage();
+        } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {
+            LOGGER.error(String.format("Failed to get source image: %s", e.getMessage()));
+            throw new NotFoundException(String.format("Could not find source image with id: '%s'", imageId));
+        }
+    }
+
     public CustomImage createCustomImage(Long workspaceId, String accountId, String creator, String imageCatalogName, CustomImage customImage) {
         String imageName = UUID.randomUUID().toString();
         LOGGER.debug(String.format("Create custom image '%s' in catalog '%s' in workspace '%d'", imageName, imageCatalogName, workspaceId));
 
         try {
             return transactionService.required(() -> {
-
                 ImageCatalog imageCatalog = getImageCatalog(workspaceId, imageCatalogName);
                 customImage.setName(imageName);
                 customImage.setCreator(creator);
@@ -81,6 +107,8 @@ public class CustomImageCatalogService {
                     vmImage.setCustomImage(customImage);
                     vmImage.setCreator(creator);
                 });
+
+                validateSourceImage(customImage);
 
                 imageCatalog.getCustomImages().add(customImage);
                 ImageCatalog result = imageCatalogService.pureSave(imageCatalog);
@@ -151,6 +179,8 @@ public class CustomImageCatalogService {
                     }
                 }
 
+                validateSourceImage(savedCustomImage);
+
                 ImageCatalog savedImageCatalog = imageCatalogService.pureSave(imageCatalog);
 
                 return getCustomImageFromCatalog(savedImageCatalog, customImage.getName());
@@ -165,5 +195,16 @@ public class CustomImageCatalogService {
     private CustomImage getCustomImageFromCatalog(ImageCatalog imageCatalog, String imageId) {
         return imageCatalog.getCustomImages().stream().filter(ci -> ci.getName().equalsIgnoreCase(imageId)).findFirst().orElseThrow(
                 () -> new NotFoundException(String.format("Could not find any image with id: '%s' in catalog: '%s'", imageId, imageCatalog.getName())));
+    }
+
+    private void validateSourceImage(CustomImage customImage) {
+        try {
+            imageCatalogService.getSourceImageByImageType(customImage);
+        } catch (Exception ex) {
+            LOGGER.error(String.format("Could not find '%s' image in default image catalog with id '%s'. %s",
+                    customImage.getImageType(), customImage.getCustomizedImageId(), ex.getMessage()));
+            throw new NotFoundException(String.format("Could not find '%s' image in default image catalog with id '%s'",
+                    customImage.getImageType(), customImage.getCustomizedImageId()));
+        }
     }
 }

@@ -11,9 +11,10 @@ import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
+import com.sequenceiq.authorization.annotation.AccountIdNotNeeded;
+import com.sequenceiq.cloudbreak.service.image.DefaultImageCatalogService;
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.authorization.annotation.AccountIdNotNeeded;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
@@ -54,6 +55,9 @@ public class ImageCatalogV4Controller extends NotificationController implements 
 
     @Inject
     private ImageCatalogService imageCatalogService;
+
+    @Inject
+    private DefaultImageCatalogService defaultImageCatalogService;
 
     @Inject
     private ConverterUtil converterUtil;
@@ -191,17 +195,23 @@ public class ImageCatalogV4Controller extends NotificationController implements 
     @AccountIdNotNeeded
     @InternalOnly
     public ImageV4Response getImageFromDefaultById(Long workspaceId, @ResourceName String imageId) throws Exception {
-
-        // FIXME: Implement this!
-        return new ImageV4Response();
+        StatedImage statedImage = defaultImageCatalogService.getImageFromDefaultCatalog(imageId);
+        return converterUtil.convert(statedImage.getImage(), ImageV4Response.class);
     }
 
     @Override
     @AccountIdNotNeeded
     @InternalOnly
     public ImageV4Response getImageFromDefault(Long workspaceId, String type, String provider, String runtime) throws Exception {
+        StatedImage statedImage = defaultImageCatalogService.getImageFromDefaultCatalog(type, provider, runtime);
+        return converterUtil.convert(statedImage.getImage(), ImageV4Response.class);
+    }
 
-        // FIXME: Implement this!
-        return new ImageV4Response();
+    @Override
+    @AccountIdNotNeeded
+    @DisableCheckPermissions
+    public ImageV4Response getImageFromDefault(Long workspaceId, String type, String provider) throws Exception {
+        StatedImage statedImage = defaultImageCatalogService.getImageFromDefaultCatalog(type, provider);
+        return converterUtil.convert(statedImage.getImage(), ImageV4Response.class);
     }
 }
