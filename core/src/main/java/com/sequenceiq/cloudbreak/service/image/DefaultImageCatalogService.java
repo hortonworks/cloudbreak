@@ -54,7 +54,8 @@ public class DefaultImageCatalogService {
         switch (imageType) {
             case FREEIPA:
                 List<Image> images = imageCatalogProvider.getImageCatalogV3(defaultFreeIpaCatalogUrl).getImages().getFreeIpaImages();
-                Optional<Image> image = images.stream().filter(i -> i.getImageSetsByProvider().containsKey(provider)).max(getImageComparing(images));
+                Optional<Image> image = images.stream().filter(i -> i.getImageSetsByProvider()
+                        .keySet().stream().anyMatch(key -> key.equalsIgnoreCase(provider))).max(getImageComparing(images));
                 statedImage = statedImage(image.orElseThrow(() ->
                                 new CloudbreakImageNotFoundException(String.format("Could not find any image with provider: '%s' in catalog: '%s'", provider,
                                         FREEIPA_DEFAULT_CATALOG_NAME))),
