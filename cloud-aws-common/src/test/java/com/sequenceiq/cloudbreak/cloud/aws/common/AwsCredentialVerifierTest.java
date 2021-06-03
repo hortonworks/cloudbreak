@@ -53,9 +53,9 @@ public class AwsCredentialVerifierTest {
 
     @Test
     public void verifyCredentialAndThrowFailExceptionTest() throws IOException {
-        URL url = Resources.getResource("definitions/aws-cb-policy.json");
-        String awsCbPolicy = Resources.toString(url, Charsets.UTF_8);
-        when(awsPlatformParameters.getCredentialPoliciesJson()).thenReturn(Base64.getEncoder().encodeToString(awsCbPolicy.getBytes()));
+        URL url = Resources.getResource("definitions/aws-environment-minimal-policy.json");
+        String awsEnvPolicy = Resources.toString(url, Charsets.UTF_8);
+        when(awsPlatformParameters.getEnvironmentMinimalPoliciesJson()).thenReturn(Base64.getEncoder().encodeToString(awsEnvPolicy.getBytes()));
         Map<String, Object> awsParameters = new HashMap<>();
         awsParameters.put("accessKey", "a");
         awsParameters.put("secretKey", "b");
@@ -102,7 +102,7 @@ public class AwsCredentialVerifierTest {
             assertThat(e.getMessage(), not(CoreMatchers.containsString("accepted_action")));
         }
         List<SimulatePrincipalPolicyRequest> allSimulatePrincipalPolicyRequest = requestArgumentCaptor.getAllValues();
-        int simulateRequestNumber = 4;
+        int simulateRequestNumber = 2;
         assertEquals("expect if " + simulateRequestNumber + " simulate request has been sent",
                 simulateRequestNumber, allSimulatePrincipalPolicyRequest.size());
         allSimulatePrincipalPolicyRequest.forEach(simulatePrincipalPolicyRequest ->
@@ -112,9 +112,9 @@ public class AwsCredentialVerifierTest {
 
     @Test
     public void verifyCredentialTest() throws IOException, AwsPermissionMissingException {
-        URL url = Resources.getResource("definitions/aws-cb-policy.json");
-        String awsCbPolicy = Resources.toString(url, Charsets.UTF_8);
-        when(awsPlatformParameters.getCredentialPoliciesJson()).thenReturn(Base64.getEncoder().encodeToString(awsCbPolicy.getBytes()));
+        URL url = Resources.getResource("definitions/aws-environment-minimal-policy.json");
+        String awsEnvPolicy = Resources.toString(url, Charsets.UTF_8);
+        when(awsPlatformParameters.getEnvironmentMinimalPoliciesJson()).thenReturn(Base64.getEncoder().encodeToString(awsEnvPolicy.getBytes()));
         Map<String, Object> awsParameters = new HashMap<>();
         awsParameters.put("accessKey", "a");
         awsParameters.put("secretKey", "b");
@@ -152,9 +152,9 @@ public class AwsCredentialVerifierTest {
 
     @Test
     public void verifyCredentialAndThrowFailExceptionBecauseOrganizatioRuleTest() throws IOException {
-        URL url = Resources.getResource("definitions/aws-cb-policy.json");
-        String awsCbPolicy = Resources.toString(url, Charsets.UTF_8);
-        when(awsPlatformParameters.getCredentialPoliciesJson()).thenReturn(Base64.getEncoder().encodeToString(awsCbPolicy.getBytes()));
+        URL url = Resources.getResource("definitions/aws-environment-minimal-policy.json");
+        String awsEnvPolicy = Resources.toString(url, Charsets.UTF_8);
+        when(awsPlatformParameters.getEnvironmentMinimalPoliciesJson()).thenReturn(Base64.getEncoder().encodeToString(awsEnvPolicy.getBytes()));
         Map<String, Object> awsParameters = new HashMap<>();
         awsParameters.put("accessKey", "a");
         awsParameters.put("secretKey", "b");
@@ -201,7 +201,7 @@ public class AwsCredentialVerifierTest {
             assertThat(e.getMessage(), not(CoreMatchers.containsString("accepted_action")));
         }
         List<SimulatePrincipalPolicyRequest> allSimulatePrincipalPolicyRequest = requestArgumentCaptor.getAllValues();
-        int simulateRequestNumber = 4;
+        int simulateRequestNumber = 2;
         assertEquals("expect if " + simulateRequestNumber + " simulate request has been sent",
                 simulateRequestNumber, allSimulatePrincipalPolicyRequest.size());
         allSimulatePrincipalPolicyRequest.forEach(simulatePrincipalPolicyRequest ->
@@ -211,9 +211,9 @@ public class AwsCredentialVerifierTest {
 
     @Test
     public void verifyCredentialAndOrganizatioDecisionDetailIsNullTest() throws IOException {
-        URL url = Resources.getResource("definitions/aws-cb-policy.json");
-        String awsCbPolicy = Resources.toString(url, Charsets.UTF_8);
-        when(awsPlatformParameters.getCredentialPoliciesJson()).thenReturn(Base64.getEncoder().encodeToString(awsCbPolicy.getBytes()));
+        URL url = Resources.getResource("definitions/aws-environment-minimal-policy.json");
+        String awsEnvPolicy = Resources.toString(url, Charsets.UTF_8);
+        when(awsPlatformParameters.getEnvironmentMinimalPoliciesJson()).thenReturn(Base64.getEncoder().encodeToString(awsEnvPolicy.getBytes()));
         Map<String, Object> awsParameters = new HashMap<>();
         awsParameters.put("accessKey", "a");
         awsParameters.put("secretKey", "b");
@@ -260,7 +260,7 @@ public class AwsCredentialVerifierTest {
             assertThat(e.getMessage(), not(CoreMatchers.containsString("accepted_action")));
         }
         List<SimulatePrincipalPolicyRequest> allSimulatePrincipalPolicyRequest = requestArgumentCaptor.getAllValues();
-        int simulateRequestNumber = 4;
+        int simulateRequestNumber = 2;
         assertEquals("expect if " + simulateRequestNumber + " simulate request has been sent",
                 simulateRequestNumber, allSimulatePrincipalPolicyRequest.size());
         allSimulatePrincipalPolicyRequest.forEach(simulatePrincipalPolicyRequest ->
