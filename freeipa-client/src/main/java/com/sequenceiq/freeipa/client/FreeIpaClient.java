@@ -17,6 +17,8 @@ import java.util.function.BiConsumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.sequenceiq.freeipa.client.operation.UserDisableOperation;
+import com.sequenceiq.freeipa.client.operation.UserEnableOperation;
 import org.apache.commons.lang3.reflect.TypeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -134,6 +136,16 @@ public class FreeIpaClient {
         ParameterizedType type = TypeUtils
                 .parameterize(Set.class, User.class);
         return (Set<User>) invoke("user_find", flags, params, type).getResult();
+    }
+
+    public void userDisable(String user) throws FreeIpaClientException {
+        UserDisableOperation.create(user).invoke(this).orElseThrow(() ->
+                new FreeIpaClientException(String.format("User disable failed for user %s", user)));
+    }
+
+    public void userEnable(String user) throws FreeIpaClientException {
+        UserEnableOperation.create(user).invoke(this).orElseThrow(() ->
+                new FreeIpaClientException(String.format("User enable failed for user %s", user)));
     }
 
     public Set<Role> findAllRole() throws FreeIpaClientException {
