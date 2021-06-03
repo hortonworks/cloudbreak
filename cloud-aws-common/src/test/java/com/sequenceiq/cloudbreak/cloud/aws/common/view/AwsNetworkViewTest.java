@@ -1,7 +1,7 @@
-package com.sequenceiq.cloudbreak.cloud.aws.view;
+package com.sequenceiq.cloudbreak.cloud.aws.common.view;
 
-import static com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView.VPC_CIDR;
-import static com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView.VPC_CIDRS;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsNetworkView.VPC_CIDR;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsNetworkView.VPC_CIDRS;
 import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.ENDPOINT_GATEWAY_SUBNET_ID;
 import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.INTERNET_GATEWAY_ID;
 import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_ID;

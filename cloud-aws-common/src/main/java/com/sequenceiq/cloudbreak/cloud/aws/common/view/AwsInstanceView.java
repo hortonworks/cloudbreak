@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.aws.view;
+package com.sequenceiq.cloudbreak.cloud.aws.common.view;
 
 import java.util.List;
 import java.util.Objects;
