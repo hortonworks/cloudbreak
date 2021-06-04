@@ -154,7 +154,7 @@ public class CredentialPrerequisiteService {
     }
 
     private boolean isPolicyFetchFromExperiencesAllowed() {
-        return entitlementService.awsRestrictedPolicy(ThreadBasedUserCrnProvider.getUserCrn());
+        return entitlementService.awsRestrictedPolicy(ThreadBasedUserCrnProvider.getAccountId());
     }
 
     private boolean isRoleArnSet(CredentialAttributes credentialAttributes) {
