@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -33,6 +34,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.AwsObjectStorageConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPlatformResources;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPublicKeyConnector;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTagValidator;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
@@ -73,6 +75,9 @@ public class AwsNativeConnector implements CloudConnector<List<CloudResource>> {
     @Inject
     private AwsNativeSetup awsNativeSetup;
 
+    @Inject
+    private AwsTagValidator awsTagValidator;
+
     @Override
     public Authenticator authentication() {
         return awsAuthenticator;
@@ -85,7 +90,7 @@ public class AwsNativeConnector implements CloudConnector<List<CloudResource>> {
 
     @Override
     public List<Validator> validators() {
-        return null;
+        return Collections.singletonList(awsTagValidator);
     }
 
     @Override
