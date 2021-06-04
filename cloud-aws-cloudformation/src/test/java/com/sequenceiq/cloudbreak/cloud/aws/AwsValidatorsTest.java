@@ -45,9 +45,12 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.AwsSessionCredentialClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTagValidator;
 import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.mapper.SdkClientExceptionMapper;
+import com.sequenceiq.cloudbreak.cloud.aws.common.subnetselector.SubnetFilterStrategyMultiplePreferPrivate;
+import com.sequenceiq.cloudbreak.cloud.aws.common.subnetselector.SubnetFilterStrategyMultiplePreferPublic;
+import com.sequenceiq.cloudbreak.cloud.aws.common.subnetselector.SubnetSelectorService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsEncodedAuthorizationFailureMessageDecoder;
-import com.sequenceiq.cloudbreak.cloud.aws.conf.AwsConfig;
-import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.converter.LoadBalancerTypeConverter;
+import com.sequenceiq.cloudbreak.cloud.aws.common.config.AwsConfig;
+import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.LoadBalancerTypeConverter;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -62,7 +65,7 @@ import com.sequenceiq.cloudbreak.service.RetryService;
 import io.opentracing.Tracer;
 
 @ExtendWith(SpringExtension.class)
-@TestPropertySource(properties = "cb.max.aws.resource.name.length=5")
+    @TestPropertySource(properties = "cb.max.aws.resource.name.length=5")
 @Import(SdkClientExceptionMapper.class)
 public class AwsValidatorsTest {
 
@@ -232,6 +235,9 @@ public class AwsValidatorsTest {
             CloudFormationStackUtil.class,
             LoadBalancerTypeConverter.class,
             SdkClientExceptionMapper.class,
+            SubnetFilterStrategyMultiplePreferPublic.class,
+            SubnetFilterStrategyMultiplePreferPrivate.class,
+            SubnetSelectorService.class,
     })
     static class Config {
 

@@ -1,10 +1,10 @@
-package com.sequenceiq.cloudbreak.cloud.aws.service.subnetselector;
+package com.sequenceiq.cloudbreak.cloud.aws.common.subnetselector;
 
 
-import static com.sequenceiq.cloudbreak.cloud.aws.service.subnetselector.SubnetBuilder.AZ_A;
-import static com.sequenceiq.cloudbreak.cloud.aws.service.subnetselector.SubnetBuilder.AZ_B;
-import static com.sequenceiq.cloudbreak.cloud.aws.service.subnetselector.SubnetBuilder.AZ_C;
-import static com.sequenceiq.cloudbreak.cloud.aws.service.subnetselector.SubnetBuilder.AZ_D;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.subnetselector.SubnetBuilder.AZ_A;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.subnetselector.SubnetBuilder.AZ_B;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.subnetselector.SubnetBuilder.AZ_C;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.subnetselector.SubnetBuilder.AZ_D;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;

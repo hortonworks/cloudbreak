@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPlatformResources;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPublicKeyConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTagValidator;
+import com.sequenceiq.cloudbreak.cloud.aws.metadata.AwsNativeMetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
@@ -79,6 +80,9 @@ public class AwsNativeConnector implements CloudConnector<List<CloudResource>> {
     @Inject
     private AwsTagValidator awsTagValidator;
 
+    @Inject
+    private AwsNativeMetadataCollector nativeMetadataCollector;
+
     @Override
     public Authenticator authentication() {
         return awsAuthenticator;
@@ -114,7 +118,7 @@ public class AwsNativeConnector implements CloudConnector<List<CloudResource>> {
 
     @Override
     public MetadataCollector metadata() {
-        return null;
+        return nativeMetadataCollector;
     }
 
     @Override

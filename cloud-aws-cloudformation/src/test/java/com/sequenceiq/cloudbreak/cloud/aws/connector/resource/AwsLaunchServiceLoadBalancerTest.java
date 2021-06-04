@@ -45,15 +45,15 @@ import com.sequenceiq.cloudbreak.cloud.aws.AwsStackRequestHelper;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationTemplateBuilder;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationTemplateBuilder.ModelContext;
-import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.LegacyAwsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.AwsLoadBalancerScheme;
+import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.LoadBalancerTypeConverter;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsPageCollector;
+import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsNetworkView;
 import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.AwsListener;
 import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.AwsLoadBalancer;
-import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.AwsLoadBalancerScheme;
 import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.AwsTargetGroup;
-import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.converter.LoadBalancerTypeConverter;
-import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsNetworkView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -182,7 +182,7 @@ public class AwsLaunchServiceLoadBalancerTest {
         AwsNetworkView awsNetworkView = createNetworkView(null, null);
         String expectedError = "Unable to configure load balancer: Could not identify subnets.";
         CloudConnectorException exception =
-            assertThrows(CloudConnectorException.class, () -> underTest.selectLoadBalancerSubnetIds(LoadBalancerType.PRIVATE, awsNetworkView));
+                assertThrows(CloudConnectorException.class, () -> underTest.selectLoadBalancerSubnetIds(LoadBalancerType.PRIVATE, awsNetworkView));
         assertEquals(expectedError, exception.getMessage());
     }
 
@@ -191,7 +191,7 @@ public class AwsLaunchServiceLoadBalancerTest {
         AwsNetworkView awsNetworkView = createNetworkView(null, null);
         String expectedError = "Unable to configure load balancer: Could not identify subnets.";
         CloudConnectorException exception =
-            assertThrows(CloudConnectorException.class, () -> underTest.selectLoadBalancerSubnetIds(LoadBalancerType.PUBLIC, awsNetworkView));
+                assertThrows(CloudConnectorException.class, () -> underTest.selectLoadBalancerSubnetIds(LoadBalancerType.PUBLIC, awsNetworkView));
         assertEquals(expectedError, exception.getMessage());
     }
 
@@ -290,10 +290,10 @@ public class AwsLaunchServiceLoadBalancerTest {
 
         setupMocksForUpdate(awsNetworkView, network, instances, Set.of(LoadBalancerType.PRIVATE));
         when(result.getStackResourceSummaries())
-            .thenReturn(List.of())
-            .thenReturn(firstUpdateSummaries)
-            .thenReturn(firstUpdateSummaries)
-            .thenReturn(secondUpdateSummaries);
+                .thenReturn(List.of())
+                .thenReturn(firstUpdateSummaries)
+                .thenReturn(firstUpdateSummaries)
+                .thenReturn(secondUpdateSummaries);
 
         underTest.updateCloudformationWithLoadBalancers(ac, cloudStack, null, null);
 
@@ -312,10 +312,10 @@ public class AwsLaunchServiceLoadBalancerTest {
 
         setupMocksForUpdate(awsNetworkView, network, instances, Set.of(LoadBalancerType.PUBLIC));
         when(result.getStackResourceSummaries())
-            .thenReturn(List.of())
-            .thenReturn(firstUpdateSummaries)
-            .thenReturn(firstUpdateSummaries)
-            .thenReturn(secondUpdateSummaries);
+                .thenReturn(List.of())
+                .thenReturn(firstUpdateSummaries)
+                .thenReturn(firstUpdateSummaries)
+                .thenReturn(secondUpdateSummaries);
 
         underTest.updateCloudformationWithLoadBalancers(ac, cloudStack, null, null);
 
@@ -334,10 +334,10 @@ public class AwsLaunchServiceLoadBalancerTest {
 
         setupMocksForUpdate(awsNetworkView, network, instances, Set.of(LoadBalancerType.PUBLIC, LoadBalancerType.PRIVATE));
         when(result.getStackResourceSummaries())
-            .thenReturn(List.of())
-            .thenReturn(firstUpdateSummaries)
-            .thenReturn(firstUpdateSummaries)
-            .thenReturn(secondUpdateSummaries);
+                .thenReturn(List.of())
+                .thenReturn(firstUpdateSummaries)
+                .thenReturn(firstUpdateSummaries)
+                .thenReturn(secondUpdateSummaries);
 
         underTest.updateCloudformationWithLoadBalancers(ac, cloudStack, null, null);
 
@@ -351,7 +351,7 @@ public class AwsLaunchServiceLoadBalancerTest {
         AwsNetworkView awsNetworkView = createNetworkView(PRIVATE_ID_1, null);
         Network network = createNetwork(PRIVATE_ID_1, null);
         String expectedError = String.format("Could not create load balancer listeners: target group %s not found.",
-            AwsTargetGroup.getTargetGroupName(PORT, AwsLoadBalancerScheme.INTERNAL));
+                AwsTargetGroup.getTargetGroupName(PORT, AwsLoadBalancerScheme.INTERNAL));
         Set<LoadBalancerType> types = Set.of(LoadBalancerType.PRIVATE);
         List<StackResourceSummary> firstUpdateSummaries = createFirstUpdateSummaries(types);
         firstUpdateSummaries.remove(TG_INDEX);
@@ -359,14 +359,14 @@ public class AwsLaunchServiceLoadBalancerTest {
 
         setupMocksForUpdate(awsNetworkView, network, instances, types);
         when(result.getStackResourceSummaries())
-            .thenReturn(List.of())
-            .thenReturn(firstUpdateSummaries)
-            .thenReturn(firstUpdateSummaries)
-            .thenReturn(secondUpdateSummaries);
+                .thenReturn(List.of())
+                .thenReturn(firstUpdateSummaries)
+                .thenReturn(firstUpdateSummaries)
+                .thenReturn(secondUpdateSummaries);
 
         CloudConnectorException exception =
-            assertThrows(CloudConnectorException.class, () ->
-                underTest.updateCloudformationWithLoadBalancers(ac, cloudStack, null, null));
+                assertThrows(CloudConnectorException.class, () ->
+                        underTest.updateCloudformationWithLoadBalancers(ac, cloudStack, null, null));
 
         verify(cfClient, times(1)).updateStack(any());
         verify(result, times(2)).getStackResourceSummaries();
@@ -379,7 +379,7 @@ public class AwsLaunchServiceLoadBalancerTest {
         AwsNetworkView awsNetworkView = createNetworkView(PRIVATE_ID_1, null);
         Network network = createNetwork(PRIVATE_ID_1, null);
         String expectedError = String.format("Could not create load balancer listeners: target group %s arn not found.",
-            AwsTargetGroup.getTargetGroupName(PORT, AwsLoadBalancerScheme.INTERNAL));
+                AwsTargetGroup.getTargetGroupName(PORT, AwsLoadBalancerScheme.INTERNAL));
         Set<LoadBalancerType> types = Set.of(LoadBalancerType.PRIVATE);
         List<StackResourceSummary> firstUpdateSummaries = createFirstUpdateSummaries(types);
         StackResourceSummary tgSummary = firstUpdateSummaries.get(TG_INDEX);
@@ -388,14 +388,14 @@ public class AwsLaunchServiceLoadBalancerTest {
 
         setupMocksForUpdate(awsNetworkView, network, instances, types);
         when(result.getStackResourceSummaries())
-            .thenReturn(List.of())
-            .thenReturn(firstUpdateSummaries)
-            .thenReturn(firstUpdateSummaries)
-            .thenReturn(secondUpdateSummaries);
+                .thenReturn(List.of())
+                .thenReturn(firstUpdateSummaries)
+                .thenReturn(firstUpdateSummaries)
+                .thenReturn(secondUpdateSummaries);
 
         CloudConnectorException exception =
-            assertThrows(CloudConnectorException.class, () ->
-                underTest.updateCloudformationWithLoadBalancers(ac, cloudStack, null, null));
+                assertThrows(CloudConnectorException.class, () ->
+                        underTest.updateCloudformationWithLoadBalancers(ac, cloudStack, null, null));
 
         verify(cfClient, times(1)).updateStack(any());
         verify(result, times(2)).getStackResourceSummaries();
@@ -408,7 +408,7 @@ public class AwsLaunchServiceLoadBalancerTest {
         AwsNetworkView awsNetworkView = createNetworkView(PRIVATE_ID_1, null);
         Network network = createNetwork(PRIVATE_ID_1, null);
         String expectedError = String.format("Could not create load balancer listeners: load balancer %s not found.",
-            AwsLoadBalancer.getLoadBalancerName(AwsLoadBalancerScheme.INTERNAL));
+                AwsLoadBalancer.getLoadBalancerName(AwsLoadBalancerScheme.INTERNAL));
         Set<LoadBalancerType> types = Set.of(LoadBalancerType.PRIVATE);
         List<StackResourceSummary> firstUpdateSummaries = createFirstUpdateSummaries(types);
         firstUpdateSummaries.remove(LB_INDEX);
@@ -416,14 +416,14 @@ public class AwsLaunchServiceLoadBalancerTest {
 
         setupMocksForUpdate(awsNetworkView, network, instances, types);
         when(result.getStackResourceSummaries())
-            .thenReturn(List.of())
-            .thenReturn(firstUpdateSummaries)
-            .thenReturn(firstUpdateSummaries)
-            .thenReturn(secondUpdateSummaries);
+                .thenReturn(List.of())
+                .thenReturn(firstUpdateSummaries)
+                .thenReturn(firstUpdateSummaries)
+                .thenReturn(secondUpdateSummaries);
 
         CloudConnectorException exception =
-            assertThrows(CloudConnectorException.class, () ->
-                underTest.updateCloudformationWithLoadBalancers(ac, cloudStack, null, null));
+                assertThrows(CloudConnectorException.class, () ->
+                        underTest.updateCloudformationWithLoadBalancers(ac, cloudStack, null, null));
 
         verify(cfClient, times(1)).updateStack(any());
         verify(result, times(2)).getStackResourceSummaries();
@@ -436,7 +436,7 @@ public class AwsLaunchServiceLoadBalancerTest {
         AwsNetworkView awsNetworkView = createNetworkView(PRIVATE_ID_1, null);
         Network network = createNetwork(PRIVATE_ID_1, null);
         String expectedError = String.format("Could not create load balancer listeners: load balancer %s arn not found.",
-            AwsLoadBalancer.getLoadBalancerName(AwsLoadBalancerScheme.INTERNAL));
+                AwsLoadBalancer.getLoadBalancerName(AwsLoadBalancerScheme.INTERNAL));
         Set<LoadBalancerType> types = Set.of(LoadBalancerType.PRIVATE);
         List<StackResourceSummary> firstUpdateSummaries = createFirstUpdateSummaries(types);
         StackResourceSummary lbSummary = firstUpdateSummaries.get(LB_INDEX);
@@ -445,14 +445,14 @@ public class AwsLaunchServiceLoadBalancerTest {
 
         setupMocksForUpdate(awsNetworkView, network, instances, types);
         when(result.getStackResourceSummaries())
-            .thenReturn(List.of())
-            .thenReturn(firstUpdateSummaries)
-            .thenReturn(firstUpdateSummaries)
-            .thenReturn(secondUpdateSummaries);
+                .thenReturn(List.of())
+                .thenReturn(firstUpdateSummaries)
+                .thenReturn(firstUpdateSummaries)
+                .thenReturn(secondUpdateSummaries);
 
         CloudConnectorException exception =
-            assertThrows(CloudConnectorException.class, () ->
-                underTest.updateCloudformationWithLoadBalancers(ac, cloudStack, null, null));
+                assertThrows(CloudConnectorException.class, () ->
+                        underTest.updateCloudformationWithLoadBalancers(ac, cloudStack, null, null));
 
         verify(cfClient, times(1)).updateStack(any());
         verify(result, times(2)).getStackResourceSummaries();
@@ -486,10 +486,10 @@ public class AwsLaunchServiceLoadBalancerTest {
 
         setupMocksForUpdate(awsNetworkView, network, instances, types);
         when(result.getStackResourceSummaries())
-            .thenReturn(List.of())
-            .thenReturn(firstUpdateSummaries)
-            .thenReturn(firstUpdateSummaries)
-            .thenReturn(secondUpdateSummaries);
+                .thenReturn(List.of())
+                .thenReturn(firstUpdateSummaries)
+                .thenReturn(firstUpdateSummaries)
+                .thenReturn(secondUpdateSummaries);
 
         List<CloudResourceStatus> statuses = underTest.updateCloudformationWithLoadBalancers(ac, cloudStack, null, null);
 
@@ -511,10 +511,10 @@ public class AwsLaunchServiceLoadBalancerTest {
 
         setupMocksForUpdate(awsNetworkView, network, instances, types);
         when(result.getStackResourceSummaries())
-            .thenReturn(List.of())
-            .thenReturn(firstUpdateSummaries)
-            .thenReturn(firstUpdateSummaries)
-            .thenReturn(secondUpdateSummaries);
+                .thenReturn(List.of())
+                .thenReturn(firstUpdateSummaries)
+                .thenReturn(firstUpdateSummaries)
+                .thenReturn(secondUpdateSummaries);
 
         List<CloudResourceStatus> statuses = underTest.updateCloudformationWithLoadBalancers(ac, cloudStack, null, null);
 
@@ -536,10 +536,10 @@ public class AwsLaunchServiceLoadBalancerTest {
 
         setupMocksForUpdate(awsNetworkView, network, instances, Set.of(LoadBalancerType.PRIVATE));
         when(result.getStackResourceSummaries())
-            .thenReturn(List.of())
-            .thenReturn(firstUpdateSummaries)
-            .thenReturn(firstUpdateSummaries)
-            .thenReturn(secondUpdateSummaries);
+                .thenReturn(List.of())
+                .thenReturn(firstUpdateSummaries)
+                .thenReturn(firstUpdateSummaries)
+                .thenReturn(secondUpdateSummaries);
 
         List<CloudResourceStatus> statuses = underTest.updateCloudformationWithLoadBalancers(ac, cloudStack, null, null);
 
@@ -561,10 +561,10 @@ public class AwsLaunchServiceLoadBalancerTest {
 
         setupMocksForUpdate(awsNetworkView, network, instances, Set.of(LoadBalancerType.PRIVATE));
         when(result.getStackResourceSummaries())
-            .thenReturn(List.of())
-            .thenReturn(firstUpdateSummaries)
-            .thenReturn(firstUpdateSummaries)
-            .thenReturn(secondUpdateSummaries);
+                .thenReturn(List.of())
+                .thenReturn(firstUpdateSummaries)
+                .thenReturn(firstUpdateSummaries)
+                .thenReturn(secondUpdateSummaries);
 
         List<CloudResourceStatus> statuses = underTest.updateCloudformationWithLoadBalancers(ac, cloudStack, null, null);
 
@@ -666,13 +666,13 @@ public class AwsLaunchServiceLoadBalancerTest {
 
     private List<CloudResource> createInstances() {
         return List.of(CloudResource.builder()
-            .name(INSTANCE_NAME)
-            .instanceId(INSTANCE_ID)
-            .type(AWS_INSTANCE)
-            .status(CREATED)
-            .params(Map.of())
-            .group(INSTANCE_NAME)
-            .build());
+                .name(INSTANCE_NAME)
+                .instanceId(INSTANCE_ID)
+                .type(AWS_INSTANCE)
+                .status(CREATED)
+                .params(Map.of())
+                .group(INSTANCE_NAME)
+                .build());
     }
 
     private CloudLoadBalancer createCloudLoadBalancer(LoadBalancerType type) {
@@ -694,7 +694,7 @@ public class AwsLaunchServiceLoadBalancerTest {
         List<StackResourceSummary> summaries = new ArrayList<>();
         for (LoadBalancerType type : types) {
             AwsLoadBalancerScheme scheme = LoadBalancerType.PRIVATE.equals(type) ?
-                AwsLoadBalancerScheme.INTERNAL : AwsLoadBalancerScheme.INTERNET_FACING;
+                    AwsLoadBalancerScheme.INTERNAL : AwsLoadBalancerScheme.INTERNET_FACING;
             if (createLbAndTg) {
                 StackResourceSummary tgSummary = new StackResourceSummary();
                 tgSummary.setLogicalResourceId(AwsTargetGroup.getTargetGroupName(PORT, scheme));
