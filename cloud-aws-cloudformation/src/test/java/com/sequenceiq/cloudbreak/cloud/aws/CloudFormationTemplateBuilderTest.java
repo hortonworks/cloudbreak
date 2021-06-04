@@ -41,7 +41,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationTemplateBuilder.ModelCo
 import com.sequenceiq.cloudbreak.cloud.aws.efs.AwsEfsFileSystem;
 import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.AwsListener;
 import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.AwsLoadBalancer;
-import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.AwsLoadBalancerScheme;
+import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.AwsLoadBalancerScheme;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;

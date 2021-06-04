@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.aws.service.subnetselector;
+package com.sequenceiq.cloudbreak.cloud.aws.common.subnetselector;
 
 import static org.junit.Assert.assertEquals;
 

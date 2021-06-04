@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.aws.conf;
+package com.sequenceiq.cloudbreak.cloud.aws.common.config;
 
 import java.util.List;
 import java.util.Map;
@@ -10,9 +10,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.google.common.collect.ImmutableMap;
-import com.sequenceiq.cloudbreak.cloud.aws.service.subnetselector.SubnetFilterStrategy;
+import com.sequenceiq.cloudbreak.cloud.aws.common.subnetselector.SubnetFilterStrategy;
+import com.sequenceiq.cloudbreak.cloud.aws.common.subnetselector.SubnetFilterStrategyType;
 import com.sequenceiq.cloudbreak.cloud.model.TagSpecification;
-import com.sequenceiq.cloudbreak.cloud.aws.service.subnetselector.SubnetFilterStrategyType;
 
 @Configuration
 public class AwsConfig {

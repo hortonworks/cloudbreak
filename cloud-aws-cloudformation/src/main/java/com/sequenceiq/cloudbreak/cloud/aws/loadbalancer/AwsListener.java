@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.cloud.aws.loadbalancer;
 
 import java.util.Set;
 
+import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.AwsLoadBalancerScheme;
+
 public class AwsListener {
 
     private static final String LISTENER_NAME_PREFIX = "ListenerPort";

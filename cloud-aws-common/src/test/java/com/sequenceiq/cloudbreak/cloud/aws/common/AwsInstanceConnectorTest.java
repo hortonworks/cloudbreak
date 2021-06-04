@@ -163,7 +163,7 @@ public class AwsInstanceConnectorTest {
                         () -> testCheckStates("anything", 81, InstanceStatus.IN_PROGRESS)));
         tests.add(
                 DynamicTest.dynamicTest(
-                        "runninG state to STARTED (not case sensitive)",
+                        "running state to STARTED (not case sensitive)",
                         () -> testCheckStates("runninG", 16, InstanceStatus.STARTED)));
         tests.add(
                 DynamicTest.dynamicTest(

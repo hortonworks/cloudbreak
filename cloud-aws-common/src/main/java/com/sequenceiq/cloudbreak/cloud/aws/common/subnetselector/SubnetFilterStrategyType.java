@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.aws.service.subnetselector;
+package com.sequenceiq.cloudbreak.cloud.aws.common.subnetselector;
 
 public enum SubnetFilterStrategyType {
     MULTIPLE_PREFER_PRIVATE("choose multiple subnets in different AZs prefer private"),

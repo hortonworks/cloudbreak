@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.cloud.aws.loadbalancer;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.AwsLoadBalancerScheme;
+
 public class AwsTargetGroup {
 
     private static final String TARGET_GROUP_NAME_PREFIX = "TargetGroupPort";

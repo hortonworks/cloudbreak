@@ -15,8 +15,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import com.sequenceiq.cloudbreak.cloud.aws.service.subnetselector.SubnetFilterStrategyMultiplePreferPublic;
-import com.sequenceiq.cloudbreak.cloud.aws.service.subnetselector.SubnetSelectorService;
+import com.sequenceiq.cloudbreak.cloud.aws.common.config.AwsConfig;
+import com.sequenceiq.cloudbreak.cloud.aws.common.subnetselector.SubnetFilterStrategyMultiplePreferPublic;
+import com.sequenceiq.cloudbreak.cloud.aws.common.subnetselector.SubnetSelectorService;
 import com.sequenceiq.cloudbreak.cloud.model.TagSpecification;
 
 @ExtendWith(SpringExtension.class)

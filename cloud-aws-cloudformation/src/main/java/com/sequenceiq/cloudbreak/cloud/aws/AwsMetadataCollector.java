@@ -27,7 +27,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsLifeCycleMapper;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AuthenticatedContextView;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.AwsLoadBalancer;
-import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.converter.LoadBalancerTypeConverter;
+import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.LoadBalancerTypeConverter;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;

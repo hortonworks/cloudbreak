@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.aws.loadbalancer;
+package com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer;
 
 public enum AwsLoadBalancerScheme {
     INTERNET_FACING("internet-facing", "External"),
