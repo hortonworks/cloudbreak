@@ -30,7 +30,9 @@ public class InstanceGroupToInstanceGroupDetailsConverter extends AbstractConver
                 volumeDetails.setVolumeCount(volmue.getVolumeCount());
                 return volumeDetails;
             }).collect(Collectors.toList()));
-            instanceGroupDetails.setTemporaryStorage(template.getTemporaryStorage().name());
+            if (template.getTemporaryStorage() != null) {
+                instanceGroupDetails.setTemporaryStorage(template.getTemporaryStorage().name());
+            }
         }
         instanceGroupDetails.setSecurityGroup(getConversionService().convert(source.getSecurityGroup(), SecurityGroupDetails.class));
         return instanceGroupDetails;
