@@ -175,6 +175,11 @@ public class UserDataBuilderTest {
         }
 
         @Override
+        public String resourceDefinitionInSubDir(String subDir, String resource) {
+            return "";
+        }
+
+        @Override
         public List<StackParamValidation> additionalStackParameters() {
             return new ArrayList<>();
         }

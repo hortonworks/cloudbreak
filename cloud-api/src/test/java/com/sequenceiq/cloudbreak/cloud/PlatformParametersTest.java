@@ -67,6 +67,11 @@ public class PlatformParametersTest {
         }
 
         @Override
+        public String resourceDefinitionInSubDir(String subDir, String resource) {
+            return "testResourceDefinition";
+        }
+
+        @Override
         public List<StackParamValidation> additionalStackParameters() {
             return Lists.newArrayList();
         }

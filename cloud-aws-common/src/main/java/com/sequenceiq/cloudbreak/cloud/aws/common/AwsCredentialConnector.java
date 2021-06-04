@@ -104,8 +104,20 @@ public class AwsCredentialConnector implements CredentialConnector {
                 policyJson = null;
         }
         AwsCredentialPrerequisites awsPrerequisites = new AwsCredentialPrerequisites(externalId, policyJson);
-        awsPrerequisites.setPolicies(Map.of("Environment", awsPlatformParameters.getEnvironmentMinimalPoliciesJson()));
+        awsPrerequisites.setPolicies(collectNecessaryPolicies());
         return new CredentialPrerequisitesResponse(cloudContext.getPlatform().value(), accountId, awsPrerequisites);
+    }
+
+    private Map<String, String> collectNecessaryPolicies() {
+        return Map.of(
+                "Log", awsPlatformParameters.getCdpLogPolicyJson(),
+                "Audit", awsPlatformParameters.getAuditPoliciesJson(),
+                "DynamoDB", awsPlatformParameters.getCdpDynamoDbPolicyJson(),
+                "Bucket_Access", awsPlatformParameters.getCdpBucketAccessPolicyJson(),
+                "Environment", awsPlatformParameters.getEnvironmentMinimalPoliciesJson(),
+                "Ranger_Audit", awsPlatformParameters.getCdpRangerAuditS3PolicyJson(),
+                "Datalake_Admin", awsPlatformParameters.getCdpDatalakeAdminS3PolicyJson()
+        );
     }
 
     private CloudCredentialStatus verifyIamRoleIsAssumable(CloudCredential cloudCredential, CredentialVerificationContext credentialVerificationContext) {

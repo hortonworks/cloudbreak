@@ -55,6 +55,11 @@ public class YarnPlatformParameters implements PlatformParameters {
     }
 
     @Override
+    public String resourceDefinitionInSubDir(String subDir, String resource) {
+        return cloudbreakResourceReaderService.resourceDefinitionInSubDir(subDir, "yarn", resource);
+    }
+
+    @Override
     public List<StackParamValidation> additionalStackParameters() {
         List<StackParamValidation> additionalStackParameterValidations = Lists.newArrayList();
         additionalStackParameterValidations.add(new StackParamValidation(YarnConstants.YARN_LIFETIME_PARAMETER, false, Integer.class, Optional.empty()));

@@ -70,6 +70,11 @@ public class MockPlatformParameters implements PlatformParameters {
     }
 
     @Override
+    public String resourceDefinitionInSubDir(String subDir, String resource) {
+        return cloudbreakResourceReaderService.resourceDefinitionInSubDir(subDir, "mock", resource);
+    }
+
+    @Override
     public List<StackParamValidation> additionalStackParameters() {
         return new ArrayList<>();
     }

@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service;
 
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+
 import java.io.File;
 import java.io.IOException;
 
@@ -19,13 +21,22 @@ public class CloudbreakResourceReaderService {
     private String etcConfigDir;
 
     public String resourceDefinition(String prefix, String resource) {
+        return resourceDefinitionInSubDir(null, prefix, resource);
+    }
+
+    public String resourceDefinitionInSubDir(String subDir, String prefix, String resource) {
         String fileName = prefix + '-' + resource;
-        return resourceDefinition(fileName);
+        return resourceDefinitionInSubDir(subDir, fileName);
     }
 
     public String resourceDefinition(String name) {
+        return resourceDefinitionInSubDir(null, name);
+    }
+
+    public String resourceDefinitionInSubDir(String subDir, String name) {
         String fileName = name + ".json";
-        File customResourceFile = new File(etcConfigDir, fileName);
+        String path = isNotEmpty(subDir) ? etcConfigDir + subDir : etcConfigDir;
+        File customResourceFile = new File(path, fileName);
         try {
             if (customResourceFile.exists() && customResourceFile.isFile()) {
                 LOGGER.debug("Read of customised resource file: {}", customResourceFile.toPath());
@@ -36,8 +47,8 @@ public class CloudbreakResourceReaderService {
             LOGGER.error("Failed to read file: {}", customResourceFile.toPath(), e);
         }
         LOGGER.debug("Read resource file from classpath: {}", "definitions/" + fileName);
-        return FileReaderUtils.readFileFromClasspathQuietly("definitions/" + fileName);
-
+        path = isNotEmpty(subDir) ? "definitions" + subDir + "/" : "definitions/";
+        return FileReaderUtils.readFileFromClasspathQuietly(path + fileName);
     }
 
 }
