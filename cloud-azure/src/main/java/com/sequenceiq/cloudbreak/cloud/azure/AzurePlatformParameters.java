@@ -138,6 +138,11 @@ public class AzurePlatformParameters implements PlatformParameters {
     }
 
     @Override
+    public String resourceDefinitionInSubDir(String subDir, String resource) {
+        return FileReaderUtils.readFileFromClasspathQuietly("definitions" + subDir + "/azure-" + resource + ".json");
+    }
+
+    @Override
     public List<StackParamValidation> additionalStackParameters() {
         List<StackParamValidation> additionalStackParameterValidations = Lists.newArrayList();
         additionalStackParameterValidations.add(new StackParamValidation(PlatformParametersConsts.TTL_MILLIS, false, String.class, Optional.of("^[0-9]*$")));

@@ -44,6 +44,7 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 
 @Service
 public class AwsPlatformParameters implements PlatformParameters {
+
     public static final String DEDICATED_INSTANCES = "dedicatedInstances";
 
     private static final Integer START_LABEL = 97;
@@ -51,6 +52,8 @@ public class AwsPlatformParameters implements PlatformParameters {
     private static final ScriptParams SCRIPT_PARAMS = new ScriptParams("xvd", START_LABEL);
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsPlatformParameters.class);
+
+    private static final String CDP_SUB_RESOURCE_DIR = "/cdp";
 
     @Inject
     private CloudbreakResourceReaderService cloudbreakResourceReaderService;
@@ -76,12 +79,27 @@ public class AwsPlatformParameters implements PlatformParameters {
 
     private String environmentMinimalPoliciesJson;
 
+    private String cdpBucketAccessPolicyJson;
+
+    private String cdpDatalakeAdminS3PolicyJson;
+
+    private String cdpDynamoDbPolicyJson;
+
+    private String cdpLogPolicyJson;
+
+    private String cdpRangerAuditS3PolicyJson;
+
     @PostConstruct
     public void init() {
-        vmRecommendations = initVmRecommendations();
         credentialPoliciesJson = initCBPolicyJson();
         auditPoliciesJson = initAuditPolicyJson();
+        vmRecommendations = initVmRecommendations();
         environmentMinimalPoliciesJson = initEnvironmentMinimalJson();
+        cdpLogPolicyJson = initCdpLogPolicyJson();
+        cdpDynamoDbPolicyJson = initCdpDynamoDbPolicyJson();
+        cdpBucketAccessPolicyJson = initCdpBucketAccessPolicyJson();
+        cdpRangerAuditS3PolicyJson = initCdpRangerAuditS3PolicyJson();
+        cdpDatalakeAdminS3PolicyJson = initCdpDatalakeAdminS3PolicyJson();
     }
 
     @Override
@@ -135,6 +153,11 @@ public class AwsPlatformParameters implements PlatformParameters {
     }
 
     @Override
+    public String resourceDefinitionInSubDir(String subDir, String resource) {
+        return cloudbreakResourceReaderService.resourceDefinitionInSubDir(subDir, "aws", resource);
+    }
+
+    @Override
     public List<StackParamValidation> additionalStackParameters() {
         List<StackParamValidation> additionalStackParameterValidations = Lists.newArrayList();
         additionalStackParameterValidations.add(new StackParamValidation(TTL_MILLIS, false, String.class, Optional.of("^[0-9]*$")));
@@ -177,6 +200,26 @@ public class AwsPlatformParameters implements PlatformParameters {
 
     public String getEnvironmentMinimalPoliciesJson() {
         return environmentMinimalPoliciesJson;
+    }
+
+    public String getCdpBucketAccessPolicyJson() {
+        return cdpBucketAccessPolicyJson;
+    }
+
+    public String getCdpDatalakeAdminS3PolicyJson() {
+        return cdpDatalakeAdminS3PolicyJson;
+    }
+
+    public String getCdpDynamoDbPolicyJson() {
+        return cdpDynamoDbPolicyJson;
+    }
+
+    public String getCdpLogPolicyJson() {
+        return cdpLogPolicyJson;
+    }
+
+    public String getCdpRangerAuditS3PolicyJson() {
+        return cdpRangerAuditS3PolicyJson;
     }
 
     public enum AwsDiskType {
@@ -229,6 +272,31 @@ public class AwsPlatformParameters implements PlatformParameters {
         return getPolicyJson(resourceDefinition);
     }
 
+    private String initCdpBucketAccessPolicyJson() {
+        String resourceDefinition = resourceDefinitionInSubDir(CDP_SUB_RESOURCE_DIR, "cdp-bucket-access-policy");
+        return getPolicyJson(resourceDefinition);
+    }
+
+    private String initCdpDatalakeAdminS3PolicyJson() {
+        String resourceDefinition = resourceDefinitionInSubDir(CDP_SUB_RESOURCE_DIR, "cdp-datalake-admin-s3-policy");
+        return getPolicyJson(resourceDefinition);
+    }
+
+    private String initCdpDynamoDbPolicyJson() {
+        String resourceDefinition = resourceDefinitionInSubDir(CDP_SUB_RESOURCE_DIR, "cdp-dynamodb-policy");
+        return getPolicyJson(resourceDefinition);
+    }
+
+    private String initCdpLogPolicyJson() {
+        String resourceDefinition = resourceDefinitionInSubDir(CDP_SUB_RESOURCE_DIR, "cdp-log-policy");
+        return getPolicyJson(resourceDefinition);
+    }
+
+    private String initCdpRangerAuditS3PolicyJson() {
+        String resourceDefinition = resourceDefinitionInSubDir(CDP_SUB_RESOURCE_DIR, "cdp-ranger-audit-s3-policy");
+        return getPolicyJson(resourceDefinition);
+    }
+
     private String getPolicyJson(String resourceDefinition) {
         String minified = JsonUtil.minify(resourceDefinition);
         if (JsonUtil.INVALID_JSON_CONTENT.equals(minified)) {
@@ -238,4 +306,5 @@ public class AwsPlatformParameters implements PlatformParameters {
         }
         return Base64.encodeBase64String(minified.getBytes());
     }
+
 }

@@ -55,6 +55,15 @@ public interface PlatformParameters {
     String resourceDefinition(String resource);
 
     /**
+     * Return the definition of a resource in JSON format if it lies in a deeper folder hierarchy.
+     *
+     * @param subDir the path for the actual directiory that contains the resource JSON. The path should start with '/'
+     * @param resource type of the resource (available ones: "credential")
+     * @return the definition in JSON
+     */
+    String resourceDefinitionInSubDir(String subDir, String resource);
+
+    /**
      * Return the additional stack parameters
      *
      * @return the {@link StackParamValidation} of a platform
