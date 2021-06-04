@@ -90,6 +90,30 @@ class StructuredEventToClusterShapeConverterTest {
         Assert.assertTrue(syncClusterShape.getTemporaryStorageUsed());
     }
 
+    @Test
+    public void testConversionWithoutTemporaryStorage() {
+        StructuredFlowEvent structuredFlowEvent = new StructuredFlowEvent();
+        StackDetails stackDetails = new StackDetails();
+        InstanceGroupDetails master = createInstanceGroupDetails("master", 2, null);
+        stackDetails.setInstanceGroups(List.of(master));
+        structuredFlowEvent.setStack(stackDetails);
+
+        UsageProto.CDPClusterShape flowClusterShape = underTest.convert(structuredFlowEvent);
+
+        Assert.assertEquals(2, flowClusterShape.getNodes());
+        Assert.assertEquals("master=2", flowClusterShape.getHostGroupNodeCount());
+        Assert.assertFalse(flowClusterShape.getTemporaryStorageUsed());
+
+        StructuredSyncEvent structuredSyncEvent = new StructuredSyncEvent();
+        structuredSyncEvent.setStack(stackDetails);
+
+        UsageProto.CDPClusterShape syncClusterShape = underTest.convert(structuredSyncEvent);
+
+        Assert.assertEquals(2, syncClusterShape.getNodes());
+        Assert.assertEquals("master=2", syncClusterShape.getHostGroupNodeCount());
+        Assert.assertFalse(syncClusterShape.getTemporaryStorageUsed());
+    }
+
     private StackDetails createStackDetails() {
         StackDetails stackDetails = new StackDetails();
         InstanceGroupDetails master = createInstanceGroupDetails("master", 1, TemporaryStorage.ATTACHED_VOLUMES.name());
