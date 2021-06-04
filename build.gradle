@@ -22,8 +22,8 @@ plugins {
   id "com.adarshr.test-logger" version "2.1.1"
 }
 
-def cmPrivateRepoUser = System.getenv("CM_PRIVATE_REPO_USER") ?: "$defaultCmPrivateRepoUser"
-def cmPrivateRepoPassword = System.getenv("CM_PRIVATE_REPO_PASSWORD") ?: "$defaultCmPrivateRepoPassword"
+def cmPrivateRepoUser = System.getenv("CM_PRIVATE_REPO_USER")
+def cmPrivateRepoPassword = System.getenv("CM_PRIVATE_REPO_PASSWORD")
 
 def springBootApps() {
   subprojects.findAll { subproject -> subproject.plugins.hasPlugin('org.springframework.boot') }

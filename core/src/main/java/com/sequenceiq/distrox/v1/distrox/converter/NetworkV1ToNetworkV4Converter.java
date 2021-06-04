@@ -26,11 +26,11 @@ import com.sequenceiq.cloudbreak.controller.validation.loadbalancer.EndpointGate
 import com.sequenceiq.cloudbreak.converter.v4.environment.network.SubnetSelector;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
-import com.sequenceiq.distrox.api.v1.distrox.model.network.AwsNetworkV1Parameters;
-import com.sequenceiq.distrox.api.v1.distrox.model.network.AzureNetworkV1Parameters;
-import com.sequenceiq.distrox.api.v1.distrox.model.network.GcpNetworkV1Parameters;
-import com.sequenceiq.distrox.api.v1.distrox.model.network.MockNetworkV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.NetworkV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.network.aws.AwsNetworkV1Parameters;
+import com.sequenceiq.distrox.api.v1.distrox.model.network.azure.AzureNetworkV1Parameters;
+import com.sequenceiq.distrox.api.v1.distrox.model.network.gcp.GcpNetworkV1Parameters;
+import com.sequenceiq.distrox.api.v1.distrox.model.network.mock.MockNetworkV1Parameters;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 
@@ -200,11 +200,18 @@ public class NetworkV1ToNetworkV4Converter {
         NetworkV1Request response = new NetworkV1Request();
         response.setAws(getIfNotNull(network.getAws(), this::convertToAwsNetworkV1Parameters));
         response.setAzure(getIfNotNull(network.getAzure(), this::convertToAzureNetworkV1Parameters));
+        response.setGcp(getIfNotNull(network.getGcp(), this::convertToGcpNetworkV1Parameters));
         return response;
     }
 
     private AzureNetworkV1Parameters convertToAzureNetworkV1Parameters(AzureNetworkV4Parameters source) {
         AzureNetworkV1Parameters response = new AzureNetworkV1Parameters();
+        response.setSubnetId(source.getSubnetId());
+        return response;
+    }
+
+    private GcpNetworkV1Parameters convertToGcpNetworkV1Parameters(GcpNetworkV4Parameters source) {
+        GcpNetworkV1Parameters response = new GcpNetworkV1Parameters();
         response.setSubnetId(source.getSubnetId());
         return response;
     }

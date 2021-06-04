@@ -36,9 +36,9 @@ import com.sequenceiq.cloudbreak.controller.validation.loadbalancer.EndpointGate
 import com.sequenceiq.cloudbreak.converter.v4.environment.network.SubnetSelector;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
-import com.sequenceiq.distrox.api.v1.distrox.model.network.AwsNetworkV1Parameters;
-import com.sequenceiq.distrox.api.v1.distrox.model.network.AzureNetworkV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.NetworkV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.network.aws.AwsNetworkV1Parameters;
+import com.sequenceiq.distrox.api.v1.distrox.model.network.azure.AzureNetworkV1Parameters;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAwsParams;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAzureParams;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkGcpParams;

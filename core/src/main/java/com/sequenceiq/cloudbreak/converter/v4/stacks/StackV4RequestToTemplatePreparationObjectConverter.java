@@ -4,6 +4,7 @@ import static java.util.stream.Collectors.toList;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -297,8 +298,7 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
         PlacementSettingsV4Request placementSettings = source.getPlacement();
         if (placementSettings != null) {
             String region = placementSettings.getRegion();
-            String availabilityZone = placementSettings.getAvailabilityZone();
-            builder.withPlacementView(new PlacementView(region, availabilityZone));
+            builder.withPlacementView(new PlacementView(region, region));
         }
     }
 

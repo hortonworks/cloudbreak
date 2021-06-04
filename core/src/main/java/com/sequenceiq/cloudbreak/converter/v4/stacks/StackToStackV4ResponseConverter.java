@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.customdomain.Cu
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.DatabaseResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.StackImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.network.InstanceGroupNetworkV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.network.NetworkV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.tags.TagsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
@@ -198,6 +199,7 @@ public class StackToStackV4ResponseConverter extends AbstractConversionServiceAw
                     .ifPresent(hostGroup -> {
                         instanceGroupResponse.setRecipes(converterUtil.convertAll(hostGroup.getRecipes(), RecipeV4Response.class));
                         instanceGroupResponse.setRecoveryMode(hostGroup.getRecoveryMode());
+                        instanceGroupResponse.setNetwork(converterUtil.convert(instanceGroup.getInstanceGroupNetwork(), InstanceGroupNetworkV4Response.class));
                         instanceGroupResponse.getMetadata().stream()
                                 .filter(md -> md.getDiscoveryFQDN() != null)
                                 .forEach(md -> {

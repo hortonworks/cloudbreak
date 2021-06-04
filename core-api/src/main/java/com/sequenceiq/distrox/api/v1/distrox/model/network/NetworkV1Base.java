@@ -3,6 +3,10 @@ package com.sequenceiq.distrox.api.v1.distrox.model.network;
 import java.io.Serializable;
 
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.NetworkModelDescription;
+import com.sequenceiq.distrox.api.v1.distrox.model.network.aws.AwsNetworkV1Parameters;
+import com.sequenceiq.distrox.api.v1.distrox.model.network.gcp.GcpNetworkV1Parameters;
+import com.sequenceiq.distrox.api.v1.distrox.model.network.mock.MockNetworkV1Parameters;
+import com.sequenceiq.distrox.api.v1.distrox.model.network.azure.AzureNetworkV1Parameters;
 
 import io.swagger.annotations.ApiModelProperty;
 

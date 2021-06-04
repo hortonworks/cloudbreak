@@ -65,7 +65,7 @@ class InstanceGroupV1ToInstanceGroupV4ConverterTest {
         when(instanceGroupParameterConverter.convert(AWS_INSTANCE_GROUP_V1_PARAMETERS)).thenReturn(AWS_INSTANCE_GROUP_V4_PARAMETERS);
         Set<InstanceGroupV1Request> instanceGroups = prepareInstanceGroupV1Requests(InstanceGroupType.CORE);
 
-        List<InstanceGroupV4Request> results = underTest.convertTo(instanceGroups, null);
+        List<InstanceGroupV4Request> results = underTest.convertTo(null, instanceGroups, null);
 
         assertThat(results).hasSameSizeAs(instanceGroups);
 
@@ -88,7 +88,7 @@ class InstanceGroupV1ToInstanceGroupV4ConverterTest {
         when(instanceTemplateConverter.convert(any(InstanceTemplateV1Request.class), eq(environment))).thenReturn(INSTANCE_TEMPLATE_V4_REQUEST);
         Set<InstanceGroupV1Request> instanceGroups = prepareInstanceGroupV1Requests(InstanceGroupType.CORE);
 
-        List<InstanceGroupV4Request> results = underTest.convertTo(instanceGroups, environment);
+        List<InstanceGroupV4Request> results = underTest.convertTo(null, instanceGroups, environment);
 
         assertThat(results).hasSameSizeAs(instanceGroups);
 
@@ -138,7 +138,7 @@ class InstanceGroupV1ToInstanceGroupV4ConverterTest {
         }
         Set<InstanceGroupV1Request> instanceGroups = prepareInstanceGroupV1Requests(instanceGroupType);
 
-        List<InstanceGroupV4Request> results = underTest.convertTo(instanceGroups, environment);
+        List<InstanceGroupV4Request> results = underTest.convertTo(null, instanceGroups, environment);
 
         assertThat(results).hasSameSizeAs(instanceGroups);
         InstanceGroupV4Request first = results.get(0);
@@ -164,7 +164,7 @@ class InstanceGroupV1ToInstanceGroupV4ConverterTest {
         when(instanceTemplateConverter.convert(any(InstanceTemplateV4Request.class))).thenReturn(INSTANCE_TEMPLATE_V1_REQUEST);
         List<InstanceGroupV4Request> instanceGroups = prepareInstanceGroupV4Requests(InstanceGroupType.CORE);
 
-        Set<InstanceGroupV1Request> results = underTest.convertFrom(instanceGroups);
+        Set<InstanceGroupV1Request> results = underTest.convertFrom(null, instanceGroups, null);
 
         assertThat(results).hasSameSizeAs(instanceGroups);
         InstanceGroupV1Request first = results.iterator().next();
@@ -200,7 +200,7 @@ class InstanceGroupV1ToInstanceGroupV4ConverterTest {
 
         List<InstanceGroupV4Request> instanceGroups = prepareInstanceGroupV4Requests(instanceGroupType);
 
-        Set<InstanceGroupV1Request> results = underTest.convertFrom(instanceGroups);
+        Set<InstanceGroupV1Request> results = underTest.convertFrom(null, instanceGroups, null);
 
         assertThat(results).hasSameSizeAs(instanceGroups);
         InstanceGroupV1Request first = results.iterator().next();

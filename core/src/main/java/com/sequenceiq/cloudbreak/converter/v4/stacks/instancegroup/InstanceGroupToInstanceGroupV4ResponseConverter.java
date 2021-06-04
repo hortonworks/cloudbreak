@@ -4,6 +4,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.network.InstanceGroupNetworkV4Response;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
@@ -43,6 +44,8 @@ public class InstanceGroupToInstanceGroupV4ResponseConverter extends AbstractCon
         instanceGroupResponse.setName(source.getGroupName());
         instanceGroupResponse.setMinimumNodeCount(source.getMinimumNodeCount());
         instanceGroupResponse.setType(source.getInstanceGroupType());
+        instanceGroupResponse.setAvailabilityZones(source.getAvailabilityZones());
+        instanceGroupResponse.setNetwork(getConversionService().convert(source.getInstanceGroupNetwork(), InstanceGroupNetworkV4Response.class));
         instanceGroupResponse.setScalabilityOption(source.getScalabilityOption() == null ? ScalabilityOption.ALLOWED : source.getScalabilityOption());
         return instanceGroupResponse;
     }

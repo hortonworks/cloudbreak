@@ -67,18 +67,18 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
             @Param("terminatedAfter") Long terminatedAfter);
 
     @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData LEFT JOIN FETCH ig.template "
-            + "LEFT JOIN FETCH ig.securityGroup WHERE s.resourceCrn= :crn AND s.workspace.id= :workspaceId AND " + SHOW_TERMINATED_CLUSTERS_IF_REQUESTED)
+            + "LEFT JOIN FETCH ig.securityGroup LEFT JOIN FETCH ig.instanceGroupNetwork WHERE s.resourceCrn= :crn AND s.workspace.id= :workspaceId AND " + SHOW_TERMINATED_CLUSTERS_IF_REQUESTED)
     Optional<Stack> findByCrnAndWorkspaceIdWithLists(@Param("crn") String crn, @Param("workspaceId") Long workspaceId,
             @Param("showTerminated") Boolean showTerminated, @Param("terminatedAfter") Long terminatedAfter);
 
     @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData LEFT JOIN FETCH ig.template "
-            + "LEFT JOIN FETCH ig.securityGroup WHERE s.resourceCrn= :crn AND s.workspace.id= :workspaceId AND s.type = :type AND " +
+            + "LEFT JOIN FETCH ig.securityGroup LEFT JOIN FETCH ig.instanceGroupNetwork WHERE s.resourceCrn= :crn AND s.workspace.id= :workspaceId AND s.type = :type AND " +
             SHOW_TERMINATED_CLUSTERS_IF_REQUESTED)
     Optional<Stack> findByCrnAndWorkspaceIdWithLists(@Param("crn") String crn, @Param("type") StackType type, @Param("workspaceId") Long workspaceId,
             @Param("showTerminated") Boolean showTerminated, @Param("terminatedAfter") Long terminatedAfter);
 
     @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData LEFT JOIN FETCH ig.template " +
-            "LEFT JOIN FETCH ig.securityGroup WHERE s.id= :id AND (s.type is not 'TEMPLATE' OR s.type is null)")
+            "LEFT JOIN FETCH ig.securityGroup LEFT JOIN FETCH ig.instanceGroupNetwork WHERE s.id= :id AND (s.type is not 'TEMPLATE' OR s.type is null)")
     Optional<Stack> findOneWithLists(@Param("id") Long id);
 
     @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData im LEFT JOIN FETCH ig.template " +
@@ -87,11 +87,11 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
     Optional<Stack> findOneWithGateway(@Param("id") Long id);
 
     @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData LEFT JOIN FETCH ig.template " +
-            "LEFT JOIN FETCH ig.securityGroup WHERE s.resourceCrn= :crn AND (s.type is not 'TEMPLATE' OR s.type is null)")
+            "LEFT JOIN FETCH ig.securityGroup LEFT JOIN FETCH ig.instanceGroupNetwork WHERE s.resourceCrn= :crn AND (s.type is not 'TEMPLATE' OR s.type is null)")
     Optional<Stack> findOneByCrnWithLists(@Param("crn") String crn);
 
     @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData LEFT JOIN FETCH ig.template " +
-            "LEFT JOIN FETCH ig.securityGroup LEFT JOIN FETCH s.cluster c LEFT JOIN FETCH c.components WHERE s.id= :id " +
+            "LEFT JOIN FETCH ig.securityGroup LEFT JOIN FETCH ig.instanceGroupNetwork LEFT JOIN FETCH s.cluster c LEFT JOIN FETCH c.components WHERE s.id= :id " +
             "AND (s.type is not 'TEMPLATE' OR s.type is null)")
     Optional<Stack> findOneWithCluster(@Param("id") Long id);
 

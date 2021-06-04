@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -28,6 +29,7 @@ import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.InstanceGroupV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.NetworkV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.tags.TagsV1Request;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -84,7 +86,8 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setAuthentication(getIfNotNull(environment.getAuthentication(), authenticationConverter::convert));
         request.setImage(getIfNotNull(source.getImage(), imageConverter::convert));
         request.setCluster(getIfNotNull(source, environment, clusterConverter::convert));
-        request.setInstanceGroups(getIfNotNull(source.getInstanceGroups(), igs -> instanceGroupConverter.convertTo(igs, environment)));
+        request.setInstanceGroups(getIfNotNull(source.getInstanceGroups(), igs ->
+                instanceGroupConverter.convertTo(source.getNetwork(), igs, environment)));
         request.setNetwork(getNetwork(source.getNetwork(), environment));
         request.setAws(getIfNotNull(source.getAws(), stackParameterConverter::convert));
         request.setAzure(getIfNotNull(source.getAzure(), stackParameterConverter::convert));
@@ -173,13 +176,15 @@ public class DistroXV1RequestToStackV4RequestConverter {
     public DistroXV1Request convert(StackV4Request source) {
         DistroXV1Request request = new DistroXV1Request();
         request.setName(source.getName());
+        DetailedEnvironmentResponse env = null;
         if (source.getEnvironmentCrn() != null) {
-            getEnvironmentName(source.getEnvironmentCrn()).ifPresent(request::setEnvironmentName);
+            env = environmentClientService.getByCrn(source.getEnvironmentCrn());
+            request.setEnvironmentName(env != null ? env.getName() : null);
         }
         request.setImage(getIfNotNull(source.getImage(), imageConverter::convert));
         request.setCluster(getIfNotNull(source.getCluster(), clusterConverter::convert));
-        request.setInstanceGroups(getIfNotNull(source.getInstanceGroups(), instanceGroupConverter::convertFrom));
         request.setNetwork(getIfNotNull(source.getNetwork(), networkConverter::convertToNetworkV1Request));
+        setInstanceGroups(source, request, env);
         request.setAws(getIfNotNull(source.getAws(), stackParameterConverter::convert));
         request.setAzure(getIfNotNull(source.getAzure(), stackParameterConverter::convert));
         request.setGcp(getIfNotNull(source.getGcp(), stackParameterConverter::convert));
@@ -193,9 +198,10 @@ public class DistroXV1RequestToStackV4RequestConverter {
         return request;
     }
 
-    private Optional<String> getEnvironmentName(String envCrn) {
-        DetailedEnvironmentResponse env = environmentClientService.getByCrn(envCrn);
-        return env != null ? Optional.of(env.getName()) : Optional.empty();
+    private void setInstanceGroups(StackV4Request source, DistroXV1Request request, DetailedEnvironmentResponse env) {
+        if (source.getInstanceGroups() != null) {
+            request.setInstanceGroups(instanceGroupConverter.convertFrom(request.getNetwork(), source.getInstanceGroups(), env));
+        }
     }
 
     private CloudPlatform getCloudPlatform(DetailedEnvironmentResponse environment) {

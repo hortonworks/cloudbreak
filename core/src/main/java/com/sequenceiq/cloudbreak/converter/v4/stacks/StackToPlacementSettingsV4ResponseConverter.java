@@ -12,7 +12,6 @@ public class StackToPlacementSettingsV4ResponseConverter extends AbstractConvers
     @Override
     public PlacementSettingsV4Response convert(Stack source) {
         PlacementSettingsV4Response response = new PlacementSettingsV4Response();
-        response.setAvailabilityZone(source.getAvailabilityZone());
         response.setRegion(source.getRegion());
         return response;
     }
