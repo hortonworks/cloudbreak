@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.microsoft.azure.management.compute.implementation.DiskEncryptionSetInner;
 import com.sequenceiq.cloudbreak.cloud.EncryptionResources;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
@@ -34,13 +35,15 @@ import com.sequenceiq.common.api.type.CommonStatus;
 
 @Service
 public class AzureEncryptionResources implements EncryptionResources {
+
+    @VisibleForTesting
+    static final Pattern RESOURCE_GROUP_NAME = Pattern.compile(".*resourceGroups/([^/]+)/providers.*");
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureEncryptionResources.class);
 
     private static final Pattern ENCRYPTION_KEY_URL_VAULT_NAME = Pattern.compile("https://([^.]+)\\.vault.*");
 
     private static final Pattern DISK_ENCRYPTION_SET_NAME = Pattern.compile(".*diskEncryptionSets/([^.]+)");
-
-    private static final Pattern DISK_ENCRYPTION_SET_RESOURCE_GROUP = Pattern.compile(".*resourceGroups/([^.]+)/providers.*");
 
     @Inject
     private AzureClientService azureClientService;
@@ -135,7 +138,7 @@ public class AzureEncryptionResources implements EncryptionResources {
                     throw new IllegalArgumentException(String.format("Failed to deduce Disk Encryption Set name from given resource id \"%s\"",
                             diskEncryptionSetId));
                 }
-                matcher = DISK_ENCRYPTION_SET_RESOURCE_GROUP.matcher(diskEncryptionSetId);
+                matcher = RESOURCE_GROUP_NAME.matcher(diskEncryptionSetId);
                 if (matcher.matches()) {
                     desResourceGroupName = matcher.group(1);
                 } else {
