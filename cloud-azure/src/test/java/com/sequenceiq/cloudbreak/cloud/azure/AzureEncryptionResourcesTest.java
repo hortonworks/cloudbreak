@@ -7,6 +7,7 @@ import static com.sequenceiq.common.api.type.ResourceType.AZURE_DISK_ENCRYPTION_
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
@@ -20,11 +21,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
+import java.util.regex.Matcher;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -137,6 +141,44 @@ public class AzureEncryptionResourcesTest {
     private void initActionFailedExceptionConversion() {
         when(azureUtils.convertToActionFailedExceptionCausedByCloudConnectorException(any(Exception.class), any(String.class)))
                 .thenAnswer(invocation -> new Retry.ActionFailedException(new CloudConnectorException(invocation.getArgument(0, Exception.class))));
+    }
+
+    private static Object[][] testResourceGroupNameExtractionDataProvider() {
+        return new Object[][]{
+                //testCaseName     resourceId     expectedResourceGroupName}
+                {"testResourceGroupName - RG name has only alphabets",
+                        "/subscriptions/dummySubscriptionId/resourceGroups/" +
+                        "dummyAlphaResourceGroup/providers/Microsoft.Compute/dummyResourceObject/dummyResourceObjectId",
+                        "dummyAlphaResourceGroup"},
+                {"testResourceGroupName - RG name is combination of alphabets and numbers",
+                        "/subscriptions/dummySubscriptionId/resourceGroups/" +
+                        "dummyAlphaNumResourceGroup0910/providers/Microsoft.Compute/dummyResourceObject/dummyResourceObjectId",
+                        "dummyAlphaNumResourceGroup0910"},
+                {"testResourceGroupName - RG name is combination of alphabets, numbers and hyphens",
+                        "/subscriptions/dummySubscriptionId/resourceGroups/" +
+                        "dummyAlphaNumHyphenResourceGroup---0910/providers/Microsoft.Compute/dummyResourceObject/dummyResourceObjectId",
+                        "dummyAlphaNumHyphenResourceGroup---0910"},
+                {"testResourceGroupName - RG name is combination of alphabets, numbers, hyphens and periods",
+                        "/subscriptions/dummySubscriptionId/resourceGroups/" +
+                        "dummyAlphaNumHyphenPeriodResourceGroup---....0910/providers/Microsoft.Compute/dummyResourceObject/dummyResourceObjectId",
+                        "dummyAlphaNumHyphenPeriodResourceGroup---....0910"},
+                {"testResourceGroupName - RG name is combination of alphabets, numbers, hyphens, periods and Parentheses",
+                        "/subscriptions/dummySubscriptionId/resourceGroups/" +
+                        "dummyAlphaParenthesesPeriodResourceGroup---....)()(0910/providers/Microsoft.Compute/dummyResourceObject/dummyResourceObjectId",
+                        "dummyAlphaParenthesesPeriodResourceGroup---....)()(0910"},
+                {"testResourceGroupName - RG name is combination of alphabets, numbers, hyphens, periods, Parentheses and underscores",
+                        "/subscriptions/dummySubscriptionId/resourceGroups/" +
+                        "dummyUnderscoreResourceGroup---___....)()(0910/providers/Microsoft.Compute/dummyResourceObject/dummyResourceObjectId",
+                        "dummyUnderscoreResourceGroup---___....)()(0910"}
+        };
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("testResourceGroupNameExtractionDataProvider")
+    public void testResourceGroupNameExtraction(String testName, String resourceId, String expectedResourceGroupName) {
+        Matcher matcher = underTest.RESOURCE_GROUP_NAME.matcher(resourceId);
+        assertTrue(matcher.matches());
+        assertEquals(matcher.group(1), expectedResourceGroupName);
     }
 
     @Test
