@@ -58,7 +58,7 @@ public class AdvertisedImageCatalogService implements ImageCatalogService {
         List<Image> freeipaImages = imageCatalogV3.getImages().getFreeIpaImages();
         List<Image> images = !freeipaImages.isEmpty() ? freeipaImages : cdhImages;
         if (images.stream().noneMatch(i -> i.isAdvertised())) {
-            throw new CloudbreakImageCatalogException("There should be at least one advertised cdh image.");
+            throw new CloudbreakImageCatalogException("There should be at least one advertised image.");
         }
     }
 }
