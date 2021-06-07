@@ -44,9 +44,11 @@ public class CMRepositoryVersionUtil {
 
     public static final Versioned CLOUDERAMANAGER_VERSION_7_4_2 = () -> "7.4.2";
 
+    public static final Versioned CLOUDERA_STACK_VERSION_7_2_9 = () -> "7.2.9";
+
     public static final Versioned CLOUDERA_STACK_VERSION_7_2_10 = () -> "7.2.10";
 
-    public static final Versioned CLOUDERA_STACK_VERSION_7_2_9 = () -> "7.2.9";
+    public static final Versioned CLOUDERA_STACK_VERSION_7_2_11 = () -> "7.2.11";
 
     public static final Versioned CFM_VERSION_2_0_0_0 = () -> "2.0.0.0";
 
