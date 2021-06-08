@@ -90,6 +90,8 @@
         "ec2:ModifySubnetAttribute",
         "ec2:ModifyVpcAttribute",
         "ec2:CreateVpc",
+        "ec2:CreatePlacementGroup",
+        "ec2:DescribePlacementGroups", 
         "ec2:CreateNatGateway",
         "ec2:CreateRouteTable",
         "ec2:CreateSubnet",
