@@ -49,7 +49,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AwsInstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
-import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.EncryptionType;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -280,7 +279,7 @@ class AwsVolumeResourceBuilderTest {
 
     private Group createGroup(List<Volume> volumes, Map<String, Object> templateParameters) {
         InstanceTemplate template = new InstanceTemplate(FLAVOR, GROUP_NAME, PRIVATE_ID, volumes, InstanceStatus.CREATE_REQUESTED, templateParameters,
-                TEMPLATE_ID, IMAGE_ID, TemporaryStorage.ATTACHED_VOLUMES);
+                TEMPLATE_ID, IMAGE_ID);
         CloudInstance instance = new CloudInstance(INSTANCE_ID, template, null);
         return new Group(GROUP_NAME, InstanceGroupType.GATEWAY, singletonList(instance), null, null, null, null, null, null, ROOT_VOLUME_SIZE, null);
     }

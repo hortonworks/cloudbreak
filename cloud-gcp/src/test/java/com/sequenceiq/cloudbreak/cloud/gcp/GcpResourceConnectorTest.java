@@ -49,7 +49,6 @@ import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 import com.sequenceiq.cloudbreak.cloud.template.group.GroupResourceService;
 import com.sequenceiq.cloudbreak.cloud.template.init.ContextBuilders;
 import com.sequenceiq.cloudbreak.cloud.template.network.NetworkResourceService;
-import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -226,8 +225,7 @@ public class GcpResourceConnectorTest {
     }
 
     private InstanceTemplate instanceTemplate() {
-        return new InstanceTemplate("large", "master", 1L, new ArrayList<>(), InstanceStatus.CREATE_REQUESTED, null, 1L,
-                "image", TemporaryStorage.ATTACHED_VOLUMES);
+        return new InstanceTemplate("large", "master", 1L, new ArrayList<>(), InstanceStatus.CREATE_REQUESTED, null, 1L, "image");
     }
 
     private InstanceAuthentication instanceAuthentication() {

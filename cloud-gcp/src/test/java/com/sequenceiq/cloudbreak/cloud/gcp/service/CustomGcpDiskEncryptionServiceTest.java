@@ -21,7 +21,6 @@ import com.google.api.services.compute.model.CustomerEncryptionKey;
 import com.google.api.services.compute.model.Disk;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
-import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.common.api.type.EncryptionType;
 
 @ExtendWith(MockitoExtension.class)
@@ -83,7 +82,7 @@ public class CustomGcpDiskEncryptionServiceTest {
         parameters.put(InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID, "testurl");
 
         InstanceTemplate instanceTemplate = new InstanceTemplate("large", "master", 1L,
-                new ArrayList<>(), InstanceStatus.CREATE_REQUESTED, parameters, 1L, "image", TemporaryStorage.ATTACHED_VOLUMES);
+                new ArrayList<>(), InstanceStatus.CREATE_REQUESTED, parameters, 1L, "image");
 
         return instanceTemplate;
     }

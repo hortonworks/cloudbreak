@@ -25,7 +25,6 @@ import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
-import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -93,8 +92,7 @@ public class OpenStackFlavorVerifierTest {
     }
 
     private Group createGroup(String flavor) {
-        InstanceTemplate template =
-                new InstanceTemplate(flavor, null, null, new ArrayList<>(), null, null, null, null, TemporaryStorage.ATTACHED_VOLUMES);
+        InstanceTemplate template = new InstanceTemplate(flavor, null, null, new ArrayList<>(), null, null, null, null);
         CloudInstance skeleton = new CloudInstance("id1", template, null);
 
         Group group = new Group("name", InstanceGroupType.GATEWAY, new ArrayList<>(), null, skeleton,
