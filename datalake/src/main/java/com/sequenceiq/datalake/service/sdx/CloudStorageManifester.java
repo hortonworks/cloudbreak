@@ -15,6 +15,7 @@ import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.FileSystemV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.responses.FileSystemParameterV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.common.api.cloudstorage.AwsStorageParameters;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
 import com.sequenceiq.common.api.cloudstorage.S3Guard;
@@ -198,15 +199,16 @@ public class CloudStorageManifester {
 
     private FileSystemParameterV4Responses getFileSystemRecommendations(String blueprint,
             String clusterName, SdxCloudStorageRequest cloudStorageRequest) {
-
-        return fileSystemV4Endpoint.getFileSystemParameters(0L,
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        return ThreadBasedUserCrnProvider.doAsInternalActor(() -> fileSystemV4Endpoint.getFileSystemParametersInternal(0L,
                 blueprint,
                 clusterName,
                 "",
                 cloudStorageRequest.getBaseLocation(),
                 cloudStorageRequest.getFileSystemType().toString(),
                 false,
-                false);
+                false,
+                accountId));
     }
 
 }
