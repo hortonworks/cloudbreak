@@ -71,7 +71,6 @@ public class EndpointConfig extends ResourceConfig {
             UserProfileV4Controller.class,
             FileSystemV4Controller.class,
             UtilV4Controller.class,
-            FileSystemV4Controller.class,
             WorkspaceAwareUtilV4Controller.class,
             AutoscaleV4Controller.class,
             StackV4Controller.class,
