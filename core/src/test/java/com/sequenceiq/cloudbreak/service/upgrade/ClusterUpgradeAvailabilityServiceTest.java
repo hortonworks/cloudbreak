@@ -54,6 +54,7 @@ import com.sequenceiq.cloudbreak.service.image.ImageCatalogProvider;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageProvider;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
+import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ClusterUpgradeImageFilter;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterParams;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterResult;
@@ -88,6 +89,12 @@ public class ClusterUpgradeAvailabilityServiceTest {
     private static final String V_7_0_2 = "7.0.2";
 
     private static final StackType DATALAKE_STACK_TYPE = StackType.DATALAKE;
+
+    private static final Long WORKSPACE_ID = 1L;
+
+    private static final String CLOUD_PLATFORM = "AWS";
+
+    private static final String REGION = "region";
 
     @InjectMocks
     private ClusterUpgradeAvailabilityService underTest;
@@ -472,14 +479,25 @@ public class ClusterUpgradeAvailabilityServiceTest {
     }
 
     @Test
-    public void testFilterUpgradeNotSupportedForCustomImages() throws CloudbreakImageNotFoundException {
+    public void testFilterUpgradeOptionsFromCustomImageCatalog() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         Stack stack = createStack(createStackStatus(Status.AVAILABLE), StackType.WORKLOAD);
         com.sequenceiq.cloudbreak.cloud.model.Image currentImage = createCurrentImageWithoutImageCatalogUrl();
+        Image image = mock(Image.class);
+        ImageFilterParams imageFilterParams = mock(ImageFilterParams.class);
+        Image imageAvailableForUpgrade = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
+        ImageFilterResult filteredImages = createFilteredImages(imageAvailableForUpgrade);
+        UpgradeV4Response upgradeResponse = mock(UpgradeV4Response.class);
 
         when(imageService.getImage(stack.getId())).thenReturn(currentImage);
+        when(imageCatalogService.getImage(null, CATALOG_NAME, currentImage.getImageId())).thenReturn(StatedImage.statedImage(image, null, null));
+        when(imageFilterParamsFactory.create(image, lockComponents, stack)).thenReturn(imageFilterParams);
+        when(clusterUpgradeImageFilter.filter(accountId, WORKSPACE_ID, CATALOG_NAME, CLOUD_PLATFORM, imageFilterParams)).thenReturn(filteredImages);
+        when(upgradeOptionsResponseFactory.createV4Response(image, filteredImages, CLOUD_PLATFORM, REGION, CATALOG_NAME)).thenReturn(upgradeResponse);
+        when(upgradeResponse.getReason()).thenReturn("done");
 
         UpgradeV4Response actual = underTest.checkForUpgradesByName(stack, lockComponents, Boolean.TRUE);
-        assertNull(actual.getUpgradeCandidates());
+
+        assertEquals(upgradeResponse, actual);
     }
 
     private StackStatus createStackStatus(Status status) {
@@ -493,17 +511,18 @@ public class ClusterUpgradeAvailabilityServiceTest {
         cluster.setId(1L);
         Stack stack = new Stack();
         stack.setId(2L);
-        stack.setCloudPlatform("AWS");
+        stack.setCloudPlatform(CLOUD_PLATFORM);
         stack.setStackStatus(stackStatus);
         stack.setCluster(cluster);
         stack.setType(stackType);
+        stack.setRegion(REGION);
         Tenant t = new Tenant();
         t.setName(accountId);
         User creator = new User();
         creator.setTenant(t);
         stack.setCreator(creator);
         Workspace workspace = new Workspace();
-        workspace.setId(1L);
+        workspace.setId(WORKSPACE_ID);
         stack.setWorkspace(workspace);
         return stack;
     }

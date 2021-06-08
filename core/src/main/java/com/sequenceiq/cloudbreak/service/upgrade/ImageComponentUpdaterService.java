@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 
 @Service
 public class ImageComponentUpdaterService {
@@ -33,9 +34,15 @@ public class ImageComponentUpdaterService {
     @Inject
     private UpgradeImageInfoFactory upgradeImageInfoFactory;
 
+    @Inject
+    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
+
     public UpgradeImageInfo updateForUpgrade(String imageId, Long stackId) {
         Stack stack = stackService.getById(stackId);
         try {
+            if (restRequestThreadLocalService.getRequestedWorkspaceId() == null) {
+                restRequestThreadLocalService.setRequestedWorkspaceId(stack.getWorkspace().getId());
+            }
             UpgradeImageInfo upgradeImageInfo = upgradeImageInfoFactory.create(imageId, stackId);
             Set<Component> targetComponents = stackComponentUpdater.updateComponentsByStackId(
                     stack, upgradeImageInfo.getTargetStatedImage(), upgradeImageInfo.getCurrentImage().getUserdata());
