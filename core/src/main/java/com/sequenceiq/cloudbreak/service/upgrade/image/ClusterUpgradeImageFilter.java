@@ -133,7 +133,7 @@ public class ClusterUpgradeImageFilter {
             boolean canUpgradeMediumDuty = mediumDuty && entitlementService.haUpgradeEnabled(accountId);
             return !mediumDuty || canUpgradeMediumDuty;
         } else {
-            return blueprintUpgradeOptionValidator.isValidBlueprint(imageFilterParams.getBlueprint());
+            return blueprintUpgradeOptionValidator.isValidBlueprint(imageFilterParams.getBlueprint(), imageFilterParams.isLockComponents());
         }
     }
 
