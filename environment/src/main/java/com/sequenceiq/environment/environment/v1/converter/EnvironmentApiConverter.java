@@ -224,9 +224,10 @@ public class EnvironmentApiConverter {
 
     private AzureResourceEncryptionParametersDto azureResourceEncryptionParametersToAzureEncryptionParametersDto(
             AzureResourceEncryptionParameters azureResourceEncryptionParameters) {
-        return AzureResourceEncryptionParametersDto.builder()
+        AzureResourceEncryptionParametersDto.Builder azureResourceEncryptionParametersDto = AzureResourceEncryptionParametersDto.builder()
                 .withEncryptionKeyUrl(azureResourceEncryptionParameters.getEncryptionKeyUrl())
-                .build();
+                .withEncryptionKeyResourceGroupName(azureResourceEncryptionParameters.getEncryptionKeyResourceGroupName());
+        return azureResourceEncryptionParametersDto.build();
     }
 
     private AzureResourceGroupDto buildDefaultResourceGroupDto() {

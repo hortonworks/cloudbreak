@@ -31,17 +31,6 @@ public class AzureParameters extends BaseParameters implements AccountIdAwareRes
     @Convert(converter = ResourceGroupUsagePatternConverter.class)
     private ResourceGroupUsagePattern resourceGroupUsagePattern;
 
-    /**
-     * This field is not used anymore
-     * @deprecated This field is no longer in use.
-     * Use {@link #encryptionKeyUrl} instead.
-     */
-    @Column(name = "encryption_keyurl")
-    @Convert(converter = SecretToString.class)
-    @Deprecated(since = "CB 2.41.0", forRemoval = true)
-    @SecretValue
-    private Secret encryptionKeyUrlDummy = Secret.EMPTY;
-
     @Column(name = "encryption_key_url")
     @Convert(converter = SecretToString.class)
     @SecretValue
@@ -49,6 +38,9 @@ public class AzureParameters extends BaseParameters implements AccountIdAwareRes
 
     @Column(name = "disk_encryption_set_id")
     private String diskEncryptionSetId;
+
+    @Column(name = "encryption_key_resource_group_name")
+    private String encryptionKeyResourceGroupName;
 
     public String getResourceGroupName() {
         return resourceGroupName;
@@ -92,5 +84,13 @@ public class AzureParameters extends BaseParameters implements AccountIdAwareRes
 
     public void setDiskEncryptionSetId(String diskEncryptionSetId) {
         this.diskEncryptionSetId = diskEncryptionSetId;
+    }
+
+    public String getEncryptionKeyResourceGroupName() {
+        return encryptionKeyResourceGroupName;
+    }
+
+    public void setEncryptionKeyResourceGroupName(String encryptionKeyResourceGroupName) {
+        this.encryptionKeyResourceGroupName = encryptionKeyResourceGroupName;
     }
 }

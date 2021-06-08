@@ -57,18 +57,25 @@ public class AzureParameterValidator implements ParameterValidator {
             return validationResultBuilder.build();
         }
 
+        ValidationResult validationResult;
         AzureResourceEncryptionParametersDto azureResourceEncryptionParametersDto = azureParametersDto.getAzureResourceEncryptionParametersDto();
+        if (azureResourceEncryptionParametersDto != null) {
+            validationResult = validateEncryptionParameters(validationResultBuilder, azureResourceEncryptionParametersDto,
+                    environmentDto.getAccountId());
+            if (validationResult.hasError()) {
+                return validationResult;
+            }
+        }
+
         AzureResourceGroupDto azureResourceGroupDto = azureParametersDto.getAzureResourceGroupDto();
         if (Objects.isNull(azureResourceGroupDto)) {
             return validationResultBuilder.build();
         }
 
-        ValidationResult validationResult = validateEntitlement(validationResultBuilder, azureResourceGroupDto,
-                azureResourceEncryptionParametersDto, environmentDto.getAccountId());
+        validationResult = validateEntitlement(validationResultBuilder, azureResourceGroupDto, environmentDto.getAccountId());
         if (validationResult.hasError()) {
             return validationResult;
         }
-
         if (USE_MULTIPLE.equals(azureResourceGroupDto.getResourceGroupUsagePattern())) {
             return validateMultipleResourceGroupUsage(validationResultBuilder, azureResourceGroupDto);
         }
@@ -109,7 +116,7 @@ public class AzureParameterValidator implements ParameterValidator {
     }
     //CHECKSTYLE:OFF:FallThroughCheck
     private ValidationResult validateEntitlement(ValidationResultBuilder validationResultBuilder, AzureResourceGroupDto azureResourceGroupDto,
-            AzureResourceEncryptionParametersDto azureResourceEncryptionParametersDto, String accountId) {
+            String accountId) {
 
         ResourceGroupUsagePattern resourceGroupUsagePattern = azureResourceGroupDto.getResourceGroupUsagePattern();
         if (Objects.nonNull(resourceGroupUsagePattern)) {
@@ -133,9 +140,15 @@ public class AzureParameterValidator implements ParameterValidator {
                     break;
             }
         }
+        return validationResultBuilder.build();
+    }
+    //CHECKSTYLE:ON
+
+    private ValidationResult validateEncryptionParameters(ValidationResultBuilder validationResultBuilder,
+            AzureResourceEncryptionParametersDto azureResourceEncryptionParametersDto, String accountId) {
 
         String encryptionKeyUrl = azureResourceEncryptionParametersDto.getEncryptionKeyUrl();
-        if (Objects.nonNull(encryptionKeyUrl)) {
+        if (encryptionKeyUrl != null) {
             if (!entitlementService.isAzureDiskSSEWithCMKEnabled(accountId)) {
                 LOGGER.info("Invalid request, CDP_CB_AZURE_DISK_SSE_WITH_CMK entitlement turned off for account {}", accountId);
                 return validationResultBuilder.error(
@@ -144,17 +157,36 @@ public class AzureParameterValidator implements ParameterValidator {
                         build();
             }
         }
+        String encryptionKeyResourceGroupName = azureResourceEncryptionParametersDto.getEncryptionKeyResourceGroupName();
+        if (encryptionKeyResourceGroupName != null) {
+            if (!entitlementService.isAzureDiskSSEWithCMKEnabled(accountId)) {
+                LOGGER.info("Invalid request, CDP_CB_AZURE_DISK_SSE_WITH_CMK entitlement turned off for account {}", accountId);
+                return validationResultBuilder.error(
+                        "You specified encryptionKeyResourceGroupName to provide the resource group name which contains the encryption key" +
+                                "for Server Side Encryption of Azure Managed disks, but that feature is currently disabled. " +
+                                "Get 'CDP_CB_AZURE_DISK_SSE_WITH_CMK' enabled for your account to use SSE with CMK.").
+                        build();
+            }
+            if (encryptionKeyUrl == null) {
+                LOGGER.info("Invalid request, encryptionKeyResourceGroupName cannot be specified without encryptionKeyUrl");
+                return validationResultBuilder.error(
+                        "You specified encryptionKeyResourceGroupName to provide the resource group name which contains the encryption key for " +
+                                "Server Side Encryption of Azure Managed disks. Please specify encryptionKeyUrl to use Server Side Encryption for " +
+                                "Azure Managed disks with CMK.").
+                        build();
+            }
+        }
         String diskEncryptionSetId = azureResourceEncryptionParametersDto.getDiskEncryptionSetId();
-        if (Objects.nonNull(diskEncryptionSetId)) {
+        if (diskEncryptionSetId != null) {
             LOGGER.info("Invalid request, diskEncryptionSetId cannot be specified");
             return validationResultBuilder.error(
-                    "Specifying diskEncryptionSetId in request is Invalid." +
+                    "Specifying diskEncryptionSetId in request is Invalid. " +
                             "Please specify encryptionKeyUrl to use Server Side Encryption for Azure Managed disks with CMK.").
                     build();
         }
+        LOGGER.debug("Validation of encryption parameters is successful.");
         return validationResultBuilder.build();
     }
-    //CHECKSTYLE:ON
 
     @Override
     public CloudPlatform getcloudPlatform() {

@@ -29,6 +29,8 @@ public class AzureEnvironmentParametersConverterTest {
 
         private static final String KEY_URL = "dummy-key-url";
 
+        private static final String KEY_RESOURCE_GROUP_NAME = "dummyResourceGroupName";
+
         private static final EnvironmentView ENVIRONMENT_VIEW = new EnvironmentView();
 
         private static final long ID = 10L;
@@ -56,7 +58,9 @@ public class AzureEnvironmentParametersConverterTest {
                     .withId(ID)
                     .withAzureParameters(AzureParametersDto.builder()
                             .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder()
-                                    .withEncryptionKeyUrl(KEY_URL).build())
+                                    .withEncryptionKeyUrl(KEY_URL)
+                                    .withEncryptionKeyResourceGroupName(KEY_RESOURCE_GROUP_NAME)
+                                    .build())
                             .build())
                     .build();
             Environment environment = new Environment();
@@ -72,6 +76,7 @@ public class AzureEnvironmentParametersConverterTest {
             assertEquals(ENVIRONMENT_VIEW, azureResult.getEnvironment());
             assertEquals(ID, azureResult.getId());
             assertEquals(KEY_URL, azureResult.getEncryptionKeyUrl());
+            assertEquals(KEY_RESOURCE_GROUP_NAME, azureResult.getEncryptionKeyResourceGroupName());
         }
 
         @Test
@@ -84,6 +89,7 @@ public class AzureEnvironmentParametersConverterTest {
             parameters.setName(ENV_NAME);
             parameters.setEncryptionKeyUrl(KEY_URL);
             parameters.setDiskEncryptionSetId("DummyDesId");
+            parameters.setEncryptionKeyResourceGroupName(KEY_RESOURCE_GROUP_NAME);
 
             ParametersDto result = underTest.convertToDto(parameters);
 
@@ -92,5 +98,6 @@ public class AzureEnvironmentParametersConverterTest {
             assertEquals(ENV_NAME, result.getName());
             assertEquals(KEY_URL, result.getAzureParametersDto().getAzureResourceEncryptionParametersDto().getEncryptionKeyUrl());
             assertEquals("DummyDesId", result.getAzureParametersDto().getAzureResourceEncryptionParametersDto().getDiskEncryptionSetId());
+            assertEquals(KEY_RESOURCE_GROUP_NAME, result.getAzureParametersDto().getAzureResourceEncryptionParametersDto().getEncryptionKeyResourceGroupName());
         }
 }

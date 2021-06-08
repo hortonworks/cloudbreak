@@ -286,6 +286,7 @@ public class EnvironmentApiConverterTest {
                 .withResourceEncryptionParameters(
                         AzureResourceEncryptionParameters.builder()
                                 .withEncryptionKeyUrl("dummy-key-url")
+                                .withEncryptionKeyResourceGroupName("dummyResourceGroupName")
                                 .build())
                 .build());
         FreeIpaCreationDto freeIpaCreationDto = mock(FreeIpaCreationDto.class);
@@ -307,6 +308,8 @@ public class EnvironmentApiConverterTest {
 
         assertEquals("dummy-key-url",
                 actual.getParameters().getAzureParametersDto().getAzureResourceEncryptionParametersDto().getEncryptionKeyUrl());
+        assertEquals("dummyResourceGroupName",
+                actual.getParameters().getAzureParametersDto().getAzureResourceEncryptionParametersDto().getEncryptionKeyResourceGroupName());
     }
 
     private void assertLocation(LocationRequest request, LocationDto actual) {
@@ -341,6 +344,8 @@ public class EnvironmentApiConverterTest {
                 actual.getAzureParametersDto().getAzureResourceGroupDto().getName());
         assertEquals(request.getAzure().getResourceEncryptionParameters().getEncryptionKeyUrl(),
                 actual.getAzureParametersDto().getAzureResourceEncryptionParametersDto().getEncryptionKeyUrl());
+        assertEquals(request.getAzure().getResourceEncryptionParameters().getEncryptionKeyResourceGroupName(),
+                actual.getAzureParametersDto().getAzureResourceEncryptionParametersDto().getEncryptionKeyResourceGroupName());
     }
 
     private void assertAwsParameters(EnvironmentRequest request, ParametersDto actual) {
@@ -422,6 +427,7 @@ public class EnvironmentApiConverterTest {
         azureEnvironmentParameters.setResourceEncryptionParameters(
                 AzureResourceEncryptionParameters.builder()
                         .withEncryptionKeyUrl("dummy-key-url")
+                        .withEncryptionKeyResourceGroupName("dummyResourceGroupName")
                         .build()
         );
         return azureEnvironmentParameters;
