@@ -130,6 +130,7 @@ public class OperationDescriptions {
 
     public static class FileSystemOpDescription {
         public static final String FILE_SYSTEM_PARAMETERS = "returns filesystem parameters";
+        public static final String FILE_SYSTEM_PARAMETERS_INTERNAL = "returns filesystem parameters using internal actor";
     }
 
     public static class UtilityOpDescription {
