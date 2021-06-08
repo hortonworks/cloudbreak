@@ -21,10 +21,17 @@ public class AzureResourceEncryptionParametersDtoTest {
         assertEquals(dummyAzureResourceEncryptionParametersDto.getDiskEncryptionSetId(), "dummy-des-id");
     }
 
+    @Test
+    void testAzureResourceEncryptionParametersDtowithEncryptionKeyResourceGroupName() {
+        AzureResourceEncryptionParametersDto dummyAzureResourceEncryptionParametersDto = createAzureResourceEncryptionParametersDto();
+        assertEquals(dummyAzureResourceEncryptionParametersDto.getEncryptionKeyResourceGroupName(), "dummyResourceGroupName");
+    }
+
     private AzureResourceEncryptionParametersDto createAzureResourceEncryptionParametersDto() {
         return AzureResourceEncryptionParametersDto.builder()
                 .withDiskEncryptionSetId("dummy-des-id")
                 .withEncryptionKeyUrl("dummy-key-url")
+                .withEncryptionKeyResourceGroupName("dummyResourceGroupName")
                 .build();
     }
 }

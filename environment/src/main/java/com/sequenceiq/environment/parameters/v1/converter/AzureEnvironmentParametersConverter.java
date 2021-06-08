@@ -48,6 +48,10 @@ public class AzureEnvironmentParametersConverter extends BaseEnvironmentParamete
                 .map(AzureParametersDto::getAzureResourceEncryptionParametersDto)
                 .map(AzureResourceEncryptionParametersDto::getEncryptionKeyUrl)
                 .orElse(null));
+        azureParameters.setEncryptionKeyResourceGroupName(azureParametersDto
+                .map(AzureParametersDto::getAzureResourceEncryptionParametersDto)
+                .map(AzureResourceEncryptionParametersDto::getEncryptionKeyResourceGroupName)
+                .orElse(null));
     }
 
     @Override
@@ -65,6 +69,7 @@ public class AzureEnvironmentParametersConverter extends BaseEnvironmentParamete
                         AzureResourceEncryptionParametersDto.builder()
                                 .withEncryptionKeyUrl(azureParameters.getEncryptionKeyUrl())
                                 .withDiskEncryptionSetId(azureParameters.getDiskEncryptionSetId())
+                                .withEncryptionKeyResourceGroupName(azureParameters.getEncryptionKeyResourceGroupName())
                                 .build())
                 .build());
     }

@@ -3,15 +3,22 @@ package com.sequenceiq.environment.parameter.dto;
 public class AzureResourceEncryptionParametersDto {
     private final String encryptionKeyUrl;
 
+    private final String encryptionKeyResourceGroupName;
+
     private final String diskEncryptionSetId;
 
     private AzureResourceEncryptionParametersDto(AzureResourceEncryptionParametersDto.Builder builder) {
         encryptionKeyUrl = builder.encryptionKeyUrl;
+        encryptionKeyResourceGroupName = builder.encryptionKeyResourceGroupName;
         diskEncryptionSetId = builder.diskEncryptionSetId;
     }
 
     public String getEncryptionKeyUrl() {
         return encryptionKeyUrl;
+    }
+
+    public String getEncryptionKeyResourceGroupName() {
+        return encryptionKeyResourceGroupName;
     }
 
     public String getDiskEncryptionSetId() {
@@ -26,7 +33,8 @@ public class AzureResourceEncryptionParametersDto {
     public String toString() {
         return "AzureResourceEncryptionParametersDto{" +
                 "encryptionKeyUrl=" + encryptionKeyUrl +
-                "diskEncryptionSetId=" + diskEncryptionSetId +
+                ", encryptionKeyResourceGroupName=" + encryptionKeyResourceGroupName +
+                ", diskEncryptionSetId=" + diskEncryptionSetId +
                 '}';
     }
 
@@ -35,8 +43,15 @@ public class AzureResourceEncryptionParametersDto {
 
         private String diskEncryptionSetId;
 
+        private String encryptionKeyResourceGroupName;
+
         public AzureResourceEncryptionParametersDto.Builder withEncryptionKeyUrl(String encryptionKeyUrl) {
             this.encryptionKeyUrl = encryptionKeyUrl;
+            return this;
+        }
+
+        public AzureResourceEncryptionParametersDto.Builder withEncryptionKeyResourceGroupName(String encryptionKeyResourceGroupName) {
+            this.encryptionKeyResourceGroupName = encryptionKeyResourceGroupName;
             return this;
         }
 
