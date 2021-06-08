@@ -138,25 +138,25 @@ public class ClusterUpgradeImageFilterTest {
         ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, lockComponents, activatedParcels, StackType.WORKLOAD, blueprint);
         ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, properImages, null, null), "");
         when(imageCatalogServiceProxy.getImageFilterResult(cloudbreakImageCatalogV3)).thenReturn(imageFilterResult);
-        when(blueprintUpgradeOptionValidator.isValidBlueprint(blueprint)).thenReturn(true);
+        when(blueprintUpgradeOptionValidator.isValidBlueprint(blueprint, imageFilterParams.isLockComponents())).thenReturn(true);
 
         ImageFilterResult actual = underTest.filter(accountId, cloudbreakImageCatalogV3, CLOUD_PLATFORM, imageFilterParams);
 
         assertTrue(actual.getReason(), actual.getAvailableImages().getCdhImages().contains(this.properImage));
         assertEquals(1, actual.getAvailableImages().getCdhImages().size());
-        verify(blueprintUpgradeOptionValidator).isValidBlueprint(blueprint);
+        verify(blueprintUpgradeOptionValidator).isValidBlueprint(blueprint, imageFilterParams.isLockComponents());
     }
 
     @Test
     public void testFilterShouldNotReturnTheAvailableImageWhenTheBlueprintIsNotEligibleForUpgradeAndTheStackTypeIsWorkload() {
         ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, lockComponents, activatedParcels, StackType.WORKLOAD, blueprint);
-        when(blueprintUpgradeOptionValidator.isValidBlueprint(blueprint)).thenReturn(false);
+        when(blueprintUpgradeOptionValidator.isValidBlueprint(blueprint, imageFilterParams.isLockComponents())).thenReturn(false);
 
         ImageFilterResult actual = underTest.filter(accountId, cloudbreakImageCatalogV3, CLOUD_PLATFORM, imageFilterParams);
 
         assertEquals("The upgrade is not allowed for this template.", actual.getReason());
         assertTrue(actual.getAvailableImages().getCdhImages().isEmpty());
-        verify(blueprintUpgradeOptionValidator).isValidBlueprint(blueprint);
+        verify(blueprintUpgradeOptionValidator).isValidBlueprint(blueprint, imageFilterParams.isLockComponents());
         verifyNoInteractions(imageCatalogServiceProxy);
     }
 

@@ -3,6 +3,7 @@
   "blueprint": {
     "cdhVersion": "7.2.10",
     "displayName": "flow-management",
+    "blueprintUpgradeOption": "OS_UPGRADE_DISABLED",
     "services": [
       {
         "refName": "core_settings",
