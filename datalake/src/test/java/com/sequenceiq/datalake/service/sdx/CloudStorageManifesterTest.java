@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.FileSystemV4Endpoin
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.responses.FileSystemParameterV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.responses.FileSystemParameterV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
 import com.sequenceiq.common.api.cloudstorage.StorageLocationBase;
 import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
@@ -75,7 +76,8 @@ public class CloudStorageManifesterTest {
         environment.setCloudPlatform("AWS");
         ClusterV4Request clusterV4Request = new ClusterV4Request();
         clusterV4Request.setBlueprintName(exampleBlueprintName);
-        CloudStorageRequest cloudStorageConfigReq = underTest.initCloudStorageRequest(environment, clusterV4Request, sdxCluster, sdxClusterRequest);
+        CloudStorageRequest cloudStorageConfigReq = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                underTest.initCloudStorageRequest(environment, clusterV4Request, sdxCluster, sdxClusterRequest));
         StorageLocationBase singleRequest = cloudStorageConfigReq.getLocations().iterator().next();
 
         assertEquals(1, cloudStorageConfigReq.getIdentities().size());
@@ -116,7 +118,8 @@ public class CloudStorageManifesterTest {
         environment.setTelemetry(telemetryResponse);
         ClusterV4Request clusterV4Request = new ClusterV4Request();
         clusterV4Request.setBlueprintName(exampleBlueprintName);
-        CloudStorageRequest cloudStorageConfigReq = underTest.initCloudStorageRequest(environment, clusterV4Request, sdxCluster, sdxClusterRequest);
+        CloudStorageRequest cloudStorageConfigReq = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                underTest.initCloudStorageRequest(environment, clusterV4Request, sdxCluster, sdxClusterRequest));
         StorageLocationBase singleRequest = cloudStorageConfigReq.getLocations().iterator().next();
 
         assertEquals(2, cloudStorageConfigReq.getIdentities().size());
@@ -183,7 +186,8 @@ public class CloudStorageManifesterTest {
         environment.setTelemetry(telemetryResponse);
         ClusterV4Request clusterV4Request = new ClusterV4Request();
         clusterV4Request.setBlueprintName(exampleBlueprintName);
-        CloudStorageRequest cloudStorageConfigReq = underTest.initCloudStorageRequest(environment, clusterV4Request, sdxCluster, sdxClusterRequest);
+        CloudStorageRequest cloudStorageConfigReq = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                underTest.initCloudStorageRequest(environment, clusterV4Request, sdxCluster, sdxClusterRequest));
         StorageLocationBase singleRequest = cloudStorageConfigReq.getLocations().iterator().next();
 
         assertEquals(2, cloudStorageConfigReq.getIdentities().size());
@@ -288,14 +292,8 @@ public class CloudStorageManifesterTest {
         resp.setPropertyName("dummyPropertyName");
         responses.add(resp);
         dummyResponses.setResponses(responses);
-        when(fileSystemV4Endpoint
-                .getFileSystemParameters(anyLong(),
-                        anyString(),
-                        anyString(),
-                        anyString(),
-                        anyString(),
-                        anyString(),
-                        anyBoolean(), anyBoolean())).thenReturn(dummyResponses);
+        when(fileSystemV4Endpoint.getFileSystemParametersInternal(anyLong(), anyString(), anyString(), anyString(),
+                        anyString(), anyString(), anyBoolean(), anyBoolean(), anyString())).thenReturn(dummyResponses);
     }
 
     @Test
