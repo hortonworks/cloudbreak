@@ -36,7 +36,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.SdkClientException;
 import com.amazonaws.services.cloudformation.AmazonCloudFormation;
-import com.amazonaws.services.ec2.model.DescribeInstanceTypesResult;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsAuthenticator;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsDefaultZoneProvider;
@@ -45,7 +44,6 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsSessionCredentialClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTagValidator;
 import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
-import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.mapper.SdkClientExceptionMapper;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsEncodedAuthorizationFailureMessageDecoder;
 import com.sequenceiq.cloudbreak.cloud.aws.conf.AwsConfig;
@@ -99,9 +97,6 @@ public class AwsValidatorsTest {
     @MockBean
     private AwsEncodedAuthorizationFailureMessageDecoder awsEncodedAuthorizationFailureMessageDecoder;
 
-    @Mock
-    private AmazonEc2Client amazonEc2Client;
-
     private AuthenticatedContext authenticatedContext;
 
     @BeforeEach
@@ -132,9 +127,7 @@ public class AwsValidatorsTest {
     public void testStackValidatorStackUnexistent() {
         doReturn(amazonCloudFormationClient).when(awsClient).createCloudFormationClient(any(), anyString());
         when(amazonCloudFormationClient.describeStacks(any())).thenThrow(new AmazonServiceException("test exist"));
-        doReturn(amazonEc2Client).when(awsClient).createEc2Client(any());
-        when(amazonEc2Client.describeInstanceTypes(any())).thenReturn(new DescribeInstanceTypesResult());
-        Assertions.assertDoesNotThrow(() -> awsStackValidatorUnderTest.validate(authenticatedContext, getTestCloudStackWithTags(Map.of())));
+        Assertions.assertDoesNotThrow(() -> awsStackValidatorUnderTest.validate(authenticatedContext, null));
     }
 
     @Test

@@ -32,7 +32,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
-import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -182,7 +181,7 @@ public class GcpMetadataCollectorTest {
     }
 
     private InstanceTemplate createInstanceTemplate(Long privateId) {
-        return new InstanceTemplate(null, null, privateId, Collections.emptyList(), null, null, null, null, TemporaryStorage.ATTACHED_VOLUMES);
+        return new InstanceTemplate(null, null, privateId, Collections.emptyList(), null, null, null, null);
     }
 
     private Map<String, Optional<NetworkInterface>> createNetworkInterfaces() {

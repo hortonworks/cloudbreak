@@ -9,7 +9,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableList;
 import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
-import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.common.api.type.EncryptionType;
 
 public class InstanceTemplate extends DynamicModel {
@@ -61,8 +60,6 @@ public class InstanceTemplate extends DynamicModel {
 
     private final String imageId;
 
-    private final TemporaryStorage temporaryStorage;
-
     @JsonCreator
     public InstanceTemplate(@JsonProperty("flavor") String flavor,
             @JsonProperty("groupName") String groupName,
@@ -71,8 +68,7 @@ public class InstanceTemplate extends DynamicModel {
             @JsonProperty("status") InstanceStatus status,
             @JsonProperty("parameters") Map<String, Object> parameters,
             @JsonProperty("templateId") Long templateId,
-            @JsonProperty("imageId") String imageId,
-            @JsonProperty("temporaryStorage") TemporaryStorage temporaryStorage) {
+            @JsonProperty("imageId") String imageId) {
         super(parameters);
         this.flavor = flavor;
         this.templateId = templateId;
@@ -81,7 +77,6 @@ public class InstanceTemplate extends DynamicModel {
         this.volumes = ImmutableList.copyOf(volumes);
         this.status = status;
         this.imageId = imageId;
-        this.temporaryStorage = temporaryStorage;
     }
 
     public String getFlavor() {
@@ -110,10 +105,6 @@ public class InstanceTemplate extends DynamicModel {
 
     public String getImageId() {
         return imageId;
-    }
-
-    public TemporaryStorage getTemporaryStorage() {
-        return temporaryStorage;
     }
 
     @Override
