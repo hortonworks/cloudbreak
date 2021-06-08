@@ -263,7 +263,14 @@ public abstract class TestContext implements ApplicationContextAware {
         Log.whenException(LOGGER, action.getClass().getSimpleName() + " action on " + entity + " by " + who);
 
         try {
-            return doAction(entity, clientClass, action, who.getAccessKey());
+            String message = String.format("Expected exception with message (%s) has not been thrown at action (%s)!",
+                    runningParameter.getExpectedMessage(), action);
+
+            doAction(entity, clientClass, action, who.getAccessKey());
+
+            getExceptionMap().put("whenException", new TestFailException(message));
+            LOGGER.error(message);
+            htmlLoggerForExceptionValidation(message, "whenException");
         } catch (Exception e) {
             exceptionValidation(expectedException, e, key, runningParameter, "whenException");
         }
