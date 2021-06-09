@@ -37,6 +37,8 @@ import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.service.HostDiscoveryService;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
@@ -136,6 +138,9 @@ public class ClusterBootstrapper {
     @Inject
     private ResourceService resourceService;
 
+    @Inject
+    private TransactionService transactionService;
+
     public void bootstrapMachines(Long stackId) throws CloudbreakException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         bootstrapOnHost(stack);
@@ -153,8 +158,8 @@ public class ClusterBootstrapper {
     }
 
     private void bootstrapOnHostInternal(Stack stack, Consumer<Stack> saveOrUpdateSaltComponent) throws CloudbreakException {
-        Set<Node> nodes = collectNodesForBootstrap(stack);
         try {
+            Set<Node> nodes = transactionService.required(() -> collectNodesForBootstrap(stack));
             List<GatewayConfig> allGatewayConfig = collectAndCheckGateways(stack);
 
             saveOrUpdateSaltComponent.accept(stack);
@@ -165,6 +170,8 @@ public class ClusterBootstrapper {
             InstanceMetaData primaryGateway = stack.getPrimaryGatewayInstance();
             saveOrchestrator(stack, primaryGateway);
             checkIfAllNodesAvailable(stack, nodes, primaryGateway);
+        } catch (TransactionExecutionException e) {
+            throw new CloudbreakException(e.getCause());
         } catch (CloudbreakOrchestratorFailedException e) {
             checkIfAnyInstanceIsNotInStartedState(stack, e);
             throw new CloudbreakException(e);
@@ -306,7 +313,7 @@ public class ClusterBootstrapper {
         Set<String> clusterNodeNames = stack.getNotTerminatedInstanceMetaDataList().stream()
                 .map(InstanceMetaData::getShortHostname).collect(Collectors.toSet());
 
-        Set<InstanceMetaData> notDeletedInstanceMetaDataSet = stack.getNotDeletedInstanceMetaDataSet();
+        Set<InstanceMetaData> notDeletedInstanceMetaDataSet = instanceMetaDataService.getNotDeletedInstanceMetadataByStackId(stack.getId());
         for (InstanceMetaData im : notDeletedInstanceMetaDataSet) {
             if (im.getPrivateIp() == null && im.getPublicIpWrapper() == null) {
                 LOGGER.debug("Skipping instance metadata because the public ip and private ips are null '{}'.", im);
@@ -326,8 +333,25 @@ public class ClusterBootstrapper {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         Set<Node> nodes = new HashSet<>();
         Set<Node> allNodes = new HashSet<>();
+
+        try {
+            transactionService.required(() -> collectNodes(stackId, upscaleCandidateAddresses, recoveryHostNames, stack, nodes, allNodes));
+            List<GatewayConfig> allGatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
+            cleanupOldSaltState(allGatewayConfigs, nodes);
+            bootstrapNewNodesOnHost(stack, allGatewayConfigs, nodes, allNodes);
+        } catch (CloudbreakOrchestratorCancelledException e) {
+            throw new CancellationException(e.getMessage());
+        } catch (CloudbreakOrchestratorException e) {
+            throw new CloudbreakException(e);
+        } catch (TransactionExecutionException e) {
+            throw new CloudbreakException(e.getCause());
+        }
+    }
+
+    private void collectNodes(Long stackId, Set<String> upscaleCandidateAddresses, Collection<String> recoveryHostNames, Stack stack,
+            Set<Node> nodes, Set<Node> allNodes) {
         boolean recoveredNodes = Integer.valueOf(recoveryHostNames.size()).equals(upscaleCandidateAddresses.size());
-        Set<InstanceMetaData> metaDataSet = stack.getReachableInstanceMetaDataSet()
+        Set<InstanceMetaData> metaDataSet = instanceMetaDataService.getReachableInstanceMetadataByStackId(stackId)
                 .stream()
                 .filter(im -> im.getPrivateIp() != null && im.getPublicIpWrapper() != null)
                 .collect(Collectors.toSet());
@@ -353,15 +377,6 @@ public class ClusterBootstrapper {
             allNodes.add(node);
         }
         instanceMetaDataService.saveAll(metaDataSet);
-        try {
-            List<GatewayConfig> allGatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
-            cleanupOldSaltState(allGatewayConfigs, nodes);
-            bootstrapNewNodesOnHost(stack, allGatewayConfigs, nodes, allNodes);
-        } catch (CloudbreakOrchestratorCancelledException e) {
-            throw new CancellationException(e.getMessage());
-        } catch (CloudbreakOrchestratorException e) {
-            throw new CloudbreakException(e);
-        }
     }
 
     private void cleanupOldSaltState(List<GatewayConfig> allGatewayConfigs, Set<Node> nodes) throws CloudbreakOrchestratorFailedException {

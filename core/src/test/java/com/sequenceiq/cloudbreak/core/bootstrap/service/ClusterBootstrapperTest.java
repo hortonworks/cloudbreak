@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.core.bootstrap.service;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -21,6 +22,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.common.service.HostDiscoveryService;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostBootstrapApiCheckerTask;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostClusterAvailabilityCheckerTask;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.context.HostBootstrapApiContext;
@@ -98,8 +100,15 @@ public class ClusterBootstrapperTest {
     @Mock
     private ResourceService resourceService;
 
+    @Mock
+    private TransactionService transactionService;
+
     @Test
     public void shouldUseReachableInstances() throws Exception {
+        doAnswer(invocation -> {
+            invocation.getArgument(0, Runnable.class).run();
+            return null;
+        }).when(transactionService).required(any(Runnable.class));
         when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
         InstanceMetaData instanceMetaData = new InstanceMetaData();
         instanceMetaData.setPrivateIp("1.1.1.1");
@@ -112,7 +121,7 @@ public class ClusterBootstrapperTest {
         instanceGroup.setTemplate(template);
         instanceMetaData.setInstanceGroup(instanceGroup);
         when(stack.getId()).thenReturn(1L);
-        when(stack.getReachableInstanceMetaDataSet()).thenReturn(Set.of(instanceMetaData));
+        when(instanceMetaDataService.getReachableInstanceMetadataByStackId(stack.getId())).thenReturn(Set.of(instanceMetaData));
         when(stack.getCustomDomain()).thenReturn("CUSTOM_DOMAIN");
         Cluster cluster = new Cluster();
         cluster.setGateway(new Gateway());
@@ -123,15 +132,19 @@ public class ClusterBootstrapperTest {
 
         underTest.bootstrapNewNodes(1L, Set.of("1.1.1.1"), List.of("host1"));
 
-        verify(stack).getReachableInstanceMetaDataSet();
+        verify(instanceMetaDataService).getReachableInstanceMetadataByStackId(1L);
         verify(gatewayConfigService).getAllGatewayConfigs(stack);
         verify(componentConfigProviderService).getImage(1L);
-        verify(instanceMetaDataService).saveAll(stack.getReachableInstanceMetaDataSet());
+        verify(instanceMetaDataService).saveAll(Set.of(instanceMetaData));
         verify(hostOrchestrator, never()).removeDeadSaltMinions(gatewayConfig);
     }
 
     @Test
     public void testcleanupOldSaltState() throws Exception {
+        doAnswer(invocation -> {
+            invocation.getArgument(0, Runnable.class).run();
+            return null;
+        }).when(transactionService).required(any(Runnable.class));
         when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
         InstanceMetaData instanceMetaData = new InstanceMetaData();
         instanceMetaData.setPrivateIp("1.1.1.1");
@@ -144,7 +157,7 @@ public class ClusterBootstrapperTest {
         instanceGroup.setTemplate(template);
         instanceMetaData.setInstanceGroup(instanceGroup);
         when(stack.getId()).thenReturn(1L);
-        when(stack.getReachableInstanceMetaDataSet()).thenReturn(Set.of(instanceMetaData));
+        when(instanceMetaDataService.getReachableInstanceMetadataByStackId(stack.getId())).thenReturn(Set.of(instanceMetaData));
         when(stack.getCustomDomain()).thenReturn("CUSTOM_DOMAIN");
         Cluster cluster = new Cluster();
         cluster.setGateway(new Gateway());
@@ -156,10 +169,10 @@ public class ClusterBootstrapperTest {
 
         underTest.bootstrapNewNodes(1L, Set.of("1.1.1.1"), List.of("host1"));
 
-        verify(stack).getReachableInstanceMetaDataSet();
+        verify(instanceMetaDataService).getReachableInstanceMetadataByStackId(1L);
         verify(gatewayConfigService).getAllGatewayConfigs(stack);
         verify(componentConfigProviderService).getImage(1L);
-        verify(instanceMetaDataService).saveAll(stack.getReachableInstanceMetaDataSet());
+        verify(instanceMetaDataService).saveAll(Set.of(instanceMetaData));
         verify(hostOrchestrator, never()).removeDeadSaltMinions(deadConfig);
         verify(hostOrchestrator, times(1)).removeDeadSaltMinions(aliveConfig);
     }

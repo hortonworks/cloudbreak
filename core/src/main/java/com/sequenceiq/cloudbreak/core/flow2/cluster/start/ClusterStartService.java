@@ -16,12 +16,15 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.publicendpoint.ClusterPublicEndpointManagementService;
@@ -49,6 +52,9 @@ public class ClusterStartService {
 
     @Inject
     private ClusterPublicEndpointManagementService clusterPublicEndpointManagementService;
+
+    @Inject
+    private TransactionService transactionService;
 
     public void updateDnsEntriesInPem(Stack stack) {
         if (clusterPublicEndpointManagementService.manageCertificateAndDnsInPem()) {
@@ -90,10 +96,16 @@ public class ClusterStartService {
     }
 
     private void updateInstancesToHealthy(StackView stack) {
-        Set<InstanceMetaData> instances = instanceMetaDataService.findNotTerminatedForStack(stack.getId());
-        for (InstanceMetaData metaData : instances) {
-            metaData.setInstanceStatus(com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_HEALTHY);
+        try {
+            transactionService.required(() -> {
+                Set<InstanceMetaData> instances = instanceMetaDataService.findNotTerminatedForStack(stack.getId());
+                for (InstanceMetaData metaData : instances) {
+                    metaData.setInstanceStatus(com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_HEALTHY);
+                }
+                instanceMetaDataService.saveAll(instances);
+            });
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
         }
-        instanceMetaDataService.saveAll(instances);
     }
 }

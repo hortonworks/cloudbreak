@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.stack;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -107,6 +108,20 @@ public class InstanceMetaDataService {
 
     public Set<InstanceMetaData> getAllInstanceMetadataByStackId(Long stackId) {
         return repository.findAllInStack(stackId);
+    }
+
+    public Set<InstanceMetaData> getNotDeletedInstanceMetadataByStackId(Long stackId) {
+        return repository.findAllInStack(stackId)
+                .stream()
+                .filter(metaData -> !metaData.isTerminated() && !metaData.isDeletedOnProvider())
+                .collect(Collectors.toSet());
+    }
+
+    public Set<InstanceMetaData> getReachableInstanceMetadataByStackId(Long stackId) {
+        return repository.findAllInStack(stackId)
+                .stream()
+                .filter(InstanceMetaData::isReachable)
+                .collect(Collectors.toSet());
     }
 
     public Set<InstanceMetaData> getAllInstanceMetadataWithoutInstaceGroupByStackId(Long stackId) {

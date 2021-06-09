@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.stack.flow;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -139,7 +140,8 @@ public class TerminationService {
 
     private void terminateMetaDataInstances(Stack stack) {
         List<InstanceMetaData> instanceMetaDatas = new ArrayList<>();
-        for (InstanceMetaData metaData : stack.getNotDeletedInstanceMetaDataSet()) {
+        Set<InstanceMetaData> notDeletedInstanceMetadataSet = instanceMetaDataService.getNotDeletedInstanceMetadataByStackId(stack.getId());
+        for (InstanceMetaData metaData : notDeletedInstanceMetadataSet) {
             metaData.setTerminationDate(clock.getCurrentTimeMillis());
             metaData.setInstanceStatus(InstanceStatus.TERMINATED);
             instanceMetaDatas.add(metaData);

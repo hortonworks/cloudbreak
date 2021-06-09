@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -284,18 +285,32 @@ public class ClusterOperationService {
         Map<String, List<String>> autoRecoveryNodesMap = new HashMap<>();
         Map<String, InstanceMetaData> autoRecoveryMetadata = new HashMap<>();
         Map<String, InstanceMetaData> failedMetaData = new HashMap<>();
-        for (String failedNode : failedNodes) {
-            instanceMetaDataService.findHostInStack(stack.getId(), failedNode).ifPresentOrElse(instanceMetaData -> {
-                hostGroupService.getRepairViewByClusterIdAndName(cluster.getId(), instanceMetaData.getInstanceGroupName()).ifPresent(hostGroup -> {
-                    if (hostGroup.getRecoveryMode() == RecoveryMode.AUTO) {
-                        validateRepair(stack, instanceMetaData);
-                        prepareForAutoRecovery(stack, autoRecoveryNodesMap, autoRecoveryMetadata, failedNode, instanceMetaData, hostGroup.getName());
-                    } else if (hostGroup.getRecoveryMode() == RecoveryMode.MANUAL) {
-                        failedMetaData.put(failedNode, instanceMetaData);
-                    }
-                });
-            }, () -> LOGGER.error("No metadata information for the node: " + failedNode));
+        Set<InstanceMetaData> notTerminatedInstanceMetadataSet = instanceMetaDataService.getAllInstanceMetadataByStackId(stack.getId()).stream()
+                .filter(i -> !i.isTerminated())
+                .collect(Collectors.toSet());
+        Set<InstanceMetaData> failedInstanceMetadataSet = notTerminatedInstanceMetadataSet.stream()
+                .filter(i -> failedNodes.contains(i.getDiscoveryFQDN()))
+                .collect(Collectors.toSet());
+        Set<String> unknownNodes = notTerminatedInstanceMetadataSet.stream()
+                .filter(i -> !failedNodes.contains(i.getDiscoveryFQDN()))
+                .map(InstanceMetaData::getDiscoveryFQDN)
+                .collect(Collectors.toSet());
+        Map<String, HostGroup> hostGroupsInCluster = hostGroupService.findHostGroupsInCluster(cluster.getId()).stream()
+                .collect(Collectors.toMap(HostGroup::getName, h -> h));
+        for (InstanceMetaData failedInstanceMetadata : failedInstanceMetadataSet) {
+            String instanceGroupName = failedInstanceMetadata.getInstanceGroupName();
+            if (hostGroupsInCluster.containsKey(instanceGroupName)) {
+                HostGroup hostGroup = hostGroupsInCluster.get(instanceGroupName);
+                if (hostGroup.getRecoveryMode() == RecoveryMode.AUTO) {
+                    validateRepair(stack, failedInstanceMetadata);
+                    prepareForAutoRecovery(stack, autoRecoveryNodesMap, autoRecoveryMetadata, failedInstanceMetadata.getDiscoveryFQDN(),
+                            failedInstanceMetadata, hostGroup.getName());
+                } else if (hostGroup.getRecoveryMode() == RecoveryMode.MANUAL) {
+                    failedMetaData.put(failedInstanceMetadata.getDiscoveryFQDN(), failedInstanceMetadata);
+                }
+            }
         }
+        LOGGER.error("No metadata information for the nodes: " + unknownNodes);
         handleChangedHosts(cluster, newHealthyNodes, autoRecoveryNodesMap, autoRecoveryMetadata, failedMetaData);
     }
 
@@ -325,9 +340,9 @@ public class ClusterOperationService {
     private void updateChangedHosts(Cluster cluster, Set<String> hostNames, Set<InstanceStatus> expectedState,
             InstanceStatus newState, ResourceEvent resourceEvent) throws TransactionService.TransactionExecutionException {
         String recoveryMessage = cloudbreakMessagesService.getMessage(resourceEvent.getMessage(), hostNames);
-        Set<InstanceMetaData> notTerminatedInstanceMetaDatasForStack = instanceMetaDataService.findNotTerminatedForStack(cluster.getStack().getId());
-        Collection<InstanceMetaData> changedHosts = new HashSet<>();
         transactionService.required(() -> {
+            Set<InstanceMetaData> notTerminatedInstanceMetaDatasForStack = instanceMetaDataService.findNotTerminatedForStack(cluster.getStack().getId());
+            Collection<InstanceMetaData> changedHosts = new HashSet<>();
             for (InstanceMetaData host : notTerminatedInstanceMetaDatasForStack) {
                 if (expectedState.contains(host.getInstanceStatus()) && hostNames.contains(host.getDiscoveryFQDN())) {
                     host.setInstanceStatus(newState);

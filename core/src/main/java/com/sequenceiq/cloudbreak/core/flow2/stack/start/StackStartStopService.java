@@ -13,6 +13,7 @@ import static java.lang.String.format;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -30,6 +31,9 @@ import com.sequenceiq.cloudbreak.cloud.event.instance.StopInstancesResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -60,6 +64,9 @@ public class StackStartStopService {
 
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
+
+    @Inject
+    private TransactionService transactionService;
 
     public void startStackStart(StackStartStopContext context) {
         Stack stack = context.getStack();
@@ -97,15 +104,20 @@ public class StackStartStopService {
 
     public void finishStackStop(StackStartStopContext context, StopInstancesResult stopInstancesResult) {
         Stack stack = context.getStack();
-        updateInstancesToStopped(stack, stack.getInstanceMetaDataAsList(), stopInstancesResult.getResults().getResults());
+        try {
+            transactionService.required(() -> updateInstancesToStopped(stack, stopInstancesResult.getResults().getResults()));
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
+        }
         validateResourceResults(context.getCloudContext(), stopInstancesResult.getErrorDetails(), stopInstancesResult.getResults(), false);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.STOPPED, "Cluster infrastructure stopped successfully.");
 
         flowMessageService.fireEventAndLog(stack.getId(), STOPPED.name(), STACK_INFRASTRUCTURE_STOPPED);
     }
 
-    private void updateInstancesToStopped(Stack stack, Iterable<InstanceMetaData> instanceMetaDataList, Collection<CloudVmInstanceStatus> instanceStatuses) {
-        for (InstanceMetaData metaData : instanceMetaDataList) {
+    private void updateInstancesToStopped(Stack stack, Collection<CloudVmInstanceStatus> instanceStatuses) {
+        Set<InstanceMetaData> allInstanceMetadataSet = instanceMetaDataService.getAllInstanceMetadataByStackId(stack.getId());
+        for (InstanceMetaData metaData : allInstanceMetadataSet) {
             Optional<CloudVmInstanceStatus> status = instanceStatuses.stream()
                     .filter(is -> is != null && is.getCloudInstance().getInstanceId() != null
                             && is.getCloudInstance().getInstanceId().equals(metaData.getInstanceId()))
@@ -118,7 +130,7 @@ public class StackStartStopService {
                 metaData.setInstanceStatus(state);
             }
         }
-        instanceMetaDataService.saveAll(instanceMetaDataList);
+        instanceMetaDataService.saveAll(allInstanceMetadataSet);
     }
 
     public void handleStackStopError(StackView stack, StackFailureEvent payload) {

@@ -16,8 +16,8 @@ public class JpaPropertiesFacory {
     private JpaPropertiesFacory() {
     }
 
-    public static Properties create(String hbm2ddlStrategy,
-            boolean debug, String dbSchemaName, CircuitBreakerType circuitBreakerType) {
+    public static Properties create(String hbm2ddlStrategy, boolean debug, String dbSchemaName, CircuitBreakerType circuitBreakerType,
+            BatchProperties batchProperties) {
         Properties properties = new Properties();
         properties.setProperty("hibernate.hbm2ddl.auto", hbm2ddlStrategy);
         properties.setProperty("hibernate.show_sql", Boolean.toString(debug));
@@ -26,6 +26,18 @@ public class JpaPropertiesFacory {
         properties.setProperty("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
         properties.setProperty("hibernate.default_schema", dbSchemaName);
         properties.setProperty("hibernate.jdbc.lob.non_contextual_creation", Boolean.toString(true));
+        if (batchProperties.getBatchSize() != null) {
+            properties.setProperty("hibernate.jdbc.batch_size", Integer.toString(batchProperties.getBatchSize()));
+        }
+        if (batchProperties.getOrderInserts() != null) {
+            properties.setProperty("hibernate.order_inserts", Boolean.toString(batchProperties.getOrderInserts()));
+        }
+        if (batchProperties.getOrderUpdates() != null) {
+            properties.setProperty("hibernate.order_updates", Boolean.toString(batchProperties.getOrderUpdates()));
+        }
+        if (batchProperties.getBatchVersionedData() != null) {
+            properties.setProperty("hibernate.jdbc.batch_versioned_data", Boolean.toString(batchProperties.getBatchVersionedData()));
+        }
 
         LOGGER.info("Hibernate NPlusOne Circuit Breaker type: {}", circuitBreakerType);
         switch (circuitBreakerType) {

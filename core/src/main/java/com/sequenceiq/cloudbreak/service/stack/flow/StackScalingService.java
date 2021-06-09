@@ -38,14 +38,15 @@ public class StackScalingService {
     public int updateRemovedResourcesState(Collection<String> instanceIds, InstanceGroup instanceGroup) throws TransactionService.TransactionExecutionException {
         return transactionService.required(() -> {
             int nodesRemoved = 0;
-            for (InstanceMetaData instanceMetaData : instanceGroup.getNotTerminatedInstanceMetaDataSet()) {
+            List<InstanceMetaData> notTerminatedInstanceMetadataSet = instanceMetaDataService.findAliveInstancesInInstanceGroup(instanceGroup.getId());
+            for (InstanceMetaData instanceMetaData : notTerminatedInstanceMetadataSet) {
                 if (instanceIds.contains(instanceMetaData.getInstanceId())) {
                     instanceMetaData.setTerminationDate(clock.getCurrentTimeMillis());
                     instanceMetaData.setInstanceStatus(InstanceStatus.TERMINATED);
-                    instanceMetaDataService.save(instanceMetaData);
                     nodesRemoved++;
                 }
             }
+            instanceMetaDataService.saveAll(notTerminatedInstanceMetadataSet);
             int nodeCount = instanceGroup.getNodeCount() - nodesRemoved;
             LOGGER.debug("Successfully terminated metadata of instances '{}' in stack.", instanceIds);
             return nodeCount;

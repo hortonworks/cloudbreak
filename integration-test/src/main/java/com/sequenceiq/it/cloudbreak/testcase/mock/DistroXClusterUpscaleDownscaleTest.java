@@ -114,7 +114,7 @@ public class DistroXClusterUpscaleDownscaleTest extends AbstractClouderaManagerT
                 .given("dx-1000-ig-worker", DistroXInstanceGroupTestDto.class)
                 .withHostGroup(HostGroupType.WORKER)
                 .withTemplate("dx-5-volume-ig-template")
-                .withNodeCount(125)
+                .withNodeCount(300)
                 .given("dx-ig-master", DistroXInstanceGroupTestDto.class)
                 .withHostGroup(HostGroupType.MASTER)
                 .given("dx-ig-gw", DistroXInstanceGroupTestDto.class)
