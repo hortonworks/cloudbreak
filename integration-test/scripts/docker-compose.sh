@@ -53,6 +53,36 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+check_primary_key () {
+    DB_NAME="$1"
+    docker exec -u postgres cbreak_commondb_1 psql -P pager=off -d "${DB_NAME}" -c "select tab.table_schema, tab.table_name \
+        from information_schema.tables tab \
+        left join information_schema.table_constraints tco \
+                   on tab.table_schema = tco.table_schema \
+                   and tab.table_name = tco.table_name \
+                   and tco.constraint_type = 'PRIMARY KEY' \
+        where tab.table_type = 'BASE TABLE' \
+              and tab.table_schema='public' \
+              and tco.constraint_name is null \
+        order by table_schema, table_name;" | grep -q "(0 rows)"
+
+    if [ $? -ne 0 ]; then
+        echo -e "\n\033[1;96m--- ERROR: There are tables in ${DB_NAME} without primary key. Process is about to terminate!\033[0m\n"
+        ./cbd kill
+        .deps/bin/docker-compose --compatibility down --remove-orphans
+        exit 1
+    fi
+}
+
+if [ "${CB_TARGET_BRANCH}" == "master" ] && [ "${PRIMARYKEY_CHECK}" == "true" ]; then
+    check_primary_key "cbdb"
+    check_primary_key "periscopedb"
+    check_primary_key "datalakedb"
+    check_primary_key "environmentdb"
+    check_primary_key "freeipadb"
+    check_primary_key "redbeamsdb"
+fi
+
 cd ..
 
 if [[ "$DOCKER_HOST" ]]; then
