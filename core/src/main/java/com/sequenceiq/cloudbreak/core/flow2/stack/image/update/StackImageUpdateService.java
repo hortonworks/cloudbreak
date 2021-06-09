@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
+import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 
 @Service
 public class StackImageUpdateService {
@@ -55,6 +56,9 @@ public class StackImageUpdateService {
 
     @Inject
     private PackageVersionChecker packageVersionChecker;
+
+    @Inject
+    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
     public void storeNewImageComponent(Stack stack, StatedImage targetImage) {
         Component imageComponent;
@@ -87,6 +91,10 @@ public class StackImageUpdateService {
 
     public StatedImage getNewImageIfVersionsMatch(Stack stack, String newImageId, String imageCatalogName, String imageCatalogUrl) {
         try {
+            if (restRequestThreadLocalService.getRequestedWorkspaceId() == null) {
+                restRequestThreadLocalService.setRequestedWorkspaceId(stack.getWorkspace().getId());
+            }
+
             Image currentImage = getCurrentImage(stack);
 
             StatedImage newImage = getNewImage(newImageId, imageCatalogName, imageCatalogUrl, currentImage);
