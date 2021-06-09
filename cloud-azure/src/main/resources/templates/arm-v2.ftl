@@ -436,6 +436,13 @@
                   ],
                   "location": "[parameters('region')]",
                   "name": "${loadBalancer.name}",
+                  "tags": {
+                    <#if userDefinedTags?? && userDefinedTags?has_content>
+                        <#list userDefinedTags?keys as key>
+                            "${key}": "${userDefinedTags[key]}"<#if key_has_next>,</#if>
+                        </#list>
+                    </#if>
+                  },
                   "properties": {
                     "backendAddressPools": [
                       {
