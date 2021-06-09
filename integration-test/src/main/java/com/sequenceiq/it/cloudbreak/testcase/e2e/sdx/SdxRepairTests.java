@@ -86,7 +86,7 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT)
+    @Test(dataProvider = TEST_CONTEXT, enabled = false)
     @Description(
             given = "there is a running Cloudbreak, and an SDX cluster in available state",
             when = "recovery called on the MASTER and then the IDBROKER host group, where the EC2 instance had been stopped",
@@ -122,7 +122,7 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT)
+    @Test(dataProvider = TEST_CONTEXT, enabled = false)
     @Description(
             given = "there is a running Cloudbreak, and an SDX medium Duty cluster in available state",
             when = "",
