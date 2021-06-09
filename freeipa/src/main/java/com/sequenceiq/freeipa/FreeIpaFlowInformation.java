@@ -10,7 +10,12 @@ import com.sequenceiq.freeipa.flow.freeipa.binduser.create.CreateBindUserFlowCon
 import com.sequenceiq.freeipa.flow.freeipa.binduser.create.event.CreateBindUserFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.cleanup.FreeIpaCleanupEvent;
 import com.sequenceiq.freeipa.flow.freeipa.cleanup.FreeIpaCleanupFlowConfig;
+import com.sequenceiq.freeipa.flow.freeipa.diagnostics.config.DiagnosticsCollectionFlowConfig;
+import com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowConfig;
 import com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionFlowConfig;
+import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayFlowConfig;
+import com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowConfig;
+import com.sequenceiq.freeipa.flow.instance.reboot.RebootFlowConfig;
 import com.sequenceiq.freeipa.flow.stack.provision.StackProvisionFlowConfig;
 import com.sequenceiq.freeipa.flow.stack.start.StackStartFlowConfig;
 import com.sequenceiq.freeipa.flow.stack.stop.StackStopFlowConfig;
@@ -27,7 +32,12 @@ public class FreeIpaFlowInformation implements ApplicationFlowInformation {
             StackStartFlowConfig.class,
             StackStopFlowConfig.class,
             FreeIpaCleanupFlowConfig.class,
-            CreateBindUserFlowConfig.class);
+            CreateBindUserFlowConfig.class,
+            DownscaleFlowConfig.class,
+            UpscaleFlowConfig.class,
+            ChangePrimaryGatewayFlowConfig.class,
+            DiagnosticsCollectionFlowConfig.class,
+            RebootFlowConfig.class);
 
     private static final List<String> PARALLEL_FLOWS = List.of(
             FreeIpaCleanupEvent.CLEANUP_EVENT.event(),
