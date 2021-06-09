@@ -328,8 +328,8 @@ public class ClusterService {
     public Cluster updateClusterMetadata(Long stackId) {
         Stack stack = stackService.getById(stackId);
         ClusterApi connector = clusterApiConnectors.getConnector(stack);
-        Set<InstanceMetaData> notTerminatedInstanceMetaDatas = instanceMetaDataService.findNotTerminatedForStack(stackId);
         if (!connector.clusterStatusService().isClusterManagerRunning()) {
+            Set<InstanceMetaData> notTerminatedInstanceMetaDatas = instanceMetaDataService.findNotTerminatedForStack(stackId);
             InstanceMetaData cmInstance = updateClusterManagerHostStatus(notTerminatedInstanceMetaDatas);
             eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(), CLUSTER_HOST_STATUS_UPDATED,
                     Arrays.asList(cmInstance.getDiscoveryFQDN(), cmInstance.getInstanceStatus().name()));
@@ -340,6 +340,7 @@ public class ClusterService {
             Map<HostName, ClusterManagerState> hostStatuses = extendedHostStatuses.getHostHealth();
             try {
                 return transactionService.required(() -> {
+                    Set<InstanceMetaData> notTerminatedInstanceMetaDatas = instanceMetaDataService.findNotTerminatedForStack(stackId);
                     List<InstanceMetaData> updatedInstanceMetaData = updateInstanceStatuses(notTerminatedInstanceMetaDatas, hostStatuses);
                     instanceMetaDataService.saveAll(updatedInstanceMetaData);
                     fireHostStatusUpdateNotification(stack, updatedInstanceMetaData);

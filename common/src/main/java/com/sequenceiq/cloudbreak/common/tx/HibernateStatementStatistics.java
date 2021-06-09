@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.common.tx;
 
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 
+import org.apache.commons.lang3.math.NumberUtils;
 import org.hibernate.BaseSessionEventListener;
 
 /**
@@ -18,12 +19,18 @@ public class HibernateStatementStatistics extends BaseSessionEventListener {
 
     private long jdbcExecuteStatementTime;
 
+    private int jdbcExecuteBatchCount;
+
+    private long jdbcExecuteBatchTime;
+
     private long jdbcPrepStart = -1;
 
     private long jdbcExecutionStart = -1;
 
+    private long jdbcExecuteBatchStart = -1;
+
     public int getQueryCount() {
-        return Math.max(jdbcPrepareStatementCount, jdbcExecuteStatementCount);
+        return NumberUtils.max(jdbcPrepareStatementCount, jdbcExecuteStatementCount, jdbcPrepareStatementCount);
     }
 
     @Override
@@ -50,13 +57,28 @@ public class HibernateStatementStatistics extends BaseSessionEventListener {
         jdbcExecutionStart = -1;
     }
 
+    @Override
+    public void jdbcExecuteBatchStart() {
+        jdbcExecuteBatchStart = System.nanoTime();
+    }
+
+    @Override
+    public void jdbcExecuteBatchEnd() {
+        jdbcExecuteBatchCount++;
+        jdbcExecuteBatchTime += System.nanoTime() - jdbcExecuteBatchStart;
+        jdbcExecuteBatchStart = -1;
+    }
+
     public String constructLogline() {
         return String.format("Hibernate Session Metrics " +
                         "%d s spent preparing %d JDBC statements; " +
-                        "%d s spent executing %d JDBC statements",
+                        "%d s spent executing %d JDBC statements; " +
+                        "%d s spent executing %d JDBC batch statements",
                 NANOSECONDS.toSeconds(jdbcPrepareStatementTime),
                 jdbcPrepareStatementCount,
                 NANOSECONDS.toSeconds(jdbcExecuteStatementTime),
-                jdbcExecuteStatementCount);
+                jdbcExecuteStatementCount,
+                NANOSECONDS.toSeconds(jdbcExecuteBatchTime),
+                jdbcExecuteBatchCount);
     }
 }

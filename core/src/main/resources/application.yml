@@ -49,8 +49,10 @@ spring:
   jpa:
     properties:
       hibernate:
-        jdbc.batch_size: 50
+        jdbc:
+          batch_size: 50
         order_inserts: true
+        order_updates: true
   lifecycle:
     timeout-per-shutdown-phase: 60
 

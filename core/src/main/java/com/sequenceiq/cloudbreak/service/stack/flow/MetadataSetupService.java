@@ -3,11 +3,6 @@ package com.sequenceiq.cloudbreak.service.stack.flow;
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.CREATED;
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.TERMINATED;
 
-import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancerMetadata;
-import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
-import com.sequenceiq.cloudbreak.service.LoadBalancerConfigService;
-import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
-import com.sequenceiq.common.api.type.LoadBalancerType;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -26,18 +21,26 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataTyp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstanceMetaData;
+import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancerMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.service.Clock;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
+import com.sequenceiq.cloudbreak.service.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.common.api.type.LoadBalancerType;
 
 @Service
 public class MetadataSetupService {
@@ -62,27 +65,43 @@ public class MetadataSetupService {
     @Inject
     private Clock clock;
 
+    @Inject
+    private TransactionService transactionService;
+
     public void cleanupRequestedInstances(Long stackId) {
-        Set<InstanceMetaData> allInstanceMetadataByStackId = instanceMetaDataService.findNotTerminatedForStack(stackId);
-        List<InstanceMetaData> requestedInstances = allInstanceMetadataByStackId.stream()
-                .filter(instanceMetaData -> InstanceStatus.REQUESTED.equals(instanceMetaData.getInstanceStatus()))
-                .collect(Collectors.toList());
-        for (InstanceMetaData inst : requestedInstances) {
-            inst.setTerminationDate(clock.getCurrentTimeMillis());
-            inst.setInstanceStatus(InstanceStatus.TERMINATED);
+        try {
+            transactionService.required(() -> {
+                Set<InstanceMetaData> allInstanceMetadataByStackId = instanceMetaDataService.findNotTerminatedForStack(stackId);
+                List<InstanceMetaData> requestedInstances = allInstanceMetadataByStackId.stream()
+                        .filter(instanceMetaData -> InstanceStatus.REQUESTED.equals(instanceMetaData.getInstanceStatus()))
+                        .collect(Collectors.toList());
+                for (InstanceMetaData inst : requestedInstances) {
+                    inst.setTerminationDate(clock.getCurrentTimeMillis());
+                    inst.setInstanceStatus(InstanceStatus.TERMINATED);
+                }
+                instanceMetaDataService.saveAll(requestedInstances);
+            });
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
         }
-        instanceMetaDataService.saveAll(requestedInstances);
     }
 
     public void cleanupRequestedInstances(Stack stack, String instanceGroupName) {
-        Optional<InstanceGroup> ig = instanceGroupService.findOneWithInstanceMetadataByGroupNameInStack(stack.getId(), instanceGroupName);
-        if (ig.isPresent()) {
-            List<InstanceMetaData> requestedInstances = instanceMetaDataService.findAllByInstanceGroupAndInstanceStatus(ig.get(), InstanceStatus.REQUESTED);
-            for (InstanceMetaData inst : requestedInstances) {
-                inst.setTerminationDate(clock.getCurrentTimeMillis());
-                inst.setInstanceStatus(InstanceStatus.TERMINATED);
-            }
-            instanceMetaDataService.saveAll(requestedInstances);
+        try {
+            transactionService.required(() -> {
+                Optional<InstanceGroup> ig = instanceGroupService.findOneWithInstanceMetadataByGroupNameInStack(stack.getId(), instanceGroupName);
+                if (ig.isPresent()) {
+                    List<InstanceMetaData> requestedInstances = instanceMetaDataService.findAllByInstanceGroupAndInstanceStatus(ig.get(),
+                            InstanceStatus.REQUESTED);
+                    for (InstanceMetaData inst : requestedInstances) {
+                        inst.setTerminationDate(clock.getCurrentTimeMillis());
+                        inst.setInstanceStatus(InstanceStatus.TERMINATED);
+                    }
+                    instanceMetaDataService.saveAll(requestedInstances);
+                }
+            });
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
         }
     }
 

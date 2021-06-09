@@ -234,15 +234,21 @@ public class ClusterBuilderService {
         clusterService.save(cluster);
     }
 
-    public void finalizeClusterInstall(Long stackId) {
+    public void finalizeClusterInstall(Long stackId) throws CloudbreakException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         Set<HostGroup> hostGroups = hostGroupService.getByClusterWithRecipes(stack.getCluster().getId());
 
-        Set<InstanceMetaData> instanceMetaDatas = loadInstanceMetadataForHostGroups(hostGroups).values()
-                .stream()
-                .flatMap(Collection::stream)
-                .collect(Collectors.toSet());
-        finalizeClusterInstallHandlerService.finalizeClusterInstall(instanceMetaDatas, stack.getCluster());
+        try {
+            transactionService.required(() -> {
+                Set<InstanceMetaData> instanceMetaDatas = loadInstanceMetadataForHostGroups(hostGroups).values()
+                        .stream()
+                        .flatMap(Collection::stream)
+                        .collect(Collectors.toSet());
+                finalizeClusterInstallHandlerService.finalizeClusterInstall(instanceMetaDatas, stack.getCluster());
+            });
+        } catch (TransactionExecutionException e) {
+            throw new CloudbreakException(e.getCause());
+        }
     }
 
     public void executePostInstallRecipes(Long stackId) throws CloudbreakException {

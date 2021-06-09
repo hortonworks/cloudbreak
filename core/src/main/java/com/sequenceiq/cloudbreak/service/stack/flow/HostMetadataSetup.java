@@ -16,12 +16,13 @@ import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
-import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
-import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -45,26 +46,41 @@ public class HostMetadataSetup {
     @Inject
     private HostOrchestrator hostOrchestrator;
 
-    public void setupHostMetadata(Long stackId) throws CloudbreakException {
-        LOGGER.debug("Setting up host metadata for the cluster.");
-        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-        Set<InstanceMetaData> allInstanceMetaData = stack.getNotDeletedInstanceMetaDataSet();
-        updateWithHostData(stack, stack.getNotDeletedInstanceMetaDataSet());
-        instanceMetaDataService.saveAll(allInstanceMetaData);
+    @Inject
+    private TransactionService transactionService;
+
+    public void setupHostMetadata(Long stackId) {
+        try {
+            transactionService.required(() -> {
+                LOGGER.debug("Setting up host metadata for the cluster.");
+                Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+                Set<InstanceMetaData> allInstanceMetadataByStackId = instanceMetaDataService.getNotDeletedInstanceMetadataByStackId(stackId);
+                updateWithHostData(stack, allInstanceMetadataByStackId);
+                instanceMetaDataService.saveAll(allInstanceMetadataByStackId);
+            });
+        } catch (TransactionExecutionException e) {
+            throw new CloudbreakRuntimeException(e.getCause());
+        }
     }
 
-    public void setupNewHostMetadata(Long stackId, Collection<String> newAddresses) throws CloudbreakException {
-        LOGGER.info("Extending host metadata: {}", newAddresses);
-        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-        Set<InstanceMetaData> newInstanceMetadata = stack.getNotDeletedInstanceMetaDataSet().stream()
-                .filter(instanceMetaData -> newAddresses.contains(instanceMetaData.getPrivateIp()))
-                .collect(Collectors.toSet());
-        updateWithHostData(stack, newInstanceMetadata);
-        selectPrimaryGwBasedOnPreviousOne(stack, newInstanceMetadata);
-        instanceMetaDataService.saveAll(newInstanceMetadata);
+    public void setupNewHostMetadata(Long stackId, Collection<String> newAddresses) {
+        try {
+            transactionService.required(() -> {
+                LOGGER.info("Extending host metadata: {}", newAddresses);
+                Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+                Set<InstanceMetaData> newInstanceMetadata = instanceMetaDataService.getNotDeletedInstanceMetadataByStackId(stackId).stream()
+                        .filter(instanceMetaData -> newAddresses.contains(instanceMetaData.getPrivateIp()))
+                        .collect(Collectors.toSet());
+                updateWithHostData(stack, newInstanceMetadata);
+                selectPrimaryGwBasedOnPreviousOne(stack, newInstanceMetadata);
+                instanceMetaDataService.saveAll(newInstanceMetadata);
+            });
+        } catch (TransactionExecutionException e) {
+            throw new CloudbreakRuntimeException(e.getCause());
+        }
     }
 
-    private void updateWithHostData(Stack stack, Collection<InstanceMetaData> metadataToUpdate) throws CloudbreakSecuritySetupException {
+    private void updateWithHostData(Stack stack, Collection<InstanceMetaData> metadataToUpdate) {
         try {
             List<String> privateIps = metadataToUpdate.stream()
                     .filter(instanceMetaData -> InstanceStatus.CREATED.equals(instanceMetaData.getInstanceStatus()))
@@ -90,7 +106,7 @@ public class HostMetadataSetup {
                 LOGGER.info("There is no hosts to update");
             }
         } catch (Exception e) {
-            throw new CloudbreakSecuritySetupException(e);
+            throw new CloudbreakRuntimeException(e);
         }
     }
 

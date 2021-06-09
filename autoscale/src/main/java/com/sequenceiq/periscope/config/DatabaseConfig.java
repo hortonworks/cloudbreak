@@ -17,6 +17,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.core.env.Environment;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -25,6 +26,7 @@ import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+import com.sequenceiq.cloudbreak.common.database.BatchProperties;
 import com.sequenceiq.cloudbreak.common.database.JpaPropertiesFacory;
 import com.sequenceiq.cloudbreak.common.tx.CircuitBreakerType;
 import com.sequenceiq.cloudbreak.util.DatabaseUtil;
@@ -83,6 +85,9 @@ public class DatabaseConfig {
     @Inject
     private PeriscopeNodeConfig periscopeNodeConfig;
 
+    @Inject
+    private Environment environment;
+
     @Bean
     public DataSource dataSource() throws SQLException {
         DatabaseUtil.createSchemaIfNeeded("postgresql", databaseAddress, dbName, dbUser, dbPassword, dbSchemaName);
@@ -122,7 +127,7 @@ public class DatabaseConfig {
         entityManagerFactory.setDataSource(dataSource());
 
         entityManagerFactory.setJpaVendorAdapter(jpaVendorAdapter());
-        entityManagerFactory.setJpaProperties(JpaPropertiesFacory.create(hbm2ddlStrategy, debug, dbSchemaName, circuitBreakerType));
+        entityManagerFactory.setJpaProperties(JpaPropertiesFacory.create(hbm2ddlStrategy, debug, dbSchemaName, circuitBreakerType, createBatchProperties()));
         entityManagerFactory.afterPropertiesSet();
         return entityManagerFactory.getObject();
     }
@@ -133,5 +138,12 @@ public class DatabaseConfig {
         hibernateJpaVendorAdapter.setShowSql(true);
         hibernateJpaVendorAdapter.setDatabase(Database.POSTGRESQL);
         return hibernateJpaVendorAdapter;
+    }
+
+    private BatchProperties createBatchProperties() {
+        return new BatchProperties(environment.getProperty("spring.jpa.properties.hibernate.jdbc.batch_size", Integer.class),
+                environment.getProperty("spring.jpa.properties.hibernate.order_inserts", Boolean.class),
+                environment.getProperty("spring.jpa.properties.hibernate.order_updates", Boolean.class),
+                environment.getProperty("spring.jpa.properties.hibernate.jdbc.batch_versioned_data", Boolean.class));
     }
 }

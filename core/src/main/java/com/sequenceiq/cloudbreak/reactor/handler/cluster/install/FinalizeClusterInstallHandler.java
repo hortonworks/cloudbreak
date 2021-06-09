@@ -11,6 +11,7 @@ import com.sequenceiq.cloudbreak.core.cluster.ClusterBuilderService;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.FinalizeClusterInstallFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.FinalizeClusterInstallRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.FinalizeClusterInstallSuccess;
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -44,6 +45,9 @@ public class FinalizeClusterInstallHandler extends ExceptionCatcherEventHandler<
             clusterBuilderService.finalizeClusterInstall(stackId);
             response = new FinalizeClusterInstallSuccess(stackId);
         } catch (RuntimeException e) {
+            LOGGER.error("ClusterInstallSuccessHandler step failed with the following message: {}", e.getMessage());
+            response = new FinalizeClusterInstallFailed(stackId, e);
+        } catch (CloudbreakException e) {
             LOGGER.error("ClusterInstallSuccessHandler step failed with the following message: {}", e.getMessage());
             response = new FinalizeClusterInstallFailed(stackId, e);
         }
