@@ -53,6 +53,7 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+
 check_primary_key () {
     set +e
     DB_NAME="$1"
