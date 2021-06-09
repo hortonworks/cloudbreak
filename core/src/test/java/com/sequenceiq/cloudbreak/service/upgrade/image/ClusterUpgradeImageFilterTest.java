@@ -26,7 +26,10 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
+import com.sequenceiq.cloudbreak.service.image.StatedImages;
 import com.sequenceiq.cloudbreak.service.image.catalog.ImageCatalogServiceProxy;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -68,6 +71,10 @@ public class ClusterUpgradeImageFilterTest {
 
     private static final StackType DATALAKE_STACK_TYPE = StackType.DATALAKE;
 
+    private static final String CATALOG_NAME = "catalog name";
+
+    private static final Long WORKSPACE_ID = 1L;
+
     @InjectMocks
     private ClusterUpgradeImageFilter underTest;
 
@@ -91,6 +98,9 @@ public class ClusterUpgradeImageFilterTest {
 
     @Mock
     private EntitlementService entitlementService;
+
+    @Mock
+    private ImageCatalogService imageCatalogService;
 
     private Image currentImage;
 
@@ -382,6 +392,34 @@ public class ClusterUpgradeImageFilterTest {
         assertTrue(actual.getReason(), actual.getAvailableImages().getCdhImages().contains(this.properImage));
         assertEquals(1, actual.getAvailableImages().getCdhImages().size());
         verifyNoInteractions(blueprintUpgradeOptionValidator);
+    }
+
+    @Test
+    public void testFilterShouldNotReturnTheAvailableImageByImageCatalogNameWhenTheBlueprintIsNotEligibleForUpgrade() {
+        ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, lockComponents, activatedParcels, StackType.WORKLOAD, blueprint);
+        when(blueprintUpgradeOptionValidator.isValidBlueprint(blueprint)).thenReturn(false);
+
+        ImageFilterResult actual = underTest.filter(accountId, WORKSPACE_ID, CATALOG_NAME, CLOUD_PLATFORM, imageFilterParams);
+
+        assertEquals("The upgrade is not allowed for this template.", actual.getReason());
+        assertTrue(actual.getAvailableImages().getCdhImages().isEmpty());
+        verify(blueprintUpgradeOptionValidator).isValidBlueprint(blueprint);
+        verifyNoInteractions(imageCatalogService);
+    }
+
+    @Test
+    public void testFilterShouldReturnTheAvailableImageByImageCatalogName() throws CloudbreakImageCatalogException {
+        List<Image> imageForUpgrade = List.of(properImage);
+        ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, lockComponents, activatedParcels, StackType.WORKLOAD, blueprint);
+        when(imageCatalogService.getImages(WORKSPACE_ID, CATALOG_NAME, CLOUD_PLATFORM))
+                .thenReturn(StatedImages.statedImages(new Images(null, imageForUpgrade, null, null), null, null));
+        when(blueprintUpgradeOptionValidator.isValidBlueprint(blueprint)).thenReturn(true);
+
+        ImageFilterResult actual = underTest.filter(accountId, WORKSPACE_ID, CATALOG_NAME, CLOUD_PLATFORM, imageFilterParams);
+
+        assertTrue(actual.getReason(), actual.getAvailableImages().getCdhImages().contains(this.properImage));
+        assertEquals(1, actual.getAvailableImages().getCdhImages().size());
+        verify(blueprintUpgradeOptionValidator).isValidBlueprint(blueprint);
     }
 
     private Image createCurrentImage() {

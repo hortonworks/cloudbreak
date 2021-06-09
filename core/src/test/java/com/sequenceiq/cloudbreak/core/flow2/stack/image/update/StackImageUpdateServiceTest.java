@@ -39,8 +39,12 @@ import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 public class StackImageUpdateServiceTest {
+
+    private static final Long WORKSPACE_ID = 123L;
 
     @Mock
     private ComponentConfigProviderService componentConfigProviderService;
@@ -60,6 +64,9 @@ public class StackImageUpdateServiceTest {
     @Mock
     private CloudbreakMessagesService messagesService;
 
+    @Mock
+    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
+
     @InjectMocks
     private StackImageUpdateService underTest;
 
@@ -74,12 +81,15 @@ public class StackImageUpdateServiceTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        Workspace workspace = new Workspace();
+        workspace.setId(WORKSPACE_ID);
 
         stack = new Stack();
         stack.setId(1L);
         stack.setName("stackname");
         stack.setRegion("region");
         stack.setCloudPlatform("AWS");
+        stack.setWorkspace(workspace);
 
         image = new Image("asdf", System.currentTimeMillis(), "asdf", "centos7", "uuid", "2.8.0", Collections.emptyMap(),
                 Collections.singletonMap("AWS", Collections.emptyMap()), null, "centos", packageVersions,
@@ -123,12 +133,28 @@ public class StackImageUpdateServiceTest {
     }
 
     @Test
-    public void testGetNewImageIfVersionsMatch() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+    public void testGetNewImageIfVersionsMatchAndWorkspaceIdIsNotInThreadLocal() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         com.sequenceiq.cloudbreak.cloud.model.Image imageInComponent =
                 new com.sequenceiq.cloudbreak.cloud.model.Image("imageOldName", Collections.emptyMap(), "centos7", "centos",
                         statedImage.getImageCatalogUrl(), statedImage.getImageCatalogName(), "uuid2", packageVersions);
+        when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(null);
         when(componentConfigProviderService.getImage(anyLong())).thenReturn(imageInComponent);
         when(imageCatalogService.getImage(anyString(), anyString(), anyString())).thenReturn(statedImage);
+
+        StatedImage newImageIfVersionsMatch = underTest.getNewImageIfVersionsMatch(stack, "newimageid", "imagecatalogname", "imagecatalogurl");
+        assertNotNull(newImageIfVersionsMatch);
+        verify(restRequestThreadLocalService).setRequestedWorkspaceId(WORKSPACE_ID);
+    }
+
+    @Test
+    public void testGetNewImageIfVersionsMatchAndWorkspaceIdIsInThreadLocal() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        com.sequenceiq.cloudbreak.cloud.model.Image imageInComponent =
+                new com.sequenceiq.cloudbreak.cloud.model.Image("imageOldName", Collections.emptyMap(), "centos7", "centos",
+                        statedImage.getImageCatalogUrl(), statedImage.getImageCatalogName(), "uuid2", packageVersions);
+        when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(WORKSPACE_ID);
+        when(componentConfigProviderService.getImage(anyLong())).thenReturn(imageInComponent);
+        when(imageCatalogService.getImage(anyString(), anyString(), anyString())).thenReturn(statedImage);
+
         StatedImage newImageIfVersionsMatch = underTest.getNewImageIfVersionsMatch(stack, "newimageid", "imagecatalogname", "imagecatalogurl");
         assertNotNull(newImageIfVersionsMatch);
     }

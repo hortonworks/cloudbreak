@@ -23,6 +23,8 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
+import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
+import com.sequenceiq.cloudbreak.service.image.StatedImages;
 import com.sequenceiq.cloudbreak.service.image.catalog.ImageCatalogServiceProxy;
 
 @Component
@@ -50,9 +52,17 @@ public class ClusterUpgradeImageFilter {
     @Inject
     private EntitlementService entitlementService;
 
+    @Inject
+    private ImageCatalogService imageCatalogService;
+
     public ImageFilterResult filter(String accountId, CloudbreakImageCatalogV3 imageCatalogV3, String cloudPlatform,
             ImageFilterParams imageFilterParams) {
         return isValidBlueprint(imageFilterParams, accountId) ? getImageFilterResult(imageCatalogV3, cloudPlatform, imageFilterParams)
+                : createEmptyResult();
+    }
+
+    public ImageFilterResult filter(String accountId, Long workspaceId, String imageCatalogName, String cloudPlatform, ImageFilterParams imageFilterParams) {
+        return isValidBlueprint(imageFilterParams, accountId) ? getImageFilterResult(workspaceId, imageCatalogName, cloudPlatform, imageFilterParams)
                 : createEmptyResult();
     }
 
@@ -64,6 +74,15 @@ public class ClusterUpgradeImageFilter {
         }
         LOGGER.debug("{} image(s) found for the given CB version", imageList.size());
         return filterImages(imageList, cloudPlatform, imageFilterParams);
+    }
+
+    private ImageFilterResult getImageFilterResult(Long workspaceId, String imageCatalogName, String cloudPlatform, ImageFilterParams imageFilterParams) {
+        try {
+            StatedImages statedImages = imageCatalogService.getImages(workspaceId, imageCatalogName, cloudPlatform);
+            return filterImages(statedImages.getImages().getCdhImages(), cloudPlatform, imageFilterParams);
+        } catch (Exception ex) {
+            return createEmptyResult();
+        }
     }
 
     private ImageFilterResult filterImages(List<Image> availableImages, String cloudPlatform, ImageFilterParams imageFilterParams) {
