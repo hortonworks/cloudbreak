@@ -1,7 +1,8 @@
 package com.sequenceiq.cloudbreak.reactor.api.event.stack.loadbalancer.handler;
 
-import java.util.Optional;
+import java.util.List;
 import java.util.Set;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -61,11 +62,11 @@ public class RegisterPublicDnsHandler extends ExceptionCatcherEventHandler<Regis
             try {
                 LOGGER.debug("Fetching instance group and instance metadata for stack.");
                 InstanceGroup instanceGroup = instanceGroupService.getPrimaryGatewayInstanceGroupByStackId(stack.getId());
-                Optional<InstanceMetaData> instanceMetaDataOptional = instanceMetaDataService.getPrimaryGatewayInstanceMetadata(stack.getId());
-                if (instanceMetaDataOptional.isPresent()) {
+                List<InstanceMetaData> instanceMetaData = instanceMetaDataService.findAliveInstancesInInstanceGroup(instanceGroup.getId());
+                if (!instanceMetaData.isEmpty()) {
                     stack.getInstanceGroups().stream()
                         .filter(ig -> ig.getId().equals(instanceGroup.getId()))
-                        .forEach(ig -> ig.setInstanceMetaData(Set.of(instanceMetaDataOptional.get())));
+                        .forEach(ig -> ig.setInstanceMetaData(Set.copyOf(instanceMetaData)));
                     LOGGER.debug("Registering load balancer public DNS entry");
                     boolean success = clusterPublicEndpointManagementService.provisionLoadBalancer(stack);
                     if (!success) {
