@@ -10,12 +10,12 @@ import javax.inject.Inject;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.service.ha.HaApplication;
 import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.service.FlowCancelService;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.dto.StackIdWithStatus;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
