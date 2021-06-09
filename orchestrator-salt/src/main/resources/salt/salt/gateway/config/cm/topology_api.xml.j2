@@ -264,6 +264,12 @@
                <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000</value>
              </param>
             {%- endif %}
+            {% if 'SSB-MVE-API' in exposed and 'MATERIALIZED_VIEW_ENGINE' in salt['pillar.get']('gateway:location') -%}
+            <param>
+              <name>SSB-MVE-API</name>
+              <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000</value>
+            </param>
+            {%- endif %}
         </provider>
     </gateway>
 
@@ -552,13 +558,24 @@
     {%- endif %}
 
     {% if 'LIVY_SERVER_FOR_SPARK3' in salt['pillar.get']('gateway:location') -%}
-        {% if 'LIVY_FOR_SPARK3_API' in exposed -%}
-        <service>
-            <role>LIVY_FOR_SPARK3</role>
-            {% for hostloc in salt['pillar.get']('gateway:location')['LIVY_SERVER_FOR_SPARK3'] -%}
-            <url>{{ protocol }}://{{ hostloc }}:{{ ports['LIVY_FOR_SPARK3_API'] }}</url>
-            {%- endfor %}
-        </service>
-        {%- endif %}
+    {% if 'LIVY_FOR_SPARK3_API' in exposed -%}
+    <service>
+        <role>LIVY_FOR_SPARK3</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['LIVY_SERVER_FOR_SPARK3'] -%}
+        <url>{{ protocol }}://{{ hostloc }}:{{ ports['LIVY_FOR_SPARK3_API'] }}</url>
+        {%- endfor %}
+    </service>
+    {%- endif %}
+    {%- endif %}
+
+    {% if 'MATERIALIZED_VIEW_ENGINE' in salt['pillar.get']('gateway:location') -%}
+    {% if 'SSB-MVE-API' in exposed -%}
+    <service>
+        <role>SSB-MVE-API</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['MATERIALIZED_VIEW_ENGINE'] -%}
+        <url>{{ protocol }}://{{ hostloc }}:{{ ports['SSB-MVE-API'] }}</url>
+        {%- endfor %}
+    </service>
+    {%- endif %}
     {%- endif %}
 </topology>

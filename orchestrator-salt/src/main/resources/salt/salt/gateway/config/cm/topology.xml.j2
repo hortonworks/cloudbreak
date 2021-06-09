@@ -189,6 +189,14 @@
                  <name>{{ aclsauthz_prefix ~ "flink.acl" }}</name>
                  <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
              </param>
+             <param>
+                 <name>{{ aclsauthz_prefix ~ "ssb-ssc-ui.acl" }}</name>
+                 <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
+             </param>
+             <param>
+                 <name>{{ aclsauthz_prefix ~ "ssb-ssc-ws.acl" }}</name>
+                 <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
+             </param>
          </provider>
     {%- endif %}
          <provider>
@@ -817,14 +825,32 @@
     {%- endif %}
 
     {% if 'FLINK_HISTORY_SERVER' in salt['pillar.get']('gateway:location') -%}
-        {% if 'FLINK' in exposed -%}
-        <service>
-            <role>FLINK</role>
-            {% for hostloc in salt['pillar.get']('gateway:location')['FLINK_HISTORY_SERVER'] -%}
-            <url>{{ protocol }}://{{ hostloc }}:{{ ports['FLINK'] }}</url>
-            {%- endfor %}
-        </service>
-        {%- endif %}
+    {% if 'FLINK' in exposed -%}
+    <service>
+        <role>FLINK</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['FLINK_HISTORY_SERVER'] -%}
+        <url>{{ protocol }}://{{ hostloc }}:{{ ports['FLINK'] }}</url>
+        {%- endfor %}
+    </service>
+    {%- endif %}
     {%- endif %}
 
+    {% if 'STREAMING_SQL_CONSOLE' in salt['pillar.get']('gateway:location') -%}
+    {% if 'SSB-SSC-UI' in exposed -%}
+    <service>
+        <role>SSB-SSC-UI</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['STREAMING_SQL_CONSOLE'] -%}
+        <url>{{ protocol }}://{{ hostloc }}:{{ ports['SSB-SSC-UI'] }}</url>
+        {%- endfor %}
+    </service>
+    {%- endif %}
+    {% if 'SSB-SSC-WS' in exposed -%}
+    <service>
+        <role>SSB-SSC-WS</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['STREAMING_SQL_CONSOLE'] -%}
+        <url>{% if protocol == 'https' %}wss{% else %}ws{% endif %}://{{ hostloc }}:{{ ports['SSB-SSC-WS'] }}</url>
+        {%- endfor %}
+    </service>
+    {%- endif %}
+    {%- endif %}
 </topology>
