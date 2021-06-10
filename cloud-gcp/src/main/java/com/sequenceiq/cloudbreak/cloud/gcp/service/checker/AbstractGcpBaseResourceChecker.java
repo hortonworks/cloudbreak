@@ -46,7 +46,7 @@ public abstract class AbstractGcpBaseResourceChecker {
         }
     }
 
-    protected GcpResourceException exceptionHandlerWithThrow(GoogleJsonResponseException ex, String name, ResourceType resourceType) {
+    protected static GcpResourceException exceptionHandlerWithThrow(GoogleJsonResponseException ex, String name, ResourceType resourceType) {
         GoogleJsonError jsonError = getGoogleJsonError(ex);
         if (jsonError != null) {
             if (jsonError.get(HTTP_CODE_KEY) != null && jsonError.get(HTTP_CODE_KEY).equals(HttpStatus.SC_NOT_FOUND)) {
@@ -60,7 +60,7 @@ public abstract class AbstractGcpBaseResourceChecker {
         }
     }
 
-    private GcpResourceException extractedGcloudError(GoogleJsonResponseException ex, GoogleJsonError jsonError) {
+    private static GcpResourceException extractedGcloudError(GoogleJsonResponseException ex, GoogleJsonError jsonError) {
         LOGGER.warn("Unable to cover the error code of {}! {}: {} with json error {}",
                 GoogleJsonResponseException.class.getSimpleName(),
                 GoogleJsonError.class.getSimpleName(),
@@ -69,7 +69,7 @@ public abstract class AbstractGcpBaseResourceChecker {
         return new GcpResourceException(ex.getDetails().getMessage());
     }
 
-    private GoogleJsonError getGoogleJsonError(GoogleJsonResponseException ex) {
+    private static GoogleJsonError getGoogleJsonError(GoogleJsonResponseException ex) {
         throwIfNull(ex, () -> new IllegalArgumentException("Unable to handle exception due to: "
                 + GoogleJsonResponseException.class.getSimpleName()
                 + " should not be null!"));
@@ -80,7 +80,7 @@ public abstract class AbstractGcpBaseResourceChecker {
         return jsonError;
     }
 
-    private GcpResourceException extractIfNoJson(GoogleJsonResponseException ex) {
+    private static GcpResourceException extractIfNoJson(GoogleJsonResponseException ex) {
         String msg = String.format("Unable to uncover the detailed information of %s since %s does not contains the details!",
                 GoogleJsonResponseException.class.getSimpleName(), GoogleJsonError.class.getSimpleName());
         LOGGER.warn(msg, ex);

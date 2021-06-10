@@ -23,6 +23,8 @@ public class GcpResourceNameService extends CloudbreakResourceNameService {
 
     private static final int INSTANCE_NAME_PART_COUNT = 3;
 
+    private static final int LOAD_BALANCER_WITH_PORT_NAME_PART_COUNT = 3;
+
     @Value("${cb.max.gcp.resource.name.length:}")
     private int maxResourceNameLength;
 
@@ -61,6 +63,11 @@ public class GcpResourceNameService extends CloudbreakResourceNameService {
                 break;
             case GCP_INSTANCE_GROUP:
                 resourceName = gcpGroupResourceName(parts);
+                break;
+            case GCP_BACKEND_SERVICE:
+            case GCP_HEALTH_CHECK:
+            case GCP_FORWARDING_RULE:
+                resourceName = gcpLoadBalancerWithPortResourceName(parts);
                 break;
             default:
                 throw new IllegalStateException("Unsupported resource type: " + resourceType);
@@ -150,6 +157,22 @@ public class GcpResourceNameService extends CloudbreakResourceNameService {
         name = normalize(stackName);
         name = adjustPartLength(name);
         name = appendPart(name, normalize(groupName));
+        name = appendHash(name, new Date());
+        name = adjustBaseLength(name, maxResourceNameLength);
+        return name;
+    }
+
+    private String gcpLoadBalancerWithPortResourceName(Object[] parts) {
+        checkArgs(LOAD_BALANCER_WITH_PORT_NAME_PART_COUNT, parts);
+        String name;
+        String stackName = String.valueOf(parts[0]);
+        String lbType = String.valueOf(parts[1]);
+        String port = String.valueOf(parts[2]);
+
+        name = normalize(stackName);
+        name = adjustPartLength(name);
+        name = appendPart(name, lbType);
+        name = appendPart(name, port);
         name = appendHash(name, new Date());
         name = adjustBaseLength(name, maxResourceNameLength);
         return name;

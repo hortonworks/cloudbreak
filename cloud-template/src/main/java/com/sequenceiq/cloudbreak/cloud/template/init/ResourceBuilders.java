@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.template.ComputeResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.template.GroupResourceBuilder;
+import com.sequenceiq.cloudbreak.cloud.template.LoadBalancerResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.template.NetworkResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.template.OrderedBuilder;
 import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
@@ -38,11 +39,16 @@ public class ResourceBuilders {
     @Autowired(required = false)
     private List<GroupResourceBuilder> group = new ArrayList<>();
 
+    @Autowired(required = false)
+    private List<LoadBalancerResourceBuilder> loadBalancer = new ArrayList<>();
+
     private final Map<Variant, List<NetworkResourceBuilder<ResourceBuilderContext>>> networkChain = new HashMap<>();
 
     private final Map<Variant, List<GroupResourceBuilder<ResourceBuilderContext>>> groupChain = new HashMap<>();
 
     private final Map<Variant, List<ComputeResourceBuilder<ResourceBuilderContext>>> computeChain = new HashMap<>();
+
+    private final Map<Variant, List<LoadBalancerResourceBuilder<ResourceBuilderContext>>> loadBalancerChain = new HashMap<>();
 
     @PostConstruct
     public void init() {
@@ -50,6 +56,7 @@ public class ResourceBuilders {
         initNetwork(comparator);
         initGroup(comparator);
         initCompute(comparator);
+        initLoadBalancer(comparator);
     }
 
     public List<NetworkResourceBuilder<ResourceBuilderContext>> network(Variant platformVariant) {
@@ -79,6 +86,15 @@ public class ResourceBuilders {
         return new ArrayList<>(groupResourceBuilders);
     }
 
+    public List<LoadBalancerResourceBuilder<ResourceBuilderContext>> loadBalancer(Variant platformVarient) {
+        List<LoadBalancerResourceBuilder<ResourceBuilderContext>> loadBalancerResourceBuilders = loadBalancerChain.get(platformVarient);
+        if (loadBalancerResourceBuilders == null) {
+            LOGGER.info("Cannot find LoadBalancerResourceBuilder for {}", platformVarient);
+            return Collections.emptyList();
+        }
+        return new ArrayList<>(loadBalancerResourceBuilders);
+    }
+
     private void initNetwork(Comparator<OrderedBuilder> comparator) {
         for (NetworkResourceBuilder<ResourceBuilderContext> builder : network) {
             List<NetworkResourceBuilder<ResourceBuilderContext>> chain = networkChain.computeIfAbsent(builder.variant(), k -> new LinkedList<>());
@@ -98,6 +114,14 @@ public class ResourceBuilders {
     private void initGroup(Comparator<OrderedBuilder> comparator) {
         for (GroupResourceBuilder<ResourceBuilderContext> builder : group) {
             List<GroupResourceBuilder<ResourceBuilderContext>> chain = groupChain.computeIfAbsent(builder.variant(), k -> new LinkedList<>());
+            chain.add(builder);
+            chain.sort(comparator);
+        }
+    }
+
+    private void initLoadBalancer(Comparator<OrderedBuilder> comparator) {
+        for (LoadBalancerResourceBuilder<ResourceBuilderContext> builder : loadBalancer) {
+            List<LoadBalancerResourceBuilder<ResourceBuilderContext>> chain = loadBalancerChain.computeIfAbsent(builder.variant(), k -> new LinkedList<>());
             chain.add(builder);
             chain.sort(comparator);
         }

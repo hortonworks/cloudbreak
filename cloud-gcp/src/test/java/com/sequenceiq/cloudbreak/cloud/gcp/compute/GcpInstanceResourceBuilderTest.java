@@ -389,7 +389,7 @@ public class GcpInstanceResourceBuilderTest {
         when(insert.setPrettyPrint(anyBoolean())).thenReturn(insert);
         when(insert.execute()).thenReturn(operation);
 
-        Operation addOperation  = new Operation();
+        Operation addOperation = new Operation();
         addOperation.setName("operation");
         addOperation.setHttpErrorStatusCode(401);
         addOperation.setHttpErrorMessage("Not Authorized");

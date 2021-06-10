@@ -117,6 +117,7 @@ public class GcpInstanceGroupResourceBuilderTest {
 
     @Test
     public void testCreateWhenEverythingGoesFine() throws Exception {
+
         when(gcpContext.getName()).thenReturn("name");
         when(group.getName()).thenReturn("group");
         when(gcpContext.getLocation()).thenReturn(location);
@@ -130,6 +131,19 @@ public class GcpInstanceGroupResourceBuilderTest {
 
     @Test
     public void testBuild() throws Exception {
+        when(gcpContext.getName()).thenReturn("name");
+        when(group.getName()).thenReturn("group");
+        when(gcpContext.getLocation()).thenReturn(location);
+        when(location.getAvailabilityZone()).thenReturn(availabilityZone);
+        when(availabilityZone.value()).thenReturn("zone");
+
+        CloudResource cloudResource = underTest.create(gcpContext, authenticatedContext, group, network);
+
+        Assertions.assertTrue(cloudResource.getName().startsWith("name-group"));
+    }
+
+    @Test
+    public void testBuildWithItemsInGroup() throws Exception {
         CloudResource resource = new CloudResource.Builder()
                 .type(ResourceType.GCP_INSTANCE_GROUP)
                 .status(CommonStatus.CREATED)
