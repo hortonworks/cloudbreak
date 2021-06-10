@@ -104,6 +104,8 @@ public class StackV4Request extends StackV4Base implements TaggableRequest {
     @ApiModelProperty(value = StackModelDescription.RESOURCE_CRN)
     private String resourceCrn;
 
+    private String variant;
+
     public String getEnvironmentCrn() {
         return environmentCrn;
     }
@@ -250,5 +252,13 @@ public class StackV4Request extends StackV4Base implements TaggableRequest {
 
     public void setResourceCrn(String resourceCrn) {
         this.resourceCrn = resourceCrn;
+    }
+
+    public String getVariant() {
+        return variant;
+    }
+
+    public void setVariant(String variant) {
+        this.variant = variant;
     }
 }

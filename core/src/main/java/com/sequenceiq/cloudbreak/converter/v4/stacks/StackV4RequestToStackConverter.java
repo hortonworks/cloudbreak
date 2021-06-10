@@ -232,7 +232,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         stack.setRegion(getIfNotNull(source.getPlacement(), s -> getRegion(source, cloudPlatform)));
         stack.setCloudPlatform(cloudPlatform);
         stack.setTags(getTags(source, environment));
-        stack.setPlatformVariant(cloudPlatform);
+        stack.setPlatformVariant(source.getVariant());
     }
 
     private void convertAsStackTemplate(StackV4Request source, Stack stack, DetailedEnvironmentResponse environment) {

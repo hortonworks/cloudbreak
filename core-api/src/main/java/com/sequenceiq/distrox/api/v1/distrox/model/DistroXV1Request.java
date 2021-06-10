@@ -54,6 +54,8 @@ public class DistroXV1Request extends DistroXV1Base implements TaggableRequest {
 
     private boolean enableLoadBalancer;
 
+    private String variant;
+
     public String getEnvironmentName() {
         return environmentName;
     }
@@ -152,6 +154,14 @@ public class DistroXV1Request extends DistroXV1Base implements TaggableRequest {
 
     public void setEnableLoadBalancer(boolean enableLoadBalancer) {
         this.enableLoadBalancer = enableLoadBalancer;
+    }
+
+    public String getVariant() {
+        return variant;
+    }
+
+    public void setVariant(String variant) {
+        this.variant = variant;
     }
 
     @JsonIgnore
