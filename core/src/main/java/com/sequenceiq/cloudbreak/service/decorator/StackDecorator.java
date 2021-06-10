@@ -2,7 +2,9 @@ package com.sequenceiq.cloudbreak.service.decorator;
 
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -32,6 +34,7 @@ import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.conf.EmbeddedDatabaseConfig;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
@@ -43,12 +46,14 @@ import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
 import com.sequenceiq.cloudbreak.domain.VolumeUsageType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.network.InstanceGroupNetwork;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.service.CdpResourceTypeProvider;
 import com.sequenceiq.cloudbreak.service.cluster.EmbeddedDatabaseService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
+import com.sequenceiq.cloudbreak.service.network.instancegroup.InstanceGroupNetworkService;
 import com.sequenceiq.cloudbreak.service.securitygroup.SecurityGroupService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
 import com.sequenceiq.cloudbreak.service.stack.SharedServiceValidator;
@@ -80,6 +85,9 @@ public class StackDecorator {
 
     @Inject
     private SecurityGroupService securityGroupService;
+
+    @Inject
+    private InstanceGroupNetworkService instanceGroupNetworkService;
 
     @Inject
     private TemplateDecorator templateDecorator;
@@ -158,7 +166,7 @@ public class StackDecorator {
                     LOGGER, "Failure policy was validated under {} ms for stack {}", stackName);
         }
 
-        measure(() -> prepareInstanceGroups(subject, request, credential, user),
+        measure(() -> prepareInstanceGroups(subject, request, credential, user, environment),
                 LOGGER, "Instance groups were prepared under {} ms for stack {}", stackName);
 
         measure(() -> validateInstanceGroups(subject),
@@ -220,11 +228,39 @@ public class StackDecorator {
         }
     }
 
+    private Set<String> getAvailabilityZoneFromEnv(InstanceGroup group, DetailedEnvironmentResponse environment) {
+        if (environment.getNetwork() != null
+                && environment.getNetwork().getSubnetMetas() != null
+                && (group.getAvailabilityZones() == null || group.getAvailabilityZones().isEmpty())) {
+            return getAvailabilityZones(environment, group.getInstanceGroupNetwork().getAttributes());
+        } else {
+            return Set.of();
+        }
+    }
+
+    private Set<String> getAvailabilityZones(DetailedEnvironmentResponse environment, Json attributes) {
+        Set<String> azs = new HashSet<>();
+        if (attributes != null) {
+            List<String> subnetIds = (List<String>) attributes.getMap().getOrDefault(NetworkConstants.SUBNET_IDS, new ArrayList<>());
+            for (String subnetId : subnetIds) {
+                for (Map.Entry<String, CloudSubnet> cloudSubnetEntry : environment.getNetwork().getSubnetMetas().entrySet()) {
+                    CloudSubnet value = cloudSubnetEntry.getValue();
+                    if (subnetId.equals(value.getId()) || subnetId.equals(value.getName())) {
+                        azs.add(value.getAvailabilityZone());
+                        break;
+                    }
+                }
+            }
+        }
+        return azs;
+    }
+
     private Credential prepareCredential(DetailedEnvironmentResponse environment) {
         return credentialConverter.convert(environment.getCredential());
     }
 
-    private void prepareInstanceGroups(Stack subject, StackV4Request request, Credential credential, User user) {
+    private void prepareInstanceGroups(Stack subject, StackV4Request request, Credential credential,
+        User user, DetailedEnvironmentResponse environment) {
         Map<String, InstanceGroupParameterResponse> instanceGroupParameterResponse = cloudParameterService
                 .getInstanceGroupParameters(extendedCloudCredentialConverter.convert(credential), getInstanceGroupParameterRequests(subject));
         CloudbreakUser cloudbreakUser = legacyRestRequestThreadLocalService.getCloudbreakUser();
@@ -258,6 +294,15 @@ public class StackDecorator {
                     securityGroup.setWorkspace(subject.getWorkspace());
                     securityGroup = securityGroupService.create(user, securityGroup);
                     instanceGroup.setSecurityGroup(securityGroup);
+                }
+            }
+            if (instanceGroup.getInstanceGroupNetwork() != null) {
+                InstanceGroupNetwork ign = instanceGroup.getInstanceGroupNetwork();
+                instanceGroup.setAvailabilityZones(getAvailabilityZoneFromEnv(instanceGroup, environment));
+                if (ign.getId() == null) {
+                    ign.setCloudPlatform(credential.cloudPlatform());
+                    ign = instanceGroupNetworkService.create(ign);
+                    instanceGroup.setInstanceGroupNetwork(ign);
                 }
             }
         });

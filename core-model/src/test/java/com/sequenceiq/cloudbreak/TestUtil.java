@@ -69,6 +69,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.stack.instance.network.InstanceGroupNetwork;
 import com.sequenceiq.cloudbreak.domain.view.StackStatusView;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
@@ -286,8 +287,13 @@ public class TestUtil {
         instanceGroup.setInstanceGroupType(instanceGroupType);
         instanceGroup.setTemplate(template);
         instanceGroup.setSecurityGroup(securityGroup(1L));
+        instanceGroup.setInstanceGroupNetwork(instanceGroupNetwork());
         instanceGroup.setInstanceMetaData(generateInstanceMetaDatas(nodeCount, id, instanceGroup));
         return instanceGroup;
+    }
+
+    private static InstanceGroupNetwork instanceGroupNetwork() {
+        return new InstanceGroupNetwork();
     }
 
     public static Network network() {

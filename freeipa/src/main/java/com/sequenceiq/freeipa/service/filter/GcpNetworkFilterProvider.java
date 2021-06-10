@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.freeipa.entity.Network;
 
 @Service
@@ -38,7 +39,7 @@ public class GcpNetworkFilterProvider implements NetworkFilterProvider {
     private Map<String, String> buildSubnetIdFilter(Collection<String> subnetIds) {
         Map<String, String> filter = new HashMap<>();
         if (subnetIds != null && !subnetIds.isEmpty()) {
-            filter.put("subnetIds", String.join(",", subnetIds));
+            filter.put(NetworkConstants.SUBNET_IDS, String.join(",", subnetIds));
         }
         return filter;
     }

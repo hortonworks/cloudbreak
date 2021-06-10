@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupViewRepository;
+import com.sequenceiq.cloudbreak.service.network.instancegroup.InstanceGroupNetworkService;
 import com.sequenceiq.cloudbreak.service.securitygroup.SecurityGroupService;
 import com.sequenceiq.cloudbreak.service.template.TemplateService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
@@ -37,6 +38,9 @@ public class InstanceGroupService {
 
     @Inject
     private TemplateService templateService;
+
+    @Inject
+    private InstanceGroupNetworkService instanceGroupNetworkService;
 
     public Set<InstanceGroup> findByStackId(Long stackId) {
         return repository.findByStackId(stackId);
@@ -64,6 +68,7 @@ public class InstanceGroupService {
                     securityGroupService.pureSave(ig.getSecurityGroup());
                     ig.getTemplate().setWorkspace(workspace);
                     templateService.savePure(ig.getTemplate());
+                    instanceGroupNetworkService.savePure(ig.getInstanceGroupNetwork());
                     InstanceGroup instanceGroup = repository.save(ig);
                     ig.getInstanceMetaDataSet().forEach(instanceMetaDataService::save);
                     return instanceGroup;

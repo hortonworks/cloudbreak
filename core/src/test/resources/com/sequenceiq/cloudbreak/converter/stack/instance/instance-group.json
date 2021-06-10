@@ -13,6 +13,9 @@
       "id"
     ]
   },
+  "network": {
+    "subnetIds": ["subnet-123"]
+  },
   "azure": {
     "discoveryName": "name"
   }

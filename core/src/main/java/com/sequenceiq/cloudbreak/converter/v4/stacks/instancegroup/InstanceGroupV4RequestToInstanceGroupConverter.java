@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.stack.instance.network.InstanceGroupNetwork;
 import com.sequenceiq.common.api.type.ScalabilityOption;
 
 @Component
@@ -40,7 +41,16 @@ public class InstanceGroupV4RequestToInstanceGroupConverter extends AbstractConv
         if (source.getNodeCount() > 0) {
             addInstanceMetadatas(source, instanceGroup);
         }
+        setNetwork(source, instanceGroup);
         return instanceGroup;
+    }
+
+    private void setNetwork(InstanceGroupV4Request source, InstanceGroup instanceGroup) {
+        if (source.getNetwork() != null) {
+            source.getNetwork().setCloudPlatform(source.getCloudPlatform());
+            InstanceGroupNetwork instanceGroupNetwork = getConversionService().convert(source.getNetwork(), InstanceGroupNetwork.class);
+            instanceGroup.setInstanceGroupNetwork(instanceGroupNetwork);
+        }
     }
 
     private void addInstanceMetadatas(InstanceGroupV4Request request, InstanceGroup instanceGroup) {

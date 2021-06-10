@@ -9,6 +9,7 @@ import javax.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.network.InstanceGroupNetworkV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupV4Base;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.securitygroup.SecurityGroupV4Request;
@@ -38,6 +39,9 @@ public class InstanceGroupV4Request extends InstanceGroupV4Base {
 
     @ApiModelProperty(value = HostGroupModelDescription.RECOVERY_MODE, allowableValues = "MANUAL,AUTO")
     private RecoveryMode recoveryMode = RecoveryMode.MANUAL;
+
+    @ApiModelProperty(InstanceGroupModelDescription.NETWORK)
+    private InstanceGroupNetworkV4Request network;
 
     public InstanceTemplateV4Request getTemplate() {
         return template;
@@ -69,5 +73,13 @@ public class InstanceGroupV4Request extends InstanceGroupV4Base {
 
     public void setRecoveryMode(RecoveryMode recoveryMode) {
         this.recoveryMode = recoveryMode;
+    }
+
+    public InstanceGroupNetworkV4Request getNetwork() {
+        return network;
+    }
+
+    public void setNetwork(InstanceGroupNetworkV4Request network) {
+        this.network = network;
     }
 }

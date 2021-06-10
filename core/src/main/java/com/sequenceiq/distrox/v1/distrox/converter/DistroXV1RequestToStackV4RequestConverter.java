@@ -84,8 +84,10 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setAuthentication(getIfNotNull(environment.getAuthentication(), authenticationConverter::convert));
         request.setImage(getIfNotNull(source.getImage(), imageConverter::convert));
         request.setCluster(getIfNotNull(source, environment, clusterConverter::convert));
-        request.setInstanceGroups(getIfNotNull(source.getInstanceGroups(), igs -> instanceGroupConverter.convertTo(igs, environment)));
-        request.setNetwork(getNetwork(source.getNetwork(), environment));
+        NetworkV4Request network = getNetwork(source.getNetwork(), environment);
+        request.setNetwork(network);
+        request.setInstanceGroups(getIfNotNull(source.getInstanceGroups(), igs ->
+                instanceGroupConverter.convertTo(network, igs, environment)));
         request.setAws(getIfNotNull(source.getAws(), stackParameterConverter::convert));
         request.setAzure(getIfNotNull(source.getAzure(), stackParameterConverter::convert));
         request.setGcp(getIfNotNull(source.getGcp(), stackParameterConverter::convert));
@@ -174,13 +176,15 @@ public class DistroXV1RequestToStackV4RequestConverter {
     public DistroXV1Request convert(StackV4Request source) {
         DistroXV1Request request = new DistroXV1Request();
         request.setName(source.getName());
+        DetailedEnvironmentResponse env = null;
         if (source.getEnvironmentCrn() != null) {
-            getEnvironmentName(source.getEnvironmentCrn()).ifPresent(request::setEnvironmentName);
+            env = environmentClientService.getByCrn(source.getEnvironmentCrn());
+            request.setEnvironmentName(env != null ? env.getName() : null);
         }
         request.setImage(getIfNotNull(source.getImage(), imageConverter::convert));
         request.setCluster(getIfNotNull(source.getCluster(), clusterConverter::convert));
-        request.setInstanceGroups(getIfNotNull(source.getInstanceGroups(), instanceGroupConverter::convertFrom));
         request.setNetwork(getIfNotNull(source.getNetwork(), networkConverter::convertToNetworkV1Request));
+        setInstanceGroups(source, request, env);
         request.setAws(getIfNotNull(source.getAws(), stackParameterConverter::convert));
         request.setAzure(getIfNotNull(source.getAzure(), stackParameterConverter::convert));
         request.setGcp(getIfNotNull(source.getGcp(), stackParameterConverter::convert));
@@ -194,9 +198,10 @@ public class DistroXV1RequestToStackV4RequestConverter {
         return request;
     }
 
-    private Optional<String> getEnvironmentName(String envCrn) {
-        DetailedEnvironmentResponse env = environmentClientService.getByCrn(envCrn);
-        return env != null ? Optional.of(env.getName()) : Optional.empty();
+    private void setInstanceGroups(StackV4Request source, DistroXV1Request request, DetailedEnvironmentResponse env) {
+        if (source.getInstanceGroups() != null) {
+            request.setInstanceGroups(instanceGroupConverter.convertFrom(source.getNetwork(), source.getInstanceGroups(), env));
+        }
     }
 
     private CloudPlatform getCloudPlatform(DetailedEnvironmentResponse environment) {

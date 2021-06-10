@@ -297,8 +297,7 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
         PlacementSettingsV4Request placementSettings = source.getPlacement();
         if (placementSettings != null) {
             String region = placementSettings.getRegion();
-            String availabilityZone = placementSettings.getAvailabilityZone();
-            builder.withPlacementView(new PlacementView(region, availabilityZone));
+            builder.withPlacementView(new PlacementView(region, region));
         }
     }
 

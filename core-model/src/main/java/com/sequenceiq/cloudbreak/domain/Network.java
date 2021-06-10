@@ -42,6 +42,10 @@ public class Network implements ProvisionEntity, WorkspaceAwareResource, Archiva
 
     private String name;
 
+    /**
+     * @deprecated only existing subnets are supported
+     */
+    @Deprecated
     private String subnetCIDR;
 
     @Column(length = 1000000, columnDefinition = "TEXT")

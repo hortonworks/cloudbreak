@@ -18,6 +18,7 @@ import org.springframework.core.convert.ConversionService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.TestUtil;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
@@ -28,7 +29,7 @@ import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.InstanceGroup
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 
 @RunWith(MockitoJUnitRunner.class)
-public class InstanceGroupToInstanceGroupResponseConverterTest extends AbstractEntityConverterTest<InstanceGroup> {
+public class InstanceGroupToInstanceGroupV4ResponseConverterTest extends AbstractEntityConverterTest<InstanceGroup> {
 
     @InjectMocks
     private InstanceGroupToInstanceGroupV4ResponseConverter underTest;
@@ -41,28 +42,29 @@ public class InstanceGroupToInstanceGroupResponseConverterTest extends AbstractE
 
     @Test
     public void testConvert() {
-        var source = getSource();
+        InstanceGroup source = getSource();
         when(converterUtil.convertAllAsSet(anySet(), eq(InstanceMetaDataV4Response.class))).thenReturn(getInstanceMetaData(source));
 
         InstanceGroupV4Response result = underTest.convert(getSource());
 
         assertEquals(source.getNodeCount(), result.getNodeCount());
         assertEquals(getSource().getInstanceGroupType(), result.getType());
-        assertAllFieldsNotNull(result, Lists.newArrayList("recipes", "template", "securityGroup", "gcp", "name", "mock", "openstack",
+        assertAllFieldsNotNull(result, Lists.newArrayList("recipes", "template", "network",
+                "securityGroup", "gcp", "name", "mock", "openstack",
                 "aws", "yarn", "azure"));
     }
 
     @Override
     public InstanceGroup createSource() {
-        var instanceGroup = TestUtil.instanceGroup(1L, InstanceGroupType.CORE, TestUtil.gcpTemplate(1L));
-        var metaData = TestUtil.instanceMetaData(1L, 1L, InstanceStatus.SERVICES_RUNNING, false, instanceGroup);
+        InstanceGroup instanceGroup = TestUtil.instanceGroup(1L, InstanceGroupType.CORE, TestUtil.gcpTemplate(1L));
+        InstanceMetaData metaData = TestUtil.instanceMetaData(1L, 1L, InstanceStatus.SERVICES_RUNNING, false, instanceGroup);
         instanceGroup.setInstanceMetaData(Set.of(metaData));
         return instanceGroup;
     }
 
     private Set<InstanceMetaDataV4Response> getInstanceMetaData(InstanceGroup instanceGroup) {
         var metaDataV4Response = instanceGroup.getInstanceMetaDataSet().stream().map(instanceMetaData -> {
-            var response = new InstanceMetaDataV4Response();
+            InstanceMetaDataV4Response response = new InstanceMetaDataV4Response();
             response.setPublicIp(instanceMetaData.getPublicIp());
             response.setAmbariServer(instanceMetaData.getAmbariServer());
             response.setDiscoveryFQDN(instanceMetaData.getDiscoveryFQDN());
