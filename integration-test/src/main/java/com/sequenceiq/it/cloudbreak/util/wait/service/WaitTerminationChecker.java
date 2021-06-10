@@ -49,10 +49,19 @@ public class WaitTerminationChecker<T extends WaitObject> extends ExceptionCheck
 
     @Override
     public boolean exitWaiting(T waitObject) {
-        if (waitObject.isDeleteFailed()) {
-            return false;
+        String name = waitObject.getName();
+        Map<String, String> actualStatuses = waitObject.actualStatuses();
+        if (actualStatuses.isEmpty()) {
+            LOGGER.info("'{}' cluster was not found. Exit waiting!", name);
+            return true;
         }
-        return waitObject.isFailed();
+        if (waitObject.isDeleteFailed()) {
+            Map<String, String> actualStatusReasons = waitObject.actualStatusReason();
+            LOGGER.error("Cluster '{}' termination failed (status:'{}'). Exit waiting!", name, actualStatuses);
+            throw new TestFailException(String.format("Cluster '%s' termination failed. Status: '%s' statusReason: '%s'",
+                    name, actualStatuses, actualStatusReasons));
+        }
+        return waitObject.isDeleted();
     }
 
     @Override

@@ -1,14 +1,10 @@
 package com.sequenceiq.it.cloudbreak.util.wait.service.instance;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.DELETE_REQUESTED;
-
 import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.util.wait.service.ExceptionChecker;
 
@@ -18,38 +14,42 @@ public class InstanceOperationChecker<T extends InstanceWaitObject> extends Exce
 
     @Override
     public boolean checkStatus(T waitObject) {
+        String name = waitObject.getHostGroup();
+        Map<String, String> actualStatuses = waitObject.actualStatuses();
+        if (actualStatuses.isEmpty()) {
+            throw new TestFailException(String.format("'%s' instance was not found.", name));
+        }
         Map<String, String> desiredStatuses = waitObject.getDesiredStatuses();
-        InstanceMetaDataV4Response instanceMetaDataV4Response = waitObject.getInstanceMetadata();
-        InstanceStatus instanceStatus = instanceMetaDataV4Response.getInstanceStatus();
-        String instanceGroupName = instanceMetaDataV4Response.getInstanceGroup();
-        String hostStatusReason = instanceMetaDataV4Response.getStatusReason();
-        LOGGER.info("Waiting for the '{}'. Actual instance state is: '{}'", desiredStatuses, instanceStatus);
-        if (instanceStatus.equals(DELETE_REQUESTED) || waitObject.isDeleted()) {
-            LOGGER.error("The '{}' instance group has been getting terminated (status:'{}'), waiting is cancelled.", instanceGroupName,
-                    instanceStatus);
-            throw new TestFailException(String.format("The '%s' instance group has been getting terminated, waiting is cancelled." +
-                    " Status: '%s' statusReason: '%s'", instanceGroupName, instanceStatus, hostStatusReason));
+        LOGGER.info("Waiting for the '{}' state of '{}' instance. Actual state is: '{}'", desiredStatuses, name, actualStatuses);
+        if (waitObject.isDeletionInProgress() || waitObject.isDeleted()) {
+            LOGGER.error("Instance '{}' has been getting terminated (status:'{}'), waiting is cancelled.", name,
+                    actualStatuses);
+            throw new TestFailException(String.format("Instance '%s' has been getting terminated, waiting is cancelled." +
+                    " Status: '%s' statusReason: '%s'", name, actualStatuses));
         }
         if (waitObject.isFailed()) {
-            LOGGER.error("The '{}' instance group is in failed state (status:'{}'), waiting is cancelled.", instanceGroupName, instanceStatus);
-            throw new TestFailException(String.format("The '%s' instance group is in failed state. Status: '%s' statusReason: '%s'",
-                    instanceGroupName, instanceStatus, hostStatusReason));
+            Map<String, String> actualStatusReasons = waitObject.actualStatusReason();
+            LOGGER.error("Instance '{}' is in failed state (status:'{}'), waiting is cancelled.", name, actualStatuses);
+            throw new TestFailException(String.format("Instance '%s' is in failed state. Status: '%s' statusReason: '%s'",
+                    name, actualStatuses, actualStatusReasons));
         }
         if (waitObject.isInDesiredStatus()) {
-            LOGGER.info("The '{}' instance group is in desired state (status:'{}').", instanceGroupName, instanceStatus);
+            LOGGER.info("Instance '{}' is in desired state (status:'{}').", name, actualStatuses);
             return true;
         }
-        return false;
+        return waitObject.isInDesiredStatus();
     }
 
     @Override
     public void handleTimeout(T waitObject) {
-        InstanceMetaDataV4Response instanceMetaDataV4Response = waitObject.getInstanceMetadata();
-        InstanceStatus instanceStatus = instanceMetaDataV4Response.getInstanceStatus();
-        String instanceGroupName = instanceMetaDataV4Response.getInstanceGroup();
-        String hostStatusReason = instanceMetaDataV4Response.getStatusReason();
-        throw new TestFailException(String.format("Wait operation timed out, '%s' instance group has been failed. Instance status: '%s' " +
-                "statusReason: '%s'", instanceGroupName, instanceStatus, hostStatusReason));
+        String name = waitObject.getHostGroup();
+        Map<String, String> actualStatuses = waitObject.actualStatuses();
+        if (actualStatuses.isEmpty()) {
+            throw new TestFailException(String.format("'%s' instance was not found.", name));
+        }
+        Map<String, String> actualStatusReasons = waitObject.actualStatusReason();
+        throw new TestFailException(String.format("Wait operation timed out! Instance '%s' has been failed. Cluster status: '%s' "
+                + "statusReason: '%s'", name, actualStatuses, actualStatusReasons));
     }
 
     @Override
@@ -60,7 +60,19 @@ public class InstanceOperationChecker<T extends InstanceWaitObject> extends Exce
 
     @Override
     public boolean exitWaiting(T waitObject) {
-        return waitObject.isFailed();
+        String name = waitObject.getHostGroup();
+        Map<String, String> actualStatuses = waitObject.actualStatuses();
+        if (actualStatuses.isEmpty()) {
+            LOGGER.info("'{}' instance was not found. Exit waiting!", name);
+            return true;
+        }
+        if (waitObject.isCreateFailed()) {
+            Map<String, String> actualStatusReasons = waitObject.actualStatusReason();
+            LOGGER.error("Instance '{}' entered into creation failed state (status:'{}'). Exit waiting!", name, actualStatuses);
+            throw new TestFailException(String.format("Instance '%s' entered into creation failed state. Status: '%s' statusReason: '%s'",
+                    name, actualStatuses, actualStatusReasons));
+        }
+        return waitObject.isInDesiredStatus();
     }
 
     @Override
@@ -70,12 +82,12 @@ public class InstanceOperationChecker<T extends InstanceWaitObject> extends Exce
 
     @Override
     public void refresh(T waitObject) {
-        String hostGroup = waitObject.getHostGroup();
+        String name = waitObject.getHostGroup();
         try {
             waitObject.fetchData();
         } catch (Exception e) {
-            LOGGER.error("Failed to get '{}' instance group status, because of {}", hostGroup, e.getMessage(), e);
-            throw new TestFailException(String.format("Failed to get '%s' instance group status", hostGroup), e);
+            LOGGER.error("Failed to get '{}' instance group status, because of {}", name, e.getMessage(), e);
+            throw new TestFailException(String.format("Failed to get '%s' instance group status", name), e);
         }
     }
 }

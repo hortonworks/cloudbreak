@@ -1,5 +1,6 @@
 package com.sequenceiq.it.cloudbreak.util.wait.service.cloudbreak;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.CREATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COMPLETED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_FAILED;
@@ -18,9 +19,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-import com.google.common.collect.Sets;
+import org.apache.commons.collections4.ListUtils;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
@@ -30,9 +31,9 @@ import com.sequenceiq.it.cloudbreak.util.wait.service.WaitObject;
 
 public class CloudbreakWaitObject implements WaitObject {
 
-    private static final Map<String, Status> STACK_DELETED = Map.of(STATUS, Status.DELETE_COMPLETED);
+    private static final Map<String, Status> STACK_DELETED = Map.of(STATUS, DELETE_COMPLETED);
 
-    private static final Map<String, Status> STACK_FAILED = Map.of(STATUS, Status.AVAILABLE, "clusterStatus", Status.CREATE_FAILED);
+    private static final Map<String, Status> STACK_FAILED = Map.of(STATUS, AVAILABLE, CLUSTER_STATUS, CREATE_FAILED);
 
     private final CloudbreakClient client;
 
@@ -69,20 +70,19 @@ public class CloudbreakWaitObject implements WaitObject {
 
     @Override
     public boolean isDeleted() {
-        Map<String, String> deletedStatuses = Map.of(STATUS, DELETE_COMPLETED.name(), "clusterStatus", DELETE_COMPLETED.name());
-        return deletedStatuses.equals(actualStatuses());
+        Map<String, Status> deletedStatuses = Map.of(STATUS, DELETE_COMPLETED, CLUSTER_STATUS, DELETE_COMPLETED);
+        return deletedStatuses.equals(actualStatusesEnum());
     }
 
     @Override
     public boolean isDeletionInProgress() {
-        Set<Status> deleteInProgressStatuses = Set.of(PRE_DELETE_IN_PROGRESS, DELETE_IN_PROGRESS, EXTERNAL_DATABASE_DELETION_IN_PROGRESS);
-        return !Sets.intersection(Set.of(actualStatuses().values()), deleteInProgressStatuses).isEmpty();
+        List<Status> deleteInProgressStatuses = List.of(PRE_DELETE_IN_PROGRESS, DELETE_IN_PROGRESS, EXTERNAL_DATABASE_DELETION_IN_PROGRESS);
+        return !ListUtils.retainAll(deleteInProgressStatuses, actualStatusesEnumValues()).isEmpty();
     }
 
     @Override
     public boolean isCreateFailed() {
-        List<Status> actualStatuses = new ArrayList<>(actualStatusesEnum().values());
-        return actualStatuses.contains(CREATE_FAILED);
+        return actualStatusesEnumValues().contains(CREATE_FAILED);
     }
 
     @Override
@@ -101,9 +101,9 @@ public class CloudbreakWaitObject implements WaitObject {
 
     @Override
     public boolean isFailed() {
-        Set<Status> failedStatuses = Set.of(UPDATE_FAILED, CREATE_FAILED, ENABLE_SECURITY_FAILED, DELETE_FAILED, START_FAILED, STOP_FAILED,
+        List<Status> failedStatuses = List.of(UPDATE_FAILED, CREATE_FAILED, ENABLE_SECURITY_FAILED, DELETE_FAILED, START_FAILED, STOP_FAILED,
                 EXTERNAL_DATABASE_CREATION_FAILED, EXTERNAL_DATABASE_DELETION_FAILED);
-        return !Sets.intersection(Set.of(actualStatusesEnum().values()), failedStatuses).isEmpty();
+        return !ListUtils.retainAll(failedStatuses, actualStatusesEnumValues()).isEmpty();
     }
 
     @Override
@@ -113,8 +113,7 @@ public class CloudbreakWaitObject implements WaitObject {
 
     @Override
     public boolean isDeleteFailed() {
-        List<String> actualStatuses = new ArrayList<>(actualStatuses().values());
-        return actualStatuses.contains(DELETE_FAILED.name());
+        return actualStatusesEnumValues().contains(DELETE_FAILED);
     }
 
     @Override
@@ -122,14 +121,18 @@ public class CloudbreakWaitObject implements WaitObject {
         if (stackStatus == null) {
             return Collections.emptyMap();
         }
-        return Map.of(STATUS, stackStatus.getStatus().name(), "clusterStatus", stackStatus.getClusterStatus().name());
+        return Map.of(STATUS, stackStatus.getStatus().name(), CLUSTER_STATUS, stackStatus.getClusterStatus().name());
     }
 
     private Map<String, Status> actualStatusesEnum() {
         if (stackStatus == null) {
             return Collections.emptyMap();
         }
-        return Map.of(STATUS, stackStatus.getStatus(), "clusterStatus", stackStatus.getClusterStatus());
+        return Map.of(STATUS, stackStatus.getStatus(), CLUSTER_STATUS, stackStatus.getClusterStatus());
+    }
+
+    private List<Status> actualStatusesEnumValues() {
+        return new ArrayList<>(actualStatusesEnum().values());
     }
 
     @Override
@@ -141,7 +144,7 @@ public class CloudbreakWaitObject implements WaitObject {
         }
         String clusterStatusReason = stackStatus.getClusterStatusReason();
         if (clusterStatusReason != null) {
-            ret.put("clusterStatusReason", clusterStatusReason);
+            ret.put(CLUSTER_STATUS_REASON, clusterStatusReason);
         }
         return ret;
     }

@@ -30,6 +30,10 @@ public class WaitFailedChecker<T extends WaitObject> extends ExceptionChecker<T>
             throw new TestFailException(String.format("Cluster '%s' has been terminated. Status: '%s' statusReason: '%s'",
                     name, actualStatuses, actualStatusReasons));
         }
+        if (waitObject.isInDesiredStatus()) {
+            LOGGER.info("Cluster '{}' is in desired state (status:'{}').", name, actualStatuses);
+            return true;
+        }
         return waitObject.isInDesiredStatus();
     }
 
@@ -44,7 +48,7 @@ public class WaitFailedChecker<T extends WaitObject> extends ExceptionChecker<T>
 
     @Override
     public String successMessage(T waitObject) {
-        return String.format("Wait operation was successfully done. '%s' %s is in the desired state '%s'", waitObject.getName(),
+        return String.format("Wait operation was successfully done. '%s' %s is in desired state '%s'", waitObject.getName(),
                 waitObject.getClass().getSimpleName(), waitObject.getDesiredStatuses());
     }
 
@@ -55,7 +59,7 @@ public class WaitFailedChecker<T extends WaitObject> extends ExceptionChecker<T>
             LOGGER.info("'{}' {} was not found. Exit waiting!", waitObject.getClass().getSimpleName(), name);
             return true;
         }
-        return false;
+        return waitObject.isInDesiredStatus();
     }
 
     @Override
