@@ -2,11 +2,13 @@ package com.sequenceiq.cloudbreak.converter.spi;
 
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_GROUP_NAME_PARAMETER;
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_GROUP_USAGE_PARAMETER;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -28,14 +30,15 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
@@ -78,7 +81,6 @@ import com.sequenceiq.cloudbreak.service.stack.DefaultRootVolumeSizeProvider;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
 import com.sequenceiq.cloudbreak.service.stack.TargetGroupPersistenceService;
-import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurationsViewProvider;
 import com.sequenceiq.common.api.type.EncryptionType;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.api.type.TargetGroupType;
@@ -87,6 +89,8 @@ import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureRe
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.ResourceGroupUsage;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class StackToCloudStackConverterTest {
 
     private static final int GENERAL_TEST_QUANTITY = 2;
@@ -113,8 +117,15 @@ public class StackToCloudStackConverterTest {
 
     private static final String RESOURCE_GROUP = "resource-group";
 
-    @Rule
-    public final ExpectedException expectedException = ExpectedException.none();
+    private static final String DISCOVERY_FQDN = "host.foo.org";
+
+    private static final String DISCOVERY_NAME = "host";
+
+    private static final String SUBNET_ID = "subnetId";
+
+    private static final String AVAILABILITY_ZONE = "availabilityZone";
+
+    private static final String INSTANCE_NAME = "instanceName";
 
     @InjectMocks
     private StackToCloudStackConverter underTest;
@@ -130,9 +141,6 @@ public class StackToCloudStackConverterTest {
 
     @Mock
     private DefaultRootVolumeSizeProvider defaultRootVolumeSizeProvider;
-
-    @Mock
-    private FileSystemConfigurationsViewProvider fileSystemConfigurationsViewProvider;
 
     @Mock
     private ConverterUtil converterUtil;
@@ -182,9 +190,8 @@ public class StackToCloudStackConverterTest {
     @Mock
     private LoadBalancerConfigService loadBalancerConfigService;
 
-    @Before
+    @BeforeEach
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
         when(stack.getStackAuthentication()).thenReturn(stackAuthentication);
         when(stack.getCluster()).thenReturn(cluster);
         when(stack.getCloudPlatform()).thenReturn(CLOUD_PLATFORM);
@@ -262,7 +269,7 @@ public class StackToCloudStackConverterTest {
     }
 
     @Test
-    public void testConvertWhenInstanceGroupContainsTemplateAndThereIsANotDeletedInstanceMetaThenInstancesShoulContainsExpectedAmountOfElements() {
+    public void testConvertWhenInstanceGroupContainsTemplateAndThereIsANotDeletedInstanceMetaThenInstancesShouldContainExpectedAmountOfElements() {
         Set<InstanceGroup> instanceGroups = new LinkedHashSet<>();
         InstanceGroup instanceGroup = mock(InstanceGroup.class);
         Template template = new Template();
@@ -329,13 +336,11 @@ public class StackToCloudStackConverterTest {
         when(instanceGroup.getTemplate()).thenReturn(template);
         when(stack.getInstanceGroupsAsList()).thenReturn(new ArrayList<>(instanceGroups));
 
-        expectedException.expect(RuntimeException.class);
-        expectedException.expectMessage(String.format("There is no skeleton and instance available for Group -> name:%s", groupName));
-
         CloudStack result = underTest.convert(stack);
 
         assertEquals(1L, result.getGroups().size());
-        result.getGroups().get(0).getReferenceInstanceConfiguration();
+        RuntimeException runtimeException = assertThrows(RuntimeException.class, () -> result.getGroups().get(0).getReferenceInstanceConfiguration());
+        assertThat(runtimeException).hasMessage("There is no skeleton and instance available for Group -> name:" + groupName);
     }
 
     @Test
@@ -384,7 +389,7 @@ public class StackToCloudStackConverterTest {
         instanceGroups.add(instanceGroup);
         Template template = new Template();
         template.setVolumeTemplates(Sets.newHashSet());
-        Map<String, Object> expected = createMap("");
+        Map<String, Object> expected = createMap("", Object.class);
         when(instanceGroup.getTemplate()).thenReturn(template);
         when(instanceGroup.getAttributes()).thenReturn(attributes);
         when(attributes.getMap()).thenReturn(expected);
@@ -677,8 +682,7 @@ public class StackToCloudStackConverterTest {
 
     @Test
     public void testConvertWhenTagsContainsOnlyUserDefinedTagsThenOnlyThoseWillBeStored() throws IOException {
-//        Map<String, String> userDefinedTags = createMap("userDefined");
-        Map<String, String> userDefinedTags = createMap("userDefined");
+        Map<String, String> userDefinedTags = createMap("userDefined", String.class);
         Json tags = mock(Json.class);
         StackTags stackTags = mock(StackTags.class);
         when(stack.getTags()).thenReturn(tags);
@@ -697,7 +701,7 @@ public class StackToCloudStackConverterTest {
 
     @Test
     public void testConvertWhenTagsContainsOnlyDefaultTagsThenOnlyThoseWillBeSaved() throws IOException {
-        Map<String, String> defaultTags = createMap("default");
+        Map<String, String> defaultTags = createMap("default", String.class);
         Json tags = mock(Json.class);
         StackTags stackTags = mock(StackTags.class);
         when(stack.getTags()).thenReturn(tags);
@@ -716,8 +720,8 @@ public class StackToCloudStackConverterTest {
 
     @Test
     public void testConvertWhenTagsContainsBothUserDefinedAndDefaultTagsThenBothShouldBeSaved() throws IOException {
-        Map<String, String> defaultTags = createMap("default");
-        Map<String, String> userDefined = createMap("userDefined");
+        Map<String, String> defaultTags = createMap("default", String.class);
+        Map<String, String> userDefined = createMap("userDefined", String.class);
         Json tags = mock(Json.class);
         StackTags stackTags = mock(StackTags.class);
         when(stack.getTags()).thenReturn(tags);
@@ -796,14 +800,49 @@ public class StackToCloudStackConverterTest {
     }
 
     @Test
-    public void testBuildCloudInstanceParametersAzureSingleResourceGroup() {
-
+    public void testBuildCloudInstanceParametersAWSComplete() {
         InstanceMetaData metaData = new InstanceMetaData();
-        String fqdnParsedName = "test1-m-1-20180605095019";
         metaData.setId(1L);
-        metaData.setDiscoveryFQDN(String.format("%s.project.id", fqdnParsedName));
-        metaData.setSubnetId(TEST_STRING_ID);
-        metaData.setInstanceName(TEST_NAME);
+        metaData.setDiscoveryFQDN(DISCOVERY_FQDN);
+        metaData.setSubnetId(SUBNET_ID);
+        metaData.setAvailabilityZone(AVAILABILITY_ZONE);
+        metaData.setInstanceName(INSTANCE_NAME);
+
+        Map<String, Object> result = underTest.buildCloudInstanceParameters(ENV_CRN, metaData, CloudPlatform.AWS);
+
+        assertThat(result).hasSize(4);
+        assertThat(result).doesNotContainKey(RESOURCE_GROUP_NAME_PARAMETER);
+        assertThat(result).doesNotContainKey(RESOURCE_GROUP_USAGE_PARAMETER);
+        assertThat(result.get(CloudInstance.DISCOVERY_NAME)).isEqualTo(DISCOVERY_NAME);
+        assertThat(result.get(CloudInstance.SUBNET_ID)).isEqualTo(SUBNET_ID);
+        assertThat(result.get(CloudInstance.AVAILABILITY_ZONE)).isEqualTo(AVAILABILITY_ZONE);
+        assertThat(result.get(CloudInstance.INSTANCE_NAME)).isEqualTo(INSTANCE_NAME);
+    }
+
+    @Test
+    public void testBuildCloudInstanceParametersAWSWithEmptyInstanceMetaData() {
+        InstanceMetaData metaData = new InstanceMetaData();
+        metaData.setId(1L);
+
+        Map<String, Object> result = underTest.buildCloudInstanceParameters(ENV_CRN, metaData, CloudPlatform.AWS);
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    public void testBuildCloudInstanceParametersAWSWithNullInstanceMetaData() {
+        Map<String, Object> result = underTest.buildCloudInstanceParameters(ENV_CRN, null, CloudPlatform.AWS);
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    public void testBuildCloudInstanceParametersAzureSingleResourceGroup() {
+        InstanceMetaData metaData = new InstanceMetaData();
+        metaData.setId(1L);
+        metaData.setDiscoveryFQDN(DISCOVERY_FQDN);
+        metaData.setSubnetId(SUBNET_ID);
+        metaData.setInstanceName(INSTANCE_NAME);
 
         DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
         environmentResponse.setCloudPlatform("AZURE");
@@ -820,17 +859,19 @@ public class StackToCloudStackConverterTest {
         assertEquals(RESOURCE_GROUP, result.get(RESOURCE_GROUP_NAME_PARAMETER).toString());
         assertEquals(ResourceGroupUsage.SINGLE.name(), result.get(RESOURCE_GROUP_USAGE_PARAMETER).toString());
         assertEquals(5, result.size());
+        assertThat(result.get(CloudInstance.DISCOVERY_NAME)).isEqualTo(DISCOVERY_NAME);
+        assertThat(result.get(CloudInstance.SUBNET_ID)).isEqualTo(SUBNET_ID);
+        assertThat(result).doesNotContainKey(CloudInstance.AVAILABILITY_ZONE);
+        assertThat(result.get(CloudInstance.INSTANCE_NAME)).isEqualTo(INSTANCE_NAME);
     }
 
     @Test
     public void testBuildCloudInstanceParametersAzureMultipleResourceGroup() {
-
         InstanceMetaData metaData = new InstanceMetaData();
-        String fqdnParsedName = "test1-m-1-20180605095019";
         metaData.setId(1L);
-        metaData.setDiscoveryFQDN(String.format("%s.project.id", fqdnParsedName));
-        metaData.setSubnetId(TEST_STRING_ID);
-        metaData.setInstanceName(TEST_NAME);
+        metaData.setDiscoveryFQDN(DISCOVERY_FQDN);
+        metaData.setSubnetId(SUBNET_ID);
+        metaData.setInstanceName(INSTANCE_NAME);
 
         DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
         environmentResponse.setCloudPlatform("AZURE");
@@ -846,6 +887,10 @@ public class StackToCloudStackConverterTest {
         assertFalse(result.containsKey(RESOURCE_GROUP_NAME_PARAMETER));
         assertFalse(result.containsKey(RESOURCE_GROUP_USAGE_PARAMETER));
         assertEquals(3, result.size());
+        assertThat(result.get(CloudInstance.DISCOVERY_NAME)).isEqualTo(DISCOVERY_NAME);
+        assertThat(result.get(CloudInstance.SUBNET_ID)).isEqualTo(SUBNET_ID);
+        assertThat(result).doesNotContainKey(CloudInstance.AVAILABILITY_ZONE);
+        assertThat(result.get(CloudInstance.INSTANCE_NAME)).isEqualTo(INSTANCE_NAME);
     }
 
     @Test
@@ -904,16 +949,16 @@ public class StackToCloudStackConverterTest {
         return stackAuthentication;
     }
 
-    private <T> Map<String, T> createMap(String keyPrefix) {
+    private <T> Map<String, T> createMap(String keyPrefix, Class<T> clazz) {
         Map<String, T> map = new LinkedHashMap<>(GENERAL_TEST_QUANTITY);
         for (int i = 0; i < GENERAL_TEST_QUANTITY; i++) {
-            map.put(String.format("%s-key-%s", keyPrefix, i), (T) String.format("key-%s", i));
+            map.put(String.format("%s-key-%s", keyPrefix, i), clazz.cast(String.format("key-%s", i)));
         }
         return map;
     }
 
     @Test
-    public void testBuildInstanceTemplateWithAttributes() throws Exception {
+    public void testBuildInstanceTemplateWithAttributes() {
         Template template = new Template();
         template.setVolumeTemplates(Sets.newHashSet());
         template.setAttributes(new Json(Map.of("someAttr", "value")));
@@ -928,7 +973,7 @@ public class StackToCloudStackConverterTest {
     }
 
     @Test
-    public void testBuildInstanceTemplateWithGcpEncryptionAttributes() throws Exception {
+    public void testBuildInstanceTemplateWithGcpEncryptionAttributes() {
         Template template = new Template();
         template.setVolumeTemplates(Sets.newHashSet());
         template.setAttributes(new Json(Map.of("keyEncryptionMethod", "RAW", InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.CUSTOM.name())));
@@ -1048,9 +1093,9 @@ public class StackToCloudStackConverterTest {
         metaData.setInstanceName(TEST_NAME);
         Set<InstanceMetaData> notDeletedMetas = Set.of(metaData);
         InstanceMetaData terminatedMetaData = new InstanceMetaData();
-        String termiantedFqdnParsedName = "test1-m-1-20200401095019";
+        String terminatedFqdnParsedName = "test1-m-1-20200401095019";
         terminatedMetaData.setId(2L);
-        terminatedMetaData.setDiscoveryFQDN(String.format("%s.project.id", termiantedFqdnParsedName));
+        terminatedMetaData.setDiscoveryFQDN(String.format("%s.project.id", terminatedFqdnParsedName));
         terminatedMetaData.setSubnetId(TEST_STRING_ID);
         terminatedMetaData.setInstanceName("terminated-" + TEST_NAME);
         Set<InstanceMetaData> deletedMetas = Set.of(terminatedMetaData);
@@ -1072,7 +1117,7 @@ public class StackToCloudStackConverterTest {
             result.getGroups().get(0).getInstances().get(0).getParameters().get(CloudInstance.SUBNET_ID));
         assertEquals(metaData.getInstanceName(),
             result.getGroups().get(0).getInstances().get(0).getParameters().get(CloudInstance.INSTANCE_NAME));
-        assertEquals(termiantedFqdnParsedName,
+        assertEquals(terminatedFqdnParsedName,
             result.getGroups().get(0).getDeletedInstances().get(0).getParameters().get(CloudInstance.DISCOVERY_NAME));
         assertEquals(terminatedMetaData.getSubnetId(),
             result.getGroups().get(0).getDeletedInstances().get(0).getParameters().get(CloudInstance.SUBNET_ID));

@@ -556,10 +556,13 @@ public class ModelDescriptions {
     }
 
     public static class InstanceMetaDataModelDescription {
-        public static final String PRIVATE_IP = "private ip of the insctance";
-        public static final String PUBLIC_IP = "public ip of the instance";
-        public static final String INSTANCE_ID = "id of the instance";
+        public static final String PRIVATE_IP = "private IP of the instance";
+        public static final String PUBLIC_IP = "public IP of the instance";
+        public static final String INSTANCE_ID = "ID of the instance";
         public static final String DISCOVERY_FQDN = "the fully qualified domain name of the node in the service discovery cluster";
+        public static final String SUBNET_ID = "ID of the subnet the instance is deployed in";
+        public static final String AVAILABILITY_ZONE = "name of the availability zone the instance is deployed in";
+        public static final String RACK_ID = "ID of the virtual network rack the instance is deployed in";
     }
 
     public static class FailurePolicyModelDescription {

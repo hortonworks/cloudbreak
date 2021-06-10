@@ -82,7 +82,22 @@ public class InstanceMetaData implements ProvisionEntity {
 
     private Long terminationDate;
 
+    /**
+     * ID of the subnet (in a cloud platform specific format) the cloud instance is deployed in.
+     */
     private String subnetId;
+
+    /**
+     * Name of the availability zone the cloud instance is deployed in. May be {@code null} if the cloud platform does not support this construct.
+     */
+    private String availabilityZone;
+
+    /**
+     * ID of the virtual network rack the cloud instance is deployed in. Interpretation and syntax are as per the
+     * <a href="https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-common/RackAwareness.html">Hadoop Rack Awareness</a> page.
+     */
+    @Column(columnDefinition = "TEXT")
+    private String rackId;
 
     private String instanceName;
 
@@ -300,6 +315,22 @@ public class InstanceMetaData implements ProvisionEntity {
 
     public void setSubnetId(String subnetId) {
         this.subnetId = subnetId;
+    }
+
+    public String getAvailabilityZone() {
+        return availabilityZone;
+    }
+
+    public void setAvailabilityZone(String availabilityZone) {
+        this.availabilityZone = availabilityZone;
+    }
+
+    public String getRackId() {
+        return rackId;
+    }
+
+    public void setRackId(String rackId) {
+        this.rackId = rackId;
     }
 
     public String getInstanceName() {

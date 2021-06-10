@@ -1,28 +1,41 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
+import static java.util.Map.entry;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
+import com.amazonaws.services.ec2.model.DescribeSubnetsRequest;
+import com.amazonaws.services.ec2.model.DescribeSubnetsResult;
 import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.Reservation;
+import com.amazonaws.services.ec2.model.Subnet;
 import com.amazonaws.services.elasticloadbalancingv2.model.LoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
@@ -33,6 +46,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.AwsLoadBalancerSc
 import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.LoadBalancerTypeConverter;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -45,10 +59,9 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
-import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class AwsMetaDataCollectorTest {
 
     private static final String USER_ID = "horton@hortonworks.com";
@@ -69,6 +82,14 @@ public class AwsMetaDataCollectorTest {
 
     private static final String ZONE_2 = "zone2";
 
+    private static final String SUBNET_ID_1 = "subnetId1";
+
+    private static final String SUBNET_ID_2 = "subnetId2";
+
+    private static final String AVAILABILITY_ZONE_1 = "availabilityZone1";
+
+    private static final String AVAILABILITY_ZONE_2 = "availabilityZone2";
+
     @Mock
     private LegacyAwsClient awsClient;
 
@@ -77,9 +98,6 @@ public class AwsMetaDataCollectorTest {
 
     @Mock
     private AwsLifeCycleMapper awsLifeCycleMapper;
-
-    @Mock
-    private SyncPollingScheduler<Boolean> syncPollingScheduler;
 
     @Mock
     private AmazonCloudFormationClient amazonCFClient;
@@ -94,19 +112,7 @@ public class AwsMetaDataCollectorTest {
     private DescribeInstancesRequest describeInstancesRequestGw;
 
     @Mock
-    private DescribeInstancesRequest describeInstancesRequestMaster;
-
-    @Mock
-    private DescribeInstancesRequest describeInstancesRequestSlave;
-
-    @Mock
     private DescribeInstancesResult describeInstancesResultGw;
-
-    @Mock
-    private DescribeInstancesResult describeInstancesResultMaster;
-
-    @Mock
-    private DescribeInstancesResult describeInstancesResultSlave;
 
     @Mock
     private LoadBalancerTypeConverter loadBalancerTypeConverter;
@@ -114,10 +120,11 @@ public class AwsMetaDataCollectorTest {
     @InjectMocks
     private AwsMetadataCollector awsMetadataCollector;
 
-    @Before
-    public void setUp() {
-        Mockito.reset(amazonEC2Client);
-    }
+    @Mock
+    private DescribeSubnetsResult describeSubnetsResult;
+
+    @Captor
+    private ArgumentCaptor<DescribeSubnetsRequest> describeSubnetsRequestCaptor;
 
     @Test
     public void collectMigratedExistingOneGroup() {
@@ -127,7 +134,6 @@ public class AwsMetaDataCollectorTest {
         vms.add(new CloudInstance("i-1",
                 new InstanceTemplate("fla", "cbgateway", 5L, volumes, InstanceStatus.CREATED, null, 0L, "imageId"),
                 instanceAuthentication));
-
 
         when(awsClient.createCloudFormationClient(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonCFClient);
         when(awsClient.createAutoScalingClient(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonASClient);
@@ -147,22 +153,67 @@ public class AwsMetaDataCollectorTest {
         when(instance.getInstanceId()).thenReturn("i-1");
         when(instance.getPrivateIpAddress()).thenReturn("privateIp");
         when(instance.getPublicIpAddress()).thenReturn("publicIp");
+        when(instance.getSubnetId()).thenReturn(SUBNET_ID_1);
 
         List<Reservation> gatewayReservations = Collections.singletonList(getReservation(instance));
 
         when(describeInstancesResultGw.getReservations()).thenReturn(gatewayReservations);
 
+        initSubnetsQuery(Map.ofEntries(entry(SUBNET_ID_1, AVAILABILITY_ZONE_1)));
+
         AuthenticatedContext ac = authenticatedContext();
         List<CloudVmMetaDataStatus> statuses = awsMetadataCollector.collect(ac, Collections.emptyList(), vms, vms);
 
-        Assert.assertEquals(1L, statuses.size());
-        Assert.assertEquals("i-1", statuses.get(0).getCloudVmInstanceStatus().getCloudInstance().getInstanceId());
-        Assert.assertEquals("privateIp", statuses.get(0).getMetaData().getPrivateIp());
-        Assert.assertEquals("publicIp", statuses.get(0).getMetaData().getPublicIp());
+        assertEquals(1L, statuses.size());
+        assertEquals("i-1", statuses.get(0).getCloudVmInstanceStatus().getCloudInstance().getInstanceId());
+        assertEquals("privateIp", statuses.get(0).getMetaData().getPrivateIp());
+        assertEquals("publicIp", statuses.get(0).getMetaData().getPublicIp());
+
+        verifyQueriedSubnetIds(SUBNET_ID_1);
+        verifyResultSubnetIds(statuses, SUBNET_ID_1);
+        verifyResultAvailabilityZones(statuses, AVAILABILITY_ZONE_1);
+    }
+
+    private void initSubnetsQuery(Map<String, String> subnetIdToAvailabilityZoneMap) {
+        List<Subnet> subnets = subnetIdToAvailabilityZoneMap.entrySet().stream()
+                .map(entry -> initSubnet(entry.getKey(), entry.getValue()))
+                .collect(Collectors.toList());
+        when(amazonEC2Client.describeSubnets(any(DescribeSubnetsRequest.class))).thenReturn(describeSubnetsResult);
+        when(describeSubnetsResult.getSubnets()).thenReturn(subnets);
+    }
+
+    private Subnet initSubnet(String subnetId, String availabilityZone) {
+        Subnet subnet = Mockito.mock(Subnet.class);
+        when(subnet.getSubnetId()).thenReturn(subnetId);
+        when(subnet.getAvailabilityZone()).thenReturn(availabilityZone);
+        return subnet;
+    }
+
+    private void verifyQueriedSubnetIds(String... subnetIdsExpected) {
+        verify(amazonEC2Client).describeSubnets(describeSubnetsRequestCaptor.capture());
+        DescribeSubnetsRequest describeSubnetsRequestCaptured = describeSubnetsRequestCaptor.getValue();
+        assertThat(describeSubnetsRequestCaptured).isNotNull();
+        assertThat(describeSubnetsRequestCaptured.getSubnetIds()).containsOnly(subnetIdsExpected);
+    }
+
+    private void verifyResultSubnetIds(List<CloudVmMetaDataStatus> statuses, String... subnetIdsExpected) {
+        assertThat(statuses).hasSize(subnetIdsExpected.length);
+        for (int i = 0; i < statuses.size(); i++) {
+            assertThat(statuses.get(i).getCloudVmInstanceStatus().getCloudInstance().getStringParameter(CloudInstance.SUBNET_ID))
+                    .isEqualTo(subnetIdsExpected[i]);
+        }
+    }
+
+    private void verifyResultAvailabilityZones(List<CloudVmMetaDataStatus> statuses, String... availabilityZonesExpected) {
+        assertThat(statuses).hasSize(availabilityZonesExpected.length);
+        for (int i = 0; i < statuses.size(); i++) {
+            assertThat(statuses.get(i).getCloudVmInstanceStatus().getCloudInstance().getStringParameter(CloudInstance.AVAILABILITY_ZONE))
+                    .isEqualTo(availabilityZonesExpected[i]);
+        }
     }
 
     @Test
-    public void collectUnkownIntances() {
+    public void collectUnknownInstances() {
         List<CloudInstance> vms = new ArrayList<>();
         List<Volume> volumes = new ArrayList<>();
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
@@ -196,6 +247,7 @@ public class AwsMetaDataCollectorTest {
             when(instance.getInstanceId()).thenReturn("i-" + i);
             when(instance.getPrivateIpAddress()).thenReturn("privateIp" + i);
             when(instance.getPublicIpAddress()).thenReturn("publicIp" + i);
+            when(instance.getSubnetId()).thenReturn(i == 0 ? SUBNET_ID_1 : i == 1 ? SUBNET_ID_2 : null);
             instances.add(instance);
         }
         Instance[] instancesArray = new Instance[instances.size()];
@@ -203,19 +255,25 @@ public class AwsMetaDataCollectorTest {
 
         when(describeInstancesResultGw.getReservations()).thenReturn(gatewayReservations);
 
+        initSubnetsQuery(Map.ofEntries(entry(SUBNET_ID_1, AVAILABILITY_ZONE_1), entry(SUBNET_ID_2, AVAILABILITY_ZONE_2)));
+
         AuthenticatedContext ac = authenticatedContext();
         List<CloudVmMetaDataStatus> statuses = awsMetadataCollector.collect(ac, Collections.emptyList(), vms, Collections.emptyList());
 
-        Assert.assertEquals(3L, statuses.size());
-        Assert.assertEquals("i-0", statuses.get(0).getCloudVmInstanceStatus().getCloudInstance().getInstanceId());
-        Assert.assertEquals("privateIp0", statuses.get(0).getMetaData().getPrivateIp());
-        Assert.assertEquals("publicIp0", statuses.get(0).getMetaData().getPublicIp());
-        Assert.assertEquals("i-1", statuses.get(1).getCloudVmInstanceStatus().getCloudInstance().getInstanceId());
-        Assert.assertEquals("privateIp1", statuses.get(1).getMetaData().getPrivateIp());
-        Assert.assertEquals("publicIp1", statuses.get(1).getMetaData().getPublicIp());
-        Assert.assertEquals("i-2", statuses.get(2).getCloudVmInstanceStatus().getCloudInstance().getInstanceId());
-        Assert.assertEquals("privateIp2", statuses.get(2).getMetaData().getPrivateIp());
-        Assert.assertEquals("publicIp2", statuses.get(2).getMetaData().getPublicIp());
+        assertEquals(3L, statuses.size());
+        assertEquals("i-0", statuses.get(0).getCloudVmInstanceStatus().getCloudInstance().getInstanceId());
+        assertEquals("privateIp0", statuses.get(0).getMetaData().getPrivateIp());
+        assertEquals("publicIp0", statuses.get(0).getMetaData().getPublicIp());
+        assertEquals("i-1", statuses.get(1).getCloudVmInstanceStatus().getCloudInstance().getInstanceId());
+        assertEquals("privateIp1", statuses.get(1).getMetaData().getPrivateIp());
+        assertEquals("publicIp1", statuses.get(1).getMetaData().getPublicIp());
+        assertEquals("i-2", statuses.get(2).getCloudVmInstanceStatus().getCloudInstance().getInstanceId());
+        assertEquals("privateIp2", statuses.get(2).getMetaData().getPrivateIp());
+        assertEquals("publicIp2", statuses.get(2).getMetaData().getPublicIp());
+
+        verifyQueriedSubnetIds(SUBNET_ID_1, SUBNET_ID_2, null);
+        verifyResultSubnetIds(statuses, SUBNET_ID_1, SUBNET_ID_2, null);
+        verifyResultAvailabilityZones(statuses, AVAILABILITY_ZONE_1, AVAILABILITY_ZONE_2, null);
     }
 
     @Test
@@ -229,7 +287,6 @@ public class AwsMetaDataCollectorTest {
         vms.add(new CloudInstance("i-1",
                 new InstanceTemplate("fla", "cbgateway", 5L, volumes, InstanceStatus.CREATED, null, 0L, "imageId"),
                 instanceAuthentication));
-
 
         when(awsClient.createCloudFormationClient(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonCFClient);
         when(awsClient.createAutoScalingClient(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonASClient);
@@ -251,29 +308,37 @@ public class AwsMetaDataCollectorTest {
         when(instance1.getInstanceId()).thenReturn("i-1");
         when(instance1.getPrivateIpAddress()).thenReturn("privateIp1");
         when(instance1.getPublicIpAddress()).thenReturn("publicIp1");
+        when(instance1.getSubnetId()).thenReturn(SUBNET_ID_1);
 
         Instance instance2 = Mockito.mock(Instance.class);
         when(instance2.getInstanceId()).thenReturn("i-2");
         when(instance2.getPrivateIpAddress()).thenReturn("privateIp2");
         when(instance2.getPublicIpAddress()).thenReturn("publicIp2");
+        when(instance2.getSubnetId()).thenReturn(SUBNET_ID_1);
 
         List<Reservation> gatewayReservations = Collections.singletonList(getReservation(instance1, instance2));
 
         when(describeInstancesResultGw.getReservations()).thenReturn(gatewayReservations);
 
+        initSubnetsQuery(Map.ofEntries(entry(SUBNET_ID_1, AVAILABILITY_ZONE_1)));
+
         AuthenticatedContext ac = authenticatedContext();
         List<CloudVmMetaDataStatus> statuses = awsMetadataCollector.collect(ac, Collections.emptyList(), vms, vms);
 
-        Assert.assertEquals(2L, statuses.size());
-        Assert.assertTrue(statuses.stream().anyMatch(predicate -> "i-1".equals(predicate.getCloudVmInstanceStatus().getCloudInstance().getInstanceId())));
-        Assert.assertTrue(statuses.stream().anyMatch(predicate -> "privateIp1".equals(predicate.getMetaData().getPrivateIp())));
-        Assert.assertTrue(statuses.stream().anyMatch(predicate -> "publicIp1".equals(predicate.getMetaData().getPublicIp())));
+        assertEquals(2L, statuses.size());
+        assertTrue(statuses.stream().anyMatch(predicate -> "i-1".equals(predicate.getCloudVmInstanceStatus().getCloudInstance().getInstanceId())));
+        assertTrue(statuses.stream().anyMatch(predicate -> "privateIp1".equals(predicate.getMetaData().getPrivateIp())));
+        assertTrue(statuses.stream().anyMatch(predicate -> "publicIp1".equals(predicate.getMetaData().getPublicIp())));
 
-        Assert.assertTrue(statuses.stream().anyMatch(predicate -> "i-2".equals(predicate.getCloudVmInstanceStatus().getCloudInstance().getInstanceId())));
-        Assert.assertTrue(statuses.stream().anyMatch(predicate -> "privateIp2".equals(predicate.getMetaData().getPrivateIp())));
-        Assert.assertTrue(statuses.stream().anyMatch(predicate -> "publicIp2".equals(predicate.getMetaData().getPublicIp())));
+        assertTrue(statuses.stream().anyMatch(predicate -> "i-2".equals(predicate.getCloudVmInstanceStatus().getCloudInstance().getInstanceId())));
+        assertTrue(statuses.stream().anyMatch(predicate -> "privateIp2".equals(predicate.getMetaData().getPrivateIp())));
+        assertTrue(statuses.stream().anyMatch(predicate -> "publicIp2".equals(predicate.getMetaData().getPublicIp())));
 
-        Assert.assertTrue(statuses.stream().allMatch(predicate -> CLOUD_INSTANCE_LIFE_CYCLE.equals(predicate.getMetaData().getLifeCycle())));
+        assertTrue(statuses.stream().allMatch(predicate -> CLOUD_INSTANCE_LIFE_CYCLE.equals(predicate.getMetaData().getLifeCycle())));
+
+        verifyQueriedSubnetIds(SUBNET_ID_1);
+        verifyResultSubnetIds(statuses, SUBNET_ID_1, SUBNET_ID_1);
+        verifyResultAvailabilityZones(statuses, AVAILABILITY_ZONE_1, AVAILABILITY_ZONE_1);
     }
 
     @Test
@@ -292,7 +357,6 @@ public class AwsMetaDataCollectorTest {
                 new InstanceTemplate("fla", "cbgateway", 5L, volumes, InstanceStatus.CREATED, null, 0L, "imageId"),
                 instanceAuthentication));
 
-
         when(awsClient.createCloudFormationClient(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonCFClient);
         when(awsClient.createAutoScalingClient(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonASClient);
 
@@ -309,23 +373,33 @@ public class AwsMetaDataCollectorTest {
 
         Instance instance1 = Mockito.mock(Instance.class);
         when(instance1.getInstanceId()).thenReturn("i-1");
+        when(instance1.getSubnetId()).thenReturn(SUBNET_ID_1);
 
         Instance instance2 = Mockito.mock(Instance.class);
         when(instance2.getInstanceId()).thenReturn("i-2");
         when(instance2.getPrivateIpAddress()).thenReturn("privateIp2");
         when(instance2.getPublicIpAddress()).thenReturn("publicIp2");
+        when(instance2.getSubnetId()).thenReturn(SUBNET_ID_2);
 
         List<Reservation> gatewayReservations = Collections.singletonList(getReservation(instance1, instance2));
 
         when(describeInstancesResultGw.getReservations()).thenReturn(gatewayReservations);
 
+        initSubnetsQuery(Map.ofEntries(entry(SUBNET_ID_2, AVAILABILITY_ZONE_2)));
+
         AuthenticatedContext ac = authenticatedContext();
         List<CloudVmMetaDataStatus> statuses = awsMetadataCollector.collect(ac, Collections.emptyList(), newVms, everyVms);
 
-        Assert.assertEquals(1L, statuses.size());
-        Assert.assertTrue(statuses.stream().anyMatch(predicate -> "i-2".equals(predicate.getCloudVmInstanceStatus().getCloudInstance().getInstanceId())));
-        Assert.assertTrue(statuses.stream().anyMatch(predicate -> "privateIp2".equals(predicate.getMetaData().getPrivateIp())));
-        Assert.assertTrue(statuses.stream().anyMatch(predicate -> "publicIp2".equals(predicate.getMetaData().getPublicIp())));
+        assertEquals(1L, statuses.size());
+        assertTrue(statuses.stream().anyMatch(predicate -> "i-2".equals(predicate.getCloudVmInstanceStatus().getCloudInstance().getInstanceId())));
+        assertTrue(statuses.stream().anyMatch(predicate -> "privateIp2".equals(predicate.getMetaData().getPrivateIp())));
+        assertTrue(statuses.stream().anyMatch(predicate -> "publicIp2".equals(predicate.getMetaData().getPublicIp())));
+
+        verifyQueriedSubnetIds(SUBNET_ID_1, SUBNET_ID_2);
+        verifyResultSubnetIds(statuses, SUBNET_ID_2);
+        assertThat(everyVms.get(0).getStringParameter(CloudInstance.SUBNET_ID)).isNull();
+        verifyResultAvailabilityZones(statuses, AVAILABILITY_ZONE_2);
+        assertThat(everyVms.get(0).getStringParameter(CloudInstance.AVAILABILITY_ZONE)).isNull();
     }
 
     @Test
@@ -336,21 +410,22 @@ public class AwsMetaDataCollectorTest {
         List<CloudLoadBalancerMetadata> metadata = awsMetadataCollector.collectLoadBalancer(ac,
                 List.of(LoadBalancerType.PRIVATE, LoadBalancerType.PUBLIC), null);
 
-        Assert.assertEquals(2, metadata.size());
+        assertEquals(2, metadata.size());
         Optional<CloudLoadBalancerMetadata> internalMetadata = metadata.stream()
                 .filter(m -> m.getType() == LoadBalancerType.PRIVATE)
                 .findFirst();
-        Assert.assertTrue(internalMetadata.isPresent());
-        Assert.assertEquals(INTERNAL_LB_DNS, internalMetadata.get().getCloudDns());
-        Assert.assertEquals(ZONE_1, internalMetadata.get().getHostedZoneId());
+        assertTrue(internalMetadata.isPresent());
+        assertEquals(INTERNAL_LB_DNS, internalMetadata.get().getCloudDns());
+        assertEquals(ZONE_1, internalMetadata.get().getHostedZoneId());
         Optional<CloudLoadBalancerMetadata> externalMetadata = metadata.stream()
                 .filter(m -> m.getType() == LoadBalancerType.PUBLIC)
                 .findFirst();
-        Assert.assertTrue(externalMetadata.isPresent());
-        Assert.assertEquals(EXTERNAL_LB_DNS, externalMetadata.get().getCloudDns());
-        Assert.assertEquals(ZONE_2, externalMetadata.get().getHostedZoneId());
+        assertTrue(externalMetadata.isPresent());
+        assertEquals(EXTERNAL_LB_DNS, externalMetadata.get().getCloudDns());
+        assertEquals(ZONE_2, externalMetadata.get().getHostedZoneId());
     }
 
+    @MockitoSettings(strictness = Strictness.LENIENT)
     @Test
     public void testCollectLoadBalancerOnlyDefaultGateway() {
         setupMethodsForLoadBalancer(true);
@@ -359,15 +434,16 @@ public class AwsMetaDataCollectorTest {
         List<CloudLoadBalancerMetadata> metadata = awsMetadataCollector.collectLoadBalancer(ac,
                 List.of(LoadBalancerType.PRIVATE), null);
 
-        Assert.assertEquals(1, metadata.size());
+        assertEquals(1, metadata.size());
         Optional<CloudLoadBalancerMetadata> internalMetadata = metadata.stream()
                 .filter(m -> m.getType() == LoadBalancerType.PRIVATE)
                 .findFirst();
-        Assert.assertTrue(internalMetadata.isPresent());
-        Assert.assertEquals(INTERNAL_LB_DNS, internalMetadata.get().getCloudDns());
-        Assert.assertEquals(ZONE_1, internalMetadata.get().getHostedZoneId());
+        assertTrue(internalMetadata.isPresent());
+        assertEquals(INTERNAL_LB_DNS, internalMetadata.get().getCloudDns());
+        assertEquals(ZONE_1, internalMetadata.get().getHostedZoneId());
     }
 
+    @MockitoSettings(strictness = Strictness.LENIENT)
     @Test
     public void testCollectLoadBalancerOnlyEndpointAccessGateway() {
         setupMethodsForLoadBalancer(true);
@@ -376,13 +452,13 @@ public class AwsMetaDataCollectorTest {
         List<CloudLoadBalancerMetadata> metadata = awsMetadataCollector.collectLoadBalancer(ac,
                 List.of(LoadBalancerType.PUBLIC), null);
 
-        Assert.assertEquals(1, metadata.size());
+        assertEquals(1, metadata.size());
         Optional<CloudLoadBalancerMetadata> externalMetadata = metadata.stream()
                 .filter(m -> m.getType() == LoadBalancerType.PUBLIC)
                 .findFirst();
-        Assert.assertTrue(externalMetadata.isPresent());
-        Assert.assertEquals(EXTERNAL_LB_DNS, externalMetadata.get().getCloudDns());
-        Assert.assertEquals(ZONE_2, externalMetadata.get().getHostedZoneId());
+        assertTrue(externalMetadata.isPresent());
+        assertEquals(EXTERNAL_LB_DNS, externalMetadata.get().getCloudDns());
+        assertEquals(ZONE_2, externalMetadata.get().getHostedZoneId());
     }
 
     @Test
@@ -393,14 +469,14 @@ public class AwsMetaDataCollectorTest {
         List<CloudLoadBalancerMetadata> metadata = awsMetadataCollector.collectLoadBalancer(ac,
                 List.of(LoadBalancerType.PRIVATE, LoadBalancerType.PUBLIC), null);
 
-        Assert.assertEquals(1, metadata.size());
+        assertEquals(1, metadata.size());
         Optional<CloudLoadBalancerMetadata> externalMetadata = metadata.stream()
                 .filter(m -> m.getType() == LoadBalancerType.PUBLIC)
                 .findFirst();
-        Assert.assertTrue(externalMetadata.isPresent());
-        Assert.assertEquals(LoadBalancerType.PUBLIC, metadata.iterator().next().getType());
-        Assert.assertEquals(EXTERNAL_LB_DNS, metadata.iterator().next().getCloudDns());
-        Assert.assertEquals(ZONE_2, metadata.iterator().next().getHostedZoneId());
+        assertTrue(externalMetadata.isPresent());
+        assertEquals(LoadBalancerType.PUBLIC, metadata.iterator().next().getType());
+        assertEquals(EXTERNAL_LB_DNS, metadata.iterator().next().getCloudDns());
+        assertEquals(ZONE_2, metadata.iterator().next().getHostedZoneId());
     }
 
     private Reservation getReservation(Instance... instance) {
@@ -445,4 +521,24 @@ public class AwsMetaDataCollectorTest {
         when(loadBalancerTypeConverter.convert(eq(LoadBalancerType.PRIVATE))).thenReturn(AwsLoadBalancerScheme.INTERNAL);
         when(loadBalancerTypeConverter.convert(eq(LoadBalancerType.PUBLIC))).thenReturn(AwsLoadBalancerScheme.INTERNET_FACING);
     }
+
+    @Test
+    void collectTestWhenError() {
+        List<CloudInstance> vms = new ArrayList<>();
+        InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
+        vms.add(new CloudInstance("i-1",
+                new InstanceTemplate("fla", "cbgateway", 5L, new ArrayList<>(), InstanceStatus.CREATED, null, 0L, "imageId"),
+                instanceAuthentication));
+
+        UnsupportedOperationException exception = new UnsupportedOperationException("Serious problem");
+        when(awsClient.createCloudFormationClient(any(AwsCredentialView.class), eq("region"))).thenThrow(exception);
+
+        AuthenticatedContext ac = authenticatedContext();
+        CloudConnectorException result = assertThrows(CloudConnectorException.class, () -> awsMetadataCollector.collect(ac,
+                Collections.emptyList(), vms, vms));
+
+        assertThat(result).hasMessage("Serious problem");
+        assertThat(result).hasCause(exception);
+    }
+
 }

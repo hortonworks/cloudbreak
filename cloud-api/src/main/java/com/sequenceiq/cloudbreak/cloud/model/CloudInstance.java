@@ -24,7 +24,17 @@ public class CloudInstance extends DynamicModel {
 
     public static final String DISCOVERY_NAME = "DiscoveryName";
 
+    /**
+     * Key of the optional dynamic parameter denoting the ID of the subnet (in a cloud platform specific format) the cloud instance is deployed in.
+     * May be absent if the subnet assignment is not (yet) known.
+     */
     public static final String SUBNET_ID = "subnetId";
+
+    /**
+     * Key of the optional dynamic parameter denoting the name of the availability zone (in a cloud platform specific format) the cloud instance is deployed in.
+     * Absent if the cloud platform does not support this construct, or if the availability zone assignment is not (yet) known.
+     */
+    public static final String AVAILABILITY_ZONE = "availabilityZone";
 
     private final String instanceId;
 

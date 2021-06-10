@@ -1,27 +1,27 @@
 package com.sequenceiq.cloudbreak.converter.stack.instance;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.cloudbreak.converter.AbstractEntityConverterTest;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.InstanceMetaDataToInstanceMetaDataV4ResponseConverter;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 
 public class InstanceMetaDataToInstanceMetaDataJsonConverterTest extends AbstractEntityConverterTest<InstanceMetaData> {
 
     private InstanceMetaDataToInstanceMetaDataV4ResponseConverter underTest;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         underTest = new InstanceMetaDataToInstanceMetaDataV4ResponseConverter();
     }
@@ -38,7 +38,7 @@ public class InstanceMetaDataToInstanceMetaDataJsonConverterTest extends Abstrac
         assertNotNull(result);
         assertEquals("test-" + source.getInstanceGroupName() + "-1-1", result.getDiscoveryFQDN());
         assertTrue(result.getAmbariServer());
-        assertAllFieldsNotNull(result, List.of("state", "statusReason"));
+        assertAllFieldsNotNull(result, List.of("state", "statusReason", "subnetId", "availabilityZone", "rackId"));
     }
 
     @Override
@@ -46,4 +46,5 @@ public class InstanceMetaDataToInstanceMetaDataJsonConverterTest extends Abstrac
         return TestUtil.instanceMetaData(1L, 1L, InstanceStatus.SERVICES_RUNNING, true,
                 TestUtil.instanceGroup(1L, InstanceGroupType.GATEWAY, TestUtil.gcpTemplate(1L)));
     }
+
 }

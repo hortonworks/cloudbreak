@@ -8,6 +8,8 @@ import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.CREATE_REQUES
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.DELETE_REQUESTED;
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.TERMINATED;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
+import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
+import static com.sequenceiq.cloudbreak.util.NullUtil.putIfPresent;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -418,19 +420,11 @@ public class StackToCloudStackConverter {
     }
 
     public Map<String, Object> buildCloudInstanceParameters(String environmentCrn, InstanceMetaData instanceMetaData, CloudPlatform platform) {
-        String hostName = instanceMetaData == null ? null : instanceMetaData.getShortHostname();
-        String subnetId = instanceMetaData == null ? null : instanceMetaData.getSubnetId();
-        String instanceName = instanceMetaData == null ? null : instanceMetaData.getInstanceName();
         Map<String, Object> params = new HashMap<>();
-        if (hostName != null) {
-            params.put(CloudInstance.DISCOVERY_NAME, hostName);
-        }
-        if (subnetId != null) {
-            params.put(CloudInstance.SUBNET_ID, subnetId);
-        }
-        if (instanceName != null) {
-            params.put(CloudInstance.INSTANCE_NAME, instanceName);
-        }
+        putIfPresent(params, CloudInstance.DISCOVERY_NAME, getIfNotNull(instanceMetaData, InstanceMetaData::getShortHostname));
+        putIfPresent(params, CloudInstance.SUBNET_ID, getIfNotNull(instanceMetaData, InstanceMetaData::getSubnetId));
+        putIfPresent(params, CloudInstance.AVAILABILITY_ZONE, getIfNotNull(instanceMetaData, InstanceMetaData::getAvailabilityZone));
+        putIfPresent(params, CloudInstance.INSTANCE_NAME, getIfNotNull(instanceMetaData, InstanceMetaData::getInstanceName));
         Optional<AzureResourceGroup> resourceGroupOptional = getAzureResourceGroup(environmentCrn, platform);
         if (resourceGroupOptional.isPresent() && !ResourceGroupUsage.MULTIPLE.equals(resourceGroupOptional.get().getResourceGroupUsage())) {
             AzureResourceGroup resourceGroup = resourceGroupOptional.get();
