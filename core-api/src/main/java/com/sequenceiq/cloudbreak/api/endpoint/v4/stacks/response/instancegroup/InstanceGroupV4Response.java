@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupV4Base;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.network.InstanceGroupNetworkV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.securitygroup.SecurityGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.template.InstanceTemplateV4Response;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
@@ -36,6 +37,12 @@ public class InstanceGroupV4Response extends InstanceGroupV4Base {
     private SecurityGroupV4Response securityGroup;
 
     private List<RecipeV4Response> recipes;
+
+    @ApiModelProperty(InstanceGroupModelDescription.AVAILABILITY_ZONES)
+    private Set<String> availabilityZones = new HashSet<>();
+
+    @ApiModelProperty(InstanceGroupModelDescription.NETWORK)
+    private InstanceGroupNetworkV4Response network;
 
     public Long getId() {
         return id;
@@ -75,5 +82,21 @@ public class InstanceGroupV4Response extends InstanceGroupV4Base {
 
     public void setRecipes(List<RecipeV4Response> recipes) {
         this.recipes = recipes;
+    }
+
+    public InstanceGroupNetworkV4Response getNetwork() {
+        return network;
+    }
+
+    public void setNetwork(InstanceGroupNetworkV4Response network) {
+        this.network = network;
+    }
+
+    public Set<String>  getAvailabilityZones() {
+        return availabilityZones;
+    }
+
+    public void setAvailabilityZones(Set<String>  availabilityZones) {
+        this.availabilityZones = availabilityZones;
     }
 }

@@ -437,7 +437,7 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
         TemplatePreparationObject result = underTest.convert(source);
         assertTrue(result.getPlacementView().isPresent());
         assertEquals(REGION, result.getPlacementView().get().getRegion());
-        assertEquals(AVAILABILITY_ZONE, result.getPlacementView().get().getAvailabilityZone());
+        assertEquals(REGION, result.getPlacementView().get().getAvailabilityZone());
     }
 
     private Set<String> createRdsConfigNames() {

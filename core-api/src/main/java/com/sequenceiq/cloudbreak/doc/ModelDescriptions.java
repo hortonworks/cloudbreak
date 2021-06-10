@@ -500,6 +500,8 @@ public class ModelDescriptions {
         public static final String INSTANCE_GROUP_SCALABILITY_TYPE = "type of the instance group scalability, default value is ALLOWED";
         public static final String INSTANCE_GROUP_MINIMUM_NODECOUNT = "minimum nodecount in an instancegroup";
         public static final String TEMPLATE = "instancegroup related template";
+        public static final String NETWORK = "instancegroup related network";
+        public static final String AVAILABILITY_ZONES = "instancegroup related availability zones";
         public static final String SECURITYGROUP = "instancegroup related securitygroup";
         public static final String NODE_COUNT = "number of nodes";
         public static final String TEMPLATE_ID = "referenced template id";
@@ -523,6 +525,7 @@ public class ModelDescriptions {
     public static class HostGroupModelDescription {
         public static final String RECIPE_IDS = "referenced recipe ids";
         public static final String RECIPE_NAMES = "referenced recipe names";
+        public static final String NETWORK = "referenced network";
         public static final String RECIPES = "referenced recipes";
         public static final String EXTENDED_RECIPES = "referenced extended recipes";
         public static final String HOST_GROUP_NAME = "name of the host group";
@@ -576,6 +579,7 @@ public class ModelDescriptions {
         public static final String GCP_PARAMETERS = "provider specific parameters of the specified network";
         public static final String AZURE_PARAMETERS = "provider specific parameters of the specified network";
         public static final String MOCK_PARAMETERS = "mock network parameters";
+        public static final String YARN_PARAMETERS = "provider specific parameters of the specified network";
         public static final String OPEN_STACK_PARAMETERS = "provider specific parameters of the specified network";
         public static final String SUBNET_CIDR = "the subnet definition of the network in CIDR format";
     }

@@ -134,6 +134,7 @@ public class TerminationService {
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
             instanceGroup.setSecurityGroup(null);
             instanceGroup.setTemplate(null);
+            instanceGroup.setInstanceGroupNetwork(null);
             instanceGroupService.save(instanceGroup);
         }
     }

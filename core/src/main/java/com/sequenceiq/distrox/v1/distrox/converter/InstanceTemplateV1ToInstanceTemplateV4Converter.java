@@ -28,7 +28,8 @@ public class InstanceTemplateV1ToInstanceTemplateV4Converter {
         response.setAttachedVolumes(getIfNotNull(source.getAttachedVolumes(), volumeConverter::convertTo));
         response.setEphemeralVolume(getIfNotNull(source.getEphemeralVolume(), volumeConverter::convert));
         response.setAws(getIfNotNull(source.getAws(), instanceTemplateParameterConverter::convert));
-        AzureInstanceTemplateV1Parameters azureParametersEffective = Objects.requireNonNullElse(source.getAzure(), new AzureInstanceTemplateV1Parameters());
+        AzureInstanceTemplateV1Parameters azureParametersEffective = Objects.requireNonNullElse(source.getAzure(),
+                new AzureInstanceTemplateV1Parameters());
         response.setAzure(instanceTemplateParameterConverter.convert(azureParametersEffective, environment));
         response.setGcp(getIfNotNull(source.getGcp(), instanceTemplateParameterConverter::convert));
         response.setYarn(getIfNotNull(source.getYarn(), instanceTemplateParameterConverter::convert));

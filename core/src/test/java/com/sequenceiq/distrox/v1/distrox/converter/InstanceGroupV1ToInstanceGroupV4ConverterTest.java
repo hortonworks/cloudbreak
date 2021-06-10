@@ -18,9 +18,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.AwsInstanceGroupV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.network.aws.InstanceGroupAwsNetworkV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AwsNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.network.InstanceGroupNetworkV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.securitygroup.SecurityGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.SecurityRuleV4Request;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -28,6 +32,7 @@ import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.AwsInstanceGrou
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.InstanceGroupV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.InstanceTemplateV1Request;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SecurityAccessResponse;
 
 @ExtendWith(MockitoExtension.class)
@@ -57,15 +62,19 @@ class InstanceGroupV1ToInstanceGroupV4ConverterTest {
     @Mock
     private InstanceGroupParameterConverter instanceGroupParameterConverter;
 
+    @Mock
+    private InstanceGroupNetworkV1ToInstanceGroupNetworkV4Converter networkConverter;
+
     @InjectMocks
     private InstanceGroupV1ToInstanceGroupV4Converter underTest;
 
     @Test
     void convertToAwsWithoutEnvironmentHappyPathTest() {
+        NetworkV4Request networkV4Request = getNetworkV4Request();
+
         when(instanceGroupParameterConverter.convert(AWS_INSTANCE_GROUP_V1_PARAMETERS)).thenReturn(AWS_INSTANCE_GROUP_V4_PARAMETERS);
         Set<InstanceGroupV1Request> instanceGroups = prepareInstanceGroupV1Requests(InstanceGroupType.CORE);
-
-        List<InstanceGroupV4Request> results = underTest.convertTo(instanceGroups, null);
+        List<InstanceGroupV4Request> results = underTest.convertTo(networkV4Request, instanceGroups, null);
 
         assertThat(results).hasSameSizeAs(instanceGroups);
 
@@ -83,12 +92,15 @@ class InstanceGroupV1ToInstanceGroupV4ConverterTest {
 
     @Test
     void convertToAwsWithEnvironmentWithoutSecurityGroupsHappyPathTest() {
+        NetworkV4Request networkV4Request = getNetworkV4Request();
+        InstanceGroupNetworkV4Request instanceGroupNetworkV4Request = getInstanceGroupNetworkV4Request();
+
         when(instanceGroupParameterConverter.convert(AWS_INSTANCE_GROUP_V1_PARAMETERS)).thenReturn(AWS_INSTANCE_GROUP_V4_PARAMETERS);
         DetailedEnvironmentResponse environment = prepareEnvironment(false, null, null, null);
         when(instanceTemplateConverter.convert(any(InstanceTemplateV1Request.class), eq(environment))).thenReturn(INSTANCE_TEMPLATE_V4_REQUEST);
+        when(networkConverter.convertToInstanceGroupNetworkV4Request(any())).thenReturn(instanceGroupNetworkV4Request);
         Set<InstanceGroupV1Request> instanceGroups = prepareInstanceGroupV1Requests(InstanceGroupType.CORE);
-
-        List<InstanceGroupV4Request> results = underTest.convertTo(instanceGroups, environment);
+        List<InstanceGroupV4Request> results = underTest.convertTo(networkV4Request, instanceGroups, environment);
 
         assertThat(results).hasSameSizeAs(instanceGroups);
 
@@ -102,6 +114,23 @@ class InstanceGroupV1ToInstanceGroupV4ConverterTest {
         assertThat(first.getRecoveryMode()).isEqualTo(RecoveryMode.AUTO);
         assertThat(first.getTemplate()).isEqualTo(INSTANCE_TEMPLATE_V4_REQUEST);
         assertThat(first.getType()).isEqualTo(InstanceGroupType.CORE);
+        assertThat(first.getNetwork().getAws().getSubnetIds().get(0)).isEqualTo("aws-123");
+    }
+
+    private InstanceGroupNetworkV4Request getInstanceGroupNetworkV4Request() {
+        InstanceGroupNetworkV4Request instanceGroupNetworkV4Request = new InstanceGroupNetworkV4Request();
+        InstanceGroupAwsNetworkV4Parameters instanceGroupAwsNetworkV4Parameters = new InstanceGroupAwsNetworkV4Parameters();
+        instanceGroupAwsNetworkV4Parameters.setSubnetIds(List.of("aws-123"));
+        instanceGroupNetworkV4Request.setAws(instanceGroupAwsNetworkV4Parameters);
+        return instanceGroupNetworkV4Request;
+    }
+
+    private NetworkV4Request getNetworkV4Request() {
+        NetworkV4Request networkV4Request = new NetworkV4Request();
+        AwsNetworkV4Parameters awsNetworkV4Parameters = new AwsNetworkV4Parameters();
+        awsNetworkV4Parameters.setSubnetId("aws-123");
+        networkV4Request.setAws(awsNetworkV4Parameters);
+        return networkV4Request;
     }
 
     // @formatter:off
@@ -138,7 +167,7 @@ class InstanceGroupV1ToInstanceGroupV4ConverterTest {
         }
         Set<InstanceGroupV1Request> instanceGroups = prepareInstanceGroupV1Requests(instanceGroupType);
 
-        List<InstanceGroupV4Request> results = underTest.convertTo(instanceGroups, environment);
+        List<InstanceGroupV4Request> results = underTest.convertTo(null, instanceGroups, environment);
 
         assertThat(results).hasSameSizeAs(instanceGroups);
         InstanceGroupV4Request first = results.get(0);
@@ -164,7 +193,7 @@ class InstanceGroupV1ToInstanceGroupV4ConverterTest {
         when(instanceTemplateConverter.convert(any(InstanceTemplateV4Request.class))).thenReturn(INSTANCE_TEMPLATE_V1_REQUEST);
         List<InstanceGroupV4Request> instanceGroups = prepareInstanceGroupV4Requests(InstanceGroupType.CORE);
 
-        Set<InstanceGroupV1Request> results = underTest.convertFrom(instanceGroups);
+        Set<InstanceGroupV1Request> results = underTest.convertFrom(null, instanceGroups, null);
 
         assertThat(results).hasSameSizeAs(instanceGroups);
         InstanceGroupV1Request first = results.iterator().next();
@@ -200,7 +229,7 @@ class InstanceGroupV1ToInstanceGroupV4ConverterTest {
 
         List<InstanceGroupV4Request> instanceGroups = prepareInstanceGroupV4Requests(instanceGroupType);
 
-        Set<InstanceGroupV1Request> results = underTest.convertFrom(instanceGroups);
+        Set<InstanceGroupV1Request> results = underTest.convertFrom(null, instanceGroups, null);
 
         assertThat(results).hasSameSizeAs(instanceGroups);
         InstanceGroupV1Request first = results.iterator().next();
@@ -211,6 +240,10 @@ class InstanceGroupV1ToInstanceGroupV4ConverterTest {
     private DetailedEnvironmentResponse prepareEnvironment(boolean securityAccessSet,
             String cidr, String defaultSecurityGroupId, String securityGroupIdKnox) {
         DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
+        EnvironmentNetworkResponse environmentNetworkResponse = new EnvironmentNetworkResponse();
+        environmentNetworkResponse.setSubnetIds(Set.of("aws-123"));
+        environment.setNetwork(environmentNetworkResponse);
+        environment.setCloudPlatform(CloudPlatform.AWS.name());
         environment.setSecurityAccess(securityAccessSet
                 ? createSecurityAccessResponse(cidr, defaultSecurityGroupId, securityGroupIdKnox)
                 : null);

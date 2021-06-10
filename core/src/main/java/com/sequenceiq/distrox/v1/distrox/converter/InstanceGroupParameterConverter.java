@@ -8,10 +8,12 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instanceg
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.AzureAvailabiltySetV4;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.AzureInstanceGroupV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.GcpInstanceGroupV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.YarnInstanceGroupV4Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.AwsInstanceGroupV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.AzureAvailabiltySetV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.AzureInstanceGroupV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.GcpInstanceGroupV1Parameters;
+import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.YarnInstanceGroupV1Parameters;
 
 @Component
 public class InstanceGroupParameterConverter {
@@ -50,6 +52,14 @@ public class InstanceGroupParameterConverter {
 
     public AwsInstanceGroupV1Parameters convert(AwsInstanceGroupV4Parameters source) {
         return new AwsInstanceGroupV1Parameters();
+    }
+
+    public YarnInstanceGroupV4Parameters convert(YarnInstanceGroupV1Parameters source) {
+        return new YarnInstanceGroupV4Parameters();
+    }
+
+    public YarnInstanceGroupV1Parameters convert(YarnInstanceGroupV4Parameters source) {
+        return new YarnInstanceGroupV1Parameters();
     }
 
     public GcpInstanceGroupV4Parameters convert(GcpInstanceGroupV1Parameters source) {

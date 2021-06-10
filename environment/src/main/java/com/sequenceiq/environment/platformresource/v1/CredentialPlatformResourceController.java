@@ -39,6 +39,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDisks;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTables;
 import com.sequenceiq.cloudbreak.cloud.model.resourcegroup.CloudResourceGroups;
+import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.common.api.type.CdpResourceType;
 import com.sequenceiq.environment.api.v1.platformresource.CredentialPlatformResourceEndpoint;
 import com.sequenceiq.environment.api.v1.platformresource.model.AccessConfigTypeQueryParam;
@@ -154,7 +155,7 @@ public class CredentialPlatformResourceController implements CredentialPlatformR
         String accountId = getAccountId();
         Map<String, String> filter = new HashMap<>();
         if (!Strings.isNullOrEmpty(subnetIds)) {
-            filter.put("subnetIds", subnetIds);
+            filter.put(NetworkConstants.SUBNET_IDS, subnetIds);
         }
         if (!Strings.isNullOrEmpty(networkId)) {
             filter.put("networkId", networkId);

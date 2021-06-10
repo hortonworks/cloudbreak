@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Convert;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -33,6 +34,7 @@ import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.instance.network.InstanceGroupNetwork;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.TargetGroup;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ScalabilityOption;
@@ -82,6 +84,13 @@ public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup>
 
     @ManyToMany(mappedBy = "instanceGroups", fetch = FetchType.LAZY)
     private Set<TargetGroup> targetGroups = new HashSet<>();
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @Column(name = "availabilityzone")
+    private Set<String> availabilityZones = new HashSet<>();
+
+    @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true)
+    private InstanceGroupNetwork instanceGroupNetwork;
 
     public String getGroupName() {
         return groupName;
@@ -259,5 +268,21 @@ public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup>
 
     public void setScalabilityOption(ScalabilityOption scalabilityOption) {
         this.scalabilityOption = scalabilityOption;
+    }
+
+    public Set<String> getAvailabilityZones() {
+        return availabilityZones;
+    }
+
+    public void setAvailabilityZones(Set<String> availabilityZones) {
+        this.availabilityZones = availabilityZones;
+    }
+
+    public InstanceGroupNetwork getInstanceGroupNetwork() {
+        return instanceGroupNetwork;
+    }
+
+    public void setInstanceGroupNetwork(InstanceGroupNetwork instanceGroupNetwork) {
+        this.instanceGroupNetwork = instanceGroupNetwork;
     }
 }

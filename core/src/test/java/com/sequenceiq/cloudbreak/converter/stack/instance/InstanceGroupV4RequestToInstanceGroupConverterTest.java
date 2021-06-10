@@ -17,6 +17,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.core.convert.ConversionService;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.network.InstanceGroupNetworkV4Request;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.mappable.Mappable;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
@@ -28,9 +29,10 @@ import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.InstanceGroup
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.network.InstanceGroupNetwork;
 
 @RunWith(MockitoJUnitRunner.class)
-public class InstanceGroupRequestToInstanceGroupConverterTest extends AbstractJsonConverterTest<InstanceGroupV4Request> {
+public class InstanceGroupV4RequestToInstanceGroupConverterTest extends AbstractJsonConverterTest<InstanceGroupV4Request> {
 
     @Rule
     public final ExpectedException thrown = ExpectedException.none();
@@ -51,6 +53,8 @@ public class InstanceGroupRequestToInstanceGroupConverterTest extends AbstractJs
         given(providerParameterCalculator.get(request)).willReturn(getMappable());
         given(conversionService.convert(any(InstanceTemplateV4Request.class), eq(Template.class))).willReturn(new Template());
         given(conversionService.convert(any(SecurityGroupV4Request.class), eq(SecurityGroup.class))).willReturn(new SecurityGroup());
+        given(conversionService.convert(any(InstanceGroupNetworkV4Request.class), eq(InstanceGroupNetwork.class)))
+                .willReturn(new InstanceGroupNetwork());
         // WHEN
         InstanceGroup instanceGroup = underTest.convert(request);
         // THEN
