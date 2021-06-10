@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -248,6 +249,7 @@ public class DistroXUpgradeAvailabilityServiceTest {
         when(stackViewService.findDatalakeViewByEnvironmentCrn(stackWithEnv.getEnvironmentCrn())).thenReturn(Optional.of(stackView));
         when(clusterComponentConfigProvider.getClouderaManagerProductDetails(1L)).thenReturn(products);
         when(stackRuntimeVersionValidator.getCdhVersionFromClouderaManagerProducts(products)).thenReturn(Optional.of("7.1.0"));
+        when(entitlementService.isDifferentDataHubAndDataLakeVersionAllowed(anyString())).thenReturn(false);
 
         UpgradeV4Response result = underTest.checkForUpgrade(CLUSTER, WORKSPACE_ID, request, USER_CRN);
 
@@ -255,6 +257,32 @@ public class DistroXUpgradeAvailabilityServiceTest {
                 + "To upgrade your Data Hub, please upgrade your Data Lake first.";
         assertEquals(0, result.getUpgradeCandidates().size());
         assertEquals(expectedMessage, result.getReason());
+    }
+
+    @Test
+    @DisplayName("this test simulates when the Data Lake and Data Hub version is the same (7.1.0)"
+            + "and the only upgrade options for Data Hub is newer than the DL (7.2.0,7.3.0,7.4.0). this will NOT be filtered"
+            + "since the different Data Hub version entitlement is enabled")
+    public void testCheckForUpgradeWhenDataLakeAndDataHubIsOnTheSameVersionAndUpgradeIsAvailable() {
+        UpgradeV4Request request = new UpgradeV4Request();
+        UpgradeV4Response response = new UpgradeV4Response();
+        ImageInfoV4Response image1 = createImageResponse(2L, "7.2.0");
+        ImageInfoV4Response image2 = createImageResponse(8L, "7.3.0");
+        ImageInfoV4Response image3 = createImageResponse(6L, "7.4.0");
+        response.setUpgradeCandidates(List.of(image1, image2, image3));
+        Stack stackWithEnv = new Stack();
+        stackWithEnv.setEnvironmentCrn("envcrn");
+        StackView stackView = new StackView();
+        ClusterView clusterView = new ClusterView();
+        clusterView.setId(1L);
+        ReflectionTestUtils.setField(stackView, "cluster", clusterView);
+        when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WORKSPACE_ID)).thenReturn(stackWithEnv);
+        when(stackOperations.checkForClusterUpgrade(ACCOUNT_ID, stackWithEnv, WORKSPACE_ID, request)).thenReturn(response);
+        when(entitlementService.isDifferentDataHubAndDataLakeVersionAllowed(anyString())).thenReturn(true);
+
+        UpgradeV4Response result = underTest.checkForUpgrade(CLUSTER, WORKSPACE_ID, request, USER_CRN);
+
+        assertEquals(3, result.getUpgradeCandidates().size());
     }
 
     private ImageInfoV4Response createImageResponse(long creation, String cdp) {

@@ -67,14 +67,24 @@ public class DistroXUpgradeAvailabilityService {
     public UpgradeV4Response checkForUpgrade(NameOrCrn nameOrCrn, Long workspaceId, UpgradeV4Request request, String userCrn) {
         verifyRuntimeUpgradeEntitlement(userCrn, request);
         Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
-        UpgradeV4Response response = stackOperations.checkForClusterUpgrade(Crn.safeFromString(userCrn).getAccountId(), stack, workspaceId, request);
-        List<ImageInfoV4Response> filteredCandidates = filterCandidates(stack, request, response);
+        String accountId = Crn.safeFromString(userCrn).getAccountId();
+        UpgradeV4Response response = stackOperations.checkForClusterUpgrade(accountId, stack, workspaceId, request);
+        List<ImageInfoV4Response> filteredCandidates = filterCandidates(accountId, stack, request, response);
         response.setUpgradeCandidates(filteredCandidates);
         return response;
     }
 
-    private List<ImageInfoV4Response> filterCandidates(Stack stack, UpgradeV4Request request, UpgradeV4Response upgradeV4Response) {
-        List<ImageInfoV4Response> filteredCandidates = filterForDatalakeVersion(stack, upgradeV4Response);
+    private List<ImageInfoV4Response> filterCandidates(String accountId, Stack stack, UpgradeV4Request request, UpgradeV4Response upgradeV4Response) {
+        List<ImageInfoV4Response> filteredCandidates;
+        String stackName = stack.getName();
+        boolean differentDataHubAndDataLakeVersionAllowed = entitlementService.isDifferentDataHubAndDataLakeVersionAllowed(accountId);
+        if (differentDataHubAndDataLakeVersionAllowed) {
+            LOGGER.info("Different Data Hub version is enabled, not filtering based on Data Lake version, Data Hub: {}", stackName);
+            filteredCandidates = upgradeV4Response.getUpgradeCandidates();
+        } else {
+            LOGGER.info("Filter Data Hub upgrade images based on the Data Lake version, Data Hub: {}", stackName);
+            filteredCandidates = filterForDatalakeVersion(stack, upgradeV4Response);
+        }
         if (CollectionUtils.isNotEmpty(filteredCandidates) && Objects.nonNull(request)) {
             if (LATEST_ONLY == request.getShowAvailableImages()) {
                 filteredCandidates = filterForLatestImagePerRuntime(filteredCandidates);
