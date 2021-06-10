@@ -67,7 +67,7 @@ public class GcpResourceConnector extends AbstractResourceConnector {
     }
 
     @Override
-    public List<CloudResourceStatus> launchLoadBalancers(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier persistenceNotifier)
+    public List<CloudResourceStatus> launchLoadBalancers(AuthenticatedContext auth, CloudStack stack, PersistenceNotifier persistenceNotifier)
             throws Exception {
         throw new UnsupportedOperationException("Load balancers are not supported for GCP.");
     }
