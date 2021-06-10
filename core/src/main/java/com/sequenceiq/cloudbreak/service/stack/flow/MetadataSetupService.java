@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.CREATED;
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.TERMINATED;
 
@@ -8,6 +9,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -23,6 +25,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstanceMetaData;
 import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancerMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.service.Clock;
@@ -44,6 +47,8 @@ import com.sequenceiq.common.api.type.LoadBalancerType;
 
 @Service
 public class MetadataSetupService {
+
+    private static final String DEFAULT_RACK = "default-rack";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MetadataSetupService.class);
 
@@ -115,12 +120,13 @@ public class MetadataSetupService {
 
             Map<String, InstanceGroup> instanceGroups = instanceGroupService.findByStackId(stack.getId())
                     .stream()
-                    .collect(Collectors.toMap(InstanceGroup::getGroupName, instanceGroup -> instanceGroup));
+                    .collect(Collectors.toMap(InstanceGroup::getGroupName, Function.identity()));
 
             for (CloudVmMetaDataStatus cloudVmMetaDataStatus : cloudVmMetaDataStatusList) {
                 CloudInstance cloudInstance = cloudVmMetaDataStatus.getCloudVmInstanceStatus().getCloudInstance();
                 CloudInstanceMetaData md = cloudVmMetaDataStatus.getMetaData();
-                Long privateId = cloudInstance.getTemplate().getPrivateId();
+                InstanceTemplate template = cloudInstance.getTemplate();
+                Long privateId = template.getPrivateId();
                 String instanceId = cloudInstance.getInstanceId();
                 InstanceMetaData instanceMetaDataEntry = createInstanceMetadataIfAbsent(allInstanceMetadata, privateId, instanceId);
                 if (instanceMetaDataEntry.getInstanceId() == null && cloudVmMetaDataStatus.getCloudVmInstanceStatus().getStatus() == CREATED) {
@@ -128,7 +134,7 @@ public class MetadataSetupService {
                 }
                 // CB 1.0.x clusters do not have private id thus we cannot correlate them with instance groups thus keep the original one
                 InstanceGroup ig = instanceMetaDataEntry.getInstanceGroup();
-                String group = ig == null ? cloudInstance.getTemplate().getGroupName() : ig.getGroupName();
+                String group = ig == null ? template.getGroupName() : ig.getGroupName();
                 InstanceGroup instanceGroup = instanceGroups.get(group);
                 instanceMetaDataEntry.setPrivateIp(md.getPrivateIp());
                 instanceMetaDataEntry.setPublicIp(md.getPublicIp());
@@ -139,6 +145,8 @@ public class MetadataSetupService {
                 instanceMetaDataEntry.setPrivateId(privateId);
                 instanceMetaDataEntry.setStartDate(clock.getCurrentTimeMillis());
                 instanceMetaDataEntry.setSubnetId(cloudInstance.getStringParameter(CloudInstance.SUBNET_ID));
+                instanceMetaDataEntry.setAvailabilityZone(cloudInstance.getStringParameter(CloudInstance.AVAILABILITY_ZONE));
+                instanceMetaDataEntry.setRackId(determineRackId(instanceMetaDataEntry.getSubnetId(), instanceMetaDataEntry.getAvailabilityZone()));
                 instanceMetaDataEntry.setInstanceName(cloudInstance.getStringParameter(CloudInstance.INSTANCE_NAME));
                 instanceMetaDataEntry.setServer(Boolean.FALSE);
                 instanceMetaDataEntry.setLifeCycle(InstanceLifeCycle.fromCloudInstanceLifeCycle(md.getLifeCycle()));
@@ -177,6 +185,13 @@ public class MetadataSetupService {
         } catch (CloudbreakImageNotFoundException | IllegalArgumentException ex) {
             throw new CloudbreakServiceException("Instance metadata collection failed", ex);
         }
+    }
+
+    private String determineRackId(String subnetId, String availabilityZone) {
+        return "/" +
+                (isNullOrEmpty(availabilityZone) ?
+                        (isNullOrEmpty(subnetId) ? DEFAULT_RACK : subnetId)
+                        : availabilityZone);
     }
 
     private InstanceMetaData createInstanceMetadataIfAbsent(Iterable<InstanceMetaData> allInstanceMetadata, Long privateId, String instanceId) {

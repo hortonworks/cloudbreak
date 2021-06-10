@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup;
 
 import org.springframework.stereotype.Component;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -10,7 +11,8 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 public class InstanceMetaDataToInstanceMetaDataV4ResponseConverter
         extends AbstractConversionServiceAwareConverter<InstanceMetaData, InstanceMetaDataV4Response> {
 
-    private static final String NOT_AVAILABLE = "N/A";
+    @VisibleForTesting
+    static final String NOT_AVAILABLE = "N/A";
 
     @Override
     public InstanceMetaDataV4Response convert(InstanceMetaData source) {
@@ -26,9 +28,13 @@ public class InstanceMetaDataToInstanceMetaDataV4ResponseConverter
         metaDataJson.setInstanceId(source.getInstanceId());
         metaDataJson.setDiscoveryFQDN(source.getDiscoveryFQDN());
         metaDataJson.setInstanceGroup(source.getInstanceGroup().getGroupName());
+        metaDataJson.setSubnetId(source.getSubnetId());
+        metaDataJson.setAvailabilityZone(source.getAvailabilityZone());
+        metaDataJson.setRackId(source.getRackId());
         metaDataJson.setInstanceStatus(source.getInstanceStatus());
         metaDataJson.setInstanceType(source.getInstanceMetadataType());
         metaDataJson.setLifeCycle(source.getLifeCycle());
         return metaDataJson;
     }
+
 }

@@ -89,6 +89,12 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
 
     private String region;
 
+    /**
+     * Name of the availability zone the stack is deployed in. May be {@code null} if the cloud platform does not support this construct.
+     *
+     * @deprecated Use {@code InstanceMetaData.availabilityZone} instead (reachable via {@code instanceGroups.instanceMetaData}).
+     */
+    @Deprecated(since = "2.45.0")
     private String availabilityZone;
 
     private Integer gatewayPort;

@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.util;
 
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -12,9 +11,9 @@ public class NullUtil {
     private NullUtil() {
     }
 
-    public static <T extends Throwable> void throwIfNull(Object o, Supplier<? extends T> exeption) throws T {
-        if (Objects.isNull(o)) {
-            throw exeption.get();
+    public static <T extends Throwable> void throwIfNull(Object o, Supplier<? extends T> exception) throws T {
+        if (o == null) {
+            throw exception.get();
         }
     }
 

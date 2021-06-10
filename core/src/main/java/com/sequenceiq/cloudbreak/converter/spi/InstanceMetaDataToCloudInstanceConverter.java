@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.converter.spi;
 
+import static com.sequenceiq.cloudbreak.util.NullUtil.putIfPresent;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,7 +23,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 
 @Component
-public class InstanceMetaDataToCloudInstanceConverter  {
+public class InstanceMetaDataToCloudInstanceConverter {
 
     @Inject
     private StackToCloudStackConverter stackToCloudStackConverter;
@@ -49,8 +51,9 @@ public class InstanceMetaDataToCloudInstanceConverter  {
                 stackAuthentication.getPublicKeyId(),
                 stackAuthentication.getLoginUserName());
         Map<String, Object> params = new HashMap<>();
-        params.put(CloudInstance.SUBNET_ID, metaDataEntity.getSubnetId());
-        params.put(CloudInstance.INSTANCE_NAME, metaDataEntity.getInstanceName());
+        putIfPresent(params, CloudInstance.SUBNET_ID, metaDataEntity.getSubnetId());
+        putIfPresent(params, CloudInstance.INSTANCE_NAME, metaDataEntity.getInstanceName());
+        putIfPresent(params, CloudInstance.AVAILABILITY_ZONE, metaDataEntity.getAvailabilityZone());
 
         Map<String, Object> cloudInstanceParameters = stackToCloudStackConverter.buildCloudInstanceParameters(
                 envCrn,

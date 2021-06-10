@@ -42,6 +42,15 @@ public class InstanceMetaDataV4Response implements JsonEntity {
     @ApiModelProperty(InstanceGroupModelDescription.INSTANCE_GROUP_NAME)
     private String instanceGroup;
 
+    @ApiModelProperty(InstanceMetaDataModelDescription.SUBNET_ID)
+    private String subnetId;
+
+    @ApiModelProperty(InstanceMetaDataModelDescription.AVAILABILITY_ZONE)
+    private String availabilityZone;
+
+    @ApiModelProperty(InstanceMetaDataModelDescription.RACK_ID)
+    private String rackId;
+
     @ApiModelProperty(InstanceGroupModelDescription.STATUS)
     private InstanceStatus instanceStatus;
 
@@ -114,6 +123,30 @@ public class InstanceMetaDataV4Response implements JsonEntity {
 
     public void setDiscoveryFQDN(String discoveryFQDN) {
         this.discoveryFQDN = discoveryFQDN;
+    }
+
+    public String getSubnetId() {
+        return subnetId;
+    }
+
+    public void setSubnetId(String subnetId) {
+        this.subnetId = subnetId;
+    }
+
+    public String getAvailabilityZone() {
+        return availabilityZone;
+    }
+
+    public void setAvailabilityZone(String availabilityZone) {
+        this.availabilityZone = availabilityZone;
+    }
+
+    public String getRackId() {
+        return rackId;
+    }
+
+    public void setRackId(String rackId) {
+        this.rackId = rackId;
     }
 
     public InstanceStatus getInstanceStatus() {

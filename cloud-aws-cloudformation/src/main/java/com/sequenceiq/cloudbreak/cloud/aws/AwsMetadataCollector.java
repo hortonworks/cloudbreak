@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -18,9 +20,11 @@ import com.amazonaws.services.ec2.model.DescribeInstanceTypesRequest;
 import com.amazonaws.services.ec2.model.DescribeInstanceTypesResult;
 import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
+import com.amazonaws.services.ec2.model.DescribeSubnetsRequest;
 import com.amazonaws.services.ec2.model.DiskInfo;
 import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.InstanceTypeInfo;
+import com.amazonaws.services.ec2.model.Subnet;
 import com.amazonaws.services.elasticloadbalancingv2.model.LoadBalancer;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
@@ -91,39 +95,54 @@ public class AwsMetadataCollector implements MetadataCollector {
 
         Multimap<String, CloudInstance> instanceGroupMap = getInstanceGroupMap(vms);
 
+        Set<String> subnetIds = new HashSet<>();
         Multimap<String, Instance> instancesOnAWSForGroup = ArrayListMultimap.create();
         for (String group : instanceGroupMap.keySet()) {
             List<Instance> instancesForGroup = collectInstancesForGroup(ac, amazonASClient, amazonEC2Client, amazonCFClient, group);
             instancesOnAWSForGroup.putAll(group, instancesForGroup);
+            subnetIds.addAll(getSubnetIdsForInstances(instancesForGroup));
         }
+        Map<String, String> subnetIdToAvailabilityZoneMap = buildSubnetIdToAvailabilityZoneMap(subnetIds, amazonEC2Client);
 
-        Multimap<String, Instance> unknownInstancesForGroup = getUnkownInstancesForGroup(knownInstanceIdList, instancesOnAWSForGroup);
+        Multimap<String, Instance> unknownInstancesForGroup = getUnknownInstancesForGroup(knownInstanceIdList, instancesOnAWSForGroup);
         for (CloudInstance vm : vms) {
             if (vm.getInstanceId() == null) {
-                addFromUnknownMap(vm, unknownInstancesForGroup, collectedCloudVmMetaDataStatuses);
+                addFromUnknownMap(vm, unknownInstancesForGroup, collectedCloudVmMetaDataStatuses, subnetIdToAvailabilityZoneMap);
             } else {
-                addKnownInstance(vm, instancesOnAWSForGroup, collectedCloudVmMetaDataStatuses);
+                addKnownInstance(vm, instancesOnAWSForGroup, collectedCloudVmMetaDataStatuses, subnetIdToAvailabilityZoneMap);
             }
         }
         return collectedCloudVmMetaDataStatuses;
     }
 
-    private Multimap<String, Instance> getUnkownInstancesForGroup(List<String> knownInstanceIdList, Multimap<String, Instance> instancesOnAWSForGroup) {
+    private Collection<String> getSubnetIdsForInstances(List<Instance> instances) {
+        return instances.stream()
+                .map(Instance::getSubnetId)
+                .collect(Collectors.toSet());
+    }
+
+    private Map<String, String> buildSubnetIdToAvailabilityZoneMap(Set<String> subnetIds, AmazonEc2Client amazonEC2Client) {
+        List<Subnet> subnets = amazonEC2Client.describeSubnets(new DescribeSubnetsRequest().withSubnetIds(subnetIds)).getSubnets();
+        return subnets.stream()
+                .collect(Collectors.toMap(Subnet::getSubnetId, Subnet::getAvailabilityZone));
+    }
+
+    private Multimap<String, Instance> getUnknownInstancesForGroup(List<String> knownInstanceIdList, Multimap<String, Instance> instancesOnAWSForGroup) {
         LOGGER.debug("Collect unknown cloud metadata statuses, knownInstanceIdList: {}, instancesOnAWSForGroup: {}", knownInstanceIdList,
                 instancesOnAWSForGroup.keySet());
         Multimap<String, Instance> unknownInstancesForGroup = ArrayListMultimap.create();
         for (String group : instancesOnAWSForGroup.keySet()) {
             Collection<Instance> instances = instancesOnAWSForGroup.get(group);
-            List<Instance> unkownInstances = instances.stream().filter(instance ->
+            List<Instance> unknownInstances = instances.stream().filter(instance ->
                     !knownInstanceIdList.contains(instance.getInstanceId()))
                     .collect(Collectors.toList());
-            unknownInstancesForGroup.putAll(group, unkownInstances);
+            unknownInstancesForGroup.putAll(group, unknownInstances);
         }
         return unknownInstancesForGroup;
     }
 
     private void addFromUnknownMap(CloudInstance cloudInstance, Multimap<String, Instance> unknownMap,
-            List<CloudVmMetaDataStatus> collectedCloudVmMetaDataStatuses) {
+            List<CloudVmMetaDataStatus> collectedCloudVmMetaDataStatuses, Map<String, String> subnetIdToAvailabilityZoneMap) {
         LOGGER.debug("Collect from unknown map, cloudInstance: {}, unknownMap: {}", cloudInstance.getInstanceId(), unknownMap.keySet());
         String groupName = cloudInstance.getTemplate().getGroupName();
         Collection<Instance> unknownInstancesForGroup = unknownMap.get(groupName);
@@ -132,6 +151,7 @@ public class AwsMetadataCollector implements MetadataCollector {
             Instance foundInstance = found.get();
             CloudInstance newCloudInstance = new CloudInstance(foundInstance.getInstanceId(), cloudInstance.getTemplate(),
                     cloudInstance.getAuthentication(), cloudInstance.getParameters());
+            addCloudInstanceNetworkParameters(newCloudInstance, foundInstance, subnetIdToAvailabilityZoneMap);
             CloudInstanceMetaData cloudInstanceMetaData = new CloudInstanceMetaData(
                     foundInstance.getPrivateIpAddress(),
                     foundInstance.getPublicIpAddress(),
@@ -139,12 +159,18 @@ public class AwsMetadataCollector implements MetadataCollector {
             CloudVmInstanceStatus cloudVmInstanceStatus = new CloudVmInstanceStatus(newCloudInstance, InstanceStatus.CREATED);
             CloudVmMetaDataStatus newMetadataStatus = new CloudVmMetaDataStatus(cloudVmInstanceStatus, cloudInstanceMetaData);
             collectedCloudVmMetaDataStatuses.add(newMetadataStatus);
-            unknownMap.remove(groupName, found.get());
+            unknownMap.remove(groupName, foundInstance);
         }
     }
 
+    private void addCloudInstanceNetworkParameters(CloudInstance cloudInstance, Instance instance, Map<String, String> subnetIdToAvailabilityZoneMap) {
+        String subnetId = instance.getSubnetId();
+        cloudInstance.putParameter(CloudInstance.SUBNET_ID, subnetId);
+        cloudInstance.putParameter(CloudInstance.AVAILABILITY_ZONE, subnetIdToAvailabilityZoneMap.get(subnetId));
+    }
+
     private void addKnownInstance(CloudInstance cloudInstance, Multimap<String, Instance> instancesOnAWSForGroup,
-            List<CloudVmMetaDataStatus> collectedCloudVmMetaDataStatuses) {
+            List<CloudVmMetaDataStatus> collectedCloudVmMetaDataStatuses, Map<String, String> subnetIdToAvailabilityZoneMap) {
         LOGGER.debug("Add known instance, cloudInstance: {}, instancesOnAWSForGroup: {}", cloudInstance.getInstanceId(), instancesOnAWSForGroup.keySet());
         List<Instance> instanceList = instancesOnAWSForGroup.entries().stream().map(Entry::getValue).collect(Collectors.toList());
         instanceList.stream()
@@ -152,6 +178,7 @@ public class AwsMetadataCollector implements MetadataCollector {
                         cloudInstance.getInstanceId().equals(instance.getInstanceId()))
                 .findAny()
                 .ifPresent(instance -> {
+                    addCloudInstanceNetworkParameters(cloudInstance, instance, subnetIdToAvailabilityZoneMap);
                     CloudInstanceMetaData cloudInstanceMetaData = new CloudInstanceMetaData(
                             instance.getPrivateIpAddress(),
                             instance.getPublicIpAddress(),
