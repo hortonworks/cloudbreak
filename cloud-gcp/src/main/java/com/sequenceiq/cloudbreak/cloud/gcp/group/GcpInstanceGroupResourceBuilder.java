@@ -46,7 +46,6 @@ public class GcpInstanceGroupResourceBuilder extends AbstractGcpGroupBuilder {
             Network network, Security security, CloudResource resource) throws Exception {
         LOGGER.info("Building GCP instancegroup {} for project {}", group.getName(), context.getProjectId());
 
-
         Insert insert = context.getCompute().instanceGroups().insert(context.getProjectId(),
                 context.getLocation().getAvailabilityZone().value(), new InstanceGroup().setName(resource.getName()));
 

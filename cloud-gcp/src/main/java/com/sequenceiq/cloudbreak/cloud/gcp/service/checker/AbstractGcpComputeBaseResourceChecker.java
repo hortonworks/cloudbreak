@@ -66,11 +66,13 @@ public abstract class AbstractGcpComputeBaseResourceChecker extends AbstractGcpB
     }
 
     protected CloudResource createOperationAwareCloudResource(CloudResource resource, Operation operation) {
-        return new Builder()
+        CloudResource build = new Builder()
                 .cloudResource(resource)
-                .params(Collections.singletonMap(OPERATION_ID, operation.getName()))
+                .params(resource.getParameters())
                 .persistent(false)
                 .build();
+        build.putParameter(OPERATION_ID, operation.getName());
+        return build;
     }
 
     protected CloudInstance createOperationAwareCloudInstance(CloudInstance instance, Operation operation) {

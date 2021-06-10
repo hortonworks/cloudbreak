@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.cloud.template.compute.DatabaseServerTerminateS
 import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 import com.sequenceiq.cloudbreak.cloud.template.group.GroupResourceService;
 import com.sequenceiq.cloudbreak.cloud.template.init.ContextBuilders;
+import com.sequenceiq.cloudbreak.cloud.template.loadbalancer.LoadBalancerResourceService;
 import com.sequenceiq.cloudbreak.cloud.template.network.NetworkResourceService;
 import com.sequenceiq.common.api.type.AdjustmentType;
 
@@ -55,6 +56,9 @@ public abstract class AbstractResourceConnector implements ResourceConnector<Lis
 
     @Inject
     private ComputeResourceService computeResourceService;
+
+    @Inject
+    private LoadBalancerResourceService loadBalancerResourceService;
 
     @Inject
     private DatabaseServerTerminateService databaseServerTerminateService;
@@ -116,8 +120,12 @@ public abstract class AbstractResourceConnector implements ResourceConnector<Lis
         //context
         ResourceBuilderContext context = contextBuilders.get(platform).contextInit(cloudContext, auth, stack.getNetwork(), cloudResources, false);
 
+        //loadBalancer
+        List<CloudResourceStatus> cloudResourceStatuses = loadBalancerResourceService.deleteResources(context, auth, cloudResources, false);
+
         //compute
-        List<CloudResourceStatus> cloudResourceStatuses = computeResourceService.deleteResources(context, auth, cloudResources, false);
+        List<CloudResourceStatus> computeStatuses = computeResourceService.deleteResources(context, auth, cloudResources, false);
+        cloudResourceStatuses.addAll(computeStatuses);
 
         //group
         List<CloudResourceStatus> groupStatuses = groupResourceService.deleteResources(context, auth, cloudResources, stack.getNetwork(), false);

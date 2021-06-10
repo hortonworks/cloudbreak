@@ -18,4 +18,7 @@ dependencies {
 
     compile group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
 
+    testCompile (group: 'org.mockito',              name: 'mockito-core',                   version: mockitoVersion) {
+      exclude group: 'org.hamcrest'
+    }
 }

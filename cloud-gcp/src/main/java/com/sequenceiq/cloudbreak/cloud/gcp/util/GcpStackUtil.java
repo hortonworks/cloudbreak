@@ -81,6 +81,10 @@ public class GcpStackUtil {
 
     private static final int MINUTES = 3;
 
+    private static final String GCP_SUBNET_FORMAT = "https://www.googleapis.com/compute/v1/projects/%s/regions/%s/subnetworks/%s";
+
+    private static final String GCP_NETWORK_FORMAT = "https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s";
+
     public String getServiceAccountId(CloudCredential credential) {
         return credential.getParameter(SERVICE_ACCOUNT, String.class);
     }
@@ -282,6 +286,14 @@ public class GcpStackUtil {
             return Boolean.FALSE;
         }
         return noPublicIp;
+    }
+
+    public String getSubnetUrl(String sharedProjectId, String value, String customSubnetworkId) {
+        return String.format(GCP_SUBNET_FORMAT, sharedProjectId, value, customSubnetworkId);
+    }
+
+    public String getNetworkUrl(String projectId, String networkId) {
+        return String.format(GCP_NETWORK_FORMAT, projectId, networkId);
     }
 
     public GcpResourceException getMissingServiceAccountKeyError(TokenResponseException e, String projectId) {

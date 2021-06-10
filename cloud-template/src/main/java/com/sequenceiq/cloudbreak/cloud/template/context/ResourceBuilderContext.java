@@ -11,6 +11,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
+import com.sequenceiq.common.api.type.LoadBalancerType;
 
 public class ResourceBuilderContext extends DynamicModel {
 
@@ -25,6 +26,8 @@ public class ResourceBuilderContext extends DynamicModel {
     private final Map<String, List<CloudResource>> groupResources = new HashMap<>();
 
     private final Map<Long, List<CloudResource>> computeResources = new HashMap<>();
+
+    private final Map<LoadBalancerType, List<CloudResource>> loadBalancerResources = new HashMap<>();
 
     private boolean build;
 
@@ -79,6 +82,15 @@ public class ResourceBuilderContext extends DynamicModel {
 
     public List<CloudResource> getComputeResources(Long index) {
         return computeResources.get(index);
+    }
+
+    public synchronized void addLoadBalancerResources(LoadBalancerType type, Collection<CloudResource> resources) {
+        List<CloudResource> list = loadBalancerResources.computeIfAbsent(type, k -> new ArrayList<>());
+        list.addAll(resources);
+    }
+
+    public List<CloudResource> getLoadBalancerResources(LoadBalancerType type) {
+        return loadBalancerResources.get(type);
     }
 
 }

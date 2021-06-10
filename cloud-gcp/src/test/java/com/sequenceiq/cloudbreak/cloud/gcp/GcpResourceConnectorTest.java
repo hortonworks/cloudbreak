@@ -52,6 +52,7 @@ import com.sequenceiq.cloudbreak.cloud.template.compute.ComputeResourceService;
 import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 import com.sequenceiq.cloudbreak.cloud.template.group.GroupResourceService;
 import com.sequenceiq.cloudbreak.cloud.template.init.ContextBuilders;
+import com.sequenceiq.cloudbreak.cloud.template.loadbalancer.LoadBalancerResourceService;
 import com.sequenceiq.cloudbreak.cloud.template.network.NetworkResourceService;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.common.api.type.CommonStatus;
@@ -75,6 +76,9 @@ public class GcpResourceConnectorTest {
     private ComputeResourceService computeResourceService;
 
     @Mock
+    private LoadBalancerResourceService loadBalancerResourceService;
+
+    @Mock
     private ContextBuilders contextBuilders;
 
     @Test
@@ -95,13 +99,39 @@ public class GcpResourceConnectorTest {
     }
 
     @Test
-    public void testLaunchLoadBalancersWhenEverythingIsFine() {
+    public void testLaunchLoadBalancersWhenEverythingIsFine() throws Exception {
         AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
         CloudStack cloudStack = mock(CloudStack.class);
         PersistenceNotifier persistenceNotifier = mock(PersistenceNotifier.class);
+        Network network = mock(Network.class);
+        CloudContext cloudContext = mock(CloudContext.class);
+        ResourceBuilderContext resourceBuilderContext = mock(ResourceBuilderContext.class);
+        ResourceContextBuilder resourceContextBuilder = mock(ResourceContextBuilder.class);
 
-        assertThrows(UnsupportedOperationException.class,
-                () -> underTest.launchLoadBalancers(authenticatedContext, cloudStack, persistenceNotifier));
+        when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
+        when(cloudStack.getNetwork()).thenReturn(network);
+        when(cloudContext.getPlatform()).thenReturn(platform("GCP"));
+        when(contextBuilders.get(any(Platform.class))).thenReturn(resourceContextBuilder);
+        when(resourceContextBuilder.contextInit(
+                any(CloudContext.class),
+                any(AuthenticatedContext.class),
+                any(Network.class),
+                anyList(),
+                anyBoolean())).thenReturn(resourceBuilderContext);
+
+        when(loadBalancerResourceService.buildResources(
+                any(ResourceBuilderContext.class),
+                any(AuthenticatedContext.class),
+                any(CloudStack.class))
+        ).thenReturn(List.of());
+
+        underTest.launchLoadBalancers(authenticatedContext, cloudStack, persistenceNotifier);
+
+        verify(contextBuilders, times(1)).get(any(Platform.class));
+        verify(loadBalancerResourceService, times(1)).buildResources(
+                any(ResourceBuilderContext.class),
+                any(AuthenticatedContext.class),
+                any(CloudStack.class));
     }
 
     @Test
