@@ -54,6 +54,7 @@ if [ $? -ne 0 ]; then
 fi
 
 check_primary_key () {
+    set +e
     DB_NAME="$1"
     docker exec -u postgres cbreak_commondb_1 psql -P pager=off -d "${DB_NAME}" -c "select tab.table_schema, tab.table_name \
         from information_schema.tables tab \
@@ -67,11 +68,13 @@ check_primary_key () {
         order by table_schema, table_name;" | grep -q "(0 rows)"
 
     if [ $? -ne 0 ]; then
+        set -e
         echo -e "\n\033[1;96m--- ERROR: There are tables in ${DB_NAME} without primary key. Process is about to terminate!\033[0m\n"
         ./cbd kill
         .deps/bin/docker-compose --compatibility down --remove-orphans
         exit 1
     fi
+    set -e
 }
 
 if [ "${CB_TARGET_BRANCH}" == "master" ] && [ "${PRIMARYKEY_CHECK}" == "true" ]; then
