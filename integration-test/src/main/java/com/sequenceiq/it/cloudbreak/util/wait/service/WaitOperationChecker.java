@@ -35,7 +35,7 @@ public class WaitOperationChecker<T extends WaitObject> extends ExceptionChecker
             LOGGER.info("Cluster '{}' is in desired state (status:'{}').", name, actualStatuses);
             return true;
         }
-        return waitObject.isFailed();
+        return waitObject.isInDesiredStatus();
     }
 
     @Override
@@ -65,10 +65,12 @@ public class WaitOperationChecker<T extends WaitObject> extends ExceptionChecker
             return true;
         }
         if (waitObject.isCreateFailed()) {
-            LOGGER.info("'{}' the polled resource entered into creation failed state. Exit waiting!", name);
-            return true;
+            Map<String, String> actualStatusReasons = waitObject.actualStatusReason();
+            LOGGER.error("Cluster '{}' entered into creation failed state (status:'{}'). Exit waiting!", name, actualStatuses);
+            throw new TestFailException(String.format("Cluster '%s' entered into creation failed state. Status: '%s' statusReason: '%s'",
+                    name, actualStatuses, actualStatusReasons));
         }
-        return waitObject.isFailed();
+        return waitObject.isInDesiredStatus();
     }
 
     @Override

@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStat
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.ORCHESTRATION_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.TERMINATED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.DELETE_REQUESTED;
 
 import java.util.List;
 import java.util.Map;
@@ -63,8 +64,7 @@ public class InstanceWaitObject implements WaitObject {
 
     @Override
     public boolean isDeleteFailed() {
-        Set<InstanceStatus> failedStatuses = Set.of(FAILED, DECOMMISSION_FAILED);
-        return failedStatuses.contains(getInstanceStatus());
+        return getInstanceStatus().equals(DECOMMISSION_FAILED);
     }
 
     @Override
@@ -118,12 +118,12 @@ public class InstanceWaitObject implements WaitObject {
 
     @Override
     public boolean isDeletionInProgress() {
-        return false;
+        return getInstanceStatus().equals(DELETE_REQUESTED);
     }
 
     @Override
     public boolean isCreateFailed() {
-        return false;
+        return getInstanceStatus().equals(ORCHESTRATION_FAILED);
     }
 
     @Override

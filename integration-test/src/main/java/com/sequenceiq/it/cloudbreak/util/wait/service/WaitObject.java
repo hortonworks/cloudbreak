@@ -8,6 +8,10 @@ public interface WaitObject {
 
     String STATUS_REASON = "statusReason";
 
+    String CLUSTER_STATUS = "clusterStatus";
+
+    String CLUSTER_STATUS_REASON = "clusterStatusReason";
+
     void fetchData();
 
     boolean isDeleteFailed();
