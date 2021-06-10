@@ -68,15 +68,7 @@ public class GcpFirewallInResourceBuilder extends AbstractGcpGroupBuilder {
                 && gcpStackUtil.isExistingNetwork(network))
                 ? updateExistingFirewallForNewTargets(context, auth, group)
                 : createNewFirewallRule(context, auth, group, network, security, buildableResource, projectId);
-        try {
-            Operation operation = firewallRequest.execute();
-            if (operation.getHttpErrorStatusCode() != null) {
-                throw new GcpResourceException(operation.getHttpErrorMessage(), resourceType(), buildableResource.getName());
-            }
-            return createOperationAwareCloudResource(buildableResource, operation);
-        } catch (GoogleJsonResponseException e) {
-            throw new GcpResourceException(checkException(e), resourceType(), buildableResource.getName());
-        }
+        return executeOperationalRequest(buildableResource, firewallRequest);
     }
 
     private Update updateExistingFirewallForNewTargets(GcpContext context, AuthenticatedContext auth, Group group)

@@ -27,6 +27,7 @@ public class GcpResourceNameService extends CloudbreakResourceNameService {
     private int maxResourceNameLength;
 
     @Override
+    @SuppressWarnings("checkstyle:CyclomaticComplexity")
     public String resourceName(ResourceType resourceType, Object... parts) {
         String resourceName;
 
@@ -57,6 +58,9 @@ public class GcpResourceNameService extends CloudbreakResourceNameService {
                 break;
             case GCP_DATABASE:
                 resourceName = deploymentTemplateName(parts);
+                break;
+            case GCP_INSTANCE_GROUP:
+                resourceName = gcpGroupResourceName(parts);
                 break;
             default:
                 throw new IllegalStateException("Unsupported resource type: " + resourceType);
@@ -136,5 +140,18 @@ public class GcpResourceNameService extends CloudbreakResourceNameService {
         subnetName = appendHash(subnetName, new Date());
         subnetName = adjustBaseLength(subnetName, maxResourceNameLength);
         return subnetName;
+    }
+
+    private String gcpGroupResourceName(Object[] parts) {
+        checkArgs(2, parts);
+        String name;
+        String stackName = String.valueOf(parts[0]);
+        String groupName = String.valueOf(parts[1]);
+        name = normalize(stackName);
+        name = adjustPartLength(name);
+        name = appendPart(name, normalize(groupName));
+        name = appendHash(name, new Date());
+        name = adjustBaseLength(name, maxResourceNameLength);
+        return name;
     }
 }
