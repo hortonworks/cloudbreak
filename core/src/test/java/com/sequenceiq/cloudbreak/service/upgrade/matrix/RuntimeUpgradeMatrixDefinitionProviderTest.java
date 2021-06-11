@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.nio.file.Path;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,7 +36,7 @@ public class RuntimeUpgradeMatrixDefinitionProviderTest {
         UpgradeMatrixDefinition actual = underTest.getUpgradeMatrix();
 
         assertNotNull(actual);
-        assertEquals(3, actual.getRuntimeUpgradeMatrix().size());
+        assertEquals(7, actual.getRuntimeUpgradeMatrix().size());
         assertTrue(actual.getRuntimeUpgradeMatrix().stream().allMatch(matrix -> containsSourceVersions(matrix) && containsTargetVersions(matrix)));
     }
 
@@ -51,6 +52,6 @@ public class RuntimeUpgradeMatrixDefinitionProviderTest {
     }
 
     private String getUpgradeMatrixJson() throws IOException {
-        return FileReaderUtils.readFileFromClasspath("/upgrade/upgrade-matrix-definition.json");
+        return FileReaderUtils.readFileFromPath(Path.of("src/main/resources/definitions/upgrade-matrix-definition.json"));
     }
 }
