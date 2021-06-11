@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceStoreMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 
@@ -168,6 +169,11 @@ public class AzureMetadataCollector implements MetadataCollector {
         }
 
         return cloudLoadBalancerMetadata;
+    }
+
+    @Override
+    public InstanceStoreMetadata collectInstanceStorageCount(AuthenticatedContext ac, List<String> instanceTypes) {
+        return new InstanceStoreMetadata();
     }
 
     private Optional<String> lookupPrivateIp(String resourceGroup, AzureClient azureClient, String loadBalancerName) {

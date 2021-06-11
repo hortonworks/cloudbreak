@@ -73,6 +73,8 @@ public class Template implements ProvisionEntity, WorkspaceAwareResource {
     @Convert(converter = TemporaryStorageConverter.class)
     private TemporaryStorage temporaryStorage = TemporaryStorage.ATTACHED_VOLUMES;
 
+    private Integer instanceStorageCount;
+
     public Template() {
         deleted = false;
     }
@@ -187,5 +189,13 @@ public class Template implements ProvisionEntity, WorkspaceAwareResource {
 
     public TemporaryStorage getTemporaryStorage() {
         return temporaryStorage;
+    }
+
+    public Integer getInstanceStorageCount() {
+        return instanceStorageCount;
+    }
+
+    public void setInstanceStorageCount(Integer instanceStorageCount) {
+        this.instanceStorageCount = instanceStorageCount;
     }
 }
