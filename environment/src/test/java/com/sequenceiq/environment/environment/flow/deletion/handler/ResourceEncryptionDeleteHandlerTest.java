@@ -94,6 +94,7 @@ class ResourceEncryptionDeleteHandlerTest {
                                 .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder()
                                         .withDiskEncryptionSetId("/subscriptions/dummySubscriptionId/resourceGroups/dummyResourceGroup/" +
                                                 "providers/Microsoft.Compute/diskEncryptionSets/dummyDesId")
+                                        .withEncryptionKeyUrl("https://dummyVault.vault.azure.net/keys/dummyKey/dummyKeyVersion")
                                         .build())
                                 .build())
                         .build())
@@ -159,7 +160,7 @@ class ResourceEncryptionDeleteHandlerTest {
     }
 
     @Test
-    void testDeletionContinuesIfDiskEncryptionSetIdIsNotPresent() {
+    void testDeletionContinuesIfEncryptionKeyUrlIsNotPresent() {
         Environment environment = new Environment();
         when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(environment));
         environmentDtoEvent.getData().setEnvironmentDto(EnvironmentDto.builder()

@@ -22,7 +22,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.encryption.CreatedDiskEncryptionSet;
 import com.sequenceiq.cloudbreak.cloud.model.encryption.DiskEncryptionSetCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.encryption.DiskEncryptionSetDeletionRequest;
-import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
@@ -121,9 +120,8 @@ public class EnvironmentEncryptionService {
     }
 
     private List<CloudResource> getResourcesForDeletion(EnvironmentDto environment) {
-        Optional<CloudResource> desCloudResourceOptional = resourceRetriever.findByResourceReferenceAndStatusAndType(
-                environment.getParameters().getAzureParametersDto().getAzureResourceEncryptionParametersDto().getDiskEncryptionSetId(),
-                CommonStatus.CREATED, ResourceType.AZURE_DISK_ENCRYPTION_SET);
+        Optional<CloudResource> desCloudResourceOptional = resourceRetriever.findByEnvironmentIdAndType(environment.getId(),
+                ResourceType.AZURE_DISK_ENCRYPTION_SET);
         return desCloudResourceOptional.map(List::of).orElse(List.of());
     }
 

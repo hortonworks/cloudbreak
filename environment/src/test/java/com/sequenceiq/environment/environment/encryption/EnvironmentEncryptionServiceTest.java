@@ -67,6 +67,8 @@ class EnvironmentEncryptionServiceTest {
 
     private static final String DISK_ENCRYPTION_SET_ID = "dummyDesId";
 
+    private static final String DISK_ENCRYPTION_SET_NAME = "dummyDesName";
+
     private static final long ENVIRONMENT_ID = 1L;
 
     private static final String KEY_URL = "dummyKeyUrl";
@@ -204,19 +206,22 @@ class EnvironmentEncryptionServiceTest {
                 .withParameters(ParametersDto.builder()
                         .withAzureParameters(AzureParametersDto.builder()
                                 .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder()
-                                        .withDiskEncryptionSetId(DISK_ENCRYPTION_SET_ID).build())
+                                        .withDiskEncryptionSetId(DISK_ENCRYPTION_SET_ID)
+                                        .withEncryptionKeyUrl(KEY_URL)
+                                        .build())
                                 .build())
                         .build())
                 .withCreator(USER_NAME)
                 .withAccountId(ACCOUNT_ID)
                 .build();
         CloudResource desCloudResource = CloudResource.builder()
-                .name("Des")
+                .name(DISK_ENCRYPTION_SET_NAME)
                 .type(ResourceType.AZURE_DISK_ENCRYPTION_SET)
                 .reference(DISK_ENCRYPTION_SET_ID)
                 .status(CommonStatus.CREATED)
                 .build();
-        when(resourceRetriever.findByResourceReferenceAndStatusAndType(any(), any(), any())).thenReturn(Optional.ofNullable(desCloudResource));
+        when(resourceRetriever.findByEnvironmentIdAndType(ENVIRONMENT_ID, ResourceType.AZURE_DISK_ENCRYPTION_SET))
+                .thenReturn(Optional.of(desCloudResource));
         when(credentialToCloudCredentialConverter.convert(credential)).thenReturn(cloudCredential);
 
         DiskEncryptionSetDeletionRequest deletionRequest = underTest.createEncryptionResourcesDeletionRequest(environmentDto);
@@ -269,7 +274,9 @@ class EnvironmentEncryptionServiceTest {
                 .withParameters(ParametersDto.builder()
                         .withAzureParameters(AzureParametersDto.builder()
                                 .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder()
-                                        .withDiskEncryptionSetId(DISK_ENCRYPTION_SET_ID).build())
+                                        .withDiskEncryptionSetId(DISK_ENCRYPTION_SET_ID)
+                                        .withEncryptionKeyUrl(KEY_URL)
+                                        .build())
                                 .build())
                         .build())
                 .withCreator(USER_NAME)
@@ -277,12 +284,13 @@ class EnvironmentEncryptionServiceTest {
                 .withCredential(credential)
                 .build();
         CloudResource desCloudResource = CloudResource.builder()
-                .name("Des")
+                .name(DISK_ENCRYPTION_SET_NAME)
                 .type(ResourceType.AZURE_DISK_ENCRYPTION_SET)
                 .reference(DISK_ENCRYPTION_SET_ID)
                 .status(CommonStatus.CREATED)
                 .build();
-        when(resourceRetriever.findByResourceReferenceAndStatusAndType(any(), any(), any())).thenReturn(Optional.ofNullable(desCloudResource));
+        when(resourceRetriever.findByEnvironmentIdAndType(ENVIRONMENT_ID, ResourceType.AZURE_DISK_ENCRYPTION_SET))
+                .thenReturn(Optional.of(desCloudResource));
 
         underTest.deleteEncryptionResources(environmentDto);
 
@@ -300,7 +308,7 @@ class EnvironmentEncryptionServiceTest {
         assertThat(desCloudResourceOptional).isNotEmpty();
         CloudResource desCloudResource = desCloudResourceOptional.get();
         assertEquals(desCloudResource.getReference(), DISK_ENCRYPTION_SET_ID);
-        assertEquals(desCloudResource.getName(), "Des");
+        assertEquals(desCloudResource.getName(), DISK_ENCRYPTION_SET_NAME);
         assertEquals(desCloudResource.getType(), ResourceType.AZURE_DISK_ENCRYPTION_SET);
         assertEquals(cloudContext.getAccountId(), ACCOUNT_ID);
         assertEquals(cloudContext.getCrn(), ENVIRONMENT_CRN);

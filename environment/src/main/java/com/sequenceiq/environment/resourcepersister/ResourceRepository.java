@@ -30,4 +30,7 @@ public interface ResourceRepository extends CrudRepository<Resource, Long> {
     @Query("SELECT r FROM Resource r WHERE r.resourceReference = :resourceReference AND r.resourceType = :type")
     Optional<Resource> findByResourceReferenceAndType(@Param("resourceReference") String resourceReference,
             @Param("type") ResourceType type);
+
+    @Query("SELECT r FROM Resource r WHERE r.environment.id = :environmentId AND r.resourceType = :type")
+    Optional<Resource> findByEnvironmentIdAndType(@Param("environmentId") Long environmentId, @Param("type") com.sequenceiq.common.api.type.ResourceType type);
 }
