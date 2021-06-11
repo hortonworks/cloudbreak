@@ -47,6 +47,8 @@ import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
+import com.sequenceiq.cloudbreak.auth.CrnTestUtil;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -118,6 +120,9 @@ public class BlueprintServiceTest {
     @Mock
     private HueWorkaroundValidatorService hueWorkaroundValidatorService;
 
+    @Mock
+    private RegionAwareCrnGenerator regionAwareCrnGenerator;
+
     @InjectMocks
     private BlueprintService underTest;
 
@@ -125,6 +130,7 @@ public class BlueprintServiceTest {
 
     @BeforeEach
     public void setup() {
+        CrnTestUtil.mockCrnGenerator(regionAwareCrnGenerator);
         blueprint = getBlueprint("name", USER_MANAGED);
         Whitebox.setInternalState(blueprintListFilters, "supportedRuntimes", new SupportedRuntimes());
         lenient().when(legacyRestRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);

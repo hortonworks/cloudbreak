@@ -13,8 +13,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.statemachine.StateContext;
 
+import com.sequenceiq.cloudbreak.auth.CrnTestUtil;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.flow.core.Flow;
@@ -152,7 +152,7 @@ public class StartDatabaseServerFailedActionTest {
         when(dbStack.getRegion()).thenReturn(DB_STACK_REGION);
         when(dbStack.getAvailabilityZone()).thenReturn(DB_STACK_AZ);
         when(dbStack.getEnvironmentId()).thenReturn(DB_STACK_ENV_ID);
-        when(dbStack.getResourceCrn()).thenReturn(Crn.builder(CrnResourceDescriptor.DATABASE_SERVER)
+        when(dbStack.getResourceCrn()).thenReturn(CrnTestUtil.getDatabaseServerCrnBuilder()
                 .setAccountId("acc")
                 .setResource("resource")
                 .build());

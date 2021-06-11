@@ -32,8 +32,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
+import com.sequenceiq.cloudbreak.auth.CrnTestUtil;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
@@ -277,7 +276,7 @@ public class FreeIpaCleanupServiceTest {
         stack.setEnvironmentCrn(ENVIRONMENT_CRN);
         stack.setName(STACK_NAME);
         stack.setCloudPlatform(CLOUD_PLATFORM);
-        stack.setResourceCrn(Crn.builder(CrnResourceDescriptor.FREEIPA)
+        stack.setResourceCrn(CrnTestUtil.getFreeipaCrnBuilder()
                 .setAccountId("accountId")
                 .setResource("resource")
                 .build().toString());

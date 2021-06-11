@@ -33,7 +33,6 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListT
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListTermsResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.WorkloadPasswordPolicy;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.thunderhead.util.JsonUtil;
 
 import io.grpc.StatusRuntimeException;
@@ -109,7 +108,11 @@ public class MockUserManagementServiceTest {
             long currentTime = System.currentTimeMillis();
 
             GetActorWorkloadCredentialsRequest req = GetActorWorkloadCredentialsRequest.newBuilder()
-                    .setActorCrn(Crn.builder(CrnResourceDescriptor.USER)
+                    .setActorCrn(Crn.builder()
+                            .setPartition(Crn.Partition.CDP)
+                            .setRegion(Crn.Region.US_WEST_1)
+                            .setService(Crn.Service.IAM)
+                            .setResourceType(Crn.ResourceType.USER)
                             .setAccountId(UUID.randomUUID().toString())
                             .setResource(UUID.randomUUID().toString())
                             .build().toString())

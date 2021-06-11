@@ -1,45 +1,38 @@
 package com.sequenceiq.cloudbreak.auth.altus.service;
 
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Service;
+
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 
+@Service
 public class RoleCrnGenerator {
 
-    private static final String ACCOUNT_IN_IAM_CRNS = "altus";
+    @Inject
+    private RegionAwareCrnGenerator regionAwareCrnGenerator;
 
-    private RoleCrnGenerator() {
-
-    }
-
-    /**
-     * Get built-in Dbus uploader role
-     * Partition and region is hard coded right now, if it will change use the same as the user crn
-     */
-    public static String getBuiltInDatabusRoleCrn() {
+    public String getBuiltInDatabusRoleCrn() {
         return getRoleCrn("DbusUploader").toString();
     }
 
-    public static String getBuiltInOwnerResourceRoleCrn() {
+    public String getBuiltInOwnerResourceRoleCrn() {
         return getResourceRoleCrn("Owner").toString();
     }
 
-    public static String getBuiltInEnvironmentAdminResourceRoleCrn() {
+    public String getBuiltInEnvironmentAdminResourceRoleCrn() {
         return getResourceRoleCrn("EnvironmentAdmin").toString();
     }
 
-    public static Crn getResourceRoleCrn(String resourceRoleName) {
-        return Crn.builder(CrnResourceDescriptor.RESOURCE_ROLE)
-                .setOldPartition()
-                .setAccountId(ACCOUNT_IN_IAM_CRNS)
-                .setResource(resourceRoleName)
-                .build();
+    public Crn getResourceRoleCrn(String resourceRoleName) {
+        // we need to find out the proper partition and region in case of every cdp deployment, we stick to altus partition and current region
+        return regionAwareCrnGenerator.generateAltusCrn(CrnResourceDescriptor.RESOURCE_ROLE, resourceRoleName);
     }
 
-    public static Crn getRoleCrn(String roleName) {
-        return Crn.builder(CrnResourceDescriptor.ROLE)
-                .setOldPartition()
-                .setAccountId(ACCOUNT_IN_IAM_CRNS)
-                .setResource(roleName)
-                .build();
+    public Crn getRoleCrn(String roleName) {
+        // we need to find out the proper partition and region in case of every cdp deployment, we stick to altus partition and current region
+        return regionAwareCrnGenerator.generateAltusCrn(CrnResourceDescriptor.ROLE, roleName);
     }
 }

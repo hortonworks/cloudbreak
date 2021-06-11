@@ -19,9 +19,8 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.sequenceiq.cloudbreak.auth.CrnTestUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.structuredevent.repository.AccountAwareResource;
 import com.sequenceiq.cloudbreak.structuredevent.repository.AccountAwareResourceRepository;
 
@@ -33,7 +32,7 @@ public class DataCollectorComponentTest {
 
     private Map<String, AccountAwareResourceRepository<?, ?>> pathRepositoryMap = new HashMap<>();
 
-    private final String userCrn = new Crn.Builder(CrnResourceDescriptor.USER)
+    private final String userCrn = CrnTestUtil.getUserCrnBuilder()
             .setResource("res")
             .setAccountId("acc")
             .build()

@@ -142,3 +142,7 @@ notification:
 
 clusterProxy:
   url: http://localhost:10180/cluster-proxy
+
+crn:
+  partition: cdp
+  region: us-west-1

@@ -13,9 +13,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.auth.CrnTestUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestCallDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestRequestDetails;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -61,7 +60,7 @@ public class FreeIpaCustomCrnOrNameProviderTest {
         restCallDetails.setRestRequest(restRequestDetails);
         restRequestDetails.setRequestUri("http://localhost/any/path?environment=env-crn");
 
-        String userCrn = Crn.builder(CrnResourceDescriptor.USER)
+        String userCrn = CrnTestUtil.getUserCrnBuilder()
                 .setAccountId("acc")
                 .setResource("res")
                 .build().toString();

@@ -30,4 +30,5 @@ dependencies {
     testImplementation (group: 'org.powermock',             name: 'powermock-api-mockito2',          version: powermockVersion) {
       exclude group: 'org.hamcrest'
     }
+    testCompile project(path: ':common', configuration: 'tests')
 }

@@ -24,8 +24,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.test.context.ActiveProfiles;
 
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
+import com.sequenceiq.cloudbreak.auth.CrnTestUtil;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.cloud.event.platform.ResourceDefinitionRequest;
@@ -139,7 +138,7 @@ public class AuditCredentialAuthorizationIntegrationTest {
     }
 
     private static String getUserCrn(String userId, String accountId) {
-        return Crn.builder(CrnResourceDescriptor.USER)
+        return CrnTestUtil.getUserCrnBuilder()
                 .setAccountId(accountId)
                 .setResource(userId)
                 .build()
@@ -147,7 +146,7 @@ public class AuditCredentialAuthorizationIntegrationTest {
     }
 
     private static String getResourceCrn(String credentialName, String accountId) {
-        return Crn.builder(CrnResourceDescriptor.CREDENTIAL)
+        return CrnTestUtil.getCredentialCrnBuilder()
                 .setAccountId(accountId)
                 .setResource(credentialName)
                 .build()

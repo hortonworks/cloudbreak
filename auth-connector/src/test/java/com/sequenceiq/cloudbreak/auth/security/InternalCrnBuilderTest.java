@@ -18,7 +18,7 @@ public class InternalCrnBuilderTest {
     @Test
     public void generateInternalCrnWhenAutoscaleIsSpecified() {
         InternalCrnBuilder internalCrnBuilder = new InternalCrnBuilder(Crn.Service.AUTOSCALE);
-        Crn generated = internalCrnBuilder.getInternalCrnForService();
+        Crn generated = Crn.safeFromString(internalCrnBuilder.getInternalCrnForServiceAsString());
         assertEquals("altus", generated.getAccountId());
         assertEquals(Crn.Service.AUTOSCALE, generated.getService());
         assertEquals(Crn.ResourceType.USER, generated.getResourceType());
@@ -28,7 +28,8 @@ public class InternalCrnBuilderTest {
     @Test
     public void generateCrnAsStringWhenFreeIpaIs() {
         InternalCrnBuilder internalCrnBuilder = new InternalCrnBuilder(Crn.Service.FREEIPA);
-        assertEquals("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__", internalCrnBuilder.getInternalCrnForServiceAsString());
+        assertEquals("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__",
+                internalCrnBuilder.getInternalCrnForServiceAsString());
     }
 
     @Test

@@ -20,7 +20,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.CrnTestUtil;
 import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 
 @ExtendWith(MockitoExtension.class)
@@ -28,9 +28,9 @@ public class CrnCollectionValidatorTest {
 
     private static final String MIXED_CRN = "crn:cdp:iam:us-west-1:acc:datalake:res";
 
-    private static final String DATAHUB_CRN = Crn.builder(CrnResourceDescriptor.DATAHUB).setAccountId("acc").setResource("res").build().toString();
+    private static final String DATAHUB_CRN = CrnTestUtil.getDatahubCrnBuilder().setAccountId("acc").setResource("res").build().toString();
 
-    private static final String ENVIRONMENT_CRN = Crn.builder(CrnResourceDescriptor.ENVIRONMENT).setAccountId("acc").setResource("res").build().toString();
+    private static final String ENVIRONMENT_CRN = CrnTestUtil.getEnvironmentCrnBuilder().setAccountId("acc").setResource("res").build().toString();
 
     @Captor
     private ArgumentCaptor<String> errorMessageCaptor;

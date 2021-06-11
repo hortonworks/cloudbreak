@@ -28,9 +28,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
+import com.sequenceiq.cloudbreak.auth.CrnTestUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
@@ -79,12 +79,16 @@ public class RecipeServiceTest {
     @Mock
     private OwnerAssignmentService ownerAssignmentService;
 
+    @Mock
+    private RegionAwareCrnGenerator regionAwareCrnGenerator;
+
     @BeforeEach
     public void setUp() throws TransactionExecutionException {
         lenient().when(clock.getCurrentTimeMillis()).thenReturn(659602800L);
         lenient().doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(transactionService).required(any(Supplier.class));
         lenient().doNothing().when(ownerAssignmentService).assignResourceOwnerRoleIfEntitled(anyString(), anyString(), anyString());
         lenient().doNothing().when(ownerAssignmentService).notifyResourceDeleted(anyString(), any());
+        CrnTestUtil.mockCrnGenerator(regionAwareCrnGenerator);
     }
 
     @Test
@@ -150,7 +154,10 @@ public class RecipeServiceTest {
         when(workspaceService.retrieveForUser(any())).thenReturn(Set.of(workspace));
         when(recipeRepository.save(any())).thenReturn(recipe);
 
-        String userCrn = Crn.builder(CrnResourceDescriptor.USER).setResource("user_id").setAccountId("account_id").build().toString();
+        String userCrn = CrnTestUtil.getUserCrnBuilder()
+                .setResource("user_id")
+                .setAccountId("account_id")
+                .build().toString();
         ThreadBasedUserCrnProvider.doAs(userCrn, () -> underTest.createForLoggedInUser(recipe, 1L, "account_id", userCrn));
 
         assertThat(recipe.getCreator(), is(userCrn));
@@ -182,7 +189,7 @@ public class RecipeServiceTest {
         recipe.setContent("bnllaGVoZSwgbmEgZXogZWd5IGZhc3phIGJhc2U2NCBjdWNj");
         recipe.setId(1L);
         recipe.setArchived(false);
-        recipe.setResourceCrn(Crn.builder(CrnResourceDescriptor.RECIPE)
+        recipe.setResourceCrn(CrnTestUtil.getRecipeCrnBuilder()
                 .setAccountId("account")
                 .setResource("name")
                 .build().toString());

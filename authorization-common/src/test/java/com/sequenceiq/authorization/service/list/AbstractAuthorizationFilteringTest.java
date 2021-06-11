@@ -19,8 +19,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
+import com.sequenceiq.cloudbreak.auth.CrnTestUtil;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 
@@ -29,8 +29,7 @@ public class AbstractAuthorizationFilteringTest {
 
     private static final String ACCOUNT_ID = "ACCOUNT_ID";
 
-    private static final Crn USER_CRN = Crn
-            .builder(CrnResourceDescriptor.USER)
+    private static final Crn USER_CRN = CrnTestUtil.getUserCrnBuilder()
             .setAccountId(ACCOUNT_ID)
             .setResource("RESOURCE_ID")
             .build();
@@ -389,7 +388,7 @@ public class AbstractAuthorizationFilteringTest {
     }
 
     private static String dataHubCrn(String resourceId) {
-        return Crn.builder(CrnResourceDescriptor.DATAHUB)
+        return CrnTestUtil.getDatahubCrnBuilder()
                 .setAccountId(ACCOUNT_ID)
                 .setResource(resourceId)
                 .build()
@@ -397,7 +396,7 @@ public class AbstractAuthorizationFilteringTest {
     }
 
     private static String environmentCrn(String resourceId) {
-        return Crn.builder(CrnResourceDescriptor.ENVIRONMENT)
+        return CrnTestUtil.getEnvironmentCrnBuilder()
                 .setAccountId(ACCOUNT_ID)
                 .setResource(resourceId)
                 .build()

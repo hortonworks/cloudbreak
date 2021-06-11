@@ -14,20 +14,17 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
+import com.sequenceiq.cloudbreak.auth.CrnTestUtil;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.request.DatabaseV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.responses.DatabaseV4Responses;
 import com.sequenceiq.redbeams.domain.DatabaseConfig;
 import com.sequenceiq.redbeams.service.dbconfig.DatabaseConfigService;
 
-// import com.sequenceiq.redbeams.api.endpoint.v4.database.request.DatabaseTestV4Request;
-// import com.sequenceiq.redbeams.api.endpoint.v4.database.responses.DatabaseTestV4Response;
-
 public class DatabaseV4ControllerTest {
 
-    private static final Crn CRN = Crn.builder(CrnResourceDescriptor.DATABASE)
+    private static final Crn CRN = CrnTestUtil.getDatabaseCrnBuilder()
             .setAccountId("account")
             .setResource("resource")
             .build();
@@ -162,28 +159,4 @@ public class DatabaseV4ControllerTest {
 
         assertEquals(2, responses.getResponses().size());
     }
-
-    // @Test
-    // public void testTestWithName() {
-    //     when(service.testConnection(DatabaseV4Controller.DEFAULT_WORKSPACE, "id", DB_NAME)).thenReturn("yeahhh");
-    //     DatabaseServerTestV4Request testRequest = new DatabaseServerTestV4Request();
-    //     testRequest.setEnvironmentId("id");
-    //     testRequest.setExistingDatabaseServerCrn(DB_NAME);
-
-    //     DatabaseServerTestV4Response response = underTest.test(testRequest);
-
-    //     assertEquals("yeahhh", response.getResult());
-    // }
-
-    // @Test
-    // public void testTestWithServer() {
-    //     when(converterUtil.convert(request, DatabaseConfig.class)).thenReturn(db);
-    //     when(service.testConnection(db)).thenReturn("okayyy");
-    //     DatabaseServerTestV4Request testRequest = new DatabaseServerTestV4Request();
-    //     testRequest.setDatabaseServer(request);
-
-    //     DatabaseServerTestV4Response response = underTest.test(testRequest);
-
-    //     assertEquals("okayyy", response.getResult());
-    // }
 }

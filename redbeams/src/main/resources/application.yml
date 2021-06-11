@@ -603,4 +603,11 @@ cb:
       - name: ambari
         pkgName: ambari-agent
         prewarmed: true
-altus.ums.host: localhost
+
+altus:
+  ums:
+    host: localhost
+
+crn:
+  partition: cdp
+  region: us-west-1

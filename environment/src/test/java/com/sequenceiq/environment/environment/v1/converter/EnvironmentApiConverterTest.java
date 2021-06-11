@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -24,6 +25,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
+import com.sequenceiq.cloudbreak.auth.CrnTestUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.telemetry.model.Features;
@@ -100,11 +103,19 @@ public class EnvironmentApiConverterTest {
     @Mock
     private NetworkRequestToDtoConverter networkRequestToDtoConverter;
 
+    @Mock
+    private RegionAwareCrnGenerator regionAwareCrnGenerator;
+
     @BeforeAll
     static void before() {
         if (ThreadBasedUserCrnProvider.getUserCrn() == null) {
             ThreadBasedUserCrnProvider.setUserCrn(USER_CRN);
         }
+    }
+
+    @BeforeEach
+    void init() {
+        CrnTestUtil.mockCrnGenerator(regionAwareCrnGenerator);
     }
 
     @ParameterizedTest

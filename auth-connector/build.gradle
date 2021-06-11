@@ -34,6 +34,7 @@ dependencies {
   testCompile group: 'org.mockito',                     name: 'mockito-core',                   version: mockitoVersion
   testImplementation group: 'org.assertj',              name: 'assertj-core',                   version: assertjVersion
   testImplementation group: 'org.hamcrest',             name: 'hamcrest',                       version: hamcrestVersion
+  testCompile project(path: ':common', configuration: 'tests')
 }
 
 

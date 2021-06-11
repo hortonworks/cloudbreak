@@ -13,6 +13,7 @@ import org.mockito.Mock;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.AccessDeniedException;
 
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.environment.proxy.domain.ProxyConfig;
 import com.sequenceiq.environment.proxy.repository.ProxyConfigRepository;
@@ -34,11 +35,15 @@ public class ProxyConfigServiceTest {
     @Mock
     private final ProxyConfigRepository proxyConfigRepository;
 
+    @Mock
+    private final RegionAwareCrnGenerator regionAwareCrnGenerator;
+
     private ProxyConfigService underTestProxyConfigService;
 
     public ProxyConfigServiceTest() {
         proxyConfigRepository = mock(ProxyConfigRepository.class);
-        underTestProxyConfigService = new ProxyConfigService(proxyConfigRepository);
+        regionAwareCrnGenerator = mock(RegionAwareCrnGenerator.class);
+        underTestProxyConfigService = new ProxyConfigService(proxyConfigRepository, regionAwareCrnGenerator);
     }
 
     @Test

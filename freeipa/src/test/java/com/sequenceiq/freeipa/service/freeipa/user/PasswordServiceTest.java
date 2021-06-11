@@ -16,8 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
+import com.sequenceiq.cloudbreak.auth.CrnTestUtil;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 
@@ -28,13 +27,13 @@ class PasswordServiceTest {
 
     private static final String ACCOUNT_ID = UUID.randomUUID().toString();
 
-    private static final String USER_CRN = Crn.builder(CrnResourceDescriptor.USER)
+    private static final String USER_CRN = CrnTestUtil.getUserCrnBuilder()
             .setAccountId(ACCOUNT_ID)
             .setResource(UUID.randomUUID().toString())
             .build()
             .toString();
 
-    private static final String MACHINE_USER_CRN = Crn.builder(CrnResourceDescriptor.MACHINE_USER)
+    private static final String MACHINE_USER_CRN = CrnTestUtil.getMachineUserCrnBuilder()
             .setAccountId(ACCOUNT_ID)
             .setResource(UUID.randomUUID().toString())
             .build()

@@ -19,8 +19,7 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 import com.google.common.base.Strings;
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
+import com.sequenceiq.cloudbreak.auth.CrnTestUtil;
 
 @RunWith(Parameterized.class)
 public class DatabaseV4RequestValidationTest {
@@ -37,7 +36,7 @@ public class DatabaseV4RequestValidationTest {
 
     private static final String DATABASE_TYPE = "hive";
 
-    private static final String ENVIRONMENT_CRN = Crn.builder(CrnResourceDescriptor.ENVIRONMENT)
+    private static final String ENVIRONMENT_CRN = CrnTestUtil.getEnvironmentCrnBuilder()
             .setAccountId("cloudera")
             .setResource("myenv")
             .build()

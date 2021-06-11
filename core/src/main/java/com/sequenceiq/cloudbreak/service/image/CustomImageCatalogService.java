@@ -1,7 +1,18 @@
 package com.sequenceiq.cloudbreak.service.image;
 
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
 import com.google.common.base.Strings;
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -12,15 +23,6 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.CustomImage;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.VmImage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
 
 @Component
 public class CustomImageCatalogService {
@@ -32,6 +34,9 @@ public class CustomImageCatalogService {
 
     @Inject
     private TransactionService transactionService;
+
+    @Inject
+    private RegionAwareCrnGenerator regionAwareCrnGenerator;
 
     public Set<ImageCatalog> getImageCatalogs(Long workspaceId) {
         LOGGER.debug(String.format("List custom image catalogs in workspace '%d'", workspaceId));
@@ -97,11 +102,7 @@ public class CustomImageCatalogService {
                 ImageCatalog imageCatalog = getImageCatalog(workspaceId, imageCatalogName);
                 customImage.setName(imageName);
                 customImage.setCreator(creator);
-                customImage.setResourceCrn(Crn.builder(CrnResourceDescriptor.IMAGE_CATALOG)
-                        .setAccountId(accountId)
-                        .setResource(imageName)
-                        .build()
-                        .toString());
+                customImage.setResourceCrn(regionAwareCrnGenerator.generateCrnString(CrnResourceDescriptor.IMAGE_CATALOG, imageName, accountId));
                 customImage.setImageCatalog(imageCatalog);
                 customImage.getVmImage().stream().forEach(vmImage -> {
                     vmImage.setCustomImage(customImage);

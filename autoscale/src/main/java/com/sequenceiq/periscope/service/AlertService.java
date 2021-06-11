@@ -1,7 +1,6 @@
 package com.sequenceiq.periscope.service;
 
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -11,8 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.periscope.domain.BaseAlert;
 import com.sequenceiq.periscope.domain.Cluster;
@@ -37,6 +36,9 @@ public class AlertService {
 
     @Inject
     private ScalingService scalingPolicyService;
+
+    @Inject
+    private RegionAwareCrnGenerator regionAwareCrnGenerator;
 
     public TimeAlert createTimeAlert(Long clusterId, TimeAlert alert) {
         Cluster cluster = clusterService.findById(clusterId);
@@ -171,9 +173,6 @@ public class AlertService {
     }
 
     private String createAlertCrn(String accountId) {
-        return Crn.builder(CrnResourceDescriptor.ALERT)
-                .setAccountId(accountId)
-                .setResource(UUID.randomUUID().toString())
-                .build().toString();
+        return regionAwareCrnGenerator.generateCrnStringWithUuid(CrnResourceDescriptor.ALERT, accountId);
     }
 }

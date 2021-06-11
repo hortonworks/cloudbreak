@@ -35,7 +35,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
@@ -53,6 +52,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.ImageCatalogV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.BaseStackDetailsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
@@ -67,9 +67,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Resp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerProductV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerV4Response;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
+import com.sequenceiq.cloudbreak.auth.CrnTestUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
 import com.sequenceiq.cloudbreak.client.CloudbreakServiceCrnEndpoints;
@@ -189,6 +189,9 @@ class SdxServiceTest {
     @Mock
     private Image image;
 
+    @Mock
+    private RegionAwareCrnGenerator regionAwareCrnGenerator;
+
     @InjectMocks
     private SdxService underTest;
 
@@ -261,6 +264,7 @@ class SdxServiceTest {
 
     @Test
     void testCreateNOTInternalSdxClusterFromLightDutyTemplateShouldTriggerSdxCreationFlow() throws IOException, TransactionExecutionException {
+        CrnTestUtil.mockCrnGenerator(regionAwareCrnGenerator);
         when(transactionService.required(isA(Supplier.class))).thenAnswer(invocation -> invocation.getArgument(0, Supplier.class).get());
         String lightDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.1.0/aws/light_duty.json");
         when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(lightDutyJson, StackV4Request.class));
@@ -395,10 +399,7 @@ class SdxServiceTest {
         DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
         detailedEnvironmentResponse.setName(sdxClusterRequest.getEnvironment());
         detailedEnvironmentResponse.setCloudPlatform(CloudPlatform.AWS.name());
-        detailedEnvironmentResponse.setCrn(Crn.builder(CrnResourceDescriptor.ENVIRONMENT)
-                .setResource(UUID.randomUUID().toString())
-                .setAccountId(UUID.randomUUID().toString())
-                .build().toString());
+        detailedEnvironmentResponse.setCrn(getCrn());
         detailedEnvironmentResponse.setEnvironmentStatus(environmentStatus);
         when(environmentClientService.getByName(anyString())).thenReturn(detailedEnvironmentResponse);
 
@@ -431,10 +432,7 @@ class SdxServiceTest {
         DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
         detailedEnvironmentResponse.setName(sdxClusterRequest.getEnvironment());
         detailedEnvironmentResponse.setCloudPlatform(CloudPlatform.AWS.name());
-        detailedEnvironmentResponse.setCrn(Crn.builder(CrnResourceDescriptor.ENVIRONMENT)
-                .setResource(UUID.randomUUID().toString())
-                .setAccountId(UUID.randomUUID().toString())
-                .build().toString());
+        detailedEnvironmentResponse.setCrn(getCrn());
         detailedEnvironmentResponse.setEnvironmentStatus(environmentStatus);
         when(environmentClientService.getByName(anyString())).thenReturn(detailedEnvironmentResponse);
 
@@ -460,10 +458,7 @@ class SdxServiceTest {
         DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
         detailedEnvironmentResponse.setName(sdxClusterRequest.getEnvironment());
         detailedEnvironmentResponse.setCloudPlatform(CloudPlatform.AWS.name());
-        detailedEnvironmentResponse.setCrn(Crn.builder(CrnResourceDescriptor.ENVIRONMENT)
-                .setResource(UUID.randomUUID().toString())
-                .setAccountId(UUID.randomUUID().toString())
-                .build().toString());
+        detailedEnvironmentResponse.setCrn(getCrn());
         detailedEnvironmentResponse.setEnvironmentStatus(environmentStatus);
         when(environmentClientService.getByName(anyString())).thenReturn(detailedEnvironmentResponse);
 
@@ -997,12 +992,16 @@ class SdxServiceTest {
         detailedEnvironmentResponse.setName(sdxClusterRequest.getEnvironment());
         detailedEnvironmentResponse.setCloudPlatform(cloudPlatform.name());
         detailedEnvironmentResponse.setEnvironmentStatus(EnvironmentStatus.AVAILABLE);
-        detailedEnvironmentResponse.setCrn(Crn.builder(CrnResourceDescriptor.ENVIRONMENT)
-                .setResource(UUID.randomUUID().toString())
-                .setAccountId(UUID.randomUUID().toString())
-                .build().toString());
+        detailedEnvironmentResponse.setCrn(getCrn());
         detailedEnvironmentResponse.setCreator(detailedEnvironmentResponse.getCrn());
         when(environmentClientService.getByName(anyString())).thenReturn(detailedEnvironmentResponse);
+    }
+
+    private String getCrn() {
+        return CrnTestUtil.getEnvironmentCrnBuilder()
+                .setResource(UUID.randomUUID().toString())
+                .setAccountId(UUID.randomUUID().toString())
+                .build().toString();
     }
 
     private SdxCluster getSdxCluster() {

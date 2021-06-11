@@ -261,7 +261,18 @@ public class Crn {
      * The Altus region in which the resource resides.
      */
     public enum Region {
-        US_WEST_1("us-west-1");
+        US_WEST_1("us-west-1"),
+        EU_1("eu-1"),
+        AP_1("ap-1");
+
+        private static final ImmutableMap<String, Region> FROM_STRING;
+        static {
+            ImmutableMap.Builder<String, Region> builder = ImmutableMap.builder();
+            Arrays.stream(Region.values()).forEach(region -> {
+                builder.put(region.name, region);
+            });
+            FROM_STRING = builder.build();
+        }
 
         private final String name;
 
@@ -276,6 +287,32 @@ public class Crn {
         @Override
         public String toString() {
             return name;
+        }
+
+        /**
+         * Get a region from a string. 'null' if 'input' is not a valid
+         * region name.
+         * @param input the input string
+         * @return the region
+         */
+        public static Region fromString(String input) {
+            checkNotNull(input);
+            return FROM_STRING.get(input);
+        }
+
+        /**
+         * Get a region from a string. This will never return null.
+         * @param input the input string
+         * @return the region
+         */
+        public static Region safeFromString(String input) {
+            checkNotNull(input);
+            Region region = fromString(input);
+            if (region == null) {
+                throw new CrnParseException(String.format(
+                        "%s is not a valid region value", input));
+            }
+            return region;
         }
     }
 
@@ -399,7 +436,7 @@ public class Crn {
      * @param resourceType the type of this Altus resource
      * @param resource     the name of this Altus resource
      */
-    public Crn(Partition partition,
+    Crn(Partition partition,
             Service service,
             Region region,
             String accountId,
@@ -506,13 +543,10 @@ public class Crn {
         if (!matcher.matches()) {
             return null;
         }
-        String region = matcher.group(3);
-        if (!Region.US_WEST_1.name.equals(region)) {
-            throw new CrnParseException(String.format("%s is not a supported region", region));
-        }
         return new Crn.Builder()
                 .setPartition(Partition.safeFromString(matcher.group(1)))
                 .setService(Service.safeFromString(matcher.group(2)))
+                .setRegion(Region.safeFromString(matcher.group(3)))
                 .setAccountId(matcher.group(4))
                 .setResourceType(ResourceType.fromString(matcher.group(5)))
                 .setResource(matcher.group(6))
@@ -597,19 +631,12 @@ public class Crn {
                 base.getResource());
     }
 
-    public static Builder builder(CrnResourceDescriptor crnResourceDescriptor) {
-        return new Builder(crnResourceDescriptor);
-    }
-
-    static Builder builder() {
+    public static Builder builder() {
         return new Builder();
     }
 
     public static class Builder {
-        private Partition partition = Partition.CDP;
-
-        // We hardcode the following for now
-        private final Region region = Region.US_WEST_1;
+        private Partition partition;
 
         private Service service;
 
@@ -619,21 +646,9 @@ public class Crn {
 
         private String resource;
 
+        private Region region;
+
         public Builder() {
-        }
-
-        public Builder(CrnResourceDescriptor crnResourceDescriptor) {
-            service = crnResourceDescriptor.getServiceType();
-            resourceType = crnResourceDescriptor.getResourceType();
-        }
-
-        /**
-         * @deprecated ALTUS was replaced by CDP and is kept here for backward compatibility reasons (e.g., dynamodb serialized CRNs).
-         */
-        @Deprecated
-        public Builder setOldPartition() {
-            this.partition = Partition.ALTUS;
-            return this;
         }
 
         public Builder setAccountId(String accountId) {
@@ -646,30 +661,33 @@ public class Crn {
             return this;
         }
 
+        public Builder setService(Service service) {
+            this.service = checkNotNull(service);
+            return this;
+        }
+
+        public Builder setResourceType(ResourceType resourceType) {
+            this.resourceType = checkNotNull(resourceType);
+            return this;
+        }
+
+        public Builder setPartition(Partition partition) {
+            this.partition = partition;
+            return this;
+        }
+
+        public Builder setRegion(Region region) {
+            this.region = region;
+            return this;
+        }
+
         public Crn build() {
-            checkNotNull(resourceType);
-            checkNotNull(service);
             return new Crn(partition,
                     service,
                     region,
                     accountId,
                     resourceType,
                     resource);
-        }
-
-        Builder setService(Service service) {
-            this.service = checkNotNull(service);
-            return this;
-        }
-
-        Builder setResourceType(ResourceType resourceType) {
-            this.resourceType = checkNotNull(resourceType);
-            return this;
-        }
-
-        private Builder setPartition(Partition partition) {
-            this.partition = partition;
-            return this;
         }
 
     }

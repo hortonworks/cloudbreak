@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -59,6 +58,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouder
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.SecurityRuleV4Request;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
@@ -161,6 +161,9 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider 
 
     @Inject
     private EntitlementService entitlementService;
+
+    @Inject
+    private RegionAwareCrnGenerator regionAwareCrnGenerator;
 
     @Value("${info.app.version}")
     private String sdxClusterServiceVersion;
@@ -871,11 +874,7 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider 
     }
 
     private String createCrn(@Nonnull String accountId) {
-        return Crn.builder(CrnResourceDescriptor.DATALAKE)
-                .setAccountId(accountId)
-                .setResource(UUID.randomUUID().toString())
-                .build()
-                .toString();
+        return regionAwareCrnGenerator.generateCrnStringWithUuid(CrnResourceDescriptor.DATALAKE, accountId);
     }
 
     public String getAccountIdFromCrn(String crnStr) {

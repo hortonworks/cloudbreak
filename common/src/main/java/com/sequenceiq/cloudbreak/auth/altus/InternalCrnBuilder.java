@@ -35,15 +35,6 @@ public class InternalCrnBuilder {
         this.serviceType = serviceType;
     }
 
-    public Crn getInternalCrnForService() {
-        return Crn.builder()
-                .setService(serviceType)
-                .setAccountId(INTERNAL_ACCOUNT)
-                .setResourceType(Crn.ResourceType.USER)
-                .setResource(INTERNAL_USER_CRN)
-                .build();
-    }
-
     public static boolean isInternalCrn(String crn) {
         Crn c = Crn.fromString(crn);
         return INTERNAL_USER_CRN.equals(c.getResource());
@@ -54,7 +45,8 @@ public class InternalCrnBuilder {
     }
 
     public String getInternalCrnForServiceAsString() {
-        return getInternalCrnForService().toString();
+        // Not sure if region and partition do matter or not in case of  internal actor
+        return getInternalCrnForService(Crn.Partition.CDP, Crn.Region.US_WEST_1).toString();
     }
 
     public static CrnUser createInternalCrnUser(Crn crn)  {
@@ -66,6 +58,17 @@ public class InternalCrnBuilder {
                 crn.getResourceType().toString(),
                 crn.getAccountId(),
                 role);
+    }
+
+    private Crn getInternalCrnForService(Crn.Partition partition, Crn.Region region) {
+        return Crn.builder()
+                .setPartition(partition)
+                .setRegion(region)
+                .setService(serviceType)
+                .setAccountId(INTERNAL_ACCOUNT)
+                .setResourceType(Crn.ResourceType.USER)
+                .setResource(INTERNAL_USER_CRN)
+                .build();
     }
 
 }

@@ -12,8 +12,7 @@ import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
+import com.sequenceiq.cloudbreak.auth.CrnTestUtil;
 import com.sequenceiq.freeipa.client.FreeIpaChecks;
 import com.sequenceiq.freeipa.service.freeipa.user.UserSyncConstants;
 import com.sequenceiq.freeipa.service.freeipa.user.UserSyncTestUtils;
@@ -306,7 +305,7 @@ class UsersStateDifferenceTest {
         FmsUser fmsUser = new FmsUser().withName(username);
         usersStateBuilder.addUser(fmsUser);
         if (ipaCredentialsVersion.isPresent()) {
-            String crn = Crn.builder(CrnResourceDescriptor.USER)
+            String crn = CrnTestUtil.getUserCrnBuilder()
                     .setAccountId(UUID.randomUUID().toString())
                     .setResource(UUID.randomUUID().toString())
                     .build().toString();

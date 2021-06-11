@@ -38,6 +38,8 @@ import org.springframework.test.context.TestPropertySource;
 import com.cloudera.cdp.environments.model.CreateAWSCredentialRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
+import com.sequenceiq.cloudbreak.auth.CrnTestUtil;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -130,8 +132,13 @@ class CredentialServiceTest {
     @MockBean
     private TransactionService transactionService;
 
+    @MockBean
+    private RegionAwareCrnGenerator regionAwareCrnGenerator;
+
     @BeforeEach
     void setupTestCredential() throws TransactionService.TransactionExecutionException {
+        CrnTestUtil.mockCrnGenerator(regionAwareCrnGenerator);
+
         CREDENTIAL.setName(CREDENTIAL_NAME);
         CREDENTIAL.setCloudPlatform(PLATFORM);
         String credentialAttributesSecret = getTestAttributes(STATE, DEPLOYMENT_ADDRESS, REDIRECT_URL);

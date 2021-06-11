@@ -39,9 +39,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
+import com.sequenceiq.cloudbreak.auth.CrnTestUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -357,12 +356,12 @@ class ProvisionerServiceTest {
         compactRegionResponse.setNames(Lists.newArrayList("eu-west-1"));
         compactRegionResponse.setDisplayNames(Map.of("eu-west-1", "ireland"));
         detailedEnvironmentResponse.setRegions(compactRegionResponse);
-        detailedEnvironmentResponse.setCrn(Crn.builder(CrnResourceDescriptor.ENVIRONMENT)
+        detailedEnvironmentResponse.setCrn(CrnTestUtil.getEnvironmentCrnBuilder()
                 .setResource(UUID.randomUUID().toString())
                 .setAccountId(UUID.randomUUID().toString())
                 .build().toString());
         EnvironmentNetworkResponse network = new EnvironmentNetworkResponse();
-        network.setCrn(Crn.builder(CrnResourceDescriptor.NETWORK)
+        network.setCrn(CrnTestUtil.getNetworkCrnBuilder()
                 .setResource(UUID.randomUUID().toString())
                 .setAccountId(UUID.randomUUID().toString())
                 .build().toString());
@@ -393,7 +392,8 @@ class ProvisionerServiceTest {
         sdxCluster.setTags(Json.silent(new HashMap<>()));
         sdxCluster.setEnvCrn("");
         sdxCluster.setStackRequestToCloudbreak("{}");
-        sdxCluster.setCrn(Crn.builder(CrnResourceDescriptor.DATALAKE).setAccountId("asd")
+        sdxCluster.setCrn(CrnTestUtil.getDatalakeCrnBuilder()
+                .setAccountId("asd")
                 .setResource("asd")
                 .build().toString());
         return sdxCluster;

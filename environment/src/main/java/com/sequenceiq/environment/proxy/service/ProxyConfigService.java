@@ -3,7 +3,6 @@ package com.sequenceiq.environment.proxy.service;
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.dao.DataIntegrityViolationException;
@@ -11,7 +10,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -23,8 +22,11 @@ public class ProxyConfigService  {
 
     private final ProxyConfigRepository proxyConfigRepository;
 
-    public ProxyConfigService(ProxyConfigRepository proxyConfigRepository) {
+    private final RegionAwareCrnGenerator regionAwareCrnGenerator;
+
+    public ProxyConfigService(ProxyConfigRepository proxyConfigRepository, RegionAwareCrnGenerator regionAwareCrnGenerator) {
         this.proxyConfigRepository = proxyConfigRepository;
+        this.regionAwareCrnGenerator = regionAwareCrnGenerator;
     }
 
     public ProxyConfig get(Long id) {
@@ -97,10 +99,6 @@ public class ProxyConfigService  {
     }
 
     private String createCRN(String accountId) {
-        return Crn.builder(CrnResourceDescriptor.PROXY)
-                .setAccountId(accountId)
-                .setResource(UUID.randomUUID().toString())
-                .build()
-                .toString();
+        return regionAwareCrnGenerator.generateCrnStringWithUuid(CrnResourceDescriptor.PROXY, accountId);
     }
 }

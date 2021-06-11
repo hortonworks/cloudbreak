@@ -9,7 +9,6 @@ import javax.inject.Inject;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkMockParams;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.assertion.datalake.SdxUpgradeTestAssertion;
@@ -111,7 +110,11 @@ public class MockSdxUpgradeTests extends AbstractMockTest {
         String cluster = "cmcluster";
         String imageSettings = "imageSettingsUpgrade";
         String networkKey = "someOtherNetwork";
-        String clusterCrn = Crn.builder(CrnResourceDescriptor.DATALAKE)
+        String clusterCrn = Crn.builder()
+                .setRegion(Crn.Region.US_WEST_1)
+                .setPartition(Crn.Partition.CDP)
+                .setService(Crn.Service.DATALAKE)
+                .setResourceType(Crn.ResourceType.DATALAKE)
                 .setResource(UUID.randomUUID().toString())
                 .setAccountId("cloudera")
                 .build()

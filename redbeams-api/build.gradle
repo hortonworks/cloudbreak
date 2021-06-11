@@ -41,6 +41,7 @@ dependencies {
   implementation project(':common')
   implementation project(':auth-connector')
   implementation project(':authorization-common-api')
+  testCompile project(path: ':common', configuration: 'tests')
 }
 
 

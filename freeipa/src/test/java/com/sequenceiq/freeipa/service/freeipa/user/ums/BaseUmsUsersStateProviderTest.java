@@ -31,8 +31,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
+import com.sequenceiq.cloudbreak.auth.CrnTestUtil;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.freeipa.service.freeipa.user.UserSyncConstants;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsGroup;
@@ -48,12 +47,6 @@ class BaseUmsUsersStateProviderTest {
     protected static final SecureRandom RANDOM = new SecureRandom();
 
     protected static final String ACCOUNT_ID = UUID.randomUUID().toString();
-
-    protected static final String ACTOR_CRN = Crn.builder(CrnResourceDescriptor.USER)
-            .setAccountId(ACCOUNT_ID)
-            .setResource(UUID.randomUUID().toString())
-            .build()
-            .toString();
 
     protected static final String ENVIRONMENT_CRN = createEnvironmentCrn();
 
@@ -167,7 +160,7 @@ class BaseUmsUsersStateProviderTest {
     }
 
     private static String createEnvironmentCrn() {
-        return Crn.builder(CrnResourceDescriptor.ENVIRONMENT)
+        return CrnTestUtil.getEnvironmentCrnBuilder()
                 .setAccountId(ACCOUNT_ID)
                 .setResource(UUID.randomUUID().toString())
                 .build()
@@ -290,7 +283,7 @@ class BaseUmsUsersStateProviderTest {
                         return UserManagementProto.User.newBuilder()
                                 .setFirstName(RandomStringUtils.randomAlphabetic(10))
                                 .setLastName(RandomStringUtils.randomAlphabetic(10))
-                                .setCrn(Crn.builder(CrnResourceDescriptor.USER)
+                                .setCrn(CrnTestUtil.getUserCrnBuilder()
                                         .setAccountId(ACCOUNT_ID)
                                         .setResource(UUID.randomUUID().toString())
                                         .build()
@@ -310,7 +303,7 @@ class BaseUmsUsersStateProviderTest {
                         return UserManagementProto.MachineUser.newBuilder()
                                 .setMachineUserId(id)
                                 .setMachineUserName(RandomStringUtils.randomAlphabetic(10))
-                                .setCrn(Crn.builder(CrnResourceDescriptor.MACHINE_USER)
+                                .setCrn(CrnTestUtil.getMachineUserCrnBuilder()
                                         .setAccountId(ACCOUNT_ID)
                                         .setResource(UUID.randomUUID().toString())
                                         .build()
@@ -330,7 +323,7 @@ class BaseUmsUsersStateProviderTest {
                         String id = UUID.randomUUID().toString();
                         return UserManagementProto.Group.newBuilder()
                                 .setGroupName(name)
-                                .setCrn(Crn.builder(CrnResourceDescriptor.GROUP)
+                                .setCrn(CrnTestUtil.getGroupCrnBuilder()
                                         .setAccountId(ACCOUNT_ID)
                                         .setResource(name + "/" + id)
                                         .build()

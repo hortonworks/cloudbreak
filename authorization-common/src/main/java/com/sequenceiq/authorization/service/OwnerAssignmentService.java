@@ -27,10 +27,13 @@ public class OwnerAssignmentService {
     @Inject
     private GrpcUmsClient umsClient;
 
+    @Inject
+    private RoleCrnGenerator roleCrnGenerator;
+
     public void assignResourceOwnerRoleIfEntitled(String userCrn, String resourceCrn, String accountId) {
         try {
             if (entitlementService.isAuthorizationEntitlementRegistered(accountId)) {
-                umsClient.assignResourceRole(userCrn, resourceCrn, RoleCrnGenerator.getBuiltInOwnerResourceRoleCrn(), MDCUtils.getRequestId());
+                umsClient.assignResourceRole(userCrn, resourceCrn, roleCrnGenerator.getBuiltInOwnerResourceRoleCrn(), MDCUtils.getRequestId());
                 LOGGER.debug("Owner role of {} is successfully assigned to the {} user", resourceCrn, userCrn);
             }
         } catch (StatusRuntimeException ex) {

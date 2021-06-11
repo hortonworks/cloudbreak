@@ -117,3 +117,7 @@ altus:
   audit:
     enabled: true
     endpoint: localhost:8982
+
+crn:
+  partition: cdp
+  region: us-west-1

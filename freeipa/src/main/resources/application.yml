@@ -301,3 +301,7 @@ clusterProxy:
     healthyStatusCode: 200
     timeoutInSec: 5
     intervalInSec: 5
+
+crn:
+  partition: cdp
+  region: us-west-1

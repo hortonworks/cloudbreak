@@ -4,28 +4,27 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
-import com.google.common.collect.ImmutableList;
-import com.google.common.io.BaseEncoding;
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
-import com.sequenceiq.freeipa.client.model.User;
-import com.sequenceiq.freeipa.service.freeipa.user.model.UserMetadata;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
+import com.google.common.collect.ImmutableList;
+import com.google.common.io.BaseEncoding;
+import com.sequenceiq.cloudbreak.auth.CrnTestUtil;
+import com.sequenceiq.freeipa.client.model.User;
+import com.sequenceiq.freeipa.service.freeipa.user.model.UserMetadata;
+
 class UserMetadataConverterTest {
 
-    private static final String VALID_USER_CRN = Crn.builder(CrnResourceDescriptor.USER)
+    private static final String VALID_USER_CRN = CrnTestUtil.getUserCrnBuilder()
             .setAccountId(UUID.randomUUID().toString())
             .setResource(UUID.randomUUID().toString())
             .build().toString();
 
-    private static final String VALID_MACHINE_USER_CRN = Crn.builder(CrnResourceDescriptor.MACHINE_USER)
+    private static final String VALID_MACHINE_USER_CRN = CrnTestUtil.getMachineUserCrnBuilder()
             .setAccountId(UUID.randomUUID().toString())
             .setResource(UUID.randomUUID().toString())
             .build().toString();
@@ -90,11 +89,11 @@ class UserMetadataConverterTest {
 
     @Test
     void testToUserMetadataInvalidCrn() {
-        String groupCrn = Crn.builder(CrnResourceDescriptor.GROUP)
+        String groupCrn = CrnTestUtil.getGroupCrnBuilder()
                 .setAccountId(UUID.randomUUID().toString())
                 .setResource(UUID.randomUUID().toString())
                 .build().toString();
-        String envCrn = Crn.builder(CrnResourceDescriptor.ENVIRONMENT)
+        String envCrn = CrnTestUtil.getEnvironmentCrnBuilder()
                 .setResource(UUID.randomUUID().toString())
                 .setAccountId(UUID.randomUUID().toString())
                 .build().toString();

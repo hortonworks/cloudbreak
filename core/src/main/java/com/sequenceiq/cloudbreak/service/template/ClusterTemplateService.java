@@ -37,6 +37,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.Clust
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.CompactViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
@@ -130,6 +131,9 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
 
     @Inject
     private ClusterTemplateCloudPlatformValidator cloudPlatformValidator;
+
+    @Inject
+    private RegionAwareCrnGenerator regionAwareCrnGenerator;
 
     @Override
     protected WorkspaceResourceRepository<ClusterTemplate, Long> repository() {
@@ -416,11 +420,7 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
     }
 
     public String createCRN(String accountId) {
-        return Crn.builder(CrnResourceDescriptor.CLUSTER_DEF)
-                .setAccountId(accountId)
-                .setResource(UUID.randomUUID().toString())
-                .build()
-                .toString();
+        return regionAwareCrnGenerator.generateCrnStringWithUuid(CrnResourceDescriptor.CLUSTER_DEF, accountId);
     }
 
     @Override
