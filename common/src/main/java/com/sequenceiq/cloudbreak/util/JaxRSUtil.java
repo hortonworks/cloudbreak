@@ -38,9 +38,10 @@ public class JaxRSUtil {
 
     public static <T> T response(Response response, Class<T> clazz) {
         if (Family.SUCCESSFUL != response.getStatusInfo().getFamily()) {
-            if (!MediaType.APPLICATION_JSON_TYPE.isCompatible(response.getMediaType())) {
-                throw handleUnexpectedError(response);
-            }
+            throw handleUnexpectedError(response);
+        }
+        if (!MediaType.APPLICATION_JSON_TYPE.isCompatible(response.getMediaType())) {
+            throw handleIncompatibleMediaType(response);
         }
         try {
             response.bufferEntity();
@@ -52,6 +53,16 @@ public class JaxRSUtil {
             LOGGER.debug("Original salt response: {}", AnonymizerUtil.anonymize(response.readEntity(String.class)));
             response.close();
         }
+    }
+
+    private static WebApplicationException handleIncompatibleMediaType(Response response) {
+        String textResponse = response.readEntity(String.class);
+        MediaType mediaType = response.getMediaType();
+        LOGGER.debug("Received response with incompatible media type: {}, response: {}", mediaType, textResponse);
+        String errormsg = "Status: " + response.getStatusInfo().getStatusCode() + ' ' + response.getStatusInfo().getReasonPhrase()
+                + " Media Type: " + mediaType
+                + " Response: " + textResponse;
+        return new WebApplicationException(errormsg);
     }
 
     private static WebApplicationException handleUnexpectedError(Response response) {
