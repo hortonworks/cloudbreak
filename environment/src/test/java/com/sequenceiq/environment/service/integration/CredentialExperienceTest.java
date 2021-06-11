@@ -27,6 +27,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
+import com.sequenceiq.cloudbreak.auth.CrnTestUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
@@ -117,6 +119,9 @@ public class CredentialExperienceTest {
     @Inject
     private CredentialV1Controller credentialV1Controller;
 
+    @MockBean
+    private RegionAwareCrnGenerator regionAwareCrnGenerator;
+
     @BeforeEach
     public void setup() {
         when(userPreferencesRepository.save(any())).thenReturn(new UserPreferences("xid", "user"));
@@ -128,6 +133,8 @@ public class CredentialExperienceTest {
         if (ThreadBasedUserCrnProvider.getUserCrn() == null) {
             ThreadBasedUserCrnProvider.setUserCrn(USER_CRN);
         }
+
+        CrnTestUtil.mockCrnGenerator(regionAwareCrnGenerator);
     }
 
     @Test

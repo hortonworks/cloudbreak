@@ -24,8 +24,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.dyngr.exception.UserBreakException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
+import com.sequenceiq.cloudbreak.auth.CrnTestUtil;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.service.EnvironmentResourceDeletionService;
 import com.sequenceiq.environment.util.PollingConfig;
@@ -120,7 +119,8 @@ class SdxDeleteServiceTest {
                 .build();
         Environment environment = new Environment();
         environment.setName("envName");
-        environment.setResourceCrn(Crn.builder(CrnResourceDescriptor.ENVIRONMENT).setAccountId("asd")
+        environment.setResourceCrn(CrnTestUtil.getEnvironmentCrnBuilder()
+                .setAccountId("asd")
                 .setResource("asd")
                 .build().toString());
         when(environmentResourceDeletionService.getAttachedSdxClusterCrns(environment)).thenReturn(emptySet());

@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -35,6 +34,7 @@ import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.authorization.service.ResourcePropertyProvider;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
@@ -117,6 +117,9 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
 
     @Inject
     private BlueprintConfigValidator blueprintConfigValidator;
+
+    @Inject
+    private RegionAwareCrnGenerator regionAwareCrnGenerator;
 
     public Blueprint get(Long id) {
         return blueprintRepository.findById(id).orElseThrow(notFound("Cluster definition", id));
@@ -442,11 +445,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
     }
 
     private String createCRN(String accountId) {
-        return Crn.builder(CrnResourceDescriptor.CLUSTER_TEMPLATE)
-                .setAccountId(accountId)
-                .setResource(UUID.randomUUID().toString())
-                .build()
-                .toString();
+        return regionAwareCrnGenerator.generateCrnStringWithUuid(CrnResourceDescriptor.CLUSTER_TEMPLATE, accountId);
     }
 
     @Override

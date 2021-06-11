@@ -82,6 +82,8 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
 
     private final TransactionService transactionService;
 
+    private final RoleCrnGenerator roleCrnGenerator;
+
     public EnvironmentService(
             EnvironmentValidatorService validatorService,
             EnvironmentRepository environmentRepository,
@@ -90,7 +92,8 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
             DelegatingCliEnvironmentRequestConverter delegatingCliEnvironmentRequestConverter,
             OwnerAssignmentService ownerAssignmentService,
             GrpcUmsClient grpcUmsClient,
-            TransactionService transactionService) {
+            TransactionService transactionService,
+            RoleCrnGenerator roleCrnGenerator) {
         this.validatorService = validatorService;
         this.environmentRepository = environmentRepository;
         this.platformParameterService = platformParameterService;
@@ -99,6 +102,7 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
         this.ownerAssignmentService = ownerAssignmentService;
         this.grpcUmsClient = grpcUmsClient;
         this.transactionService = transactionService;
+        this.roleCrnGenerator = roleCrnGenerator;
     }
 
     public Environment save(Environment environment) {
@@ -373,7 +377,7 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
 
     public void assignEnvironmentAdminRole(String userCrn, String environmentCrn) {
         try {
-            grpcUmsClient.assignResourceRole(userCrn, environmentCrn, RoleCrnGenerator.getBuiltInEnvironmentAdminResourceRoleCrn(), MDCUtils.getRequestId());
+            grpcUmsClient.assignResourceRole(userCrn, environmentCrn, roleCrnGenerator.getBuiltInEnvironmentAdminResourceRoleCrn(), MDCUtils.getRequestId());
             LOGGER.debug("EnvironmentAdmin role of {} environemnt is successfully assigned to the {} user", environmentCrn, userCrn);
         } catch (StatusRuntimeException ex) {
             if (Code.ALREADY_EXISTS.equals(ex.getStatus().getCode())) {

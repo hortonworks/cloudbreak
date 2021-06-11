@@ -1,5 +1,29 @@
 package com.sequenceiq.cloudbreak.service.image;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.when;
+
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Supplier;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
+import com.sequenceiq.cloudbreak.auth.CrnTestUtil;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
@@ -11,27 +35,6 @@ import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.VmImage;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.common.api.type.ImageType;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Supplier;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class CustomImageCatalogServiceTest {
@@ -64,6 +67,9 @@ public class CustomImageCatalogServiceTest {
 
     @Mock
     private WorkspaceResourceRepository<ImageCatalog, Long> repository;
+
+    @Mock
+    private RegionAwareCrnGenerator regionAwareCrnGenerator;
 
     @InjectMocks
     private CustomImageCatalogService victim;
@@ -200,6 +206,8 @@ public class CustomImageCatalogServiceTest {
 
     @Test
     public void testCreateCustomImage() throws TransactionService.TransactionExecutionException {
+        CrnTestUtil.mockCrnGenerator(regionAwareCrnGenerator);
+
         ImageCatalog imageCatalog = new ImageCatalog();
         CustomImage expected = aCustomImage();
 
@@ -228,6 +236,8 @@ public class CustomImageCatalogServiceTest {
     @Test
     public void testCreateCustomImageShouldFailInCaseOfNonCustomImageCatalog() throws TransactionService.TransactionExecutionException,
             CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        CrnTestUtil.mockCrnGenerator(regionAwareCrnGenerator);
+
         ImageCatalog imageCatalog = new ImageCatalog();
         CustomImage customImage = aCustomImage();
 

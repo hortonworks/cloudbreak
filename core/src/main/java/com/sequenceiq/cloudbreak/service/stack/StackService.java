@@ -21,7 +21,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -47,6 +46,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.aspect.Measure;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
@@ -222,6 +222,9 @@ public class StackService implements ResourceIdProvider, ResourcePropertyProvide
 
     @Inject
     private TargetGroupPersistenceService targetGroupPersistenceService;
+
+    @Inject
+    private RegionAwareCrnGenerator regionAwareCrnGenerator;
 
     @Value("${cb.nginx.port}")
     private Integer nginxPort;
@@ -856,11 +859,7 @@ public class StackService implements ResourceIdProvider, ResourcePropertyProvide
     }
 
     private String createCRN(String accountId) {
-        return Crn.builder(CrnResourceDescriptor.DATAHUB)
-                .setAccountId(accountId)
-                .setResource(UUID.randomUUID().toString())
-                .build()
-                .toString();
+        return regionAwareCrnGenerator.generateCrnStringWithUuid(CrnResourceDescriptor.DATAHUB, accountId);
     }
 
     public Optional<Duration> getTtlValueForStack(Long stackId) {

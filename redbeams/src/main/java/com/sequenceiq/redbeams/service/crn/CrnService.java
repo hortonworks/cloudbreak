@@ -4,6 +4,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
@@ -18,6 +19,9 @@ public class CrnService {
 
     @Inject
     private UuidGeneratorService uuidGeneratorService;
+
+    @Inject
+    private RegionAwareCrnGenerator regionAwareCrnGenerator;
 
     public String getCurrentAccountId() {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
@@ -58,9 +62,6 @@ public class CrnService {
 
         String resourceId = uuidGeneratorService.randomUuid();
 
-        return Crn.builder(resourceDescriptor)
-                .setAccountId(getCurrentAccountId())
-                .setResource(resourceId)
-                .build();
+        return regionAwareCrnGenerator.generateCrn(resourceDescriptor, resourceId, getCurrentAccountId());
     }
 }

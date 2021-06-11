@@ -31,8 +31,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.cedarsoftware.util.io.JsonWriter;
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
+import com.sequenceiq.cloudbreak.auth.CrnTestUtil;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
@@ -57,7 +56,7 @@ public class FlowLogDBServiceTest {
 
     private static final long ID = 1L;
 
-    private static final String CLOUDBREAK_STACK_CRN = Crn.builder(CrnResourceDescriptor.DATALAKE)
+    private static final String CLOUDBREAK_STACK_CRN = CrnTestUtil.getDatalakeCrnBuilder()
             .setAccountId("acc")
             .setResource("stack")
             .build().toString();

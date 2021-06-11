@@ -588,10 +588,7 @@ public class MockUserManagementService extends UserManagementImplBase {
     }
 
     private User createUser(String accountId, String userName) {
-        String userCrn = Crn.builder(CrnResourceDescriptor.USER)
-                .setAccountId(accountId)
-                .setResource(userName)
-                .build().toString();
+        String userCrn = mockCrnService.createCrn(accountId, CrnResourceDescriptor.USER, userName).toString();
         return User.newBuilder()
                 .setUserId(UUID.nameUUIDFromBytes((accountId + '#' + userName).getBytes()).toString())
                 .setCrn(userCrn)
@@ -1022,11 +1019,7 @@ public class MockUserManagementService extends UserManagementImplBase {
         if (sshPublicKey.isPresent()) {
             Crn actorCrn = Crn.safeFromString(request.getActorCrn());
             builder.addSshPublicKey(SshPublicKey.newBuilder(sshPublicKey.get())
-                    .setCrn(Crn.builder(CrnResourceDescriptor.PUBLIC_KEY)
-                            .setAccountId(actorCrn.getAccountId())
-                            .setResource(UUID.randomUUID().toString())
-                            .build()
-                            .toString())
+                    .setCrn(mockCrnService.createCrn(actorCrn.getAccountId(), CrnResourceDescriptor.PUBLIC_KEY, UUID.randomUUID().toString()).toString())
                     .build());
         }
 

@@ -24,9 +24,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.auth.CrnTestUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.common.exception.ExceptionResponse;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
@@ -44,7 +43,7 @@ class FreeIpaServiceTest {
 
     private static final String OPERATION = "operation";
 
-    private static final String ENVCRN = Crn.builder(CrnResourceDescriptor.ENVIRONMENT)
+    private static final String ENVCRN = CrnTestUtil.getEnvironmentCrnBuilder()
             .setAccountId("acc")
             .setResource("env")
             .build().toString();

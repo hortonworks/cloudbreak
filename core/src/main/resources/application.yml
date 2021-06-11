@@ -740,3 +740,7 @@ gateway:
 
 notification:
   urls: http://localhost:3000/notifications
+
+crn:
+  partition: cdp
+  region: us-west-1

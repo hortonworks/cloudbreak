@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -13,7 +12,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.common.api.telemetry.model.AnonymizationRule;
@@ -33,11 +32,15 @@ public class AccountTelemetryService {
 
     private final AccountTelemetryRepository accountTelemetryRepository;
 
+    private final RegionAwareCrnGenerator regionAwareCrnGenerator;
+
     private final List<AnonymizationRule> defaultRules;
 
-    public AccountTelemetryService(AccountTelemetryRepository accountTelemetryRepository, AccountTelemetryConfig accountTelemetryConfig) {
+    public AccountTelemetryService(AccountTelemetryRepository accountTelemetryRepository, AccountTelemetryConfig accountTelemetryConfig,
+            RegionAwareCrnGenerator regionAwareCrnGenerator) {
         this.accountTelemetryRepository = accountTelemetryRepository;
         this.defaultRules = accountTelemetryConfig.getRules();
+        this.regionAwareCrnGenerator = regionAwareCrnGenerator;
     }
 
     public AccountTelemetry create(AccountTelemetry telemetry, String accountId) {
@@ -158,11 +161,7 @@ public class AccountTelemetryService {
     }
 
     private String createCRN(String accountId) {
-        return Crn.builder(CrnResourceDescriptor.ACCOUNT_TELEMETRY)
-                .setAccountId(accountId)
-                .setResource(UUID.randomUUID().toString())
-                .build()
-                .toString();
+        return regionAwareCrnGenerator.generateCrnStringWithUuid(CrnResourceDescriptor.ACCOUNT_TELEMETRY, accountId);
     }
 
 }

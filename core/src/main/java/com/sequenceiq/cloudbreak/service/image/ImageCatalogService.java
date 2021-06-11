@@ -8,7 +8,6 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.partitioningBy;
 import static java.util.stream.Collectors.toList;
-
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.util.ArrayList;
@@ -21,16 +20,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
-import com.google.common.base.Strings;
-import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
-import com.sequenceiq.common.api.type.ImageType;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -39,6 +34,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
@@ -46,6 +42,7 @@ import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.authorization.service.ResourcePropertyProvider;
 import com.sequenceiq.authorization.service.list.ResourceWithId;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
@@ -70,9 +67,11 @@ import com.sequenceiq.cloudbreak.service.account.PreferencesService;
 import com.sequenceiq.cloudbreak.service.image.catalog.ImageCatalogServiceProxy;
 import com.sequenceiq.cloudbreak.service.user.UserProfileHandler;
 import com.sequenceiq.cloudbreak.service.user.UserProfileService;
+import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
+import com.sequenceiq.common.api.type.ImageType;
 
 @Component
 public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<ImageCatalog> implements ResourcePropertyProvider {
@@ -134,6 +133,9 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
 
     @Inject
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
+
+    @Inject
+    private RegionAwareCrnGenerator regionAwareCrnGenerator;
 
     public Set<ImageCatalog> findAllByWorkspaceId(Long workspaceId, boolean customCatalogsOnly) {
 
@@ -485,11 +487,8 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         ImageCatalog imageCatalog = new ImageCatalog();
         imageCatalog.setName(CDP_DEFAULT_CATALOG_NAME);
         imageCatalog.setImageCatalogUrl(defaultCatalogUrl);
-        imageCatalog.setResourceCrn(Crn.builder(CrnResourceDescriptor.IMAGE_CATALOG)
-                .setResource(CDP_DEFAULT_CATALOG_NAME)
-                .setAccountId(ThreadBasedUserCrnProvider.getAccountId())
-                .build()
-                .toString());
+        imageCatalog.setResourceCrn(regionAwareCrnGenerator.generateCrnString(CrnResourceDescriptor.IMAGE_CATALOG, CDP_DEFAULT_CATALOG_NAME,
+                ThreadBasedUserCrnProvider.getAccountId()));
         return imageCatalog;
     }
 
@@ -497,11 +496,8 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         ImageCatalog imageCatalog = new ImageCatalog();
         imageCatalog.setName(CLOUDBREAK_DEFAULT_CATALOG_NAME);
         imageCatalog.setImageCatalogUrl(defaultCatalogUrl);
-        imageCatalog.setResourceCrn(Crn.builder(CrnResourceDescriptor.IMAGE_CATALOG)
-                .setResource(CLOUDBREAK_DEFAULT_CATALOG_NAME)
-                .setAccountId(ThreadBasedUserCrnProvider.getAccountId())
-                .build()
-                .toString());
+        imageCatalog.setResourceCrn(regionAwareCrnGenerator.generateCrnString(CrnResourceDescriptor.IMAGE_CATALOG, CLOUDBREAK_DEFAULT_CATALOG_NAME,
+                ThreadBasedUserCrnProvider.getAccountId()));
         return imageCatalog;
     }
 
@@ -663,11 +659,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
     }
 
     private String createCRN(String accountId) {
-        return Crn.builder(CrnResourceDescriptor.IMAGE_CATALOG)
-                .setAccountId(accountId)
-                .setResource(UUID.randomUUID().toString())
-                .build()
-                .toString();
+        return regionAwareCrnGenerator.generateCrnStringWithUuid(CrnResourceDescriptor.IMAGE_CATALOG, accountId);
     }
 
     @Override

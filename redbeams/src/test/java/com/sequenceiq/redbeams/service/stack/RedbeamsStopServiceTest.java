@@ -16,8 +16,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.auth.CrnTestUtil;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
 import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
@@ -27,7 +27,7 @@ import com.sequenceiq.redbeams.flow.redbeams.stop.RedbeamsStopEvent;
 
 @ExtendWith(MockitoExtension.class)
 public class RedbeamsStopServiceTest {
-    private static final Crn CRN = Crn.builder(CrnResourceDescriptor.DATABASE_SERVER)
+    private static final Crn CRN = CrnTestUtil.getDatabaseServerCrnBuilder()
             .setAccountId("accountId")
             .setResource("resource")
             .build();

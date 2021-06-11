@@ -1,11 +1,12 @@
 package com.sequenceiq.freeipa.util;
 
-import java.util.UUID;
+import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.Crn.ResourceType;
@@ -16,6 +17,9 @@ import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 public class CrnService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CrnService.class);
+
+    @Inject
+    private RegionAwareCrnGenerator regionAwareCrnGenerator;
 
     public String getCurrentAccountId() {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
@@ -58,9 +62,6 @@ public class CrnService {
     }
 
     public String createCrn(String accountId, CrnResourceDescriptor resourceDescriptor) {
-        return Crn.builder(resourceDescriptor)
-                .setAccountId(accountId)
-                .setResource(UUID.randomUUID().toString())
-                .build().toString();
+        return regionAwareCrnGenerator.generateCrnStringWithUuid(resourceDescriptor, accountId);
     }
 }

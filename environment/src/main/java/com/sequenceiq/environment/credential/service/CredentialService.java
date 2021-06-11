@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
@@ -37,6 +36,7 @@ import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.authorization.service.ResourcePropertyProvider;
 import com.sequenceiq.authorization.service.list.ResourceWithId;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
@@ -92,6 +92,9 @@ public class CredentialService extends AbstractCredentialService implements Reso
 
     @Inject
     private TransactionService transactionService;
+
+    @Inject
+    private RegionAwareCrnGenerator regionAwareCrnGenerator;
 
     protected CredentialService(NotificationSender notificationSender, CloudbreakMessagesService messagesService,
             @Value("${environment.enabledplatforms}") Set<String> enabledPlatforms) {
@@ -366,11 +369,7 @@ public class CredentialService extends AbstractCredentialService implements Reso
     }
 
     private String createCRN(@Nonnull String accountId) {
-        return Crn.builder(CrnResourceDescriptor.CREDENTIAL)
-                .setAccountId(accountId)
-                .setResource(UUID.randomUUID().toString())
-                .build()
-                .toString();
+        return regionAwareCrnGenerator.generateCrnStringWithUuid(CrnResourceDescriptor.CREDENTIAL, accountId);
     }
 
     @Override

@@ -1,7 +1,7 @@
 package com.sequenceiq.thunderhead.grpc.service.auth;
 
-import static com.sequenceiq.cloudbreak.auth.altus.InternalCrnBuilder.INTERNAL_ACCOUNT;
 import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
+import static com.sequenceiq.cloudbreak.auth.altus.InternalCrnBuilder.INTERNAL_ACCOUNT;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,9 +19,13 @@ class MockCrnService {
     private static final Logger LOGGER = LoggerFactory.getLogger(MockCrnService.class);
 
     Crn createCrn(String accountId, CrnResourceDescriptor resourceDescriptor, String resource) {
-        return Crn.builder(resourceDescriptor)
-                .setAccountId(accountId)
+        return Crn.builder()
+                .setRegion(Crn.Region.US_WEST_1)
+                .setPartition(Crn.Partition.CDP)
+                .setService(resourceDescriptor.getServiceType())
+                .setResourceType(resourceDescriptor.getResourceType())
                 .setResource(resource)
+                .setAccountId(accountId)
                 .build();
     }
 

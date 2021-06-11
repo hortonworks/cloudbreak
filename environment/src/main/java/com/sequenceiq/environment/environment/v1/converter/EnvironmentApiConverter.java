@@ -9,7 +9,6 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 
 import javax.annotation.Nonnull;
 
@@ -18,8 +17,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.util.NullUtil;
@@ -54,13 +53,13 @@ import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentFeatures;
 import com.sequenceiq.environment.network.dto.NetworkDto;
-import com.sequenceiq.environment.parameter.dto.AzureResourceEncryptionParametersDto;
-import com.sequenceiq.environment.parameter.dto.ResourceGroupCreation;
-import com.sequenceiq.environment.parameter.dto.ResourceGroupUsagePattern;
 import com.sequenceiq.environment.parameter.dto.AwsParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureParametersDto;
+import com.sequenceiq.environment.parameter.dto.AzureResourceEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureResourceGroupDto;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
+import com.sequenceiq.environment.parameter.dto.ResourceGroupCreation;
+import com.sequenceiq.environment.parameter.dto.ResourceGroupUsagePattern;
 import com.sequenceiq.environment.telemetry.service.AccountTelemetryService;
 
 @Component
@@ -82,13 +81,16 @@ public class EnvironmentApiConverter {
 
     private final NetworkRequestToDtoConverter networkRequestToDtoConverter;
 
+    private final RegionAwareCrnGenerator regionAwareCrnGenerator;
+
     public EnvironmentApiConverter(TelemetryApiConverter telemetryApiConverter,
             BackupConverter backupConverter,
             TunnelConverter tunnelConverter,
             AccountTelemetryService accountTelemetryService,
             CredentialService credentialService,
             FreeIpaConverter freeIpaConverter,
-            NetworkRequestToDtoConverter networkRequestToDtoConverter) {
+            NetworkRequestToDtoConverter networkRequestToDtoConverter,
+            RegionAwareCrnGenerator regionAwareCrnGenerator) {
         this.backupConverter = backupConverter;
         this.telemetryApiConverter = telemetryApiConverter;
         this.accountTelemetryService = accountTelemetryService;
@@ -96,6 +98,7 @@ public class EnvironmentApiConverter {
         this.credentialService = credentialService;
         this.freeIpaConverter = freeIpaConverter;
         this.networkRequestToDtoConverter = networkRequestToDtoConverter;
+        this.regionAwareCrnGenerator = regionAwareCrnGenerator;
     }
 
     public EnvironmentCreationDto initCreationDto(EnvironmentRequest request) {
@@ -148,11 +151,7 @@ public class EnvironmentApiConverter {
     }
 
     private String createCrn(@Nonnull String accountId) {
-        return Crn.builder(CrnResourceDescriptor.ENVIRONMENT)
-                .setAccountId(accountId)
-                .setResource(UUID.randomUUID().toString())
-                .build()
-                .toString();
+        return regionAwareCrnGenerator.generateCrnStringWithUuid(CrnResourceDescriptor.ENVIRONMENT, accountId);
     }
 
     private ParametersDto paramsToParametersDto(EnvironmentRequest request, String cloudPlatform) {

@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -32,6 +33,7 @@ import org.springframework.context.annotation.Import;
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
+import com.sequenceiq.cloudbreak.auth.altus.service.RoleCrnGenerator;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.util.TestConstants;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
@@ -67,12 +69,17 @@ class EnvironmentServiceTest {
     @Mock
     private OwnerAssignmentService ownerAssignmentService;
 
+    @Mock
+    private RoleCrnGenerator roleCrnGenerator;
+
     private Environment environment;
 
     private EnvironmentDto environmentDto;
 
     @BeforeEach
     public void setup() {
+        lenient().when(roleCrnGenerator.getBuiltInEnvironmentAdminResourceRoleCrn())
+                .thenReturn("crn:altus:iam:us-west-1:altus:resourceRole:EnvironmentAdmin");
         environment = new Environment();
         environmentDto = new EnvironmentDto();
     }

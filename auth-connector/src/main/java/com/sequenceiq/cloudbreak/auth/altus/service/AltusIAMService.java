@@ -21,10 +21,14 @@ public class AltusIAMService {
 
     private final SharedAltusCredentialProvider sharedAltusCredentialProvider;
 
+    private final RoleCrnGenerator roleCrnGenerator;
+
     public AltusIAMService(GrpcUmsClient umsClient,
-            SharedAltusCredentialProvider sharedAltusCredentialProvider) {
+            SharedAltusCredentialProvider sharedAltusCredentialProvider,
+            RoleCrnGenerator roleCrnGenerator) {
         this.umsClient = umsClient;
         this.sharedAltusCredentialProvider = sharedAltusCredentialProvider;
+        this.roleCrnGenerator = roleCrnGenerator;
     }
 
     /**
@@ -35,7 +39,7 @@ public class AltusIAMService {
                 machineUserName,
                 actorCrn,
                 accountId,
-                RoleCrnGenerator.getBuiltInDatabusRoleCrn());
+                roleCrnGenerator.getBuiltInDatabusRoleCrn());
     }
 
     /**
@@ -47,7 +51,7 @@ public class AltusIAMService {
                         machineUserName,
                         actorCrn,
                         accountId,
-                        RoleCrnGenerator.getBuiltInDatabusRoleCrn(),
+                        roleCrnGenerator.getBuiltInDatabusRoleCrn(),
                         UserManagementProto.AccessKeyType.Value.ED25519)));
     }
 
@@ -80,7 +84,7 @@ public class AltusIAMService {
             if (sharedAltusCredentialProvider.isSharedAltusCredentialInUse(useSharedCredential)) {
                 LOGGER.debug("Access and secret keys are set manually application wide for Databus, skip machine user cleanup.");
             } else {
-                umsClient.clearMachineUserWithAccessKeysAndRole(machineUserName, actorCrn, accountId, RoleCrnGenerator.getBuiltInDatabusRoleCrn());
+                umsClient.clearMachineUserWithAccessKeysAndRole(machineUserName, actorCrn, accountId, roleCrnGenerator.getBuiltInDatabusRoleCrn());
             }
         } catch (Exception e) {
             LOGGER.warn("Cluster Databus resource cleanup failed (fluent - databus user). It is not a fatal issue, "

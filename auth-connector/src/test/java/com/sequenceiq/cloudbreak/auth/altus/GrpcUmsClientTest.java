@@ -36,6 +36,7 @@ import com.cloudera.thunderhead.service.common.paging.PagingProto;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ServicePrincipalCloudIdentities;
 import com.google.common.collect.Lists;
+import com.sequenceiq.cloudbreak.auth.CrnTestUtil;
 import com.sequenceiq.cloudbreak.auth.altus.config.UmsClientConfig;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
 
@@ -45,7 +46,7 @@ import io.opentracing.Tracer;
 @ExtendWith(MockitoExtension.class)
 public class GrpcUmsClientTest {
 
-    private static final String USER_CRN = Crn.builder(CrnResourceDescriptor.USER)
+    private static final String USER_CRN = CrnTestUtil.getUserCrnBuilder()
             .setResource("user")
             .setAccountId("acc")
             .build().toString();
@@ -170,8 +171,8 @@ public class GrpcUmsClientTest {
 
     @Test
     public void testHasRightsUsesCheckRightWhenRequestNumberIsLessThenThreshold() {
-        String resourceCrn1 = Crn.builder(CrnResourceDescriptor.DATAHUB).setAccountId("a1").setResource("r1").build().toString();
-        String resourceCrn2 = Crn.builder(CrnResourceDescriptor.DATAHUB).setAccountId("a1").setResource("r2").build().toString();
+        String resourceCrn1 = CrnTestUtil.getDatahubCrnBuilder().setAccountId("a1").setResource("r1").build().toString();
+        String resourceCrn2 = CrnTestUtil.getDatahubCrnBuilder().setAccountId("a1").setResource("r2").build().toString();
         doNothing().when(authorizationClient).checkRight(REQUEST_ID.get(), USER_CRN, "right", resourceCrn1);
         doThrow(new RuntimeException("Permission denied")).when(authorizationClient).checkRight(REQUEST_ID.get(), USER_CRN, "right", resourceCrn2);
 
@@ -185,9 +186,9 @@ public class GrpcUmsClientTest {
 
     @Test
     public void testHasRightsUsesHasRightsWhenRequestNumberIsGreaterThenThreshold() {
-        String resourceCrn1 = Crn.builder(CrnResourceDescriptor.DATAHUB).setAccountId("a1").setResource("r1").build().toString();
-        String resourceCrn2 = Crn.builder(CrnResourceDescriptor.DATAHUB).setAccountId("a1").setResource("r2").build().toString();
-        String resourceCrn3 = Crn.builder(CrnResourceDescriptor.DATAHUB).setAccountId("a1").setResource("r3").build().toString();
+        String resourceCrn1 = CrnTestUtil.getDatahubCrnBuilder().setAccountId("a1").setResource("r1").build().toString();
+        String resourceCrn2 = CrnTestUtil.getDatahubCrnBuilder().setAccountId("a1").setResource("r2").build().toString();
+        String resourceCrn3 = CrnTestUtil.getDatahubCrnBuilder().setAccountId("a1").setResource("r3").build().toString();
         doAnswer(m -> Lists.newArrayList((Iterable<AuthorizationProto.RightCheck>) m.getArgument(2)).stream().map(i -> true).collect(Collectors.toList()))
                 .when(authorizationClient).hasRights(any(), anyString(), any());
 

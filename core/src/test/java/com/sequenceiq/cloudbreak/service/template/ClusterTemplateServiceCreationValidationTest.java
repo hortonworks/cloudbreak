@@ -16,6 +16,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
+import com.sequenceiq.cloudbreak.auth.CrnTestUtil;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -59,12 +61,16 @@ class ClusterTemplateServiceCreationValidationTest {
     @Mock
     private GrpcUmsClient grpcUmsClient;
 
+    @Mock
+    private RegionAwareCrnGenerator regionAwareCrnGenerator;
+
     @InjectMocks
     private ClusterTemplateService underTest;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.initMocks(this);
+        CrnTestUtil.mockCrnGenerator(regionAwareCrnGenerator);
         try {
             when(transactionService.required(any(Supplier.class))).thenAnswer(invocation -> {
                 Supplier<ClusterTemplate> arg = (Supplier<ClusterTemplate>) invocation.getArguments()[0];

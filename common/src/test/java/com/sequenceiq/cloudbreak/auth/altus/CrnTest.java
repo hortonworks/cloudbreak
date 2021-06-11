@@ -9,6 +9,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import com.sequenceiq.cloudbreak.auth.CrnTestUtil;
+
 public class CrnTest {
 
     @Rule
@@ -36,10 +38,10 @@ public class CrnTest {
 
     @Test
     public void testBuilder() {
-        Crn crn = Crn.builder(CrnResourceDescriptor.USER)
-            .setAccountId("accountId")
-            .setResource("userId")
-            .build();
+        Crn crn = CrnTestUtil.getUserCrnBuilder()
+                .setAccountId("accountId")
+                .setResource("userId")
+                .build();
 
         assertEquals(Crn.Service.IAM, crn.getService());
         assertEquals("accountId", crn.getAccountId());
@@ -102,16 +104,16 @@ public class CrnTest {
 
     @Test
     public void testGetUserId() {
-        Crn crn = Crn.builder(CrnResourceDescriptor.USER)
-            .setAccountId("accountId")
-            .setResource("userId")
-            .build();
+        Crn crn = CrnTestUtil.getUserCrnBuilder()
+                .setAccountId("accountId")
+                .setResource("userId")
+                .build();
         assertEquals("userId", crn.getUserId());
 
-        crn = Crn.builder(CrnResourceDescriptor.USER)
-            .setAccountId("accountId")
-            .setResource("externalId/userId")
-            .build();
+        crn = CrnTestUtil.getUserCrnBuilder()
+                .setAccountId("accountId")
+                .setResource("externalId/userId")
+                .build();
         assertEquals("userId", crn.getUserId());
     }
 

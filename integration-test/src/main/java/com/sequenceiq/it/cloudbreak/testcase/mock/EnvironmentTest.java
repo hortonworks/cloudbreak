@@ -17,7 +17,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.it.cloudbreak.EnvironmentClient;
@@ -99,8 +98,10 @@ public class EnvironmentTest extends AbstractMockTest {
             when = "a get and delete request is sent for the environment with invalid crn",
             then = "requests should fail with validation error")
     public void testGetAndDeleteEnvironmentWithInvalidCrn(MockedTestContext testContext) {
-        String invalidCrn = Crn.builder(CrnResourceDescriptor.DATALAKE).setResource("dl").setAccountId("acc").build().toString();
-        String otherInvalidCrn = Crn.builder(CrnResourceDescriptor.DATAHUB).setResource("dh").setAccountId("acc").build().toString();
+        String invalidCrn = Crn.builder().setResourceType(Crn.ResourceType.DATALAKE).setService(Crn.Service.DATALAKE)
+                .setPartition(Crn.Partition.CDP).setRegion(Crn.Region.US_WEST_1).setResource("dl").setAccountId("acc").build().toString();
+        String otherInvalidCrn = Crn.builder().setResourceType(Crn.ResourceType.CLUSTER).setService(Crn.Service.DATAHUB)
+                .setPartition(Crn.Partition.CDP).setRegion(Crn.Region.US_WEST_1).setResource("dh").setAccountId("acc").build().toString();
         testContext
                 .given(CredentialTestDto.class)
                 .when(credentialTestClient.create())

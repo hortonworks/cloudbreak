@@ -20,8 +20,8 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.auth.CrnTestUtil;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
@@ -118,7 +118,7 @@ public class DBStackStatusSyncServiceTest {
         cloudContextArgumentCaptor = ArgumentCaptor.forClass(CloudContext.class);
 
         when(dbStack.getEnvironmentId()).thenReturn(ENVIRONMENT_ID);
-        when(dbStack.getResourceCrn()).thenReturn(Crn.builder(CrnResourceDescriptor.DATABASE_SERVER)
+        when(dbStack.getResourceCrn()).thenReturn(CrnTestUtil.getDatabaseServerCrnBuilder()
                 .setAccountId("acc")
                 .setResource("resource")
                 .build());

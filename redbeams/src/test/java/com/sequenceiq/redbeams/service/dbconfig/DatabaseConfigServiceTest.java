@@ -42,9 +42,9 @@ import org.springframework.validation.ObjectError;
 
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
+import com.sequenceiq.cloudbreak.auth.CrnTestUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.common.database.DatabaseCommon;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.service.Clock;
@@ -65,14 +65,14 @@ public class DatabaseConfigServiceTest {
 
     private static final String ACCOUNT_ID = UUID.randomUUID().toString();
 
-    private static final Crn DB_CRN = Crn.builder(CrnResourceDescriptor.DATABASE)
+    private static final Crn DB_CRN = CrnTestUtil.getDatabaseCrnBuilder()
             .setAccountId(ACCOUNT_ID)
             .setResource("resource")
             .build();
 
     private static final String DB_CRN_STRING = DB_CRN.toString();
 
-    private static final Crn DB2_CRN = Crn.builder(CrnResourceDescriptor.DATABASE)
+    private static final Crn DB2_CRN = CrnTestUtil.getDatabaseCrnBuilder()
             .setAccountId(ACCOUNT_ID)
             .setResource("resource2")
             .build();

@@ -37,9 +37,9 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.tags.TagsV4Response;
+import com.sequenceiq.cloudbreak.auth.CrnTestUtil;
 import com.sequenceiq.cloudbreak.auth.CrnUser;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.security.CrnUserDetailsService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
@@ -242,7 +242,7 @@ class AllocateDatabaseServerV4RequestToDBStackConverterTest {
         when(databaseServerSslCertificateConfig.getMaxVersionByPlatform(anyString())).thenReturn(MAX_VERSION);
 
         when(clock.getCurrentInstant()).thenReturn(NOW);
-        when(crnService.createCrn(any(DBStack.class))).thenReturn(Crn.builder(CrnResourceDescriptor.DATABASE_SERVER)
+        when(crnService.createCrn(any(DBStack.class))).thenReturn(CrnTestUtil.getDatabaseServerCrnBuilder()
                 .setAccountId("accountid")
                 .setResource("1")
                 .build());

@@ -5,13 +5,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
@@ -31,10 +31,14 @@ public class AccountTagService {
 
     private final EntitlementService entitlementService;
 
-    public AccountTagService(AccountTagRepository accountTagRepository, CostTagging costTagging, EntitlementService entitlementService) {
+    private final RegionAwareCrnGenerator regionAwareCrnGenerator;
+
+    public AccountTagService(AccountTagRepository accountTagRepository, CostTagging costTagging, EntitlementService entitlementService,
+            RegionAwareCrnGenerator regionAwareCrnGenerator) {
         this.accountTagRepository = accountTagRepository;
         this.costTagging = costTagging;
         this.entitlementService = entitlementService;
+        this.regionAwareCrnGenerator = regionAwareCrnGenerator;
     }
 
     public Set<AccountTag> get(String accountId) {
@@ -86,10 +90,6 @@ public class AccountTagService {
     }
 
     private String createCRN(String accountId) {
-        return Crn.builder(CrnResourceDescriptor.ACCOUNT_TAG)
-                .setAccountId(accountId)
-                .setResource(UUID.randomUUID().toString())
-                .build()
-                .toString();
+        return regionAwareCrnGenerator.generateCrnStringWithUuid(CrnResourceDescriptor.ACCOUNT_TAG, accountId);
     }
 }

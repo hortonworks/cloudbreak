@@ -5,14 +5,13 @@ import static java.util.stream.Collectors.toMap;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 
 import javax.annotation.Nonnull;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
@@ -44,14 +43,18 @@ public class NetworkService {
 
     private final CloudNetworkService cloudNetworkService;
 
+    private final RegionAwareCrnGenerator regionAwareCrnGenerator;
+
     public NetworkService(BaseNetworkRepository baseNetworkRepository,
             Map<CloudPlatform, EnvironmentNetworkConverter> environmentNetworkConverterMap, CloudNetworkService cloudNetworkService,
-            EnvironmentNetworkService environmentNetworkService, NetworkCreationValidator networkCreationValidator) {
+            EnvironmentNetworkService environmentNetworkService, NetworkCreationValidator networkCreationValidator,
+            RegionAwareCrnGenerator regionAwareCrnGenerator) {
         networkRepository = baseNetworkRepository;
         this.environmentNetworkConverterMap = environmentNetworkConverterMap;
         this.environmentNetworkService = environmentNetworkService;
         this.cloudNetworkService = cloudNetworkService;
         this.networkCreationValidator = networkCreationValidator;
+        this.regionAwareCrnGenerator = regionAwareCrnGenerator;
     }
 
     public BaseNetwork saveNetwork(Environment environment, NetworkDto networkDto, String accountId, Map<String, CloudSubnet> subnetMetas,
@@ -130,11 +133,7 @@ public class NetworkService {
     }
 
     private String createCRN(@Nonnull String accountId) {
-        return Crn.builder(CrnResourceDescriptor.NETWORK)
-                .setAccountId(accountId)
-                .setResource(UUID.randomUUID().toString())
-                .build()
-                .toString();
+        return regionAwareCrnGenerator.generateCrnStringWithUuid(CrnResourceDescriptor.NETWORK, accountId);
     }
 
     private String getDocLink(CloudPlatform cloudPlatform) {

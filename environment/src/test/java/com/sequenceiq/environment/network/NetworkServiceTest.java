@@ -20,6 +20,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.network.NetworkCidr;
@@ -52,12 +53,15 @@ public class NetworkServiceTest {
 
     private EnvironmentNetworkConverter environmentNetworkConverter = mock(EnvironmentNetworkConverter.class);
 
+    private RegionAwareCrnGenerator regionAwareCrnGenerator = mock(RegionAwareCrnGenerator.class);
+
     private NetworkService underTest = new NetworkService(
             networkRepository,
             environmentNetworkConverterMap,
             cloudNetworkService,
             environmentNetworkService,
-            networkCreationValidator);
+            networkCreationValidator,
+            regionAwareCrnGenerator);
 
     @Test
     public void testSaveNetworkIfNewNetwork() {

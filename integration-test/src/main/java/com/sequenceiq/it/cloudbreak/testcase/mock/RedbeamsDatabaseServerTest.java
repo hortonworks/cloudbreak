@@ -10,7 +10,6 @@ import javax.ws.rs.BadRequestException;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkMockParams;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.client.RedbeamsDatabaseServerTestClient;
@@ -41,7 +40,11 @@ public class RedbeamsDatabaseServerTest extends AbstractMockTest {
     public void createRedbeamsDatabaseServerTest(MockedTestContext testContext) {
         String databaseName = resourcePropertyProvider().getName();
         String networkKey = "someOtherNetwork";
-        String clusterCrn = Crn.builder(CrnResourceDescriptor.DATALAKE)
+        String clusterCrn = Crn.builder()
+                .setService(Crn.Service.DATALAKE)
+                .setRegion(Crn.Region.US_WEST_1)
+                .setPartition(Crn.Partition.CDP)
+                .setResourceType(Crn.ResourceType.DATALAKE)
                 .setResource(UUID.randomUUID().toString())
                 .setAccountId("cloudera")
                 .build()
@@ -84,7 +87,12 @@ public class RedbeamsDatabaseServerTest extends AbstractMockTest {
                 .await(EnvironmentStatus.AVAILABLE)
                 .given(RedbeamsDatabaseServerTestDto.class)
                 .withName(databaseName)
-                .withClusterCrn(Crn.builder(CrnResourceDescriptor.ENVIRONMENT).setAccountId("acc").setResource("res").build().toString())
+                .withClusterCrn(Crn.builder()
+                        .setService(Crn.Service.ENVIRONMENTS)
+                        .setRegion(Crn.Region.US_WEST_1)
+                        .setPartition(Crn.Partition.CDP)
+                        .setResourceType(Crn.ResourceType.ENVIRONMENT)
+                        .setAccountId("acc").setResource("res").build().toString())
                 .whenException(redbeamsDatabaseServerTest.createV4(), BadRequestException.class,
                         expectedMessage(".*Crn provided: crn:cdp:environments:us-west-1:acc:environment:res has invalid resource type or" +
                                 " service type. Denied service type / resource type pairs: [(]environments,environment[)].*"))

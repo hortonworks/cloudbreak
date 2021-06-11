@@ -21,6 +21,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.auth.CrnTestUtil;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UmsUsersState;
@@ -34,7 +35,7 @@ class UmsUsersStateProviderDispatcherTest {
     private static final String ACCOUNT_ID = UUID.randomUUID().toString();
 
     private static final Set<String> ENVIRONMENT_CRNS = Set.of(
-            Crn.builder(CrnResourceDescriptor.ENVIRONMENT)
+            CrnTestUtil.getEnvironmentCrnBuilder()
                     .setAccountId(ACCOUNT_ID)
                     .setResource(UUID.randomUUID().toString())
                     .build()
@@ -123,7 +124,11 @@ class UmsUsersStateProviderDispatcherTest {
     }
 
     private String createActorCrn(CrnResourceDescriptor resourceDescriptor) {
-        return Crn.builder(resourceDescriptor)
+        return Crn.builder()
+                .setPartition(Crn.Partition.CDP)
+                .setRegion(Crn.Region.US_WEST_1)
+                .setService(resourceDescriptor.getServiceType())
+                .setResourceType(resourceDescriptor.getResourceType())
                 .setAccountId(ACCOUNT_ID)
                 .setResource(UUID.randomUUID().toString())
                 .build()

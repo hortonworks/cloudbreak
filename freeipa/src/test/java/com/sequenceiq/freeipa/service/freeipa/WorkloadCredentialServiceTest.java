@@ -31,19 +31,18 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.googlecode.jsonrpc4j.JsonRpcClientException;
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
+import com.sequenceiq.cloudbreak.auth.CrnTestUtil;
+import com.sequenceiq.cloudbreak.client.RPCResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.WorkloadCredentialsUpdateType;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
-import com.sequenceiq.cloudbreak.client.RPCResponse;
 import com.sequenceiq.freeipa.client.model.User;
 import com.sequenceiq.freeipa.configuration.BatchPartitionSizeProperties;
-import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredentialUpdate;
 import com.sequenceiq.freeipa.service.freeipa.user.UserSyncTestUtils;
 import com.sequenceiq.freeipa.service.freeipa.user.conversion.UserMetadataConverter;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UserSyncOptions;
 import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredential;
+import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredentialUpdate;
 
 @ExtendWith(MockitoExtension.class)
 class WorkloadCredentialServiceTest {
@@ -205,7 +204,7 @@ class WorkloadCredentialServiceTest {
     }
 
     private static String getRandomUserCrn() {
-        return Crn.builder(CrnResourceDescriptor.USER)
+        return CrnTestUtil.getUserCrnBuilder()
                 .setAccountId(UUID.randomUUID().toString())
                 .setResource(UUID.randomUUID().toString())
                 .build().toString();
