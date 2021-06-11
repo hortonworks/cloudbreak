@@ -21,7 +21,15 @@ public class SdxConverter {
             return null;
         }
         if (sdx.getStatus() != SdxClusterStatusResponse.RUNNING) {
-            throw new BadRequestException(String.format("Datalake should be running state. Current state is '%s' instead of Running", sdx.getStatus()));
+            throw new BadRequestException(
+                    String.format("Your current Environment %s contains one Data Lake the name of which is %s. " +
+                            "This Data Lake should be in running/available state but currently it is in '%s' instead of Running. " +
+                            "Please make sure your Data Lake is up and running before you provision the Data Hub. " +
+                            "If your Data Lake is in stopped state, please restart it. " +
+                            "If your Data Lake has failed to provision please check our documentation " +
+                            "https://docs.cloudera.com/management-console/cloud/data-lakes/topics/mc-data-lake.html or contact " +
+                            "the Cloudera support to get some help or try to provision a new Data Lake with the " +
+                            "correct configuration.", sdx.getEnvironmentName(),  sdx.getName(), sdx.getStatus()));
         }
         return getSharedServiceV4Request(sdx);
     }
