@@ -44,9 +44,21 @@ public class AzureVirtualMachineService {
     @Inject
     private AzureResourceGroupMetadataProvider azureResourceGroupMetadataProvider;
 
-    @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
+    @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 10)
     public Map<String, VirtualMachine> getVirtualMachinesByName(AzureClient azureClient, String resourceGroup, Collection<String> privateInstanceIds) {
         LOGGER.debug("Starting to retrieve vm metadata from Azure for {} for ids: {}", resourceGroup, privateInstanceIds);
+        PagedList<VirtualMachine> virtualMachines = azureClient.getVirtualMachines(resourceGroup);
+        while (hasMissingVm(virtualMachines, privateInstanceIds) && virtualMachines.hasNextPage()) {
+            virtualMachines.loadNextPage();
+        }
+        errorIfEmpty(virtualMachines);
+        validateResponse(virtualMachines, privateInstanceIds);
+        return collectVirtualMachinesByName(privateInstanceIds, virtualMachines);
+    }
+
+    private Map<String, VirtualMachine> getVirtualMachinesByNameEmptyAllowed(AzureClient azureClient, String resourceGroup,
+            Collection<String> privateInstanceIds) {
+        LOGGER.debug("Starting to retrieve vm metadata gracefully from Azure for {} for ids: {}", resourceGroup, privateInstanceIds);
         PagedList<VirtualMachine> virtualMachines = azureClient.getVirtualMachines(resourceGroup);
         while (hasMissingVm(virtualMachines, privateInstanceIds) && virtualMachines.hasNextPage()) {
             virtualMachines.loadNextPage();
@@ -106,12 +118,15 @@ public class AzureVirtualMachineService {
     }
 
     private void validateResponse(PagedList<VirtualMachine> virtualMachines, Collection<String> privateInstanceIds) {
+        if (hasMissingVm(virtualMachines, privateInstanceIds)) {
+            LOGGER.warn("Failed to retrieve all host from Azure. Only {} found from the {}.", virtualMachines.size(), privateInstanceIds.size());
+        }
+    }
+
+    private void errorIfEmpty(PagedList<VirtualMachine> virtualMachines) {
         if (hasNoVmInResourceGroup(virtualMachines)) {
             LOGGER.warn("Azure returned 0 vms when listing by resource group. This should not be possible, retrying");
             throw new CloudConnectorException("Operation failed, azure returned an empty list while trying to list vms in resource group.");
-        }
-        if (hasMissingVm(virtualMachines, privateInstanceIds)) {
-            LOGGER.warn("Failed to retrieve all host from Azure. Only {} found from the {}.", virtualMachines.size(), privateInstanceIds.size());
         }
     }
 
@@ -129,7 +144,7 @@ public class AzureVirtualMachineService {
         for (Map.Entry<String, Collection<String>> resourceGroupInstanceIdsMap : resourceGroupInstanceMultimap.asMap().entrySet()) {
             LOGGER.info("Get vms for resource group and add to all virtual machines: {}", resourceGroupInstanceIdsMap.getKey());
             try {
-                virtualMachines.putAll(getVirtualMachinesByName(azureClient,
+                virtualMachines.putAll(getVirtualMachinesByNameEmptyAllowed(azureClient,
                         resourceGroupInstanceIdsMap.getKey(), resourceGroupInstanceIdsMap.getValue()));
             } catch (CloudException e) {
                 LOGGER.debug("Exception occurred during the list of Virtual Machines by resource group", e);

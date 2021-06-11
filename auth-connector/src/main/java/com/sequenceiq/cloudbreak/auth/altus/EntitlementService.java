@@ -29,7 +29,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_BACKUP_ON_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_METRICS_DATABUS_PROCESSING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_AWS_EFS;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_CUSTOM_IMAGE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_LOAD_BALANCER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENABLE_DISTROX_INSTANCE_TYPES;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENDPOINT_GATEWAY_SKIP_VALIDATION;
@@ -225,10 +224,6 @@ public class EntitlementService {
 
     public boolean dataLakeEfsEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_DATA_LAKE_AWS_EFS);
-    }
-
-    public boolean dataLakeCustomImageEnabled(String accountId) {
-        return isEntitlementRegistered(accountId, CDP_DATA_LAKE_CUSTOM_IMAGE);
     }
 
     public boolean awsAutoScalingEnabled(String accountId) {
