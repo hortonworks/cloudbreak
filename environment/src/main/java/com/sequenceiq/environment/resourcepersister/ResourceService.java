@@ -44,4 +44,8 @@ public class ResourceService {
     public Optional<Resource> findByResourceReferenceAndType(String resourceReference, ResourceType resourceType) {
         return repository.findByResourceReferenceAndType(resourceReference, resourceType);
     }
+
+    public Optional<Resource> findByEnvironmentIdAndType(Long environmentId, ResourceType resourceType) {
+        return repository.findByEnvironmentIdAndType(environmentId, resourceType);
+    }
 }

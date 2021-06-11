@@ -32,4 +32,12 @@ public class CloudResourceRetrieverService implements ResourceRetriever {
         return optionalResource
                 .map(resource -> cloudResourceConverter.convert(resource));
     }
+
+    public Optional<CloudResource> findByEnvironmentIdAndType(Long environmentId, ResourceType resourceType) {
+        Optional<Resource> optionalResource = resourceService.findByEnvironmentIdAndType(environmentId, resourceType);
+        LOGGER.debug("Resource retrieved by environmentId: {} and type: {}. Is present: {}", environmentId, resourceType, optionalResource.isPresent());
+        return optionalResource
+                .map(resource -> cloudResourceConverter.convert(resource));
+    }
+
 }
