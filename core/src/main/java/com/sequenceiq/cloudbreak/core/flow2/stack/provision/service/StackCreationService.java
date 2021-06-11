@@ -17,6 +17,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -32,6 +33,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.OnFailureAction;
+import com.sequenceiq.cloudbreak.cloud.CloudConnector;
+import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
 import com.sequenceiq.cloudbreak.cloud.event.loadbalancer.CollectLoadBalancerMetadataResult;
@@ -39,8 +42,10 @@ import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchLoadBalancerResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.setup.CheckImageRequest;
 import com.sequenceiq.cloudbreak.cloud.event.setup.CheckImageResult;
+import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceStoreMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
@@ -49,7 +54,9 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
+import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.notification.Notification;
@@ -65,6 +72,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TlsSetupService;
+import com.sequenceiq.cloudbreak.service.template.TemplateService;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
 import reactor.bus.EventBus;
@@ -117,6 +125,12 @@ public class StackCreationService {
 
     @Inject
     private CloudbreakMetricService metricService;
+
+    @Inject
+    private CloudPlatformConnectors cloudPlatformConnectors;
+
+    @Inject
+    private TemplateService templateService;
 
     public void setupProvision(Stack stack) {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.PROVISION_SETUP, "Provisioning setup");
@@ -246,6 +260,29 @@ public class StackCreationService {
                 flowMessageService.fireEventAndLog(stack.getId(), Status.CREATE_FAILED.name(), STACK_INFRASTRUCTURE_CREATE_FAILED, errorReason);
             } else {
                 flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), STACK_INFRASTRUCTURE_CREATE_FAILED, errorReason);
+            }
+        }
+    }
+
+    public void setInstanceStoreCount(StackContext stackContext) {
+        Stack stack = stackContext.getStack();
+        CloudConnector<Object> connector = cloudPlatformConnectors.get(stackContext.getCloudContext().getPlatformVariant());
+        AuthenticatedContext ac = connector.authentication().authenticate(stackContext.getCloudContext(), stackContext.getCloudCredential());
+
+        List<String> instanceTypes = stack.getInstanceGroups().stream()
+                .map(InstanceGroup::getTemplate)
+                .filter(Objects::nonNull)
+                .map(Template::getInstanceType)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        InstanceStoreMetadata instanceStoreMetadata = connector.metadata().collectInstanceStorageCount(ac, instanceTypes);
+
+        for (InstanceGroup ig : stack.getInstanceGroups()) {
+            if (ig.getTemplate() != null) {
+                ig.getTemplate().setInstanceStorageCount(
+                        instanceStoreMetadata.mapInstanceTypeToInstanceStoreCountNullHandled(ig.getTemplate().getInstanceType()));
+                templateService.savePure(ig.getTemplate());
             }
         }
     }

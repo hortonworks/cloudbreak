@@ -130,6 +130,7 @@ public class StackCreationActions {
             @Override
             protected void doExecute(StackContext context, CreateUserDataSuccess payload, Map<Object, Object> variables) {
                 stackCreationService.setupProvision(context.getStack());
+                stackCreationService.setInstanceStoreCount(context);
                 sendEvent(context);
             }
 

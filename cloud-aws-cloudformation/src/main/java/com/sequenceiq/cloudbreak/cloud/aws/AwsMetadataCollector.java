@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.aws;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -13,9 +14,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.amazonaws.services.ec2.model.DescribeInstanceTypesRequest;
+import com.amazonaws.services.ec2.model.DescribeInstanceTypesResult;
 import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
+import com.amazonaws.services.ec2.model.DiskInfo;
 import com.amazonaws.services.ec2.model.Instance;
+import com.amazonaws.services.ec2.model.InstanceTypeInfo;
 import com.amazonaws.services.elasticloadbalancingv2.model.LoadBalancer;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
@@ -37,6 +42,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceStoreMetadata;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 
 @Service
@@ -205,5 +211,26 @@ public class AwsMetadataCollector implements MetadataCollector {
             }
         }
         return cloudLoadBalancerMetadata;
+    }
+
+    @Override
+    public InstanceStoreMetadata collectInstanceStorageCount(AuthenticatedContext ac, List<String> instanceTypes) {
+        AwsCredentialView credentialView = new AwsCredentialView(ac.getCloudCredential());
+        AmazonEc2Client amazonEC2Client = awsClient.createEc2Client(credentialView);
+        DescribeInstanceTypesRequest request = new DescribeInstanceTypesRequest().withInstanceTypes(new HashSet<>(instanceTypes));
+        try {
+            DescribeInstanceTypesResult result = amazonEC2Client.describeInstanceTypes(request);
+            InstanceStoreMetadata instanceStoreMetadata = new InstanceStoreMetadata();
+            for (InstanceTypeInfo instanceTypeInfo: result.getInstanceTypes()) {
+                instanceStoreMetadata.addInstanceStoreCountToInstanceType(instanceTypeInfo.getInstanceType(),
+                        instanceTypeInfo.getInstanceStorageSupported() ?
+                        instanceTypeInfo.getInstanceStorageInfo().getDisks() != null ?
+                        instanceTypeInfo.getInstanceStorageInfo().getDisks().stream().map(DiskInfo::getCount).mapToInt(Integer::intValue).sum() : 0 : 0);
+            }
+            return instanceStoreMetadata;
+        } catch (Exception e) {
+            LOGGER.warn("Failed to describe instance types: {}", instanceTypes, e);
+            throw new CloudConnectorException(e.getMessage(), e);
+        }
     }
 }
