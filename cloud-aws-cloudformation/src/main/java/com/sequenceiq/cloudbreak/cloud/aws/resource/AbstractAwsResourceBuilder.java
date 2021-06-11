@@ -9,8 +9,8 @@ import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.cloud.CloudPlatformAware;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
-import com.sequenceiq.cloudbreak.cloud.aws.context.AwsContext;
-import com.sequenceiq.cloudbreak.cloud.aws.service.AwsResourceNameService;
+import com.sequenceiq.cloudbreak.cloud.aws.common.context.AwsContext;
+import com.sequenceiq.cloudbreak.cloud.aws.common.service.AwsResourceNameService;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;

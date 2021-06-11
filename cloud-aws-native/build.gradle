@@ -14,9 +14,6 @@ repositories {
 
 dependencies {
   compile project(':cloud-aws-common')
-  compile project(':cloud-api')
-  compile project(':cloud-template')
-  compile project(':template-manager-tag')
 
   // mockito juniper depends on ByteBuddy 1.9.7, but hibernate use older version
   compile group: 'net.bytebuddy',                 name: 'byte-buddy',                     version: '1.9.12'

@@ -18,7 +18,9 @@ import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.InstanceBlockDeviceMapping;
+import com.amazonaws.services.ec2.model.ResourceType;
 import com.amazonaws.services.ec2.model.Tag;
+import com.amazonaws.services.ec2.model.TagSpecification;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -92,6 +94,10 @@ public class AwsTaggingService {
             LOGGER.debug("Tag {} root volumes for stack: {}", volumeIds.size(), stackName);
             ec2Client.createTags(new CreateTagsRequest().withResources(volumeIds).withTags(tags));
         }
+    }
+
+    public TagSpecification prepareEc2TagSpecification(Map<String, String> userDefinedTags, ResourceType resourceType) {
+        return new TagSpecification().withTags(prepareEc2Tags(userDefinedTags)).withResourceType(resourceType);
     }
 
     private com.amazonaws.services.cloudformation.model.Tag prepareCloudformationTag(String key, String value) {

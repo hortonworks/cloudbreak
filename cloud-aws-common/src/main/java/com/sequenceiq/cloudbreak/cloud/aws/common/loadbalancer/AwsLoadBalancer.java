@@ -1,11 +1,9 @@
-package com.sequenceiq.cloudbreak.cloud.aws.loadbalancer;
+package com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.AwsLoadBalancerScheme;
 
 public class AwsLoadBalancer {
 

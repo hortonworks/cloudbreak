@@ -16,6 +16,7 @@ dependencies {
   compile project(':cloud-api')
   compile project(':cloud-common')
   compile project(':cloud-reactor-api')
+  compile project(':cloud-template')
   compile project(':template-manager-tag')
   compile project(':auth-connector')
 

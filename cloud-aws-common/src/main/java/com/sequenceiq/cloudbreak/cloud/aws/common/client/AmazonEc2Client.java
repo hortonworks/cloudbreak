@@ -5,6 +5,12 @@ import com.amazonaws.services.ec2.model.AssociateAddressRequest;
 import com.amazonaws.services.ec2.model.AssociateAddressResult;
 import com.amazonaws.services.ec2.model.AttachVolumeRequest;
 import com.amazonaws.services.ec2.model.AttachVolumeResult;
+import com.amazonaws.services.ec2.model.AuthorizeSecurityGroupEgressRequest;
+import com.amazonaws.services.ec2.model.AuthorizeSecurityGroupEgressResult;
+import com.amazonaws.services.ec2.model.AuthorizeSecurityGroupIngressRequest;
+import com.amazonaws.services.ec2.model.AuthorizeSecurityGroupIngressResult;
+import com.amazonaws.services.ec2.model.CreateSecurityGroupRequest;
+import com.amazonaws.services.ec2.model.CreateSecurityGroupResult;
 import com.amazonaws.services.ec2.model.CreateTagsRequest;
 import com.amazonaws.services.ec2.model.CreateTagsResult;
 import com.amazonaws.services.ec2.model.CreateVolumeRequest;
@@ -192,5 +198,17 @@ public class AmazonEc2Client extends AmazonClient {
 
     public DescribeInstanceTypesResult describeInstanceTypes(DescribeInstanceTypesRequest request) {
         return client.describeInstanceTypes(request);
+    }
+
+    public CreateSecurityGroupResult createSecurityGroup(CreateSecurityGroupRequest request) {
+        return client.createSecurityGroup(request);
+    }
+
+    public AuthorizeSecurityGroupIngressResult addIngress(AuthorizeSecurityGroupIngressRequest reguest) {
+        return client.authorizeSecurityGroupIngress(reguest);
+    }
+
+    public AuthorizeSecurityGroupEgressResult addEgress(AuthorizeSecurityGroupEgressRequest reguest) {
+        return client.authorizeSecurityGroupEgress(reguest);
     }
 }

@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.aws.efs;
+package com.sequenceiq.cloudbreak.cloud.aws.common.efs;
 
 import static com.sequenceiq.cloudbreak.cloud.model.filesystem.efs.CloudEfsConfiguration.KEY_BACKUP_POLICY_STATUS;
 import static com.sequenceiq.cloudbreak.cloud.model.filesystem.efs.CloudEfsConfiguration.KEY_ENCRYPTED;

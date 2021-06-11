@@ -37,11 +37,11 @@ import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.ImmutableMap;
-import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationTemplateBuilder.ModelContext;
-import com.sequenceiq.cloudbreak.cloud.aws.efs.AwsEfsFileSystem;
-import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.AwsListener;
-import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.AwsLoadBalancer;
+import com.sequenceiq.cloudbreak.cloud.aws.common.efs.AwsEfsFileSystem;
+import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.AwsListener;
+import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.AwsLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.AwsLoadBalancerScheme;
+import com.sequenceiq.cloudbreak.cloud.aws.common.resource.ModelContext;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;

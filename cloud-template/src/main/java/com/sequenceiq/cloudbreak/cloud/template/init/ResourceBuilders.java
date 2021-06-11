@@ -1,7 +1,10 @@
 package com.sequenceiq.cloudbreak.cloud.template.init;
 
+import static org.slf4j.LoggerFactory.getLogger;
+
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -10,6 +13,7 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -22,6 +26,8 @@ import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 
 @Component
 public class ResourceBuilders {
+
+    private static final Logger LOGGER = getLogger(ResourceBuilders.class);
 
     @Autowired(required = false)
     private List<NetworkResourceBuilder> network = new ArrayList<>();
@@ -47,15 +53,30 @@ public class ResourceBuilders {
     }
 
     public List<NetworkResourceBuilder<ResourceBuilderContext>> network(Platform platform) {
-        return new ArrayList<>(networkChain.get(platform));
+        List<NetworkResourceBuilder<ResourceBuilderContext>> networkResourceBuilders = networkChain.get(platform);
+        if (networkResourceBuilders == null) {
+            LOGGER.info("Cannot find NetworkResourceBuilder for {}", platform);
+            return Collections.emptyList();
+        }
+        return new ArrayList<>(networkResourceBuilders);
     }
 
     public List<ComputeResourceBuilder<ResourceBuilderContext>> compute(Platform platform) {
-        return new ArrayList<>(computeChain.get(platform));
+        List<ComputeResourceBuilder<ResourceBuilderContext>> computeResourceBuilders = computeChain.get(platform);
+        if (computeResourceBuilders == null) {
+            LOGGER.info("Cannot find ComputeResourceBuilder for {}", platform);
+            return Collections.emptyList();
+        }
+        return new ArrayList<>(computeResourceBuilders);
     }
 
     public List<GroupResourceBuilder<ResourceBuilderContext>> group(Platform platform) {
-        return new ArrayList<>(groupChain.get(platform));
+        List<GroupResourceBuilder<ResourceBuilderContext>> groupResourceBuilders = groupChain.get(platform);
+        if (groupResourceBuilders == null) {
+            LOGGER.info("Cannot find GroupResourceBuilder for {}", platform);
+            return Collections.emptyList();
+        }
+        return new ArrayList<>(groupResourceBuilders);
     }
 
     private void initNetwork(Comparator<OrderedBuilder> comparator) {

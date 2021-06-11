@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.aws.context;
+package com.sequenceiq.cloudbreak.cloud.aws.common.context;
 
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 
