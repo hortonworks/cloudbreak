@@ -8,12 +8,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.it.cloudbreak.UmsClient;
-import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ums.UmsTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 
-public class AssignResourceRoleGroupAction implements Action<UmsTestDto, UmsClient> {
+public class AssignResourceRoleGroupAction extends AbstractUmsAction<UmsTestDto> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AssignResourceRoleGroupAction.class);
 
@@ -24,7 +23,7 @@ public class AssignResourceRoleGroupAction implements Action<UmsTestDto, UmsClie
     }
 
     @Override
-    public UmsTestDto action(TestContext testContext, UmsTestDto testDto, UmsClient client) throws Exception {
+    protected UmsTestDto umsAction(TestContext testContext, UmsTestDto testDto, UmsClient client) throws Exception {
         String resourceRole = testDto.getRequest().getRoleCrn();
         String resourceCrn = testDto.getRequest().getResourceCrn();
         Log.when(LOGGER, format(" Assigning resource role '%s' at resource '%s' for group '%s' ", resourceRole, resourceCrn, groupCrn));

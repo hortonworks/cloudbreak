@@ -8,13 +8,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.it.cloudbreak.UmsClient;
-import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ums.UmsTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 
-public class UnassignResourceRoleAction implements Action<UmsTestDto, UmsClient> {
+public class UnassignResourceRoleAction extends AbstractUmsAction<UmsTestDto> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UnassignResourceRoleAction.class);
 
@@ -25,7 +24,7 @@ public class UnassignResourceRoleAction implements Action<UmsTestDto, UmsClient>
     }
 
     @Override
-    public UmsTestDto action(TestContext testContext, UmsTestDto testDto, UmsClient client) throws Exception {
+    protected UmsTestDto umsAction(TestContext testContext, UmsTestDto testDto, UmsClient client) throws Exception {
         CloudbreakUser user = testContext.getRealUmsUserByKey(userKey);
         String resourceRole = testDto.getRequest().getRoleCrn();
         String resourceCrn = testDto.getRequest().getResourceCrn();
