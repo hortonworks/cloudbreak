@@ -5,16 +5,13 @@ import static com.sequenceiq.cloudbreak.cloud.aws.scheduler.WaiterRunner.run;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.amazonaws.AmazonServiceException;
@@ -22,22 +19,22 @@ import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
 import com.amazonaws.services.cloudformation.model.ResourceStatus;
 import com.amazonaws.services.ec2.model.DescribeKeyPairsRequest;
 import com.amazonaws.services.ec2.model.ImportKeyPairRequest;
-import com.amazonaws.services.ec2.model.PrefixList;
 import com.amazonaws.waiters.Waiter;
-import com.sequenceiq.cloudbreak.cloud.aws.AwsNetworkCfTemplateProvider;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsStackRequestHelper;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationTemplateBuilder;
-import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationTemplateBuilder.ModelContext;
+import com.sequenceiq.cloudbreak.cloud.aws.LegacyAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
-import com.sequenceiq.cloudbreak.cloud.aws.LegacyAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
+import com.sequenceiq.cloudbreak.cloud.aws.common.connector.resource.AwsNetworkService;
+import com.sequenceiq.cloudbreak.cloud.aws.common.resource.ModelContext;
+import com.sequenceiq.cloudbreak.cloud.aws.common.connector.resource.AwsModelService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
+import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsNetworkView;
 import com.sequenceiq.cloudbreak.cloud.aws.scheduler.StackCancellationCheck;
 import com.sequenceiq.cloudbreak.cloud.aws.util.AwsCloudFormationErrorMessageProvider;
-import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsNetworkView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -48,7 +45,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.common.api.type.AdjustmentType;
-import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
@@ -59,9 +55,6 @@ public class AwsLaunchService {
     private static final String CREATED_VPC = "CreatedVpc";
 
     private static final String CREATED_SUBNET = "CreatedSubnet";
-
-    @Value("${cb.aws.vpcendpoints.enabled.gateway.services}")
-    private Set<String> enabledGatewayServices;
 
     @Inject
     private CloudFormationStackUtil cfStackUtil;
@@ -273,19 +266,5 @@ public class AwsLaunchService {
             throw new CloudConnectorException(amazonAutoscalingFailed);
         }
         awsAutoScalingService.suspendAutoScaling(ac, stack);
-    }
-
-    private List<String> getPrefixListIds(AmazonEc2Client amazonEC2Client, String regionName, OutboundInternetTraffic outboundInternetTraffic) {
-        List<String> result = List.of();
-        if (outboundInternetTraffic == OutboundInternetTraffic.DISABLED && CollectionUtils.isNotEmpty(enabledGatewayServices)) {
-            Set<String> gatewayRegionServices = enabledGatewayServices.stream()
-                    .map(s -> String.format(AwsNetworkCfTemplateProvider.VPC_INTERFACE_SERVICE_ENDPOINT_NAME_PATTERN, regionName, s))
-                    .collect(Collectors.toSet());
-            result = amazonEC2Client.describePrefixLists().getPrefixLists().stream()
-                    .filter(pl -> gatewayRegionServices.contains(pl.getPrefixListName()))
-                    .map(PrefixList::getPrefixListId)
-                    .collect(Collectors.toList());
-        }
-        return result;
     }
 }

@@ -8,7 +8,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.aws.AwsContextService;
-import com.sequenceiq.cloudbreak.cloud.aws.context.AwsContextBuilder;
+import com.sequenceiq.cloudbreak.cloud.aws.common.context.AwsContextBuilder;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;

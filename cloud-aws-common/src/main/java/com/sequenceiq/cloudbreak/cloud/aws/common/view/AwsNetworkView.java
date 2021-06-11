@@ -10,6 +10,7 @@ import java.util.List;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
+import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 
 public class AwsNetworkView {
 
@@ -88,4 +89,7 @@ public class AwsNetworkView {
         return cidrs;
     }
 
+    public OutboundInternetTraffic getOutboundInternetTraffic() {
+        return network.getOutboundInternetTraffic();
+    }
 }

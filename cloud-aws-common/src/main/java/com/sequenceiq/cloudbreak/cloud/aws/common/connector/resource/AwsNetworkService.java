@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
+package com.sequenceiq.cloudbreak.cloud.aws.common.connector.resource;
 
 import static java.util.Collections.singletonList;
 
@@ -25,7 +25,7 @@ import com.amazonaws.services.ec2.model.Vpc;
 import com.amazonaws.services.ec2.model.VpcCidrBlockAssociation;
 import com.google.common.collect.Lists;
 import com.google.common.net.InetAddresses;
-import com.sequenceiq.cloudbreak.cloud.aws.LegacyAwsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsNetworkView;
@@ -47,7 +47,7 @@ public class AwsNetworkService {
     private static final String CFS_OUTPUT_EIPALLOCATION_ID = "EIPAllocationID";
 
     @Inject
-    private LegacyAwsClient awsClient;
+    private CommonAwsClient awsClient;
 
     public List<Group> getGatewayGroups(Collection<Group> groups) {
         return groups.stream().filter(group -> group.getType() == InstanceGroupType.GATEWAY).collect(Collectors.toList());

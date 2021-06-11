@@ -102,7 +102,9 @@ public class EnvironmentApiConverterTest {
 
     @BeforeAll
     static void before() {
-        ThreadBasedUserCrnProvider.setUserCrn(USER_CRN);
+        if (ThreadBasedUserCrnProvider.getUserCrn() == null) {
+            ThreadBasedUserCrnProvider.setUserCrn(USER_CRN);
+        }
     }
 
     @ParameterizedTest

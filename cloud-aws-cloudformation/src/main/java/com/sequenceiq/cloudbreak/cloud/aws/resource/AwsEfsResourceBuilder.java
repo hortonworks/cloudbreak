@@ -37,7 +37,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.LegacyAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEfsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
-import com.sequenceiq.cloudbreak.cloud.aws.context.AwsContext;
+import com.sequenceiq.cloudbreak.cloud.aws.common.context.AwsContext;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEfsAttributes;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;

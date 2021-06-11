@@ -1,13 +1,14 @@
-package com.sequenceiq.cloudbreak.cloud.aws.service;
+package com.sequenceiq.cloudbreak.cloud.aws.common.service;
 
 import java.util.Date;
 
-import org.apache.commons.lang3.text.WordUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.google.common.base.CaseFormat;
 import com.sequenceiq.cloudbreak.cloud.service.CloudbreakResourceNameService;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -23,6 +24,8 @@ public class AwsResourceNameService extends CloudbreakResourceNameService {
 
     private static final int INSTANCE_NAME_PART_COUNT = 3;
 
+    private static final int SECURITY_GROUP_PART_COUNT = 3;
+
     @Value("${cb.max.aws.resource.name.length:}")
     private int maxResourceNameLength;
 
@@ -32,6 +35,10 @@ public class AwsResourceNameService extends CloudbreakResourceNameService {
 
         if (resourceType == ResourceType.AWS_VOLUMESET) {
             resourceName = attachedDiskResourceName(parts);
+        } else if (resourceType == ResourceType.AWS_INSTANCE) {
+            resourceName = instanceName(parts);
+        } else if (resourceType == ResourceType.AWS_SECURITY_GROUP) {
+            resourceName = securityGroup(parts);
         } else {
             throw new IllegalStateException("Unsupported resource type: " + resourceType);
         }
@@ -53,14 +60,30 @@ public class AwsResourceNameService extends CloudbreakResourceNameService {
         checkArgs(INSTANCE_NAME_PART_COUNT, parts);
         String name;
         String stackName = String.valueOf(parts[0]);
-        String instanceGroupName = WordUtils.initials(String.valueOf(parts[1]).replaceAll("_", " "));
+        String instanceGroupName = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, String.valueOf(parts[1]).toLowerCase());
         String privateId = String.valueOf(parts[2]);
 
         name = normalize(stackName);
         name = adjustPartLength(name);
         name = appendPart(name, normalize(instanceGroupName));
         name = appendPart(name, privateId);
-        name = appendHash(name, new Date());
+        name = adjustBaseLength(name, maxResourceNameLength);
+
+        return name;
+    }
+
+    private String securityGroup(Object[] parts) {
+        checkArgs(SECURITY_GROUP_PART_COUNT, parts);
+        String name;
+        String stackName = String.valueOf(parts[0]);
+        String instanceGroupName = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, String.valueOf(parts[1]).toLowerCase());
+        String stackId = String.valueOf(parts[2]);
+
+        name = normalize(stackName);
+        name = adjustPartLength(name);
+        name = appendPart(name, stackId);
+        name = appendPart(name, "ClusterNodeSecurityGroup");
+        name = appendPart(name, StringUtils.capitalize(normalize(instanceGroupName)));
         name = adjustBaseLength(name, maxResourceNameLength);
 
         return name;

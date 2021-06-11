@@ -31,7 +31,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.LegacyAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
-import com.sequenceiq.cloudbreak.cloud.aws.context.AwsContextBuilder;
+import com.sequenceiq.cloudbreak.cloud.aws.common.context.AwsContextBuilder;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;

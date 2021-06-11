@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
+package com.sequenceiq.cloudbreak.cloud.aws.common.connector.resource;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
@@ -31,10 +31,8 @@ import com.amazonaws.services.ec2.model.DescribeVpcsResult;
 import com.amazonaws.services.ec2.model.Vpc;
 import com.amazonaws.services.ec2.model.VpcCidrBlockAssociation;
 import com.google.common.net.InetAddresses;
-import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
-import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationTemplateBuilder;
-import com.sequenceiq.cloudbreak.cloud.aws.LegacyAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
+import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -63,19 +61,10 @@ public class AwsNetworkServiceTest {
     private AwsNetworkService underTest;
 
     @Mock
-    private LegacyAwsClient awsClient;
-
-    @Mock
-    private CloudFormationStackUtil cfStackUtil;
+    private CommonAwsClient awsClient;
 
     @Mock
     private SyncPollingScheduler<Boolean> syncPollingScheduler;
-
-    @Mock
-    private CloudFormationTemplateBuilder cloudFormationTemplateBuilder;
-
-    @Mock
-    private CloudFormationStackUtil cloudFormationStackUtil;
 
     @Mock
     private AwsTaggingService awsTaggingService;

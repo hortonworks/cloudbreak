@@ -69,6 +69,7 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.LegacyAwsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonCloudWatchClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEfsClient;
@@ -166,6 +167,9 @@ public class AwsLaunchTest {
 
     @MockBean
     private LegacyAwsClient awsClient;
+
+    @MockBean
+    private CommonAwsClient commonAwsClient;
 
     @MockBean
     private AmazonCloudWatchClient cloudWatchClient;

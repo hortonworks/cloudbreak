@@ -15,11 +15,9 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
-import com.sequenceiq.cloudbreak.cloud.aws.efs.AwsEfsFileSystem;
-import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.AwsLoadBalancer;
-import com.sequenceiq.cloudbreak.cloud.aws.view.AwsGroupView;
+import com.sequenceiq.cloudbreak.cloud.aws.common.resource.ModelContext;
+import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsGroupView;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsInstanceView;
-import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
@@ -27,7 +25,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudS3View;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 import com.sequenceiq.common.api.type.InstanceGroupType;
-import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -47,10 +44,10 @@ public class CloudFormationTemplateBuilder {
         Collection<AwsGroupView> awsGroupViews = new ArrayList<>();
         Collection<AwsGroupView> awsGatewayGroupViews = new ArrayList<>();
         int subnetCounter = 0;
-        boolean multigw = context.stack.getGroups().stream().filter(g -> g.getType() == InstanceGroupType.GATEWAY).count() > 1;
-        for (Group group : context.stack.getGroups()) {
+        boolean multigw = context.getStack().getGroups().stream().filter(g -> g.getType() == InstanceGroupType.GATEWAY).count() > 1;
+        for (Group group : context.getStack().getGroups()) {
             AwsInstanceView awsInstanceView = new AwsInstanceView(group.getReferenceInstanceTemplate());
-            String encryptedAMI = context.encryptedAMIByGroupName.get(group.getName());
+            String encryptedAMI = context.getEncryptedAMIByGroupName().get(group.getName());
             AwsGroupView groupView = new AwsGroupView(
                     group.getInstancesSize(),
                     group.getType().name(),
@@ -61,7 +58,7 @@ public class CloudFormationTemplateBuilder {
                     awsInstanceView.getVolumes().stream().collect(Collectors.groupingBy(Volume::getType, Collectors.counting())),
                     group.getSecurity().getRules(),
                     group.getSecurity().getCloudSecurityIds(),
-                    getSubnetIds(context.existingSubnetIds, subnetCounter, group, multigw),
+                    getSubnetIds(context.getExistingSubnetIds(), subnetCounter, group, multigw),
                     awsInstanceView.isKmsCustom(),
                     awsInstanceView.getKmsKey(),
                     encryptedAMI,
@@ -78,27 +75,28 @@ public class CloudFormationTemplateBuilder {
         }
         model.put("instanceGroups", awsGroupViews);
         model.put("gatewayGroups", awsGatewayGroupViews);
-        model.put("existingVPC", context.existingVPC);
-        model.put("existingIGW", context.existingIGW);
-        model.put("existingSubnet", !isNullOrEmptyList(context.existingSubnetCidr));
-        model.put("enableInstanceProfile", context.enableInstanceProfile || context.instanceProfileAvailable);
-        model.put("existingRole", context.instanceProfileAvailable);
-        model.put("cbSubnet", (isNullOrEmptyList(context.existingSubnetCidr)) ? Lists.newArrayList(context.defaultSubnet)
-                : context.existingSubnetCidr);
-        model.put("vpcSubnet", context.existingVpcCidr == null ? Collections.emptyList() : context.existingVpcCidr);
-        model.put("dedicatedInstances", areDedicatedInstancesRequested(context.stack));
-        model.put("availabilitySetNeeded", context.ac.getCloudContext().getLocation().getAvailabilityZone() != null
-                && context.ac.getCloudContext().getLocation().getAvailabilityZone().value() != null);
-        model.put("mapPublicIpOnLaunch", context.mapPublicIpOnLaunch);
-        model.put("outboundInternetTraffic", context.outboundInternetTraffic);
-        model.put("vpcCidrs", context.vpcCidrs);
-        model.put("prefixListIds", context.prefixListIds);
-        model.put("loadBalancers", Optional.ofNullable(context.loadBalancers).orElse(Collections.emptyList()));
-        model.put("enableEfs", context.enableEfs);
-        model.put("efsFileSystem", context.efsFileSystem);
+        model.put("existingVPC", context.isExistingVPC());
+        model.put("existingIGW", context.isExistingIGW());
+        model.put("existingSubnet", !isNullOrEmptyList(context.getExistingSubnetCidr()));
+        model.put("enableInstanceProfile", context.isEnableInstanceProfile() || context.isInstanceProfileAvailable());
+        model.put("existingRole", context.isInstanceProfileAvailable());
+        model.put("cbSubnet", (isNullOrEmptyList(context.getExistingSubnetCidr())) ? Lists.newArrayList(context.getDefaultSubnet())
+                : context.getExistingSubnetCidr());
+        model.put("vpcSubnet", context.getExistingVpcCidr() == null ? Collections.emptyList() : context.getExistingVpcCidr());
+        model.put("dedicatedInstances", areDedicatedInstancesRequested(context.getStack()));
+        model.put("availabilitySetNeeded", context.getAc().getCloudContext().getLocation().getAvailabilityZone() != null
+                && context.getAc().getCloudContext().getLocation().getAvailabilityZone().value() != null);
+        model.put("mapPublicIpOnLaunch", context.isMapPublicIpOnLaunch());
+        model.put("outboundInternetTraffic", context.getOutboundInternetTraffic());
+        model.put("vpcCidrs", context.getVpcCidrs());
+        model.put("prefixListIds", context.getPrefixListIds());
+        model.put("loadBalancers", Optional.ofNullable(context.getLoadBalancers()).orElse(Collections.emptyList()));
+        model.put("enableEfs", context.isEnableEfs());
+        model.put("efsFileSystem", context.getEfsFileSystem());
 
         try {
-            String template = freeMarkerTemplateUtils.processTemplateIntoString(new Template("aws-template", context.template, freemarkerConfiguration), model);
+            String template = freeMarkerTemplateUtils.processTemplateIntoString(new Template("aws-template", context.getTemplate(), freemarkerConfiguration),
+                    model);
             return template.replaceAll("\\t|\\n| [\\s]+", "");
         } catch (IOException | TemplateException e) {
             throw new CloudConnectorException("Failed to process CloudFormation freemarker template", e);
@@ -148,142 +146,6 @@ public class CloudFormationTemplateBuilder {
     private boolean isDedicatedInstancesParamExistAndTrue(CloudStack stack) {
         return stack.getParameters().containsKey("dedicatedInstances")
                 && Boolean.valueOf(stack.getParameters().get("dedicatedInstances"));
-    }
-
-    public static class ModelContext {
-
-        private AuthenticatedContext ac;
-
-        private CloudStack stack;
-
-        private boolean existingVPC;
-
-        private boolean existingIGW;
-
-        private List<String> existingSubnetIds = new ArrayList<>();
-
-        private List<String> existingSubnetCidr = new ArrayList<>();
-
-        private List<String> existingVpcCidr = new ArrayList<>();
-
-        private boolean mapPublicIpOnLaunch;
-
-        private String template;
-
-        private boolean enableInstanceProfile;
-
-        private boolean instanceProfileAvailable;
-
-        private String defaultSubnet;
-
-        private Map<String, String> encryptedAMIByGroupName = new HashMap<>();
-
-        private OutboundInternetTraffic outboundInternetTraffic;
-
-        private List<String> vpcCidrs;
-
-        private List<String> prefixListIds;
-
-        private List<AwsLoadBalancer> loadBalancers;
-
-        private boolean enableEfs;
-
-        private AwsEfsFileSystem efsFileSystem;
-
-        public ModelContext withAuthenticatedContext(AuthenticatedContext ac) {
-            this.ac = ac;
-            return this;
-        }
-
-        public ModelContext withStack(CloudStack stack) {
-            this.stack = stack;
-            return this;
-        }
-
-        public ModelContext withExistingVpc(boolean existingVpc) {
-            existingVPC = existingVpc;
-            return this;
-        }
-
-        public ModelContext withExistingIGW(boolean existingIGW) {
-            this.existingIGW = existingIGW;
-            return this;
-        }
-
-        public ModelContext withExistingSubnetCidr(List<String> cidr) {
-            existingSubnetCidr = cidr;
-            return this;
-        }
-
-        public ModelContext withExistinVpcCidr(List<String> cidr) {
-            existingVpcCidr = cidr;
-            return this;
-        }
-
-        public ModelContext withExistingSubnetIds(List<String> subnetIds) {
-            existingSubnetIds = subnetIds;
-            return this;
-        }
-
-        public ModelContext mapPublicIpOnLaunch(boolean mapPublicIpOnLaunch) {
-            this.mapPublicIpOnLaunch = mapPublicIpOnLaunch;
-            return this;
-        }
-
-        public ModelContext withEnableInstanceProfile(boolean enableInstanceProfile) {
-            this.enableInstanceProfile = enableInstanceProfile;
-            return this;
-        }
-
-        public ModelContext withInstanceProfileAvailable(boolean instanceProfileAvailable) {
-            this.instanceProfileAvailable = instanceProfileAvailable;
-            return this;
-        }
-
-        public ModelContext withTemplate(String template) {
-            this.template = template;
-            return this;
-        }
-
-        public ModelContext withDefaultSubnet(String subnet) {
-            defaultSubnet = subnet;
-            return this;
-        }
-
-        public ModelContext withOutboundInternetTraffic(OutboundInternetTraffic outboundInternetTraffic) {
-            this.outboundInternetTraffic = outboundInternetTraffic;
-            return this;
-        }
-
-        public ModelContext withVpcCidrs(List<String> vpcCidrs) {
-            this.vpcCidrs = vpcCidrs;
-            return this;
-        }
-
-        public ModelContext withPrefixListIds(List<String> prefixListIds) {
-            this.prefixListIds = prefixListIds;
-            return this;
-        }
-
-        public ModelContext withEncryptedAMIByGroupName(Map<String, String> encryptedAMIByGroupName) {
-            this.encryptedAMIByGroupName.putAll(encryptedAMIByGroupName);
-            return this;
-        }
-
-        public ModelContext withLoadBalancers(List<AwsLoadBalancer> loadBalancers) {
-            this.loadBalancers = loadBalancers;
-            return this;
-        }
-
-        public ModelContext withEnableEfs(boolean enableEfs) {
-            this.enableEfs = enableEfs;
-            return this;
-        }
-
-        public ModelContext withEfsFileSystem(AwsEfsFileSystem efsFileSystem) {
-            this.efsFileSystem = efsFileSystem;
-            return this;
-        }
     }
 
     public static class RDSModelContext {

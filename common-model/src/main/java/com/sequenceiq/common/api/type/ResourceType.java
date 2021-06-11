@@ -23,6 +23,7 @@ public enum ResourceType {
     RDS_DB_SUBNET_GROUP,
     RDS_DB_PARAMETER_GROUP,
     ELASTIC_LOAD_BALANCER,
+    AWS_SECURITY_GROUP,
 
     // OPENSTACK
     HEAT_STACK(CommonResourceType.TEMPLATE),

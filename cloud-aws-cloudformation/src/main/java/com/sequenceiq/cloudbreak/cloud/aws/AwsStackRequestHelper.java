@@ -26,7 +26,7 @@ import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AuthenticatedContextView;
-import com.sequenceiq.cloudbreak.cloud.aws.view.AwsInstanceProfileView;
+import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsInstanceProfileView;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsNetworkView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsRdsDbParameterGroupView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsRdsDbSubnetGroupView;
