@@ -594,20 +594,54 @@ public class UmsClient {
                 .build());
     }
 
-    public void assignResourceRole(String requestId, String assigneeCrn, String resourceCrn, String resourceRoleCrn) {
-        newStub(requestId).assignResourceRole(UserManagementProto.AssignResourceRoleRequest.newBuilder()
-                .setAssignee(getAssignee(assigneeCrn))
-                .setResourceCrn(resourceCrn)
-                .setResourceRoleCrn(resourceRoleCrn)
-                .build());
+    /**
+     * Assign a resource role to an assignee
+     *
+     * @param requestId         id of the request
+     * @param assigneeCrn       user CRN who is going to be own the selected role on the resource
+     * @param resourceCrn       resource CRN where the resource role is going to be assigned to the user
+     * @param resourceRoleCrn   selected resource role CRN for user
+     * @return                  AssignResourceRoleResponse
+     */
+    public UserManagementProto.AssignResourceRoleResponse assignResourceRole(String requestId, String assigneeCrn, String resourceCrn,
+            String resourceRoleCrn) {
+        checkNotNull(requestId);
+        checkNotNull(assigneeCrn);
+        checkNotNull(resourceCrn);
+        checkNotNull(resourceRoleCrn);
+
+        UserManagementProto.AssignResourceRoleResponse assignResourceRoleResponse =
+                newStub(requestId).assignResourceRole(UserManagementProto.AssignResourceRoleRequest.newBuilder()
+                        .setAssignee(getAssignee(assigneeCrn))
+                        .setResourceCrn(resourceCrn)
+                        .setResourceRoleCrn(resourceRoleCrn)
+                        .build());
+        return assignResourceRoleResponse;
     }
 
-    public void unassignResourceRole(String requestId, String assigneeCrn, String resourceCrn, String resourceRoleCrn) {
-        newStub(requestId).unassignResourceRole(UserManagementProto.UnassignResourceRoleRequest.newBuilder()
-                .setAssignee(getAssignee(assigneeCrn))
-                .setResourceCrn(resourceCrn)
-                .setResourceRoleCrn(resourceRoleCrn)
-                .build());
+    /**
+     * Unassign a resource role from an assignee
+     *
+     * @param requestId         id of the request
+     * @param assigneeCrn       user CRN whom resource role is going to be revoked
+     * @param resourceCrn       resource CRN where the resource role is going to be revoked from the user
+     * @param resourceRoleCrn   selected resource role CRN for user
+     * @return                  UnassignResourceRoleResponse
+     */
+    public UserManagementProto.UnassignResourceRoleResponse unassignResourceRole(String requestId, String assigneeCrn, String resourceCrn,
+            String resourceRoleCrn) {
+        checkNotNull(requestId);
+        checkNotNull(assigneeCrn);
+        checkNotNull(resourceCrn);
+        checkNotNull(resourceRoleCrn);
+
+        UserManagementProto.UnassignResourceRoleResponse unassignResourceRoleResponse =
+                newStub(requestId).unassignResourceRole(UserManagementProto.UnassignResourceRoleRequest.newBuilder()
+                        .setAssignee(getAssignee(assigneeCrn))
+                        .setResourceCrn(resourceCrn)
+                        .setResourceRoleCrn(resourceRoleCrn)
+                        .build());
+        return unassignResourceRoleResponse;
     }
 
     /**

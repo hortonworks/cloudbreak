@@ -789,19 +789,20 @@ public class GrpcUmsClient {
         return resourceRoleAssignments;
     }
 
-    public void assignResourceRole(
-            String assigneeCrn, String resourceCrn, String resourceRoleCrn, Optional<String> requestId) {
+    public void assignResourceRole(String assigneeCrn, String resourceCrn, String resourceRoleCrn, Optional<String> requestId) {
         UmsClient client = makeClient(channelWrapper.getChannel());
-        LOGGER.info("Assigning {} role for resource {} to assignee {}", resourceRoleCrn, resourceCrn, assigneeCrn);
+        LOGGER.info("Assigning '{}' role at resource '{}' to assignee '{}'...", resourceRoleCrn, resourceCrn, assigneeCrn);
         client.assignResourceRole(RequestIdUtil.getOrGenerate(requestId), assigneeCrn, resourceCrn, resourceRoleCrn);
-        LOGGER.info("Assigned {} role for resource {} to assignee {}", resourceRoleCrn, resourceCrn, assigneeCrn);
+        LOGGER.info("Resource role assignment has been successfully done ::: Role: {} Resource: {} Assignee: {}",
+                resourceRoleCrn, resourceCrn, assigneeCrn);
     }
 
     public void unassignResourceRole(String assigneeCrn, String resourceCrn, String resourceRoleCrn, Optional<String> requestId) {
         UmsClient client = makeClient(channelWrapper.getChannel());
-        LOGGER.info("Unassigning {} role for resource {} from assignee {}", resourceRoleCrn, resourceCrn, assigneeCrn);
+        LOGGER.info("Unassigning '{}' role at resource '{}' from assignee '{}'...", resourceRoleCrn, resourceCrn, assigneeCrn);
         client.unassignResourceRole(RequestIdUtil.getOrGenerate(requestId), assigneeCrn, resourceCrn, resourceRoleCrn);
-        LOGGER.info("Unassigned {} role for resource {} from assignee {}", resourceRoleCrn, resourceCrn, assigneeCrn);
+        LOGGER.info("Resource role unassignment has been successfully done ::: Role: {} Resource: {} Assignee: {}",
+                resourceRoleCrn, resourceCrn, assigneeCrn);
     }
 
     public void notifyResourceDeleted(String resourceCrn, Optional<String> requestId) {
