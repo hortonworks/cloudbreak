@@ -26,8 +26,8 @@ import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
 import com.amazonaws.waiters.Waiter;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
-import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.LegacyAwsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AuthenticatedContextView;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
@@ -91,7 +91,9 @@ public class AwsDownscaleService {
 
             Long stackId = auth.getCloudContext().getId();
             List<String> terminatedInstances = terminateInstances(stackId, instanceIds, amazonEC2Client);
-            waitForTerminateInstances(stackId, terminatedInstances, amazonEC2Client);
+            if (!terminatedInstances.isEmpty()) {
+                waitForTerminateInstances(stackId, terminatedInstances, amazonEC2Client);
+            }
 
             try {
                 int maxSize = getInstanceCount(stack, vms.get(0).getTemplate().getGroupName());
