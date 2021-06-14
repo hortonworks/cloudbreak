@@ -109,6 +109,8 @@ public class CommonClusterManagerProperties {
     }
 
     public static class UpgradeProperties {
+        private String currentHARuntimeVersion;
+
         private String currentRuntimeVersion;
 
         private String targetRuntimeVersion;
@@ -116,6 +118,14 @@ public class CommonClusterManagerProperties {
         private String distroXUpgradeCurrentVersion;
 
         private String distroXUpgradeTargetVersion;
+
+        public String getCurrentHARuntimeVersion() {
+            return currentHARuntimeVersion;
+        }
+
+        public void setCurrentHARuntimeVersion(String currentHARuntimeVersion) {
+            this.currentHARuntimeVersion = currentHARuntimeVersion;
+        }
 
         public String getCurrentRuntimeVersion() {
             return currentRuntimeVersion;
@@ -148,5 +158,6 @@ public class CommonClusterManagerProperties {
         public void setDistroXUpgradeTargetVersion(String distroXUpgradeTargetVersion) {
             this.distroXUpgradeTargetVersion = distroXUpgradeTargetVersion;
         }
+
     }
 }

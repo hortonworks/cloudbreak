@@ -64,7 +64,7 @@ public class SdxSecurityTests extends PreconditionSdxE2ETest {
                 .withExternalDatabase(noDatabaseRequest)
                 .when(sdxTestClient.create(), key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
-                .awaitForInstance(getSdxInstancesHealthyState())
+                .awaitForHealthyInstances()
                 .then((tc, testDto, client) -> {
                     Map<String, Pair<Integer, String>> certValidityCmdResultByIpsMap = sshJClientActions.executeSshCommand(getInstanceGroups(testDto, client),
                             List.of(HostGroupType.MASTER.getName(), HostGroupType.IDBROKER.getName()), HOST_CERT_VALIDITY_CMD, false);
@@ -75,7 +75,7 @@ public class SdxSecurityTests extends PreconditionSdxE2ETest {
                 .when(sdxTestClient.rotateAutotlsCertificates(), key(sdx))
                 .await(SdxClusterStatusResponse.CERT_ROTATION_IN_PROGRESS, key(sdx).withWaitForFlow(false))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
-                .awaitForInstance(getSdxInstancesHealthyState())
+                .awaitForHealthyInstances()
                 .then((tc, testDto, client) -> {
                     Map<String, Pair<Integer, String>> certValidityCmdResultByIpsMap = sshJClientActions.executeSshCommand(getInstanceGroups(testDto, client),
                             List.of(HostGroupType.MASTER.getName(), HostGroupType.IDBROKER.getName()), HOST_CERT_VALIDITY_CMD, false);

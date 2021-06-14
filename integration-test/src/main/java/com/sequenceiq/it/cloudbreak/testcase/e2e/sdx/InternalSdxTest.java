@@ -34,7 +34,7 @@ public class InternalSdxTest extends PreconditionSdxE2ETest {
                     .withCloudStorage(getCloudStorageRequest(testContext))
                 .when(sdxTestClient.createInternal())
                 .await(SdxClusterStatusResponse.RUNNING)
-                .awaitForInstance(getSdxInstancesHealthyState())
+                .awaitForHealthyInstances()
                 .when(sdxTestClient.describeInternal())
                 .validate();
     }

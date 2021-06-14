@@ -80,7 +80,7 @@ public class BaseImageValidatorE2ETest extends AbstractImageValidatorE2ETest {
                     .withoutDatabase()
                 .when(sdxTestClient.createInternal(), key(sdxInternalKey))
                 .await(SdxClusterStatusResponse.RUNNING)
-                .awaitForInstance(HEALTY_STATUSES)
+                .awaitForHealthyInstances()
                 .validate();
     }
 

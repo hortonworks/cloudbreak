@@ -27,6 +27,7 @@ import org.springframework.context.ApplicationContextAware;
 import org.testng.ITestResult;
 import org.testng.Reporter;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.it.TestParameter;
@@ -949,11 +950,11 @@ public abstract class TestContext implements ApplicationContextAware {
         return entity;
     }
 
-    public <T extends CloudbreakTestDto, E extends Enum<E>> T awaitForInstance(T entity, Map<String, E> desiredStatuses, RunningParameter runningParameter) {
+    public <T extends CloudbreakTestDto> T awaitForInstance(T entity, Map<List<String>, InstanceStatus> desiredStatuses, RunningParameter runningParameter) {
         return awaitForInstance(entity, desiredStatuses, runningParameter, getPollingDurationInMills());
     }
 
-    public <T extends CloudbreakTestDto, E extends Enum<E>> T awaitForInstance(T entity, Map<String, E> desiredStatuses, RunningParameter runningParameter,
+    public <T extends CloudbreakTestDto> T awaitForInstance(T entity, Map<List<String>, InstanceStatus> desiredStatuses, RunningParameter runningParameter,
             Duration pollingInterval) {
         checkShutdown();
         if (!getExceptionMap().isEmpty() && runningParameter.isSkipOnFail()) {

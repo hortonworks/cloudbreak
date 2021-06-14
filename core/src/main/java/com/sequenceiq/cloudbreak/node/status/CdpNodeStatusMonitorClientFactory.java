@@ -69,7 +69,7 @@ public class CdpNodeStatusMonitorClientFactory {
     private CdpNodeStatusMonitorClient buildClientForClusterProxy(Stack stack, InstanceMetaData instanceMetaData, Optional<String> username,
             Optional<String> password) {
         HttpClientConfig httpClientConfig = new HttpClientConfig(clusterProxyConfiguration.getClusterProxyHost());
-        String clusterProxyPath = toClusterProxyBasepath(stack, instanceMetaData.getDiscoveryFQDN());
+        String clusterProxyPath = toClusterProxyBasepath(stack, instanceMetaData.getInstanceId());
         return buildNodeStatusMonitorClient(httpClientConfig, clusterProxyConfiguration.getClusterProxyPort(), clusterProxyPath, clusterProxyHeaders(),
                 username, password);
     }
@@ -115,7 +115,7 @@ public class CdpNodeStatusMonitorClientFactory {
     }
 
     private String toClusterProxyBasepath(Stack stack, String clusterProxyServiceName) {
-        return String.format("%s%s", clusterProxyService.getProxyPath(stack.getResourceCrn()), DEFAULT_BASE_PATH);
+        return String.format("%s%s", clusterProxyService.getProxyPath(stack.getResourceCrn(), clusterProxyServiceName), DEFAULT_BASE_PATH);
     }
 
     private URL getUrl(HttpClientConfig clientConfig, int port, String basePath) throws MalformedURLException {

@@ -4,6 +4,7 @@ import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.IDBROKER;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,6 +21,7 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.util.SdxUtil;
 import com.sequenceiq.it.cloudbreak.util.VolumeUtils;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
+import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 public class SdxUpgradeTests extends PreconditionSdxE2ETest {
@@ -54,21 +56,64 @@ public class SdxUpgradeTests extends PreconditionSdxE2ETest {
                 .withRuntimeVersion(commonClusterManagerProperties.getUpgrade().getCurrentRuntimeVersion())
                 .when(sdxTestClient.create(), key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
-                .awaitForInstance(getSdxInstancesHealthyState())
+                .awaitForHealthyInstances()
                 .then((tc, testDto, client) -> {
                     List<String> instances = sdxUtil.getInstanceIds(testDto, client, MASTER.getName());
                     instances.addAll(sdxUtil.getInstanceIds(testDto, client, IDBROKER.getName()));
-                    expectedVolumeIds.addAll(getCloudFunctionality(tc).listInstanceVolumeIds(instances));
+                    expectedVolumeIds.addAll(getCloudFunctionality(tc).listInstanceVolumeIds(testDto.getName(), instances));
                     return testDto;
                 })
                 .when(sdxTestClient.upgrade(), key(sdx))
                 .await(SdxClusterStatusResponse.DATALAKE_UPGRADE_IN_PROGRESS, key(sdx).withWaitForFlow(Boolean.FALSE))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
-                .awaitForInstance(getSdxInstancesHealthyState())
+                .awaitForHealthyInstances()
                 .then((tc, testDto, client) -> {
                     List<String> instanceIds = sdxUtil.getInstanceIds(testDto, client, MASTER.getName());
                     instanceIds.addAll(sdxUtil.getInstanceIds(testDto, client, IDBROKER.getName()));
-                    actualVolumeIds.addAll(getCloudFunctionality(tc).listInstanceVolumeIds(instanceIds));
+                    actualVolumeIds.addAll(getCloudFunctionality(tc).listInstanceVolumeIds(testDto.getName(), instanceIds));
+                    return testDto;
+                })
+                .then((tc, testDto, client) -> VolumeUtils.compareVolumeIdsAfterRepair(testDto, actualVolumeIds, expectedVolumeIds))
+                // This assertion is disabled until the Audit Service is not configured.
+                //.then(datalakeAuditGrpcServiceAssertion::upgradeClusterByNameInternal)
+                .validate();
+    }
+
+    @Test(dataProvider = TEST_CONTEXT)
+    @UseSpotInstances
+    @Description(
+            given = "there is a running Cloudbreak, and a HA SDX cluster in available state",
+            when = "upgrade called on the HA SDX cluster",
+            then = "HA SDX upgrade should be successful, the cluster should be up and running"
+    )
+    public void testSDXHAUpgrade(TestContext testContext) {
+        String sdx = resourcePropertyProvider().getName();
+
+        List<String> actualVolumeIds = new ArrayList<>();
+        List<String> expectedVolumeIds = new ArrayList<>();
+
+        testContext
+                .given(sdx, SdxTestDto.class)
+                .withClusterShape(SdxClusterShape.MEDIUM_DUTY_HA)
+                .withCloudStorage()
+                .withRuntimeVersion(commonClusterManagerProperties.getUpgrade().getCurrentHARuntimeVersion())
+                .when(sdxTestClient.create(), key(sdx))
+                .await(SdxClusterStatusResponse.RUNNING, key(sdx))
+                .awaitForHealthyInstances()
+                .then((tc, testDto, client) -> {
+                    List<String> instances = sdxUtil.getInstanceIds(testDto, client, MASTER.getName());
+                    instances.addAll(sdxUtil.getInstanceIds(testDto, client, IDBROKER.getName()));
+                    expectedVolumeIds.addAll(getCloudFunctionality(tc).listInstanceVolumeIds(testDto.getName(), instances));
+                    return testDto;
+                })
+                .when(sdxTestClient.upgrade(), key(sdx))
+                .await(SdxClusterStatusResponse.DATALAKE_UPGRADE_IN_PROGRESS, key(sdx).withWaitForFlow(Boolean.FALSE))
+                .await(SdxClusterStatusResponse.RUNNING, key(sdx), Duration.ofSeconds(5L))
+                .awaitForHealthyInstances()
+                .then((tc, testDto, client) -> {
+                    List<String> instanceIds = sdxUtil.getInstanceIds(testDto, client, MASTER.getName());
+                    instanceIds.addAll(sdxUtil.getInstanceIds(testDto, client, IDBROKER.getName()));
+                    actualVolumeIds.addAll(getCloudFunctionality(tc).listInstanceVolumeIds(testDto.getName(), instanceIds));
                     return testDto;
                 })
                 .then((tc, testDto, client) -> VolumeUtils.compareVolumeIdsAfterRepair(testDto, actualVolumeIds, expectedVolumeIds))

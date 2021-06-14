@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType.GATEWAY;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType.GATEWAY_PRIMARY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -8,14 +10,19 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -48,6 +55,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 
 @ExtendWith(MockitoExtension.class)
 public class MetadataSetupServiceTest {
@@ -150,6 +158,10 @@ public class MetadataSetupServiceTest {
         when(clock.getCurrentTimeMillis()).thenReturn(CURRENT_TIME);
         Iterable<CloudVmMetaDataStatus> cloudVmMetaDataStatuses = getCloudVmMetaDataStatuses(InstanceStatus.CREATED, subnetId, availabilityZone);
 
+        InstanceMetaData pgwInstanceMetadata = new InstanceMetaData();
+        pgwInstanceMetadata.setInstanceMetadataType(GATEWAY_PRIMARY);
+        when(instanceMetaDataService.findNotTerminatedForStack(1L)).thenReturn(Set.of(pgwInstanceMetadata));
+
         int newInstances = underTest.saveInstanceMetaData(stack, cloudVmMetaDataStatuses, CREATED);
 
         assertEquals(1, newInstances);
@@ -178,6 +190,10 @@ public class MetadataSetupServiceTest {
         when(instanceGroupService.findByStackId(STACK_ID)).thenReturn(instanceGroupSet);
         when(clock.getCurrentTimeMillis()).thenReturn(CURRENT_TIME);
         Iterable<CloudVmMetaDataStatus> cloudVmMetaDataStatuses = getCloudVmMetaDataStatuses(InstanceStatus.TERMINATED, subnetId, availabilityZone);
+
+        InstanceMetaData pgwInstanceMetadata = new InstanceMetaData();
+        pgwInstanceMetadata.setInstanceMetadataType(GATEWAY_PRIMARY);
+        when(instanceMetaDataService.findNotTerminatedForStack(1L)).thenReturn(Set.of(pgwInstanceMetadata));
 
         int newInstances = underTest.saveInstanceMetaData(stack, cloudVmMetaDataStatuses, SERVICES_RUNNING);
 
@@ -211,6 +227,7 @@ public class MetadataSetupServiceTest {
         originalInstanceMetadata.setInstanceId("instanceId");
         originalInstanceMetadata.setPrivateId(PRIVATE_ID);
         originalInstanceMetadata.setInstanceGroup(instanceGroup);
+        originalInstanceMetadata.setInstanceMetadataType(GATEWAY_PRIMARY);
         when(instanceMetaDataService.findNotTerminatedForStack(STACK_ID)).thenReturn(Set.of(originalInstanceMetadata));
 
         int newInstances = underTest.saveInstanceMetaData(stack, cloudVmMetaDataStatuses, SERVICES_RUNNING);
@@ -222,6 +239,141 @@ public class MetadataSetupServiceTest {
         assertThat(instanceMetaData.getInstanceGroup()).isSameAs(instanceGroup);
         assertTrue(instanceMetaData.getAmbariServer());
         assertTrue(instanceMetaData.getClusterManagerServer());
+    }
+
+    @Test
+    public void testSaveInstanceMetadataAndSelectTheRightPGW() {
+        Stack stack = new Stack();
+        stack.setId(1L);
+        List<CloudVmMetaDataStatus> cloudVmMetaDataStatuses = new ArrayList<>();
+        cloudVmMetaDataStatuses.add(new CloudVmMetaDataStatus(new CloudVmInstanceStatus(new CloudInstance("id1", new InstanceTemplate("medium", "gateway",
+                10L, Collections.emptyList(), InstanceStatus.CREATED, Map.of(), 40L, "imageid", TemporaryStorage.ATTACHED_VOLUMES), null, "subnet", "az"),
+                InstanceStatus.CREATED),
+                new CloudInstanceMetaData("1.1.1.1", "1.1.1.1")));
+        cloudVmMetaDataStatuses.add(new CloudVmMetaDataStatus(new CloudVmInstanceStatus(new CloudInstance("id2", new InstanceTemplate("medium", "gateway",
+                11L, Collections.emptyList(), InstanceStatus.CREATED, Map.of(), 40L, "imageid", TemporaryStorage.ATTACHED_VOLUMES), null, "subnet", "az"),
+                InstanceStatus.CREATED),
+                new CloudInstanceMetaData("1.1.1.2", "1.1.1.2")));
+        cloudVmMetaDataStatuses.add(new CloudVmMetaDataStatus(new CloudVmInstanceStatus(new CloudInstance("id3", new InstanceTemplate("medium", "worker",
+                12L, Collections.emptyList(), InstanceStatus.CREATED, Map.of(), 41L, "imageid", TemporaryStorage.ATTACHED_VOLUMES), null, "subnet", "az"),
+                InstanceStatus.CREATED),
+                new CloudInstanceMetaData("1.1.1.2", "1.1.1.2")));
+        InstanceMetaData lastTerminatedPGW = new InstanceMetaData();
+        String primaryGWDiscoveryFQDN = "primarygw.example.com";
+        lastTerminatedPGW.setDiscoveryFQDN(primaryGWDiscoveryFQDN);
+        when(instanceMetaDataService.getLastTerminatedPrimaryGatewayInstanceMetadata(1L)).thenReturn(Optional.of(lastTerminatedPGW));
+
+        InstanceMetaData gwInstanceMetadata1 = new InstanceMetaData();
+        InstanceGroup gwInstanceGroup = new InstanceGroup();
+        gwInstanceGroup.setGroupName("gateway");
+        gwInstanceGroup.setInstanceGroupType(InstanceGroupType.GATEWAY);
+        gwInstanceMetadata1.setInstanceGroup(gwInstanceGroup);
+        gwInstanceMetadata1.setPrivateId(10L);
+        gwInstanceMetadata1.setDiscoveryFQDN(primaryGWDiscoveryFQDN);
+
+        InstanceMetaData gwInstanceMetadata2 = new InstanceMetaData();
+        gwInstanceMetadata2.setInstanceGroup(gwInstanceGroup);
+        gwInstanceMetadata2.setPrivateId(11L);
+        String gw1DiscoveryFQDN = "gw1.example.com";
+        gwInstanceMetadata2.setDiscoveryFQDN(gw1DiscoveryFQDN);
+
+        InstanceGroup workerInstanceGroup = new InstanceGroup();
+        workerInstanceGroup.setGroupName("worker");
+        workerInstanceGroup.setInstanceGroupType(InstanceGroupType.CORE);
+
+        InstanceMetaData gwInstanceMetadata3 = new InstanceMetaData();
+        gwInstanceMetadata3.setInstanceGroup(workerInstanceGroup);
+        gwInstanceMetadata3.setPrivateId(12L);
+        String gw2DiscoveryFQDN = "gw2.example.com";
+        gwInstanceMetadata3.setDiscoveryFQDN(gw2DiscoveryFQDN);
+
+        when(instanceMetaDataService.findNotTerminatedForStack(1L)).thenReturn(Set.of(gwInstanceMetadata1, gwInstanceMetadata2, gwInstanceMetadata3));
+        underTest.saveInstanceMetaData(stack, cloudVmMetaDataStatuses, CREATED);
+
+        verify(instanceMetaDataService, times(3)).save(instanceMetaDataCaptor.capture());
+        List<InstanceMetaData> savedInstanceMetadatas = instanceMetaDataCaptor.getAllValues();
+        List<InstanceMetaData> primaryGWs = savedInstanceMetadatas.stream()
+                .filter(instanceMetaData -> GATEWAY_PRIMARY.equals(instanceMetaData.getInstanceMetadataType()))
+                .collect(Collectors.toList());
+        assertEquals(1, primaryGWs.size());
+        assertEquals(primaryGWDiscoveryFQDN, primaryGWs.get(0).getDiscoveryFQDN());
+        List<InstanceMetaData> gws = savedInstanceMetadatas.stream()
+                .filter(instanceMetaData -> GATEWAY.equals(instanceMetaData.getInstanceMetadataType()))
+                .collect(Collectors.toList());
+        assertEquals(1, gws.size());
+        assertEquals(gw1DiscoveryFQDN, gws.get(0).getDiscoveryFQDN());
+    }
+
+    @Test
+    public void testSaveInstanceMetadataAndSelectTheRightPGWButFQDNDidNotMatchSoFallback() {
+        Stack stack = new Stack();
+        stack.setId(1L);
+        List<CloudVmMetaDataStatus> cloudVmMetaDataStatuses = new ArrayList<>();
+        cloudVmMetaDataStatuses.add(new CloudVmMetaDataStatus(new CloudVmInstanceStatus(new CloudInstance("id1", new InstanceTemplate("medium", "gateway",
+                10L, Collections.emptyList(), InstanceStatus.CREATED, Map.of(), 40L, "imageid", TemporaryStorage.ATTACHED_VOLUMES), null, "subnet", "az"),
+                InstanceStatus.CREATED),
+                new CloudInstanceMetaData("1.1.1.1", "1.1.1.1")));
+        cloudVmMetaDataStatuses.add(new CloudVmMetaDataStatus(new CloudVmInstanceStatus(new CloudInstance("id2", new InstanceTemplate("medium", "gateway",
+                11L, Collections.emptyList(), InstanceStatus.CREATED, Map.of(), 40L, "imageid", TemporaryStorage.ATTACHED_VOLUMES), null, "subnet", "az"),
+                InstanceStatus.CREATED),
+                new CloudInstanceMetaData("1.1.1.2", "1.1.1.2")));
+        cloudVmMetaDataStatuses.add(new CloudVmMetaDataStatus(new CloudVmInstanceStatus(new CloudInstance("id3", new InstanceTemplate("medium", "worker",
+                12L, Collections.emptyList(), InstanceStatus.CREATED, Map.of(), 41L, "imageid", TemporaryStorage.ATTACHED_VOLUMES), null, "subnet", "az"),
+                InstanceStatus.CREATED),
+                new CloudInstanceMetaData("1.1.1.3", "1.1.1.3")));
+        InstanceMetaData lastTerminatedPGW = new InstanceMetaData();
+        String primaryGWDiscoveryFQDN = "primarygw.example.com";
+        lastTerminatedPGW.setDiscoveryFQDN(primaryGWDiscoveryFQDN);
+        when(instanceMetaDataService.getLastTerminatedPrimaryGatewayInstanceMetadata(1L)).thenReturn(Optional.of(lastTerminatedPGW));
+
+        InstanceMetaData gwInstanceMetadata1 = new InstanceMetaData();
+        InstanceGroup gwInstanceGroup = new InstanceGroup();
+        gwInstanceGroup.setGroupName("gateway");
+        gwInstanceGroup.setInstanceGroupType(InstanceGroupType.GATEWAY);
+        gwInstanceMetadata1.setInstanceGroup(gwInstanceGroup);
+        gwInstanceMetadata1.setPrivateId(10L);
+        String gw1DiscoveryFQDN = "gw1.example.com";
+        gwInstanceMetadata1.setDiscoveryFQDN(gw1DiscoveryFQDN);
+
+        InstanceMetaData gwInstanceMetadata2 = new InstanceMetaData();
+        gwInstanceMetadata2.setInstanceGroup(gwInstanceGroup);
+        gwInstanceMetadata2.setPrivateId(11L);
+        String gw2DiscoveryFQDN = "gw2.example.com";
+        gwInstanceMetadata2.setDiscoveryFQDN(gw2DiscoveryFQDN);
+
+        gwInstanceGroup.setInstanceMetaData(Set.of(gwInstanceMetadata1, gwInstanceMetadata2));
+
+        InstanceGroup workerInstanceGroup = new InstanceGroup();
+        workerInstanceGroup.setGroupName("worker");
+        workerInstanceGroup.setInstanceGroupType(InstanceGroupType.CORE);
+
+        InstanceMetaData workerInstanceMetadata3 = new InstanceMetaData();
+        workerInstanceMetadata3.setInstanceGroup(workerInstanceGroup);
+        workerInstanceMetadata3.setPrivateId(12L);
+        String worker1DiscoveryFQDN = "worker1.example.com";
+        workerInstanceMetadata3.setDiscoveryFQDN(worker1DiscoveryFQDN);
+
+        workerInstanceGroup.setInstanceMetaData(Set.of(workerInstanceMetadata3));
+
+        when(instanceGroupService.findByStackId(1L)).thenReturn(Set.of(gwInstanceGroup, workerInstanceGroup));
+        when(instanceMetaDataService.findAllByInstanceGroupAndInstanceStatus(gwInstanceGroup,
+                com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.CREATED)).thenReturn(List.of(gwInstanceMetadata1, gwInstanceMetadata2));
+        when(instanceMetaDataService.findNotTerminatedForStack(1L)).thenReturn(Set.of(gwInstanceMetadata1, gwInstanceMetadata2, workerInstanceMetadata3));
+        underTest.saveInstanceMetaData(stack, cloudVmMetaDataStatuses, CREATED);
+
+        verify(instanceMetaDataService, times(4)).save(instanceMetaDataCaptor.capture());
+        List<InstanceMetaData> savedInstanceMetadatas = instanceMetaDataCaptor.getAllValues();
+        List<InstanceMetaData> primaryGWs = savedInstanceMetadatas.stream()
+                .filter(instanceMetaData -> GATEWAY_PRIMARY.equals(instanceMetaData.getInstanceMetadataType()))
+                .distinct()
+                .collect(Collectors.toList());
+        assertEquals(1, primaryGWs.size());
+        assertEquals(gw1DiscoveryFQDN, primaryGWs.get(0).getDiscoveryFQDN());
+        List<InstanceMetaData> gws = savedInstanceMetadatas.stream()
+                .filter(instanceMetaData -> GATEWAY.equals(instanceMetaData.getInstanceMetadataType()))
+                .collect(Collectors.toList());
+        assertEquals(1, gws.size());
+        assertEquals(gw2DiscoveryFQDN, gws.get(0).getDiscoveryFQDN());
     }
 
     private Image getEmptyImage() {

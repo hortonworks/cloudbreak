@@ -462,6 +462,28 @@ public class ClusterRepairServiceTest {
                 actual.getError().getValidationErrors().get(0));
     }
 
+    @Test
+    public void testValidateRepairWhenPGWUnhealthyAndNotSelected() {
+        when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
+        when(freeipaService.freeipaStatusInDesiredState(stack, Set.of(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE)))
+                .thenReturn(true);
+        when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
+        InstanceMetaData primaryGW = new InstanceMetaData();
+        primaryGW.setInstanceStatus(InstanceStatus.DELETED_ON_PROVIDER_SIDE);
+        InstanceGroup instanceGroup = new InstanceGroup();
+        instanceGroup.setGroupName("gateway");
+        primaryGW.setInstanceGroup(instanceGroup);
+        when(stack.getPrimaryGatewayInstance()).thenReturn(primaryGW);
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> actual =
+                    underTest.validateRepair(ManualClusterRepairMode.HOST_GROUP, STACK_ID, Set.of("idbroker"), false, false);
+            assertEquals(1, actual.getError().getValidationErrors().size());
+            assertEquals("Primary gateway node is unhealthy, it must be repaired first.",
+                    actual.getError().getValidationErrors().get(0));
+        });
+    }
+
     private void verifyEventArguments(ResourceEvent resourceEvent, String messageAssert) {
         @SuppressWarnings("unchecked")
         ArgumentCaptor<Collection<String>> argument = ArgumentCaptor.forClass(Collection.class);

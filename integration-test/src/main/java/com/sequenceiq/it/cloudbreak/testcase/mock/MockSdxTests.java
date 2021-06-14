@@ -309,7 +309,7 @@ public class MockSdxTests extends AbstractMockTest {
                     return testDto;
                 })
                 .await(stateBeforeRepair)
-                .when(sdxTestClient.repairInternal(), key(sdxInternal))
+                .when(sdxTestClient.repairInternal(hostGroups.stream().map(HostGroupType::getName).toArray(String[]::new)), key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdxInternal))
                 .validate();
     }

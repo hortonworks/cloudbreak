@@ -6,7 +6,6 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -18,9 +17,9 @@ import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.client.RecipeTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.client.StackTestClient;
-import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.util.SdxUtil;
@@ -63,23 +62,23 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                 .given(sdx, SdxTestDto.class).withCloudStorage()
                 .when(sdxTestClient.create(), key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
-                .awaitForInstance(getSdxInstancesHealthyState())
+                .awaitForHealthyInstances()
                 .then((tc, testDto, client) -> {
                     List<String> instancesToDelete = sdxUtil.getInstanceIds(testDto, client, MASTER.getName());
                     instancesToDelete.addAll(sdxUtil.getInstanceIds(testDto, client, IDBROKER.getName()));
-                    expectedVolumeIds.addAll(getCloudFunctionality(tc).listInstanceVolumeIds(instancesToDelete));
-                    getCloudFunctionality(tc).deleteInstances(instancesToDelete);
+                    expectedVolumeIds.addAll(getCloudFunctionality(tc).listInstanceVolumeIds(testDto.getName(), instancesToDelete));
+                    getCloudFunctionality(tc).deleteInstances(testDto.getName(), instancesToDelete);
                     return testDto;
                 })
-                .awaitForInstance(getSdxInstancesDeletedOnProviderSideState())
-                .when(sdxTestClient.repair(), key(sdx))
+                .awaitForDeletedInstancesOnProvider()
+                .when(sdxTestClient.repair(MASTER.getName(), IDBROKER.getName()), key(sdx))
                 .await(SdxClusterStatusResponse.REPAIR_IN_PROGRESS, key(sdx).withWaitForFlow(false))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
-                .awaitForInstance(getSdxInstancesHealthyState())
+                .awaitForHealthyInstances()
                 .then((tc, testDto, client) -> {
                     List<String> instanceIds = sdxUtil.getInstanceIds(testDto, client, MASTER.getName());
                     instanceIds.addAll(sdxUtil.getInstanceIds(testDto, client, IDBROKER.getName()));
-                    actualVolumeIds.addAll(getCloudFunctionality(tc).listInstanceVolumeIds(instanceIds));
+                    actualVolumeIds.addAll(getCloudFunctionality(tc).listInstanceVolumeIds(testDto.getName(), instanceIds));
                     return testDto;
                 })
                 .then((tc, testDto, client) -> VolumeUtils.compareVolumeIdsAfterRepair(testDto, actualVolumeIds, expectedVolumeIds))
@@ -103,10 +102,10 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                 .given(sdx, SdxTestDto.class).withCloudStorage()
                 .when(sdxTestClient.create(), key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
-                .awaitForInstance(getSdxInstancesHealthyState());
+                .awaitForHealthyInstances();
 
-        repair(sdxTestDto, sdx, MASTER);
-        repair(sdxTestDto, sdx, IDBROKER);
+        repair(sdxTestDto, sdx, MASTER.getName());
+        repair(sdxTestDto, sdx, IDBROKER.getName());
 
         sdxTestDto
                 .then((tc, testDto, client) -> {
@@ -128,41 +127,65 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
             when = "",
             then = "SDX creation should be successful, the cluster should be up and running"
     )
-    public void testSDXMediumDutyCreation(TestContext testContext) {
+    public void testSDXMediumDutyRepair(TestContext testContext) {
         String sdx = resourcePropertyProvider().getName();
 
         testContext.given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.describe())
                 .getResponse();
 
+        List<String> actualVolumeIds = new ArrayList<>();
+        List<String> expectedVolumeIds = new ArrayList<>();
+
         testContext
+                .given(EnvironmentTestDto.class)
                 .given(sdx, SdxTestDto.class).withCloudStorage()
                 .withClusterShape(SdxClusterShape.MEDIUM_DUTY_HA)
                 .when(sdxTestClient.create(), key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
-                .awaitForInstance(getSdxInstancesHealthyState());
-        // once fix HA salt been implemented CB-12410, we will add the repair part
+                .awaitForHealthyInstances()
+                .then((tc, testDto, client) -> {
+                    List<String> instancesToDelete = sdxUtil.getInstanceIds(testDto, client, "gateway");
+                    instancesToDelete.addAll(sdxUtil.getInstanceIds(testDto, client, "idbroker"));
+                    expectedVolumeIds.addAll(getCloudFunctionality(tc).listInstanceVolumeIds(testDto.getName(), instancesToDelete));
+                    getCloudFunctionality(tc).deleteInstances(testDto.getName(), instancesToDelete);
+                    return testDto;
+                })
+                .awaitForHostGroups(List.of("gateway", "idbroker"), InstanceStatus.DELETED_ON_PROVIDER_SIDE)
+                .when(sdxTestClient.repair("gateway", "idbroker"), key(sdx))
+                .await(SdxClusterStatusResponse.REPAIR_IN_PROGRESS, key(sdx).withWaitForFlow(false))
+                .await(SdxClusterStatusResponse.RUNNING, key(sdx))
+                .awaitForHealthyInstances()
+                .then((tc, testDto, client) -> {
+                    List<String> instanceIds = sdxUtil.getInstanceIds(testDto, client, "gateway");
+                    instanceIds.addAll(sdxUtil.getInstanceIds(testDto, client, "idbroker"));
+                    actualVolumeIds.addAll(getCloudFunctionality(tc).listInstanceVolumeIds(testDto.getName(), instanceIds));
+                    return testDto;
+                })
+                .then((tc, testDto, client) -> VolumeUtils.compareVolumeIdsAfterRepair(testDto, actualVolumeIds, expectedVolumeIds))
+                .validate();
+
     }
 
-    private void repair(SdxTestDto sdxTestDto, String sdx, HostGroupType hostGroupType) {
+    private void repair(SdxTestDto sdxTestDto, String sdx, String hostgroupName) {
         List<String> expectedVolumeIds = new ArrayList<>();
         List<String> actualVolumeIds = new ArrayList<>();
 
         sdxTestDto
                 .then((tc, testDto, client) -> {
-                    List<String> instancesToStop = sdxUtil.getInstanceIds(testDto, client, hostGroupType.getName());
-                    expectedVolumeIds.addAll(getCloudFunctionality(tc).listInstanceVolumeIds(instancesToStop));
-                    getCloudFunctionality(tc).stopInstances(instancesToStop);
+                    List<String> instancesToStop = sdxUtil.getInstanceIds(testDto, client, hostgroupName);
+                    expectedVolumeIds.addAll(getCloudFunctionality(tc).listInstanceVolumeIds(testDto.getName(), instancesToStop));
+                    getCloudFunctionality(tc).stopInstances(testDto.getName(), instancesToStop);
                     return testDto;
                 })
-                .awaitForInstance(Map.of(hostGroupType.getName(), InstanceStatus.STOPPED))
-                .when(sdxTestClient.repair(), key(sdx))
+                .awaitForHostGroups(List.of(hostgroupName), InstanceStatus.STOPPED)
+                .when(sdxTestClient.repair(hostgroupName), key(sdx))
                 .await(SdxClusterStatusResponse.REPAIR_IN_PROGRESS, key(sdx).withWaitForFlow(Boolean.FALSE))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
-                .awaitForInstance(getSdxInstancesHealthyState())
+                .awaitForHealthyInstances()
                 .then((tc, testDto, client) -> {
-                    List<String> instanceIds = sdxUtil.getInstanceIds(testDto, client, hostGroupType.getName());
-                    actualVolumeIds.addAll(getCloudFunctionality(tc).listInstanceVolumeIds(instanceIds));
+                    List<String> instanceIds = sdxUtil.getInstanceIds(testDto, client, hostgroupName);
+                    actualVolumeIds.addAll(getCloudFunctionality(tc).listInstanceVolumeIds(testDto.getName(), instanceIds));
                     return testDto;
                 })
                 .then((tc, testDto, client) -> VolumeUtils.compareVolumeIdsAfterRepair(testDto,

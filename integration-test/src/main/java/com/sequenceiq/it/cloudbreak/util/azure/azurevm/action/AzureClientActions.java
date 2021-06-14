@@ -18,6 +18,7 @@ import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.compute.PowerState;
 import com.microsoft.azure.management.compute.VirtualMachine;
 import com.microsoft.azure.management.resources.fluentcore.arm.models.HasId;
+import com.sequenceiq.it.cloudbreak.ResourcePropertyProvider;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.util.azure.AzureInstanceActionExecutor;
 import com.sequenceiq.it.cloudbreak.util.azure.AzureInstanceActionResult;
@@ -29,23 +30,26 @@ public class AzureClientActions {
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureClientActions.class);
 
     @Inject
+    private ResourcePropertyProvider resourcePropertyProvider;
+
+    @Inject
     private Azure azure;
 
-    public List<String> listInstanceVolumeIds(List<String> instanceIds) {
+    public List<String> listInstanceVolumeIds(String clusterName, List<String> instanceIds) {
         List<String> diskIds = new ArrayList<>();
         instanceIds.forEach(id -> {
-            String resourceGroup = getResourceGroupName(id);
+            String resourceGroup = getResourceGroupName(clusterName, id);
             VirtualMachine vm = azure.virtualMachines().getByResourceGroup(resourceGroup, id);
             diskIds.addAll(vm.dataDisks().values().stream().map(HasId::id).collect(Collectors.toList()));
         });
         return diskIds;
     }
 
-    public void deleteInstances(List<String> instanceIds) {
+    public void deleteInstances(String clusterName, List<String> instanceIds) {
         AzureInstanceActionExecutor.builder()
                 .onInstances(instanceIds)
                 .withInstanceAction(id -> {
-                    String resourceGroup = getResourceGroupName(id);
+                    String resourceGroup = getResourceGroupName(clusterName, id);
                     VirtualMachine vm = azure.virtualMachines().getByResourceGroup(resourceGroup, id);
                     LOGGER.info("Before deleting, vm {} power state is {}", id, vm.powerState());
                     return azure.virtualMachines().deleteByResourceGroupAsync(resourceGroup, id)
@@ -53,7 +57,7 @@ public class AzureClientActions {
                             .subscribeOn(Schedulers.io());
                 })
                 .withInstanceStatusCheck(id -> {
-                    String resourceGroup = getResourceGroupName(id);
+                    String resourceGroup = getResourceGroupName(clusterName, id);
                     VirtualMachine vm = azure.virtualMachines().getByResourceGroup(resourceGroup, id);
                     String powerState = getVmPowerState(vm);
                     String provisioningState = getVmProvisioningState(vm);
@@ -67,11 +71,11 @@ public class AzureClientActions {
         LOGGER.info("Deleting instances finished succesfully");
     }
 
-    public void stopInstances(List<String> instanceIds) {
+    public void stopInstances(String clusterName, List<String> instanceIds) {
         AzureInstanceActionExecutor.builder()
                 .onInstances(instanceIds)
                 .withInstanceAction(id -> {
-                    String resourceGroup = getResourceGroupName(id);
+                    String resourceGroup = getResourceGroupName(clusterName, id);
                     VirtualMachine vm = azure.virtualMachines().getByResourceGroup(resourceGroup, id);
                     LOGGER.info("Before stopping, vm {} power state is {}", id, vm.powerState());
                     return azure.virtualMachines().deallocateAsync(vm.resourceGroupName(), vm.name())
@@ -79,7 +83,7 @@ public class AzureClientActions {
                             .subscribeOn(Schedulers.io());
                 })
                 .withInstanceStatusCheck(id -> {
-                    String resourceGroup = getResourceGroupName(id);
+                    String resourceGroup = getResourceGroupName(clusterName, id);
                     VirtualMachine vm = azure.virtualMachines().getByResourceGroup(resourceGroup, id);
                     String powerState = getVmPowerState(vm);
                     String provisioningState = getVmProvisioningState(vm);
@@ -101,18 +105,19 @@ public class AzureClientActions {
         return Optional.ofNullable(vm).map(VirtualMachine::provisioningState).orElse("no provisioning state");
     }
 
-    private String getResourceGroupName(String id) {
-        return id.replaceFirst("..$", "");
+    // We don't have resource group name, so we are guessing it from cluster name and instance name
+    private String getResourceGroupName(String clusterName, String id) {
+        return id.replaceAll("(" + clusterName + "[0-9]+).*", "$1");
     }
 
     public void setAzure(Azure azure) {
         this.azure = azure;
     }
 
-    public Map<String, Map<String, String>> listTagsByInstanceId(List<String> instanceIds) {
+    public Map<String, Map<String, String>> listTagsByInstanceId(String clusterName, List<String> instanceIds) {
         return instanceIds.stream()
                 .filter(StringUtils::isNotEmpty)
-                .map(id -> azure.virtualMachines().getByResourceGroup(getResourceGroupName(id), id))
+                .map(id -> azure.virtualMachines().getByResourceGroup(getResourceGroupName(clusterName, id), id))
                 .collect(Collectors.toMap(VirtualMachine::id, VirtualMachine::tags));
     }
 }

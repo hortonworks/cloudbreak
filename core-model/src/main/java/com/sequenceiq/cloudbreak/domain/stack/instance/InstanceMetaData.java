@@ -244,6 +244,10 @@ public class InstanceMetaData implements ProvisionEntity {
         return InstanceStatus.DELETED_ON_PROVIDER_SIDE.equals(instanceStatus) || InstanceStatus.DELETED_BY_PROVIDER.equals(instanceStatus);
     }
 
+    public boolean isHealthy() {
+        return InstanceStatus.SERVICES_HEALTHY.equals(instanceStatus) || InstanceStatus.SERVICES_RUNNING.equals(instanceStatus);
+    }
+
     public boolean isUnhealthy() {
         return InstanceStatus.SERVICES_UNHEALTHY.equals(instanceStatus);
     }

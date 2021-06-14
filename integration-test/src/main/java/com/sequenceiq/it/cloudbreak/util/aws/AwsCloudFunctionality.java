@@ -25,22 +25,22 @@ public class AwsCloudFunctionality implements CloudFunctionality {
     private AmazonS3Util amazonS3Util;
 
     @Override
-    public List<String> listInstanceVolumeIds(List<String> instanceIds) {
+    public List<String> listInstanceVolumeIds(String clusterName, List<String> instanceIds) {
         return amazonEC2Util.listInstanceVolumeIds(instanceIds);
     }
 
     @Override
-    public Map<String, Map<String, String>> listTagsByInstanceId(List<String> instanceIds) {
+    public Map<String, Map<String, String>> listTagsByInstanceId(String clusterName, List<String> instanceIds) {
         return amazonEC2Util.listTagsByInstanceId(instanceIds);
     }
 
     @Override
-    public void deleteInstances(List<String> instanceIds) {
+    public void deleteInstances(String clusterName, List<String> instanceIds) {
         amazonEC2Util.deleteHostGroupInstances(instanceIds);
     }
 
     @Override
-    public void stopInstances(List<String> instanceIds) {
+    public void stopInstances(String clusterName, List<String> instanceIds) {
         amazonEC2Util.stopHostGroupInstances(instanceIds);
     }
 

@@ -192,7 +192,7 @@ public class SdxCustomTestDto extends AbstractSdxTestDto<SdxCustomClusterRequest
         return getTestContext().awaitForFlow(this, runningParameter);
     }
 
-    public SdxCustomTestDto awaitForInstance(Map<String, InstanceStatus> statuses) {
+    public SdxCustomTestDto awaitForInstance(Map<List<String>, InstanceStatus> statuses) {
         return awaitForInstance(statuses, emptyRunningParameter());
     }
 
@@ -200,15 +200,15 @@ public class SdxCustomTestDto extends AbstractSdxTestDto<SdxCustomClusterRequest
         return getTestContext().await(entity, statuses, runningParameter);
     }
 
-    public SdxCustomTestDto awaitForInstance(Map<String, InstanceStatus> statuses, RunningParameter runningParameter) {
+    public SdxCustomTestDto awaitForInstance(Map<List<String>, InstanceStatus> statuses, RunningParameter runningParameter) {
         return getTestContext().awaitForInstance(this, statuses, runningParameter);
     }
 
-    public SdxCustomTestDto awaitForInstance(Map<String, InstanceStatus> statuses, RunningParameter runningParameter, Duration pollingInterval) {
+    public SdxCustomTestDto awaitForInstance(Map<List<String>, InstanceStatus> statuses, RunningParameter runningParameter, Duration pollingInterval) {
         return getTestContext().awaitForInstance(this, statuses, runningParameter, pollingInterval);
     }
 
-    public SdxCustomTestDto awaitForInstance(Map<String, InstanceStatus> statuses, Duration pollingInterval) {
+    public SdxCustomTestDto awaitForInstance(Map<List<String>, InstanceStatus> statuses, Duration pollingInterval) {
         return awaitForInstance(statuses, emptyRunningParameter(), pollingInterval);
     }
 

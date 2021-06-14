@@ -16,7 +16,6 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.DistroXUpgradeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxUpgradeTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
-import com.sequenceiq.it.cloudbreak.util.InstanceUtil;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxUpgradeReplaceVms;
@@ -56,14 +55,14 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
                 .withRuntimeVersion(currentRuntimeVersion)
                 .when(sdxTestClient.create(), key(sdxName))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdxName))
-                .awaitForInstance(getSdxInstancesHealthyState())
+                .awaitForHealthyInstances()
                 .validate();
         testContext
                 .given(distroXName, DistroXTestDto.class)
                 .withTemplate(String.format(commonClusterManagerProperties.getInternalDistroXBlueprintType(), currentRuntimeVersion))
                 .when(distroXTestClient.create(), key(distroXName))
                 .await(STACK_AVAILABLE)
-                .awaitForInstance(InstanceUtil.getHealthyDistroXInstances())
+                .awaitForHealthyInstances()
                 .validate();
         testContext
                 .given(distroXName, DistroXTestDto.class)
@@ -78,7 +77,7 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
                 .when(sdxTestClient.upgrade(), key(sdxName))
                 .await(SdxClusterStatusResponse.DATALAKE_UPGRADE_IN_PROGRESS, key(sdxName).withWaitForFlow(Boolean.FALSE))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdxName))
-                .awaitForInstance(getSdxInstancesHealthyState())
+                .awaitForHealthyInstances()
                 .validate();
         testContext
                 .given(distroXName, DistroXTestDto.class)
@@ -91,7 +90,7 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
                 .given(distroXName, DistroXTestDto.class)
                 .when(distroXTestClient.upgrade(), key(distroXName))
                 .await(STACK_AVAILABLE, key(distroXName))
-                .awaitForInstance(InstanceUtil.getHealthyDistroXInstances())
+                .awaitForHealthyInstances()
                 .validate();
     }
 }

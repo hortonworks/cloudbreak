@@ -22,23 +22,23 @@ public class AzureCloudFunctionality implements CloudFunctionality {
     private AzureCloudBlobUtil azureCloudBlobUtil;
 
     @Override
-    public List<String> listInstanceVolumeIds(List<String> instanceIds) {
-        return azureClientActions.listInstanceVolumeIds(instanceIds);
+    public List<String> listInstanceVolumeIds(String clusterName, List<String> instanceIds) {
+        return azureClientActions.listInstanceVolumeIds(clusterName, instanceIds);
     }
 
     @Override
-    public Map<String, Map<String, String>> listTagsByInstanceId(List<String> instanceIds) {
-        return azureClientActions.listTagsByInstanceId(instanceIds);
+    public Map<String, Map<String, String>> listTagsByInstanceId(String clusterName, List<String> instanceIds) {
+        return azureClientActions.listTagsByInstanceId(clusterName, instanceIds);
     }
 
     @Override
-    public void deleteInstances(List<String> instanceIds) {
-        azureClientActions.deleteInstances(instanceIds);
+    public void deleteInstances(String clusterName, List<String> instanceIds) {
+        azureClientActions.deleteInstances(clusterName, instanceIds);
     }
 
     @Override
-    public void stopInstances(List<String> instanceIds) {
-        azureClientActions.stopInstances(instanceIds);
+    public void stopInstances(String clusterName, List<String> instanceIds) {
+        azureClientActions.stopInstances(clusterName, instanceIds);
     }
 
     @Override

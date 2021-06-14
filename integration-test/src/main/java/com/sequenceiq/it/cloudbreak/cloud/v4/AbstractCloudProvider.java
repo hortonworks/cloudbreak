@@ -204,7 +204,9 @@ public abstract class AbstractCloudProvider implements CloudProvider {
 
     @Override
     public final SdxRepairTestDto sdxRepair(SdxRepairTestDto sdxRepair) {
-        sdxRepair.withHostGroupNames(List.of(HostGroupType.MASTER.getName(), HostGroupType.IDBROKER.getName()));
+        if (sdxRepair.getRequest().getHostGroupNames() == null || sdxRepair.getRequest().getHostGroupNames().isEmpty()) {
+            sdxRepair.withHostGroupNames(List.of(HostGroupType.MASTER.getName(), HostGroupType.IDBROKER.getName()));
+        }
         return sdxRepair;
     }
 

@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak.util.wait.service.instance;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -20,7 +21,7 @@ public class InstanceAwait {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InstanceAwait.class);
 
-    public <E extends Enum<E>> CloudbreakTestDto await(CloudbreakTestDto entity, Map<String, E> desiredStatuses, TestContext testContext,
+    public CloudbreakTestDto await(CloudbreakTestDto entity, Map<List<String>, InstanceStatus> desiredStatuses, TestContext testContext,
             RunningParameter runningParameter, Duration pollingInterval, int maxRetry) {
         try {
             if (entity == null) {
@@ -30,8 +31,8 @@ public class InstanceAwait {
             Log.await(LOGGER, String.format("%s for %s", name, desiredStatuses));
             MicroserviceClient client = testContext.getMicroserviceClient(entity.getClass(), testContext.setActingUser(runningParameter).getAccessKey());
 
-            desiredStatuses.forEach((hostGroup, instanceStatus) -> {
-                InstanceWaitObject waitObject = new InstanceWaitObject(testContext, name, hostGroup, (InstanceStatus) instanceStatus);
+            desiredStatuses.forEach((instanceIds, instanceStatus) -> {
+                InstanceWaitObject waitObject = new InstanceWaitObject(testContext, name, instanceIds, instanceStatus);
 
                 if (waitObject.isDeletionCheck()) {
                     client.<InstanceWaitObject>waiterService().waitObject(new InstanceTerminationChecker<>(), waitObject, testContext, pollingInterval,

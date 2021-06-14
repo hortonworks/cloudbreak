@@ -19,13 +19,19 @@ public class SdxRepairAction implements Action<SdxTestDto, SdxClient> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxRepairAction.class);
 
+    private final String[] hostGroups;
+
+    public SdxRepairAction(String[] hostGroups) {
+        this.hostGroups = hostGroups;
+    }
+
     @Override
     public SdxTestDto action(TestContext testContext, SdxTestDto testDto, SdxClient client) throws Exception {
         Log.when(LOGGER, format(" Starting repair on SDX: %s ", testDto.getName()));
-        Log.whenJson(LOGGER, " SDX repair request: ", testDto.getSdxRepairRequest());
+        Log.whenJson(LOGGER, " SDX repair request: ", testDto.getSdxRepairRequest(hostGroups));
         FlowIdentifier flowIdentifier = client.getDefaultClient()
                 .sdxEndpoint()
-                .repairCluster(testDto.getName(), testDto.getSdxRepairRequest());
+                .repairCluster(testDto.getName(), testDto.getSdxRepairRequest(hostGroups));
         testDto.setFlow("SDX repair", flowIdentifier);
         SdxClusterDetailResponse detailedResponse = client.getDefaultClient()
                 .sdxEndpoint()

@@ -31,7 +31,7 @@ public class BootstrapNewNodesHandler implements EventHandler<BootstrapNewNodesR
         BootstrapNewNodesRequest request = event.getData();
         BootstrapNewNodesResult result;
         try {
-            clusterBootstrapper.bootstrapNewNodes(request.getResourceId(), request.getUpscaleCandidateAddresses(), request.getHostNames());
+            clusterBootstrapper.bootstrapNewNodes(request.getResourceId(), request.getUpscaleCandidateAddresses());
             result = new BootstrapNewNodesResult(request);
         } catch (Exception e) {
             result = new BootstrapNewNodesResult(e.getMessage(), e, request);

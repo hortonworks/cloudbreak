@@ -7,6 +7,7 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.DELETED;
 
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -23,6 +24,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.customdomain.CustomDomainSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.MicroserviceClient;
@@ -310,23 +312,37 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
         return getTestContext().awaitForFlow(this, runningParameter);
     }
 
-    public SdxInternalTestDto awaitForInstance(Map<String, InstanceStatus> statuses) {
+    public SdxInternalTestDto awaitForHealthyInstances() {
+        Map<List<String>, InstanceStatus> instanceStatusMap = getResponse().getStackV4Response().getInstanceGroups().stream()
+                .collect(Collectors.toMap(
+                        instanceGroupV4Response -> instanceGroupV4Response.getMetadata().stream()
+                                .map(InstanceMetaDataV4Response::getInstanceId).collect(Collectors.toList()),
+                        instanceMetaDataV4Response -> InstanceStatus.SERVICES_HEALTHY));
+        return awaitForInstance(instanceStatusMap);
+    }
+
+    public SdxInternalTestDto awaitForStoppedInstances() {
+        Map<List<String>, InstanceStatus> instanceStatusMap = getResponse().getStackV4Response().getInstanceGroups().stream()
+                .collect(Collectors.toMap(
+                        instanceGroupV4Response -> instanceGroupV4Response.getMetadata().stream()
+                                .map(InstanceMetaDataV4Response::getInstanceId).collect(Collectors.toList()),
+                        instanceMetaDataV4Response -> InstanceStatus.STOPPED));
+        return awaitForInstance(instanceStatusMap);
+    }
+
+    public SdxInternalTestDto awaitForInstance(Map<List<String>, InstanceStatus> statuses) {
         return awaitForInstance(statuses, emptyRunningParameter());
     }
 
-    public SdxInternalTestDto awaitForInstance(SdxInternalTestDto entity, Map<String, InstanceStatus> statuses, RunningParameter runningParameter) {
-        return getTestContext().await(entity, statuses, runningParameter);
-    }
-
-    public SdxInternalTestDto awaitForInstance(Map<String, InstanceStatus> statuses, RunningParameter runningParameter) {
+    public SdxInternalTestDto awaitForInstance(Map<List<String>, InstanceStatus> statuses, RunningParameter runningParameter) {
         return getTestContext().awaitForInstance(this, statuses, runningParameter);
     }
 
-    public SdxInternalTestDto awaitForInstance(Map<String, InstanceStatus> statuses, RunningParameter runningParameter, Duration pollingInterval) {
+    public SdxInternalTestDto awaitForInstance(Map<List<String>, InstanceStatus> statuses, RunningParameter runningParameter, Duration pollingInterval) {
         return getTestContext().awaitForInstance(this, statuses, runningParameter, pollingInterval);
     }
 
-    public SdxInternalTestDto awaitForInstance(Map<String, InstanceStatus> statuses, Duration pollingInterval) {
+    public SdxInternalTestDto awaitForInstance(Map<List<String>, InstanceStatus> statuses, Duration pollingInterval) {
         return awaitForInstance(statuses, emptyRunningParameter(), pollingInterval);
     }
 
@@ -430,8 +446,8 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
         }
     }
 
-    public SdxRepairRequest getSdxRepairRequest() {
-        SdxRepairTestDto repair = getCloudProvider().sdxRepair(given(SdxRepairTestDto.class));
+    public SdxRepairRequest getSdxRepairRequest(String... hostGroups) {
+        SdxRepairTestDto repair = getCloudProvider().sdxRepair(given(SdxRepairTestDto.class).withHostGroupNames(Arrays.asList(hostGroups)));
         if (repair == null) {
             throw new IllegalArgumentException("SDX Repair does not exist!");
         }

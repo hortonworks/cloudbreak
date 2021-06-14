@@ -5,6 +5,7 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.DELETED;
 
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -19,6 +20,8 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.responses.AuditEventV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.MicroserviceClient;
@@ -141,6 +144,10 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
         return getTestContext().await(this, Map.of("status", status), runningParameter);
     }
 
+    public SdxTestDto await(SdxClusterStatusResponse status, RunningParameter runningParameter, Duration pollingInterval) {
+        return getTestContext().await(this, Map.of("status", status), runningParameter, pollingInterval);
+    }
+
     public SdxTestDto awaitForFlow() {
         return awaitForFlow(emptyRunningParameter());
     }
@@ -150,23 +157,55 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
         return getTestContext().awaitForFlow(this, runningParameter);
     }
 
-    public SdxTestDto awaitForInstance(Map<String, InstanceStatus> statuses) {
+    public SdxTestDto awaitForHealthyInstances() {
+        Map<List<String>, InstanceStatus> instanceStatusMap = getResponse().getStackV4Response().getInstanceGroups().stream()
+                .collect(Collectors.toMap(
+                        instanceGroupV4Response -> instanceGroupV4Response.getMetadata().stream()
+                                .map(InstanceMetaDataV4Response::getInstanceId).collect(Collectors.toList()),
+                        instanceMetaDataV4Response -> InstanceStatus.SERVICES_HEALTHY));
+        return awaitForInstance(instanceStatusMap);
+    }
+
+    public SdxTestDto awaitForDeletedInstancesOnProvider() {
+        Map<List<String>, InstanceStatus> instanceStatusMap = getResponse().getStackV4Response().getInstanceGroups().stream()
+                .collect(Collectors.toMap(
+                        instanceGroupV4Response -> instanceGroupV4Response.getMetadata().stream()
+                                .map(InstanceMetaDataV4Response::getInstanceId).collect(Collectors.toList()),
+                        instanceMetaDataV4Response -> InstanceStatus.DELETED_ON_PROVIDER_SIDE));
+        return awaitForInstance(instanceStatusMap);
+    }
+
+    public SdxTestDto awaitForHostGroups(List<String> hostGroups, InstanceStatus instanceStatus) {
+        List<InstanceGroupV4Response> instanceGroups = getResponse().getStackV4Response().getInstanceGroups().stream()
+                .filter(instanceGroupV4Response -> hostGroups.contains(instanceGroupV4Response.getName()))
+                .collect(Collectors.toList());
+        if (hostGroups.size() == instanceGroups.size()) {
+            List<String> instanceIds =
+                    instanceGroups.stream().flatMap(instanceGroupV4Response -> instanceGroupV4Response.getMetadata().stream())
+                            .map(InstanceMetaDataV4Response::getInstanceId).collect(Collectors.toList());
+            return awaitForInstance(Map.of(instanceIds, instanceStatus));
+        } else {
+            throw new IllegalStateException("Can't find instance groups with this name: " + hostGroups);
+        }
+    }
+
+    public SdxTestDto awaitForInstance(Map<List<String>, InstanceStatus> statuses) {
         return awaitForInstance(statuses, emptyRunningParameter());
     }
 
-    public SdxTestDto awaitForInstance(SdxTestDto entity, Map<String, InstanceStatus> statuses, RunningParameter runningParameter) {
+    public SdxTestDto awaitForInstance(SdxTestDto entity, Map<List<String>, InstanceStatus> statuses, RunningParameter runningParameter) {
         return getTestContext().awaitForInstance(entity, statuses, runningParameter);
     }
 
-    public SdxTestDto awaitForInstance(Map<String, InstanceStatus> statuses, RunningParameter runningParameter) {
+    public SdxTestDto awaitForInstance(Map<List<String>, InstanceStatus> statuses, RunningParameter runningParameter) {
         return getTestContext().awaitForInstance(this, statuses, runningParameter);
     }
 
-    public SdxTestDto awaitForInstance(Map<String, InstanceStatus> statuses, RunningParameter runningParameter, Duration pollingInterval) {
+    public SdxTestDto awaitForInstance(Map<List<String>, InstanceStatus> statuses, RunningParameter runningParameter, Duration pollingInterval) {
         return getTestContext().awaitForInstance(this, statuses, runningParameter, pollingInterval);
     }
 
-    public SdxTestDto awaitForInstance(Map<String, InstanceStatus> statuses, Duration pollingInterval) {
+    public SdxTestDto awaitForInstance(Map<List<String>, InstanceStatus> statuses, Duration pollingInterval) {
         return awaitForInstance(statuses, emptyRunningParameter(), pollingInterval);
     }
 
@@ -268,8 +307,8 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
         return getResponse().getCrn();
     }
 
-    public SdxRepairRequest getSdxRepairRequest() {
-        SdxRepairTestDto repair = getCloudProvider().sdxRepair(given(SdxRepairTestDto.class));
+    public SdxRepairRequest getSdxRepairRequest(String... hostgroups) {
+        SdxRepairTestDto repair = getCloudProvider().sdxRepair(given(SdxRepairTestDto.class).withHostGroupNames(Arrays.asList(hostgroups)));
         if (repair == null) {
             throw new IllegalArgumentException("SDX Repair does not exist!");
         }

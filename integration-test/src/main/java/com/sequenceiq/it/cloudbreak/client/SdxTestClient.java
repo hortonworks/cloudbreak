@@ -111,8 +111,8 @@ public class SdxTestClient {
         return new SdxRefreshCustomAction();
     }
 
-    public Action<SdxTestDto, SdxClient> repair() {
-        return new SdxRepairAction();
+    public Action<SdxTestDto, SdxClient> repair(String... hostGroups) {
+        return new SdxRepairAction(hostGroups);
     }
 
     public Action<SdxTestDto, SdxClient> checkForUpgrade() {
@@ -127,8 +127,8 @@ public class SdxTestClient {
         return new SdxAutotlsCertRotationAction();
     }
 
-    public Action<SdxInternalTestDto, SdxClient> repairInternal() {
-        return new SdxRepairInternalAction();
+    public Action<SdxInternalTestDto, SdxClient> repairInternal(String... hostGroups) {
+        return new SdxRepairInternalAction(hostGroups);
     }
 
     public Action<SdxInternalTestDto, SdxClient> syncInternal() {

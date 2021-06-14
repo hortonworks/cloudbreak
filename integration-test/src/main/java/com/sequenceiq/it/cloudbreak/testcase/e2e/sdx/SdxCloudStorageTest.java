@@ -53,7 +53,7 @@ public class SdxCloudStorageTest extends PreconditionSdxE2ETest {
                 .withExternalDatabase(sdxDatabaseRequest)
                 .when(sdxTestClient.create(), key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING)
-                .awaitForInstance(getSdxInstancesHealthyState())
+                .awaitForHealthyInstances()
                 .then((tc, testDto, client) -> {
                     getCloudFunctionality(tc).cloudStorageListContainerDataLake(getBaseLocation(testDto),
                             testDto.getResponse().getName(), testDto.getResponse().getStackCrn());

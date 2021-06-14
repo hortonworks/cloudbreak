@@ -2,16 +2,13 @@ package com.sequenceiq.it.cloudbreak.testcase.e2e.distrox;
 
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.WORKER;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -20,10 +17,6 @@ import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.DistroxUtil;
 
 public class DistroXScaleEdgeCasesTest extends AbstractE2ETest {
-
-    private static final Map<String, InstanceStatus> DELETED_INSTANCE_STATUSES = new HashMap<>() {{
-        put(WORKER.getName(), InstanceStatus.DELETED_ON_PROVIDER_SIDE);
-    }};
 
     @Inject
     private DistroXTestClient distroXTestClient;
@@ -53,11 +46,11 @@ public class DistroXScaleEdgeCasesTest extends AbstractE2ETest {
                 .then((tc, testDto, client) -> {
                     List<String> instancesToDelete = distroxUtil.getInstanceIds(testDto, client, WORKER.getName()).stream()
                             .limit(1).collect(Collectors.toList());
-                    testContext.getCloudProvider().getCloudFunctionality().deleteInstances(instancesToDelete);
+                    testContext.getCloudProvider().getCloudFunctionality().deleteInstances(testDto.getName(), instancesToDelete);
                     testDto.setRemovableInstanceId(instancesToDelete.iterator().next());
                     return testDto;
                 })
-                .awaitForInstance(DELETED_INSTANCE_STATUSES)
+                .awaitForRemovableInstance()
                 .when(distroXTestClient.removeInstance())
                 .await(STACK_AVAILABLE)
                 .validate();
