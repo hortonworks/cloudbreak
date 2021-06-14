@@ -63,7 +63,8 @@ public class ClusterUpgradeActions {
                     variables.put(CURRENT_IMAGE, images.getCurrentStatedImage());
                     variables.put(TARGET_IMAGE, images.getTargetStatedImage());
                     clusterUpgradeService.initUpgradeCluster(context.getStackId(), getTargetImage(variables));
-                    Selectable event = new ClusterUpgradeInitRequest(context.getStackId());
+                    Selectable event = new ClusterUpgradeInitRequest(context.getStackId(), isPatchUpgrade(images.getCurrentStatedImage().getImage(),
+                                    images.getTargetStatedImage().getImage()));
                     sendEvent(context, event.selector(), event);
                 } catch (Exception e) {
                     LOGGER.error("Error during updating cluster components with image id: [{}]", payload.getImageId(), e);
@@ -137,13 +138,6 @@ public class ClusterUpgradeActions {
                 sendEvent(context, event.selector(), event);
             }
 
-            private boolean isPatchUpgrade(Image currentImage, Image targetImage) {
-                StackDetails currentImageStackDetails = currentImage.getStackDetails();
-                StackDetails targetImageStackDetails = targetImage.getStackDetails();
-                return currentImageStackDetails != null && targetImageStackDetails != null
-                        && currentImageStackDetails.getVersion().equals(targetImageStackDetails.getVersion());
-            }
-
             @Override
             protected Object getFailurePayload(ClusterManagerUpgradeSuccess payload, Optional<ClusterUpgradeContext> flowContext, Exception ex) {
                 return ClusterUpgradeFailedEvent.from(payload, ex, DetailedStackStatus.CLUSTER_UPGRADE_FAILED);
@@ -208,4 +202,10 @@ public class ClusterUpgradeActions {
         };
     }
 
+    private boolean isPatchUpgrade(Image currentImage, Image targetImage) {
+        StackDetails currentImageStackDetails = currentImage.getStackDetails();
+        StackDetails targetImageStackDetails = targetImage.getStackDetails();
+        return currentImageStackDetails != null && targetImageStackDetails != null
+                && currentImageStackDetails.getVersion().equals(targetImageStackDetails.getVersion());
+    }
 }

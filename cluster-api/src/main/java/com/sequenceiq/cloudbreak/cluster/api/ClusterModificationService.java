@@ -33,6 +33,8 @@ public interface ClusterModificationService {
 
     void updateServiceConfigAndRestartService(String serviceName, String configName, String newConfigValue) throws Exception;
 
+    void downloadAndDistributeParcels(Set<ClusterComponent> components, boolean patchUpgrade) throws CloudbreakException;
+
     default void removeUnusedParcels(Set<ClusterComponent> usedParcelComponents) throws CloudbreakException {
         throw new UnsupportedOperationException("Interface not implemented.");
     }

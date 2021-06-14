@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade;
 
+import java.util.Set;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -9,9 +11,14 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.cluster.ClusterManagerUpgradeService;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgradeFailedEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgradeInitRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgradeInitSuccess;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
+import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -24,6 +31,15 @@ public class ClusterUpgradeInitHandler extends ExceptionCatcherEventHandler<Clus
 
     @Inject
     private ClusterManagerUpgradeService clusterManagerUpgradeService;
+
+    @Inject
+    private ClusterApiConnectors clusterApiConnectors;
+
+    @Inject
+    private StackService stackService;
+
+    @Inject
+    private ParcelService parcelService;
 
     @Override
     public String selector() {
@@ -38,10 +54,13 @@ public class ClusterUpgradeInitHandler extends ExceptionCatcherEventHandler<Clus
     @Override
     protected Selectable doAccept(HandlerEvent<ClusterUpgradeInitRequest> event) {
         LOGGER.debug("Accepting Cluster Manager parcel deactivation event..");
+        Stack stack = stackService.getByIdWithClusterInTransaction(event.getData().getResourceId());
         ClusterUpgradeInitRequest request = event.getData();
         Selectable result;
         try {
             clusterManagerUpgradeService.removeUnusedComponents(request.getResourceId());
+            Set<ClusterComponent> components = parcelService.getParcelComponentsByBlueprint(stack);
+            clusterApiConnectors.getConnector(stack).downloadAndDistributeParcels(components, request.isPatchUpgrade());
             result = new ClusterUpgradeInitSuccess(request.getResourceId());
         } catch (Exception e) {
             LOGGER.info("Cluster Manager parcel deactivaton failed", e);
