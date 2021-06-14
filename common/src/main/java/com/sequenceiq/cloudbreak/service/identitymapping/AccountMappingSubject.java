@@ -12,7 +12,7 @@ public class AccountMappingSubject {
      * Adapted from {@code com.cloudera.thunderhead.service.idbrokermappingmanagement.server.IdBrokerMappingManagementService.DATA_ACCESS_SERVICES}.
      */
     public static final Set<String> DATA_ACCESS_USERS = Set.of("hbase", "hdfs", "hive", "impala", "yarn", "dpprofiler", "zeppelin", "kudu", "hue",
-            "schemaregistry", "mapred");
+            "schemaregistry", "mapred", "flink");
 
     /**
      * Immutable set of service users that are not data access ones but do need Ranger Audit access. Always disjoint from {@link #DATA_ACCESS_USERS}, and
