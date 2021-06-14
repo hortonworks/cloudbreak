@@ -1,7 +1,6 @@
 package com.sequenceiq.it.cloudbreak.testcase;
 
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -11,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.testng.ITestResult;
 import org.testng.annotations.BeforeMethod;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
+import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkMockParams;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNetworkRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
@@ -40,7 +39,6 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.mock.ImageCatalogMockServerSetup;
-import com.sequenceiq.it.cloudbreak.util.InstanceUtil;
 import com.sequenceiq.it.cloudbreak.util.azure.azurecloudblob.AzureCloudBlobUtil;
 import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
@@ -48,8 +46,6 @@ import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractIntegrationTest.class);
-
-    private final Map<String, InstanceStatus> instancesHealthy = InstanceUtil.getHealthySDXInstances();
 
     @Inject
     private CredentialTestClient credentialTestClient;
@@ -103,10 +99,6 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
 
     public EnvironmentTestClient getEnvironmentTestClient() {
         return environmentTestClient;
-    }
-
-    protected Map<String, InstanceStatus> getSdxInstancesHealthyState() {
-        return instancesHealthy;
     }
 
     protected void createImageValidationSourceCatalog(TestContext testContext, String url, String name) {
@@ -166,7 +158,7 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
                     .withCloudStorage(getCloudStorageRequest(testContext))
                 .when(sdxTestClient.createInternal())
                 .await(SdxClusterStatusResponse.RUNNING)
-                .awaitForInstance(getSdxInstancesHealthyState())
+                .awaitForHealthyInstances()
                 .when(sdxTestClient.describeInternal())
                 .validate();
     }
@@ -223,6 +215,7 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
                 .given(EnvironmentTestDto.class)
                 .withNetwork()
                 .withTelemetry("telemetry")
+                .withTunnel(Tunnel.CLUSTER_PROXY)
                 .withCreateFreeIpa(Boolean.TRUE)
                 .withFreeIpaImage(commonCloudProperties().getImageValidation().getFreeIpaImageCatalog(),
                         commonCloudProperties().getImageValidation().getFreeIpaImageUuid())

@@ -21,6 +21,7 @@ import org.testng.util.Strings;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
+import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.base.CloudStorageValidation;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
@@ -159,6 +160,11 @@ public class EnvironmentTestDto
 
     public EnvironmentTestDto withCloudStorageValidation(CloudStorageValidation cloudStorageValidation) {
         getRequest().setCloudStorageValidation(cloudStorageValidation);
+        return this;
+    }
+
+    public EnvironmentTestDto withTunnel(Tunnel tunnel) {
+        getRequest().setTunnel(tunnel);
         return this;
     }
 

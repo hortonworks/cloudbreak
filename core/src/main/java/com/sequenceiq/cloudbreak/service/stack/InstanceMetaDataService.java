@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -55,7 +56,8 @@ public class InstanceMetaDataService {
         }
     }
 
-    public Stack saveInstanceAndGetUpdatedStack(Stack stack, List<CloudInstance> cloudInstances, boolean save) {
+    public Stack saveInstanceAndGetUpdatedStack(Stack stack, List<CloudInstance> cloudInstances, boolean save, Set<String> hostNames) {
+        Iterator<String> hostNameIterator = hostNames.iterator();
         for (CloudInstance cloudInstance : cloudInstances) {
             InstanceGroup instanceGroup = getInstanceGroup(stack.getInstanceGroups(), cloudInstance.getTemplate().getGroupName());
             if (instanceGroup != null) {
@@ -63,6 +65,11 @@ public class InstanceMetaDataService {
                 instanceMetaData.setPrivateId(cloudInstance.getTemplate().getPrivateId());
                 instanceMetaData.setInstanceStatus(com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.REQUESTED);
                 instanceMetaData.setInstanceGroup(instanceGroup);
+                if (hostNameIterator.hasNext()) {
+                    String hostName = hostNameIterator.next();
+                    LOGGER.info("We have hostname to be allocated: {}, set it to this instanceMetadata: {}", hostName, instanceMetaData);
+                    instanceMetaData.setDiscoveryFQDN(hostName);
+                }
                 if (save) {
                     repository.save(instanceMetaData);
                 }

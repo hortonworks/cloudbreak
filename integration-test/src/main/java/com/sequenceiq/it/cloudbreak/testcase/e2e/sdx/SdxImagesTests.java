@@ -56,7 +56,7 @@ public class SdxImagesTests extends PreconditionSdxE2ETest {
                 .withExternalDatabase(sdxDatabaseRequest)
                 .when(sdxTestClient.create(), key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING)
-                .awaitForInstance(getSdxInstancesHealthyState())
+                .awaitForHealthyInstances()
                 .validate();
     }
 
@@ -101,7 +101,7 @@ public class SdxImagesTests extends PreconditionSdxE2ETest {
                 .withStackRequest(key(cluster), key(stack))
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING)
-                .awaitForInstance(getSdxInstancesHealthyState())
+                .awaitForHealthyInstances()
                 .then((tc, dto, client) -> {
                     Log.log(LOGGER, format(" Image Catalog Name: %s ", dto.getResponse().getStackV4Response().getImage().getCatalogName()));
                     Log.log(LOGGER, format(" Image Catalog URL: %s ", dto.getResponse().getStackV4Response().getImage().getCatalogUrl()));

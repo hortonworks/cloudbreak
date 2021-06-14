@@ -7,6 +7,7 @@ import static java.util.Collections.singletonList;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -29,6 +30,7 @@ import com.sequenceiq.cloudbreak.clusterproxy.ConfigRegistrationRequest;
 import com.sequenceiq.cloudbreak.clusterproxy.ConfigRegistrationRequestBuilder;
 import com.sequenceiq.cloudbreak.clusterproxy.ConfigRegistrationResponse;
 import com.sequenceiq.cloudbreak.clusterproxy.ConfigUpdateRequest;
+import com.sequenceiq.cloudbreak.clusterproxy.ReadConfigResponse;
 import com.sequenceiq.cloudbreak.clusterproxy.TunnelEntry;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
@@ -135,10 +137,27 @@ public class ClusterProxyService {
     }
 
     private List<ClusterServiceConfig> serviceConfigs(Stack stack) {
-        String internalAdminUrl = internalAdminUrl(stack, ServiceFamilies.GATEWAY.getDefaultPort());
-        return asList(
-                cmServiceConfig(stack, null, "cloudera-manager", clusterManagerUrl(stack)),
-                cmServiceConfig(stack, clientCertificates(stack), CB_INTERNAL, internalAdminUrl));
+        String primaryGWInternalAdminUrl = internalAdminUrl(stack, ServiceFamilies.GATEWAY.getDefaultPort());
+        LOGGER.info("Primary GW internal admin URL is: {}", primaryGWInternalAdminUrl);
+        List<ClusterServiceConfig> clusterServiceConfigs = getClusterServiceConfigsForGWs(stack);
+        clusterServiceConfigs.add(cmServiceConfig(stack, null, "cloudera-manager", clusterManagerUrl(stack)));
+        clusterServiceConfigs.add(cmServiceConfig(stack, clientCertificates(stack), CB_INTERNAL, primaryGWInternalAdminUrl));
+        LOGGER.info("Service configs: {}", clusterServiceConfigs);
+        return clusterServiceConfigs;
+    }
+
+    private List<ClusterServiceConfig> getClusterServiceConfigsForGWs(Stack stack) {
+        List<InstanceMetaData> gatewayInstanceMetadatas = stack.getGatewayInstanceMetadata();
+        return gatewayInstanceMetadatas.stream()
+                .map(gatewayInstanceMetadata -> createClusterServiceConfigFromGWMetadata(stack, gatewayInstanceMetadata))
+                .collect(Collectors.toList());
+    }
+
+    private ClusterServiceConfig createClusterServiceConfigFromGWMetadata(Stack stack, InstanceMetaData gatewayInstanceMetadata) {
+        String gatewayIp = gatewayInstanceMetadata.getPublicIpWrapper();
+        String internalAdminUrl = String.format("https://%s:%d", gatewayIp, ServiceFamilies.GATEWAY.getDefaultPort());
+        return cmServiceConfig(stack, clientCertificates(stack),
+                CB_INTERNAL + "-" + gatewayInstanceMetadata.getInstanceId(), internalAdminUrl);
     }
 
     private List<ClusterServiceConfig> serviceConfigsForCcmV2(Stack stack) {
@@ -225,8 +244,23 @@ public class ClusterProxyService {
         return String.format("https://%s:%d", gatewayIp, port);
     }
 
-    public String getProxyPath(String crn) {
-        return String.format("%s/proxy/%s/%s", clusterProxyConfiguration.getClusterProxyBasePath(), crn, CB_INTERNAL);
+    public String getProxyPath(String crn, String internalIdentity) {
+        String endpointWithIdentity = CB_INTERNAL + "-" + internalIdentity;
+        LOGGER.info("Get proxy path for crn: {} and internal identity: {}", crn, internalIdentity);
+        if (isServiceEndpointWithIdentityIsRegistered(crn, endpointWithIdentity)) {
+            LOGGER.debug("Internal endpoint with identity is registered");
+            return String.format("%s/proxy/%s/%s", clusterProxyConfiguration.getClusterProxyBasePath(), crn, endpointWithIdentity);
+        } else {
+            LOGGER.debug("Internal endpoint with identity is NOT registered");
+            return String.format("%s/proxy/%s/%s", clusterProxyConfiguration.getClusterProxyBasePath(), crn, CB_INTERNAL);
+        }
+    }
+
+    private boolean isServiceEndpointWithIdentityIsRegistered(String crn, String endpointWithIdentity) {
+        ReadConfigResponse readConfigResponse = clusterProxyRegistrationClient.readConfig(crn);
+        LOGGER.debug("Check if internal endpoint with identity is registered");
+        return readConfigResponse.getServices().stream()
+                .anyMatch(readConfigService -> endpointWithIdentity.equals(readConfigService.getName()));
     }
 
     private String vaultPath(String vaultSecretJsonString, boolean base64) {

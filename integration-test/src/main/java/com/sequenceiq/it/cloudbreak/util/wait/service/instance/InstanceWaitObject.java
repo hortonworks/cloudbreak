@@ -4,15 +4,15 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStat
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.DECOMMISSION_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.DELETED_BY_PROVIDER;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.DELETED_ON_PROVIDER_SIDE;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.DELETE_REQUESTED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.ORCHESTRATION_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.TERMINATED;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.DELETE_REQUESTED;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.NotFoundException;
 
@@ -33,7 +33,7 @@ public class InstanceWaitObject implements WaitObject {
 
     private final String name;
 
-    private final String hostGroup;
+    private final List<String> instanceIds;
 
     private final InstanceStatus desiredStatus;
 
@@ -41,10 +41,10 @@ public class InstanceWaitObject implements WaitObject {
 
     private List<InstanceGroupV4Response> instanceGroups;
 
-    public InstanceWaitObject(TestContext testContext, String name, String hostGroup, InstanceStatus desiredStatus) {
+    public InstanceWaitObject(TestContext testContext, String name, List<String> instanceIds, InstanceStatus desiredStatus) {
         this.testContext = testContext;
         this.name = name;
-        this.hostGroup = hostGroup;
+        this.instanceIds = instanceIds;
         this.desiredStatus = desiredStatus;
     }
 
@@ -63,41 +63,21 @@ public class InstanceWaitObject implements WaitObject {
     }
 
     @Override
-    public boolean isDeleteFailed() {
-        return getInstanceStatus().equals(DECOMMISSION_FAILED);
-    }
-
-    @Override
     public Map<String, String> actualStatuses() {
-        Optional<InstanceGroupV4Response> instanceGroup = getInstanceGroup();
-        if (instanceGroup.isPresent()) {
-            Optional<InstanceMetaDataV4Response> instanceMetaData = instanceGroup
-                    .get().getMetadata().stream().findFirst();
-            if (instanceMetaData.isPresent()) {
-                InstanceMetaDataV4Response instanceMetaDataV4Response = instanceMetaData.get();
-                return Map.of(STATUS, instanceMetaDataV4Response.getInstanceStatus().name());
-            } else {
-                LOGGER.error("'{}' instance metadata is empty, may instance group was deleted. ", hostGroup);
-                return Map.of(STATUS, DELETED_ON_PROVIDER_SIDE.name());
-            }
-        } else {
-            LOGGER.error("'{}' instance group is not present, may this was deleted. ", hostGroup);
-            return Map.of(STATUS, DELETED_ON_PROVIDER_SIDE.name());
-        }
+        return getInstanceMetaDatas().stream()
+                .collect(Collectors.toMap(InstanceMetaDataV4Response::getInstanceId,
+                        instanceMetaDataV4Response -> instanceMetaDataV4Response.getInstanceStatus().name()));
     }
 
     @Override
     public Map<String, String> actualStatusReason() {
-        String statusReason = getInstanceMetadata().getStatusReason();
-        if (statusReason != null) {
-            return Map.of(STATUS_REASON, statusReason);
-        }
-        return Map.of();
+        return getInstanceMetaDatas().stream().collect(Collectors.toMap(InstanceMetaDataV4Response::getInstanceId,
+                InstanceMetaDataV4Response::getStatusReason));
     }
 
     @Override
     public Map<String, String> getDesiredStatuses() {
-        return Map.of(STATUS, desiredStatus.name());
+        return instanceIds.stream().collect(Collectors.toMap(instanceId -> instanceId, instanceId -> desiredStatus.name()));
     }
 
     public String getName() {
@@ -107,23 +87,28 @@ public class InstanceWaitObject implements WaitObject {
     @Override
     public boolean isDeleted() {
         Set<InstanceStatus> deletedStatuses = Set.of(DELETED_ON_PROVIDER_SIDE, DELETED_BY_PROVIDER, DECOMMISSIONED, TERMINATED);
-        return deletedStatuses.contains(getInstanceStatus());
+        return deletedStatuses.containsAll(getInstanceStatuses().values());
+    }
+
+    @Override
+    public boolean isDeleteFailed() {
+        return getInstanceStatuses().values().stream().anyMatch(DECOMMISSION_FAILED::equals);
     }
 
     @Override
     public boolean isFailed() {
         Set<InstanceStatus> failedStatuses = Set.of(FAILED, ORCHESTRATION_FAILED, DECOMMISSION_FAILED);
-        return failedStatuses.contains(getInstanceStatus());
+        return getInstanceStatuses().values().stream().anyMatch(failedStatuses::contains);
     }
 
     @Override
     public boolean isDeletionInProgress() {
-        return getInstanceStatus().equals(DELETE_REQUESTED);
+        return getInstanceStatuses().values().stream().allMatch(DELETE_REQUESTED::equals);
     }
 
     @Override
     public boolean isCreateFailed() {
-        return getInstanceStatus().equals(ORCHESTRATION_FAILED);
+        return getInstanceStatuses().values().stream().anyMatch(ORCHESTRATION_FAILED::equals);
     }
 
     @Override
@@ -138,35 +123,20 @@ public class InstanceWaitObject implements WaitObject {
         return failedStatuses.contains(desiredStatus);
     }
 
-    public String getHostGroup() {
-        return hostGroup;
+    public List<String> getInstanceIds() {
+        return instanceIds;
     }
 
-    public InstanceStatus getInstanceStatus() {
-        return getInstanceMetadata().getInstanceStatus();
+    public Map<String, InstanceStatus> getInstanceStatuses() {
+        return getInstanceMetaDatas().stream()
+                .collect(Collectors.toMap(InstanceMetaDataV4Response::getInstanceId, InstanceMetaDataV4Response::getInstanceStatus));
     }
 
-    public InstanceMetaDataV4Response getInstanceMetadata() {
-        Optional<InstanceGroupV4Response> instanceGroup = getInstanceGroup();
-        if (instanceGroup.isPresent()) {
-            Optional<InstanceMetaDataV4Response> instanceMetaData = instanceGroup
-                    .get().getMetadata().stream().findFirst();
-            if (instanceMetaData.isPresent()) {
-                return instanceMetaData.get();
-            } else {
-                LOGGER.error("'{}' instance group metadata is empty.", hostGroup);
-                throw new TestFailException(String.format("'%s' instance group metadata is empty.", hostGroup));
-            }
-        } else {
-            LOGGER.error("'{}' instance group is not present.", hostGroup);
-            throw new TestFailException(String.format("'%s' instance group is not present.", hostGroup));
-        }
-    }
-
-    public Optional<InstanceGroupV4Response> getInstanceGroup() {
+    public List<InstanceMetaDataV4Response> getInstanceMetaDatas() {
         return instanceGroups
                 .stream()
-                .filter(ig -> ig.getName().equals(hostGroup))
-                .findFirst();
+                .flatMap(instanceGroup -> instanceGroup.getMetadata().stream())
+                .filter(instanceMetadata -> instanceIds.contains(instanceMetadata.getInstanceId()))
+                .collect(Collectors.toList());
     }
 }

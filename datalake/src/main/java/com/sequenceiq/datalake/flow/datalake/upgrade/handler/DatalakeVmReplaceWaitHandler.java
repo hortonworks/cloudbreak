@@ -32,7 +32,7 @@ public class DatalakeVmReplaceWaitHandler extends ExceptionCatcherEventHandler<D
     @Value("${sdx.vm.replace.sleeptime_sec:20}")
     private int sleepTimeInSec;
 
-    @Value("${sdx.vm.replace.duration_min:60}")
+    @Value("${sdx.vm.replace.duration_min:120}")
     private int durationInMinutes;
 
     @Inject

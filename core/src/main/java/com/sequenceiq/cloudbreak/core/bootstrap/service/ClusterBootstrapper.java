@@ -8,7 +8,6 @@ import static org.apache.commons.lang3.StringUtils.isNoneBlank;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -30,10 +29,8 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
-import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
-import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.service.HostDiscoveryService;
@@ -47,7 +44,6 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostClusterAvailabi
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.context.HostBootstrapApiContext;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.context.HostOrchestratorClusterContext;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
-import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
@@ -65,7 +61,6 @@ import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.orchestrator.OrchestratorService;
-import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackInstanceStatusChecker;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -131,12 +126,6 @@ public class ClusterBootstrapper {
 
     @Inject
     private InstanceMetaDataToCloudInstanceConverter cloudInstanceConverter;
-
-    @Inject
-    private ResourceAttributeUtil resourceAttributeUtil;
-
-    @Inject
-    private ResourceService resourceService;
 
     @Inject
     private TransactionService transactionService;
@@ -329,13 +318,14 @@ public class ClusterBootstrapper {
         return nodes;
     }
 
-    public void bootstrapNewNodes(Long stackId, Set<String> upscaleCandidateAddresses, Collection<String> recoveryHostNames) throws CloudbreakException {
+    public void bootstrapNewNodes(Long stackId, Set<String> upscaleCandidateAddresses) throws CloudbreakException {
+        LOGGER.info("Bootstrap new nodes: {}", upscaleCandidateAddresses);
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         Set<Node> nodes = new HashSet<>();
         Set<Node> allNodes = new HashSet<>();
 
         try {
-            transactionService.required(() -> collectNodes(stackId, upscaleCandidateAddresses, recoveryHostNames, stack, nodes, allNodes));
+            transactionService.required(() -> collectNodes(stackId, upscaleCandidateAddresses, stack, nodes, allNodes));
             List<GatewayConfig> allGatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
             cleanupOldSaltState(allGatewayConfigs, nodes);
             bootstrapNewNodesOnHost(stack, allGatewayConfigs, nodes, allNodes);
@@ -348,9 +338,8 @@ public class ClusterBootstrapper {
         }
     }
 
-    private void collectNodes(Long stackId, Set<String> upscaleCandidateAddresses, Collection<String> recoveryHostNames, Stack stack,
+    private void collectNodes(Long stackId, Set<String> upscaleCandidateAddresses, Stack stack,
             Set<Node> nodes, Set<Node> allNodes) {
-        boolean recoveredNodes = Integer.valueOf(recoveryHostNames.size()).equals(upscaleCandidateAddresses.size());
         Set<InstanceMetaData> metaDataSet = instanceMetaDataService.getReachableInstanceMetadataByStackId(stackId)
                 .stream()
                 .filter(im -> im.getPrivateIp() != null && im.getPublicIpWrapper() != null)
@@ -361,17 +350,9 @@ public class ClusterBootstrapper {
         Set<String> clusterNodeNames = stack.getNotTerminatedInstanceMetaDataList().stream()
                 .map(InstanceMetaData::getShortHostname).collect(Collectors.toSet());
 
-        Map<String, Optional<String>> instanceIdToFQDN = createInstanceIdToFQDNMappingFromDiskResources(stack);
         for (InstanceMetaData im : metaDataSet) {
             Node node = createNodeAndInitFqdnInInstanceMetadata(stack, im, clusterDomain, hostGroupNodeIndexes, clusterNodeNames);
             if (upscaleCandidateAddresses.contains(im.getPrivateIp())) {
-                // use the hostname of the node we're recovering instead of generating a new one
-                // but only when we would have generated a hostname, otherwise use the cloud provider's default mechanism
-                Optional<String> fqdnOptional = instanceIdToFQDN.getOrDefault(im.getInstanceId(), Optional.empty());
-                if (recoveredNodes && isNoneBlank(node.getHostname()) && fqdnOptional.isPresent()) {
-                    node.setHostname(fqdnOptional.get().split("\\.")[0]);
-                    LOGGER.debug("Set the hostname to {} for address: {}", node.getHostname(), im.getPrivateIp());
-                }
                 nodes.add(node);
             }
             allNodes.add(node);
@@ -381,21 +362,11 @@ public class ClusterBootstrapper {
 
     private void cleanupOldSaltState(List<GatewayConfig> allGatewayConfigs, Set<Node> nodes) throws CloudbreakOrchestratorFailedException {
         List<GatewayConfig> saltMastersToCorrect = allGatewayConfigs.stream()
-                .filter(gc -> nodes.stream().anyMatch(n -> !gc.getPrivateAddress().equals(n.getPrivateIp())))
+                .filter(gc -> nodes.stream().noneMatch(n -> gc.getPrivateAddress().equals(n.getPrivateIp())))
                 .collect(Collectors.toList());
         for  (GatewayConfig masterToCorrect: saltMastersToCorrect) {
             hostOrchestrator.removeDeadSaltMinions(masterToCorrect);
         }
-    }
-
-    private Map<String, Optional<String>> createInstanceIdToFQDNMappingFromDiskResources(Stack stack) {
-        List<Resource> diskResources = resourceService.findByStackIdAndType(stack.getId(), stack.getDiskResourceType());
-        Map<String, Optional<String>> imIdToFQDN = diskResources.stream()
-                .collect(Collectors.toMap(Resource::getInstanceId, volumeSet -> {
-                    Optional<VolumeSetAttributes> volumeSetAttributes = resourceAttributeUtil.getTypedAttributes(volumeSet, VolumeSetAttributes.class);
-                    return volumeSetAttributes.map(VolumeSetAttributes::getDiscoveryFQDN);
-                }));
-        return imIdToFQDN;
     }
 
     private String getClusterDomain(Set<InstanceMetaData> metaDataSet, String customDomain) {

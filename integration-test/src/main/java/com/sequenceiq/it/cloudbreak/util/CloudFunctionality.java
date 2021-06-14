@@ -20,25 +20,25 @@ public interface CloudFunctionality {
             maxAttempts = ATTEMPTS,
             backoff = @Backoff(delay = DELAY, multiplier = MULTIPLIER, maxDelay = MAX_DELAY)
     )
-    List<String> listInstanceVolumeIds(List<String> instanceIds);
+    List<String> listInstanceVolumeIds(String clusterName, List<String> instanceIds);
 
     @Retryable(
             maxAttempts = ATTEMPTS,
             backoff = @Backoff(delay = DELAY, multiplier = MULTIPLIER, maxDelay = MAX_DELAY)
     )
-    Map<String, Map<String, String>> listTagsByInstanceId(List<String> instanceIds);
+    Map<String, Map<String, String>> listTagsByInstanceId(String clusterName, List<String> instanceIds);
 
     @Retryable(
             maxAttempts = ATTEMPTS,
             backoff = @Backoff(delay = DELAY, multiplier = MULTIPLIER, maxDelay = MAX_DELAY)
     )
-    void deleteInstances(List<String> instanceIds);
+    void deleteInstances(String clusterName, List<String> instanceIds);
 
     @Retryable(
             maxAttempts = ATTEMPTS,
             backoff = @Backoff(delay = DELAY, multiplier = MULTIPLIER, maxDelay = MAX_DELAY)
     )
-    void stopInstances(List<String> instanceIds);
+    void stopInstances(String clusterName, List<String> instanceIds);
 
     @Retryable(
             maxAttempts = ATTEMPTS,

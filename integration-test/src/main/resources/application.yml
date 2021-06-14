@@ -77,6 +77,7 @@ integrationtest:
   cloudProvider: MOCK
   runtimeVersion: 7.2.10
   upgrade:
+    currentHARuntimeVersion: 7.2.7
     currentRuntimeVersion: 7.2.0
     targetRuntimeVersion: 7.2.10
     distroXUpgradeCurrentVersion: 7.2.7

@@ -2,6 +2,7 @@ package com.sequenceiq.datalake.service.sdx;
 
 import static com.sequenceiq.datalake.flow.create.SdxCreateEvent.SDX_STACK_CREATION_IN_PROGRESS_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_UPGRADE_IN_PROGRESS_EVENT;
+import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_VM_REPLACE_IN_PROGRESS_EVENT;
 import static com.sequenceiq.datalake.flow.repair.SdxRepairEvent.SDX_REPAIR_IN_PROGRESS_EVENT;
 import static com.sequenceiq.datalake.flow.start.SdxStartEvent.SDX_START_IN_PROGRESS_EVENT;
 import static com.sequenceiq.datalake.flow.stop.SdxStopEvent.SDX_STOP_IN_PROGRESS_EVENT;
@@ -20,6 +21,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.service.flowlog.FlowRetryUtil;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.flow.core.Flow2Handler;
@@ -40,6 +42,9 @@ public class SdxRetryService {
 
     @Inject
     private StackV4Endpoint stackV4Endpoint;
+
+    @Inject
+    private SdxStatusService sdxStatusService;
 
     public FlowIdentifier retrySdx(SdxCluster sdxCluster) {
         List<FlowLog> flowLogs = flowLogService.findAllForLastFlowIdByResourceIdOrderByCreatedDesc(sdxCluster.getId());
@@ -75,13 +80,14 @@ public class SdxRetryService {
     }
 
     private boolean isCloudbreakRetryNecessary(String retriedEvent) {
-        return getStackRetryEvents().stream().anyMatch(flowEvent -> retriedEvent.equals(flowEvent.name()));
+        return getStackRetryEvents().stream().anyMatch(flowEvent -> retriedEvent.equals(flowEvent.name()) || retriedEvent.equals(flowEvent.event()));
     }
 
     private List<FlowEvent> getStackRetryEvents() {
         return Arrays.asList(
                 SDX_STACK_CREATION_IN_PROGRESS_EVENT,
                 DATALAKE_UPGRADE_IN_PROGRESS_EVENT,
+                DATALAKE_VM_REPLACE_IN_PROGRESS_EVENT,
                 SDX_REPAIR_IN_PROGRESS_EVENT,
                 SDX_START_IN_PROGRESS_EVENT,
                 SDX_STOP_IN_PROGRESS_EVENT

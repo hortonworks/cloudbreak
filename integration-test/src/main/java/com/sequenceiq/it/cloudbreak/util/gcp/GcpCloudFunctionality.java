@@ -27,22 +27,22 @@ public class GcpCloudFunctionality implements CloudFunctionality {
     private GcpLabelUtil gcpLabelUtil;
 
     @Override
-    public List<String> listInstanceVolumeIds(List<String> instanceIds) {
+    public List<String> listInstanceVolumeIds(String clusterName, List<String> instanceIds) {
         return gcpUtil.listInstanceDiskNames(instanceIds);
     }
 
     @Override
-    public Map<String, Map<String, String>> listTagsByInstanceId(List<String> instanceIds) {
+    public Map<String, Map<String, String>> listTagsByInstanceId(String clusterName, List<String> instanceIds) {
         return gcpUtil.listTagsByInstanceId(instanceIds);
     }
 
     @Override
-    public void deleteInstances(List<String> instanceIds) {
+    public void deleteInstances(String clusterName, List<String> instanceIds) {
         gcpUtil.deleteHostGroupInstances(instanceIds);
     }
 
     @Override
-    public void stopInstances(List<String> instanceIds) {
+    public void stopInstances(String clusterName, List<String> instanceIds) {
         gcpUtil.stopHostGroupInstances(instanceIds);
     }
 

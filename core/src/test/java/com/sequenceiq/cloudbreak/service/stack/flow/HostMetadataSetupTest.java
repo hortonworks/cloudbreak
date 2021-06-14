@@ -10,7 +10,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.Assertions;
@@ -131,131 +130,6 @@ public class HostMetadataSetupTest {
         InstanceMetaData expectedIm2 = createInstanceMetadata("id2", InstanceMetadataType.GATEWAY, 2L, "10.0.0.2", "host2", false);
         assertMetadataEquals(expectedIm1, actualIm.stream().filter(im -> im.getPrivateId() == 1L).findFirst().get());
         assertMetadataEquals(expectedIm2, actualIm.stream().filter(im -> im.getPrivateId() == 2L).findFirst().get());
-    }
-
-    @Test
-    @DisplayName("when multiple non-primary gateways and a single primary gateway with correct assignments are repaired and scaled "
-            + "we should not make any changes in the primary gateway assignments. this has an assumption that the previous primary "
-            + "gateway has the same hostname as the current one")
-    public void testSetupNewHostMetadataWithMultipleNonPrimaryAndOnePrimaryChangeWithCorrectAssignment()
-            throws CloudbreakException, CloudbreakOrchestratorException {
-        Stack stack = mock(Stack.class);
-        InstanceMetaData im1 = createInstanceMetadata("id1", InstanceMetadataType.GATEWAY, 1L, "10.0.0.1", "host1", false);
-        InstanceMetaData im2 = createInstanceMetadata("id2", InstanceMetadataType.GATEWAY, 2L, "10.0.0.2", "host2", false);
-        InstanceMetaData im3 = createInstanceMetadata("id3", InstanceMetadataType.GATEWAY_PRIMARY, 3L, "10.0.0.3", "host3", true);
-        Set<InstanceMetaData> allNewInstances = Set.of(im1, im2, im3);
-        when(instanceMetaDataService.getNotDeletedInstanceMetadataByStackId(STACK_ID)).thenReturn(allNewInstances);
-        when(stack.getId()).thenReturn(STACK_ID);
-        when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
-        when(hostOrchestrator.getMembers(any(), any())).thenReturn(Map.of(
-                "10.0.0.1", "host1", "10.0.0.2", "host2", "10.0.0.3", "host3"));
-        InstanceMetaData lastPrimary = createInstanceMetadata("id0", InstanceMetadataType.GATEWAY_PRIMARY, 59L, "10.0.0.150", "host3", true);
-        when(instanceMetaDataService.getLastTerminatedPrimaryGatewayInstanceMetadata(STACK_ID)).thenReturn(Optional.of(lastPrimary));
-
-        hostMetadataSetup.setupNewHostMetadata(STACK_ID, List.of("10.0.0.1", "10.0.0.2", "10.0.0.3"));
-
-        verify(instanceMetaDataService, times(1)).getLastTerminatedPrimaryGatewayInstanceMetadata(STACK_ID);
-        verify(instanceMetaDataService, times(1)).saveAll(instanceMetadataCaptor.capture());
-        InstanceMetaData expectedIm1 = createInstanceMetadata("id1", InstanceMetadataType.GATEWAY, 1L, "10.0.0.1", "host1", false);
-        InstanceMetaData expectedIm2 = createInstanceMetadata("id2", InstanceMetadataType.GATEWAY, 2L, "10.0.0.2", "host2", false);
-        InstanceMetaData expectedIm3 = createInstanceMetadata("id3", InstanceMetadataType.GATEWAY_PRIMARY, 3L, "10.0.0.3", "host3", true);
-        Set<InstanceMetaData> actualIm = instanceMetadataCaptor.getValue();
-        assertMetadataEquals(expectedIm1, actualIm.stream().filter(im -> im.getPrivateId() == 1L).findFirst().get());
-        assertMetadataEquals(expectedIm2, actualIm.stream().filter(im -> im.getPrivateId() == 2L).findFirst().get());
-        assertMetadataEquals(expectedIm3, actualIm.stream().filter(im -> im.getPrivateId() == 3L).findFirst().get());
-    }
-
-    @Test
-    @DisplayName("when multiple non-primary gateways and a single primary gateway with incorrect assignments are repaired and scaled "
-            + "we should change the primary gateway to match the previous one. this has an assumption that there is a previous primary gateway")
-    public void testSetupNewHostMetadataWithMultipleNonPrimaryAndOnePrimaryChangeWithIncorrectAssignment()
-            throws CloudbreakException, CloudbreakOrchestratorException {
-        Stack stack = mock(Stack.class);
-        InstanceMetaData im1 = createInstanceMetadata("id1", InstanceMetadataType.GATEWAY, 1L, "10.0.0.1", "host1", false);
-        InstanceMetaData im2 = createInstanceMetadata("id2", InstanceMetadataType.GATEWAY_PRIMARY, 2L, "10.0.0.2", "host2", true);
-        InstanceMetaData im3 = createInstanceMetadata("id3", InstanceMetadataType.GATEWAY, 3L, "10.0.0.3", "host3", false);
-        Set<InstanceMetaData> allNewInstances = Set.of(im1, im2, im3);
-        when(instanceMetaDataService.getNotDeletedInstanceMetadataByStackId(STACK_ID)).thenReturn(allNewInstances);
-        when(stack.getId()).thenReturn(STACK_ID);
-        when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
-        when(hostOrchestrator.getMembers(any(), any())).thenReturn(Map.of(
-                "10.0.0.1", "host1", "10.0.0.2", "host2", "10.0.0.3", "host3"));
-        InstanceMetaData lastPrimary = createInstanceMetadata("id0", InstanceMetadataType.GATEWAY_PRIMARY, 59L, "10.0.0.150", "host3", true);
-        when(instanceMetaDataService.getLastTerminatedPrimaryGatewayInstanceMetadata(STACK_ID)).thenReturn(Optional.of(lastPrimary));
-
-        hostMetadataSetup.setupNewHostMetadata(STACK_ID, List.of("10.0.0.1", "10.0.0.2", "10.0.0.3"));
-
-        verify(instanceMetaDataService, times(1)).getLastTerminatedPrimaryGatewayInstanceMetadata(STACK_ID);
-        verify(instanceMetaDataService, times(1)).saveAll(instanceMetadataCaptor.capture());
-        InstanceMetaData expectedIm1 = createInstanceMetadata("id1", InstanceMetadataType.GATEWAY, 1L, "10.0.0.1", "host1", false);
-        InstanceMetaData expectedIm2 = createInstanceMetadata("id2", InstanceMetadataType.GATEWAY, 2L, "10.0.0.2", "host2", false);
-        InstanceMetaData expectedIm3 = createInstanceMetadata("id3", InstanceMetadataType.GATEWAY_PRIMARY, 3L, "10.0.0.3", "host3", true);
-        Set<InstanceMetaData> actualIm = instanceMetadataCaptor.getValue();
-        assertMetadataEquals(expectedIm1, actualIm.stream().filter(im -> im.getPrivateId() == 1L).findFirst().get());
-        assertMetadataEquals(expectedIm2, actualIm.stream().filter(im -> im.getPrivateId() == 2L).findFirst().get());
-        assertMetadataEquals(expectedIm3, actualIm.stream().filter(im -> im.getPrivateId() == 3L).findFirst().get());
-    }
-
-    @Test
-    @DisplayName("when multiple non-primary gateways and a single primary gateway with incorrect assignments are repaired and scaled "
-            + "we should not make any changes in the primary gateway assignments if there are no previous primary gateways")
-    public void testSetupNewHostMetadataWithMultipleNonPrimaryAndOnePrimaryChangeWithIncorrectAssignmentNoPrevious()
-            throws CloudbreakException, CloudbreakOrchestratorException {
-        Stack stack = mock(Stack.class);
-        InstanceMetaData im1 = createInstanceMetadata("id1", InstanceMetadataType.GATEWAY, 1L, "10.0.0.1", "host1", false);
-        InstanceMetaData im2 = createInstanceMetadata("id2", InstanceMetadataType.GATEWAY_PRIMARY, 2L, "10.0.0.2", "host2", true);
-        InstanceMetaData im3 = createInstanceMetadata("id3", InstanceMetadataType.GATEWAY, 3L, "10.0.0.3", "host3", false);
-        Set<InstanceMetaData> allNewInstances = Set.of(im1, im2, im3);
-        when(instanceMetaDataService.getNotDeletedInstanceMetadataByStackId(STACK_ID)).thenReturn(allNewInstances);
-        when(stack.getId()).thenReturn(STACK_ID);
-        when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
-        when(hostOrchestrator.getMembers(any(), any())).thenReturn(Map.of(
-                "10.0.0.1", "host1", "10.0.0.2", "host2", "10.0.0.3", "host3"));
-        when(instanceMetaDataService.getLastTerminatedPrimaryGatewayInstanceMetadata(STACK_ID)).thenReturn(Optional.empty());
-
-        hostMetadataSetup.setupNewHostMetadata(STACK_ID, List.of("10.0.0.1", "10.0.0.2", "10.0.0.3"));
-
-        verify(instanceMetaDataService, times(1)).getLastTerminatedPrimaryGatewayInstanceMetadata(STACK_ID);
-        verify(instanceMetaDataService, times(1)).saveAll(instanceMetadataCaptor.capture());
-        InstanceMetaData expectedIm1 = createInstanceMetadata("id1", InstanceMetadataType.GATEWAY, 1L, "10.0.0.1", "host1", false);
-        InstanceMetaData expectedIm2 = createInstanceMetadata("id2", InstanceMetadataType.GATEWAY_PRIMARY, 2L, "10.0.0.2", "host2", true);
-        InstanceMetaData expectedIm3 = createInstanceMetadata("id3", InstanceMetadataType.GATEWAY, 3L, "10.0.0.3", "host3", false);
-        Set<InstanceMetaData> actualIm = instanceMetadataCaptor.getValue();
-        assertMetadataEquals(expectedIm1, actualIm.stream().filter(im -> im.getPrivateId() == 1L).findFirst().get());
-        assertMetadataEquals(expectedIm2, actualIm.stream().filter(im -> im.getPrivateId() == 2L).findFirst().get());
-        assertMetadataEquals(expectedIm3, actualIm.stream().filter(im -> im.getPrivateId() == 3L).findFirst().get());
-    }
-
-    @Test
-    @DisplayName("when multiple non-primary gateways and a single primary gateway with incorrect assignments are repaired and scaled "
-            + "we should not make any changes in the primary gateway assignments if there is a previous primary gateway but the new "
-            + "instances do not match the hostname")
-    public void testSetupNewHostMetadataWithMultipleNonPrimaryAndOnePrimaryChangeWithIncorrectAssignmentNoMatchingPrevious()
-            throws CloudbreakException, CloudbreakOrchestratorException {
-        Stack stack = mock(Stack.class);
-        InstanceMetaData im1 = createInstanceMetadata("id1", InstanceMetadataType.GATEWAY, 1L, "10.0.0.1", "host1", false);
-        InstanceMetaData im2 = createInstanceMetadata("id2", InstanceMetadataType.GATEWAY_PRIMARY, 2L, "10.0.0.2", "host2", true);
-        InstanceMetaData im3 = createInstanceMetadata("id3", InstanceMetadataType.GATEWAY, 3L, "10.0.0.3", "host3", false);
-        Set<InstanceMetaData> allNewInstances = Set.of(im1, im2, im3);
-        when(instanceMetaDataService.getNotDeletedInstanceMetadataByStackId(STACK_ID)).thenReturn(allNewInstances);
-        when(stack.getId()).thenReturn(STACK_ID);
-        when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
-        when(hostOrchestrator.getMembers(any(), any())).thenReturn(Map.of(
-                "10.0.0.1", "host1", "10.0.0.2", "host2", "10.0.0.3", "host3"));
-        InstanceMetaData lastPrimary = createInstanceMetadata("id0", InstanceMetadataType.GATEWAY_PRIMARY, 59L, "10.0.0.150", "host4", true);
-        when(instanceMetaDataService.getLastTerminatedPrimaryGatewayInstanceMetadata(STACK_ID)).thenReturn(Optional.of(lastPrimary));
-
-        hostMetadataSetup.setupNewHostMetadata(STACK_ID, List.of("10.0.0.1", "10.0.0.2", "10.0.0.3"));
-
-        verify(instanceMetaDataService, times(1)).getLastTerminatedPrimaryGatewayInstanceMetadata(STACK_ID);
-        verify(instanceMetaDataService, times(1)).saveAll(instanceMetadataCaptor.capture());
-        InstanceMetaData expectedIm1 = createInstanceMetadata("id1", InstanceMetadataType.GATEWAY, 1L, "10.0.0.1", "host1", false);
-        InstanceMetaData expectedIm2 = createInstanceMetadata("id2", InstanceMetadataType.GATEWAY_PRIMARY, 2L, "10.0.0.2", "host2", true);
-        InstanceMetaData expectedIm3 = createInstanceMetadata("id3", InstanceMetadataType.GATEWAY, 3L, "10.0.0.3", "host3", false);
-        Set<InstanceMetaData> actualIm = instanceMetadataCaptor.getValue();
-        assertMetadataEquals(expectedIm1, actualIm.stream().filter(im -> im.getPrivateId() == 1L).findFirst().get());
-        assertMetadataEquals(expectedIm2, actualIm.stream().filter(im -> im.getPrivateId() == 2L).findFirst().get());
-        assertMetadataEquals(expectedIm3, actualIm.stream().filter(im -> im.getPrivateId() == 3L).findFirst().get());
     }
 
     private InstanceGroup createInstanceGroup(InstanceGroupType instanceGroupType, String groupName) {

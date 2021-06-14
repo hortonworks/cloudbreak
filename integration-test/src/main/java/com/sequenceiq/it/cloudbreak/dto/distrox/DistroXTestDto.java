@@ -1,5 +1,6 @@
 package com.sequenceiq.it.cloudbreak.dto.distrox;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.DELETED_ON_PROVIDER_SIDE;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunningParameter;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest.STACK_DELETED;
@@ -23,6 +24,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
@@ -163,23 +166,64 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
         return getTestContext().await(this, statuses, runningParameter);
     }
 
-    public DistroXTestDto awaitForInstance(Map<String, InstanceStatus> statuses) {
+    public DistroXTestDto awaitForHealthyInstances() {
+        Map<List<String>, InstanceStatus> instanceStatusMap = getResponse().getInstanceGroups().stream()
+                .collect(Collectors.toMap(
+                        instanceGroupV4Response -> instanceGroupV4Response.getMetadata().stream()
+                                .map(InstanceMetaDataV4Response::getInstanceId).collect(Collectors.toList()),
+                        instanceMetaDataV4Response -> InstanceStatus.SERVICES_HEALTHY));
+        return awaitForInstance(instanceStatusMap);
+    }
+
+    public DistroXTestDto awaitForRemovableInstance() {
+        if (getRemovableInstanceId().isPresent()) {
+            return awaitForInstance(Map.of(List.of(getRemovableInstanceId().get()), DELETED_ON_PROVIDER_SIDE));
+        } else {
+            throw new IllegalStateException("There is no removable instance to wait");
+        }
+    }
+
+    public DistroXTestDto awaitForHostGroup(String hostGroup, InstanceStatus instanceStatus) {
+        Optional<InstanceGroupV4Response> instanceGroup = getResponse().getInstanceGroups().stream()
+                .filter(instanceGroupV4Response -> hostGroup.equals(instanceGroupV4Response.getName()))
+                .findAny();
+        if (instanceGroup.isPresent()) {
+            List<String> instanceIds = instanceGroup.get().getMetadata().stream().map(InstanceMetaDataV4Response::getInstanceId).collect(Collectors.toList());
+            return awaitForInstance(Map.of(instanceIds, instanceStatus));
+        } else {
+            throw new IllegalStateException("Can't find instance group with this name: " + hostGroup);
+        }
+    }
+
+    public DistroXTestDto awaitForHostGroups(List<String> hostGroup, InstanceStatus instanceStatus) {
+        Optional<InstanceGroupV4Response> instanceGroup = getResponse().getInstanceGroups().stream()
+                .filter(instanceGroupV4Response -> hostGroup.contains(instanceGroupV4Response.getName()))
+                .findAny();
+        if (instanceGroup.isPresent()) {
+            List<String> instanceIds = instanceGroup.get().getMetadata().stream().map(InstanceMetaDataV4Response::getInstanceId).collect(Collectors.toList());
+            return awaitForInstance(Map.of(instanceIds, instanceStatus));
+        } else {
+            throw new IllegalStateException("Can't find instance group with this name: " + hostGroup);
+        }
+    }
+
+    public DistroXTestDto awaitForInstance(Map<List<String>, InstanceStatus> statuses) {
         return awaitForInstance(statuses, emptyRunningParameter());
     }
 
-    public DistroXTestDto awaitForInstance(DistroXTestDto entity, Map<String, InstanceStatus> statuses, RunningParameter runningParameter) {
+    public DistroXTestDto awaitForInstance(DistroXTestDto entity, Map<List<String>, InstanceStatus> statuses, RunningParameter runningParameter) {
         return getTestContext().awaitForInstance(entity, statuses, runningParameter);
     }
 
-    public DistroXTestDto awaitForInstance(Map<String, InstanceStatus> statuses, RunningParameter runningParameter) {
+    public DistroXTestDto awaitForInstance(Map<List<String>, InstanceStatus> statuses, RunningParameter runningParameter) {
         return getTestContext().awaitForInstance(this, statuses, runningParameter);
     }
 
-    public DistroXTestDto awaitForInstance(Map<String, InstanceStatus> statuses, RunningParameter runningParameter, Duration pollingInterval) {
+    public DistroXTestDto awaitForInstance(Map<List<String>, InstanceStatus> statuses, RunningParameter runningParameter, Duration pollingInterval) {
         return getTestContext().awaitForInstance(this, statuses, runningParameter, pollingInterval);
     }
 
-    public DistroXTestDto awaitForInstance(Map<String, InstanceStatus> statuses, Duration pollingInterval) {
+    public DistroXTestDto awaitForInstance(Map<List<String>, InstanceStatus> statuses, Duration pollingInterval) {
         return awaitForInstance(statuses, emptyRunningParameter(), pollingInterval);
     }
 

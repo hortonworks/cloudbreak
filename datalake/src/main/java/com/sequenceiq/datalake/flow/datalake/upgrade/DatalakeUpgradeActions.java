@@ -301,7 +301,7 @@ public class DatalakeUpgradeActions {
                 LOGGER.info("Sdx upgrade failed for sdxId: {}", payload.getResourceId());
                 sdxStatusService.setStatusForDatalakeAndNotify(
                         DatalakeStatusEnum.DATALAKE_UPGRADE_FAILED,
-                        "Upgrade failed",
+                        "Upgrade failed: " + payload.getException().getMessage(),
                         payload.getResourceId());
                 sendEvent(context, DATALAKE_UPGRADE_FAILED_HANDLED_EVENT.event(), payload);
             }

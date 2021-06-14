@@ -4,6 +4,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.CREATED;
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.TERMINATED;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -122,6 +123,11 @@ public class MetadataSetupService {
                     .stream()
                     .collect(Collectors.toMap(InstanceGroup::getGroupName, Function.identity()));
 
+            Optional<InstanceMetaData> terminatedPrimaryGwWhichShouldBeRestored = Optional.empty();
+            if (!primaryIgSelected) {
+                terminatedPrimaryGwWhichShouldBeRestored = instanceMetaDataService.getLastTerminatedPrimaryGatewayInstanceMetadata(stack.getId());
+            }
+
             for (CloudVmMetaDataStatus cloudVmMetaDataStatus : cloudVmMetaDataStatusList) {
                 CloudInstance cloudInstance = cloudVmMetaDataStatus.getCloudVmInstanceStatus().getCloudInstance();
                 CloudInstanceMetaData md = cloudVmMetaDataStatus.getMetaData();
@@ -136,44 +142,18 @@ public class MetadataSetupService {
                 InstanceGroup ig = instanceMetaDataEntry.getInstanceGroup();
                 String group = ig == null ? template.getGroupName() : ig.getGroupName();
                 InstanceGroup instanceGroup = instanceGroups.get(group);
-                instanceMetaDataEntry.setPrivateIp(md.getPrivateIp());
-                instanceMetaDataEntry.setPublicIp(md.getPublicIp());
-                instanceMetaDataEntry.setSshPort(md.getSshPort());
-                instanceMetaDataEntry.setLocalityIndicator(md.getLocalityIndicator());
+                setupFromCloudInstanceMetadata(md, instanceMetaDataEntry);
+                setupFromCloudInstance(cloudInstance, instanceMetaDataEntry);
                 instanceMetaDataEntry.setInstanceGroup(instanceGroup);
                 instanceMetaDataEntry.setInstanceId(instanceId);
                 instanceMetaDataEntry.setPrivateId(privateId);
-                instanceMetaDataEntry.setAvailabilityZone(cloudInstance.getAvailabilityZone());
                 instanceMetaDataEntry.setStartDate(clock.getCurrentTimeMillis());
-                instanceMetaDataEntry.setSubnetId(cloudInstance.getSubnetId());
-                instanceMetaDataEntry.setAvailabilityZone(cloudInstance.getAvailabilityZone());
                 instanceMetaDataEntry.setRackId(determineRackId(instanceMetaDataEntry.getSubnetId(), instanceMetaDataEntry.getAvailabilityZone()));
-                instanceMetaDataEntry.setInstanceName(cloudInstance.getStringParameter(CloudInstance.INSTANCE_NAME));
                 if (instanceMetaDataEntry.getClusterManagerServer() == null) {
                     instanceMetaDataEntry.setServer(Boolean.FALSE);
                 }
                 instanceMetaDataEntry.setLifeCycle(InstanceLifeCycle.fromCloudInstanceLifeCycle(md.getLifeCycle()));
-                if (instanceMetaDataEntry.getInstanceMetadataType() == null) {
-                    if (ig != null) {
-                        if (InstanceGroupType.GATEWAY.equals(ig.getInstanceGroupType())) {
-                            if (!primaryIgSelected) {
-                                primaryIgSelected = true;
-                                instanceMetaDataEntry.setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
-                                instanceMetaDataEntry.setServer(Boolean.TRUE);
-                                LOGGER.info("Primary gateway is not selected, let's select this instance: {}", instanceMetaDataEntry.getInstanceId());
-                            } else {
-                                LOGGER.info("Primary gateway was selected");
-                                instanceMetaDataEntry.setInstanceMetadataType(InstanceMetadataType.GATEWAY);
-                            }
-                        } else {
-                            LOGGER.info("Instance is a core instance: {}", instanceMetaDataEntry.getInstanceId());
-                            instanceMetaDataEntry.setInstanceMetadataType(InstanceMetadataType.CORE);
-                        }
-                    } else {
-                        LOGGER.info("Instance group is null, instance will be a core instance: {}", instanceMetaDataEntry.getInstanceId());
-                        instanceMetaDataEntry.setInstanceMetadataType(InstanceMetadataType.CORE);
-                    }
-                }
+                primaryIgSelected = setupInstanceMetaDataType(primaryIgSelected, terminatedPrimaryGwWhichShouldBeRestored, instanceMetaDataEntry, ig);
                 if (status != null) {
                     if (cloudVmMetaDataStatus.getCloudVmInstanceStatus().getStatus() == TERMINATED) {
                         instanceMetaDataEntry.setInstanceStatus(InstanceStatus.TERMINATED);
@@ -184,9 +164,115 @@ public class MetadataSetupService {
                 }
                 instanceMetaDataService.save(instanceMetaDataEntry);
             }
+            primaryGWSelectionFallbackIfNecessary(primaryIgSelected, instanceGroups);
+
             return newInstances;
         } catch (CloudbreakImageNotFoundException | IllegalArgumentException ex) {
             throw new CloudbreakServiceException("Instance metadata collection failed", ex);
+        }
+    }
+
+    private boolean setupInstanceMetaDataType(boolean primaryIgSelectedYet, Optional<InstanceMetaData> terminatedPrimaryGwWhichShouldBeRestored,
+            InstanceMetaData instanceMetaDataEntry, InstanceGroup ig) {
+        boolean primaryIgSelected = primaryIgSelectedYet;
+        if (instanceMetaDataEntry.getInstanceMetadataType() == null) {
+            if (ig != null) {
+                LOGGER.info("Instance group type: {}", ig.getInstanceGroupType());
+                if (InstanceGroupType.GATEWAY.equals(ig.getInstanceGroupType())) {
+                    primaryIgSelected = setupGatewayInstance(primaryIgSelected, terminatedPrimaryGwWhichShouldBeRestored, instanceMetaDataEntry);
+                } else {
+                    LOGGER.info("Instance is a core instance: {}", instanceMetaDataEntry.getInstanceId());
+                    instanceMetaDataEntry.setInstanceMetadataType(InstanceMetadataType.CORE);
+                }
+            } else {
+                LOGGER.info("Instance group is null, instance will be a core instance: {}", instanceMetaDataEntry.getInstanceId());
+                instanceMetaDataEntry.setInstanceMetadataType(InstanceMetadataType.CORE);
+            }
+        }
+        return primaryIgSelected;
+    }
+
+    private void setupFromCloudInstance(CloudInstance cloudInstance, InstanceMetaData instanceMetaDataEntry) {
+        instanceMetaDataEntry.setSubnetId(cloudInstance.getSubnetId());
+        instanceMetaDataEntry.setAvailabilityZone(cloudInstance.getAvailabilityZone());
+        instanceMetaDataEntry.setInstanceName(cloudInstance.getStringParameter(CloudInstance.INSTANCE_NAME));
+    }
+
+    private void setupFromCloudInstanceMetadata(CloudInstanceMetaData md, InstanceMetaData instanceMetaDataEntry) {
+        instanceMetaDataEntry.setPrivateIp(md.getPrivateIp());
+        instanceMetaDataEntry.setPublicIp(md.getPublicIp());
+        instanceMetaDataEntry.setSshPort(md.getSshPort());
+        instanceMetaDataEntry.setLocalityIndicator(md.getLocalityIndicator());
+    }
+
+    private void primaryGWSelectionFallbackIfNecessary(boolean primaryIgSelected, Map<String, InstanceGroup> instanceGroups) {
+        if (!primaryIgSelected) {
+            LOGGER.info("Primary GW was not selected! We will select one from the available GWs. It should not happen, it is a fallback mechanism");
+            selectPrimaryGWFromGatewayInstances(instanceGroups.values());
+        }
+    }
+
+    private boolean setupGatewayInstance(boolean primaryIgSelectedYet, Optional<InstanceMetaData> terminatedPrimaryGwWhichShouldBeRestored,
+            InstanceMetaData instanceMetaDataEntry) {
+        LOGGER.info("Instance is a gateway instance: {}", instanceMetaDataEntry.getInstanceId());
+        if (terminatedPrimaryGwWhichShouldBeRestored.isPresent()) {
+            LOGGER.info("Terminated primary GW should be restored: {}", terminatedPrimaryGwWhichShouldBeRestored.get());
+            boolean primaryGWRestored = restorePrimaryGWIfFQDNMatch(terminatedPrimaryGwWhichShouldBeRestored.get(), instanceMetaDataEntry);
+            if (primaryGWRestored) {
+                return true;
+            }
+        } else {
+            return selectPrimaryGWIfNotSelected(primaryIgSelectedYet, instanceMetaDataEntry);
+        }
+        return primaryIgSelectedYet;
+    }
+
+    private void selectPrimaryGWFromGatewayInstances(Collection<InstanceGroup> instanceGroups) {
+        Optional<InstanceGroup> gwInstanceGroup = instanceGroups.stream()
+                .filter(instanceGroup -> InstanceGroupType.GATEWAY.equals(instanceGroup.getInstanceGroupType()))
+                .findFirst();
+
+        if (gwInstanceGroup.isPresent()) {
+            List<InstanceMetaData> gwInstances = instanceMetaDataService.findAllByInstanceGroupAndInstanceStatus(gwInstanceGroup.get(), InstanceStatus.CREATED);
+            Optional<InstanceMetaData> gwInstance = gwInstances.stream().findFirst();
+            if (gwInstance.isPresent()) {
+                LOGGER.info("We were able to select primary GW from GW instances: {}", gwInstance);
+                gwInstance.get().setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
+                instanceMetaDataService.save(gwInstance.get());
+            } else {
+                LOGGER.error("We were not able to select primary gateway!");
+                throw new CloudbreakServiceException("We were not able to select primary gateway!");
+            }
+        } else {
+            LOGGER.error("There is no gateway group!");
+            throw new CloudbreakServiceException("There is no gateway group!");
+        }
+    }
+
+    private boolean selectPrimaryGWIfNotSelected(boolean primaryIgSelectedYet, InstanceMetaData instanceMetaDataEntry) {
+        boolean primaryIgSelected = primaryIgSelectedYet;
+        if (!primaryIgSelected) {
+            primaryIgSelected = true;
+            instanceMetaDataEntry.setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
+            instanceMetaDataEntry.setServer(Boolean.TRUE);
+            LOGGER.info("Primary gateway is not selected, let's select this instance: {}", instanceMetaDataEntry.getInstanceId());
+        } else {
+            LOGGER.info("Primary gateway was selected. {} will be a normal gateway instance.", instanceMetaDataEntry.getInstanceId());
+            instanceMetaDataEntry.setInstanceMetadataType(InstanceMetadataType.GATEWAY);
+        }
+        return primaryIgSelected;
+    }
+
+    private boolean restorePrimaryGWIfFQDNMatch(InstanceMetaData terminatedPrimaryGwWhichShouldBeRestored, InstanceMetaData instanceMetaDataEntry) {
+        if (terminatedPrimaryGwWhichShouldBeRestored.getDiscoveryFQDN().equals(instanceMetaDataEntry.getDiscoveryFQDN())) {
+            instanceMetaDataEntry.setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
+            instanceMetaDataEntry.setServer(Boolean.TRUE);
+            LOGGER.info("Instance will be a primary GW: {}", instanceMetaDataEntry);
+            return true;
+        } else {
+            LOGGER.info("Primary gateway is another instance not this one: {}", instanceMetaDataEntry.getInstanceId());
+            instanceMetaDataEntry.setInstanceMetadataType(InstanceMetadataType.GATEWAY);
+            return false;
         }
     }
 

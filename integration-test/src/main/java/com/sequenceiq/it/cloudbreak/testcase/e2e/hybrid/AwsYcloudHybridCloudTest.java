@@ -207,7 +207,7 @@ public class AwsYcloudHybridCloudTest extends AbstractE2ETest {
                     .withEnvironmentKey(RunningParameter.key(CHILD_ENVIRONMENT_KEY))
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING)
-                .awaitForInstance(INSTANCES_HEALTHY)
+                .awaitForHealthyInstances()
                 .then((tc, dto, client) -> {
                     String environmentCrn = dto.getResponse().getEnvironmentCrn();
                     com.sequenceiq.freeipa.api.client.FreeIpaClient freeIpaClient = tc.getMicroserviceClient(FreeIpaClient.class).getDefaultClient();

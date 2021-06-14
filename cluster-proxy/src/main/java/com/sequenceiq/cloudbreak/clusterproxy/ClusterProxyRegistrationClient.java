@@ -9,6 +9,8 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
@@ -18,6 +20,15 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 
 @Component
 public class ClusterProxyRegistrationClient {
+
+    public static final int CLUSTER_PROXY_REGISTRATION_RETRY_DELAY = 1000;
+
+    public static final int CLUSTER_PROXY_REGISTRATION_RETRY_MULTIPLIER = 2;
+
+    public static final int CLUSTER_PROXY_REGISTRATION_RETRY_MAX_DELAY = 10000;
+
+    public static final int CLUSTER_PROXY_REGISTRATION_RETRY_MAX_ATTEMTPS = 5;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterProxyRegistrationClient.class);
 
     private RestTemplate restTemplate;
@@ -30,6 +41,8 @@ public class ClusterProxyRegistrationClient {
         this.restTemplate = restTemplate;
     }
 
+    @Retryable(backoff = @Backoff(delay = CLUSTER_PROXY_REGISTRATION_RETRY_DELAY, multiplier = CLUSTER_PROXY_REGISTRATION_RETRY_MULTIPLIER,
+            maxDelay = CLUSTER_PROXY_REGISTRATION_RETRY_MAX_DELAY), maxAttempts = CLUSTER_PROXY_REGISTRATION_RETRY_MAX_ATTEMTPS)
     public ConfigRegistrationResponse registerConfig(ConfigRegistrationRequest configRegistrationRequest) {
         String registerConfigUrl = clusterProxyConfiguration.getRegisterConfigUrl();
         try {
@@ -52,6 +65,8 @@ public class ClusterProxyRegistrationClient {
         }
     }
 
+    @Retryable(backoff = @Backoff(delay = CLUSTER_PROXY_REGISTRATION_RETRY_DELAY, multiplier = CLUSTER_PROXY_REGISTRATION_RETRY_MULTIPLIER,
+            maxDelay = CLUSTER_PROXY_REGISTRATION_RETRY_MAX_DELAY), maxAttempts = CLUSTER_PROXY_REGISTRATION_RETRY_MAX_ATTEMTPS)
     public void updateConfig(ConfigUpdateRequest configUpdateRequest) {
         String updateConfigUrl = clusterProxyConfiguration.getUpdateConfigUrl();
         try {
@@ -72,6 +87,8 @@ public class ClusterProxyRegistrationClient {
         }
     }
 
+    @Retryable(backoff = @Backoff(delay = CLUSTER_PROXY_REGISTRATION_RETRY_DELAY, multiplier = CLUSTER_PROXY_REGISTRATION_RETRY_MULTIPLIER,
+            maxDelay = CLUSTER_PROXY_REGISTRATION_RETRY_MAX_DELAY), maxAttempts = CLUSTER_PROXY_REGISTRATION_RETRY_MAX_ATTEMTPS)
     public void deregisterConfig(String clusterIdentifier) {
         String removeConfigUrl = clusterProxyConfiguration.getRemoveConfigUrl();
         try {
@@ -92,6 +109,8 @@ public class ClusterProxyRegistrationClient {
         }
     }
 
+    @Retryable(backoff = @Backoff(delay = CLUSTER_PROXY_REGISTRATION_RETRY_DELAY, multiplier = CLUSTER_PROXY_REGISTRATION_RETRY_MULTIPLIER,
+            maxDelay = CLUSTER_PROXY_REGISTRATION_RETRY_MAX_DELAY), maxAttempts = CLUSTER_PROXY_REGISTRATION_RETRY_MAX_ATTEMTPS)
     public ReadConfigResponse readConfig(String clusterIdentifier) {
         String readConfigUrl = clusterProxyConfiguration.getReadConfigUrl();
         try {

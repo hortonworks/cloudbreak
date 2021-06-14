@@ -135,7 +135,7 @@ public class TlsSecurityService {
         if (clusterProxyService.isCreateConfigForClusterProxy(stack)) {
             LOGGER.info("Create config for cluster proxy");
             gatewayConfig
-                    .withPath(clusterProxyService.getProxyPath(stack.getResourceCrn()))
+                    .withPath(clusterProxyService.getProxyPath(stack.getResourceCrn(), gatewayInstance.getInstanceId()))
                     .withProtocol(clusterProxyConfiguration.getClusterProxyProtocol());
         }
         return gatewayConfig;

@@ -4,6 +4,7 @@ import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -54,6 +55,15 @@ import com.sequenceiq.common.api.type.Tunnel;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ClusterProxyServiceTest {
+
+    public static final String PRIMARY_INSTANCE_ID = "i-abc123";
+
+    public static final String OTHER_INSTANCE_ID = "i-def456";
+
+    public static final String PRIMARY_PUBLIC_IP = "10.10.10.10";
+
+    public static final String OTHER_PUBLIC_IP = "10.10.10.11";
+
     private static final long STACK_ID = 100L;
 
     private static final long CLUSTER_ID = 1000L;
@@ -85,7 +95,6 @@ public class ClusterProxyServiceTest {
     public void shouldRegisterProxyConfigurationWithClusterProxy() throws ClusterProxyException {
         ConfigRegistrationResponse response = new ConfigRegistrationResponse();
         response.setX509Unwrapped("X509PublicKey");
-        ConfigRegistrationRequest request = configRegistrationRequestWithTunnelEntries();
 
         when(clusterProxyRegistrationClient.registerConfig(any())).thenReturn(response);
         when(securityConfigService.findOneByStackId(STACK_ID)).thenReturn(Optional.of(gatewaySecurityConfig()));
@@ -93,8 +102,16 @@ public class ClusterProxyServiceTest {
         ConfigRegistrationResponse registrationResponse =
                 ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> service.registerCluster(testStackUsingCCM()));
 
+
         assertEquals("X509PublicKey", registrationResponse.getX509Unwrapped());
-        verify(clusterProxyRegistrationClient).registerConfig(request);
+        ArgumentCaptor<ConfigRegistrationRequest> configRegistrationRequestArgumentCaptor = ArgumentCaptor.forClass(ConfigRegistrationRequest.class);
+        verify(clusterProxyRegistrationClient).registerConfig(configRegistrationRequestArgumentCaptor.capture());
+        ConfigRegistrationRequest requestSent = configRegistrationRequestArgumentCaptor.getValue();
+        assertEquals(4, requestSent.getServices().size());
+        assertTrue(requestSent.getServices().contains(cmServiceConfigWithInstanceId(PRIMARY_PUBLIC_IP, PRIMARY_INSTANCE_ID)));
+        assertTrue(requestSent.getServices().contains(cmServiceConfigWithInstanceId(OTHER_PUBLIC_IP, OTHER_INSTANCE_ID)));
+        assertTrue(requestSent.getServices().contains(cmServiceConfig()));
+        assertTrue(requestSent.getServices().contains(cmInternalServiceConfig()));
     }
 
     @Test
@@ -134,7 +151,11 @@ public class ClusterProxyServiceTest {
 
         assertEquals(true, proxyRegisterationReq.isUseTunnel(), "CCMV1 tunnel should be enabled");
         assertEquals(tunnelEntries(), proxyRegisterationReq.getTunnels(), "CCMV1 tunnel should be configured.");
-        assertEquals(List.of(cmServiceConfig(), cmInternalServiceConfig()), proxyRegisterationReq.getServices(), "CCMV1 service configs should match.");
+        assertEquals(4, proxyRegisterationReq.getServices().size());
+        assertTrue(proxyRegisterationReq.getServices().contains(cmServiceConfigWithInstanceId(PRIMARY_PUBLIC_IP, PRIMARY_INSTANCE_ID)));
+        assertTrue(proxyRegisterationReq.getServices().contains(cmServiceConfigWithInstanceId(OTHER_PUBLIC_IP, OTHER_INSTANCE_ID)));
+        assertTrue(proxyRegisterationReq.getServices().contains(cmServiceConfig()));
+        assertTrue(proxyRegisterationReq.getServices().contains(cmInternalServiceConfig()));
     }
 
     @Test
@@ -184,7 +205,11 @@ public class ClusterProxyServiceTest {
 
         assertEquals(true, proxyRegisterationReq.isUseTunnel(), "CCMV1 tunnel should be enabled");
         assertEquals(tunnelEntries(), proxyRegisterationReq.getTunnels(), "CCMV1 tunnel should be configured.");
-        assertEquals(List.of(cmServiceConfig(), cmInternalServiceConfig()), proxyRegisterationReq.getServices(), "CCMV1 service configs should match.");
+        assertEquals(4, proxyRegisterationReq.getServices().size());
+        assertTrue(proxyRegisterationReq.getServices().contains(cmServiceConfigWithInstanceId(PRIMARY_PUBLIC_IP, PRIMARY_INSTANCE_ID)));
+        assertTrue(proxyRegisterationReq.getServices().contains(cmServiceConfigWithInstanceId(OTHER_PUBLIC_IP, OTHER_INSTANCE_ID)));
+        assertTrue(proxyRegisterationReq.getServices().contains(cmServiceConfig()));
+        assertTrue(proxyRegisterationReq.getServices().contains(cmInternalServiceConfig()));
     }
 
     @Test
@@ -230,14 +255,19 @@ public class ClusterProxyServiceTest {
         ConfigRegistrationResponse response = new ConfigRegistrationResponse();
         response.setX509Unwrapped("X509PublicKey");
 
-        ConfigRegistrationRequest request = configRegistrationRequest();
-
         when(clusterProxyRegistrationClient.registerConfig(any())).thenReturn(response);
         when(securityConfigService.findOneByStackId(STACK_ID)).thenReturn(Optional.of(gatewaySecurityConfig()));
 
         ConfigRegistrationResponse registrationResponse = service.registerCluster(testStack());
         assertEquals("X509PublicKey", registrationResponse.getX509Unwrapped());
-        verify(clusterProxyRegistrationClient).registerConfig(request);
+        ArgumentCaptor<ConfigRegistrationRequest> configRegistrationRequestArgumentCaptor = ArgumentCaptor.forClass(ConfigRegistrationRequest.class);
+        verify(clusterProxyRegistrationClient).registerConfig(configRegistrationRequestArgumentCaptor.capture());
+        ConfigRegistrationRequest requestSent = configRegistrationRequestArgumentCaptor.getValue();
+        assertEquals(4, requestSent.getServices().size());
+        assertTrue(requestSent.getServices().contains(cmServiceConfigWithInstanceId(PRIMARY_PUBLIC_IP, PRIMARY_INSTANCE_ID)));
+        assertTrue(requestSent.getServices().contains(cmServiceConfigWithInstanceId(OTHER_PUBLIC_IP, OTHER_INSTANCE_ID)));
+        assertTrue(requestSent.getServices().contains(cmServiceConfig()));
+        assertTrue(requestSent.getServices().contains(cmInternalServiceConfig()));
     }
 
     @Test
@@ -272,7 +302,8 @@ public class ClusterProxyServiceTest {
 
     private ConfigRegistrationRequest configRegistrationRequest() {
         return new ConfigRegistrationRequestBuilder(STACK_CRN)
-                .withAliases(List.of(String.valueOf(CLUSTER_ID))).withServices(List.of(cmServiceConfig(), cmInternalServiceConfig())).build();
+                .withAliases(List.of(String.valueOf(CLUSTER_ID))).withServices(List.of(cmServiceConfigWithInstanceId(PRIMARY_PUBLIC_IP, PRIMARY_INSTANCE_ID),
+                        cmServiceConfigWithInstanceId(OTHER_PUBLIC_IP, OTHER_INSTANCE_ID), cmServiceConfig(), cmInternalServiceConfig())).build();
     }
 
     private ConfigRegistrationRequest configRegistrationRequestWithTunnelEntries() {
@@ -286,6 +317,15 @@ public class ClusterProxyServiceTest {
     private List<TunnelEntry> tunnelEntries() {
         return List.of(new TunnelEntry("i-abc123", "GATEWAY", "10.10.10.10", 9443, MINA_ID),
                 new TunnelEntry("i-abc123", "KNOX", "10.10.10.10", 443, MINA_ID));
+    }
+
+    private ClusterServiceConfig cmServiceConfigWithInstanceId(String ipAddress, String instanceId) {
+        ClusterServiceCredential cloudbreakUser = new ClusterServiceCredential("cloudbreak", "/cb/test-data/secret/cbpassword:secret");
+        ClusterServiceCredential dpUser = new ClusterServiceCredential("cmmgmt", "/cb/test-data/secret/dppassword:secret", true);
+        ClientCertificate clientCertificate = new ClientCertificate("/cb/test-data/secret/clientKey:secret:base64",
+                "/cb/test-data/secret/clientCert:secret:base64");
+        return new ClusterServiceConfig("cb-internal-" + instanceId,
+                List.of("https://" + ipAddress + ":9443"), asList(cloudbreakUser, dpUser), clientCertificate, null);
     }
 
     private ClusterServiceConfig cmServiceConfig() {
@@ -334,11 +374,12 @@ public class ClusterProxyServiceTest {
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setInstanceGroupType(InstanceGroupType.GATEWAY);
         InstanceMetaData primaryInstanceMetaData = new InstanceMetaData();
-        primaryInstanceMetaData.setPublicIp("10.10.10.10");
-        primaryInstanceMetaData.setInstanceId("i-abc123");
+        primaryInstanceMetaData.setPublicIp(PRIMARY_PUBLIC_IP);
+        primaryInstanceMetaData.setInstanceId(PRIMARY_INSTANCE_ID);
         primaryInstanceMetaData.setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
         InstanceMetaData instanceMetaData = new InstanceMetaData();
-        instanceMetaData.setPublicIp("10.10.10.11");
+        instanceMetaData.setPublicIp(OTHER_PUBLIC_IP);
+        instanceMetaData.setInstanceId(OTHER_INSTANCE_ID);
         instanceGroup.setInstanceMetaData(Set.of(instanceMetaData, primaryInstanceMetaData));
         stack.setInstanceGroups(Set.of(instanceGroup));
         return stack;

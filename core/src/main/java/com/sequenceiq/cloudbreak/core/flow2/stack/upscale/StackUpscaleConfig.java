@@ -51,7 +51,7 @@ public class StackUpscaleConfig extends AbstractFlowConfiguration<StackUpscaleSt
                                     .failureEvent(ADD_INSTANCES_FINISHED_FAILURE_EVENT)
                     .from(EXTEND_METADATA_STATE).to(EXTEND_METADATA_FINISHED_STATE).event(EXTEND_METADATA_FINISHED_EVENT)
                                     .failureEvent(EXTEND_METADATA_FAILURE_EVENT)
-                    .from(EXTEND_METADATA_FINISHED_STATE).to(BOOTSTRAP_NEW_NODES_STATE).event(StackUpscaleEvent.BOOTSTRAP_NEW_NODES_EVENT)
+                    .from(EXTEND_METADATA_FINISHED_STATE).to(RE_REGISTER_WITH_CLUSTER_PROXY_STATE).event(StackUpscaleEvent.BOOTSTRAP_NEW_NODES_EVENT)
                                     .failureEvent(StackUpscaleEvent.EXTEND_METADATA_FINISHED_FAILURE_EVENT)
                     .from(EXTEND_METADATA_FINISHED_STATE).to(GATEWAY_TLS_SETUP_STATE).event(StackUpscaleEvent.SSHFINGERPRINTS_EVENT)
                                     .failureEvent(StackUpscaleEvent.EXTEND_METADATA_FINISHED_FAILURE_EVENT)
