@@ -940,7 +940,6 @@ class SdxServiceTest {
         ImagesV4Response imagesV4Response = new ImagesV4Response();
         imagesV4Response.setCdhImages(List.of(imageResponse));
 
-        when(entitlementService.dataLakeCustomImageEnabled(anyString())).thenReturn(true);
         when(cloudbreakInternalCrnClient.withInternalCrn()).thenReturn(cloudbreakServiceCrnEndpoints);
         when(cloudbreakServiceCrnEndpoints.imageCatalogV4Endpoint()).thenReturn(imageCatalogV4Endpoint);
         when(imageCatalogV4Endpoint.getImageByCatalogNameAndImageId(any(), any(), any(), any())).thenReturn(imagesV4Response);

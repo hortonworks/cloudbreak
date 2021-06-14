@@ -697,12 +697,6 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider 
         CloudPlatform cloudPlatform = EnumUtils.getEnumIgnoreCase(CloudPlatform.class, environment.getCloudPlatform());
 
         if (imageV4Response != null) {
-            boolean dataLakeCustomImageEnabled = entitlementService.dataLakeCustomImageEnabled(Crn.safeFromString(environment.getCreator()).getAccountId());
-
-            if (!dataLakeCustomImageEnabled) {
-                validationBuilder.error("Creating Data Lake with custom image is not enabled for this account.");
-            }
-
             if (clusterRequest.getRuntime() != null) {
                 validationBuilder.error("SDX cluster request must not specify both runtime version and image at the same time because image " +
                         "decides runtime version.");
