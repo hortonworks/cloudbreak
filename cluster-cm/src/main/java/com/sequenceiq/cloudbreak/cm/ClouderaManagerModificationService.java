@@ -193,11 +193,11 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             setParcelRepo(products, clouderaManagerResourceApi);
             refreshParcelRepos(clouderaManagerResourceApi);
             if (patchUpgrade) {
-                downloadAndActivateParcels(products, parcelResourceApi);
+                downloadAndActivateParcels(products, parcelResourceApi, true);
                 restartServices(clustersResourceApi);
             } else {
                 ClouderaManagerProduct cdhProduct = getCdhProducts(products);
-                upgradeNonCdhProducts(products, cdhProduct.getName(), parcelResourceApi);
+                upgradeNonCdhProducts(products, cdhProduct.getName(), parcelResourceApi, true);
                 upgradeCdh(clustersResourceApi, parcelResourceApi, cdhProduct);
                 restartStaleServices(clustersResourceApi);
             }
@@ -206,6 +206,29 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             LOGGER.info("Cluster runtime upgrade finished");
         } catch (ApiException e) {
             LOGGER.info("Could not upgrade Cloudera Runtime services", e);
+            throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void downloadAndDistributeParcels(Set<ClusterComponent> components, boolean patchUpgrade) throws CloudbreakException {
+        try {
+            ParcelResourceApi parcelResourceApi = clouderaManagerApiFactory.getParcelResourceApi(apiClient);
+            ClouderaManagerResourceApi clouderaManagerResourceApi = clouderaManagerApiFactory.getClouderaManagerResourceApi(apiClient);
+            checkParcelApiAvailability();
+            Set<ClouderaManagerProduct> products = getProducts(components);
+            setParcelRepo(products, clouderaManagerResourceApi);
+            refreshParcelRepos(clouderaManagerResourceApi);
+            if (patchUpgrade) {
+                LOGGER.info("Downloading parcels for {} products...", products);
+                downloadAndActivateParcels(products, parcelResourceApi, false);
+            } else {
+                ClouderaManagerProduct cdhProduct = getCdhProducts(products);
+                upgradeNonCdhProducts(products, cdhProduct.getName(), parcelResourceApi, false);
+                downloadAndActivateParcels(Collections.singleton(cdhProduct), parcelResourceApi, false);
+            }
+        } catch (ApiException e) {
+            LOGGER.info("Error during downloading parcels!", e);
             throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
         }
     }
@@ -221,23 +244,27 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         return clouderaManagerProductsProvider.getProducts(components);
     }
 
-    private void upgradeNonCdhProducts(Set<ClouderaManagerProduct> products, String cdhServiceName, ParcelResourceApi parcelResourceApi)
-            throws CloudbreakException, ApiException {
+    private void upgradeNonCdhProducts(Set<ClouderaManagerProduct> products, String cdhServiceName, ParcelResourceApi parcelResourceApi,
+            boolean activateParcels) throws CloudbreakException, ApiException {
         Set<ClouderaManagerProduct> nonCdhServices = getNonCdhProducts(products, cdhServiceName);
         if (!nonCdhServices.isEmpty()) {
             List<String> productNames = nonCdhServices.stream().map(ClouderaManagerProduct::getName).collect(Collectors.toList());
             LOGGER.debug("Starting to upgrade the following Non-CDH products: {}", productNames);
-            downloadAndActivateParcels(nonCdhServices, parcelResourceApi);
+            downloadAndActivateParcels(nonCdhServices, parcelResourceApi, activateParcels);
         } else {
             LOGGER.debug("Skipping Non-CDH products upgrade because the cluster does not contains any other products beside CDH.");
         }
     }
 
-    private void downloadAndActivateParcels(Set<ClouderaManagerProduct> products, ParcelResourceApi parcelResourceApi)
+    private void downloadAndActivateParcels(Set<ClouderaManagerProduct> products, ParcelResourceApi parcelResourceApi, boolean activate)
             throws ApiException, CloudbreakException {
         downloadParcels(products, parcelResourceApi);
         distributeParcels(products, parcelResourceApi);
-        activateParcels(products, parcelResourceApi);
+        if (activate) {
+            activateParcels(products, parcelResourceApi);
+        } else {
+            LOGGER.info("No parcel activation is necessary yet.");
+        }
     }
 
     private ClouderaManagerProduct getCdhProducts(Set<ClouderaManagerProduct> products) {
@@ -453,10 +480,10 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             hosts.stream()
                     .filter(host -> hostname.equalsIgnoreCase(host.getHostname()))
                     .findFirst().ifPresent(apiHost -> {
-                        String hostId = apiHost.getHostId();
-                        body.addItemsItem(
-                                new ApiHostRef().hostname(hostname).hostId(hostId));
-                    });
+                String hostId = apiHost.getHostId();
+                body.addItemsItem(
+                        new ApiHostRef().hostname(hostname).hostId(hostId));
+            });
         });
         LOGGER.debug("Created ApiHostRefList from upscaled hosts. Host count: [{}]", body.getItems().size());
         return body;

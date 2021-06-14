@@ -77,6 +77,10 @@ public interface ClusterApi {
         return clusterModificationService().gatherInstalledParcels(stackName);
     }
 
+    default void downloadAndDistributeParcels(Set<ClusterComponent> components, boolean patchUpgrade) throws CloudbreakException {
+        clusterModificationService().downloadAndDistributeParcels(components, patchUpgrade);
+    }
+
     default void removeUnusedParcels(Set<ClusterComponent> usedParcelComponents) throws CloudbreakException {
         clusterModificationService().removeUnusedParcels(usedParcelComponents);
     }
