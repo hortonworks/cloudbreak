@@ -253,6 +253,7 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
             List<String> subjectAlternativeNames = new ArrayList<>();
             subjectAlternativeNames.add(commonName);
             subjectAlternativeNames.add(fullyQualifiedEndpointName);
+            subjectAlternativeNames.add("datalakemigrationtest");
             for (String loadBalancerEndpoint : loadBalancerEndpoints) {
                 String loadBalancerEndpointName = getDomainNameProvider().getFullyQualifiedEndpointName(
                         hueHostGroups, loadBalancerEndpoint, environmentName, workloadSubdomain);

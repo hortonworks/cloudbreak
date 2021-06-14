@@ -186,7 +186,7 @@ public class DatalakeService {
         if (res.isEmpty()) {
             return Optional.empty();
         } else {
-            // it has the assumption that environemt and datalake has 1:1 connection
+            // it has the assumption that environment and data lake has 1:1 connection
             return Optional.of(stackService.getByIdWithListsInTransaction(res.get(FIRST).getId()));
         }
     }

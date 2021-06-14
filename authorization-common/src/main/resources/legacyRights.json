@@ -26,6 +26,7 @@
   "datahub/createClusterTemplate": "datahub/write",
   "environments/getFreeipaOperationStatus": "environments/read",
   "datalake/createDatalake": "datalake/write",
+  "datalake/resizeDatalake": "datalake/write",
   "datalake/describeDatalake": "datalake/read",
   "datalake/describeDetailedDatalake": "datalake/read",
   "datalake/deleteDatalake": "datalake/write",
