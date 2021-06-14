@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import com.sequenceiq.cloudbreak.cluster.api.ClusterSetupService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
@@ -505,6 +506,27 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         try {
             startClouderaManager();
             startAgents();
+            // fetch th context
+            // configure mgmt services.
+            return startServices();
+        } catch (ApiException e) {
+            LOGGER.info("Couldn't start Cloudera Manager services", e);
+            throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
+        }
+    }
+//
+//    private ClusterSetupService getClusterSetupService(Stack stack) {
+//        return clusterApiConnectors.getConnector(stack)
+//                .clusterSetupService();
+//    }
+
+    public void startClusterMgmtServices() throws CloudbreakException {
+        startClouderaManager();
+        startAgents();
+    }
+
+    public int startClusterServices() throws CloudbreakException {
+        try {
             return startServices();
         } catch (ApiException e) {
             LOGGER.info("Couldn't start Cloudera Manager services", e);
