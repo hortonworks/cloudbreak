@@ -38,25 +38,8 @@ public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetw
         result.setSubnetCIDR(null);
         result.setOutboundInternetTraffic(source.getOutboundInternetTraffic());
         result.setNetworkCidrs(source.getNetworkCidrs());
-        Map<String, Object> attributes = new HashMap<>();
-        Optional<CloudSubnet> cloudSubnet = subnetSelector.chooseSubnet(source.getPreferedSubnetId(), source.getSubnetMetas(),
-            availabilityZone, SelectionFallbackStrategy.ALLOW_FALLBACK);
-        if (cloudSubnet.isEmpty()) {
-            throw new BadRequestException("No subnet for the given availability zone: " + availabilityZone);
-        }
-        LOGGER.debug("Chosen subnet: {}", cloudSubnet.get());
 
-        attributes.put(SUBNET_ID, cloudSubnet.get().getId());
-        attributes.put(CLOUD_PLATFORM, getCloudPlatform().name());
-        attributes.putAll(getAttributesForLegacyNetwork(source));
-        if (PublicEndpointAccessGateway.ENABLED.equals(source.getPublicEndpointAccessGateway())) {
-            Optional<CloudSubnet> endpointGatewaySubnet = subnetSelector.chooseSubnetForEndpointGateway(source, cloudSubnet.get().getId());
-            if (endpointGatewaySubnet.isPresent()) {
-                attributes.put(ENDPOINT_GATEWAY_SUBNET_ID, endpointGatewaySubnet.get().getId());
-            } else {
-                throw new BadRequestException("Could not find public subnet in availability zone: " + cloudSubnet.get().getAvailabilityZone());
-            }
-        }
+        Map<String, Object> attributes = buildAttributes(source, availabilityZone);
 
         try {
             result.setAttributes(new Json(attributes));
@@ -64,6 +47,44 @@ public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetw
             LOGGER.debug("Environment's network could not be converted to network.", e);
         }
         return result;
+    }
+
+    private Map<String, Object> buildAttributes(EnvironmentNetworkResponse source, String availabilityZone) {
+        Map<String, Object> attributes = new HashMap<>();
+        CloudSubnet cloudSubnet = getCloudSubnet(source, availabilityZone);
+        LOGGER.debug("Chosen subnet: {}", cloudSubnet);
+
+        attributes.put(SUBNET_ID, cloudSubnet.getId());
+        attributes.put(CLOUD_PLATFORM, getCloudPlatform().name());
+        attributes.putAll(getAttributesForLegacyNetwork(source));
+        if (PublicEndpointAccessGateway.ENABLED.equals(source.getPublicEndpointAccessGateway())) {
+            attachEndpointGatewaySubnet(source, attributes, cloudSubnet);
+        }
+        return attributes;
+    }
+
+    /**
+     * Attach the subnet ID in which to place a public endpoint gateway.
+     *
+     * The default implementation should be sufficient for GCP and AWS.
+     *
+     * For Azure, we do not need to attach the endpoint gateway to a public subnet, so this method must be overrridable.
+     * @param source contains source information to retrieve subnets from
+     * @param attributes a Map which we put the gateway subnet ID in
+     */
+    protected void attachEndpointGatewaySubnet(EnvironmentNetworkResponse source, Map<String, Object> attributes, CloudSubnet cloudSubnet) {
+        Optional<CloudSubnet> endpointGatewaySubnet = subnetSelector.chooseSubnetForEndpointGateway(source, cloudSubnet.getId());
+        if (endpointGatewaySubnet.isPresent()) {
+            attributes.put(ENDPOINT_GATEWAY_SUBNET_ID, endpointGatewaySubnet.get().getId());
+        } else {
+            throw new BadRequestException("Could not find public subnet in availability zone: " + cloudSubnet.getAvailabilityZone());
+        }
+    }
+
+    private CloudSubnet getCloudSubnet(EnvironmentNetworkResponse source, String availabilityZone) {
+        Optional<CloudSubnet> cloudSubnet = subnetSelector.chooseSubnet(source.getPreferedSubnetId(), source.getSubnetMetas(),
+                availabilityZone, SelectionFallbackStrategy.ALLOW_FALLBACK);
+        return cloudSubnet.orElseThrow(() -> new BadRequestException("No subnet for the given availability zone: " + availabilityZone));
     }
 
     abstract Map<String, Object> getAttributesForLegacyNetwork(EnvironmentNetworkResponse source);
