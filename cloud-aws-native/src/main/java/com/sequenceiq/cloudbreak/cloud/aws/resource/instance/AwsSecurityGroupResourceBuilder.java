@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.resource.instance;
 
+import static com.sequenceiq.cloudbreak.cloud.aws.resource.instance.util.SecurityGroupBuilderUtil.SECURITY_GROUP_NAME;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.util.Collections;
@@ -58,7 +59,7 @@ public class AwsSecurityGroupResourceBuilder extends AbstractAwsNativeComputeBui
         Map<String, String> resources = securityGroupBuilderUtil.createSecurityGroupIfNeed(awsCloudStackView, group, amazonEc2Client, ac.getCloudContext(),
                 awsNativeModel);
         resources.forEach(context::putParameter);
-        return Collections.singletonList(createNamedResource(resourceType(), resources.get("SECURITY_GROUP_NAME")));
+        return Collections.singletonList(createNamedResource(resourceType(), resources.get(SECURITY_GROUP_NAME)));
     }
 
     @Override

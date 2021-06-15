@@ -46,6 +46,10 @@ public class SecurityGroupBuilderUtil {
 
     public static final int TO_PORT = 65535;
 
+    public static final String SECURITY_GROUP_ID = "SECURITY_GROUP_ID";
+
+    public static final String SECURITY_GROUP_NAME = "SECURITY_GROUP_NAME";
+
     private static final Logger LOGGER = getLogger(SecurityGroupBuilderUtil.class);
 
     @Inject
@@ -68,8 +72,8 @@ public class SecurityGroupBuilderUtil {
             resources = createOrGetSecurityGroup(amazonEc2Client, request, group, awsNativeModel);
         } else {
             List<SecurityGroup> securityGroups = fetchSecurityGroups(cloudSecurityIds, amazonEc2Client);
-            resources.put("SECURITY_GROUP_ID", securityGroups.get(0).getGroupId());
-            resources.put("SECURITY_GROUP_NAME", securityGroups.get(0).getGroupName());
+            resources.put(SECURITY_GROUP_ID, securityGroups.get(0).getGroupId());
+            resources.put(SECURITY_GROUP_NAME, securityGroups.get(0).getGroupName());
         }
         return resources;
     }
@@ -102,8 +106,8 @@ public class SecurityGroupBuilderUtil {
             egress(amazonEc2Client, awsNativeModel, securityGroup.getGroupId(), securityGroup.getIpPermissionsEgress());
             securityGroupId = groupId;
         }
-        resources.put("SECURITY_GROUP_ID", securityGroupId);
-        resources.put("SECURITY_GROUP_NAME", request.getGroupName());
+        resources.put(SECURITY_GROUP_ID, securityGroupId);
+        resources.put(SECURITY_GROUP_NAME, request.getGroupName());
         return resources;
     }
 

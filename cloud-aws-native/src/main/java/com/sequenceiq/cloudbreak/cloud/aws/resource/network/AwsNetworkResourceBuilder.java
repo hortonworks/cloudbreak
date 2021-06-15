@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws.resource.network;
 
+import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.VPC_ID;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,8 +23,6 @@ import com.sequenceiq.common.api.type.ResourceType;
 public class AwsNetworkResourceBuilder extends AbstractAwsNetworkBuilder {
 
     public static final String VPC_NAME = "vpcName";
-
-    public static final String VPC_ID = "vpcId";
 
     @Inject
     private AwsStackUtil awsStackUtil;
