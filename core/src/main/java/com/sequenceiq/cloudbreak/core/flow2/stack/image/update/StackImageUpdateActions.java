@@ -72,7 +72,7 @@ public class StackImageUpdateActions {
             protected void doExecute(StackContext context, ImageUpdateEvent payload, Map<Object, Object> variables) {
                 CheckResult checkResult = getStackImageUpdateService().checkPackageVersions(context.getStack(), payload.getImage());
                 if (checkResult.getStatus() == EventStatus.FAILED) {
-                    throw new OperationException(checkResult.getMessage());
+                    LOGGER.info("Check package versions failed: {}", checkResult);
                 }
                 sendEvent(context, new ImageUpdateEvent(StackImageUpdateEvent.CHECK_PACKAGE_VERSIONS_FINISHED_EVENT.event(),
                         context.getStack().getId(), payload.getImage()));
