@@ -30,7 +30,7 @@ public abstract class AbstractAwsComputeBaseResourceChecker extends AbstractAwsB
             ResourceType type, AwsContext context, AuthenticatedContext auth, Iterable<CloudResource> resources) {
         List<CloudResourceStatus> result = new ArrayList<>();
         for (CloudResource resource : resources) {
-            LOGGER.debug("Check {} resource: {}", type, resource);
+            LOGGER.debug("Check {} resource: {}. Build: {}", type, resource, context.isBuild());
             try {
                 boolean finished = isFinished(context, auth, resource);
                 ResourceStatus successStatus = context.isBuild() ? ResourceStatus.CREATED : ResourceStatus.DELETED;

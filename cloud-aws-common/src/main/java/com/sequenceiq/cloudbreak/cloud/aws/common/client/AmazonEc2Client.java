@@ -57,6 +57,8 @@ import com.amazonaws.services.ec2.model.ImportKeyPairRequest;
 import com.amazonaws.services.ec2.model.ImportKeyPairResult;
 import com.amazonaws.services.ec2.model.ModifyInstanceAttributeRequest;
 import com.amazonaws.services.ec2.model.ModifyInstanceAttributeResult;
+import com.amazonaws.services.ec2.model.RunInstancesRequest;
+import com.amazonaws.services.ec2.model.RunInstancesResult;
 import com.amazonaws.services.ec2.model.StartInstancesRequest;
 import com.amazonaws.services.ec2.model.StartInstancesResult;
 import com.amazonaws.services.ec2.model.StopInstancesRequest;
@@ -221,5 +223,13 @@ public class AmazonEc2Client extends AmazonClient {
         CreateVpcRequest request = new CreateVpcRequest();
         request.withCidrBlock(security.getCloudSecurityId());
         return client.createVpc(request);
+    }
+
+    public RunInstancesResult createInstance(RunInstancesRequest request) {
+        return client.runInstances(request);
+    }
+
+    public TerminateInstancesResult deleteInstance(TerminateInstancesRequest request) {
+        return client.terminateInstances(request);
     }
 }
