@@ -556,6 +556,29 @@
       "dependencies": ["ZOOKEEPER", "HDFS", "HBASE"]
     },
     {
+      "name": "SQL_STREAM_BUILDER",
+      "displayName": "SQL Stream Builder",
+      "componentNameInParcel": "ssb",
+      "components": [
+        {
+          "name": "STREAMING_SQL_ENGINE",
+          "groups": ["manager"],
+          "base" : true
+        },
+        {
+          "name": "STREAMING_SQL_CONSOLE",
+          "groups": ["manager"],
+          "base" : true
+        },
+        {
+          "name": "MATERIALIZED_VIEW_ENGINE",
+          "groups": ["manager"],
+          "base" : true
+        }
+      ],
+      "dependencies": ["FLINK", "KAFKA"]
+    },
+    {
       "name": "STREAMS_REPLICATION_MANAGER",
       "displayName": "Stream Replication Manager",
       "componentNameInParcel": "srm",
