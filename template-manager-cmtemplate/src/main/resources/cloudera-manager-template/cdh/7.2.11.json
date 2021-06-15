@@ -125,6 +125,10 @@
       "version": "1.10.1"
     },
     {
+      "name": "SQL_STREAM_BUILDER",
+      "version": "1.4.0"
+    },
+    {
       "name": "SPARK3_ON_YARN",
       "version": "3.0.0"
     },
