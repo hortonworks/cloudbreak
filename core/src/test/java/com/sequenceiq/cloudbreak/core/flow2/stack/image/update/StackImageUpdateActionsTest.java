@@ -298,8 +298,8 @@ public class StackImageUpdateActionsTest {
         checkPackageVersionsAction.execute(stateContext);
 
         verify(stackImageUpdateService, times(1)).checkPackageVersions(any(Stack.class), any(StatedImage.class));
-        verify(eventBus, times(0)).notify(eq(StackImageUpdateEvent.CHECK_PACKAGE_VERSIONS_FINISHED_EVENT.event()), any(Event.class));
-        verify(eventBus, times(1)).notify(eq(StackImageUpdateEvent.STACK_IMAGE_UPDATE_FAILED_EVENT.event()), any(Event.class));
+        verify(eventBus, times(1)).notify(eq(StackImageUpdateEvent.CHECK_PACKAGE_VERSIONS_FINISHED_EVENT.event()), any(Event.class));
+        verify(eventBus, times(0)).notify(eq(StackImageUpdateEvent.STACK_IMAGE_UPDATE_FAILED_EVENT.event()), any(Event.class));
     }
 
     @Test

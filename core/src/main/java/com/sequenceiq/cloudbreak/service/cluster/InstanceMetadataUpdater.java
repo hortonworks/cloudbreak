@@ -273,6 +273,9 @@ public class InstanceMetadataUpdater {
                     packagesWithMultipleVersions.add(pkg);
                 }
             }
+            if (!packagesWithMultipleVersions.isEmpty()) {
+                LOGGER.debug("Packages unfortunately do have multiple versions: {}", pkgVersionsMMap);
+            }
             return packagesWithMultipleVersions;
         } catch (IOException ex) {
             LOGGER.warn("Cannot collect package versions from hosts", ex);
@@ -281,7 +284,7 @@ public class InstanceMetadataUpdater {
     }
 
     public Map<String, List<String>> collectInstancesWithMissingPackageVersions(Collection<InstanceMetaData> instanceMetaDatas) {
-        Map<String, List<String>> instancesWithMissingPackagVersions = new HashMap<>();
+        Map<String, List<String>> instancesWithMissingPackageVersions = new HashMap<>();
 
         for (InstanceMetaData instanceMetaData : instanceMetaDatas) {
             try {
@@ -290,14 +293,14 @@ public class InstanceMetadataUpdater {
                 List<String> missingPackageVersions = this.packages.stream().map(Package::getName).collect(Collectors.toList());
                 missingPackageVersions.removeAll(packages);
                 if (!missingPackageVersions.isEmpty()) {
-                    instancesWithMissingPackagVersions.put(instanceMetaData.getInstanceId(), missingPackageVersions);
+                    instancesWithMissingPackageVersions.put(instanceMetaData.getInstanceId(), missingPackageVersions);
                 }
             } catch (IOException e) {
                 LOGGER.warn("Missing image information for instance: " + instanceMetaData.getInstanceId(), e);
             }
         }
 
-        return instancesWithMissingPackagVersions;
+        return instancesWithMissingPackageVersions;
     }
 
     public List<Package> getPackages() {

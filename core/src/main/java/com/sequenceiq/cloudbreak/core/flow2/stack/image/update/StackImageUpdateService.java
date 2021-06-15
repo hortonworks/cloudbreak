@@ -177,17 +177,20 @@ public class StackImageUpdateService {
 
         CheckResult instanceHaveMultipleVersionResult = packageVersionChecker.checkInstancesHaveMultiplePackageVersions(instanceMetaDataSet);
         if (instanceHaveMultipleVersionResult.getStatus() == EventStatus.FAILED) {
+            LOGGER.debug("Check packages - Instances do have multiple package versions: {}", instanceHaveMultipleVersionResult);
             return instanceHaveMultipleVersionResult;
         }
 
         CheckResult instancesHaveAllMandatoryPackageVersionResult = packageVersionChecker.checkInstancesHaveAllMandatoryPackageVersion(instanceMetaDataSet);
         if (instancesHaveAllMandatoryPackageVersionResult.getStatus() == EventStatus.FAILED) {
+            LOGGER.debug("Check packages - Instances are missing one or more package versions: {}", instancesHaveAllMandatoryPackageVersionResult);
             return instancesHaveAllMandatoryPackageVersionResult;
         }
 
         CheckResult compareImageAndInstancesMandatoryPackageVersion =
                 packageVersionChecker.compareImageAndInstancesMandatoryPackageVersion(newImage, instanceMetaDataSet);
         if (compareImageAndInstancesMandatoryPackageVersion.getStatus() == EventStatus.FAILED) {
+            LOGGER.debug("Check packages - Image and instances mandatory packages do differ: {}", compareImageAndInstancesMandatoryPackageVersion);
             return compareImageAndInstancesMandatoryPackageVersion;
         }
 
