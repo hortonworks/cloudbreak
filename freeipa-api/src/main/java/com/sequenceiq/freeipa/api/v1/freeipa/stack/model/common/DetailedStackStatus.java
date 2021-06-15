@@ -70,7 +70,9 @@ public enum DetailedStackStatus {
     WAIT_FOR_SYNC(Status.WAIT_FOR_SYNC, AvailabilityStatus.UNAVAILABLE),
     UNREACHABLE(Status.UNREACHABLE, AvailabilityStatus.UNAVAILABLE),
     DELETED_ON_PROVIDER_SIDE(Status.DELETED_ON_PROVIDER_SIDE, AvailabilityStatus.UNAVAILABLE),
-    UNHEALTHY(Status.UNHEALTHY, AvailabilityStatus.AVAILABLE);
+    UNHEALTHY(Status.UNHEALTHY, AvailabilityStatus.AVAILABLE),
+    SALT_STATE_UPDATE_IN_PROGRESS(Status.UPDATE_IN_PROGRESS, AvailabilityStatus.AVAILABLE),
+    SALT_STATE_UPDATE_FAILED(Status.UPDATE_FAILED, AvailabilityStatus.AVAILABLE);
 
     public static final Collection<DetailedStackStatus> AVAILABLE_STATUSES;
 

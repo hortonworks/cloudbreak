@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.api.v1.freeipa.stack;
 
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaOperationDescriptions.UPDATE_SALT;
+
 import java.util.List;
 
 import javax.validation.Valid;
@@ -176,7 +178,13 @@ public interface FreeIpaV1Endpoint {
     @PUT
     @Path("change_image")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = FreeIpaOperationDescriptions.BIND_USER_CREATE, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
+    @ApiOperation(value = FreeIpaOperationDescriptions.CHANGE_IMAGE, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
             nickname = "changeImageV1")
     FlowIdentifier changeImage(@Valid @NotNull ImageChangeRequest request);
+
+    @PUT
+    @Path("salt_update")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = UPDATE_SALT, nickname = "updateSaltV1")
+    FlowIdentifier updateSaltByName(@QueryParam("environment") @NotEmpty String environmentCrn, @AccountId @QueryParam("accountId") String accountId);
 }

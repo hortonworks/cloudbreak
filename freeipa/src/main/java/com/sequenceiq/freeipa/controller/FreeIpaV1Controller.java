@@ -5,6 +5,7 @@ import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CRN;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
@@ -22,6 +23,7 @@ import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.annotation.RequestObject;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
@@ -49,6 +51,7 @@ import com.sequenceiq.freeipa.client.FreeIpaClientExceptionWrapper;
 import com.sequenceiq.freeipa.controller.validation.AttachChildEnvironmentRequestValidator;
 import com.sequenceiq.freeipa.controller.validation.CreateFreeIpaRequestValidator;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.orchestrator.SaltUpdateService;
 import com.sequenceiq.freeipa.service.binduser.BindUserCreateService;
 import com.sequenceiq.freeipa.service.freeipa.cert.root.FreeIpaRootCertificateService;
 import com.sequenceiq.freeipa.service.freeipa.cleanup.CleanupService;
@@ -124,6 +127,9 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
 
     @Inject
     private ImageChangeService imageChangeService;
+
+    @Inject
+    private SaltUpdateService saltUpdateService;
 
     @Override
     @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = EDIT_ENVIRONMENT)
@@ -275,5 +281,12 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
     public FlowIdentifier changeImage(@RequestObject @Valid @NotNull ImageChangeRequest request) {
         String accountId = crnService.getCurrentAccountId();
         return imageChangeService.changeImage(accountId, request);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = EDIT_ENVIRONMENT)
+    public FlowIdentifier updateSaltByName(@ResourceCrn @NotEmpty String environmentCrn, @AccountId String accountId) {
+        String currentAccountId = Optional.ofNullable(accountId).orElseGet(ThreadBasedUserCrnProvider::getAccountId);
+        return saltUpdateService.updateSaltStates(environmentCrn, currentAccountId);
     }
 }
