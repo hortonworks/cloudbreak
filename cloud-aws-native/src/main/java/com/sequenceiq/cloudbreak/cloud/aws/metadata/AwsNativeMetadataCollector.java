@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancerMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceStoreMetadata;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -102,6 +103,11 @@ public class AwsNativeMetadataCollector implements MetadataCollector {
             collectedLoadBalancer.ifPresent(result::add);
         }
         return result;
+    }
+
+    @Override
+    public InstanceStoreMetadata collectInstanceStorageCount(AuthenticatedContext ac, List<String> instanceTypes) {
+        return null;
     }
 
     private List<CloudVmMetaDataStatus> collectInstances(List<CloudInstance> vms, List<String> knownInstanceIdList, AmazonEc2Client ec2Client) {
