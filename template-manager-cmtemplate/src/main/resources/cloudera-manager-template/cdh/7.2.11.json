@@ -122,7 +122,7 @@
     },
     {
       "name": "FLINK",
-      "version": "1.10.1"
+      "version": "1.12.3"
     },
     {
       "name": "SQL_STREAM_BUILDER",
