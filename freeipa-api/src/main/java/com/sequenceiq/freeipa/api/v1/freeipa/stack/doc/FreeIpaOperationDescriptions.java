@@ -20,6 +20,9 @@ public final class FreeIpaOperationDescriptions {
     public static final String REBOOT = "Reboot one or more instances";
     public static final String REPAIR = "Repair one or more instances";
     public static final String BIND_USER_CREATE = "Creates kerberos and ldap bind users for cluster";
+    public static final String UPDATE_SALT = "Update salt states on FreeIPA instances";
+    public static final String CHANGE_IMAGE = "Changes the image used for creating instances";
+
 
     private FreeIpaOperationDescriptions() {
     }

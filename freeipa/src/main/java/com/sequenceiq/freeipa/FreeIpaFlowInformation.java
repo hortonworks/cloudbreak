@@ -14,6 +14,7 @@ import com.sequenceiq.freeipa.flow.freeipa.diagnostics.config.DiagnosticsCollect
 import com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowConfig;
 import com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionFlowConfig;
 import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayFlowConfig;
+import com.sequenceiq.freeipa.flow.freeipa.salt.update.SaltUpdateFlowConfig;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowConfig;
 import com.sequenceiq.freeipa.flow.instance.reboot.RebootFlowConfig;
 import com.sequenceiq.freeipa.flow.stack.image.change.ImageChangeFlowConfig;
@@ -39,7 +40,8 @@ public class FreeIpaFlowInformation implements ApplicationFlowInformation {
             UpscaleFlowConfig.class,
             ChangePrimaryGatewayFlowConfig.class,
             DiagnosticsCollectionFlowConfig.class,
-            RebootFlowConfig.class);
+            RebootFlowConfig.class,
+            SaltUpdateFlowConfig.class);
 
     private static final List<String> PARALLEL_FLOWS = List.of(
             FreeIpaCleanupEvent.CLEANUP_EVENT.event(),
