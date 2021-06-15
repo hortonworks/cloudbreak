@@ -17,7 +17,8 @@ public class FmsUserConverter {
     public FmsUser toFmsUser(UserManagementProto.User umsUser) {
         return createFmsUser(umsUser.getWorkloadUsername(),
                 umsUser.getFirstName(),
-                umsUser.getLastName());
+                umsUser.getLastName(),
+                umsUser.getState());
     }
 
     public FmsUser toFmsUser(UserManagementProto.MachineUser umsMachineUser) {
@@ -25,22 +26,42 @@ public class FmsUserConverter {
         // Store the machine user name and id instead.
         return createFmsUser(umsMachineUser.getWorkloadUsername(),
                 umsMachineUser.getMachineUserName(),
-                umsMachineUser.getMachineUserId());
+                umsMachineUser.getMachineUserId(),
+                umsMachineUser.getState());
     }
 
     public FmsUser toFmsUser(
             UserManagementProto.UserSyncActorDetails actorDetails) {
         return createFmsUser(actorDetails.getWorkloadUsername(),
                 actorDetails.getFirstName(),
-                actorDetails.getLastName());
+                actorDetails.getLastName(),
+                actorDetails.getState());
     }
 
-    private FmsUser createFmsUser(String workloadUsername, String firstName, String lastName) {
+    private FmsUser createFmsUser(
+            String workloadUsername, String firstName, String lastName,
+            UserManagementProto.ActorState.Value actorState) {
         checkArgument(StringUtils.isNotBlank(workloadUsername));
         FmsUser fmsUser = new FmsUser();
         fmsUser.withName(workloadUsername);
         fmsUser.withFirstName(StringUtils.defaultIfBlank(StringUtils.strip(firstName), NONE_STRING));
         fmsUser.withLastName(StringUtils.defaultIfBlank(StringUtils.strip(lastName), NONE_STRING));
+        fmsUser.withState(toFmsUserState(actorState));
         return fmsUser;
+    }
+
+    private FmsUser.State toFmsUserState(UserManagementProto.ActorState.Value actorState) {
+        if (null == actorState) {
+            return FmsUser.State.ENABLED;
+        }
+        switch (actorState) {
+            case DEACTIVATED:
+                return FmsUser.State.DISABLED;
+            case ACTIVE:
+            case DELETING:
+            case UNRECOGNIZED:
+            default:
+                return FmsUser.State.ENABLED;
+        }
     }
 }

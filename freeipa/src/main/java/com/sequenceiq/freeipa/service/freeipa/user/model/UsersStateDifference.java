@@ -3,7 +3,9 @@ package com.sequenceiq.freeipa.service.freeipa.user.model;
 import static java.util.Objects.requireNonNull;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -113,9 +115,15 @@ public class UsersStateDifference {
     }
 
     public static ImmutableSet<FmsUser> calculateUsersToAdd(UmsUsersState umsState, UsersState ipaState) {
-        ImmutableSet<FmsUser> usersToAdd = ImmutableSet.copyOf(Sets.difference(umsState.getUsersState().getUsers(), ipaState.getUsers())
+        Map<String, FmsUser> umsUsers = umsState.getUsersState().getUsers().stream()
+                .collect(Collectors.toMap(FmsUser::getName, Function.identity()));
+        Set<String> ipaUsers = ipaState.getUsers().stream()
+                .map(FmsUser::getName)
+                .collect(Collectors.toSet());
+        ImmutableSet<FmsUser> usersToAdd = ImmutableSet.copyOf(Sets.difference(umsUsers.keySet(), ipaUsers)
                 .stream()
-                .filter(fmsUser -> !FreeIpaChecks.IPA_PROTECTED_USERS.contains(fmsUser.getName()))
+                .filter(username -> !FreeIpaChecks.IPA_PROTECTED_USERS.contains(username))
+                .map(username -> umsUsers.get(username))
                 .collect(Collectors.toSet()));
 
         LOGGER.info("usersToAdd size = {}", usersToAdd.size());

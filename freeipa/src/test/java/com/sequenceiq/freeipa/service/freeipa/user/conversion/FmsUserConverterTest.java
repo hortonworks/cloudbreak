@@ -8,6 +8,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class FmsUserConverterTest {
+    private static final int UNRECOGNIZED_STATE_VALUE = 99;
+
     private FmsUserConverter underTest = new FmsUserConverter();
 
     @Test
@@ -19,6 +21,7 @@ class FmsUserConverterTest {
                 .setFirstName(firstName)
                 .setLastName(lastName)
                 .setWorkloadUsername(workloadUsername)
+                .setState(UserManagementProto.ActorState.Value.ACTIVE)
                 .build();
 
         FmsUser fmsUser = underTest.toFmsUser(umsUser);
@@ -26,6 +29,7 @@ class FmsUserConverterTest {
         assertEquals(workloadUsername, fmsUser.getName());
         assertEquals(firstName, fmsUser.getFirstName());
         assertEquals(lastName, fmsUser.getLastName());
+        assertEquals(FmsUser.State.ENABLED, fmsUser.getState());
     }
 
     @Test
@@ -37,6 +41,7 @@ class FmsUserConverterTest {
                 .setFirstName(firstName)
                 .setLastName(lastName)
                 .setWorkloadUsername(workloadUsername)
+                .setState(UserManagementProto.ActorState.Value.ACTIVE)
                 .build();
 
         FmsUser fmsUser = underTest.toFmsUser(umsUser);
@@ -44,10 +49,75 @@ class FmsUserConverterTest {
         assertEquals("foobar", fmsUser.getName());
         assertEquals("Foo", fmsUser.getFirstName());
         assertEquals("Bar", fmsUser.getLastName());
+        assertEquals(FmsUser.State.ENABLED, fmsUser.getState());
     }
 
     @Test
     public void testUserToFmsUserMissingNames() {
+        String workloadUsername = "foobar";
+        UserManagementProto.User umsUser = UserManagementProto.User.newBuilder()
+                .setWorkloadUsername(workloadUsername)
+                .setState(UserManagementProto.ActorState.Value.ACTIVE)
+                .build();
+
+        FmsUser fmsUser = underTest.toFmsUser(umsUser);
+
+        assertEquals(workloadUsername, fmsUser.getName());
+        assertEquals(underTest.NONE_STRING, fmsUser.getFirstName());
+        assertEquals(underTest.NONE_STRING, fmsUser.getLastName());
+        assertEquals(FmsUser.State.ENABLED, fmsUser.getState());
+    }
+
+    @Test
+    public void testUserToFmsUserDeactivatedState() {
+        String workloadUsername = "foobar";
+        UserManagementProto.User umsUser = UserManagementProto.User.newBuilder()
+                .setWorkloadUsername(workloadUsername)
+                .setState(UserManagementProto.ActorState.Value.DEACTIVATED)
+                .build();
+
+        FmsUser fmsUser = underTest.toFmsUser(umsUser);
+
+        assertEquals(workloadUsername, fmsUser.getName());
+        assertEquals(underTest.NONE_STRING, fmsUser.getFirstName());
+        assertEquals(underTest.NONE_STRING, fmsUser.getLastName());
+        assertEquals(FmsUser.State.DISABLED, fmsUser.getState());
+    }
+
+    @Test
+    public void testUserToFmsUserDeletingState() {
+        String workloadUsername = "foobar";
+        UserManagementProto.User umsUser = UserManagementProto.User.newBuilder()
+                .setWorkloadUsername(workloadUsername)
+                .setState(UserManagementProto.ActorState.Value.DELETING)
+                .build();
+
+        FmsUser fmsUser = underTest.toFmsUser(umsUser);
+
+        assertEquals(workloadUsername, fmsUser.getName());
+        assertEquals(underTest.NONE_STRING, fmsUser.getFirstName());
+        assertEquals(underTest.NONE_STRING, fmsUser.getLastName());
+        assertEquals(FmsUser.State.ENABLED, fmsUser.getState());
+    }
+
+    @Test
+    public void testUserToFmsUserUnrecognizedState() {
+        String workloadUsername = "foobar";
+        UserManagementProto.User umsUser = UserManagementProto.User.newBuilder()
+                .setWorkloadUsername(workloadUsername)
+                .setStateValue(UNRECOGNIZED_STATE_VALUE)
+                .build();
+
+        FmsUser fmsUser = underTest.toFmsUser(umsUser);
+
+        assertEquals(workloadUsername, fmsUser.getName());
+        assertEquals(underTest.NONE_STRING, fmsUser.getFirstName());
+        assertEquals(underTest.NONE_STRING, fmsUser.getLastName());
+        assertEquals(FmsUser.State.ENABLED, fmsUser.getState());
+    }
+
+    @Test
+    public void testUserToFmsUserMissingState() {
         String workloadUsername = "foobar";
         UserManagementProto.User umsUser = UserManagementProto.User.newBuilder()
                 .setWorkloadUsername(workloadUsername)
@@ -58,6 +128,7 @@ class FmsUserConverterTest {
         assertEquals(workloadUsername, fmsUser.getName());
         assertEquals(underTest.NONE_STRING, fmsUser.getFirstName());
         assertEquals(underTest.NONE_STRING, fmsUser.getLastName());
+        assertEquals(FmsUser.State.ENABLED, fmsUser.getState());
     }
 
     @Test
@@ -67,6 +138,7 @@ class FmsUserConverterTest {
         UserManagementProto.User umsUser = UserManagementProto.User.newBuilder()
                 .setFirstName(firstName)
                 .setLastName(lastName)
+                .setState(UserManagementProto.ActorState.Value.ACTIVE)
                 .build();
 
         assertThrows(IllegalArgumentException.class, () -> underTest.toFmsUser(umsUser));
@@ -81,6 +153,7 @@ class FmsUserConverterTest {
                 .setMachineUserName(name)
                 .setMachineUserId(id)
                 .setWorkloadUsername(workloadUsername)
+                .setState(UserManagementProto.ActorState.Value.ACTIVE)
                 .build();
 
         FmsUser fmsUser = underTest.toFmsUser(umsMachineUser);
@@ -88,6 +161,7 @@ class FmsUserConverterTest {
         assertEquals(workloadUsername, fmsUser.getName());
         assertEquals(name, fmsUser.getFirstName());
         assertEquals(id, fmsUser.getLastName());
+        assertEquals(FmsUser.State.ENABLED, fmsUser.getState());
     }
 
     @Test
@@ -99,6 +173,7 @@ class FmsUserConverterTest {
                 .setMachineUserName(name)
                 .setMachineUserId(id)
                 .setWorkloadUsername(workloadUsername)
+                .setState(UserManagementProto.ActorState.Value.ACTIVE)
                 .build();
 
         FmsUser fmsUser = underTest.toFmsUser(umsMachineUser);
@@ -106,10 +181,75 @@ class FmsUserConverterTest {
         assertEquals("foobar", fmsUser.getName());
         assertEquals("Foo", fmsUser.getFirstName());
         assertEquals("Bar", fmsUser.getLastName());
+        assertEquals(FmsUser.State.ENABLED, fmsUser.getState());
     }
 
     @Test
     public void testMachineUserToFmsUserMissingNames() {
+        String workloadUsername = "foobar";
+        UserManagementProto.MachineUser umsMachineUser = UserManagementProto.MachineUser.newBuilder()
+                .setWorkloadUsername(workloadUsername)
+                .setState(UserManagementProto.ActorState.Value.ACTIVE)
+                .build();
+
+        FmsUser fmsUser = underTest.toFmsUser(umsMachineUser);
+
+        assertEquals(workloadUsername, fmsUser.getName());
+        assertEquals(underTest.NONE_STRING, fmsUser.getFirstName());
+        assertEquals(underTest.NONE_STRING, fmsUser.getLastName());
+        assertEquals(FmsUser.State.ENABLED, fmsUser.getState());
+    }
+
+    @Test
+    public void testMachineUserToFmsUserDeactivatedState() {
+        String workloadUsername = "foobar";
+        UserManagementProto.MachineUser umsMachineUser = UserManagementProto.MachineUser.newBuilder()
+                .setWorkloadUsername(workloadUsername)
+                .setState(UserManagementProto.ActorState.Value.DEACTIVATED)
+                .build();
+
+        FmsUser fmsUser = underTest.toFmsUser(umsMachineUser);
+
+        assertEquals(workloadUsername, fmsUser.getName());
+        assertEquals(underTest.NONE_STRING, fmsUser.getFirstName());
+        assertEquals(underTest.NONE_STRING, fmsUser.getLastName());
+        assertEquals(FmsUser.State.DISABLED, fmsUser.getState());
+    }
+
+    @Test
+    public void testMachineUserToFmsUserDeletingState() {
+        String workloadUsername = "foobar";
+        UserManagementProto.MachineUser umsMachineUser = UserManagementProto.MachineUser.newBuilder()
+                .setWorkloadUsername(workloadUsername)
+                .setState(UserManagementProto.ActorState.Value.DELETING)
+                .build();
+
+        FmsUser fmsUser = underTest.toFmsUser(umsMachineUser);
+
+        assertEquals(workloadUsername, fmsUser.getName());
+        assertEquals(underTest.NONE_STRING, fmsUser.getFirstName());
+        assertEquals(underTest.NONE_STRING, fmsUser.getLastName());
+        assertEquals(FmsUser.State.ENABLED, fmsUser.getState());
+    }
+
+    @Test
+    public void testMachineUserToFmsUserUnrecognizedState() {
+        String workloadUsername = "foobar";
+        UserManagementProto.MachineUser umsMachineUser = UserManagementProto.MachineUser.newBuilder()
+                .setWorkloadUsername(workloadUsername)
+                .setStateValue(UNRECOGNIZED_STATE_VALUE)
+                .build();
+
+        FmsUser fmsUser = underTest.toFmsUser(umsMachineUser);
+
+        assertEquals(workloadUsername, fmsUser.getName());
+        assertEquals(underTest.NONE_STRING, fmsUser.getFirstName());
+        assertEquals(underTest.NONE_STRING, fmsUser.getLastName());
+        assertEquals(FmsUser.State.ENABLED, fmsUser.getState());
+    }
+
+    @Test
+    public void testMachineUserToFmsUserMissingState() {
         String workloadUsername = "foobar";
         UserManagementProto.MachineUser umsMachineUser = UserManagementProto.MachineUser.newBuilder()
                 .setWorkloadUsername(workloadUsername)
@@ -120,6 +260,7 @@ class FmsUserConverterTest {
         assertEquals(workloadUsername, fmsUser.getName());
         assertEquals(underTest.NONE_STRING, fmsUser.getFirstName());
         assertEquals(underTest.NONE_STRING, fmsUser.getLastName());
+        assertEquals(FmsUser.State.ENABLED, fmsUser.getState());
     }
 
     @Test
@@ -129,6 +270,7 @@ class FmsUserConverterTest {
         UserManagementProto.MachineUser umsMachineUser = UserManagementProto.MachineUser.newBuilder()
                 .setMachineUserName(name)
                 .setMachineUserId(id)
+                .setState(UserManagementProto.ActorState.Value.ACTIVE)
                 .build();
 
         assertThrows(IllegalArgumentException.class, () -> underTest.toFmsUser(umsMachineUser));
@@ -144,6 +286,7 @@ class FmsUserConverterTest {
                         .setFirstName(firstName)
                         .setLastName(lastName)
                         .setWorkloadUsername(workloadUsername)
+                        .setState(UserManagementProto.ActorState.Value.ACTIVE)
                         .build();
 
         FmsUser fmsUser = underTest.toFmsUser(actorDetails);
@@ -151,6 +294,7 @@ class FmsUserConverterTest {
         assertEquals(workloadUsername, fmsUser.getName());
         assertEquals(firstName, fmsUser.getFirstName());
         assertEquals(lastName, fmsUser.getLastName());
+        assertEquals(FmsUser.State.ENABLED, fmsUser.getState());
     }
 
     @Test
@@ -163,6 +307,7 @@ class FmsUserConverterTest {
                         .setFirstName(firstName)
                         .setLastName(lastName)
                         .setWorkloadUsername(workloadUsername)
+                        .setState(UserManagementProto.ActorState.Value.ACTIVE)
                         .build();
 
         FmsUser fmsUser = underTest.toFmsUser(actorDetails);
@@ -170,10 +315,79 @@ class FmsUserConverterTest {
         assertEquals("foobar", fmsUser.getName());
         assertEquals("Foo", fmsUser.getFirstName());
         assertEquals("Bar", fmsUser.getLastName());
+        assertEquals(FmsUser.State.ENABLED, fmsUser.getState());
     }
 
     @Test
     public void testUserSyncActorDetailsToFmsUserMissingNames() {
+        String workloadUsername = "foobar";
+        UserManagementProto.UserSyncActorDetails actorDetails =
+                UserManagementProto.UserSyncActorDetails.newBuilder()
+                        .setWorkloadUsername(workloadUsername)
+                        .setState(UserManagementProto.ActorState.Value.ACTIVE)
+                        .build();
+
+        FmsUser fmsUser = underTest.toFmsUser(actorDetails);
+
+        assertEquals(workloadUsername, fmsUser.getName());
+        assertEquals(underTest.NONE_STRING, fmsUser.getFirstName());
+        assertEquals(underTest.NONE_STRING, fmsUser.getLastName());
+        assertEquals(FmsUser.State.ENABLED, fmsUser.getState());
+    }
+
+    @Test
+    public void testUserSyncActorDetailsToFmsUserDeactivatedState() {
+        String workloadUsername = "foobar";
+        UserManagementProto.UserSyncActorDetails actorDetails =
+                UserManagementProto.UserSyncActorDetails.newBuilder()
+                        .setWorkloadUsername(workloadUsername)
+                        .setState(UserManagementProto.ActorState.Value.DEACTIVATED)
+                        .build();
+
+        FmsUser fmsUser = underTest.toFmsUser(actorDetails);
+
+        assertEquals(workloadUsername, fmsUser.getName());
+        assertEquals(underTest.NONE_STRING, fmsUser.getFirstName());
+        assertEquals(underTest.NONE_STRING, fmsUser.getLastName());
+        assertEquals(FmsUser.State.DISABLED, fmsUser.getState());
+    }
+
+    @Test
+    public void testUserSyncActorDetailsToFmsUserDeletingState() {
+        String workloadUsername = "foobar";
+        UserManagementProto.UserSyncActorDetails actorDetails =
+                UserManagementProto.UserSyncActorDetails.newBuilder()
+                        .setWorkloadUsername(workloadUsername)
+                        .setState(UserManagementProto.ActorState.Value.DELETING)
+                        .build();
+
+        FmsUser fmsUser = underTest.toFmsUser(actorDetails);
+
+        assertEquals(workloadUsername, fmsUser.getName());
+        assertEquals(underTest.NONE_STRING, fmsUser.getFirstName());
+        assertEquals(underTest.NONE_STRING, fmsUser.getLastName());
+        assertEquals(FmsUser.State.ENABLED, fmsUser.getState());
+    }
+
+    @Test
+    public void testUserSyncActorDetailsToFmsUserUnrecognizedState() {
+        String workloadUsername = "foobar";
+        UserManagementProto.UserSyncActorDetails actorDetails =
+                UserManagementProto.UserSyncActorDetails.newBuilder()
+                        .setWorkloadUsername(workloadUsername)
+                        .setStateValue(UNRECOGNIZED_STATE_VALUE)
+                        .build();
+
+        FmsUser fmsUser = underTest.toFmsUser(actorDetails);
+
+        assertEquals(workloadUsername, fmsUser.getName());
+        assertEquals(underTest.NONE_STRING, fmsUser.getFirstName());
+        assertEquals(underTest.NONE_STRING, fmsUser.getLastName());
+        assertEquals(FmsUser.State.ENABLED, fmsUser.getState());
+    }
+
+    @Test
+    public void testUserSyncActorDetailsToFmsUserMissingState() {
         String workloadUsername = "foobar";
         UserManagementProto.UserSyncActorDetails actorDetails =
                 UserManagementProto.UserSyncActorDetails.newBuilder()
@@ -185,6 +399,7 @@ class FmsUserConverterTest {
         assertEquals(workloadUsername, fmsUser.getName());
         assertEquals(underTest.NONE_STRING, fmsUser.getFirstName());
         assertEquals(underTest.NONE_STRING, fmsUser.getLastName());
+        assertEquals(FmsUser.State.ENABLED, fmsUser.getState());
     }
 
     @Test
@@ -195,6 +410,7 @@ class FmsUserConverterTest {
                 UserManagementProto.UserSyncActorDetails.newBuilder()
                         .setFirstName(firstName)
                         .setLastName(lastName)
+                        .setState(UserManagementProto.ActorState.Value.ACTIVE)
                         .build();
 
         assertThrows(IllegalArgumentException.class, () -> underTest.toFmsUser(actorDetails));
@@ -210,6 +426,7 @@ class FmsUserConverterTest {
                         .setFirstName(firstName)
                         .setLastName(lastName)
                         .setWorkloadUsername(workloadUserName)
+                        .setState(UserManagementProto.ActorState.Value.ACTIVE)
                         .build();
 
         assertThrows(IllegalArgumentException.class, () -> underTest.toFmsUser(actorDetails));
