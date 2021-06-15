@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -291,7 +292,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
                 .withBlockDeviceMappings(deviceMappingSpecifications);
 
         ModifyInstanceAttributeResult modifyIdentityIdFormatResult = client.modifyInstanceAttribute(modifyInstanceAttributeRequest);
-        LOGGER.debug("Delete on termination set to ture. {}", modifyIdentityIdFormatResult);
+        LOGGER.debug("Delete on termination set to true. {}", modifyIdentityIdFormatResult);
     }
 
     private void deleteOrphanedVolumes(List<CloudResourceStatus> cloudResourceStatuses, AmazonEc2Client client) {
@@ -320,11 +321,20 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
 
         DescribeVolumesRequest describeVolumesRequest = new DescribeVolumesRequest(volumes.getFirst());
         LOGGER.debug("Going to describe volume(s) with id(s): [{}]", String.join(",", describeVolumesRequest.getVolumeIds()));
-        DescribeVolumesResult result = client.describeVolumes(describeVolumesRequest);
-        ResourceStatus volumeSetStatus = getResourceStatus(result);
+        AtomicReference<ResourceStatus> volumeSetStatus = new AtomicReference<>();
+        try {
+            DescribeVolumesResult result = client.describeVolumes(describeVolumesRequest);
+            volumeSetStatus.set(getResourceStatus(result));
+        } catch (AmazonEC2Exception e) {
+            if (!"InvalidVolume.NotFound".equals(e.getErrorCode())) {
+                throw e;
+            }
+            LOGGER.info("The volume doesn't need to be deleted as it does not exist on the provider side. Reason: {}", e.getMessage());
+            volumeSetStatus.set(DELETED);
+        }
         LOGGER.debug("[{}] volume set status is {}", String.join(",", volumes.getFirst()), volumeSetStatus);
         return volumes.getSecond().stream()
-                .map(resource -> new CloudResourceStatus(resource, volumeSetStatus))
+                .map(resource -> new CloudResourceStatus(resource, volumeSetStatus.get()))
                 .collect(Collectors.toList());
     }
 

@@ -41,6 +41,8 @@ public class AwsAttachmentResourceBuilder extends AbstractAwsComputeBuilder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsAttachmentResourceBuilder.class);
 
+    private static final int ORDER = 4;
+
     @Inject
     @Qualifier("intermediateBuilderExecutor")
     private AsyncTaskExecutor intermediateBuilderExecutor;
@@ -150,6 +152,6 @@ public class AwsAttachmentResourceBuilder extends AbstractAwsComputeBuilder {
 
     @Override
     public int order() {
-        return 2;
+        return ORDER;
     }
 }

@@ -15,6 +15,8 @@ import com.amazonaws.services.ec2.model.CreateTagsRequest;
 import com.amazonaws.services.ec2.model.CreateTagsResult;
 import com.amazonaws.services.ec2.model.CreateVolumeRequest;
 import com.amazonaws.services.ec2.model.CreateVolumeResult;
+import com.amazonaws.services.ec2.model.CreateVpcRequest;
+import com.amazonaws.services.ec2.model.CreateVpcResult;
 import com.amazonaws.services.ec2.model.DeleteKeyPairRequest;
 import com.amazonaws.services.ec2.model.DeleteKeyPairResult;
 import com.amazonaws.services.ec2.model.DeleteVolumeRequest;
@@ -62,6 +64,8 @@ import com.amazonaws.services.ec2.model.StopInstancesResult;
 import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
 import com.amazonaws.services.ec2.model.TerminateInstancesResult;
 import com.amazonaws.services.ec2.waiters.AmazonEC2Waiters;
+import com.sequenceiq.cloudbreak.cloud.model.Network;
+import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.service.Retry;
 
 public class AmazonEc2Client extends AmazonClient {
@@ -210,5 +214,12 @@ public class AmazonEc2Client extends AmazonClient {
 
     public AuthorizeSecurityGroupEgressResult addEgress(AuthorizeSecurityGroupEgressRequest reguest) {
         return client.authorizeSecurityGroupEgress(reguest);
+    }
+
+    // WIP
+    public CreateVpcResult createVpc(Network network, Security security) {
+        CreateVpcRequest request = new CreateVpcRequest();
+        request.withCidrBlock(security.getCloudSecurityId());
+        return client.createVpc(request);
     }
 }
