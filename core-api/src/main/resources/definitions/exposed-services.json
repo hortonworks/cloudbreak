@@ -435,6 +435,21 @@
       "visibleForDatahub": true
     },
     {
+      "name": "CRUISE_CONTROL_API",
+      "displayName": "Cruise Control",
+      "serviceName": "CRUISE_CONTROL_SERVER",
+      "knoxService": "CRUISE-CONTROL",
+      "knoxUrl": "/cruise-control/kafkacruisecontrol/",
+      "ssoSupported": true,
+      "port": 8899,
+      "tlsPort": 8899,
+      "apiOnly": true,
+      "apiIncluded": true,
+      "visibleForDatalake": true,
+      "visibleForDatahub": true,
+      "minVersion": "7.2.11"
+    },
+    {
       "name": "IMPALA",
       "displayName": "Impala",
       "serviceName": "IMPALAD",

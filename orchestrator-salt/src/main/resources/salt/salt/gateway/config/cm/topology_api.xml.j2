@@ -535,6 +535,18 @@
     {%- endif %}
     {%- endif %}
 
+    {% if 'CRUISE_CONTROL_SERVER' in salt['pillar.get']('gateway:location') -%}
+    {% if 'CRUISE-CONTROL' in exposed -%}
+    <service>
+        <role>CRUISE-CONTROL</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['CRUISE_CONTROL_SERVER'] -%}
+        <url>{{ protocol }}://{{ hostloc }}:{{ ports['CRUISE-CONTROL'] }}</url>
+        {%- endfor %}
+    </service>
+    {%- endif %}
+    {%- endif %}
+
+
     {% if 'PHOENIX_QUERY_SERVER' in salt['pillar.get']('gateway:location') -%}
     {% if 'AVATICA' in exposed -%}
     <service>
