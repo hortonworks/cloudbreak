@@ -101,7 +101,7 @@ public class BackupRestoreStatusServiceTest {
     public void testRestorepFailure() {
         ArgumentCaptor<ResourceEvent> captor = ArgumentCaptor.forClass(ResourceEvent.class);
         service.handleDatabaseRestoreFailure(STACK_ID, ERROR_MESSAGE, DetailedStackStatus.DATABASE_RESTORE_FAILED);
-        verify(clusterService, times(1)).updateClusterStatusByStackId(STACK_ID, Status.RESTORE_FAILED, ERROR_MESSAGE);
+        verify(clusterService, times(1)).updateClusterStatusByStackId(STACK_ID, Status.AVAILABLE, ERROR_MESSAGE);
         verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(Status.UPDATE_FAILED.name()), captor.capture(), eq(ERROR_MESSAGE));
         assertEquals(DATALAKE_DATABASE_RESTORE_FAILED, captor.getValue());
     }
