@@ -62,7 +62,7 @@ public class BackupRestoreStatusService {
     }
 
     public void handleDatabaseRestoreFailure(long stackId, String errorReason, DetailedStackStatus detailedStatus) {
-        clusterService.updateClusterStatusByStackId(stackId, Status.RESTORE_FAILED, errorReason);
+        clusterService.updateClusterStatusByStackId(stackId, Status.AVAILABLE, errorReason);
         stackUpdater.updateStackStatus(stackId, detailedStatus, extractSaltErrorIfAvailable(errorReason));
         flowMessageService.fireEventAndLog(stackId, Status.UPDATE_FAILED.name(), DATALAKE_DATABASE_RESTORE_FAILED, errorReason);
     }
