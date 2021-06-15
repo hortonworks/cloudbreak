@@ -19,6 +19,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
+import com.sequenceiq.cloudbreak.service.runtimes.SupportedRuntimes;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterParams;
 import com.sequenceiq.cloudbreak.service.upgrade.matrix.UpgradeMatrixService;
 
@@ -39,6 +40,9 @@ public class UpgradePermissionProviderTest {
     @Mock
     private ComponentVersionComparator componentVersionComparator;
 
+    @Mock
+    private SupportedRuntimes supportedRuntimes;
+
     @Test
     public void testPermitStackUpgradeShouldReturnTrueWhenTheVersionsAreEqualAndTheBuildNumberIsGreater() {
         String componentVersion = "7.2.1";
@@ -47,6 +51,7 @@ public class UpgradePermissionProviderTest {
         ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, true, Map.of(), DATALAKE_STACK_TYPE, null);
 
         when(componentBuildNumberComparator.compare(currentImage, candidateImage, ImagePackageVersion.CDH_BUILD_NUMBER.getKey())).thenReturn(true);
+        when(supportedRuntimes.isSupported("7.2.1")).thenReturn(true);
 
         boolean actual = underTest.permitStackUpgrade(imageFilterParams, candidateImage);
 
@@ -63,6 +68,7 @@ public class UpgradePermissionProviderTest {
         ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, true, Map.of(), DATALAKE_STACK_TYPE, null);
 
         when(componentBuildNumberComparator.compare(currentImage, candidateImage, ImagePackageVersion.CDH_BUILD_NUMBER.getKey())).thenReturn(false);
+        when(supportedRuntimes.isSupported("7.2.1")).thenReturn(true);
 
         boolean actual = underTest.permitStackUpgrade(imageFilterParams, candidateImage);
 
@@ -81,6 +87,7 @@ public class UpgradePermissionProviderTest {
 
         when(componentVersionComparator.permitCmAndStackUpgradeByComponentVersion(currentVersion, targetVersion)).thenReturn(true);
         when(upgradeMatrixService.permitByUpgradeMatrix(currentVersion, targetVersion)).thenReturn(true);
+        when(supportedRuntimes.isSupported("7.2.2")).thenReturn(true);
 
         boolean actual = underTest.permitStackUpgrade(imageFilterParams, candidateImage);
 
@@ -99,6 +106,7 @@ public class UpgradePermissionProviderTest {
         ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, true, Map.of(), DATALAKE_STACK_TYPE, null);
 
         when(componentVersionComparator.permitCmAndStackUpgradeByComponentVersion(currentVersion, targetVersion)).thenReturn(false);
+        when(supportedRuntimes.isSupported("7.1.2")).thenReturn(true);
 
         boolean actual = underTest.permitStackUpgrade(imageFilterParams, candidateImage);
 
@@ -117,6 +125,7 @@ public class UpgradePermissionProviderTest {
 
         when(componentVersionComparator.permitCmAndStackUpgradeByComponentVersion(currentVersion, targetVersion)).thenReturn(true);
         when(upgradeMatrixService.permitByUpgradeMatrix(currentVersion, targetVersion)).thenReturn(false);
+        when(supportedRuntimes.isSupported("7.2.2")).thenReturn(true);
 
         boolean actual = underTest.permitStackUpgrade(imageFilterParams, candidateImage);
 
@@ -135,6 +144,7 @@ public class UpgradePermissionProviderTest {
         ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, true, Map.of(), StackType.WORKLOAD, null);
 
         when(componentVersionComparator.permitCmAndStackUpgradeByComponentVersion(currentVersion, targetVersion)).thenReturn(true);
+        when(supportedRuntimes.isSupported("7.2.2")).thenReturn(true);
 
         boolean actual = underTest.permitStackUpgrade(imageFilterParams, candidateImage);
 
@@ -169,12 +179,30 @@ public class UpgradePermissionProviderTest {
         ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, true, Map.of(), DATALAKE_STACK_TYPE, null);
 
         when(componentBuildNumberComparator.compare(currentImage, candidateImage, ImagePackageVersion.CDH_BUILD_NUMBER.getKey())).thenReturn(false);
+        when(supportedRuntimes.isSupported("7.2.1")).thenReturn(true);
 
         boolean actual = underTest.permitStackUpgrade(imageFilterParams, candidateImage);
 
         assertFalse(actual);
         verify(componentBuildNumberComparator).compare(currentImage, candidateImage, ImagePackageVersion.CDH_BUILD_NUMBER.getKey());
         verifyNoInteractions(upgradeMatrixService, componentVersionComparator);
+    }
+
+    @Test
+    public void testPermitStackUpgradeShouldReturnfalseWhenTheCandidateCdhVersionIsNotSupported() {
+        String currentVersion = "7.2.1";
+        String targetVersion = "7.2.10";
+        Image currentImage = createImage(currentVersion, "2002");
+        Image candidateImage = createImage(targetVersion, "2010");
+        ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, true, Map.of(), DATALAKE_STACK_TYPE, null);
+
+        when(supportedRuntimes.isSupported("7.2.10")).thenReturn(false);
+
+        boolean actual = underTest.permitStackUpgrade(imageFilterParams, candidateImage);
+
+        assertFalse(actual);
+        verify(supportedRuntimes).isSupported("7.2.10");
+        verifyNoInteractions(componentBuildNumberComparator, componentVersionComparator, upgradeMatrixService);
     }
 
     private Image createImage(String version, String buildNumber) {

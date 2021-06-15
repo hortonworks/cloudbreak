@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
+import com.sequenceiq.cloudbreak.service.runtimes.SupportedRuntimes;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterParams;
 import com.sequenceiq.cloudbreak.service.upgrade.matrix.UpgradeMatrixService;
 
@@ -22,12 +23,16 @@ public class UpgradePermissionProvider {
     @Inject
     private ComponentVersionComparator componentVersionComparator;
 
+    @Inject
+    private SupportedRuntimes supportedRuntimes;
+
     public boolean permitCmUpgrade(ImageFilterParams imageFilterParams, Image image) {
         return permitUpgrade(imageFilterParams, image, ImagePackageVersion.CM, ImagePackageVersion.CM_BUILD_NUMBER, false);
     }
 
-    public boolean permitStackUpgrade(ImageFilterParams imageFilterParams, Image image) {
-        return permitUpgrade(imageFilterParams, image, ImagePackageVersion.STACK, ImagePackageVersion.CDH_BUILD_NUMBER, checkUpgradeMatrix(imageFilterParams));
+    public boolean permitStackUpgrade(ImageFilterParams filterParams, Image image) {
+        return isRuntimeVersionSupported(image)
+                && permitUpgrade(filterParams, image, ImagePackageVersion.STACK, ImagePackageVersion.CDH_BUILD_NUMBER, checkUpgradeMatrix(filterParams));
     }
 
     private boolean checkUpgradeMatrix(ImageFilterParams imageFilterParams) {
@@ -40,8 +45,8 @@ public class UpgradePermissionProvider {
         String newVersion = image.getPackageVersion(version);
         return versionsArePresent(currentVersion, newVersion)
                 && currentVersion.equals(newVersion)
-                        ? permitCmAndStackUpgradeByBuildNumber(imageFilterParams.getCurrentImage(), image, buildNumber.getKey())
-                        : permitCmAndStackUpgradeByComponentVersion(currentVersion, newVersion, checkUpgradeMatrix);
+                ? permitCmAndStackUpgradeByBuildNumber(imageFilterParams.getCurrentImage(), image, buildNumber.getKey())
+                : permitCmAndStackUpgradeByComponentVersion(currentVersion, newVersion, checkUpgradeMatrix);
     }
 
     private boolean versionsArePresent(String currentVersion, String newVersion) {
@@ -55,6 +60,10 @@ public class UpgradePermissionProvider {
     boolean permitCmAndStackUpgradeByComponentVersion(String currentVersion, String newVersion, boolean checkUpgradeMatrix) {
         return permitByComponentVersion(currentVersion, newVersion)
                 && (!checkUpgradeMatrix || permitByUpgradeMatrix(currentVersion, newVersion));
+    }
+
+    private boolean isRuntimeVersionSupported(Image image) {
+        return supportedRuntimes.isSupported(image.getPackageVersion(ImagePackageVersion.STACK));
     }
 
     private boolean permitByComponentVersion(String currentVersion, String newVersion) {
