@@ -4,11 +4,18 @@ import java.util.Objects;
 
 public class FmsUser {
 
+    public enum State {
+        ENABLED,
+        DISABLED
+    }
+
     private String name;
 
     private String firstName;
 
     private String lastName;
+
+    private State state;
 
     public String getName() {
         return name;
@@ -37,6 +44,15 @@ public class FmsUser {
         return this;
     }
 
+    public State getState() {
+        return state;
+    }
+
+    public FmsUser withState(State state) {
+        this.state = state;
+        return this;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -49,12 +65,13 @@ public class FmsUser {
         FmsUser other = (FmsUser) o;
         return Objects.equals(this.name, other.name)
                 && Objects.equals(this.firstName, other.firstName)
-                && Objects.equals(this.lastName, other.lastName);
+                && Objects.equals(this.lastName, other.lastName)
+                && Objects.equals(this.state, other.state);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, firstName, lastName);
+        return Objects.hash(name, firstName, lastName, state);
     }
 
     @Override
@@ -63,6 +80,7 @@ public class FmsUser {
                 + "name='" + name + '\''
                 + ", firstName='" + firstName + '\''
                 + ", lastName='" + lastName + '\''
+                + ", state=" + state
                 + '}';
     }
 }

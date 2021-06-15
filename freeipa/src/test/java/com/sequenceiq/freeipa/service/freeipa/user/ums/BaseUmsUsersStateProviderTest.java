@@ -111,11 +111,11 @@ class BaseUmsUsersStateProviderTest {
                         groupsPerMember.get(u.getWorkloadUsername()),
                         state.getUsersWorkloadCredentialMap().get(u.getWorkloadUsername()),
                         usersState.getUserMetadataMap().get(u.getWorkloadUsername())));
-        testData.machineUsers.forEach(u ->
-                verifyActor(u.getCrn(), u.getWorkloadUsername(), workloadUsersWithAccess,
-                        groupsPerMember.get(u.getWorkloadUsername()),
-                        state.getUsersWorkloadCredentialMap().get(u.getWorkloadUsername()),
-                        usersState.getUserMetadataMap().get(u.getWorkloadUsername())));
+        testData.machineUsers.forEach(mu ->
+                verifyActor(mu.getCrn(), mu.getWorkloadUsername(), workloadUsersWithAccess,
+                        groupsPerMember.get(mu.getWorkloadUsername()),
+                        state.getUsersWorkloadCredentialMap().get(mu.getWorkloadUsername()),
+                        usersState.getUserMetadataMap().get(mu.getWorkloadUsername())));
 
         assertEquals(testData.servicePrincipalCloudIdentities, state.getServicePrincipalCloudIdentities());
     }
@@ -297,6 +297,7 @@ class BaseUmsUsersStateProviderTest {
                                         .toString())
                                 .setWorkloadUsername(userNameBasis + i)
                                 .addCloudIdentities(createCloudIdentity())
+                                .setState(UserManagementProto.ActorState.Value.ACTIVE)
                                 .build();
                     })
                     .collect(Collectors.toList());
@@ -316,6 +317,7 @@ class BaseUmsUsersStateProviderTest {
                                         .toString())
                                 .setWorkloadUsername(RandomStringUtils.randomAlphabetic(10))
                                 .addCloudIdentities(createCloudIdentity())
+                                .setState(UserManagementProto.ActorState.Value.ACTIVE)
                                 .build();
                     })
                     .collect(Collectors.toList());

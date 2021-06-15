@@ -37,6 +37,10 @@ import com.sequenceiq.freeipa.service.freeipa.user.model.UsersState;
 @ExtendWith(MockitoExtension.class)
 class FreeIpaUsersStateProviderTest {
 
+    private static final boolean USER_ENABLED = true;
+
+    private static final boolean USER_DISABLED = false;
+
     @InjectMocks
     FreeIpaUsersStateProvider underTest;
 
@@ -176,14 +180,29 @@ class FreeIpaUsersStateProviderTest {
     }
 
     @Test
-    void testFromIpaUser() {
-        com.sequenceiq.freeipa.client.model.User ipaUser = createIpaUser("uid", List.of("group1", "group2"));
+    void testFromIpaUserEnabled() {
+        com.sequenceiq.freeipa.client.model.User ipaUser =
+                createIpaUser("uid", List.of("group1", "group2"), USER_ENABLED);
 
         FmsUser fmsUser = underTest.fromIpaUser(ipaUser);
 
         assertEquals(fmsUser.getName(), ipaUser.getUid());
         assertEquals(fmsUser.getLastName(), ipaUser.getSn());
         assertEquals(fmsUser.getFirstName(), ipaUser.getGivenname());
+        assertEquals(fmsUser.getState(), FmsUser.State.ENABLED);
+    }
+
+    @Test
+    void testFromIpaUserDisabled() {
+        com.sequenceiq.freeipa.client.model.User ipaUser =
+                createIpaUser("uid", List.of("group1", "group2"), USER_DISABLED);
+
+        FmsUser fmsUser = underTest.fromIpaUser(ipaUser);
+
+        assertEquals(fmsUser.getName(), ipaUser.getUid());
+        assertEquals(fmsUser.getLastName(), ipaUser.getSn());
+        assertEquals(fmsUser.getFirstName(), ipaUser.getGivenname());
+        assertEquals(fmsUser.getState(), FmsUser.State.DISABLED);
     }
 
     @Test
@@ -196,12 +215,18 @@ class FreeIpaUsersStateProviderTest {
     }
 
     private com.sequenceiq.freeipa.client.model.User createIpaUser(String uid, List<String> memberOfGroup) {
+        return createIpaUser(uid, memberOfGroup, USER_ENABLED);
+    }
+
+    private com.sequenceiq.freeipa.client.model.User createIpaUser(
+            String uid, List<String> memberOfGroup, boolean enabled) {
         com.sequenceiq.freeipa.client.model.User ipaUser = new com.sequenceiq.freeipa.client.model.User();
         ipaUser.setUid(uid);
         ipaUser.setDn(UUID.randomUUID().toString());
         ipaUser.setSn(UUID.randomUUID().toString());
         ipaUser.setGivenname(UUID.randomUUID().toString());
         ipaUser.setMemberOfGroup(memberOfGroup);
+        ipaUser.setNsAccountLock(enabled);
         return ipaUser;
     }
 

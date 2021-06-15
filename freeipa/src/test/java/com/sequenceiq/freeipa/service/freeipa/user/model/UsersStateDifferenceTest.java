@@ -23,32 +23,51 @@ class UsersStateDifferenceTest {
     @Test
     void testCalculateUsersToAdd() {
         FmsUser userUms = new FmsUser().withName("userUms");
+        FmsUser userDisabledUms = new FmsUser().withName("userDisabledUms")
+                .withState(FmsUser.State.DISABLED);
         FmsUser userProtected = new FmsUser().withName(FreeIpaChecks.IPA_PROTECTED_USERS.get(0));
-        FmsUser userBoth = new FmsUser().withName("userBoth");
-        FmsUser userIPA = new FmsUser().withName("userIPA");
+        FmsUser userBothUms = new FmsUser().withName("userBoth");
+        FmsUser userBothIpa = new FmsUser().withName("userBoth");
+        FmsUser userIpa = new FmsUser().withName("userIPA");
+        FmsUser userSameStateUms = new FmsUser().withName("userSameState")
+                .withState(FmsUser.State.DISABLED);
+        FmsUser userSameStateIpa = new FmsUser().withName("userSameState")
+                .withState(FmsUser.State.DISABLED);
+        FmsUser userDifferentStateUms = new FmsUser().withName("userDifferentState")
+                .withState(FmsUser.State.ENABLED);
+        FmsUser userDifferentStateIpa = new FmsUser().withName("userDifferentState")
+                .withState(FmsUser.State.DISABLED);
 
         UmsUsersState umsUsersState = new UmsUsersState.Builder()
                 .setUsersState(new UsersState.Builder()
                         .addUser(userUms)
+                        .addUser(userDisabledUms)
                         .addUser(userProtected)
-                        .addUser(userBoth)
+                        .addUser(userBothUms)
+                        .addUser(userSameStateUms)
+                        .addUser(userDifferentStateUms)
                         .build())
                 .build();
 
         UsersState ipaUsersState = new UsersState.Builder()
-                .addUser(userBoth)
-                .addUser(userIPA)
+                .addUser(userBothIpa)
+                .addUser(userIpa)
+                .addUser(userSameStateIpa)
+                .addUser(userDifferentStateIpa)
                 .build();
 
         ImmutableSet<FmsUser> usersToAdd = UsersStateDifference.calculateUsersToAdd(umsUsersState, ipaUsersState);
 
         // the user that exists only in the UMS will be added
         assertTrue(usersToAdd.contains(userUms));
+        assertTrue(usersToAdd.contains(userDisabledUms));
         // protected users will be ignored
         assertFalse(usersToAdd.contains(userProtected));
         // users that exist in both or only in ipa will not be added
-        assertFalse(usersToAdd.contains(userBoth));
-        assertFalse(usersToAdd.contains(userIPA));
+        assertFalse(usersToAdd.contains(userBothUms));
+        assertFalse(usersToAdd.contains(userIpa));
+        assertFalse(usersToAdd.contains(userSameStateUms));
+        assertFalse(usersToAdd.contains(userDifferentStateUms));
     }
 
     @Test

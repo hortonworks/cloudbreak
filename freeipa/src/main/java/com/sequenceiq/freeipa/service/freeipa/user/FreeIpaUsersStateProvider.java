@@ -89,7 +89,8 @@ public class FreeIpaUsersStateProvider {
         return new FmsUser()
                 .withName(ipaUser.getUid())
                 .withFirstName(ipaUser.getGivenname())
-                .withLastName(ipaUser.getSn());
+                .withLastName(ipaUser.getSn())
+                .withState(ipaUser.getNsAccountLock() ? FmsUser.State.ENABLED : FmsUser.State.DISABLED);
     }
 
     @VisibleForTesting
