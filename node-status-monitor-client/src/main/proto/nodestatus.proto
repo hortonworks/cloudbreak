@@ -191,6 +191,10 @@ message NetworkDetails {
     HealthStatus azureManagementAccessible = 17;
     // Version of the cdp-telemetry binary
     string cdpTelemetryVersion = 18;
+    // Availability of archive.cloudera.com address.
+    HealthStatus archiveClouderaComAccessible = 19;
+    // Availability of cloudera-service-delivery-cache.s3.amazonaws.com address.
+    HealthStatus serviceDeliveryCacheS3Accessible = 20;
 }
 
 // System host metrics that is collected periodically by nodestatus monitor.
