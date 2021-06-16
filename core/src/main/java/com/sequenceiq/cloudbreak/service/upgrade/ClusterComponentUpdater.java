@@ -26,11 +26,13 @@ public class ClusterComponentUpdater {
     @Inject
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
 
-    public void updateClusterComponentsByStackId(Stack stack, Set<Component> targetComponents) {
+    public void updateClusterComponentsByStackId(Stack stack, Set<Component> targetComponents, boolean removeUnused) {
         Set<ClusterComponent> clusterComponentsFromDb = clusterComponentConfigProvider.getComponentsByClusterId(stack.getCluster().getId());
         targetComponents.forEach(targetComponent -> updateComponentFromDbAttributeField(clusterComponentsFromDb, targetComponent));
         clusterComponentConfigProvider.store(clusterComponentsFromDb);
-        removeUnusedComponents(targetComponents, clusterComponentsFromDb);
+        if (removeUnused) {
+            removeUnusedComponents(targetComponents, clusterComponentsFromDb);
+        }
         LOGGER.info("Updated cluster components:" + clusterComponentsFromDb);
     }
 
@@ -77,6 +79,7 @@ public class ClusterComponentUpdater {
                 .filter(component -> ComponentType.CDH_PRODUCT_DETAILS.equals(component.getComponentType()))
                 .filter(filterDiffBetweenComponentsFromImageAndDatabase(targetComponents))
                 .collect(Collectors.toSet());
+        LOGGER.debug("Removing unused components: {}", unusedCdhProductDetails);
         clusterComponentConfigProvider.deleteClusterComponents(unusedCdhProductDetails);
     }
 }

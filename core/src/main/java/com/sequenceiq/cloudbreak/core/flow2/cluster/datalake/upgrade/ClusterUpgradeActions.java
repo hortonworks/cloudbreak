@@ -4,11 +4,13 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.Clus
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.StateContext;
@@ -33,6 +35,7 @@ import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.upgrade.ImageComponentUpdaterService;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradeImageInfo;
+import com.sequenceiq.cloudbreak.service.upgrade.sync.CmVersionSyncerService;
 import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowParameters;
@@ -179,6 +182,12 @@ public class ClusterUpgradeActions {
     public Action<?, ?> clusterUpgradeFailedAction() {
         return new AbstractClusterUpgradeAction<>(ClusterUpgradeFailedEvent.class) {
 
+            @Value("${cb.upgrade.failure.sync.sdx.enabled}")
+            private boolean syncAfterFailureEnabled;
+
+            @Inject
+            private CmVersionSyncerService cmVersionSyncerService;
+
             @Override
             protected ClusterUpgradeContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
                     ClusterUpgradeFailedEvent payload) {
@@ -191,6 +200,12 @@ public class ClusterUpgradeActions {
 
             @Override
             protected void doExecute(ClusterUpgradeContext context, ClusterUpgradeFailedEvent payload, Map<Object, Object> variables) {
+                if (syncAfterFailureEnabled) {
+                    StatedImage currentImage = getCurrentImage(variables);
+                    StatedImage targetImage = getTargetImage(variables);
+                    Stack stack = stackService.getById(payload.getResourceId());
+                    cmVersionSyncerService.syncCmParcelsToDb(stack, Set.of(currentImage, targetImage));
+                }
                 clusterUpgradeService.handleUpgradeClusterFailure(context.getStackId(), payload.getException().getMessage(), payload.getDetailedStatus());
                 sendEvent(context, CLUSTER_UPGRADE_FAIL_HANDLED_EVENT.event(), payload);
             }

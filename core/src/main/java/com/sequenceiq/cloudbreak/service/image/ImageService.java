@@ -2,12 +2,15 @@ package com.sequenceiq.cloudbreak.service.image;
 
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 import static com.sequenceiq.cloudbreak.common.type.ComponentType.CDH_PRODUCT_DETAILS;
+import static com.sequenceiq.cloudbreak.common.type.ComponentType.CM_REPO_DETAILS;
+import static com.sequenceiq.cloudbreak.common.type.ComponentType.IMAGE;
 import static com.sequenceiq.cloudbreak.service.image.ImageCatalogService.CDP_DEFAULT_CATALOG_NAME;
 
 import java.io.IOException;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -37,6 +40,7 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.StackDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
 import com.sequenceiq.cloudbreak.cmtemplate.utils.BlueprintUtils;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
@@ -46,7 +50,6 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.StackMatrixService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
@@ -81,6 +84,9 @@ public class ImageService {
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
 
+    @Inject
+    private ClouderaManagerProductConverter clouderaManagerProductConverter;
+
     public Image getImage(Long stackId) throws CloudbreakImageNotFoundException {
         return componentConfigProviderService.getImage(stackId);
     }
@@ -95,7 +101,7 @@ public class ImageService {
         LOGGER.debug("Selected VM image for CloudPlatform '{}' and region '{}' is: {} from: {} image catalog",
                 platformString, region, imageName, imgFromCatalog.getImageCatalogUrl());
 
-        Set<Component> components = getComponents(stack, Map.of(), imgFromCatalog, imageName);
+        Set<Component> components = getComponents(stack, Map.of(), imgFromCatalog, imageName, EnumSet.of(IMAGE, CDH_PRODUCT_DETAILS, CM_REPO_DETAILS));
         componentConfigProviderService.store(components);
         return components;
     }
@@ -218,27 +224,74 @@ public class ImageService {
                 .findFirst();
     }
 
-    public Set<Component> getComponents(Stack stack, Map<InstanceGroupType, String> userData, StatedImage statedImage, String imageName)
+    public Set<Component> getComponents(Stack stack, StatedImage targetImage, Map<InstanceGroupType, String> userData,
+            EnumSet<ComponentType> requestedComponentTypes)
+            throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        String imageName = determineImageName(stack.cloudPlatform(), stack.getRegion(), targetImage.getImage());
+        return getComponents(stack, userData, targetImage, imageName, requestedComponentTypes);
+    }
+
+    private Set<Component> getComponents(Stack stack, Map<InstanceGroupType, String> userData, StatedImage statedImage, String imageName,
+            EnumSet<ComponentType> requestedComponents)
             throws CloudbreakImageCatalogException {
         Set<Component> components = new HashSet<>();
         com.sequenceiq.cloudbreak.cloud.model.catalog.Image catalogBasedImage = statedImage.getImage();
-        Image image = new Image(imageName, userData, catalogBasedImage.getOs(), catalogBasedImage.getOsType(),
-                statedImage.getImageCatalogUrl(), statedImage.getImageCatalogName(), catalogBasedImage.getUuid(),
-                catalogBasedImage.getPackageVersions());
-        Component imageComponent = new Component(ComponentType.IMAGE, ComponentType.IMAGE.name(), new Json(image), stack);
-        components.add(imageComponent);
+        if (requestedComponents.contains(IMAGE)) {
+            addImage(stack, userData, statedImage, imageName, catalogBasedImage, components);
+        }
+        if (requestedComponents.contains(CDH_PRODUCT_DETAILS)) {
+            addStackRepo(stack, components, catalogBasedImage);
+            addPrewarmParcels(stack, statedImage, components);
+        }
+        if (requestedComponents.contains(CM_REPO_DETAILS)) {
+            addCmRepo(stack, components, catalogBasedImage);
+        }
+        return components;
+    }
+
+    private void addPrewarmParcels(Stack stack, StatedImage statedImage, Set<Component> components) {
+        components.addAll(clouderaManagerProductConverter.clouderaManagerProductListToComponent(getPreWarmParcels(statedImage), stack));
+    }
+
+    private void addStackRepo(Stack stack, Set<Component> components, com.sequenceiq.cloudbreak.cloud.model.catalog.Image catalogBasedImage)
+            throws CloudbreakImageCatalogException {
         if (catalogBasedImage.getStackDetails() != null) {
             StackDetails stackDetails = catalogBasedImage.getStackDetails();
             StackType stackType = determineStackType(stackDetails);
             Component stackRepoComponent = getStackComponent(stack, stackDetails, stackType, catalogBasedImage.getOsType());
             components.add(stackRepoComponent);
+        }
+    }
+
+    private void addCmRepo(Stack stack, Set<Component> components, com.sequenceiq.cloudbreak.cloud.model.catalog.Image catalogBasedImage)
+            throws CloudbreakImageCatalogException {
+        if (catalogBasedImage.getStackDetails() != null) {
+            StackDetails stackDetails = catalogBasedImage.getStackDetails();
+            StackType stackType = determineStackType(stackDetails);
             components.add(getClusterManagerComponent(stack, catalogBasedImage, stackType));
         }
-        catalogBasedImage.getPreWarmParcels().forEach(parcel -> {
-            Optional<ClouderaManagerProduct> product = preWarmParcelParser.parseProductFromParcel(parcel, catalogBasedImage.getPreWarmCsd());
-            product.ifPresent(p -> components.add(new Component(CDH_PRODUCT_DETAILS, p.getName(), new Json(p), stack)));
-        });
-        return components;
+    }
+
+    private void addImage(Stack stack, Map<InstanceGroupType, String> userData, StatedImage statedImage, String imageName,
+            com.sequenceiq.cloudbreak.cloud.model.catalog.Image catalogBasedImage, Set<Component> components) {
+        Image image = new Image(imageName, userData, catalogBasedImage.getOs(), catalogBasedImage.getOsType(),
+                statedImage.getImageCatalogUrl(), statedImage.getImageCatalogName(), catalogBasedImage.getUuid(),
+                catalogBasedImage.getPackageVersions());
+        components.add(new Component(IMAGE, IMAGE.name(), new Json(image), stack));
+    }
+
+    /**
+     * Will return the list of parcels from the image, except for the CDH parcel
+     *
+     * @param statedImage an image from the image catalog
+     * @return List of prewarmed parcels as a form of ClouderaManagerProducts
+     */
+    public List<ClouderaManagerProduct> getPreWarmParcels(StatedImage statedImage) {
+        return statedImage.getImage().getPreWarmParcels().stream()
+                .map(p -> preWarmParcelParser.parseProductFromParcel(p, statedImage.getImage().getPreWarmCsd()))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList());
     }
 
     private Component getStackComponent(Stack stack, StackDetails stackDetails, StackType stackType, String osType) {
@@ -261,7 +314,7 @@ public class ImageService {
                     throw new CloudbreakImageCatalogException(
                             String.format("Cloudera Manager repo was not found in image for os: '%s'.", imgFromCatalog.getOsType()));
                 }
-                return new Component(ComponentType.CM_REPO_DETAILS, ComponentType.CM_REPO_DETAILS.name(), new Json(clouderaManagerRepo), stack);
+                return new Component(CM_REPO_DETAILS, CM_REPO_DETAILS.name(), new Json(clouderaManagerRepo), stack);
             } else {
                 throw new CloudbreakImageCatalogException(String.format("Invalid Ambari repo present in image catalog: '%s'.", imgFromCatalog.getRepo()));
             }
@@ -302,7 +355,7 @@ public class ImageService {
     public void decorateImageWithUserDataForStack(Stack stack, Map<InstanceGroupType, String> userData) throws CloudbreakImageNotFoundException {
         Image image = componentConfigProviderService.getImage(stack.getId());
         image.setUserdata(userData);
-        Component imageComponent = new Component(ComponentType.IMAGE, ComponentType.IMAGE.name(), new Json(image), stack);
+        Component imageComponent = new Component(IMAGE, IMAGE.name(), new Json(image), stack);
         componentConfigProviderService.replaceImageComponentWithNew(imageComponent);
     }
 }
