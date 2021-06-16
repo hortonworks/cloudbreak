@@ -44,6 +44,7 @@ import com.cloudera.api.swagger.model.ApiRoleRef;
 import com.cloudera.api.swagger.model.ApiRoleState;
 import com.cloudera.api.swagger.model.ApiService;
 import com.cloudera.api.swagger.model.ApiServiceState;
+import com.cloudera.api.swagger.model.ApiVersionInfo;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimaps;
@@ -398,6 +399,17 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
         } catch (ApiException e) {
             LOGGER.info("Failed to get version from CM", e);
             return false;
+        }
+    }
+
+    @Override
+    public String getClusterManagerVersion() {
+        try {
+            ApiVersionInfo apiVersionInfo = cmApiRetryTemplate.execute(context -> clouderaManagerApiFactory.getClouderaManagerResourceApi(client).getVersion());
+            return apiVersionInfo.getVersion();
+        } catch (ApiException e) {
+            LOGGER.info("Failed to get version from CM", e);
+            return "";
         }
     }
 
