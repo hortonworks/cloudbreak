@@ -179,9 +179,7 @@ public class SaltStates {
     }
 
     public static boolean jobIsRunning(SaltConnector sc, String jid) throws CloudbreakOrchestratorFailedException {
-        RunningJobsResponse runningInfo = sc.run("jobs.active", RUNNER, RunningJobsResponse.class);
-        LOGGER.debug("Active salt jobs: {}", runningInfo);
-        validateRunningInfoResultNotNull(runningInfo);
+        RunningJobsResponse runningInfo = getRunningJobs(sc);
         for (Map<String, Map<String, Object>> results : runningInfo.getResult()) {
             for (Entry<String, Map<String, Object>> stringMapEntry : results.entrySet()) {
                 if (stringMapEntry.getKey().equals(jid)) {
@@ -190,6 +188,13 @@ public class SaltStates {
             }
         }
         return false;
+    }
+
+    public static RunningJobsResponse getRunningJobs(SaltConnector sc) throws CloudbreakOrchestratorFailedException {
+        RunningJobsResponse runningInfo = sc.run("jobs.active", RUNNER, RunningJobsResponse.class);
+        LOGGER.debug("Active salt jobs: {}", runningInfo);
+        validateRunningInfoResultNotNull(runningInfo);
+        return runningInfo;
     }
 
     private static void validateRunningInfoResultNotNull(RunningJobsResponse runningInfo) throws CloudbreakOrchestratorFailedException {

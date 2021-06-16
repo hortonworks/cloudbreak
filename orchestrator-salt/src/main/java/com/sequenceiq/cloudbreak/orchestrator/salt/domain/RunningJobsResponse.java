@@ -15,7 +15,7 @@ public class RunningJobsResponse {
     @SerializedName("return")
     private List<Map<String, Map<String, Object>>> result;
 
-    public Iterable<Map<String, Map<String, Object>>> getResult() {
+    public List<Map<String, Map<String, Object>>> getResult() {
         return result;
     }
 
