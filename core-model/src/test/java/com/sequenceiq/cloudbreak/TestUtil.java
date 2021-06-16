@@ -91,6 +91,7 @@ import com.sequenceiq.cloudbreak.workspace.model.WorkspaceStatus;
 import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
+import com.sequenceiq.common.model.AwsDiskType;
 
 public class TestUtil {
 
@@ -149,7 +150,7 @@ public class TestUtil {
     public static Stack setEphemeral(Stack stack) {
         if (stack.cloudPlatform().equals(AWS)) {
             for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-                (instanceGroup.getTemplate()).getVolumeTemplates().iterator().next().setVolumeType("ephemeral");
+                (instanceGroup.getTemplate()).getVolumeTemplates().iterator().next().setVolumeType(AwsDiskType.Ephemeral.value());
             }
         }
         return stack;
