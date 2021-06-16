@@ -4,6 +4,8 @@ import static com.sequenceiq.cloudbreak.validation.ValidationResult.State.ERROR;
 import static com.sequenceiq.cloudbreak.validation.ValidationResult.State.VALID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 
 import java.util.Set;
 
@@ -16,6 +18,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Sets;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.controller.validation.template.InstanceTemplateValidator;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -30,6 +34,8 @@ import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.cloudbreak.workspace.model.Tenant;
+import com.sequenceiq.cloudbreak.workspace.model.User;
 
 @RunWith(MockitoJUnitRunner.class)
 public class StackValidatorTest extends StackRequestValidatorTestBase {
@@ -84,6 +90,9 @@ public class StackValidatorTest extends StackRequestValidatorTestBase {
     @Mock
     private LdapConfigService ldapConfigService;
 
+    @Mock
+    private EntitlementService entitlementService;
+
     public StackValidatorTest() {
         super(LoggerFactory.getLogger(StackValidatorTest.class));
     }
@@ -94,6 +103,8 @@ public class StackValidatorTest extends StackRequestValidatorTestBase {
         Stack stackRequest = stackWithRootVolumeSize(0);
         ValidationResult.ValidationResultBuilder builder = new ValidationResult.ValidationResultBuilder();
 
+        entitlementMock(stackRequest, false);
+
         underTest.validate(stackRequest, builder);
         assertEquals(ERROR, builder.build().getState());
     }
@@ -102,6 +113,8 @@ public class StackValidatorTest extends StackRequestValidatorTestBase {
     public void testWithNegativeRootVolumeSize() {
         Stack stack = stackWithRootVolumeSize(-1);
         ValidationResult.ValidationResultBuilder builder = new ValidationResult.ValidationResultBuilder();
+
+        entitlementMock(stack, false);
 
         underTest.validate(stack, builder);
         assertEquals(ERROR, builder.build().getState());
@@ -112,6 +125,8 @@ public class StackValidatorTest extends StackRequestValidatorTestBase {
         Stack stack = stackWithRootVolumeSize(null);
         ValidationResult.ValidationResultBuilder builder = new ValidationResult.ValidationResultBuilder();
 
+        entitlementMock(stack, false);
+
         underTest.validate(stack, builder);
         assertEquals(VALID, builder.build().getState());
     }
@@ -121,8 +136,46 @@ public class StackValidatorTest extends StackRequestValidatorTestBase {
         Stack stack = stackWithRootVolumeSize(1);
         ValidationResult.ValidationResultBuilder builder = new ValidationResult.ValidationResultBuilder();
 
+        entitlementMock(stack, false);
+
         underTest.validate(stack, builder);
         assertEquals(VALID, builder.build().getState());
+    }
+
+    @Test
+    public void testWithNativeVariantWhenEntitlementEnabledShouldBeValid() {
+        Stack stack = stackWithRootVolumeSize(1);
+        stack.setPlatformVariant(AwsConstants.AwsVariant.AWS_NATIVE_VARIANT.variant().value());
+        ValidationResult.ValidationResultBuilder builder = new ValidationResult.ValidationResultBuilder();
+
+        entitlementMock(stack, true);
+
+        underTest.validate(stack, builder);
+        assertEquals(VALID, builder.build().getState());
+    }
+
+    @Test
+    public void testWithNativeVariantWhenEntitlementNOTEnabledShouldNOTBeValid() {
+        Stack stack = stackWithRootVolumeSize(1);
+        stack.setPlatformVariant(AwsConstants.AwsVariant.AWS_NATIVE_VARIANT.variant().value());
+        ValidationResult.ValidationResultBuilder builder = new ValidationResult.ValidationResultBuilder();
+
+        entitlementMock(stack, false);
+
+        underTest.validate(stack, builder);
+        assertEquals(ERROR, builder.build().getState());
+    }
+
+    private void entitlementMock(Stack stack, boolean enabled) {
+        Tenant tenant = new Tenant();
+        tenant.setName("tenant1");
+
+        User user = new User();
+        user.setTenant(tenant);
+
+        stack.setCreator(user);
+
+        when(entitlementService.awsNativeEnabled(anyString())).thenReturn(enabled);
     }
 
     private Stack stackWithRootVolumeSize(Integer rootVolumeSize) {

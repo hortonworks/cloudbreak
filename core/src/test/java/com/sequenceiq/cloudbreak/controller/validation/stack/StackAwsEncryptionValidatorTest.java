@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsEncryptionV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateV4Parameters;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKey;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -29,6 +30,8 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.PlatformResourceClientService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.cloudbreak.workspace.model.Tenant;
+import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.common.api.type.EncryptionType;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -52,6 +55,9 @@ public class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBa
     @Mock
     private Stack subject;
 
+    @Mock
+    private EntitlementService entitlementService;
+
     @InjectMocks
     private StackValidator underTest;
 
@@ -63,11 +69,20 @@ public class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBa
     public void setup() {
         CredentialResponse credentialResponse = new CredentialResponse();
         credentialResponse.setName("cred");
+
+        Tenant tenant = new Tenant();
+        tenant.setName("tenant1");
+
+        User user = new User();
+        user.setTenant(tenant);
+
         when(subject.getEnvironmentCrn()).thenReturn(ENV_CRN);
         when(subject.getRegion()).thenReturn("region");
+        when(subject.getCreator()).thenReturn(user);
         DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
         environmentResponse.setCredential(credentialResponse);
         environmentResponse.setCrn(ENV_CRN);
+        when(entitlementService.awsNativeEnabled(anyString())).thenReturn(false);
         when(environmentClientService.getByCrn(anyString())).thenReturn(environmentResponse);
         when(templateRequestValidator.validate(any())).thenReturn(ValidationResult.builder().build());
     }

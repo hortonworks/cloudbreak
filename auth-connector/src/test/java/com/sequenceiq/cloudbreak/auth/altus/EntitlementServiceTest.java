@@ -49,6 +49,9 @@ class EntitlementServiceTest {
                 {"CDP_GCP", (EntitlementCheckFunction) EntitlementService::gcpEnabled, false},
                 {"CDP_GCP", (EntitlementCheckFunction) EntitlementService::gcpEnabled, true},
 
+                {"CDP_CB_AWS_NATIVE", (EntitlementCheckFunction) EntitlementService::awsNativeEnabled, false},
+                {"CDP_CB_AWS_NATIVE", (EntitlementCheckFunction) EntitlementService::awsNativeEnabled, true},
+
                 {"CDP_BASE_IMAGE", (EntitlementCheckFunction) EntitlementService::baseImageEnabled, false},
                 {"CDP_BASE_IMAGE", (EntitlementCheckFunction) EntitlementService::baseImageEnabled, true},
 
