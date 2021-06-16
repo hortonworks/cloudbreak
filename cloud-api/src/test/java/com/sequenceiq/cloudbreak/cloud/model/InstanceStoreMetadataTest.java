@@ -18,9 +18,11 @@ public class InstanceStoreMetadataTest {
 
     @Test
     public void testConstructorCreated() {
-        Map<String, Integer> testMap = new HashMap<>();
-        testMap.put("instance1", 1);
-        testMap.put("instance2", 2);
+        Map<String, VolumeParameterConfig> testMap = new HashMap<>();
+        VolumeParameterConfig firstConfig = new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1);
+        VolumeParameterConfig secondConfig = new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 2, 2);
+        testMap.put("instance1", firstConfig);
+        testMap.put("instance2", secondConfig);
 
         InstanceStoreMetadata instanceStoreMetadata = new InstanceStoreMetadata(testMap);
 
@@ -31,12 +33,14 @@ public class InstanceStoreMetadataTest {
     @Test
     public void testAddingSameEntries() {
         InstanceStoreMetadata instanceStoreMetadata = new InstanceStoreMetadata();
-        instanceStoreMetadata.addInstanceStoreCountToInstanceType("instance1", 1);
+        VolumeParameterConfig singleStorage = new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1);
+        instanceStoreMetadata.addInstanceStoreConfigToInstanceType("instance1", singleStorage);
 
         Assertions.assertEquals(1, instanceStoreMetadata.mapInstanceTypeToInstanceStoreCount("instance1"));
         Assertions.assertEquals(1, instanceStoreMetadata.mapInstanceTypeToInstanceStoreCountNullHandled("instance1"));
 
-        instanceStoreMetadata.addInstanceStoreCountToInstanceType("instance1", 2);
+        VolumeParameterConfig multipleStorage = new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 2, 2);
+        instanceStoreMetadata.addInstanceStoreConfigToInstanceType("instance1", multipleStorage);
 
         Assertions.assertEquals(2, instanceStoreMetadata.mapInstanceTypeToInstanceStoreCount("instance1"));
         Assertions.assertEquals(2, instanceStoreMetadata.mapInstanceTypeToInstanceStoreCountNullHandled("instance1"));

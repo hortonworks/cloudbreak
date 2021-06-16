@@ -29,11 +29,10 @@ import com.amazonaws.services.ec2.model.CreateVolumeResult;
 import com.amazonaws.services.ec2.model.Tag;
 import com.amazonaws.services.ec2.model.TagSpecification;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
-import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
-import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.common.context.AwsContext;
+import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -53,6 +52,7 @@ import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.EncryptionType;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
+import com.sequenceiq.common.model.AwsDiskType;
 
 @ExtendWith(MockitoExtension.class)
 class AwsVolumeResourceBuilderTest {
@@ -77,9 +77,9 @@ class AwsVolumeResourceBuilderTest {
 
     private static final int VOLUME_SIZE = 78;
 
-    private static final String TYPE_GP2 = AwsPlatformParameters.AwsDiskType.Gp2.value();
+    private static final String TYPE_GP2 = AwsDiskType.Gp2.value();
 
-    private static final String TYPE_EPHEMERAL = AwsPlatformParameters.AwsDiskType.Ephemeral.value();
+    private static final String TYPE_EPHEMERAL = AwsDiskType.Ephemeral.value();
 
     private static final String VOLUME_SET_NAME = "volumeName";
 

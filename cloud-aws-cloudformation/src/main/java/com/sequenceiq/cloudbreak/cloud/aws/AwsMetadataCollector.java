@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -16,14 +17,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.services.ec2.model.DescribeInstanceTypesRequest;
-import com.amazonaws.services.ec2.model.DescribeInstanceTypesResult;
 import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.amazonaws.services.ec2.model.DescribeSubnetsRequest;
-import com.amazonaws.services.ec2.model.DiskInfo;
 import com.amazonaws.services.ec2.model.Instance;
-import com.amazonaws.services.ec2.model.InstanceTypeInfo;
 import com.amazonaws.services.ec2.model.Subnet;
 import com.amazonaws.services.elasticloadbalancingv2.model.LoadBalancer;
 import com.google.common.collect.ArrayListMultimap;
@@ -31,6 +28,7 @@ import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPlatformResources;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.AwsLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.LoadBalancerTypeConverter;
@@ -45,8 +43,12 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancerMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStoreMetadata;
+import com.sequenceiq.cloudbreak.cloud.model.Location;
+import com.sequenceiq.cloudbreak.cloud.model.VmType;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterConfig;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 
 @Service
@@ -64,6 +66,9 @@ public class AwsMetadataCollector implements MetadataCollector {
 
     @Inject
     private LoadBalancerTypeConverter loadBalancerTypeConverter;
+
+    @Inject
+    private AwsPlatformResources awsPlatformResources;
 
     @Override
     public List<CloudVmMetaDataStatus> collect(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms,
@@ -242,22 +247,19 @@ public class AwsMetadataCollector implements MetadataCollector {
 
     @Override
     public InstanceStoreMetadata collectInstanceStorageCount(AuthenticatedContext ac, List<String> instanceTypes) {
-        AwsCredentialView credentialView = new AwsCredentialView(ac.getCloudCredential());
-        AmazonEc2Client amazonEC2Client = awsClient.createEc2Client(credentialView);
-        DescribeInstanceTypesRequest request = new DescribeInstanceTypesRequest().withInstanceTypes(new HashSet<>(instanceTypes));
+        Location location = ac.getCloudContext().getLocation();
         try {
-            DescribeInstanceTypesResult result = amazonEC2Client.describeInstanceTypes(request);
-            InstanceStoreMetadata instanceStoreMetadata = new InstanceStoreMetadata();
-            for (InstanceTypeInfo instanceTypeInfo: result.getInstanceTypes()) {
-                instanceStoreMetadata.addInstanceStoreCountToInstanceType(instanceTypeInfo.getInstanceType(),
-                        instanceTypeInfo.getInstanceStorageSupported() ?
-                        instanceTypeInfo.getInstanceStorageInfo().getDisks() != null ?
-                        instanceTypeInfo.getInstanceStorageInfo().getDisks().stream().map(DiskInfo::getCount).mapToInt(Integer::intValue).sum() : 0 : 0);
-            }
-            return instanceStoreMetadata;
+            CloudVmTypes cloudVmTypes = awsPlatformResources.virtualMachines(ac.getCloudCredential(), location.getRegion(), Map.of());
+            Map<String, Set<VmType>> cloudVmResponses = cloudVmTypes.getCloudVmResponses();
+            Map<String, VolumeParameterConfig> instanceTypeToInstanceStorageMap = cloudVmResponses.getOrDefault(location.getAvailabilityZone().value(), Set.of())
+                    .stream()
+                    .filter(vmType -> instanceTypes.contains(vmType.value()))
+                    .filter(vmType -> Objects.nonNull(vmType.getMetaData().getEphemeralConfig()))
+                    .collect(Collectors.toMap(VmType::value, vmType -> vmType.getMetaData().getEphemeralConfig()));
+            return new InstanceStoreMetadata(instanceTypeToInstanceStorageMap);
         } catch (Exception e) {
-            LOGGER.warn("Failed to describe instance types: {}", instanceTypes, e);
-            throw new CloudConnectorException(e.getMessage(), e);
-        }
+        LOGGER.warn("Failed to get vm type data: {}", instanceTypes, e);
+        throw new CloudConnectorException(e.getMessage(), e);
+    }
     }
 }

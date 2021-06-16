@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.common.model.AwsDiskType;
 
 public class StackStopRestrictionServiceTest {
 
@@ -22,7 +23,7 @@ public class StackStopRestrictionServiceTest {
     public void infrastructureShouldNotBeStoppableForEphemeralStorage() {
         Set<InstanceGroup> groups = new HashSet<>();
         groups.add(createGroup("ebs"));
-        groups.add(createGroup("ephemeral"));
+        groups.add(createGroup(AwsDiskType.Ephemeral.value()));
 
         StopRestrictionReason actual = underTest.isInfrastructureStoppable("AWS", groups);
 

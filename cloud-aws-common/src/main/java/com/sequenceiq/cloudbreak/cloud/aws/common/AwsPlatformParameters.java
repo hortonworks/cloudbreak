@@ -38,9 +38,10 @@ import com.sequenceiq.cloudbreak.cloud.model.TagSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.VmRecommendations;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.type.OrchestratorConstants;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
-import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.common.model.AwsDiskType;
 
 @Service
 public class AwsPlatformParameters implements PlatformParameters {
@@ -128,17 +129,17 @@ public class AwsPlatformParameters implements PlatformParameters {
 
     private Map<String, VolumeParameterType> diskMappings() {
         Map<String, VolumeParameterType> map = new HashMap<>();
-        map.put(AwsDiskType.Standard.value, VolumeParameterType.MAGNETIC);
-        map.put(AwsDiskType.Gp2.value, VolumeParameterType.SSD);
-        map.put(AwsDiskType.Ephemeral.value, VolumeParameterType.EPHEMERAL);
-        map.put(AwsDiskType.St1.value, VolumeParameterType.ST1);
+        map.put(AwsDiskType.Standard.value(), VolumeParameterType.MAGNETIC);
+        map.put(AwsDiskType.Gp2.value(), VolumeParameterType.SSD);
+        map.put(AwsDiskType.Ephemeral.value(), VolumeParameterType.EPHEMERAL);
+        map.put(AwsDiskType.St1.value(), VolumeParameterType.ST1);
         return map;
     }
 
     private Collection<DiskType> getDiskTypes() {
         Collection<DiskType> disks = Lists.newArrayList();
         for (AwsDiskType diskType : AwsDiskType.values()) {
-            disks.add(diskType(diskType.value));
+            disks.add(diskType(diskType.value()));
         }
         return disks;
     }
@@ -220,30 +221,6 @@ public class AwsPlatformParameters implements PlatformParameters {
 
     public String getCdpRangerAuditS3PolicyJson() {
         return cdpRangerAuditS3PolicyJson;
-    }
-
-    public enum AwsDiskType {
-        Standard("standard", "Magnetic"),
-        Ephemeral("ephemeral", "Ephemeral"),
-        Gp2("gp2", "General Purpose (SSD)"),
-        St1("st1", "Throughput Optimized HDD");
-
-        private final String value;
-
-        private final String displayName;
-
-        AwsDiskType(String value, String displayName) {
-            this.value = value;
-            this.displayName = displayName;
-        }
-
-        public String value() {
-            return value;
-        }
-
-        public String displayName() {
-            return displayName;
-        }
     }
 
     private VmRecommendations initVmRecommendations() {
