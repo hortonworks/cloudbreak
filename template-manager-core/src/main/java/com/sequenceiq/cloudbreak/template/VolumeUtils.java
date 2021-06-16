@@ -4,6 +4,8 @@ public final class VolumeUtils {
 
     public static final String VOLUME_PREFIX = "/hadoopfs/fs";
 
+    public static final String EPHEMERAL_VOLUME_PREFIX = "/hadoopfs/ephfs";
+
     public static final String ROOT_VOLUME_PREFIX = "/hadoopfs/root";
 
     public static final String DATABASE_VOLUME = "/dbfs";
@@ -25,6 +27,17 @@ public final class VolumeUtils {
      */
     public static String buildVolumePathString(int volumeCount, String directory) {
         return buildVolumePathString(volumeCount, directory, VOLUME_PREFIX);
+    }
+
+    /**
+     * This method construct a directory string delimited by comma using "/hadoopfs/ephfs" as base.
+     *
+     * @param volumeCount number of volumes attached
+     * @param directory   directory to use as postfix
+     * @return returns the full path of the directories delimited by comma. In case of 0 volumes it will return an empty string.
+     */
+    public static String buildEphemeralVolumePathString(int volumeCount, String directory) {
+        return buildVolumePathString(volumeCount, directory, EPHEMERAL_VOLUME_PREFIX);
     }
 
     /**
