@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.parcel;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -48,7 +49,7 @@ public class ClouderaManagerProductTransformerTest {
         Image image = createImage(preWarmParcels, preWarmCsdList);
         when(preWarmParcelParser.parseProductFromParcel(preWarmParcels, preWarmCsdList)).thenReturn(Optional.of(new ClouderaManagerProduct()));
 
-        Set<ClouderaManagerProduct> actual = underTest.transform(image);
+        Set<ClouderaManagerProduct> actual = underTest.transform(image, true);
 
         assertEquals(2, actual.size());
         assertTrue(assertCdhProduct(actual));
@@ -62,11 +63,24 @@ public class ClouderaManagerProductTransformerTest {
         Image image = createImage(preWarmParcels, preWarmCsdList);
         when(preWarmParcelParser.parseProductFromParcel(preWarmParcels, preWarmCsdList)).thenReturn(Optional.empty());
 
-        Set<ClouderaManagerProduct> actual = underTest.transform(image);
+        Set<ClouderaManagerProduct> actual = underTest.transform(image, true);
 
         assertEquals(1, actual.size());
         assertTrue(assertCdhProduct(actual));
         verify(preWarmParcelParser).parseProductFromParcel(preWarmParcels, preWarmCsdList);
+    }
+
+    @Test
+    public void testTransformShouldParseCDHFromAnImageWhenGetPrewarmParcelsIsFalse() {
+        List<String> preWarmParcels = Collections.emptyList();
+        List<String> preWarmCsdList = Collections.emptyList();
+        Image image = createImage(preWarmParcels, preWarmCsdList);
+
+        Set<ClouderaManagerProduct> actual = underTest.transform(image, false);
+
+        assertEquals(1, actual.size());
+        assertTrue(assertCdhProduct(actual));
+        verify(preWarmParcelParser, never()).parseProductFromParcel(preWarmParcels, preWarmCsdList);
     }
 
     private boolean assertCdhProduct(Set<ClouderaManagerProduct> actual) {

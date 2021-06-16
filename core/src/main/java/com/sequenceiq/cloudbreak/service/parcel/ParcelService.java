@@ -80,7 +80,8 @@ public class ParcelService {
             return getDataLakeClusterComponents(components);
         } else {
             Map<String, ClusterComponent> cmProductMap = collectClusterComponentsByName(components);
-            Set<ClouderaManagerProduct> cmProducts = clouderaManagerProductTransformer.transform(image);
+            Set<ClouderaManagerProduct> cmProducts = clouderaManagerProductTransformer
+                    .transform(image, true);
             cmProducts = filterParcelsByBlueprint(cmProducts, stack.getCluster().getBlueprint(), false);
             LOGGER.debug("The following parcels are used in CM based on blueprint: {}", cmProducts);
             return getComponentsByRequiredProducts(cmProductMap, cmProducts);
