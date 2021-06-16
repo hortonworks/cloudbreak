@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.controller.validation.stack;
 
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_NATIVE;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants.AwsVariant.AWS_NATIVE_VARIANT;
+
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -10,6 +13,7 @@ import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.GcpInstanceTemplateV4Parameters;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKey;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -36,12 +40,26 @@ public class StackValidator {
     @Inject
     private PlatformResourceClientService platformResourceClientService;
 
+    @Inject
+    private EntitlementService entitlementService;
+
     public void validate(Stack subject, ValidationResult.ValidationResultBuilder validationBuilder) {
         if (CollectionUtils.isEmpty(subject.getInstanceGroups())) {
             validationBuilder.error("Stack request must contain instance groups.");
         }
         validateTemplates(subject, validationBuilder);
         validateEncryptionKey(subject, validationBuilder);
+        validateVariant(subject, validationBuilder);
+    }
+
+    private void validateVariant(Stack source, ValidationResultBuilder validationBuilder) {
+        String variant = source.getPlatformVariant();
+        boolean awsNativeEnabled = entitlementService.awsNativeEnabled(source.getCreator().getTenant().getName());
+        if (AWS_NATIVE_VARIANT.variant().value().equals(variant) && !awsNativeEnabled) {
+            validationBuilder.error(String.format("%s entitlement was not granted to your tenant. "
+                    + "Please get in contact with Cloudera support to request it.",
+                    CDP_CB_AWS_NATIVE.name()));
+        }
     }
 
     private void validateTemplates(Stack stack, ValidationResultBuilder resultBuilder) {

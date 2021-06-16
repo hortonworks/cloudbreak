@@ -5,6 +5,7 @@ import static com.sequenceiq.common.api.type.CdpResourceType.fromStackType;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -23,6 +24,7 @@ import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.controller.validation.ParametersValidator;
 import com.sequenceiq.cloudbreak.controller.validation.datalake.DataLakeValidator;
 import com.sequenceiq.cloudbreak.controller.validation.environment.ClusterCreationEnvironmentValidator;
+import com.sequenceiq.cloudbreak.controller.validation.network.MultiAzValidator;
 import com.sequenceiq.cloudbreak.controller.validation.stack.StackValidator;
 import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidator;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
@@ -87,6 +89,9 @@ public class CloudConfigValidationActions {
     private DataLakeValidator dataLakeValidator;
 
     @Inject
+    private MultiAzValidator multiAzValidator;
+
+    @Inject
     private UserService userService;
 
     @Bean(name = "VALIDATE_CLOUD_CONFIG_STATE")
@@ -108,8 +113,9 @@ public class CloudConfigValidationActions {
                         stack.getCreator().getUserId(),
                         stack.getCreator().getTenant().getId());
 
+                Set<InstanceGroup> instanceGroups = context.getStack().getInstanceGroups();
                 measure(() -> {
-                    for (InstanceGroup instanceGroup : context.getStack().getInstanceGroups()) {
+                    for (InstanceGroup instanceGroup : instanceGroups) {
                         LOGGER.info("Validate template for {} name with {} instanceGroup.", name, instanceGroup.toString());
                         StackType type = stack.getType();
                         templateValidator.validate(
@@ -119,8 +125,10 @@ public class CloudConfigValidationActions {
                                 fromStackType(type == null ? null : type.name()),
                                 user,
                                 validationBuilder);
+
                     }
                 }, LOGGER, "Stack's instance templates have been validated in {} ms for stack {}", name);
+                multiAzValidator.validateMultiAzForStack(stack.getPlatformVariant(), instanceGroups, validationBuilder);
 
                 ParametersValidationRequest parametersValidationRequest = parametersValidator.validate(
                         stack.getCloudPlatform(),
