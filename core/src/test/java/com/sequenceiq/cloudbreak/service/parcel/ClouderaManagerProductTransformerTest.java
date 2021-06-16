@@ -1,7 +1,12 @@
 package com.sequenceiq.cloudbreak.service.parcel;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.collection.IsEmptyCollection.empty;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -48,10 +53,10 @@ public class ClouderaManagerProductTransformerTest {
         Image image = createImage(preWarmParcels, preWarmCsdList);
         when(preWarmParcelParser.parseProductFromParcel(preWarmParcels, preWarmCsdList)).thenReturn(Optional.of(new ClouderaManagerProduct()));
 
-        Set<ClouderaManagerProduct> actual = underTest.transform(image);
+        Set<ClouderaManagerProduct> foundProducts = underTest.transform(image, true, true);
 
-        assertEquals(2, actual.size());
-        assertTrue(assertCdhProduct(actual));
+        assertThat(foundProducts, hasSize(2));
+        assertTrue(assertCdhProduct(foundProducts));
         verify(preWarmParcelParser).parseProductFromParcel(preWarmParcels, preWarmCsdList);
     }
 
@@ -62,11 +67,50 @@ public class ClouderaManagerProductTransformerTest {
         Image image = createImage(preWarmParcels, preWarmCsdList);
         when(preWarmParcelParser.parseProductFromParcel(preWarmParcels, preWarmCsdList)).thenReturn(Optional.empty());
 
-        Set<ClouderaManagerProduct> actual = underTest.transform(image);
+        Set<ClouderaManagerProduct> foundProducts = underTest.transform(image, true, true);
 
-        assertEquals(1, actual.size());
-        assertTrue(assertCdhProduct(actual));
+        assertThat(foundProducts, hasSize(1));
+        assertTrue(assertCdhProduct(foundProducts));
         verify(preWarmParcelParser).parseProductFromParcel(preWarmParcels, preWarmCsdList);
+    }
+
+    @Test
+    public void testTransformShouldParseCDHFromAnImageWhenGetPrewarmParcelsIsFalse() {
+        List<String> preWarmParcels = Collections.emptyList();
+        List<String> preWarmCsdList = Collections.emptyList();
+        Image image = createImage(preWarmParcels, preWarmCsdList);
+
+        Set<ClouderaManagerProduct> foundProducts = underTest.transform(image, true, false);
+
+        assertThat(foundProducts, hasSize(1));
+        assertTrue(assertCdhProduct(foundProducts));
+        verify(preWarmParcelParser, never()).parseProductFromParcel(any(), any());
+    }
+
+    @Test
+    public void testTransformShouldParsePreWarmParcelsFromAnImageWhenGetCDHParcelsIsFalse() {
+        List<String> preWarmParcels = Collections.emptyList();
+        List<String> preWarmCsdList = Collections.emptyList();
+        Image image = createImage(preWarmParcels, preWarmCsdList);
+        when(preWarmParcelParser.parseProductFromParcel(preWarmParcels, preWarmCsdList)).thenReturn(Optional.of(new ClouderaManagerProduct()));
+
+        Set<ClouderaManagerProduct> foundProducts = underTest.transform(image, false, true);
+
+        assertThat(foundProducts, hasSize(1));
+        assertFalse(assertCdhProduct(foundProducts));
+        verify(preWarmParcelParser).parseProductFromParcel(preWarmParcels, preWarmCsdList);
+    }
+
+    @Test
+    public void testTransformShouldNotParseFromAnImageWhenCDHAndPreWarmBothFalse() {
+        List<String> preWarmParcels = Collections.emptyList();
+        List<String> preWarmCsdList = Collections.emptyList();
+        Image image = createImage(preWarmParcels, preWarmCsdList);
+
+        Set<ClouderaManagerProduct> foundProducts = underTest.transform(image, false, false);
+
+        assertThat(foundProducts, empty());
+        verify(preWarmParcelParser, never()).parseProductFromParcel(any(), any());
     }
 
     private boolean assertCdhProduct(Set<ClouderaManagerProduct> actual) {

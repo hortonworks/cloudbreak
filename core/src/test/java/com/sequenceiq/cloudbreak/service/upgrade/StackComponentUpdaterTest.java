@@ -2,10 +2,6 @@ package com.sequenceiq.cloudbreak.service.upgrade;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyMap;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -79,10 +75,9 @@ class StackComponentUpdaterTest {
         Component originalImageComponent = new Component(ComponentType.IMAGE, ComponentType.IMAGE.name(), new Json(originalImage), stack);
 
         when(componentConfigProviderService.getComponentsByStackId(stack.getId())).thenReturn(Set.of(originalImageComponent));
-        when(imageService.determineImageName(anyString(), anyString(), any(Image.class))).thenReturn("imageName");
-        when(imageService.getComponents(eq(stack), anyMap(), any(StatedImage.class), anyString())).thenReturn(createComponents(stack, targetImage));
+        Set<Component> targetComponents = createComponents(stack, targetImage);
 
-        underTest.updateComponentsByStackId(stack, targetImage, Map.of(InstanceGroupType.GATEWAY, "gw user data"));
+        underTest.updateComponentsByStackId(stack, targetComponents, true);
 
         ArgumentCaptor<Set<Component>> componentCatcher = ArgumentCaptor.forClass(Set.class);
         verify(componentConfigProviderService, times(1)).store(componentCatcher.capture());

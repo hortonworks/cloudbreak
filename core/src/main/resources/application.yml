@@ -716,6 +716,8 @@ cb:
     supportedPlatforms: AWS,YARN,AZURE
 
   upgrade:
+    failure.sync:
+      sdx.enabled: false
     validation:
       distrox:
         enabled: false

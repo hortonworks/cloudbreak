@@ -21,10 +21,14 @@ public class ClouderaManagerProductTransformer {
     @Inject
     private PreWarmParcelParser preWarmParcelParser;
 
-    public Set<ClouderaManagerProduct> transform(Image image) {
+    public Set<ClouderaManagerProduct> transform(Image image, boolean getCdhParcel, boolean getPrewarmParcels) {
         Set<ClouderaManagerProduct> products = new HashSet<>();
-        products.add(getCdhParcel(image));
-        products.addAll(getPreWarmParcels(image));
+        if (getCdhParcel) {
+            products.add(getCdhParcel(image));
+        }
+        if (getPrewarmParcels) {
+            products.addAll(getPreWarmParcels(image));
+        }
         return products;
     }
 
@@ -44,4 +48,5 @@ public class ClouderaManagerProductTransformer {
                 .withName(stackInfo.get(StackRepoDetails.REPO_ID_TAG).split("-")[0])
                 .withParcel(stackInfo.get(image.getOsType()));
     }
+
 }
