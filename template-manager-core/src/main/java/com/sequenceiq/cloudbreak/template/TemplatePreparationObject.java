@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
@@ -303,8 +304,10 @@ public class TemplatePreparationObject {
                     Set<String> fqdns = instanceGroup.getAllInstanceMetaData().stream()
                             .map(InstanceMetaData::getDiscoveryFQDN)
                             .collect(Collectors.toSet());
+                    TemporaryStorage temporaryStorage = template == null ? null : template.getTemporaryStorage();
+                    Integer temporaryStorageVolumeCount = template == null ? null : template.getInstanceStorageCount();
                     hostgroupViews.add(new HostgroupView(hostGroup.getName(), volumeCount,
-                            instanceGroup.getInstanceGroupType(), fqdns, volumeTemplates));
+                            instanceGroup.getInstanceGroupType(), fqdns, volumeTemplates, temporaryStorage, temporaryStorageVolumeCount));
                 } else {
                     hostgroupViews.add(new HostgroupView(hostGroup.getName()));
                 }
