@@ -3,8 +3,8 @@ package com.sequenceiq.cloudbreak.cloud.aws.common.view;
 import java.util.List;
 import java.util.Map;
 
-import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPlatformParameters.AwsDiskType;
 import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
+import com.sequenceiq.common.model.AwsDiskType;
 
 public class AwsGroupView {
 

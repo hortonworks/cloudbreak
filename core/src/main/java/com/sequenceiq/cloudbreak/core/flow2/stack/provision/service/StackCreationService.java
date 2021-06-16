@@ -18,6 +18,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -47,6 +49,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStoreMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterConfig;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
@@ -55,6 +58,8 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.Template;
+import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
+import com.sequenceiq.cloudbreak.domain.VolumeUsageType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -73,6 +78,7 @@ import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProvider
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TlsSetupService;
 import com.sequenceiq.cloudbreak.service.template.TemplateService;
+import com.sequenceiq.common.model.AwsDiskType;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
 import reactor.bus.EventBus;
@@ -279,12 +285,44 @@ public class StackCreationService {
         InstanceStoreMetadata instanceStoreMetadata = connector.metadata().collectInstanceStorageCount(ac, instanceTypes);
 
         for (InstanceGroup ig : stack.getInstanceGroups()) {
-            if (ig.getTemplate() != null) {
-                ig.getTemplate().setInstanceStorageCount(
-                        instanceStoreMetadata.mapInstanceTypeToInstanceStoreCountNullHandled(ig.getTemplate().getInstanceType()));
-                templateService.savePure(ig.getTemplate());
+            Template template = ig.getTemplate();
+            if (template != null) {
+                addInstanceStorageVolumeTemplateToTemplate(instanceStoreMetadata, ig, template);
+                Integer instanceStorageCount = instanceStoreMetadata.mapInstanceTypeToInstanceStoreCountNullHandled(template.getInstanceType());
+                LOGGER.debug("Setting instance storage count in template. " +
+                        "Group name: {}, Template id: {}, instance type: {}", ig.getGroupName(), template.getId(), template.getInstanceType());
+                template.setInstanceStorageCount(instanceStorageCount);
+                templateService.savePure(template);
             }
         }
+    }
+
+    private void addInstanceStorageVolumeTemplateToTemplate(InstanceStoreMetadata instanceStoreMetadata, InstanceGroup ig, Template template) {
+        if (!isTemplateSetUpForInstanceStorage(template)) {
+            LOGGER.debug("Instance storage was not requested. Attempting to add them implicitly. " +
+                    "Group name: {}, instance type: {}", ig.getGroupName(), template.getInstanceType());
+            Optional.ofNullable(instanceStoreMetadata.getInstaceStoreConfigMap())
+                    .map(instCfgMap -> instCfgMap.get(template.getInstanceType()))
+                    .map(toVolumeTemplate(template))
+                    .ifPresent(volumeTemplate -> template.getVolumeTemplates().add(volumeTemplate));
+        }
+    }
+
+    private Function<VolumeParameterConfig, VolumeTemplate> toVolumeTemplate(Template template) {
+        return config -> {
+            LOGGER.info("Adding instance storage to template. Template id: {}, instane type: {}", template.getId(), template.getInstanceType());
+            VolumeTemplate volumeTemplate = new VolumeTemplate();
+            volumeTemplate.setVolumeType(AwsDiskType.Ephemeral.value());
+            volumeTemplate.setVolumeCount(config.maximumNumber());
+            volumeTemplate.setVolumeSize(config.maximumSize());
+            volumeTemplate.setUsageType(VolumeUsageType.GENERAL);
+            volumeTemplate.setTemplate(template);
+            return volumeTemplate;
+        };
+    }
+
+    private boolean isTemplateSetUpForInstanceStorage(Template template) {
+        return template.getVolumeTemplates().stream().anyMatch(volumeTemplate -> AwsDiskType.Ephemeral.value().equalsIgnoreCase(volumeTemplate.getVolumeType()));
     }
 
     private void sendNotificationIfNecessary(CheckImageResult result, Stack stack) {
