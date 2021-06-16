@@ -28,7 +28,6 @@ import com.amazonaws.services.ec2.model.Tag;
 import com.amazonaws.services.ec2.model.TagSpecification;
 import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsMethodExecutor;
-import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.context.AwsContext;
@@ -45,6 +44,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudS3View;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
+import com.sequenceiq.common.model.AwsDiskType;
 
 @Service
 public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBuilder {
@@ -196,7 +196,7 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
 
     private Boolean isEbsOptimized(InstanceTemplate instanceTemplate) {
         Set<String> types = instanceTemplate.getVolumes().stream().map(Volume::getType).collect(Collectors.toSet());
-        return types.contains(AwsPlatformParameters.AwsDiskType.St1.value());
+        return types.contains(AwsDiskType.St1.value());
     }
 
     private String getInstanceProfile(Group group) {
