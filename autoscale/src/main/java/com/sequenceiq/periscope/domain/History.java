@@ -1,5 +1,11 @@
 package com.sequenceiq.periscope.domain;
 
+import static com.sequenceiq.periscope.common.AlertConstants.ALERT_NAME;
+import static com.sequenceiq.periscope.common.AlertConstants.SCALING_TARGET;
+import static com.sequenceiq.periscope.common.AlertConstants.TIME_ZONE;
+import static com.sequenceiq.periscope.common.AlertConstants.CRON;
+import static com.sequenceiq.periscope.common.AlertConstants.PARAMETERS;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,24 +35,6 @@ import com.sequenceiq.periscope.converter.ScalingStatusConverter;
         @NamedQuery(name = "History.findByCluster", query = "SELECT c FROM History c WHERE c.clusterId= :clusterId AND c.id= :historyId")
 })
 public class History {
-
-    public static final String ALERT_DEFINITION = "alertDefinition";
-
-    public static final String PERIOD = "period";
-
-    public static final String ALERT_STATE = "alertState";
-
-    public static final String ALERT_NAME = "alertName";
-
-    public static final String TIME_ZONE = "timeZone";
-
-    public static final String CRON = "cron";
-
-    public static final String SCALING_TARGET = "scalingTarget";
-
-    public static final String ALERT_RULE = "alertRule";
-
-    public static final String PARAMETERS = "parameters";
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "history_generator")

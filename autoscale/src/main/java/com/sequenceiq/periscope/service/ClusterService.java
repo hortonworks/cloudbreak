@@ -258,11 +258,12 @@ public class ClusterService {
         }
     }
 
-    public void deleteAlertsForCluster(Long clusterId) {
+    public Cluster deleteAlertsForCluster(Long clusterId) {
         Cluster cluster = findById(clusterId);
         cluster.getLoadAlerts().clear();
         cluster.getTimeAlerts().clear();
         save(cluster);
+        return cluster;
     }
 
     private void calculateClusterStateMetrics() {

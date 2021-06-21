@@ -1,5 +1,10 @@
 package com.sequenceiq.periscope.domain;
 
+import static com.sequenceiq.periscope.common.AlertConstants.PARAMETERS;
+
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.DiscriminatorValue;
@@ -45,5 +50,11 @@ public class LoadAlert extends BaseAlert {
 
     public AlertType getAlertType() {
         return AlertType.LOAD;
+    }
+
+    public Map<String, String> getTelemetryParameters() {
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put(PARAMETERS, loadAlertConfiguration.toString());
+        return parameters;
     }
 }

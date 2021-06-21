@@ -39,10 +39,11 @@ import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.EntitlementValidationService;
 import com.sequenceiq.periscope.service.HistoryService;
 import com.sequenceiq.periscope.service.NotFoundException;
+import com.sequenceiq.periscope.service.UsageReportingService;
 import com.sequenceiq.periscope.service.configuration.ClusterProxyConfigurationService;
 
 @Component
-public class AutoScaleClusterCommonService  implements ResourcePropertyProvider {
+public class AutoScaleClusterCommonService implements ResourcePropertyProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(AutoScaleClusterCommonService.class);
 
     @Inject
@@ -50,6 +51,9 @@ public class AutoScaleClusterCommonService  implements ResourcePropertyProvider 
 
     @Inject
     private HistoryService historyService;
+
+    @Inject
+    private UsageReportingService usageReportingService;
 
     @Inject
     private CloudbreakCommunicator cloudbreakCommunicator;
@@ -111,19 +115,26 @@ public class AutoScaleClusterCommonService  implements ResourcePropertyProvider 
         Cluster cluster = clusterService.findById(clusterId);
         if (!cluster.isAutoscalingEnabled().equals(enableAutoScaling)) {
             cluster = clusterService.setAutoscaleState(clusterId, enableAutoScaling);
-            createAutoscalingStateChangedHistoryAndNotify(cluster);
+            processAutoscalingStateChanged(cluster);
         }
         return cluster;
     }
 
     public void deleteAlertsForClusterCrn(String stackCrn) {
         Cluster cluster = getClusterByCrnOrName(NameOrCrn.ofCrn(stackCrn));
-        clusterService.deleteAlertsForCluster(cluster.getId());
+        cluster = clusterService.deleteAlertsForCluster(cluster.getId());
+        processAutoscalingStateChanged(cluster);
     }
 
     public void deleteAlertsForClusterName(String stackName) {
         Cluster cluster = getClusterByCrnOrName(NameOrCrn.ofName(stackName));
-        clusterService.deleteAlertsForCluster(cluster.getId());
+        cluster = clusterService.deleteAlertsForCluster(cluster.getId());
+        processAutoscalingStateChanged(cluster);
+    }
+
+    public void processAutoscalingStateChanged(Cluster cluster) {
+        createAutoscalingConfigChangedHistoryAndNotify(cluster);
+        usageReportingService.reportAutoscalingConfigChanged(restRequestThreadLocalService.getCloudbreakUser().getUserCrn(), cluster);
     }
 
     public void createLoadAlerts(Long clusterId, List<LoadAlert> loadAlerts) {

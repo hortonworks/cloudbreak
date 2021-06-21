@@ -713,6 +713,56 @@ public final class UsageProto {
 
     /**
      * <pre>
+     * Autoscale event for a CDP Datahub cluster
+     * </pre>
+     *
+     * <code>.usage.CDPDatahubAutoscaleTriggered cdpDatahubAutoscaleTriggered = 70;</code>
+     */
+    boolean hasCdpDatahubAutoscaleTriggered();
+    /**
+     * <pre>
+     * Autoscale event for a CDP Datahub cluster
+     * </pre>
+     *
+     * <code>.usage.CDPDatahubAutoscaleTriggered cdpDatahubAutoscaleTriggered = 70;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered getCdpDatahubAutoscaleTriggered();
+    /**
+     * <pre>
+     * Autoscale event for a CDP Datahub cluster
+     * </pre>
+     *
+     * <code>.usage.CDPDatahubAutoscaleTriggered cdpDatahubAutoscaleTriggered = 70;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggeredOrBuilder getCdpDatahubAutoscaleTriggeredOrBuilder();
+
+    /**
+     * <pre>
+     * Autoscale config changed for a CDP Datahub cluster
+     * </pre>
+     *
+     * <code>.usage.CDPDatahubAutoscaleConfigChanged cdpDatahubAutoscaleConfigChanged = 71;</code>
+     */
+    boolean hasCdpDatahubAutoscaleConfigChanged();
+    /**
+     * <pre>
+     * Autoscale config changed for a CDP Datahub cluster
+     * </pre>
+     *
+     * <code>.usage.CDPDatahubAutoscaleConfigChanged cdpDatahubAutoscaleConfigChanged = 71;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged getCdpDatahubAutoscaleConfigChanged();
+    /**
+     * <pre>
+     * Autoscale config changed for a CDP Datahub cluster
+     * </pre>
+     *
+     * <code>.usage.CDPDatahubAutoscaleConfigChanged cdpDatahubAutoscaleConfigChanged = 71;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChangedOrBuilder getCdpDatahubAutoscaleConfigChangedOrBuilder();
+
+    /**
+     * <pre>
      * A CDP DF Catalog Artifact was created
      * </pre>
      *
@@ -1452,6 +1502,34 @@ public final class UsageProto {
               detailsCase_ = 47;
               break;
             }
+            case 562: {
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered.Builder subBuilder = null;
+              if (detailsCase_ == 70) {
+                subBuilder = ((com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered) details_).toBuilder();
+              }
+              details_ =
+                  input.readMessage(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom((com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered) details_);
+                details_ = subBuilder.buildPartial();
+              }
+              detailsCase_ = 70;
+              break;
+            }
+            case 570: {
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged.Builder subBuilder = null;
+              if (detailsCase_ == 71) {
+                subBuilder = ((com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged) details_).toBuilder();
+              }
+              details_ =
+                  input.readMessage(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom((com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged) details_);
+                details_ = subBuilder.buildPartial();
+              }
+              detailsCase_ = 71;
+              break;
+            }
             default: {
               if (!parseUnknownFieldProto3(
                   input, unknownFields, extensionRegistry, tag)) {
@@ -1514,6 +1592,8 @@ public final class UsageProto {
       CDPDATAHUBSTATUSCHANGED(35),
       CDPDATALAKESYNC(36),
       CDPDATAHUBSYNC(37),
+      CDPDATAHUBAUTOSCALETRIGGERED(70),
+      CDPDATAHUBAUTOSCALECONFIGCHANGED(71),
       CDPDFCATALOGARTIFACTCREATED(40),
       CDPDFCATALOGARTIFACTDELETED(41),
       CDPDFCATALOGARTIFACTVERSIONCREATED(42),
@@ -1563,6 +1643,8 @@ public final class UsageProto {
           case 35: return CDPDATAHUBSTATUSCHANGED;
           case 36: return CDPDATALAKESYNC;
           case 37: return CDPDATAHUBSYNC;
+          case 70: return CDPDATAHUBAUTOSCALETRIGGERED;
+          case 71: return CDPDATAHUBAUTOSCALECONFIGCHANGED;
           case 40: return CDPDFCATALOGARTIFACTCREATED;
           case 41: return CDPDFCATALOGARTIFACTDELETED;
           case 42: return CDPDFCATALOGARTIFACTVERSIONCREATED;
@@ -2649,6 +2731,82 @@ public final class UsageProto {
       return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubSync.getDefaultInstance();
     }
 
+    public static final int CDPDATAHUBAUTOSCALETRIGGERED_FIELD_NUMBER = 70;
+    /**
+     * <pre>
+     * Autoscale event for a CDP Datahub cluster
+     * </pre>
+     *
+     * <code>.usage.CDPDatahubAutoscaleTriggered cdpDatahubAutoscaleTriggered = 70;</code>
+     */
+    public boolean hasCdpDatahubAutoscaleTriggered() {
+      return detailsCase_ == 70;
+    }
+    /**
+     * <pre>
+     * Autoscale event for a CDP Datahub cluster
+     * </pre>
+     *
+     * <code>.usage.CDPDatahubAutoscaleTriggered cdpDatahubAutoscaleTriggered = 70;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered getCdpDatahubAutoscaleTriggered() {
+      if (detailsCase_ == 70) {
+         return (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered) details_;
+      }
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered.getDefaultInstance();
+    }
+    /**
+     * <pre>
+     * Autoscale event for a CDP Datahub cluster
+     * </pre>
+     *
+     * <code>.usage.CDPDatahubAutoscaleTriggered cdpDatahubAutoscaleTriggered = 70;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggeredOrBuilder getCdpDatahubAutoscaleTriggeredOrBuilder() {
+      if (detailsCase_ == 70) {
+         return (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered) details_;
+      }
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered.getDefaultInstance();
+    }
+
+    public static final int CDPDATAHUBAUTOSCALECONFIGCHANGED_FIELD_NUMBER = 71;
+    /**
+     * <pre>
+     * Autoscale config changed for a CDP Datahub cluster
+     * </pre>
+     *
+     * <code>.usage.CDPDatahubAutoscaleConfigChanged cdpDatahubAutoscaleConfigChanged = 71;</code>
+     */
+    public boolean hasCdpDatahubAutoscaleConfigChanged() {
+      return detailsCase_ == 71;
+    }
+    /**
+     * <pre>
+     * Autoscale config changed for a CDP Datahub cluster
+     * </pre>
+     *
+     * <code>.usage.CDPDatahubAutoscaleConfigChanged cdpDatahubAutoscaleConfigChanged = 71;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged getCdpDatahubAutoscaleConfigChanged() {
+      if (detailsCase_ == 71) {
+         return (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged) details_;
+      }
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged.getDefaultInstance();
+    }
+    /**
+     * <pre>
+     * Autoscale config changed for a CDP Datahub cluster
+     * </pre>
+     *
+     * <code>.usage.CDPDatahubAutoscaleConfigChanged cdpDatahubAutoscaleConfigChanged = 71;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChangedOrBuilder getCdpDatahubAutoscaleConfigChangedOrBuilder() {
+      if (detailsCase_ == 71) {
+         return (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged) details_;
+      }
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged.getDefaultInstance();
+    }
+
     public static final int CDPDFCATALOGARTIFACTCREATED_FIELD_NUMBER = 40;
     /**
      * <pre>
@@ -3078,6 +3236,12 @@ public final class UsageProto {
       if (detailsCase_ == 47) {
         output.writeMessage(47, (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived) details_);
       }
+      if (detailsCase_ == 70) {
+        output.writeMessage(70, (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered) details_);
+      }
+      if (detailsCase_ == 71) {
+        output.writeMessage(71, (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged) details_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -3234,6 +3398,14 @@ public final class UsageProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(47, (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived) details_);
       }
+      if (detailsCase_ == 70) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(70, (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered) details_);
+      }
+      if (detailsCase_ == 71) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(71, (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged) details_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -3363,6 +3535,14 @@ public final class UsageProto {
         case 37:
           result = result && getCdpDatahubSync()
               .equals(other.getCdpDatahubSync());
+          break;
+        case 70:
+          result = result && getCdpDatahubAutoscaleTriggered()
+              .equals(other.getCdpDatahubAutoscaleTriggered());
+          break;
+        case 71:
+          result = result && getCdpDatahubAutoscaleConfigChanged()
+              .equals(other.getCdpDatahubAutoscaleConfigChanged());
           break;
         case 40:
           result = result && getCdpDFCatalogArtifactCreated()
@@ -3521,6 +3701,14 @@ public final class UsageProto {
         case 37:
           hash = (37 * hash) + CDPDATAHUBSYNC_FIELD_NUMBER;
           hash = (53 * hash) + getCdpDatahubSync().hashCode();
+          break;
+        case 70:
+          hash = (37 * hash) + CDPDATAHUBAUTOSCALETRIGGERED_FIELD_NUMBER;
+          hash = (53 * hash) + getCdpDatahubAutoscaleTriggered().hashCode();
+          break;
+        case 71:
+          hash = (37 * hash) + CDPDATAHUBAUTOSCALECONFIGCHANGED_FIELD_NUMBER;
+          hash = (53 * hash) + getCdpDatahubAutoscaleConfigChanged().hashCode();
           break;
         case 40:
           hash = (37 * hash) + CDPDFCATALOGARTIFACTCREATED_FIELD_NUMBER;
@@ -3913,6 +4101,20 @@ public final class UsageProto {
             result.details_ = cdpDatahubSyncBuilder_.build();
           }
         }
+        if (detailsCase_ == 70) {
+          if (cdpDatahubAutoscaleTriggeredBuilder_ == null) {
+            result.details_ = details_;
+          } else {
+            result.details_ = cdpDatahubAutoscaleTriggeredBuilder_.build();
+          }
+        }
+        if (detailsCase_ == 71) {
+          if (cdpDatahubAutoscaleConfigChangedBuilder_ == null) {
+            result.details_ = details_;
+          } else {
+            result.details_ = cdpDatahubAutoscaleConfigChangedBuilder_.build();
+          }
+        }
         if (detailsCase_ == 40) {
           if (cdpDFCatalogArtifactCreatedBuilder_ == null) {
             result.details_ = details_;
@@ -4131,6 +4333,14 @@ public final class UsageProto {
           }
           case CDPDATAHUBSYNC: {
             mergeCdpDatahubSync(other.getCdpDatahubSync());
+            break;
+          }
+          case CDPDATAHUBAUTOSCALETRIGGERED: {
+            mergeCdpDatahubAutoscaleTriggered(other.getCdpDatahubAutoscaleTriggered());
+            break;
+          }
+          case CDPDATAHUBAUTOSCALECONFIGCHANGED: {
+            mergeCdpDatahubAutoscaleConfigChanged(other.getCdpDatahubAutoscaleConfigChanged());
             break;
           }
           case CDPDFCATALOGARTIFACTCREATED: {
@@ -8869,6 +9079,350 @@ public final class UsageProto {
         detailsCase_ = 37;
         onChanged();;
         return cdpDatahubSyncBuilder_;
+      }
+
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggeredOrBuilder> cdpDatahubAutoscaleTriggeredBuilder_;
+      /**
+       * <pre>
+       * Autoscale event for a CDP Datahub cluster
+       * </pre>
+       *
+       * <code>.usage.CDPDatahubAutoscaleTriggered cdpDatahubAutoscaleTriggered = 70;</code>
+       */
+      public boolean hasCdpDatahubAutoscaleTriggered() {
+        return detailsCase_ == 70;
+      }
+      /**
+       * <pre>
+       * Autoscale event for a CDP Datahub cluster
+       * </pre>
+       *
+       * <code>.usage.CDPDatahubAutoscaleTriggered cdpDatahubAutoscaleTriggered = 70;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered getCdpDatahubAutoscaleTriggered() {
+        if (cdpDatahubAutoscaleTriggeredBuilder_ == null) {
+          if (detailsCase_ == 70) {
+            return (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered) details_;
+          }
+          return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered.getDefaultInstance();
+        } else {
+          if (detailsCase_ == 70) {
+            return cdpDatahubAutoscaleTriggeredBuilder_.getMessage();
+          }
+          return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered.getDefaultInstance();
+        }
+      }
+      /**
+       * <pre>
+       * Autoscale event for a CDP Datahub cluster
+       * </pre>
+       *
+       * <code>.usage.CDPDatahubAutoscaleTriggered cdpDatahubAutoscaleTriggered = 70;</code>
+       */
+      public Builder setCdpDatahubAutoscaleTriggered(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered value) {
+        if (cdpDatahubAutoscaleTriggeredBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          details_ = value;
+          onChanged();
+        } else {
+          cdpDatahubAutoscaleTriggeredBuilder_.setMessage(value);
+        }
+        detailsCase_ = 70;
+        return this;
+      }
+      /**
+       * <pre>
+       * Autoscale event for a CDP Datahub cluster
+       * </pre>
+       *
+       * <code>.usage.CDPDatahubAutoscaleTriggered cdpDatahubAutoscaleTriggered = 70;</code>
+       */
+      public Builder setCdpDatahubAutoscaleTriggered(
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered.Builder builderForValue) {
+        if (cdpDatahubAutoscaleTriggeredBuilder_ == null) {
+          details_ = builderForValue.build();
+          onChanged();
+        } else {
+          cdpDatahubAutoscaleTriggeredBuilder_.setMessage(builderForValue.build());
+        }
+        detailsCase_ = 70;
+        return this;
+      }
+      /**
+       * <pre>
+       * Autoscale event for a CDP Datahub cluster
+       * </pre>
+       *
+       * <code>.usage.CDPDatahubAutoscaleTriggered cdpDatahubAutoscaleTriggered = 70;</code>
+       */
+      public Builder mergeCdpDatahubAutoscaleTriggered(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered value) {
+        if (cdpDatahubAutoscaleTriggeredBuilder_ == null) {
+          if (detailsCase_ == 70 &&
+              details_ != com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered.getDefaultInstance()) {
+            details_ = com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered.newBuilder((com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered) details_)
+                .mergeFrom(value).buildPartial();
+          } else {
+            details_ = value;
+          }
+          onChanged();
+        } else {
+          if (detailsCase_ == 70) {
+            cdpDatahubAutoscaleTriggeredBuilder_.mergeFrom(value);
+          }
+          cdpDatahubAutoscaleTriggeredBuilder_.setMessage(value);
+        }
+        detailsCase_ = 70;
+        return this;
+      }
+      /**
+       * <pre>
+       * Autoscale event for a CDP Datahub cluster
+       * </pre>
+       *
+       * <code>.usage.CDPDatahubAutoscaleTriggered cdpDatahubAutoscaleTriggered = 70;</code>
+       */
+      public Builder clearCdpDatahubAutoscaleTriggered() {
+        if (cdpDatahubAutoscaleTriggeredBuilder_ == null) {
+          if (detailsCase_ == 70) {
+            detailsCase_ = 0;
+            details_ = null;
+            onChanged();
+          }
+        } else {
+          if (detailsCase_ == 70) {
+            detailsCase_ = 0;
+            details_ = null;
+          }
+          cdpDatahubAutoscaleTriggeredBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Autoscale event for a CDP Datahub cluster
+       * </pre>
+       *
+       * <code>.usage.CDPDatahubAutoscaleTriggered cdpDatahubAutoscaleTriggered = 70;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered.Builder getCdpDatahubAutoscaleTriggeredBuilder() {
+        return getCdpDatahubAutoscaleTriggeredFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * Autoscale event for a CDP Datahub cluster
+       * </pre>
+       *
+       * <code>.usage.CDPDatahubAutoscaleTriggered cdpDatahubAutoscaleTriggered = 70;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggeredOrBuilder getCdpDatahubAutoscaleTriggeredOrBuilder() {
+        if ((detailsCase_ == 70) && (cdpDatahubAutoscaleTriggeredBuilder_ != null)) {
+          return cdpDatahubAutoscaleTriggeredBuilder_.getMessageOrBuilder();
+        } else {
+          if (detailsCase_ == 70) {
+            return (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered) details_;
+          }
+          return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered.getDefaultInstance();
+        }
+      }
+      /**
+       * <pre>
+       * Autoscale event for a CDP Datahub cluster
+       * </pre>
+       *
+       * <code>.usage.CDPDatahubAutoscaleTriggered cdpDatahubAutoscaleTriggered = 70;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggeredOrBuilder> 
+          getCdpDatahubAutoscaleTriggeredFieldBuilder() {
+        if (cdpDatahubAutoscaleTriggeredBuilder_ == null) {
+          if (!(detailsCase_ == 70)) {
+            details_ = com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered.getDefaultInstance();
+          }
+          cdpDatahubAutoscaleTriggeredBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggeredOrBuilder>(
+                  (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered) details_,
+                  getParentForChildren(),
+                  isClean());
+          details_ = null;
+        }
+        detailsCase_ = 70;
+        onChanged();;
+        return cdpDatahubAutoscaleTriggeredBuilder_;
+      }
+
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChangedOrBuilder> cdpDatahubAutoscaleConfigChangedBuilder_;
+      /**
+       * <pre>
+       * Autoscale config changed for a CDP Datahub cluster
+       * </pre>
+       *
+       * <code>.usage.CDPDatahubAutoscaleConfigChanged cdpDatahubAutoscaleConfigChanged = 71;</code>
+       */
+      public boolean hasCdpDatahubAutoscaleConfigChanged() {
+        return detailsCase_ == 71;
+      }
+      /**
+       * <pre>
+       * Autoscale config changed for a CDP Datahub cluster
+       * </pre>
+       *
+       * <code>.usage.CDPDatahubAutoscaleConfigChanged cdpDatahubAutoscaleConfigChanged = 71;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged getCdpDatahubAutoscaleConfigChanged() {
+        if (cdpDatahubAutoscaleConfigChangedBuilder_ == null) {
+          if (detailsCase_ == 71) {
+            return (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged) details_;
+          }
+          return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged.getDefaultInstance();
+        } else {
+          if (detailsCase_ == 71) {
+            return cdpDatahubAutoscaleConfigChangedBuilder_.getMessage();
+          }
+          return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged.getDefaultInstance();
+        }
+      }
+      /**
+       * <pre>
+       * Autoscale config changed for a CDP Datahub cluster
+       * </pre>
+       *
+       * <code>.usage.CDPDatahubAutoscaleConfigChanged cdpDatahubAutoscaleConfigChanged = 71;</code>
+       */
+      public Builder setCdpDatahubAutoscaleConfigChanged(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged value) {
+        if (cdpDatahubAutoscaleConfigChangedBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          details_ = value;
+          onChanged();
+        } else {
+          cdpDatahubAutoscaleConfigChangedBuilder_.setMessage(value);
+        }
+        detailsCase_ = 71;
+        return this;
+      }
+      /**
+       * <pre>
+       * Autoscale config changed for a CDP Datahub cluster
+       * </pre>
+       *
+       * <code>.usage.CDPDatahubAutoscaleConfigChanged cdpDatahubAutoscaleConfigChanged = 71;</code>
+       */
+      public Builder setCdpDatahubAutoscaleConfigChanged(
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged.Builder builderForValue) {
+        if (cdpDatahubAutoscaleConfigChangedBuilder_ == null) {
+          details_ = builderForValue.build();
+          onChanged();
+        } else {
+          cdpDatahubAutoscaleConfigChangedBuilder_.setMessage(builderForValue.build());
+        }
+        detailsCase_ = 71;
+        return this;
+      }
+      /**
+       * <pre>
+       * Autoscale config changed for a CDP Datahub cluster
+       * </pre>
+       *
+       * <code>.usage.CDPDatahubAutoscaleConfigChanged cdpDatahubAutoscaleConfigChanged = 71;</code>
+       */
+      public Builder mergeCdpDatahubAutoscaleConfigChanged(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged value) {
+        if (cdpDatahubAutoscaleConfigChangedBuilder_ == null) {
+          if (detailsCase_ == 71 &&
+              details_ != com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged.getDefaultInstance()) {
+            details_ = com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged.newBuilder((com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged) details_)
+                .mergeFrom(value).buildPartial();
+          } else {
+            details_ = value;
+          }
+          onChanged();
+        } else {
+          if (detailsCase_ == 71) {
+            cdpDatahubAutoscaleConfigChangedBuilder_.mergeFrom(value);
+          }
+          cdpDatahubAutoscaleConfigChangedBuilder_.setMessage(value);
+        }
+        detailsCase_ = 71;
+        return this;
+      }
+      /**
+       * <pre>
+       * Autoscale config changed for a CDP Datahub cluster
+       * </pre>
+       *
+       * <code>.usage.CDPDatahubAutoscaleConfigChanged cdpDatahubAutoscaleConfigChanged = 71;</code>
+       */
+      public Builder clearCdpDatahubAutoscaleConfigChanged() {
+        if (cdpDatahubAutoscaleConfigChangedBuilder_ == null) {
+          if (detailsCase_ == 71) {
+            detailsCase_ = 0;
+            details_ = null;
+            onChanged();
+          }
+        } else {
+          if (detailsCase_ == 71) {
+            detailsCase_ = 0;
+            details_ = null;
+          }
+          cdpDatahubAutoscaleConfigChangedBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Autoscale config changed for a CDP Datahub cluster
+       * </pre>
+       *
+       * <code>.usage.CDPDatahubAutoscaleConfigChanged cdpDatahubAutoscaleConfigChanged = 71;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged.Builder getCdpDatahubAutoscaleConfigChangedBuilder() {
+        return getCdpDatahubAutoscaleConfigChangedFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * Autoscale config changed for a CDP Datahub cluster
+       * </pre>
+       *
+       * <code>.usage.CDPDatahubAutoscaleConfigChanged cdpDatahubAutoscaleConfigChanged = 71;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChangedOrBuilder getCdpDatahubAutoscaleConfigChangedOrBuilder() {
+        if ((detailsCase_ == 71) && (cdpDatahubAutoscaleConfigChangedBuilder_ != null)) {
+          return cdpDatahubAutoscaleConfigChangedBuilder_.getMessageOrBuilder();
+        } else {
+          if (detailsCase_ == 71) {
+            return (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged) details_;
+          }
+          return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged.getDefaultInstance();
+        }
+      }
+      /**
+       * <pre>
+       * Autoscale config changed for a CDP Datahub cluster
+       * </pre>
+       *
+       * <code>.usage.CDPDatahubAutoscaleConfigChanged cdpDatahubAutoscaleConfigChanged = 71;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChangedOrBuilder> 
+          getCdpDatahubAutoscaleConfigChangedFieldBuilder() {
+        if (cdpDatahubAutoscaleConfigChangedBuilder_ == null) {
+          if (!(detailsCase_ == 71)) {
+            details_ = com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged.getDefaultInstance();
+          }
+          cdpDatahubAutoscaleConfigChangedBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChangedOrBuilder>(
+                  (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged) details_,
+                  getParentForChildren(),
+                  isClean());
+          details_ = null;
+        }
+        detailsCase_ = 71;
+        onChanged();;
+        return cdpDatahubAutoscaleConfigChangedBuilder_;
       }
 
       private com.google.protobuf.SingleFieldBuilderV3<
@@ -81872,6 +82426,5695 @@ public final class UsageProto {
 
   }
 
+  public interface AutoscalePolicyTypeOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:usage.AutoscalePolicyType)
+      com.google.protobuf.MessageOrBuilder {
+  }
+  /**
+   * <pre>
+   *Autoscale Policy Type
+   * </pre>
+   *
+   * Protobuf type {@code usage.AutoscalePolicyType}
+   */
+  public  static final class AutoscalePolicyType extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:usage.AutoscalePolicyType)
+      AutoscalePolicyTypeOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use AutoscalePolicyType.newBuilder() to construct.
+    private AutoscalePolicyType(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private AutoscalePolicyType() {
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private AutoscalePolicyType(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownFieldProto3(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_AutoscalePolicyType_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_AutoscalePolicyType_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscalePolicyType.class, com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscalePolicyType.Builder.class);
+    }
+
+    /**
+     * Protobuf enum {@code usage.AutoscalePolicyType.Value}
+     */
+    public enum Value
+        implements com.google.protobuf.ProtocolMessageEnum {
+      /**
+       * <pre>
+       * A value indicating the enum is unset.
+       * </pre>
+       *
+       * <code>UNSET = 0;</code>
+       */
+      UNSET(0),
+      /**
+       * <pre>
+       * The schedule-based autoscale policy.
+       * </pre>
+       *
+       * <code>TIME_BASED = 1;</code>
+       */
+      TIME_BASED(1),
+      /**
+       * <pre>
+       * The load-based autoscale policy.
+       * </pre>
+       *
+       * <code>LOAD_BASED = 2;</code>
+       */
+      LOAD_BASED(2),
+      UNRECOGNIZED(-1),
+      ;
+
+      /**
+       * <pre>
+       * A value indicating the enum is unset.
+       * </pre>
+       *
+       * <code>UNSET = 0;</code>
+       */
+      public static final int UNSET_VALUE = 0;
+      /**
+       * <pre>
+       * The schedule-based autoscale policy.
+       * </pre>
+       *
+       * <code>TIME_BASED = 1;</code>
+       */
+      public static final int TIME_BASED_VALUE = 1;
+      /**
+       * <pre>
+       * The load-based autoscale policy.
+       * </pre>
+       *
+       * <code>LOAD_BASED = 2;</code>
+       */
+      public static final int LOAD_BASED_VALUE = 2;
+
+
+      public final int getNumber() {
+        if (this == UNRECOGNIZED) {
+          throw new java.lang.IllegalArgumentException(
+              "Can't get the number of an unknown enum value.");
+        }
+        return value;
+      }
+
+      /**
+       * @deprecated Use {@link #forNumber(int)} instead.
+       */
+      @java.lang.Deprecated
+      public static Value valueOf(int value) {
+        return forNumber(value);
+      }
+
+      public static Value forNumber(int value) {
+        switch (value) {
+          case 0: return UNSET;
+          case 1: return TIME_BASED;
+          case 2: return LOAD_BASED;
+          default: return null;
+        }
+      }
+
+      public static com.google.protobuf.Internal.EnumLiteMap<Value>
+          internalGetValueMap() {
+        return internalValueMap;
+      }
+      private static final com.google.protobuf.Internal.EnumLiteMap<
+          Value> internalValueMap =
+            new com.google.protobuf.Internal.EnumLiteMap<Value>() {
+              public Value findValueByNumber(int number) {
+                return Value.forNumber(number);
+              }
+            };
+
+      public final com.google.protobuf.Descriptors.EnumValueDescriptor
+          getValueDescriptor() {
+        return getDescriptor().getValues().get(ordinal());
+      }
+      public final com.google.protobuf.Descriptors.EnumDescriptor
+          getDescriptorForType() {
+        return getDescriptor();
+      }
+      public static final com.google.protobuf.Descriptors.EnumDescriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscalePolicyType.getDescriptor().getEnumTypes().get(0);
+      }
+
+      private static final Value[] VALUES = values();
+
+      public static Value valueOf(
+          com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+        if (desc.getType() != getDescriptor()) {
+          throw new java.lang.IllegalArgumentException(
+            "EnumValueDescriptor is not for this type.");
+        }
+        if (desc.getIndex() == -1) {
+          return UNRECOGNIZED;
+        }
+        return VALUES[desc.getIndex()];
+      }
+
+      private final int value;
+
+      private Value(int value) {
+        this.value = value;
+      }
+
+      // @@protoc_insertion_point(enum_scope:usage.AutoscalePolicyType.Value)
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscalePolicyType)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscalePolicyType other = (com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscalePolicyType) obj;
+
+      boolean result = true;
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscalePolicyType parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscalePolicyType parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscalePolicyType parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscalePolicyType parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscalePolicyType parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscalePolicyType parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscalePolicyType parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscalePolicyType parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscalePolicyType parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscalePolicyType parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscalePolicyType parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscalePolicyType parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscalePolicyType prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     *Autoscale Policy Type
+     * </pre>
+     *
+     * Protobuf type {@code usage.AutoscalePolicyType}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:usage.AutoscalePolicyType)
+        com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscalePolicyTypeOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_AutoscalePolicyType_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_AutoscalePolicyType_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscalePolicyType.class, com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscalePolicyType.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscalePolicyType.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_AutoscalePolicyType_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscalePolicyType getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscalePolicyType.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscalePolicyType build() {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscalePolicyType result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscalePolicyType buildPartial() {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscalePolicyType result = new com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscalePolicyType(this);
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscalePolicyType) {
+          return mergeFrom((com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscalePolicyType)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscalePolicyType other) {
+        if (other == com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscalePolicyType.getDefaultInstance()) return this;
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscalePolicyType parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscalePolicyType) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFieldsProto3(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:usage.AutoscalePolicyType)
+    }
+
+    // @@protoc_insertion_point(class_scope:usage.AutoscalePolicyType)
+    private static final com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscalePolicyType DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscalePolicyType();
+    }
+
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscalePolicyType getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<AutoscalePolicyType>
+        PARSER = new com.google.protobuf.AbstractParser<AutoscalePolicyType>() {
+      @java.lang.Override
+      public AutoscalePolicyType parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new AutoscalePolicyType(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<AutoscalePolicyType> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<AutoscalePolicyType> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscalePolicyType getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface CDPAutoscalePolicyDefinitionOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:usage.CDPAutoscalePolicyDefinition)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * The autoscale policy type
+     * </pre>
+     *
+     * <code>.usage.AutoscalePolicyType.Value autoscalePolicyType = 1;</code>
+     */
+    int getAutoscalePolicyTypeValue();
+    /**
+     * <pre>
+     * The autoscale policy type
+     * </pre>
+     *
+     * <code>.usage.AutoscalePolicyType.Value autoscalePolicyType = 1;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscalePolicyType.Value getAutoscalePolicyType();
+
+    /**
+     * <pre>
+     * The autoscale policy parameters
+     * </pre>
+     *
+     * <code>string autoscalePolicyParameters = 2;</code>
+     */
+    java.lang.String getAutoscalePolicyParameters();
+    /**
+     * <pre>
+     * The autoscale policy parameters
+     * </pre>
+     *
+     * <code>string autoscalePolicyParameters = 2;</code>
+     */
+    com.google.protobuf.ByteString
+        getAutoscalePolicyParametersBytes();
+
+    /**
+     * <pre>
+     * The autoscale host group
+     * </pre>
+     *
+     * <code>string autoscalingHostGroup = 3;</code>
+     */
+    java.lang.String getAutoscalingHostGroup();
+    /**
+     * <pre>
+     * The autoscale host group
+     * </pre>
+     *
+     * <code>string autoscalingHostGroup = 3;</code>
+     */
+    com.google.protobuf.ByteString
+        getAutoscalingHostGroupBytes();
+
+    /**
+     * <pre>
+     * The autoscale policy name.
+     * </pre>
+     *
+     * <code>string autoscalingPolicyName = 4;</code>
+     */
+    java.lang.String getAutoscalingPolicyName();
+    /**
+     * <pre>
+     * The autoscale policy name.
+     * </pre>
+     *
+     * <code>string autoscalingPolicyName = 4;</code>
+     */
+    com.google.protobuf.ByteString
+        getAutoscalingPolicyNameBytes();
+  }
+  /**
+   * <pre>
+   *Autoscale Policy Definition
+   * </pre>
+   *
+   * Protobuf type {@code usage.CDPAutoscalePolicyDefinition}
+   */
+  public  static final class CDPAutoscalePolicyDefinition extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:usage.CDPAutoscalePolicyDefinition)
+      CDPAutoscalePolicyDefinitionOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use CDPAutoscalePolicyDefinition.newBuilder() to construct.
+    private CDPAutoscalePolicyDefinition(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private CDPAutoscalePolicyDefinition() {
+      autoscalePolicyType_ = 0;
+      autoscalePolicyParameters_ = "";
+      autoscalingHostGroup_ = "";
+      autoscalingPolicyName_ = "";
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private CDPAutoscalePolicyDefinition(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 8: {
+              int rawValue = input.readEnum();
+
+              autoscalePolicyType_ = rawValue;
+              break;
+            }
+            case 18: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              autoscalePolicyParameters_ = s;
+              break;
+            }
+            case 26: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              autoscalingHostGroup_ = s;
+              break;
+            }
+            case 34: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              autoscalingPolicyName_ = s;
+              break;
+            }
+            default: {
+              if (!parseUnknownFieldProto3(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPAutoscalePolicyDefinition_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPAutoscalePolicyDefinition_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition.class, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition.Builder.class);
+    }
+
+    public static final int AUTOSCALEPOLICYTYPE_FIELD_NUMBER = 1;
+    private int autoscalePolicyType_;
+    /**
+     * <pre>
+     * The autoscale policy type
+     * </pre>
+     *
+     * <code>.usage.AutoscalePolicyType.Value autoscalePolicyType = 1;</code>
+     */
+    public int getAutoscalePolicyTypeValue() {
+      return autoscalePolicyType_;
+    }
+    /**
+     * <pre>
+     * The autoscale policy type
+     * </pre>
+     *
+     * <code>.usage.AutoscalePolicyType.Value autoscalePolicyType = 1;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscalePolicyType.Value getAutoscalePolicyType() {
+      @SuppressWarnings("deprecation")
+      com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscalePolicyType.Value result = com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscalePolicyType.Value.valueOf(autoscalePolicyType_);
+      return result == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscalePolicyType.Value.UNRECOGNIZED : result;
+    }
+
+    public static final int AUTOSCALEPOLICYPARAMETERS_FIELD_NUMBER = 2;
+    private volatile java.lang.Object autoscalePolicyParameters_;
+    /**
+     * <pre>
+     * The autoscale policy parameters
+     * </pre>
+     *
+     * <code>string autoscalePolicyParameters = 2;</code>
+     */
+    public java.lang.String getAutoscalePolicyParameters() {
+      java.lang.Object ref = autoscalePolicyParameters_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        autoscalePolicyParameters_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The autoscale policy parameters
+     * </pre>
+     *
+     * <code>string autoscalePolicyParameters = 2;</code>
+     */
+    public com.google.protobuf.ByteString
+        getAutoscalePolicyParametersBytes() {
+      java.lang.Object ref = autoscalePolicyParameters_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        autoscalePolicyParameters_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int AUTOSCALINGHOSTGROUP_FIELD_NUMBER = 3;
+    private volatile java.lang.Object autoscalingHostGroup_;
+    /**
+     * <pre>
+     * The autoscale host group
+     * </pre>
+     *
+     * <code>string autoscalingHostGroup = 3;</code>
+     */
+    public java.lang.String getAutoscalingHostGroup() {
+      java.lang.Object ref = autoscalingHostGroup_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        autoscalingHostGroup_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The autoscale host group
+     * </pre>
+     *
+     * <code>string autoscalingHostGroup = 3;</code>
+     */
+    public com.google.protobuf.ByteString
+        getAutoscalingHostGroupBytes() {
+      java.lang.Object ref = autoscalingHostGroup_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        autoscalingHostGroup_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int AUTOSCALINGPOLICYNAME_FIELD_NUMBER = 4;
+    private volatile java.lang.Object autoscalingPolicyName_;
+    /**
+     * <pre>
+     * The autoscale policy name.
+     * </pre>
+     *
+     * <code>string autoscalingPolicyName = 4;</code>
+     */
+    public java.lang.String getAutoscalingPolicyName() {
+      java.lang.Object ref = autoscalingPolicyName_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        autoscalingPolicyName_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The autoscale policy name.
+     * </pre>
+     *
+     * <code>string autoscalingPolicyName = 4;</code>
+     */
+    public com.google.protobuf.ByteString
+        getAutoscalingPolicyNameBytes() {
+      java.lang.Object ref = autoscalingPolicyName_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        autoscalingPolicyName_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (autoscalePolicyType_ != com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscalePolicyType.Value.UNSET.getNumber()) {
+        output.writeEnum(1, autoscalePolicyType_);
+      }
+      if (!getAutoscalePolicyParametersBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, autoscalePolicyParameters_);
+      }
+      if (!getAutoscalingHostGroupBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, autoscalingHostGroup_);
+      }
+      if (!getAutoscalingPolicyNameBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, autoscalingPolicyName_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (autoscalePolicyType_ != com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscalePolicyType.Value.UNSET.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(1, autoscalePolicyType_);
+      }
+      if (!getAutoscalePolicyParametersBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, autoscalePolicyParameters_);
+      }
+      if (!getAutoscalingHostGroupBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, autoscalingHostGroup_);
+      }
+      if (!getAutoscalingPolicyNameBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, autoscalingPolicyName_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition other = (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition) obj;
+
+      boolean result = true;
+      result = result && autoscalePolicyType_ == other.autoscalePolicyType_;
+      result = result && getAutoscalePolicyParameters()
+          .equals(other.getAutoscalePolicyParameters());
+      result = result && getAutoscalingHostGroup()
+          .equals(other.getAutoscalingHostGroup());
+      result = result && getAutoscalingPolicyName()
+          .equals(other.getAutoscalingPolicyName());
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + AUTOSCALEPOLICYTYPE_FIELD_NUMBER;
+      hash = (53 * hash) + autoscalePolicyType_;
+      hash = (37 * hash) + AUTOSCALEPOLICYPARAMETERS_FIELD_NUMBER;
+      hash = (53 * hash) + getAutoscalePolicyParameters().hashCode();
+      hash = (37 * hash) + AUTOSCALINGHOSTGROUP_FIELD_NUMBER;
+      hash = (53 * hash) + getAutoscalingHostGroup().hashCode();
+      hash = (37 * hash) + AUTOSCALINGPOLICYNAME_FIELD_NUMBER;
+      hash = (53 * hash) + getAutoscalingPolicyName().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     *Autoscale Policy Definition
+     * </pre>
+     *
+     * Protobuf type {@code usage.CDPAutoscalePolicyDefinition}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:usage.CDPAutoscalePolicyDefinition)
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinitionOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPAutoscalePolicyDefinition_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPAutoscalePolicyDefinition_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition.class, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        autoscalePolicyType_ = 0;
+
+        autoscalePolicyParameters_ = "";
+
+        autoscalingHostGroup_ = "";
+
+        autoscalingPolicyName_ = "";
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPAutoscalePolicyDefinition_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition build() {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition buildPartial() {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition result = new com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition(this);
+        result.autoscalePolicyType_ = autoscalePolicyType_;
+        result.autoscalePolicyParameters_ = autoscalePolicyParameters_;
+        result.autoscalingHostGroup_ = autoscalingHostGroup_;
+        result.autoscalingPolicyName_ = autoscalingPolicyName_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition) {
+          return mergeFrom((com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition other) {
+        if (other == com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition.getDefaultInstance()) return this;
+        if (other.autoscalePolicyType_ != 0) {
+          setAutoscalePolicyTypeValue(other.getAutoscalePolicyTypeValue());
+        }
+        if (!other.getAutoscalePolicyParameters().isEmpty()) {
+          autoscalePolicyParameters_ = other.autoscalePolicyParameters_;
+          onChanged();
+        }
+        if (!other.getAutoscalingHostGroup().isEmpty()) {
+          autoscalingHostGroup_ = other.autoscalingHostGroup_;
+          onChanged();
+        }
+        if (!other.getAutoscalingPolicyName().isEmpty()) {
+          autoscalingPolicyName_ = other.autoscalingPolicyName_;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private int autoscalePolicyType_ = 0;
+      /**
+       * <pre>
+       * The autoscale policy type
+       * </pre>
+       *
+       * <code>.usage.AutoscalePolicyType.Value autoscalePolicyType = 1;</code>
+       */
+      public int getAutoscalePolicyTypeValue() {
+        return autoscalePolicyType_;
+      }
+      /**
+       * <pre>
+       * The autoscale policy type
+       * </pre>
+       *
+       * <code>.usage.AutoscalePolicyType.Value autoscalePolicyType = 1;</code>
+       */
+      public Builder setAutoscalePolicyTypeValue(int value) {
+        autoscalePolicyType_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The autoscale policy type
+       * </pre>
+       *
+       * <code>.usage.AutoscalePolicyType.Value autoscalePolicyType = 1;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscalePolicyType.Value getAutoscalePolicyType() {
+        @SuppressWarnings("deprecation")
+        com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscalePolicyType.Value result = com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscalePolicyType.Value.valueOf(autoscalePolicyType_);
+        return result == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscalePolicyType.Value.UNRECOGNIZED : result;
+      }
+      /**
+       * <pre>
+       * The autoscale policy type
+       * </pre>
+       *
+       * <code>.usage.AutoscalePolicyType.Value autoscalePolicyType = 1;</code>
+       */
+      public Builder setAutoscalePolicyType(com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscalePolicyType.Value value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        autoscalePolicyType_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The autoscale policy type
+       * </pre>
+       *
+       * <code>.usage.AutoscalePolicyType.Value autoscalePolicyType = 1;</code>
+       */
+      public Builder clearAutoscalePolicyType() {
+        
+        autoscalePolicyType_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object autoscalePolicyParameters_ = "";
+      /**
+       * <pre>
+       * The autoscale policy parameters
+       * </pre>
+       *
+       * <code>string autoscalePolicyParameters = 2;</code>
+       */
+      public java.lang.String getAutoscalePolicyParameters() {
+        java.lang.Object ref = autoscalePolicyParameters_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          autoscalePolicyParameters_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The autoscale policy parameters
+       * </pre>
+       *
+       * <code>string autoscalePolicyParameters = 2;</code>
+       */
+      public com.google.protobuf.ByteString
+          getAutoscalePolicyParametersBytes() {
+        java.lang.Object ref = autoscalePolicyParameters_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          autoscalePolicyParameters_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The autoscale policy parameters
+       * </pre>
+       *
+       * <code>string autoscalePolicyParameters = 2;</code>
+       */
+      public Builder setAutoscalePolicyParameters(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        autoscalePolicyParameters_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The autoscale policy parameters
+       * </pre>
+       *
+       * <code>string autoscalePolicyParameters = 2;</code>
+       */
+      public Builder clearAutoscalePolicyParameters() {
+        
+        autoscalePolicyParameters_ = getDefaultInstance().getAutoscalePolicyParameters();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The autoscale policy parameters
+       * </pre>
+       *
+       * <code>string autoscalePolicyParameters = 2;</code>
+       */
+      public Builder setAutoscalePolicyParametersBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        autoscalePolicyParameters_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object autoscalingHostGroup_ = "";
+      /**
+       * <pre>
+       * The autoscale host group
+       * </pre>
+       *
+       * <code>string autoscalingHostGroup = 3;</code>
+       */
+      public java.lang.String getAutoscalingHostGroup() {
+        java.lang.Object ref = autoscalingHostGroup_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          autoscalingHostGroup_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The autoscale host group
+       * </pre>
+       *
+       * <code>string autoscalingHostGroup = 3;</code>
+       */
+      public com.google.protobuf.ByteString
+          getAutoscalingHostGroupBytes() {
+        java.lang.Object ref = autoscalingHostGroup_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          autoscalingHostGroup_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The autoscale host group
+       * </pre>
+       *
+       * <code>string autoscalingHostGroup = 3;</code>
+       */
+      public Builder setAutoscalingHostGroup(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        autoscalingHostGroup_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The autoscale host group
+       * </pre>
+       *
+       * <code>string autoscalingHostGroup = 3;</code>
+       */
+      public Builder clearAutoscalingHostGroup() {
+        
+        autoscalingHostGroup_ = getDefaultInstance().getAutoscalingHostGroup();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The autoscale host group
+       * </pre>
+       *
+       * <code>string autoscalingHostGroup = 3;</code>
+       */
+      public Builder setAutoscalingHostGroupBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        autoscalingHostGroup_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object autoscalingPolicyName_ = "";
+      /**
+       * <pre>
+       * The autoscale policy name.
+       * </pre>
+       *
+       * <code>string autoscalingPolicyName = 4;</code>
+       */
+      public java.lang.String getAutoscalingPolicyName() {
+        java.lang.Object ref = autoscalingPolicyName_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          autoscalingPolicyName_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The autoscale policy name.
+       * </pre>
+       *
+       * <code>string autoscalingPolicyName = 4;</code>
+       */
+      public com.google.protobuf.ByteString
+          getAutoscalingPolicyNameBytes() {
+        java.lang.Object ref = autoscalingPolicyName_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          autoscalingPolicyName_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The autoscale policy name.
+       * </pre>
+       *
+       * <code>string autoscalingPolicyName = 4;</code>
+       */
+      public Builder setAutoscalingPolicyName(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        autoscalingPolicyName_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The autoscale policy name.
+       * </pre>
+       *
+       * <code>string autoscalingPolicyName = 4;</code>
+       */
+      public Builder clearAutoscalingPolicyName() {
+        
+        autoscalingPolicyName_ = getDefaultInstance().getAutoscalingPolicyName();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The autoscale policy name.
+       * </pre>
+       *
+       * <code>string autoscalingPolicyName = 4;</code>
+       */
+      public Builder setAutoscalingPolicyNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        autoscalingPolicyName_ = value;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFieldsProto3(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:usage.CDPAutoscalePolicyDefinition)
+    }
+
+    // @@protoc_insertion_point(class_scope:usage.CDPAutoscalePolicyDefinition)
+    private static final com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition();
+    }
+
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<CDPAutoscalePolicyDefinition>
+        PARSER = new com.google.protobuf.AbstractParser<CDPAutoscalePolicyDefinition>() {
+      @java.lang.Override
+      public CDPAutoscalePolicyDefinition parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new CDPAutoscalePolicyDefinition(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<CDPAutoscalePolicyDefinition> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<CDPAutoscalePolicyDefinition> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface AutoscaleScalingStatusTypeOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:usage.AutoscaleScalingStatusType)
+      com.google.protobuf.MessageOrBuilder {
+  }
+  /**
+   * <pre>
+   *Autoscale Trigger Status
+   * </pre>
+   *
+   * Protobuf type {@code usage.AutoscaleScalingStatusType}
+   */
+  public  static final class AutoscaleScalingStatusType extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:usage.AutoscaleScalingStatusType)
+      AutoscaleScalingStatusTypeOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use AutoscaleScalingStatusType.newBuilder() to construct.
+    private AutoscaleScalingStatusType(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private AutoscaleScalingStatusType() {
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private AutoscaleScalingStatusType(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownFieldProto3(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_AutoscaleScalingStatusType_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_AutoscaleScalingStatusType_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscaleScalingStatusType.class, com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscaleScalingStatusType.Builder.class);
+    }
+
+    /**
+     * Protobuf enum {@code usage.AutoscaleScalingStatusType.Value}
+     */
+    public enum Value
+        implements com.google.protobuf.ProtocolMessageEnum {
+      /**
+       * <pre>
+       * A value indicating the enum is unset.
+       * </pre>
+       *
+       * <code>UNSET = 0;</code>
+       */
+      UNSET(0),
+      /**
+       * <pre>
+       * Scaling requested successfully.
+       * </pre>
+       *
+       * <code>SCALING_REQUESTED = 1;</code>
+       */
+      SCALING_REQUESTED(1),
+      /**
+       * <pre>
+       * Scaling request failed.
+       * </pre>
+       *
+       * <code>SCALING_REQUEST_FAILED = 2;</code>
+       */
+      SCALING_REQUEST_FAILED(2),
+      /**
+       * <pre>
+       * Autoscale trigger failed.
+       * </pre>
+       *
+       * <code>AUTOSCALE_TRIGGER_FAILED = 3;</code>
+       */
+      AUTOSCALE_TRIGGER_FAILED(3),
+      UNRECOGNIZED(-1),
+      ;
+
+      /**
+       * <pre>
+       * A value indicating the enum is unset.
+       * </pre>
+       *
+       * <code>UNSET = 0;</code>
+       */
+      public static final int UNSET_VALUE = 0;
+      /**
+       * <pre>
+       * Scaling requested successfully.
+       * </pre>
+       *
+       * <code>SCALING_REQUESTED = 1;</code>
+       */
+      public static final int SCALING_REQUESTED_VALUE = 1;
+      /**
+       * <pre>
+       * Scaling request failed.
+       * </pre>
+       *
+       * <code>SCALING_REQUEST_FAILED = 2;</code>
+       */
+      public static final int SCALING_REQUEST_FAILED_VALUE = 2;
+      /**
+       * <pre>
+       * Autoscale trigger failed.
+       * </pre>
+       *
+       * <code>AUTOSCALE_TRIGGER_FAILED = 3;</code>
+       */
+      public static final int AUTOSCALE_TRIGGER_FAILED_VALUE = 3;
+
+
+      public final int getNumber() {
+        if (this == UNRECOGNIZED) {
+          throw new java.lang.IllegalArgumentException(
+              "Can't get the number of an unknown enum value.");
+        }
+        return value;
+      }
+
+      /**
+       * @deprecated Use {@link #forNumber(int)} instead.
+       */
+      @java.lang.Deprecated
+      public static Value valueOf(int value) {
+        return forNumber(value);
+      }
+
+      public static Value forNumber(int value) {
+        switch (value) {
+          case 0: return UNSET;
+          case 1: return SCALING_REQUESTED;
+          case 2: return SCALING_REQUEST_FAILED;
+          case 3: return AUTOSCALE_TRIGGER_FAILED;
+          default: return null;
+        }
+      }
+
+      public static com.google.protobuf.Internal.EnumLiteMap<Value>
+          internalGetValueMap() {
+        return internalValueMap;
+      }
+      private static final com.google.protobuf.Internal.EnumLiteMap<
+          Value> internalValueMap =
+            new com.google.protobuf.Internal.EnumLiteMap<Value>() {
+              public Value findValueByNumber(int number) {
+                return Value.forNumber(number);
+              }
+            };
+
+      public final com.google.protobuf.Descriptors.EnumValueDescriptor
+          getValueDescriptor() {
+        return getDescriptor().getValues().get(ordinal());
+      }
+      public final com.google.protobuf.Descriptors.EnumDescriptor
+          getDescriptorForType() {
+        return getDescriptor();
+      }
+      public static final com.google.protobuf.Descriptors.EnumDescriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscaleScalingStatusType.getDescriptor().getEnumTypes().get(0);
+      }
+
+      private static final Value[] VALUES = values();
+
+      public static Value valueOf(
+          com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+        if (desc.getType() != getDescriptor()) {
+          throw new java.lang.IllegalArgumentException(
+            "EnumValueDescriptor is not for this type.");
+        }
+        if (desc.getIndex() == -1) {
+          return UNRECOGNIZED;
+        }
+        return VALUES[desc.getIndex()];
+      }
+
+      private final int value;
+
+      private Value(int value) {
+        this.value = value;
+      }
+
+      // @@protoc_insertion_point(enum_scope:usage.AutoscaleScalingStatusType.Value)
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscaleScalingStatusType)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscaleScalingStatusType other = (com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscaleScalingStatusType) obj;
+
+      boolean result = true;
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscaleScalingStatusType parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscaleScalingStatusType parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscaleScalingStatusType parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscaleScalingStatusType parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscaleScalingStatusType parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscaleScalingStatusType parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscaleScalingStatusType parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscaleScalingStatusType parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscaleScalingStatusType parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscaleScalingStatusType parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscaleScalingStatusType parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscaleScalingStatusType parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscaleScalingStatusType prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     *Autoscale Trigger Status
+     * </pre>
+     *
+     * Protobuf type {@code usage.AutoscaleScalingStatusType}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:usage.AutoscaleScalingStatusType)
+        com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscaleScalingStatusTypeOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_AutoscaleScalingStatusType_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_AutoscaleScalingStatusType_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscaleScalingStatusType.class, com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscaleScalingStatusType.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscaleScalingStatusType.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_AutoscaleScalingStatusType_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscaleScalingStatusType getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscaleScalingStatusType.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscaleScalingStatusType build() {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscaleScalingStatusType result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscaleScalingStatusType buildPartial() {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscaleScalingStatusType result = new com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscaleScalingStatusType(this);
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscaleScalingStatusType) {
+          return mergeFrom((com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscaleScalingStatusType)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscaleScalingStatusType other) {
+        if (other == com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscaleScalingStatusType.getDefaultInstance()) return this;
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscaleScalingStatusType parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscaleScalingStatusType) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFieldsProto3(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:usage.AutoscaleScalingStatusType)
+    }
+
+    // @@protoc_insertion_point(class_scope:usage.AutoscaleScalingStatusType)
+    private static final com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscaleScalingStatusType DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscaleScalingStatusType();
+    }
+
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscaleScalingStatusType getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<AutoscaleScalingStatusType>
+        PARSER = new com.google.protobuf.AbstractParser<AutoscaleScalingStatusType>() {
+      @java.lang.Override
+      public AutoscaleScalingStatusType parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new AutoscaleScalingStatusType(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<AutoscaleScalingStatusType> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<AutoscaleScalingStatusType> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscaleScalingStatusType getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface CDPAutoscaleTriggerDetailsOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:usage.CDPAutoscaleTriggerDetails)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * The CDP account ID of the datahub cluster.
+     * </pre>
+     *
+     * <code>string accountId = 1;</code>
+     */
+    java.lang.String getAccountId();
+    /**
+     * <pre>
+     * The CDP account ID of the datahub cluster.
+     * </pre>
+     *
+     * <code>string accountId = 1;</code>
+     */
+    com.google.protobuf.ByteString
+        getAccountIdBytes();
+
+    /**
+     * <pre>
+     * The user-supplied cluster name.
+     * </pre>
+     *
+     * <code>string clusterName = 2;</code>
+     */
+    java.lang.String getClusterName();
+    /**
+     * <pre>
+     * The user-supplied cluster name.
+     * </pre>
+     *
+     * <code>string clusterName = 2;</code>
+     */
+    com.google.protobuf.ByteString
+        getClusterNameBytes();
+
+    /**
+     * <pre>
+     * The cluster crn.
+     * </pre>
+     *
+     * <code>string clusterCrn = 3;</code>
+     */
+    java.lang.String getClusterCrn();
+    /**
+     * <pre>
+     * The cluster crn.
+     * </pre>
+     *
+     * <code>string clusterCrn = 3;</code>
+     */
+    com.google.protobuf.ByteString
+        getClusterCrnBytes();
+
+    /**
+     * <pre>
+     * The autoscaling policy definition.
+     * </pre>
+     *
+     * <code>.usage.CDPAutoscalePolicyDefinition autoscalingPolicyDefinition = 4;</code>
+     */
+    boolean hasAutoscalingPolicyDefinition();
+    /**
+     * <pre>
+     * The autoscaling policy definition.
+     * </pre>
+     *
+     * <code>.usage.CDPAutoscalePolicyDefinition autoscalingPolicyDefinition = 4;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition getAutoscalingPolicyDefinition();
+    /**
+     * <pre>
+     * The autoscaling policy definition.
+     * </pre>
+     *
+     * <code>.usage.CDPAutoscalePolicyDefinition autoscalingPolicyDefinition = 4;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinitionOrBuilder getAutoscalingPolicyDefinitionOrBuilder();
+
+    /**
+     * <pre>
+     * The original hostGroup node count.
+     * </pre>
+     *
+     * <code>int32 originalHostGroupNodeCount = 5;</code>
+     */
+    int getOriginalHostGroupNodeCount();
+
+    /**
+     * <pre>
+     * The desired hostGroup node count.
+     * </pre>
+     *
+     * <code>int32 desiredHostGroupNodeCount = 6;</code>
+     */
+    int getDesiredHostGroupNodeCount();
+
+    /**
+     * <pre>
+     * The autoscaling action that was performed.
+     * </pre>
+     *
+     * <code>string autoscalingAction = 7;</code>
+     */
+    java.lang.String getAutoscalingAction();
+    /**
+     * <pre>
+     * The autoscaling action that was performed.
+     * </pre>
+     *
+     * <code>string autoscalingAction = 7;</code>
+     */
+    com.google.protobuf.ByteString
+        getAutoscalingActionBytes();
+
+    /**
+     * <pre>
+     * The status of the trigger
+     * </pre>
+     *
+     * <code>.usage.AutoscaleScalingStatusType.Value autoscaleStatus = 8;</code>
+     */
+    int getAutoscaleStatusValue();
+    /**
+     * <pre>
+     * The status of the trigger
+     * </pre>
+     *
+     * <code>.usage.AutoscaleScalingStatusType.Value autoscaleStatus = 8;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscaleScalingStatusType.Value getAutoscaleStatus();
+  }
+  /**
+   * <pre>
+   *Autoscale Trigger Details
+   * </pre>
+   *
+   * Protobuf type {@code usage.CDPAutoscaleTriggerDetails}
+   */
+  public  static final class CDPAutoscaleTriggerDetails extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:usage.CDPAutoscaleTriggerDetails)
+      CDPAutoscaleTriggerDetailsOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use CDPAutoscaleTriggerDetails.newBuilder() to construct.
+    private CDPAutoscaleTriggerDetails(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private CDPAutoscaleTriggerDetails() {
+      accountId_ = "";
+      clusterName_ = "";
+      clusterCrn_ = "";
+      originalHostGroupNodeCount_ = 0;
+      desiredHostGroupNodeCount_ = 0;
+      autoscalingAction_ = "";
+      autoscaleStatus_ = 0;
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private CDPAutoscaleTriggerDetails(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              accountId_ = s;
+              break;
+            }
+            case 18: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              clusterName_ = s;
+              break;
+            }
+            case 26: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              clusterCrn_ = s;
+              break;
+            }
+            case 34: {
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition.Builder subBuilder = null;
+              if (autoscalingPolicyDefinition_ != null) {
+                subBuilder = autoscalingPolicyDefinition_.toBuilder();
+              }
+              autoscalingPolicyDefinition_ = input.readMessage(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(autoscalingPolicyDefinition_);
+                autoscalingPolicyDefinition_ = subBuilder.buildPartial();
+              }
+
+              break;
+            }
+            case 40: {
+
+              originalHostGroupNodeCount_ = input.readInt32();
+              break;
+            }
+            case 48: {
+
+              desiredHostGroupNodeCount_ = input.readInt32();
+              break;
+            }
+            case 58: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              autoscalingAction_ = s;
+              break;
+            }
+            case 64: {
+              int rawValue = input.readEnum();
+
+              autoscaleStatus_ = rawValue;
+              break;
+            }
+            default: {
+              if (!parseUnknownFieldProto3(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPAutoscaleTriggerDetails_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPAutoscaleTriggerDetails_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetails.class, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetails.Builder.class);
+    }
+
+    public static final int ACCOUNTID_FIELD_NUMBER = 1;
+    private volatile java.lang.Object accountId_;
+    /**
+     * <pre>
+     * The CDP account ID of the datahub cluster.
+     * </pre>
+     *
+     * <code>string accountId = 1;</code>
+     */
+    public java.lang.String getAccountId() {
+      java.lang.Object ref = accountId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        accountId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The CDP account ID of the datahub cluster.
+     * </pre>
+     *
+     * <code>string accountId = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getAccountIdBytes() {
+      java.lang.Object ref = accountId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        accountId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int CLUSTERNAME_FIELD_NUMBER = 2;
+    private volatile java.lang.Object clusterName_;
+    /**
+     * <pre>
+     * The user-supplied cluster name.
+     * </pre>
+     *
+     * <code>string clusterName = 2;</code>
+     */
+    public java.lang.String getClusterName() {
+      java.lang.Object ref = clusterName_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        clusterName_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The user-supplied cluster name.
+     * </pre>
+     *
+     * <code>string clusterName = 2;</code>
+     */
+    public com.google.protobuf.ByteString
+        getClusterNameBytes() {
+      java.lang.Object ref = clusterName_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        clusterName_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int CLUSTERCRN_FIELD_NUMBER = 3;
+    private volatile java.lang.Object clusterCrn_;
+    /**
+     * <pre>
+     * The cluster crn.
+     * </pre>
+     *
+     * <code>string clusterCrn = 3;</code>
+     */
+    public java.lang.String getClusterCrn() {
+      java.lang.Object ref = clusterCrn_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        clusterCrn_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The cluster crn.
+     * </pre>
+     *
+     * <code>string clusterCrn = 3;</code>
+     */
+    public com.google.protobuf.ByteString
+        getClusterCrnBytes() {
+      java.lang.Object ref = clusterCrn_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        clusterCrn_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int AUTOSCALINGPOLICYDEFINITION_FIELD_NUMBER = 4;
+    private com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition autoscalingPolicyDefinition_;
+    /**
+     * <pre>
+     * The autoscaling policy definition.
+     * </pre>
+     *
+     * <code>.usage.CDPAutoscalePolicyDefinition autoscalingPolicyDefinition = 4;</code>
+     */
+    public boolean hasAutoscalingPolicyDefinition() {
+      return autoscalingPolicyDefinition_ != null;
+    }
+    /**
+     * <pre>
+     * The autoscaling policy definition.
+     * </pre>
+     *
+     * <code>.usage.CDPAutoscalePolicyDefinition autoscalingPolicyDefinition = 4;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition getAutoscalingPolicyDefinition() {
+      return autoscalingPolicyDefinition_ == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition.getDefaultInstance() : autoscalingPolicyDefinition_;
+    }
+    /**
+     * <pre>
+     * The autoscaling policy definition.
+     * </pre>
+     *
+     * <code>.usage.CDPAutoscalePolicyDefinition autoscalingPolicyDefinition = 4;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinitionOrBuilder getAutoscalingPolicyDefinitionOrBuilder() {
+      return getAutoscalingPolicyDefinition();
+    }
+
+    public static final int ORIGINALHOSTGROUPNODECOUNT_FIELD_NUMBER = 5;
+    private int originalHostGroupNodeCount_;
+    /**
+     * <pre>
+     * The original hostGroup node count.
+     * </pre>
+     *
+     * <code>int32 originalHostGroupNodeCount = 5;</code>
+     */
+    public int getOriginalHostGroupNodeCount() {
+      return originalHostGroupNodeCount_;
+    }
+
+    public static final int DESIREDHOSTGROUPNODECOUNT_FIELD_NUMBER = 6;
+    private int desiredHostGroupNodeCount_;
+    /**
+     * <pre>
+     * The desired hostGroup node count.
+     * </pre>
+     *
+     * <code>int32 desiredHostGroupNodeCount = 6;</code>
+     */
+    public int getDesiredHostGroupNodeCount() {
+      return desiredHostGroupNodeCount_;
+    }
+
+    public static final int AUTOSCALINGACTION_FIELD_NUMBER = 7;
+    private volatile java.lang.Object autoscalingAction_;
+    /**
+     * <pre>
+     * The autoscaling action that was performed.
+     * </pre>
+     *
+     * <code>string autoscalingAction = 7;</code>
+     */
+    public java.lang.String getAutoscalingAction() {
+      java.lang.Object ref = autoscalingAction_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        autoscalingAction_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The autoscaling action that was performed.
+     * </pre>
+     *
+     * <code>string autoscalingAction = 7;</code>
+     */
+    public com.google.protobuf.ByteString
+        getAutoscalingActionBytes() {
+      java.lang.Object ref = autoscalingAction_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        autoscalingAction_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int AUTOSCALESTATUS_FIELD_NUMBER = 8;
+    private int autoscaleStatus_;
+    /**
+     * <pre>
+     * The status of the trigger
+     * </pre>
+     *
+     * <code>.usage.AutoscaleScalingStatusType.Value autoscaleStatus = 8;</code>
+     */
+    public int getAutoscaleStatusValue() {
+      return autoscaleStatus_;
+    }
+    /**
+     * <pre>
+     * The status of the trigger
+     * </pre>
+     *
+     * <code>.usage.AutoscaleScalingStatusType.Value autoscaleStatus = 8;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscaleScalingStatusType.Value getAutoscaleStatus() {
+      @SuppressWarnings("deprecation")
+      com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscaleScalingStatusType.Value result = com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscaleScalingStatusType.Value.valueOf(autoscaleStatus_);
+      return result == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscaleScalingStatusType.Value.UNRECOGNIZED : result;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!getAccountIdBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, accountId_);
+      }
+      if (!getClusterNameBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, clusterName_);
+      }
+      if (!getClusterCrnBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, clusterCrn_);
+      }
+      if (autoscalingPolicyDefinition_ != null) {
+        output.writeMessage(4, getAutoscalingPolicyDefinition());
+      }
+      if (originalHostGroupNodeCount_ != 0) {
+        output.writeInt32(5, originalHostGroupNodeCount_);
+      }
+      if (desiredHostGroupNodeCount_ != 0) {
+        output.writeInt32(6, desiredHostGroupNodeCount_);
+      }
+      if (!getAutoscalingActionBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 7, autoscalingAction_);
+      }
+      if (autoscaleStatus_ != com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscaleScalingStatusType.Value.UNSET.getNumber()) {
+        output.writeEnum(8, autoscaleStatus_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!getAccountIdBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, accountId_);
+      }
+      if (!getClusterNameBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, clusterName_);
+      }
+      if (!getClusterCrnBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, clusterCrn_);
+      }
+      if (autoscalingPolicyDefinition_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(4, getAutoscalingPolicyDefinition());
+      }
+      if (originalHostGroupNodeCount_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(5, originalHostGroupNodeCount_);
+      }
+      if (desiredHostGroupNodeCount_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(6, desiredHostGroupNodeCount_);
+      }
+      if (!getAutoscalingActionBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, autoscalingAction_);
+      }
+      if (autoscaleStatus_ != com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscaleScalingStatusType.Value.UNSET.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(8, autoscaleStatus_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetails)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetails other = (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetails) obj;
+
+      boolean result = true;
+      result = result && getAccountId()
+          .equals(other.getAccountId());
+      result = result && getClusterName()
+          .equals(other.getClusterName());
+      result = result && getClusterCrn()
+          .equals(other.getClusterCrn());
+      result = result && (hasAutoscalingPolicyDefinition() == other.hasAutoscalingPolicyDefinition());
+      if (hasAutoscalingPolicyDefinition()) {
+        result = result && getAutoscalingPolicyDefinition()
+            .equals(other.getAutoscalingPolicyDefinition());
+      }
+      result = result && (getOriginalHostGroupNodeCount()
+          == other.getOriginalHostGroupNodeCount());
+      result = result && (getDesiredHostGroupNodeCount()
+          == other.getDesiredHostGroupNodeCount());
+      result = result && getAutoscalingAction()
+          .equals(other.getAutoscalingAction());
+      result = result && autoscaleStatus_ == other.autoscaleStatus_;
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + ACCOUNTID_FIELD_NUMBER;
+      hash = (53 * hash) + getAccountId().hashCode();
+      hash = (37 * hash) + CLUSTERNAME_FIELD_NUMBER;
+      hash = (53 * hash) + getClusterName().hashCode();
+      hash = (37 * hash) + CLUSTERCRN_FIELD_NUMBER;
+      hash = (53 * hash) + getClusterCrn().hashCode();
+      if (hasAutoscalingPolicyDefinition()) {
+        hash = (37 * hash) + AUTOSCALINGPOLICYDEFINITION_FIELD_NUMBER;
+        hash = (53 * hash) + getAutoscalingPolicyDefinition().hashCode();
+      }
+      hash = (37 * hash) + ORIGINALHOSTGROUPNODECOUNT_FIELD_NUMBER;
+      hash = (53 * hash) + getOriginalHostGroupNodeCount();
+      hash = (37 * hash) + DESIREDHOSTGROUPNODECOUNT_FIELD_NUMBER;
+      hash = (53 * hash) + getDesiredHostGroupNodeCount();
+      hash = (37 * hash) + AUTOSCALINGACTION_FIELD_NUMBER;
+      hash = (53 * hash) + getAutoscalingAction().hashCode();
+      hash = (37 * hash) + AUTOSCALESTATUS_FIELD_NUMBER;
+      hash = (53 * hash) + autoscaleStatus_;
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetails parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetails parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetails parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetails parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetails parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetails parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetails parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetails parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetails parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetails parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetails parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetails parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetails prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     *Autoscale Trigger Details
+     * </pre>
+     *
+     * Protobuf type {@code usage.CDPAutoscaleTriggerDetails}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:usage.CDPAutoscaleTriggerDetails)
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetailsOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPAutoscaleTriggerDetails_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPAutoscaleTriggerDetails_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetails.class, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetails.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetails.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        accountId_ = "";
+
+        clusterName_ = "";
+
+        clusterCrn_ = "";
+
+        if (autoscalingPolicyDefinitionBuilder_ == null) {
+          autoscalingPolicyDefinition_ = null;
+        } else {
+          autoscalingPolicyDefinition_ = null;
+          autoscalingPolicyDefinitionBuilder_ = null;
+        }
+        originalHostGroupNodeCount_ = 0;
+
+        desiredHostGroupNodeCount_ = 0;
+
+        autoscalingAction_ = "";
+
+        autoscaleStatus_ = 0;
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPAutoscaleTriggerDetails_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetails getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetails.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetails build() {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetails result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetails buildPartial() {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetails result = new com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetails(this);
+        result.accountId_ = accountId_;
+        result.clusterName_ = clusterName_;
+        result.clusterCrn_ = clusterCrn_;
+        if (autoscalingPolicyDefinitionBuilder_ == null) {
+          result.autoscalingPolicyDefinition_ = autoscalingPolicyDefinition_;
+        } else {
+          result.autoscalingPolicyDefinition_ = autoscalingPolicyDefinitionBuilder_.build();
+        }
+        result.originalHostGroupNodeCount_ = originalHostGroupNodeCount_;
+        result.desiredHostGroupNodeCount_ = desiredHostGroupNodeCount_;
+        result.autoscalingAction_ = autoscalingAction_;
+        result.autoscaleStatus_ = autoscaleStatus_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetails) {
+          return mergeFrom((com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetails)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetails other) {
+        if (other == com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetails.getDefaultInstance()) return this;
+        if (!other.getAccountId().isEmpty()) {
+          accountId_ = other.accountId_;
+          onChanged();
+        }
+        if (!other.getClusterName().isEmpty()) {
+          clusterName_ = other.clusterName_;
+          onChanged();
+        }
+        if (!other.getClusterCrn().isEmpty()) {
+          clusterCrn_ = other.clusterCrn_;
+          onChanged();
+        }
+        if (other.hasAutoscalingPolicyDefinition()) {
+          mergeAutoscalingPolicyDefinition(other.getAutoscalingPolicyDefinition());
+        }
+        if (other.getOriginalHostGroupNodeCount() != 0) {
+          setOriginalHostGroupNodeCount(other.getOriginalHostGroupNodeCount());
+        }
+        if (other.getDesiredHostGroupNodeCount() != 0) {
+          setDesiredHostGroupNodeCount(other.getDesiredHostGroupNodeCount());
+        }
+        if (!other.getAutoscalingAction().isEmpty()) {
+          autoscalingAction_ = other.autoscalingAction_;
+          onChanged();
+        }
+        if (other.autoscaleStatus_ != 0) {
+          setAutoscaleStatusValue(other.getAutoscaleStatusValue());
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetails parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetails) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private java.lang.Object accountId_ = "";
+      /**
+       * <pre>
+       * The CDP account ID of the datahub cluster.
+       * </pre>
+       *
+       * <code>string accountId = 1;</code>
+       */
+      public java.lang.String getAccountId() {
+        java.lang.Object ref = accountId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          accountId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The CDP account ID of the datahub cluster.
+       * </pre>
+       *
+       * <code>string accountId = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getAccountIdBytes() {
+        java.lang.Object ref = accountId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          accountId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The CDP account ID of the datahub cluster.
+       * </pre>
+       *
+       * <code>string accountId = 1;</code>
+       */
+      public Builder setAccountId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        accountId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The CDP account ID of the datahub cluster.
+       * </pre>
+       *
+       * <code>string accountId = 1;</code>
+       */
+      public Builder clearAccountId() {
+        
+        accountId_ = getDefaultInstance().getAccountId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The CDP account ID of the datahub cluster.
+       * </pre>
+       *
+       * <code>string accountId = 1;</code>
+       */
+      public Builder setAccountIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        accountId_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object clusterName_ = "";
+      /**
+       * <pre>
+       * The user-supplied cluster name.
+       * </pre>
+       *
+       * <code>string clusterName = 2;</code>
+       */
+      public java.lang.String getClusterName() {
+        java.lang.Object ref = clusterName_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          clusterName_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The user-supplied cluster name.
+       * </pre>
+       *
+       * <code>string clusterName = 2;</code>
+       */
+      public com.google.protobuf.ByteString
+          getClusterNameBytes() {
+        java.lang.Object ref = clusterName_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          clusterName_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The user-supplied cluster name.
+       * </pre>
+       *
+       * <code>string clusterName = 2;</code>
+       */
+      public Builder setClusterName(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        clusterName_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The user-supplied cluster name.
+       * </pre>
+       *
+       * <code>string clusterName = 2;</code>
+       */
+      public Builder clearClusterName() {
+        
+        clusterName_ = getDefaultInstance().getClusterName();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The user-supplied cluster name.
+       * </pre>
+       *
+       * <code>string clusterName = 2;</code>
+       */
+      public Builder setClusterNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        clusterName_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object clusterCrn_ = "";
+      /**
+       * <pre>
+       * The cluster crn.
+       * </pre>
+       *
+       * <code>string clusterCrn = 3;</code>
+       */
+      public java.lang.String getClusterCrn() {
+        java.lang.Object ref = clusterCrn_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          clusterCrn_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The cluster crn.
+       * </pre>
+       *
+       * <code>string clusterCrn = 3;</code>
+       */
+      public com.google.protobuf.ByteString
+          getClusterCrnBytes() {
+        java.lang.Object ref = clusterCrn_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          clusterCrn_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The cluster crn.
+       * </pre>
+       *
+       * <code>string clusterCrn = 3;</code>
+       */
+      public Builder setClusterCrn(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        clusterCrn_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The cluster crn.
+       * </pre>
+       *
+       * <code>string clusterCrn = 3;</code>
+       */
+      public Builder clearClusterCrn() {
+        
+        clusterCrn_ = getDefaultInstance().getClusterCrn();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The cluster crn.
+       * </pre>
+       *
+       * <code>string clusterCrn = 3;</code>
+       */
+      public Builder setClusterCrnBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        clusterCrn_ = value;
+        onChanged();
+        return this;
+      }
+
+      private com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition autoscalingPolicyDefinition_ = null;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinitionOrBuilder> autoscalingPolicyDefinitionBuilder_;
+      /**
+       * <pre>
+       * The autoscaling policy definition.
+       * </pre>
+       *
+       * <code>.usage.CDPAutoscalePolicyDefinition autoscalingPolicyDefinition = 4;</code>
+       */
+      public boolean hasAutoscalingPolicyDefinition() {
+        return autoscalingPolicyDefinitionBuilder_ != null || autoscalingPolicyDefinition_ != null;
+      }
+      /**
+       * <pre>
+       * The autoscaling policy definition.
+       * </pre>
+       *
+       * <code>.usage.CDPAutoscalePolicyDefinition autoscalingPolicyDefinition = 4;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition getAutoscalingPolicyDefinition() {
+        if (autoscalingPolicyDefinitionBuilder_ == null) {
+          return autoscalingPolicyDefinition_ == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition.getDefaultInstance() : autoscalingPolicyDefinition_;
+        } else {
+          return autoscalingPolicyDefinitionBuilder_.getMessage();
+        }
+      }
+      /**
+       * <pre>
+       * The autoscaling policy definition.
+       * </pre>
+       *
+       * <code>.usage.CDPAutoscalePolicyDefinition autoscalingPolicyDefinition = 4;</code>
+       */
+      public Builder setAutoscalingPolicyDefinition(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition value) {
+        if (autoscalingPolicyDefinitionBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          autoscalingPolicyDefinition_ = value;
+          onChanged();
+        } else {
+          autoscalingPolicyDefinitionBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * The autoscaling policy definition.
+       * </pre>
+       *
+       * <code>.usage.CDPAutoscalePolicyDefinition autoscalingPolicyDefinition = 4;</code>
+       */
+      public Builder setAutoscalingPolicyDefinition(
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition.Builder builderForValue) {
+        if (autoscalingPolicyDefinitionBuilder_ == null) {
+          autoscalingPolicyDefinition_ = builderForValue.build();
+          onChanged();
+        } else {
+          autoscalingPolicyDefinitionBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * The autoscaling policy definition.
+       * </pre>
+       *
+       * <code>.usage.CDPAutoscalePolicyDefinition autoscalingPolicyDefinition = 4;</code>
+       */
+      public Builder mergeAutoscalingPolicyDefinition(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition value) {
+        if (autoscalingPolicyDefinitionBuilder_ == null) {
+          if (autoscalingPolicyDefinition_ != null) {
+            autoscalingPolicyDefinition_ =
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition.newBuilder(autoscalingPolicyDefinition_).mergeFrom(value).buildPartial();
+          } else {
+            autoscalingPolicyDefinition_ = value;
+          }
+          onChanged();
+        } else {
+          autoscalingPolicyDefinitionBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * The autoscaling policy definition.
+       * </pre>
+       *
+       * <code>.usage.CDPAutoscalePolicyDefinition autoscalingPolicyDefinition = 4;</code>
+       */
+      public Builder clearAutoscalingPolicyDefinition() {
+        if (autoscalingPolicyDefinitionBuilder_ == null) {
+          autoscalingPolicyDefinition_ = null;
+          onChanged();
+        } else {
+          autoscalingPolicyDefinition_ = null;
+          autoscalingPolicyDefinitionBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * The autoscaling policy definition.
+       * </pre>
+       *
+       * <code>.usage.CDPAutoscalePolicyDefinition autoscalingPolicyDefinition = 4;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition.Builder getAutoscalingPolicyDefinitionBuilder() {
+        
+        onChanged();
+        return getAutoscalingPolicyDefinitionFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * The autoscaling policy definition.
+       * </pre>
+       *
+       * <code>.usage.CDPAutoscalePolicyDefinition autoscalingPolicyDefinition = 4;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinitionOrBuilder getAutoscalingPolicyDefinitionOrBuilder() {
+        if (autoscalingPolicyDefinitionBuilder_ != null) {
+          return autoscalingPolicyDefinitionBuilder_.getMessageOrBuilder();
+        } else {
+          return autoscalingPolicyDefinition_ == null ?
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition.getDefaultInstance() : autoscalingPolicyDefinition_;
+        }
+      }
+      /**
+       * <pre>
+       * The autoscaling policy definition.
+       * </pre>
+       *
+       * <code>.usage.CDPAutoscalePolicyDefinition autoscalingPolicyDefinition = 4;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinitionOrBuilder> 
+          getAutoscalingPolicyDefinitionFieldBuilder() {
+        if (autoscalingPolicyDefinitionBuilder_ == null) {
+          autoscalingPolicyDefinitionBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinitionOrBuilder>(
+                  getAutoscalingPolicyDefinition(),
+                  getParentForChildren(),
+                  isClean());
+          autoscalingPolicyDefinition_ = null;
+        }
+        return autoscalingPolicyDefinitionBuilder_;
+      }
+
+      private int originalHostGroupNodeCount_ ;
+      /**
+       * <pre>
+       * The original hostGroup node count.
+       * </pre>
+       *
+       * <code>int32 originalHostGroupNodeCount = 5;</code>
+       */
+      public int getOriginalHostGroupNodeCount() {
+        return originalHostGroupNodeCount_;
+      }
+      /**
+       * <pre>
+       * The original hostGroup node count.
+       * </pre>
+       *
+       * <code>int32 originalHostGroupNodeCount = 5;</code>
+       */
+      public Builder setOriginalHostGroupNodeCount(int value) {
+        
+        originalHostGroupNodeCount_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The original hostGroup node count.
+       * </pre>
+       *
+       * <code>int32 originalHostGroupNodeCount = 5;</code>
+       */
+      public Builder clearOriginalHostGroupNodeCount() {
+        
+        originalHostGroupNodeCount_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int desiredHostGroupNodeCount_ ;
+      /**
+       * <pre>
+       * The desired hostGroup node count.
+       * </pre>
+       *
+       * <code>int32 desiredHostGroupNodeCount = 6;</code>
+       */
+      public int getDesiredHostGroupNodeCount() {
+        return desiredHostGroupNodeCount_;
+      }
+      /**
+       * <pre>
+       * The desired hostGroup node count.
+       * </pre>
+       *
+       * <code>int32 desiredHostGroupNodeCount = 6;</code>
+       */
+      public Builder setDesiredHostGroupNodeCount(int value) {
+        
+        desiredHostGroupNodeCount_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The desired hostGroup node count.
+       * </pre>
+       *
+       * <code>int32 desiredHostGroupNodeCount = 6;</code>
+       */
+      public Builder clearDesiredHostGroupNodeCount() {
+        
+        desiredHostGroupNodeCount_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object autoscalingAction_ = "";
+      /**
+       * <pre>
+       * The autoscaling action that was performed.
+       * </pre>
+       *
+       * <code>string autoscalingAction = 7;</code>
+       */
+      public java.lang.String getAutoscalingAction() {
+        java.lang.Object ref = autoscalingAction_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          autoscalingAction_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The autoscaling action that was performed.
+       * </pre>
+       *
+       * <code>string autoscalingAction = 7;</code>
+       */
+      public com.google.protobuf.ByteString
+          getAutoscalingActionBytes() {
+        java.lang.Object ref = autoscalingAction_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          autoscalingAction_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The autoscaling action that was performed.
+       * </pre>
+       *
+       * <code>string autoscalingAction = 7;</code>
+       */
+      public Builder setAutoscalingAction(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        autoscalingAction_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The autoscaling action that was performed.
+       * </pre>
+       *
+       * <code>string autoscalingAction = 7;</code>
+       */
+      public Builder clearAutoscalingAction() {
+        
+        autoscalingAction_ = getDefaultInstance().getAutoscalingAction();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The autoscaling action that was performed.
+       * </pre>
+       *
+       * <code>string autoscalingAction = 7;</code>
+       */
+      public Builder setAutoscalingActionBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        autoscalingAction_ = value;
+        onChanged();
+        return this;
+      }
+
+      private int autoscaleStatus_ = 0;
+      /**
+       * <pre>
+       * The status of the trigger
+       * </pre>
+       *
+       * <code>.usage.AutoscaleScalingStatusType.Value autoscaleStatus = 8;</code>
+       */
+      public int getAutoscaleStatusValue() {
+        return autoscaleStatus_;
+      }
+      /**
+       * <pre>
+       * The status of the trigger
+       * </pre>
+       *
+       * <code>.usage.AutoscaleScalingStatusType.Value autoscaleStatus = 8;</code>
+       */
+      public Builder setAutoscaleStatusValue(int value) {
+        autoscaleStatus_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The status of the trigger
+       * </pre>
+       *
+       * <code>.usage.AutoscaleScalingStatusType.Value autoscaleStatus = 8;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscaleScalingStatusType.Value getAutoscaleStatus() {
+        @SuppressWarnings("deprecation")
+        com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscaleScalingStatusType.Value result = com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscaleScalingStatusType.Value.valueOf(autoscaleStatus_);
+        return result == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscaleScalingStatusType.Value.UNRECOGNIZED : result;
+      }
+      /**
+       * <pre>
+       * The status of the trigger
+       * </pre>
+       *
+       * <code>.usage.AutoscaleScalingStatusType.Value autoscaleStatus = 8;</code>
+       */
+      public Builder setAutoscaleStatus(com.cloudera.thunderhead.service.common.usage.UsageProto.AutoscaleScalingStatusType.Value value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        autoscaleStatus_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The status of the trigger
+       * </pre>
+       *
+       * <code>.usage.AutoscaleScalingStatusType.Value autoscaleStatus = 8;</code>
+       */
+      public Builder clearAutoscaleStatus() {
+        
+        autoscaleStatus_ = 0;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFieldsProto3(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:usage.CDPAutoscaleTriggerDetails)
+    }
+
+    // @@protoc_insertion_point(class_scope:usage.CDPAutoscaleTriggerDetails)
+    private static final com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetails DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetails();
+    }
+
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetails getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<CDPAutoscaleTriggerDetails>
+        PARSER = new com.google.protobuf.AbstractParser<CDPAutoscaleTriggerDetails>() {
+      @java.lang.Override
+      public CDPAutoscaleTriggerDetails parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new CDPAutoscaleTriggerDetails(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<CDPAutoscaleTriggerDetails> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<CDPAutoscaleTriggerDetails> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetails getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface CDPDatahubAutoscaleTriggeredOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:usage.CDPDatahubAutoscaleTriggered)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * The autoscaling trigger details
+     * </pre>
+     *
+     * <code>.usage.CDPAutoscaleTriggerDetails autoscaleTriggerDetails = 1;</code>
+     */
+    boolean hasAutoscaleTriggerDetails();
+    /**
+     * <pre>
+     * The autoscaling trigger details
+     * </pre>
+     *
+     * <code>.usage.CDPAutoscaleTriggerDetails autoscaleTriggerDetails = 1;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetails getAutoscaleTriggerDetails();
+    /**
+     * <pre>
+     * The autoscaling trigger details
+     * </pre>
+     *
+     * <code>.usage.CDPAutoscaleTriggerDetails autoscaleTriggerDetails = 1;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetailsOrBuilder getAutoscaleTriggerDetailsOrBuilder();
+  }
+  /**
+   * <pre>
+   * Generated after autoscale has been triggered.
+   * </pre>
+   *
+   * Protobuf type {@code usage.CDPDatahubAutoscaleTriggered}
+   */
+  public  static final class CDPDatahubAutoscaleTriggered extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:usage.CDPDatahubAutoscaleTriggered)
+      CDPDatahubAutoscaleTriggeredOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use CDPDatahubAutoscaleTriggered.newBuilder() to construct.
+    private CDPDatahubAutoscaleTriggered(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private CDPDatahubAutoscaleTriggered() {
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private CDPDatahubAutoscaleTriggered(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetails.Builder subBuilder = null;
+              if (autoscaleTriggerDetails_ != null) {
+                subBuilder = autoscaleTriggerDetails_.toBuilder();
+              }
+              autoscaleTriggerDetails_ = input.readMessage(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetails.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(autoscaleTriggerDetails_);
+                autoscaleTriggerDetails_ = subBuilder.buildPartial();
+              }
+
+              break;
+            }
+            default: {
+              if (!parseUnknownFieldProto3(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPDatahubAutoscaleTriggered_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPDatahubAutoscaleTriggered_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered.class, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered.Builder.class);
+    }
+
+    public static final int AUTOSCALETRIGGERDETAILS_FIELD_NUMBER = 1;
+    private com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetails autoscaleTriggerDetails_;
+    /**
+     * <pre>
+     * The autoscaling trigger details
+     * </pre>
+     *
+     * <code>.usage.CDPAutoscaleTriggerDetails autoscaleTriggerDetails = 1;</code>
+     */
+    public boolean hasAutoscaleTriggerDetails() {
+      return autoscaleTriggerDetails_ != null;
+    }
+    /**
+     * <pre>
+     * The autoscaling trigger details
+     * </pre>
+     *
+     * <code>.usage.CDPAutoscaleTriggerDetails autoscaleTriggerDetails = 1;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetails getAutoscaleTriggerDetails() {
+      return autoscaleTriggerDetails_ == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetails.getDefaultInstance() : autoscaleTriggerDetails_;
+    }
+    /**
+     * <pre>
+     * The autoscaling trigger details
+     * </pre>
+     *
+     * <code>.usage.CDPAutoscaleTriggerDetails autoscaleTriggerDetails = 1;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetailsOrBuilder getAutoscaleTriggerDetailsOrBuilder() {
+      return getAutoscaleTriggerDetails();
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (autoscaleTriggerDetails_ != null) {
+        output.writeMessage(1, getAutoscaleTriggerDetails());
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (autoscaleTriggerDetails_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, getAutoscaleTriggerDetails());
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered other = (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered) obj;
+
+      boolean result = true;
+      result = result && (hasAutoscaleTriggerDetails() == other.hasAutoscaleTriggerDetails());
+      if (hasAutoscaleTriggerDetails()) {
+        result = result && getAutoscaleTriggerDetails()
+            .equals(other.getAutoscaleTriggerDetails());
+      }
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (hasAutoscaleTriggerDetails()) {
+        hash = (37 * hash) + AUTOSCALETRIGGERDETAILS_FIELD_NUMBER;
+        hash = (53 * hash) + getAutoscaleTriggerDetails().hashCode();
+      }
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Generated after autoscale has been triggered.
+     * </pre>
+     *
+     * Protobuf type {@code usage.CDPDatahubAutoscaleTriggered}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:usage.CDPDatahubAutoscaleTriggered)
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggeredOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPDatahubAutoscaleTriggered_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPDatahubAutoscaleTriggered_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered.class, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        if (autoscaleTriggerDetailsBuilder_ == null) {
+          autoscaleTriggerDetails_ = null;
+        } else {
+          autoscaleTriggerDetails_ = null;
+          autoscaleTriggerDetailsBuilder_ = null;
+        }
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPDatahubAutoscaleTriggered_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered build() {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered buildPartial() {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered result = new com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered(this);
+        if (autoscaleTriggerDetailsBuilder_ == null) {
+          result.autoscaleTriggerDetails_ = autoscaleTriggerDetails_;
+        } else {
+          result.autoscaleTriggerDetails_ = autoscaleTriggerDetailsBuilder_.build();
+        }
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered) {
+          return mergeFrom((com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered other) {
+        if (other == com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered.getDefaultInstance()) return this;
+        if (other.hasAutoscaleTriggerDetails()) {
+          mergeAutoscaleTriggerDetails(other.getAutoscaleTriggerDetails());
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetails autoscaleTriggerDetails_ = null;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetails, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetails.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetailsOrBuilder> autoscaleTriggerDetailsBuilder_;
+      /**
+       * <pre>
+       * The autoscaling trigger details
+       * </pre>
+       *
+       * <code>.usage.CDPAutoscaleTriggerDetails autoscaleTriggerDetails = 1;</code>
+       */
+      public boolean hasAutoscaleTriggerDetails() {
+        return autoscaleTriggerDetailsBuilder_ != null || autoscaleTriggerDetails_ != null;
+      }
+      /**
+       * <pre>
+       * The autoscaling trigger details
+       * </pre>
+       *
+       * <code>.usage.CDPAutoscaleTriggerDetails autoscaleTriggerDetails = 1;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetails getAutoscaleTriggerDetails() {
+        if (autoscaleTriggerDetailsBuilder_ == null) {
+          return autoscaleTriggerDetails_ == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetails.getDefaultInstance() : autoscaleTriggerDetails_;
+        } else {
+          return autoscaleTriggerDetailsBuilder_.getMessage();
+        }
+      }
+      /**
+       * <pre>
+       * The autoscaling trigger details
+       * </pre>
+       *
+       * <code>.usage.CDPAutoscaleTriggerDetails autoscaleTriggerDetails = 1;</code>
+       */
+      public Builder setAutoscaleTriggerDetails(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetails value) {
+        if (autoscaleTriggerDetailsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          autoscaleTriggerDetails_ = value;
+          onChanged();
+        } else {
+          autoscaleTriggerDetailsBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * The autoscaling trigger details
+       * </pre>
+       *
+       * <code>.usage.CDPAutoscaleTriggerDetails autoscaleTriggerDetails = 1;</code>
+       */
+      public Builder setAutoscaleTriggerDetails(
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetails.Builder builderForValue) {
+        if (autoscaleTriggerDetailsBuilder_ == null) {
+          autoscaleTriggerDetails_ = builderForValue.build();
+          onChanged();
+        } else {
+          autoscaleTriggerDetailsBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * The autoscaling trigger details
+       * </pre>
+       *
+       * <code>.usage.CDPAutoscaleTriggerDetails autoscaleTriggerDetails = 1;</code>
+       */
+      public Builder mergeAutoscaleTriggerDetails(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetails value) {
+        if (autoscaleTriggerDetailsBuilder_ == null) {
+          if (autoscaleTriggerDetails_ != null) {
+            autoscaleTriggerDetails_ =
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetails.newBuilder(autoscaleTriggerDetails_).mergeFrom(value).buildPartial();
+          } else {
+            autoscaleTriggerDetails_ = value;
+          }
+          onChanged();
+        } else {
+          autoscaleTriggerDetailsBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * The autoscaling trigger details
+       * </pre>
+       *
+       * <code>.usage.CDPAutoscaleTriggerDetails autoscaleTriggerDetails = 1;</code>
+       */
+      public Builder clearAutoscaleTriggerDetails() {
+        if (autoscaleTriggerDetailsBuilder_ == null) {
+          autoscaleTriggerDetails_ = null;
+          onChanged();
+        } else {
+          autoscaleTriggerDetails_ = null;
+          autoscaleTriggerDetailsBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * The autoscaling trigger details
+       * </pre>
+       *
+       * <code>.usage.CDPAutoscaleTriggerDetails autoscaleTriggerDetails = 1;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetails.Builder getAutoscaleTriggerDetailsBuilder() {
+        
+        onChanged();
+        return getAutoscaleTriggerDetailsFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * The autoscaling trigger details
+       * </pre>
+       *
+       * <code>.usage.CDPAutoscaleTriggerDetails autoscaleTriggerDetails = 1;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetailsOrBuilder getAutoscaleTriggerDetailsOrBuilder() {
+        if (autoscaleTriggerDetailsBuilder_ != null) {
+          return autoscaleTriggerDetailsBuilder_.getMessageOrBuilder();
+        } else {
+          return autoscaleTriggerDetails_ == null ?
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetails.getDefaultInstance() : autoscaleTriggerDetails_;
+        }
+      }
+      /**
+       * <pre>
+       * The autoscaling trigger details
+       * </pre>
+       *
+       * <code>.usage.CDPAutoscaleTriggerDetails autoscaleTriggerDetails = 1;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetails, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetails.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetailsOrBuilder> 
+          getAutoscaleTriggerDetailsFieldBuilder() {
+        if (autoscaleTriggerDetailsBuilder_ == null) {
+          autoscaleTriggerDetailsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetails, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetails.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscaleTriggerDetailsOrBuilder>(
+                  getAutoscaleTriggerDetails(),
+                  getParentForChildren(),
+                  isClean());
+          autoscaleTriggerDetails_ = null;
+        }
+        return autoscaleTriggerDetailsBuilder_;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFieldsProto3(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:usage.CDPDatahubAutoscaleTriggered)
+    }
+
+    // @@protoc_insertion_point(class_scope:usage.CDPDatahubAutoscaleTriggered)
+    private static final com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered();
+    }
+
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<CDPDatahubAutoscaleTriggered>
+        PARSER = new com.google.protobuf.AbstractParser<CDPDatahubAutoscaleTriggered>() {
+      @java.lang.Override
+      public CDPDatahubAutoscaleTriggered parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new CDPDatahubAutoscaleTriggered(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<CDPDatahubAutoscaleTriggered> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<CDPDatahubAutoscaleTriggered> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleTriggered getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface CDPDatahubAutoscaleConfigChangedOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:usage.CDPDatahubAutoscaleConfigChanged)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * The user crn who updated the autoscale config.
+     * </pre>
+     *
+     * <code>string userCrn = 1;</code>
+     */
+    java.lang.String getUserCrn();
+    /**
+     * <pre>
+     * The user crn who updated the autoscale config.
+     * </pre>
+     *
+     * <code>string userCrn = 1;</code>
+     */
+    com.google.protobuf.ByteString
+        getUserCrnBytes();
+
+    /**
+     * <pre>
+     * Is autoscaling enabled for cluster.
+     * </pre>
+     *
+     * <code>bool autoscalingEnabled = 2;</code>
+     */
+    boolean getAutoscalingEnabled();
+
+    /**
+     * <pre>
+     * The autoscaling policy definition.
+     * </pre>
+     *
+     * <code>repeated .usage.CDPAutoscalePolicyDefinition autoscalingPolicyDefinition = 3;</code>
+     */
+    java.util.List<com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition> 
+        getAutoscalingPolicyDefinitionList();
+    /**
+     * <pre>
+     * The autoscaling policy definition.
+     * </pre>
+     *
+     * <code>repeated .usage.CDPAutoscalePolicyDefinition autoscalingPolicyDefinition = 3;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition getAutoscalingPolicyDefinition(int index);
+    /**
+     * <pre>
+     * The autoscaling policy definition.
+     * </pre>
+     *
+     * <code>repeated .usage.CDPAutoscalePolicyDefinition autoscalingPolicyDefinition = 3;</code>
+     */
+    int getAutoscalingPolicyDefinitionCount();
+    /**
+     * <pre>
+     * The autoscaling policy definition.
+     * </pre>
+     *
+     * <code>repeated .usage.CDPAutoscalePolicyDefinition autoscalingPolicyDefinition = 3;</code>
+     */
+    java.util.List<? extends com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinitionOrBuilder> 
+        getAutoscalingPolicyDefinitionOrBuilderList();
+    /**
+     * <pre>
+     * The autoscaling policy definition.
+     * </pre>
+     *
+     * <code>repeated .usage.CDPAutoscalePolicyDefinition autoscalingPolicyDefinition = 3;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinitionOrBuilder getAutoscalingPolicyDefinitionOrBuilder(
+        int index);
+  }
+  /**
+   * <pre>
+   * Generated after autoscale config has been updated.
+   * </pre>
+   *
+   * Protobuf type {@code usage.CDPDatahubAutoscaleConfigChanged}
+   */
+  public  static final class CDPDatahubAutoscaleConfigChanged extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:usage.CDPDatahubAutoscaleConfigChanged)
+      CDPDatahubAutoscaleConfigChangedOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use CDPDatahubAutoscaleConfigChanged.newBuilder() to construct.
+    private CDPDatahubAutoscaleConfigChanged(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private CDPDatahubAutoscaleConfigChanged() {
+      userCrn_ = "";
+      autoscalingEnabled_ = false;
+      autoscalingPolicyDefinition_ = java.util.Collections.emptyList();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private CDPDatahubAutoscaleConfigChanged(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              userCrn_ = s;
+              break;
+            }
+            case 16: {
+
+              autoscalingEnabled_ = input.readBool();
+              break;
+            }
+            case 26: {
+              if (!((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
+                autoscalingPolicyDefinition_ = new java.util.ArrayList<com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition>();
+                mutable_bitField0_ |= 0x00000004;
+              }
+              autoscalingPolicyDefinition_.add(
+                  input.readMessage(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition.parser(), extensionRegistry));
+              break;
+            }
+            default: {
+              if (!parseUnknownFieldProto3(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
+          autoscalingPolicyDefinition_ = java.util.Collections.unmodifiableList(autoscalingPolicyDefinition_);
+        }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPDatahubAutoscaleConfigChanged_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPDatahubAutoscaleConfigChanged_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged.class, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged.Builder.class);
+    }
+
+    private int bitField0_;
+    public static final int USERCRN_FIELD_NUMBER = 1;
+    private volatile java.lang.Object userCrn_;
+    /**
+     * <pre>
+     * The user crn who updated the autoscale config.
+     * </pre>
+     *
+     * <code>string userCrn = 1;</code>
+     */
+    public java.lang.String getUserCrn() {
+      java.lang.Object ref = userCrn_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        userCrn_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The user crn who updated the autoscale config.
+     * </pre>
+     *
+     * <code>string userCrn = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getUserCrnBytes() {
+      java.lang.Object ref = userCrn_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        userCrn_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int AUTOSCALINGENABLED_FIELD_NUMBER = 2;
+    private boolean autoscalingEnabled_;
+    /**
+     * <pre>
+     * Is autoscaling enabled for cluster.
+     * </pre>
+     *
+     * <code>bool autoscalingEnabled = 2;</code>
+     */
+    public boolean getAutoscalingEnabled() {
+      return autoscalingEnabled_;
+    }
+
+    public static final int AUTOSCALINGPOLICYDEFINITION_FIELD_NUMBER = 3;
+    private java.util.List<com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition> autoscalingPolicyDefinition_;
+    /**
+     * <pre>
+     * The autoscaling policy definition.
+     * </pre>
+     *
+     * <code>repeated .usage.CDPAutoscalePolicyDefinition autoscalingPolicyDefinition = 3;</code>
+     */
+    public java.util.List<com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition> getAutoscalingPolicyDefinitionList() {
+      return autoscalingPolicyDefinition_;
+    }
+    /**
+     * <pre>
+     * The autoscaling policy definition.
+     * </pre>
+     *
+     * <code>repeated .usage.CDPAutoscalePolicyDefinition autoscalingPolicyDefinition = 3;</code>
+     */
+    public java.util.List<? extends com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinitionOrBuilder> 
+        getAutoscalingPolicyDefinitionOrBuilderList() {
+      return autoscalingPolicyDefinition_;
+    }
+    /**
+     * <pre>
+     * The autoscaling policy definition.
+     * </pre>
+     *
+     * <code>repeated .usage.CDPAutoscalePolicyDefinition autoscalingPolicyDefinition = 3;</code>
+     */
+    public int getAutoscalingPolicyDefinitionCount() {
+      return autoscalingPolicyDefinition_.size();
+    }
+    /**
+     * <pre>
+     * The autoscaling policy definition.
+     * </pre>
+     *
+     * <code>repeated .usage.CDPAutoscalePolicyDefinition autoscalingPolicyDefinition = 3;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition getAutoscalingPolicyDefinition(int index) {
+      return autoscalingPolicyDefinition_.get(index);
+    }
+    /**
+     * <pre>
+     * The autoscaling policy definition.
+     * </pre>
+     *
+     * <code>repeated .usage.CDPAutoscalePolicyDefinition autoscalingPolicyDefinition = 3;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinitionOrBuilder getAutoscalingPolicyDefinitionOrBuilder(
+        int index) {
+      return autoscalingPolicyDefinition_.get(index);
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!getUserCrnBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, userCrn_);
+      }
+      if (autoscalingEnabled_ != false) {
+        output.writeBool(2, autoscalingEnabled_);
+      }
+      for (int i = 0; i < autoscalingPolicyDefinition_.size(); i++) {
+        output.writeMessage(3, autoscalingPolicyDefinition_.get(i));
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!getUserCrnBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, userCrn_);
+      }
+      if (autoscalingEnabled_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(2, autoscalingEnabled_);
+      }
+      for (int i = 0; i < autoscalingPolicyDefinition_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(3, autoscalingPolicyDefinition_.get(i));
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged other = (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged) obj;
+
+      boolean result = true;
+      result = result && getUserCrn()
+          .equals(other.getUserCrn());
+      result = result && (getAutoscalingEnabled()
+          == other.getAutoscalingEnabled());
+      result = result && getAutoscalingPolicyDefinitionList()
+          .equals(other.getAutoscalingPolicyDefinitionList());
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + USERCRN_FIELD_NUMBER;
+      hash = (53 * hash) + getUserCrn().hashCode();
+      hash = (37 * hash) + AUTOSCALINGENABLED_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getAutoscalingEnabled());
+      if (getAutoscalingPolicyDefinitionCount() > 0) {
+        hash = (37 * hash) + AUTOSCALINGPOLICYDEFINITION_FIELD_NUMBER;
+        hash = (53 * hash) + getAutoscalingPolicyDefinitionList().hashCode();
+      }
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Generated after autoscale config has been updated.
+     * </pre>
+     *
+     * Protobuf type {@code usage.CDPDatahubAutoscaleConfigChanged}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:usage.CDPDatahubAutoscaleConfigChanged)
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChangedOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPDatahubAutoscaleConfigChanged_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPDatahubAutoscaleConfigChanged_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged.class, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+          getAutoscalingPolicyDefinitionFieldBuilder();
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        userCrn_ = "";
+
+        autoscalingEnabled_ = false;
+
+        if (autoscalingPolicyDefinitionBuilder_ == null) {
+          autoscalingPolicyDefinition_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000004);
+        } else {
+          autoscalingPolicyDefinitionBuilder_.clear();
+        }
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPDatahubAutoscaleConfigChanged_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged build() {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged buildPartial() {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged result = new com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        result.userCrn_ = userCrn_;
+        result.autoscalingEnabled_ = autoscalingEnabled_;
+        if (autoscalingPolicyDefinitionBuilder_ == null) {
+          if (((bitField0_ & 0x00000004) == 0x00000004)) {
+            autoscalingPolicyDefinition_ = java.util.Collections.unmodifiableList(autoscalingPolicyDefinition_);
+            bitField0_ = (bitField0_ & ~0x00000004);
+          }
+          result.autoscalingPolicyDefinition_ = autoscalingPolicyDefinition_;
+        } else {
+          result.autoscalingPolicyDefinition_ = autoscalingPolicyDefinitionBuilder_.build();
+        }
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged) {
+          return mergeFrom((com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged other) {
+        if (other == com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged.getDefaultInstance()) return this;
+        if (!other.getUserCrn().isEmpty()) {
+          userCrn_ = other.userCrn_;
+          onChanged();
+        }
+        if (other.getAutoscalingEnabled() != false) {
+          setAutoscalingEnabled(other.getAutoscalingEnabled());
+        }
+        if (autoscalingPolicyDefinitionBuilder_ == null) {
+          if (!other.autoscalingPolicyDefinition_.isEmpty()) {
+            if (autoscalingPolicyDefinition_.isEmpty()) {
+              autoscalingPolicyDefinition_ = other.autoscalingPolicyDefinition_;
+              bitField0_ = (bitField0_ & ~0x00000004);
+            } else {
+              ensureAutoscalingPolicyDefinitionIsMutable();
+              autoscalingPolicyDefinition_.addAll(other.autoscalingPolicyDefinition_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.autoscalingPolicyDefinition_.isEmpty()) {
+            if (autoscalingPolicyDefinitionBuilder_.isEmpty()) {
+              autoscalingPolicyDefinitionBuilder_.dispose();
+              autoscalingPolicyDefinitionBuilder_ = null;
+              autoscalingPolicyDefinition_ = other.autoscalingPolicyDefinition_;
+              bitField0_ = (bitField0_ & ~0x00000004);
+              autoscalingPolicyDefinitionBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getAutoscalingPolicyDefinitionFieldBuilder() : null;
+            } else {
+              autoscalingPolicyDefinitionBuilder_.addAllMessages(other.autoscalingPolicyDefinition_);
+            }
+          }
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      private java.lang.Object userCrn_ = "";
+      /**
+       * <pre>
+       * The user crn who updated the autoscale config.
+       * </pre>
+       *
+       * <code>string userCrn = 1;</code>
+       */
+      public java.lang.String getUserCrn() {
+        java.lang.Object ref = userCrn_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          userCrn_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The user crn who updated the autoscale config.
+       * </pre>
+       *
+       * <code>string userCrn = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getUserCrnBytes() {
+        java.lang.Object ref = userCrn_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          userCrn_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The user crn who updated the autoscale config.
+       * </pre>
+       *
+       * <code>string userCrn = 1;</code>
+       */
+      public Builder setUserCrn(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        userCrn_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The user crn who updated the autoscale config.
+       * </pre>
+       *
+       * <code>string userCrn = 1;</code>
+       */
+      public Builder clearUserCrn() {
+        
+        userCrn_ = getDefaultInstance().getUserCrn();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The user crn who updated the autoscale config.
+       * </pre>
+       *
+       * <code>string userCrn = 1;</code>
+       */
+      public Builder setUserCrnBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        userCrn_ = value;
+        onChanged();
+        return this;
+      }
+
+      private boolean autoscalingEnabled_ ;
+      /**
+       * <pre>
+       * Is autoscaling enabled for cluster.
+       * </pre>
+       *
+       * <code>bool autoscalingEnabled = 2;</code>
+       */
+      public boolean getAutoscalingEnabled() {
+        return autoscalingEnabled_;
+      }
+      /**
+       * <pre>
+       * Is autoscaling enabled for cluster.
+       * </pre>
+       *
+       * <code>bool autoscalingEnabled = 2;</code>
+       */
+      public Builder setAutoscalingEnabled(boolean value) {
+        
+        autoscalingEnabled_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Is autoscaling enabled for cluster.
+       * </pre>
+       *
+       * <code>bool autoscalingEnabled = 2;</code>
+       */
+      public Builder clearAutoscalingEnabled() {
+        
+        autoscalingEnabled_ = false;
+        onChanged();
+        return this;
+      }
+
+      private java.util.List<com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition> autoscalingPolicyDefinition_ =
+        java.util.Collections.emptyList();
+      private void ensureAutoscalingPolicyDefinitionIsMutable() {
+        if (!((bitField0_ & 0x00000004) == 0x00000004)) {
+          autoscalingPolicyDefinition_ = new java.util.ArrayList<com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition>(autoscalingPolicyDefinition_);
+          bitField0_ |= 0x00000004;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinitionOrBuilder> autoscalingPolicyDefinitionBuilder_;
+
+      /**
+       * <pre>
+       * The autoscaling policy definition.
+       * </pre>
+       *
+       * <code>repeated .usage.CDPAutoscalePolicyDefinition autoscalingPolicyDefinition = 3;</code>
+       */
+      public java.util.List<com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition> getAutoscalingPolicyDefinitionList() {
+        if (autoscalingPolicyDefinitionBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(autoscalingPolicyDefinition_);
+        } else {
+          return autoscalingPolicyDefinitionBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <pre>
+       * The autoscaling policy definition.
+       * </pre>
+       *
+       * <code>repeated .usage.CDPAutoscalePolicyDefinition autoscalingPolicyDefinition = 3;</code>
+       */
+      public int getAutoscalingPolicyDefinitionCount() {
+        if (autoscalingPolicyDefinitionBuilder_ == null) {
+          return autoscalingPolicyDefinition_.size();
+        } else {
+          return autoscalingPolicyDefinitionBuilder_.getCount();
+        }
+      }
+      /**
+       * <pre>
+       * The autoscaling policy definition.
+       * </pre>
+       *
+       * <code>repeated .usage.CDPAutoscalePolicyDefinition autoscalingPolicyDefinition = 3;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition getAutoscalingPolicyDefinition(int index) {
+        if (autoscalingPolicyDefinitionBuilder_ == null) {
+          return autoscalingPolicyDefinition_.get(index);
+        } else {
+          return autoscalingPolicyDefinitionBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <pre>
+       * The autoscaling policy definition.
+       * </pre>
+       *
+       * <code>repeated .usage.CDPAutoscalePolicyDefinition autoscalingPolicyDefinition = 3;</code>
+       */
+      public Builder setAutoscalingPolicyDefinition(
+          int index, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition value) {
+        if (autoscalingPolicyDefinitionBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureAutoscalingPolicyDefinitionIsMutable();
+          autoscalingPolicyDefinition_.set(index, value);
+          onChanged();
+        } else {
+          autoscalingPolicyDefinitionBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The autoscaling policy definition.
+       * </pre>
+       *
+       * <code>repeated .usage.CDPAutoscalePolicyDefinition autoscalingPolicyDefinition = 3;</code>
+       */
+      public Builder setAutoscalingPolicyDefinition(
+          int index, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition.Builder builderForValue) {
+        if (autoscalingPolicyDefinitionBuilder_ == null) {
+          ensureAutoscalingPolicyDefinitionIsMutable();
+          autoscalingPolicyDefinition_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          autoscalingPolicyDefinitionBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The autoscaling policy definition.
+       * </pre>
+       *
+       * <code>repeated .usage.CDPAutoscalePolicyDefinition autoscalingPolicyDefinition = 3;</code>
+       */
+      public Builder addAutoscalingPolicyDefinition(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition value) {
+        if (autoscalingPolicyDefinitionBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureAutoscalingPolicyDefinitionIsMutable();
+          autoscalingPolicyDefinition_.add(value);
+          onChanged();
+        } else {
+          autoscalingPolicyDefinitionBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The autoscaling policy definition.
+       * </pre>
+       *
+       * <code>repeated .usage.CDPAutoscalePolicyDefinition autoscalingPolicyDefinition = 3;</code>
+       */
+      public Builder addAutoscalingPolicyDefinition(
+          int index, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition value) {
+        if (autoscalingPolicyDefinitionBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureAutoscalingPolicyDefinitionIsMutable();
+          autoscalingPolicyDefinition_.add(index, value);
+          onChanged();
+        } else {
+          autoscalingPolicyDefinitionBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The autoscaling policy definition.
+       * </pre>
+       *
+       * <code>repeated .usage.CDPAutoscalePolicyDefinition autoscalingPolicyDefinition = 3;</code>
+       */
+      public Builder addAutoscalingPolicyDefinition(
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition.Builder builderForValue) {
+        if (autoscalingPolicyDefinitionBuilder_ == null) {
+          ensureAutoscalingPolicyDefinitionIsMutable();
+          autoscalingPolicyDefinition_.add(builderForValue.build());
+          onChanged();
+        } else {
+          autoscalingPolicyDefinitionBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The autoscaling policy definition.
+       * </pre>
+       *
+       * <code>repeated .usage.CDPAutoscalePolicyDefinition autoscalingPolicyDefinition = 3;</code>
+       */
+      public Builder addAutoscalingPolicyDefinition(
+          int index, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition.Builder builderForValue) {
+        if (autoscalingPolicyDefinitionBuilder_ == null) {
+          ensureAutoscalingPolicyDefinitionIsMutable();
+          autoscalingPolicyDefinition_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          autoscalingPolicyDefinitionBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The autoscaling policy definition.
+       * </pre>
+       *
+       * <code>repeated .usage.CDPAutoscalePolicyDefinition autoscalingPolicyDefinition = 3;</code>
+       */
+      public Builder addAllAutoscalingPolicyDefinition(
+          java.lang.Iterable<? extends com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition> values) {
+        if (autoscalingPolicyDefinitionBuilder_ == null) {
+          ensureAutoscalingPolicyDefinitionIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, autoscalingPolicyDefinition_);
+          onChanged();
+        } else {
+          autoscalingPolicyDefinitionBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The autoscaling policy definition.
+       * </pre>
+       *
+       * <code>repeated .usage.CDPAutoscalePolicyDefinition autoscalingPolicyDefinition = 3;</code>
+       */
+      public Builder clearAutoscalingPolicyDefinition() {
+        if (autoscalingPolicyDefinitionBuilder_ == null) {
+          autoscalingPolicyDefinition_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000004);
+          onChanged();
+        } else {
+          autoscalingPolicyDefinitionBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The autoscaling policy definition.
+       * </pre>
+       *
+       * <code>repeated .usage.CDPAutoscalePolicyDefinition autoscalingPolicyDefinition = 3;</code>
+       */
+      public Builder removeAutoscalingPolicyDefinition(int index) {
+        if (autoscalingPolicyDefinitionBuilder_ == null) {
+          ensureAutoscalingPolicyDefinitionIsMutable();
+          autoscalingPolicyDefinition_.remove(index);
+          onChanged();
+        } else {
+          autoscalingPolicyDefinitionBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The autoscaling policy definition.
+       * </pre>
+       *
+       * <code>repeated .usage.CDPAutoscalePolicyDefinition autoscalingPolicyDefinition = 3;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition.Builder getAutoscalingPolicyDefinitionBuilder(
+          int index) {
+        return getAutoscalingPolicyDefinitionFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <pre>
+       * The autoscaling policy definition.
+       * </pre>
+       *
+       * <code>repeated .usage.CDPAutoscalePolicyDefinition autoscalingPolicyDefinition = 3;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinitionOrBuilder getAutoscalingPolicyDefinitionOrBuilder(
+          int index) {
+        if (autoscalingPolicyDefinitionBuilder_ == null) {
+          return autoscalingPolicyDefinition_.get(index);  } else {
+          return autoscalingPolicyDefinitionBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <pre>
+       * The autoscaling policy definition.
+       * </pre>
+       *
+       * <code>repeated .usage.CDPAutoscalePolicyDefinition autoscalingPolicyDefinition = 3;</code>
+       */
+      public java.util.List<? extends com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinitionOrBuilder> 
+           getAutoscalingPolicyDefinitionOrBuilderList() {
+        if (autoscalingPolicyDefinitionBuilder_ != null) {
+          return autoscalingPolicyDefinitionBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(autoscalingPolicyDefinition_);
+        }
+      }
+      /**
+       * <pre>
+       * The autoscaling policy definition.
+       * </pre>
+       *
+       * <code>repeated .usage.CDPAutoscalePolicyDefinition autoscalingPolicyDefinition = 3;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition.Builder addAutoscalingPolicyDefinitionBuilder() {
+        return getAutoscalingPolicyDefinitionFieldBuilder().addBuilder(
+            com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition.getDefaultInstance());
+      }
+      /**
+       * <pre>
+       * The autoscaling policy definition.
+       * </pre>
+       *
+       * <code>repeated .usage.CDPAutoscalePolicyDefinition autoscalingPolicyDefinition = 3;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition.Builder addAutoscalingPolicyDefinitionBuilder(
+          int index) {
+        return getAutoscalingPolicyDefinitionFieldBuilder().addBuilder(
+            index, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition.getDefaultInstance());
+      }
+      /**
+       * <pre>
+       * The autoscaling policy definition.
+       * </pre>
+       *
+       * <code>repeated .usage.CDPAutoscalePolicyDefinition autoscalingPolicyDefinition = 3;</code>
+       */
+      public java.util.List<com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition.Builder> 
+           getAutoscalingPolicyDefinitionBuilderList() {
+        return getAutoscalingPolicyDefinitionFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinitionOrBuilder> 
+          getAutoscalingPolicyDefinitionFieldBuilder() {
+        if (autoscalingPolicyDefinitionBuilder_ == null) {
+          autoscalingPolicyDefinitionBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinitionOrBuilder>(
+                  autoscalingPolicyDefinition_,
+                  ((bitField0_ & 0x00000004) == 0x00000004),
+                  getParentForChildren(),
+                  isClean());
+          autoscalingPolicyDefinition_ = null;
+        }
+        return autoscalingPolicyDefinitionBuilder_;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFieldsProto3(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:usage.CDPDatahubAutoscaleConfigChanged)
+    }
+
+    // @@protoc_insertion_point(class_scope:usage.CDPDatahubAutoscaleConfigChanged)
+    private static final com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged();
+    }
+
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<CDPDatahubAutoscaleConfigChanged>
+        PARSER = new com.google.protobuf.AbstractParser<CDPDatahubAutoscaleConfigChanged>() {
+      @java.lang.Override
+      public CDPDatahubAutoscaleConfigChanged parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new CDPDatahubAutoscaleConfigChanged(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<CDPDatahubAutoscaleConfigChanged> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<CDPDatahubAutoscaleConfigChanged> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubAutoscaleConfigChanged getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_usage_Event_descriptor;
   private static final 
@@ -82192,6 +88435,36 @@ public final class UsageProto {
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_usage_CDPUDXBundleDetails_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_usage_AutoscalePolicyType_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_usage_AutoscalePolicyType_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_usage_CDPAutoscalePolicyDefinition_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_usage_CDPAutoscalePolicyDefinition_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_usage_AutoscaleScalingStatusType_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_usage_AutoscaleScalingStatusType_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_usage_CDPAutoscaleTriggerDetails_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_usage_CDPAutoscaleTriggerDetails_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_usage_CDPDatahubAutoscaleTriggered_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_usage_CDPDatahubAutoscaleTriggered_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_usage_CDPDatahubAutoscaleConfigChanged_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_usage_CDPDatahubAutoscaleConfigChanged_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -82201,7 +88474,7 @@ public final class UsageProto {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\013usage.proto\022\005usage\"\314\023\n\005Event\022\n\n\002id\030\001 \001" +
+      "\n\013usage.proto\022\005usage\"\356\024\n\005Event\022\n\n\002id\030\001 \001" +
       "(\t\022\021\n\ttimestamp\030\002 \001(\004\022\017\n\007version\030\003 \001(\r\022?" +
       "\n\026altusIamAccountCreated\030\004 \001(\0132\035.usage.A" +
       "ltusIamAccountCreatedH\000\0229\n\023altusIamUserC" +
@@ -82247,322 +88520,350 @@ public final class UsageProto {
       "bStatusChanged\030# \001(\0132\036.usage.CDPDatahubS" +
       "tatusChangedH\000\0221\n\017cdpDatalakeSync\030$ \001(\0132" +
       "\026.usage.CDPDatalakeSyncH\000\022/\n\016cdpDatahubS" +
-      "ync\030% \001(\0132\025.usage.CDPDatahubSyncH\000\022I\n\033cd" +
-      "pDFCatalogArtifactCreated\030( \001(\0132\".usage." +
-      "CDPDFCatalogArtifactCreatedH\000\022I\n\033cdpDFCa" +
-      "talogArtifactDeleted\030) \001(\0132\".usage.CDPDF" +
-      "CatalogArtifactDeletedH\000\022W\n\"cdpDFCatalog" +
-      "ArtifactVersionCreated\030* \001(\0132).usage.CDP" +
-      "DFCatalogArtifactVersionCreatedH\000\022W\n\"cdp" +
-      "DFCatalogArtifactVersionDeleted\030+ \001(\0132)." +
-      "usage.CDPDFCatalogArtifactVersionDeleted" +
-      "H\000\022=\n\025cdpDFServiceRequested\030, \001(\0132\034.usag" +
-      "e.CDPDFServiceRequestedH\000\022E\n\031cdpDFServic" +
-      "eStatusChanged\030- \001(\0132 .usage.CDPDFServic" +
-      "eStatusChangedH\000\022=\n\025cdpUDXBundleInitiate" +
-      "d\030. \001(\0132\034.usage.CDPUDXBundleInitiatedH\000\022" +
-      ";\n\024cdpUDXBundleReceived\030/ \001(\0132\033.usage.CD" +
-      "PUDXBundleReceivedH\000B\t\n\007detailsJ\004\010\010\020\tJ\004\010" +
-      "\t\020\nJ\004\010\n\020\013J\004\010\013\020\014J\004\010\014\020\rJ\004\010\r\020\016J\004\010\016\020\017J\004\010\017\020\020J" +
-      "\004\010\024\020\025J\004\010\025\020\026\"A\n\023AltusIamAccountType\"*\n\005Va" +
-      "lue\022\t\n\005UNSET\020\000\022\013\n\007REGULAR\020\001\022\t\n\005TRIAL\020\002\"\225" +
-      "\001\n\026AltusIamAccountCreated\022\021\n\taccountId\030\001" +
-      " \001(\t\022\032\n\022identifyProviderId\030\003 \001(\t\022\025\n\rsfdc" +
-      "AccountId\030\004 \001(\t\0225\n\013accountType\030\005 \001(\0162 .u" +
-      "sage.AltusIamAccountType.Value\"\333\001\n\023Altus" +
-      "IamUserCreated\022\016\n\006userId\030\001 \001(\t\022\021\n\taccoun" +
-      "tId\030\003 \001(\t\022\036\n\026identityProviderUserId\030\004 \001(" +
-      "\t\022\025\n\rsfdcContactId\030\005 \001(\t\022\r\n\005admin\030\006 \001(\010\022" +
-      "\013\n\003crn\030\n \001(\t\022\033\n\023identityProviderCrn\030\013 \001(" +
-      "\t\022\031\n\021explicitlyCreated\030\014 \001(\010J\004\010\002\020\003J\004\010\007\020\010" +
-      "J\004\010\010\020\tJ\004\010\t\020\n\"F\n\023AltusIamUserUpdated\022\016\n\006u" +
-      "serId\030\001 \001(\t\022\r\n\005admin\030\005 \001(\010J\004\010\002\020\003J\004\010\003\020\004J\004" +
-      "\010\004\020\005\"%\n\023AltusIamUserDeleted\022\016\n\006userId\030\001 " +
-      "\001(\t\".\n\034AltusIamUserInteractiveLogin\022\016\n\006u" +
-      "serId\030\001 \001(\t\"5\n#AltusIamUserInteractiveLo" +
-      "ginFailure\022\016\n\006userId\030\001 \001(\t\"~\n\032AltusIamMa" +
-      "chineUserCreated\022\025\n\rmachineUserId\030\001 \001(\t\022" +
-      "\021\n\taccountId\030\002 \001(\t\022\027\n\017machineUserName\030\003 " +
-      "\001(\t\022\013\n\003crn\030\004 \001(\t\022\020\n\010internal\030\005 \001(\010\"3\n\032Al" +
-      "tusIamMachineUserDeleted\022\025\n\rmachineUserI" +
-      "d\030\001 \001(\t\"s\n\030AltusIamAccessKeyCreated\022\023\n\013a" +
-      "ccessKeyId\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t\022\020\n\010a" +
-      "ctorCrn\030\003 \001(\t\022\013\n\003crn\030\004 \001(\t\022\020\n\010internal\030\005" +
-      " \001(\010\"/\n\030AltusIamAccessKeyDeleted\022\023\n\013acce" +
-      "ssKeyId\030\001 \001(\t\"e\n\032AltusIamAccessTokenCrea" +
-      "ted\022\025\n\raccessTokenId\030\001 \001(\t\022\021\n\taccountId\030" +
-      "\002 \001(\t\022\020\n\010actorCrn\030\003 \001(\t\022\013\n\003crn\030\004 \001(\t\"3\n\032" +
-      "AltusIamAccessTokenDeleted\022\025\n\raccessToke" +
-      "nId\030\001 \001(\t\"e\n\036CDPEnvironmentsEnvironmentT" +
-      "ype\"C\n\005Value\022\t\n\005UNSET\020\000\022\007\n\003AWS\020\001\022\t\n\005AZUR" +
-      "E\020\002\022\007\n\003GCP\020\003\022\010\n\004YARN\020\004\022\010\n\004MOCK\020\005\"\353\003\n\032CDP" +
-      "CloudbreakClusterStatus\"\314\003\n\005Value\022\t\n\005UNS" +
-      "ET\020\000\022\r\n\tREQUESTED\020\001\022\026\n\022CREATE_IN_PROGRES" +
-      "S\020\002\022\r\n\tAVAILABLE\020\003\022\026\n\022UPDATE_IN_PROGRESS" +
-      "\020\004\022\024\n\020UPDATE_REQUESTED\020\005\022\021\n\rUPDATE_FAILE" +
-      "D\020\006\022\021\n\rCREATE_FAILED\020\007\022\032\n\026ENABLE_SECURIT" +
-      "Y_FAILED\020\010\022\032\n\026PRE_DELETE_IN_PROGRESS\020\t\022\026" +
-      "\n\022DELETE_IN_PROGRESS\020\n\022\021\n\rDELETE_FAILED\020" +
-      "\013\022\024\n\020DELETE_COMPLETED\020\014\022\013\n\007STOPPED\020\r\022\022\n\016" +
-      "STOP_REQUESTED\020\016\022\023\n\017START_REQUESTED\020\017\022\024\n" +
-      "\020STOP_IN_PROGRESS\020\020\022\025\n\021START_IN_PROGRESS" +
-      "\020\021\022\020\n\014START_FAILED\020\022\022\017\n\013STOP_FAILED\020\023\022\021\n" +
-      "\rWAIT_FOR_SYNC\020\024\022\034\n\030MAINTENANCE_MODE_ENA" +
-      "BLED\020\025\"\215\002\n\033CDPDatalakeClusterRequested\022\022" +
-      "\n\ndatalakeId\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t\022\024\n" +
-      "\014datalakeName\030\003 \001(\t\022D\n\017environmentType\030\004" +
-      " \001(\0162+.usage.CDPEnvironmentsEnvironmentT" +
-      "ype.Value\022\026\n\016environmentCrn\030\005 \001(\t\022\023\n\013cdp" +
-      "dVersion\030\006 \001(\t\022\013\n\003crn\030\007 \001(\t\022\022\n\ncreatorCr" +
-      "n\030\010 \001(\t\022\035\n\025clusterDefinitionName\030\t \001(\t\"\304" +
-      "\001\n\037CDPDatalakeClusterStatusChanged\022\022\n\nda" +
-      "talakeId\030\001 \001(\t\022:\n\toldStatus\030\002 \001(\0162\'.usag" +
-      "e.CDPCloudbreakClusterStatus.Value\022:\n\tne" +
-      "wStatus\030\003 \001(\0162\'.usage.CDPCloudbreakClust" +
-      "erStatus.Value\022\025\n\rfailureReason\030\004 \001(\t\"\237\002" +
-      "\n\032CDPDatahubClusterRequested\022\021\n\tclusterI" +
-      "d\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t\022\023\n\013clusterNam" +
-      "e\030\003 \001(\t\022D\n\017environmentType\030\004 \001(\0162+.usage" +
-      ".CDPEnvironmentsEnvironmentType.Value\022\026\n" +
-      "\016environmentCrn\030\005 \001(\t\022\023\n\013cdpdVersion\030\006 \001" +
-      "(\t\022\023\n\013datalakeCrn\030\007 \001(\t\022\013\n\003crn\030\010 \001(\t\022\022\n\n" +
-      "creatorCrn\030\t \001(\t\022\035\n\025clusterDefinitionNam" +
-      "e\030\n \001(\t\"\302\001\n\036CDPDatahubClusterStatusChang" +
-      "ed\022\021\n\tclusterId\030\001 \001(\t\022:\n\toldStatus\030\002 \001(\016" +
-      "2\'.usage.CDPCloudbreakClusterStatus.Valu" +
-      "e\022:\n\tnewStatus\030\003 \001(\0162\'.usage.CDPCloudbre" +
-      "akClusterStatus.Value\022\025\n\rfailureReason\030\004" +
-      " \001(\t\"\333\004\n\025CDPCMLWorkspaceStatus\"\301\004\n\005Value" +
-      "\022\t\n\005UNSET\020\000\022\025\n\021PROVISION_STARTED\020\001\022\026\n\022PR" +
-      "OVISION_FINISHED\020\002\022\024\n\020PROVISION_FAILED\020\003" +
-      "\022\030\n\024INSTALLATION_STARTED\020\004\022\031\n\025INSTALLATI" +
-      "ON_FINISHED\020\005\022\027\n\023INSTALLATION_FAILED\020\006\022\027" +
-      "\n\023DEPROVISION_STARTED\020\007\022\030\n\024DEPROVISION_F" +
-      "INISHED\020\010\022\026\n\022DEPROVISION_FAILED\020\t\022\021\n\rREN" +
-      "EW_STARTED\020\n\022\022\n\016RENEW_FINISHED\020\013\022\021\n\rRENE" +
-      "W_WARNING\020\014\022\023\n\017SUSPEND_STARTED\020\r\022\024\n\020SUSP" +
-      "END_FINISHED\020\016\022\022\n\016SUSPEND_FAILED\020\017\022\022\n\016RE" +
-      "SUME_STARTED\020\020\022\023\n\017RESUME_FINISHED\020\021\022\021\n\rR" +
-      "ESUME_FAILED\020\022\022\022\n\016RESUME_WARNING\020\023\022\023\n\017UP" +
-      "GRADE_STARTED\020\024\022\024\n\020UPGRADE_FINISHED\020\025\022\022\n" +
-      "\016UPGRADE_FAILED\020\026\022\026\n\022VALIDATION_STARTED\020" +
-      "\027\022\030\n\024VALIDATION_SUCCEEDED\020\030\022\025\n\021VALIDATIO" +
-      "N_FAILED\020\031\"\231\001\n\032CDPCMLAWSWorkspaceMetadat" +
+      "ync\030% \001(\0132\025.usage.CDPDatahubSyncH\000\022K\n\034cd" +
+      "pDatahubAutoscaleTriggered\030F \001(\0132#.usage" +
+      ".CDPDatahubAutoscaleTriggeredH\000\022S\n cdpDa" +
+      "tahubAutoscaleConfigChanged\030G \001(\0132\'.usag" +
+      "e.CDPDatahubAutoscaleConfigChangedH\000\022I\n\033" +
+      "cdpDFCatalogArtifactCreated\030( \001(\0132\".usag" +
+      "e.CDPDFCatalogArtifactCreatedH\000\022I\n\033cdpDF" +
+      "CatalogArtifactDeleted\030) \001(\0132\".usage.CDP" +
+      "DFCatalogArtifactDeletedH\000\022W\n\"cdpDFCatal" +
+      "ogArtifactVersionCreated\030* \001(\0132).usage.C" +
+      "DPDFCatalogArtifactVersionCreatedH\000\022W\n\"c" +
+      "dpDFCatalogArtifactVersionDeleted\030+ \001(\0132" +
+      ").usage.CDPDFCatalogArtifactVersionDelet" +
+      "edH\000\022=\n\025cdpDFServiceRequested\030, \001(\0132\034.us" +
+      "age.CDPDFServiceRequestedH\000\022E\n\031cdpDFServ" +
+      "iceStatusChanged\030- \001(\0132 .usage.CDPDFServ" +
+      "iceStatusChangedH\000\022=\n\025cdpUDXBundleInitia" +
+      "ted\030. \001(\0132\034.usage.CDPUDXBundleInitiatedH" +
+      "\000\022;\n\024cdpUDXBundleReceived\030/ \001(\0132\033.usage." +
+      "CDPUDXBundleReceivedH\000B\t\n\007detailsJ\004\010\010\020\tJ" +
+      "\004\010\t\020\nJ\004\010\n\020\013J\004\010\013\020\014J\004\010\014\020\rJ\004\010\r\020\016J\004\010\016\020\017J\004\010\017\020" +
+      "\020J\004\010\024\020\025J\004\010\025\020\026\"A\n\023AltusIamAccountType\"*\n\005" +
+      "Value\022\t\n\005UNSET\020\000\022\013\n\007REGULAR\020\001\022\t\n\005TRIAL\020\002" +
+      "\"\225\001\n\026AltusIamAccountCreated\022\021\n\taccountId" +
+      "\030\001 \001(\t\022\032\n\022identifyProviderId\030\003 \001(\t\022\025\n\rsf" +
+      "dcAccountId\030\004 \001(\t\0225\n\013accountType\030\005 \001(\0162 " +
+      ".usage.AltusIamAccountType.Value\"\333\001\n\023Alt" +
+      "usIamUserCreated\022\016\n\006userId\030\001 \001(\t\022\021\n\tacco" +
+      "untId\030\003 \001(\t\022\036\n\026identityProviderUserId\030\004 " +
+      "\001(\t\022\025\n\rsfdcContactId\030\005 \001(\t\022\r\n\005admin\030\006 \001(" +
+      "\010\022\013\n\003crn\030\n \001(\t\022\033\n\023identityProviderCrn\030\013 " +
+      "\001(\t\022\031\n\021explicitlyCreated\030\014 \001(\010J\004\010\002\020\003J\004\010\007" +
+      "\020\010J\004\010\010\020\tJ\004\010\t\020\n\"F\n\023AltusIamUserUpdated\022\016\n" +
+      "\006userId\030\001 \001(\t\022\r\n\005admin\030\005 \001(\010J\004\010\002\020\003J\004\010\003\020\004" +
+      "J\004\010\004\020\005\"%\n\023AltusIamUserDeleted\022\016\n\006userId\030" +
+      "\001 \001(\t\".\n\034AltusIamUserInteractiveLogin\022\016\n" +
+      "\006userId\030\001 \001(\t\"5\n#AltusIamUserInteractive" +
+      "LoginFailure\022\016\n\006userId\030\001 \001(\t\"~\n\032AltusIam" +
+      "MachineUserCreated\022\025\n\rmachineUserId\030\001 \001(" +
+      "\t\022\021\n\taccountId\030\002 \001(\t\022\027\n\017machineUserName\030" +
+      "\003 \001(\t\022\013\n\003crn\030\004 \001(\t\022\020\n\010internal\030\005 \001(\010\"3\n\032" +
+      "AltusIamMachineUserDeleted\022\025\n\rmachineUse" +
+      "rId\030\001 \001(\t\"s\n\030AltusIamAccessKeyCreated\022\023\n" +
+      "\013accessKeyId\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t\022\020\n" +
+      "\010actorCrn\030\003 \001(\t\022\013\n\003crn\030\004 \001(\t\022\020\n\010internal" +
+      "\030\005 \001(\010\"/\n\030AltusIamAccessKeyDeleted\022\023\n\013ac" +
+      "cessKeyId\030\001 \001(\t\"e\n\032AltusIamAccessTokenCr" +
+      "eated\022\025\n\raccessTokenId\030\001 \001(\t\022\021\n\taccountI" +
+      "d\030\002 \001(\t\022\020\n\010actorCrn\030\003 \001(\t\022\013\n\003crn\030\004 \001(\t\"3" +
+      "\n\032AltusIamAccessTokenDeleted\022\025\n\raccessTo" +
+      "kenId\030\001 \001(\t\"e\n\036CDPEnvironmentsEnvironmen" +
+      "tType\"C\n\005Value\022\t\n\005UNSET\020\000\022\007\n\003AWS\020\001\022\t\n\005AZ" +
+      "URE\020\002\022\007\n\003GCP\020\003\022\010\n\004YARN\020\004\022\010\n\004MOCK\020\005\"\353\003\n\032C" +
+      "DPCloudbreakClusterStatus\"\314\003\n\005Value\022\t\n\005U" +
+      "NSET\020\000\022\r\n\tREQUESTED\020\001\022\026\n\022CREATE_IN_PROGR" +
+      "ESS\020\002\022\r\n\tAVAILABLE\020\003\022\026\n\022UPDATE_IN_PROGRE" +
+      "SS\020\004\022\024\n\020UPDATE_REQUESTED\020\005\022\021\n\rUPDATE_FAI" +
+      "LED\020\006\022\021\n\rCREATE_FAILED\020\007\022\032\n\026ENABLE_SECUR" +
+      "ITY_FAILED\020\010\022\032\n\026PRE_DELETE_IN_PROGRESS\020\t" +
+      "\022\026\n\022DELETE_IN_PROGRESS\020\n\022\021\n\rDELETE_FAILE" +
+      "D\020\013\022\024\n\020DELETE_COMPLETED\020\014\022\013\n\007STOPPED\020\r\022\022" +
+      "\n\016STOP_REQUESTED\020\016\022\023\n\017START_REQUESTED\020\017\022" +
+      "\024\n\020STOP_IN_PROGRESS\020\020\022\025\n\021START_IN_PROGRE" +
+      "SS\020\021\022\020\n\014START_FAILED\020\022\022\017\n\013STOP_FAILED\020\023\022" +
+      "\021\n\rWAIT_FOR_SYNC\020\024\022\034\n\030MAINTENANCE_MODE_E" +
+      "NABLED\020\025\"\215\002\n\033CDPDatalakeClusterRequested" +
+      "\022\022\n\ndatalakeId\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t\022" +
+      "\024\n\014datalakeName\030\003 \001(\t\022D\n\017environmentType" +
+      "\030\004 \001(\0162+.usage.CDPEnvironmentsEnvironmen" +
+      "tType.Value\022\026\n\016environmentCrn\030\005 \001(\t\022\023\n\013c" +
+      "dpdVersion\030\006 \001(\t\022\013\n\003crn\030\007 \001(\t\022\022\n\ncreator" +
+      "Crn\030\010 \001(\t\022\035\n\025clusterDefinitionName\030\t \001(\t" +
+      "\"\304\001\n\037CDPDatalakeClusterStatusChanged\022\022\n\n" +
+      "datalakeId\030\001 \001(\t\022:\n\toldStatus\030\002 \001(\0162\'.us" +
+      "age.CDPCloudbreakClusterStatus.Value\022:\n\t" +
+      "newStatus\030\003 \001(\0162\'.usage.CDPCloudbreakClu" +
+      "sterStatus.Value\022\025\n\rfailureReason\030\004 \001(\t\"" +
+      "\237\002\n\032CDPDatahubClusterRequested\022\021\n\tcluste" +
+      "rId\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t\022\023\n\013clusterN" +
+      "ame\030\003 \001(\t\022D\n\017environmentType\030\004 \001(\0162+.usa" +
+      "ge.CDPEnvironmentsEnvironmentType.Value\022" +
+      "\026\n\016environmentCrn\030\005 \001(\t\022\023\n\013cdpdVersion\030\006" +
+      " \001(\t\022\023\n\013datalakeCrn\030\007 \001(\t\022\013\n\003crn\030\010 \001(\t\022\022" +
+      "\n\ncreatorCrn\030\t \001(\t\022\035\n\025clusterDefinitionN" +
+      "ame\030\n \001(\t\"\302\001\n\036CDPDatahubClusterStatusCha" +
+      "nged\022\021\n\tclusterId\030\001 \001(\t\022:\n\toldStatus\030\002 \001" +
+      "(\0162\'.usage.CDPCloudbreakClusterStatus.Va" +
+      "lue\022:\n\tnewStatus\030\003 \001(\0162\'.usage.CDPCloudb" +
+      "reakClusterStatus.Value\022\025\n\rfailureReason" +
+      "\030\004 \001(\t\"\333\004\n\025CDPCMLWorkspaceStatus\"\301\004\n\005Val" +
+      "ue\022\t\n\005UNSET\020\000\022\025\n\021PROVISION_STARTED\020\001\022\026\n\022" +
+      "PROVISION_FINISHED\020\002\022\024\n\020PROVISION_FAILED" +
+      "\020\003\022\030\n\024INSTALLATION_STARTED\020\004\022\031\n\025INSTALLA" +
+      "TION_FINISHED\020\005\022\027\n\023INSTALLATION_FAILED\020\006" +
+      "\022\027\n\023DEPROVISION_STARTED\020\007\022\030\n\024DEPROVISION" +
+      "_FINISHED\020\010\022\026\n\022DEPROVISION_FAILED\020\t\022\021\n\rR" +
+      "ENEW_STARTED\020\n\022\022\n\016RENEW_FINISHED\020\013\022\021\n\rRE" +
+      "NEW_WARNING\020\014\022\023\n\017SUSPEND_STARTED\020\r\022\024\n\020SU" +
+      "SPEND_FINISHED\020\016\022\022\n\016SUSPEND_FAILED\020\017\022\022\n\016" +
+      "RESUME_STARTED\020\020\022\023\n\017RESUME_FINISHED\020\021\022\021\n" +
+      "\rRESUME_FAILED\020\022\022\022\n\016RESUME_WARNING\020\023\022\023\n\017" +
+      "UPGRADE_STARTED\020\024\022\024\n\020UPGRADE_FINISHED\020\025\022" +
+      "\022\n\016UPGRADE_FAILED\020\026\022\026\n\022VALIDATION_STARTE" +
+      "D\020\027\022\030\n\024VALIDATION_SUCCEEDED\020\030\022\025\n\021VALIDAT" +
+      "ION_FAILED\020\031\"\231\001\n\032CDPCMLAWSWorkspaceMetad" +
+      "ata\022\022\n\nminWorkers\030\001 \001(\005\022\022\n\nmaxWorkers\030\002 " +
+      "\001(\005\022\016\n\006minGpu\030\003 \001(\005\022\016\n\006maxGpu\030\004 \001(\005\022\032\n\022w" +
+      "orkerInstanceType\030\005 \001(\t\022\027\n\017gpuInstanceTy" +
+      "pe\030\006 \001(\t\"\233\001\n\034CDPCMLAzureWorkspaceMetadat" +
       "a\022\022\n\nminWorkers\030\001 \001(\005\022\022\n\nmaxWorkers\030\002 \001(" +
       "\005\022\016\n\006minGpu\030\003 \001(\005\022\016\n\006maxGpu\030\004 \001(\005\022\032\n\022wor" +
       "kerInstanceType\030\005 \001(\t\022\027\n\017gpuInstanceType" +
-      "\030\006 \001(\t\"\233\001\n\034CDPCMLAzureWorkspaceMetadata\022" +
-      "\022\n\nminWorkers\030\001 \001(\005\022\022\n\nmaxWorkers\030\002 \001(\005\022" +
-      "\016\n\006minGpu\030\003 \001(\005\022\016\n\006maxGpu\030\004 \001(\005\022\032\n\022worke" +
-      "rInstanceType\030\005 \001(\t\022\027\n\017gpuInstanceType\030\006" +
-      " \001(\t\"\271\003\n\030CDPCMLWorkspaceRequested\022\013\n\003crn" +
-      "\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t\022\025\n\rworkspaceNa" +
-      "me\030\003 \001(\t\022D\n\017environmentType\030\004 \001(\0162+.usag" +
-      "e.CDPEnvironmentsEnvironmentType.Value\022\026" +
-      "\n\016environmentCrn\030\005 \001(\t\022\023\n\013cdpdVersion\030\006 " +
-      "\001(\t\022\022\n\ncreatorCrn\030\007 \001(\t\022G\n\032cdpCMLAWSWork" +
-      "spaceMetadata\030\010 \001(\0132!.usage.CDPCMLAWSWor" +
-      "kspaceMetadataH\000\022K\n\034cdpCMLAzureWorkspace" +
-      "Metadata\030\t \001(\0132#.usage.CDPCMLAzureWorksp" +
-      "aceMetadataH\000\022\030\n\020workspaceVersion\030\n \001(\t\022" +
-      "\021\n\trequestId\030\013 \001(\t\022\020\n\010userTags\030\014 \001(\tB\n\n\010" +
-      "metadata\"\217\002\n\034CDPCMLWorkspaceStatusChange" +
-      "d\022\013\n\003crn\030\001 \001(\t\0225\n\toldStatus\030\002 \001(\0162\".usag" +
-      "e.CDPCMLWorkspaceStatus.Value\0225\n\tnewStat" +
-      "us\030\003 \001(\0162\".usage.CDPCMLWorkspaceStatus.V" +
-      "alue\022\025\n\rfailureReason\030\004 \001(\t\022\023\n\013fromVersi" +
-      "on\030\005 \001(\t\022\021\n\ttoVersion\030\006 \001(\t\022\021\n\trequestId" +
-      "\030\007 \001(\t\022\020\n\010liftieId\030\010 \001(\t\022\020\n\010userTags\030\t \001" +
-      "(\t\"M\n\030CDPRequestProcessingStep\"1\n\005Value\022" +
-      "\t\n\005UNSET\020\000\022\010\n\004INIT\020\001\022\t\n\005FINAL\020\002\022\010\n\004SYNC\020" +
-      "\003\"\236\002\n\024CDPEnvironmentStatus\"\205\002\n\005Value\022\t\n\005" +
-      "UNSET\020\000\022\022\n\016CREATE_STARTED\020\001\022\023\n\017CREATE_FI" +
-      "NISHED\020\002\022\021\n\rCREATE_FAILED\020\003\022\022\n\016DELETE_ST" +
-      "ARTED\020\004\022\023\n\017DELETE_FINISHED\020\005\022\021\n\rDELETE_F" +
-      "AILED\020\006\022\023\n\017SUSPEND_STARTED\020\007\022\024\n\020SUSPEND_" +
-      "FINISHED\020\010\022\022\n\016SUSPEND_FAILED\020\t\022\022\n\016RESUME" +
-      "_STARTED\020\n\022\023\n\017RESUME_FINISHED\020\013\022\021\n\rRESUM" +
-      "E_FAILED\020\014\"\226\007\n\020CDPClusterStatus\"\201\007\n\005Valu" +
-      "e\022\t\n\005UNSET\020\000\022\022\n\016CREATE_STARTED\020\001\022\023\n\017CREA" +
-      "TE_FINISHED\020\002\022\021\n\rCREATE_FAILED\020\003\022\022\n\016DELE" +
-      "TE_STARTED\020\004\022\023\n\017DELETE_FINISHED\020\005\022\021\n\rDEL" +
-      "ETE_FAILED\020\006\022\023\n\017SUSPEND_STARTED\020\007\022\024\n\020SUS" +
-      "PEND_FINISHED\020\010\022\022\n\016SUSPEND_FAILED\020\t\022\022\n\016R" +
-      "ESUME_STARTED\020\n\022\023\n\017RESUME_FINISHED\020\013\022\021\n\r" +
-      "RESUME_FAILED\020\014\022\023\n\017UPGRADE_STARTED\020\r\022\024\n\020" +
-      "UPGRADE_FINISHED\020\016\022\022\n\016UPGRADE_FAILED\020\017\022\022" +
-      "\n\016REPAIR_STARTED\020\020\022\023\n\017REPAIR_FINISHED\020\021\022" +
-      "\021\n\rREPAIR_FAILED\020\022\022\023\n\017UPSCALE_STARTED\020\023\022" +
-      "\024\n\020UPSCALE_FINISHED\020\024\022\022\n\016UPSCALE_FAILED\020" +
-      "\025\022\025\n\021DOWNSCALE_STARTED\020\026\022\026\n\022DOWNSCALE_FI" +
-      "NISHED\020\027\022\024\n\020DOWNSCALE_FAILED\020\030\022\035\n\031RENEW_" +
-      "PUBLIC_CERT_STARTED\020\031\022\036\n\032RENEW_PUBLIC_CE" +
-      "RT_FINISHED\020\032\022\034\n\030RENEW_PUBLIC_CERT_FAILE" +
-      "D\020\033\022\'\n#RENEW_CLUSTER_INTERNAL_CERT_START" +
-      "ED\020\034\022(\n$RENEW_CLUSTER_INTERNAL_CERT_FINI" +
-      "SHED\020\035\022&\n\"RENEW_CLUSTER_INTERNAL_CERT_FA" +
-      "ILED\020\036\022\022\n\016BACKUP_STARTED\020\037\022\023\n\017BACKUP_FIN" +
-      "ISHED\020 \022\021\n\rBACKUP_FAILED\020!\022!\n\035DIAGNOSTIC" +
-      "_COLLECTION_STARTED\020\"\022\"\n\036DIAGNOSTIC_COLL" +
-      "ECTION_FINISHED\020#\022 \n\034DIAGNOSTIC_COLLECTI" +
-      "ON_FAILED\020$\"\343\002\n\023CDPOperationDetails\022\021\n\ta" +
-      "ccountId\030\001 \001(\t\022\023\n\013resourceCrn\030\002 \001(\t\022\024\n\014r" +
-      "esourceName\030\003 \001(\t\022\024\n\014initiatorCrn\030\004 \001(\t\022" +
-      "\032\n\022applicationVersion\030\005 \001(\t\022G\n\030cdpReques" +
-      "tProcessingStep\030\006 \001(\0162%.usage.CDPRequest" +
-      "ProcessingStep.Value\022\016\n\006flowId\030\007 \001(\t\022\023\n\013" +
-      "flowChainId\030\010 \001(\t\022\021\n\tflowState\030\t \001(\t\022\025\n\r" +
-      "correlationId\030\n \001(\t\022D\n\017environmentType\030\013" +
-      " \001(\0162+.usage.CDPEnvironmentsEnvironmentT" +
-      "ype.Value\"\335\002\n\025CDPEnvironmentDetails\022D\n\017e" +
-      "nvironmentType\030\001 \001(\0162+.usage.CDPEnvironm" +
-      "entsEnvironmentType.Value\022\016\n\006region\030\002 \001(" +
-      "\t\022!\n\031numberOfAvailabilityZones\030\003 \001(\005\022\031\n\021" +
-      "availabilityZones\030\004 \001(\t\0220\n\016networkDetail" +
-      "s\030\005 \001(\0132\030.usage.CDPNetworkDetails\0223\n\naws" +
-      "Details\030\006 \001(\0132\037.usage.CDPEnvironmentAwsD" +
-      "etails\0227\n\014azureDetails\030\007 \001(\0132!.usage.CDP" +
-      "EnvironmentAzureDetails\022\020\n\010userTags\030\010 \001(" +
-      "\t\"0\n\021CDPFreeIPADetails\022\r\n\005nodes\030\001 \001(\005\022\014\n" +
-      "\004spot\030\002 \001(\010\"\\\n\032CDPEnvironmentAzureDetail" +
-      "s\022\033\n\023singleResourceGroup\030\001 \001(\010\022!\n\031resour" +
-      "ceEncryptionEnabled\030\002 \001(\010\"\032\n\030CDPEnvironm" +
-      "entAwsDetails\"a\n%CDPEnvironmentTelemetry" +
-      "FeatureDetails\022\031\n\021workloadAnalytics\030\001 \001(" +
-      "\t\022\035\n\025clusterLogsCollection\030\002 \001(\t\"J\n\017CDPP" +
-      "roxyDetails\022\r\n\005proxy\030\001 \001(\010\022\020\n\010protocol\030\002" +
-      " \001(\t\022\026\n\016authentication\030\003 \001(\t\"\211\002\n\021CDPNetw" +
-      "orkDetails\022\023\n\013networkType\030\001 \001(\t\022\024\n\014conne" +
-      "ctivity\030\002 \001(\t\022\033\n\023numberPublicSubnets\030\003 \001" +
-      "(\005\022\034\n\024numberPrivateSubnets\030\004 \001(\005\022\037\n\027serv" +
-      "iceEndpointCreation\030\005 \001(\t\022,\n\014proxyDetail" +
-      "s\030\006 \001(\0132\026.usage.CDPProxyDetails\022#\n\033publi" +
-      "cEndpointAccessGateway\030\007 \001(\t\022\032\n\022security" +
-      "AccessType\030\010 \001(\t\"\203\002\n\027CDPEnvironmentReque" +
-      "sted\0224\n\020operationDetails\030\001 \001(\0132\032.usage.C" +
-      "DPOperationDetails\0228\n\022environmentDetails" +
-      "\030\002 \001(\0132\034.usage.CDPEnvironmentDetails\022M\n\027" +
-      "telemetryFeatureDetails\030\003 \001(\0132,.usage.CD" +
-      "PEnvironmentTelemetryFeatureDetails\022)\n\007f" +
-      "reeIPA\030\004 \001(\0132\030.usage.CDPFreeIPADetails\"\212" +
-      "\003\n\033CDPEnvironmentStatusChanged\0224\n\020operat" +
-      "ionDetails\030\001 \001(\0132\032.usage.CDPOperationDet" +
-      "ails\0224\n\toldStatus\030\002 \001(\0162!.usage.CDPEnvir" +
-      "onmentStatus.Value\0224\n\tnewStatus\030\003 \001(\0162!." +
-      "usage.CDPEnvironmentStatus.Value\022\025\n\rfail" +
-      "ureReason\030\004 \001(\t\0228\n\022environmentDetails\030\005 " +
-      "\001(\0132\034.usage.CDPEnvironmentDetails\022M\n\027tel" +
-      "emetryFeatureDetails\030\006 \001(\0132,.usage.CDPEn" +
-      "vironmentTelemetryFeatureDetails\022)\n\007free" +
-      "IPA\030\007 \001(\0132\030.usage.CDPFreeIPADetails\"8\n\017C" +
-      "DPImageDetails\022\017\n\007imageId\030\001 \001(\t\022\024\n\014image" +
-      "Catalog\030\002 \001(\t\"\222\001\n\017CDPClusterShape\022\033\n\023clu" +
-      "sterTemplateName\030\001 \001(\t\022\r\n\005nodes\030\002 \001(\005\022\032\n" +
-      "\022hostGroupNodeCount\030\003 \001(\t\022\031\n\021definitionD" +
-      "etails\030\004 \001(\t\022\034\n\024temporaryStorageUsed\030\005 \001" +
-      "(\010\"\206\001\n\021CDPVersionDetails\022\021\n\tcrVersion\030\001 " +
-      "\001(\t\022\021\n\tcmVersion\030\002 \001(\t\022\023\n\013cdpdVersion\030\003 " +
-      "\001(\t\022\023\n\013saltVersion\030\004 \001(\t\022\024\n\014osPatchLevel" +
-      "\030\005 \001(\t\022\013\n\003all\030\006 \001(\t\"\263\001\n\021CDPClusterDetail" +
-      "s\022,\n\014clusterShape\030\001 \001(\0132\026.usage.CDPClust" +
-      "erShape\0220\n\016versionDetails\030\002 \001(\0132\030.usage." +
-      "CDPVersionDetails\022,\n\014imageDetails\030\003 \001(\0132" +
-      "\026.usage.CDPImageDetails\022\020\n\010userTags\030\004 \001(" +
-      "\t\"\223\001\n\020CDPStatusDetails\022\023\n\013stackStatus\030\001 " +
-      "\001(\t\022\033\n\023stackDetailedStatus\030\002 \001(\t\022\031\n\021stac" +
-      "kStatusReason\030\003 \001(\t\022\025\n\rclusterStatus\030\004 \001" +
-      "(\t\022\033\n\023clusterStatusReason\030\005 \001(\t\"1\n\023CDPDa" +
-      "talakeFeatures\022\032\n\003raz\030\001 \001(\0132\r.usage.CDPR" +
-      "az\"\030\n\006CDPRaz\022\016\n\006status\030\001 \001(\t\"\304\001\n\024CDPData" +
-      "lakeRequested\0224\n\020operationDetails\030\001 \001(\0132" +
-      "\032.usage.CDPOperationDetails\022\026\n\016environme" +
-      "ntCrn\030\002 \001(\t\0220\n\016clusterDetails\030\003 \001(\0132\030.us" +
-      "age.CDPClusterDetails\022,\n\010features\030\004 \001(\0132" +
-      "\032.usage.CDPDatalakeFeatures\"\334\002\n\030CDPDatal" +
-      "akeStatusChanged\0224\n\020operationDetails\030\001 \001" +
-      "(\0132\032.usage.CDPOperationDetails\0220\n\toldSta" +
-      "tus\030\002 \001(\0162\035.usage.CDPClusterStatus.Value" +
-      "\0220\n\tnewStatus\030\003 \001(\0162\035.usage.CDPClusterSt" +
-      "atus.Value\022.\n\rstatusDetails\030\004 \001(\0132\027.usag" +
-      "e.CDPStatusDetails\022\026\n\016environmentCrn\030\005 \001" +
-      "(\t\0220\n\016clusterDetails\030\006 \001(\0132\030.usage.CDPCl" +
-      "usterDetails\022,\n\010features\030\007 \001(\0132\032.usage.C" +
-      "DPDatalakeFeatures\"\225\001\n\023CDPDatahubRequest" +
-      "ed\0224\n\020operationDetails\030\001 \001(\0132\032.usage.CDP" +
-      "OperationDetails\022\026\n\016environmentCrn\030\002 \001(\t" +
-      "\0220\n\016clusterDetails\030\003 \001(\0132\030.usage.CDPClus" +
-      "terDetails\"\255\002\n\027CDPDatahubStatusChanged\0224" +
-      "\n\020operationDetails\030\001 \001(\0132\032.usage.CDPOper" +
-      "ationDetails\0220\n\toldStatus\030\002 \001(\0162\035.usage." +
-      "CDPClusterStatus.Value\0220\n\tnewStatus\030\003 \001(" +
-      "\0162\035.usage.CDPClusterStatus.Value\022.\n\rstat" +
-      "usDetails\030\004 \001(\0132\027.usage.CDPStatusDetails" +
-      "\022\026\n\016environmentCrn\030\005 \001(\t\0220\n\016clusterDetai" +
-      "ls\030\006 \001(\0132\030.usage.CDPClusterDetails\"y\n\016CD" +
-      "PSyncDetails\022\016\n\006status\030\001 \001(\t\022\026\n\016detailed" +
-      "Status\030\002 \001(\t\022\036\n\026clusterCreationStarted\030\003" +
-      " \001(\004\022\037\n\027clusterCreationFinished\030\004 \001(\004\"\325\001" +
-      "\n\017CDPDatalakeSync\0224\n\020operationDetails\030\001 " +
-      "\001(\0132\032.usage.CDPOperationDetails\022*\n\013syncD" +
-      "etails\030\002 \001(\0132\025.usage.CDPSyncDetails\0220\n\016c" +
-      "lusterDetails\030\003 \001(\0132\030.usage.CDPClusterDe" +
-      "tails\022.\n\rstatusDetails\030\004 \001(\0132\027.usage.CDP" +
-      "StatusDetails\"\324\001\n\016CDPDatahubSync\0224\n\020oper" +
+      "\030\006 \001(\t\"\271\003\n\030CDPCMLWorkspaceRequested\022\013\n\003c" +
+      "rn\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t\022\025\n\rworkspace" +
+      "Name\030\003 \001(\t\022D\n\017environmentType\030\004 \001(\0162+.us" +
+      "age.CDPEnvironmentsEnvironmentType.Value" +
+      "\022\026\n\016environmentCrn\030\005 \001(\t\022\023\n\013cdpdVersion\030" +
+      "\006 \001(\t\022\022\n\ncreatorCrn\030\007 \001(\t\022G\n\032cdpCMLAWSWo" +
+      "rkspaceMetadata\030\010 \001(\0132!.usage.CDPCMLAWSW" +
+      "orkspaceMetadataH\000\022K\n\034cdpCMLAzureWorkspa" +
+      "ceMetadata\030\t \001(\0132#.usage.CDPCMLAzureWork" +
+      "spaceMetadataH\000\022\030\n\020workspaceVersion\030\n \001(" +
+      "\t\022\021\n\trequestId\030\013 \001(\t\022\020\n\010userTags\030\014 \001(\tB\n" +
+      "\n\010metadata\"\217\002\n\034CDPCMLWorkspaceStatusChan" +
+      "ged\022\013\n\003crn\030\001 \001(\t\0225\n\toldStatus\030\002 \001(\0162\".us" +
+      "age.CDPCMLWorkspaceStatus.Value\0225\n\tnewSt" +
+      "atus\030\003 \001(\0162\".usage.CDPCMLWorkspaceStatus" +
+      ".Value\022\025\n\rfailureReason\030\004 \001(\t\022\023\n\013fromVer" +
+      "sion\030\005 \001(\t\022\021\n\ttoVersion\030\006 \001(\t\022\021\n\trequest" +
+      "Id\030\007 \001(\t\022\020\n\010liftieId\030\010 \001(\t\022\020\n\010userTags\030\t" +
+      " \001(\t\"M\n\030CDPRequestProcessingStep\"1\n\005Valu" +
+      "e\022\t\n\005UNSET\020\000\022\010\n\004INIT\020\001\022\t\n\005FINAL\020\002\022\010\n\004SYN" +
+      "C\020\003\"\236\002\n\024CDPEnvironmentStatus\"\205\002\n\005Value\022\t" +
+      "\n\005UNSET\020\000\022\022\n\016CREATE_STARTED\020\001\022\023\n\017CREATE_" +
+      "FINISHED\020\002\022\021\n\rCREATE_FAILED\020\003\022\022\n\016DELETE_" +
+      "STARTED\020\004\022\023\n\017DELETE_FINISHED\020\005\022\021\n\rDELETE" +
+      "_FAILED\020\006\022\023\n\017SUSPEND_STARTED\020\007\022\024\n\020SUSPEN" +
+      "D_FINISHED\020\010\022\022\n\016SUSPEND_FAILED\020\t\022\022\n\016RESU" +
+      "ME_STARTED\020\n\022\023\n\017RESUME_FINISHED\020\013\022\021\n\rRES" +
+      "UME_FAILED\020\014\"\226\007\n\020CDPClusterStatus\"\201\007\n\005Va" +
+      "lue\022\t\n\005UNSET\020\000\022\022\n\016CREATE_STARTED\020\001\022\023\n\017CR" +
+      "EATE_FINISHED\020\002\022\021\n\rCREATE_FAILED\020\003\022\022\n\016DE" +
+      "LETE_STARTED\020\004\022\023\n\017DELETE_FINISHED\020\005\022\021\n\rD" +
+      "ELETE_FAILED\020\006\022\023\n\017SUSPEND_STARTED\020\007\022\024\n\020S" +
+      "USPEND_FINISHED\020\010\022\022\n\016SUSPEND_FAILED\020\t\022\022\n" +
+      "\016RESUME_STARTED\020\n\022\023\n\017RESUME_FINISHED\020\013\022\021" +
+      "\n\rRESUME_FAILED\020\014\022\023\n\017UPGRADE_STARTED\020\r\022\024" +
+      "\n\020UPGRADE_FINISHED\020\016\022\022\n\016UPGRADE_FAILED\020\017" +
+      "\022\022\n\016REPAIR_STARTED\020\020\022\023\n\017REPAIR_FINISHED\020" +
+      "\021\022\021\n\rREPAIR_FAILED\020\022\022\023\n\017UPSCALE_STARTED\020" +
+      "\023\022\024\n\020UPSCALE_FINISHED\020\024\022\022\n\016UPSCALE_FAILE" +
+      "D\020\025\022\025\n\021DOWNSCALE_STARTED\020\026\022\026\n\022DOWNSCALE_" +
+      "FINISHED\020\027\022\024\n\020DOWNSCALE_FAILED\020\030\022\035\n\031RENE" +
+      "W_PUBLIC_CERT_STARTED\020\031\022\036\n\032RENEW_PUBLIC_" +
+      "CERT_FINISHED\020\032\022\034\n\030RENEW_PUBLIC_CERT_FAI" +
+      "LED\020\033\022\'\n#RENEW_CLUSTER_INTERNAL_CERT_STA" +
+      "RTED\020\034\022(\n$RENEW_CLUSTER_INTERNAL_CERT_FI" +
+      "NISHED\020\035\022&\n\"RENEW_CLUSTER_INTERNAL_CERT_" +
+      "FAILED\020\036\022\022\n\016BACKUP_STARTED\020\037\022\023\n\017BACKUP_F" +
+      "INISHED\020 \022\021\n\rBACKUP_FAILED\020!\022!\n\035DIAGNOST" +
+      "IC_COLLECTION_STARTED\020\"\022\"\n\036DIAGNOSTIC_CO" +
+      "LLECTION_FINISHED\020#\022 \n\034DIAGNOSTIC_COLLEC" +
+      "TION_FAILED\020$\"\343\002\n\023CDPOperationDetails\022\021\n" +
+      "\taccountId\030\001 \001(\t\022\023\n\013resourceCrn\030\002 \001(\t\022\024\n" +
+      "\014resourceName\030\003 \001(\t\022\024\n\014initiatorCrn\030\004 \001(" +
+      "\t\022\032\n\022applicationVersion\030\005 \001(\t\022G\n\030cdpRequ" +
+      "estProcessingStep\030\006 \001(\0162%.usage.CDPReque" +
+      "stProcessingStep.Value\022\016\n\006flowId\030\007 \001(\t\022\023" +
+      "\n\013flowChainId\030\010 \001(\t\022\021\n\tflowState\030\t \001(\t\022\025" +
+      "\n\rcorrelationId\030\n \001(\t\022D\n\017environmentType" +
+      "\030\013 \001(\0162+.usage.CDPEnvironmentsEnvironmen" +
+      "tType.Value\"\335\002\n\025CDPEnvironmentDetails\022D\n" +
+      "\017environmentType\030\001 \001(\0162+.usage.CDPEnviro" +
+      "nmentsEnvironmentType.Value\022\016\n\006region\030\002 " +
+      "\001(\t\022!\n\031numberOfAvailabilityZones\030\003 \001(\005\022\031" +
+      "\n\021availabilityZones\030\004 \001(\t\0220\n\016networkDeta" +
+      "ils\030\005 \001(\0132\030.usage.CDPNetworkDetails\0223\n\na" +
+      "wsDetails\030\006 \001(\0132\037.usage.CDPEnvironmentAw" +
+      "sDetails\0227\n\014azureDetails\030\007 \001(\0132!.usage.C" +
+      "DPEnvironmentAzureDetails\022\020\n\010userTags\030\010 " +
+      "\001(\t\"0\n\021CDPFreeIPADetails\022\r\n\005nodes\030\001 \001(\005\022" +
+      "\014\n\004spot\030\002 \001(\010\"\\\n\032CDPEnvironmentAzureDeta" +
+      "ils\022\033\n\023singleResourceGroup\030\001 \001(\010\022!\n\031reso" +
+      "urceEncryptionEnabled\030\002 \001(\010\"\032\n\030CDPEnviro" +
+      "nmentAwsDetails\"a\n%CDPEnvironmentTelemet" +
+      "ryFeatureDetails\022\031\n\021workloadAnalytics\030\001 " +
+      "\001(\t\022\035\n\025clusterLogsCollection\030\002 \001(\t\"J\n\017CD" +
+      "PProxyDetails\022\r\n\005proxy\030\001 \001(\010\022\020\n\010protocol" +
+      "\030\002 \001(\t\022\026\n\016authentication\030\003 \001(\t\"\211\002\n\021CDPNe" +
+      "tworkDetails\022\023\n\013networkType\030\001 \001(\t\022\024\n\014con" +
+      "nectivity\030\002 \001(\t\022\033\n\023numberPublicSubnets\030\003" +
+      " \001(\005\022\034\n\024numberPrivateSubnets\030\004 \001(\005\022\037\n\027se" +
+      "rviceEndpointCreation\030\005 \001(\t\022,\n\014proxyDeta" +
+      "ils\030\006 \001(\0132\026.usage.CDPProxyDetails\022#\n\033pub" +
+      "licEndpointAccessGateway\030\007 \001(\t\022\032\n\022securi" +
+      "tyAccessType\030\010 \001(\t\"\203\002\n\027CDPEnvironmentReq" +
+      "uested\0224\n\020operationDetails\030\001 \001(\0132\032.usage" +
+      ".CDPOperationDetails\0228\n\022environmentDetai" +
+      "ls\030\002 \001(\0132\034.usage.CDPEnvironmentDetails\022M" +
+      "\n\027telemetryFeatureDetails\030\003 \001(\0132,.usage." +
+      "CDPEnvironmentTelemetryFeatureDetails\022)\n" +
+      "\007freeIPA\030\004 \001(\0132\030.usage.CDPFreeIPADetails" +
+      "\"\212\003\n\033CDPEnvironmentStatusChanged\0224\n\020oper" +
       "ationDetails\030\001 \001(\0132\032.usage.CDPOperationD" +
-      "etails\022*\n\013syncDetails\030\002 \001(\0132\025.usage.CDPS" +
-      "yncDetails\0220\n\016clusterDetails\030\003 \001(\0132\030.usa" +
-      "ge.CDPClusterDetails\022.\n\rstatusDetails\030\004 " +
-      "\001(\0132\027.usage.CDPStatusDetails\"8\n\030CDPDFCat" +
-      "alogArtifactType\"\034\n\005Value\022\t\n\005UNSET\020\000\022\010\n\004" +
-      "FLOW\020\001\"\206\001\n\033CDPDFCatalogArtifactCreated\022\022" +
-      "\n\nartifactId\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t\022\013\n" +
-      "\003crn\030\003 \001(\t\0223\n\004type\030\004 \001(\0162%.usage.CDPDFCa" +
-      "talogArtifactType.Value\"\206\001\n\033CDPDFCatalog" +
-      "ArtifactDeleted\022\022\n\nartifactId\030\001 \001(\t\022\021\n\ta" +
-      "ccountId\030\002 \001(\t\022\013\n\003crn\030\003 \001(\t\0223\n\004type\030\004 \001(" +
-      "\0162%.usage.CDPDFCatalogArtifactType.Value" +
-      "\"k\n\"CDPDFCatalogArtifactVersionCreated\022\021" +
-      "\n\tversionId\030\001 \001(\t\022\022\n\nartifactId\030\002 \001(\t\022\013\n" +
-      "\003crn\030\003 \001(\t\022\021\n\taccountId\030\004 \001(\t\"k\n\"CDPDFCa" +
-      "talogArtifactVersionDeleted\022\021\n\tversionId" +
-      "\030\001 \001(\t\022\022\n\nartifactId\030\002 \001(\t\022\013\n\003crn\030\003 \001(\t\022" +
-      "\021\n\taccountId\030\004 \001(\t\"\262\002\n\022CDPDFServiceStatu" +
-      "s\"\233\002\n\005Value\022\t\n\005UNSET\020\000\022\024\n\020ENABLE_REQUEST" +
-      "ED\020\001\022\026\n\022ENABLE_IN_PROGRESS\020\002\022\024\n\020ENABLE_C" +
-      "OMPLETED\020\003\022\021\n\rENABLE_FAILED\020\004\022\025\n\021DISABLE" +
-      "_REQUESTED\020\005\022\027\n\023DISABLE_IN_PROGRESS\020\006\022\025\n" +
-      "\021DISABLE_COMPLETED\020\007\022\022\n\016DISABLE_FAILED\020\010" +
-      "\022\024\n\020UPDATE_REQUESTED\020\t\022\026\n\022UPDATE_IN_PROG" +
-      "RESS\020\n\022\021\n\rUPDATE_FAILED\020\013\022\024\n\020UPDATE_COMP" +
-      "LETED\020\014\"f\n\025CDPDFOperationDetails\022\n\n\002id\030\001" +
-      " \001(\t\022\013\n\003crn\030\002 \001(\t\022\021\n\taccountId\030\003 \001(\t\022\022\n\n" +
-      "workflowId\030\004 \001(\t\022\r\n\005runId\030\005 \001(\t\"\365\002\n\025CDPD" +
-      "FServiceRequested\0226\n\020operationDetails\030\001 " +
-      "\001(\0132\034.usage.CDPDFOperationDetails\022\026\n\016env" +
-      "ironmentCrn\030\002 \001(\t\022D\n\017environmentType\030\003 \001" +
-      "(\0162+.usage.CDPEnvironmentsEnvironmentTyp" +
-      "e.Value\022\024\n\014instanceType\030\004 \001(\t\022\020\n\010minNode" +
-      "s\030\005 \001(\005\022\020\n\010maxNodes\030\006 \001(\005\022\030\n\020k8sServerVe" +
-      "rsion\030\007 \001(\t\022\017\n\007version\030\010 \001(\t\022\026\n\016publicEn" +
-      "dpoint\030\t \001(\010\022\030\n\020accessRestricted\030\n \001(\010\022/" +
-      "\n\006status\030\013 \001(\0162\037.usage.CDPDFServiceStatu" +
-      "s.Value\"\322\001\n\031CDPDFServiceStatusChanged\0226\n" +
-      "\020operationDetails\030\001 \001(\0132\034.usage.CDPDFOpe" +
-      "rationDetails\0222\n\toldStatus\030\002 \001(\0162\037.usage" +
-      ".CDPDFServiceStatus.Value\0222\n\tnewStatus\030\003" +
-      " \001(\0162\037.usage.CDPDFServiceStatus.Value\022\025\n" +
-      "\rfailureReason\030\004 \001(\t\"t\n\025CDPUDXBundleInit" +
-      "iated\0221\n\rbundleDetails\030\001 \001(\0132\032.usage.CDP" +
-      "UDXBundleDetails\022\024\n\014initiatorCrn\030\002 \001(\t\022\022" +
-      "\n\ncaseNumber\030\003 \001(\t\"g\n\024CDPUDXBundleReceiv" +
-      "ed\0221\n\rbundleDetails\030\001 \001(\0132\032.usage.CDPUDX" +
-      "BundleDetails\022\014\n\004host\030\002 \001(\t\022\016\n\006status\030\003 " +
-      "\001(\t\"q\n\023CDPUDXBundleDetails\022\021\n\taccountId\030" +
-      "\001 \001(\t\022\014\n\004uuid\030\002 \001(\t\022\026\n\016environmentCrn\030\003 " +
-      "\001(\t\022\023\n\013resourceCrn\030\004 \001(\t\022\014\n\004type\030\005 \001(\tBV" +
-      "\n-com.cloudera.thunderhead.service.commo" +
-      "n.usageB\nUsageProtoZ\031com/cloudera/cdp/pr" +
-      "otobufb\006proto3"
+      "etails\0224\n\toldStatus\030\002 \001(\0162!.usage.CDPEnv" +
+      "ironmentStatus.Value\0224\n\tnewStatus\030\003 \001(\0162" +
+      "!.usage.CDPEnvironmentStatus.Value\022\025\n\rfa" +
+      "ilureReason\030\004 \001(\t\0228\n\022environmentDetails\030" +
+      "\005 \001(\0132\034.usage.CDPEnvironmentDetails\022M\n\027t" +
+      "elemetryFeatureDetails\030\006 \001(\0132,.usage.CDP" +
+      "EnvironmentTelemetryFeatureDetails\022)\n\007fr" +
+      "eeIPA\030\007 \001(\0132\030.usage.CDPFreeIPADetails\"8\n" +
+      "\017CDPImageDetails\022\017\n\007imageId\030\001 \001(\t\022\024\n\014ima" +
+      "geCatalog\030\002 \001(\t\"\222\001\n\017CDPClusterShape\022\033\n\023c" +
+      "lusterTemplateName\030\001 \001(\t\022\r\n\005nodes\030\002 \001(\005\022" +
+      "\032\n\022hostGroupNodeCount\030\003 \001(\t\022\031\n\021definitio" +
+      "nDetails\030\004 \001(\t\022\034\n\024temporaryStorageUsed\030\005" +
+      " \001(\010\"\206\001\n\021CDPVersionDetails\022\021\n\tcrVersion\030" +
+      "\001 \001(\t\022\021\n\tcmVersion\030\002 \001(\t\022\023\n\013cdpdVersion\030" +
+      "\003 \001(\t\022\023\n\013saltVersion\030\004 \001(\t\022\024\n\014osPatchLev" +
+      "el\030\005 \001(\t\022\013\n\003all\030\006 \001(\t\"\263\001\n\021CDPClusterDeta" +
+      "ils\022,\n\014clusterShape\030\001 \001(\0132\026.usage.CDPClu" +
+      "sterShape\0220\n\016versionDetails\030\002 \001(\0132\030.usag" +
+      "e.CDPVersionDetails\022,\n\014imageDetails\030\003 \001(" +
+      "\0132\026.usage.CDPImageDetails\022\020\n\010userTags\030\004 " +
+      "\001(\t\"\223\001\n\020CDPStatusDetails\022\023\n\013stackStatus\030" +
+      "\001 \001(\t\022\033\n\023stackDetailedStatus\030\002 \001(\t\022\031\n\021st" +
+      "ackStatusReason\030\003 \001(\t\022\025\n\rclusterStatus\030\004" +
+      " \001(\t\022\033\n\023clusterStatusReason\030\005 \001(\t\"1\n\023CDP" +
+      "DatalakeFeatures\022\032\n\003raz\030\001 \001(\0132\r.usage.CD" +
+      "PRaz\"\030\n\006CDPRaz\022\016\n\006status\030\001 \001(\t\"\304\001\n\024CDPDa" +
+      "talakeRequested\0224\n\020operationDetails\030\001 \001(" +
+      "\0132\032.usage.CDPOperationDetails\022\026\n\016environ" +
+      "mentCrn\030\002 \001(\t\0220\n\016clusterDetails\030\003 \001(\0132\030." +
+      "usage.CDPClusterDetails\022,\n\010features\030\004 \001(" +
+      "\0132\032.usage.CDPDatalakeFeatures\"\334\002\n\030CDPDat" +
+      "alakeStatusChanged\0224\n\020operationDetails\030\001" +
+      " \001(\0132\032.usage.CDPOperationDetails\0220\n\toldS" +
+      "tatus\030\002 \001(\0162\035.usage.CDPClusterStatus.Val" +
+      "ue\0220\n\tnewStatus\030\003 \001(\0162\035.usage.CDPCluster" +
+      "Status.Value\022.\n\rstatusDetails\030\004 \001(\0132\027.us" +
+      "age.CDPStatusDetails\022\026\n\016environmentCrn\030\005" +
+      " \001(\t\0220\n\016clusterDetails\030\006 \001(\0132\030.usage.CDP" +
+      "ClusterDetails\022,\n\010features\030\007 \001(\0132\032.usage" +
+      ".CDPDatalakeFeatures\"\225\001\n\023CDPDatahubReque" +
+      "sted\0224\n\020operationDetails\030\001 \001(\0132\032.usage.C" +
+      "DPOperationDetails\022\026\n\016environmentCrn\030\002 \001" +
+      "(\t\0220\n\016clusterDetails\030\003 \001(\0132\030.usage.CDPCl" +
+      "usterDetails\"\255\002\n\027CDPDatahubStatusChanged" +
+      "\0224\n\020operationDetails\030\001 \001(\0132\032.usage.CDPOp" +
+      "erationDetails\0220\n\toldStatus\030\002 \001(\0162\035.usag" +
+      "e.CDPClusterStatus.Value\0220\n\tnewStatus\030\003 " +
+      "\001(\0162\035.usage.CDPClusterStatus.Value\022.\n\rst" +
+      "atusDetails\030\004 \001(\0132\027.usage.CDPStatusDetai" +
+      "ls\022\026\n\016environmentCrn\030\005 \001(\t\0220\n\016clusterDet" +
+      "ails\030\006 \001(\0132\030.usage.CDPClusterDetails\"y\n\016" +
+      "CDPSyncDetails\022\016\n\006status\030\001 \001(\t\022\026\n\016detail" +
+      "edStatus\030\002 \001(\t\022\036\n\026clusterCreationStarted" +
+      "\030\003 \001(\004\022\037\n\027clusterCreationFinished\030\004 \001(\004\"" +
+      "\325\001\n\017CDPDatalakeSync\0224\n\020operationDetails\030" +
+      "\001 \001(\0132\032.usage.CDPOperationDetails\022*\n\013syn" +
+      "cDetails\030\002 \001(\0132\025.usage.CDPSyncDetails\0220\n" +
+      "\016clusterDetails\030\003 \001(\0132\030.usage.CDPCluster" +
+      "Details\022.\n\rstatusDetails\030\004 \001(\0132\027.usage.C" +
+      "DPStatusDetails\"\324\001\n\016CDPDatahubSync\0224\n\020op" +
+      "erationDetails\030\001 \001(\0132\032.usage.CDPOperatio" +
+      "nDetails\022*\n\013syncDetails\030\002 \001(\0132\025.usage.CD" +
+      "PSyncDetails\0220\n\016clusterDetails\030\003 \001(\0132\030.u" +
+      "sage.CDPClusterDetails\022.\n\rstatusDetails\030" +
+      "\004 \001(\0132\027.usage.CDPStatusDetails\"8\n\030CDPDFC" +
+      "atalogArtifactType\"\034\n\005Value\022\t\n\005UNSET\020\000\022\010" +
+      "\n\004FLOW\020\001\"\206\001\n\033CDPDFCatalogArtifactCreated" +
+      "\022\022\n\nartifactId\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t\022" +
+      "\013\n\003crn\030\003 \001(\t\0223\n\004type\030\004 \001(\0162%.usage.CDPDF" +
+      "CatalogArtifactType.Value\"\206\001\n\033CDPDFCatal" +
+      "ogArtifactDeleted\022\022\n\nartifactId\030\001 \001(\t\022\021\n" +
+      "\taccountId\030\002 \001(\t\022\013\n\003crn\030\003 \001(\t\0223\n\004type\030\004 " +
+      "\001(\0162%.usage.CDPDFCatalogArtifactType.Val" +
+      "ue\"k\n\"CDPDFCatalogArtifactVersionCreated" +
+      "\022\021\n\tversionId\030\001 \001(\t\022\022\n\nartifactId\030\002 \001(\t\022" +
+      "\013\n\003crn\030\003 \001(\t\022\021\n\taccountId\030\004 \001(\t\"k\n\"CDPDF" +
+      "CatalogArtifactVersionDeleted\022\021\n\tversion" +
+      "Id\030\001 \001(\t\022\022\n\nartifactId\030\002 \001(\t\022\013\n\003crn\030\003 \001(" +
+      "\t\022\021\n\taccountId\030\004 \001(\t\"\262\002\n\022CDPDFServiceSta" +
+      "tus\"\233\002\n\005Value\022\t\n\005UNSET\020\000\022\024\n\020ENABLE_REQUE" +
+      "STED\020\001\022\026\n\022ENABLE_IN_PROGRESS\020\002\022\024\n\020ENABLE" +
+      "_COMPLETED\020\003\022\021\n\rENABLE_FAILED\020\004\022\025\n\021DISAB" +
+      "LE_REQUESTED\020\005\022\027\n\023DISABLE_IN_PROGRESS\020\006\022" +
+      "\025\n\021DISABLE_COMPLETED\020\007\022\022\n\016DISABLE_FAILED" +
+      "\020\010\022\024\n\020UPDATE_REQUESTED\020\t\022\026\n\022UPDATE_IN_PR" +
+      "OGRESS\020\n\022\021\n\rUPDATE_FAILED\020\013\022\024\n\020UPDATE_CO" +
+      "MPLETED\020\014\"f\n\025CDPDFOperationDetails\022\n\n\002id" +
+      "\030\001 \001(\t\022\013\n\003crn\030\002 \001(\t\022\021\n\taccountId\030\003 \001(\t\022\022" +
+      "\n\nworkflowId\030\004 \001(\t\022\r\n\005runId\030\005 \001(\t\"\365\002\n\025CD" +
+      "PDFServiceRequested\0226\n\020operationDetails\030" +
+      "\001 \001(\0132\034.usage.CDPDFOperationDetails\022\026\n\016e" +
+      "nvironmentCrn\030\002 \001(\t\022D\n\017environmentType\030\003" +
+      " \001(\0162+.usage.CDPEnvironmentsEnvironmentT" +
+      "ype.Value\022\024\n\014instanceType\030\004 \001(\t\022\020\n\010minNo" +
+      "des\030\005 \001(\005\022\020\n\010maxNodes\030\006 \001(\005\022\030\n\020k8sServer" +
+      "Version\030\007 \001(\t\022\017\n\007version\030\010 \001(\t\022\026\n\016public" +
+      "Endpoint\030\t \001(\010\022\030\n\020accessRestricted\030\n \001(\010" +
+      "\022/\n\006status\030\013 \001(\0162\037.usage.CDPDFServiceSta" +
+      "tus.Value\"\322\001\n\031CDPDFServiceStatusChanged\022" +
+      "6\n\020operationDetails\030\001 \001(\0132\034.usage.CDPDFO" +
+      "perationDetails\0222\n\toldStatus\030\002 \001(\0162\037.usa" +
+      "ge.CDPDFServiceStatus.Value\0222\n\tnewStatus" +
+      "\030\003 \001(\0162\037.usage.CDPDFServiceStatus.Value\022" +
+      "\025\n\rfailureReason\030\004 \001(\t\"t\n\025CDPUDXBundleIn" +
+      "itiated\0221\n\rbundleDetails\030\001 \001(\0132\032.usage.C" +
+      "DPUDXBundleDetails\022\024\n\014initiatorCrn\030\002 \001(\t" +
+      "\022\022\n\ncaseNumber\030\003 \001(\t\"g\n\024CDPUDXBundleRece" +
+      "ived\0221\n\rbundleDetails\030\001 \001(\0132\032.usage.CDPU" +
+      "DXBundleDetails\022\014\n\004host\030\002 \001(\t\022\016\n\006status\030" +
+      "\003 \001(\t\"q\n\023CDPUDXBundleDetails\022\021\n\taccountI" +
+      "d\030\001 \001(\t\022\014\n\004uuid\030\002 \001(\t\022\026\n\016environmentCrn\030" +
+      "\003 \001(\t\022\023\n\013resourceCrn\030\004 \001(\t\022\014\n\004type\030\005 \001(\t" +
+      "\"I\n\023AutoscalePolicyType\"2\n\005Value\022\t\n\005UNSE" +
+      "T\020\000\022\016\n\nTIME_BASED\020\001\022\016\n\nLOAD_BASED\020\002\"\275\001\n\034" +
+      "CDPAutoscalePolicyDefinition\022=\n\023autoscal" +
+      "ePolicyType\030\001 \001(\0162 .usage.AutoscalePolic" +
+      "yType.Value\022!\n\031autoscalePolicyParameters" +
+      "\030\002 \001(\t\022\034\n\024autoscalingHostGroup\030\003 \001(\t\022\035\n\025" +
+      "autoscalingPolicyName\030\004 \001(\t\"\201\001\n\032Autoscal" +
+      "eScalingStatusType\"c\n\005Value\022\t\n\005UNSET\020\000\022\025" +
+      "\n\021SCALING_REQUESTED\020\001\022\032\n\026SCALING_REQUEST" +
+      "_FAILED\020\002\022\034\n\030AUTOSCALE_TRIGGER_FAILED\020\003\"" +
+      "\306\002\n\032CDPAutoscaleTriggerDetails\022\021\n\taccoun" +
+      "tId\030\001 \001(\t\022\023\n\013clusterName\030\002 \001(\t\022\022\n\ncluste" +
+      "rCrn\030\003 \001(\t\022H\n\033autoscalingPolicyDefinitio" +
+      "n\030\004 \001(\0132#.usage.CDPAutoscalePolicyDefini" +
+      "tion\022\"\n\032originalHostGroupNodeCount\030\005 \001(\005" +
+      "\022!\n\031desiredHostGroupNodeCount\030\006 \001(\005\022\031\n\021a" +
+      "utoscalingAction\030\007 \001(\t\022@\n\017autoscaleStatu" +
+      "s\030\010 \001(\0162\'.usage.AutoscaleScalingStatusTy" +
+      "pe.Value\"b\n\034CDPDatahubAutoscaleTriggered" +
+      "\022B\n\027autoscaleTriggerDetails\030\001 \001(\0132!.usag" +
+      "e.CDPAutoscaleTriggerDetails\"\231\001\n CDPData" +
+      "hubAutoscaleConfigChanged\022\017\n\007userCrn\030\001 \001" +
+      "(\t\022\032\n\022autoscalingEnabled\030\002 \001(\010\022H\n\033autosc" +
+      "alingPolicyDefinition\030\003 \003(\0132#.usage.CDPA" +
+      "utoscalePolicyDefinitionBV\n-com.cloudera" +
+      ".thunderhead.service.common.usageB\nUsage" +
+      "ProtoZ\031com/cloudera/cdp/protobufb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -82581,7 +88882,7 @@ public final class UsageProto {
     internal_static_usage_Event_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_Event_descriptor,
-        new java.lang.String[] { "Id", "Timestamp", "Version", "AltusIamAccountCreated", "AltusIamUserCreated", "AltusIamUserUpdated", "AltusIamUserDeleted", "AltusIamUserInteractiveLogin", "AltusIamUserInteractiveLoginFailure", "AltusIamMachineUserCreated", "AltusIamMachineUserDeleted", "AltusIamAccessKeyCreated", "AltusIamAccessKeyDeleted", "AltusIamAccessTokenCreated", "AltusIamAccessTokenDeleted", "CdpDatalakeClusterRequested", "CdpDatalakeClusterStatusChanged", "CdpDatahubClusterRequested", "CdpDatahubClusterStatusChanged", "CdpCMLWorkspaceRequested", "CdpCMLWorkspaceStatusChanged", "CdpEnvironmentRequested", "CdpEnvironmentStatusChanged", "CdpDatalakeRequested", "CdpDatalakeStatusChanged", "CdpDatahubRequested", "CdpDatahubStatusChanged", "CdpDatalakeSync", "CdpDatahubSync", "CdpDFCatalogArtifactCreated", "CdpDFCatalogArtifactDeleted", "CdpDFCatalogArtifactVersionCreated", "CdpDFCatalogArtifactVersionDeleted", "CdpDFServiceRequested", "CdpDFServiceStatusChanged", "CdpUDXBundleInitiated", "CdpUDXBundleReceived", "Details", });
+        new java.lang.String[] { "Id", "Timestamp", "Version", "AltusIamAccountCreated", "AltusIamUserCreated", "AltusIamUserUpdated", "AltusIamUserDeleted", "AltusIamUserInteractiveLogin", "AltusIamUserInteractiveLoginFailure", "AltusIamMachineUserCreated", "AltusIamMachineUserDeleted", "AltusIamAccessKeyCreated", "AltusIamAccessKeyDeleted", "AltusIamAccessTokenCreated", "AltusIamAccessTokenDeleted", "CdpDatalakeClusterRequested", "CdpDatalakeClusterStatusChanged", "CdpDatahubClusterRequested", "CdpDatahubClusterStatusChanged", "CdpCMLWorkspaceRequested", "CdpCMLWorkspaceStatusChanged", "CdpEnvironmentRequested", "CdpEnvironmentStatusChanged", "CdpDatalakeRequested", "CdpDatalakeStatusChanged", "CdpDatahubRequested", "CdpDatahubStatusChanged", "CdpDatalakeSync", "CdpDatahubSync", "CdpDatahubAutoscaleTriggered", "CdpDatahubAutoscaleConfigChanged", "CdpDFCatalogArtifactCreated", "CdpDFCatalogArtifactDeleted", "CdpDFCatalogArtifactVersionCreated", "CdpDFCatalogArtifactVersionDeleted", "CdpDFServiceRequested", "CdpDFServiceStatusChanged", "CdpUDXBundleInitiated", "CdpUDXBundleReceived", "Details", });
     internal_static_usage_AltusIamAccountType_descriptor =
       getDescriptor().getMessageTypes().get(1);
     internal_static_usage_AltusIamAccountType_fieldAccessorTable = new
@@ -82960,6 +89261,42 @@ public final class UsageProto {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPUDXBundleDetails_descriptor,
         new java.lang.String[] { "AccountId", "Uuid", "EnvironmentCrn", "ResourceCrn", "Type", });
+    internal_static_usage_AutoscalePolicyType_descriptor =
+      getDescriptor().getMessageTypes().get(64);
+    internal_static_usage_AutoscalePolicyType_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_usage_AutoscalePolicyType_descriptor,
+        new java.lang.String[] { });
+    internal_static_usage_CDPAutoscalePolicyDefinition_descriptor =
+      getDescriptor().getMessageTypes().get(65);
+    internal_static_usage_CDPAutoscalePolicyDefinition_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_usage_CDPAutoscalePolicyDefinition_descriptor,
+        new java.lang.String[] { "AutoscalePolicyType", "AutoscalePolicyParameters", "AutoscalingHostGroup", "AutoscalingPolicyName", });
+    internal_static_usage_AutoscaleScalingStatusType_descriptor =
+      getDescriptor().getMessageTypes().get(66);
+    internal_static_usage_AutoscaleScalingStatusType_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_usage_AutoscaleScalingStatusType_descriptor,
+        new java.lang.String[] { });
+    internal_static_usage_CDPAutoscaleTriggerDetails_descriptor =
+      getDescriptor().getMessageTypes().get(67);
+    internal_static_usage_CDPAutoscaleTriggerDetails_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_usage_CDPAutoscaleTriggerDetails_descriptor,
+        new java.lang.String[] { "AccountId", "ClusterName", "ClusterCrn", "AutoscalingPolicyDefinition", "OriginalHostGroupNodeCount", "DesiredHostGroupNodeCount", "AutoscalingAction", "AutoscaleStatus", });
+    internal_static_usage_CDPDatahubAutoscaleTriggered_descriptor =
+      getDescriptor().getMessageTypes().get(68);
+    internal_static_usage_CDPDatahubAutoscaleTriggered_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_usage_CDPDatahubAutoscaleTriggered_descriptor,
+        new java.lang.String[] { "AutoscaleTriggerDetails", });
+    internal_static_usage_CDPDatahubAutoscaleConfigChanged_descriptor =
+      getDescriptor().getMessageTypes().get(69);
+    internal_static_usage_CDPDatahubAutoscaleConfigChanged_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_usage_CDPDatahubAutoscaleConfigChanged_descriptor,
+        new java.lang.String[] { "UserCrn", "AutoscalingEnabled", "AutoscalingPolicyDefinition", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)
