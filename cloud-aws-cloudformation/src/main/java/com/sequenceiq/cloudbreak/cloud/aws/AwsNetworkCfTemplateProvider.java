@@ -55,7 +55,7 @@ public class AwsNetworkCfTemplateProvider {
     private FreeMarkerTemplateUtils freeMarkerTemplateUtils;
 
     @Inject
-    private LegacyAwsClient awsClient;
+    private AwsCloudFormationClient awsClient;
 
     public String provide(NetworkCreationRequest networkCreationRequest, List<SubnetRequest> subnets) {
 

@@ -67,7 +67,7 @@ public class CloudFormationStackUtil {
     private int maxResourceNameLength;
 
     @Inject
-    private LegacyAwsClient awsClient;
+    private AwsCloudFormationClient awsClient;
 
     @Inject
     private LoadBalancerTypeConverter loadBalancerTypeConverter;

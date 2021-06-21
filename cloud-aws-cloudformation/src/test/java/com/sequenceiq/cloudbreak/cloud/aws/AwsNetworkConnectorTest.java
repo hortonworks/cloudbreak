@@ -122,7 +122,7 @@ public class AwsNetworkConnectorTest {
     private CloudFormationStackUtil cfStackUtil;
 
     @Mock
-    private LegacyAwsClient awsClient;
+    private AwsCloudFormationClient awsClient;
 
     @Mock
     private AmazonCloudFormationWaiters cfWaiters;

@@ -92,7 +92,7 @@ public class AwsValidatorsTest {
     private Retry retry;
 
     @SpyBean
-    private LegacyAwsClient awsClient;
+    private AwsCloudFormationClient awsClient;
 
     @MockBean
     private Tracer tracer;

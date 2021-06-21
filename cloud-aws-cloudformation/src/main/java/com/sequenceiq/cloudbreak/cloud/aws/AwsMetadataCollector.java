@@ -54,7 +54,7 @@ public class AwsMetadataCollector implements MetadataCollector {
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsMetadataCollector.class);
 
     @Inject
-    private LegacyAwsClient awsClient;
+    private AwsCloudFormationClient awsClient;
 
     @Inject
     private CloudFormationStackUtil cloudFormationStackUtil;

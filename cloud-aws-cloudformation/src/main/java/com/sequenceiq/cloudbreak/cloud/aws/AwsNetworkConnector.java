@@ -79,7 +79,7 @@ public class AwsNetworkConnector implements DefaultNetworkConnector {
     private CloudFormationStackUtil cfStackUtil;
 
     @Inject
-    private LegacyAwsClient awsClient;
+    private AwsCloudFormationClient awsClient;
 
     @Inject
     private AwsSubnetRequestProvider awsSubnetRequestProvider;

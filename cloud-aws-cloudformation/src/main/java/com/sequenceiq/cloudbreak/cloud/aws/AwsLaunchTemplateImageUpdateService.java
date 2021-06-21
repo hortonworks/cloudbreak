@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 public class AwsLaunchTemplateImageUpdateService {
 
     @Inject
-    private LegacyAwsClient awsClient;
+    private AwsCloudFormationClient awsClient;
 
     @Inject
     private AwsStackRequestHelper awsStackRequestHelper;

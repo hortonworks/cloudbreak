@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.service.Retry;
 import io.opentracing.Tracer;
 
 @Component
-public class LegacyAwsClient extends AwsClient {
+public class AwsCloudFormationClient extends AwsClient {
 
     @Inject
     private Retry retry;

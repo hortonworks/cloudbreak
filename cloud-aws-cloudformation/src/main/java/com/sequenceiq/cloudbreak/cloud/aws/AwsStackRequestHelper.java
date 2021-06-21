@@ -54,7 +54,7 @@ public class AwsStackRequestHelper {
     private AwsTaggingService awsTaggingService;
 
     @Inject
-    private LegacyAwsClient awsClient;
+    private AwsCloudFormationClient awsClient;
 
     public CreateStackRequest createCreateStackRequest(AuthenticatedContext ac, CloudStack stack, String cFStackName, String subnet, String cfTemplate) {
         return new CreateStackRequest()
