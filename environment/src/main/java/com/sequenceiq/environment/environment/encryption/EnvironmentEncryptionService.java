@@ -2,11 +2,11 @@ package com.sequenceiq.environment.environment.encryption;
 
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
-import static com.sequenceiq.environment.parameter.dto.ResourceGroupUsagePattern.USE_MULTIPLE;
 
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.cdp.shaded.com.google.common.annotations.VisibleForTesting;
@@ -27,9 +27,9 @@ import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCrede
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.service.EnvironmentTagProvider;
 import com.sequenceiq.environment.parameter.dto.AzureParametersDto;
+import com.sequenceiq.environment.parameter.dto.AzureResourceEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureResourceGroupDto;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
-import com.sequenceiq.environment.parameter.dto.ResourceGroupUsagePattern;
 import com.sequenceiq.environment.resourcepersister.CloudResourceRetrieverService;
 
 @Component
@@ -72,17 +72,25 @@ public class EnvironmentEncryptionService {
 
     @VisibleForTesting
     DiskEncryptionSetCreationRequest createEncryptionResourcesCreationRequest(EnvironmentDto environment) {
+        String encryptionKeyResourceGroupName = Optional.ofNullable(environment.getParameters())
+                .map(ParametersDto::getAzureParametersDto)
+                .map(AzureParametersDto::getAzureResourceEncryptionParametersDto)
+                .map(AzureResourceEncryptionParametersDto::getEncryptionKeyResourceGroupName).orElse(null);
+        String diskEncryptionSetResourceGroupName = Optional.ofNullable(environment.getParameters())
+                .map(ParametersDto::getAzureParametersDto)
+                .map(AzureParametersDto::getAzureResourceGroupDto)
+                .map(AzureResourceGroupDto::getName).orElse(null);
         DiskEncryptionSetCreationRequest.Builder builder = new DiskEncryptionSetCreationRequest.Builder()
                 .withId(Crn.safeFromString(environment.getResourceCrn()).getResource())
                 .withCloudCredential(credentialToCloudCredentialConverter.convert(environment.getCredential()))
                 .withTags(environmentTagProvider.getTags(environment, environment.getResourceCrn()))
                 .withCloudContext(getCloudContext(environment))
-                .withEncryptionKeyUrl(environment.getParameters().getAzureParametersDto().getAzureResourceEncryptionParametersDto().getEncryptionKeyUrl());
-        if (isSingleResourceGroup(environment)) {
-            builder.withSingleResourceGroup(true);
-            builder.withResourceGroupName(environment.getParameters().getAzureParametersDto().getAzureResourceGroupDto().getName());
+                .withEncryptionKeyUrl(environment.getParameters().getAzureParametersDto().getAzureResourceEncryptionParametersDto().getEncryptionKeyUrl())
+                .withDiskEncryptionSetResourceGroupName(diskEncryptionSetResourceGroupName);
+        if (StringUtils.isNotEmpty(encryptionKeyResourceGroupName)) {
+            builder.withEncryptionKeyResourceGroupName(encryptionKeyResourceGroupName);
         } else {
-            builder.withSingleResourceGroup(false);
+            builder.withEncryptionKeyResourceGroupName(diskEncryptionSetResourceGroupName);
         }
         return builder.build();
     }
@@ -94,15 +102,6 @@ public class EnvironmentEncryptionService {
                 .withCloudContext(getCloudContext(environment))
                 .withCloudResources(getResourcesForDeletion(environment))
                 .build();
-    }
-
-    private boolean isSingleResourceGroup(EnvironmentDto environmentDto) {
-        ResourceGroupUsagePattern resourceGroupUsagePattern = Optional.ofNullable(environmentDto.getParameters())
-                .map(ParametersDto::azureParametersDto)
-                .map(AzureParametersDto::getAzureResourceGroupDto)
-                .map(AzureResourceGroupDto::getResourceGroupUsagePattern)
-                .orElse(USE_MULTIPLE);
-        return resourceGroupUsagePattern.isSingleResourceGroup();
     }
 
     private CloudContext getCloudContext(EnvironmentDto environment) {
