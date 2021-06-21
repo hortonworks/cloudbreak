@@ -78,8 +78,6 @@ public class AzureEncryptionResources implements EncryptionResources {
     public CreatedDiskEncryptionSet createDiskEncryptionSet(DiskEncryptionSetCreationRequest diskEncryptionSetCreationRequest) {
         try {
             String vaultName;
-            String vaultResourceGroupName;
-            String desResourceGroupName;
             AuthenticatedContext authenticatedContext = azureClientService.createAuthenticatedContext(diskEncryptionSetCreationRequest.getCloudContext(),
                     diskEncryptionSetCreationRequest.getCloudCredential());
             AzureClient azureClient = authenticatedContext.getParameter(AzureClient.class);
@@ -91,13 +89,8 @@ public class AzureEncryptionResources implements EncryptionResources {
                 throw new IllegalArgumentException("vaultName cannot be fetched from encryptionKeyUrl. encryptionKeyUrl should be of format - " +
                         "'https://<vaultName>.vault.azure.net/keys/<keyName>/<keyVersion>'");
             }
-            if (diskEncryptionSetCreationRequest.isSingleResourceGroup()) {
-                desResourceGroupName = diskEncryptionSetCreationRequest.getResourceGroupName();
-                vaultResourceGroupName = desResourceGroupName;
-            } else {
-                throw new IllegalArgumentException("Customer Managed Key Encryption for managed Azure disks is supported only if the CDP resources " +
-                        "are in the same resource group as the vault.");
-            }
+            String vaultResourceGroupName = diskEncryptionSetCreationRequest.getEncryptionKeyResourceGroupName();
+            String desResourceGroupName = diskEncryptionSetCreationRequest.getDiskEncryptionSetResourceGroupName();
             String sourceVaultId = String.format("/subscriptions/%s/resourceGroups/%s/providers/Microsoft.KeyVault/vaults/%s",
                     azureClient.getCurrentSubscription().subscriptionId(), vaultResourceGroupName, vaultName);
 
@@ -228,7 +221,8 @@ public class AzureEncryptionResources implements EncryptionResources {
                     azureClient.deleteDiskEncryptionSet(desResourceGroupName, desName);
                     LOGGER.info("Deleted {}.", description);
                     removeKeyVaultAccessPolicyFromDiskEncryptionSetServicePrincipal(azureClient, desResourceGroupName, desName,
-                            existingDiskEncryptionSet.activeKey().keyUrl(), existingDiskEncryptionSet.identity().principalId());
+                            existingDiskEncryptionSet.activeKey().keyUrl(), existingDiskEncryptionSet.identity().principalId(),
+                            existingDiskEncryptionSet.activeKey().sourceVault().id());
                 } else {
                     LOGGER.info("No {} found to delete.", description);
                 }
@@ -240,21 +234,28 @@ public class AzureEncryptionResources implements EncryptionResources {
     }
 
     private void removeKeyVaultAccessPolicyFromDiskEncryptionSetServicePrincipal(AzureClient azureClient, String desResourceGroupName, String desName,
-            String encryptionKeyUrl, String desPrincipalObjectId) {
-        Matcher matcher = ENCRYPTION_KEY_URL_VAULT_NAME.matcher(encryptionKeyUrl);
+            String encryptionKeyUrl, String desPrincipalObjectId, String sourceVaultId) {
         String vaultName;
+        String vaultResourceGroupName;
+        Matcher matcher = ENCRYPTION_KEY_URL_VAULT_NAME.matcher(encryptionKeyUrl);
         if (matcher.matches()) {
             vaultName = matcher.group(1);
         } else {
-            throw new IllegalArgumentException(String.format("Failed to deduce vault name from given encryption key url \"%s\"", encryptionKeyUrl));
+            throw new IllegalArgumentException(String.format("Failed to deduce vault name from given encryption key URL \"%s\"", encryptionKeyUrl));
+        }
+        matcher = RESOURCE_GROUP_NAME.matcher(sourceVaultId);
+        if (matcher.matches()) {
+            vaultResourceGroupName = matcher.group(1);
+        } else {
+            throw new IllegalArgumentException(String.format("Failed to deduce vault resource group name from source vault ID \"%s\"", sourceVaultId));
         }
         String description = String.format("access to Key Vault \"%s\" in Resource Group \"%s\" for Service Principal having object ID \"%s\" " +
-                        "associated with Disk Encryption Set \"%s\" in Resource Group \"%s\"", vaultName, desResourceGroupName, desPrincipalObjectId,
+                        "associated with Disk Encryption Set \"%s\" in Resource Group \"%s\"", vaultName, vaultResourceGroupName, desPrincipalObjectId,
                 desName, desResourceGroupName);
         retryService.testWith2SecDelayMax15Times(() -> {
             try {
                 LOGGER.info("Removing {}.", description);
-                azureClient.removeKeyVaultAccessPolicyFromServicePrincipal(desResourceGroupName, vaultName, desPrincipalObjectId);
+                azureClient.removeKeyVaultAccessPolicyFromServicePrincipal(vaultResourceGroupName, vaultName, desPrincipalObjectId);
                 LOGGER.info("Removed {}.", description);
                 return true;
             } catch (Exception e) {

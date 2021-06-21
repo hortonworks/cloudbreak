@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -75,6 +74,8 @@ class EnvironmentEncryptionServiceTest {
 
     private static final String RESOURCE_GROUP_NAME = "dummyRG";
 
+    private static final String KEY_URL_RESOURCE_GROUP_NAME = "dummyRG";
+
     @Mock
     private CloudConnector<Object> cloudConnector;
 
@@ -106,7 +107,7 @@ class EnvironmentEncryptionServiceTest {
     private CloudCredential cloudCredential;
 
     @Test
-    void testCreateEncryptionResourcesCreationRequestShouldReturnWithANewEncryptionResourcesCreationRequest() {
+    void testCreateEncryptionResourcesCreationRequestShouldReturnWithANewEncryptionResourcesCreationRequestWhenEncryptionKeyResourceGroupNameIsNotPresent() {
         EnvironmentDto environmentDto = EnvironmentDto.builder()
                 .withResourceCrn(ENVIRONMENT_CRN)
                 .withId(ENVIRONMENT_ID)
@@ -133,8 +134,46 @@ class EnvironmentEncryptionServiceTest {
         DiskEncryptionSetCreationRequest creationRequest = underTest.createEncryptionResourcesCreationRequest(environmentDto);
 
         assertEquals(creationRequest.getEncryptionKeyUrl(), KEY_URL);
-        assertEquals(creationRequest.getResourceGroupName(), RESOURCE_GROUP_NAME);
-        assertTrue(creationRequest.isSingleResourceGroup());
+        assertEquals(creationRequest.getDiskEncryptionSetResourceGroupName(), RESOURCE_GROUP_NAME);
+        assertEquals(creationRequest.getEncryptionKeyResourceGroupName(), RESOURCE_GROUP_NAME);
+        verifyCloudContext(creationRequest.getCloudContext());
+        assertThat(creationRequest.getCloudCredential()).isSameAs(cloudCredential);
+        assertThat(creationRequest.getId()).isEqualTo("randomGeneratedResource");
+        assertThat(creationRequest.getTags()).isSameAs(tags);
+    }
+
+    @Test
+    void testCreateEncryptionResourcesCreationRequestShouldReturnWithANewEncryptionResourcesCreationRequestWhenEncryptionKeyResourceGroupNameIsPresent() {
+        EnvironmentDto environmentDto = EnvironmentDto.builder()
+                .withResourceCrn(ENVIRONMENT_CRN)
+                .withId(ENVIRONMENT_ID)
+                .withName(ENVIRONMENT_NAME)
+                .withCloudPlatform(CLOUD_PLATFORM)
+                .withCredential(credential)
+                .withLocationDto(LocationDto.builder().withName(REGION).build())
+                .withParameters(ParametersDto.builder()
+                        .withAzureParameters(AzureParametersDto.builder()
+                                .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder()
+                                        .withEncryptionKeyUrl(KEY_URL)
+                                        .withEncryptionKeyResourceGroupName(KEY_URL_RESOURCE_GROUP_NAME)
+                                        .build())
+                                .withResourceGroup(AzureResourceGroupDto.builder()
+                                        .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_SINGLE)
+                                        .withName(RESOURCE_GROUP_NAME).build())
+                                .build())
+                        .build())
+                .withCreator(USER_NAME)
+                .withAccountId(ACCOUNT_ID)
+                .build();
+        when(credentialToCloudCredentialConverter.convert(credential)).thenReturn(cloudCredential);
+        Map<String, String> tags = Map.ofEntries(entry("tag1", "value1"), entry("tag2", "value2"));
+        when(environmentTagProvider.getTags(environmentDto, ENVIRONMENT_CRN)).thenReturn(tags);
+
+        DiskEncryptionSetCreationRequest creationRequest = underTest.createEncryptionResourcesCreationRequest(environmentDto);
+
+        assertEquals(creationRequest.getEncryptionKeyUrl(), KEY_URL);
+        assertEquals(creationRequest.getDiskEncryptionSetResourceGroupName(), RESOURCE_GROUP_NAME);
+        assertEquals(creationRequest.getEncryptionKeyResourceGroupName(), KEY_URL_RESOURCE_GROUP_NAME);
         verifyCloudContext(creationRequest.getCloudContext());
         assertThat(creationRequest.getCloudCredential()).isSameAs(cloudCredential);
         assertThat(creationRequest.getId()).isEqualTo("randomGeneratedResource");

@@ -31,12 +31,27 @@ class DiskEncryptionSetCreationRequestTest {
                 .withTags(Map.of())
                 .withCloudCredential(cloudCredential)
                 .withId("foo")
-                .withResourceGroupName("myRg")
-                .withSingleResourceGroup(true)
+                .withDiskEncryptionSetResourceGroupName("myRg")
                 .build();
 
         assertThat(underTest.getEncryptionKeyUrl()).isEqualTo(ENCRYPTION_KEY_URL);
         assertThat(underTest.toString()).doesNotContain(ENCRYPTION_KEY_URL);
+    }
+
+    @Test
+    void testShouldCreateRequestWithEncryptionKeyUrlResourceGroupNameAndDiskEncryptionSetResourceGroupName() {
+        DiskEncryptionSetCreationRequest underTest = new DiskEncryptionSetCreationRequest.Builder()
+                .withEncryptionKeyUrl(ENCRYPTION_KEY_URL)
+                .withCloudContext(cloudContext)
+                .withTags(Map.of())
+                .withCloudCredential(cloudCredential)
+                .withId("foo")
+                .withDiskEncryptionSetResourceGroupName("myRg")
+                .withEncryptionKeyResourceGroupName("dummyRg")
+                .build();
+
+        assertThat(underTest.getDiskEncryptionSetResourceGroupName()).isEqualTo("myRg");
+        assertThat(underTest.getEncryptionKeyResourceGroupName()).isEqualTo("dummyRg");
     }
 
 }

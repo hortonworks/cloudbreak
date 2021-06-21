@@ -148,27 +148,27 @@ public class AzureEncryptionResourcesTest {
                 //testCaseName     resourceId     expectedResourceGroupName}
                 {"testResourceGroupName - RG name has only alphabets",
                         "/subscriptions/dummySubscriptionId/resourceGroups/" +
-                        "dummyAlphaResourceGroup/providers/Microsoft.Compute/dummyResourceObject/dummyResourceObjectId",
+                                "dummyAlphaResourceGroup/providers/Microsoft.Compute/dummyResourceObject/dummyResourceObjectId",
                         "dummyAlphaResourceGroup"},
                 {"testResourceGroupName - RG name is combination of alphabets and numbers",
                         "/subscriptions/dummySubscriptionId/resourceGroups/" +
-                        "dummyAlphaNumResourceGroup0910/providers/Microsoft.Compute/dummyResourceObject/dummyResourceObjectId",
+                                "dummyAlphaNumResourceGroup0910/providers/Microsoft.Compute/dummyResourceObject/dummyResourceObjectId",
                         "dummyAlphaNumResourceGroup0910"},
                 {"testResourceGroupName - RG name is combination of alphabets, numbers and hyphens",
                         "/subscriptions/dummySubscriptionId/resourceGroups/" +
-                        "dummyAlphaNumHyphenResourceGroup---0910/providers/Microsoft.Compute/dummyResourceObject/dummyResourceObjectId",
+                                "dummyAlphaNumHyphenResourceGroup---0910/providers/Microsoft.Compute/dummyResourceObject/dummyResourceObjectId",
                         "dummyAlphaNumHyphenResourceGroup---0910"},
                 {"testResourceGroupName - RG name is combination of alphabets, numbers, hyphens and periods",
                         "/subscriptions/dummySubscriptionId/resourceGroups/" +
-                        "dummyAlphaNumHyphenPeriodResourceGroup---....0910/providers/Microsoft.Compute/dummyResourceObject/dummyResourceObjectId",
+                                "dummyAlphaNumHyphenPeriodResourceGroup---....0910/providers/Microsoft.Compute/dummyResourceObject/dummyResourceObjectId",
                         "dummyAlphaNumHyphenPeriodResourceGroup---....0910"},
                 {"testResourceGroupName - RG name is combination of alphabets, numbers, hyphens, periods and Parentheses",
                         "/subscriptions/dummySubscriptionId/resourceGroups/" +
-                        "dummyAlphaParenthesesPeriodResourceGroup---....)()(0910/providers/Microsoft.Compute/dummyResourceObject/dummyResourceObjectId",
+                                "dummyAlphaParenthesesPeriodResourceGroup---....)()(0910/providers/Microsoft.Compute/dummyResourceObject/dummyResourceObjectId",
                         "dummyAlphaParenthesesPeriodResourceGroup---....)()(0910"},
                 {"testResourceGroupName - RG name is combination of alphabets, numbers, hyphens, periods, Parentheses and underscores",
                         "/subscriptions/dummySubscriptionId/resourceGroups/" +
-                        "dummyUnderscoreResourceGroup---___....)()(0910/providers/Microsoft.Compute/dummyResourceObject/dummyResourceObjectId",
+                                "dummyUnderscoreResourceGroup---___....)()(0910/providers/Microsoft.Compute/dummyResourceObject/dummyResourceObjectId",
                         "dummyUnderscoreResourceGroup---___....)()(0910"}
         };
     }
@@ -179,25 +179,6 @@ public class AzureEncryptionResourcesTest {
         Matcher matcher = underTest.RESOURCE_GROUP_NAME.matcher(resourceId);
         assertTrue(matcher.matches());
         assertEquals(matcher.group(1), expectedResourceGroupName);
-    }
-
-    @Test
-    public void testExceptionIsThrownWhenNotIsSingleResourceGroup() {
-        DiskEncryptionSetCreationRequest requestedSet = new DiskEncryptionSetCreationRequest.Builder()
-                .withCloudCredential(cloudCredential)
-                .withCloudContext(cloudContext)
-                .withSingleResourceGroup(false)
-                .withResourceGroupName("dummyResourceGroup")
-                .withTags(new HashMap<>())
-                .withEncryptionKeyUrl("https://dummyVaultName.vault.azure.net/keys/dummyKeyName/dummyKeyVersion")
-                .build();
-        when(azureClientService.createAuthenticatedContext(cloudContext, cloudCredential)).thenReturn(authenticatedContext);
-        when(authenticatedContext.getParameter(AzureClient.class)).thenReturn(azureClient);
-        initExceptionConversion();
-
-        verifyException(IllegalArgumentException.class, () -> underTest.createDiskEncryptionSet(requestedSet),
-                "Customer Managed Key Encryption for managed Azure disks is supported only if the CDP resources " +
-                        "are in the same resource group as the vault.");
     }
 
     private <T extends Throwable> void verifyException(Class<T> expectedType, Executable executable, String messageExpected) {
@@ -216,8 +197,7 @@ public class AzureEncryptionResourcesTest {
         DiskEncryptionSetCreationRequest requestedSet = new DiskEncryptionSetCreationRequest.Builder()
                 .withCloudCredential(cloudCredential)
                 .withCloudContext(cloudContext)
-                .withSingleResourceGroup(true)
-                .withResourceGroupName("dummyResourceGroup")
+                .withDiskEncryptionSetResourceGroupName("dummyResourceGroup")
                 .withTags(new HashMap<>())
                 .withEncryptionKeyUrl("wrongKeyUrl")
                 .build();
@@ -236,8 +216,7 @@ public class AzureEncryptionResourcesTest {
                 .withId("uniqueId")
                 .withCloudCredential(cloudCredential)
                 .withCloudContext(cloudContext)
-                .withSingleResourceGroup(true)
-                .withResourceGroupName("dummyResourceGroup")
+                .withDiskEncryptionSetResourceGroupName("dummyResourceGroup")
                 .withTags(new HashMap<>())
                 .withEncryptionKeyUrl("https://dummyVaultName.vault.azure.net/keys/dummyKeyName/dummyKeyVersion")
                 .build();
@@ -261,8 +240,8 @@ public class AzureEncryptionResourcesTest {
                 .withId("uniqueId")
                 .withCloudContext(cloudContext)
                 .withCloudCredential(cloudCredential)
-                .withSingleResourceGroup(true)
-                .withResourceGroupName("dummyResourceGroup")
+                .withDiskEncryptionSetResourceGroupName("dummyResourceGroup")
+                .withEncryptionKeyResourceGroupName("dummyResourceGroup")
                 .withTags(new HashMap<>())
                 .withEncryptionKeyUrl("https://dummyVaultName.vault.azure.net/keys/dummyKeyName/dummyKeyVersion")
                 .build();
@@ -323,8 +302,8 @@ public class AzureEncryptionResourcesTest {
                 .withId("uniqueId")
                 .withCloudContext(cloudContext)
                 .withCloudCredential(cloudCredential)
-                .withSingleResourceGroup(true)
-                .withResourceGroupName("dummyResourceGroup")
+                .withDiskEncryptionSetResourceGroupName("dummyResourceGroup")
+                .withEncryptionKeyResourceGroupName("dummyResourceGroup")
                 .withTags(new HashMap<>())
                 .withEncryptionKeyUrl("https://dummyVaultName.vault.azure.net/keys/dummyKeyName/dummyKeyVersion")
                 .build();
@@ -382,8 +361,8 @@ public class AzureEncryptionResourcesTest {
                 .withId("uniqueId")
                 .withCloudContext(cloudContext)
                 .withCloudCredential(cloudCredential)
-                .withSingleResourceGroup(true)
-                .withResourceGroupName("dummyResourceGroup")
+                .withDiskEncryptionSetResourceGroupName("dummyResourceGroup")
+                .withEncryptionKeyResourceGroupName("dummyResourceGroup")
                 .withTags(new HashMap<>())
                 .withEncryptionKeyUrl("https://dummyVaultName.vault.azure.net/keys/dummyKeyName/dummyKeyVersion")
                 .build();
@@ -429,8 +408,8 @@ public class AzureEncryptionResourcesTest {
                 .withId("uniqueId")
                 .withCloudContext(cloudContext)
                 .withCloudCredential(cloudCredential)
-                .withSingleResourceGroup(true)
-                .withResourceGroupName("dummyResourceGroup")
+                .withDiskEncryptionSetResourceGroupName("dummyResourceGroup")
+                .withEncryptionKeyResourceGroupName("dummyResourceGroup")
                 .withTags(new HashMap<>())
                 .withEncryptionKeyUrl("https://dummyVaultName.vault.azure.net/keys/dummyKeyName/dummyKeyVersion")
                 .build();
@@ -466,6 +445,53 @@ public class AzureEncryptionResourcesTest {
         initActionFailedExceptionConversion();
 
         verifyActionFailedException(UnsupportedOperationException.class, () -> underTest.createDiskEncryptionSet(requestedSet), "Serious problem");
+
+        verifyPersistedCloudResource();
+    }
+
+    @Test
+    public void testCreateDiskEncryptionSetShouldReturnNewlyCreatedDiskEncryptionSetWhenDesAndVaultResourceGroupAreDifferentAndDesNotAlreadyExists() {
+        DiskEncryptionSetCreationRequest requestedSet = new DiskEncryptionSetCreationRequest.Builder()
+                .withId("uniqueId")
+                .withCloudContext(cloudContext)
+                .withCloudCredential(cloudCredential)
+                .withDiskEncryptionSetResourceGroupName("dummyResourceGroup")
+                .withEncryptionKeyResourceGroupName("dummyVaultResourceGroup")
+                .withTags(new HashMap<>())
+                .withEncryptionKeyUrl("https://dummyVaultName.vault.azure.net/keys/dummyKeyName/dummyKeyVersion")
+                .build();
+        EncryptionSetIdentity identity = new EncryptionSetIdentity().withType(DiskEncryptionSetIdentityType.SYSTEM_ASSIGNED);
+        ReflectionTestUtils.setField(identity, "principalId", DES_PRINCIPAL_ID);
+        DiskEncryptionSetInner des = (DiskEncryptionSetInner) new DiskEncryptionSetInner()
+                .withEncryptionType(DiskEncryptionSetType.ENCRYPTION_AT_REST_WITH_CUSTOMER_KEY)
+                .withActiveKey(new KeyVaultAndKeyReference()
+                        .withKeyUrl("https://dummyVaultName.vault.azure.net/keys/dummyKeyName/dummyKeyVersion")
+                        .withSourceVault(new SourceVault()
+                                .withId("/subscriptions/dummySubs/resourceGroups/dummyVaultResourceGroup/providers/Microsoft.KeyVault/vaults/dummyVaultName")))
+                .withIdentity(identity)
+                .withLocation("dummyRegion")
+                .withTags(new HashMap<>());
+        ReflectionTestUtils.setField(des, "id", DES_RESOURCE_ID);
+        Subscription subscription = mock(Subscription.class);
+        when(persistenceNotifier.notifyAllocation(any(CloudResource.class), eq(cloudContext))).thenReturn(new ResourcePersisted());
+        when(subscription.subscriptionId()).thenReturn("dummySubscriptionId");
+        when(azureUtils.generateDesNameByNameAndId(any(String.class), any(String.class))).thenReturn("dummyEnvName-DES-uniqueId");
+        when(azureClientService.createAuthenticatedContext(cloudContext, cloudCredential)).thenReturn(authenticatedContext);
+        when(authenticatedContext.getParameter(AzureClient.class)).thenReturn(azureClient);
+        when(azureClient.getCurrentSubscription()).thenReturn(subscription);
+        when(azureClient.getDiskEncryptionSetByName(any(String.class), any(String.class))).thenReturn(null);
+        when(azureClient.createDiskEncryptionSet(any(String.class), any(String.class), any(String.class),
+                any(String.class), any(String.class), any(Map.class))).thenReturn(des);
+        initRetry();
+        // Return the same DES instance to simulate that the poller checker task instantly completed
+        when(diskEncryptionSetCreationPoller.startPolling(eq(authenticatedContext), any(DiskEncryptionSetCreationCheckerContext.class), eq(des)))
+                .thenReturn(des);
+
+        CreatedDiskEncryptionSet createdDes = underTest.createDiskEncryptionSet(requestedSet);
+
+        assertEquals(createdDes.getDiskEncryptionSetLocation(), "dummyRegion");
+        assertEquals(createdDes.getDiskEncryptionSetResourceGroupName(), "dummyResourceGroup");
+        verify(azureClient).grantKeyVaultAccessPolicyToServicePrincipal("dummyVaultResourceGroup", "dummyVaultName", DES_PRINCIPAL_ID);
 
         verifyPersistedCloudResource();
     }
@@ -547,7 +573,7 @@ public class AzureEncryptionResourcesTest {
     }
 
     @Test
-    public void testDeleteDiskEncryptionSetShouldDeduceValidResourceGroupAndDiskEncryptionSetName() {
+    public void testDeleteDiskEncryptionSetShouldDeduceValidResourceGroupAndDiskEncryptionSetNameWhenDesAndVaultHaveSameResourceGroup() {
         List<CloudResource> resources = getResources("/subscriptions/dummySubscriptionId/resourceGroups/dummyResourceGroup/providers/" +
                 "Microsoft.Compute/diskEncryptionSets/dummyDesId");
         DiskEncryptionSetDeletionRequest deletionRequest = new DiskEncryptionSetDeletionRequest.Builder()
@@ -575,6 +601,68 @@ public class AzureEncryptionResourcesTest {
         verify(azureClient).deleteDiskEncryptionSet("dummyResourceGroup", "dummyDesId");
         verify(azureClient).removeKeyVaultAccessPolicyFromServicePrincipal("dummyResourceGroup", "dummyVaultName", DES_PRINCIPAL_ID);
         verify(persistenceNotifier).notifyDeletion(deletionRequest.getCloudResources().iterator().next(), deletionRequest.getCloudContext());
+    }
+
+    @Test
+    public void testDeleteDiskEncryptionSetShouldDeduceValidDiskEncryptionSetNameAndResourceGroupWhenDesAndVaultDoNotHaveSameResourceGroup() {
+        List<CloudResource> resources = getResources("/subscriptions/dummySubscriptionId/resourceGroups/dummyDesResourceGroup/providers/" +
+                "Microsoft.Compute/diskEncryptionSets/dummyDesId");
+        DiskEncryptionSetDeletionRequest deletionRequest = new DiskEncryptionSetDeletionRequest.Builder()
+                .withCloudCredential(cloudCredential)
+                .withCloudContext(cloudContext)
+                .withCloudResources(resources)
+                .build();
+        initCloudResourceHelper(resources);
+        EncryptionSetIdentity identity = new EncryptionSetIdentity().withType(DiskEncryptionSetIdentityType.SYSTEM_ASSIGNED);
+        ReflectionTestUtils.setField(identity, "principalId", DES_PRINCIPAL_ID);
+        DiskEncryptionSetInner des = (DiskEncryptionSetInner) new DiskEncryptionSetInner()
+                .withEncryptionType(DiskEncryptionSetType.ENCRYPTION_AT_REST_WITH_CUSTOMER_KEY)
+                .withActiveKey(new KeyVaultAndKeyReference()
+                        .withKeyUrl("https://dummyVaultName.vault.azure.net/keys/dummyKeyName/dummyKeyVersion")
+                        .withSourceVault(new SourceVault()
+                                .withId("/subscriptions/dummySubs/resourceGroups/dummyVaultResourceGroup/providers/Microsoft.KeyVault/vaults/dummyVaultName")))
+                .withIdentity(identity)
+                .withLocation("dummyRegion");
+        when(azureClient.getDiskEncryptionSetByName(any(), any())).thenReturn(des);
+        when(azureClientService.getClient(cloudCredential)).thenReturn(azureClient);
+        initRetry();
+
+        underTest.deleteDiskEncryptionSet(deletionRequest);
+
+        verify(azureClient).deleteDiskEncryptionSet("dummyDesResourceGroup", "dummyDesId");
+        verify(azureClient).removeKeyVaultAccessPolicyFromServicePrincipal("dummyVaultResourceGroup", "dummyVaultName", DES_PRINCIPAL_ID);
+        verify(persistenceNotifier).notifyDeletion(deletionRequest.getCloudResources().iterator().next(), deletionRequest.getCloudContext());
+    }
+
+    @Test
+    public void testDeleteDiskEncryptionSetShouldThrowExceptionWhenVaultResourceGroupIsNotFound() {
+        List<CloudResource> resources = getResources("/subscriptions/dummySubscriptionId/resourceGroups/dummyDesResourceGroup/providers/" +
+                "Microsoft.Compute/diskEncryptionSets/dummyDesId");
+        DiskEncryptionSetDeletionRequest deletionRequest = new DiskEncryptionSetDeletionRequest.Builder()
+                .withCloudCredential(cloudCredential)
+                .withCloudContext(cloudContext)
+                .withCloudResources(resources)
+                .build();
+        initCloudResourceHelper(resources);
+        EncryptionSetIdentity identity = new EncryptionSetIdentity().withType(DiskEncryptionSetIdentityType.SYSTEM_ASSIGNED);
+        ReflectionTestUtils.setField(identity, "principalId", DES_PRINCIPAL_ID);
+        DiskEncryptionSetInner des = (DiskEncryptionSetInner) new DiskEncryptionSetInner()
+                .withEncryptionType(DiskEncryptionSetType.ENCRYPTION_AT_REST_WITH_CUSTOMER_KEY)
+                .withActiveKey(new KeyVaultAndKeyReference()
+                        .withKeyUrl("https://dummyVaultName.vault.azure.net/keys/dummyKeyName/dummyKeyVersion")
+                        .withSourceVault(new SourceVault()
+                                .withId("invaildSourceVault")))
+                .withIdentity(identity)
+                .withLocation("dummyRegion");
+        when(azureClient.getDiskEncryptionSetByName(any(), any())).thenReturn(des);
+        when(azureClientService.getClient(cloudCredential)).thenReturn(azureClient);
+        initRetry();
+        initExceptionConversion();
+        initActionFailedExceptionConversion();
+
+        verifyActionFailedException(IllegalArgumentException.class, () -> underTest.deleteDiskEncryptionSet(deletionRequest),
+                "Failed to deduce vault resource group name from source vault ID " +
+                        "\"invaildSourceVault\"");
     }
 
     @Test

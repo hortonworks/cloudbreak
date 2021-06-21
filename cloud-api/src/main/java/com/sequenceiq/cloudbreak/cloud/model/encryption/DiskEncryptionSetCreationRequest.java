@@ -17,9 +17,9 @@ public class DiskEncryptionSetCreationRequest implements CloudPlatformAware {
 
     private final CloudCredential cloudCredential;
 
-    private final String resourceGroupName;
+    private final String diskEncryptionSetResourceGroupName;
 
-    private final boolean singleResourceGroup;
+    private final String encryptionKeyResourceGroupName;
 
     private final Map<String, String> tags;
 
@@ -28,8 +28,8 @@ public class DiskEncryptionSetCreationRequest implements CloudPlatformAware {
     private DiskEncryptionSetCreationRequest(Builder builder) {
         this.id = builder.id;
         this.cloudCredential = builder.cloudCredential;
-        this.resourceGroupName = builder.resourceGroupName;
-        this.singleResourceGroup = builder.singleResourceGroup;
+        this.diskEncryptionSetResourceGroupName = builder.diskEncryptionSetResourceGroupName;
+        this.encryptionKeyResourceGroupName = builder.encryptionKeyResourceGroupName;
         this.tags = builder.tags;
         this.encryptionKeyUrl = builder.encryptionKeyUrl;
         this.cloudContext = builder.cloudContext;
@@ -47,12 +47,12 @@ public class DiskEncryptionSetCreationRequest implements CloudPlatformAware {
         return cloudCredential;
     }
 
-    public String getResourceGroupName() {
-        return resourceGroupName;
+    public String getDiskEncryptionSetResourceGroupName() {
+        return diskEncryptionSetResourceGroupName;
     }
 
-    public boolean isSingleResourceGroup() {
-        return singleResourceGroup;
+    public String getEncryptionKeyResourceGroupName() {
+        return encryptionKeyResourceGroupName;
     }
 
     public Map<String, String> getTags() {
@@ -80,8 +80,8 @@ public class DiskEncryptionSetCreationRequest implements CloudPlatformAware {
         sb.append("id='").append(id).append('\'');
         sb.append(", cloudContext=").append(cloudContext);
         sb.append(", cloudCredential=").append(cloudCredential);
-        sb.append(", resourceGroupName='").append(resourceGroupName).append('\'');
-        sb.append(", singleResourceGroup=").append(singleResourceGroup);
+        sb.append(", diskEncryptionSetResourceGroupName='").append(diskEncryptionSetResourceGroupName).append('\'');
+        sb.append(", encryptionKeyResourceGroupName='").append(encryptionKeyResourceGroupName).append('\'');
         sb.append(", tags=").append(tags);
         sb.append('}');
         return sb.toString();
@@ -95,9 +95,9 @@ public class DiskEncryptionSetCreationRequest implements CloudPlatformAware {
 
         private CloudCredential cloudCredential;
 
-        private String resourceGroupName;
+        private String diskEncryptionSetResourceGroupName;
 
-        private boolean singleResourceGroup;
+        private String encryptionKeyResourceGroupName;
 
         private Map<String, String> tags = new HashMap<>();
 
@@ -121,13 +121,13 @@ public class DiskEncryptionSetCreationRequest implements CloudPlatformAware {
             return this;
         }
 
-        public Builder withResourceGroupName(String resourceGroupName) {
-            this.resourceGroupName = resourceGroupName;
+        public Builder withDiskEncryptionSetResourceGroupName(String diskEncryptionSetResourceGroupName) {
+            this.diskEncryptionSetResourceGroupName = diskEncryptionSetResourceGroupName;
             return this;
         }
 
-        public Builder withSingleResourceGroup(boolean singleResourceGroup) {
-            this.singleResourceGroup = singleResourceGroup;
+        public Builder withEncryptionKeyResourceGroupName(String encryptionKeyResourceGroupName) {
+            this.encryptionKeyResourceGroupName = encryptionKeyResourceGroupName;
             return this;
         }
 
