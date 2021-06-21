@@ -9,10 +9,12 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
+import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaUserSyncTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 
@@ -58,6 +60,13 @@ public class FreeIpaTests extends AbstractE2ETest {
                 .when(freeIpaTestClient.repair(InstanceMetadataType.GATEWAY))
                 .await(Status.UPDATE_IN_PROGRESS, waitForFlow().withWaitForFlow(Boolean.FALSE))
                 .await(FREEIPA_AVAILABLE)
+                .given(FreeIpaUserSyncTestDto.class)
+                .forAllEnvironments()
+                .when(freeIpaTestClient.getLastSyncOperationStatus())
+                .await(OperationState.COMPLETED)
+                .when(freeIpaTestClient.syncAll())
+                .await(OperationState.COMPLETED)
+                .given(freeIpa, FreeIpaTestDto.class)
                 .then((tc, testDto, client) -> freeIpaTestClient.delete().action(tc, testDto, client))
                 .await(FREEIPA_DELETE_COMPLETED)
                 .validate();

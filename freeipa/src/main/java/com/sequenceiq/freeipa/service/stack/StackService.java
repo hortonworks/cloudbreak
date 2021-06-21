@@ -17,6 +17,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Service;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Lists;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.ResourcePropertyProvider;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -97,7 +98,7 @@ public class StackService implements ResourcePropertyProvider {
 
     public List<Stack> getMultipleByEnvironmentCrnOrChildEnvironmantCrnAndAccountId(Collection<String> environmentCrns, String accountId) {
         if (environmentCrns.isEmpty()) {
-            return getAllByAccountId(accountId);
+            return Lists.newArrayList(getAllByAccountId(accountId));
         } else {
             return stackRepository.findMultipleByEnvironmentCrnOrChildEnvironmentCrnAndAccountId(environmentCrns, accountId);
         }
@@ -133,7 +134,7 @@ public class StackService implements ResourcePropertyProvider {
                 .orElseThrow(() -> new NotFoundException(String.format("FreeIPA stack by environment [%s] not found", environmentCrn)));
     }
 
-    public List<Stack> getAllByAccountId(String accountId) {
+    public Set<Stack> getAllByAccountId(String accountId) {
         return stackRepository.findByAccountId(accountId);
     }
 
