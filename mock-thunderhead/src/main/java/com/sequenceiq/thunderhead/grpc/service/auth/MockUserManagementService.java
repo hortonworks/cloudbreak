@@ -42,6 +42,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RAW_S3;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RAZ;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RUNTIME_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RUNTIME_UPGRADE_DATAHUB;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RUNTIME_UPGRADE_DATAHUB_CUSTOM_TEMPLATE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SDX_HBASE_CLOUD_STORAGE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SHOW_CLI;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_USER_SYNC_CREDENTIALS_UPDATE_OPTIMIZATION;
@@ -288,6 +289,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.datahub.runtime.upgrade.enable}")
     private boolean datahubRuntimeUpgradeEnabled;
+
+    @Value("${auth.mock.runtime.upgrade.customtemplate.enable}")
+    private boolean datahubRuntimeUpgradeForCustomTemplateEnabled;
 
     @Value("${auth.mock.raz.enable}")
     private boolean razEnabled;
@@ -661,6 +665,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (datahubRuntimeUpgradeEnabled) {
             builder.addEntitlements(createEntitlement(CDP_RUNTIME_UPGRADE_DATAHUB));
+        }
+        if (datahubRuntimeUpgradeForCustomTemplateEnabled) {
+            builder.addEntitlements(createEntitlement(CDP_RUNTIME_UPGRADE_DATAHUB_CUSTOM_TEMPLATE));
         }
         if (razEnabled) {
             builder.addEntitlements(createEntitlement(CDP_RAZ));

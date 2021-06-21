@@ -57,13 +57,15 @@ public class ClusterUpgradeImageFilter {
 
     public ImageFilterResult filter(String accountId, CloudbreakImageCatalogV3 imageCatalogV3, String cloudPlatform,
             ImageFilterParams imageFilterParams) {
-        return isValidBlueprint(imageFilterParams, accountId) ? getImageFilterResult(imageCatalogV3, cloudPlatform, imageFilterParams)
-                : createEmptyResult();
+        BlueprintValidationResult blueprintValidationResult = isValidBlueprint(imageFilterParams, accountId);
+        return blueprintValidationResult.isValid() ? getImageFilterResult(imageCatalogV3, cloudPlatform, imageFilterParams)
+                : createEmptyResult(blueprintValidationResult.getReason());
     }
 
     public ImageFilterResult filter(String accountId, Long workspaceId, String imageCatalogName, String cloudPlatform, ImageFilterParams imageFilterParams) {
-        return isValidBlueprint(imageFilterParams, accountId) ? getImageFilterResult(workspaceId, imageCatalogName, cloudPlatform, imageFilterParams)
-                : createEmptyResult();
+        BlueprintValidationResult blueprintValidationResult = isValidBlueprint(imageFilterParams, accountId);
+        return blueprintValidationResult.isValid() ? getImageFilterResult(workspaceId, imageCatalogName, cloudPlatform, imageFilterParams)
+                : createEmptyResult(blueprintValidationResult.getReason());
     }
 
     private ImageFilterResult getImageFilterResult(CloudbreakImageCatalogV3 imageCatalogV3, String cloudPlatform, ImageFilterParams imageFilterParams) {
@@ -81,7 +83,8 @@ public class ClusterUpgradeImageFilter {
             StatedImages statedImages = imageCatalogService.getImages(workspaceId, imageCatalogName, cloudPlatform);
             return filterImages(statedImages.getImages().getCdhImages(), cloudPlatform, imageFilterParams);
         } catch (Exception ex) {
-            return createEmptyResult();
+            LOGGER.error("Error during image filtering.", ex);
+            return createEmptyResult("Failed to retrieve eligible images due tue an internal error.");
         }
     }
 
@@ -146,11 +149,11 @@ public class ClusterUpgradeImageFilter {
         return packageLocationFilter.filterImage(currentImage, imageFilterParams);
     }
 
-    private boolean isValidBlueprint(ImageFilterParams imageFilterParams, String accountId) {
+    private BlueprintValidationResult isValidBlueprint(ImageFilterParams imageFilterParams, String accountId) {
         if (imageFilterParams.getStackType().equals(StackType.DATALAKE)) {
             boolean mediumDuty = imageFilterParams.getBlueprint().getName().contains("SDX Medium Duty");
             boolean canUpgradeMediumDuty = mediumDuty && entitlementService.haUpgradeEnabled(accountId);
-            return !mediumDuty || canUpgradeMediumDuty;
+            return new BlueprintValidationResult(!mediumDuty || canUpgradeMediumDuty, "The upgrade is not allowed for this template.");
         } else {
             return blueprintUpgradeOptionValidator.isValidBlueprint(imageFilterParams.getBlueprint(), imageFilterParams.isLockComponents());
         }
@@ -160,7 +163,7 @@ public class ClusterUpgradeImageFilter {
         return newImage.getOs().equalsIgnoreCase(currentImage.getOs()) && newImage.getOsType().equalsIgnoreCase(currentImage.getOsType());
     }
 
-    private ImageFilterResult createEmptyResult() {
-        return new ImageFilterResult(new Images(null, Collections.emptyList(), null, null), "The upgrade is not allowed for this template.");
+    private ImageFilterResult createEmptyResult(String reason) {
+        return new ImageFilterResult(new Images(null, Collections.emptyList(), null, null), reason);
     }
 }
