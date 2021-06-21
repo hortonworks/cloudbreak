@@ -13,9 +13,10 @@
           "hdfs-BALANCER-BASE",
           "hdfs-GATEWAY-BASE",
           "hdfs-JOURNALNODE-BASE",
-          "ssb-MATERIALIZED_VIEW_ENGINE-BASE",
-          "ssb-STREAMING_SQL_CONSOLE-BASE",
-          "ssb-STREAMING_SQL_ENGINE-BASE",
+          "kafka-GATEWAY-BASE",
+          "sql_stream_builder-MATERIALIZED_VIEW_ENGINE-BASE",
+          "sql_stream_builder-STREAMING_SQL_CONSOLE-BASE",
+          "sql_stream_builder-STREAMING_SQL_ENGINE-BASE",
           "yarn-GATEWAY-BASE",
           "yarn-JOBHISTORY-BASE",
           "zookeeper-SERVER-BASE"
@@ -40,6 +41,7 @@
         "cardinality": 3,
         "roleConfigGroupsRefNames": [
           "hdfs-DATANODE-BASE",
+          "kafka-KAFKA_BROKER-BASE",
           "yarn-NODEMANAGER-BASE"
         ]
       }
@@ -149,6 +151,22 @@
         ]
       },
       {
+        "refName": "kafka",
+        "serviceType": "KAFKA",
+        "roleConfigGroups": [
+          {
+            "refName": "kafka-GATEWAY-BASE",
+            "roleType": "GATEWAY",
+            "base": true
+          },
+          {
+            "refName": "kafka-KAFKA_BROKER-BASE",
+            "roleType": "KAFKA_BROKER",
+            "base": true
+          }
+        ]
+      },
+      {
         "refName": "flink",
         "serviceType": "FLINK",
         "serviceConfigs": [
@@ -191,7 +209,7 @@
         ]
       },
       {
-        "refName": "ssb",
+        "refName": "sql_stream_builder",
         "serviceType": "SQL_STREAM_BUILDER",
         "serviceConfigs": [
           {
@@ -201,18 +219,18 @@
         ],
         "roleConfigGroups": [
           {
-            "refName": "ssb-MATERIALIZED_VIEW_ENGINE-BASE",
-            "roleType": "MATERIALIZED_VIEW_ENGINE",
+            "refName": "sql_stream_builder-STREAMING_SQL_ENGINE-BASE",
+            "roleType": "STREAMING_SQL_ENGINE",
             "base": true
           },
           {
-            "refName": "ssb-STREAMING_SQL_CONSOLE-BASE",
+            "refName": "sql_stream_builder-STREAMING_SQL_CONSOLE-BASE",
             "roleType": "STREAMING_SQL_CONSOLE",
             "base": true
           },
           {
-            "refName": "ssb-STREAMING_SQL_ENGINE-BASE",
-            "roleType": "STREAMING_SQL_ENGINE",
+            "refName": "sql_stream_builder-MATERIALIZED_VIEW_ENGINE-BASE",
+            "roleType": "MATERIALIZED_VIEW_ENGINE",
             "base": true
           }
         ]
