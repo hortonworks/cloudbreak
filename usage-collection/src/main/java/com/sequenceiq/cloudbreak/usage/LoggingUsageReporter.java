@@ -120,6 +120,22 @@ public class LoggingUsageReporter implements UsageReporter {
                 .build());
     }
 
+    @Override
+    public void cdpDatahubAutoscaleTriggered(UsageProto.CDPDatahubAutoscaleTriggered details) {
+        checkNotNull(details);
+        log(eventBuilder()
+                .setCdpDatahubAutoscaleTriggered(details)
+                .build());
+    }
+
+    @Override
+    public void cdpDatahubAutoscaleConfigChanged(UsageProto.CDPDatahubAutoscaleConfigChanged details) {
+        checkNotNull(details);
+        log(eventBuilder()
+                .setCdpDatahubAutoscaleConfigChanged(details)
+                .build());
+    }
+
     private UsageProto.Event.Builder eventBuilder() {
         return UsageProto.Event.newBuilder()
                 .setId(UUID.randomUUID().toString())

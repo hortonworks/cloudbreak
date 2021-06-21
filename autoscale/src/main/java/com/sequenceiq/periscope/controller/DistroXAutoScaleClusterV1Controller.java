@@ -158,7 +158,7 @@ public class DistroXAutoScaleClusterV1Controller implements DistroXAutoScaleClus
         }
 
         Cluster updatedCluster = clusterService.findById(cluster.getId());
-        asClusterCommonService.createAutoscalingConfigChangedHistoryAndNotify(updatedCluster);
+        asClusterCommonService.processAutoscalingStateChanged(updatedCluster);
         return createClusterJsonResponse(updatedCluster);
     }
 }

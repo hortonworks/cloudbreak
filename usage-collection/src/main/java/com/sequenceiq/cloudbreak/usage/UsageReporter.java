@@ -107,4 +107,18 @@ public interface UsageReporter {
      */
     void cdpDatahubSync(
             UsageProto.CDPDatahubSync details);
+
+    /**
+     * Reports that an CDP Datahub Autoscale has been triggered.
+     * @param details the event details
+     */
+    void cdpDatahubAutoscaleTriggered(
+            UsageProto.CDPDatahubAutoscaleTriggered details);
+
+    /**
+     * Reports that CDP Datahub Autoscale config changed.
+     * @param details the event details
+     */
+    void cdpDatahubAutoscaleConfigChanged(
+            UsageProto.CDPDatahubAutoscaleConfigChanged details);
 }

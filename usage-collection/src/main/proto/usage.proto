@@ -85,6 +85,10 @@ message Event {
     CDPDatalakeSync cdpDatalakeSync = 36;
     // Sync event for a CDP Datahub cluster
     CDPDatahubSync cdpDatahubSync = 37;
+    // Autoscale event for a CDP Datahub cluster
+    CDPDatahubAutoscaleTriggered cdpDatahubAutoscaleTriggered = 70;
+    // Autoscale config changed for a CDP Datahub cluster
+    CDPDatahubAutoscaleConfigChanged cdpDatahubAutoscaleConfigChanged = 71;
     // A CDP DF Catalog Artifact was created
     CDPDFCatalogArtifactCreated cdpDFCatalogArtifactCreated = 40;
     // A CDP DF Catalog Artifact was deleted
@@ -1170,4 +1174,78 @@ message CDPUDXBundleDetails {
   string resourceCrn = 4;
   // The type of the diagnostics bundle.
   string type = 5;
+}
+
+//Autoscale Policy Type
+message AutoscalePolicyType {
+  enum Value {
+    // A value indicating the enum is unset.
+    UNSET = 0;
+    // The schedule-based autoscale policy.
+    TIME_BASED = 1;
+    // The load-based autoscale policy.
+    LOAD_BASED = 2;
+  }
+}
+
+//Autoscale Policy Definition
+message CDPAutoscalePolicyDefinition {
+  // The autoscale policy type
+  AutoscalePolicyType.Value autoscalePolicyType = 1;
+  // The autoscale policy parameters
+  string autoscalePolicyParameters = 2;
+  // The autoscale host group
+  string autoscalingHostGroup = 3;
+  // The autoscale policy name.
+  string autoscalingPolicyName = 4;
+}
+
+//Autoscale Trigger Status
+message AutoscaleScalingStatusType {
+  enum Value {
+    // A value indicating the enum is unset.
+    UNSET = 0;
+    // Scaling requested successfully.
+    SCALING_REQUESTED = 1;
+    // Scaling request failed.
+    SCALING_REQUEST_FAILED = 2;
+    // Autoscale trigger failed.
+    AUTOSCALE_TRIGGER_FAILED = 3;
+  }
+}
+
+//Autoscale Trigger Details
+message CDPAutoscaleTriggerDetails {
+  // The CDP account ID of the datahub cluster.
+  string accountId = 1;
+  // The user-supplied cluster name.
+  string clusterName = 2;
+  // The cluster crn.
+  string clusterCrn = 3;
+  // The autoscaling policy definition.
+  CDPAutoscalePolicyDefinition autoscalingPolicyDefinition = 4;
+  // The original hostGroup node count.
+  int32 originalHostGroupNodeCount = 5;
+  // The desired hostGroup node count.
+  int32 desiredHostGroupNodeCount = 6;
+   // The autoscaling action that was performed.
+  string autoscalingAction = 7;
+  // The status of the trigger
+  AutoscaleScalingStatusType.Value autoscaleStatus = 8;
+}
+
+// Generated after autoscale has been triggered.
+message CDPDatahubAutoscaleTriggered {
+  // The autoscaling trigger details
+  CDPAutoscaleTriggerDetails autoscaleTriggerDetails = 1;
+}
+
+// Generated after autoscale config has been updated.
+message CDPDatahubAutoscaleConfigChanged {
+  // The user crn who updated the autoscale config.
+  string userCrn = 1;
+  // Is autoscaling enabled for cluster.
+  bool autoscalingEnabled = 2;
+   // The autoscaling policy definition.
+  repeated CDPAutoscalePolicyDefinition autoscalingPolicyDefinition = 3;
 }

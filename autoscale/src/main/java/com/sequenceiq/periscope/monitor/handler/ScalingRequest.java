@@ -33,6 +33,7 @@ import com.sequenceiq.periscope.notification.HttpNotificationSender;
 import com.sequenceiq.periscope.service.AuditService;
 import com.sequenceiq.periscope.service.HistoryService;
 import com.sequenceiq.periscope.service.PeriscopeMetricService;
+import com.sequenceiq.periscope.service.UsageReportingService;
 import com.sequenceiq.periscope.utils.LoggingUtils;
 
 @Component("ScalingRequest")
@@ -76,6 +77,9 @@ public class ScalingRequest implements Runnable {
 
     @Inject
     private AuditService auditService;
+
+    @Inject
+    private UsageReportingService usageReportingService;
 
     public ScalingRequest(Cluster cluster, ScalingPolicy policy, int totalNodes, int desiredNodeCount, List<String> decommissionNodeIds) {
         this.cluster = cluster;
@@ -136,7 +140,7 @@ public class ScalingRequest implements Runnable {
                     hostGroup, cluster.getStackCrn(), desiredNodeCount, statusReason, e);
             metricService.incrementMetricCounter(MetricType.CLUSTER_UPSCALE_FAILED);
         } finally {
-            createHistoryAndNotify(scalingAdjustment, totalNodes, statusReason, scalingStatus);
+            processAutoscalingTriggered(scalingAdjustment, totalNodes, statusReason, scalingStatus);
         }
     }
 
@@ -169,7 +173,7 @@ public class ScalingRequest implements Runnable {
             LOGGER.error("Couldn't trigger downscaling for host group '{}', cluster '{}', desiredNodeCount '{}', error '{}' ",
                     hostGroup, cluster.getStackCrn(), desiredNodeCount, statusReason, e);
         } finally {
-            createHistoryAndNotify(scalingAdjustment, totalNodes, statusReason, scalingStatus);
+            processAutoscalingTriggered(scalingAdjustment, totalNodes, statusReason, scalingStatus);
         }
     }
 
@@ -194,16 +198,17 @@ public class ScalingRequest implements Runnable {
                     "decommissionNodeIds '{}', error '{}' ", hostGroup, cluster.getStackCrn(), decommissionNodeIds.size(),
                     decommissionNodeIds, statusReason, e);
         } finally {
-            createHistoryAndNotify(-decommissionNodeIds.size(), totalNodes, statusReason, scalingStatus);
+            processAutoscalingTriggered(-decommissionNodeIds.size(), totalNodes, statusReason, scalingStatus);
         }
     }
 
-    private void createHistoryAndNotify(int adjustmentCount, int totalNodes, String statusReason, ScalingStatus scalingStatus) {
+    private void processAutoscalingTriggered(int adjustmentCount, int totalNodes, String statusReason, ScalingStatus scalingStatus) {
         History history = historyService.createEntry(scalingStatus,
                 StringUtils.left(statusReason, STATUSREASON_MAX_LENGTH), totalNodes, adjustmentCount, policy);
         notificationSender.sendHistoryUpdateNotification(history, cluster);
         auditService.auditAutoscaleServiceEvent(scalingStatus, statusReason, cluster.getStackCrn(),
                 cluster.getClusterPertain().getTenant(), System.currentTimeMillis());
+        usageReportingService.reportAutoscalingTriggered(adjustmentCount, totalNodes, scalingStatus, statusReason, policy.getAlert(), cluster);
     }
 
     private String getMessageForCBException(Exception cbApiException) {

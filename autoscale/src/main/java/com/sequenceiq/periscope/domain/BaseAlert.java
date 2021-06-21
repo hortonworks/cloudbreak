@@ -1,5 +1,7 @@
 package com.sequenceiq.periscope.domain;
 
+import java.util.Map;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
@@ -91,4 +93,6 @@ public abstract class BaseAlert implements Clustered {
     public void setAlertCrn(String alertCrn) {
         this.alertCrn = alertCrn;
     }
+
+    public abstract Map<String, String> getTelemetryParameters();
 }
