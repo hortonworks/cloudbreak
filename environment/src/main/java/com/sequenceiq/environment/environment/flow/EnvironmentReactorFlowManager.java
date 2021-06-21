@@ -5,6 +5,7 @@ import static com.sequenceiq.environment.environment.flow.deletion.chain.FlowCha
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_FREEIPA_DELETE_EVENT;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -27,6 +28,7 @@ import com.sequenceiq.environment.environment.flow.start.event.EnvStartStateSele
 import com.sequenceiq.environment.environment.flow.stop.event.EnvStopEvent;
 import com.sequenceiq.environment.environment.flow.stop.event.EnvStopStateSelectors;
 import com.sequenceiq.environment.environment.service.stack.StackService;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.service.FlowCancelService;
@@ -140,7 +142,7 @@ public class EnvironmentReactorFlowManager {
             new Event.Headers(getFlowTriggerUsercrn(userCrn)));
     }
 
-    public void triggerLoadBalancerUpdateFlow(EnvironmentDto environmentDto, Long envId, String envName, String envCrn,
+    public Optional<FlowIdentifier> triggerLoadBalancerUpdateFlow(EnvironmentDto environmentDto, Long envId, String envName, String envCrn,
             PublicEndpointAccessGateway endpointAccessGateway, Set<String> subnetIds, String userCrn) {
         LOGGER.info("Load balancer update flow triggered.");
         if (PublicEndpointAccessGateway.ENABLED.equals(endpointAccessGateway)) {
@@ -161,6 +163,6 @@ public class EnvironmentReactorFlowManager {
             .withSubnetIds(subnetIds)
             .build();
 
-        eventSender.sendEvent(loadBalancerUpdateEvent, new Event.Headers(getFlowTriggerUsercrn(userCrn)));
+        return eventSender.sendEvent(loadBalancerUpdateEvent, new Event.Headers(getFlowTriggerUsercrn(userCrn)));
     }
 }

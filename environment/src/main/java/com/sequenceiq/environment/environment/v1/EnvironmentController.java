@@ -52,6 +52,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentLo
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentCrnResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentLoadBalancerUpdateResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponses;
 import com.sequenceiq.environment.authorization.EnvironmentFiltering;
@@ -380,21 +381,22 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.EDIT_ENVIRONMENT)
-    public void updateEnvironmentLoadBalancersByName(@ResourceName String envName, @NotNull EnvironmentLoadBalancerUpdateRequest request) {
+    public EnvironmentLoadBalancerUpdateResponse updateEnvironmentLoadBalancersByName(@ResourceName String envName,
+            @NotNull EnvironmentLoadBalancerUpdateRequest request) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         EnvironmentDto environmentDto = environmentService.getByNameAndAccountId(envName, accountId);
         EnvironmentLoadBalancerDto environmentLoadBalancerDto = environmentApiConverter.initLoadBalancerDto(request);
-        environmentLoadBalancerService.updateLoadBalancerInEnvironmentAndStacks(environmentDto, environmentLoadBalancerDto);
+        return environmentLoadBalancerService.updateLoadBalancerInEnvironmentAndStacks(environmentDto, environmentLoadBalancerDto);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.EDIT_ENVIRONMENT)
-    public void updateEnvironmentLoadBalancersByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn @TenantAwareParam String crn,
-            @NotNull EnvironmentLoadBalancerUpdateRequest request) {
+    public EnvironmentLoadBalancerUpdateResponse updateEnvironmentLoadBalancersByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT)
+            @ResourceCrn @TenantAwareParam String crn, @NotNull EnvironmentLoadBalancerUpdateRequest request) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         EnvironmentDto environmentDto = environmentService.getByCrnAndAccountId(crn, accountId);
         EnvironmentLoadBalancerDto environmentLoadBalancerDto = environmentApiConverter.initLoadBalancerDto(request);
-        environmentLoadBalancerService.updateLoadBalancerInEnvironmentAndStacks(environmentDto, environmentLoadBalancerDto);
+        return environmentLoadBalancerService.updateLoadBalancerInEnvironmentAndStacks(environmentDto, environmentLoadBalancerDto);
     }
 
     @Override

@@ -102,7 +102,7 @@ public class LoadBalancerEnvUpdateHandler extends EventSenderAwareHandler<Enviro
                 .build();
             eventSender().sendEvent(loadBalancerUpdateEvent, envLoadBalancerDtoEvent.getHeaders());
         } catch (Exception e) {
-            LOGGER.error("Caught exception while updating environment state with laod balancers.", e);
+            LOGGER.error("Caught exception while updating environment state with load balancers.", e);
             LoadBalancerUpdateFailedEvent failedEvent = new LoadBalancerUpdateFailedEvent(environmentDto, e,
                 EnvironmentStatus.LOAD_BALANCER_ENV_UPDATE_FAILED);
             eventSender().sendEvent(failedEvent, envLoadBalancerDtoEvent.getHeaders());

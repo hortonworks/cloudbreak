@@ -35,6 +35,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentLo
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentCrnResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentLoadBalancerUpdateResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponses;
 import com.sequenceiq.flow.api.model.FlowProgressResponse;
@@ -238,15 +239,16 @@ public interface EnvironmentEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.UPDATE_LOAD_BALANCERS_BY_ENV_NAME, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
         nickname = "updateEnvironmentLoadBalancersByNameV11")
-    void updateEnvironmentLoadBalancersByName(@PathParam("name") String envName, @NotNull EnvironmentLoadBalancerUpdateRequest request);
+    EnvironmentLoadBalancerUpdateResponse updateEnvironmentLoadBalancersByName(@PathParam("name") String envName,
+            @NotNull EnvironmentLoadBalancerUpdateRequest request);
 
     @PUT
     @Path("/crn/{crn}/update_load_balancers")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.UPDATE_LOAD_BALANCERS_BY_ENV_CRN, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
         nickname = "updateEnvironmentLoadBalancersByCrnV1")
-    void updateEnvironmentLoadBalancersByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn,
-            @NotNull EnvironmentLoadBalancerUpdateRequest request);
+    EnvironmentLoadBalancerUpdateResponse updateEnvironmentLoadBalancersByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT)
+            @PathParam("crn") String crn, @NotNull EnvironmentLoadBalancerUpdateRequest request);
 
     @GET
     @Path("/progress/resource/crn/{resourceCrn}/last")
