@@ -33,6 +33,11 @@ public class FreeIpaUserSyncTestDto extends AbstractFreeIpaTestDto<SynchronizeAl
         return this;
     }
 
+    public FreeIpaUserSyncTestDto forAllEnvironments() {
+        getRequest().setEnvironments(Set.of());
+        return this;
+    }
+
     public String getEnvironmentCrn() {
         return getTestContext().get(EnvironmentTestDto.class).getResponse().getCrn();
     }
