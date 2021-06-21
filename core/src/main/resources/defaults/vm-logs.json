@@ -39,7 +39,7 @@
     "label": "get_uuid_list"
   },
   {
-    "path": "/var/log/-mount-disks.log",
+    "path": "/var/log/mount-disks.log",
     "label": "mount_disks"
   },
   {
@@ -241,7 +241,7 @@
     "label": "SCHEMAREGISTRY_registry"
   },
   {
-    "path": "${serviceLogFolderPrefix}}/kafka/kafka-broker*.log",
+    "path": "${serviceLogFolderPrefix}/kafka/kafka-broker*.log",
     "label": "KAFKA_BROKER"
   },
   {
