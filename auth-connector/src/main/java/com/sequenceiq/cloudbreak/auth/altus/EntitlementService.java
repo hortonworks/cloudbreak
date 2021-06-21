@@ -45,6 +45,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RAZ;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RUNTIME_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RUNTIME_UPGRADE_DATAHUB;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RUNTIME_UPGRADE_DATAHUB_CUSTOM_TEMPLATE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SDX_HBASE_CLOUD_STORAGE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_USER_SYNC_CREDENTIALS_UPDATE_OPTIMIZATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_USE_CM_SYNC_COMMAND_POLLER;
@@ -198,6 +199,10 @@ public class EntitlementService {
 
     public boolean datahubRuntimeUpgradeEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_RUNTIME_UPGRADE_DATAHUB);
+    }
+
+    public boolean datahubRuntimeUpgradeEnabledForCustomTemplate(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_RUNTIME_UPGRADE_DATAHUB_CUSTOM_TEMPLATE);
     }
 
     public boolean azureSingleResourceGroupDeploymentEnabled(String accountId) {
