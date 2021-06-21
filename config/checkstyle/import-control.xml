@@ -12,7 +12,7 @@
         <file name="AwsClient">
             <allow pkg="(?!.*model)com\.amazonaws\.services.*" regex="true"/>
         </file>
-        <file name="LegacyAwsClient">
+        <file name="AwsCloudFormationClient">
             <allow pkg="(?!.*model)com\.amazonaws\.services.*" regex="true"/>
         </file>
         <file name="CommonAwsClient">

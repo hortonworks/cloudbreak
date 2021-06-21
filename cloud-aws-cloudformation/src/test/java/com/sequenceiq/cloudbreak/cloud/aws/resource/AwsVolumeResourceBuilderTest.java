@@ -28,7 +28,7 @@ import com.amazonaws.services.ec2.model.CreateVolumeRequest;
 import com.amazonaws.services.ec2.model.CreateVolumeResult;
 import com.amazonaws.services.ec2.model.Tag;
 import com.amazonaws.services.ec2.model.TagSpecification;
-import com.sequenceiq.cloudbreak.cloud.aws.LegacyAwsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
@@ -105,7 +105,7 @@ class AwsVolumeResourceBuilderTest {
     private AwsTaggingService awsTaggingService;
 
     @Mock
-    private LegacyAwsClient awsClient;
+    private AwsCloudFormationClient awsClient;
 
     @InjectMocks
     private AwsVolumeResourceBuilder underTest;

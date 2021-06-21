@@ -22,7 +22,7 @@ import com.amazonaws.services.rds.model.DescribeDBInstancesRequest;
 import com.amazonaws.services.rds.model.StopDBInstanceRequest;
 import com.amazonaws.waiters.Waiter;
 import com.amazonaws.waiters.WaiterTimedOutException;
-import com.sequenceiq.cloudbreak.cloud.aws.LegacyAwsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonRdsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.scheduler.CustomAmazonWaiterProvider;
@@ -44,7 +44,7 @@ public class AwsRdsStopServiceTest {
     private static final String SUCCESS_STATUS = "stopped";
 
     @Mock
-    private LegacyAwsClient awsClient;
+    private AwsCloudFormationClient awsClient;
 
     @Mock
     private AuthenticatedContext authenticatedContext;

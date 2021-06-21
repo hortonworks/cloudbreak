@@ -24,7 +24,7 @@ import com.amazonaws.services.cloudformation.model.Stack;
 import com.amazonaws.services.cloudformation.model.StackEvent;
 import com.amazonaws.services.cloudformation.model.StackResource;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
-import com.sequenceiq.cloudbreak.cloud.aws.LegacyAwsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsEncodedAuthorizationFailureMessageDecoder;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 
@@ -36,7 +36,7 @@ class AwsCloudFormationErrorMessageProviderTest {
     private static final String STACK_NAME = "cf-stack";
 
     @Mock
-    private LegacyAwsClient awsClient;
+    private AwsCloudFormationClient awsClient;
 
     @Mock
     private AmazonCloudFormationClient cfRetryClient;

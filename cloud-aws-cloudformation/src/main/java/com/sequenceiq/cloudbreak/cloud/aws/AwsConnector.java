@@ -62,7 +62,7 @@ public class AwsConnector implements CloudConnector<Object> {
     private AwsPlatformResources awsPlatformResources;
 
     @Inject
-    private AwsLegacySetup awsSetup;
+    private AwsCloudFormationSetup awsSetup;
 
     @Inject
     private AwsTagValidator awsTagValidator;

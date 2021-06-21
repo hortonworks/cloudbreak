@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import com.amazonaws.services.rds.model.DescribeDBInstancesRequest;
 import com.amazonaws.services.rds.model.StartDBInstanceRequest;
 import com.amazonaws.waiters.Waiter;
-import com.sequenceiq.cloudbreak.cloud.aws.LegacyAwsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonRdsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.scheduler.StackCancellationCheck;
@@ -26,7 +26,7 @@ public class AwsRdsStartService {
     private static final String SUCCESS_STATUS = "available";
 
     @Inject
-    private LegacyAwsClient awsClient;
+    private AwsCloudFormationClient awsClient;
 
     public void start(AuthenticatedContext ac, DatabaseStack dbStack) throws ExecutionException, TimeoutException, InterruptedException {
         AwsCredentialView credentialView = new AwsCredentialView(ac.getCloudCredential());

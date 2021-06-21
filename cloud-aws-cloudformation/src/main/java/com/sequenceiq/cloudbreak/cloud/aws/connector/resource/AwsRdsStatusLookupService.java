@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import com.amazonaws.services.rds.model.DBInstanceNotFoundException;
 import com.amazonaws.services.rds.model.DescribeDBInstancesRequest;
 import com.amazonaws.services.rds.model.DescribeDBInstancesResult;
-import com.sequenceiq.cloudbreak.cloud.aws.LegacyAwsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonRdsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -25,7 +25,7 @@ public class AwsRdsStatusLookupService {
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsRdsStatusLookupService.class);
 
     @Inject
-    private LegacyAwsClient awsClient;
+    private AwsCloudFormationClient awsClient;
 
     public ExternalDatabaseStatus getStatus(AuthenticatedContext ac, DatabaseStack dbStack) {
         DescribeDBInstancesResult describeDBInstancesResult = getDescribeDBInstancesResultInternal(ac, dbStack, "RDS Querying ExternalDatabaseStatus",

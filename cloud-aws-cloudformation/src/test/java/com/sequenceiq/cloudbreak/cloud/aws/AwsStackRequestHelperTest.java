@@ -58,7 +58,7 @@ public class AwsStackRequestHelperTest {
     private AwsTaggingService awsTaggingService;
 
     @Mock
-    private LegacyAwsClient awsClient;
+    private AwsCloudFormationClient awsClient;
 
     @Mock
     private AuthenticatedContext authenticatedContext;

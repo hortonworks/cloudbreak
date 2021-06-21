@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 public class AwsLaunchConfigurationImageUpdateService {
 
     @Inject
-    private LegacyAwsClient awsClient;
+    private AwsCloudFormationClient awsClient;
 
     @Inject
     private LaunchConfigurationHandler launchConfigurationHandler;

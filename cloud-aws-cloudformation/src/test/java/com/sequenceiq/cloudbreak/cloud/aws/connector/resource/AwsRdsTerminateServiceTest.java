@@ -23,7 +23,7 @@ import com.amazonaws.waiters.WaiterParameters;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsStackRequestHelper;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
-import com.sequenceiq.cloudbreak.cloud.aws.LegacyAwsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -45,7 +45,7 @@ public class AwsRdsTerminateServiceTest {
     private CloudFormationStackUtil cfStackUtil;
 
     @Mock
-    private LegacyAwsClient awsClient;
+    private AwsCloudFormationClient awsClient;
 
     @Mock
     private AwsStackRequestHelper awsStackRequestHelper;

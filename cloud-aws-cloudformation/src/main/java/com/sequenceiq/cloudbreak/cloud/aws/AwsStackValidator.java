@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 public class AwsStackValidator implements Validator {
 
     @Inject
-    private LegacyAwsClient awsClient;
+    private AwsCloudFormationClient awsClient;
 
     @Inject
     private CloudFormationStackUtil cfStackUtil;

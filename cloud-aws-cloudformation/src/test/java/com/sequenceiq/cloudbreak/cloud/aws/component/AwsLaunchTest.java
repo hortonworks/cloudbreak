@@ -68,7 +68,7 @@ import com.amazonaws.waiters.Waiter;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
-import com.sequenceiq.cloudbreak.cloud.aws.LegacyAwsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonCloudWatchClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
@@ -166,7 +166,7 @@ public class AwsLaunchTest {
     private Waiter<DescribeInstancesRequest> instanceWaiter;
 
     @MockBean
-    private LegacyAwsClient awsClient;
+    private AwsCloudFormationClient awsClient;
 
     @MockBean
     private CommonAwsClient commonAwsClient;

@@ -42,7 +42,7 @@ public class AwsLaunchConfigurationImageUpdateServiceTest {
     private static final String IMAGE_NAME = "imageName";
 
     @Mock
-    private LegacyAwsClient awsClient;
+    private AwsCloudFormationClient awsClient;
 
     @Mock
     private LaunchConfigurationHandler launchConfigurationHandler;

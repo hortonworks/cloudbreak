@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 import com.amazonaws.services.rds.model.DescribeDBInstancesRequest;
 import com.amazonaws.services.rds.model.ModifyDBInstanceRequest;
 import com.amazonaws.waiters.Waiter;
-import com.sequenceiq.cloudbreak.cloud.aws.LegacyAwsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonRdsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.scheduler.CustomAmazonWaiterProvider;
@@ -29,7 +29,7 @@ public class AwsRdsModifyService {
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsRdsModifyService.class);
 
     @Inject
-    private LegacyAwsClient awsClient;
+    private AwsCloudFormationClient awsClient;
 
     @Inject
     private CustomAmazonWaiterProvider customAmazonWaiterProvider;

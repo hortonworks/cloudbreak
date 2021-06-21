@@ -29,9 +29,9 @@ import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 
 @Component
-public class AwsLegacySetup extends AwsSetup {
+public class AwsCloudFormationSetup extends AwsSetup {
 
-    private static final Logger LOGGER = getLogger(AwsLegacySetup.class);
+    private static final Logger LOGGER = getLogger(AwsCloudFormationSetup.class);
 
     @Inject
     private CloudFormationStackUtil cfStackUtil;
@@ -40,7 +40,7 @@ public class AwsLegacySetup extends AwsSetup {
     private AwsInstanceConnector instanceConnector;
 
     @Inject
-    private LegacyAwsClient awsClient;
+    private AwsCloudFormationClient awsClient;
 
     @Override
     public void scalingPrerequisites(AuthenticatedContext ac, CloudStack stack, boolean upscale) {

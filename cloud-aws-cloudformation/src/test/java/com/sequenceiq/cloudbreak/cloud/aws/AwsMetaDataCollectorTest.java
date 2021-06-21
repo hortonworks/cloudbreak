@@ -91,7 +91,7 @@ public class AwsMetaDataCollectorTest {
     private static final String AVAILABILITY_ZONE_2 = "availabilityZone2";
 
     @Mock
-    private LegacyAwsClient awsClient;
+    private AwsCloudFormationClient awsClient;
 
     @Mock
     private CloudFormationStackUtil cloudFormationStackUtil;

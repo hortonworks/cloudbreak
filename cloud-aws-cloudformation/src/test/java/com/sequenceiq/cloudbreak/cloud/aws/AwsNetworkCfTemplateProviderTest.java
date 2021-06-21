@@ -56,7 +56,7 @@ public class AwsNetworkCfTemplateProviderTest {
     private FreeMarkerTemplateUtils freeMarkerTemplateUtils;
 
     @Mock
-    private LegacyAwsClient awsClient;
+    private AwsCloudFormationClient awsClient;
 
     private static Stream<Arguments> privateSubnetArguments() {
         return Stream.of(
