@@ -12,6 +12,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_I
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_SINGLE_RESOURCE_GROUP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_SINGLE_RESOURCE_GROUP_DEDICATED_STORAGE_ACCOUNT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_BASE_IMAGE;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_DISK_ENCRYPTION_WITH_CMK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_DISK_SSE_WITH_CMK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_DATABASE_WIRE_ENCRYPTION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CCM_V2;
@@ -268,6 +269,10 @@ public class EntitlementService {
 
     public boolean isAzureDiskSSEWithCMKEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_CB_AZURE_DISK_SSE_WITH_CMK);
+    }
+
+    public boolean isAWSDiskEncryptionWithCMKEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_CB_AWS_DISK_ENCRYPTION_WITH_CMK);
     }
 
     public boolean usersyncCredentialsUpdateOptimizationEnabled(String accountId) {
