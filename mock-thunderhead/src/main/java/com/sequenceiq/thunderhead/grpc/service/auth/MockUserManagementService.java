@@ -34,6 +34,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENDPOIN
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_EXPERIENCE_DELETION_BY_ENVIRONMENT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_HA_REPAIR;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_GCP;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_GCP_HA;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MEDIUM_DUTY_SDX;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_NETWORK_PREFLIGHT_NOTIFICATIONS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_NODESTATUS_ENABLE_SALT_PING;
@@ -369,6 +370,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.ephemeral.disks.for.temp.data.enable}")
     private boolean ephemeralDisksForTempDataEnabled;
+
+    @Value("${auth.mock.gcp.ha}")
+    private boolean gcpHaEnabled;
 
     private String cbLicense;
 
@@ -739,6 +743,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (ephemeralDisksForTempDataEnabled) {
             builder.addEntitlements(createEntitlement(EPHEMERAL_DISKS_FOR_TEMP_DATA));
+        }
+        if (gcpHaEnabled) {
+            builder.addEntitlements(createEntitlement(CDP_GCP_HA));
         }
         if (enableAzureDiskSSEWithCMK) {
             builder.addEntitlements(createEntitlement(CDP_CB_AZURE_DISK_SSE_WITH_CMK));

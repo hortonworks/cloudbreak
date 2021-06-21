@@ -316,6 +316,10 @@ public class EntitlementService {
         return isEntitlementRegistered(accountId, EPHEMERAL_DISKS_FOR_TEMP_DATA);
     }
 
+    public boolean gcpHaEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, Entitlement.CDP_GCP_HA);
+    }
+
     public List<String> getEntitlements(String accountId) {
         Account accountDetails = umsClient.getAccountDetails(
                 accountId,

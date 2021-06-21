@@ -155,7 +155,10 @@ class EntitlementServiceTest {
                 {"DEACTIVATE_USER", (EntitlementCheckFunction) EntitlementService::deactivateUserEnabled, true},
 
                 {"EPHEMERAL_DISKS_FOR_TEMP_DATA", (EntitlementCheckFunction) EntitlementService::ephemeralDisksForTempDataEnabled, false},
-                {"EPHEMERAL_DISKS_FOR_TEMP_DATA", (EntitlementCheckFunction) EntitlementService::ephemeralDisksForTempDataEnabled, true}
+                {"EPHEMERAL_DISKS_FOR_TEMP_DATA", (EntitlementCheckFunction) EntitlementService::ephemeralDisksForTempDataEnabled, true},
+
+                {"CDP_GCP_HA", (EntitlementCheckFunction) EntitlementService::gcpHaEnabled, false},
+                {"CDP_GCP_HA", (EntitlementCheckFunction) EntitlementService::gcpHaEnabled, true},
         };
     }
 

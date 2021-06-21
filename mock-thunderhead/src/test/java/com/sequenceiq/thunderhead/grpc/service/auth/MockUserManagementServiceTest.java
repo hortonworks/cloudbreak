@@ -267,6 +267,9 @@ public class MockUserManagementServiceTest {
 
                 {"ephemeralDisksForTempDataEnabled false", "ephemeralDisksForTempDataEnabled", false, "EPHEMERAL_DISKS_FOR_TEMP_DATA", false},
                 {"ephemeralDisksForTempDataEnabled true", "ephemeralDisksForTempDataEnabled", true, "EPHEMERAL_DISKS_FOR_TEMP_DATA", true},
+
+                {"gcphHaEnabled false", "gcpHaEnabled", false, "CDP_GCP_HA", false },
+                {"gcphHaEnabled true", "gcpHaEnabled", true, "CDP_GCP_HA", true },
         };
     }
 
