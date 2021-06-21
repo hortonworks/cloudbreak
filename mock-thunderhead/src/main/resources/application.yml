@@ -21,7 +21,11 @@ auth:
       aws: true
       azure: true
       gcp: false
-    runtime.upgrade.enable: true
+    runtime:
+      upgrade:
+        enable: true
+        customtemplate:
+          enable: true
     sshpublickey.file: key.pub
     raz.enable: true
     raws3.enable: false

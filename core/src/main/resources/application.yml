@@ -712,6 +712,7 @@ cb:
         enabled: false
       sdx:
         enabled: false
+    requiredServices: DAS,HDFS,HIVE,HIVE_ON_TEZ,HUE,KNOX,LIVY,LIVY_FOR_SPARK3,OOZIE,QUEUEMANAGER,SPARK3_ON_YARN,SPARK_ON_YARN,SQOOP_CLIENT,TEZ,YARN,ZEPPELIN,ZOOKEEPER
 
 cluster:
   monitoring:

@@ -6,6 +6,8 @@ import static com.sequenceiq.cloudbreak.domain.BlueprintUpgradeOption.OS_UPGRADE
 
 import java.util.Optional;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -18,17 +20,20 @@ class BlueprintUpgradeOptionValidator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BlueprintUpgradeOptionValidator.class);
 
+    @Inject
+    private CustomTemplateUpgradeValidator customTemplateUpgradeValidator;
+
     boolean isValidBlueprint(Blueprint blueprint, boolean lockComponents) {
         LOGGER.debug("Validating blueprint upgrade option. Name: {}, type: {}, upgradeOption: {}, lockComponents: {}", blueprint.getName(),
                 blueprint.getStatus(), blueprint.getBlueprintUpgradeOption(), lockComponents);
-        return isCustomBlueprint(blueprint) || isEnabled(lockComponents, blueprint);
+        return isDefaultBlueprint(blueprint) ? isEnabledForDefaultBlueprint(lockComponents, blueprint) : isEnabledForCustomBlueprint(blueprint);
     }
 
-    private boolean isCustomBlueprint(Blueprint blueprint) {
-        return !blueprint.getStatus().isDefault();
+    private boolean isDefaultBlueprint(Blueprint blueprint) {
+        return blueprint.getStatus().isDefault();
     }
 
-    private boolean isEnabled(boolean lockComponents, Blueprint blueprint) {
+    private boolean isEnabledForDefaultBlueprint(boolean lockComponents, Blueprint blueprint) {
         return lockComponents ? isOsUpgradeEnabled(blueprint) : isRuntimeUpgradeEnabled(blueprint);
     }
 
@@ -42,7 +47,10 @@ class BlueprintUpgradeOptionValidator {
     }
 
     private BlueprintUpgradeOption getBlueprintUpgradeOption(Blueprint blueprint) {
-        return Optional.ofNullable(blueprint.getBlueprintUpgradeOption())
-                .orElse(ENABLED);
+        return Optional.ofNullable(blueprint.getBlueprintUpgradeOption()).orElse(ENABLED);
+    }
+
+    private boolean isEnabledForCustomBlueprint(Blueprint blueprint) {
+        return !blueprint.getStatus().isDefault() && customTemplateUpgradeValidator.isValid(blueprint);
     }
 }
