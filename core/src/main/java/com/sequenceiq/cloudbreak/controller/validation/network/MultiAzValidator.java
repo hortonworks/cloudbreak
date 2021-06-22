@@ -52,12 +52,14 @@ public class MultiAzValidator {
         Set<String> allSubnetIds = new HashSet<>();
         for (InstanceGroup instanceGroup : instanceGroups) {
             InstanceGroupNetwork instanceGroupNetwork = instanceGroup.getInstanceGroupNetwork();
-            Json attributes = instanceGroupNetwork.getAttributes();
-            if (attributes != null) {
-                List<String> subnetIds = (List<String>) attributes
-                        .getMap()
-                        .getOrDefault(NetworkConstants.SUBNET_IDS, new ArrayList<>());
-                allSubnetIds.addAll(subnetIds);
+            if (instanceGroupNetwork != null) {
+                Json attributes = instanceGroupNetwork.getAttributes();
+                if (attributes != null) {
+                    List<String> subnetIds = (List<String>) attributes
+                            .getMap()
+                            .getOrDefault(NetworkConstants.SUBNET_IDS, new ArrayList<>());
+                    allSubnetIds.addAll(subnetIds);
+                }
             }
         }
         return allSubnetIds;
