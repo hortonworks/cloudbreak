@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.RandomUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -111,7 +113,7 @@ public class AwsStackRequestHelperTest {
     }
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
         when(authenticatedContext.getParameter(any())).thenReturn(amazonEC2Client);
 
@@ -126,7 +128,7 @@ public class AwsStackRequestHelperTest {
     }
 
     @Test
-    public void testCreateCreateStackRequestForCloudStack() {
+    void testCreateCreateStackRequestForCloudStack() {
         when(cloudContext.getLocation()).thenReturn(Location.location(Region.region("region"), new AvailabilityZone("az")));
         DescribeImagesResult imagesResult = new DescribeImagesResult();
         when(amazonEC2Client.describeImages(any(DescribeImagesRequest.class)))
@@ -147,7 +149,7 @@ public class AwsStackRequestHelperTest {
     }
 
     @Test
-    public void testCreateCreateStackRequestForDatabaseStack() {
+    void testCreateCreateStackRequestForDatabaseStack() {
         Collection<Tag> tags = Lists.newArrayList(new Tag().withKey("mytag").withValue("myvalue"));
         when(awsTaggingService.prepareCloudformationTags(authenticatedContext, databaseStack.getTags())).thenReturn(tags);
 
@@ -163,7 +165,7 @@ public class AwsStackRequestHelperTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("testGetStackParametersDbDataProvider")
-    public void testGetStackParametersDb(String testCaseName, String sslCertificateIdentifier, boolean sslCertificateIdentifierParameterDefinedExpected,
+    void testGetStackParametersDb(String testCaseName, String sslCertificateIdentifier, boolean sslCertificateIdentifierParameterDefinedExpected,
             String sslCertificateIdentifierParameterExpected, String engineVersion, String expectedEngineVersion, String expectedFamily) {
         when(network.getStringParameter("subnetId")).thenReturn("subnet-1234");
 
@@ -215,7 +217,7 @@ public class AwsStackRequestHelperTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("testGetMinimalStackParametersDbDataProvider")
-    public void testGetMinimalStackParametersDb(String testCaseName, String sslCertificateIdentifier) {
+    void testGetMinimalStackParametersDb(String testCaseName, String sslCertificateIdentifier) {
         when(network.getStringParameter("subnetId")).thenReturn("subnet-1234");
 
         when(databaseServer.getStorageSize()).thenReturn(null);
@@ -263,40 +265,58 @@ public class AwsStackRequestHelperTest {
     }
 
     @Test
-    public void testAddParameterChunks() {
+    void testAddParameterChunks() {
         int chunkSize = AwsStackRequestHelper.CHUNK_SIZE;
-        String baseParameterKey = RandomStringUtils.random(20);
-        int len = 2 * chunkSize;
-        String bigParameterValue = RandomStringUtils.random(len);
-        String chunk0 = bigParameterValue.substring(0, chunkSize);
+        String baseParameterKey = RandomStringUtils.randomPrint(20);
         String key1 = baseParameterKey + "1";
-        String chunk1 = bigParameterValue.substring(chunkSize, len);
-        // for padding
         String key2 = baseParameterKey + "2";
 
-        // len is a multiple of chunk size
+        int len = 2 * chunkSize;
+        int emptyCount = RandomUtils.nextInt(1, 20);
+        String bigParameterValue = RandomStringUtils.randomPrint(chunkSize - emptyCount) +
+                StringUtils.repeat(' ', emptyCount) +
+                RandomStringUtils.randomPrint(chunkSize);
+
         Collection<Parameter> parameters = new ArrayList<>();
         underTest.addParameterChunks(parameters, baseParameterKey, bigParameterValue, 3);
-        assertContainsParameter(parameters, baseParameterKey, chunk0);
-        assertContainsParameter(parameters, key1, chunk1);
-        assertContainsParameter(parameters, key2, "");
+        String baseParameterValue = getParameterValue(parameters, baseParameterKey);
+        String key1ParameterValue = getParameterValue(parameters, key1);
+        assertFalse(Character.isWhitespace(baseParameterValue.charAt(baseParameterValue.length() - 1)));
+        assertFalse(Character.isWhitespace(key1ParameterValue.charAt(0)));
 
-        // len is not a multiple of chunk size
-        parameters = new ArrayList<>();
-        underTest.addParameterChunks(parameters, baseParameterKey, bigParameterValue.substring(0, len - 1), 3);
-        assertContainsParameter(parameters, baseParameterKey, chunk0);
-        assertContainsParameter(parameters, key1, chunk1.substring(0, chunkSize - 1));
-        assertContainsParameter(parameters, key2, "");
+        int totalLenght = parameters.stream()
+                .map(Parameter::getParameterValue)
+                .map(String::length)
+                .reduce(0, Integer::sum);
+        assertEquals(len, totalLenght, "Total chunk parameters length is not equal to the original string length");
+        assertEquals(concatParameterValues(parameters, List.of(baseParameterKey, key1, key2)), bigParameterValue,
+                "The concatenated value is not equal to the original string");
+
+    }
+
+    @Test
+    void testAddParameterChunksEmptyInput() {
+        String baseParameterKey = RandomStringUtils.randomPrint(20);
+        String key1 = baseParameterKey + "1";
+        String key2 = baseParameterKey + "2";
 
         // len is 0
-        parameters = new ArrayList<>();
+        Collection<Parameter> parameters = new ArrayList<>();
         underTest.addParameterChunks(parameters, baseParameterKey, "", 3);
+        // this is the backwards-compatible behavior
         assertContainsParameter(parameters, baseParameterKey, "");
         assertContainsParameter(parameters, key1, "");
         assertContainsParameter(parameters, key2, "");
+    }
+
+    @Test
+    void testAddParameterChunksNullInput() {
+        String baseParameterKey = RandomStringUtils.randomPrint(20);
+        String key1 = baseParameterKey + "1";
+        String key2 = baseParameterKey + "2";
 
         // string is null
-        parameters = new ArrayList<>();
+        Collection<Parameter> parameters = new ArrayList<>();
         underTest.addParameterChunks(parameters, baseParameterKey, null, 3);
         // this is the backwards-compatible behavior
         assertContainsParameter(parameters, baseParameterKey, null);
@@ -304,12 +324,28 @@ public class AwsStackRequestHelperTest {
         assertContainsParameter(parameters, key2, "");
     }
 
-    private void assertContainsParameter(Collection<Parameter> parameters, String key, String value) {
+    private String concatParameterValues(Collection<Parameter> parameters, List<String> keys) {
+        StringBuilder sb = new StringBuilder();
+        keys.forEach(key -> {
+            Optional<Parameter> param = parameters.stream()
+                    .filter(p -> p.getParameterKey().equals(key))
+                    .findFirst();
+            assertTrue(param.isPresent(), "Parameter is missing with key: " + key);
+            sb.append(param.get().getParameterValue());
+        });
+        return sb.toString();
+    }
+
+    private String getParameterValue(Collection<Parameter> parameters, String key) {
         Optional<Parameter> foundParameterOpt = parameters.stream()
                 .filter(p -> p.getParameterKey().equals(key))
                 .findFirst();
         assertTrue(foundParameterOpt.isPresent(), "Parameters are missing " + key);
-        String foundValue = foundParameterOpt.get().getParameterValue();
+        return foundParameterOpt.get().getParameterValue();
+    }
+
+    private void assertContainsParameter(Collection<Parameter> parameters, String key, String value) {
+        String foundValue = getParameterValue(parameters, key);
         assertEquals(
                 value, foundValue, "Parameter " + key + " should have value " + value + " but has value " + foundValue);
     }
