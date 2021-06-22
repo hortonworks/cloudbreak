@@ -312,6 +312,7 @@ public class FreeIpaClientBuilder {
                 .setConnectionManager(connectionManager)
                 .setDefaultCookieStore(cookieStore)
                 .setConnectionManagerShared(true)
+                .addInterceptorFirst(new RequestIdProviderInterceptor())
                 .setDefaultSocketConfig(
                         SocketConfig.custom()
                                 .setSoTimeout(SO_TIMEOUT)

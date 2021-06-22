@@ -72,6 +72,7 @@ public class RestClientUtil {
         config.property(ClientProperties.CONNECT_TIMEOUT, connectionTimeout);
         readTimeout.ifPresent(rt -> config.property(ClientProperties.READ_TIMEOUT, rt));
         config.register(MultiPartFeature.class);
+        config.register(RequestIdProviderFeature.class);
 
         ClientBuilder builder = ClientBuilder.newBuilder().withConfig(config);
         builder.sslContext(sslContext);
@@ -91,6 +92,7 @@ public class RestClientUtil {
         config.property(ClientProperties.CONNECT_TIMEOUT, configKey.getTimeout().orElse(CONNECT_TIMEOUT_MS));
         configKey.getTimeout().ifPresent(rt -> config.property(ClientProperties.READ_TIMEOUT, rt));
         config.register(MultiPartFeature.class);
+        config.register(RequestIdProviderFeature.class);
 
         ClientBuilder builder = ClientBuilder.newBuilder().withConfig(config);
 
