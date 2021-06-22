@@ -106,6 +106,7 @@ integrationtest:
       secretKey:
     instance:
       type: m5.2xlarge
+      rootVolumeSize: 100
       volumeSize: 100
       volumeCount: 1
       volumeType: gp2
@@ -138,6 +139,7 @@ integrationtest:
       tenantId:
     instance:
       type: Standard_D16_v3
+      rootVolumeSize: 100
       volumeSize: 100
       volumeCount: 1
       volumeType: StandardSSD_LRS
@@ -186,6 +188,7 @@ integrationtest:
         projectId:
     instance:
       type: n1-standard-8
+      rootVolumeSize: 100
       volumeSize: 100
       volumeCount: 1
       volumeType: pd-standard
@@ -207,6 +210,7 @@ integrationtest:
     networkingOption: self-service
     instance:
       type: m1.xlarge
+      rootVolumeSize: 100
       volumeSize: 100
       volumeCount: 0
       volumeType: HDD
@@ -227,6 +231,7 @@ integrationtest:
     instance:
       cpuCount: 4
       memory: 8192
+      rootVolumeSize: 100
       volumeSize: 0
       volumeCount: 0
     queue: infrastructure-services

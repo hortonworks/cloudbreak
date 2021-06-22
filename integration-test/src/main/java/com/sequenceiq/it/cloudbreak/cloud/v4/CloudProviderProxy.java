@@ -22,6 +22,7 @@ import com.sequenceiq.it.cloudbreak.dto.ImageSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.InstanceTemplateV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.NetworkV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.PlacementSettingsTestDto;
+import com.sequenceiq.it.cloudbreak.dto.RootVolumeV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.StackAuthenticationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.VolumeV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
@@ -30,6 +31,7 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.DistroXClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.image.DistroXImageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXInstanceTemplateTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXNetworkTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXRootVolumeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXVolumeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentAuthenticationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
@@ -184,6 +186,16 @@ public class CloudProviderProxy implements CloudProvider {
     @Override
     public DistroXVolumeTestDto attachedVolume(DistroXVolumeTestDto volume) {
         return getDelegate(volume).attachedVolume(volume);
+    }
+
+    @Override
+    public RootVolumeV4TestDto rootVolume(RootVolumeV4TestDto rootVolume) {
+        return getDelegate(rootVolume).rootVolume(rootVolume);
+    }
+
+    @Override
+    public DistroXRootVolumeTestDto distroXRootVolume(DistroXRootVolumeTestDto distroXRootVolume) {
+        return getDelegate(distroXRootVolume).distroXRootVolume(distroXRootVolume);
     }
 
     @Override
