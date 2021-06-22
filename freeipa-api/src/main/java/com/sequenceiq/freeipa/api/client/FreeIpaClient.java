@@ -7,6 +7,7 @@ import com.sequenceiq.freeipa.api.v1.diagnostics.DiagnosticsV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.dns.DnsV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.test.ClientTestV1Endpoint;
+import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.FreeIpaUpgradeV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.UserV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.kerberos.KerberosConfigV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.KerberosMgmtV1Endpoint;
@@ -41,4 +42,6 @@ public interface FreeIpaClient {
     CDPStructuredEventV1Endpoint structuredEventsV1Endpoint();
 
     UtilV1Endpoint utilV1Endpoint();
+
+    FreeIpaUpgradeV1Endpoint getFreeIpaUpgradeV1Endpoint();
 }
