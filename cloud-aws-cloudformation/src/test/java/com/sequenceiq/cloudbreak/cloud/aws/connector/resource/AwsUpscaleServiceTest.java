@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -56,6 +57,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.model.GroupNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
@@ -67,6 +69,7 @@ import com.sequenceiq.cloudbreak.cloud.transform.CloudResourceHelper;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.LoadBalancerType;
+import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 import com.sequenceiq.common.api.type.ResourceType;
 
 class AwsUpscaleServiceTest {
@@ -539,30 +542,32 @@ class AwsUpscaleServiceTest {
 
     private Group getWorkerGroup(InstanceAuthentication instanceAuthentication) {
         List<CloudInstance> cloudInstances = new ArrayList<>();
-        CloudInstance workerInstance1 = new CloudInstance("i-worker1", mock(InstanceTemplate.class), instanceAuthentication);
-        CloudInstance workerInstance2 = new CloudInstance("i-worker2", mock(InstanceTemplate.class), instanceAuthentication);
-        CloudInstance workerInstance3 = new CloudInstance("i-worker3", mock(InstanceTemplate.class), instanceAuthentication);
+        CloudInstance workerInstance1 = new CloudInstance("i-worker1", mock(InstanceTemplate.class), instanceAuthentication, "subnet-1", "az1");
+        CloudInstance workerInstance2 = new CloudInstance("i-worker2", mock(InstanceTemplate.class), instanceAuthentication, "subnet-1", "az1");
+        CloudInstance workerInstance3 = new CloudInstance("i-worker3", mock(InstanceTemplate.class), instanceAuthentication, "subnet-1", "az1");
         InstanceTemplate newInstanceTemplate = mock(InstanceTemplate.class);
         when(newInstanceTemplate.getStatus()).thenReturn(InstanceStatus.CREATE_REQUESTED);
-        CloudInstance workerInstance4 = new CloudInstance(null, newInstanceTemplate, instanceAuthentication);
-        CloudInstance workerInstance5 = new CloudInstance(null, newInstanceTemplate, instanceAuthentication);
+        CloudInstance workerInstance4 = new CloudInstance(null, newInstanceTemplate, instanceAuthentication, "subnet-1", "az1");
+        CloudInstance workerInstance5 = new CloudInstance(null, newInstanceTemplate, instanceAuthentication, "subnet-1", "az1");
         cloudInstances.add(workerInstance1);
         cloudInstances.add(workerInstance2);
         cloudInstances.add(workerInstance3);
         cloudInstances.add(workerInstance4);
         cloudInstances.add(workerInstance5);
         return new Group("worker", InstanceGroupType.CORE, cloudInstances, null, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), 50, Optional.empty());
+                instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(), 50, Optional.empty(), createGroupNetwork());
     }
 
     private Group getMasterGroup(InstanceAuthentication instanceAuthentication) {
         List<CloudInstance> masterInstances = new ArrayList<>();
-        CloudInstance masterInstance1 = new CloudInstance("i-master1", mock(InstanceTemplate.class), instanceAuthentication);
-        CloudInstance masterInstance2 = new CloudInstance("i-master2", mock(InstanceTemplate.class), instanceAuthentication);
+        CloudInstance masterInstance1 = new CloudInstance("i-master1", mock(InstanceTemplate.class), instanceAuthentication, "subnet-1", "az1");
+        CloudInstance masterInstance2 = new CloudInstance("i-master2", mock(InstanceTemplate.class), instanceAuthentication, "subnet-1", "az1");
         masterInstances.add(masterInstance1);
         masterInstances.add(masterInstance2);
         return new Group("master", InstanceGroupType.GATEWAY, masterInstances, null, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), 50, Optional.empty());
+                instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(), 50, Optional.empty(), createGroupNetwork());
     }
 
     private Network getNetwork() {
@@ -570,5 +575,9 @@ class AwsUpscaleServiceTest {
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
         return new Network(new Subnet(null), networkParameters);
+    }
+
+    private GroupNetwork createGroupNetwork() {
+        return new GroupNetwork(OutboundInternetTraffic.DISABLED, new HashSet<>(), new HashMap<>());
     }
 }

@@ -74,7 +74,11 @@ public abstract class AbstractGcpComputeBaseResourceChecker extends AbstractGcpB
     }
 
     protected CloudInstance createOperationAwareCloudInstance(CloudInstance instance, Operation operation) {
-        return new CloudInstance(instance.getInstanceId(), instance.getTemplate(), instance.getAuthentication(),
+        return new CloudInstance(instance.getInstanceId(),
+                instance.getTemplate(),
+                instance.getAuthentication(),
+                instance.getSubnetId(),
+                instance.getAvailabilityZone(),
                 Collections.singletonMap(OPERATION_ID, operation.getName()));
     }
 

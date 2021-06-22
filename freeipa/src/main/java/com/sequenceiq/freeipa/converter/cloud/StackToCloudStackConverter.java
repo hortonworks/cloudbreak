@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_GROUP_USAGE_PARAMETER;
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.CREATE_REQUESTED;
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.DELETE_REQUESTED;
+import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_ID;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus.REQUESTED;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -35,6 +36,8 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.model.GroupNetwork;
+import com.sequenceiq.cloudbreak.cloud.model.GroupSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
@@ -110,8 +113,12 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
     public CloudStack convert(Stack stack, Collection<String> deleteRequestedInstances) {
         Image image = imageConverter.convert(imageService.getByStack(stack));
         Optional<CloudFileSystemView> fileSystemView = buildFileSystemView(stack);
-        List<Group> instanceGroups = buildInstanceGroups(Lists.newArrayList(stack.getInstanceGroups()), stack.getStackAuthentication(),
-                deleteRequestedInstances, stack.getCloudPlatform(), image.getImageName(), fileSystemView, stack.getEnvironmentCrn());
+        List<Group> instanceGroups = buildInstanceGroups(
+                stack,
+                Lists.newArrayList(stack.getInstanceGroups()),
+                deleteRequestedInstances,
+                image.getImageName(),
+                fileSystemView);
         Network network = buildNetwork(stack);
         InstanceAuthentication instanceAuthentication = buildInstanceAuthentication(stack.getStackAuthentication());
         Map<String, String> parameters = buildCloudStackParameters(stack.getEnvironmentCrn());
@@ -124,27 +131,43 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
     public CloudInstance buildInstance(Stack stack, InstanceMetaData instanceMetaData, InstanceGroup instanceGroup,
             StackAuthentication stackAuthentication, Long privateId, InstanceStatus status) {
         ImageEntity imageEntity = imageService.getByStack(stack);
-        return buildInstance(instanceMetaData, instanceGroup, stackAuthentication, privateId, status, imageEntity.getImageName(), stack.getEnvironmentCrn());
+        return buildInstance(stack,
+                instanceMetaData,
+                instanceGroup,
+                stackAuthentication,
+                privateId,
+                status,
+                imageEntity.getImageName());
     }
 
-    private CloudInstance buildInstance(InstanceMetaData instanceMetaData, InstanceGroup instanceGroup,
-            StackAuthentication stackAuthentication, Long privateId, InstanceStatus status, String imageName, String environmentCrn) {
+    private CloudInstance buildInstance(Stack stack, InstanceMetaData instanceMetaData, InstanceGroup instanceGroup,
+            StackAuthentication stackAuthentication, Long privateId, InstanceStatus status, String imageName) {
         LOGGER.debug("Instance metadata is {}", instanceMetaData);
         String id = instanceMetaData == null ? null : instanceMetaData.getInstanceId();
         String name = instanceGroup.getGroupName();
         Template template = instanceGroup.getTemplate();
         InstanceTemplate instanceTemplate = buildInstanceTemplate(template, name, privateId, status, imageName);
         InstanceAuthentication instanceAuthentication = buildInstanceAuthentication(stackAuthentication);
-        Map<String, Object> parameters = buildCloudInstanceParameters(environmentCrn, instanceMetaData);
+        Map<String, Object> parameters = buildCloudInstanceParameters(stack.getEnvironmentCrn(), instanceMetaData);
 
-        return new CloudInstance(id, instanceTemplate, instanceAuthentication, parameters);
+        return new CloudInstance(
+                id,
+                instanceTemplate,
+                instanceAuthentication,
+                instanceMetaData.getSubnetId(),
+                stack.getAvailabilityZone(),
+                parameters);
     }
 
     public List<CloudInstance> buildInstances(Stack stack) {
         ImageEntity imageEntity = imageService.getByStack(stack);
         Optional<CloudFileSystemView> fileSystemView = buildFileSystemView(stack);
-        List<Group> groups = buildInstanceGroups(Lists.newArrayList(stack.getInstanceGroups()), stack.getStackAuthentication(), Collections.emptySet(),
-                stack.getCloudPlatform(), imageEntity.getImageName(), fileSystemView, stack.getEnvironmentCrn());
+        List<Group> groups = buildInstanceGroups(
+                stack,
+                Lists.newArrayList(stack.getInstanceGroups()),
+                Collections.emptySet(),
+                imageEntity.getImageName(),
+                fileSystemView);
 
         List<CloudInstance> cloudInstances = new ArrayList<>();
         for (Group group : groups) {
@@ -193,11 +216,13 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
         return result;
     }
 
-    private List<Group> buildInstanceGroups(List<InstanceGroup> instanceGroups, StackAuthentication stackAuthentication, Collection<String> deleteRequests,
-            String cloudPlatform, String imageName, Optional<CloudFileSystemView> fileSystemView, String environmentCrn) {
+    private List<Group> buildInstanceGroups(Stack stack, List<InstanceGroup> instanceGroups, Collection<String> deleteRequests,
+        String imageName, Optional<CloudFileSystemView> fileSystemView) {
+        String cloudPlatform = stack.getCloudPlatform();
         // sort by name to avoid shuffling the different instance groups
         Collections.sort(instanceGroups);
         List<Group> groups = new ArrayList<>();
+        InstanceAuthentication instanceAuthentication = buildInstanceAuthentication(stack.getStackAuthentication());
         for (InstanceGroup instanceGroup : instanceGroups) {
             if (instanceGroup.getTemplate() != null) {
                 CloudInstance skeleton = null;
@@ -206,21 +231,22 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
                 // existing instances
                 for (InstanceMetaData metaData : instanceGroup.getNotDeletedInstanceMetaDataSet()) {
                     InstanceStatus status = getInstanceStatus(metaData, deleteRequests);
-                    instances.add(buildInstance(metaData, instanceGroup, stackAuthentication, metaData.getPrivateId(), status,
-                            imageName, environmentCrn));
+                    instances.add(buildInstance(stack, metaData, instanceGroup, stack.getStackAuthentication(), metaData.getPrivateId(), status,
+                            imageName));
                 }
                 if (instanceGroup.getNodeCount() == 0) {
-                    skeleton = buildInstance(null, instanceGroup, stackAuthentication, 0L,
-                            CREATE_REQUESTED, imageName, environmentCrn);
+                    skeleton = buildInstance(stack, null, instanceGroup, stack.getStackAuthentication(), 0L,
+                            CREATE_REQUESTED, imageName);
                 }
                 Json attributes = instanceGroup.getAttributes();
-                InstanceAuthentication instanceAuthentication = buildInstanceAuthentication(stackAuthentication);
                 Map<String, Object> fields = attributes == null ? Collections.emptyMap() : attributes.getMap();
 
                 Integer rootVolumeSize = instanceGroup.getTemplate().getRootVolumeSize();
                 if (Objects.isNull(rootVolumeSize)) {
                     rootVolumeSize = defaultRootVolumeSizeProvider.getForPlatform(cloudPlatform);
                 }
+
+                GroupNetwork groupNetwork = buildGroupNetwork(stack.getNetwork());
 
                 groups.add(
                         new Group(instanceGroup.getGroupName(),
@@ -232,7 +258,9 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
                                 instanceAuthentication,
                                 instanceAuthentication.getLoginUserName(),
                                 instanceAuthentication.getPublicKey(),
-                                rootVolumeSize, fileSystemView)
+                                rootVolumeSize,
+                                fileSystemView,
+                                groupNetwork)
                 );
             }
         }
@@ -244,6 +272,20 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
                 stackAuthentication.getPublicKey(),
                 stackAuthentication.getPublicKeyId(),
                 stackAuthentication.getLoginUserName());
+    }
+
+    private GroupNetwork buildGroupNetwork(com.sequenceiq.freeipa.entity.Network network) {
+        Map<String, Object> params = new HashMap<>();
+        String subnetId = null;
+        if (network != null) {
+            Json attributes = network.getAttributes();
+            params = attributes == null ? Collections.emptyMap() : attributes.getMap();
+            if (params != null) {
+                subnetId = (String) params.get(SUBNET_ID);
+            }
+        }
+        GroupSubnet subnet = new GroupSubnet(subnetId);
+        return new GroupNetwork(network.getOutboundInternetTraffic(), Set.of(subnet), params);
     }
 
     private Security buildSecurity(InstanceGroup ig) {
@@ -392,7 +434,7 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
             params.put(CloudInstance.DISCOVERY_NAME, hostName);
         }
         if (subnetId != null) {
-            params.put(CloudInstance.SUBNET_ID, subnetId);
+            params.put(SUBNET_ID, subnetId);
         }
         if (instanceName != null) {
             params.put(CloudInstance.INSTANCE_NAME, instanceName);

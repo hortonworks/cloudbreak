@@ -178,7 +178,7 @@ public class GcpMetadataCollectorTest {
 
     private CloudInstance createCloudInstance(String name, Long privateId) {
         InstanceTemplate instanceTemplate = createInstanceTemplate(privateId);
-        return new CloudInstance(name, instanceTemplate, null);
+        return new CloudInstance(name, instanceTemplate, null, "subnet-1", "az1");
     }
 
     private InstanceTemplate createInstanceTemplate(Long privateId) {

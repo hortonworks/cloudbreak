@@ -49,8 +49,8 @@ public class InstanceStateHandlerTest {
     @Before
     public void init() {
         instances = Arrays.asList(
-                new CloudInstance("host1", null, null),
-                new CloudInstance("host2", null, null)
+                new CloudInstance("host1", null, null, "subnet-1", "az1"),
+                new CloudInstance("host2", null, null, "subnet-1", "az1")
         );
         request = new GetInstancesStateRequest<>(null, null, instances);
         event = new Event<>(request);

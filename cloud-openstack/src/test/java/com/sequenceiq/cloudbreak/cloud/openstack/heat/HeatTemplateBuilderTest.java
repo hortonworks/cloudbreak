@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -39,6 +40,7 @@ import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.model.GroupNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
@@ -57,6 +59,7 @@ import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
+import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
@@ -122,12 +125,13 @@ public class HeatTemplateBuilderTest {
         InstanceTemplate instanceTemplate = new InstanceTemplate("m1.medium", name, 0L, volumes, InstanceStatus.CREATE_REQUESTED,
                 new HashMap<>(), 0L, "cb-centos66-amb200-2015-05-25", TemporaryStorage.ATTACHED_VOLUMES);
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
-        CloudInstance instance = new CloudInstance("SOME_ID", instanceTemplate, instanceAuthentication);
+        CloudInstance instance = new CloudInstance("SOME_ID", instanceTemplate, instanceAuthentication, "subnet-1", "az1");
         List<SecurityRule> rules = singletonList(new SecurityRule("0.0.0.0/0",
                 new PortDefinition[]{new PortDefinition("22", "22"), new PortDefinition("443", "443")}, "tcp"));
         Security security = new Security(rules, emptyList());
         groups.add(new Group(name, InstanceGroupType.CORE, singletonList(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), 50, Optional.empty()));
+                instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(), 50, Optional.empty(), createGroupNetwork()));
         Map<InstanceGroupType, String> userData = ImmutableMap.of(
                 InstanceGroupType.CORE, "CORE",
                 InstanceGroupType.GATEWAY, "GATEWAY"
@@ -174,7 +178,7 @@ public class HeatTemplateBuilderTest {
         Security security = new Security(emptyList(), singletonList(cloudSecurityId));
         Group groupWithSecGroup = new Group(group.getName(), InstanceGroupType.CORE, group.getInstances(), security, null,
                 group.getInstanceAuthentication(), group.getInstanceAuthentication().getLoginUserName(),
-                group.getInstanceAuthentication().getPublicKey(), 50, Optional.empty());
+                group.getInstanceAuthentication().getPublicKey(), 50, Optional.empty(), createGroupNetwork());
         groups.add(groupWithSecGroup);
 
         //WHEN
@@ -509,6 +513,10 @@ public class HeatTemplateBuilderTest {
         }
         // template has no version, we assume it is the latest one
         return true;
+    }
+
+    private GroupNetwork createGroupNetwork() {
+        return new GroupNetwork(OutboundInternetTraffic.DISABLED, new HashSet<>(), new HashMap<>());
     }
 
 }

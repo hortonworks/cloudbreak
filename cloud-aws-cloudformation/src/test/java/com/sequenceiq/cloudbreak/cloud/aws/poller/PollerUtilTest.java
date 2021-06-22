@@ -69,7 +69,7 @@ public class PollerUtilTest {
         CloudContext context = createCloudContext();
         CloudCredential cloudCredential = new CloudCredential(STACK_ID.toString(), "");
         AuthenticatedContext ac = new AuthenticatedContext(context, cloudCredential);
-        CloudInstance cloudInstance = new CloudInstance("instanceId", null, null);
+        CloudInstance cloudInstance = new CloudInstance("instanceId", null, null, "subnet-1", "az1");
         List<CloudInstance> instances = List.of(cloudInstance);
 
         CloudVmInstanceStatus cloudVmInstanceStatus = new CloudVmInstanceStatus(cloudInstance, InstanceStatus.CREATED);
@@ -90,7 +90,7 @@ public class PollerUtilTest {
         CloudContext context = createCloudContext();
         CloudCredential cloudCredential = new CloudCredential(STACK_ID.toString(), "");
         AuthenticatedContext ac = new AuthenticatedContext(context, cloudCredential);
-        CloudInstance cloudInstance = new CloudInstance("instanceId", null, null);
+        CloudInstance cloudInstance = new CloudInstance("instanceId", null, null, "subnet-1", "az1");
         List<CloudInstance> instances = List.of(cloudInstance);
 
         CloudVmInstanceStatus cloudVmInstanceStatus1 = new CloudVmInstanceStatus(cloudInstance, InstanceStatus.IN_PROGRESS);
@@ -113,7 +113,7 @@ public class PollerUtilTest {
 
         CloudCredential cloudCredential = new CloudCredential(STACK_ID.toString(), "");
         AuthenticatedContext ac = new AuthenticatedContext(createCloudContext(), cloudCredential);
-        CloudInstance cloudInstance = new CloudInstance("instanceId", null, null);
+        CloudInstance cloudInstance = new CloudInstance("instanceId", null, null, "subnet-1", "az1");
         List<CloudInstance> instances = List.of(cloudInstance);
 
         when(awsInstanceConnector.check(ac, instances)).thenReturn(List.of(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.FAILED)));
@@ -131,7 +131,7 @@ public class PollerUtilTest {
 
         CloudCredential cloudCredential = new CloudCredential(STACK_ID.toString(), "");
         AuthenticatedContext ac = new AuthenticatedContext(createCloudContext(), cloudCredential);
-        CloudInstance cloudInstance = new CloudInstance("instanceId", null, null);
+        CloudInstance cloudInstance = new CloudInstance("instanceId", null, null, "subnet-1", "az1");
         List<CloudInstance> instances = List.of(cloudInstance);
 
         when(awsInstanceConnector.check(ac, instances))

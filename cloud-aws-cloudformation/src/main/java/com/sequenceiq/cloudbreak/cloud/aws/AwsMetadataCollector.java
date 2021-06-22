@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
+import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_ID;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -154,8 +156,12 @@ public class AwsMetadataCollector implements MetadataCollector {
         if (!unknownInstancesForGroup.isEmpty()) {
             Optional<Instance> found = unknownInstancesForGroup.stream().findFirst();
             Instance foundInstance = found.get();
-            CloudInstance newCloudInstance = new CloudInstance(foundInstance.getInstanceId(), cloudInstance.getTemplate(),
-                    cloudInstance.getAuthentication(), cloudInstance.getParameters());
+            CloudInstance newCloudInstance = new CloudInstance(foundInstance.getInstanceId(),
+                    cloudInstance.getTemplate(),
+                    cloudInstance.getAuthentication(),
+                    cloudInstance.getSubnetId(),
+                    cloudInstance.getAvailabilityZone(),
+                    cloudInstance.getParameters());
             addCloudInstanceNetworkParameters(newCloudInstance, foundInstance, subnetIdToAvailabilityZoneMap);
             CloudInstanceMetaData cloudInstanceMetaData = new CloudInstanceMetaData(
                     foundInstance.getPrivateIpAddress(),
@@ -170,8 +176,10 @@ public class AwsMetadataCollector implements MetadataCollector {
 
     private void addCloudInstanceNetworkParameters(CloudInstance cloudInstance, Instance instance, Map<String, String> subnetIdToAvailabilityZoneMap) {
         String subnetId = instance.getSubnetId();
-        cloudInstance.putParameter(CloudInstance.SUBNET_ID, subnetId);
-        cloudInstance.putParameter(CloudInstance.AVAILABILITY_ZONE, subnetIdToAvailabilityZoneMap.get(subnetId));
+        cloudInstance.putParameter(SUBNET_ID, subnetId);
+        cloudInstance.setSubnetId(subnetId);
+        String availabilityZone = subnetIdToAvailabilityZoneMap.get(subnetId);
+        cloudInstance.setAvailabilityZone(availabilityZone);
     }
 
     private void addKnownInstance(CloudInstance cloudInstance, Multimap<String, Instance> instancesOnAWSForGroup,

@@ -5,11 +5,16 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.model.GroupNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.LoadBalancerType;
+import com.sequenceiq.common.api.type.OutboundInternetTraffic;
+
 import org.junit.jupiter.api.Test;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -39,14 +44,15 @@ class AzureLoadBalancerModelBuilderTest {
         CloudStack mockCloudStack = mock(CloudStack.class);
         Group targetGroup = new Group(INSTANCE_GROUP_NAME,
                 InstanceGroupType.GATEWAY,
-                List.of(new CloudInstance(INSTANCE_NAME, null, null)),
+                List.of(new CloudInstance(INSTANCE_NAME, null, null, "subnet-1", "az1")),
                 null,
                 null,
                 null,
                 null,
                 null,
                 64,
-                null);
+                null,
+                createGroupNetwork());
         CloudLoadBalancer cloudLoadBalancer = new CloudLoadBalancer(LoadBalancerType.PRIVATE);
         cloudLoadBalancer.addPortToTargetGroupMapping(new TargetGroupPortPair(443, 443), Set.of(targetGroup));
         when(mockCloudStack.getLoadBalancers()).thenReturn(List.of(cloudLoadBalancer));
@@ -69,5 +75,9 @@ class AzureLoadBalancerModelBuilderTest {
         List<AzureLoadBalancer> mappingList = mapping.get(INSTANCE_GROUP_NAME);
         assertEquals(1, mappingList.size());
         assertEquals(LOAD_BALANCER_STACK_NAME, mappingList.get(0).getName());
+    }
+
+    private GroupNetwork createGroupNetwork() {
+        return new GroupNetwork(OutboundInternetTraffic.DISABLED, new HashSet<>(), new HashMap<>());
     }
 }

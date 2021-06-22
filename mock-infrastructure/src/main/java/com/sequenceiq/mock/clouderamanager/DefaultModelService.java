@@ -56,7 +56,12 @@ public class DefaultModelService {
                 CloudInstance cloudInstance = group.getInstances().get(instanceIndex);
                 String address = generateAddress(prefix, spiDto, indexOfExistedGroup, ret);
                 String instanceId = String.format("instance-%s", address);
-                CloudInstance cloudInstanceWithId = new CloudInstance(instanceId, getTemplateCreated(cloudInstance), cloudInstance.getAuthentication());
+                CloudInstance cloudInstanceWithId = new CloudInstance(
+                        instanceId,
+                        getTemplateCreated(cloudInstance),
+                        cloudInstance.getAuthentication(),
+                        cloudInstance.getSubnetId(),
+                        cloudInstance.getAvailabilityZone());
                 CloudVmInstanceStatus cloudVmInstanceStatus = new CloudVmInstanceStatus(cloudInstanceWithId, InstanceStatus.STARTED);
                 String publicIp = mockInfrastructureHost + ":10090/" + name;
                 CloudInstanceMetaData cloudInstanceMetaData = new CloudInstanceMetaData(address, publicIp, SSH_PORT, "MOCK");

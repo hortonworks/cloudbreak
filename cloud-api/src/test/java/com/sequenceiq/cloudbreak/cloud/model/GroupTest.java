@@ -8,6 +8,8 @@ import static org.mockito.Mockito.mock;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 
 @ExtendWith(MockitoExtension.class)
 class GroupTest {
@@ -141,11 +144,15 @@ class GroupTest {
 
     private Group createGroup(Collection<CloudInstance> instances, CloudInstance skeleton) {
         return new Group(GROUP_NAME, InstanceGroupType.GATEWAY, instances, security, skeleton, instanceAuthentication, LOGIN_USER_NAME, PUBLIC_KEY,
-                ROOT_VOLUME_SIZE, Optional.empty());
+                ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork());
     }
 
     private CloudInstance createCloudInstance() {
-        return new CloudInstance(INSTANCE_ID, mock(InstanceTemplate.class), instanceAuthentication);
+        return new CloudInstance(INSTANCE_ID, mock(InstanceTemplate.class), instanceAuthentication, "subnet-123", "eu1a");
+    }
+
+    private GroupNetwork createGroupNetwork() {
+        return new GroupNetwork(OutboundInternetTraffic.DISABLED, new HashSet<>(), new HashMap<>());
     }
 
 }

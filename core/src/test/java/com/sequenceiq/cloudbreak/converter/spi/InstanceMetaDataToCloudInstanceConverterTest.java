@@ -17,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
+import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.cloudbreak.converter.AbstractEntityConverterTest;
 import com.sequenceiq.cloudbreak.converter.InstanceMetadataToImageIdConverter;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
@@ -63,18 +64,16 @@ public class InstanceMetaDataToCloudInstanceConverterTest extends AbstractEntity
     }
 
     private void verifyParams(CloudInstance cloudInstance, String subnetId, String instanceName, String availabilityZone) {
-        assertEquals(3, cloudInstance.getParameters().size());
-        assertThat(cloudInstance.getStringParameter(CloudInstance.SUBNET_ID)).isEqualTo(subnetId);
+        assertEquals(2, cloudInstance.getParameters().size());
+        assertThat(cloudInstance.getStringParameter(NetworkConstants.SUBNET_ID)).isEqualTo(subnetId);
         assertThat(cloudInstance.getStringParameter(CloudInstance.INSTANCE_NAME)).isEqualTo(instanceName);
-        assertThat(cloudInstance.getStringParameter(CloudInstance.AVAILABILITY_ZONE)).isEqualTo(availabilityZone);
     }
 
     private void initStackToCloudStackConverter(boolean withParams) {
         Map<String, Object> params = new HashMap<>();
         if (withParams) {
-            params.put(CloudInstance.SUBNET_ID, SUBNET_ID);
+            params.put(NetworkConstants.SUBNET_ID, SUBNET_ID);
             params.put(CloudInstance.INSTANCE_NAME, INSTANCE_NAME);
-            params.put(CloudInstance.AVAILABILITY_ZONE, AVAILABILITY_ZONE);
         }
         when(stackToCloudStackConverter.buildCloudInstanceParameters(any(), any(), any())).thenReturn(params);
     }

@@ -537,7 +537,7 @@ public class AzureUtilsTest {
 
     @NotNull
     private CloudInstance createCloudInstance(String instanceId) {
-        return new CloudInstance(instanceId, null, null);
+        return new CloudInstance(instanceId, null, null, "subnet-1", "az1");
     }
 
     private Map<String, VirtualMachine> createVirtualMachineMap(String... instanceIds) {

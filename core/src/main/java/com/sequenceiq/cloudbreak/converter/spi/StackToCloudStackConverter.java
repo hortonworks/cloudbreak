@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.CREATE_REQUESTED;
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.DELETE_REQUESTED;
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.TERMINATED;
+import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_ID;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 import static com.sequenceiq.cloudbreak.util.NullUtil.putIfPresent;
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -35,6 +37,8 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.model.GroupNetwork;
+import com.sequenceiq.cloudbreak.cloud.model.GroupSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
@@ -54,6 +58,7 @@ import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.cloudbreak.converter.InstanceMetadataToImageIdConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
@@ -65,6 +70,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.stack.instance.network.InstanceGroupNetwork;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.TargetGroup;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
@@ -180,7 +186,12 @@ public class StackToCloudStackConverter {
 
         Map<String, Object> parameters = buildCloudInstanceParameters(
                 stack.getEnvironmentCrn(), instanceMetaData, CloudPlatform.valueOf(stack.getCloudPlatform()));
-        return new CloudInstance(id, instanceTemplate, instanceAuthentication, parameters);
+        return new CloudInstance(id,
+                instanceTemplate,
+                instanceAuthentication,
+                instanceMetaData == null ? null : instanceMetaData.getSubnetId(),
+                instanceMetaData == null ? null : instanceMetaData.getAvailabilityZone(),
+                parameters);
     }
 
     InstanceTemplate buildInstanceTemplate(Template template, String name, Long privateId, InstanceStatus status, String instanceImageId) {
@@ -267,7 +278,8 @@ public class StackToCloudStackConverter {
                                         instanceAuthentication.getPublicKey(),
                                         getRootVolumeSize(instanceGroup),
                                         cloudFileSystemView,
-                                        buildDeletedCloudInstances(stackAuthentication, deleteRequests, instanceGroup))
+                                        buildDeletedCloudInstances(stackAuthentication, deleteRequests, instanceGroup),
+                                        buildGroupNetwork(stack.getNetwork(), instanceGroup))
                         );
                     }
                 }
@@ -396,6 +408,25 @@ public class StackToCloudStackConverter {
         return spiFileSystem;
     }
 
+    public GroupNetwork buildGroupNetwork(com.sequenceiq.cloudbreak.domain.Network stackNetwork, InstanceGroup instanceGroup) {
+        GroupNetwork groupNetwork = null;
+        InstanceGroupNetwork instanceGroupNetwork = instanceGroup.getInstanceGroupNetwork();
+        if (instanceGroupNetwork != null) {
+            Json attributes = instanceGroupNetwork.getAttributes();
+            Map<String, Object> params = attributes == null ? Collections.emptyMap() : attributes.getMap();
+            Set<GroupSubnet> subnets = new HashSet<>();
+            if (params != null) {
+                List<String> subnetIds = (List<String>) params.getOrDefault(NetworkConstants.SUBNET_IDS, new ArrayList<>());
+                for (String subnetId : subnetIds) {
+                    GroupSubnet groupSubnet = new GroupSubnet(subnetId);
+                    subnets.add(groupSubnet);
+                }
+            }
+            groupNetwork = new GroupNetwork(stackNetwork.getOutboundInternetTraffic(), subnets, params);
+        }
+        return groupNetwork;
+    }
+
     public Network buildNetwork(Stack stack) {
         com.sequenceiq.cloudbreak.domain.Network stackNetwork = stack.getNetwork();
         Network result = null;
@@ -423,8 +454,7 @@ public class StackToCloudStackConverter {
     public Map<String, Object> buildCloudInstanceParameters(String environmentCrn, InstanceMetaData instanceMetaData, CloudPlatform platform) {
         Map<String, Object> params = new HashMap<>();
         putIfPresent(params, CloudInstance.DISCOVERY_NAME, getIfNotNull(instanceMetaData, InstanceMetaData::getShortHostname));
-        putIfPresent(params, CloudInstance.SUBNET_ID, getIfNotNull(instanceMetaData, InstanceMetaData::getSubnetId));
-        putIfPresent(params, CloudInstance.AVAILABILITY_ZONE, getIfNotNull(instanceMetaData, InstanceMetaData::getAvailabilityZone));
+        putIfPresent(params, SUBNET_ID, getIfNotNull(instanceMetaData, InstanceMetaData::getSubnetId));
         putIfPresent(params, CloudInstance.INSTANCE_NAME, getIfNotNull(instanceMetaData, InstanceMetaData::getInstanceName));
         Optional<AzureResourceGroup> resourceGroupOptional = getAzureResourceGroup(environmentCrn, platform);
         if (resourceGroupOptional.isPresent() && !ResourceGroupUsage.MULTIPLE.equals(resourceGroupOptional.get().getResourceGroupUsage())) {

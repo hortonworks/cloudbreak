@@ -36,30 +36,68 @@ public class Group extends DynamicModel {
 
     private final List<CloudInstance> deletedInstances;
 
-    public Group(String name, InstanceGroupType type, Collection<CloudInstance> instances, Security security, CloudInstance skeleton,
-            InstanceAuthentication instanceAuthentication, String loginUserName, String publicKey,
-            int rootVolumeSize, Optional<CloudFileSystemView> identity) {
+    private final GroupNetwork network;
+
+    public Group(String name,
+        InstanceGroupType type,
+        Collection<CloudInstance> instances,
+        Security security,
+        CloudInstance skeleton,
+        InstanceAuthentication instanceAuthentication,
+        String loginUserName,
+        String publicKey,
+        int rootVolumeSize,
+        Optional<CloudFileSystemView> identity,
+        GroupNetwork groupNetwork) {
         this(name, type, instances, security, skeleton, new HashMap<>(), instanceAuthentication, loginUserName, publicKey,
-            rootVolumeSize, identity, new ArrayList<>());
+            rootVolumeSize, identity, new ArrayList<>(), groupNetwork);
     }
 
-    public Group(String name, InstanceGroupType type, Collection<CloudInstance> instances, Security security, CloudInstance skeleton,
-            InstanceAuthentication instanceAuthentication, String loginUserName, String publicKey,
-            int rootVolumeSize, Optional<CloudFileSystemView> identity, List<CloudInstance> deletedInstances) {
+    public Group(String name,
+        InstanceGroupType type,
+        Collection<CloudInstance> instances,
+        Security security,
+        CloudInstance skeleton,
+        InstanceAuthentication instanceAuthentication,
+        String loginUserName,
+        String publicKey,
+        int rootVolumeSize,
+        Optional<CloudFileSystemView> identity,
+        List<CloudInstance> deletedInstances,
+        GroupNetwork groupNetwork) {
         this(name, type, instances, security, skeleton, new HashMap<>(), instanceAuthentication, loginUserName, publicKey,
-            rootVolumeSize, identity, deletedInstances);
+            rootVolumeSize, identity, deletedInstances, groupNetwork);
     }
 
-    public Group(String name, InstanceGroupType type, Collection<CloudInstance> instances, Security security, CloudInstance skeleton,
-            Map<String, Object> parameters, InstanceAuthentication instanceAuthentication, String loginUserName,
-            String publicKey, int rootVolumeSize, Optional<CloudFileSystemView> identity) {
+    public Group(String name,
+        InstanceGroupType type,
+        Collection<CloudInstance> instances,
+        Security security,
+        CloudInstance skeleton,
+        Map<String, Object> parameters,
+        InstanceAuthentication instanceAuthentication,
+        String loginUserName,
+        String publicKey,
+        int rootVolumeSize,
+        Optional<CloudFileSystemView> identity,
+        GroupNetwork groupNetwork) {
         this(name, type, instances, security, skeleton, parameters, instanceAuthentication, loginUserName, publicKey,
-            rootVolumeSize, identity, new ArrayList<>());
+            rootVolumeSize, identity, new ArrayList<>(), groupNetwork);
     }
 
-    public Group(String name, InstanceGroupType type, Collection<CloudInstance> instances, Security security, CloudInstance skeleton,
-            Map<String, Object> parameters, InstanceAuthentication instanceAuthentication, String loginUserName,
-            String publicKey, int rootVolumeSize, Optional<CloudFileSystemView> identity, List<CloudInstance> deletedInstances) {
+    public Group(String name,
+        InstanceGroupType type,
+        Collection<CloudInstance> instances,
+        Security security,
+        CloudInstance skeleton,
+        Map<String, Object> parameters,
+        InstanceAuthentication instanceAuthentication,
+        String loginUserName,
+        String publicKey,
+        int rootVolumeSize,
+        Optional<CloudFileSystemView> identity,
+        List<CloudInstance> deletedInstances,
+        GroupNetwork groupNetwork) {
         super(parameters);
         this.name = name;
         this.type = type;
@@ -72,6 +110,7 @@ public class Group extends DynamicModel {
         this.rootVolumeSize = rootVolumeSize;
         this.identity = identity;
         this.deletedInstances = deletedInstances;
+        this.network = groupNetwork;
     }
 
     public CloudInstance getReferenceInstanceConfiguration() {
@@ -129,18 +168,25 @@ public class Group extends DynamicModel {
         return deletedInstances;
     }
 
+    public GroupNetwork getNetwork() {
+        return network;
+    }
+
     @Override
     public String toString() {
-        return "Group{"
-                + "name='" + name + '\''
-                + ", type=" + type
-                + ", instances=" + instances
-                + ", security=" + security
-                + ", publicKey='" + publicKey + '\''
-                + ", loginUserName='" + loginUserName + '\''
-                + ", instanceAuthentication=" + instanceAuthentication
-                + ", skeleton=" + skeleton
-                + ", deletedInstances=" + deletedInstances
-                + '}';
+        return "Group{" +
+                "name=" + name +
+                ", type=" + type +
+                ", instances=" + instances +
+                ", security=" + security +
+                ", publicKey=" + publicKey +
+                ", loginUserName=" + loginUserName +
+                ", instanceAuthentication=" + instanceAuthentication +
+                ", skeleton=" + skeleton +
+                ", rootVolumeSize=" + rootVolumeSize +
+                ", identity=" + identity +
+                ", deletedInstances=" + deletedInstances +
+                ", network=" + network +
+                '}';
     }
 }

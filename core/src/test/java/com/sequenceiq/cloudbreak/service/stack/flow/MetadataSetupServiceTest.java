@@ -38,6 +38,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
@@ -132,7 +133,7 @@ public class MetadataSetupServiceTest {
         };
     }
 
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "saveInstanceMetaDataTestDataProvider {0}")
     @MethodSource("saveInstanceMetaDataTestDataProvider")
     public void saveInstanceMetaDataTestOneNewInstance(String testCaseName, String subnetId, String availabilityZone, String rackIdExpected)
             throws CloudbreakImageNotFoundException {
@@ -161,7 +162,7 @@ public class MetadataSetupServiceTest {
         assertNotNull(instanceMetaData.getImage());
     }
 
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "saveInstanceMetaDataTestOneTerminatedInstance {0}")
     @MethodSource("saveInstanceMetaDataTestDataProvider")
     public void saveInstanceMetaDataTestOneTerminatedInstance(String testCaseName, String subnetId, String availabilityZone, String rackIdExpected)
             throws CloudbreakImageNotFoundException {
@@ -231,10 +232,9 @@ public class MetadataSetupServiceTest {
         InstanceTemplate instanceTemplate = new InstanceTemplate(null, GROUP_NAME, PRIVATE_ID, List.of(), null, Map.of(), null, null,
                 TemporaryStorage.ATTACHED_VOLUMES);
         Map<String, Object> params = new HashMap<>();
-        params.put(CloudInstance.SUBNET_ID, subnetId);
-        params.put(CloudInstance.AVAILABILITY_ZONE, availabilityZone);
+        params.put(NetworkConstants.SUBNET_ID, subnetId);
         params.put(CloudInstance.INSTANCE_NAME, INSTANCE_NAME);
-        CloudInstance cloudInstance = new CloudInstance(null, instanceTemplate, null, params);
+        CloudInstance cloudInstance = new CloudInstance(null, instanceTemplate, null, subnetId, availabilityZone, params);
         CloudVmInstanceStatus cloudVmInstanceStatus = new CloudVmInstanceStatus(cloudInstance, instanceStatus);
         CloudInstanceMetaData cloudInstanceMetaData =
                 new CloudInstanceMetaData(PRIVATE_IP, PUBLIC_IP, SSH_PORT, LOCALITY_INDICATOR, CloudInstanceLifeCycle.SPOT);

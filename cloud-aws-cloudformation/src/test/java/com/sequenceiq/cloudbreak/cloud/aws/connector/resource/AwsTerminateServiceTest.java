@@ -8,6 +8,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -41,12 +43,14 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.model.GroupNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.template.compute.ComputeResourceService;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -157,7 +161,8 @@ public class AwsTerminateServiceTest {
     public void testTerminateWhenResourcesHasNoCfButStackNotExist() {
         CloudResource cf = new Builder().name("cfn-87654321").type(ResourceType.CLOUDFORMATION_STACK).build();
         CloudResource lc = new Builder().name("lc-87654321").type(ResourceType.AWS_LAUNCHCONFIGURATION).build();
-        Group group = new Group("alma", InstanceGroupType.GATEWAY, List.of(), null, null, null, null, "", 0, Optional.empty());
+        Group group = new Group("alma", InstanceGroupType.GATEWAY, List.of(), null, null, null, null,
+                "", 0, Optional.empty(), createGroupNetwork());
         DescribeAutoScalingGroupsResult describeAutoScalingGroupsResult = new DescribeAutoScalingGroupsResult();
         describeAutoScalingGroupsResult.setAutoScalingGroups(List.of());
 
@@ -181,7 +186,8 @@ public class AwsTerminateServiceTest {
     public void testTerminateWhenResourcesHasCf() {
         CloudResource cf = new Builder().name("cfn-87654321").type(ResourceType.CLOUDFORMATION_STACK).build();
         CloudResource lc = new Builder().name("lc-87654321").type(ResourceType.AWS_LAUNCHCONFIGURATION).build();
-        Group group = new Group("alma", InstanceGroupType.GATEWAY, List.of(), null, null, null, null, "", 0, Optional.empty());
+        Group group = new Group("alma", InstanceGroupType.GATEWAY, List.of(), null, null, null, null,
+                "", 0, Optional.empty(), createGroupNetwork());
         DescribeAutoScalingGroupsResult describeAutoScalingGroupsResult = new DescribeAutoScalingGroupsResult();
         describeAutoScalingGroupsResult.setAutoScalingGroups(List.of());
 
@@ -221,5 +227,9 @@ public class AwsTerminateServiceTest {
         AuthenticatedContext ac = new AuthenticatedContext(cloudContext, credential);
         ac.putParameter(AmazonEc2Client.class, ec2Client);
         return ac;
+    }
+
+    private GroupNetwork createGroupNetwork() {
+        return new GroupNetwork(OutboundInternetTraffic.DISABLED, new HashSet<>(), new HashMap<>());
     }
 }

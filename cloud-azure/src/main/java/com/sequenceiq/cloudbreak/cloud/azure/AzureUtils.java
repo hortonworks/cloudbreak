@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
+import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_ID;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.util.ArrayList;
@@ -208,7 +209,7 @@ public class AzureUtils {
     }
 
     public List<String> getCustomSubnetIds(Network network) {
-        String subnetIds = network.getStringParameter(CloudInstance.SUBNET_ID);
+        String subnetIds = network.getStringParameter(SUBNET_ID);
         if (StringUtils.isBlank(subnetIds)) {
             return new ArrayList<>();
         }

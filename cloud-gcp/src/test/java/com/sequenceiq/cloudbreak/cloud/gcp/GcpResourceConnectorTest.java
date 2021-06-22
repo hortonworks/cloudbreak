@@ -18,6 +18,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -36,6 +38,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.model.GroupNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
@@ -52,6 +55,7 @@ import com.sequenceiq.cloudbreak.cloud.template.network.NetworkResourceService;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @ExtendWith(MockitoExtension.class)
@@ -208,7 +212,7 @@ public class GcpResourceConnectorTest {
     }
 
     private CloudInstance cloudInstance(String name) {
-        return new CloudInstance(name, instanceTemplate(), instanceAuthentication());
+        return new CloudInstance(name, instanceTemplate(), instanceAuthentication(), "subnet-1", "az1");
     }
 
     private Group group(String name) {
@@ -222,7 +226,8 @@ public class GcpResourceConnectorTest {
                 "loginUserName",
                 "publicKey",
                 50,
-                Optional.empty());
+                Optional.empty(),
+                createGroupNetwork());
     }
 
     private InstanceTemplate instanceTemplate() {
@@ -235,6 +240,10 @@ public class GcpResourceConnectorTest {
     }
 
     private CloudInstance cloudInstance() {
-        return new CloudInstance("test-1", instanceTemplate(), instanceAuthentication());
+        return new CloudInstance("test-1", instanceTemplate(), instanceAuthentication(), "subnet-1", "az1");
+    }
+
+    private GroupNetwork createGroupNetwork() {
+        return new GroupNetwork(OutboundInternetTraffic.DISABLED, new HashSet<>(), new HashMap<>());
     }
 }

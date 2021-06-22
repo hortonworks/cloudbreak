@@ -14,6 +14,7 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -67,6 +68,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.model.GroupNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
@@ -80,6 +82,7 @@ import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.cloudbreak.service.RetryService;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 
 import io.opentracing.Tracer;
 
@@ -154,8 +157,8 @@ public class AwsValidatorsTest {
         when(amazonCloudFormationClient.describeStacks(any())).thenThrow(new AmazonServiceException("stackName does not exist"));
         InstanceTemplate template =
                 new InstanceTemplate("noStorage", "worker", 0L, List.of(), InstanceStatus.CREATE_REQUESTED, Map.of(), 0L, "", ATTACHED_VOLUMES);
-        CloudInstance instance = new CloudInstance("", template, null);
-        Group group = new Group("worker", InstanceGroupType.CORE, List.of(instance), null, null, null, "", "", 0, Optional.empty());
+        CloudInstance instance = new CloudInstance("", template, null, "subnet-1", "az1");
+        Group group = new Group("worker", InstanceGroupType.CORE, List.of(instance), null, null, null, "", "", 0, Optional.empty(), createGroupNetwork());
         CloudStack cloudStack = new CloudStack(List.of(group), null, null, Map.of(), Map.of(), "", null, "", "", null);
         awsStackValidatorUnderTest.validate(authenticatedContext, cloudStack);
     }
@@ -169,10 +172,12 @@ public class AwsValidatorsTest {
                 new InstanceTemplate("noStorage", "worker", 0L, List.of(volume), InstanceStatus.CREATE_REQUESTED, Map.of(), 0L, "", EPHEMERAL_VOLUMES);
         InstanceTemplate storageTemplate =
                 new InstanceTemplate("storage", "compute", 0L, List.of(volume), InstanceStatus.CREATE_REQUESTED, Map.of(), 0L, "", EPHEMERAL_VOLUMES);
-        CloudInstance noStorageInstance = new CloudInstance("", noStorageTemplate, null);
-        CloudInstance storageInstance = new CloudInstance("", storageTemplate, null);
-        Group noStoragegroup = new Group("worker", InstanceGroupType.CORE, List.of(noStorageInstance), null, null, null, "", "", 0, Optional.empty());
-        Group storageGroup = new Group("compute", InstanceGroupType.CORE, List.of(storageInstance), null, null, null, "", "", 0, Optional.empty());
+        CloudInstance noStorageInstance = new CloudInstance("", noStorageTemplate, null, "subnet-1", "az1");
+        CloudInstance storageInstance = new CloudInstance("", storageTemplate, null, "subnet-1", "az1");
+        Group noStoragegroup = new Group("worker", InstanceGroupType.CORE,
+                List.of(noStorageInstance), null, null, null, "", "", 0, Optional.empty(), createGroupNetwork());
+        Group storageGroup = new Group("compute", InstanceGroupType.CORE,
+                List.of(storageInstance), null, null, null, "", "", 0, Optional.empty(), createGroupNetwork());
         CloudStack cloudStack = new CloudStack(List.of(noStoragegroup, storageGroup), null, null, Map.of(), Map.of(), "", null, "", "", null);
 
         CloudVmTypes cloudVmTypes = new CloudVmTypes();
@@ -271,6 +276,10 @@ public class AwsValidatorsTest {
     private CloudStack getTestCloudStackWithTags(Map<String, String> tags) {
         return new CloudStack(List.of(), null, null, Map.of(), tags,
                 "", null, null, null, null);
+    }
+
+    private GroupNetwork createGroupNetwork() {
+        return new GroupNetwork(OutboundInternetTraffic.DISABLED, new HashSet<>(), new HashMap<>());
     }
 
     @Configuration

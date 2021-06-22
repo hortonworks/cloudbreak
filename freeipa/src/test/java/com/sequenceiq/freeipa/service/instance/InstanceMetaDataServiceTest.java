@@ -105,7 +105,7 @@ public class InstanceMetaDataServiceTest {
     public void testSaveInstanceAndGetUpdatedStack() {
         InstanceTemplate template = mock(InstanceTemplate.class);
         when(template.getGroupName()).thenReturn(GROUP_NAME);
-        List<CloudInstance> cloudInstances = List.of(new CloudInstance(INSTANCE_ID_3, template, null));
+        List<CloudInstance> cloudInstances = List.of(new CloudInstance(INSTANCE_ID_3, template, null, "subnet-1", "az1"));
         Stack stack1 = underTest.saveInstanceAndGetUpdatedStack(stack, cloudInstances);
         verify(instanceMetaDataRepository).save(any());
         assertEquals(3, stack1.getAllInstanceMetaDataList().size());

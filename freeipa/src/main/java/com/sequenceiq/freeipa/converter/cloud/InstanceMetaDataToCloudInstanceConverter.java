@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.converter.cloud;
 
+import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_ID;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -60,7 +62,7 @@ public class InstanceMetaDataToCloudInstanceConverter extends AbstractConversion
                 stackAuthentication.map(StackAuthentication::getPublicKeyId).orElse(null),
                 stackAuthentication.map(StackAuthentication::getLoginUserName).orElse(null));
         Map<String, Object> params = new HashMap<>();
-        params.put(CloudInstance.SUBNET_ID, metaDataEntity.getSubnetId());
+        params.put(SUBNET_ID, metaDataEntity.getSubnetId());
         params.put(CloudInstance.INSTANCE_NAME, metaDataEntity.getInstanceName());
 
         Stack stack = stackAuthenticationView
@@ -69,7 +71,13 @@ public class InstanceMetaDataToCloudInstanceConverter extends AbstractConversion
                 .orElseThrow(NotFoundException::new);
         Map<String, Object> cloudInstanceParameters = stackToCloudStackConverter.buildCloudInstanceParameters(stack.getEnvironmentCrn(), metaDataEntity);
         params.putAll(cloudInstanceParameters);
-        return new CloudInstance(metaDataEntity.getInstanceId(), instanceTemplate, instanceAuthentication, params);
+        return new CloudInstance(
+                metaDataEntity.getInstanceId(),
+                instanceTemplate,
+                instanceAuthentication,
+                metaDataEntity.getSubnetId(),
+                stack.getAvailabilityZone(),
+                params);
     }
 
     private InstanceStatus getInstanceStatus(InstanceMetaData metaData) {

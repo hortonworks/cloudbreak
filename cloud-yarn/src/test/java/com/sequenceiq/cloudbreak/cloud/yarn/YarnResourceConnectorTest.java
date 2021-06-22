@@ -14,6 +14,7 @@ import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -35,6 +36,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.model.GroupNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
@@ -52,6 +54,7 @@ import com.sequenceiq.cloudbreak.cloud.yarn.client.model.response.ResponseContex
 import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 
 @RunWith(MockitoJUnitRunner.class)
 public class YarnResourceConnectorTest {
@@ -178,7 +181,11 @@ public class YarnResourceConnectorTest {
         InstanceGroupType type = InstanceGroupType.CORE;
         Collection<CloudInstance> instances = Lists.newArrayList(cloudInstanceMock, cloudInstanceMock);
 
-        return new Group(name, type, instances, null, null, null, null, null, 50, Optional.empty());
+        return new Group(name, type, instances, null, null, null, null, null, 50, Optional.empty(), createGroupNetwork());
+    }
+
+    private GroupNetwork createGroupNetwork() {
+        return new GroupNetwork(OutboundInternetTraffic.DISABLED, new HashSet<>(), new HashMap<>());
     }
 
     private Map<String, String> setUpStackParameters() {
