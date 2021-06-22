@@ -92,6 +92,8 @@ public class YarnProperties {
 
         private Integer memory;
 
+        private Integer rootVolumeSize;
+
         private Integer volumeSize;
 
         private Integer volumeCount;
@@ -110,6 +112,14 @@ public class YarnProperties {
 
         public void setMemory(Integer memory) {
             this.memory = memory;
+        }
+
+        public Integer getRootVolumeSize() {
+            return rootVolumeSize;
+        }
+
+        public void setRootVolumeSize(Integer rootVolumeSize) {
+            this.rootVolumeSize = rootVolumeSize;
         }
 
         public Integer getVolumeSize() {

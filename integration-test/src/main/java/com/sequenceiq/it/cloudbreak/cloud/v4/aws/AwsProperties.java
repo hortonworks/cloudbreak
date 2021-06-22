@@ -107,6 +107,8 @@ public class AwsProperties {
 
         private String type;
 
+        private Integer rootVolumeSize;
+
         private Integer volumeSize;
 
         private Integer volumeCount;
@@ -119,6 +121,14 @@ public class AwsProperties {
 
         public void setType(String type) {
             this.type = type;
+        }
+
+        public Integer getRootVolumeSize() {
+            return rootVolumeSize;
+        }
+
+        public void setRootVolumeSize(Integer rootVolumeSize) {
+            this.rootVolumeSize = rootVolumeSize;
         }
 
         public Integer getVolumeSize() {

@@ -15,7 +15,7 @@ public class DistroXRootVolumeTestDto extends AbstractCloudbreakTestDto<RootVolu
 
     @Override
     public DistroXRootVolumeTestDto valid() {
-        return withSize(50);
+        return getCloudProvider().distroXRootVolume(this);
     }
 
     public DistroXRootVolumeTestDto withSize(int size) {
