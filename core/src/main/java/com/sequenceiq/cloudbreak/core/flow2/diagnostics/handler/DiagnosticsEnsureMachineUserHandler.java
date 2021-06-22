@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.Diagnostics
 import static com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.DiagnosticsCollectionStateSelectors.START_DIAGNOSTICS_COLLECTION_EVENT;
 
 import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -54,11 +55,17 @@ public class DiagnosticsEnsureMachineUserHandler extends EventSenderAwareHandler
                 parameters.setSupportBundleDbusAccessKey(credential.getAccessKey());
                 parameters.setSupportBundleDbusPrivateKey(credential.getPrivateKey());
             }
+            Set<String> hosts = parameters.getHosts();
+            Set<String> hostGroups = parameters.getHostGroups();
+            Set<String> excludedHosts = parameters.getExcludeHosts();
             DiagnosticsCollectionEvent diagnosticsCollectionEvent = DiagnosticsCollectionEvent.builder()
                     .withResourceCrn(resourceCrn)
                     .withResourceId(resourceId)
                     .withSelector(START_DIAGNOSTICS_COLLECTION_EVENT.selector())
                     .withParameters(parameters)
+                    .withHostGroups(hostGroups)
+                    .withHosts(hosts)
+                    .withExcludeHosts(excludedHosts)
                     .build();
             eventSender().sendEvent(diagnosticsCollectionEvent, event.getHeaders());
         } catch (Exception e) {
