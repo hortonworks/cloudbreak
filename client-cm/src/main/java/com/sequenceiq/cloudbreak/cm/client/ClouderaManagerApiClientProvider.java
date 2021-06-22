@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.client.CertificateTrustManager;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.client.KeyStoreUtil;
 import com.sequenceiq.cloudbreak.cm.client.tracing.CmOkHttpTracingInterceptor;
+import com.sequenceiq.cloudbreak.cm.client.tracing.CmRequestIdProviderInterceptor;
 import com.sequenceiq.cloudbreak.util.HostUtil;
 
 @Component
@@ -45,6 +46,9 @@ public class ClouderaManagerApiClientProvider {
 
     @Inject
     private CmOkHttpTracingInterceptor cmOkHttpTracingInterceptor;
+
+    @Inject
+    private CmRequestIdProviderInterceptor cmRequestIdProviderInterceptor;
 
     public ApiClient getDefaultClient(Integer gatewayPort, HttpClientConfig clientConfig, String apiVersion) throws ClouderaManagerClientInitException {
         ApiClient client = getClouderaManagerClient(clientConfig, gatewayPort, "admin", "admin", apiVersion);
@@ -118,6 +122,7 @@ public class ClouderaManagerApiClientProvider {
                 cmClient.getHttpClient().setHostnameVerifier(CertificateTrustManager.hostnameVerifier());
             }
             cmClient.getHttpClient().interceptors().add(cmOkHttpTracingInterceptor);
+            cmClient.getHttpClient().interceptors().add(cmRequestIdProviderInterceptor);
             cmClient.getHttpClient().setConnectTimeout(Long.valueOf(connectTimeoutSeconds), TimeUnit.SECONDS);
             cmClient.getHttpClient().setReadTimeout(Long.valueOf(readTimeoutSeconds), TimeUnit.SECONDS);
             cmClient.getHttpClient().setWriteTimeout(Long.valueOf(writeTimeoutSeconds), TimeUnit.SECONDS);
