@@ -88,7 +88,7 @@ public class AzureStackView {
     }
 
     private String getInstanceSubnetId(CloudInstance instance, AzureSubnetStrategy subnetStrategy) {
-        String stored = instance.getStringParameter(CloudInstance.SUBNET_ID);
+        String stored = instance.getSubnetId();
         if (StringUtils.isNoneBlank(stored)) {
             return stored;
         }

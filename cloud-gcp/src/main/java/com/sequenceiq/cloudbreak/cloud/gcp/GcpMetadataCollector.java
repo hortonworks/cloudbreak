@@ -94,7 +94,12 @@ public class GcpMetadataCollector implements MetadataCollector {
             Map<String, Optional<NetworkInterface>> networkInterfacesByInstance) {
         CloudVmMetaDataStatus cloudVmMetaDataStatus;
         if (cloudResource != null) {
-            CloudInstance cloudInstance = new CloudInstance(cloudResource.getName(), matchedInstance.getTemplate(), matchedInstance.getAuthentication());
+            CloudInstance cloudInstance = new CloudInstance(
+                    cloudResource.getName(),
+                    matchedInstance.getTemplate(),
+                    matchedInstance.getAuthentication(),
+                    matchedInstance.getSubnetId(),
+                    matchedInstance.getAvailabilityZone());
             Optional<NetworkInterface> networkInterface = networkInterfacesByInstance.get(cloudResource.getName());
             try {
                 String privateIp = networkInterface

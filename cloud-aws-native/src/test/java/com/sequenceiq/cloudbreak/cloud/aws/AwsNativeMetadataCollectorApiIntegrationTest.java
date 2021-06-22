@@ -112,10 +112,10 @@ class AwsNativeMetadataCollectorApiIntegrationTest {
 
     @Test
     void collectInstanceMetadataWhenTheSpecifiedInstanceInstanceIdsDoNotExist() {
-        InstanceTemplate instanceTemplate =
-                new InstanceTemplate("flavor", "alma", 1L, Set.of(), InstanceStatus.UNKNOWN, Map.of(), 1L, "imageid", TemporaryStorage.ATTACHED_VOLUMES);
-        CloudInstance cloudInstance1 = new CloudInstance("i-0000067a1cfd73843", instanceTemplate, null, Map.of());
-        CloudInstance cloudInstance2 = new CloudInstance("i-0000057a1cfd73843", instanceTemplate, null, Map.of());
+        InstanceTemplate instanceTemplate = new InstanceTemplate("flavor", "alma", 1L, Set.of(), InstanceStatus.UNKNOWN,
+                Map.of(), 1L, "imageid", TemporaryStorage.ATTACHED_VOLUMES);
+        CloudInstance cloudInstance1 = new CloudInstance("i-0000067a1cfd73843", instanceTemplate, null, "subnet-123", "az1", Map.of());
+        CloudInstance cloudInstance2 = new CloudInstance("i-0000057a1cfd73843", instanceTemplate, null, "subnet-123", "az1", Map.of());
         List<CloudInstance> vms = List.of(cloudInstance1, cloudInstance2);
 
         List<CloudVmMetaDataStatus> collect = underTest.collect(authenticatedContext, List.of(), vms, vms);

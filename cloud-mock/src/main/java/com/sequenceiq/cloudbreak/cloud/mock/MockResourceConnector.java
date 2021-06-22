@@ -141,8 +141,17 @@ public class MockResourceConnector implements ResourceConnector<Object> {
                     List<CloudInstance> newInstances = g.getInstances().stream()
                             .filter(i -> i.getTemplate().getStatus() == InstanceStatus.CREATE_REQUESTED)
                             .collect(Collectors.toList());
-                    return new Group(g.getName(), g.getType(), newInstances, g.getSecurity(), g.getReferenceInstanceConfiguration(),
-                            g.getInstanceAuthentication(), g.getLoginUserName(), g.getPublicKey(), g.getRootVolumeSize(), g.getIdentity());
+                    return new Group(g.getName(),
+                            g.getType(),
+                            newInstances,
+                            g.getSecurity(),
+                            g.getReferenceInstanceConfiguration(),
+                            g.getInstanceAuthentication(),
+                            g.getLoginUserName(),
+                            g.getPublicKey(),
+                            g.getRootVolumeSize(),
+                            g.getIdentity(),
+                            g.getNetwork());
                 }).collect(Collectors.toList());
 
         List<CloudVmInstanceStatus> resized = resize(authenticatedContext, groups);

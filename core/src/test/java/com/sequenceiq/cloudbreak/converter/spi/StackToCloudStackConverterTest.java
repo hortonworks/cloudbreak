@@ -58,6 +58,7 @@ import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.cloudbreak.converter.InstanceMetadataToImageIdConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -294,7 +295,7 @@ public class StackToCloudStackConverterTest {
         assertEquals(1L, result.getGroups().size());
         assertEquals(1L, result.getGroups().get(0).getInstances().size());
         assertEquals(fqdnParsedName, result.getGroups().get(0).getInstances().get(0).getParameters().get(CloudInstance.DISCOVERY_NAME));
-        assertEquals(metaData.getSubnetId(), result.getGroups().get(0).getInstances().get(0).getParameters().get(CloudInstance.SUBNET_ID));
+        assertEquals(metaData.getSubnetId(), result.getGroups().get(0).getInstances().get(0).getParameters().get(NetworkConstants.SUBNET_ID));
         assertEquals(metaData.getInstanceName(), result.getGroups().get(0).getInstances().get(0).getParameters().get(CloudInstance.INSTANCE_NAME));
     }
 
@@ -810,12 +811,11 @@ public class StackToCloudStackConverterTest {
 
         Map<String, Object> result = underTest.buildCloudInstanceParameters(ENV_CRN, metaData, CloudPlatform.AWS);
 
-        assertThat(result).hasSize(4);
+        assertThat(result).hasSize(3);
         assertThat(result).doesNotContainKey(RESOURCE_GROUP_NAME_PARAMETER);
         assertThat(result).doesNotContainKey(RESOURCE_GROUP_USAGE_PARAMETER);
         assertThat(result.get(CloudInstance.DISCOVERY_NAME)).isEqualTo(DISCOVERY_NAME);
-        assertThat(result.get(CloudInstance.SUBNET_ID)).isEqualTo(SUBNET_ID);
-        assertThat(result.get(CloudInstance.AVAILABILITY_ZONE)).isEqualTo(AVAILABILITY_ZONE);
+        assertThat(result.get(NetworkConstants.SUBNET_ID)).isEqualTo(SUBNET_ID);
         assertThat(result.get(CloudInstance.INSTANCE_NAME)).isEqualTo(INSTANCE_NAME);
     }
 
@@ -860,8 +860,7 @@ public class StackToCloudStackConverterTest {
         assertEquals(ResourceGroupUsage.SINGLE.name(), result.get(RESOURCE_GROUP_USAGE_PARAMETER).toString());
         assertEquals(5, result.size());
         assertThat(result.get(CloudInstance.DISCOVERY_NAME)).isEqualTo(DISCOVERY_NAME);
-        assertThat(result.get(CloudInstance.SUBNET_ID)).isEqualTo(SUBNET_ID);
-        assertThat(result).doesNotContainKey(CloudInstance.AVAILABILITY_ZONE);
+        assertThat(result.get(NetworkConstants.SUBNET_ID)).isEqualTo(SUBNET_ID);
         assertThat(result.get(CloudInstance.INSTANCE_NAME)).isEqualTo(INSTANCE_NAME);
     }
 
@@ -888,8 +887,7 @@ public class StackToCloudStackConverterTest {
         assertFalse(result.containsKey(RESOURCE_GROUP_USAGE_PARAMETER));
         assertEquals(3, result.size());
         assertThat(result.get(CloudInstance.DISCOVERY_NAME)).isEqualTo(DISCOVERY_NAME);
-        assertThat(result.get(CloudInstance.SUBNET_ID)).isEqualTo(SUBNET_ID);
-        assertThat(result).doesNotContainKey(CloudInstance.AVAILABILITY_ZONE);
+        assertThat(result.get(NetworkConstants.SUBNET_ID)).isEqualTo(SUBNET_ID);
         assertThat(result.get(CloudInstance.INSTANCE_NAME)).isEqualTo(INSTANCE_NAME);
     }
 
@@ -1114,13 +1112,13 @@ public class StackToCloudStackConverterTest {
         assertEquals(fqdnParsedName,
             result.getGroups().get(0).getInstances().get(0).getParameters().get(CloudInstance.DISCOVERY_NAME));
         assertEquals(metaData.getSubnetId(),
-            result.getGroups().get(0).getInstances().get(0).getParameters().get(CloudInstance.SUBNET_ID));
+            result.getGroups().get(0).getInstances().get(0).getParameters().get(NetworkConstants.SUBNET_ID));
         assertEquals(metaData.getInstanceName(),
             result.getGroups().get(0).getInstances().get(0).getParameters().get(CloudInstance.INSTANCE_NAME));
         assertEquals(terminatedFqdnParsedName,
             result.getGroups().get(0).getDeletedInstances().get(0).getParameters().get(CloudInstance.DISCOVERY_NAME));
         assertEquals(terminatedMetaData.getSubnetId(),
-            result.getGroups().get(0).getDeletedInstances().get(0).getParameters().get(CloudInstance.SUBNET_ID));
+            result.getGroups().get(0).getDeletedInstances().get(0).getParameters().get(NetworkConstants.SUBNET_ID));
         assertEquals(terminatedMetaData.getInstanceName(),
             result.getGroups().get(0).getDeletedInstances().get(0).getParameters().get(CloudInstance.INSTANCE_NAME));
     }

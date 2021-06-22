@@ -143,9 +143,10 @@ public class MetadataSetupService {
                 instanceMetaDataEntry.setInstanceGroup(instanceGroup);
                 instanceMetaDataEntry.setInstanceId(instanceId);
                 instanceMetaDataEntry.setPrivateId(privateId);
+                instanceMetaDataEntry.setAvailabilityZone(cloudInstance.getAvailabilityZone());
                 instanceMetaDataEntry.setStartDate(clock.getCurrentTimeMillis());
-                instanceMetaDataEntry.setSubnetId(cloudInstance.getStringParameter(CloudInstance.SUBNET_ID));
-                instanceMetaDataEntry.setAvailabilityZone(cloudInstance.getStringParameter(CloudInstance.AVAILABILITY_ZONE));
+                instanceMetaDataEntry.setSubnetId(cloudInstance.getSubnetId());
+                instanceMetaDataEntry.setAvailabilityZone(cloudInstance.getAvailabilityZone());
                 instanceMetaDataEntry.setRackId(determineRackId(instanceMetaDataEntry.getSubnetId(), instanceMetaDataEntry.getAvailabilityZone()));
                 instanceMetaDataEntry.setInstanceName(cloudInstance.getStringParameter(CloudInstance.INSTANCE_NAME));
                 if (instanceMetaDataEntry.getClusterManagerServer() == null) {

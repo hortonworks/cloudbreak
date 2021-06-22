@@ -442,8 +442,8 @@ public class AwsInstanceConnectorTest {
     }
 
     private List<CloudInstance> getCloudInstances() {
-        CloudInstance instance1 = new CloudInstance("i-1", null, null);
-        CloudInstance instance2 = new CloudInstance("i-2", null, null);
+        CloudInstance instance1 = new CloudInstance("i-1", null, null, "subnet-123", "az1");
+        CloudInstance instance2 = new CloudInstance("i-2", null, null, "subnet-123", "az1");
         return List.of(instance1, instance2);
     }
 

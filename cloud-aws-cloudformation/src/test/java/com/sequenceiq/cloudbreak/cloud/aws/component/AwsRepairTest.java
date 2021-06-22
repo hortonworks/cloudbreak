@@ -421,8 +421,8 @@ public class AwsRepairTest {
         InstanceTemplate instanceTemplate = new InstanceTemplate("", WORKER_GROUP, 0L, volumes, InstanceStatus.STARTED, Map.of(), 0L,
                 IMAGE_ID, TemporaryStorage.ATTACHED_VOLUMES);
         InstanceAuthentication authentication = new InstanceAuthentication("publicKey", "publicKeyId", "cloudbreak");
-        CloudInstance firstCloudInstance = new CloudInstance(INSTANCE_ID_1, instanceTemplate, authentication);
-        CloudInstance secondCloudInstance = new CloudInstance(INSTANCE_ID_2, instanceTemplate, authentication);
+        CloudInstance firstCloudInstance = new CloudInstance(INSTANCE_ID_1, instanceTemplate, authentication, "subnet-1", "az1");
+        CloudInstance secondCloudInstance = new CloudInstance(INSTANCE_ID_2, instanceTemplate, authentication, "subnet-1", "az1");
         List<CloudInstance> cloudInstancesToRemove = List.of(firstCloudInstance, secondCloudInstance);
 
         CloudResource instance1VolumeResource = createVolumeResource(VOLUME_ID_1, INSTANCE_ID_1, SIZE_DISK_1, FSTAB_1, CommonStatus.CREATED);

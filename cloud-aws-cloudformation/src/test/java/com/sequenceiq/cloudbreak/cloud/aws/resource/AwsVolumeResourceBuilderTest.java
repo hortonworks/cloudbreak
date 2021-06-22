@@ -10,6 +10,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.FutureTask;
@@ -40,6 +42,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.model.GroupNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
@@ -52,6 +55,7 @@ import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.EncryptionType;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.common.model.AwsDiskType;
 
@@ -281,8 +285,9 @@ class AwsVolumeResourceBuilderTest {
     private Group createGroup(List<Volume> volumes, Map<String, Object> templateParameters) {
         InstanceTemplate template = new InstanceTemplate(FLAVOR, GROUP_NAME, PRIVATE_ID, volumes, InstanceStatus.CREATE_REQUESTED, templateParameters,
                 TEMPLATE_ID, IMAGE_ID, TemporaryStorage.ATTACHED_VOLUMES);
-        CloudInstance instance = new CloudInstance(INSTANCE_ID, template, null);
-        return new Group(GROUP_NAME, InstanceGroupType.GATEWAY, singletonList(instance), null, null, null, null, null, null, ROOT_VOLUME_SIZE, null);
+        CloudInstance instance = new CloudInstance(INSTANCE_ID, template, null, "subnet-1", "az1");
+        return new Group(GROUP_NAME, InstanceGroupType.GATEWAY, singletonList(instance), null, null, null, null, null,
+                null, ROOT_VOLUME_SIZE, null, createGroupNetwork());
     }
 
     private VolumeSetAttributes.Volume createVolumeForVolumeSet(String type) {
@@ -344,6 +349,10 @@ class AwsVolumeResourceBuilderTest {
         assertThat(tagSpecification).isNotNull();
         assertThat(tagSpecification.getResourceType()).isEqualTo(com.amazonaws.services.ec2.model.ResourceType.Volume.toString());
         assertThat(tagSpecification.getTags()).isEqualTo(EC2_TAGS);
+    }
+
+    private GroupNetwork createGroupNetwork() {
+        return new GroupNetwork(OutboundInternetTraffic.DISABLED, new HashSet<>(), new HashMap<>());
     }
 
 }

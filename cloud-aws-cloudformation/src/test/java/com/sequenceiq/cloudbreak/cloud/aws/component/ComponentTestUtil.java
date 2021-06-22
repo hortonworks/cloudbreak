@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -27,6 +28,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.model.GroupNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
@@ -42,6 +44,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.efs.CloudEfsConfiguration;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 import com.sequenceiq.common.model.FileSystemType;
 
 @Component
@@ -105,10 +108,10 @@ public class ComponentTestUtil {
                 getCloudInstance(instanceAuthentication, "worker", InstanceStatus.STARTED, 2L, INSTANCE_ID_3));
         List<Group> groups = List.of(new Group("master", InstanceGroupType.CORE, masterInstances, security, null,
                         instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                        instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()),
+                        instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork()),
                 new Group("worker", InstanceGroupType.CORE, workerInstances, security, null,
                         instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                        instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()));
+                        instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork()));
         Network network = new Network(new Subnet(CIDR));
 
         Map<InstanceGroupType, String> userData = ImmutableMap.of(
@@ -129,7 +132,7 @@ public class ComponentTestUtil {
 
         List<Group> groups = List.of(new Group("group1", InstanceGroupType.CORE, List.of(instance), security, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()));
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork()));
         Network network = new Network(new Subnet(CIDR));
 
         Map<InstanceGroupType, String> userData = ImmutableMap.of(
@@ -167,12 +170,16 @@ public class ComponentTestUtil {
         InstanceTemplate instanceTemplate = new InstanceTemplate("m1.medium", groupName, privateId, volumes, instanceStatus,
                 new HashMap<>(), 0L, "cb-centos66-amb200-2015-05-25", TemporaryStorage.ATTACHED_VOLUMES);
         Map<String, Object> params = new HashMap<>();
-        return new CloudInstance(instanceId, instanceTemplate, instanceAuthentication, params);
+        return new CloudInstance(instanceId, instanceTemplate, instanceAuthentication, "subnet-1", "az1", params);
     }
 
     private Security getSecurity() {
         List<SecurityRule> rules = Collections.singletonList(new SecurityRule("0.0.0.0/0",
                 new PortDefinition[]{new PortDefinition("22", "22"), new PortDefinition("443", "443")}, "tcp"));
         return new Security(rules, emptyList());
+    }
+
+    private GroupNetwork createGroupNetwork() {
+        return new GroupNetwork(OutboundInternetTraffic.DISABLED, new HashSet<>(), new HashMap<>());
     }
 }

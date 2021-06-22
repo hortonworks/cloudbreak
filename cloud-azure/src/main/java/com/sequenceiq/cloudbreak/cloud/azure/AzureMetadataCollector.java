@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
+import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_ID;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -85,9 +87,9 @@ public class AzureMetadataCollector implements MetadataCollector {
                     InstanceTemplate template = templateMap.get(instanceId);
                     if (template != null) {
                         Map<String, Object> params = new HashMap<>(1);
-                        params.put(CloudInstance.SUBNET_ID, subnetId);
+                        params.put(SUBNET_ID, subnetId);
                         params.put(CloudInstance.INSTANCE_NAME, vm.computerName());
-                        CloudInstance cloudInstance = new CloudInstance(instanceId, template, null, params);
+                        CloudInstance cloudInstance = new CloudInstance(instanceId, template, null, subnetId, null, params);
                         CloudVmInstanceStatus status = new CloudVmInstanceStatus(cloudInstance, InstanceStatus.CREATED);
                         results.add(new CloudVmMetaDataStatus(status, md));
                     }

@@ -89,9 +89,9 @@ class AwsDownscaleServiceTest {
                 new CloudResource.Builder().name("i-3").type(ResourceType.AWS_INSTANCE).build());
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         List<CloudInstance> cloudInstances = new ArrayList<>();
-        CloudInstance workerInstance1 = new CloudInstance("i-worker1", mock(InstanceTemplate.class), instanceAuthentication);
-        CloudInstance workerInstance2 = new CloudInstance("i-worker2", mock(InstanceTemplate.class), instanceAuthentication);
-        CloudInstance workerInstance3 = new CloudInstance("i-worker3", mock(InstanceTemplate.class), instanceAuthentication);
+        CloudInstance workerInstance1 = new CloudInstance("i-worker1", mock(InstanceTemplate.class), instanceAuthentication, "subnet-1", "az1");
+        CloudInstance workerInstance2 = new CloudInstance("i-worker2", mock(InstanceTemplate.class), instanceAuthentication, "subnet-1", "az1");
+        CloudInstance workerInstance3 = new CloudInstance("i-worker3", mock(InstanceTemplate.class), instanceAuthentication, "subnet-1", "az1");
         cloudInstances.add(workerInstance1);
         cloudInstances.add(workerInstance2);
         cloudInstances.add(workerInstance3);
@@ -145,9 +145,9 @@ class AwsDownscaleServiceTest {
                 new CloudResource.Builder().name("i-3").type(ResourceType.AWS_INSTANCE).build());
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         List<CloudInstance> cloudInstances = new ArrayList<>();
-        CloudInstance workerInstance1 = new CloudInstance("i-worker1", mock(InstanceTemplate.class), instanceAuthentication);
-        CloudInstance workerInstance2 = new CloudInstance("i-worker2", mock(InstanceTemplate.class), instanceAuthentication);
-        CloudInstance workerInstance3 = new CloudInstance("i-worker3", mock(InstanceTemplate.class), instanceAuthentication);
+        CloudInstance workerInstance1 = new CloudInstance("i-worker1", mock(InstanceTemplate.class), instanceAuthentication, "subnet-1", "az1");
+        CloudInstance workerInstance2 = new CloudInstance("i-worker2", mock(InstanceTemplate.class), instanceAuthentication, "subnet-1", "az1");
+        CloudInstance workerInstance3 = new CloudInstance("i-worker3", mock(InstanceTemplate.class), instanceAuthentication, "subnet-1", "az1");
         cloudInstances.add(workerInstance1);
         cloudInstances.add(workerInstance2);
         cloudInstances.add(workerInstance3);
@@ -201,7 +201,7 @@ class AwsDownscaleServiceTest {
         List<CloudResource> resources = List.of(new CloudResource.Builder().name("i-1").type(ResourceType.AWS_INSTANCE).build());
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         List<CloudInstance> cloudInstances = new ArrayList<>();
-        CloudInstance workerInstance1 = new CloudInstance("i-worker1", mock(InstanceTemplate.class), instanceAuthentication);
+        CloudInstance workerInstance1 = new CloudInstance("i-worker1", mock(InstanceTemplate.class), instanceAuthentication, "subnet-1", "az1");
         cloudInstances.add(workerInstance1);
         CloudContext context = CloudContext.Builder.builder()
                 .withId(1L)
@@ -250,7 +250,7 @@ class AwsDownscaleServiceTest {
         CloudStack stack = mock(CloudStack.class);
         List<CloudResource> resources = Collections.emptyList();
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
-        List<CloudInstance> cloudInstances = List.of(new CloudInstance("i-worker1", mock(InstanceTemplate.class), instanceAuthentication));
+        List<CloudInstance> cloudInstances = List.of(new CloudInstance("i-worker1", mock(InstanceTemplate.class), instanceAuthentication, "subnet-1", "az1"));
         CloudLoadBalancer privateLoadBalancer = new CloudLoadBalancer(LoadBalancerType.PRIVATE);
         CloudLoadBalancer publicLoadBalancer = new CloudLoadBalancer(LoadBalancerType.PUBLIC);
         CloudContext context = CloudContext.Builder.builder()
@@ -301,10 +301,10 @@ class AwsDownscaleServiceTest {
                 new CloudResource.Builder().name("i-4").type(ResourceType.AWS_INSTANCE).build());
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         List<CloudInstance> cloudInstances = new ArrayList<>();
-        CloudInstance workerInstance1 = new CloudInstance("i-worker1", mock(InstanceTemplate.class), instanceAuthentication);
-        CloudInstance workerInstance2 = new CloudInstance("i-worker2", mock(InstanceTemplate.class), instanceAuthentication);
-        CloudInstance workerInstance3 = new CloudInstance("i-worker3", mock(InstanceTemplate.class), instanceAuthentication);
-        CloudInstance workerInstance4 = new CloudInstance("i-worker4", mock(InstanceTemplate.class), instanceAuthentication);
+        CloudInstance workerInstance1 = new CloudInstance("i-worker1", mock(InstanceTemplate.class), instanceAuthentication, "subnet-1", "az1");
+        CloudInstance workerInstance2 = new CloudInstance("i-worker2", mock(InstanceTemplate.class), instanceAuthentication, "subnet-1", "az1");
+        CloudInstance workerInstance3 = new CloudInstance("i-worker3", mock(InstanceTemplate.class), instanceAuthentication, "subnet-1", "az1");
+        CloudInstance workerInstance4 = new CloudInstance("i-worker4", mock(InstanceTemplate.class), instanceAuthentication, "subnet-1", "az1");
         cloudInstances.add(workerInstance1);
         cloudInstances.add(workerInstance2);
         cloudInstances.add(workerInstance3);
@@ -398,10 +398,10 @@ class AwsDownscaleServiceTest {
                 new CloudResource.Builder().name("i-4").type(ResourceType.AWS_INSTANCE).build());
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         List<CloudInstance> cloudInstances = new ArrayList<>();
-        CloudInstance workerInstance1 = new CloudInstance("i-worker1", mock(InstanceTemplate.class), instanceAuthentication);
-        CloudInstance workerInstance2 = new CloudInstance("i-worker2", mock(InstanceTemplate.class), instanceAuthentication);
-        CloudInstance workerInstance3 = new CloudInstance("i-worker3", mock(InstanceTemplate.class), instanceAuthentication);
-        CloudInstance workerInstance4 = new CloudInstance("i-worker4", mock(InstanceTemplate.class), instanceAuthentication);
+        CloudInstance workerInstance1 = new CloudInstance("i-worker1", mock(InstanceTemplate.class), instanceAuthentication, "subnet-1", "az1");
+        CloudInstance workerInstance2 = new CloudInstance("i-worker2", mock(InstanceTemplate.class), instanceAuthentication, "subnet-1", "az1");
+        CloudInstance workerInstance3 = new CloudInstance("i-worker3", mock(InstanceTemplate.class), instanceAuthentication, "subnet-1", "az1");
+        CloudInstance workerInstance4 = new CloudInstance("i-worker4", mock(InstanceTemplate.class), instanceAuthentication, "subnet-1", "az1");
         cloudInstances.add(workerInstance1);
         cloudInstances.add(workerInstance2);
         cloudInstances.add(workerInstance3);

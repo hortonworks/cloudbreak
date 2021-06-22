@@ -21,6 +21,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -64,12 +65,14 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.model.GroupNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
 import com.sequenceiq.common.api.type.LoadBalancerType;
+import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 
 @PrepareForTest(AwsPageCollector.class)
 @RunWith(PowerMockRunner.class)
@@ -678,7 +681,8 @@ public class AwsLaunchServiceLoadBalancerTest {
     }
 
     private CloudLoadBalancer createCloudLoadBalancer(LoadBalancerType type) {
-        Group group = new Group(INSTANCE_NAME, GATEWAY, List.of(), null, null, null, null, null, null, 100, null);
+        Group group = new Group(INSTANCE_NAME, GATEWAY, List.of(), null, null, null, null,
+                null, null, 100, null, createGroupNetwork());
         CloudLoadBalancer cloudLoadBalancer = new CloudLoadBalancer(type);
         cloudLoadBalancer.addPortToTargetGroupMapping(new TargetGroupPortPair(PORT, PORT), Set.of(group));
         return cloudLoadBalancer;
@@ -751,5 +755,9 @@ public class AwsLaunchServiceLoadBalancerTest {
         AwsLoadBalancer publicLb = new AwsLoadBalancer(AwsLoadBalancerScheme.INTERNET_FACING);
         publicLb.getOrCreateListener(PORT, PORT);
         return List.of(privateLb, publicLb);
+    }
+
+    private GroupNetwork createGroupNetwork() {
+        return new GroupNetwork(OutboundInternetTraffic.DISABLED, new HashSet<>(), new HashMap<>());
     }
 }

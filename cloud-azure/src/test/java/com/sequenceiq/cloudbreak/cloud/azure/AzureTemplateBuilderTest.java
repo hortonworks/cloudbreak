@@ -60,6 +60,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.model.GroupNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
@@ -76,10 +77,12 @@ import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsGen2View;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AzureInstanceTemplate;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
+import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 import com.sequenceiq.cloudbreak.util.Version;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.LoadBalancerType;
+import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 import com.sequenceiq.common.model.CloudIdentityType;
 
 import freemarker.template.Configuration;
@@ -218,9 +221,9 @@ public class AzureTemplateBuilderTest {
         InstanceTemplate instanceTemplate = new InstanceTemplate("m1.medium", name, 0L, volumes, InstanceStatus.CREATE_REQUESTED,
                 new HashMap<>(), 0L, "cb-centos66-amb200-2015-05-25", TemporaryStorage.ATTACHED_VOLUMES);
         Map<String, Object> params = new HashMap<>();
-        params.put(CloudInstance.SUBNET_ID, "existingSubnet");
+        params.put(NetworkConstants.SUBNET_ID, "existingSubnet");
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
-        instance = new CloudInstance("SOME_ID", instanceTemplate, instanceAuthentication, params);
+        instance = new CloudInstance("SOME_ID", instanceTemplate, instanceAuthentication, "existingSubnet", "az1", params);
         List<SecurityRule> rules = Collections.singletonList(new SecurityRule("0.0.0.0/0",
                 new PortDefinition[]{new PortDefinition("22", "22"), new PortDefinition("443", "443")}, "tcp"));
         security = new Security(rules, emptyList());
@@ -242,7 +245,7 @@ public class AzureTemplateBuilderTest {
         when(customVMImageNameProvider.getImageNameFromConnectionString(anyString())).thenCallRealMethod();
     }
 
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "buildNoPublicIpFirewallWithTags {0}")
     @MethodSource("templatesPathDataProvider")
     public void buildNoPublicIpFirewallWithTags(String templatePath) {
         //GIVEN
@@ -257,7 +260,8 @@ public class AzureTemplateBuilderTest {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
 
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()));
+                instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork()));
         Map<String, String> userDefinedTags = Maps.newHashMap();
         userDefinedTags.put("testtagkey1", "testtagvalue1");
         userDefinedTags.put("testtagkey2", "testtagvalue2");
@@ -277,7 +281,7 @@ public class AzureTemplateBuilderTest {
         assertTrue(templateString.contains("\"testtagkey2\": \"testtagvalue2\""));
     }
 
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "buildNoPublicIpNoFirewallButExistingNetwork {0}")
     @MethodSource("templatesPathDataProvider")
     public void buildNoPublicIpNoFirewallButExistingNetwork(String templatePath) {
         assumeTrue(isTemplateVersionGreaterOrEqualThan1165(templatePath));
@@ -298,7 +302,8 @@ public class AzureTemplateBuilderTest {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
 
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()));
+                instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork()));
         cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
@@ -314,7 +319,7 @@ public class AzureTemplateBuilderTest {
         assertTrue(templateString.contains("existingNetworkName"));
     }
 
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "buildNoPublicIpButFirewall {0}")
     @MethodSource("templatesPathDataProvider")
     public void buildNoPublicIpButFirewall(String templatePath) {
         //GIVEN
@@ -330,7 +335,8 @@ public class AzureTemplateBuilderTest {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
 
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()));
+                instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork()));
         cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
@@ -347,7 +353,7 @@ public class AzureTemplateBuilderTest {
         assertTrue(templateString.contains("networkSecurityGroups"));
     }
 
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "buildWithPublicIpAndFirewall {0}")
     @MethodSource("templatesPathDataProvider")
     public void buildWithPublicIpAndFirewall(String templatePath) {
         //GIVEN
@@ -363,7 +369,8 @@ public class AzureTemplateBuilderTest {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
 
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()));
+                instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork()));
         cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
@@ -384,7 +391,7 @@ public class AzureTemplateBuilderTest {
         return new String(Base64.encodeBase64(String.format("%s", data).getBytes()));
     }
 
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "buildWithInstanceGroupTypeCore {0}")
     @MethodSource("templatesPathDataProvider")
     public void buildWithInstanceGroupTypeCore(String templatePath) {
         //GIVEN
@@ -397,7 +404,8 @@ public class AzureTemplateBuilderTest {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
 
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()));
+                instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork()));
         cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
@@ -415,7 +423,7 @@ public class AzureTemplateBuilderTest {
         assertTrue(templateString.contains("\"customData\": \"" + base64EncodedUserData(CORE_CUSTOM_DATA) + '"'));
     }
 
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "buildWithInstanceGroupTypeCoreShouldNotContainsGatewayCustomData {0}")
     @MethodSource("templatesPathDataProvider")
     public void buildWithInstanceGroupTypeCoreShouldNotContainsGatewayCustomData(String templatePath) {
         //GIVEN
@@ -428,7 +436,8 @@ public class AzureTemplateBuilderTest {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
 
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()));
+                instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork()));
         cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
@@ -446,7 +455,7 @@ public class AzureTemplateBuilderTest {
         assertFalse(templateString.contains("\"customData\": \"" + base64EncodedUserData(GATEWAY_CUSTOM_DATA) + '"'));
     }
 
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "buildWithInstanceGroupTypeGateway {0}")
     @MethodSource("templatesPathDataProvider")
     public void buildWithInstanceGroupTypeGateway(String templatePath) {
         //GIVEN
@@ -459,7 +468,8 @@ public class AzureTemplateBuilderTest {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
 
         groups.add(new Group(name, InstanceGroupType.GATEWAY, Collections.singletonList(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()));
+                instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork()));
         cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
@@ -477,7 +487,7 @@ public class AzureTemplateBuilderTest {
         assertTrue(templateString.contains("\"customData\": \"" + base64EncodedUserData(GATEWAY_CUSTOM_DATA) + '"'));
     }
 
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "buildWithGatewayInstanceGroupTypeAndLoadBalancer {0}")
     @MethodSource("templatesPathDataProvider")
     public void buildWithGatewayInstanceGroupTypeAndLoadBalancer(String templatePath) {
         assumeTrue(isTemplateVersionGreaterOrEqualThan(templatePath, "2.7.3.0"));
@@ -491,7 +501,8 @@ public class AzureTemplateBuilderTest {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
 
         groups.add(new Group("gateway-group", InstanceGroupType.GATEWAY, Collections.singletonList(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()));
+                instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork()));
 
         List<CloudLoadBalancer> loadBalancers = new ArrayList<>();
         CloudLoadBalancer loadBalancer = new CloudLoadBalancer(LoadBalancerType.PUBLIC);
@@ -520,7 +531,7 @@ public class AzureTemplateBuilderTest {
         assertTrue(templateString.contains("\"type\": \"Microsoft.Network/publicIPAddresses\","));
     }
 
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "buildWithGatewayInstanceGroupTypeAndMultipleLoadBalancers {0}")
     @MethodSource("templatesPathDataProvider")
     public void buildWithGatewayInstanceGroupTypeAndMultipleLoadBalancers(String templatePath) {
         ReflectionTestUtils.setField(azureTemplateBuilder, FIELD_ARM_TEMPLATE_PATH, templatePath);
@@ -533,7 +544,8 @@ public class AzureTemplateBuilderTest {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
 
         groups.add(new Group("gateway-group", InstanceGroupType.GATEWAY, Collections.singletonList(instance), security, null,
-            instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()));
+            instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork()));
 
         List<CloudLoadBalancer> loadBalancers = new ArrayList<>();
         CloudLoadBalancer publicLb = new CloudLoadBalancer(LoadBalancerType.PUBLIC);
@@ -575,7 +587,7 @@ public class AzureTemplateBuilderTest {
             "\"id\": \"[resourceId('Microsoft.Network/publicIPAddresses', 'LoadBalancertestStackPUBLIC-publicIp')]\""));
     }
 
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "testNicDependenciesAreValidJson {0}")
     @MethodSource("templatesPathDataProvider")
     public void testNicDependenciesAreValidJson(String templatePath) {
         ReflectionTestUtils.setField(azureTemplateBuilder, FIELD_ARM_TEMPLATE_PATH, templatePath);
@@ -588,7 +600,8 @@ public class AzureTemplateBuilderTest {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
 
         groups.add(new Group("gateway-group", InstanceGroupType.GATEWAY, Collections.singletonList(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()));
+                instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork()));
 
         List<CloudLoadBalancer> loadBalancers = new ArrayList<>();
         CloudLoadBalancer publicLb = new CloudLoadBalancer(LoadBalancerType.PUBLIC);
@@ -619,7 +632,7 @@ public class AzureTemplateBuilderTest {
         validateJson(templateString);
     }
 
-    @ParameterizedTest(name = "{displayName}_{0}")
+    @ParameterizedTest(name = "testNicDependenciesWhenNoSecurityGroupsNoFirewallRulesAndNoPublicIp {displayName}_{0}")
     @MethodSource("templatesPathDataProvider")
     public void testNicDependenciesWhenNoSecurityGroupsNoFirewallRulesAndNoPublicIp(String templatePath) {
         ReflectionTestUtils.setField(azureTemplateBuilder, FIELD_ARM_TEMPLATE_PATH, templatePath);
@@ -632,7 +645,8 @@ public class AzureTemplateBuilderTest {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
 
         groups.add(new Group("gateway-group", InstanceGroupType.GATEWAY, Collections.singletonList(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()));
+                instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork()));
 
         List<CloudLoadBalancer> loadBalancers = new ArrayList<>();
         CloudLoadBalancer publicLb = new CloudLoadBalancer(LoadBalancerType.PUBLIC);
@@ -689,7 +703,7 @@ public class AzureTemplateBuilderTest {
         }
     }
 
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "buildWithInstanceGroupTypeGatewayShouldNotContainsCoreCustomData {0}")
     @MethodSource("templatesPathDataProvider")
     public void buildWithInstanceGroupTypeGatewayShouldNotContainsCoreCustomData(String templatePath) {
         //GIVEN
@@ -702,7 +716,8 @@ public class AzureTemplateBuilderTest {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
 
         groups.add(new Group(name, InstanceGroupType.GATEWAY, Collections.singletonList(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()));
+                instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork()));
         cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
@@ -720,7 +735,7 @@ public class AzureTemplateBuilderTest {
         assertFalse(templateString.contains("\"customData\": \"" + base64EncodedUserData(CORE_CUSTOM_DATA) + '"'));
     }
 
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "buildWithInstanceGroupTypeGatewayAndCore {0}")
     @MethodSource("templatesPathDataProvider")
     public void buildWithInstanceGroupTypeGatewayAndCore(String templatePath) {
         //GIVEN
@@ -733,9 +748,11 @@ public class AzureTemplateBuilderTest {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
 
         groups.add(new Group(name, InstanceGroupType.GATEWAY, Collections.singletonList(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()));
+                instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork()));
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()));
+                instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork()));
         cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
@@ -754,7 +771,7 @@ public class AzureTemplateBuilderTest {
         assertTrue(templateString.contains("\"customData\": \"" + base64EncodedUserData(GATEWAY_CUSTOM_DATA) + '"'));
     }
 
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "buildTestResourceGroupName {0}")
     @MethodSource("templatesPathDataProvider")
     public void buildTestResourceGroupName(String templatePath) {
         //GIVEN
@@ -767,9 +784,11 @@ public class AzureTemplateBuilderTest {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
 
         groups.add(new Group(name, InstanceGroupType.GATEWAY, Collections.singletonList(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()));
+                instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork()));
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()));
+                instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork()));
         cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
@@ -787,7 +806,7 @@ public class AzureTemplateBuilderTest {
         assertFalse(templateString.contains("resourceGroupName"));
     }
 
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "buildTestExistingVNETName {0}")
     @MethodSource("templatesPathDataProvider")
     public void buildTestExistingVNETName(String templatePath) {
         //GIVEN
@@ -804,9 +823,11 @@ public class AzureTemplateBuilderTest {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
 
         groups.add(new Group(name, InstanceGroupType.GATEWAY, Collections.singletonList(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()));
+                instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork()));
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()));
+                instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork()));
         cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
@@ -826,7 +847,7 @@ public class AzureTemplateBuilderTest {
         assertTrue(templateString.contains("existingResourceGroup"));
     }
 
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "buildTestExistingSubnetNameNotInTemplate {0}")
     @MethodSource("templatesPathDataProvider")
     public void buildTestExistingSubnetNameNotInTemplate(String templatePath) {
         //GIVEN
@@ -839,9 +860,11 @@ public class AzureTemplateBuilderTest {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
 
         groups.add(new Group(name, InstanceGroupType.GATEWAY, Collections.singletonList(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()));
+                instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork()));
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()));
+                instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork()));
         cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
@@ -859,7 +882,7 @@ public class AzureTemplateBuilderTest {
         assertFalse(templateString.contains("existingSubnetName"));
     }
 
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "buildTestVirtualNetworkNamePrefix {0}")
     @MethodSource("templatesPathDataProvider")
     public void buildTestVirtualNetworkNamePrefix(String templatePath) {
         //GIVEN
@@ -872,9 +895,11 @@ public class AzureTemplateBuilderTest {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
 
         groups.add(new Group(name, InstanceGroupType.GATEWAY, Collections.singletonList(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()));
+                instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork()));
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()));
+                instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork()));
         cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
@@ -892,7 +917,7 @@ public class AzureTemplateBuilderTest {
         assertTrue(templateString.contains("virtualNetworkNamePrefix"));
     }
 
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "buildTestSubnet1Prefix {0}")
     @MethodSource("templatesPathDataProvider")
     public void buildTestSubnet1Prefix(String templatePath) {
         //GIVEN
@@ -905,9 +930,11 @@ public class AzureTemplateBuilderTest {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
 
         groups.add(new Group(name, InstanceGroupType.GATEWAY, Collections.singletonList(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()));
+                instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork()));
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()));
+                instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork()));
         cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
@@ -925,7 +952,7 @@ public class AzureTemplateBuilderTest {
         assertTrue(templateString.contains("subnet1Prefix"));
     }
 
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "buildTestDisksFor1xVersions {0}")
     @MethodSource("templatesPathDataProvider")
     public void buildTestDisksFor1xVersions(String templatePath) {
         //GIVEN
@@ -940,9 +967,11 @@ public class AzureTemplateBuilderTest {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
 
         groups.add(new Group(name, InstanceGroupType.GATEWAY, Collections.singletonList(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()));
+                instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork()));
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()));
+                instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork()));
         cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
@@ -961,7 +990,7 @@ public class AzureTemplateBuilderTest {
         assertThat(templateString).contains("[concat('datadisk', 'm0', '1')]");
     }
 
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "buildTestDisksOnAllVersionsAndVerifyOsDisks {0}")
     @MethodSource("templatesPathDataProvider")
     public void buildTestDisksOnAllVersionsAndVerifyOsDisks(String templatePath) {
         //GIVEN
@@ -974,9 +1003,11 @@ public class AzureTemplateBuilderTest {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
 
         groups.add(new Group(name, InstanceGroupType.GATEWAY, Collections.singletonList(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()));
+                instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork()));
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()));
+                instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork()));
         cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
@@ -994,7 +1025,7 @@ public class AzureTemplateBuilderTest {
         assertTrue(templateString.contains("[concat(parameters('vmNamePrefix'),'-osDisk', 'm0')]"));
     }
 
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "buildTestDisksWhenTheVersion210OrGreater {0}")
     @MethodSource("templatesPathDataProvider")
     public void buildTestDisksWhenTheVersion210OrGreater(String templatePath) {
         //GIVEN
@@ -1009,9 +1040,11 @@ public class AzureTemplateBuilderTest {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
 
         groups.add(new Group(name, InstanceGroupType.GATEWAY, Collections.singletonList(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()));
+                instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork()));
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()));
+                instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork()));
         cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
@@ -1030,7 +1063,7 @@ public class AzureTemplateBuilderTest {
         assertFalse(templateString.contains("[concat('datadisk', 'm0', '1')]"));
     }
 
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "buildTestAvailabilitySetInTemplate {0}")
     @MethodSource("templatesPathDataProvider")
     public void buildTestAvailabilitySetInTemplate(String templatePath) {
         //GIVEN
@@ -1043,7 +1076,8 @@ public class AzureTemplateBuilderTest {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
 
         Group gatewayGroup = new Group("gateway", InstanceGroupType.GATEWAY, Collections.singletonList(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty());
+                instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork());
         Map<String, Object> asMap = new HashMap<>();
         String availabilitySetName = gatewayGroup.getType().name().toLowerCase() + "-as";
         asMap.put("name", availabilitySetName);
@@ -1053,7 +1087,8 @@ public class AzureTemplateBuilderTest {
         groups.add(gatewayGroup);
 
         Group coreGroup = new Group("core", InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty());
+                instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork());
         coreGroup.putParameter("availabilitySet", null);
         groups.add(coreGroup);
 
@@ -1077,7 +1112,7 @@ public class AzureTemplateBuilderTest {
         assertFalse(templateString.contains("'Microsoft.Compute/availabilitySets', 'core-as'"));
     }
 
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "buildTestWithVmVersion {0}")
     @MethodSource("templatesPathDataProvider")
     public void buildTestWithVmVersion(String templatePath) {
         //GIVEN
@@ -1095,7 +1130,8 @@ public class AzureTemplateBuilderTest {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
 
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()));
+                instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork()));
         cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
@@ -1113,7 +1149,7 @@ public class AzureTemplateBuilderTest {
                 "                   \"type\": \"Microsoft.Compute/virtualMachines\",\n");
     }
 
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "buildTestWithNoManagedIdentity {0}")
     @MethodSource("templatesPathDataProvider")
     public void buildTestWithNoManagedIdentity(String templatePath) {
         //GIVEN
@@ -1129,7 +1165,8 @@ public class AzureTemplateBuilderTest {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
 
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()));
+                instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork()));
         cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
@@ -1146,7 +1183,7 @@ public class AzureTemplateBuilderTest {
         assertThat(templateString).doesNotContain("\"identity\": {");
     }
 
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "buildTestWithManagedIdentityGiven {0}")
     @MethodSource("templatesPathDataProvider")
     public void buildTestWithManagedIdentityGiven(String templatePath) {
         //GIVEN
@@ -1167,8 +1204,9 @@ public class AzureTemplateBuilderTest {
         cloudAdlsGen2View.setManagedIdentity("myIdentity");
 
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE,
-                Optional.of(cloudAdlsGen2View)));
+                instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE,
+                Optional.of(cloudAdlsGen2View), createGroupNetwork()));
         cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
@@ -1190,7 +1228,7 @@ public class AzureTemplateBuilderTest {
                 "                        }\n");
     }
 
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "buildTestWithNoDiskEncryptionSetId {0}")
     @MethodSource("templatesPathDataProvider")
     public void buildTestWithNoDiskEncryptionSetId(String templatePath) {
         //GIVEN
@@ -1206,7 +1244,8 @@ public class AzureTemplateBuilderTest {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
 
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()));
+                instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork()));
         cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
@@ -1223,7 +1262,7 @@ public class AzureTemplateBuilderTest {
         assertThat(templateString).doesNotContain("\"diskEncryptionSet\": {");
     }
 
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "buildTestWithDiskEncryptionSetIdGiven {0}")
     @MethodSource("templatesPathDataProvider")
     public void buildTestWithDiskEncryptionSetIdGiven(String templatePath) {
         //GIVEN
@@ -1244,7 +1283,8 @@ public class AzureTemplateBuilderTest {
         instance.getTemplate().putParameter(AzureInstanceTemplate.DISK_ENCRYPTION_SET_ID, "myDES");
 
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()));
+                instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork()));
         cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
@@ -1283,5 +1323,9 @@ public class AzureTemplateBuilderTest {
         String[] splitName = templatePath.split("-");
         String templateVersion = splitName[splitName.length - 1].replaceAll("\\.ftl", "");
         return Version.versionCompare(templateVersion, version) > -1;
+    }
+
+    private GroupNetwork createGroupNetwork() {
+        return new GroupNetwork(OutboundInternetTraffic.DISABLED, new HashSet<>(), new HashMap<>());
     }
 }

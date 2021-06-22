@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -40,6 +41,7 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.model.GroupNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
@@ -48,6 +50,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AwsNetworkServiceTest {
@@ -76,7 +79,8 @@ public class AwsNetworkServiceTest {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
 
         Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, identity);
+                instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, identity, createGroupNetwork());
         Map<String, Object> networkParameters = new HashMap<>();
 
         networkParameters.put("vpcId", "vpc-12345678");
@@ -125,7 +129,8 @@ public class AwsNetworkServiceTest {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
 
         Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, identity);
+                instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, identity, createGroupNetwork());
         Map<String, Object> networkParameters = new HashMap<>();
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
@@ -169,7 +174,8 @@ public class AwsNetworkServiceTest {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
 
         Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, identity);
+                instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, identity, createGroupNetwork());
         Map<String, Object> networkParameters = new HashMap<>();
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
@@ -213,7 +219,8 @@ public class AwsNetworkServiceTest {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
 
         Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, identity);
+                instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, identity, createGroupNetwork());
         Map<String, Object> networkParameters = new HashMap<>();
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
@@ -257,7 +264,8 @@ public class AwsNetworkServiceTest {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
 
         Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, identity);
+                instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, identity, createGroupNetwork());
         Map<String, Object> networkParameters = new HashMap<>();
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
@@ -295,7 +303,8 @@ public class AwsNetworkServiceTest {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
 
         Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, identity);
+                instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, identity, createGroupNetwork());
         Map<String, Object> networkParameters = new HashMap<>();
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
@@ -331,7 +340,8 @@ public class AwsNetworkServiceTest {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
 
         Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, identity);
+                instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, identity, createGroupNetwork());
         Map<String, Object> networkParameters = new HashMap<>();
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
@@ -375,7 +385,8 @@ public class AwsNetworkServiceTest {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
 
         Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, identity);
+                instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, identity, createGroupNetwork());
         Map<String, Object> networkParameters = new HashMap<>();
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
@@ -419,7 +430,8 @@ public class AwsNetworkServiceTest {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
 
         Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, identity);
+                instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, identity, createGroupNetwork());
         Map<String, Object> networkParameters = new HashMap<>();
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
@@ -472,7 +484,8 @@ public class AwsNetworkServiceTest {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
 
         Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, identity);
+                instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, identity, createGroupNetwork());
         Map<String, Object> networkParameters = new HashMap<>();
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
@@ -524,7 +537,8 @@ public class AwsNetworkServiceTest {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
 
         Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, identity);
+                instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, identity, createGroupNetwork());
         Map<String, Object> networkParameters = new HashMap<>();
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
@@ -576,7 +590,8 @@ public class AwsNetworkServiceTest {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
 
         Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, identity);
+                instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, identity, createGroupNetwork());
         Map<String, Object> networkParameters = new HashMap<>();
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
@@ -628,7 +643,8 @@ public class AwsNetworkServiceTest {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
 
         Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, identity);
+                instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, identity, createGroupNetwork());
         Map<String, Object> networkParameters = new HashMap<>();
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
@@ -674,7 +690,8 @@ public class AwsNetworkServiceTest {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
 
         Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, identity);
+                instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, identity, createGroupNetwork());
         Map<String, Object> networkParameters = new HashMap<>();
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
@@ -750,6 +767,10 @@ public class AwsNetworkServiceTest {
     private String incrementIp(String ip) {
         int ipValue = InetAddresses.coerceToInteger(InetAddresses.forString(ip)) + 256;
         return InetAddresses.fromInteger(ipValue).getHostAddress();
+    }
+
+    private GroupNetwork createGroupNetwork() {
+        return new GroupNetwork(OutboundInternetTraffic.DISABLED, new HashSet<>(), new HashMap<>());
     }
 
 }

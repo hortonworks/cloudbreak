@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.reactor.api.event.stack.loadbalancer.handler;
 
-import static com.sequenceiq.cloudbreak.cloud.model.CloudInstance.SUBNET_ID;
 import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.ENDPOINT_GATEWAY_SUBNET_ID;
+import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_ID;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 
 import java.util.Collections;

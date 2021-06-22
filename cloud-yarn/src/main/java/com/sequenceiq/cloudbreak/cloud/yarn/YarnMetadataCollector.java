@@ -73,7 +73,11 @@ public class YarnMetadataCollector implements MetadataCollector {
                         if (cloudInstance == null) {
                             if (!untrackedInstances.isEmpty()) {
                                 cloudInstance = untrackedInstances.remove();
-                                cloudInstance = new CloudInstance(containerId, cloudInstance.getTemplate(), cloudInstance.getAuthentication());
+                                cloudInstance = new CloudInstance(containerId,
+                                        cloudInstance.getTemplate(),
+                                        cloudInstance.getAuthentication(),
+                                        cloudInstance.getSubnetId(),
+                                        cloudInstance.getAvailabilityZone());
                             }
                         }
                         if (cloudInstance != null) {

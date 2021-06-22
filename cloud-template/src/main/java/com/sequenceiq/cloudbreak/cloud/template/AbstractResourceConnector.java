@@ -237,11 +237,17 @@ public abstract class AbstractResourceConnector implements ResourceConnector<Lis
     protected Group getScalingGroup(Group scalingGroup) {
         List<CloudInstance> instances = new ArrayList<>(scalingGroup.getInstances());
         instances.removeIf(cloudInstance -> InstanceStatus.CREATE_REQUESTED != cloudInstance.getTemplate().getStatus());
-        return new Group(scalingGroup.getName(), scalingGroup.getType(), instances, scalingGroup.getSecurity(), null,
+        return new Group(scalingGroup.getName(),
+                scalingGroup.getType(),
+                instances,
+                scalingGroup.getSecurity(),
+                null,
                 scalingGroup.getInstanceAuthentication(),
                 scalingGroup.getInstanceAuthentication().getLoginUserName(),
                 scalingGroup.getInstanceAuthentication().getPublicKey(),
-                scalingGroup.getRootVolumeSize(), scalingGroup.getIdentity());
+                scalingGroup.getRootVolumeSize(),
+                scalingGroup.getIdentity(),
+                scalingGroup.getNetwork());
     }
 
     protected Group getGroup(Iterable<Group> groups, String groupName) {

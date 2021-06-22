@@ -8,6 +8,8 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 import org.junit.jupiter.api.Assertions;
@@ -27,7 +29,9 @@ import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.scheduler.CustomAmazonWaiterProvider;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.model.GroupNetwork;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 
 @ExtendWith(MockitoExtension.class)
 public class AwsAutoScalingServiceTest {
@@ -53,7 +57,7 @@ public class AwsAutoScalingServiceTest {
         activity1.setCause("Cause");
         activity1.setStatusCode("FAILED");
         result.setActivities(List.of(activity1));
-        Group group = createGroup("master", InstanceGroupType.GATEWAY, List.of(new CloudInstance("anId", null, null)));
+        Group group = createGroup("master", InstanceGroupType.GATEWAY, List.of(new CloudInstance("anId", null, null, "subnet-1", "az1")));
         when(amazonAutoScalingClient.describeScalingActivities(any(DescribeScalingActivitiesRequest.class))).thenReturn(result);
         when(customAmazonWaiterProvider.getAutoscalingActivitiesWaiter(any(), any())).thenReturn(describeScalingActivitiesRequestWaiter);
         mockDescribeAutoscalingGroup();
@@ -74,7 +78,7 @@ public class AwsAutoScalingServiceTest {
         activity1.setCause("Cause");
         activity1.setStatusCode("FAILED");
         result.setActivities(List.of(activity1));
-        Group group = createGroup("master", InstanceGroupType.GATEWAY, List.of(new CloudInstance("anId", null, null)));
+        Group group = createGroup("master", InstanceGroupType.GATEWAY, List.of(new CloudInstance("anId", null, null, "subnet-1", "az1")));
         when(amazonAutoScalingClient.describeScalingActivities(any(DescribeScalingActivitiesRequest.class))).thenReturn(result);
         when(customAmazonWaiterProvider.getAutoscalingActivitiesWaiter(any(), any())).thenReturn(describeScalingActivitiesRequestWaiter);
         mockDescribeAutoscalingGroup();
@@ -92,7 +96,7 @@ public class AwsAutoScalingServiceTest {
         activity1.setCause("Cause");
         activity1.setStatusCode("success");
         result.setActivities(List.of(activity1));
-        Group group = createGroup("master", InstanceGroupType.GATEWAY, List.of(new CloudInstance("anId", null, null)));
+        Group group = createGroup("master", InstanceGroupType.GATEWAY, List.of(new CloudInstance("anId", null, null, "subnet-1", "az1")));
         when(amazonAutoScalingClient.describeScalingActivities(any(DescribeScalingActivitiesRequest.class))).thenReturn(result);
         when(customAmazonWaiterProvider.getAutoscalingActivitiesWaiter(any(), any())).thenReturn(describeScalingActivitiesRequestWaiter);
         mockDescribeAutoscalingGroup();
@@ -135,7 +139,11 @@ public class AwsAutoScalingServiceTest {
     }
 
     private Group createGroup(String groupName, InstanceGroupType groupType, List<CloudInstance> instances) {
-        Group group = new Group(groupName, groupType, instances, null, null, null, null, null, 0, null);
+        Group group = new Group(groupName, groupType, instances, null, null, null, null, null, 0, null, createGroupNetwork());
         return group;
+    }
+
+    private GroupNetwork createGroupNetwork() {
+        return new GroupNetwork(OutboundInternetTraffic.DISABLED, new HashSet<>(), new HashMap<>());
     }
 }

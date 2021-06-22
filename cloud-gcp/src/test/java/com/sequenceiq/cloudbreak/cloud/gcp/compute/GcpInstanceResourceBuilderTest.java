@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -69,6 +70,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.model.GroupNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
@@ -87,6 +89,7 @@ import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.EncryptionType;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.common.model.CloudIdentityType;
 import com.sequenceiq.common.model.FileSystemType;
@@ -352,13 +355,14 @@ public class GcpInstanceResourceBuilderTest {
                 instanceAuthentication.getLoginUserName(),
                 instanceAuthentication.getPublicKey(),
                 50,
-                Optional.ofNullable(cloudFileSystemView));
+                Optional.ofNullable(cloudFileSystemView),
+                createGroupNetwork());
     }
 
     public CloudInstance newCloudInstance(Map<String, Object> params, InstanceAuthentication instanceAuthentication) {
         InstanceTemplate instanceTemplate = new InstanceTemplate(flavor, name, privateId, volumes, InstanceStatus.CREATE_REQUESTED, params,
                 0L, "cb-centos66-amb200-2015-05-25", TemporaryStorage.ATTACHED_VOLUMES);
-        return new CloudInstance(instanceId, instanceTemplate, instanceAuthentication, params);
+        return new CloudInstance(instanceId, instanceTemplate, instanceAuthentication, "subnet-1", "az1", params);
     }
 
     @Test
@@ -602,6 +606,10 @@ public class GcpInstanceResourceBuilderTest {
         String sshKey = "ssh-rsa key cloudbreak cloudbreak cloudbreak cloudbreak cloudbreak cloudbreak";
         String publicKey = builder.getPublicKey(sshKey, loginName);
         Assert.assertEquals("cloudbreak:ssh-rsa key cloudbreak", publicKey);
+    }
+
+    private GroupNetwork createGroupNetwork() {
+        return new GroupNetwork(OutboundInternetTraffic.DISABLED, new HashSet<>(), new HashMap<>());
     }
 
 }

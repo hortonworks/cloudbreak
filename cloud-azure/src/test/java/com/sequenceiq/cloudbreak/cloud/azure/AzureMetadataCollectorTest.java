@@ -173,7 +173,7 @@ public class AzureMetadataCollectorTest {
     private CloudInstance createCloudInstance(String instanceId, Long privateId) {
         InstanceTemplate instanceTemplate = new InstanceTemplate(null, INSTANCE_GROUP_NAME, privateId, Collections.emptyList(), null, Collections.emptyMap(),
                 null, null, TemporaryStorage.ATTACHED_VOLUMES);
-        return new CloudInstance(instanceId, instanceTemplate, null);
+        return new CloudInstance(instanceId, instanceTemplate, null, "subnet-1", "az1");
     }
 
     private CloudResource createCloudResource() {

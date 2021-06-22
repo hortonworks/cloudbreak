@@ -330,7 +330,7 @@ class StackStatusIntegrationTest {
     }
 
     private CloudVmInstanceStatus createCloudVmInstanceStatus(String instanceId, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus instanceStatus) {
-        return new CloudVmInstanceStatus(new CloudInstance(instanceId, null, null), instanceStatus);
+        return new CloudVmInstanceStatus(new CloudInstance(instanceId, null, null, "subnet-1", "az1"), instanceStatus);
     }
 
     private void setUpClusterStatus(ClusterStatus clusterStatus) {
