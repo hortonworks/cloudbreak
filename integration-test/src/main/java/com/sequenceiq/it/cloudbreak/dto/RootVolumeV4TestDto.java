@@ -14,7 +14,7 @@ public class RootVolumeV4TestDto extends AbstractCloudbreakTestDto<RootVolumeV4R
 
     @Override
     public RootVolumeV4TestDto valid() {
-        return withSize(50);
+        return getCloudProvider().rootVolume(this);
     }
 
     public RootVolumeV4TestDto withSize(int size) {
