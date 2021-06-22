@@ -7,7 +7,7 @@ import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
+import com.sequenceiq.cloudbreak.auth.crn.CrnParseException;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;

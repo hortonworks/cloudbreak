@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 
 import com.cedarsoftware.util.io.JsonWriter;
 import com.google.common.base.Joiner;
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;

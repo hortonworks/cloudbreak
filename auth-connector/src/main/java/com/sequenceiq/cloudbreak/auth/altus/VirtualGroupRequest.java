@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.auth.altus;
 
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
+
 public class VirtualGroupRequest {
     private final String accountId;
 

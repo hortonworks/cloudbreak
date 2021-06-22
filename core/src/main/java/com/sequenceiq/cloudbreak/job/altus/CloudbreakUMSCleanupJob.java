@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.quartz.cleanup.UMSCleanupConfig;
 import com.sequenceiq.cloudbreak.quartz.cleanup.job.UMSCleanupJob;
 import com.sequenceiq.cloudbreak.service.altus.AltusMachineUserService;

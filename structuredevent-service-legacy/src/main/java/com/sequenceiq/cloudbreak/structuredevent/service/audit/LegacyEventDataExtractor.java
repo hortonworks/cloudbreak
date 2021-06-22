@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.structuredevent.service.audit;
 
 import com.sequenceiq.cloudbreak.audit.model.AuditEventName;
 import com.sequenceiq.cloudbreak.audit.model.EventData;
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEvent;
 
 public interface LegacyEventDataExtractor<T extends StructuredEvent> {

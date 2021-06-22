@@ -63,6 +63,7 @@ dependencies {
   testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
   testImplementation group: 'org.assertj',        name: 'assertj-core',                   version: assertjVersion
   testImplementation group: 'org.junit.jupiter',  name: 'junit-jupiter-migrationsupport', version: junitJupiterVersion
+  testImplementation project(path: ':common', configuration: 'tests')
 
   compile project(':auth-connector')
   compile (project(':audit-connector')) {

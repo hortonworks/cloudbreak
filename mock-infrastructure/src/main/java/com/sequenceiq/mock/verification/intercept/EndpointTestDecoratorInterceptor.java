@@ -18,7 +18,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.util.ContentCachingRequestWrapper;
 
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.mock.service.ResponseModifierService;
 import com.sequenceiq.mock.verification.Call;
 import com.sequenceiq.mock.verification.RequestResponseStorageService;

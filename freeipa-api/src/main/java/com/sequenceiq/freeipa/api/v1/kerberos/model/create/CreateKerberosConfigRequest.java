@@ -8,7 +8,7 @@ import javax.validation.constraints.Size;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
+import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.freeipa.api.v1.kerberos.doc.KerberosConfigModelDescription;
 import com.sequenceiq.freeipa.api.v1.kerberos.validation.ValidKerberosRequest;

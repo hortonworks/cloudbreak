@@ -6,8 +6,8 @@ import javax.inject.Named;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.altus.InternalCrnBuilder;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.InternalCrnBuilder;
 import com.sequenceiq.environment.client.EnvironmentInternalCrnClient;
 import com.sequenceiq.environment.client.EnvironmentServiceUserCrnClient;
 import com.sequenceiq.environment.client.EnvironmentServiceUserCrnClientBuilder;

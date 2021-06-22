@@ -14,7 +14,7 @@ import java.lang.annotation.Target;
 import javax.validation.Constraint;
 import javax.validation.Payload;
 
-import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
+import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 
 @Documented
 @Constraint(validatedBy = { CrnValidator.class, CrnCollectionValidator.class})

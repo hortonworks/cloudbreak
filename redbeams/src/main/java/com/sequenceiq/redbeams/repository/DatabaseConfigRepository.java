@@ -12,7 +12,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.authorization.service.model.projection.ResourceCrnAndNameView;
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 import com.sequenceiq.redbeams.domain.DatabaseConfig;
 

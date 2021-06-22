@@ -1,11 +1,11 @@
-package com.sequenceiq.cloudbreak.auth.altus;
+package com.sequenceiq.cloudbreak.auth.crn;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static com.sequenceiq.cloudbreak.auth.altus.Crn.ResourceType.MACHINE_USER;
-import static com.sequenceiq.cloudbreak.auth.altus.Crn.ResourceType.USER;
-import static com.sequenceiq.cloudbreak.auth.altus.Crn.Service.IAM;
+import static com.sequenceiq.cloudbreak.auth.crn.Crn.ResourceType.MACHINE_USER;
+import static com.sequenceiq.cloudbreak.auth.crn.Crn.ResourceType.USER;
+import static com.sequenceiq.cloudbreak.auth.crn.Crn.Service.IAM;
 
 import java.util.Arrays;
 import java.util.regex.Matcher;
@@ -631,7 +631,7 @@ public class Crn {
                 base.getResource());
     }
 
-    public static Builder builder() {
+    static Builder builder() {
         return new Builder();
     }
 
@@ -648,7 +648,7 @@ public class Crn {
 
         private Region region;
 
-        public Builder() {
+        Builder() {
         }
 
         public Builder setAccountId(String accountId) {
@@ -661,26 +661,6 @@ public class Crn {
             return this;
         }
 
-        public Builder setService(Service service) {
-            this.service = checkNotNull(service);
-            return this;
-        }
-
-        public Builder setResourceType(ResourceType resourceType) {
-            this.resourceType = checkNotNull(resourceType);
-            return this;
-        }
-
-        public Builder setPartition(Partition partition) {
-            this.partition = partition;
-            return this;
-        }
-
-        public Builder setRegion(Region region) {
-            this.region = region;
-            return this;
-        }
-
         public Crn build() {
             return new Crn(partition,
                     service,
@@ -688,6 +668,26 @@ public class Crn {
                     accountId,
                     resourceType,
                     resource);
+        }
+
+        Builder setPartition(Partition partition) {
+            this.partition = partition;
+            return this;
+        }
+
+        Builder setRegion(Region region) {
+            this.region = region;
+            return this;
+        }
+
+        Builder setService(Service service) {
+            this.service = checkNotNull(service);
+            return this;
+        }
+
+        Builder setResourceType(ResourceType resourceType) {
+            this.resourceType = checkNotNull(resourceType);
+            return this;
         }
 
     }

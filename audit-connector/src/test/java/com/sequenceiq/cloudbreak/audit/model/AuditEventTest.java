@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 
 class AuditEventTest {
     public static final ActorCrn ACTOR = ActorCrn.builder().withActorCrn("crn:cdp:iam:us-west-1:1234:user:1").build();

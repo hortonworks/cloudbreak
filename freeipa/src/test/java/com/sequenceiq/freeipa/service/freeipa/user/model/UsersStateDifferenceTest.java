@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
-import com.sequenceiq.cloudbreak.auth.CrnTestUtil;
+import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
 import com.sequenceiq.freeipa.client.FreeIpaChecks;
 import com.sequenceiq.freeipa.service.freeipa.user.UserSyncConstants;
 import com.sequenceiq.freeipa.service.freeipa.user.UserSyncTestUtils;

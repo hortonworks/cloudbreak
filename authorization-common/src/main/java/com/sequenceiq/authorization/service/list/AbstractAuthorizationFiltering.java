@@ -7,9 +7,9 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.auth.altus.InternalCrnBuilder;
+import com.sequenceiq.cloudbreak.auth.crn.InternalCrnBuilder;
 
 public abstract class AbstractAuthorizationFiltering<T> {
 

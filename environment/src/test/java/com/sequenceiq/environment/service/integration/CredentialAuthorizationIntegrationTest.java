@@ -35,7 +35,7 @@ import org.springframework.test.context.ActiveProfiles;
 import com.cloudera.thunderhead.service.authorization.AuthorizationProto;
 import com.google.api.client.util.Lists;
 import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.auth.CrnTestUtil;
+import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.cloud.event.platform.ResourceDefinitionRequest;

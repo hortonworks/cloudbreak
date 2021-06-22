@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.validation;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 
 public class DatalakeCrnValidator implements ConstraintValidator<DatalakeCrn, String> {
 

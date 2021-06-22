@@ -15,7 +15,7 @@ import org.apache.commons.lang3.reflect.FieldUtils;
 import org.slf4j.MDC;
 
 import com.google.common.collect.Maps;
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 
 public class MDCBuilder {
     public static final String MDC_CONTEXT_ID = "MDC_CONTEXT_ID";

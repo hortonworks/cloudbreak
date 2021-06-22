@@ -14,7 +14,7 @@ import org.springframework.util.CollectionUtils;
 import org.testng.asserts.SoftAssert;
 
 import com.google.common.base.Objects;
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpLabelUtil;
 import com.sequenceiq.common.api.tag.request.TaggableRequest;
 import com.sequenceiq.common.api.tag.response.TaggedResponse;

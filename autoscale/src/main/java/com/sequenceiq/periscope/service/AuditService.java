@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.audit.model.ApiRequestData;
 import com.sequenceiq.cloudbreak.audit.model.AuditEvent;
 import com.sequenceiq.cloudbreak.audit.model.AuditEventName;
 import com.sequenceiq.cloudbreak.audit.model.ServiceEventData;
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.periscope.api.model.ScalingStatus;
 import com.sequenceiq.periscope.model.json.Json;
 

@@ -1,7 +1,7 @@
 package com.sequenceiq.authorization.service;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.sequenceiq.cloudbreak.auth.altus.InternalCrnBuilder.INTERNAL_ACCOUNT;
+import static com.sequenceiq.cloudbreak.auth.crn.InternalCrnBuilder.INTERNAL_ACCOUNT;
 
 import java.lang.annotation.Annotation;
 import java.util.Optional;
@@ -23,8 +23,8 @@ import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.cloudbreak.auth.ReflectionUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.altus.InternalCrnBuilder;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.auth.security.CrnUserDetailsService;
 import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
 import com.sequenceiq.cloudbreak.auth.security.internal.InternalUserModifier;

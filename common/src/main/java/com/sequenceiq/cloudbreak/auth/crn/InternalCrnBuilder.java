@@ -1,9 +1,9 @@
-package com.sequenceiq.cloudbreak.auth.altus;
+package com.sequenceiq.cloudbreak.auth.crn;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.sequenceiq.cloudbreak.auth.CrnUser;
-import com.sequenceiq.cloudbreak.auth.altus.Crn.Service;
+import com.sequenceiq.cloudbreak.auth.crn.Crn.Service;
 
 /**
  * Builder for constructing the user CRN for an internal actor.

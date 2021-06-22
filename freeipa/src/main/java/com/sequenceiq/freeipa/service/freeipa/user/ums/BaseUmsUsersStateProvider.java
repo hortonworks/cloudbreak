@@ -1,7 +1,7 @@
 package com.sequenceiq.freeipa.service.freeipa.user.ums;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.freeipa.service.freeipa.user.UserSyncConstants;
 import com.sequenceiq.freeipa.service.freeipa.user.conversion.FmsGroupConverter;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsGroup;

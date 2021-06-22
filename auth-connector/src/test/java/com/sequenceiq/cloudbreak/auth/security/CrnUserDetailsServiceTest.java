@@ -13,8 +13,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
-import com.sequenceiq.cloudbreak.auth.altus.InternalCrnBuilder;
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.InternalCrnBuilder;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 
 @RunWith(MockitoJUnitRunner.class)

@@ -1,11 +1,10 @@
-package com.sequenceiq.cloudbreak.auth;
+package com.sequenceiq.cloudbreak.auth.crn;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
 
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
+import java.util.UUID;
 
 public class CrnTestUtil {
 
@@ -21,6 +20,15 @@ public class CrnTestUtil {
         lenient().when(regionAwareCrnGenerator.generateCrnString(any(), anyString(), anyString())).thenCallRealMethod();
         lenient().when(regionAwareCrnGenerator.generateCrn(any(), anyString(), anyString())).thenCallRealMethod();
         lenient().when(regionAwareCrnGenerator.generateAltusCrn(any(), anyString())).thenCallRealMethod();
+    }
+
+    public static Crn.Builder getCustomCrnBuilder(CrnResourceDescriptor resourceDescriptor) {
+        return Crn.builder()
+                .setPartition(Crn.Partition.CDP)
+                .setRegion(Crn.Region.US_WEST_1)
+                .setService(resourceDescriptor.getServiceType())
+                .setResourceType(resourceDescriptor.getResourceType())
+                .setResource(UUID.randomUUID().toString());
     }
 
     public static Crn.Builder getEnvironmentCrnBuilder() {

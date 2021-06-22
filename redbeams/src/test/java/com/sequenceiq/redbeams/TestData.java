@@ -1,6 +1,6 @@
 package com.sequenceiq.redbeams;
 
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 
 public final class TestData {
 

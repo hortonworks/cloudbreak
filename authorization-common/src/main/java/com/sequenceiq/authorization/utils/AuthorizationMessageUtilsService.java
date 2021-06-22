@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.cloudera.thunderhead.service.authorization.AuthorizationProto;
 import com.sequenceiq.authorization.service.ResourceNameFactoryService;
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 
 @Service
 public class AuthorizationMessageUtilsService {

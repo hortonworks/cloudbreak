@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.ccm.key;
 
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 
 /**
  * Provides utilities for dealing with resources.

@@ -4,7 +4,7 @@ import javax.ws.rs.core.Response.Status;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
+import com.sequenceiq.cloudbreak.auth.crn.CrnParseException;
 
 @Component
 public class CrnParseExceptionMapper extends BaseExceptionMapper<CrnParseException> {

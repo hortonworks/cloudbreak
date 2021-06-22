@@ -1,7 +1,11 @@
 package com.sequenceiq.thunderhead.grpc.service.auth;
 
-import static com.sequenceiq.cloudbreak.auth.altus.InternalCrnBuilder.INTERNAL_ACCOUNT;
+import static com.sequenceiq.cloudbreak.auth.crn.InternalCrnBuilder.INTERNAL_ACCOUNT;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -19,7 +23,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.rules.ExpectedException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -32,7 +35,8 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAc
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListTermsRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListTermsResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.WorkloadPasswordPolicy;
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
+import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
 import com.sequenceiq.thunderhead.util.JsonUtil;
 
 import io.grpc.StatusRuntimeException;
@@ -51,7 +55,7 @@ public class MockUserManagementServiceTest {
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
-    @Spy
+    @Mock
     private MockCrnService mockCrnService;
 
     @InjectMocks
@@ -105,17 +109,13 @@ public class MockUserManagementServiceTest {
         try {
             underTest.initializeActorWorkloadCredentials();
 
+            when(mockCrnService.createCrn(anyString(), any(), anyString())).thenReturn(CrnTestUtil.getCustomCrnBuilder(CrnResourceDescriptor.PUBLIC_KEY)
+                    .setResource(UUID.randomUUID().toString()).setAccountId(ACCOUNT_ID).build());
+
             long currentTime = System.currentTimeMillis();
 
             GetActorWorkloadCredentialsRequest req = GetActorWorkloadCredentialsRequest.newBuilder()
-                    .setActorCrn(Crn.builder()
-                            .setPartition(Crn.Partition.CDP)
-                            .setRegion(Crn.Region.US_WEST_1)
-                            .setService(Crn.Service.IAM)
-                            .setResourceType(Crn.ResourceType.USER)
-                            .setAccountId(UUID.randomUUID().toString())
-                            .setResource(UUID.randomUUID().toString())
-                            .build().toString())
+                    .setActorCrn(CrnTestUtil.getUserCrnBuilder().setAccountId(ACCOUNT_ID).setResource(UUID.randomUUID().toString()).build().toString())
                     .build();
             StreamRecorder<GetActorWorkloadCredentialsResponse> observer = StreamRecorder.create();
 
@@ -320,6 +320,7 @@ public class MockUserManagementServiceTest {
 
     @Test
     void testGetAccountWithAltusAccountId() {
+        doCallRealMethod().when(mockCrnService).ensureProperAccountIdUsage(anyString());
         GetAccountRequest req = GetAccountRequest.newBuilder()
                 .setAccountId(INTERNAL_ACCOUNT)
                 .build();
