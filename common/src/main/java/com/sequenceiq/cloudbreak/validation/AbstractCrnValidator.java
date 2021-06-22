@@ -9,7 +9,7 @@ import javax.validation.ConstraintValidatorContext;
 
 import org.apache.commons.lang3.tuple.Pair;
 
-import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
+import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 
 public abstract class AbstractCrnValidator<T> implements ConstraintValidator<ValidCrn, T> {
 

@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.microsoft.azure.management.storage.Kind;
 import com.microsoft.azure.management.storage.StorageAccount;
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.ObjectStorageConnector;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;

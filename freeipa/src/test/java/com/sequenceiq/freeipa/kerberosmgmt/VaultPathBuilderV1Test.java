@@ -3,7 +3,7 @@ package com.sequenceiq.freeipa.kerberosmgmt;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
+import com.sequenceiq.cloudbreak.auth.crn.CrnParseException;
 import com.sequenceiq.freeipa.kerberosmgmt.v1.VaultPathBuilder;
 
 public class VaultPathBuilderV1Test {

@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.BaseEncoding;
-import com.sequenceiq.cloudbreak.auth.CrnTestUtil;
+import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
 import com.sequenceiq.freeipa.client.model.User;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UserMetadata;
 

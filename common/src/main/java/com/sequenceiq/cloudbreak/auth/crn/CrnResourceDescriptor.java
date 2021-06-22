@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.auth.altus;
+package com.sequenceiq.cloudbreak.auth.crn;
 
 import org.apache.commons.lang3.tuple.Pair;
 

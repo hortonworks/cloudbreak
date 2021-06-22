@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.audit.model;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 
 public class ActorCrn extends ActorBase {
 

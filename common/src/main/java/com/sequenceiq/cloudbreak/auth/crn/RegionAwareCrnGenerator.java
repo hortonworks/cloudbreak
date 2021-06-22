@@ -5,9 +5,6 @@ import java.util.UUID;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
-
 @Service
 @ConfigurationProperties("crn")
 public class RegionAwareCrnGenerator {

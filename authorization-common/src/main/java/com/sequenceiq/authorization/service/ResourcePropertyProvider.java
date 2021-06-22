@@ -9,7 +9,7 @@ import java.util.Optional;
 import org.apache.commons.lang3.NotImplementedException;
 
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 
 public interface ResourcePropertyProvider {
 

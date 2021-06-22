@@ -1,6 +1,6 @@
 package com.sequenceiq.it.cloudbreak.actor;
 
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 
 public class CloudbreakUser {
 

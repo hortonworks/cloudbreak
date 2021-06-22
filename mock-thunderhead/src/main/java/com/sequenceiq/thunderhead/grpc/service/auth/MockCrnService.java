@@ -1,14 +1,17 @@
 package com.sequenceiq.thunderhead.grpc.service.auth;
 
 import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
-import static com.sequenceiq.cloudbreak.auth.altus.InternalCrnBuilder.INTERNAL_ACCOUNT;
+import static com.sequenceiq.cloudbreak.auth.crn.InternalCrnBuilder.INTERNAL_ACCOUNT;
+
+import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.thunderhead.grpc.GrpcActorContext;
 
 import io.grpc.Status;
@@ -18,15 +21,11 @@ class MockCrnService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MockCrnService.class);
 
+    @Inject
+    private RegionAwareCrnGenerator regionAwareCrnGenerator;
+
     Crn createCrn(String accountId, CrnResourceDescriptor resourceDescriptor, String resource) {
-        return Crn.builder()
-                .setRegion(Crn.Region.US_WEST_1)
-                .setPartition(Crn.Partition.CDP)
-                .setService(resourceDescriptor.getServiceType())
-                .setResourceType(resourceDescriptor.getResourceType())
-                .setResource(resource)
-                .setAccountId(accountId)
-                .build();
+        return regionAwareCrnGenerator.generateCrn(resourceDescriptor, resource, accountId);
     }
 
     void ensureInternalActor() {

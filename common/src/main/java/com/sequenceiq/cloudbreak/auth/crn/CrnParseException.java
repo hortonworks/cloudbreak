@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.auth.altus;
+package com.sequenceiq.cloudbreak.auth.crn;
 
 public class CrnParseException extends RuntimeException {
     /**

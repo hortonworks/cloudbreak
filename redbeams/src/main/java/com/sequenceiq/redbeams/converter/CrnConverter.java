@@ -4,7 +4,7 @@ import javax.persistence.AttributeConverter;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 
 @Component
 public class CrnConverter implements AttributeConverter<Crn, String> {
