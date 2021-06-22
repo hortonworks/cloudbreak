@@ -10,6 +10,7 @@ import com.sequenceiq.freeipa.api.v1.diagnostics.DiagnosticsV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.dns.DnsV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.test.ClientTestV1Endpoint;
+import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.FreeIpaUpgradeV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.UserV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.kerberos.KerberosConfigV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.KerberosMgmtV1Endpoint;
@@ -85,5 +86,10 @@ public class FreeIpaApiUserCrnEndpoint extends AbstractUserCrnServiceEndpoint im
     @Override
     public UtilV1Endpoint utilV1Endpoint() {
         return getEndpoint(UtilV1Endpoint.class);
+    }
+
+    @Override
+    public FreeIpaUpgradeV1Endpoint getFreeIpaUpgradeV1Endpoint() {
+        return getEndpoint(FreeIpaUpgradeV1Endpoint.class);
     }
 }
