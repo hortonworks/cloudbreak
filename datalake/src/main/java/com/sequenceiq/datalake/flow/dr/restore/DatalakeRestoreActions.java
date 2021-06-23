@@ -1,11 +1,14 @@
 package com.sequenceiq.datalake.flow.dr.restore;
 
-import static com.sequenceiq.datalake.flow.dr.restore.DatalakeDatabaseRestoreEvent.DATALAKE_DATABASE_RESTORE_FAILURE_HANDLED_EVENT;
-import static com.sequenceiq.datalake.flow.dr.restore.DatalakeDatabaseRestoreEvent.DATALAKE_RESTORE_FAILURE_HANDLED_EVENT;
-import static com.sequenceiq.datalake.flow.dr.restore.DatalakeDatabaseRestoreEvent.DATALAKE_DATABASE_RESTORE_FINALIZED_EVENT;
-import static com.sequenceiq.datalake.flow.dr.restore.DatalakeDatabaseRestoreEvent.DATALAKE_DATABASE_RESTORE_IN_PROGRESS_EVENT;
+import static com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreEvent.DATALAKE_DATABASE_RESTORE_FAILURE_HANDLED_EVENT;
+import static com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreEvent.DATALAKE_DATABASE_RESTORE_FINALIZED_EVENT;
+import static com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreEvent.DATALAKE_DATABASE_RESTORE_IN_PROGRESS_EVENT;
+import static com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreEvent.DATALAKE_RESTORE_FAILED_EVENT;
+import static com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreEvent.DATALAKE_RESTORE_FAILURE_HANDLED_EVENT;
 
 import com.google.common.base.Strings;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeDrStatusResponse;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -19,6 +22,7 @@ import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeDatabaseRestoreStar
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeRestoreSuccessEvent;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeDatabaseRestoreWaitRequest;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeFullRestoreWaitRequest;
+import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeTriggerRestoreEvent;
 import com.sequenceiq.datalake.metric.MetricType;
 import com.sequenceiq.datalake.metric.SdxMetricService;
 import com.sequenceiq.datalake.service.AbstractSdxAction;
@@ -44,8 +48,8 @@ import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
 @Configuration
-public class DatalakeDatabaseRestoreActions {
-    private static final Logger LOGGER = LoggerFactory.getLogger(DatalakeDatabaseRestoreActions.class);
+public class DatalakeRestoreActions {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DatalakeRestoreActions.class);
 
     private static final String OPERATION_ID = "OPERATION-ID";
 
@@ -65,6 +69,46 @@ public class DatalakeDatabaseRestoreActions {
     @Inject
     private SdxService sdxService;
 
+    @Bean(name = "DATALAKE_TRIGGERING_RESTORE_STATE")
+    public Action<?, ?> triggerDatalakeRestore() {
+        return new AbstractSdxAction<>(DatalakeTriggerRestoreEvent.class) {
+            @Override
+            protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
+                    DatalakeTriggerRestoreEvent payload) {
+                return SdxContext.from(flowParameters, payload);
+            }
+
+            @Override
+            protected void prepareExecution(DatalakeTriggerRestoreEvent payload, Map<Object, Object> variables) {
+                super.prepareExecution(payload, variables);
+            }
+
+            @Override
+            protected void doExecute(SdxContext context, DatalakeTriggerRestoreEvent payload, Map<Object, Object> variables) {
+                LOGGER.info("Triggering datalake restore for {}", payload.getResourceId());
+                DatalakeDrStatusResponse restoreStatusResponse =
+                        sdxBackupRestoreService.triggerDatalakeRestore(payload.getResourceId(),
+                                payload.getBackupId(),
+                                payload.getBackupLocationOverride(),
+                                payload.getUserId());
+                variables.put(RESTORE_ID, restoreStatusResponse.getDrOperationId());
+                variables.put(OPERATION_ID, restoreStatusResponse.getDrOperationId());
+                payload.getDrStatus().setOperationId(restoreStatusResponse.getDrOperationId());
+                if (!restoreStatusResponse.failed()) {
+                    sendEvent(context, DatalakeDatabaseRestoreStartEvent.from(payload, restoreStatusResponse.getDrOperationId()));
+                } else {
+                    LOGGER.error("Datalake restore has failed for {} ", payload.getResourceId());
+                    sendEvent(context, DATALAKE_RESTORE_FAILED_EVENT.event(), payload);
+                }
+            }
+
+            @Override
+            protected Object getFailurePayload(DatalakeTriggerRestoreEvent payload, Optional<SdxContext> flowContext, Exception ex) {
+                return DatalakeRestoreFailedEvent.from(payload, ex);
+            }
+        };
+    }
+
     @Bean(name = "DATALAKE_DATABASE_RESTORE_START_STATE")
     public Action<?, ?> datalakeRestore() {
         return new AbstractSdxAction<>(DatalakeDatabaseRestoreStartEvent.class) {
@@ -77,21 +121,30 @@ public class DatalakeDatabaseRestoreActions {
             @Override
             protected void prepareExecution(DatalakeDatabaseRestoreStartEvent payload, Map<Object, Object> variables) {
                 super.prepareExecution(payload, variables);
-                variables.put(BACKUP_ID, payload.getBackupId());
+                if (!variables.containsKey(BACKUP_ID)) {
+                    variables.put(BACKUP_ID, payload.getBackupId());
+                }
                 if (!Strings.isNullOrEmpty(payload.getRestoreId())) {
                     variables.put(RESTORE_ID, payload.getRestoreId());
                 }
-                variables.put(OPERATION_ID, payload.getDrStatus().getOperationId());
+                if (!variables.containsKey(OPERATION_ID)) {
+                    variables.put(OPERATION_ID, payload.getDrStatus().getOperationId());
+                }
             }
 
             @Override
             protected void doExecute(SdxContext context, DatalakeDatabaseRestoreStartEvent payload, Map<Object, Object> variables) {
-                LOGGER.info("Datalake database restore has been started for {}", payload.getResourceId());
-                sdxBackupRestoreService.databaseRestore(payload.getDrStatus(),
-                        payload.getResourceId(),
-                        payload.getBackupId(),
-                        payload.getBackupLocation());
-                sendEvent(context, DATALAKE_DATABASE_RESTORE_IN_PROGRESS_EVENT.event(), payload);
+                if (payload.getBackupLocation() != null) {
+                    LOGGER.info("Datalake database restore has been started for {}", payload.getResourceId());
+                    sdxBackupRestoreService.databaseRestore(payload.getDrStatus(),
+                            payload.getResourceId(),
+                            payload.getBackupId(),
+                            payload.getBackupLocation());
+                    sendEvent(context, DATALAKE_DATABASE_RESTORE_IN_PROGRESS_EVENT.event(), payload);
+                } else {
+                    LOGGER.error("Datalake database restore has been skipped because backup location is null {}", payload.getResourceId());
+                    throw new BadRequestException("Backup Location is null. Datalake database restore is not triggered.");
+                }
             }
 
             @Override
@@ -179,8 +232,7 @@ public class DatalakeDatabaseRestoreActions {
 
             @Override
             protected Object getFailurePayload(SdxEvent payload, Optional<SdxContext> flowContext, Exception ex) {
-                return DatalakeDatabaseRestoreFailedEvent.from(payload, ex);
-
+                return DatalakeRestoreFailedEvent.from(payload, ex);
             }
         };
     }
@@ -259,7 +311,7 @@ public class DatalakeDatabaseRestoreActions {
 
             @Override
             protected Object getFailurePayload(DatalakeRestoreFailedEvent payload, Optional<SdxContext> flowContext, Exception ex) {
-                return DatalakeRestoreFailedEvent.from(payload, ex);
+                return null;
             }
         };
     }

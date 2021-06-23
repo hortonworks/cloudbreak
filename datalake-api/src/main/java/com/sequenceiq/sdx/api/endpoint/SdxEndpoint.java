@@ -44,6 +44,8 @@ import com.sequenceiq.sdx.api.model.SdxValidateCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SetRangerCloudIdentityMappingRequest;
 import com.sequenceiq.sdx.api.model.SdxBackupResponse;
 import com.sequenceiq.sdx.api.model.SdxBackupStatusResponse;
+import com.sequenceiq.sdx.api.model.SdxRestoreResponse;
+import com.sequenceiq.sdx.api.model.SdxRestoreStatusResponse;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -203,6 +205,20 @@ public interface SdxEndpoint {
     SdxBackupStatusResponse backupDatalakeStatusByName(@PathParam("name") String name,
             @QueryParam("backupId") String backupId,
             @QueryParam("backupName") String backupName);
+
+    @POST
+    @Path("{name}/restoreDatalake")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "restore the datalake ", produces = MediaType.APPLICATION_JSON, nickname = "restoreDatalake")
+    SdxRestoreResponse restoreDatalakeByName(@PathParam("name") String name,
+            @QueryParam("backupId") String backupId, @QueryParam("backupLocationOverride") String backupLocationOverride);
+
+    @POST
+    @Path("{name}/restoreDatalakeStatus")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "restore status of the datalake ", produces = MediaType.APPLICATION_JSON, nickname = "restoreDatalakeStatus")
+    SdxRestoreStatusResponse getRestoreDatalakeStatusByName(@PathParam("name") String name,
+            @QueryParam("restoreId") String restoreId);
 
     @POST
     @Path("{name}/backupDatabase")

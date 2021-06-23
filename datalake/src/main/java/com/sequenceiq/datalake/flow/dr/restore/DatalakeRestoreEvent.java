@@ -9,8 +9,9 @@ import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeFullRestoreInProgre
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 
-public enum DatalakeDatabaseRestoreEvent implements FlowEvent {
+public enum DatalakeRestoreEvent implements FlowEvent {
     DATALAKE_DATABASE_RESTORE_EVENT(EventSelectorUtil.selector(DatalakeDatabaseRestoreStartEvent.class)),
+    DATALAKE_TRIGGER_RESTORE_EVENT("DATALAKE_TRIGGER_RESTORE_EVENT"),
     DATALAKE_DATABASE_RESTORE_COULD_NOT_START_EVENT(EventSelectorUtil.selector(DatalakeDatabaseRestoreCouldNotStartEvent.class)),
     DATALAKE_DATABASE_RESTORE_IN_PROGRESS_EVENT("DATALAKE_DATABASE_RESTORE_IN_PROGRESS_EVENT"),
     DATALAKE_FULL_RESTORE_IN_PROGRESS_EVENT(EventSelectorUtil.selector(DatalakeFullRestoreInProgressEvent.class)),
@@ -22,7 +23,7 @@ public enum DatalakeDatabaseRestoreEvent implements FlowEvent {
     DATALAKE_RESTORE_FAILURE_HANDLED_EVENT("DATALAKE_RESTORE_FAILURE_HANDLED_EVENT");
     private final String event;
 
-    DatalakeDatabaseRestoreEvent(String event) {
+    DatalakeRestoreEvent(String event) {
         this.event = event;
     }
 

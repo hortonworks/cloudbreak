@@ -4,9 +4,11 @@ import com.dyngr.exception.PollerException;
 import com.dyngr.exception.PollerStoppedException;
 import com.dyngr.exception.UserBreakException;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.datalake.entity.operation.SdxOperationStatus;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeDatabaseRestoreFailedEvent;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeDatabaseRestoreWaitRequest;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeFullRestoreInProgressEvent;
+import com.sequenceiq.datalake.repository.SdxOperationRepository;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
@@ -38,6 +40,9 @@ public class DatalakeDatabaseRestoreWaitHandler extends ExceptionCatcherEventHan
     @Inject
     private SdxBackupRestoreService sdxBackupRestoreService;
 
+    @Inject
+    private SdxOperationRepository sdxOperationRepository;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(DatalakeDatabaseRestoreWaitRequest.class);
@@ -61,13 +66,19 @@ public class DatalakeDatabaseRestoreWaitHandler extends ExceptionCatcherEventHan
             response = new DatalakeFullRestoreInProgressEvent(sdxId, userId, request.getOperationId());
         } catch (UserBreakException userBreakException) {
             LOGGER.info("Database restore polling exited before timeout. Cause: ", userBreakException);
+            sdxBackupRestoreService.updateDatabaseStatusEntry(event.getData().getOperationId(),
+                    SdxOperationStatus.FAILED, userBreakException.getLocalizedMessage());
             response = new DatalakeDatabaseRestoreFailedEvent(sdxId, userId, userBreakException);
         } catch (PollerStoppedException pollerStoppedException) {
             LOGGER.info("Database restore poller stopped for cluster: {}", sdxId);
+            sdxBackupRestoreService.updateDatabaseStatusEntry(event.getData().getOperationId(),
+                    SdxOperationStatus.FAILED, pollerStoppedException.getLocalizedMessage());
             response = new DatalakeDatabaseRestoreFailedEvent(sdxId, userId,
                     new PollerStoppedException("Database restore timed out after " + durationInMinutes + " minutes"));
         } catch (PollerException exception) {
             LOGGER.info("Database restore polling failed for cluster: {}", sdxId);
+            sdxBackupRestoreService.updateDatabaseStatusEntry(event.getData().getOperationId(),
+                    SdxOperationStatus.FAILED, exception.getLocalizedMessage());
             response = new DatalakeDatabaseRestoreFailedEvent(sdxId, userId, exception);
         }
         return response;
