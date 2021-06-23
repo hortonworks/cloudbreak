@@ -334,13 +334,13 @@ public class SaltOrchestrator implements HostOrchestrator {
 
     @SuppressFBWarnings("REC_CATCH_EXCEPTION")
     @Override
-    public void initServiceRun(List<GatewayConfig> allGateway, Set<Node> allNodes, SaltConfig saltConfig, ExitCriteriaModel exitModel)
-            throws CloudbreakOrchestratorException {
+    public void initServiceRun(List<GatewayConfig> allGateway, Set<Node> allNodes, Set<Node> reachableNodes, SaltConfig saltConfig,
+            ExitCriteriaModel exitModel) throws CloudbreakOrchestratorException {
         GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(allGateway);
         Set<String> gatewayTargetIpAddresses = getGatewayPrivateIps(allGateway);
         Set<String> gatewayTargetHostnames = getGatewayHostnames(allGateway);
         Set<String> serverHostname = Sets.newHashSet(primaryGateway.getHostname());
-        Set<String> allNodeHostname = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
+        Set<String> reachableHostnames = reachableNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
         try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
             OrchestratorBootstrap hostSave = new PillarSave(sc, gatewayTargetIpAddresses, allNodes);
             Callable<Boolean> saltPillarRunner = saltRunner.runner(hostSave, exitCriteria, exitModel);
@@ -352,8 +352,8 @@ public class SaltOrchestrator implements HostOrchestrator {
                 saltPillarRunner.call();
             }
 
-            setAdMemberRoleIfNeeded(allNodes, saltConfig, exitModel, sc, allNodeHostname);
-            setIpaMemberRoleIfNeeded(allNodes, saltConfig, exitModel, sc, allNodeHostname);
+            setAdMemberRoleIfNeeded(allNodes, saltConfig, exitModel, sc, reachableHostnames);
+            setIpaMemberRoleIfNeeded(allNodes, saltConfig, exitModel, sc, reachableHostnames);
 
             // knox
             if (primaryGateway.getKnoxGatewayEnabled()) {
@@ -362,15 +362,15 @@ public class SaltOrchestrator implements HostOrchestrator {
 
             setPostgreRoleIfNeeded(allNodes, saltConfig, exitModel, sc, serverHostname);
 
-            addClusterManagerRoles(allNodes, exitModel, sc, serverHostname, allNodeHostname);
+            addClusterManagerRoles(allNodes, exitModel, sc, serverHostname, reachableHostnames);
 
             // kerberos
             if (saltConfig.getServicePillarConfig().containsKey("kerberos")) {
-                saltCommandRunner.runModifyGrainCommand(sc, new GrainAddRunner(allNodeHostname, allNodes, "kerberized"), exitModel, exitCriteria);
+                saltCommandRunner.runModifyGrainCommand(sc, new GrainAddRunner(reachableHostnames, allNodes, "kerberized"), exitModel, exitCriteria);
             }
             grainUploader.uploadGrains(allNodes, saltConfig.getGrainsProperties(), exitModel, sc, exitCriteria);
 
-            runSyncAll(sc, allNodeHostname, allNodes, exitModel);
+            runSyncAll(sc, reachableHostnames, allNodes, exitModel);
             saltCommandRunner.runSaltCommand(sc, new MineUpdateRunner(gatewayTargetHostnames, allNodes), exitModel, exitCriteria);
         } catch (ExecutionException e) {
             LOGGER.warn("Error occurred during bootstrap", e);
@@ -414,22 +414,22 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     private void addClusterManagerRoles(Set<Node> allNodes, ExitCriteriaModel exitModel,
-            SaltConnector sc, Set<String> serverHostnames, Set<String> allNodeHostname) throws Exception {
-        saltCommandRunner.runModifyGrainCommand(sc, new GrainAddRunner(allNodeHostname, allNodes, "manager_agent"), exitModel, exitCriteria);
+            SaltConnector sc, Set<String> serverHostnames, Set<String> reachableHostnames) throws Exception {
+        saltCommandRunner.runModifyGrainCommand(sc, new GrainAddRunner(reachableHostnames, allNodes, "manager_agent"), exitModel, exitCriteria);
         saltCommandRunner.runModifyGrainCommand(sc, new GrainAddRunner(serverHostnames, allNodes, "manager_server"), exitModel, exitCriteria);
     }
 
-    private void setAdMemberRoleIfNeeded(Set<Node> allNodes, SaltConfig saltConfig, ExitCriteriaModel exitModel, SaltConnector sc, Set<String> allHostnames)
-            throws Exception {
+    private void setAdMemberRoleIfNeeded(Set<Node> allNodes, SaltConfig saltConfig, ExitCriteriaModel exitModel, SaltConnector sc,
+            Set<String> reachableHostnames) throws Exception {
         if (saltConfig.getServicePillarConfig().containsKey("sssd-ad")) {
-            saltCommandRunner.runModifyGrainCommand(sc, new GrainAddRunner(allHostnames, allNodes, "ad_member"), exitModel, exitCriteria);
+            saltCommandRunner.runModifyGrainCommand(sc, new GrainAddRunner(reachableHostnames, allNodes, "ad_member"), exitModel, exitCriteria);
         }
     }
 
-    private void setIpaMemberRoleIfNeeded(Set<Node> allNodes, SaltConfig saltConfig, ExitCriteriaModel exitModel, SaltConnector sc, Set<String> allHostnames)
-            throws Exception {
+    private void setIpaMemberRoleIfNeeded(Set<Node> allNodes, SaltConfig saltConfig, ExitCriteriaModel exitModel, SaltConnector sc,
+            Set<String> reachableHostnames) throws Exception {
         if (saltConfig.getServicePillarConfig().containsKey("sssd-ipa")) {
-            saltCommandRunner.runModifyGrainCommand(sc, new GrainAddRunner(allHostnames, allNodes, "ipa_member"), exitModel, exitCriteria);
+            saltCommandRunner.runModifyGrainCommand(sc, new GrainAddRunner(reachableHostnames, allNodes, "ipa_member"), exitModel, exitCriteria);
         }
     }
 
@@ -442,7 +442,7 @@ public class SaltOrchestrator implements HostOrchestrator {
         try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
             retry.testWith2SecDelayMax5Times(() -> getRolesBeforeHighstateMagic(sc));
             Set<String> allHostnames = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
-            runNewService(sc, new HighStateAllRunner(allHostnames, allNodes), exitModel);
+            runNewService(sc, new HighStateRunner(allHostnames, allNodes), exitModel);
         } catch (ExecutionException e) {
             LOGGER.info("Error occurred during bootstrap", e);
             if (e.getCause() instanceof CloudbreakOrchestratorFailedException) {
@@ -689,7 +689,7 @@ public class SaltOrchestrator implements HostOrchestrator {
 
             Set<String> allHostnames = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
             runSyncAll(sc, allHostnames, allNodes, exitCriteriaModel);
-            runNewService(sc, new HighStateAllRunner(allHostnames, allNodes), exitCriteriaModel, maxRetry, true);
+            runNewService(sc, new HighStateRunner(allHostnames, allNodes), exitCriteriaModel, maxRetry, true);
 
             // remove 'manager_upgrade' role from all nodes
             saltCommandRunner.runModifyGrainCommand(sc, new GrainRemoveRunner(targetHostnames, allNodes, "roles", "manager_upgrade"),

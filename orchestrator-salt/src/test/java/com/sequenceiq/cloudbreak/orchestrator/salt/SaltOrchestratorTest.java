@@ -80,7 +80,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltCommandTracker;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltJobIdTracker;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.GrainAddRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.GrainRemoveRunner;
-import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.HighStateAllRunner;
+import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.HighStateRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.MineUpdateRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.ModifyGrainBase;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.SyncAllRunner;
@@ -206,8 +206,8 @@ public class SaltOrchestratorTest {
         SaltCommandTracker syncGrainsCheckerSaltCommandTracker = mock(SaltCommandTracker.class);
         whenNew(SaltCommandTracker.class).withArguments(eq(saltConnector), eq(syncAllRunner)).thenReturn(syncGrainsCheckerSaltCommandTracker);
 
-        HighStateAllRunner highStateAllRunner = mock(HighStateAllRunner.class);
-        whenNew(HighStateAllRunner.class).withAnyArguments().thenReturn(highStateAllRunner);
+        HighStateRunner highStateRunner = mock(HighStateRunner.class);
+        whenNew(HighStateRunner.class).withAnyArguments().thenReturn(highStateRunner);
 
         SaltJobIdTracker saltJobIdTracker = mock(SaltJobIdTracker.class);
         whenNew(SaltJobIdTracker.class).withAnyArguments().thenReturn(saltJobIdTracker);
@@ -222,7 +222,7 @@ public class SaltOrchestratorTest {
         PowerMockito.when(SaltStates.getGrains(any(), any(), any())).thenReturn(new HashMap<>());
 
         SaltConfig saltConfig = new SaltConfig();
-        saltOrchestrator.initServiceRun(Collections.singletonList(gatewayConfig), targets, saltConfig, exitCriteriaModel);
+        saltOrchestrator.initServiceRun(Collections.singletonList(gatewayConfig), targets, targets, saltConfig, exitCriteriaModel);
         saltOrchestrator.runService(Collections.singletonList(gatewayConfig), targets, saltConfig, exitCriteriaModel);
 
         Set<String> allNodes = targets.stream().map(Node::getHostname).collect(Collectors.toSet());
@@ -231,9 +231,9 @@ public class SaltOrchestratorTest {
         verifyNew(SyncAllRunner.class, times(1)).withArguments(eq(allNodes), eq(targets));
 
         // verify run new service
-        verifyNew(HighStateAllRunner.class, atLeastOnce()).withArguments(eq(allNodes),
+        verifyNew(HighStateRunner.class, atLeastOnce()).withArguments(eq(allNodes),
                 eq(targets));
-        verifyNew(SaltJobIdTracker.class, atLeastOnce()).withArguments(eq(saltConnector), eq(highStateAllRunner), eq(true));
+        verifyNew(SaltJobIdTracker.class, atLeastOnce()).withArguments(eq(saltConnector), eq(highStateRunner), eq(true));
         verify(saltCommandRunner, times(1)).runSaltCommand(any(SaltConnector.class), any(BaseSaltJobRunner.class),
                 any(ExitCriteriaModel.class), any(ExitCriteria.class));
         verify(saltCommandRunner, times(2)).runModifyGrainCommand(any(SaltConnector.class), any(ModifyGrainBase.class),
