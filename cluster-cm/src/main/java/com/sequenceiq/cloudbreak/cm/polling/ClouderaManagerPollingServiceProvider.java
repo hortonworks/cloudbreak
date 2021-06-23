@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cm.polling;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -12,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.api.swagger.client.ApiClient;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cm.commands.SyncApiCommandRetriever;
@@ -23,7 +25,6 @@ import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerApplyHostTemplat
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerBatchCommandsListenerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerCollectDiagnosticsListenerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerDecommissionHostListenerTask;
-import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerSyncApiCommandIdCheckerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerDeployClientConfigListenerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerGenerateCredentialsListenerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerHostStatusChecker;
@@ -41,12 +42,14 @@ import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerStartManagementS
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerStartupListenerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerStopListenerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerStopManagementServiceListenerTask;
+import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerSyncApiCommandIdCheckerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerTemplateInstallationChecker;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerUpgradeParcelDistributeListenerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerUpgradeParcelDownloadListenerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerUpgradeRuntimeListenerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.SilentCMDecommissionHostListenerTask;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
@@ -250,12 +253,20 @@ public class ClouderaManagerPollingServiceProvider {
                 stack.getClusterManagerIp());
         ClouderaManagerSyncCommandPollerObject pollerObject = new ClouderaManagerSyncCommandPollerObject(stack, apiClient, recentCommandId, commandName);
         ClouderaManagerSyncApiCommandIdCheckerTask listenerTask =
-                new ClouderaManagerSyncApiCommandIdCheckerTask(clouderaManagerApiPojoFactory, syncApiCommandRetriever);
+                new ClouderaManagerSyncApiCommandIdCheckerTask(clouderaManagerApiPojoFactory, syncApiCommandRetriever, cloudbreakEventService);
         return clouderaManagerCommandPollerObjectPollingService.pollWithAbsoluteTimeout(
                 listenerTask,
                 pollerObject,
                 POLL_INTERVAL,
                 POLL_FOR_15_MINUTES);
+    }
+
+    public void fireCommandTimeoutEvent(Long stackId, Optional<BigDecimal> commandId) {
+        cloudbreakEventService.fireClusterManagerEvent(stackId, Status.UPDATE_FAILED.name(), ResourceEvent.CLUSTER_CM_COMMAND_TIMEOUT, commandId);
+    }
+
+    public void fireCommandFailedEvent(Long stackId, Optional<BigDecimal> commandId) {
+        cloudbreakEventService.fireClusterManagerEvent(stackId, Status.UPDATE_FAILED.name(), ResourceEvent.CLUSTER_CM_COMMAND_FAILED, commandId);
     }
 
     private PollingResult pollCommandListWithTimeListener(Stack stack, ApiClient apiClient, List<BigDecimal> commandIds, long maximumWaitTimeInSeconds,

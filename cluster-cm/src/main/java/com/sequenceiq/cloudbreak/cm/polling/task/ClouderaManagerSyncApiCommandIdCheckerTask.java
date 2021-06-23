@@ -15,7 +15,9 @@ import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cm.commands.SyncApiCommandRetriever;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerCommandPollerObject;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerSyncCommandPollerObject;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 
 public class ClouderaManagerSyncApiCommandIdCheckerTask
         extends ClusterBasedStatusCheckerTask<ClouderaManagerCommandPollerObject> {
@@ -27,11 +29,15 @@ public class ClouderaManagerSyncApiCommandIdCheckerTask
 
     private final SyncApiCommandRetriever syncApiCommandRetriever;
 
+    private final CloudbreakEventService cloudbreakEventService;
+
     public ClouderaManagerSyncApiCommandIdCheckerTask(
             ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory,
-            SyncApiCommandRetriever syncApiCommandRetriever) {
+            SyncApiCommandRetriever syncApiCommandRetriever,
+            CloudbreakEventService cloudbreakEventService) {
         this.clouderaManagerApiPojoFactory = clouderaManagerApiPojoFactory;
         this.syncApiCommandRetriever = syncApiCommandRetriever;
+        this.cloudbreakEventService = cloudbreakEventService;
     }
 
     @Override
@@ -61,6 +67,8 @@ public class ClouderaManagerSyncApiCommandIdCheckerTask
 
     @Override
     public void handleTimeout(ClouderaManagerCommandPollerObject pollerObject) {
+        cloudbreakEventService.fireClusterManagerEvent(pollerObject.getStack().getId(), pollerObject.getStack().getStatus().name(),
+                ResourceEvent.CLUSTER_CM_COMMAND_TIMEOUT, Optional.of(pollerObject.getId()));
         throw new ClouderaManagerOperationFailedException(String.format("Operation timed out. "
                 + "Failed to get newest successful %s command ID.", cast(pollerObject).getCommandName()));
     }

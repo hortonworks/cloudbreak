@@ -316,6 +316,8 @@ public enum ResourceEvent {
     CLUSTER_CM_CLUSTER_SERVICES_STARTING("cm.cluster.services.starting"),
     CLUSTER_CM_SECURITY_GROUP_TOO_STRICT("cm.cluster.securitygroup.too.strict"),
     CLUSTER_CM_SERVICE_DEREGISTER_FAILED("cm.cluster.service.deregister.failed"),
+    CLUSTER_CM_COMMAND_FAILED("cm.cluster.command.failed"),
+    CLUSTER_CM_COMMAND_TIMEOUT("cm.cluster.command.timeout"),
     CLUSTER_MANAGER_CLUSTER_DECOMMISSIONING_TIME("cluster.ambari.cluster.decommissioning.time"),
     CLUSTER_MANAGER_CLUSTER_SERVICES_STOPPING("cluster.ambari.cluster.services.stopping"),
     CLUSTER_MANAGER_CLUSTER_SERVICES_STOPPED("cluster.ambari.cluster.services.stopped"),

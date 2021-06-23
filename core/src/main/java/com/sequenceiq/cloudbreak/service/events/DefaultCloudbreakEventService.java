@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.events;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -25,6 +26,7 @@ import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.decorator.StackResponseDecorator;
+import com.sequenceiq.cloudbreak.service.stack.CmCommandLinkProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
@@ -83,6 +85,9 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
     @Inject
     private StackResponseDecorator stackResponseDecorator;
 
+    @Inject
+    private CmCommandLinkProvider cmCommandLinkProvider;
+
     @PostConstruct
     public void setup() {
         reactor.on(Selectors.$(CLOUDBREAK_EVENT), cloudbreakEventHandler);
@@ -106,6 +111,20 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
         String eventMessage = getMessage(resourceEvent, eventMessageArgs);
         LOGGER.debug("Firing Cloudbreak event: stackId: {}, type: {}, message: {}, instancegroup: {}", stackId, eventType, eventMessage, instanceGroupName);
         fireEventWithPayload(stackId, eventType, resourceEvent, eventMessageArgs, eventMessage, instanceGroupName);
+    }
+
+    @Override
+    public void fireClusterManagerEvent(Long stackId, String eventType, ResourceEvent resourceEvent, Optional<BigDecimal> clusterManagerEventId) {
+        if (clusterManagerEventId.isPresent()) {
+            Stack stack = stackService.getByIdWithTransaction(stackId);
+            Optional<String> link = cmCommandLinkProvider.getCmCommandLink(stack, clusterManagerEventId.get().toString());
+            if (link.isPresent()) {
+                Collection<String> eventMessageArgs = List.of(link.get());
+                String eventMessage = getMessage(resourceEvent, eventMessageArgs);
+                LOGGER.debug("Firing Cluster Manager event: stackId: {}, type: {}, message: {}", stackId, eventType, eventMessage);
+                fireEventWithPayload(stack, eventType, resourceEvent, eventMessageArgs, eventMessage, null);
+            }
+        }
     }
 
     @Override
@@ -144,8 +163,11 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
 
     private void fireEventWithPayload(Long stackId, String eventType, ResourceEvent resourceEvent, Collection<String> eventMessageArgs,
             String eventMessage, String instanceGroupName) {
-
         Stack stack = stackService.getByIdWithTransaction(stackId);
+        fireEventWithPayload(stack, eventType, resourceEvent, eventMessageArgs, eventMessage, instanceGroupName);
+    }
+
+    private void fireEventWithPayload(Stack stack, String eventType, ResourceEvent resourceEvent, Collection<String> eventMessageArgs, String eventMessage, String instanceGroupName) {
         StructuredNotificationEvent structuredNotificationEvent = baseLegacyStructuredFlowEventFactory.createStructuredNotificationEvent(
                 stack,
                 eventType,

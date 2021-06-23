@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.polling.PollingResult.isExited;
 import static com.sequenceiq.cloudbreak.polling.PollingResult.isSuccess;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -70,9 +71,11 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.repository.ClusterCommandRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
@@ -123,6 +126,9 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
 
     @Inject
     private ClouderaManagerStorageErrorMapper clouderaManagerStorageErrorMapper;
+
+    @Inject
+    private CloudbreakEventService cloudbreakEventService;
 
     private final Stack stack;
 
@@ -256,6 +262,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
     @Override
     public void installCluster(String template) {
         Cluster cluster = stack.getCluster();
+        Optional<BigDecimal> commandId = Optional.empty();
         try {
             Optional<ApiCluster> cmCluster = getCmClusterByName(cluster.getName());
             boolean prewarmed = isPrewarmed(cluster.getId());
@@ -272,6 +279,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
                             .importClusterTemplate(calculateAddRepositories(apiClusterTemplate, prewarmed), apiClusterTemplate);
                     ClusterCommand clusterCommand = new ClusterCommand();
                     clusterCommand.setClusterId(cluster.getId());
+                    commandId = Optional.of(apiCommand.getId());
                     clusterCommand.setCommandId(apiCommand.getId());
                     clusterCommand.setClusterCommandType(ClusterCommandType.IMPORT_CLUSTER);
                     importCommand = Optional.of(clusterCommandRepository.save(clusterCommand));
@@ -280,9 +288,13 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
             importCommand.ifPresent(cmd -> clouderaManagerPollingServiceProvider.startPollingCmTemplateInstallation(stack, apiClient, cmd.getCommandId()));
         } catch (ApiException e) {
             String msg = "Installation of CDP with Cloudera Manager has failed: " + extractMessage(e);
+            cloudbreakEventService.fireClusterManagerEvent(stack.getId(), stack.getStatus().name(),
+                    ResourceEvent.CLUSTER_CM_COMMAND_FAILED, commandId);
             throw new ClouderaManagerOperationFailedException(msg, e);
         } catch (CloudStorageConfigurationFailedException e) {
             LOGGER.info("Error while configuring cloud storage. Message: {}", e.getMessage(), e);
+            cloudbreakEventService.fireClusterManagerEvent(stack.getId(), stack.getStatus().name(),
+                    ResourceEvent.CLUSTER_CM_COMMAND_FAILED, commandId);
             throw new ClouderaManagerOperationFailedException(clouderaManagerStorageErrorMapper.map(e, stack.cloudPlatform(), cluster), e);
         } catch (Exception e) {
             throw mapException(e);

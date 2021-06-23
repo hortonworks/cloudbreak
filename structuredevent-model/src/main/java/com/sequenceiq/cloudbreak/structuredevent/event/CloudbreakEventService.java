@@ -1,7 +1,9 @@
 package com.sequenceiq.cloudbreak.structuredevent.event;
 
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -32,6 +34,8 @@ public interface CloudbreakEventService {
 
     void fireCloudbreakInstanceGroupEvent(Long stackId, String eventType, String instanceGroupName, ResourceEvent resourceEvent,
             Collection<String> eventMessageArgs);
+
+    void fireClusterManagerEvent(Long stackId, String eventType, ResourceEvent resourceEvent, Optional<BigDecimal> clusterManagerEventId);
 
     List<StructuredNotificationEvent> cloudbreakEvents(Long workspaceId, Long since);
 
