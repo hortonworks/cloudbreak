@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -41,6 +42,8 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStoreMetadata;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -69,14 +72,8 @@ public class AwsNativeMetadataCollector implements MetadataCollector {
                 ac.getCloudContext().getName(), resources.size(), vms.size(), allInstances.size());
         try {
             String region = ac.getCloudContext().getLocation().getRegion().value();
-            List<String> instanceIds = resources.stream()
-                    .filter(resource -> ResourceType.AWS_INSTANCE.equals(resource.getType()))
-                    .map(CloudResource::getInstanceId)
-                    .collect(Collectors.toList());
-
             AmazonEc2Client ec2Client = awsClient.createEc2Client(new AwsCredentialView(ac.getCloudCredential()), region);
-
-            return collectInstances(vms, instanceIds, ec2Client);
+            return collectInstances(vms, resources, ec2Client);
         } catch (RuntimeException e) {
             LOGGER.warn("Collection of instance metadata failed", e);
             throw new CloudConnectorException(e.getMessage(), e);
@@ -110,27 +107,28 @@ public class AwsNativeMetadataCollector implements MetadataCollector {
         return null;
     }
 
-    private List<CloudVmMetaDataStatus> collectInstances(List<CloudInstance> vms, List<String> knownInstanceIdList, AmazonEc2Client ec2Client) {
+    private List<CloudVmMetaDataStatus> collectInstances(List<CloudInstance> vms, List<CloudResource> resources, AmazonEc2Client ec2Client) {
         List<CloudVmMetaDataStatus> result = new ArrayList<>();
+        Set<String> knownInstanceIds = resources.stream()
+                .filter(resource -> ResourceType.AWS_INSTANCE.equals(resource.getType()))
+                .map(CloudResource::getInstanceId)
+                .collect(Collectors.toSet());
+        Map<String, CloudResource> resourcesByInstanceId = resources.stream()
+                .filter(resource -> ResourceType.AWS_INSTANCE.equals(resource.getType()))
+                .collect(Collectors.toMap(CloudResource::getInstanceId, Function.identity()));
         final AtomicInteger counter = new AtomicInteger(0);
-        Map<Integer, List<String>> instanceIdBatches = knownInstanceIdList.stream()
+        Map<Integer, List<String>> instanceIdBatches = knownInstanceIds.stream()
                 .collect(Collectors.groupingBy(s -> counter.getAndIncrement() / instanceFetchMaxBatchSize));
+
         for (Map.Entry<Integer, List<String>> instanceIdBatchEntry : instanceIdBatches.entrySet()) {
             List<String> instanceIdBatch = instanceIdBatchEntry.getValue();
             LOGGER.info("Collecting metadata for instances iteration {}/{}", instanceIdBatchEntry.getKey(), instanceIdBatches.size());
             try {
-                List<CloudVmMetaDataStatus> cloudVmMetaDataStatuses = describeInstances(vms, instanceIdBatch, ec2Client);
-                result.addAll(cloudVmMetaDataStatuses);
+                List<CloudVmMetaDataStatus> metaDataStatuses = describeInstances(vms, instanceIdBatch, resourcesByInstanceId, ec2Client);
+                result.addAll(metaDataStatuses);
             } catch (AmazonServiceException serviceException) {
                 if (StringUtils.isNotEmpty(serviceException.getErrorCode()) && INSTANCE_NOT_FOUND_ERROR_CODE.equals(serviceException.getErrorCode())) {
-                    LOGGER.info("One or more load balancers could not be found, collecting metadata for existing ones");
-                    List<String> existingInstances = instanceIdBatch.stream()
-                            .filter(instanceId -> !serviceException.getMessage().contains(instanceId))
-                            .collect(Collectors.toList());
-                    if (!existingInstances.isEmpty()) {
-                        LOGGER.info("Existing instances on AWS to collect metadata: {}/{}", existingInstances, instanceFetchMaxBatchSize);
-                        result.addAll(describeInstances(vms, existingInstances, ec2Client));
-                    }
+                    result.addAll(handleNotFoundInstancesAndDescribeOthers(vms, ec2Client, instanceIdBatch, serviceException, resourcesByInstanceId));
                 } else {
                     LOGGER.warn("Collection of instance metadata failed", serviceException);
                     throw serviceException;
@@ -140,7 +138,37 @@ public class AwsNativeMetadataCollector implements MetadataCollector {
         return result;
     }
 
-    private List<CloudVmMetaDataStatus> describeInstances(List<CloudInstance> vms, List<String> knownInstanceIdList, AmazonEc2Client ec2Client) {
+    private List<CloudVmMetaDataStatus> handleNotFoundInstancesAndDescribeOthers(List<CloudInstance> vms, AmazonEc2Client ec2Client,
+            List<String> instanceIdBatch, AmazonServiceException serviceException, Map<String, CloudResource> resourcesByInstanceId) {
+        LOGGER.info("One or more load balancers could not be found, collecting metadata for existing ones");
+        List<CloudVmMetaDataStatus> result = new ArrayList<>();
+        List<String> existingInstanceIds = new ArrayList<>();
+        instanceIdBatch
+                .forEach(instanceId -> {
+                    if (!serviceException.getMessage().contains(instanceId)) {
+                        existingInstanceIds.add(instanceId);
+                    } else {
+                        LOGGER.info("Marking instance '{}' as terminated because could not be found on the provider side", instanceId);
+                        CloudResource cloudResource = resourcesByInstanceId.get(instanceId);
+                        CloudInstance matchedInstance = vms.stream()
+                                .filter(ci -> cloudResource.getReference().equals(String.valueOf(ci.getTemplate().getPrivateId())))
+                                .findFirst()
+                                .orElseThrow();
+                        CloudInstance updatedInstance = new CloudInstance(cloudResource.getReference(), matchedInstance.getTemplate(),
+                                matchedInstance.getAuthentication(), matchedInstance.getSubnetId(), matchedInstance.getAvailabilityZone());
+                        CloudVmInstanceStatus status = new CloudVmInstanceStatus(updatedInstance, InstanceStatus.TERMINATED);
+                        result.add(new CloudVmMetaDataStatus(status, CloudInstanceMetaData.EMPTY_METADATA));
+                    }
+                });
+        if (!existingInstanceIds.isEmpty()) {
+            LOGGER.info("Existing instances on AWS to collect metadata: {}/{}", existingInstanceIds, instanceFetchMaxBatchSize);
+            result.addAll(describeInstances(vms, existingInstanceIds, resourcesByInstanceId, ec2Client));
+        }
+        return result;
+    }
+
+    private List<CloudVmMetaDataStatus> describeInstances(List<CloudInstance> vms, List<String> knownInstanceIdList,
+            Map<String, CloudResource> resourcesByInstanceId, AmazonEc2Client ec2Client) {
         LOGGER.info("Collecting metadata for instance ids: '{}'", String.join(", ", knownInstanceIdList));
         List<CloudVmMetaDataStatus> result = new ArrayList<>();
         DescribeInstancesRequest instancesRequest = new DescribeInstancesRequest().withInstanceIds(knownInstanceIdList);
@@ -151,15 +179,22 @@ public class AwsNativeMetadataCollector implements MetadataCollector {
                 .collect(Collectors.toList());
 
         for (Instance instance : instances) {
+            String instanceId = instance.getInstanceId();
+            CloudResource connectedResource = resourcesByInstanceId.get(instanceId);
+            if (connectedResource == null) {
+                throw new NotFoundException(String.format("Instance with id '%s' could not be found as resource on our side", instanceId));
+            }
             CloudInstance cloudInstance = vms.stream()
-                    .filter(ci -> instance.getInstanceId().equals(ci.getInstanceId()))
+                    .filter(ci -> connectedResource.getReference().equals(String.valueOf(ci.getTemplate().getPrivateId())))
                     .findFirst()
                     .orElseThrow();
+            CloudInstance updatedInstance = new CloudInstance(connectedResource.getInstanceId(), cloudInstance.getTemplate(), cloudInstance.getAuthentication(),
+                    cloudInstance.getSubnetId(), cloudInstance.getAvailabilityZone());
             CloudInstanceMetaData cloudInstanceMetaData = new CloudInstanceMetaData(
                     instance.getPrivateIpAddress(),
                     instance.getPublicIpAddress(),
                     awsLifeCycleMapper.getLifeCycle(instance));
-            CloudVmInstanceStatus cloudVmInstanceStatus = new CloudVmInstanceStatus(cloudInstance, cloudInstance.getTemplate().getStatus());
+            CloudVmInstanceStatus cloudVmInstanceStatus = new CloudVmInstanceStatus(updatedInstance, updatedInstance.getTemplate().getStatus());
             CloudVmMetaDataStatus newMetadataStatus = new CloudVmMetaDataStatus(cloudVmInstanceStatus, cloudInstanceMetaData);
             result.add(newMetadataStatus);
         }
