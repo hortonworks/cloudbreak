@@ -8,12 +8,11 @@ import com.cloudera.api.swagger.ParcelResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiParcel;
-import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
+import com.sequenceiq.cloudbreak.cluster.service.ClusterEventService;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cm.model.ParcelResource;
 import com.sequenceiq.cloudbreak.cm.model.ParcelStatus;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerCommandPollerObject;
-import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 
 public class ClouderaManagerUpgradeParcelDistributeListenerTask extends AbstractClouderaManagerCommandCheckerTask<ClouderaManagerCommandPollerObject> {
 
@@ -22,13 +21,13 @@ public class ClouderaManagerUpgradeParcelDistributeListenerTask extends Abstract
     private ParcelResource parcelResource;
 
     public ClouderaManagerUpgradeParcelDistributeListenerTask(ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory,
-            CloudbreakEventService cloudbreakEventService) {
-        super(clouderaManagerApiPojoFactory, cloudbreakEventService);
+            ClusterEventService clusterEventService) {
+        super(clouderaManagerApiPojoFactory, clusterEventService);
     }
 
     public ClouderaManagerUpgradeParcelDistributeListenerTask(ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory,
-            CloudbreakEventService cloudbreakEventService, ParcelResource parcelResource) {
-        super(clouderaManagerApiPojoFactory, cloudbreakEventService);
+            ClusterEventService clusterEventService, ParcelResource parcelResource) {
+        super(clouderaManagerApiPojoFactory, clusterEventService);
         this.parcelResource = parcelResource;
     }
 
@@ -48,16 +47,6 @@ public class ClouderaManagerUpgradeParcelDistributeListenerTask extends Abstract
         } else {
             return true;
         }
-    }
-
-    @Override
-    public void handleTimeout(ClouderaManagerCommandPollerObject toolsResourceApi) {
-        throw new ClouderaManagerOperationFailedException("Operation timed out. Failed to distribute parcel in time.");
-    }
-
-    @Override
-    public String successMessage(ClouderaManagerCommandPollerObject toolsResourceApi) {
-        return "Successfully distributed CDP Runtime parcel.";
     }
 
     @Override

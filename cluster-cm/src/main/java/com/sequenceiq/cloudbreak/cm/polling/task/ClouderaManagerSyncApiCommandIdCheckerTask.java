@@ -10,11 +10,13 @@ import com.cloudera.api.swagger.ClustersResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterBasedStatusCheckerTask;
+import com.sequenceiq.cloudbreak.cluster.service.ClusterEventService;
 import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cm.commands.SyncApiCommandRetriever;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerCommandPollerObject;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerSyncCommandPollerObject;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 
 public class ClouderaManagerSyncApiCommandIdCheckerTask
@@ -27,11 +29,15 @@ public class ClouderaManagerSyncApiCommandIdCheckerTask
 
     private final SyncApiCommandRetriever syncApiCommandRetriever;
 
+    private final ClusterEventService clusterEventService;
+
     public ClouderaManagerSyncApiCommandIdCheckerTask(
             ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory,
-            SyncApiCommandRetriever syncApiCommandRetriever) {
+            SyncApiCommandRetriever syncApiCommandRetriever,
+            ClusterEventService clusterEventService) {
         this.clouderaManagerApiPojoFactory = clouderaManagerApiPojoFactory;
         this.syncApiCommandRetriever = syncApiCommandRetriever;
+        this.clusterEventService = clusterEventService;
     }
 
     @Override
@@ -61,6 +67,8 @@ public class ClouderaManagerSyncApiCommandIdCheckerTask
 
     @Override
     public void handleTimeout(ClouderaManagerCommandPollerObject pollerObject) {
+        clusterEventService.fireClusterManagerEvent(pollerObject.getStack(),
+                ResourceEvent.CLUSTER_CM_COMMAND_TIMEOUT, "Sync API", Optional.of(pollerObject.getId()));
         throw new ClouderaManagerOperationFailedException(String.format("Operation timed out. "
                 + "Failed to get newest successful %s command ID.", cast(pollerObject).getCommandName()));
     }

@@ -13,12 +13,11 @@ import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiParcel;
 import com.cloudera.api.swagger.model.ApiParcelList;
-import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
+import com.sequenceiq.cloudbreak.cluster.service.ClusterEventService;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cm.model.ParcelStatus;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerCommandPollerObject;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 
 public class ClouderaManagerParcelDeletedListenerTask extends AbstractClouderaManagerCommandCheckerTask<ClouderaManagerCommandPollerObject> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerParcelDeletedListenerTask.class);
@@ -26,8 +25,8 @@ public class ClouderaManagerParcelDeletedListenerTask extends AbstractClouderaMa
     private Map<String, String> parcelVersions;
 
     public ClouderaManagerParcelDeletedListenerTask(ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory,
-            CloudbreakEventService cloudbreakEventService, Map<String, String> parcelVersions) {
-        super(clouderaManagerApiPojoFactory, cloudbreakEventService);
+            ClusterEventService clusterEventService, Map<String, String> parcelVersions) {
+        super(clouderaManagerApiPojoFactory, clusterEventService);
         this.parcelVersions = parcelVersions;
     }
 
@@ -66,16 +65,6 @@ public class ClouderaManagerParcelDeletedListenerTask extends AbstractClouderaMa
         return notActivated.stream()
                 .map(parcel -> String.format("(%s %s : %s)", parcel.getProduct(), parcel.getVersion(), parcel.getStage()))
                 .collect(Collectors.joining(", "));
-    }
-
-    @Override
-    public void handleTimeout(ClouderaManagerCommandPollerObject toolsResourceApi) {
-        throw new ClouderaManagerOperationFailedException("Operation timed out. Parcels are not deleted.");
-    }
-
-    @Override
-    public String successMessage(ClouderaManagerCommandPollerObject toolsResourceApi) {
-        return String.format("Cloudera Manager parcels %s are deleted.", parcelVersions);
     }
 
     @Override

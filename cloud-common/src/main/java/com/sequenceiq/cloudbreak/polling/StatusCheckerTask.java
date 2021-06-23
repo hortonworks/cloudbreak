@@ -15,4 +15,12 @@ public interface StatusCheckerTask<T> {
     default boolean initialExitCheck(T t) {
         return true;
     }
+
+    default void sendFailureEvent(T t) {
+
+    }
+
+    default void sendTimeoutEvent(T t) {
+
+    }
 }

@@ -17,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
+import com.sequenceiq.cloudbreak.cluster.service.ClusterEventService;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cm.commands.SyncApiCommandRetriever;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerSyncCommandPollerObject;
@@ -37,12 +38,15 @@ public class ClouderaManagerSyncApiCommandIdCheckerTaskTest {
     private ApiClient apiClient;
 
     @Mock
+    private ClusterEventService clusterEventService;
+
+    @Mock
     private Stack stack;
 
     @BeforeEach
     public void setUp() {
         underTest = new ClouderaManagerSyncApiCommandIdCheckerTask(
-                new ClouderaManagerApiPojoFactory(), commandRetriever);
+                new ClouderaManagerApiPojoFactory(), commandRetriever, clusterEventService);
     }
 
     @Test

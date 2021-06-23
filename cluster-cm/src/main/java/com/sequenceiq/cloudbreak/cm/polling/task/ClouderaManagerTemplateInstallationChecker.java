@@ -10,6 +10,7 @@ import com.cloudera.api.swagger.CommandsResourceApi;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiCommand;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.cluster.service.ClusterEventService;
 import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cm.exception.CloudStorageConfigurationFailedException;
@@ -17,7 +18,6 @@ import com.sequenceiq.cloudbreak.cm.exception.CommandDetails;
 import com.sequenceiq.cloudbreak.cm.exception.CommandDetailsFormatter;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerCommandPollerObject;
 import com.sequenceiq.cloudbreak.cm.util.ClouderaManagerCommandUtil;
-import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 
 public class ClouderaManagerTemplateInstallationChecker extends AbstractClouderaManagerCommandCheckerTask<ClouderaManagerCommandPollerObject> {
 
@@ -32,8 +32,8 @@ public class ClouderaManagerTemplateInstallationChecker extends AbstractCloudera
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerTemplateInstallationChecker.class);
 
     public ClouderaManagerTemplateInstallationChecker(ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory,
-            CloudbreakEventService cloudbreakEventService) {
-        super(clouderaManagerApiPojoFactory, cloudbreakEventService);
+            ClusterEventService clusterEventService) {
+        super(clouderaManagerApiPojoFactory, clusterEventService);
     }
 
     @Override
@@ -61,13 +61,7 @@ public class ClouderaManagerTemplateInstallationChecker extends AbstractCloudera
         } catch (ApiException e) {
             LOGGER.info("Cloudera Manager had run into a timeout, and we were unable to determine the failure reason", e);
         }
-
         throw new ClouderaManagerOperationFailedException(msg);
-    }
-
-    @Override
-    public String successMessage(ClouderaManagerCommandPollerObject clouderaManagerCommandPollerObject) {
-        return String.format("Template installation success for stack '%s'", clouderaManagerCommandPollerObject.getStack().getId());
     }
 
     @Override

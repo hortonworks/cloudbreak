@@ -25,12 +25,12 @@ import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostList;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
+import com.sequenceiq.cloudbreak.cluster.service.ClusterEventService;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerCommandPollerObject;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 
 @SuppressWarnings("checkstyle:Regexp")
 @RunWith(MockitoJUnitRunner.class)
@@ -42,7 +42,7 @@ public class ClouderaManagerHostStatusCheckerTest {
     private ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory;
 
     @Mock
-    private CloudbreakEventService cloudbreakEventService;
+    private ClusterEventService clusterEventService;
 
     @Mock
     private HostsResourceApi hostsResourceApi;
@@ -51,7 +51,7 @@ public class ClouderaManagerHostStatusCheckerTest {
 
     @Before
     public void init() {
-        underTest = new ClouderaManagerHostStatusChecker(clouderaManagerApiPojoFactory, cloudbreakEventService);
+        underTest = new ClouderaManagerHostStatusChecker(clouderaManagerApiPojoFactory, clusterEventService);
         when(clouderaManagerApiPojoFactory.getHostsResourceApi(any(ApiClient.class))).thenReturn(hostsResourceApi);
     }
 

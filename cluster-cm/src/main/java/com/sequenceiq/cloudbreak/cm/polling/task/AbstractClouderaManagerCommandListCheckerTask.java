@@ -13,21 +13,22 @@ import org.slf4j.LoggerFactory;
 import com.cloudera.api.swagger.CommandsResourceApi;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiCommand;
+
+import com.sequenceiq.cloudbreak.cluster.service.ClusterEventService;
 import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cm.exception.CommandDetails;
 import com.sequenceiq.cloudbreak.cm.exception.CommandDetailsFormatter;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerCommandListPollerObject;
 import com.sequenceiq.cloudbreak.cm.util.ClouderaManagerCommandUtil;
-import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 
 public abstract class AbstractClouderaManagerCommandListCheckerTask<T extends ClouderaManagerCommandListPollerObject>
         extends AbstractClouderaManagerApiCheckerTask<T> {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractClouderaManagerCommandListCheckerTask.class);
 
     protected AbstractClouderaManagerCommandListCheckerTask(ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory,
-            CloudbreakEventService cloudbreakEventService) {
-        super(clouderaManagerApiPojoFactory, cloudbreakEventService);
+            ClusterEventService clusterEventService) {
+        super(clouderaManagerApiPojoFactory, clusterEventService);
     }
 
     protected boolean doStatusCheck(T pollerObject, CommandsResourceApi commandsResourceApi) throws ApiException {

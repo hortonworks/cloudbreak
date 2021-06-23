@@ -57,6 +57,7 @@ public class PollingService<T> {
             }
             if (consecutiveFailures >= maxConsecutiveFailures) {
                 LOGGER.debug("Polling failure reached the limit which was {}, poller will drop the last exception.", maxConsecutiveFailures);
+                statusCheckerTask.sendFailureEvent(t);
                 statusCheckerTask.handleException(actual);
                 return new ImmutablePair<>(PollingResult.FAILURE, actual);
             } else if (success) {
@@ -72,6 +73,7 @@ public class PollingService<T> {
         }
         if (timeout) {
             LOGGER.debug("Poller timeout.");
+            statusCheckerTask.sendTimeoutEvent(t);
             statusCheckerTask.handleTimeout(t);
             return new ImmutablePair<>(PollingResult.TIMEOUT, actual);
         }

@@ -12,10 +12,9 @@ import com.cloudera.api.swagger.CommandsResourceApi;
 import com.cloudera.api.swagger.ToolsResourceApi;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiEcho;
-import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
+import com.sequenceiq.cloudbreak.cluster.service.ClusterEventService;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerCommandPollerObject;
-import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 
 public class ClouderaManagerStartupListenerTask extends AbstractClouderaManagerCommandCheckerTask<ClouderaManagerCommandPollerObject> {
 
@@ -26,8 +25,8 @@ public class ClouderaManagerStartupListenerTask extends AbstractClouderaManagerC
     private static final String[] CONNECTION_MESSAGES = {"Connection refused", "connect timed out"};
 
     public ClouderaManagerStartupListenerTask(ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory,
-            CloudbreakEventService cloudbreakEventService) {
-        super(clouderaManagerApiPojoFactory, cloudbreakEventService);
+            ClusterEventService clusterEventService) {
+        super(clouderaManagerApiPojoFactory, clusterEventService);
     }
 
     @Override
@@ -56,15 +55,5 @@ public class ClouderaManagerStartupListenerTask extends AbstractClouderaManagerC
     @Override
     protected String getCommandName() {
         return "API Echo";
-    }
-
-    @Override
-    public void handleTimeout(ClouderaManagerCommandPollerObject pollerObject) {
-        throw new ClouderaManagerOperationFailedException("Operation timed out. Failed to check Cloudera Manager startup.");
-    }
-
-    @Override
-    public String successMessage(ClouderaManagerCommandPollerObject pollerObject) {
-        return "Cloudera Manager startup finished with success result.";
     }
 }

@@ -4,8 +4,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -28,12 +26,12 @@ import com.cloudera.api.swagger.CommandsResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.cluster.service.ClusterEventService;
 import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerCommandPollerObject;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
-import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AbstractClouderaManagerCommandCheckerTaskTest {
@@ -55,10 +53,10 @@ public class AbstractClouderaManagerCommandCheckerTaskTest {
 
     private final CommandsResourceApi commandsResourceApi = Mockito.mock(CommandsResourceApi.class);
 
-    private final CloudbreakEventService cloudbreakEventService = Mockito.mock(CloudbreakEventService.class);
+    private final ClusterEventService clusterEventService = Mockito.mock(ClusterEventService.class);
 
     private final AbstractClouderaManagerCommandCheckerTask<ClouderaManagerCommandPollerObject> underTest
-            = new ClouderaManagerDecommissionHostListenerTask(clouderaManagerApiPojoFactory, cloudbreakEventService);
+            = new ClouderaManagerDefaultListenerTask(clouderaManagerApiPojoFactory, clusterEventService, "Decommission host");
 
     @Before
     public void setup() {
@@ -163,6 +161,6 @@ public class AbstractClouderaManagerCommandCheckerTaskTest {
         }
         underTest.checkStatus(pollerObject);
 
-        verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(anyLong(), anyString(), any(), anyList());
+        verify(clusterEventService, times(1)).fireCloudbreakEvent(any(), any(), anyList());
     }
 }
