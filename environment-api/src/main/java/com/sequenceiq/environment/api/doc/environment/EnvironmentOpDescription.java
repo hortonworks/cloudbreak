@@ -29,6 +29,10 @@ public class EnvironmentOpDescription {
         "Endpoint Access Gateway if it's enabled. Environment is specified by name.";
     public static final String UPDATE_LOAD_BALANCERS_BY_ENV_CRN = "Updates all cluster in an environment with load balancers, including adding the " +
         "Endpoint Access Gateway if it's enabled. Environment is specified by CRN.";
+    public static final String LOAD_BALANCERS_UPDATE_STATUS_BY_ENV_NAME = "Gets the status of the most recent load balancer update operation " +
+        "by environment name.";
+    public static final String LOAD_BALANCERS_UPDATE_STATUS_BY_ENV_CRN = "Gets the status of the most recent load balancer update operation " +
+        "by environment CRN.";
     public static final String GET_LAST_FLOW_PROGRESS = "Get last flow operation progress details for resource by resource crn";
     public static final String LIST_FLOW_PROGRESS = "List recent flow operations progress details for resource by resource crn";
 

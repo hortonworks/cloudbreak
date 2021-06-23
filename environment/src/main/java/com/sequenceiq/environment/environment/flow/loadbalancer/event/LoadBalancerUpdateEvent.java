@@ -20,22 +20,28 @@ public class LoadBalancerUpdateEvent extends BaseNamedFlowEvent {
 
     private final Set<String> subnetIds;
 
+    private String flowId;
+
     public LoadBalancerUpdateEvent(String selector, Long resourceId, String resourceName, String resourceCrn,
-            Environment environment, EnvironmentDto environmentDto, PublicEndpointAccessGateway endpointAccessGateway, Set<String> subnetIds) {
+            Environment environment, EnvironmentDto environmentDto, PublicEndpointAccessGateway endpointAccessGateway,
+            Set<String> subnetIds, String flowId) {
         super(selector, resourceId, resourceName, resourceCrn);
         this.environment = environment;
         this.environmentDto = environmentDto;
         this.endpointAccessGateway = endpointAccessGateway;
         this.subnetIds = subnetIds;
+        this.flowId = flowId;
     }
 
-    public LoadBalancerUpdateEvent(String selector, Long resourceId, Promise<AcceptResult> accepted, String resourceName, String resourceCrn,
-            Environment environment, EnvironmentDto environmentDto, PublicEndpointAccessGateway endpointAccessGateway, Set<String> subnetIds) {
+    public LoadBalancerUpdateEvent(String selector, Long resourceId, Promise<AcceptResult> accepted, String resourceName,
+            String resourceCrn, Environment environment, EnvironmentDto environmentDto, PublicEndpointAccessGateway endpointAccessGateway,
+            Set<String> subnetIds, String flowId) {
         super(selector, resourceId, accepted, resourceName, resourceCrn);
         this.environment = environment;
         this.environmentDto = environmentDto;
         this.endpointAccessGateway = endpointAccessGateway;
         this.subnetIds = subnetIds;
+        this.flowId = flowId;
     }
 
     public Environment getEnvironment() {
@@ -52,6 +58,10 @@ public class LoadBalancerUpdateEvent extends BaseNamedFlowEvent {
 
     public Set<String> getSubnetIds() {
         return subnetIds;
+    }
+
+    public String getFlowId() {
+        return flowId;
     }
 
     public static final class LoadBalancerUpdateEventBuilder {
@@ -73,6 +83,8 @@ public class LoadBalancerUpdateEvent extends BaseNamedFlowEvent {
         private PublicEndpointAccessGateway endpointAccessGateway;
 
         private Set<String> subnetIds;
+
+        private String flowId;
 
         private LoadBalancerUpdateEventBuilder() {
         }
@@ -126,9 +138,14 @@ public class LoadBalancerUpdateEvent extends BaseNamedFlowEvent {
             return this;
         }
 
+        public LoadBalancerUpdateEventBuilder withFlowId(String flowId) {
+            this.flowId = flowId;
+            return this;
+        }
+
         public LoadBalancerUpdateEvent build() {
             LoadBalancerUpdateEvent event = new LoadBalancerUpdateEvent(selector, resourceId, accepted,
-                resourceName, resourceCrn, environment, environmentDto, endpointAccessGateway, subnetIds);
+                resourceName, resourceCrn, environment, environmentDto, endpointAccessGateway, subnetIds, flowId);
             return event;
         }
     }

@@ -76,6 +76,7 @@ public class LoadBalancerUpdateActions {
                     .withEnvironmentDto(payload.getEnvironmentDto())
                     .withEndpointAccessGateway(payload.getEndpointAccessGateway())
                     .withEndpointGatewaySubnetIds(payload.getSubnetIds())
+                    .withFlowId(context.getFlowId())
                     .build();
                 sendEvent(context, LoadBalancerUpdateHandlerSelectors.STACK_UPDATE_HANDLER_EVENT.selector(), environmentLoadBalancerDto);
             }

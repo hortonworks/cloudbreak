@@ -31,10 +31,12 @@ import com.sequenceiq.environment.api.v1.credential.model.response.CredentialRes
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentChangeCredentialRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentCloudStorageValidationRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentEditRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentLbUpdateStatusRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentLoadBalancerUpdateRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentCrnResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentLbUpdateStatusResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponses;
 import com.sequenceiq.flow.api.model.FlowProgressResponse;
@@ -247,6 +249,22 @@ public interface EnvironmentEndpoint {
         nickname = "updateEnvironmentLoadBalancersByCrnV1")
     void updateEnvironmentLoadBalancersByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn,
             @NotNull EnvironmentLoadBalancerUpdateRequest request);
+
+    @GET
+    @Path("/name/{name}/update_load_balancers_status")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = EnvironmentOpDescription.LOAD_BALANCERS_UPDATE_STATUS_BY_ENV_NAME, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
+        nickname = "getLoadBalancerUpdateStatusByEnvironmentNameV1")
+    EnvironmentLbUpdateStatusResponse getLoadBalancerUpdateStatusByEnvironmentName(@PathParam("name") String envName,
+            @NotNull EnvironmentLbUpdateStatusRequest request);
+
+    @GET
+    @Path("/crn/{crn}/update_load_balancers_status")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = EnvironmentOpDescription.LOAD_BALANCERS_UPDATE_STATUS_BY_ENV_CRN, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
+        nickname = "getLoadBalancerUpdateStatusByEnvironmentCrnV1")
+    EnvironmentLbUpdateStatusResponse getLoadBalancerUpdateStatusByEnvironmentCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT)
+            @PathParam("crn") String crn, @NotNull EnvironmentLbUpdateStatusRequest request);
 
     @GET
     @Path("/progress/resource/crn/{resourceCrn}/last")
