@@ -15,6 +15,10 @@ import com.cloudera.thunderhead.service.datalakedr.datalakeDRGrpc;
 import com.cloudera.thunderhead.service.datalakedr.datalakeDRGrpc.datalakeDRBlockingStub;
 import com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeStatusRequest;
 import com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeRequest;
+import com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatalakeBackupInfo;
+import com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.ListDatalakeBackupRequest;
+import com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.ListDatalakeBackupResponse;
+import com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeRequest;
 import com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeStatusRequest;
 import com.sequenceiq.cloudbreak.datalakedr.config.DatalakeDrConfig;
 import com.sequenceiq.cloudbreak.datalakedr.converter.GrpcStatusResponseToDatalakeDrStatusResponseConverter;
@@ -46,7 +50,7 @@ public class DatalakeDrClient {
         this.tracer = tracer;
     }
 
-    public DatalakeDrStatusResponse triggerbackup(String datalakeName, String backupLocation, String backupName, String actorCrn) {
+    public DatalakeDrStatusResponse triggerBackup(String datalakeName, String backupLocation, String backupName, String actorCrn) {
         if (!datalakeDrConfig.isConfigured()) {
             return missingConnectorResponse();
         }
@@ -65,6 +69,30 @@ public class DatalakeDrClient {
             return statusConverter.convert(
                     newStub(channelWrapper.getChannel(), UUID.randomUUID().toString(), actorCrn)
                             .backupDatalake(builder.build())
+            );
+        }
+    }
+
+    public DatalakeDrStatusResponse triggerRestore(String datalakeName, String backupId, String backupLocationOverride, String actorCrn) {
+        if (!datalakeDrConfig.isConfigured()) {
+            return missingConnectorResponse();
+        }
+
+        checkNotNull(datalakeName);
+        checkNotNull(actorCrn);
+
+        try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
+            RestoreDatalakeRequest.Builder builder = RestoreDatalakeRequest.newBuilder()
+                    .setDatalakeName(datalakeName);
+            if (!Strings.isNullOrEmpty(backupId)) {
+                builder.setBackupId(backupId);
+            }
+            if (!Strings.isNullOrEmpty(backupLocationOverride)) {
+                builder.setBackupLocationOverride(backupLocationOverride);
+            }
+            return statusConverter.convert(
+                    newStub(channelWrapper.getChannel(), UUID.randomUUID().toString(), actorCrn)
+                            .restoreDatalake(builder.build())
             );
         }
     }
@@ -111,13 +139,62 @@ public class DatalakeDrClient {
 
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
             RestoreDatalakeStatusRequest.Builder builder = RestoreDatalakeStatusRequest.newBuilder()
-                .setDatalakeName(datalakeName)
-                .setRestoreId(restoreId);
+                    .setDatalakeName(datalakeName)
+                    .setRestoreId(restoreId);
 
             return statusConverter.convert(
-                newStub(channelWrapper.getChannel(), UUID.randomUUID().toString(), actorCrn)
-                    .restoreDatalakeStatus(builder.build())
+                    newStub(channelWrapper.getChannel(), UUID.randomUUID().toString(), actorCrn)
+                            .restoreDatalakeStatus(builder.build())
             );
+        }
+    }
+
+    public DatalakeBackupInfo getLastSuccessBackup(String datalakeName, String actorCrn) {
+        DatalakeBackupInfo datalakeBackupInfo = null;
+        if (!datalakeDrConfig.isConfigured()) {
+            return null;
+        }
+
+        checkNotNull(datalakeName);
+        checkNotNull(actorCrn);
+
+        try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
+            ListDatalakeBackupRequest.Builder builder = ListDatalakeBackupRequest.newBuilder()
+                    .setDatalakeName(datalakeName);
+            ListDatalakeBackupResponse response = newStub(channelWrapper.getChannel(), UUID.randomUUID().toString(), actorCrn)
+                    .listDatalakeBackups(builder.build());
+
+            if (response != null && response.getDatalakeInfoList() != null) {
+                datalakeBackupInfo = response.getDatalakeInfoList().stream()
+                        .filter(backup -> "SUCCESSFUL".equals(backup.getOverallState()))
+                        .findFirst().orElse(null);
+            }
+            return datalakeBackupInfo;
+        }
+    }
+
+    public DatalakeBackupInfo getBackupById(String datalakeName, String backupId, String actorCrn) {
+        DatalakeBackupInfo datalakeBackupInfo = null;
+        if (!datalakeDrConfig.isConfigured()) {
+            return null;
+        }
+
+        checkNotNull(datalakeName);
+        checkNotNull(backupId);
+        checkNotNull(actorCrn);
+
+        try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
+            ListDatalakeBackupRequest.Builder builder = ListDatalakeBackupRequest.newBuilder()
+                    .setDatalakeName(datalakeName);
+            ListDatalakeBackupResponse response = newStub(channelWrapper.getChannel(), UUID.randomUUID().toString(), actorCrn)
+                    .listDatalakeBackups(builder.build());
+
+            if (response != null && response.getDatalakeInfoList() != null) {
+                datalakeBackupInfo = response.getDatalakeInfoList().stream()
+                        .filter(backup -> backupId.equals(backup.getBackupId()))
+                        .findFirst().orElse(null);
+            }
+            return datalakeBackupInfo;
         }
     }
 

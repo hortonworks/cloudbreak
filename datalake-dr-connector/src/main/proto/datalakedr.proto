@@ -80,6 +80,7 @@ message RestoreDatalakeRequest {
   string backupId = 3; // Unique identifier for the back-up.
   bool includeDatabase = 4; // When set to true would trigger database restore.
   bool force = 5; // When set to true will restore even if the backups is in a failed state.
+  string backupLocationOverride = 6; // Used this location to perform the restore.
 }
 
 /**
