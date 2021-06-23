@@ -234,12 +234,13 @@ public class ClusterHostServiceRunner {
 
     public void runClusterServices(@Nonnull Stack stack, @Nonnull Cluster cluster, Map<String, String> candidateAddresses) {
         try {
+            Set<Node> nodes = stackUtil.collectNodes(stack);
             Set<Node> reachableNodes = stackUtil.collectAndCheckReachableNodes(stack, candidateAddresses.keySet());
             GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
             List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
-            SaltConfig saltConfig = createSaltConfig(stack, cluster, primaryGatewayConfig, gatewayConfigs, reachableNodes);
+            SaltConfig saltConfig = createSaltConfig(stack, cluster, primaryGatewayConfig, gatewayConfigs, nodes, reachableNodes);
             ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stack.getId(), cluster.getId());
-            hostOrchestrator.initServiceRun(gatewayConfigs, reachableNodes, saltConfig, exitCriteriaModel);
+            hostOrchestrator.initServiceRun(gatewayConfigs, nodes, reachableNodes, saltConfig, exitCriteriaModel);
             if (CollectionUtils.isEmpty(candidateAddresses)) {
                 mountDisks.mountAllDisks(stack.getId());
             } else {
@@ -261,13 +262,14 @@ public class ClusterHostServiceRunner {
 
     public void updateClusterConfigs(@Nonnull Stack stack, @Nonnull Cluster cluster) {
         try {
-            Set<Node> nodes = stackUtil.collectReachableNodesByInstanceStates(stack);
+            Set<Node> nodes = stackUtil.collectNodes(stack);
+            Set<Node> reachableNodes = stackUtil.collectReachableNodesByInstanceStates(stack);
             GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
             List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
-            SaltConfig saltConfig = createSaltConfig(stack, cluster, primaryGatewayConfig, gatewayConfigs, nodes);
+            SaltConfig saltConfig = createSaltConfig(stack, cluster, primaryGatewayConfig, gatewayConfigs, nodes, reachableNodes);
             ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stack.getId(), cluster.getId());
             hostOrchestrator.initSaltConfig(gatewayConfigs, nodes, saltConfig, exitCriteriaModel);
-            hostOrchestrator.runService(gatewayConfigs, nodes, saltConfig, exitCriteriaModel);
+            hostOrchestrator.runService(gatewayConfigs, reachableNodes, saltConfig, exitCriteriaModel);
         } catch (CloudbreakOrchestratorException | IOException e) {
             throw new CloudbreakServiceException(e.getMessage(), e);
         }
@@ -303,13 +305,14 @@ public class ClusterHostServiceRunner {
 
     public void redeployGatewayCertificate(@Nonnull Stack stack, @Nonnull Cluster cluster) {
         try {
-            Set<Node> nodes = stackUtil.collectReachableNodes(stack);
+            Set<Node> nodes = stackUtil.collectNodes(stack);
+            Set<Node> reachableNodes = stackUtil.collectReachableNodes(stack);
             GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
             List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
-            SaltConfig saltConfig = createSaltConfig(stack, cluster, primaryGatewayConfig, gatewayConfigs, nodes);
+            SaltConfig saltConfig = createSaltConfig(stack, cluster, primaryGatewayConfig, gatewayConfigs, nodes, reachableNodes);
             ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stack.getId(), cluster.getId());
             hostOrchestrator.uploadGatewayPillar(gatewayConfigs, nodes, exitCriteriaModel, saltConfig);
-            hostOrchestrator.runService(gatewayConfigs, nodes, saltConfig, exitCriteriaModel);
+            hostOrchestrator.runService(gatewayConfigs, reachableNodes, saltConfig, exitCriteriaModel);
         } catch (CloudbreakOrchestratorCancelledException e) {
             throw new CancellationException(e.getMessage());
         } catch (CloudbreakOrchestratorException | IOException e) {
@@ -318,8 +321,7 @@ public class ClusterHostServiceRunner {
     }
 
     private SaltConfig createSaltConfig(Stack stack, Cluster cluster, GatewayConfig primaryGatewayConfig, Iterable<GatewayConfig> gatewayConfigs,
-            Set<Node> nodes)
-            throws IOException, CloudbreakOrchestratorException {
+            Set<Node> nodes, Set<Node> reachableNodes) throws IOException, CloudbreakOrchestratorException {
         ClouderaManagerRepo clouderaManagerRepo = clusterComponentConfigProvider.getClouderaManagerRepoDetails(cluster.getId());
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
         KerberosConfig kerberosConfig = kerberosConfigService.get(stack.getEnvironmentCrn(), stack.getName()).orElse(null);
@@ -354,7 +356,7 @@ public class ClusterHostServiceRunner {
 
         decoratePillarWithJdbcConnectors(cluster, servicePillar);
 
-        return new SaltConfig(servicePillar, grainPropertiesService.createGrainProperties(gatewayConfigs, cluster, nodes));
+        return new SaltConfig(servicePillar, grainPropertiesService.createGrainProperties(gatewayConfigs, cluster, reachableNodes));
     }
 
     private void addKerberosConfig(Map<String, SaltPillarProperties> servicePillar, KerberosConfig kerberosConfig) throws IOException {
