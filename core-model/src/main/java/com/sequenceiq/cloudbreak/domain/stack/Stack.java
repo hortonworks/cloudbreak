@@ -200,6 +200,8 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
 
     private String environmentCrn;
 
+    private String datalakeCrn;
+
     @Convert(converter = StackTypeConverter.class)
     private StackType type;
 
@@ -425,6 +427,14 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setEnvironmentCrn(String environmentCrn) {
         this.environmentCrn = environmentCrn;
+    }
+
+    public String getDatalakeCrn() {
+        return datalakeCrn;
+    }
+
+    public void setDatalakeCrn(String datalakeCrn) {
+        this.datalakeCrn = datalakeCrn;
     }
 
     public List<Resource> getDiskResources() {

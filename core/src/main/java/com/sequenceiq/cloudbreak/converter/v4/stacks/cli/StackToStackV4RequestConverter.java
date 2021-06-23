@@ -21,7 +21,6 @@ import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.StackAuthenticationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.sharedservice.SharedServiceV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.customdomain.CustomDomainSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.placement.PlacementSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
@@ -42,10 +41,9 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
-import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
+import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 
@@ -61,13 +59,13 @@ public class StackToStackV4RequestConverter extends AbstractConversionServiceAwa
     private ProviderParameterCalculator providerParameterCalculator;
 
     @Inject
-    private DatalakeResourcesService datalakeResourcesService;
-
-    @Inject
     private TelemetryConverter telemetryConverter;
 
     @Inject
     private DatabaseAvailabilityTypeToExternalDatabaseRequestConverter databaseAvailabilityTypeToExternalDatabaseRequestConverter;
+
+    @Inject
+    private DatalakeService datalakeService;
 
     @Override
     public StackV4Request convert(Stack source) {
@@ -88,7 +86,7 @@ public class StackToStackV4RequestConverter extends AbstractConversionServiceAwa
         prepareImage(source, stackV4Request);
         prepareTags(source, stackV4Request);
         prepareTelemetryRequest(source, stackV4Request);
-        prepareDatalakeRequest(source, stackV4Request);
+        datalakeService.prepareDatalakeRequest(source, stackV4Request);
         stackV4Request.setPlacement(getPlacementSettings(source.getRegion(), source.getAvailabilityZone()));
         prepareInputs(source, stackV4Request);
         stackV4Request.setTimeToLive(getStackTimeToLive(source));
@@ -100,17 +98,6 @@ public class StackToStackV4RequestConverter extends AbstractConversionServiceAwa
         if (telemetry != null) {
             TelemetryRequest telemetryRequest = telemetryConverter.convertToRequest(telemetry);
             stackV4Request.setTelemetry(telemetryRequest);
-        }
-    }
-
-    private void prepareDatalakeRequest(Stack source, StackV4Request stackRequest) {
-        if (source.getDatalakeResourceId() != null) {
-            Optional<DatalakeResources> datalakeResources = datalakeResourcesService.findById(source.getDatalakeResourceId());
-            if (datalakeResources.isPresent()) {
-                SharedServiceV4Request sharedServiceRequest = new SharedServiceV4Request();
-                sharedServiceRequest.setDatalakeName(datalakeResources.get().getName());
-                stackRequest.setSharedService(sharedServiceRequest);
-            }
         }
     }
 

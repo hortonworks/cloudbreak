@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
@@ -28,7 +27,6 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
@@ -41,11 +39,11 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.FinalizeClusterInstallHandlerService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
 import com.sequenceiq.cloudbreak.service.cluster.flow.telemetry.ClusterMonitoringEngine;
-import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.sharedservice.ClouderaManagerDatalakeConfigProvider;
+import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
@@ -96,7 +94,7 @@ public class ClusterBuilderService {
     private BlueprintUtils blueprintUtils;
 
     @Inject
-    private DatalakeResourcesService datalakeResourcesService;
+    private DatalakeService datalakeService;
 
     @Inject
     private KerberosConfigService kerberosConfigService;
@@ -218,14 +216,14 @@ public class ClusterBuilderService {
 
         String template = getClusterSetupService(stack)
                 .prepareTemplate(
-                    loadInstanceMetadataForHostGroups(hostGroups),
-                    conversionService.convert(stack, TemplatePreparationObject.class),
-                    getSdxContext(stack),
-                    getSdxStackCrn(stack),
-                    kerberosConfigService.get(
-                            stack.getEnvironmentCrn(),
-                            stack.getName()
-                    ).orElse(null)
+                        loadInstanceMetadataForHostGroups(hostGroups),
+                        conversionService.convert(stack, TemplatePreparationObject.class),
+                        getSdxContext(stack),
+                        getSdxStackCrn(stack),
+                        kerberosConfigService.get(
+                                stack.getEnvironmentCrn(),
+                                stack.getName()
+                        ).orElse(null)
                 );
 
         validateExtendedBlueprintTextDoesNotContainUnresolvedHandlebarParams(template);
@@ -288,11 +286,7 @@ public class ClusterBuilderService {
     }
 
     private Optional<Stack> getSdxStack(Stack stack) {
-        return Optional.ofNullable(getDatalakeResources(stack))
-                .map(Set::stream)
-                .flatMap(Stream::findFirst)
-                .map(DatalakeResources::getDatalakeStackId)
-                .map(stackService::getByIdWithListsInTransaction);
+        return datalakeService.getDatalakeStackByStackEnvironmentCrn(stack);
     }
 
     private ClusterSetupService getClusterSetupService(Long stackId) {
@@ -303,13 +297,6 @@ public class ClusterBuilderService {
     private ClusterSetupService getClusterSetupService(Stack stack) {
         return clusterApiConnectors.getConnector(stack)
                 .clusterSetupService();
-    }
-
-    private Set<DatalakeResources> getDatalakeResources(Stack stack) {
-        return datalakeResourcesService
-                .findDatalakeResourcesByWorkspaceAndEnvironment(
-                        stack.getWorkspace().getId(),
-                        stack.getEnvironmentCrn());
     }
 
     private void setInitialBlueprintText(Cluster cluster) {

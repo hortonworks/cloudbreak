@@ -12,8 +12,8 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
+import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslMode;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
@@ -29,13 +29,16 @@ public class RedbeamsDbCertificateProvider {
 
     private final StackService stackService;
 
+    private final DatalakeService datalakeService;
+
     private final String certsPath;
 
     public RedbeamsDbCertificateProvider(RedbeamsDbServerConfigurer dbServerConfigurer, DatalakeResourcesService datalakeResourcesService,
-            StackService stackService, @Value("${cb.externaldatabase.ssl.rootcerts.path:}") String certsPath) {
+            StackService stackService, DatalakeService datalakeService, @Value("${cb.externaldatabase.ssl.rootcerts.path:}") String certsPath) {
         this.dbServerConfigurer = dbServerConfigurer;
         this.datalakeResourcesService = datalakeResourcesService;
         this.stackService = stackService;
+        this.datalakeService = datalakeService;
         this.certsPath = certsPath;
     }
 
@@ -53,21 +56,14 @@ public class RedbeamsDbCertificateProvider {
 
     private void getDatalakeDatabaseRootCerts(Stack stack, Set<String> result) {
         if (StackType.WORKLOAD.equals(stack.getType())) {
-            if (stack.getDatalakeResourceId() != null) {
-                LOGGER.debug("Gathering datalake and its database if exists for the cluster");
-                Optional<DatalakeResources> datalakeResource = datalakeResourcesService.findById(stack.getDatalakeResourceId());
-                if (datalakeResource.isPresent()) {
-                    Long datalakeStackId = datalakeResource.get().getDatalakeStackId();
-                    Stack dataLakeStack = stackService.getByIdWithListsInTransaction(datalakeStackId);
-                    Cluster dataLakeCluster = dataLakeStack.getCluster();
-                    result.addAll(getDatabaseRootCerts(dataLakeCluster));
-                } else {
-                    LOGGER.info("There is no datalake resource could be found for the cluster.");
-                }
+            Optional<Stack> datalakeStack = datalakeService.getDatalakeStackByDatahubStack(stack);
+            LOGGER.debug("Gathering datalake and its database if exists for the cluster");
+            if (datalakeStack.isPresent()) {
+                Cluster dataLakeCluster = datalakeStack.get().getCluster();
+                result.addAll(getDatabaseRootCerts(dataLakeCluster));
             } else {
-                LOGGER.info("There is no datalake resource id has set for the cluster.");
+                LOGGER.info("There is no datalake resource could be found for the cluster.");
             }
-
         }
     }
 

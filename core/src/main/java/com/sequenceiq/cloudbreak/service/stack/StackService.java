@@ -84,7 +84,6 @@ import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.StackValidation;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
@@ -95,7 +94,6 @@ import com.sequenceiq.cloudbreak.orchestrator.model.OrchestrationCredential;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
-import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
 import com.sequenceiq.cloudbreak.service.decorator.StackResponseDecorator;
 import com.sequenceiq.cloudbreak.service.environment.credential.OpenSshPublicKeyValidator;
@@ -105,6 +103,7 @@ import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.orchestrator.OrchestratorService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
+import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 import com.sequenceiq.cloudbreak.service.stack.ShowTerminatedClusterConfigService.ShowTerminatedClustersAfterConfig;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
 import com.sequenceiq.cloudbreak.service.stackstatus.StackStatusService;
@@ -150,9 +149,6 @@ public class StackService implements ResourceIdProvider, ResourcePropertyProvide
 
     @Inject
     private ContainerOrchestratorResolver containerOrchestratorResolver;
-
-    @Inject
-    private DatalakeResourcesService datalakeResourcesService;
 
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
@@ -225,6 +221,9 @@ public class StackService implements ResourceIdProvider, ResourcePropertyProvide
 
     @Inject
     private RegionAwareCrnGenerator regionAwareCrnGenerator;
+
+    @Inject
+    private DatalakeService datalakeService;
 
     @Value("${cb.nginx.port}")
     private Integer nginxPort;
@@ -300,6 +299,14 @@ public class StackService implements ResourceIdProvider, ResourcePropertyProvide
         }
     }
 
+    public Set<StackIdView> findByDatalakeCrn(String crn) {
+        try {
+            return transactionService.required(() -> stackRepository.findByDatalakeCrn(crn));
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
+        }
+    }
+
     public StackClusterStatusView getStatusByCrn(String crn) {
         return stackRepository.getStatusByCrn(crn).orElseThrow(notFound("stack", crn));
     }
@@ -331,8 +338,27 @@ public class StackService implements ResourceIdProvider, ResourcePropertyProvide
     }
 
     public Set<StackIdView> findClustersConnectedToDatalakeByDatalakeStackId(Long datalakeStackId) {
-        Optional<DatalakeResources> datalakeResources = datalakeResourcesService.findByDatalakeStackId(datalakeStackId);
-        return datalakeResources.isEmpty() ? Collections.emptySet() : stackRepository.findEphemeralClusters(datalakeResources.get().getId());
+        Stack datalakeStack = get(datalakeStackId);
+        Set<StackIdView> stacksConnectedByDatalakeCrn;
+        if (datalakeStack != null) {
+            stacksConnectedByDatalakeCrn = findByDatalakeCrn(datalakeStack.getResourceCrn());
+        } else {
+            stacksConnectedByDatalakeCrn = Collections.emptySet();
+        }
+
+        Optional<Long> id = datalakeService.getDatalakeResourceId(datalakeStackId);
+        Set<StackIdView> stacksConnectedByDatalakeResource;
+        if (id.isEmpty()) {
+            stacksConnectedByDatalakeResource = Collections.emptySet();
+        } else {
+            stacksConnectedByDatalakeResource = stackRepository.findEphemeralClusters(id.get());
+        }
+
+        Set<StackIdView> result = new HashSet<>();
+        result.addAll(stacksConnectedByDatalakeCrn);
+        result.addAll(stacksConnectedByDatalakeResource);
+
+        return result;
     }
 
     public Stack getByIdWithListsInTransaction(Long id) {
@@ -894,8 +920,8 @@ public class StackService implements ResourceIdProvider, ResourcePropertyProvide
         return stackRepository.findIdByCrnAndWorkspaceId(crn, workspaceId).orElseThrow(notFound("Stack", crn));
     }
 
-    public Set<StackIdView> findClustersConnectedToDatalake(Long stackId) {
-        return stackRepository.findEphemeralClusters(stackId);
+    public Set<StackIdView> findClustersConnectedToDatalake(Long datalakeResourceId) {
+        return stackRepository.findEphemeralClusters(datalakeResourceId);
     }
 
     public Set<StackListItem> getByWorkspaceId(Long workspaceId, String environmentCrn, List<StackType> stackTypes) {

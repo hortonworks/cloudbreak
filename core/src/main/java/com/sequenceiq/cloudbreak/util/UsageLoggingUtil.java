@@ -1,5 +1,10 @@
 package com.sequenceiq.cloudbreak.util;
 
+import javax.annotation.Nullable;
+
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
@@ -8,9 +13,6 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.usage.LoggingUsageReporter;
 import com.sequenceiq.cloudbreak.usage.UsageReporter;
 import com.sequenceiq.cloudbreak.workspace.model.User;
-import org.springframework.stereotype.Component;
-
-import javax.annotation.Nullable;
 
 /**
  * Utility class for logging usage events.
@@ -55,7 +57,9 @@ public class UsageLoggingUtil {
             UsageProto.CDPDatahubClusterRequested.Builder protoBuilder =
                     UsageProto.CDPDatahubClusterRequested.newBuilder();
             protoBuilder.setClusterId(cluster.getId().toString());
-            if (stack.getDatalakeResourceId() != null) {
+            if (StringUtils.hasLength(stack.getDatalakeCrn())) {
+                protoBuilder.setDatalakeCrn(stack.getDatalakeCrn());
+            } else if (stack.getDatalakeResourceId() != null) {
                 // TODO: CB-9422 Find crn of datalake for this field. Stack id is used here, but for datalake event cluster id is used.
                 protoBuilder.setDatalakeCrn(stack.getDatalakeResourceId().toString());
             }
