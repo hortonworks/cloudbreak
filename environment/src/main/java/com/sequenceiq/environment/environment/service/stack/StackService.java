@@ -1,8 +1,9 @@
 package com.sequenceiq.environment.environment.service.stack;
 
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.ws.rs.WebApplicationException;
@@ -70,19 +71,19 @@ public class StackService {
         }
     }
 
-    public List<FlowIdentifier> updateLoadBalancer(Set<String> names) {
+    public Map<String, FlowIdentifier> updateLoadBalancer(Set<String> names) {
         String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        List<FlowIdentifier> flowIdentifiers = new ArrayList<>();
+        Map<String, FlowIdentifier> flowIdentifiers = new HashMap<>();
         for (String name : names) {
             try {
                 ThreadBasedUserCrnProvider.doAsInternalActor(() -> {
                     FlowIdentifier flowidentifier = stackV4Endpoint.updateLoadBalancersInternal(0L, name, initiatorUserCrn);
-                    flowIdentifiers.add(flowidentifier);
+                    flowIdentifiers.put(name, flowidentifier);
                 });
             } catch (WebApplicationException e) {
                 String errorMessage = messageExtractor.getErrorMessage(e);
-                LOGGER.error(String.format("Failed update load balancer for stack %s due to: '%s'.", name, errorMessage), e);
-                throw e;
+                LOGGER.error(String.format("Failed to update load balancer for stack %s due to: '%s'.", name, errorMessage), e);
+                flowIdentifiers.put(name, null);
             }
         }
         return flowIdentifiers;

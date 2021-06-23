@@ -15,6 +15,8 @@ public class EnvironmentLoadBalancerDto implements Payload {
 
     private Set<String> endpointGatewaySubnetIds;
 
+    private String flowId;
+
     public void setId(Long id) {
         this.id = id;
     }
@@ -48,6 +50,14 @@ public class EnvironmentLoadBalancerDto implements Payload {
         this.endpointGatewaySubnetIds = endpointGatewaySubnetIds;
     }
 
+    public String getFlowId() {
+        return flowId;
+    }
+
+    public void setFlowId(String flowId) {
+        this.flowId = flowId;
+    }
+
     @Override
     public String toString() {
         return "EnvironmentLoadBalancerDto{" +
@@ -71,6 +81,8 @@ public class EnvironmentLoadBalancerDto implements Payload {
 
         private Set<String> endpointGatewaySubnetIds;
 
+        private String flowId;
+
         public Builder withId(Long id) {
             this.id = id;
             return this;
@@ -91,12 +103,18 @@ public class EnvironmentLoadBalancerDto implements Payload {
             return this;
         }
 
+        public Builder withFlowId(String flowId) {
+            this.flowId = flowId;
+            return this;
+        }
+
         public EnvironmentLoadBalancerDto build() {
             EnvironmentLoadBalancerDto environmentLoadBalancerDto = new EnvironmentLoadBalancerDto();
             environmentLoadBalancerDto.setId(id);
             environmentLoadBalancerDto.setEnvironmentDto(environmentDto);
             environmentLoadBalancerDto.setEndpointAccessGateway(endpointAccessGateway);
             environmentLoadBalancerDto.setEndpointGatewaySubnetIds(endpointGatewaySubnetIds);
+            environmentLoadBalancerDto.setFlowId(flowId);
             return environmentLoadBalancerDto;
         }
     }

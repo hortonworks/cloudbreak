@@ -52,6 +52,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentLo
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentCrnResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentLbUpdateStatusResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponses;
 import com.sequenceiq.environment.authorization.EnvironmentFiltering;
@@ -395,6 +396,23 @@ public class EnvironmentController implements EnvironmentEndpoint {
         EnvironmentDto environmentDto = environmentService.getByCrnAndAccountId(crn, accountId);
         EnvironmentLoadBalancerDto environmentLoadBalancerDto = environmentApiConverter.initLoadBalancerDto(request);
         environmentLoadBalancerService.updateLoadBalancerInEnvironmentAndStacks(environmentDto, environmentLoadBalancerDto);
+    }
+
+    @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
+    public EnvironmentLbUpdateStatusResponse getLoadBalancerUpdateStatusByEnvironmentName(@ResourceName String envName) {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        EnvironmentDto environmentDto = environmentService.getByNameAndAccountId(envName, accountId);
+        return environmentLoadBalancerService.getLoadBalancerUpdateStatus(environmentDto);
+    }
+
+    @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
+    public EnvironmentLbUpdateStatusResponse getLoadBalancerUpdateStatusByEnvironmentCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT)
+            @ResourceCrn @TenantAwareParam String crn) {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        EnvironmentDto environmentDto = environmentService.getByCrnAndAccountId(crn, accountId);
+        return environmentLoadBalancerService.getLoadBalancerUpdateStatus(environmentDto);
     }
 
     @Override

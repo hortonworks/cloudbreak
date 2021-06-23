@@ -22,6 +22,14 @@ public class EnvironmentModelDescription {
     public static final String ENDPOINT_ACCESS_GATEWAY_SUBNET_METAS = "Subnet metadata for the Public Endpoint Access Gateway. If provided, these " +
         "are the subnets that will be used to create a public Knox endpoint for out-of-network UI/API access. If not provided, public subnets will be " +
         "selected from the subnet list provided for environment creation. (Optional)";
+    public static final String LB_UPDATE_STATUS = "Overall status of load balancer update oeration.";
+    public static final String LB_UPDATE_ERROR = "An error string if any load balancer update operation has failed.";
+    public static final String LB_UPDATE_FLOWID = "The flow id of the environment load balancer update flow.";
+    public static final String LB_UPDATE_CHILD_NAME = "Name of the cluster undergoing load balancer update.";
+    public static final String LB_UPDATE_CHILD_CRN = "CRN of the cluster undergoing load balancer update.";
+    public static final String LB_UPDATE_CHILD_FLOWID = "Flow id of the cluster load balancer update flow.";
+    public static final String LB_UPDATE_CHILD_STATUS = "Status for each data lake/data hub that is part of the update operation.";
+    public static final String LB_UPDATE_CHILD_STATE = "The current state of the update flow. Used to track the current operation.";
     public static final String OUTBOUND_INTERNET_TRAFFIC = "A flag to enable or disable the outbound internet traffic from the instances.";
     public static final String AWS_SPECIFIC_PARAMETERS = "AWS-specific properties of the network";
     public static final String AZURE_SPECIFIC_PARAMETERS = "Azure-specific properties of the network";

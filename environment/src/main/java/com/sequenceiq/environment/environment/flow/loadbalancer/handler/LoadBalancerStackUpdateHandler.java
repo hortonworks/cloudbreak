@@ -41,7 +41,7 @@ public class LoadBalancerStackUpdateHandler extends EventSenderAwareHandler<Envi
         try {
             LOGGER.debug("Initating stack load balancer update");
             loadBalancerPollerService.updateStackWithLoadBalancer(environmentDto.getId(), environmentDto.getResourceCrn(),
-                environmentDto.getName(), environmentLoadBalancerDto.getEndpointAccessGateway());
+                environmentDto.getName(), environmentLoadBalancerDto.getEndpointAccessGateway(), environmentLoadBalancerDto.getFlowId());
 
             LOGGER.debug("Stack load balancer update complete.");
             LoadBalancerUpdateEvent loadBalancerUpdateEvent = LoadBalancerUpdateEvent.LoadBalancerUpdateEventBuilder.aLoadBalancerUpdateEvent()
