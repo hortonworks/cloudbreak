@@ -39,8 +39,12 @@ public class RemoteDataContextWorkaroundService {
     private MissingResourceNameGenerator nameGenerator;
 
     public Set<RDSConfig> prepareRdsConfigs(Cluster requestedCluster, DatalakeResources datalakeResources) {
+        return prepareRdsConfigs(requestedCluster, datalakeResources.getRdsConfigs());
+    }
+
+    public Set<RDSConfig> prepareRdsConfigs(Cluster requestedCluster, Set<RDSConfig> rdsConfigs) {
         Set<RDSConfig> rdsConfigsWithoutHive = requestedCluster.getRdsConfigs();
-        Set<RDSConfig> hiveDbfromSdx = datalakeResources.getRdsConfigs()
+        Set<RDSConfig> hiveDbfromSdx = rdsConfigs
                 .stream()
                 .filter(this::isActiveHiveMetastoreDatabase)
                 .collect(toSet());
@@ -69,12 +73,16 @@ public class RemoteDataContextWorkaroundService {
 
     public FileSystem prepareFilesytem(Cluster requestedCluster, DatalakeResources datalakeResources) {
         Stack stack = stackService.getById(datalakeResources.getDatalakeStackId());
-        prepareFilesystemIfNotPresentedButSdxHasIt(requestedCluster, stack);
+        return prepareFilesytem(requestedCluster, stack);
+    }
+
+    public FileSystem prepareFilesytem(Cluster requestedCluster, Stack datalakeStack) {
+        prepareFilesystemIfNotPresentedButSdxHasIt(requestedCluster, datalakeStack);
         if (hasFilesystem(requestedCluster.getFileSystem())) {
             FileSystem fileSystem = requestedCluster.getFileSystem();
             if (hasLocations(fileSystem)) {
                 CloudStorage cloudStorage = fileSystem.getCloudStorage();
-                FileSystem dlFileSystem = stack.getCluster().getFileSystem();
+                FileSystem dlFileSystem = datalakeStack.getCluster().getFileSystem();
                 if (hasFilesystem(dlFileSystem)) {
                     if (hasLocations(dlFileSystem)) {
                         List<StorageLocation> dlStorageLocations = dlFileSystem.getCloudStorage().getLocations();

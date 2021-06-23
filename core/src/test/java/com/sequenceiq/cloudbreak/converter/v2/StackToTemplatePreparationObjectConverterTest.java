@@ -46,7 +46,6 @@ import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.cloudstorage.CmCloudStorageConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.general.GeneralClusterConfigsProvider;
-import com.sequenceiq.cloudbreak.cmtemplate.sharedservice.SharedServiceConfigsViewProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -85,6 +84,7 @@ import com.sequenceiq.cloudbreak.service.idbroker.IdBrokerService;
 import com.sequenceiq.cloudbreak.service.identitymapping.AwsMockAccountMappingService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbCertificateProvider;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
+import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
@@ -157,9 +157,6 @@ public class StackToTemplatePreparationObjectConverterTest {
 
     @Mock
     private GeneralClusterConfigsProvider generalClusterConfigsProvider;
-
-    @Mock
-    private SharedServiceConfigsViewProvider sharedServiceConfigProvider;
 
     @Mock
     private Stack stackMock;
@@ -244,6 +241,9 @@ public class StackToTemplatePreparationObjectConverterTest {
 
     @Mock
     private TransactionService transactionService;
+
+    @Mock
+    private DatalakeService datalakeService;
 
     @Spy
     @SuppressFBWarnings(value = "UrF", justification = "This gets injected")
@@ -441,7 +441,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         // just in case adding one to avoid matching with the class variable
         Optional<DatalakeResources> datalakeResources = Optional.of(new DatalakeResources());
         SharedServiceConfigsView expected = new SharedServiceConfigsView();
-        when(sharedServiceConfigProvider.createSharedServiceConfigs(stackMock, datalakeResources)).thenReturn(expected);
+        when(datalakeService.createSharedServiceConfigsView(stackMock)).thenReturn(expected);
         when(stackMock.getDatalakeResourceId()).thenReturn(1L);
         when(datalakeResourcesService.findById(anyLong())).thenReturn(datalakeResources);
 

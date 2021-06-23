@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.converter.v4.stacks;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.MOCK;
 import static org.junit.Assert.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -34,7 +33,6 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.StackAuthenticationV4Request;
@@ -55,7 +53,6 @@ import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.TargetGroup;
@@ -66,6 +63,7 @@ import com.sequenceiq.cloudbreak.service.account.PreferencesService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
+import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 import com.sequenceiq.cloudbreak.service.stack.GatewaySecurityGroupDecorator;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
@@ -164,6 +162,9 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
     @Mock
     private LoadBalancerConfigService loadBalancerConfigService;
 
+    @Mock
+    private DatalakeService datalakeService;
+
     private Credential credential;
 
     @BeforeAll
@@ -190,6 +191,7 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
         when(environmentClientService.getByCrn(anyString())).thenReturn(environmentResponse);
         when(kerberosConfigService.get(anyString(), anyString())).thenReturn(Optional.empty());
         when(costTagging.mergeTags(any(CDPTagMergeRequest.class))).thenReturn(new HashMap<>());
+        when(datalakeService.getDatalakeCrn(any(), any())).thenReturn("crn");
         credential = Credential.builder()
                 .cloudPlatform("AWS")
                 .build();
@@ -214,8 +216,8 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
                 Arrays.asList("description", "cluster", "environmentCrn", "gatewayPort", "useCcm", "network", "securityConfig",
                         "version", "created", "platformVariant", "cloudPlatform",
                         "customHostname", "customDomain", "clusterNameAsSubdomain", "hostgroupNameAsHostname", "parameters", "creator",
-                        "environmentCrn", "terminated", "datalakeResourceId", "type", "inputs", "failurePolicy", "resourceCrn", "minaSshdServiceId",
-                        "ccmV2AgentCrn", "externalDatabaseCreationType", "stackVersion"));
+                        "environmentCrn", "terminated", "datalakeResourceId", "datalakeCrn", "type", "inputs", "failurePolicy", "resourceCrn",
+                        "minaSshdServiceId", "ccmV2AgentCrn", "externalDatabaseCreationType", "stackVersion"));
         assertEquals("eu-west-1", stack.getRegion());
         assertEquals("AWS", stack.getCloudPlatform());
         assertEquals("mystack", stack.getName());
@@ -243,7 +245,7 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
                 Arrays.asList("description", "cluster", "environmentCrn", "gatewayPort", "useCcm", "network", "securityConfig",
                         "version", "created", "platformVariant", "cloudPlatform", "resourceCrn",
                         "customHostname", "customDomain", "clusterNameAsSubdomain", "hostgroupNameAsHostname", "parameters", "creator",
-                        "environmentCrn", "terminated", "datalakeResourceId", "type", "inputs", "failurePolicy", "minaSshdServiceId",
+                        "environmentCrn", "terminated", "datalakeResourceId", "datalakeCrn", "type", "inputs", "failurePolicy", "minaSshdServiceId",
                         "ccmV2AgentCrn", "externalDatabaseCreationType", "stackVersion"));
         assertEquals("eu-west-1", stack.getRegion());
         assertEquals("AWS", stack.getCloudPlatform());
@@ -320,78 +322,11 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
     }
 
     @Test
-    public void testConvertSharedServicePreparedWhenSharedServiceIsNullThenDatabaseNameShouldNotBeSet() {
-        StackV4Request request = getRequest("stack.json");
-        request.setCloudPlatform(MOCK);
-        request.setNetwork(TestUtil.networkV4RequestForMock());
-        InstanceGroup instanceGroup = mock(InstanceGroup.class);
-        when(instanceGroup.getInstanceGroupType()).thenReturn(InstanceGroupType.GATEWAY);
-
-        //GIVEN
-        given(credentialClientService.getByName(anyString())).willReturn(credential);
-        given(credentialClientService.getByCrn(anyString())).willReturn(credential);
-        given(conversionService.convert(any(InstanceGroupV4Request.class), eq(InstanceGroup.class))).willReturn(instanceGroup);
-        given(providerParameterCalculator.get(request)).willReturn(getMappable());
-        given(conversionService.convert(any(ClusterV4Request.class), eq(Cluster.class))).willReturn(new Cluster());
-
-        //WHEN
-        Stack result = underTest.convert(request);
-
-        //THEN
-        assertNull(result.getDatalakeResourceId());
-    }
-
-    @Test
-    public void testWhenSourceIsTemplate() {
-        StackV4Request request = getRequest("stack.json");
-        request.setCloudPlatform(MOCK);
-        request.setType(StackType.TEMPLATE);
-        request.setNetwork(TestUtil.networkV4RequestForMock());
-        InstanceGroup instanceGroup = mock(InstanceGroup.class);
-        when(instanceGroup.getInstanceGroupType()).thenReturn(InstanceGroupType.GATEWAY);
-
-        //GIVEN
-        given(credentialClientService.getByName(anyString())).willReturn(credential);
-        given(credentialClientService.getByCrn(anyString())).willReturn(credential);
-        given(conversionService.convert(any(InstanceGroupV4Request.class), eq(InstanceGroup.class))).willReturn(instanceGroup);
-        given(providerParameterCalculator.get(request)).willReturn(getMappable());
-        given(conversionService.convert(any(ClusterV4Request.class), eq(Cluster.class))).willReturn(new Cluster());
-
-        //WHEN
-        Stack result = underTest.convert(request);
-
-        //THEN
-        assertNull(result.getDatalakeResourceId());
-    }
-
-    @Test
-    public void testConvertSharedServicePreparateWhenThereIsNoDatalakeNameButSharedServiceIsNotNullThenThisDataShoudlBeTheDatalakeId() {
-        Long expectedDataLakeId = 1L;
-        StackV4Request request = getRequest("stack-with-shared-service.json");
-
-        //GIVEN
-        given(credentialClientService.getByName(anyString())).willReturn(credential);
-        given(credentialClientService.getByCrn(anyString())).willReturn(credential);
-        given(providerParameterCalculator.get(request)).willReturn(getMappable());
-        given(conversionService.convert(any(ClusterV4Request.class), eq(Cluster.class))).willReturn(new Cluster());
-        DatalakeResources datalakeResources = new DatalakeResources();
-        datalakeResources.setId(expectedDataLakeId);
-        given(datalakeResourcesService.getByNameForWorkspace(anyString(), any(Workspace.class))).willReturn(datalakeResources);
-
-        //WHEN
-        Stack result = underTest.convert(request);
-
-        //THEN
-        assertEquals(expectedDataLakeId, result.getDatalakeResourceId());
-    }
-
-    @Test
     public void testConvertWithKnoxLoadBalancer() {
         initMocks();
         setDefaultRegions(AWS);
         StackV4Request request = getRequest("stack-datalake-with-instancegroups.json");
         ReflectionTestUtils.setField(underTest, "defaultRegions", "AWS:eu-west-2");
-        //StackV4Request request = setupRequestWithNetwork();
         TargetGroup targetGroup = new TargetGroup();
         targetGroup.setType(TargetGroupType.KNOX);
         LoadBalancer loadBalancer = new LoadBalancer();

@@ -450,6 +450,11 @@ public class OfflineStateGenerator {
         }
 
         @Override
+        public Set<StackIdView> findByDatalakeCrn(String crn) {
+            return null;
+        }
+
+        @Override
         public String findTimeToLiveValueForSTack(Long stackId, String ttl) {
             return null;
         }

@@ -14,15 +14,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
+import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
+import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
@@ -40,10 +43,20 @@ public class SharedServiceConfigProvider {
     @Inject
     private RemoteDataContextWorkaroundService remoteDataContextWorkaroundService;
 
+    @Inject
+    private RdsConfigService rdsConfigService;
+
     public Cluster configureCluster(@Nonnull Cluster requestedCluster, User user, Workspace workspace) {
         Objects.requireNonNull(requestedCluster);
         Stack stack = requestedCluster.getStack();
-        if (stack.getDatalakeResourceId() != null) {
+        if (!Strings.isNullOrEmpty(stack.getDatalakeCrn())) {
+            Stack datalakeStack = stackService.getByCrn(stack.getDatalakeCrn());
+            if (datalakeStack != null) {
+                Set<RDSConfig> rdsConfigs = rdsConfigService.findByClusterId(datalakeStack.getCluster().getId());
+                setupRds(requestedCluster, rdsConfigs);
+                setupStoragePath(requestedCluster, datalakeStack);
+            }
+        } else if (stack.getDatalakeResourceId() != null) {
             Optional<DatalakeResources> datalakeResources = datalakeResourcesService.findById(stack.getDatalakeResourceId());
             if (datalakeResources.isPresent()) {
                 DatalakeResources datalakeResource = datalakeResources.get();
@@ -86,6 +99,7 @@ public class SharedServiceConfigProvider {
         if (datalakeResource.isPresent()) {
             DatalakeResources datalakeResources = datalakeResource.get();
             publicStack.setDatalakeResourceId(datalakeResources.getId());
+            publicStack.setDatalakeCrn(stackService.get(datalakeResources.getDatalakeStackId()).getResourceCrn());
             StackInputs stackInputs = publicStack.getInputs().get(StackInputs.class);
             stackInputs.setDatalakeInputs(new HashMap<>());
             stackInputs.setFixInputs(new HashMap<>());
@@ -115,4 +129,14 @@ public class SharedServiceConfigProvider {
         requestedCluster.setFileSystem(fileSystem);
     }
 
+    private void setupRds(Cluster requestedCluster, Set<RDSConfig> rdsConfigs) {
+        if (requestedCluster.getRdsConfigs().isEmpty() && rdsConfigs != null) {
+            requestedCluster.setRdsConfigs(remoteDataContextWorkaroundService.prepareRdsConfigs(requestedCluster, rdsConfigs));
+        }
+    }
+
+    private void setupStoragePath(Cluster requestedCluster, Stack datalakeStack) {
+        FileSystem fileSystem = remoteDataContextWorkaroundService.prepareFilesytem(requestedCluster, datalakeStack);
+        requestedCluster.setFileSystem(fileSystem);
+    }
 }

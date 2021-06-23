@@ -17,6 +17,7 @@ import static org.mockito.Mockito.when;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -52,6 +53,7 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.domain.projection.AutoscaleStack;
+import com.sequenceiq.cloudbreak.domain.projection.StackIdView;
 import com.sequenceiq.cloudbreak.domain.projection.StackImageView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
@@ -65,6 +67,7 @@ import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.saltsecurityconf.SaltSecurityConfigService;
 import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
+import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
@@ -183,6 +186,9 @@ public class StackServiceTest {
 
     @Mock
     private RegionAwareCrnGenerator regionAwareCrnGenerator;
+
+    @Mock
+    private DatalakeService datalakeService;
 
     @Before
     public void setUp() {
@@ -351,9 +357,65 @@ public class StackServiceTest {
         verify(stackRepository).findImagesOfAliveStacks(Timestamp.valueOf(MOCK_NOW.minusDays(thresholdInDays)).getTime());
     }
 
+    @Test
+    public void testFindClustersConnectedToDatalakeByDatalakeStackIdWhereResultsAreAdded() throws TransactionExecutionException {
+        StackIdView i = new StackIdViewImpl(1L, "no", "no");
+        StackIdView j = new StackIdViewImpl(2L, "nope", "no");
+        StackIdView k = new StackIdViewImpl(3L, "none", "no");
+
+        Set<StackIdView> result = findClusterConnectedToDatalake(Set.of(i, j), Set.of(k));
+        assertEquals(3, result.size());
+    }
+
+    @Test
+    public void testFindClustersConnectedToDatalakeByDatalakeStackIdWhereResultsAreSame() throws TransactionExecutionException {
+        StackIdView i = new StackIdViewImpl(1L, "no", "no");
+        StackIdView j = new StackIdViewImpl(2L, "nope", "no");
+
+        Set<StackIdView> result = findClusterConnectedToDatalake(Set.of(i, j), Set.of(j));
+        assertEquals(2, result.size());
+    }
+
+    @Test
+    public void testFindClustersConnectedToDatalakeByDatalakeStackIdWhereNoResultFromDatalakeCrn() throws TransactionExecutionException {
+        StackIdView i = new StackIdViewImpl(1L, "no", "no");
+        StackIdView j = new StackIdViewImpl(2L, "nope", "no");
+        StackIdView k = new StackIdViewImpl(3L, "none", "no");
+
+        Set<StackIdView> result = findClusterConnectedToDatalake(Set.of(i, j, k), Set.of());
+        assertEquals(3, result.size());
+    }
+
+    @Test
+    public void testFindClustersConnectedToDatalakeByDatalakeStackIdWhereNoResultFromDatalakeResource() throws TransactionExecutionException {
+        StackIdView i = new StackIdViewImpl(1L, "no", "no");
+        StackIdView j = new StackIdViewImpl(2L, "nope", "no");
+        StackIdView k = new StackIdViewImpl(3L, "none", "no");
+
+        Set<StackIdView> result = findClusterConnectedToDatalake(Set.of(), Set.of(i, j, k));
+        assertEquals(3, result.size());
+    }
+
+    private Set<StackIdView> findClusterConnectedToDatalake(Set<StackIdView> setOfStackThroughOldDatalakeResource,
+            Set<StackIdView> setOfStackThroughNewDatalakeCrn) throws TransactionExecutionException {
+        when(datalakeService.getDatalakeResourceId(1L)).thenReturn(Optional.of(Long.valueOf(2L)));
+        when(stackRepository.findEphemeralClusters(2L)).thenReturn(new HashSet<>(setOfStackThroughOldDatalakeResource));
+        when(stackRepository.findByDatalakeCrn(anyString())).thenReturn(new HashSet<>(setOfStackThroughNewDatalakeCrn));
+        Stack datalakeStack = new Stack();
+        datalakeStack.setDatalakeCrn("crnofdl");
+        datalakeStack.setResourceCrn("crnofme");
+        when(stackRepository.findById(1L)).thenReturn(Optional.of(datalakeStack));
+        when(transactionService.required(any(Supplier.class))).thenAnswer(invocation -> {
+            Supplier<Stack> callback = invocation.getArgument(0);
+            return callback.get();
+        });
+        return underTest.findClustersConnectedToDatalakeByDatalakeStackId(1L);
+    }
+
     private StackImageView createStackImageView(String json) {
         final StackImageView stackImageView = mock(StackImageView.class);
         when(stackImageView.getImage()).thenReturn(new Json(json));
         return stackImageView;
     }
+
 }
