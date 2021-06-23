@@ -17,7 +17,7 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.cloud.model.Platform;
+import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.template.ComputeResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.template.GroupResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.template.NetworkResourceBuilder;
@@ -38,11 +38,11 @@ public class ResourceBuilders {
     @Autowired(required = false)
     private List<GroupResourceBuilder> group = new ArrayList<>();
 
-    private final Map<Platform, List<NetworkResourceBuilder<ResourceBuilderContext>>> networkChain = new HashMap<>();
+    private final Map<Variant, List<NetworkResourceBuilder<ResourceBuilderContext>>> networkChain = new HashMap<>();
 
-    private final Map<Platform, List<GroupResourceBuilder<ResourceBuilderContext>>> groupChain = new HashMap<>();
+    private final Map<Variant, List<GroupResourceBuilder<ResourceBuilderContext>>> groupChain = new HashMap<>();
 
-    private final Map<Platform, List<ComputeResourceBuilder<ResourceBuilderContext>>> computeChain = new HashMap<>();
+    private final Map<Variant, List<ComputeResourceBuilder<ResourceBuilderContext>>> computeChain = new HashMap<>();
 
     @PostConstruct
     public void init() {
@@ -52,28 +52,28 @@ public class ResourceBuilders {
         initCompute(comparator);
     }
 
-    public List<NetworkResourceBuilder<ResourceBuilderContext>> network(Platform platform) {
-        List<NetworkResourceBuilder<ResourceBuilderContext>> networkResourceBuilders = networkChain.get(platform);
+    public List<NetworkResourceBuilder<ResourceBuilderContext>> network(Variant platformVariant) {
+        List<NetworkResourceBuilder<ResourceBuilderContext>> networkResourceBuilders = networkChain.get(platformVariant);
         if (networkResourceBuilders == null) {
-            LOGGER.info("Cannot find NetworkResourceBuilder for {}", platform);
+            LOGGER.info("Cannot find NetworkResourceBuilder for platform variant: '{}'", platformVariant);
             return Collections.emptyList();
         }
         return new ArrayList<>(networkResourceBuilders);
     }
 
-    public List<ComputeResourceBuilder<ResourceBuilderContext>> compute(Platform platform) {
-        List<ComputeResourceBuilder<ResourceBuilderContext>> computeResourceBuilders = computeChain.get(platform);
+    public List<ComputeResourceBuilder<ResourceBuilderContext>> compute(Variant platformVariant) {
+        List<ComputeResourceBuilder<ResourceBuilderContext>> computeResourceBuilders = computeChain.get(platformVariant);
         if (computeResourceBuilders == null) {
-            LOGGER.info("Cannot find ComputeResourceBuilder for {}", platform);
+            LOGGER.info("Cannot find ComputeResourceBuilder for platform variant: '{}'", platformVariant);
             return Collections.emptyList();
         }
         return new ArrayList<>(computeResourceBuilders);
     }
 
-    public List<GroupResourceBuilder<ResourceBuilderContext>> group(Platform platform) {
-        List<GroupResourceBuilder<ResourceBuilderContext>> groupResourceBuilders = groupChain.get(platform);
+    public List<GroupResourceBuilder<ResourceBuilderContext>> group(Variant platformVariant) {
+        List<GroupResourceBuilder<ResourceBuilderContext>> groupResourceBuilders = groupChain.get(platformVariant);
         if (groupResourceBuilders == null) {
-            LOGGER.info("Cannot find GroupResourceBuilder for {}", platform);
+            LOGGER.info("Cannot find GroupResourceBuilder for platform variant: '{}'", platformVariant);
             return Collections.emptyList();
         }
         return new ArrayList<>(groupResourceBuilders);
@@ -81,7 +81,7 @@ public class ResourceBuilders {
 
     private void initNetwork(Comparator<OrderedBuilder> comparator) {
         for (NetworkResourceBuilder<ResourceBuilderContext> builder : network) {
-            List<NetworkResourceBuilder<ResourceBuilderContext>> chain = networkChain.computeIfAbsent(builder.platform(), k -> new LinkedList<>());
+            List<NetworkResourceBuilder<ResourceBuilderContext>> chain = networkChain.computeIfAbsent(builder.variant(), k -> new LinkedList<>());
             chain.add(builder);
             chain.sort(comparator);
         }
@@ -89,7 +89,7 @@ public class ResourceBuilders {
 
     private void initCompute(Comparator<OrderedBuilder> comparator) {
         for (ComputeResourceBuilder<ResourceBuilderContext> builder : compute) {
-            List<ComputeResourceBuilder<ResourceBuilderContext>> chain = computeChain.computeIfAbsent(builder.platform(), k -> new LinkedList<>());
+            List<ComputeResourceBuilder<ResourceBuilderContext>> chain = computeChain.computeIfAbsent(builder.variant(), k -> new LinkedList<>());
             chain.add(builder);
             chain.sort(comparator);
         }
@@ -97,7 +97,7 @@ public class ResourceBuilders {
 
     private void initGroup(Comparator<OrderedBuilder> comparator) {
         for (GroupResourceBuilder<ResourceBuilderContext> builder : group) {
-            List<GroupResourceBuilder<ResourceBuilderContext>> chain = groupChain.computeIfAbsent(builder.platform(), k -> new LinkedList<>());
+            List<GroupResourceBuilder<ResourceBuilderContext>> chain = groupChain.computeIfAbsent(builder.variant(), k -> new LinkedList<>());
             chain.add(builder);
             chain.sort(comparator);
         }

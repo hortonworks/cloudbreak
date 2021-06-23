@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.template.compute.ComputeResourceService;
 import com.sequenceiq.cloudbreak.cloud.template.compute.DatabaseServerCheckerService;
@@ -157,17 +158,18 @@ public abstract class AbstractResourceConnector implements ResourceConnector<Lis
     public List<CloudResourceStatus> upscale(AuthenticatedContext auth, CloudStack stack, List<CloudResource> resources) {
         CloudContext cloudContext = auth.getCloudContext();
         Platform platform = cloudContext.getPlatform();
+        Variant variant = cloudContext.getVariant();
 
         //context
         ResourceBuilderContext context = contextBuilders.get(platform).contextInit(cloudContext, auth, stack.getNetwork(), resources, true);
 
         //network
-        context.addNetworkResources(networkResourceService.getNetworkResources(platform, resources));
+        context.addNetworkResources(networkResourceService.getNetworkResources(variant, resources));
 
         Group scalingGroup = getScalingGroup(getGroup(stack.getGroups(), getGroupName(stack)));
 
         //group
-        context.addGroupResources(scalingGroup.getName(), groupResourceService.getGroupResources(platform, resources));
+        context.addGroupResources(scalingGroup.getName(), groupResourceService.getGroupResources(variant, resources));
 
         //compute
         return computeResourceService.buildResourcesForUpscale(context, auth, stack, Collections.singletonList(scalingGroup));
@@ -201,16 +203,17 @@ public abstract class AbstractResourceConnector implements ResourceConnector<Lis
     public List<CloudResourceStatus> update(AuthenticatedContext auth, CloudStack stack, List<CloudResource> resources) throws Exception {
         CloudContext cloudContext = auth.getCloudContext();
         Platform platform = cloudContext.getPlatform();
+        Variant variant = cloudContext.getVariant();
 
         //context
         ResourceBuilderContext context = contextBuilders.get(platform).contextInit(cloudContext, auth, stack.getNetwork(), resources, true);
 
         //group
-        List<CloudResource> groupResources = groupResourceService.getGroupResources(platform, resources);
+        List<CloudResource> groupResources = groupResourceService.getGroupResources(variant, resources);
         List<CloudResourceStatus> groupStatuses = groupResourceService.update(context, auth, stack.getNetwork(), stack.getCloudSecurity(), groupResources);
 
         //network
-        List<CloudResource> networkResources = networkResourceService.getNetworkResources(platform, resources);
+        List<CloudResource> networkResources = networkResourceService.getNetworkResources(variant, resources);
         List<CloudResourceStatus> networkStatuses = networkResourceService.update(context, auth, stack.getNetwork(), stack.getCloudSecurity(), networkResources);
 
         groupStatuses.addAll(networkStatuses);

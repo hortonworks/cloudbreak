@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
+import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.service.CloudbreakResourceNameService;
 import com.sequenceiq.cloudbreak.cloud.template.AbstractResourceConnector;
@@ -75,17 +76,18 @@ public class GcpResourceConnector extends AbstractResourceConnector {
     public List<CloudResourceStatus> upscale(AuthenticatedContext auth, CloudStack stack, List<CloudResource> resources) {
         CloudContext cloudContext = auth.getCloudContext();
         Platform platform = cloudContext.getPlatform();
+        Variant variant = cloudContext.getVariant();
 
         //context
         ResourceBuilderContext context = contextBuilders.get(platform).contextInit(cloudContext, auth, stack.getNetwork(), resources, true);
 
         //network
-        context.addNetworkResources(networkResourceService.getNetworkResources(platform, resources));
+        context.addNetworkResources(networkResourceService.getNetworkResources(variant, resources));
 
         Group scalingGroup = getScalingGroup(getGroup(stack.getGroups(), getGroupName(stack)));
 
         //group
-        context.addGroupResources(scalingGroup.getName(), groupResourceService.getGroupResources(platform, resources));
+        context.addGroupResources(scalingGroup.getName(), groupResourceService.getGroupResources(variant, resources));
 
         //compute
         List<CloudResource> diskSets = resources.stream()

@@ -18,8 +18,8 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
-import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
+import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
@@ -53,7 +53,8 @@ public class NetworkResourceService {
             AuthenticatedContext auth, Network network, Security security) throws Exception {
         CloudContext cloudContext = auth.getCloudContext();
         List<CloudResourceStatus> results = new ArrayList<>();
-        for (NetworkResourceBuilder<ResourceBuilderContext> builder : resourceBuilders.network(cloudContext.getPlatform())) {
+        Variant variant = cloudContext.getVariant();
+        for (NetworkResourceBuilder<ResourceBuilderContext> builder : resourceBuilders.network(variant)) {
             PollGroup pollGroup = InMemoryStateStore.getStack(auth.getCloudContext().getId());
             if (CANCELLED.equals(pollGroup)) {
                 break;
@@ -78,7 +79,8 @@ public class NetworkResourceService {
             AuthenticatedContext auth, Iterable<CloudResource> resources, Network network, boolean cancellable) throws Exception {
         CloudContext cloudContext = auth.getCloudContext();
         List<CloudResourceStatus> results = new ArrayList<>();
-        List<NetworkResourceBuilder<ResourceBuilderContext>> builderChain = resourceBuilders.network(cloudContext.getPlatform());
+        Variant variant = cloudContext.getVariant();
+        List<NetworkResourceBuilder<ResourceBuilderContext>> builderChain = resourceBuilders.network(variant);
         for (int i = builderChain.size() - 1; i >= 0; i--) {
             NetworkResourceBuilder<ResourceBuilderContext> builder = builderChain.get(i);
             List<CloudResource> specificResources = getResources(resources, builder.resourceType());
@@ -102,7 +104,8 @@ public class NetworkResourceService {
             Network network, Security security, Iterable<CloudResource> networkResources) throws Exception {
         List<CloudResourceStatus> results = new ArrayList<>();
         CloudContext cloudContext = auth.getCloudContext();
-        for (NetworkResourceBuilder<ResourceBuilderContext> builder : resourceBuilders.network(cloudContext.getPlatform())) {
+        Variant variant = cloudContext.getVariant();
+        for (NetworkResourceBuilder<ResourceBuilderContext> builder : resourceBuilders.network(variant)) {
             List<CloudResource> resources = getResources(networkResources, builder.resourceType());
             if (!resources.isEmpty()) {
                 CloudResource resource = resources.get(0);
@@ -118,9 +121,9 @@ public class NetworkResourceService {
         return results;
     }
 
-    public List<CloudResource> getNetworkResources(Platform platform, Iterable<CloudResource> resources) {
+    public List<CloudResource> getNetworkResources(Variant variant, Iterable<CloudResource> resources) {
         Collection<ResourceType> types = new ArrayList<>();
-        for (NetworkResourceBuilder<?> builder : resourceBuilders.network(platform)) {
+        for (NetworkResourceBuilder<?> builder : resourceBuilders.network(variant)) {
             types.add(builder.resourceType());
         }
         return getResources(resources, types);

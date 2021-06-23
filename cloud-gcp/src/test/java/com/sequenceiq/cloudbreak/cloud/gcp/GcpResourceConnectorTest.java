@@ -45,6 +45,7 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
+import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.template.ResourceContextBuilder;
 import com.sequenceiq.cloudbreak.cloud.template.compute.ComputeResourceService;
@@ -167,6 +168,7 @@ public class GcpResourceConnectorTest {
         when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
         when(cloudStack.getNetwork()).thenReturn(network);
         when(cloudContext.getPlatform()).thenReturn(platform("GCP"));
+        when(cloudContext.getVariant()).thenReturn(GcpConstants.GCP_VARIANT);
         when(contextBuilders.get(any(Platform.class))).thenReturn(resourceContextBuilder);
         when(resourceContextBuilder.contextInit(
                 any(CloudContext.class),
@@ -174,9 +176,9 @@ public class GcpResourceConnectorTest {
                 any(Network.class),
                 anyList(),
                 anyBoolean())).thenReturn(resourceBuilderContext);
-        when(networkResourceService.getNetworkResources(any(Platform.class), anyList())).thenReturn(new ArrayList<>());
+        when(networkResourceService.getNetworkResources(any(Variant.class), anyList())).thenReturn(new ArrayList<>());
         doNothing().when(resourceBuilderContext).addNetworkResources(anyCollection());
-        when(groupResourceService.getGroupResources(any(Platform.class), anyCollection()))
+        when(groupResourceService.getGroupResources(any(Variant.class), anyCollection()))
                 .thenReturn(List.of(cloudResource("test-1", GCP_INSTANCE)));
         when(cloudStack.getGroups()).thenReturn(List.of(group("master")));
         doNothing().when(resourceBuilderContext).addComputeResources(anyLong(), anyList());
@@ -190,8 +192,8 @@ public class GcpResourceConnectorTest {
         underTest.upscale(authenticatedContext, cloudStack, cloudResourceList);
 
         verify(contextBuilders, times(1)).get(any(Platform.class));
-        verify(networkResourceService, times(1)).getNetworkResources(any(Platform.class), anyList());
-        verify(groupResourceService, times(1)).getGroupResources(any(Platform.class), anyList());
+        verify(networkResourceService, times(1)).getNetworkResources(any(Variant.class), anyList());
+        verify(groupResourceService, times(1)).getGroupResources(any(Variant.class), anyList());
         verify(resourceBuilderContext, times(1)).addComputeResources(anyLong(), anyList());
         verify(computeResourceService, times(1)).buildResourcesForUpscale(
                 any(ResourceBuilderContext.class),

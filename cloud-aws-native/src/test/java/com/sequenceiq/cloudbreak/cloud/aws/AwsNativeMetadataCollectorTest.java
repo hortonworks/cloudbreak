@@ -147,9 +147,9 @@ class AwsNativeMetadataCollectorTest {
         List<CloudResource> resources = List.of(cloudResource, secondCloudResource);
         InstanceTemplate instanceTemplate =
                 new InstanceTemplate("flavor", "alma", 1L, Set.of(), CREATED, Map.of(), 1L, "imageid", TemporaryStorage.ATTACHED_VOLUMES);
+        CloudInstance cloudInstance = new CloudInstance(anInstanceId, instanceTemplate, null, "subnet-123", "az1");
         InstanceTemplate secondInstanceTemplate =
                 new InstanceTemplate("flavor", "alma", 2L, Set.of(), CREATED, Map.of(), 1L, "imageid", TemporaryStorage.ATTACHED_VOLUMES);
-        CloudInstance cloudInstance = new CloudInstance(anInstanceId, instanceTemplate, null, "subnet-123", "az1");
         CloudInstance secondCloudInstance = new CloudInstance(secondInstanceId, secondInstanceTemplate, null, "subnet-123", "az1");
         List<CloudInstance> cloudInstances = List.of(cloudInstance, secondCloudInstance);
         when(awsClient.createEc2Client(any(), anyString())).thenReturn(ec2Client);
@@ -178,9 +178,9 @@ class AwsNativeMetadataCollectorTest {
         List<CloudResource> resources = List.of(cloudResource, secondCloudResource);
         InstanceTemplate instanceTemplate =
                 new InstanceTemplate("flavor", "alma", 1L, Set.of(), CREATED, Map.of(), 1L, "imageid", TemporaryStorage.ATTACHED_VOLUMES);
+        CloudInstance cloudInstance = new CloudInstance(anInstanceId, instanceTemplate, null, "subnet-123", "az1");
         InstanceTemplate secondInstanceTemplate =
                 new InstanceTemplate("flavor", "alma", 2L, Set.of(), CREATED, Map.of(), 1L, "imageid", TemporaryStorage.ATTACHED_VOLUMES);
-        CloudInstance cloudInstance = new CloudInstance(anInstanceId, instanceTemplate, null, "subnet-123", "az1");
         CloudInstance secondCloudInstance = new CloudInstance(secondInstanceId, secondInstanceTemplate, null, "subnet-123", "az1");
         List<CloudInstance> cloudInstances = List.of(cloudInstance, secondCloudInstance);
         when(awsClient.createEc2Client(any(), anyString())).thenReturn(ec2Client);

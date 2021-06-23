@@ -21,8 +21,8 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
-import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
+import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
@@ -57,7 +57,7 @@ public class GroupResourceService {
             AuthenticatedContext auth, Iterable<Group> groups, Network network, Security security) throws Exception {
         CloudContext cloudContext = auth.getCloudContext();
         List<CloudResourceStatus> results = new ArrayList<>();
-        for (GroupResourceBuilder<ResourceBuilderContext> builder : resourceBuilders.group(cloudContext.getPlatform())) {
+        for (GroupResourceBuilder<ResourceBuilderContext> builder : resourceBuilders.group(cloudContext.getVariant())) {
             PollGroup pollGroup = InMemoryStateStore.getStack(auth.getCloudContext().getId());
             if (CANCELLED.equals(pollGroup)) {
                 break;
@@ -85,7 +85,7 @@ public class GroupResourceService {
             AuthenticatedContext auth, Collection<CloudResource> resources, Network network, boolean cancellable) throws Exception {
         CloudContext cloudContext = auth.getCloudContext();
         List<CloudResourceStatus> results = new ArrayList<>();
-        List<GroupResourceBuilder<ResourceBuilderContext>> builderChain = resourceBuilders.group(cloudContext.getPlatform());
+        List<GroupResourceBuilder<ResourceBuilderContext>> builderChain = resourceBuilders.group(cloudContext.getVariant());
         for (int i = builderChain.size() - 1; i >= 0; i--) {
             GroupResourceBuilder<ResourceBuilderContext> builder = builderChain.get(i);
             List<CloudResource> specificResources = getResources(resources, builder.resourceType());
@@ -109,7 +109,7 @@ public class GroupResourceService {
             Network network, Security security, Collection<CloudResource> groupResources) throws Exception {
         List<CloudResourceStatus> results = new ArrayList<>();
         CloudContext cloudContext = auth.getCloudContext();
-        for (NetworkResourceBuilder<ResourceBuilderContext> builder : resourceBuilders.network(cloudContext.getPlatform())) {
+        for (NetworkResourceBuilder<ResourceBuilderContext> builder : resourceBuilders.network(cloudContext.getVariant())) {
             List<CloudResource> resources = getResources(groupResources, builder.resourceType());
             for (CloudResource resource : resources) {
                 CloudResourceStatus status = builder.update(context, auth, network, security, resource);
@@ -124,9 +124,9 @@ public class GroupResourceService {
         return results;
     }
 
-    public List<CloudResource> getGroupResources(Platform platform, Collection<CloudResource> resources) {
+    public List<CloudResource> getGroupResources(Variant variant, Collection<CloudResource> resources) {
         Collection<ResourceType> types = new ArrayList<>();
-        for (GroupResourceBuilder<?> builder : resourceBuilders.group(platform)) {
+        for (GroupResourceBuilder<?> builder : resourceBuilders.group(variant)) {
             types.add(builder.resourceType());
         }
         return getResources(resources, types);
