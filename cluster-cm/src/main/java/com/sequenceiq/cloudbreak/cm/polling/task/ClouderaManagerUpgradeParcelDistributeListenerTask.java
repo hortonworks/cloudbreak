@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cm.polling.task;
 
+import java.util.Optional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,6 +15,7 @@ import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cm.model.ParcelResource;
 import com.sequenceiq.cloudbreak.cm.model.ParcelStatus;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerCommandPollerObject;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 
 public class ClouderaManagerUpgradeParcelDistributeListenerTask extends AbstractClouderaManagerCommandCheckerTask<ClouderaManagerCommandPollerObject> {
@@ -51,7 +54,9 @@ public class ClouderaManagerUpgradeParcelDistributeListenerTask extends Abstract
     }
 
     @Override
-    public void handleTimeout(ClouderaManagerCommandPollerObject toolsResourceApi) {
+    public void handleTimeout(ClouderaManagerCommandPollerObject pollerObject) {
+        getCloudbreakEventService().fireClusterManagerEvent(pollerObject.getStack().getId(), pollerObject.getStack().getStatus().name(),
+                ResourceEvent.CLUSTER_CM_COMMAND_TIMEOUT, Optional.of(pollerObject.getId()));
         throw new ClouderaManagerOperationFailedException("Operation timed out. Failed to distribute parcel in time.");
     }
 

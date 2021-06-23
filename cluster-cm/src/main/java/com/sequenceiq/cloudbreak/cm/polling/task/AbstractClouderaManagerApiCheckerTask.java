@@ -130,6 +130,10 @@ public abstract class AbstractClouderaManagerApiCheckerTask<T extends ClouderaMa
         return resultMessage;
     }
 
+    public CloudbreakEventService getCloudbreakEventService() {
+        return cloudbreakEventService;
+    }
+
     protected abstract boolean doStatusCheck(T pollerObject, CommandsResourceApi commandsResourceApi) throws ApiException;
 
     protected abstract String getCommandName();

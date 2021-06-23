@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
 
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -22,6 +23,7 @@ import com.sequenceiq.cloudbreak.cm.commands.SyncApiCommandRetriever;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerSyncCommandPollerObject;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 
 @ExtendWith(MockitoExtension.class)
 public class ClouderaManagerSyncApiCommandIdCheckerTaskTest {
@@ -37,12 +39,16 @@ public class ClouderaManagerSyncApiCommandIdCheckerTaskTest {
     private ApiClient apiClient;
 
     @Mock
+    private CloudbreakEventService cloudbreakEventService;
+
+    @Mock
     private Stack stack;
 
     @BeforeEach
     public void setUp() {
         underTest = new ClouderaManagerSyncApiCommandIdCheckerTask(
-                new ClouderaManagerApiPojoFactory(), commandRetriever);
+                new ClouderaManagerApiPojoFactory(), commandRetriever, cloudbreakEventService);
+        doNothing().when(cloudbreakEventService).fireClusterManagerEvent(any(), anyString(), any(), anyString());
     }
 
     @Test

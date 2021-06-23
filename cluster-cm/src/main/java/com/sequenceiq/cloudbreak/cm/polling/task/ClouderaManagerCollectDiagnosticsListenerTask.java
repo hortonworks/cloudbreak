@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cm.polling.task;
 
+import java.util.Optional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,6 +11,7 @@ import com.cloudera.api.swagger.model.ApiCommand;
 import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerCommandPollerObject;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 
 public class ClouderaManagerCollectDiagnosticsListenerTask extends AbstractClouderaManagerCommandCheckerTask<ClouderaManagerCommandPollerObject> {
@@ -32,12 +35,16 @@ public class ClouderaManagerCollectDiagnosticsListenerTask extends AbstractCloud
             String detailedErrorMessage = getResultMessageWithDetailedErrorsPostFix(apiCommand, commandsResourceApi);
             String msg = "Collect diagnostics failed: " + detailedErrorMessage;
             LOGGER.info(msg);
+            getCloudbreakEventService().fireClusterManagerEvent(pollerObject.getStack().getId(), pollerObject.getStack().getStatus().name(),
+                    ResourceEvent.CLUSTER_CM_COMMAND_FAILED, Optional.of(pollerObject.getId()));
             throw new ClouderaManagerOperationFailedException(msg);
         }
     }
 
     @Override
-    public void handleTimeout(ClouderaManagerCommandPollerObject clouderaManagerCommandPollerObject) {
+    public void handleTimeout(ClouderaManagerCommandPollerObject pollerObject) {
+        getCloudbreakEventService().fireClusterManagerEvent(pollerObject.getStack().getId(), pollerObject.getStack().getStatus().name(),
+                ResourceEvent.CLUSTER_CM_COMMAND_TIMEOUT, Optional.of(pollerObject.getId()));
         throw new ClouderaManagerOperationFailedException("Operation timed out. Failed to collect diagnostics.");
     }
 
