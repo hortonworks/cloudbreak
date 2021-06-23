@@ -3,18 +3,18 @@ package com.sequenceiq.cloudbreak.cm.polling.task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.cloudbreak.cluster.service.ClusterEventService;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerCommandPollerObject;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
-import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 
-public class SilentCMDecommissionHostListenerTask extends ClouderaManagerDecommissionHostListenerTask {
+public class SilentCMDecommissionHostListenerTask extends ClouderaManagerDefaultListenerTask {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerPollingServiceProvider.class);
 
     public SilentCMDecommissionHostListenerTask(ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory,
-            CloudbreakEventService cloudbreakEventService) {
-        super(clouderaManagerApiPojoFactory, cloudbreakEventService);
+            ClusterEventService clusterEventService) {
+        super(clouderaManagerApiPojoFactory, clusterEventService, "Decommission host");
     }
 
     @Override

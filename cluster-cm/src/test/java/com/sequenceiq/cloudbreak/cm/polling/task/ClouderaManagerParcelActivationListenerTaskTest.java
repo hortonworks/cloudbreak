@@ -26,6 +26,7 @@ import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiParcel;
 import com.cloudera.api.swagger.model.ApiParcelList;
+import com.sequenceiq.cloudbreak.cluster.service.ClusterEventService;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerCommandPollerObject;
 import com.sequenceiq.cloudbreak.cm.util.TestUtil;
@@ -35,7 +36,6 @@ import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
-import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 
 @ExtendWith(MockitoExtension.class)
 class ClouderaManagerParcelActivationListenerTaskTest {
@@ -60,7 +60,7 @@ class ClouderaManagerParcelActivationListenerTaskTest {
     private ParcelsResourceApi parcelsResourcesApi;
 
     @Mock
-    private CloudbreakEventService cloudbreakEventService;
+    private ClusterEventService clusterEventService;
 
     private ClouderaManagerParcelActivationListenerTask underTest;
 
@@ -70,7 +70,7 @@ class ClouderaManagerParcelActivationListenerTaskTest {
 
     @BeforeEach
     void setUp() {
-        underTest = new ClouderaManagerParcelActivationListenerTask(clouderaManagerApiPojoFactory, cloudbreakEventService);
+        underTest = new ClouderaManagerParcelActivationListenerTask(clouderaManagerApiPojoFactory, clusterEventService);
         stack = new Stack();
         cluster = new Cluster();
         stack.setCluster(TestUtil.clusterComponents(cluster));

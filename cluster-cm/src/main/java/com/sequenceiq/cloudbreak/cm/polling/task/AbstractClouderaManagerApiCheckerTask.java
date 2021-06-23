@@ -14,12 +14,12 @@ import com.cloudera.api.swagger.CommandsResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterBasedStatusCheckerTask;
+import com.sequenceiq.cloudbreak.cluster.service.ClusterEventService;
 import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollerObject;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
-import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 
 public abstract class AbstractClouderaManagerApiCheckerTask<T extends ClouderaManagerPollerObject> extends ClusterBasedStatusCheckerTask<T> {
 
@@ -30,7 +30,7 @@ public abstract class AbstractClouderaManagerApiCheckerTask<T extends ClouderaMa
     //CHECKSTYLE:OFF
     protected final ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory;
 
-    private final CloudbreakEventService cloudbreakEventService;
+    private final ClusterEventService clusterEventService;
 
     private int toleratedErrorCounter = 0;
 
@@ -38,9 +38,9 @@ public abstract class AbstractClouderaManagerApiCheckerTask<T extends ClouderaMa
     //CHECKSTYLE:ON
 
     protected AbstractClouderaManagerApiCheckerTask(ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory,
-            CloudbreakEventService cloudbreakEventService) {
+            ClusterEventService clusterEventService) {
         this.clouderaManagerApiPojoFactory = clouderaManagerApiPojoFactory;
-        this.cloudbreakEventService = cloudbreakEventService;
+        this.clusterEventService = clusterEventService;
     }
 
     @Override
@@ -73,8 +73,7 @@ public abstract class AbstractClouderaManagerApiCheckerTask<T extends ClouderaMa
         if (!connectExceptionOccurred) {
             connectExceptionOccurred = true;
             Stack stack = pollerObject.getStack();
-            cloudbreakEventService.fireCloudbreakEvent(stack.getId(), stack.getStatus().name(),
-                    ResourceEvent.CLUSTER_CM_SECURITY_GROUP_TOO_STRICT, List.of(e.getMessage()));
+            clusterEventService.fireCloudbreakEvent(stack, ResourceEvent.CLUSTER_CM_SECURITY_GROUP_TOO_STRICT, List.of(e.getMessage()));
         }
         return false;
     }
@@ -99,6 +98,10 @@ public abstract class AbstractClouderaManagerApiCheckerTask<T extends ClouderaMa
                 || e.getCause() instanceof SocketException
                 || e.getCause() instanceof IOException
                 || e.getCause() instanceof SocketTimeoutException;
+    }
+
+    public ClusterEventService getClusterEventService() {
+        return clusterEventService;
     }
 
     protected abstract boolean doStatusCheck(T pollerObject, CommandsResourceApi commandsResourceApi) throws ApiException;

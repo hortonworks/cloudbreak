@@ -1,16 +1,16 @@
 package com.sequenceiq.cloudbreak.cm.polling.task;
 
+import com.sequenceiq.cloudbreak.cluster.service.ClusterEventService;
 import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerCommandListPollerObject;
-import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 
 public class ClouderaManagerBatchCommandsListenerTask extends AbstractClouderaManagerCommandListCheckerTask<ClouderaManagerCommandListPollerObject> {
     private String commandName;
 
     public ClouderaManagerBatchCommandsListenerTask(ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory,
-            CloudbreakEventService cloudbreakEventService, String commandName) {
-        super(clouderaManagerApiPojoFactory, cloudbreakEventService);
+            ClusterEventService clusterEventService, String commandName) {
+        super(clouderaManagerApiPojoFactory, clusterEventService);
         this.commandName = commandName;
     }
 

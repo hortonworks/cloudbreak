@@ -8,11 +8,10 @@ import com.cloudera.api.swagger.ParcelResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
-import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
+import com.sequenceiq.cloudbreak.cluster.service.ClusterEventService;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cm.model.ParcelStatus;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerCommandPollerObject;
-import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 
 public class ClouderaManagerSingleParcelActivationListenerTask extends AbstractClouderaManagerCommandCheckerTask<ClouderaManagerCommandPollerObject> {
 
@@ -21,8 +20,8 @@ public class ClouderaManagerSingleParcelActivationListenerTask extends AbstractC
     private final ClouderaManagerProduct product;
 
     public ClouderaManagerSingleParcelActivationListenerTask(ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory,
-            CloudbreakEventService cloudbreakEventService, ClouderaManagerProduct product) {
-        super(clouderaManagerApiPojoFactory, cloudbreakEventService);
+            ClusterEventService clusterEventService, ClouderaManagerProduct product) {
+        super(clouderaManagerApiPojoFactory, clusterEventService);
         this.product = product;
     }
 
@@ -45,17 +44,7 @@ public class ClouderaManagerSingleParcelActivationListenerTask extends AbstractC
     }
 
     @Override
-    public void handleTimeout(ClouderaManagerCommandPollerObject toolsResourceApi) {
-        throw new ClouderaManagerOperationFailedException(String.format("Operation timed out. Failed to activate %s parcel.", product.getName()));
-    }
-
-    @Override
-    public String successMessage(ClouderaManagerCommandPollerObject toolsResourceApi) {
-        return String.format("%s parcel activation finished with success result.", product.getName());
-    }
-
-    @Override
     protected String getCommandName() {
-        return "Activate parcel";
+        return String.format("Activate parcel [%s]", product.getName());
     }
 }

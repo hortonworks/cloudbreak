@@ -13,11 +13,10 @@ import com.cloudera.api.swagger.HostsResourceApi;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostList;
-import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
+import com.sequenceiq.cloudbreak.cluster.service.ClusterEventService;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerCommandPollerObject;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 
 public class ClouderaManagerHostStatusChecker extends AbstractClouderaManagerCommandCheckerTask<ClouderaManagerCommandPollerObject> {
 
@@ -28,8 +27,8 @@ public class ClouderaManagerHostStatusChecker extends AbstractClouderaManagerCom
     private final Instant start;
 
     public ClouderaManagerHostStatusChecker(ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory,
-            CloudbreakEventService cloudbreakEventService) {
-        super(clouderaManagerApiPojoFactory, cloudbreakEventService);
+            ClusterEventService clusterEventService) {
+        super(clouderaManagerApiPojoFactory, clusterEventService);
         start = Instant.now();
     }
 
@@ -72,15 +71,5 @@ public class ClouderaManagerHostStatusChecker extends AbstractClouderaManagerCom
     @Override
     protected String getCommandName() {
         return "Host status summary";
-    }
-
-    @Override
-    public void handleTimeout(ClouderaManagerCommandPollerObject pollerObject) {
-        throw new ClouderaManagerOperationFailedException("Operation timed out. Failed to check cloudera manager startup.");
-    }
-
-    @Override
-    public String successMessage(ClouderaManagerCommandPollerObject pollerObject) {
-        return String.format("Cloudera Manager client found all hosts for stack '%s'", pollerObject.getStack().getId());
     }
 }

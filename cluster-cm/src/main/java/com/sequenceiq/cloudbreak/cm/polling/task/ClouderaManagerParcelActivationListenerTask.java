@@ -20,7 +20,7 @@ import com.cloudera.api.swagger.model.ApiParcel;
 import com.cloudera.api.swagger.model.ApiParcelList;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
-import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
+import com.sequenceiq.cloudbreak.cluster.service.ClusterEventService;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cm.model.ParcelStatus;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerCommandPollerObject;
@@ -30,15 +30,14 @@ import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
-import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 
 public class ClouderaManagerParcelActivationListenerTask extends AbstractClouderaManagerCommandCheckerTask<ClouderaManagerCommandPollerObject> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerParcelActivationListenerTask.class);
 
     public ClouderaManagerParcelActivationListenerTask(ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory,
-            CloudbreakEventService cloudbreakEventService) {
-        super(clouderaManagerApiPojoFactory, cloudbreakEventService);
+            ClusterEventService clusterEventService) {
+        super(clouderaManagerApiPojoFactory, clusterEventService);
     }
 
     @Override
@@ -130,17 +129,7 @@ public class ClouderaManagerParcelActivationListenerTask extends AbstractClouder
     }
 
     @Override
-    public void handleTimeout(ClouderaManagerCommandPollerObject toolsResourceApi) {
-        throw new ClouderaManagerOperationFailedException("Operation timed out. Failed to deploy client configurations.");
-    }
-
-    @Override
-    public String successMessage(ClouderaManagerCommandPollerObject toolsResourceApi) {
-        return "Cloudera Manager deployed client configurations finished with success result.";
-    }
-
-    @Override
     protected String getCommandName() {
-        return "Deploy client configurations";
+        return "Parcel activation";
     }
 }

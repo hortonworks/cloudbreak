@@ -10,12 +10,12 @@ import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiParcel;
 import com.cloudera.api.swagger.model.ApiParcelState;
+import com.sequenceiq.cloudbreak.cluster.service.ClusterEventService;
 import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cm.model.ParcelResource;
 import com.sequenceiq.cloudbreak.cm.model.ParcelStatus;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerCommandPollerObject;
-import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 
 public class ClouderaManagerUpgradeParcelDownloadListenerTask extends AbstractClouderaManagerCommandCheckerTask<ClouderaManagerCommandPollerObject> {
 
@@ -24,13 +24,13 @@ public class ClouderaManagerUpgradeParcelDownloadListenerTask extends AbstractCl
     private ParcelResource parcelResource;
 
     public ClouderaManagerUpgradeParcelDownloadListenerTask(ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory,
-            CloudbreakEventService cloudbreakEventService) {
-        super(clouderaManagerApiPojoFactory, cloudbreakEventService);
+            ClusterEventService clusterEventService) {
+        super(clouderaManagerApiPojoFactory, clusterEventService);
     }
 
     public ClouderaManagerUpgradeParcelDownloadListenerTask(ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory,
-            CloudbreakEventService cloudbreakEventService, ParcelResource parcelResource) {
-        super(clouderaManagerApiPojoFactory, cloudbreakEventService);
+            ClusterEventService clusterEventService, ParcelResource parcelResource) {
+        super(clouderaManagerApiPojoFactory, clusterEventService);
         this.parcelResource = parcelResource;
     }
 
@@ -53,13 +53,12 @@ public class ClouderaManagerUpgradeParcelDownloadListenerTask extends AbstractCl
     }
 
     @Override
-    public void handleTimeout(ClouderaManagerCommandPollerObject toolsResourceApi) {
-
+    public void handleTimeout(ClouderaManagerCommandPollerObject pollerObject) {
         //when downloading, progress and totalProgress will show the current number of bytes downloaded
         // and the total number of bytes needed to be downloaded respectively.
         String baseMessage = "Operation timed out. Failed to download parcel in time.";
         try {
-            ApiParcel apiParcel = getApiParcel(toolsResourceApi);
+            ApiParcel apiParcel = getApiParcel(pollerObject);
             ApiParcelState parcelState = apiParcel.getState();
             String progress = FileUtils.byteCountToDisplaySize(parcelState.getProgress().toBigInteger());
             String totalProgress = FileUtils.byteCountToDisplaySize(parcelState.getTotalProgress().toBigInteger());
@@ -74,11 +73,6 @@ public class ClouderaManagerUpgradeParcelDownloadListenerTask extends AbstractCl
         ApiClient apiClient = pollerObject.getApiClient();
         ParcelResourceApi parcelResourceApi = clouderaManagerApiPojoFactory.getParcelResourceApi(apiClient);
         return parcelResourceApi.readParcel(parcelResource.getClusterName(), parcelResource.getProduct(), parcelResource.getVersion());
-    }
-
-    @Override
-    public String successMessage(ClouderaManagerCommandPollerObject toolsResourceApi) {
-        return "Successfully downloaded CDP Runtime parcel.";
     }
 
     @Override
