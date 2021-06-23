@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.template.ComputeResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 import com.sequenceiq.cloudbreak.cloud.template.init.ResourceBuilders;
@@ -124,7 +125,8 @@ public class CloudFailureHandler {
 
     private void doRollbackAndDecreaseNodeCount(AuthenticatedContext auth, List<CloudResourceStatus> statuses, Collection<Long> ids, Group group,
             ResourceBuilderContext ctx, ResourceBuilders resourceBuilders, Boolean upscale) {
-        List<ComputeResourceBuilder<ResourceBuilderContext>> compute = resourceBuilders.compute(auth.getCloudContext().getPlatform());
+        Variant variant = auth.getCloudContext().getVariant();
+        List<ComputeResourceBuilder<ResourceBuilderContext>> compute = resourceBuilders.compute(variant);
         Collection<Future<ResourceRequestResult<List<CloudResourceStatus>>>> futures = new ArrayList<>();
         LOGGER.info("InstanceGroup {} node count decreased with one so the new node size is: {}", group.getName(), group.getInstancesSize());
 

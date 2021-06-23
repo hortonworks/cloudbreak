@@ -34,8 +34,8 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
-import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
@@ -100,8 +100,8 @@ public class ComputeResourceService {
         LOGGER.debug("Deleting the following resources: {}", resources);
         List<CloudResourceStatus> results = new ArrayList<>();
         Collection<Future<ResourceRequestResult<List<CloudResourceStatus>>>> futures = new ArrayList<>();
-        Platform platform = auth.getCloudContext().getPlatform();
-        List<ComputeResourceBuilder<ResourceBuilderContext>> builders = resourceBuilders.compute(platform);
+        Variant variant = auth.getCloudContext().getVariant();
+        List<ComputeResourceBuilder<ResourceBuilderContext>> builders = resourceBuilders.compute(variant);
         int numberOfBuilders = builders.size();
         for (int i = numberOfBuilders - 1; i >= 0; i--) {
             ComputeResourceBuilder<ResourceBuilderContext> builder = builders.get(i);
@@ -135,8 +135,8 @@ public class ComputeResourceService {
     private List<CloudVmInstanceStatus> stopStart(ResourceBuilderContext context,
             AuthenticatedContext auth, List<CloudResource> resources, List<CloudInstance> instances) {
         List<CloudVmInstanceStatus> results = new ArrayList<>();
-        Platform platform = auth.getCloudContext().getPlatform();
-        List<ComputeResourceBuilder<ResourceBuilderContext>> builders = resourceBuilders.compute(platform);
+        Variant variant = auth.getCloudContext().getVariant();
+        List<ComputeResourceBuilder<ResourceBuilderContext>> builders = resourceBuilders.compute(variant);
         if (!context.isBuild()) {
             Collections.reverse(builders);
         }
@@ -348,7 +348,8 @@ public class ComputeResourceService {
         }
 
         private Optional<ComputeResourceBuilder<ResourceBuilderContext>> determineComputeResourceBuilder(CloudResource resource) {
-            return resourceBuilders.compute(auth.getCloudContext().getPlatform())
+            Variant variant = auth.getCloudContext().getVariant();
+            return resourceBuilders.compute(variant)
                     .stream().filter(rb -> rb.resourceType().equals(resource.getType())).findFirst();
         }
 

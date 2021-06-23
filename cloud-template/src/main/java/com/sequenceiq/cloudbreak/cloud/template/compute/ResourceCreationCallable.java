@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
@@ -81,7 +82,8 @@ public class ResourceCreationCallable implements Callable<ResourceRequestResult<
             Collection<CloudResource> buildableResources = new ArrayList<>();
             Long privateId = instance.getTemplate().getPrivateId();
             try {
-                List<ComputeResourceBuilder<ResourceBuilderContext>> compute = resourceBuilders.compute(auth.getCloudContext().getPlatform());
+                Variant variant = auth.getCloudContext().getVariant();
+                List<ComputeResourceBuilder<ResourceBuilderContext>> compute = resourceBuilders.compute(variant);
                 for (ComputeResourceBuilder<ResourceBuilderContext> builder : compute) {
                     LOGGER.info("Start building '{} ({})' resources of '{}' instance group of '{}' stack", builder.resourceType(),
                             builder.getClass().getSimpleName(), group.getName(), stackName);

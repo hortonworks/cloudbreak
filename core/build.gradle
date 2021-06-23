@@ -266,6 +266,7 @@ dependencies {
   runtime project(':cloud-openstack')
   runtime project(':cloud-gcp')
   implementation project(':cloud-aws-cloudformation')
+  implementation project(':cloud-aws-native')
   runtime project(':cloud-mock')
   runtime project(':cloud-azure')
   runtime project(':cloud-yarn')

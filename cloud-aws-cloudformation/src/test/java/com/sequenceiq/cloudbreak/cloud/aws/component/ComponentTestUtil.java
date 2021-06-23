@@ -21,6 +21,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.test.context.ActiveProfiles;
 
 import com.google.common.collect.ImmutableMap;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -84,8 +85,8 @@ public class ComponentTestUtil {
                 .withId(1L)
                 .withName("cloudContext")
                 .withCrn("crn")
-                .withPlatform("AWS")
-                .withVariant("variant")
+                .withPlatform(AwsConstants.AWS_PLATFORM.value())
+                .withVariant(AwsConstants.AWS_DEFAULT_VARIANT.value())
                 .withLocation(location)
                 .withUserId("owner@company.com")
                 .withAccountId("5")
