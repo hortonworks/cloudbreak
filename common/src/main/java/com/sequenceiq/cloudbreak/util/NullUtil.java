@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.util;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -14,6 +15,12 @@ public class NullUtil {
     public static <T extends Throwable> void throwIfNull(Object o, Supplier<? extends T> exception) throws T {
         if (o == null) {
             throw exception.get();
+        }
+    }
+
+    public static <T> void throwIfNull(Collection<T> collection, Class<T> type) {
+        if (collection == null) {
+            throw new IllegalArgumentException("The collection of " + type.getSimpleName() + "s should not be null!");
         }
     }
 

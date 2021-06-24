@@ -5,9 +5,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import jakarta.ws.rs.NotFoundException;
-
 public enum AuthorizationResourceAction {
+
     CHANGE_CREDENTIAL("environments/changeCredential", AuthorizationResourceType.ENVIRONMENT),
     EDIT_CREDENTIAL("environments/editCredential", AuthorizationResourceType.CREDENTIAL),
     ENVIRONMENT_VERTICAL_SCALING("environments/verticalScale", AuthorizationResourceType.ENVIRONMENT),
@@ -141,13 +140,4 @@ public enum AuthorizationResourceAction {
         return authorizationResourceType;
     }
 
-    public static AuthorizationResourceAction getByRight(String right) {
-        List<AuthorizationResourceAction> result = BY_RIGHT.get(right);
-        if (result == null || result.isEmpty()) {
-            throw new NotFoundException(String.format("Action not found by right %s", right));
-        } else if (result.size() > 1) {
-            throw new NotFoundException(String.format("Multiple results found by right %s, thus we cannot lookup for action!", right));
-        }
-        return result.get(0);
-    }
 }

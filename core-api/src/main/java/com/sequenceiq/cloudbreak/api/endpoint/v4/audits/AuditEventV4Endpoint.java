@@ -51,4 +51,5 @@ public interface AuditEventV4Endpoint {
             operationId = "getAuditEventByWorkspace",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     AuditEventV4Response getAuditEventById(@PathParam("workspaceId") Long workspaceId, @PathParam("auditId") Long auditId);
+
 }

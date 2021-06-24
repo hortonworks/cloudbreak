@@ -50,4 +50,5 @@ public interface CDPStructuredEventV1Endpoint {
     Response getAuditEventsZip(
             @QueryParam("resourceCrn") @NotNull(message = "The 'resourceCrn' query parameter must be specified.") String resourceCrn,
             @QueryParam("types") List<StructuredEventType> types);
+
 }
