@@ -128,6 +128,10 @@ public class CommonPermissionCheckingUtils {
         return (T) result;
     }
 
+    public void throwAccessDeniedIfActionNotAllowed(AuthorizationResourceAction action, Collection<String> resourceCrns) {
+        throwAccessDeniedIfActionNotAllowed(action, resourceCrns, defaultResourceCheckerMap.get(umsRightProvider.getResourceType(action)));
+    }
+
     public void throwAccessDeniedIfActionNotAllowed(AuthorizationResourceAction action, Collection<String> resourceCrns,
             DefaultResourceChecker defaultResourceChecker) {
         if (!defaultResourceChecker.isAllowedAction(action)) {

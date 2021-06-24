@@ -197,4 +197,5 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService, Cl
         );
         reactor.notify(CLOUDBREAK_EVENT, eventFactory.createEvent(compositeEvent));
     }
+
 }

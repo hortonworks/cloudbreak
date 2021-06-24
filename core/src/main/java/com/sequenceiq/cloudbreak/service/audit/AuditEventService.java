@@ -54,12 +54,15 @@ public class AuditEventService extends AbstractWorkspaceAwareResourceService<Str
     }
 
     public AuditEventV4Response getAuditEventByWorkspaceId(Long workspaceId, Long auditId) {
+        LOGGER.debug("getAuditEventByWorkspaceId() has been called with workspaceID: {} and auditID: {}", workspaceId, auditId);
         StructuredEventEntity event = Optional.ofNullable(legacyStructuredEventDBService.findByWorkspaceIdAndId(workspaceId, auditId))
                 .orElseThrow(notFound("StructuredEvent", auditId));
         return structuredEventEntityToAuditEventV4ResponseConverter.convert(event);
     }
 
     public List<AuditEventV4Response> getAuditEventsByWorkspaceId(Long workspaceId, String resourceType, Long resourceId, String resourceCrn) {
+        LOGGER.debug("getAuditEventsByWorkspaceId() has been called with workspaceID: {}, resourceType: {}, resourceID: {} and resourceCRN: {}", workspaceId,
+                resourceType, resourceId, resourceCrn);
         User user = userService.getOrCreate(legacyRestRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = getWorkspaceService().get(workspaceId, user);
         List<AuditEventV4Response> auditEventV4Responses = getEventsForUserWithTypeAndResourceIdByWorkspace(workspace, resourceType, resourceId, resourceCrn);
@@ -69,6 +72,8 @@ public class AuditEventService extends AbstractWorkspaceAwareResourceService<Str
 
     @VisibleForTesting
     List<AuditEventV4Response> getEventsForUserWithTypeAndResourceIdByWorkspace(Workspace workspace, String resourceType, Long resourceId, String resourceCrn) {
+        LOGGER.debug("getEventsForUserWithTypeAndResourceIdByWorkspace() has been called with workspace: {}, resourceType: {}, resourceID: {} " +
+                        "and resourceCRN: {}", workspace, resourceType, resourceId, resourceCrn);
         List<StructuredEventEntity> events;
         if (!Strings.isNullOrEmpty(resourceCrn)) {
             events = legacyStructuredEventDBService.findByWorkspaceAndResourceTypeAndResourceCrn(workspace, resourceCrn);
@@ -95,4 +100,5 @@ public class AuditEventService extends AbstractWorkspaceAwareResourceService<Str
     protected void prepareCreation(StructuredEventEntity resource) {
 
     }
+
 }

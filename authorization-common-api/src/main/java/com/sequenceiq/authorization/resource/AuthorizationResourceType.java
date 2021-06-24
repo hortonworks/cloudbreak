@@ -14,6 +14,10 @@ public enum AuthorizationResourceType {
     RECIPE(false),
     AUDIT_CREDENTIAL(false),
     PROXY(false),
+    CONSUMPTION(false),
+    KERBEROS(false),
+    FREEIPA(false),
+    LDAP(false),
     STRUCTURED_EVENT(false);
 
     private boolean hierarchicalAuthorizationNeeded;

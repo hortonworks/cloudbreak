@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.structuredevent.rest.controller;
 
+import static com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType.NOTIFICATION;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -7,6 +8,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -21,6 +24,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
+import com.sequenceiq.authorization.utils.EventAuthorizationUtils;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPOperationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEvent;
@@ -45,6 +49,9 @@ class CDPStructuredEventV1ControllerTest {
     @Mock
     private CDPStructuredEventDBService mockStructuredEventDBService;
 
+    @Mock
+    private EventAuthorizationUtils mockEventAuthorizationUtils;
+
     @InjectMocks
     private CDPStructuredEventV1Controller underTest;
 
@@ -62,6 +69,8 @@ class CDPStructuredEventV1ControllerTest {
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
+
+        verify(mockEventAuthorizationUtils, never()).checkPermissionBasedOnResourceTypeAndCrn(any());
     }
 
     @Test
@@ -91,6 +100,7 @@ class CDPStructuredEventV1ControllerTest {
     private CDPStructuredEvent createTestCDPStructuredEvent() {
         CDPOperationDetails operationDetails = new CDPOperationDetails();
         operationDetails.setResourceCrn("someCrn");
+        operationDetails.setEventType(NOTIFICATION);
         operationDetails.setResourceType("environment");
         CDPStructuredEvent cdpStructuredEvent = new CDPStructuredEvent() {
             @Override

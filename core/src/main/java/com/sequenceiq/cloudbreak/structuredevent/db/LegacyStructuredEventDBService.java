@@ -174,6 +174,8 @@ public class LegacyStructuredEventDBService extends AbstractWorkspaceAwareResour
     }
 
     public StructuredEventEntity findByWorkspaceIdAndId(Long workspaceId, Long id) {
+        LOGGER.debug("Looking up for {} entry in DB based on the workspace ID [{}] and resource ID [{}]", StructuredEventEntity.class.getSimpleName(),
+                workspaceId, id);
         return repository.findByWorkspaceIdAndId(workspaceId, id);
     }
 
