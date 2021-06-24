@@ -48,4 +48,5 @@ public interface AuditEventV4Endpoint {
     @ApiOperation(value = AuditOpDescription.GET_BY_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = Notes.AUDIT_EVENTS_NOTES,
             nickname = "getAuditEventByWorkspace")
     AuditEventV4Response getAuditEventById(@PathParam("workspaceId") Long workspaceId, @PathParam("auditId") Long auditId);
+
 }
