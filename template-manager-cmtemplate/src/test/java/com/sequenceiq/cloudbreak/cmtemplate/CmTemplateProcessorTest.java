@@ -560,6 +560,37 @@ public class CmTemplateProcessorTest {
         assertTrue(underTest.getTemplate().getHostTemplates().stream().allMatch(ht -> hosts.contains(ht.getRefName())));
     }
 
+    @Test
+    public void testIfCustomServiceConfigsAreMerged() {
+        underTest = new CmTemplateProcessor(getBlueprintText("input/de-ha.bp"));
+        // config not present in template
+        List<ApiClusterTemplateConfig> customSparkConfigs = List.of(
+                new ApiClusterTemplateConfig().name("spark_driver_log_persist_to_dfs").value("false")
+        );
+        // config present in template
+        List<ApiClusterTemplateConfig> customHiveConfigs = List.of(
+                new ApiClusterTemplateConfig().name("tez_auto_reducer_parallelism").value("true"),
+                new ApiClusterTemplateConfig().name("hive_service_config_safety_valve")
+                        .value("<property><name>hive_server2_tez_session_lifetime</name><value>30m</value></property>")
+        );
+        ApiClusterTemplateService spark = underTest.getTemplate().getServices()
+                .stream()
+                .filter(service -> "SPARK_ON_YARN".equals(service.getServiceType()))
+                .findFirst().get();
+        ApiClusterTemplateService hive = underTest.getTemplate().getServices()
+                .stream()
+                .filter(service -> "HIVE_ON_TEZ".equals(service.getServiceType()))
+                .findFirst().get();
+        List<ApiClusterTemplateConfig> existingSparkConfigs = spark.getServiceConfigs();
+        List<ApiClusterTemplateConfig> existingHiveConfigs = hive.getServiceConfigs();
+        underTest.mergeCustomServiceConfigs(spark, customSparkConfigs);
+        underTest.mergeCustomServiceConfigs(hive, customHiveConfigs);
+        assertEquals((existingSparkConfigs == null ? 0 : existingSparkConfigs.size()) + customSparkConfigs.size(), spark.getServiceConfigs().size());
+        assertEquals(customSparkConfigs, spark.getServiceConfigs());
+        assertEquals(existingHiveConfigs.size(), hive.getServiceConfigs().size());
+        assertTrue(hive.getServiceConfigs().get(2).getValue().endsWith("<property><name>hive_server2_tez_session_lifetime</name><value>30m</value></property>"));
+    }
+
     private static void assertSortedEquals(Set<?> expected, Set<?> actual) {
         assertEquals(new TreeSet<>(expected), new TreeSet<>(actual));
     }

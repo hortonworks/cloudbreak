@@ -15,6 +15,20 @@ public class OperationDescriptions {
         public static final String CLI_COMMAND = "produce cli command input";
     }
 
+    public static class CustomConfigsOpDescription {
+        public static final String GET_ALL = "retrieve all custom configs";
+        public static final String GET_BY_NAME = "retrieve custom configs by name";
+        public static final String GET_BY_CRN = "get custom configs by crn";
+        public static final String CREATE = "create new custom configs";
+        public static final String CLONE_BY_NAME = "clone new custom configs from existing custom configs by name";
+        public static final String CLONE_BY_CRN = "clone new custom configs from existing custom configs by crn";
+        public static final String DELETE_BY_CRN = "delete custom configs by crn";
+        public static final String DELETE_BY_NAME = "delete custom configs by name";
+//        public static final String UPDATE_BY_CRN = "update custom configs by crn";
+//        public static final String UPDATE_BY_NAME = "update custom configs by name";
+        public static final String DELETE_MULTIPLE = "Delete multiple custom configs by names";
+    }
+
     public static class StackOpDescription {
         public static final String GET_BY_CRN = "retrieve stack by crn";
         public static final String GET_STATUS_BY_NAME = "retrieve stack status by stack name";

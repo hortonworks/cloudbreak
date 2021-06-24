@@ -22,10 +22,11 @@ public class HiveOnTezServiceConfigProvider implements CmTemplateComponentConfig
 
     @Override
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
-        return ConfigUtils.getStorageLocationForServiceProperty(source, HMS_METASTORE_EXTERNAL_DIR)
+        List<ApiClusterTemplateConfig> serviceConfigs = ConfigUtils.getStorageLocationForServiceProperty(source, HMS_METASTORE_EXTERNAL_DIR)
                 .map(location -> location.getValue().replaceAll("/?$", "") + HIVE_HOOK_PROTO_BASE_DIR_SUFFIX)
                 .map(logDir -> List.of(config(HIVE_HOOK_PROTO_BASE_DIR_PARAM, logDir)))
                 .orElseGet(List::of);
+        return serviceConfigs;
     }
 
     @Override

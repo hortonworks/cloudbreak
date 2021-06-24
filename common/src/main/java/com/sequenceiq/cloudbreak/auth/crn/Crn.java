@@ -352,6 +352,7 @@ public class Crn {
         BLUEPRINT("blueprint"),
         CLUSTER_DEFINITION("clusterdefinition"),
         CLUSTER_TEMPLATE("clustertemplate"),
+        CUSTOM_CONFIGS("customconfigs"),
         /**
          * @deprecated {@link #STACK} was replaced by {@link #CLUSTER} and is kept here for backward compatibility reasons (e.g., dynamodb serialized CRNs).
          */

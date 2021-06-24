@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
+import com.sequenceiq.cloudbreak.domain.CustomConfigs;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.AccountMapping;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -51,6 +52,7 @@ import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
 import com.sequenceiq.cloudbreak.logger.MDCUtils;
+import com.sequenceiq.cloudbreak.service.CustomConfigsService;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
@@ -133,6 +135,9 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
     private GcpMockAccountMappingService gcpMockAccountMappingService;
 
     @Inject
+    private CustomConfigsService customConfigsService;
+
+    @Inject
     private CmCloudStorageConfigProvider cmCloudStorageConfigProvider;
 
     @Inject
@@ -195,6 +200,7 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
             List<ClouderaManagerProduct> products = clusterComponentConfigProvider.getClouderaManagerProductDetails(cluster.getId());
             BaseFileSystemConfigurationsView fileSystemConfigurationView = getFileSystemConfigurationView(credential, source, fileSystem);
             StackInputs stackInputs = getStackInputs(source);
+            Optional<CustomConfigs> customConfigs = source.getCluster().getCustomConfigs() == null ? Optional.empty() : getCustomConfigs(source);
             Map<String, Object> fixInputs = stackInputs.getFixInputs() == null ? new HashMap<>() : stackInputs.getFixInputs();
             fixInputs.putAll(stackInputs.getDatalakeInputs() == null ? new HashMap<>() : stackInputs.getDatalakeInputs());
             Gateway gateway = cluster.getGateway();
@@ -221,6 +227,7 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
                     .withRdsSslCertificateFilePath(dbCertificateProvider.getSslCertsFilePath())
                     .withGateway(gateway, gatewaySignKey, exposedServiceCollector.getAllKnoxExposed())
                     .withIdBroker(idbroker)
+                    .withCustomConfigs(customConfigs)
                     .withCustomInputs(stackInputs.getCustomInputs() == null ? new HashMap<>() : stackInputs.getCustomInputs())
                     .withFixInputs(fixInputs)
                     .withBlueprintView(blueprintViewProvider.getBlueprintView(cluster.getBlueprint()))
@@ -305,6 +312,18 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
         String region = source.getRegion();
         String availabilityZone = source.getAvailabilityZone();
         builder.withPlacementView(new PlacementView(region, availabilityZone));
+    }
+
+    private Optional<CustomConfigs> getCustomConfigs(Stack source) {
+        if (source.getType() == StackType.WORKLOAD) {
+            CustomConfigs customConfigs = customConfigsService.getByCrn(source.getCluster().getCustomConfigs().getResourceCrn());
+            if (customConfigs.getPlatformVersion() == null || source.getStackVersion().equals(customConfigs.getPlatformVersion())) {
+                return Optional.ofNullable(customConfigsService.getByCrn(source.getCluster().getCustomConfigs().getResourceCrn()));
+            } else {
+                throw new IllegalStateException("Custom configs version and stack version must match!");
+            }
+        }
+        return Optional.empty();
     }
 
     private void decorateBuilderWithAccountMapping(Stack source, DetailedEnvironmentResponse environment, Credential credential, Builder builder,

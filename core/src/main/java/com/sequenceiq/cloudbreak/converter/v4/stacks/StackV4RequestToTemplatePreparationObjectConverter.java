@@ -150,6 +150,7 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
             BaseFileSystemConfigurationsView fileSystemConfigurationView = getFileSystemConfigurationView(source, credential.getAttributes());
             Set<RDSConfig> rdsConfigs = getRdsConfigs(source, workspace);
             Blueprint blueprint = getBlueprint(source, workspace);
+
             Set<HostgroupView> hostgroupViews = getHostgroupViews(source);
             Gateway gateway = source.getCluster().getGateway() == null ? null : getConversionService().convert(source, Gateway.class);
             BlueprintView blueprintView = blueprintViewProvider.getBlueprintView(blueprint);

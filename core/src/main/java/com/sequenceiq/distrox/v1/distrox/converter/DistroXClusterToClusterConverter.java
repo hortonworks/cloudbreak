@@ -48,6 +48,7 @@ public class DistroXClusterToClusterConverter {
         response.setName(null);
         response.setDatabases(source.getDatabases());
         response.setBlueprintName(source.getBlueprintName());
+        response.setCustomConfigsName(source.getCustomConfigsName());
         response.setUserName(source.getUserName());
         response.setPassword(source.getPassword());
         response.setProxyConfigCrn(getIfNotNull(source.getProxy(), proxy -> getProxyCrnByName(ThreadBasedUserCrnProvider.getAccountId(), proxy)));

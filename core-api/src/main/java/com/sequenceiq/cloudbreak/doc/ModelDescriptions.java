@@ -51,6 +51,15 @@ public class ModelDescriptions {
         public static final String CODE_GRANT_FLOW_LOGIN_URL = "Login URL for code grant flow";
     }
 
+    public static class CustomConfigsModelDescription {
+        public static final String CUSTOM_CONFIGS_NAME = "unique name of the custom configs";
+        public static final String CRN = "unique crn of the custom configs";
+        public static final String CUSTOM_CONFIGS_SET = "list of porperties";
+        public static final String CUSTOM_CONFIG_NAME = "name of the property";
+        public static final String CUSTOM_CONFIG_VALUE = "value of the property";
+        public static final String VERSION = "CDH version that custom configs point to";
+    }
+
     public static class OrchestratorModelDescription {
         public static final String TYPE = "type of the orchestrator";
         public static final String PARAMETERS = "orchestrator specific parameters, like authentication details";
@@ -160,6 +169,7 @@ public class ModelDescriptions {
         public static final String AVAILABILITY_ZONE = "availability zone of the stack";
         public static final String CREDENTIAL_ID = "credential resource id for the stack";
         public static final String CREDENTIAL_NAME = "credential resource name for the stack";
+        public static final String CUSTOM_CONFIGS = "custom configs for the stack";
         public static final String USERNAME = "ambari username";
         public static final String PASSWORD = "ambari password";
         public static final String EXTENDED_BLUEPRINT_TEXT = "extended blueprint text";
