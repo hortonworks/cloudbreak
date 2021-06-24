@@ -31,6 +31,18 @@ class StackStatusMessageTransformatorTest {
     }
 
     @Test
+    void transformMessageWithCCMV2Issue() {
+        String result = underTest.transformMessage("com.sequenceiq.environment.exception.FreeIpaOperationFailedException: "
+                + "FreeIpa creation operation failed. FreeIpa creation failed. Status: 'CREATE_FAILED' statusReason: 'Status: 502 Bad Gateway Response: "
+                + "{\"status\":502,\"code\":\"cluster-proxy.ccmv2.endpoint-unavailable\",\"message\":\"Unable to get endpoint from CCM for key "
+                + "(i-0ff60b23ff3845f39, GATEWAY)\"}'");
+
+        String expected = "The Control Plane was not able to establish the connection with the gateway instance. "
+                + "Please check your connection and proxy settings and make sure the instance can reach *.ccm.cdp.cloudera.com.";
+        Assertions.assertEquals(expected, result);
+    }
+
+    @Test
     void transformMessageWhenNoPatternFound() {
         String result = underTest.transformMessage("com.sequenceiq.environment.exception.FreeIpaOperationFailedException: Random error happened");
 
