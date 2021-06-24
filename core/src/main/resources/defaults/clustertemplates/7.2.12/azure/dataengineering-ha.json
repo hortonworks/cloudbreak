@@ -55,7 +55,7 @@
           },
           "attachedVolumes": [
             {
-              "size": 150,
+              "size": 500,
               "count": 1,
               "type": "StandardSSD_LRS"
             }
@@ -96,6 +96,7 @@
       },
       {
         "nodeCount": 2,
+        "minimumNodeCount": 2,
         "name": "master",
         "type": "CORE",
         "recoveryMode": "MANUAL",
@@ -153,6 +154,7 @@
       },
       {
         "nodeCount": 1,
+        "minimumNodeCount": 1,
         "name": "masterx",
         "type": "CORE",
         "recoveryMode": "MANUAL",
