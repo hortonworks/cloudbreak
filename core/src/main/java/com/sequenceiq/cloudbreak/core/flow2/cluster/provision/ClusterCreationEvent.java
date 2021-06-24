@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.provision;
 
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.AutoConfigureClusterManagerFailed;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.AutoConfigureClusterManagerSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.InstallClusterFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.InstallClusterSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartClusterFailed;
@@ -108,6 +110,8 @@ public enum ClusterCreationEvent implements FlowEvent {
     REFRESH_PARCEL_REPOS_FAILED_EVENT(EventSelectorUtil.selector(ClusterManagerRefreshParcelFailed.class)),
     INSTALL_CLUSTER_FINISHED_EVENT(EventSelectorUtil.selector(InstallClusterSuccess.class)),
     INSTALL_CLUSTER_FAILED_EVENT(EventSelectorUtil.selector(InstallClusterFailed.class)),
+    AUTOCONFIGURE_CLUSTER_MANAGER_SUCCESS_EVENT(EventSelectorUtil.selector(AutoConfigureClusterManagerSuccess.class)),
+    AUTOCONFIGURE_CLUSTER_MANAGER_FAILED_EVENT(EventSelectorUtil.selector(AutoConfigureClusterManagerFailed.class)),
     START_MANAGEMENT_SERVICES_SUCCESS_EVENT(EventSelectorUtil.selector(StartClusterManagerManagementServicesSuccess.class)),
     START_MANAGEMENT_SERVICES_FAILED_EVENT(EventSelectorUtil.selector(StartClusterManagerManagementServicesFailed.class)),
     SUPPRESS_WARNINGS_SUCCESS_EVENT(EventSelectorUtil.selector(SuppressClusterWarningsSuccess.class)),

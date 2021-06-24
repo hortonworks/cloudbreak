@@ -288,6 +288,10 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
     }
 
     @Override
+    public void autoConfigureClusterManager() {
+    }
+
+    @Override
     public void updateConfig() {
         com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType stackType = stack.getType();
         try {

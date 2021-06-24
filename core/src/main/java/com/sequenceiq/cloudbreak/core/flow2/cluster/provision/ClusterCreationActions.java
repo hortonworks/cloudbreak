@@ -25,6 +25,8 @@ import com.sequenceiq.cloudbreak.job.StackJobAdapter;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.AutoConfigureClusterManagerRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.AutoConfigureClusterManagerSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.InstallClusterRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.InstallClusterSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartClusterRequest;
@@ -492,11 +494,26 @@ public class ClusterCreationActions {
         };
     }
 
-    @Bean(name = "START_MANAGEMENT_SERVICES_STATE")
-    public Action<?, ?> startManagementServicesAction() {
+    @Bean(name = "AUTOCONFIGURE_CLUSTER_MANAGER_STATE")
+    public Action<?, ?> autoConfiguerClusterManagerAction() {
         return new AbstractClusterAction<>(InstallClusterSuccess.class) {
             @Override
             protected void doExecute(ClusterViewContext context, InstallClusterSuccess payload, Map<Object, Object> variables) {
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(ClusterViewContext context) {
+                return new AutoConfigureClusterManagerRequest(context.getStackId());
+            }
+        };
+    }
+
+    @Bean(name = "START_MANAGEMENT_SERVICES_STATE")
+    public Action<?, ?> startManagementServicesAction() {
+        return new AbstractClusterAction<>(AutoConfigureClusterManagerSuccess.class) {
+            @Override
+            protected void doExecute(ClusterViewContext context, AutoConfigureClusterManagerSuccess payload, Map<Object, Object> variables) {
                 sendEvent(context);
             }
 
