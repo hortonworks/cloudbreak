@@ -241,23 +241,30 @@ public class RestUrlParserTest {
 
     private void checkResourceIdOrName(String methodPath, Map<String, String> params) {
         if (methodPath.contains(RESOURCE_ID)) {
-            assertEquals("params should contain resource ID",
+            assertEquals("params should contain resource ID for path: " + methodPath,
                     RESOURCE_ID, params.get(LegacyRestUrlParser.RESOURCE_ID));
-            assertNull("params must not contain resource name when having a resource ID", params.get(LegacyRestUrlParser.RESOURCE_NAME));
+            assertNull("params must not contain resource name when having a resource ID for path: " + methodPath,
+                    params.get(LegacyRestUrlParser.RESOURCE_NAME));
         } else if (methodPath.contains(RESOURCE_NAME)) {
-            assertEquals("params should contain resource name",
+            assertEquals("params should contain resource name for path: " + methodPath,
                     RESOURCE_NAME, params.get(LegacyRestUrlParser.RESOURCE_NAME));
-            assertNull("params must not contain resource ID when having a resource name", params.get(LegacyRestUrlParser.RESOURCE_ID));
+            assertNull("params must not contain resource ID when having a resource name for path: " + methodPath,
+                    params.get(LegacyRestUrlParser.RESOURCE_ID));
         } else if (methodPath.contains(WORKSPACE_NAME)) {
-            assertEquals("params should contain workspace name",
+            assertEquals("params should contain workspace name for path: " + methodPath,
                     WORKSPACE_NAME, params.get(LegacyRestUrlParser.RESOURCE_NAME));
-            assertNull("params must not contain resource ID when having a resource name", params.get(LegacyRestUrlParser.RESOURCE_ID));
+            assertNull("params must not contain resource ID when having a resource name  for path: " + methodPath,
+                    params.get(LegacyRestUrlParser.RESOURCE_ID));
         } else if (methodPath.contains(RESOURCE_CRN)) {
-            assertEquals("params should contains resource crn", RESOURCE_CRN, params.get(LegacyRestUrlParser.RESOURCE_NAME));
-            assertNull("params must not contain resource ID when having a resource crn", params.get(LegacyRestUrlParser.RESOURCE_ID));
+            assertEquals("params should contains resource crn for path: " + methodPath,
+                    RESOURCE_CRN, params.get(LegacyRestUrlParser.RESOURCE_NAME));
+            assertNull("params must not contain resource ID when having a resource crn for path: " + methodPath,
+                    params.get(LegacyRestUrlParser.RESOURCE_ID));
         } else {
-            assertNull(String.format("%s method params must not contain resource ID", methodPath), params.get(LegacyRestUrlParser.RESOURCE_ID));
-            assertNull(String.format("%s method params must not contain resource name", methodPath), params.get(LegacyRestUrlParser.RESOURCE_NAME));
+            assertNull(String.format("%s method params must not contain resource ID  for path: " + methodPath, methodPath),
+                    params.get(LegacyRestUrlParser.RESOURCE_ID));
+            assertNull(String.format("%s method params must not contain resource name for path: " + methodPath, methodPath),
+                    params.get(LegacyRestUrlParser.RESOURCE_NAME));
         }
     }
 

@@ -8,6 +8,7 @@ import java.util.stream.Stream;
 import javax.ws.rs.NotFoundException;
 
 public enum AuthorizationResourceAction {
+
     CHANGE_CREDENTIAL("environments/changeCredential", AuthorizationResourceType.ENVIRONMENT),
     EDIT_CREDENTIAL("environments/editCredential", AuthorizationResourceType.CREDENTIAL),
     EDIT_ENVIRONMENT("environments/editEnvironment", AuthorizationResourceType.ENVIRONMENT),
@@ -92,6 +93,11 @@ public enum AuthorizationResourceAction {
     DATAHUB_READ("datahub/read", AuthorizationResourceType.DATAHUB),
     DATAHUB_WRITE("datahub/write", AuthorizationResourceType.DATAHUB);
 
+    private static final String DESCRIBE_ACTION_PREFIX = "DESCRIBE";
+
+    private static final String GET_ACTION_PREFIX = "GET";
+
+    private static final String ADMIN_ACTION_PREFIX = "ADMIN";
 
     private static final Map<String, List<AuthorizationResourceAction>> BY_RIGHT = Stream.of(AuthorizationResourceAction.values())
             .collect(Collectors.groupingBy(AuthorizationResourceAction::getRight));
@@ -111,6 +117,18 @@ public enum AuthorizationResourceAction {
 
     public AuthorizationResourceType getAuthorizationResourceType() {
         return authorizationResourceType;
+    }
+
+    public boolean isDescribeAction() {
+        return name().startsWith(DESCRIBE_ACTION_PREFIX);
+    }
+
+    public boolean isGetAction() {
+        return name().contains(GET_ACTION_PREFIX);
+    }
+
+    public boolean isAdminAction() {
+        return name().startsWith(ADMIN_ACTION_PREFIX);
     }
 
     public static AuthorizationResourceAction getByRight(String right) {

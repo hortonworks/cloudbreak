@@ -21,6 +21,7 @@ dependencies {
     implementation project(':audit-connector')
     implementation project(':usage-collection')
     implementation project(':secret-engine')
+    implementation project(':authorization-common')
 
     implementation group: 'org.springframework.kafka',          name: 'spring-kafka',                version: '2.6.4'
     implementation group: 'com.google.protobuf',                name: 'protobuf-java-util',          version: '3.10.0'
