@@ -1,19 +1,11 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.customimage.response;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.util.Map;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.common.model.JsonEntity;
-import io.swagger.annotations.ApiModel;
 
-import javax.validation.constraints.NotNull;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-@ApiModel
-@JsonIgnoreProperties(ignoreUnknown = true)
-@NotNull
-public class CustomImageCatalogV4GetImageResponse implements JsonEntity {
+public class CustomImageCatalogV4ImageListItemResponse implements JsonEntity {
 
     @JsonProperty
     private String imageId;
@@ -35,12 +27,6 @@ public class CustomImageCatalogV4GetImageResponse implements JsonEntity {
 
     @JsonProperty
     private String cloudProvider;
-
-    @JsonProperty
-    private String baseParcelUrl;
-
-    @JsonProperty
-    private Set<CustomImageCatalogV4VmImageResponse> vmImages = new HashSet<>();
 
     public String getImageId() {
         return imageId;
@@ -96,21 +82,5 @@ public class CustomImageCatalogV4GetImageResponse implements JsonEntity {
 
     public void setCloudProvider(String cloudProvider) {
         this.cloudProvider = cloudProvider;
-    }
-
-    public String getBaseParcelUrl() {
-        return baseParcelUrl;
-    }
-
-    public void setBaseParcelUrl(String baseParcelUrl) {
-        this.baseParcelUrl = baseParcelUrl;
-    }
-
-    public Set<CustomImageCatalogV4VmImageResponse> getVmImages() {
-        return vmImages;
-    }
-
-    public void setVmImages(Set<CustomImageCatalogV4VmImageResponse> vmImages) {
-        this.vmImages = vmImages;
     }
 }
