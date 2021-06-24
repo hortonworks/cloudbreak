@@ -148,7 +148,9 @@ public class MetadataSetupService {
                 instanceMetaDataEntry.setAvailabilityZone(cloudInstance.getStringParameter(CloudInstance.AVAILABILITY_ZONE));
                 instanceMetaDataEntry.setRackId(determineRackId(instanceMetaDataEntry.getSubnetId(), instanceMetaDataEntry.getAvailabilityZone()));
                 instanceMetaDataEntry.setInstanceName(cloudInstance.getStringParameter(CloudInstance.INSTANCE_NAME));
-                instanceMetaDataEntry.setServer(Boolean.FALSE);
+                if (instanceMetaDataEntry.getClusterManagerServer() == null) {
+                    instanceMetaDataEntry.setServer(Boolean.FALSE);
+                }
                 instanceMetaDataEntry.setLifeCycle(InstanceLifeCycle.fromCloudInstanceLifeCycle(md.getLifeCycle()));
                 if (instanceMetaDataEntry.getInstanceMetadataType() == null) {
                     if (ig != null) {
@@ -219,7 +221,7 @@ public class MetadataSetupService {
 
             for (CloudLoadBalancerMetadata cloudLoadBalancerMetadata : cloudLoadBalancerMetadataList) {
                 LoadBalancer loadBalancerEntry = createLoadBalancerMetadataIfAbsent(allLoadBalancerMetadata,
-                    stack, cloudLoadBalancerMetadata.getType());
+                        stack, cloudLoadBalancerMetadata.getType());
 
                 loadBalancerEntry.setDns(cloudLoadBalancerMetadata.getCloudDns());
                 loadBalancerEntry.setHostedZoneId(cloudLoadBalancerMetadata.getHostedZoneId());
