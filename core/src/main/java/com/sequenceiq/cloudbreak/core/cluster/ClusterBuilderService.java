@@ -175,6 +175,11 @@ public class ClusterBuilderService {
         getClusterSetupService(stack).installCluster(stack.getCluster().getExtendedBlueprintText());
     }
 
+    public void autoConfigureCluster(Long stackId) throws CloudbreakException, ClusterClientInitException {
+        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        getClusterSetupService(stack).autoConfigureClusterManager();
+    }
+
     public void prepareProxyConfig(Long stackId) {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
 

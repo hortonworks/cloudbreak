@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.provision;
 
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.AUTOCONFIGURE_CLUSTER_MANAGER_FAILED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.AUTOCONFIGURE_CLUSTER_MANAGER_SUCCESS_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.BOOTSTRAP_FREEIPA_ENDPOINT_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.BOOTSTRAP_MACHINES_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.BOOTSTRAP_MACHINES_FINISHED_EVENT;
@@ -64,6 +66,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCrea
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.VALIDATE_LICENCE_SUCCESS_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.WAIT_FOR_CLUSTER_MANAGER_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.WAIT_FOR_CLUSTER_MANAGER_FINISHED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.AUTOCONFIGURE_CLUSTER_MANAGER_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.BOOTSTRAPPING_FREEIPA_ENDPOINT_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.BOOTSTRAPPING_MACHINES_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.BOOTSTRAPPING_PUBLIC_ENDPOINT_STATE;
@@ -214,9 +217,13 @@ public class ClusterCreationFlowConfig extends AbstractFlowConfiguration<Cluster
                     .event(REFRESH_PARCEL_REPOS_SUCCESS_EVENT)
                     .failureEvent(REFRESH_PARCEL_REPOS_FAILED_EVENT)
             .from(INSTALLING_CLUSTER_STATE)
-                    .to(START_MANAGEMENT_SERVICES_STATE)
+                    .to(AUTOCONFIGURE_CLUSTER_MANAGER_STATE)
                     .event(INSTALL_CLUSTER_FINISHED_EVENT)
                     .failureEvent(INSTALL_CLUSTER_FAILED_EVENT)
+            .from(AUTOCONFIGURE_CLUSTER_MANAGER_STATE)
+                    .to(START_MANAGEMENT_SERVICES_STATE)
+                    .event(AUTOCONFIGURE_CLUSTER_MANAGER_SUCCESS_EVENT)
+                    .failureEvent(AUTOCONFIGURE_CLUSTER_MANAGER_FAILED_EVENT)
             .from(START_MANAGEMENT_SERVICES_STATE)
                     .to(SUPPRESS_WARNINGS_STATE)
                     .event(START_MANAGEMENT_SERVICES_SUCCESS_EVENT)
