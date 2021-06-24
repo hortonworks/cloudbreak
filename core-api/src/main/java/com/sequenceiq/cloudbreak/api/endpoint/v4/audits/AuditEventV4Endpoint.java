@@ -27,6 +27,7 @@ import io.swagger.annotations.ApiOperation;
 public interface AuditEventV4Endpoint {
 
     @GET
+    @Deprecated
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = AuditOpDescription.LIST_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = Notes.AUDIT_EVENTS_NOTES,
@@ -35,6 +36,15 @@ public interface AuditEventV4Endpoint {
             @QueryParam("resourceId") Long resourceId, @QueryParam("resourceCrn") String resourceCrn);
 
     @GET
+    @Path("type/{resourceType}/crn/{crn}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = AuditOpDescription.LIST_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = Notes.AUDIT_EVENTS_NOTES,
+            nickname = "getAuditEventsInWorkspaceByCrnForAccount")
+    AuditEventV4Responses getAuditEvents(@PathParam("workspaceId") Long workspaceId, @PathParam("resourceType") String resourceType,
+            @PathParam("crn") String resourceCrn);
+
+    @GET
+    @Deprecated
     @Path("zip")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     @ApiOperation(value = AuditOpDescription.LIST_IN_WORKSPACE_ZIP, produces = MediaType.APPLICATION_OCTET_STREAM, notes = Notes.AUDIT_EVENTS_NOTES,
@@ -43,9 +53,18 @@ public interface AuditEventV4Endpoint {
             @QueryParam("resourceId") Long resourceId, @QueryParam("resourceCrn") String resourceCrn);
 
     @GET
+    @Path("zip/type/{resourceType}/crn/{crn}")
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    @ApiOperation(value = AuditOpDescription.LIST_IN_WORKSPACE_ZIP, produces = MediaType.APPLICATION_OCTET_STREAM, notes = Notes.AUDIT_EVENTS_NOTES,
+            nickname = "getAuditEventsZipInWorkspaceByCrnForAccount")
+    Response getAuditEventsZip(@PathParam("workspaceId") Long workspaceId, @PathParam("resourceType") String resourceType,
+            @PathParam("crn") String resourceCrn);
+
+    @GET
     @Path("{auditId}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = AuditOpDescription.GET_BY_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = Notes.AUDIT_EVENTS_NOTES,
             nickname = "getAuditEventByWorkspace")
     AuditEventV4Response getAuditEventById(@PathParam("workspaceId") Long workspaceId, @PathParam("auditId") Long auditId);
+
 }

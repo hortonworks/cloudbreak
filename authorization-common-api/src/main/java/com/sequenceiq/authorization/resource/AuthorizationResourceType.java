@@ -11,6 +11,7 @@ public enum AuthorizationResourceType {
     DATABASE,
     DATABASE_SERVER,
     RECIPE,
+    AUDIT,
     AUDIT_CREDENTIAL,
     STRUCTURED_EVENT;
 }

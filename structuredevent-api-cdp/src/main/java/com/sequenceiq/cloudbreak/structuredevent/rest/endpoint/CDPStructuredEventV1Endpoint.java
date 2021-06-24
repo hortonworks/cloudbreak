@@ -11,6 +11,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
@@ -31,6 +32,7 @@ public interface CDPStructuredEventV1Endpoint {
 
     @GET
     @Path("")
+    @Deprecated
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = LIST_FOR_RESOURCE, produces = MediaType.APPLICATION_JSON, notes = AUDIT_EVENTS_NOTES,
             nickname = "getCDPAuditEventsForResource")
@@ -41,11 +43,31 @@ public interface CDPStructuredEventV1Endpoint {
             @QueryParam("size") @DefaultValue("100") Integer size);
 
     @GET
+    @Path("crn/{crn}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = LIST_FOR_RESOURCE, produces = MediaType.APPLICATION_JSON, notes = AUDIT_EVENTS_NOTES,
+            nickname = "getCDPAuditEventsForResourceByCrnForAccount")
+    List<CDPStructuredEvent> getAuditEventsForCrn(
+            @PathParam("crn") String resourceCrn,
+            @QueryParam("types") List<StructuredEventType> types,
+            @QueryParam("page") @DefaultValue("0") Integer page,
+            @QueryParam("size") @DefaultValue("100") Integer size);
+
+    @GET
     @Path("zip")
+    @Deprecated
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     @ApiOperation(value = LIST_FOR_RESOURCE_ZIP, produces = MediaType.APPLICATION_JSON, notes = AUDIT_EVENTS_NOTES,
             nickname = "getAuditEventsZipForResource")
     Response getAuditEventsZip(
             @QueryParam("resourceCrn") @NotNull(message = "The 'resourceCrn' query parameter must be specified.") String resourceCrn,
             @QueryParam("types") List<StructuredEventType> types);
+
+    @GET
+    @Path("crn/{crn}/zip")
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    @ApiOperation(value = LIST_FOR_RESOURCE_ZIP, produces = MediaType.APPLICATION_JSON, notes = AUDIT_EVENTS_NOTES,
+            nickname = "getAuditEventsZipForResourceCrn")
+    Response getAuditEventsZipForCrn(@PathParam("crn") String resourceCrn, @QueryParam("types") List<StructuredEventType> types);
+
 }
