@@ -2,9 +2,11 @@ package com.sequenceiq.cloudbreak.service.stack.flow;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -185,6 +187,39 @@ public class MetadataSetupServiceTest {
         assertCommonProperties(instanceMetaData, subnetId, availabilityZone, rackIdExpected);
         assertEquals(TERMINATED, instanceMetaData.getInstanceStatus());
         assertNull(instanceMetaData.getImage());
+        assertFalse(instanceMetaData.getClusterManagerServer());
+    }
+
+    @Test
+    public void saveInstanceMetaDataTestServerFlagIsAlreadySet() throws CloudbreakImageNotFoundException {
+        Stack stack = new Stack();
+        stack.setId(STACK_ID);
+        Image image = getEmptyImage();
+        when(imageService.getImage(STACK_ID)).thenReturn(image);
+        InstanceGroup instanceGroup = new InstanceGroup();
+        instanceGroup.setId(INSTANCE_GROUP_ID);
+        instanceGroup.setGroupName(GROUP_NAME);
+        Set<InstanceGroup> instanceGroupSet = new TreeSet<>();
+        instanceGroupSet.add(instanceGroup);
+        when(instanceGroupService.findByStackId(STACK_ID)).thenReturn(instanceGroupSet);
+        when(clock.getCurrentTimeMillis()).thenReturn(CURRENT_TIME);
+        Iterable<CloudVmMetaDataStatus> cloudVmMetaDataStatuses = getCloudVmMetaDataStatuses(InstanceStatus.STOPPED, "subnetId", "availabilityZone");
+        InstanceMetaData originalInstanceMetadata = new InstanceMetaData();
+        originalInstanceMetadata.setServer(true);
+        originalInstanceMetadata.setInstanceId("instanceId");
+        originalInstanceMetadata.setPrivateId(PRIVATE_ID);
+        originalInstanceMetadata.setInstanceGroup(instanceGroup);
+        when(instanceMetaDataService.findNotTerminatedForStack(STACK_ID)).thenReturn(Set.of(originalInstanceMetadata));
+
+        int newInstances = underTest.saveInstanceMetaData(stack, cloudVmMetaDataStatuses, SERVICES_RUNNING);
+
+        assertEquals(0, newInstances);
+        verify(imageService).getImage(STACK_ID);
+        verify(instanceMetaDataService).save(instanceMetaDataCaptor.capture());
+        InstanceMetaData instanceMetaData = instanceMetaDataCaptor.getValue();
+        assertThat(instanceMetaData.getInstanceGroup()).isSameAs(instanceGroup);
+        assertTrue(instanceMetaData.getAmbariServer());
+        assertTrue(instanceMetaData.getClusterManagerServer());
     }
 
     private Image getEmptyImage() {
