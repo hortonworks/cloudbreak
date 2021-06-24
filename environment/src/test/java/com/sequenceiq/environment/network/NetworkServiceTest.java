@@ -8,6 +8,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -21,22 +22,32 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
+import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.network.NetworkCidr;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.common.api.type.Tunnel;
+import com.sequenceiq.environment.api.v1.environment.model.base.CloudStorageValidation;
+import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.domain.Environment;
+import com.sequenceiq.environment.environment.dto.AuthenticationDto;
+import com.sequenceiq.environment.environment.dto.EnvironmentBackup;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
+import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
+import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.environment.validation.validators.NetworkCreationValidator;
 import com.sequenceiq.environment.network.dao.domain.AwsNetwork;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
+import com.sequenceiq.environment.network.dao.domain.GcpNetwork;
 import com.sequenceiq.environment.network.dao.domain.RegistrationType;
 import com.sequenceiq.environment.network.dao.repository.BaseNetworkRepository;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.network.v1.converter.EnvironmentNetworkConverter;
+import com.sequenceiq.environment.parameter.dto.ParametersDto;
 
 @ExtendWith(MockitoExtension.class)
 public class NetworkServiceTest {
@@ -84,6 +95,121 @@ public class NetworkServiceTest {
 
         Assertions.assertNull(result.getNetworkCidr());
         verify(environmentNetworkService, times(0)).getNetworkCidr(eq(network), anyString(), eq(credential));
+    }
+
+    @Test
+    public void testRefreshMetadataFromAwsCloudProviderMustUseSubnetId() {
+        NetworkDto networkDto = mock(NetworkDto.class);
+        AuthenticationDto authenticationDto = mock(AuthenticationDto.class);
+        EnvironmentTelemetry environmentTelemetry = mock(EnvironmentTelemetry.class);
+        EnvironmentBackup environmentBackup = mock(EnvironmentBackup.class);
+        SecurityAccessDto securityAccessDto = mock(SecurityAccessDto.class);
+        ParametersDto parametersDto = mock(ParametersDto.class);
+
+        EnvironmentNetworkConverter environmentNetworkConverter = mock(EnvironmentNetworkConverter.class);
+        Network network = mock(Network.class);
+        Credential credential = mock(Credential.class);
+
+        BaseNetwork baseNetwork = new GcpNetwork();
+        baseNetwork.setRegistrationType(RegistrationType.EXISTING);
+
+        Environment environment = new Environment();
+        environment.setCloudPlatform("AWS");
+        environment.setCredential(credential);
+
+        EnvironmentEditDto environmentEditDto = new EnvironmentEditDto(
+                "description",
+                "accountId",
+                networkDto,
+                authenticationDto,
+                environmentTelemetry,
+                environmentBackup,
+                securityAccessDto,
+                Tunnel.CCMV2,
+                IdBrokerMappingSource.MOCK,
+                CloudStorageValidation.ENABLED,
+                "adminGroupName",
+                parametersDto
+        );
+
+        when(environmentNetworkConverterMap.get(any(CloudPlatform.class)))
+                .thenReturn(environmentNetworkConverter);
+        when(environmentNetworkConverter.convertToDto(baseNetwork))
+                .thenReturn(networkDto);
+        when(cloudNetworkService.retrieveSubnetMetadata(any(Environment.class), any(NetworkDto.class)))
+                .thenReturn(Map.of("s1", cloudSubnet("s1", "subnet1")));
+        when(cloudNetworkService.retrieveEndpointGatewaySubnetMetadata(any(Environment.class), any(NetworkDto.class)))
+                .thenReturn(Map.of("s1", cloudSubnet("s1", "subnet1")));
+        when(environmentNetworkConverter.convertToNetwork(any(BaseNetwork.class)))
+                .thenReturn(network);
+        when(environmentNetworkService.getNetworkCidr(any(Network.class), anyString(), any(Credential.class)))
+                .thenReturn(new NetworkCidr("10.0.0.0", new ArrayList<>()));
+
+        BaseNetwork result = underTest.refreshMetadataFromCloudProvider(baseNetwork, environmentEditDto, environment);
+
+        Assertions.assertEquals(result.getSubnetMetas().keySet().stream().findFirst().get(), "s1");
+        Assertions.assertEquals(result.getSubnetMetas().keySet().size(), 1);
+    }
+
+    @Test
+    public void testRefreshMetadataFromGoogleCloudProviderMustUseSubnetName() {
+        NetworkDto networkDto = mock(NetworkDto.class);
+        AuthenticationDto authenticationDto = mock(AuthenticationDto.class);
+        EnvironmentTelemetry environmentTelemetry = mock(EnvironmentTelemetry.class);
+        EnvironmentBackup environmentBackup = mock(EnvironmentBackup.class);
+        SecurityAccessDto securityAccessDto = mock(SecurityAccessDto.class);
+        ParametersDto parametersDto = mock(ParametersDto.class);
+
+        EnvironmentNetworkConverter environmentNetworkConverter = mock(EnvironmentNetworkConverter.class);
+        Network network = mock(Network.class);
+        Credential credential = mock(Credential.class);
+
+        BaseNetwork baseNetwork = new GcpNetwork();
+        baseNetwork.setRegistrationType(RegistrationType.EXISTING);
+
+        Environment environment = new Environment();
+        environment.setCloudPlatform("GCP");
+        environment.setCredential(credential);
+
+        EnvironmentEditDto environmentEditDto = new EnvironmentEditDto(
+                "description",
+                "accountId",
+                networkDto,
+                authenticationDto,
+                environmentTelemetry,
+                environmentBackup,
+                securityAccessDto,
+                Tunnel.CCMV2,
+                IdBrokerMappingSource.MOCK,
+                CloudStorageValidation.ENABLED,
+                "adminGroupName",
+                parametersDto
+        );
+
+        when(environmentNetworkConverterMap.get(any(CloudPlatform.class)))
+                .thenReturn(environmentNetworkConverter);
+        when(environmentNetworkConverter.convertToDto(baseNetwork))
+                .thenReturn(networkDto);
+        when(cloudNetworkService.retrieveSubnetMetadata(any(Environment.class), any(NetworkDto.class)))
+                .thenReturn(Map.of("s1", cloudSubnet("s1", "subnet1")));
+        when(cloudNetworkService.retrieveEndpointGatewaySubnetMetadata(any(Environment.class), any(NetworkDto.class)))
+                .thenReturn(Map.of("s1", cloudSubnet("s1", "subnet1")));
+        when(environmentNetworkConverter.convertToNetwork(any(BaseNetwork.class)))
+                .thenReturn(network);
+        when(environmentNetworkService.getNetworkCidr(any(Network.class), anyString(), any(Credential.class)))
+            .thenReturn(new NetworkCidr("10.0.0.0", new ArrayList<>()));
+
+        BaseNetwork result = underTest.refreshMetadataFromCloudProvider(baseNetwork, environmentEditDto, environment);
+
+        Assertions.assertEquals(result.getSubnetMetas().keySet().stream().findFirst().get(), "subnet1");
+        Assertions.assertEquals(result.getSubnetMetas().keySet().size(), 1);
+    }
+
+    private CloudSubnet cloudSubnet(String id, String name) {
+        CloudSubnet cloudSubnet = new CloudSubnet();
+        cloudSubnet.setName(name);
+        cloudSubnet.setId(id);
+        return cloudSubnet;
     }
 
     // TODO: 2020. 01. 31. move these tests to the new CloudNetworkServiceTest class
