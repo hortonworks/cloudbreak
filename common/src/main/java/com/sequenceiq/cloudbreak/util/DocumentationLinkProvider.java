@@ -26,10 +26,6 @@ public class DocumentationLinkProvider {
         return "https://docs.cloudera.com/cdp/latest/requirements-azure/topics/mc-az-minimal-setup-for-cloud-storage.html";
     }
 
-    public static String ccmSetupLink() {
-        return "https://docs.cloudera.com/management-console/cloud/connection-to-private-subnets/topics/mc-ccm-overview.html";
-    }
-
     public static String azureAddSubnetLink() {
         return "https://docs.cloudera.com/management-console/cloud/environments-azure/topics/mc-subnet-adding-azure.html";
     }
