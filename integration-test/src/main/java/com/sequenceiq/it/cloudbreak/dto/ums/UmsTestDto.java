@@ -117,4 +117,8 @@ public class UmsTestDto extends AbstractTestDto<AssignResourceRequest, UserManag
     public UmsTestDto then(Assertion<UmsTestDto, UmsClient> assertion, RunningParameter runningParameter) {
         return getTestContext().then((UmsTestDto) this, UmsClient.class, assertion, runningParameter);
     }
+
+    public static String getIamGroupAdminCrn() {
+        return IAM_GROUP_ADMIN;
+    }
 }

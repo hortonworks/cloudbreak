@@ -1,5 +1,6 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.l0promotion;
 
+import static com.sequenceiq.it.cloudbreak.dto.ums.UmsTestDto.getIamGroupAdminCrn;
 import static java.lang.String.format;
 
 import java.util.HashMap;
@@ -160,15 +161,20 @@ public class BasicEnvironmentVirtualGroupTest extends AbstractE2ETest {
                 .given(FreeIpaUserSyncTestDto.class)
                 .when(freeIpaTestClient.getLastSyncOperationStatus())
                 .await(OperationState.COMPLETED)
+                .given(FreeIpaTestDto.class)
+                .when(freeIpaTestClient.describe())
+                .validate();
+
+        testContext
                 .given(UmsTestDto.class)
                 .assignTargetByCrn(ADMIN_GROUP_CRN)
                 .withGroupAdmin()
                 .when(umsTestClient.assignResourceRole(L0UserKeys.ENV_CREATOR_A))
-                .then((tc, dto, client) -> validateAssignedResourceRoles(tc, dto, client, userEnvCreatorA, true))
+                .then((tc, dto, client) -> validateAssignedResourceRole(tc, dto, client, userEnvCreatorA, getIamGroupAdminCrn(), true))
                 .assignTargetByCrn(USER_GROUP_CRN)
                 .withGroupAdmin()
                 .when(umsTestClient.assignResourceRole(L0UserKeys.ENV_CREATOR_A))
-                .then((tc, dto, client) -> validateAssignedResourceRoles(tc, dto, client, userEnvCreatorA, true))
+                .then((tc, dto, client) -> validateAssignedResourceRole(tc, dto, client, userEnvCreatorA, getIamGroupAdminCrn(), true))
                 .given(UmsGroupTestDto.class)
                 .when(umsTestClient.addUserToGroup(ADMIN_GROUP_NAME, userEnvAdminA.getCrn()))
                 .when(umsTestClient.addUserToGroup(USER_GROUP_NAME, userEnvCreatorB.getCrn()))
@@ -216,11 +222,11 @@ public class BasicEnvironmentVirtualGroupTest extends AbstractE2ETest {
                 .assignTargetByCrn(ADMIN_GROUP_CRN)
                 .withGroupAdmin()
                 .when(umsTestClient.unAssignResourceRole(L0UserKeys.ENV_CREATOR_A))
-                .then((tc, dto, client) -> validateAssignedResourceRoles(tc, dto, client, userEnvCreatorA, false))
+                .then((tc, dto, client) -> validateAssignedResourceRole(tc, dto, client, userEnvCreatorA, getIamGroupAdminCrn(), false))
                 .assignTargetByCrn(USER_GROUP_CRN)
                 .withGroupAdmin()
                 .when(umsTestClient.unAssignResourceRole(L0UserKeys.ENV_CREATOR_A))
-                .then((tc, dto, client) -> validateAssignedResourceRoles(tc, dto, client, userEnvCreatorA, false))
+                .then((tc, dto, client) -> validateAssignedResourceRole(tc, dto, client, userEnvCreatorA, getIamGroupAdminCrn(), false))
                 .validate();
     }
 
@@ -308,33 +314,33 @@ public class BasicEnvironmentVirtualGroupTest extends AbstractE2ETest {
         return umsGroupTestDto;
     }
 
-    private UmsTestDto validateAssignedResourceRoles(TestContext testContext, UmsTestDto umsTestDto, UmsClient client, CloudbreakUser assignee,
-            boolean expectedPresence) {
-        String resourceRole = umsTestDto.getRequest().getRoleCrn();
+    private UmsTestDto validateAssignedResourceRole(TestContext testContext, UmsTestDto umsTestDto, UmsClient client, CloudbreakUser assignee,
+            String roleCrn, boolean expectedPresence) {
         String resourceCrn = umsTestDto.getRequest().getResourceCrn();
+        String userCrn = assignee.getCrn();
 
-        Multimap<String, String> assignedResourceRoles = client.getDefaultClient().listAssignedResourceRoles(assignee.getCrn(), Optional.of(""));
-        boolean resourceRoleAssigned = assignedResourceRoles.get(resourceCrn).contains(resourceRole);
-        LOGGER.info(format(" Assigned resource roles ['%s'] are present to user '%s' ", assignedResourceRoles, assignee.getCrn()));
+        LOGGER.info(format(" Validate resource role '%s' has been successfully assigned to user '%s' at resource '%s'... ", roleCrn, userCrn, resourceCrn));
+        Multimap<String, String> assignedResourceRoles = client.getDefaultClient().listAssignedResourceRoles(userCrn, Optional.of(""));
+        boolean resourceRoleAssigned = assignedResourceRoles.get(resourceCrn).contains(roleCrn);
         if (expectedPresence) {
             if (resourceRoleAssigned) {
-                LOGGER.info(format(" Resource role '%s' has successfully been assigned to user '%s' at resource '%s' ", resourceRole, assignee.getCrn(),
+                LOGGER.info(format(" Resource role '%s' has successfully been assigned to user '%s' at resource '%s' ", roleCrn, userCrn,
                         resourceCrn));
-                Log.then(LOGGER, format(" Resource role '%s' has successfully been assigned to user '%s' at resource '%s' ", resourceRole, assignee.getCrn(),
+                Log.then(LOGGER, format(" Resource role '%s' has successfully been assigned to user '%s' at resource '%s' ", roleCrn, userCrn,
                         resourceCrn));
             } else {
-                throw new TestFailException(String.format(" Resource role '%s' has not been assigned to user '%s' at resource '%s'! ", resourceRole,
-                        assignee.getCrn(), resourceCrn));
+                throw new TestFailException(String.format(" Resource role '%s' has not been assigned to user '%s' at resource '%s'! ", roleCrn,
+                        userCrn, resourceCrn));
             }
         } else {
             if (!resourceRoleAssigned) {
-                LOGGER.info(format(" Resource role '%s' has successfully been unassigned from user '%s' at resource '%s' ", resourceRole, assignee.getCrn(),
+                LOGGER.info(format(" Resource role '%s' has successfully been revoked from user '%s' at resource '%s' ", roleCrn, userCrn,
                         resourceCrn));
-                Log.then(LOGGER, format(" Resource role '%s' has successfully been unassigned from user '%s' at resource '%s' ", resourceRole,
-                        assignee.getCrn(), resourceCrn));
+                Log.then(LOGGER, format(" Resource role '%s' has successfully been revoked from user '%s' at resource '%s' ", roleCrn,
+                        userCrn, resourceCrn));
             } else {
-                throw new TestFailException(String.format(" Resource role '%s' has not been unassigned to user '%s' at resource '%s'! ", resourceRole,
-                        assignee.getCrn(), resourceCrn));
+                throw new TestFailException(String.format(" Resource role '%s' has not been revoked from user '%s' at resource '%s'! ", roleCrn,
+                        userCrn, resourceCrn));
             }
         }
         return umsTestDto;
