@@ -1,5 +1,6 @@
 package com.sequenceiq.datalake.flow.dr.backup;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_BACKUP_FAILED;
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_DATABASE_BACKUP_FAILURE_HANDLED_EVENT;
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_BACKUP_FAILURE_HANDLED_EVENT;
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_DATABASE_BACKUP_FINALIZED_EVENT;
@@ -21,6 +22,7 @@ import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeBackupSuccessEvent;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeDatabaseBackupWaitRequest;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeFullBackupWaitRequest;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeTriggerBackupEvent;
+import com.sequenceiq.datalake.flow.dr.event.EventSenderService;
 import com.sequenceiq.datalake.metric.MetricType;
 import com.sequenceiq.datalake.metric.SdxMetricService;
 import com.sequenceiq.datalake.service.AbstractSdxAction;
@@ -69,6 +71,9 @@ public class DatalakeBackupActions {
 
     @Inject
     private SdxService sdxService;
+
+    @Inject
+    private EventSenderService eventService;
 
     @Bean(name = "DATALAKE_TRIGGERING_BACKUP_STATE")
     public Action<?, ?> triggerDatalakeBackup() {
@@ -297,9 +302,10 @@ public class DatalakeBackupActions {
                 Exception exception = payload.getException();
                 LOGGER.error("Datalake backup failed for datalake with id: {}", payload.getResourceId(), exception);
                 SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING,
-                        ResourceEvent.DATALAKE_BACKUP_FAILED,
+                        DATALAKE_BACKUP_FAILED,
                         getFailureReason(variables), payload.getResourceId());
                 metricService.incrementMetricCounter(MetricType.SDX_BACKUP_FAILED, sdxCluster);
+                eventService.sendEventAndNotification(sdxCluster, context.getFlowTriggerUserCrn(), DATALAKE_BACKUP_FAILED);
                 Flow flow = getFlow(context.getFlowParameters().getFlowId());
                 flow.setFlowFailed(payload.getException());
                 sendEvent(context, DATALAKE_BACKUP_FAILURE_HANDLED_EVENT.event(), payload);

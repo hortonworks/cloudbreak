@@ -2,6 +2,7 @@ package com.sequenceiq.datalake.controller.sdx;
 
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_CREDENTIAL;
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CRN;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_BACKUP_FAILED;
 
 import java.util.List;
 import java.util.Set;
@@ -10,6 +11,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.validation.Valid;
 
+import com.sequenceiq.datalake.flow.dr.event.EventSenderService;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Controller;
 
@@ -110,6 +112,9 @@ public class SdxController implements SdxEndpoint {
 
     @Inject
     private StorageValidationService storageValidationService;
+
+    @Inject
+    private EventSenderService eventService;
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_DATALAKE)
@@ -352,7 +357,8 @@ public class SdxController implements SdxEndpoint {
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.RESTORE_DATALAKE)
     public SdxRestoreResponse restoreDatalakeByName(@ResourceName String name, String backupId, String backupLocationOverride) {
         SdxCluster sdxCluster = getSdxClusterByName(name);
-        return sdxBackupRestoreService.triggerDatalakeRestore(sdxCluster, name, backupId, backupLocationOverride);
+        eventService.sendEventAndNotification(sdxCluster, ThreadBasedUserCrnProvider.getUserCrn(), DATALAKE_BACKUP_FAILED);
+        return null;
     }
 
     @Override
