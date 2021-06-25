@@ -21,12 +21,13 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.YarnStackV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsEncryptionV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AzureEncryptionV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AzureInstanceTemplateV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.StackAuthenticationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
@@ -53,6 +54,8 @@ import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.service.validation.cloudstorage.CloudStorageValidator;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkYarnParams;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
+import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SecurityAccessResponse;
 
@@ -129,7 +132,7 @@ public class StackRequestManifester {
             prepareTelemetryForStack(stackRequest, environment, sdxCluster);
             setupCloudStorageAccountMapping(stackRequest, environment.getCrn(), environment.getIdBrokerMappingSource(), environment.getCloudPlatform());
             cloudStorageValidator.validate(stackRequest.getCluster().getCloudStorage(), environment, new ValidationResult.ValidationResultBuilder());
-            setupInstanceVolumeEncryption(stackRequest, environment.getCloudPlatform(), Crn.safeFromString(environment.getCrn()).getAccountId());
+            setupInstanceVolumeEncryption(stackRequest, environment);
             return stackRequest;
         } catch (IOException e) {
             LOGGER.error("Can not parse JSON to stack request");
@@ -292,8 +295,8 @@ public class StackRequestManifester {
     }
 
     @VisibleForTesting
-    void setupInstanceVolumeEncryption(StackV4Request stackRequest, String cloudPlatform, String accountId) {
-        if (CloudPlatform.AWS.name().equals(cloudPlatform)) {
+    void setupInstanceVolumeEncryption(StackV4Request stackRequest, DetailedEnvironmentResponse environmentResponse) {
+        if (CloudPlatform.AWS.name().equals(environmentResponse.getCloudPlatform())) {
             stackRequest.getInstanceGroups().forEach(ig -> {
                 AwsInstanceTemplateV4Parameters aws = ig.getTemplate().createAws();
                 AwsEncryptionV4Parameters encryption = aws.getEncryption();
@@ -306,6 +309,23 @@ public class StackRequestManifester {
                     encryption.setType(EncryptionType.DEFAULT);
                 }
             });
+        } else if (CloudPlatform.AZURE.name().equals(environmentResponse.getCloudPlatform())) {
+            Optional<String> diskEncryptionSetId = Optional.of(environmentResponse)
+                    .map(DetailedEnvironmentResponse::getAzure)
+                    .map(AzureEnvironmentParameters::getResourceEncryptionParameters)
+                    .map(AzureResourceEncryptionParameters::getDiskEncryptionSetId);
+            if (diskEncryptionSetId.isPresent()) {
+                stackRequest.getInstanceGroups().forEach(ig -> {
+                    AzureInstanceTemplateV4Parameters azure = ig.getTemplate().createAzure();
+                    AzureEncryptionV4Parameters encryption = azure.getEncryption();
+                    if (encryption == null) {
+                        encryption = new AzureEncryptionV4Parameters();
+                        azure.setEncryption(encryption);
+                    }
+                    azure.getEncryption().setType(EncryptionType.CUSTOM);
+                    azure.getEncryption().setDiskEncryptionSetId(diskEncryptionSetId.get());
+                });
+            }
         }
     }
 

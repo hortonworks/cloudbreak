@@ -14,6 +14,7 @@ import org.springframework.util.CollectionUtils;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AwsInstanceTemplate;
+import com.sequenceiq.cloudbreak.cloud.model.instance.AzureInstanceTemplate;
 import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -42,7 +43,7 @@ public class InstanceTemplateRequestToTemplateConverter {
     @Inject
     private EntitlementService entitlementService;
 
-    public Template convert(InstanceTemplateRequest source, CloudPlatform cloudPlatform, String accountId) {
+    public Template convert(InstanceTemplateRequest source, CloudPlatform cloudPlatform, String accountId, String diskEncryptionSetId) {
         Template template = new Template();
         template.setName(missingResourceNameGenerator.generateName(APIResourceType.TEMPLATE));
         template.setStatus(ResourceStatus.USER_MANAGED);
@@ -63,6 +64,10 @@ public class InstanceTemplateRequestToTemplateConverter {
                             }
                         }
                 );
+        if (diskEncryptionSetId != null && cloudPlatform == CloudPlatform.AZURE) {
+            attributes.put(AzureInstanceTemplate.DISK_ENCRYPTION_SET_ID, diskEncryptionSetId);
+            attributes.put(AzureInstanceTemplate.MANAGED_DISK_ENCRYPTION_WITH_CUSTOM_KEY_ENABLED, true);
+        }
         template.setAttributes(new Json(attributes));
         return template;
     }

@@ -13,6 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceTemplateRequest;
@@ -61,10 +62,10 @@ public class InstanceGroupRequestToInstanceGroupConverterTest {
         request.setSecurityGroup(securityGroupRequest);
 
         // GIVEN
-        given(defaultInstanceGroupProvider.createDefaultTemplate(eq(MOCK), eq(ACCOUNT_ID))).willReturn(template);
+        given(defaultInstanceGroupProvider.createDefaultTemplate(eq(MOCK), eq(ACCOUNT_ID), eq(null))).willReturn(template);
         given(securityGroupConverter.convert(eq(securityGroupRequest))).willReturn(securityGroup);
         // WHEN
-        InstanceGroup result = underTest.convert(request, ACCOUNT_ID, MOCK.name(), NAME, HOSTNAME, DOMAINNAME);
+        InstanceGroup result = underTest.convert(request, ACCOUNT_ID, MOCK.name(), NAME, HOSTNAME, DOMAINNAME, null);
         // THEN
         assertThat(result).isNotNull();
         assertThat(result.getGroupName()).isEqualTo(NAME);
@@ -87,9 +88,36 @@ public class InstanceGroupRequestToInstanceGroupConverterTest {
         InstanceTemplateRequest instanceTemplateRequest = mock(InstanceTemplateRequest.class);
         request.setInstanceTemplateRequest(instanceTemplateRequest);
         Template template = mock(Template.class);
-        when(templateConverter.convert(instanceTemplateRequest, MOCK, ACCOUNT_ID)).thenReturn(template);
+        when(templateConverter.convert(instanceTemplateRequest, MOCK, ACCOUNT_ID, null)).thenReturn(template);
 
-        InstanceGroup result = underTest.convert(request, ACCOUNT_ID, MOCK.name(), NAME, HOSTNAME, DOMAINNAME);
+        InstanceGroup result = underTest.convert(request, ACCOUNT_ID, MOCK.name(), NAME, HOSTNAME, DOMAINNAME, null);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getTemplate()).isSameAs(template);
+    }
+
+    @Test
+    void convertTestTemplateConversionWithDiskEncryptionSetId() {
+        InstanceGroupRequest request = new InstanceGroupRequest();
+
+        InstanceTemplateRequest instanceTemplateRequest = mock(InstanceTemplateRequest.class);
+        request.setInstanceTemplateRequest(instanceTemplateRequest);
+        Template template = mock(Template.class);
+        when(templateConverter.convert(instanceTemplateRequest, MOCK, ACCOUNT_ID, "dummyDiskEncryptionSetId")).thenReturn(template);
+
+        InstanceGroup result = underTest.convert(request, ACCOUNT_ID, MOCK.name(), NAME, HOSTNAME, DOMAINNAME, "dummyDiskEncryptionSetId");
+
+        assertThat(result).isNotNull();
+        assertThat(result.getTemplate()).isSameAs(template);
+    }
+
+    @Test
+    void convertTestDefaultTemplateConversionWithDiskEncryptionSetId() {
+        InstanceGroupRequest request = new InstanceGroupRequest();
+        Template template = mock(Template.class);
+        when(defaultInstanceGroupProvider.createDefaultTemplate(CloudPlatform.AZURE, ACCOUNT_ID, "dummyDiskEncryptionSetId")).thenReturn(template);
+
+        InstanceGroup result = underTest.convert(request, ACCOUNT_ID, CloudPlatform.AZURE.name(), NAME, HOSTNAME, DOMAINNAME, "dummyDiskEncryptionSetId");
 
         assertThat(result).isNotNull();
         assertThat(result.getTemplate()).isSameAs(template);

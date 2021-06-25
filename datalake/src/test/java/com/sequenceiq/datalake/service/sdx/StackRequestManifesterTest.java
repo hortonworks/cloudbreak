@@ -25,6 +25,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsEncryptionV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AzureEncryptionV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AzureInstanceTemplateV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
@@ -43,6 +45,9 @@ import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Paramete
 import com.sequenceiq.common.api.type.EncryptionType;
 import com.sequenceiq.common.model.CloudIdentityType;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
+import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceEncryptionParameters;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @ExtendWith(MockitoExtension.class)
 public class StackRequestManifesterTest {
@@ -277,42 +282,129 @@ public class StackRequestManifesterTest {
     }
 
     @Test
-    void setupInstanceVolumeEncryptionTestWhenAzure() {
-        underTest.setupInstanceVolumeEncryption(stackV4Request, CLOUD_PLATFORM_AZURE, ACCOUNT_ID);
+    void setupInstanceVolumeEncryptionTestWhenAzureAndDiskEncryptionSetIdIsNotPresent() {
+        DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
+        envResponse.setCloudPlatform(CloudPlatform.AZURE.name());
+
+        underTest.setupInstanceVolumeEncryption(stackV4Request, envResponse);
 
         verify(stackV4Request, never()).getInstanceGroups();
     }
 
     @Test
-    void setupInstanceVolumeEncryptionTestWhenAwsAndNoInstanceGroups() {
+    void setupInstanceVolumeEncryptionTestWhenAzureAndDiskEncryptionSetIdAndNoInstanceGroups() {
+        DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
+        envResponse.setCloudPlatform(CloudPlatform.AZURE.name());
+        envResponse.setAzure(AzureEnvironmentParameters.builder()
+                .withResourceEncryptionParameters(AzureResourceEncryptionParameters.builder()
+                        .withDiskEncryptionSetId("dummyDiskEncryptionSetId")
+                        .build())
+                .build());
+
         List<InstanceGroupV4Request> instanceGroups = new ArrayList<>();
         when(stackV4Request.getInstanceGroups()).thenReturn(instanceGroups);
 
-        underTest.setupInstanceVolumeEncryption(stackV4Request, CLOUD_PLATFORM_AWS, ACCOUNT_ID);
+        underTest.setupInstanceVolumeEncryption(stackV4Request, envResponse);
+
+        assertThat(instanceGroups).isEmpty();
+    }
+
+    @Test
+    void setupInstanceVolumeEncryptionTestWhenAzureAndDiskEncryptionSetIdAndNoInstanceTemplateParameters() {
+        DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
+        envResponse.setCloudPlatform(CloudPlatform.AZURE.name());
+        envResponse.setAzure(AzureEnvironmentParameters.builder()
+                .withResourceEncryptionParameters(AzureResourceEncryptionParameters.builder()
+                        .withDiskEncryptionSetId("dummyDiskEncryptionSetId")
+                        .build())
+                .build());
+        InstanceGroupV4Request instanceGroupV4Request = createInstanceGroupV4Request();
+        when(stackV4Request.getInstanceGroups()).thenReturn(List.of(instanceGroupV4Request));
+
+        underTest.setupInstanceVolumeEncryption(stackV4Request, envResponse);
+
+        verifyAzureEncryption(instanceGroupV4Request.getTemplate(), EncryptionType.CUSTOM, "dummyDiskEncryptionSetId");
+    }
+
+    @Test
+    void setupInstanceVolumeEncryptionTestWhenAzureAndDiskEncryptionSetIdAndNoEncryptionParameters() {
+        DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
+        envResponse.setCloudPlatform(CloudPlatform.AZURE.name());
+        envResponse.setAzure(AzureEnvironmentParameters.builder()
+                .withResourceEncryptionParameters(AzureResourceEncryptionParameters.builder()
+                        .withDiskEncryptionSetId("dummyDiskEncryptionSetId")
+                        .build())
+                .build());
+        InstanceGroupV4Request instanceGroupV4Request = createInstanceGroupV4Request();
+        InstanceTemplateV4Request instanceTemplateV4Request = instanceGroupV4Request.getTemplate();
+        instanceTemplateV4Request.createAzure();
+        when(stackV4Request.getInstanceGroups()).thenReturn(List.of(instanceGroupV4Request));
+
+        underTest.setupInstanceVolumeEncryption(stackV4Request, envResponse);
+
+        verifyAzureEncryption(instanceTemplateV4Request, EncryptionType.CUSTOM, "dummyDiskEncryptionSetId");
+    }
+
+    @Test
+    void setupInstanceVolumeEncryptionTestWhenAzureAndDiskEncryptionSetIdAndTwoInstanceGroups() {
+        DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
+        envResponse.setAzure(AzureEnvironmentParameters.builder()
+                .withResourceEncryptionParameters(AzureResourceEncryptionParameters.builder()
+                        .withDiskEncryptionSetId("dummyDiskEncryptionSetId")
+                        .build())
+                .build());
+        envResponse.setCloudPlatform(CloudPlatform.AZURE.name());
+
+        InstanceGroupV4Request instanceGroupV4Request1 = createInstanceGroupV4Request();
+        InstanceTemplateV4Request instanceTemplateV4Request1 = instanceGroupV4Request1.getTemplate();
+
+        InstanceGroupV4Request instanceGroupV4Request2 = createInstanceGroupV4Request();
+        InstanceTemplateV4Request instanceTemplateV4Request2 = instanceGroupV4Request2.getTemplate();
+        instanceTemplateV4Request2.createAzure().setEncryption(createAzureEncryptionV4Parameters(EncryptionType.CUSTOM, ENCRYPTION_KEY));
+
+        when(stackV4Request.getInstanceGroups()).thenReturn(List.of(instanceGroupV4Request1, instanceGroupV4Request2));
+
+        underTest.setupInstanceVolumeEncryption(stackV4Request, envResponse);
+        verifyAzureEncryption(instanceTemplateV4Request1, EncryptionType.CUSTOM, "dummyDiskEncryptionSetId");
+        verifyAzureEncryption(instanceTemplateV4Request2, EncryptionType.CUSTOM, "dummyDiskEncryptionSetId");
+    }
+
+    @Test
+    void setupInstanceVolumeEncryptionTestWhenAwsAndNoInstanceGroups() {
+        DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
+        envResponse.setCloudPlatform(CloudPlatform.AWS.name());
+        List<InstanceGroupV4Request> instanceGroups = new ArrayList<>();
+        when(stackV4Request.getInstanceGroups()).thenReturn(instanceGroups);
+
+        underTest.setupInstanceVolumeEncryption(stackV4Request, envResponse);
 
         assertThat(instanceGroups).isEmpty();
     }
 
     @Test
     void setupInstanceVolumeEncryptionTestWhenAwsAndNoInstanceTemplateParameters() {
+        DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
+        envResponse.setCloudPlatform(CloudPlatform.AWS.name());
         InstanceGroupV4Request instanceGroupV4Request = createInstanceGroupV4Request();
         when(stackV4Request.getInstanceGroups()).thenReturn(List.of(instanceGroupV4Request));
 
-        underTest.setupInstanceVolumeEncryption(stackV4Request, CLOUD_PLATFORM_AWS, ACCOUNT_ID);
+        underTest.setupInstanceVolumeEncryption(stackV4Request, envResponse);
 
-        verifyEncryption(instanceGroupV4Request.getTemplate(), EncryptionType.DEFAULT);
+        verifyAwsEncryption(instanceGroupV4Request.getTemplate(), EncryptionType.DEFAULT);
     }
 
     @Test
     void setupInstanceVolumeEncryptionTestWhenAwsAndNoEncryptionParameters() {
+        DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
+        envResponse.setCloudPlatform(CloudPlatform.AWS.name());
         InstanceGroupV4Request instanceGroupV4Request = createInstanceGroupV4Request();
         InstanceTemplateV4Request instanceTemplateV4Request = instanceGroupV4Request.getTemplate();
         instanceTemplateV4Request.createAws();
         when(stackV4Request.getInstanceGroups()).thenReturn(List.of(instanceGroupV4Request));
 
-        underTest.setupInstanceVolumeEncryption(stackV4Request, CLOUD_PLATFORM_AWS, ACCOUNT_ID);
+        underTest.setupInstanceVolumeEncryption(stackV4Request, envResponse);
 
-        verifyEncryption(instanceTemplateV4Request, EncryptionType.DEFAULT);
+        verifyAwsEncryption(instanceTemplateV4Request, EncryptionType.DEFAULT);
     }
 
     static Object[][] encryptionTypeDataProvider() {
@@ -329,6 +421,8 @@ public class StackRequestManifesterTest {
     @MethodSource("encryptionTypeDataProvider")
     void setupInstanceVolumeEncryptionTestWhenAwsAndEncryptionParameters(String testCaseName, EncryptionType encryptionType, String encryptionKey,
             EncryptionType encryptionTypeExpected, String encryptionKeyExpected) {
+        DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
+        envResponse.setCloudPlatform(CloudPlatform.AWS.name());
         InstanceGroupV4Request instanceGroupV4Request = createInstanceGroupV4Request();
         InstanceTemplateV4Request instanceTemplateV4Request = instanceGroupV4Request.getTemplate();
         if (encryptionKey == null) {
@@ -338,17 +432,19 @@ public class StackRequestManifesterTest {
         }
         when(stackV4Request.getInstanceGroups()).thenReturn(List.of(instanceGroupV4Request));
 
-        underTest.setupInstanceVolumeEncryption(stackV4Request, CLOUD_PLATFORM_AWS, ACCOUNT_ID);
+        underTest.setupInstanceVolumeEncryption(stackV4Request, envResponse);
 
         if (encryptionKeyExpected == null) {
-            verifyEncryption(instanceTemplateV4Request, encryptionTypeExpected);
+            verifyAwsEncryption(instanceTemplateV4Request, encryptionTypeExpected);
         } else {
-            verifyEncryption(instanceTemplateV4Request, encryptionTypeExpected, encryptionKeyExpected);
+            verifyAwsEncryption(instanceTemplateV4Request, encryptionTypeExpected, encryptionKeyExpected);
         }
     }
 
     @Test
     void setupInstanceVolumeEncryptionTestWhenAwsAndTwoInstanceGroupsAndEncryptionTypesNoneCustom() {
+        DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
+        envResponse.setCloudPlatform(CloudPlatform.AWS.name());
         InstanceGroupV4Request instanceGroupV4Request1 = createInstanceGroupV4Request();
         InstanceTemplateV4Request instanceTemplateV4Request1 = instanceGroupV4Request1.getTemplate();
         instanceTemplateV4Request1.createAws().setEncryption(createAwsEncryptionV4Parameters(EncryptionType.NONE));
@@ -359,10 +455,10 @@ public class StackRequestManifesterTest {
 
         when(stackV4Request.getInstanceGroups()).thenReturn(List.of(instanceGroupV4Request1, instanceGroupV4Request2));
 
-        underTest.setupInstanceVolumeEncryption(stackV4Request, CLOUD_PLATFORM_AWS, ACCOUNT_ID);
+        underTest.setupInstanceVolumeEncryption(stackV4Request, envResponse);
 
-        verifyEncryption(instanceTemplateV4Request1, EncryptionType.NONE);
-        verifyEncryption(instanceTemplateV4Request2, EncryptionType.CUSTOM, ENCRYPTION_KEY);
+        verifyAwsEncryption(instanceTemplateV4Request1, EncryptionType.NONE);
+        verifyAwsEncryption(instanceTemplateV4Request2, EncryptionType.CUSTOM, ENCRYPTION_KEY);
     }
 
     private InstanceGroupV4Request createInstanceGroupV4Request() {
@@ -371,11 +467,11 @@ public class StackRequestManifesterTest {
         return instanceGroupV4Request;
     }
 
-    private void verifyEncryption(InstanceTemplateV4Request instanceTemplateV4Request, EncryptionType expectedEncryptionType) {
-        verifyEncryption(instanceTemplateV4Request, expectedEncryptionType, null);
+    private void verifyAwsEncryption(InstanceTemplateV4Request instanceTemplateV4Request, EncryptionType expectedEncryptionType) {
+        verifyAwsEncryption(instanceTemplateV4Request, expectedEncryptionType, null);
     }
 
-    private void verifyEncryption(InstanceTemplateV4Request instanceTemplateV4Request, EncryptionType expectedEncryptionType, String expectedEncryptionKey) {
+    private void verifyAwsEncryption(InstanceTemplateV4Request instanceTemplateV4Request, EncryptionType expectedEncryptionType, String expectedEncryptionKey) {
         AwsInstanceTemplateV4Parameters aws = instanceTemplateV4Request.getAws();
         assertThat(aws).isNotNull();
         AwsEncryptionV4Parameters encryption = aws.getEncryption();
@@ -393,6 +489,23 @@ public class StackRequestManifesterTest {
         awsEncryptionV4Parameters.setType(encryptionType);
         awsEncryptionV4Parameters.setKey(encryptionKey);
         return awsEncryptionV4Parameters;
+    }
+
+    private AzureEncryptionV4Parameters createAzureEncryptionV4Parameters(EncryptionType encryptionType, String encryptionKey) {
+        AzureEncryptionV4Parameters azureEncryptionV4Parameters = new AzureEncryptionV4Parameters();
+        azureEncryptionV4Parameters.setType(encryptionType);
+        azureEncryptionV4Parameters.setKey(encryptionKey);
+        return azureEncryptionV4Parameters;
+    }
+
+    private void verifyAzureEncryption(InstanceTemplateV4Request instanceTemplateV4Request, EncryptionType expectedEncryptionType,
+            String expectedDiskEncryptionSetId) {
+        AzureInstanceTemplateV4Parameters azure = instanceTemplateV4Request.getAzure();
+        assertThat(azure).isNotNull();
+        AzureEncryptionV4Parameters encryption = azure.getEncryption();
+        assertThat(encryption).isNotNull();
+        assertThat(encryption.getType()).isEqualTo(expectedEncryptionType);
+        assertThat(encryption.getDiskEncryptionSetId()).isEqualTo(expectedDiskEncryptionSetId);
     }
 
 }
