@@ -27,4 +27,13 @@ public class ImageWrapper {
     public String getCatalogName() {
         return catalogName;
     }
+
+    @Override
+    public String toString() {
+        return "ImageWrapper{" +
+                "image=" + image +
+                ", catalogUrl='" + catalogUrl + '\'' +
+                ", catalogName='" + catalogName + '\'' +
+                '}';
+    }
 }

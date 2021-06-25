@@ -49,15 +49,11 @@ import com.sequenceiq.freeipa.flow.stack.HealthCheckSuccess;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
-import com.sequenceiq.freeipa.sync.StackStatusCheckerJob;
 
 @Configuration
 public class ChangePrimaryGatewayActions {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ChangePrimaryGatewayActions.class);
-
-    @Inject
-    private StackStatusCheckerJob stackStatusCheckerJob;
 
     @Inject
     private StackUpdater stackUpdater;

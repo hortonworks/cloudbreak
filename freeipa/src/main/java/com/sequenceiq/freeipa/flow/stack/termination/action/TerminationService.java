@@ -82,7 +82,6 @@ public class TerminationService {
             transactionService.required(() -> {
                 Stack stack = stackService.getByIdWithListsInTransaction(stackId);
                 terminateMetaDataInstances(stack, instanceIds);
-                return null;
             });
         } catch (TransactionExecutionException ex) {
             LOGGER.info("Failed to terminate cluster infrastructure.");
