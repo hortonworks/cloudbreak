@@ -137,7 +137,7 @@ class CmAndStackVersionFilterTest {
     }
 
     private ImageFilterParams createImageFilterParams(boolean lockComponents) {
-        return new ImageFilterParams(currentImage, lockComponents, activatedParcels, StackType.DATALAKE, null);
+        return new ImageFilterParams(currentImage, lockComponents, activatedParcels, StackType.DATALAKE, null, 1L);
     }
 
     private void assertLockedCommon() {

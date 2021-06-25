@@ -31,6 +31,8 @@ import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterParams;
 @RunWith(MockitoJUnitRunner.class)
 public class ImageFilterParamsFactoryTest {
 
+    private static final Long STACK_ID = 1L;
+
     @InjectMocks
     private ImageFilterParamsFactory underTest;
 
@@ -61,6 +63,7 @@ public class ImageFilterParamsFactoryTest {
         assertEquals(cdhVersion, actual.getStackRelatedParcels().get(cdhName));
         assertEquals(StackType.DATALAKE, actual.getStackType());
         assertEquals(blueprint, actual.getBlueprint());
+        assertEquals(STACK_ID, actual.getStackId());
         verify(parcelService).getParcelComponentsByBlueprint(stack);
         verify(clouderaManagerProductsProvider).findCdhProduct(clusterComponents);
     }
@@ -88,6 +91,7 @@ public class ImageFilterParamsFactoryTest {
         assertEquals(nifiVersion, actual.getStackRelatedParcels().get(nifiName));
         assertEquals(StackType.WORKLOAD, actual.getStackType());
         assertEquals(blueprint, actual.getBlueprint());
+        assertEquals(STACK_ID, actual.getStackId());
         verify(parcelService).getParcelComponentsByBlueprint(stack);
         verify(clouderaManagerProductsProvider).getProducts(cdhClusterComponent);
     }
@@ -114,6 +118,7 @@ public class ImageFilterParamsFactoryTest {
         Stack stack = new Stack();
         stack.setType(stackType);
         stack.setCluster(createCluster());
+        stack.setId(STACK_ID);
         return stack;
     }
 

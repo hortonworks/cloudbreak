@@ -19,12 +19,16 @@ public class ImageFilterParams {
 
     private final Blueprint blueprint;
 
-    public ImageFilterParams(Image currentImage, boolean lockComponents, Map<String, String> stackRelatedParcels, StackType stackType, Blueprint blueprint) {
+    private final Long stackId;
+
+    public ImageFilterParams(Image currentImage, boolean lockComponents, Map<String, String> stackRelatedParcels, StackType stackType, Blueprint blueprint,
+            Long stackId) {
         this.currentImage = currentImage;
         this.lockComponents = lockComponents;
         this.stackRelatedParcels = stackRelatedParcels;
         this.stackType = stackType;
         this.blueprint = blueprint;
+        this.stackId = stackId;
     }
 
     public Image getCurrentImage() {
@@ -47,6 +51,10 @@ public class ImageFilterParams {
         return blueprint;
     }
 
+    public Long getStackId() {
+        return stackId;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -60,11 +68,12 @@ public class ImageFilterParams {
                 Objects.equals(currentImage, that.currentImage) &&
                 Objects.equals(stackRelatedParcels, that.stackRelatedParcels) &&
                 Objects.equals(stackType, that.stackType) &&
-                Objects.equals(blueprint, that.blueprint);
+                Objects.equals(blueprint, that.blueprint) &&
+                Objects.equals(stackId, that.stackId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(currentImage, lockComponents, stackRelatedParcels, stackType, blueprint);
+        return Objects.hash(currentImage, lockComponents, stackRelatedParcels, stackType, blueprint, stackId);
     }
 }
