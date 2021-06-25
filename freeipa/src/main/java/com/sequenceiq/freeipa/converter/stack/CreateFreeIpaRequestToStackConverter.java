@@ -2,6 +2,7 @@ package com.sequenceiq.freeipa.converter.stack;
 
 import static com.gs.collections.impl.utility.StringIterate.isEmpty;
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
+import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.util.HashMap;
@@ -39,6 +40,9 @@ import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagGenerationRequest;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
 import com.sequenceiq.common.api.type.Tunnel;
+import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceEncryptionParameters;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupType;
@@ -54,6 +58,7 @@ import com.sequenceiq.freeipa.entity.SecurityGroup;
 import com.sequenceiq.freeipa.entity.SecurityRule;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackStatus;
+import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
 import com.sequenceiq.freeipa.service.tag.AccountTagService;
 import com.sequenceiq.freeipa.util.CrnService;
 
@@ -90,6 +95,9 @@ public class CreateFreeIpaRequestToStackConverter {
 
     @Inject
     private AccountTagService accountTagService;
+
+    @Inject
+    private CachedEnvironmentClientService cachedEnvironmentClientService;
 
     @Value("${cb.platform.default.regions:}")
     private String defaultRegions;
@@ -257,12 +265,19 @@ public class CreateFreeIpaRequestToStackConverter {
         if (CollectionUtils.isEmpty(source.getInstanceGroups())) {
             throw new BadRequestException(String.format("No instancegroups are specified. Instancegroups field cannot be empty."));
         }
+        DetailedEnvironmentResponse environment = measure(() -> cachedEnvironmentClientService.getByCrn(source.getEnvironmentCrn()),
+                LOGGER, "Environment properties were queried under {} ms for environment {}", source.getEnvironmentCrn());
+        String diskEncryptionSetId = Optional.of(environment)
+                .map(DetailedEnvironmentResponse::getAzure)
+                .map(AzureEnvironmentParameters::getResourceEncryptionParameters)
+                .map(AzureResourceEncryptionParameters::getDiskEncryptionSetId)
+                .orElse(null);
         Set<InstanceGroup> convertedSet = new HashSet<>();
         source.getInstanceGroups().stream()
                 .map(ig -> {
                     FreeIpaServerRequest ipaServerRequest = source.getFreeIpa();
                     return instanceGroupConverter.convert(ig, accountId, stack.getCloudPlatform(), stack.getName(),
-                            ipaServerRequest.getHostname(), ipaServerRequest.getDomain());
+                            ipaServerRequest.getHostname(), ipaServerRequest.getDomain(), diskEncryptionSetId);
                 })
                 .forEach(ig -> {
                     ig.setStack(stack);

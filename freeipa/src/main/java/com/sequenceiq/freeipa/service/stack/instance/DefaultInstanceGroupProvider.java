@@ -8,10 +8,10 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AwsInstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AzureInstanceGroupParameters;
+import com.sequenceiq.cloudbreak.cloud.model.instance.AzureInstanceTemplate;
 import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -37,10 +37,7 @@ public class DefaultInstanceGroupProvider {
     @Inject
     private DefaultInstanceTypeProvider defaultInstanceTypeProvider;
 
-    @Inject
-    private EntitlementService entitlementService;
-
-    public Template createDefaultTemplate(CloudPlatform cloudPlatform, String accountId) {
+    public Template createDefaultTemplate(CloudPlatform cloudPlatform, String accountId, String diskEncryptionSetId) {
         Template template = new Template();
         template.setName(missingResourceNameGenerator.generateName(APIResourceType.TEMPLATE));
         template.setStatus(ResourceStatus.DEFAULT);
@@ -54,6 +51,11 @@ public class DefaultInstanceGroupProvider {
             template.setAttributes(new Json(Map.<String, Object>ofEntries(
                     entry(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, Boolean.TRUE),
                     entry(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.DEFAULT.name()))));
+        }
+        if (cloudPlatform == CloudPlatform.AZURE && diskEncryptionSetId != null) {
+            template.setAttributes(new Json(Map.<String, Object>ofEntries(
+                    entry(AzureInstanceTemplate.DISK_ENCRYPTION_SET_ID, diskEncryptionSetId),
+                    entry(AzureInstanceTemplate.MANAGED_DISK_ENCRYPTION_WITH_CUSTOM_KEY_ENABLED, Boolean.TRUE))));
         }
         return template;
     }

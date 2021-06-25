@@ -26,12 +26,13 @@ public class InstanceGroupRequestToInstanceGroupConverter {
     @Inject
     private DefaultInstanceGroupProvider defaultInstanceGroupProvider;
 
-    public InstanceGroup convert(InstanceGroupRequest source, String accountId, String cloudPlatformString, String stackName, String hostname, String domain) {
+    public InstanceGroup convert(InstanceGroupRequest source, String accountId, String cloudPlatformString, String stackName, String hostname, String domain,
+            String diskEncryptionSetId) {
         InstanceGroup instanceGroup = new InstanceGroup();
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(cloudPlatformString);
         instanceGroup.setTemplate(source.getInstanceTemplate() == null
-                ? defaultInstanceGroupProvider.createDefaultTemplate(cloudPlatform, accountId)
-                : templateConverter.convert(source.getInstanceTemplate(), cloudPlatform, accountId));
+                ? defaultInstanceGroupProvider.createDefaultTemplate(cloudPlatform, accountId, diskEncryptionSetId)
+                : templateConverter.convert(source.getInstanceTemplate(), cloudPlatform, accountId, diskEncryptionSetId));
         instanceGroup.setSecurityGroup(securityGroupConverter.convert(source.getSecurityGroup()));
         String instanceGroupName = source.getName();
         instanceGroup.setGroupName(instanceGroupName);

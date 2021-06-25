@@ -8,10 +8,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AwsInstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AzureInstanceGroupParameters;
+import com.sequenceiq.cloudbreak.cloud.model.instance.AzureInstanceTemplate;
 import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -41,24 +41,32 @@ class DefaultInstanceGroupProviderTest {
     @Mock
     private DefaultInstanceTypeProvider defaultInstanceTypeProvider;
 
-    @Mock
-    private EntitlementService entitlementService;
-
     @InjectMocks
     private DefaultInstanceGroupProvider underTest;
 
     @Test
     void createDefaultTemplateTestNoVolumeEncryptionWhenAzure() {
-        Template result = underTest.createDefaultTemplate(CloudPlatform.AZURE, ACCOUNT_ID);
+        Template result = underTest.createDefaultTemplate(CloudPlatform.AZURE, ACCOUNT_ID, null);
 
         assertThat(result).isNotNull();
         assertThat(result.getAttributes()).isNull();
     }
 
     @Test
+    void createDefaultTemplateTestVolumeEncryptionAddedWhenAzure() {
+        Template result = underTest.createDefaultTemplate(CloudPlatform.AZURE, ACCOUNT_ID, "dummyDiskEncryptionSet");
+
+        assertThat(result).isNotNull();
+        Json attributes = result.getAttributes();
+        assertThat(attributes).isNotNull();
+        assertThat(attributes.<Object>getValue(AzureInstanceTemplate.DISK_ENCRYPTION_SET_ID)).isEqualTo("dummyDiskEncryptionSet");
+        assertThat(attributes.<Object>getValue(AzureInstanceTemplate.MANAGED_DISK_ENCRYPTION_WITH_CUSTOM_KEY_ENABLED)).isEqualTo(Boolean.TRUE);
+    }
+
+    @Test
     void createDefaultTemplateTestVolumeEncryptionAddedWhenAws() {
 
-        Template result = underTest.createDefaultTemplate(CloudPlatform.AWS, ACCOUNT_ID);
+        Template result = underTest.createDefaultTemplate(CloudPlatform.AWS, ACCOUNT_ID, null);
 
         assertThat(result).isNotNull();
         Json attributes = result.getAttributes();
