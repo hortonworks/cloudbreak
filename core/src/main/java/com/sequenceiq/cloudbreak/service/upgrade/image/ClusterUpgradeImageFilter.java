@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
+import com.sequenceiq.cloudbreak.service.image.ImageProvider;
 import com.sequenceiq.cloudbreak.service.image.StatedImages;
 import com.sequenceiq.cloudbreak.service.image.catalog.ImageCatalogServiceProxy;
 
@@ -54,6 +55,9 @@ public class ClusterUpgradeImageFilter {
 
     @Inject
     private ImageCatalogService imageCatalogService;
+
+    @Inject
+    private ImageProvider imageProvider;
 
     public ImageFilterResult filter(String accountId, CloudbreakImageCatalogV3 imageCatalogV3, String cloudPlatform,
             ImageFilterParams imageFilterParams) {
@@ -92,7 +96,7 @@ public class ClusterUpgradeImageFilter {
         Mutable<String> reason = new MutableObject<>();
         Image currentImage = imageFilterParams.getCurrentImage();
         List<Image> images = availableImages.stream()
-                .filter(filterCurrentImage(currentImage, reason))
+                .filter(filterCurrentImage(imageFilterParams, reason))
                 .filter(filterNonCmImages(reason))
                 .filter(filterIgnoredCmVersion(reason))
                 .filter(creationBasedFilter.filterPreviousImages(currentImage, reason))
@@ -109,10 +113,11 @@ public class ClusterUpgradeImageFilter {
         return images.isEmpty() ? reason.getValue() : null;
     }
 
-    private Predicate<Image> filterCurrentImage(Image currentImage, Mutable<String> reason) {
+    private Predicate<Image> filterCurrentImage(ImageFilterParams imageFilterParams, Mutable<String> reason) {
         return image -> {
             reason.setValue("There are no newer compatible images available.");
-            return !image.getUuid().equals(currentImage.getUuid());
+            String currentImageId = imageFilterParams.getCurrentImage().getUuid();
+            return !(image.getUuid().equals(currentImageId) && !imageProvider.filterCurrentImage(imageFilterParams.getStackId(), currentImageId));
         };
     }
 

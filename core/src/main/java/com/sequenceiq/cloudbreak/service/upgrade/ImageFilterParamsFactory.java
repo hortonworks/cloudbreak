@@ -32,7 +32,7 @@ public class ImageFilterParamsFactory {
     private ClouderaManagerProductsProvider clouderaManagerProductsProvider;
 
     public ImageFilterParams create(Image image, boolean lockComponents, Stack stack) {
-        return new ImageFilterParams(image, lockComponents, getStackRelatedParcels(stack), stack.getType(), getBlueprint(stack));
+        return new ImageFilterParams(image, lockComponents, getStackRelatedParcels(stack), stack.getType(), getBlueprint(stack), stack.getId());
     }
 
     public Map<String, String> getStackRelatedParcels(Stack stack) {

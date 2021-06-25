@@ -19,11 +19,13 @@ public class PreWarmParcelLocationFilterTest {
 
     private static final String RANDOM_URL = "http://random.cloudera.com/asdf/";
 
+    private static final long STACK_ID = 1L;
+
     private final PreWarmParcelLocationFilter underTest = new PreWarmParcelLocationFilter();
 
     @Test
     public void testFilterImageShouldReturnTrueWhenTheStackTypeIsNotWorkload() {
-        assertTrue(underTest.filterImage(null, null, new ImageFilterParams(null, false, null, StackType.DATALAKE, null)));
+        assertTrue(underTest.filterImage(null, null, new ImageFilterParams(null, false, null, StackType.DATALAKE, null, STACK_ID)));
     }
 
     @Test
@@ -125,7 +127,7 @@ public class PreWarmParcelLocationFilterTest {
     }
 
     private ImageFilterParams createImageFilterParams(Map<String, String> stackRelatedParcels) {
-        return new ImageFilterParams(null, false, stackRelatedParcels, StackType.WORKLOAD, null);
+        return new ImageFilterParams(null, false, stackRelatedParcels, StackType.WORKLOAD, null, STACK_ID);
     }
 
 }
