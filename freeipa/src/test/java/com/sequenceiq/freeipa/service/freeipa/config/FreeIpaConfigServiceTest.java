@@ -14,6 +14,8 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -29,6 +31,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.AdlsGen2ConfigGenerator;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
+import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.freeipa.api.model.Backup;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.Network;
@@ -41,7 +44,7 @@ import com.sequenceiq.freeipa.service.freeipa.dns.ReverseDnsZoneCalculator;
 import com.sequenceiq.freeipa.service.stack.NetworkService;
 
 @ExtendWith(MockitoExtension.class)
-public class FreeIpaConfigServiceTest {
+class FreeIpaConfigServiceTest {
 
     private static final String DOMAIN = "cloudera.com";
 
@@ -87,7 +90,7 @@ public class FreeIpaConfigServiceTest {
     private ProxyConfigDtoService proxyConfigDtoService;
 
     @InjectMocks
-    private FreeIpaConfigService freeIpaConfigService;
+    private FreeIpaConfigService underTest;
 
     @BeforeEach
     public void init() {
@@ -96,7 +99,7 @@ public class FreeIpaConfigServiceTest {
     }
 
     @Test
-    public void testCreateFreeIpaConfigs() {
+    void testCreateFreeIpaConfigs() {
         String backupLocation = "s3://mybucket/test";
         Backup backup = new Backup();
         backup.setStorageLocation(backupLocation);
@@ -126,7 +129,7 @@ public class FreeIpaConfigServiceTest {
         Map<String, String> expectedHost = Map.of("ip", PRIVATE_IP, "fqdn", HOSTNAME);
         Set<Object> expectedHosts = ImmutableSet.of(expectedHost);
 
-        FreeIpaConfigView freeIpaConfigView = freeIpaConfigService.createFreeIpaConfigs(
+        FreeIpaConfigView freeIpaConfigView = underTest.createFreeIpaConfigs(
                 stack, ImmutableSet.of(node));
 
         assertEquals(DOMAIN.toUpperCase(), freeIpaConfigView.getRealm());
@@ -140,4 +143,46 @@ public class FreeIpaConfigServiceTest {
         assertEquals(expectedHosts, freeIpaConfigView.getHosts());
         assertEquals(List.of(CIDR), freeIpaConfigView.getCidrBlocks());
     }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("ccmv2Scenarios")
+    void testCcmV2Tunnel(Tunnel tunnel, boolean expectedCcmv2Enabled, boolean expectedCcmV2JumpgateEnabled) {
+        Stack stack = new Stack();
+        stack.setTunnel(tunnel);
+        Network network = new Network();
+        network.setNetworkCidrs(List.of(CIDR));
+        stack.setNetwork(network);
+
+        FreeIpa freeIpa = new FreeIpa();
+        freeIpa.setDomain(DOMAIN);
+        when(freeIpaService.findByStack(any())).thenReturn(freeIpa);
+        when(reverseDnsZoneCalculator.reverseDnsZoneForCidrs(any())).thenReturn(REVERSE_ZONE);
+        when(networkService.getFilteredSubnetWithCidr(any())).thenReturn(subnetWithCidr);
+        GatewayConfig gatewayConfig = mock(GatewayConfig.class);
+        when(gatewayConfig.getHostname()).thenReturn(HOSTNAME);
+        when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
+        when(networkService.getFilteredSubnetWithCidr(any())).thenReturn(subnetWithCidr);
+
+        FreeIpaConfigView freeIpaConfigView = underTest.createFreeIpaConfigs(
+                stack, Set.of());
+
+        assertEquals(expectedCcmv2Enabled, freeIpaConfigView.isCcmv2Enabled());
+        assertEquals(expectedCcmV2JumpgateEnabled, freeIpaConfigView.isCcmv2JumpgateEnabled());
+    }
+
+    // @formatter:off
+    // CHECKSTYLE:OFF
+    static Object[][] ccmv2Scenarios() {
+        return new Object[][] {
+                // testName              expectedCcmv2Enabled    expectedCcmV2JumpgateEnabled
+                { Tunnel.DIRECT,         false,                  false },
+                { Tunnel.CLUSTER_PROXY,  false,                  false },
+                { Tunnel.CCM,            false,                  false },
+                { Tunnel.CCMV2,          true,                   false },
+                { Tunnel.CCMV2_JUMPGATE, true,                   true  },
+        };
+    }
+    // CHECKSTYLE:ON
+    // @formatter:on
+
 }

@@ -9,14 +9,10 @@ import javax.inject.Inject;
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmConnectivityParameters;
-import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmParameterSupplier;
-import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmV2ParameterSupplier;
 import com.sequenceiq.cloudbreak.certificate.PkiUtil;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
@@ -30,17 +26,13 @@ import com.sequenceiq.freeipa.entity.SecurityConfig;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.CredentialService;
 import com.sequenceiq.freeipa.service.cloud.PlatformParameterService;
-import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 import com.sequenceiq.freeipa.service.image.ImageService;
 import com.sequenceiq.freeipa.service.stack.StackService;
-import com.sequenceiq.freeipa.util.CrnService;
 
 @Service
 public class UserDataService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserDataService.class);
-
-    private static final int CCM_KEY_ID_LENGTH = 36;
 
     @Inject
     private UserDataBuilder userDataBuilder;
@@ -50,15 +42,6 @@ public class UserDataService {
 
     @Inject
     private AsyncTaskExecutor intermediateBuilderExecutor;
-
-    @Autowired
-    private CcmParameterSupplier ccmParameterSupplier;
-
-    @Autowired
-    private CcmV2ParameterSupplier ccmV2ParameterSupplier;
-
-    @Inject
-    private CrnService crnService;
 
     @Inject
     private CredentialService credentialService;
@@ -73,13 +56,7 @@ public class UserDataService {
     private ImageService imageService;
 
     @Inject
-    private EntitlementService entitlementService;
-
-    @Inject
     private CcmUserDataService ccmUserDataService;
-
-    @Inject
-    private FreeIpaService freeIpaService;
 
     public void createUserData(Long stackId) {
         Stack stack = stackService.getStackById(stackId);

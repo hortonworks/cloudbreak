@@ -103,7 +103,7 @@ public class ClusterProxyService {
     }
 
     private void registerGateway(Stack stack) {
-        String knoxUrl = stack.getTunnel().useCcmV2() ? knoxUrlForCcmV2(stack) : knoxUrl(stack);
+        String knoxUrl = stack.getTunnel().useCcmV2OrJumpgate() ? knoxUrlForCcmV2(stack) : knoxUrl(stack);
         ConfigUpdateRequest request = new ConfigUpdateRequest(stack.getResourceCrn(), knoxUrl);
         clusterProxyRegistrationClient.updateConfig(request);
     }
@@ -118,7 +118,7 @@ public class ClusterProxyService {
                 .withAliases(singletonList(clusterId(stack.getCluster()))).withServices(serviceConfigs(stack));
         if (stack.getTunnel().useCcmV1()) {
             requestBuilder.withAccountId(getAccountId(stack)).withTunnelEntries(tunnelEntries(stack));
-        } else if (stack.getTunnel().useCcmV2()) {
+        } else if (stack.getTunnel().useCcmV2OrJumpgate()) {
             requestBuilder.withAccountId(getAccountId(stack)).withServices(serviceConfigsForCcmV2(stack)).withCcmV2Entries(ccmV2Configs(stack));
         }
         return requestBuilder.build();
@@ -129,7 +129,7 @@ public class ClusterProxyService {
                 .withAliases(singletonList(clusterId(stack.getCluster()))).withServices(serviceConfigs(stack)).withKnoxUrl(knoxUrl(stack));
         if (stack.getTunnel().useCcmV1()) {
             requestBuilder.withAccountId(getAccountId(stack)).withTunnelEntries(tunnelEntries(stack));
-        } else if (stack.getTunnel().useCcmV2()) {
+        } else if (stack.getTunnel().useCcmV2OrJumpgate()) {
             requestBuilder.withAccountId(getAccountId(stack)).withServices(serviceConfigsForCcmV2(stack))
                     .withCcmV2Entries(ccmV2Configs(stack)).withKnoxUrl(knoxUrlForCcmV2(stack));
         }

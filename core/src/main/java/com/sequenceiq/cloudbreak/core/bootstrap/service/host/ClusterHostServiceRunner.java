@@ -581,7 +581,8 @@ public class ClusterHostServiceRunner {
         gateway.put("username", cluster.getUserName());
         gateway.put("password", cluster.getPassword());
         gateway.put("enable_knox_ranger_authorizer", enableKnoxRangerAuthorizer);
-        gateway.put("enable_ccmv2", stack.getTunnel().useCcmV2());
+        gateway.put("enable_ccmv2", stack.getTunnel().useCcmV2OrJumpgate());
+        gateway.put("enable_ccmv2_jumpgate", stack.getTunnel().useCcmV2Jumpgate());
 
         // for cloudbreak upgradeability
         gateway.put("ssotype", SSOType.NONE);

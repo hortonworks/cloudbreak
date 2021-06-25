@@ -19,6 +19,10 @@ public enum Tunnel {
         return this == CCMV2;
     }
 
+    public boolean useCcmV2OrJumpgate() {
+        return this == CCMV2 || this == CCMV2_JUMPGATE;
+    }
+
     public boolean useCcmV2Jumpgate() {
         return this == CCMV2_JUMPGATE;
     }

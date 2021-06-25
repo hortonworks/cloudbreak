@@ -10,12 +10,14 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmConnectivityParameters;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmParameterSupplier;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmParameters;
+import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmV2JumpgateParameterSupplier;
+import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmV2JumpgateParameters;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmV2ParameterSupplier;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmV2Parameters;
 import com.sequenceiq.cloudbreak.ccm.endpoint.KnownServiceIdentifier;
@@ -45,38 +47,44 @@ public class CcmUserDataService {
     @Inject
     private FreeIpaService freeIpaService;
 
-    @Autowired
+    @Inject
     private CcmParameterSupplier ccmParameterSupplier;
 
-    @Autowired
+    @Inject
+    @Qualifier("DefaultCcmV2ParameterSupplier")
     private CcmV2ParameterSupplier ccmV2ParameterSupplier;
+
+    @Inject
+    @Qualifier("DefaultCcmV2JumpgateParameterSupplier")
+    private CcmV2JumpgateParameterSupplier ccmV2JumpgateParameterSupplier;
 
     public CcmConnectivityParameters fetchAndSaveCcmParameters(Stack stack) {
         CcmConnectivityParameters ccmConnectivityParameters = new CcmConnectivityParameters();
         String keyId = CcmResourceUtil.getKeyId(stack.getResourceCrn());
 
         if (stack.getTunnel().useCcmV1()) {
-            String actorCrn = Objects.requireNonNull(crnService.getUserCrn(), "userCrn is null");
-            int gatewayPort = Optional.ofNullable(stack.getGatewayport()).orElse(ServiceFamilies.GATEWAY.getDefaultPort());
-            Map<KnownServiceIdentifier, Integer> tunneledServicePorts = Collections.singletonMap(KnownServiceIdentifier.GATEWAY, gatewayPort);
-
-            CcmParameters ccmV1Parameters = ccmParameterSupplier
-                    .getCcmParameters(actorCrn, stack.getAccountId(), keyId, tunneledServicePorts)
-                    .orElse(null);
-            ccmConnectivityParameters = new CcmConnectivityParameters(ccmV1Parameters);
-            saveCcmV1Config(stack.getId(), ccmV1Parameters);
+            ccmConnectivityParameters = getCcmConnectivityParameters(stack, keyId);
         } else if (stack.getTunnel().useCcmV2()) {
-            FreeIpa freeIpa = freeIpaService.findByStack(stack);
-            String gatewayHostName = hostDiscoveryService.generateHostname(freeIpa.getHostname(), null, 0, false);
-            String generatedClusterDomain = hostDiscoveryService.determineGatewayFqdn(gatewayHostName, freeIpa.getDomain());
-
-            CcmV2Parameters ccmV2Parameters = ccmV2ParameterSupplier.getCcmV2Parameters(stack.getAccountId(), Optional.of(stack.getEnvironmentCrn()),
-                    generatedClusterDomain, keyId);
-            ccmConnectivityParameters = new CcmConnectivityParameters(ccmV2Parameters);
-            saveCcmV2Config(stack.getId(), ccmV2Parameters);
+            ccmConnectivityParameters = getCcmV2ConnectivityParameters(stack, keyId);
+        } else if (stack.getTunnel().useCcmV2Jumpgate()) {
+            ccmConnectivityParameters = getCcmV2JumpgateConnectivityParameters(stack, keyId);
         } else {
             LOGGER.debug("CCM not enabled for stack.");
         }
+        return ccmConnectivityParameters;
+    }
+
+    private CcmConnectivityParameters getCcmConnectivityParameters(Stack stack, String keyId) {
+        CcmConnectivityParameters ccmConnectivityParameters;
+        String actorCrn = Objects.requireNonNull(crnService.getUserCrn(), "userCrn is null");
+        int gatewayPort = Optional.ofNullable(stack.getGatewayport()).orElse(ServiceFamilies.GATEWAY.getDefaultPort());
+        Map<KnownServiceIdentifier, Integer> tunneledServicePorts = Collections.singletonMap(KnownServiceIdentifier.GATEWAY, gatewayPort);
+
+        CcmParameters ccmV1Parameters = ccmParameterSupplier
+                .getCcmParameters(actorCrn, stack.getAccountId(), keyId, tunneledServicePorts)
+                .orElse(null);
+        ccmConnectivityParameters = new CcmConnectivityParameters(ccmV1Parameters);
+        saveCcmV1Config(stack.getId(), ccmV1Parameters);
         return ccmConnectivityParameters;
     }
 
@@ -93,6 +101,22 @@ public class CcmUserDataService {
         }
     }
 
+    private CcmConnectivityParameters getCcmV2ConnectivityParameters(Stack stack, String keyId) {
+        String generatedClusterDomain = getGatewayFqdn(stack);
+
+        CcmV2Parameters ccmV2Parameters = ccmV2ParameterSupplier.getCcmV2Parameters(stack.getAccountId(), Optional.of(stack.getEnvironmentCrn()),
+                generatedClusterDomain, keyId);
+        CcmConnectivityParameters ccmConnectivityParameters = new CcmConnectivityParameters(ccmV2Parameters);
+        saveCcmV2Config(stack.getId(), ccmV2Parameters);
+        return ccmConnectivityParameters;
+    }
+
+    private String getGatewayFqdn(Stack stack) {
+        FreeIpa freeIpa = freeIpaService.findByStack(stack);
+        String gatewayHostName = hostDiscoveryService.generateHostname(freeIpa.getHostname(), null, 0, false);
+        return hostDiscoveryService.determineGatewayFqdn(gatewayHostName, freeIpa.getDomain());
+    }
+
     private void saveCcmV2Config(Long stackId, CcmV2Parameters ccmV2Parameters) {
         String ccmV2AgentCrn = ccmV2Parameters.getAgentCrn();
         if (StringUtils.isNotBlank(ccmV2AgentCrn)) {
@@ -103,4 +127,15 @@ public class CcmUserDataService {
             LOGGER.debug("Added CcmV2AgentCrn  '{}' to stack", ccmV2AgentCrn);
         }
     }
+
+    private CcmConnectivityParameters getCcmV2JumpgateConnectivityParameters(Stack stack, String keyId) {
+        String generatedClusterDomain = getGatewayFqdn(stack);
+
+        CcmV2JumpgateParameters ccmV2JumpgateParameters = ccmV2JumpgateParameterSupplier.getCcmV2JumpgateParameters(stack.getAccountId(),
+                Optional.of(stack.getEnvironmentCrn()), generatedClusterDomain, keyId);
+        CcmConnectivityParameters ccmConnectivityParameters = new CcmConnectivityParameters(ccmV2JumpgateParameters);
+        saveCcmV2Config(stack.getId(), ccmV2JumpgateParameters);
+        return ccmConnectivityParameters;
+    }
+
 }

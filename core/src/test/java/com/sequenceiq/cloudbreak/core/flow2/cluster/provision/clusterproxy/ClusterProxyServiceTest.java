@@ -14,12 +14,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
@@ -53,8 +55,8 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.Tunnel;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ClusterProxyServiceTest {
+@ExtendWith(MockitoExtension.class)
+class ClusterProxyServiceTest {
 
     public static final String PRIMARY_INSTANCE_ID = "i-abc123";
 
@@ -92,7 +94,7 @@ public class ClusterProxyServiceTest {
     private ClusterProxyService service;
 
     @Test
-    public void shouldRegisterProxyConfigurationWithClusterProxy() throws ClusterProxyException {
+    void shouldRegisterProxyConfigurationWithClusterProxy() throws ClusterProxyException {
         ConfigRegistrationResponse response = new ConfigRegistrationResponse();
         response.setX509Unwrapped("X509PublicKey");
 
@@ -114,10 +116,11 @@ public class ClusterProxyServiceTest {
         assertTrue(requestSent.getServices().contains(cmInternalServiceConfig()));
     }
 
-    @Test
-    public void testRegisterClusterWhenCCMV2() throws ClusterProxyException {
+    @ParameterizedTest
+    @EnumSource(value = Tunnel.class, names = {"CCMV2", "CCMV2_JUMPGATE"}, mode = EnumSource.Mode.INCLUDE)
+    void testRegisterClusterWhenCCMV2OrJumpgate(Tunnel tunnel) throws ClusterProxyException {
         Stack stack = testStackUsingCCM();
-        stack.setTunnel(Tunnel.CCMV2);
+        stack.setTunnel(tunnel);
         stack.setCcmV2AgentCrn("testAgentCrn");
         when(securityConfigService.findOneByStackId(STACK_ID)).thenReturn(Optional.of(gatewaySecurityConfig()));
 
@@ -137,7 +140,7 @@ public class ClusterProxyServiceTest {
     }
 
     @Test
-    public void testRegisterClusterWhenCCMV1() throws ClusterProxyException {
+    void testRegisterClusterWhenCCMV1() throws ClusterProxyException {
         Stack stack = testStackUsingCCM();
         when(securityConfigService.findOneByStackId(STACK_ID)).thenReturn(Optional.of(gatewaySecurityConfig()));
 
@@ -158,10 +161,11 @@ public class ClusterProxyServiceTest {
         assertTrue(proxyRegisterationReq.getServices().contains(cmInternalServiceConfig()));
     }
 
-    @Test
-    public void testReRegisterClusterWhenCCMV2() throws ClusterProxyException {
+    @ParameterizedTest
+    @EnumSource(value = Tunnel.class, names = {"CCMV2", "CCMV2_JUMPGATE"}, mode = EnumSource.Mode.INCLUDE)
+    void testReRegisterClusterWhenCCMV2(Tunnel tunnel) throws ClusterProxyException {
         Stack stack = testStackUsingCCM();
-        stack.setTunnel(Tunnel.CCMV2);
+        stack.setTunnel(tunnel);
         stack.setCcmV2AgentCrn("testAgentCrn");
         Gateway gateway = new Gateway();
         gateway.setPath("test-cluster");
@@ -186,7 +190,7 @@ public class ClusterProxyServiceTest {
     }
 
     @Test
-    public void testReRegisterClusterWhenCCMV1() throws ClusterProxyException {
+    void testReRegisterClusterWhenCCMV1() throws ClusterProxyException {
         Stack stack = testStackUsingCCM();
         Gateway gateway = new Gateway();
         gateway.setPath("test-cluster");
@@ -213,7 +217,7 @@ public class ClusterProxyServiceTest {
     }
 
     @Test
-    public void testRegisterGatewayConfigurationWithoutCcmEnabled() {
+    void testRegisterGatewayConfigurationWithoutCcmEnabled() {
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(testStackWithKnox());
 
         service.registerGatewayConfiguration(STACK_ID);
@@ -225,7 +229,7 @@ public class ClusterProxyServiceTest {
     }
 
     @Test
-    public void testRegisterGatewayConfigurationWithCcmV1Enabled() {
+    void testRegisterGatewayConfigurationWithCcmV1Enabled() {
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(testStackUsingCCMAndKnox());
 
         service.registerGatewayConfiguration(STACK_ID);
@@ -236,10 +240,11 @@ public class ClusterProxyServiceTest {
         assertEquals("https://10.10.10.10/test-cluster", gatewayUpdateRequest.getUriOfKnox(), "CCMV1 Knox URI should match");
     }
 
-    @Test
-    public void testRegisterGatewayConfigurationWithCcmV2Enabled() {
+    @ParameterizedTest
+    @EnumSource(value = Tunnel.class, names = {"CCMV2", "CCMV2_JUMPGATE"}, mode = EnumSource.Mode.INCLUDE)
+    void testRegisterGatewayConfigurationWithCcmV2Enabled(Tunnel tunnel) {
         Stack testStack = testStackUsingCCMAndKnox();
-        testStack.setTunnel(Tunnel.CCMV2);
+        testStack.setTunnel(tunnel);
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(testStack);
 
         service.registerGatewayConfiguration(STACK_ID);
@@ -251,7 +256,7 @@ public class ClusterProxyServiceTest {
     }
 
     @Test
-    public void shouldNotRegisterSSHTunnelInfoIfCCMIsDisabled() throws ClusterProxyException {
+    void shouldNotRegisterSSHTunnelInfoIfCCMIsDisabled() throws ClusterProxyException {
         ConfigRegistrationResponse response = new ConfigRegistrationResponse();
         response.setX509Unwrapped("X509PublicKey");
 
@@ -271,13 +276,13 @@ public class ClusterProxyServiceTest {
     }
 
     @Test
-    public void shouldFailIfVaultSecretIsInvalid() throws ClusterProxyException {
+    void shouldFailIfVaultSecretIsInvalid() throws ClusterProxyException {
         assertThrows(VaultConfigException.class, () -> service.registerCluster(testStackWithInvalidSecret()));
         verify(clusterProxyRegistrationClient, times(0)).registerConfig(any());
     }
 
     @Test
-    public void shouldUpdateKnoxUrlWithClusterProxy() throws ClusterProxyException {
+    void shouldUpdateKnoxUrlWithClusterProxy() throws ClusterProxyException {
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(testStackWithKnox());
 
         ConfigUpdateRequest request = configUpdateRequest(STACK_CRN);
@@ -287,7 +292,7 @@ public class ClusterProxyServiceTest {
     }
 
     @Test
-    public void shouldNotUpdateProxyConfigIfClusterIsNotConfiguredWithGateway() throws ClusterProxyException {
+    void shouldNotUpdateProxyConfigIfClusterIsNotConfiguredWithGateway() throws ClusterProxyException {
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(testStack());
 
         service.registerGatewayConfiguration(STACK_ID);
@@ -295,7 +300,7 @@ public class ClusterProxyServiceTest {
     }
 
     @Test
-    public void shouldDeregisterCluster() throws ClusterProxyException {
+    void shouldDeregisterCluster() throws ClusterProxyException {
         service.deregisterCluster(testStack());
         verify(clusterProxyRegistrationClient).deregisterConfig(STACK_CRN);
     }

@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.ccmimpl.cloudinit;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import java.util.Optional;
+
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
@@ -18,9 +20,7 @@ import com.sequenceiq.cloudbreak.ccm.cloudinit.DefaultCcmV2Parameters;
 import com.sequenceiq.cloudbreak.ccmimpl.ccmv2.CcmV2ManagementClient;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
-import java.util.Optional;
-
-@Component
+@Component("DefaultCcmV2ParameterSupplier")
 public class DefaultCcmV2ParameterSupplier implements CcmV2ParameterSupplier {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultCcmV2ParameterSupplier.class);

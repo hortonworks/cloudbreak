@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmConnectivityMode;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmConnectivityParameters;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmParameterSupplier;
+import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmV2JumpgateParameterSupplier;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmV2ParameterSupplier;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.DefaultCcmParameters;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.DefaultCcmV2Parameters;
@@ -57,6 +58,9 @@ public class CcmUserDataServiceTest {
 
     @Mock
     private CcmV2ParameterSupplier ccmV2ParameterSupplier;
+
+    @Mock
+    private CcmV2JumpgateParameterSupplier ccmV2JumpgateParameterSupplier;
 
     @Mock
     private FreeIpaService freeIpaService;
@@ -120,6 +124,31 @@ public class CcmUserDataServiceTest {
         verifyNoInteractions(ccmParameterSupplier);
 
         assertEquals("testAgentCrn", stack.getCcmV2AgentCrn(), "Ccm V2 Config should be initialized");
+        verify(stackService, times(1)).save(stack);
+    }
+
+    @Test
+    public void testFetchAndSaveCcmParametersWhenCcmV2JumpgateIsEnabled() {
+        Stack stack = getAStack();
+        stack.setTunnel(Tunnel.CCMV2_JUMPGATE);
+        DefaultCcmV2Parameters defaultCcmV2Parameters = mock(DefaultCcmV2Parameters.class);
+        FreeIpa freeIpa = mock(FreeIpa.class);
+
+        when(stackService.getStackById(stack.getId())).thenReturn(stack);
+        when(freeIpaService.findByStack(stack)).thenReturn(freeIpa);
+        when(freeIpa.getDomain()).thenReturn("cldr.work.site");
+        when(ccmV2JumpgateParameterSupplier.getCcmV2JumpgateParameters(anyString(), any(Optional.class), anyString(), anyString()))
+                .thenReturn(defaultCcmV2Parameters);
+        when(defaultCcmV2Parameters.getAgentCrn()).thenReturn("testAgentCrn");
+        when(hostDiscoveryService.determineGatewayFqdn(any(), any())).thenReturn("datahub.master0.cldr.work.site");
+
+        CcmConnectivityParameters ccmParameters = ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.fetchAndSaveCcmParameters(stack));
+        assertEquals(CcmConnectivityMode.CCMV2_JUMPGATE, ccmParameters.getConnectivityMode(), "CCM V2 Jumpgate should be enabled.");
+        assertEquals(defaultCcmV2Parameters, ccmParameters.getCcmV2JumpgateParameters(), "CCM V2 Jumpgate Parameters should match.");
+        verify(ccmV2JumpgateParameterSupplier, times(1)).getCcmV2JumpgateParameters(anyString(), any(Optional.class), anyString(), anyString());
+        verifyNoInteractions(ccmParameterSupplier);
+
+        assertEquals("testAgentCrn", stack.getCcmV2AgentCrn(), "Ccm V2 Jumpgate Config should be initialized");
         verify(stackService, times(1)).save(stack);
     }
 

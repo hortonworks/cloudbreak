@@ -23,6 +23,7 @@ export PROXY_PASSWORD="pwd"
 export PROXY_NO_PROXY_HOSTS="noproxy.com"
 export IS_CCM_ENABLED=false
 export IS_CCM_V2_ENABLED=false
+export IS_CCM_V2_JUMPGATE_ENABLED=false
 
 date >> /tmp/time.txt
 

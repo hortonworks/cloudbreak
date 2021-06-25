@@ -16,16 +16,16 @@ export SALT_BOOT_PASSWORD=pass
 export SALT_BOOT_SIGN_KEY=cHJpdi1rZXk=
 export CB_CERT=cert
 export IS_PROXY_ENABLED=false
-export IS_CCM_ENABLED=true
-export CCM_HOST=ccm.cloudera.com
-export CCM_SSH_PORT=8990
-export CCM_PUBLIC_KEY="W2NjbS5jbG91ZGVyYS5jb21dOjg5OTAgcHViLWtleQ=="
-export CCM_TUNNEL_INITIATOR_ID="tunnel-id"
-export CCM_KEY_ID="key-id"
-export CCM_ENCIPHERED_PRIVATE_KEY="cHJpdmF0ZS1rZXk="
-export CCM_GATEWAY_PORT=9443
-export IS_CCM_V2_ENABLED=false
-export IS_CCM_V2_JUMPGATE_ENABLED=false
+export IS_CCM_ENABLED=false
+export IS_CCM_V2_ENABLED=true
+export CCM_V2_INVERTING_PROXY_CERTIFICATE="invertingProxyCertificate"
+export CCM_V2_INVERTING_PROXY_HOST="invertingProxyHost"
+export CCM_V2_AGENT_CERTIFICATE="agentCertificate"
+export CCM_V2_AGENT_ENCIPHERED_KEY="agentEncipheredPrivateKey"
+export CCM_V2_AGENT_KEY_ID="agentKeyId"
+export CCM_V2_AGENT_CRN="agentCrn"
+export CCM_V2_AGENT_BACKEND_ID_PREFIX="agentCrn-"
+export IS_CCM_V2_JUMPGATE_ENABLED=true
 
 date >> /tmp/time.txt
 

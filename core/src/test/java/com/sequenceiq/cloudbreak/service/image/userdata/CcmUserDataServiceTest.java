@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmConnectivityMode;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmConnectivityParameters;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmParameterSupplier;
+import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmV2JumpgateParameterSupplier;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmV2ParameterSupplier;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.DefaultCcmParameters;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.DefaultCcmV2Parameters;
@@ -55,6 +56,9 @@ public class CcmUserDataServiceTest {
 
     @Mock
     private CcmV2ParameterSupplier ccmV2ParameterSupplier;
+
+    @Mock
+    private CcmV2JumpgateParameterSupplier ccmV2JumpgateParameterSupplier;
 
     @Mock
     private HostDiscoveryService hostDiscoveryService;
@@ -104,6 +108,27 @@ public class CcmUserDataServiceTest {
         assertEquals(CcmConnectivityMode.CCMV2, ccmParameters.getConnectivityMode(), "CCM V2 should be enabled.");
         assertEquals(defaultCcmV2Parameters, ccmParameters.getCcmV2Parameters(), "CCM V2 Parameters should match.");
         verify(ccmV2ParameterSupplier, times(1)).getCcmV2Parameters(anyString(), any(Optional.class), anyString(), anyString());
+        verifyNoInteractions(ccmParameterSupplier);
+        verify(stackService, times(1)).setCcmV2AgentCrnByStackId(100L, "testAgentCrn");
+        verify(stackService, never()).setMinaSshdServiceIdByStackId(any(), any());
+    }
+
+    @Test
+    public void testFetchAndSaveCcmParametersWhenCcmV2JumpgateIsEnabled() {
+        Stack stack = getAStack();
+        stack.setTunnel(Tunnel.CCMV2_JUMPGATE);
+        DefaultCcmV2Parameters defaultCcmV2Parameters = mock(DefaultCcmV2Parameters.class);
+
+        when(ccmV2JumpgateParameterSupplier.getCcmV2JumpgateParameters(anyString(), any(Optional.class), anyString(), anyString()))
+                .thenReturn(defaultCcmV2Parameters);
+        when(defaultCcmV2Parameters.getAgentCrn()).thenReturn("testAgentCrn");
+        when(hostDiscoveryService.determineGatewayFqdn(any(), any())).thenReturn("datahub.master0.cldr.work.site");
+
+        CcmConnectivityParameters ccmParameters = ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.fetchAndSaveCcmParameters(stack));
+        assertEquals(CcmConnectivityMode.CCMV2_JUMPGATE, ccmParameters.getConnectivityMode(), "CCM V2 Jumpgate should be enabled.");
+        assertEquals(defaultCcmV2Parameters, ccmParameters.getCcmV2JumpgateParameters(), "CCM V2 Jumpgate Parameters should match.");
+        verify(ccmV2JumpgateParameterSupplier, times(1))
+                .getCcmV2JumpgateParameters(anyString(), any(Optional.class), anyString(), anyString());
         verifyNoInteractions(ccmParameterSupplier);
         verify(stackService, times(1)).setCcmV2AgentCrnByStackId(100L, "testAgentCrn");
         verify(stackService, never()).setMinaSshdServiceIdByStackId(any(), any());

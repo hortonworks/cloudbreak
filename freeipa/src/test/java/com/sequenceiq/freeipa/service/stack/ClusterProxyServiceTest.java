@@ -11,12 +11,14 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.ccm.endpoint.ServiceFamilies;
 import com.sequenceiq.cloudbreak.clusterproxy.CcmV2Config;
@@ -37,7 +39,7 @@ import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 import com.sequenceiq.freeipa.util.ClusterProxyServiceAvailabilityChecker;
 import com.sequenceiq.freeipa.util.HealthCheckAvailabilityChecker;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ClusterProxyServiceTest {
 
     private static final long STACK_ID = 100L;
@@ -77,10 +79,11 @@ public class ClusterProxyServiceTest {
     @Mock
     private HealthCheckAvailabilityChecker healthCheckAvailabilityChecker;
 
-    @Test
-    public void testClusterProxyRegisterationWhenCCMV2() {
+    @ParameterizedTest
+    @EnumSource(value = Tunnel.class, names = {"CCMV2", "CCMV2_JUMPGATE"}, mode = EnumSource.Mode.INCLUDE)
+    public void testClusterProxyRegisterationWhenCCMV2OrJumpgate(Tunnel ccmv2Mode) {
         Stack aStack = getAStack();
-        aStack.setTunnel(Tunnel.CCMV2);
+        aStack.setTunnel(ccmv2Mode);
         aStack.setCcmV2AgentCrn("testAgentCrn");
 
         GatewayConfig gatewayConfig = new GatewayConfig("connectionAddress", null, "privateIpAddress",
@@ -102,15 +105,16 @@ public class ClusterProxyServiceTest {
         ConfigRegistrationRequest proxyRegisterationReq = captor.getValue();
 
         assertEquals(false, proxyRegisterationReq.isUseTunnel(), "CCMV1 tunnel should not be enabled");
-        assertEquals(true, proxyRegisterationReq.isUseCcmV2(), "CCMV2 should  be enabled.");
+        assertEquals(true, proxyRegisterationReq.isUseCcmV2(), ccmv2Mode.toString() + " should be enabled.");
         assertEquals(List.of(new CcmV2Config("testAgentCrn", "testAgentCrn-testInstanceId", "privateIpAddress",
-                        ServiceFamilies.GATEWAY.getDefaultPort())), proxyRegisterationReq.getCcmV2Configs(), "CCMV2 config should match");
+                        ServiceFamilies.GATEWAY.getDefaultPort())), proxyRegisterationReq.getCcmV2Configs(), ccmv2Mode.toString() + " config should match");
     }
 
-    @Test
-    public void testUpdateClusterProxyRegisterationWhenCCMV2() {
+    @ParameterizedTest
+    @EnumSource(value = Tunnel.class, names = {"CCMV2", "CCMV2_JUMPGATE"}, mode = EnumSource.Mode.INCLUDE)
+    public void testUpdateClusterProxyRegisterationWhenCCMV2OrJumpgate(Tunnel ccmv2Mode) {
         Stack aStack = getAStack();
-        aStack.setTunnel(Tunnel.CCMV2);
+        aStack.setTunnel(ccmv2Mode);
         aStack.setCcmV2AgentCrn("testAgentCrn");
 
         SecurityConfig securityConfig = new SecurityConfig();
@@ -147,12 +151,12 @@ public class ClusterProxyServiceTest {
         ConfigRegistrationRequest proxyRegisterationReq = captor.getValue();
 
         assertEquals(false, proxyRegisterationReq.isUseTunnel(), "CCMV1 tunnel should not be enabled");
-        assertEquals(true, proxyRegisterationReq.isUseCcmV2(), "CCMV2 should  be enabled.");
+        assertEquals(true, proxyRegisterationReq.isUseCcmV2(), ccmv2Mode.toString() + " should be enabled.");
         assertEquals(List.of(
                 new CcmV2Config("testAgentCrn", "testAgentCrn-testInstanceId1", "privateIpAddress1",
                         ServiceFamilies.GATEWAY.getDefaultPort()),
                 new CcmV2Config("testAgentCrn", "testAgentCrn-testInstanceId2", "privateIpAddress2",
-                        ServiceFamilies.GATEWAY.getDefaultPort())), proxyRegisterationReq.getCcmV2Configs(), "CCMV2 config should match");
+                        ServiceFamilies.GATEWAY.getDefaultPort())), proxyRegisterationReq.getCcmV2Configs(), ccmv2Mode.toString() + " config should match");
     }
 
     @Test

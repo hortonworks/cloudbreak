@@ -71,8 +71,9 @@ public class FreeIpaConfigService {
                 .withFreeIpaToReplicate(gatewayConfigService.getPrimaryGatewayConfig(stack))
                 .withHosts(hosts)
                 .withBackupConfig(determineAndSetBackup(stack))
-                .withCcmv2Enabled(stack.getTunnel().useCcmV2())
+                .withCcmv2Enabled(stack.getTunnel().useCcmV2OrJumpgate())
                 .withCidrBlocks(stack.getNetwork().getNetworkCidrs())
+                .withCcmv2JumpgateEnabled(stack.getTunnel().useCcmV2Jumpgate())
                 .build();
     }
 

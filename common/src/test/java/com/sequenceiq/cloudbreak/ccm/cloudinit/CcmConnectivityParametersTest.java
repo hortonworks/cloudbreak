@@ -24,6 +24,13 @@ public class CcmConnectivityParametersTest {
     }
 
     @Test
+    public void testConnectivityModeCcmV2Jumpgate() {
+        CcmV2JumpgateParameters ccmV2JumpgateParameters = mock(CcmV2JumpgateParameters.class);
+        underTest = new CcmConnectivityParameters(ccmV2JumpgateParameters);
+        assertEquals(CcmConnectivityMode.CCMV2_JUMPGATE, underTest.getConnectivityMode(), "CcmConnectivityMode should be CCMV2_JUMPGATE");
+    }
+
+    @Test
     public void testConnectivityModeNone() {
         underTest = new CcmConnectivityParameters();
         assertEquals(CcmConnectivityMode.NONE, underTest.getConnectivityMode(), "CcmConnectivityMode should be NONE");

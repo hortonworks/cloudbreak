@@ -25,6 +25,7 @@ export CCM_V2_AGENT_ENCIPHERED_KEY="agentEncipheredPrivateKey"
 export CCM_V2_AGENT_KEY_ID="agentKeyId"
 export CCM_V2_AGENT_CRN="agentCrn"
 export CCM_V2_AGENT_BACKEND_ID_PREFIX="agentCrn-"
+export IS_CCM_V2_JUMPGATE_ENABLED=false
 
 date >> /tmp/time.txt
 

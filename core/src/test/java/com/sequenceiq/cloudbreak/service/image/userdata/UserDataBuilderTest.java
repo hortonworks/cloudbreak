@@ -21,6 +21,7 @@ import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmConnectivityParameters;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmParameters;
+import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmV2JumpgateParameters;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmV2Parameters;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.DefaultCcmParameters;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.DefaultCcmV2Parameters;
@@ -114,6 +115,22 @@ public class UserDataBuilderTest {
 
         String expectedCoreScript = FileReaderUtils.readFileFromClasspath("azure-core-ccm-init.sh");
         String expectedGwScript = FileReaderUtils.readFileFromClasspath("azure-gateway-ccm-v2-init.sh");
+
+        Assert.assertEquals(expectedCoreScript, userdata.get(InstanceGroupType.CORE));
+        Assert.assertEquals(expectedGwScript, userdata.get(InstanceGroupType.GATEWAY));
+    }
+
+    @Test
+    public void testBuildUserDataWithCCMV2Jumpgate() throws IOException {
+        CcmV2JumpgateParameters ccmV2JumpgateParameters = new DefaultCcmV2Parameters("invertingProxyHost", "invertingProxyCertificate",
+                "agentCrn", "agentKeyId", "agentEncipheredPrivateKey", "agentCertificate");
+        CcmConnectivityParameters ccmConnectivityParameters = new CcmConnectivityParameters(ccmV2JumpgateParameters);
+
+        Map<InstanceGroupType, String> userdata = underTest.buildUserData(Platform.platform("AZURE"), "priv-key".getBytes(),
+                "cloudbreak", getPlatformParameters(), "pass", "cert", ccmConnectivityParameters, null);
+
+        String expectedCoreScript = FileReaderUtils.readFileFromClasspath("azure-core-ccm-init.sh");
+        String expectedGwScript = FileReaderUtils.readFileFromClasspath("azure-gateway-ccm-v2-jumpgate-init.sh");
 
         Assert.assertEquals(expectedCoreScript, userdata.get(InstanceGroupType.CORE));
         Assert.assertEquals(expectedGwScript, userdata.get(InstanceGroupType.GATEWAY));

@@ -59,6 +59,7 @@ public class CreateFreeIpaRequest implements TaggableRequest {
     @ApiModelProperty(FreeIpaModelDescriptions.NETWORK)
     private NetworkRequest network;
 
+    @Valid
     @ApiModelProperty(FreeIpaModelDescriptions.IMAGE_SETTINGS)
     private ImageSettingsRequest image;
 

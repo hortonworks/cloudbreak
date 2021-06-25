@@ -40,7 +40,7 @@ public class CcmKeyDeregistrationHandler implements EventHandler<CcmKeyDeregistr
                 ccmResourceTerminationListener.deregisterCcmSshTunnelingKey(request.getActorCrn(), request.getAccountId(), request.getKeyId(),
                         request.getMinaSshdServiceId());
                 LOGGER.debug("De-registered CCM key '{}' for freeipa stack '{}'", request.getMinaSshdServiceId(), request.getResourceId());
-            } else if (request.getTunnel().useCcmV2()) {
+            } else if (request.getTunnel().useCcmV2OrJumpgate()) {
                 LOGGER.debug("De-registering CCM V2 key '{}' for freeipa stack {}", request.getCcmV2AgentCrn(), request.getResourceId());
                 ccmV2AgentTerminationListener.deregisterInvertingProxyAgent(request.getCcmV2AgentCrn());
                 LOGGER.debug("De-registered CCM V2 key '{}' for freeipa stack {}", request.getCcmV2AgentCrn(), request.getResourceId());

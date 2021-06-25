@@ -35,6 +35,7 @@ public class AttachedFreeIpaRequest implements Serializable {
     @ApiModelProperty(EnvironmentModelDescription.FREEIPA_GCP_PARAMETERS)
     private GcpFreeIpaParameters gcp;
 
+    @Valid
     @ApiModelProperty(EnvironmentModelDescription.FREEIPA_IMAGE)
     private FreeIpaImageRequest image;
 
