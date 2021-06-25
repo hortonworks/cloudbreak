@@ -7,21 +7,21 @@ import java.util.Map;
 
 import javax.annotation.Nonnull;
 
-public class DefaultCcmV2Parameters implements CcmV2Parameters, Serializable {
+public class DefaultCcmV2Parameters implements CcmV2JumpgateParameters, Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private String invertingProxyHost;
+    private final String invertingProxyHost;
 
-    private String invertingProxyCertificate;
+    private final String invertingProxyCertificate;
 
-    private String agentCrn;
+    private final String agentCrn;
 
-    private String agentKeyId;
+    private final String agentKeyId;
 
-    private String agentCertificate;
+    private final String agentCertificate;
 
-    private String agentEncipheredPrivateKey;
+    private final String agentEncipheredPrivateKey;
 
     public DefaultCcmV2Parameters(@Nonnull String invertingProxyHost, @Nonnull String invertingProxyCertificate, @Nonnull String agentCrn,
             @Nonnull String agentKeyId, @Nonnull String agentEncipheredPrivateKey, @Nonnull String agentCertificate) {

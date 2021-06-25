@@ -41,6 +41,8 @@ public class FreeIpaConfigView {
 
     private final List<String> cidrBlocks;
 
+    private final boolean ccmv2JumpgateEnabled;
+
     @SuppressWarnings("ExecutableStatementCount")
     private FreeIpaConfigView(Builder builder) {
         this.realm = builder.realm;
@@ -55,6 +57,7 @@ public class FreeIpaConfigView {
         this.backup = builder.backup;
         this.ccmv2Enabled = builder.ccmv2Enabled;
         this.cidrBlocks = builder.cidrBlocks;
+        this.ccmv2JumpgateEnabled = builder.ccmv2JumpgateEnabled;
     }
 
     public String getRealm() {
@@ -101,6 +104,14 @@ public class FreeIpaConfigView {
         return cidrBlocks;
     }
 
+    public boolean isCcmv2Enabled() {
+        return ccmv2Enabled;
+    }
+
+    public boolean isCcmv2JumpgateEnabled() {
+        return ccmv2JumpgateEnabled;
+    }
+
     @SuppressWarnings("ExecutableStatementCount")
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
@@ -113,6 +124,7 @@ public class FreeIpaConfigView {
         map.put("freeipa_to_replicate", ObjectUtils.defaultIfNull(this.freeipaToReplicate, EMPTY_CONFIG_DEFAULT));
         map.put("freeipa_to_replicate_ip", ObjectUtils.defaultIfNull(this.freeipaToReplicateIp, EMPTY_CONFIG_DEFAULT));
         map.put("enable_ccmv2", this.ccmv2Enabled);
+        map.put("enable_ccmv2_jumpgate", this.ccmv2JumpgateEnabled);
         if (MapUtils.isNotEmpty(backup.toMap())) {
             map.put("backup", this.backup.toMap());
         }
@@ -148,6 +160,8 @@ public class FreeIpaConfigView {
         private boolean ccmv2Enabled;
 
         private List<String> cidrBlocks;
+
+        private boolean ccmv2JumpgateEnabled;
 
         public FreeIpaConfigView build() {
             return new FreeIpaConfigView(this);
@@ -210,6 +224,11 @@ public class FreeIpaConfigView {
 
         public Builder withCidrBlocks(List<String> cidrBlocks) {
             this.cidrBlocks = cidrBlocks;
+            return this;
+        }
+
+        public Builder withCcmv2JumpgateEnabled(boolean ccmv2JumpgateEnabled) {
+            this.ccmv2JumpgateEnabled = ccmv2JumpgateEnabled;
             return this;
         }
     }

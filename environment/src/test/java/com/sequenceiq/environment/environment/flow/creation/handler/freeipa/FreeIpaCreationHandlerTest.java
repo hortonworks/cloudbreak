@@ -1,8 +1,8 @@
 package com.sequenceiq.environment.environment.flow.creation.handler.freeipa;
 
 import static java.util.Collections.emptyMap;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -18,7 +18,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import com.sequenceiq.environment.environment.v1.converter.BackupConverter;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -48,6 +47,7 @@ import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsSpotParamete
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
+import com.sequenceiq.environment.environment.v1.converter.BackupConverter;
 import com.sequenceiq.environment.environment.v1.converter.TelemetryApiConverter;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.flow.reactor.api.event.BaseNamedFlowEvent;
@@ -305,7 +305,7 @@ public class FreeIpaCreationHandlerTest {
     }
 
     @Test
-    public void testFreeIpaImageIsNullInCaseOfMissingImageCatalog() {
+    public void testFreeIpaImageIdIsPopulatedInCaseOfMissingImageCatalog() {
         EnvironmentDto environmentDto = someEnvironmentWithFreeIpaCreation();
         environmentDto.getFreeIpaCreation().setImageId(IMAGE_ID);
         environmentDto.getFreeIpaCreation().setImageCatalog(null);
@@ -330,8 +330,8 @@ public class FreeIpaCreationHandlerTest {
         ArgumentCaptor<CreateFreeIpaRequest> freeIpaRequestCaptor = ArgumentCaptor.forClass(CreateFreeIpaRequest.class);
         verify(freeIpaService).create(freeIpaRequestCaptor.capture());
         CreateFreeIpaRequest freeIpaRequest = freeIpaRequestCaptor.getValue();
-        assertNull(freeIpaRequest.getImage());
-        assertNull(freeIpaRequest.getImage());
+        assertNull(freeIpaRequest.getImage().getCatalog());
+        assertEquals(IMAGE_ID, freeIpaRequest.getImage().getId());
     }
 
     @Test

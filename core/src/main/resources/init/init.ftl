@@ -62,6 +62,11 @@ export CCM_V2_AGENT_BACKEND_ID_PREFIX="${ccmV2AgentBackendIdPrefix}"
 <#else>
 export IS_CCM_V2_ENABLED=false
 </#if>
+<#if ccmV2JumpgateEnabled!false>
+export IS_CCM_V2_JUMPGATE_ENABLED=true
+<#else>
+export IS_CCM_V2_JUMPGATE_ENABLED=false
+</#if>
 
 ${customUserData}
 

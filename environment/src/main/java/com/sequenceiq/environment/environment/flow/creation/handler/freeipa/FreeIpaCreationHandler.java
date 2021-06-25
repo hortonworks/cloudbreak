@@ -17,9 +17,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-import com.sequenceiq.common.api.backup.request.BackupRequest;
-import com.sequenceiq.environment.environment.v1.converter.BackupConverter;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -34,6 +31,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
 import com.sequenceiq.cloudbreak.util.CidrUtil;
+import com.sequenceiq.common.api.backup.request.BackupRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.configuration.SupportedPlatforms;
@@ -47,6 +45,7 @@ import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEve
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationFailureEvent;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
+import com.sequenceiq.environment.environment.v1.converter.BackupConverter;
 import com.sequenceiq.environment.environment.v1.converter.TelemetryApiConverter;
 import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
@@ -57,11 +56,12 @@ import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetsRequest;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneNetwork;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.attachchildenv.AttachChildEnvironmentRequest;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.aws.AwsInstanceTemplateParameters;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.aws.AwsInstanceTemplateSpotParameters;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceTemplateRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.aws.AwsInstanceTemplateParameters;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.aws.AwsInstanceTemplateSpotParameters;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.region.PlacementRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.security.SecurityGroupRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.security.SecurityRuleRequest;
@@ -374,7 +374,7 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
         if (environment.getFreeIpaCreation() != null) {
             String imageCatalog = environment.getFreeIpaCreation().getImageCatalog();
             String imageId = environment.getFreeIpaCreation().getImageId();
-            if (!Strings.isNullOrEmpty(imageCatalog) && !Strings.isNullOrEmpty(imageId)) {
+            if (!Strings.isNullOrEmpty(imageId)) {
                 LOGGER.info("FreeIPA creation with a pre-defined image catalog and image id: '{}', '{}'", imageCatalog, imageId);
                 ImageSettingsRequest imageSettings = new ImageSettingsRequest();
                 imageSettings.setCatalog(imageCatalog);

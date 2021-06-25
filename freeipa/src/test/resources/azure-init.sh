@@ -18,6 +18,7 @@ export CB_CERT=cert
 export IS_PROXY_ENABLED=false
 export IS_CCM_ENABLED=false
 export IS_CCM_V2_ENABLED=false
+export IS_CCM_V2_JUMPGATE_ENABLED=false
 
 date >> /tmp/time.txt
 
