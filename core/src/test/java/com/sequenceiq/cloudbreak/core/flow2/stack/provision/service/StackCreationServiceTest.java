@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -26,6 +27,7 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceStoreMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterConfig;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
@@ -46,19 +48,21 @@ class StackCreationServiceTest {
     @InjectMocks
     private StackCreationService underTest;
 
-    @Test
-    void setInstanceStoreCount() {
+    @BeforeEach
+    void setUp() {
         CloudConnector<Object> cloudConnector = Mockito.mock(CloudConnector.class);
         when(cloudPlatformConnectors.get(any())).thenReturn(cloudConnector);
         MetadataCollector metadataCollector = Mockito.mock(MetadataCollector.class);
         when(cloudConnector.metadata()).thenReturn(metadataCollector);
         Authenticator authenticator = Mockito.mock(Authenticator.class);
         when(cloudConnector.authentication()).thenReturn(authenticator);
-
         InstanceStoreMetadata instanceStoreMetadata = getInstanceStoreMetadata();
         when(metadataCollector.collectInstanceStorageCount(any(), any())).thenReturn(instanceStoreMetadata);
+    }
 
-        StackContext context = getStackContext();
+    @Test
+    void setInstanceStoreCount() {
+        StackContext context = getStackContext(AwsDiskType.Standard.value());
         underTest.setInstanceStoreCount(context);
 
         ArgumentCaptor<Template> savedTemplate = ArgumentCaptor.forClass(Template.class);
@@ -67,7 +71,27 @@ class StackCreationServiceTest {
         Set<VolumeTemplate> savedVolumeTemplates = savedTemplate.getValue().getVolumeTemplates();
         assertEquals(2, savedVolumeTemplates.size());
 
+        assertEquals(TemporaryStorage.EPHEMERAL_VOLUMES, savedTemplate.getValue().getTemporaryStorage());
+
         Set<String> expectedTypes = new HashSet<>(Set.of(AwsDiskType.Standard.value(), AwsDiskType.Ephemeral.value()));
+        savedVolumeTemplates.stream().map(VolumeTemplate::getVolumeType).forEach(expectedTypes::remove);
+        assertTrue(expectedTypes.isEmpty());
+    }
+
+    @Test
+    void setInstanceStoreCountOnClusterWithEphemeralDisksOnly() {
+        StackContext context = getStackContext(AwsDiskType.Ephemeral.value());
+        underTest.setInstanceStoreCount(context);
+
+        ArgumentCaptor<Template> savedTemplate = ArgumentCaptor.forClass(Template.class);
+        verify(templateService).savePure(savedTemplate.capture());
+
+        Set<VolumeTemplate> savedVolumeTemplates = savedTemplate.getValue().getVolumeTemplates();
+        assertEquals(1, savedVolumeTemplates.size());
+
+        assertEquals(TemporaryStorage.EPHEMERAL_VOLUMES_ONLY, savedTemplate.getValue().getTemporaryStorage());
+
+        Set<String> expectedTypes = new HashSet<>(Set.of(AwsDiskType.Ephemeral.value()));
         savedVolumeTemplates.stream().map(VolumeTemplate::getVolumeType).forEach(expectedTypes::remove);
         assertTrue(expectedTypes.isEmpty());
     }
@@ -79,13 +103,14 @@ class StackCreationServiceTest {
         return instanceStoreMetadata;
     }
 
-    private StackContext getStackContext() {
+    private StackContext getStackContext(String volumeType) {
         Stack stack = new Stack();
         InstanceGroup group = new InstanceGroup();
         Template template = new Template();
         template.setInstanceType("vm.type");
+        template.setTemporaryStorage(TemporaryStorage.EPHEMERAL_VOLUMES);
         VolumeTemplate volumeTemplate = new VolumeTemplate();
-        volumeTemplate.setVolumeType(AwsDiskType.Standard.value());
+        volumeTemplate.setVolumeType(volumeType);
         template.setVolumeTemplates(new HashSet<>(Set.of(volumeTemplate)));
         group.setTemplate(template);
         stack.setInstanceGroups(Set.of(group));

@@ -52,6 +52,7 @@ import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterConfig;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
@@ -305,6 +306,11 @@ public class StackCreationService {
                     .map(instCfgMap -> instCfgMap.get(template.getInstanceType()))
                     .map(toVolumeTemplate(template))
                     .ifPresent(volumeTemplate -> template.getVolumeTemplates().add(volumeTemplate));
+        } else {
+            LOGGER.debug("Instance storage was already requested. Setting temporary storage in template to: {}. " +
+                    "Group name: {}, Template id: {}, instance type: {}",
+                    TemporaryStorage.EPHEMERAL_VOLUMES_ONLY.name(), ig.getGroupName(), template.getId(), template.getInstanceType());
+            template.setTemporaryStorage(TemporaryStorage.EPHEMERAL_VOLUMES_ONLY);
         }
     }
 
