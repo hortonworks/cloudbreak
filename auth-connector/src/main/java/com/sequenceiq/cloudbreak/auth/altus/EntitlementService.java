@@ -37,6 +37,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENDPOIN
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_EXPERIENCE_DELETION_BY_ENVIRONMENT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FMS_CLUSTER_PROXY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_HA_REPAIR;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_GCP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MEDIUM_DUTY_SDX;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_NETWORK_PREFLIGHT_NOTIFICATIONS;
@@ -314,6 +315,10 @@ public class EntitlementService {
 
     public boolean ephemeralDisksForTempDataEnabled(String accountId) {
         return isEntitlementRegistered(accountId, EPHEMERAL_DISKS_FOR_TEMP_DATA);
+    }
+
+    public boolean isFreeIpaUpgradeEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_FREEIPA_UPGRADE);
     }
 
     public List<String> getEntitlements(String accountId) {

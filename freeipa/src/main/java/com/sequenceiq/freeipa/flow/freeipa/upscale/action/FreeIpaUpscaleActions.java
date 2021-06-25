@@ -140,6 +140,8 @@ public class FreeIpaUpscaleActions {
                 setOperationId(variables, operationId);
                 setInstanceCountByGroup(variables, payload.getInstanceCountByGroup());
                 setRepair(variables, payload.isRepair());
+                setChainedAction(variables, payload.isChained());
+                setFinalChain(variables, payload.isFinalChain());
                 LOGGER.info("Starting upscale {}", payload);
                 stackUpdater.updateStackStatus(stack.getId(), getInProgressStatus(variables), "Starting upscale");
                 sendEvent(context, UPSCALE_STARTING_FINISHED_EVENT.selector(), new StackEvent(stack.getId()));
@@ -533,7 +535,7 @@ public class FreeIpaUpscaleActions {
             protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
                 Stack stack = context.getStack();
                 stackUpdater.updateStackStatus(stack.getId(), getUpscaleCompleteStatus(variables), "Upscale complete");
-                if (!isRepair(variables)) {
+                if (!isRepair(variables) || !isChainedAction(variables) || isFinalChain(variables)) {
                     SuccessDetails successDetails = new SuccessDetails(stack.getEnvironmentCrn());
                     successDetails.getAdditionalDetails().put("Hosts", getUpscaleHosts(variables));
                     operationService.completeOperation(stack.getAccountId(), getOperationId(variables), List.of(successDetails), Collections.emptyList());
