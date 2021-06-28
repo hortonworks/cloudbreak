@@ -2,8 +2,11 @@ package com.sequenceiq.cloudbreak.cloud.aws;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.amazonaws.services.cloudformation.model.AmazonCloudFormationException;
 import com.amazonaws.services.cloudformation.model.GetTemplateRequest;
 import com.amazonaws.services.cloudformation.model.GetTemplateResult;
 import com.amazonaws.services.cloudformation.model.UpdateStackRequest;
@@ -16,6 +19,8 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 
 @Service
 public class AwsLaunchTemplateImageUpdateService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AwsLaunchTemplateImageUpdateService.class);
 
     @Inject
     private AwsCloudFormationClient awsClient;
@@ -34,7 +39,15 @@ public class AwsLaunchTemplateImageUpdateService {
 
         String newCfTemplate = templateJson.getValue();
         UpdateStackRequest updateStackRequest = awsStackRequestHelper.createUpdateStackRequest(authenticatedContext, stack, cfStackName, newCfTemplate);
-        cloudFormationClient.updateStack(updateStackRequest);
+        try {
+            cloudFormationClient.updateStack(updateStackRequest);
+        } catch (AmazonCloudFormationException e) {
+            if ("ValidationError".equals(e.getErrorCode()) && e.getErrorMessage().contains("No updates are to be performed")) {
+                LOGGER.debug(String.format("CloudFormation is not updated as it is already in the latest state, name: %s", cfResource.getName()), e);
+            } else {
+                throw e;
+            }
+        }
     }
 
     private String getCfTemplate(CloudResource cfResource, AmazonCloudFormationClient cloudFormationClient) {
