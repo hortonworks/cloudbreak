@@ -156,9 +156,6 @@ class EntitlementServiceTest {
                 {"CDP_NODESTATUS_ENABLE_SALT_PING", (EntitlementCheckFunction) EntitlementService::nodestatusSaltPingEnabled, false},
                 {"CDP_NODESTATUS_ENABLE_SALT_PING", (EntitlementCheckFunction) EntitlementService::nodestatusSaltPingEnabled, true},
 
-                {"DEACTIVATE_USER", (EntitlementCheckFunction) EntitlementService::deactivateUserEnabled, false},
-                {"DEACTIVATE_USER", (EntitlementCheckFunction) EntitlementService::deactivateUserEnabled, true},
-
                 {"EPHEMERAL_DISKS_FOR_TEMP_DATA", (EntitlementCheckFunction) EntitlementService::ephemeralDisksForTempDataEnabled, false},
                 {"EPHEMERAL_DISKS_FOR_TEMP_DATA", (EntitlementCheckFunction) EntitlementService::ephemeralDisksForTempDataEnabled, true}
         };
