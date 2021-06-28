@@ -29,7 +29,7 @@ public class UserAddOperationTest {
     @Test
     public void testInvokeWhenUserProtected() {
         assertThrows(FreeIpaClientException.class, () ->
-                UserAddOperation.create("admin", "admin", "admin").invoke(freeIpaClient));
+                UserAddOperation.create("admin", "admin", "admin", false).invoke(freeIpaClient));
         verifyNoInteractions(freeIpaClient);
     }
 
@@ -40,7 +40,7 @@ public class UserAddOperationTest {
 
         when(freeIpaClient.invoke(any(), anyList(), any(), any())).thenReturn(rpcResponse);
 
-        UserAddOperation.create(USER_NAME, USER_NAME, USER_NAME).invoke(freeIpaClient);
+        UserAddOperation.create(USER_NAME, USER_NAME, USER_NAME, false).invoke(freeIpaClient);
 
         verify(freeIpaClient).invoke(eq("user_add"), anyList(), any(), any());
     }

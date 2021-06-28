@@ -17,6 +17,8 @@ import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
+import com.sequenceiq.freeipa.client.operation.UserDisableOperation;
+import com.sequenceiq.freeipa.client.operation.UserEnableOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -103,7 +105,9 @@ public class UserSyncService {
         ADD_USERS_TO_GROUPS,
         REMOVE_USERS_FROM_GROUPS,
         REMOVE_USERS,
-        REMOVE_GROUPS
+        REMOVE_GROUPS,
+        DISABLE_USERS,
+        ENABLE_USERS
     }
 
     @VisibleForTesting
@@ -501,7 +505,7 @@ public class UserSyncService {
     @VisibleForTesting
     void applyStateDifferenceToIpa(String environmentCrn, FreeIpaClient freeIpaClient, UsersStateDifference stateDifference,
             BiConsumer<String, String> warnings, boolean fmsToFreeipaBatchCallEnabled) throws FreeIpaClientException {
-        LOGGER.info("Applying state difference to environment {}.", environmentCrn);
+        LOGGER.info("Applying state difference {} to environment {}.", stateDifference, environmentCrn);
 
         LOGGER.debug("Starting {} for {} groups ...", LogEvent.ADD_GROUPS,
                 stateDifference.getGroupsToAdd().size());
@@ -512,6 +516,16 @@ public class UserSyncService {
                 stateDifference.getUsersToAdd().size());
         addUsers(fmsToFreeipaBatchCallEnabled, freeIpaClient, stateDifference.getUsersToAdd(), warnings);
         LOGGER.debug("Finished {}.", LogEvent.ADD_USERS);
+
+        LOGGER.debug("Starting {} for {} users ...", LogEvent.DISABLE_USERS,
+                stateDifference.getUsersToDisable().size());
+        disableUsers(fmsToFreeipaBatchCallEnabled, freeIpaClient, stateDifference.getUsersToDisable(), warnings);
+        LOGGER.debug("Finished {}.", LogEvent.DISABLE_USERS);
+
+        LOGGER.debug("Starting {} for {} users ...", LogEvent.ENABLE_USERS,
+                stateDifference.getUsersToEnable().size());
+        enableUsers(fmsToFreeipaBatchCallEnabled, freeIpaClient, stateDifference.getUsersToEnable(), warnings);
+        LOGGER.debug("Finished {}.", LogEvent.ENABLE_USERS);
 
         LOGGER.debug("Starting {} for {} group memberships ...", LogEvent.ADD_USERS_TO_GROUPS,
                 stateDifference.getGroupMembershipToAdd().size());
@@ -548,10 +562,31 @@ public class UserSyncService {
             BiConsumer<String, String> warnings) throws FreeIpaClientException {
         List<UserAddOperation> operations = Lists.newArrayList();
         for (FmsUser fmsUser : fmsUsers) {
-            operations.add(UserAddOperation.create(fmsUser.getName(), fmsUser.getFirstName(), fmsUser.getLastName()));
+            operations.add(UserAddOperation.create(fmsUser.getName(), fmsUser.getFirstName(), fmsUser.getLastName(),
+                    fmsUser.getState() == FmsUser.State.DISABLED));
         }
         invokeOperation(operations, fmsToFreeipaBatchCallEnabled, freeIpaClient, warnings,
                 Set.of(FreeIpaErrorCodes.DUPLICATE_ENTRY), true);
+    }
+
+    void disableUsers(boolean fmsToFreeipaBatchCallEnabled, FreeIpaClient freeIpaClient, Set<String> users,
+            BiConsumer<String, String> warnings) throws FreeIpaClientException {
+        List<UserDisableOperation> operations = Lists.newArrayList();
+        for (String user : users) {
+            operations.add(UserDisableOperation.create(user));
+        }
+        invokeOperation(operations, fmsToFreeipaBatchCallEnabled, freeIpaClient, warnings,
+                Set.of(FreeIpaErrorCodes.ALREADY_INACTIVE), true);
+    }
+
+    void enableUsers(boolean fmsToFreeipaBatchCallEnabled, FreeIpaClient freeIpaClient, Set<String> users,
+            BiConsumer<String, String> warnings) throws FreeIpaClientException {
+        List<UserEnableOperation> operations = Lists.newArrayList();
+        for (String user : users) {
+            operations.add(UserEnableOperation.create(user));
+        }
+        invokeOperation(operations, fmsToFreeipaBatchCallEnabled, freeIpaClient, warnings,
+                Set.of(FreeIpaErrorCodes.ALREADY_ACTIVE), true);
     }
 
     void removeUsers(boolean fmsToFreeipaBatchCallEnabled, FreeIpaClient freeIpaClient, Set<String> fmsUsers,

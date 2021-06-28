@@ -22,24 +22,29 @@ import com.sequenceiq.freeipa.service.freeipa.user.UserSyncConstants;
 public class UsersStateDifference {
     private static final Logger LOGGER = LoggerFactory.getLogger(UsersStateDifference.class);
 
-    private ImmutableSet<FmsGroup> groupsToAdd;
+    private final ImmutableSet<FmsGroup> groupsToAdd;
 
-    private ImmutableSet<FmsGroup> groupsToRemove;
+    private final ImmutableSet<FmsGroup> groupsToRemove;
 
-    private ImmutableSet<FmsUser> usersToAdd;
+    private final ImmutableSet<FmsUser> usersToAdd;
 
     private final ImmutableSet<String> usersWithCredentialsToUpdate;
 
-    private ImmutableSet<String> usersToRemove;
+    private final ImmutableSet<String> usersToRemove;
 
-    private ImmutableMultimap<String, String> groupMembershipToAdd;
+    private final ImmutableSet<String> usersToDisable;
 
-    private ImmutableMultimap<String, String> groupMembershipToRemove;
+    private final ImmutableSet<String> usersToEnable;
+
+    private final ImmutableMultimap<String, String> groupMembershipToAdd;
+
+    private final ImmutableMultimap<String, String> groupMembershipToRemove;
 
     @SuppressWarnings("checkstyle:ExecutableStatementCount")
     public UsersStateDifference(ImmutableSet<FmsGroup> groupsToAdd, ImmutableSet<FmsGroup> groupsToRemove,
             ImmutableSet<FmsUser> usersToAdd, ImmutableSet<String> usersWithCredentialsToUpdate, ImmutableSet<String> usersToRemove,
-            ImmutableMultimap<String, String> groupMembershipToAdd, ImmutableMultimap<String, String> groupMembershipToRemove) {
+            ImmutableMultimap<String, String> groupMembershipToAdd, ImmutableMultimap<String, String> groupMembershipToRemove,
+            ImmutableSet<String> usersToDisable, ImmutableSet<String> usersToEnable) {
         this.groupsToAdd = requireNonNull(groupsToAdd);
         this.groupsToRemove = requireNonNull(groupsToRemove);
         this.usersToAdd = requireNonNull(usersToAdd);
@@ -47,6 +52,8 @@ public class UsersStateDifference {
         this.usersToRemove = requireNonNull(usersToRemove);
         this.groupMembershipToAdd = requireNonNull(groupMembershipToAdd);
         this.groupMembershipToRemove = requireNonNull(groupMembershipToRemove);
+        this.usersToDisable = requireNonNull(usersToDisable);
+        this.usersToEnable = requireNonNull(usersToEnable);
     }
 
     public ImmutableSet<FmsGroup> getGroupsToAdd() {
@@ -77,6 +84,14 @@ public class UsersStateDifference {
         return groupMembershipToRemove;
     }
 
+    public ImmutableSet<String> getUsersToDisable() {
+        return usersToDisable;
+    }
+
+    public ImmutableSet<String> getUsersToEnable() {
+        return usersToEnable;
+    }
+
     @Override
     public String toString() {
         return "UsersStateDifference{"
@@ -87,6 +102,8 @@ public class UsersStateDifference {
                 + ", usersToRemove=" + usersToRemove
                 + ", groupMembershipToAdd=" + groupMembershipToAdd
                 + ", groupMembershipToRemove=" + groupMembershipToRemove
+                + ", usersToDisable=" + usersToDisable
+                + ", usersToEnable=" + usersToEnable
                 + '}';
     }
 
@@ -98,7 +115,9 @@ public class UsersStateDifference {
                 calculateUsersWithCredentialsToUpdate(umsState, ipaState, options.isCredentialsUpdateOptimizationEnabled()),
                 calculateUsersToRemove(umsState, ipaState),
                 calculateGroupMembershipToAdd(umsState, ipaState),
-                calculateGroupMembershipToRemove(umsState, ipaState));
+                calculateGroupMembershipToRemove(umsState, ipaState),
+                calculateUsersToDisable(umsState, ipaState),
+                calculateUsersToEnable(umsState, ipaState));
     }
 
     public static UsersStateDifference forDeletedUser(String deletedUser, Collection<String> groupMembershipsToRemove) {
@@ -111,7 +130,9 @@ public class UsersStateDifference {
                 ImmutableSet.of(),
                 ImmutableSet.of(deletedUser),
                 ImmutableMultimap.of(),
-                ImmutableMultimap.copyOf(groupMembershipsToRemoveMap));
+                ImmutableMultimap.copyOf(groupMembershipsToRemoveMap),
+                ImmutableSet.of(),
+                ImmutableSet.of());
     }
 
     public static ImmutableSet<FmsUser> calculateUsersToAdd(UmsUsersState umsState, UsersState ipaState) {
@@ -130,6 +151,35 @@ public class UsersStateDifference {
         LOGGER.debug("userToAdd = {}", usersToAdd.stream().map(FmsUser::getName).collect(Collectors.toSet()));
 
         return usersToAdd;
+    }
+
+    public static ImmutableSet<String> calculateUsersToDisable(UmsUsersState umsState, UsersState ipaState) {
+        ImmutableSet<String> usersToDisable = calculateUsersWithDifferingState(umsState, ipaState, FmsUser.State.DISABLED);
+        LOGGER.info("usersToDisable size = {}", usersToDisable.size());
+        LOGGER.debug("userToDisable = {}", usersToDisable);
+
+        return usersToDisable;
+    }
+
+    public static ImmutableSet<String> calculateUsersToEnable(UmsUsersState umsState, UsersState ipaState) {
+        ImmutableSet<String> usersToEnable = calculateUsersWithDifferingState(umsState, ipaState, FmsUser.State.ENABLED);
+        LOGGER.info("usersToEnable size = {}", usersToEnable.size());
+        LOGGER.debug("userToEnable = {}", usersToEnable);
+
+        return usersToEnable;
+    }
+
+    private static ImmutableSet<String> calculateUsersWithDifferingState(
+            UmsUsersState umsState, UsersState ipaState, FmsUser.State state) {
+        Map<String, FmsUser> existingIpaUsers = ipaState.getUsers().stream()
+                .collect(Collectors.toMap(FmsUser::getName, Function.identity()));
+        return ImmutableSet.copyOf(umsState.getUsersState().getUsers().stream()
+                .filter(u -> u.getState() == state &&
+                        existingIpaUsers.containsKey(u.getName()) &&
+                        existingIpaUsers.get(u.getName()).getState() != state)
+                .map(FmsUser::getName)
+                .filter(username -> !FreeIpaChecks.IPA_PROTECTED_USERS.contains(username))
+                .collect(Collectors.toSet()));
     }
 
     public static ImmutableSet<String> calculateUsersWithCredentialsToUpdate(UmsUsersState umsState, UsersState ipaState,

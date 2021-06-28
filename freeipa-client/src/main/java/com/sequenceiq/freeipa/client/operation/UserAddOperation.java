@@ -24,14 +24,17 @@ public class UserAddOperation extends AbstractFreeipaOperation<User> {
 
     private String lastName;
 
-    private UserAddOperation(String user, String firstName, String lastName) {
+    private boolean disabled;
+
+    private UserAddOperation(String user, String firstName, String lastName, boolean disabled) {
         this.user = user;
         this.firstName = firstName;
         this.lastName = lastName;
+        this.disabled = disabled;
     }
 
-    public static UserAddOperation create(String user, String firstName, String lastName) {
-        return new UserAddOperation(user, firstName, lastName);
+    public static UserAddOperation create(String user, String firstName, String lastName, boolean disabled) {
+        return new UserAddOperation(user, firstName, lastName, disabled);
     }
 
     @Override
@@ -51,7 +54,8 @@ public class UserAddOperation extends AbstractFreeipaOperation<User> {
                 "sn", lastName,
                 "loginshell", "/bin/bash",
                 "random", true,
-                "setattr", "krbPasswordExpiration=" + MAX_PASSWORD_EXPIRATION_DATETIME
+                "setattr", List.of("krbPasswordExpiration=" + MAX_PASSWORD_EXPIRATION_DATETIME,
+                        "nsAccountLock=" + disabled)
         );
     }
 

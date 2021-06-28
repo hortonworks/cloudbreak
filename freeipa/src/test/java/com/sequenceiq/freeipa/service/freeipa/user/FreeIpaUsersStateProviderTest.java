@@ -37,9 +37,9 @@ import com.sequenceiq.freeipa.service.freeipa.user.model.UsersState;
 @ExtendWith(MockitoExtension.class)
 class FreeIpaUsersStateProviderTest {
 
-    private static final boolean USER_ENABLED = true;
+    private static final boolean USER_ENABLED = false;
 
-    private static final boolean USER_DISABLED = false;
+    private static final boolean USER_DISABLED = true;
 
     @InjectMocks
     FreeIpaUsersStateProvider underTest;
@@ -219,14 +219,14 @@ class FreeIpaUsersStateProviderTest {
     }
 
     private com.sequenceiq.freeipa.client.model.User createIpaUser(
-            String uid, List<String> memberOfGroup, boolean enabled) {
+            String uid, List<String> memberOfGroup, boolean disabled) {
         com.sequenceiq.freeipa.client.model.User ipaUser = new com.sequenceiq.freeipa.client.model.User();
         ipaUser.setUid(uid);
         ipaUser.setDn(UUID.randomUUID().toString());
         ipaUser.setSn(UUID.randomUUID().toString());
         ipaUser.setGivenname(UUID.randomUUID().toString());
         ipaUser.setMemberOfGroup(memberOfGroup);
-        ipaUser.setNsAccountLock(enabled);
+        ipaUser.setNsAccountLock(disabled);
         return ipaUser;
     }
 
