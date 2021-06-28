@@ -1,14 +1,13 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.List;
 
 import org.junit.Before;
@@ -17,9 +16,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import com.amazonaws.services.cloudformation.model.AmazonCloudFormationException;
 import com.amazonaws.services.cloudformation.model.GetTemplateResult;
 import com.amazonaws.services.cloudformation.model.UpdateStackRequest;
-import com.github.jknack.handlebars.internal.Files;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
@@ -33,6 +32,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.common.api.type.ResourceType;
 
 public class AwsLaunchTemplateImageUpdateServiceTest {
@@ -104,7 +104,8 @@ public class AwsLaunchTemplateImageUpdateServiceTest {
                 .type(ResourceType.CLOUDFORMATION_STACK)
                 .name(cfStackName)
                 .build();
-        String template = Files.read(new File("src/test/resources/json/aws-cf-template.json"), Charset.defaultCharset());
+
+        String template = FileReaderUtils.readFileFromClasspath("json/aws-cf-template.json");
         String cfTemplateBody = JsonUtil.minify(String.format(template, "{\"Ref\":\"AMI\"}"));
         when(cloudFormationClient.getTemplate(any())).thenReturn(new GetTemplateResult().withTemplateBody(cfTemplateBody));
 
@@ -112,6 +113,59 @@ public class AwsLaunchTemplateImageUpdateServiceTest {
         when(awsStackRequestHelper.createUpdateStackRequest(ac, stack, cfStackName, cfTemplateBody)).thenReturn(updateStackRequest);
 
         underTest.updateImage(ac, stack, cfResource);
+
+        verify(awsStackRequestHelper).createUpdateStackRequest(ac, stack, cfStackName, cfTemplateBody);
+        verify(cloudFormationClient).updateStack(updateStackRequest);
+    }
+
+    @Test
+    public void testUpdateImageForValidationError() throws IOException {
+        String cfStackName = "cf";
+        CloudResource cfResource = CloudResource.builder()
+                .type(ResourceType.CLOUDFORMATION_STACK)
+                .name(cfStackName)
+                .build();
+        String template = FileReaderUtils.readFileFromClasspath("json/aws-cf-template.json");
+        String cfTemplateBody = JsonUtil.minify(String.format(template, "{\"Ref\":\"AMI\"}"));
+        when(cloudFormationClient.getTemplate(any())).thenReturn(new GetTemplateResult().withTemplateBody(cfTemplateBody));
+        when(awsClient.createCloudFormationClient(any(), any())).thenReturn(cloudFormationClient);
+
+        UpdateStackRequest updateStackRequest = new UpdateStackRequest();
+        when(awsStackRequestHelper.createUpdateStackRequest(ac, stack, cfStackName, cfTemplateBody)).thenReturn(updateStackRequest);
+        AmazonCloudFormationException exception = new AmazonCloudFormationException("Cannot execute method: updateStack. No updates are to be performed.");
+        exception.setErrorCode("ValidationError");
+        when(cloudFormationClient.updateStack(updateStackRequest)).thenThrow(exception);
+
+        underTest.updateImage(ac, stack, cfResource);
+
+        verify(awsStackRequestHelper).createUpdateStackRequest(ac, stack, cfStackName, cfTemplateBody);
+        verify(cloudFormationClient).updateStack(updateStackRequest);
+    }
+
+    @Test
+    public void testUpdateImageForValidationErrorShouldThrow() throws IOException {
+        String cfStackName = "cf";
+        CloudResource cfResource = CloudResource.builder()
+                .type(ResourceType.CLOUDFORMATION_STACK)
+                .name(cfStackName)
+                .build();
+        String template = FileReaderUtils.readFileFromClasspath("json/aws-cf-template.json");
+        String cfTemplateBody = JsonUtil.minify(String.format(template, "{\"Ref\":\"AMI\"}"));
+        when(cloudFormationClient.getTemplate(any())).thenReturn(new GetTemplateResult().withTemplateBody(cfTemplateBody));
+        when(awsClient.createCloudFormationClient(any(), any())).thenReturn(cloudFormationClient);
+
+        UpdateStackRequest updateStackRequest = new UpdateStackRequest();
+        when(awsStackRequestHelper.createUpdateStackRequest(ac, stack, cfStackName, cfTemplateBody)).thenReturn(updateStackRequest);
+        AmazonCloudFormationException exception = new AmazonCloudFormationException("Some other message");
+        exception.setErrorCode("NotValidationError");
+        when(cloudFormationClient.updateStack(updateStackRequest)).thenThrow(exception);
+
+        try {
+            underTest.updateImage(ac, stack, cfResource);
+        } catch (AmazonCloudFormationException e) {
+            assertEquals(e.getErrorMessage(), "Some other message");
+            assertEquals(e.getErrorCode(), "NotValidationError");
+        }
 
         verify(awsStackRequestHelper).createUpdateStackRequest(ac, stack, cfStackName, cfTemplateBody);
         verify(cloudFormationClient).updateStack(updateStackRequest);
