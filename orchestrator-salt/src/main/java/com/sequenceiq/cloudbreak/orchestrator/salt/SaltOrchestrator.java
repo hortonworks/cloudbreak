@@ -1044,7 +1044,7 @@ public class SaltOrchestrator implements HostOrchestrator {
     @Override
     public Set<Node> getResponsiveNodes(Set<Node> nodes, GatewayConfig gatewayConfig) {
         try (SaltConnector saltConnector = saltService.createSaltConnector(gatewayConfig)) {
-            return retry.testWith1SecDelayMax5Times(() -> getResponsiveNodes(nodes, saltConnector));
+            return getResponsiveNodes(nodes, saltConnector);
         }
     }
 
@@ -1264,7 +1264,7 @@ public class SaltOrchestrator implements HostOrchestrator {
 
     private Set<Node> getResponsiveNodes(Set<Node> nodes, SaltConnector sc) {
         Set<Node> responsiveNodes = new HashSet<>();
-        MinionIpAddressesResponse minionIpAddressesResponse = SaltStates.collectMinionIpAddresses(sc);
+        MinionIpAddressesResponse minionIpAddressesResponse = SaltStates.collectMinionIpAddresses(retry, sc);
         if (minionIpAddressesResponse != null) {
             nodes.forEach(node -> {
                 if (minionIpAddressesResponse.getAllIpAddresses().contains(node.getPrivateIp())) {

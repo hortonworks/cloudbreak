@@ -204,6 +204,17 @@ public class SaltStates {
         }
     }
 
+    public static MinionIpAddressesResponse collectMinionIpAddresses(Retry retry, SaltConnector sc) {
+        return retry.testWith1SecDelayMax5Times(() -> {
+            try {
+                return collectMinionIpAddresses(sc);
+            } catch (RuntimeException e) {
+                LOGGER.error("Collecting minion IP addresses failed", e);
+                throw new Retry.ActionFailedException("Collecting minion IP addresses failed", e);
+            }
+        });
+    }
+
     public static MinionIpAddressesResponse collectMinionIpAddresses(SaltConnector sc) {
         MinionIpAddressesResponse minionIpAddressesResponse = measure(() -> sc.run(Glob.ALL, "network.ipaddrs", LOCAL, MinionIpAddressesResponse.class),
                 LOGGER, "Network IP address call took {}ms");
