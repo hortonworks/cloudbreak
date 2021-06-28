@@ -404,7 +404,7 @@ public class SaltOrchestratorTest {
         responsiveAddresses.add("10.0.0.2");
         responsiveAddresses.add("10.0.0.3");
         when(minionIpAddressesResponse.getAllIpAddresses()).thenReturn(responsiveAddresses);
-        PowerMockito.when(SaltStates.collectMinionIpAddresses(any())).thenReturn(minionIpAddressesResponse);
+        PowerMockito.when(SaltStates.collectMinionIpAddresses(any(), any())).thenReturn(minionIpAddressesResponse);
 
         Callable pillarSaveCallable = mock(Callable.class);
         when(saltRunner.runner(any(), any(), any(), anyInt(), anyInt())).thenReturn(pillarSaveCallable);
