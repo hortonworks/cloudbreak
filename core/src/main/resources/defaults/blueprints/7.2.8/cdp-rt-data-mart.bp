@@ -42,6 +42,10 @@
           {
             "refName": "kudu-MASTER-BASE",
             "roleType": "KUDU_MASTER",
+            "configs": [ {
+              "name": "ranger_kudu_plugin_service_name",
+              "value": "{{GENERATED_RANGER_SERVICE_NAME}}"
+            } ],
             "base": true
           },
           {

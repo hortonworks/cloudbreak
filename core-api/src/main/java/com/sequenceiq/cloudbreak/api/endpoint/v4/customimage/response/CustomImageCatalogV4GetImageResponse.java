@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiModel;
 
 import javax.validation.constraints.NotNull;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 @ApiModel
@@ -18,6 +19,9 @@ public class CustomImageCatalogV4GetImageResponse implements JsonEntity {
     private String imageId;
 
     @JsonProperty
+    private Long imageDate;
+
+    @JsonProperty
     private String imageType;
 
     @JsonProperty
@@ -25,6 +29,12 @@ public class CustomImageCatalogV4GetImageResponse implements JsonEntity {
 
     @JsonProperty
     private Long sourceImageDate;
+
+    @JsonProperty
+    private Map<String, String> versions;
+
+    @JsonProperty
+    private String cloudProvider;
 
     @JsonProperty
     private String baseParcelUrl;
@@ -38,6 +48,14 @@ public class CustomImageCatalogV4GetImageResponse implements JsonEntity {
 
     public void setImageId(String imageId) {
         this.imageId = imageId;
+    }
+
+    public Long getImageDate() {
+        return imageDate;
+    }
+
+    public void setImageDate(Long imageDate) {
+        this.imageDate = imageDate;
     }
 
     public String getImageType() {
@@ -62,6 +80,22 @@ public class CustomImageCatalogV4GetImageResponse implements JsonEntity {
 
     public void setSourceImageDate(Long sourceImageDate) {
         this.sourceImageDate = sourceImageDate;
+    }
+
+    public Map<String, String> getVersions() {
+        return versions;
+    }
+
+    public void setVersions(Map<String, String> versions) {
+        this.versions = versions;
+    }
+
+    public String getCloudProvider() {
+        return cloudProvider;
+    }
+
+    public void setCloudProvider(String cloudProvider) {
+        this.cloudProvider = cloudProvider;
     }
 
     public String getBaseParcelUrl() {

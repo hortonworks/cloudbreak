@@ -5,7 +5,6 @@ import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 import static java.lang.String.format;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.io.IOException;
@@ -52,7 +51,6 @@ import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.cmtemplate.metering.MeteringServiceFieldResolver;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
@@ -71,8 +69,8 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
 import com.sequenceiq.cloudbreak.service.LoadBalancerConfigService;
-import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 import com.sequenceiq.cloudbreak.service.stack.GatewaySecurityGroupDecorator;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.tag.ClusterTemplateApplicationTag;
@@ -108,9 +106,6 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
     private ProviderParameterCalculator providerParameterCalculator;
 
     @Inject
-    private DatalakeResourcesService datalakeResourcesService;
-
-    @Inject
     private Clock clock;
 
     @Inject
@@ -136,6 +131,9 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
 
     @Inject
     private LoadBalancerConfigService loadBalancerConfigService;
+
+    @Inject
+    private DatalakeService datalakeService;
 
     @Override
     public Stack convert(StackV4Request source) {
@@ -169,7 +167,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         setTimeToLive(source, stack);
         stack.setWorkspace(workspace);
         stack.setDisplayName(source.getName());
-        stack.setDatalakeResourceId(getDatalakeResourceId(source, workspace));
+        datalakeService.setDatalakeIdOnStack(stack, source, workspace);
         stack.setStackAuthentication(getConversionService().convert(source.getAuthentication(), StackAuthentication.class));
         stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.PROVISION_REQUESTED));
         stack.setCreated(clock.getCurrentTimeMillis());
@@ -314,17 +312,6 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         } catch (Exception e) {
             throw new BadRequestException("Failed to convert dynamic tags. " + e.getMessage(), e);
         }
-    }
-
-    private Long getDatalakeResourceId(StackV4Request source, Workspace workspace) {
-        try {
-            if (source.getSharedService() != null && isNotBlank(source.getSharedService().getDatalakeName())) {
-                return datalakeResourcesService.getByNameForWorkspace(source.getSharedService().getDatalakeName(), workspace).getId();
-            }
-        } catch (NotFoundException nfe) {
-            LOGGER.debug("No datalake resource found for data lake: {}", source.getSharedService().getDatalakeName());
-        }
-        return null;
     }
 
     private void validateStackAuthentication(StackV4Request source) {

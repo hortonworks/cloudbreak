@@ -1,14 +1,16 @@
 package com.sequenceiq.flow.reactor.config;
 
-import com.sequenceiq.cloudbreak.logger.concurrent.MDCCleanerThreadPoolExecutor;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+
+import com.sequenceiq.cloudbreak.logger.concurrent.MDCCleanerThreadPoolExecutor;
+
 import reactor.bus.EventBus;
 import reactor.core.Dispatcher;
-
-import javax.inject.Inject;
-import javax.inject.Named;
 
 @Component
 public class EventBusStatisticReporter {
@@ -39,7 +41,6 @@ public class EventBusStatisticReporter {
 
         stats.setPoolSize(executor.getPoolSize());
         stats.setCorePoolSize(executor.getCorePoolSize());
-        stats.setActiveCount(executor.getActiveCount());
         stats.setTaskCount(executor.getTaskCount());
         stats.setActiveCount(executor.getActiveCount());
         stats.setCompletedTaskCount(executor.getCompletedTaskCount());
@@ -53,8 +54,6 @@ public class EventBusStatisticReporter {
 
         private long remainingSlots;
 
-        private long getActiveCount;
-
         private long taskCount;
 
         private long completedTaskCount;
@@ -66,10 +65,6 @@ public class EventBusStatisticReporter {
         private int activeCount;
 
         private boolean inContext;
-
-        public void setGetActiveCount(long getActiveCount) {
-            this.getActiveCount = getActiveCount;
-        }
 
         public void setTaskCount(long taskCount) {
             this.taskCount = taskCount;
@@ -108,7 +103,6 @@ public class EventBusStatisticReporter {
             return "EventBusStatistics{" +
                     "backLogSize=" + backLogSize +
                     ", remainingSlots=" + remainingSlots +
-                    ", getActiveCount=" + getActiveCount +
                     ", taskCount=" + taskCount +
                     ", completedTaskCount=" + completedTaskCount +
                     ", corePoolSize=" + corePoolSize +

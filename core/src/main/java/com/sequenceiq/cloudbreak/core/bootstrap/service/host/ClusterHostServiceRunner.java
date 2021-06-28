@@ -5,9 +5,7 @@ import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUD
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_1;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel;
-
 import static java.util.Collections.singletonMap;
-
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
@@ -68,7 +66,6 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.Telemetry
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.IdBroker;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
@@ -97,12 +94,12 @@ import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.blueprint.ComponentLocatorService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
-import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentConfigProvider;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.idbroker.IdBrokerService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigProvider;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
+import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -176,9 +173,6 @@ public class ClusterHostServiceRunner {
     private BlueprintService blueprintService;
 
     @Inject
-    private DatalakeResourcesService datalakeResourcesService;
-
-    @Inject
     private ComponentConfigProviderService componentConfigProviderService;
 
     @Inject
@@ -232,14 +226,18 @@ public class ClusterHostServiceRunner {
     @Inject
     private EntitlementService entitlementService;
 
+    @Inject
+    private DatalakeService datalakeService;
+
     public void runClusterServices(@Nonnull Stack stack, @Nonnull Cluster cluster, Map<String, String> candidateAddresses) {
         try {
+            Set<Node> nodes = stackUtil.collectNodes(stack);
             Set<Node> reachableNodes = stackUtil.collectAndCheckReachableNodes(stack, candidateAddresses.keySet());
             GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
             List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
-            SaltConfig saltConfig = createSaltConfig(stack, cluster, primaryGatewayConfig, gatewayConfigs, reachableNodes);
+            SaltConfig saltConfig = createSaltConfig(stack, cluster, primaryGatewayConfig, gatewayConfigs, nodes, reachableNodes);
             ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stack.getId(), cluster.getId());
-            hostOrchestrator.initServiceRun(gatewayConfigs, reachableNodes, saltConfig, exitCriteriaModel);
+            hostOrchestrator.initServiceRun(gatewayConfigs, nodes, reachableNodes, saltConfig, exitCriteriaModel);
             if (CollectionUtils.isEmpty(candidateAddresses)) {
                 mountDisks.mountAllDisks(stack.getId());
             } else {
@@ -261,13 +259,14 @@ public class ClusterHostServiceRunner {
 
     public void updateClusterConfigs(@Nonnull Stack stack, @Nonnull Cluster cluster) {
         try {
-            Set<Node> nodes = stackUtil.collectReachableNodesByInstanceStates(stack);
+            Set<Node> nodes = stackUtil.collectNodes(stack);
+            Set<Node> reachableNodes = stackUtil.collectReachableNodesByInstanceStates(stack);
             GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
             List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
-            SaltConfig saltConfig = createSaltConfig(stack, cluster, primaryGatewayConfig, gatewayConfigs, nodes);
+            SaltConfig saltConfig = createSaltConfig(stack, cluster, primaryGatewayConfig, gatewayConfigs, nodes, reachableNodes);
             ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stack.getId(), cluster.getId());
             hostOrchestrator.initSaltConfig(gatewayConfigs, nodes, saltConfig, exitCriteriaModel);
-            hostOrchestrator.runService(gatewayConfigs, nodes, saltConfig, exitCriteriaModel);
+            hostOrchestrator.runService(gatewayConfigs, reachableNodes, saltConfig, exitCriteriaModel);
         } catch (CloudbreakOrchestratorException | IOException e) {
             throw new CloudbreakServiceException(e.getMessage(), e);
         }
@@ -303,13 +302,14 @@ public class ClusterHostServiceRunner {
 
     public void redeployGatewayCertificate(@Nonnull Stack stack, @Nonnull Cluster cluster) {
         try {
-            Set<Node> nodes = stackUtil.collectReachableNodes(stack);
+            Set<Node> nodes = stackUtil.collectNodes(stack);
+            Set<Node> reachableNodes = stackUtil.collectReachableNodes(stack);
             GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
             List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
-            SaltConfig saltConfig = createSaltConfig(stack, cluster, primaryGatewayConfig, gatewayConfigs, nodes);
+            SaltConfig saltConfig = createSaltConfig(stack, cluster, primaryGatewayConfig, gatewayConfigs, nodes, reachableNodes);
             ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stack.getId(), cluster.getId());
             hostOrchestrator.uploadGatewayPillar(gatewayConfigs, nodes, exitCriteriaModel, saltConfig);
-            hostOrchestrator.runService(gatewayConfigs, nodes, saltConfig, exitCriteriaModel);
+            hostOrchestrator.runService(gatewayConfigs, reachableNodes, saltConfig, exitCriteriaModel);
         } catch (CloudbreakOrchestratorCancelledException e) {
             throw new CancellationException(e.getMessage());
         } catch (CloudbreakOrchestratorException | IOException e) {
@@ -318,8 +318,7 @@ public class ClusterHostServiceRunner {
     }
 
     private SaltConfig createSaltConfig(Stack stack, Cluster cluster, GatewayConfig primaryGatewayConfig, Iterable<GatewayConfig> gatewayConfigs,
-            Set<Node> nodes)
-            throws IOException, CloudbreakOrchestratorException {
+            Set<Node> nodes, Set<Node> reachableNodes) throws IOException, CloudbreakOrchestratorException {
         ClouderaManagerRepo clouderaManagerRepo = clusterComponentConfigProvider.getClouderaManagerRepoDetails(cluster.getId());
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
         KerberosConfig kerberosConfig = kerberosConfigService.get(stack.getEnvironmentCrn(), stack.getName()).orElse(null);
@@ -354,7 +353,7 @@ public class ClusterHostServiceRunner {
 
         decoratePillarWithJdbcConnectors(cluster, servicePillar);
 
-        return new SaltConfig(servicePillar, grainPropertiesService.createGrainProperties(gatewayConfigs, cluster, nodes));
+        return new SaltConfig(servicePillar, grainPropertiesService.createGrainProperties(gatewayConfigs, cluster, reachableNodes));
     }
 
     private void addKerberosConfig(Map<String, SaltPillarProperties> servicePillar, KerberosConfig kerberosConfig) throws IOException {
@@ -557,17 +556,13 @@ public class ClusterHostServiceRunner {
     }
 
     private void saveDatalakeNameservers(Stack stack, Map<String, SaltPillarProperties> servicePillar) {
-        Long datalakeResourceId = stack.getDatalakeResourceId();
-        if (datalakeResourceId != null) {
-            Optional<DatalakeResources> datalakeResource = datalakeResourcesService.findById(datalakeResourceId);
-            if (datalakeResource.isPresent() && datalakeResource.get().getDatalakeStackId() != null) {
-                Long datalakeStackId = datalakeResource.get().getDatalakeStackId();
-                Stack dataLakeStack = stackService.getByIdWithListsInTransaction(datalakeStackId);
-                String datalakeDomain = dataLakeStack.getGatewayInstanceMetadata().get(0).getDomain();
-                List<String> ipList = dataLakeStack.getGatewayInstanceMetadata().stream().map(InstanceMetaData::getPrivateIp).collect(Collectors.toList());
-                servicePillar.put("forwarder-zones", new SaltPillarProperties("/unbound/forwarders.sls",
-                        singletonMap("forwarder-zones", singletonMap(datalakeDomain, singletonMap("nameservers", ipList)))));
-            }
+        Optional<Stack> datalakeStackOptional = datalakeService.getDatalakeStackByDatahubStack(stack);
+        if (datalakeStackOptional.isPresent()) {
+            Stack dataLakeStack = datalakeStackOptional.get();
+            String datalakeDomain = dataLakeStack.getGatewayInstanceMetadata().get(0).getDomain();
+            List<String> ipList = dataLakeStack.getGatewayInstanceMetadata().stream().map(InstanceMetaData::getPrivateIp).collect(Collectors.toList());
+            servicePillar.put("forwarder-zones", new SaltPillarProperties("/unbound/forwarders.sls",
+                    singletonMap("forwarder-zones", singletonMap(datalakeDomain, singletonMap("nameservers", ipList)))));
         }
     }
 

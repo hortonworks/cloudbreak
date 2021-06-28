@@ -105,11 +105,16 @@ public class NetworkService {
 
         try {
             Map<String, CloudSubnet> subnetMetadatas = cloudNetworkService.retrieveSubnetMetadata(environment, cloneNetworkDto);
-            originalNetwork.setSubnetMetas(subnetMetadatas.values().stream().collect(toMap(CloudSubnet::getId, c -> c)));
+            originalNetwork.setSubnetMetas(subnetMetadatas.values()
+                    .stream()
+                    .collect(toMap(c -> getId(environment.getCloudPlatform(), c), c -> c)));
 
             Map<String, CloudSubnet> endpointGatewaySubnetMetadatas =
-                cloudNetworkService.retrieveEndpointGatewaySubnetMetadata(environment, cloneNetworkDto);
-            originalNetwork.setEndpointGatewaySubnetMetas(endpointGatewaySubnetMetadatas.values().stream().collect(toMap(CloudSubnet::getId, c -> c)));
+                    cloudNetworkService.retrieveEndpointGatewaySubnetMetadata(environment, cloneNetworkDto);
+            originalNetwork.setEndpointGatewaySubnetMetas(
+                    endpointGatewaySubnetMetadatas.values()
+                            .stream()
+                            .collect(toMap(c -> getId(environment.getCloudPlatform(), c), c -> c)));
 
             Network network = environmentNetworkConverter.convertToNetwork(originalNetwork);
             NetworkCidr networkCidr = environmentNetworkService.getNetworkCidr(network, environment.getCloudPlatform(), environment.getCredential());
@@ -119,6 +124,14 @@ public class NetworkService {
             throw new BadRequestException(connectorNotFoundException.getMessage());
         }
         return originalNetwork;
+    }
+
+    private String getId(String cloudPlatform, CloudSubnet cloudSubnet) {
+        if (cloudPlatform.equals(CloudPlatform.GCP.name())) {
+            return cloudSubnet.getName();
+        } else {
+            return cloudSubnet.getId();
+        }
     }
 
     @SuppressWarnings("unchecked")

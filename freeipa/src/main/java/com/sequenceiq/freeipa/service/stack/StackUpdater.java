@@ -32,6 +32,9 @@ public class StackUpdater {
     @Inject
     private StackStatusMessageTransformator stackStatusMessageTransformator;
 
+    @Inject
+    private ServiceStatusRawMessageTransformer serviceStatusRawMessageTransformer;
+
     public Stack updateStackStatus(Long stackId, DetailedStackStatus detailedStatus, String statusReason) {
         return doUpdateStackStatus(stackId, detailedStatus, statusReason);
     }
@@ -60,6 +63,7 @@ public class StackUpdater {
         Status newStatus = newDetailedStatus.getStatus();
         StackStatus stackStatus = stack.getStackStatus();
         if (!Status.DELETE_COMPLETED.equals(stackStatus.getStatus())) {
+            rawNewStatusReason = serviceStatusRawMessageTransformer.transformMessage(rawNewStatusReason, stack.getTunnel());
             String transformedStatusReason = stackStatusMessageTransformator.transformMessage(rawNewStatusReason);
             if (isStatusChanged(stack, newDetailedStatus, transformedStatusReason, newStatus)) {
                 stack = handleStatusChange(stack, newDetailedStatus, transformedStatusReason, newStatus, stackStatus);

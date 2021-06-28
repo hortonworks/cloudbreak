@@ -148,7 +148,7 @@ public class ClusterUpgradeImageFilterTest {
         ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, lockComponents, activatedParcels, StackType.WORKLOAD, blueprint);
         ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, properImages, null, null), "");
         when(imageCatalogServiceProxy.getImageFilterResult(cloudbreakImageCatalogV3)).thenReturn(imageFilterResult);
-        when(blueprintUpgradeOptionValidator.isValidBlueprint(blueprint, imageFilterParams.isLockComponents())).thenReturn(true);
+        when(blueprintUpgradeOptionValidator.isValidBlueprint(blueprint, imageFilterParams.isLockComponents())).thenReturn(new BlueprintValidationResult(true));
 
         ImageFilterResult actual = underTest.filter(accountId, cloudbreakImageCatalogV3, CLOUD_PLATFORM, imageFilterParams);
 
@@ -160,11 +160,12 @@ public class ClusterUpgradeImageFilterTest {
     @Test
     public void testFilterShouldNotReturnTheAvailableImageWhenTheBlueprintIsNotEligibleForUpgradeAndTheStackTypeIsWorkload() {
         ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, lockComponents, activatedParcels, StackType.WORKLOAD, blueprint);
-        when(blueprintUpgradeOptionValidator.isValidBlueprint(blueprint, imageFilterParams.isLockComponents())).thenReturn(false);
+        BlueprintValidationResult blueprintValidationResult = new BlueprintValidationResult(false, "The upgrade is not allowed for this template.");
+        when(blueprintUpgradeOptionValidator.isValidBlueprint(blueprint, imageFilterParams.isLockComponents())).thenReturn(blueprintValidationResult);
 
         ImageFilterResult actual = underTest.filter(accountId, cloudbreakImageCatalogV3, CLOUD_PLATFORM, imageFilterParams);
 
-        assertEquals("The upgrade is not allowed for this template.", actual.getReason());
+        assertEquals(blueprintValidationResult.getReason(), actual.getReason());
         assertTrue(actual.getAvailableImages().getCdhImages().isEmpty());
         verify(blueprintUpgradeOptionValidator).isValidBlueprint(blueprint, imageFilterParams.isLockComponents());
         verifyNoInteractions(imageCatalogServiceProxy);
@@ -397,11 +398,12 @@ public class ClusterUpgradeImageFilterTest {
     @Test
     public void testFilterShouldNotReturnTheAvailableImageByImageCatalogNameWhenTheBlueprintIsNotEligibleForUpgrade() {
         ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, lockComponents, activatedParcels, StackType.WORKLOAD, blueprint);
-        when(blueprintUpgradeOptionValidator.isValidBlueprint(blueprint, imageFilterParams.isLockComponents())).thenReturn(false);
+        BlueprintValidationResult blueprintValidationResult = new BlueprintValidationResult(false, "The upgrade is not allowed for this template.");
+        when(blueprintUpgradeOptionValidator.isValidBlueprint(blueprint, imageFilterParams.isLockComponents())).thenReturn(blueprintValidationResult);
 
         ImageFilterResult actual = underTest.filter(accountId, WORKSPACE_ID, CATALOG_NAME, CLOUD_PLATFORM, imageFilterParams);
 
-        assertEquals("The upgrade is not allowed for this template.", actual.getReason());
+        assertEquals(blueprintValidationResult.getReason(), actual.getReason());
         assertTrue(actual.getAvailableImages().getCdhImages().isEmpty());
         verify(blueprintUpgradeOptionValidator).isValidBlueprint(blueprint, imageFilterParams.isLockComponents());
         verifyNoInteractions(imageCatalogService);
@@ -413,7 +415,7 @@ public class ClusterUpgradeImageFilterTest {
         ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, lockComponents, activatedParcels, StackType.WORKLOAD, blueprint);
         when(imageCatalogService.getImages(WORKSPACE_ID, CATALOG_NAME, CLOUD_PLATFORM))
                 .thenReturn(StatedImages.statedImages(new Images(null, imageForUpgrade, null, null), null, null));
-        when(blueprintUpgradeOptionValidator.isValidBlueprint(blueprint, imageFilterParams.isLockComponents())).thenReturn(true);
+        when(blueprintUpgradeOptionValidator.isValidBlueprint(blueprint, imageFilterParams.isLockComponents())).thenReturn(new BlueprintValidationResult(true));
 
         ImageFilterResult actual = underTest.filter(accountId, WORKSPACE_ID, CATALOG_NAME, CLOUD_PLATFORM, imageFilterParams);
 

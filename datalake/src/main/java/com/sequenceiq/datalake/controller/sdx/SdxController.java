@@ -55,6 +55,8 @@ import com.sequenceiq.sdx.api.model.AdvertisedRuntime;
 import com.sequenceiq.sdx.api.model.RangerCloudIdentitySyncStatus;
 import com.sequenceiq.sdx.api.model.SdxBackupResponse;
 import com.sequenceiq.sdx.api.model.SdxBackupStatusResponse;
+import com.sequenceiq.sdx.api.model.SdxRestoreResponse;
+import com.sequenceiq.sdx.api.model.SdxRestoreStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
@@ -336,7 +338,29 @@ public class SdxController implements SdxEndpoint {
     public SdxDatabaseRestoreResponse restoreDatabaseByName(@ResourceName String name, String backupId,
             String restoreId, String backupLocation) {
         SdxCluster sdxCluster = getSdxClusterByName(name);
-        return sdxBackupRestoreService.triggerDatabaseRestore(sdxCluster, backupId, restoreId, backupLocation);
+        try {
+            sdxBackupRestoreService.getDatabaseRestoreStatus(sdxCluster, restoreId);
+            SdxDatabaseRestoreResponse sdxDatabaseRestoreResponse = new SdxDatabaseRestoreResponse();
+            sdxDatabaseRestoreResponse.setOperationId(restoreId);
+            return sdxDatabaseRestoreResponse;
+        } catch (NotFoundException notFoundException) {
+            return sdxBackupRestoreService.triggerDatabaseRestore(sdxCluster, backupId, restoreId, backupLocation);
+        }
+    }
+
+    @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.RESTORE_DATALAKE)
+    public SdxRestoreResponse restoreDatalakeByName(@ResourceName String name, String backupId, String backupLocationOverride) {
+        SdxCluster sdxCluster = getSdxClusterByName(name);
+        return sdxBackupRestoreService.triggerDatalakeRestore(sdxCluster, name, backupId, backupLocationOverride);
+    }
+
+    @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.RESTORE_DATALAKE)
+    public SdxRestoreStatusResponse getRestoreDatalakeStatusByName(@ResourceName String name,
+                                                                String restoreId) {
+        return sdxBackupRestoreService.getDatalakeRestoreStatus(name, restoreId,
+                ThreadBasedUserCrnProvider.getUserCrn());
     }
 
     @Override

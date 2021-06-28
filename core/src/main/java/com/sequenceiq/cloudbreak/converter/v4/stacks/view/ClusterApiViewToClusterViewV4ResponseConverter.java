@@ -8,20 +8,18 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.BlueprintV4ViewResponse;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.sharedservice.SharedServiceV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.ClusterViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.HostGroupViewV4Response;
 import com.sequenceiq.cloudbreak.converter.CompactViewToCompactViewResponseConverter;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.view.ClusterApiView;
 import com.sequenceiq.cloudbreak.domain.view.HostGroupView;
-import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
+import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 
 @Component
 public class ClusterApiViewToClusterViewV4ResponseConverter extends CompactViewToCompactViewResponseConverter<ClusterApiView, ClusterViewV4Response> {
 
     @Inject
-    private DatalakeResourcesService datalakeResourcesService;
+    private DatalakeService datalakeService;
 
     @Override
     public ClusterViewV4Response convert(ClusterApiView source) {
@@ -31,7 +29,7 @@ public class ClusterApiViewToClusterViewV4ResponseConverter extends CompactViewT
         clusterViewResponse.setStatus(source.getStatus());
         clusterViewResponse.setHostGroups(convertHostGroupsToJson(source.getHostGroups()));
         clusterViewResponse.setCertExpirationState(source.getCertExpirationState());
-        addSharedServiceResponse(source, clusterViewResponse);
+        datalakeService.addSharedServiceResponse(source, clusterViewResponse);
         return clusterViewResponse;
     }
 
@@ -46,18 +44,5 @@ public class ClusterApiViewToClusterViewV4ResponseConverter extends CompactViewT
             jsons.add(getConversionService().convert(hostGroup, HostGroupViewV4Response.class));
         }
         return jsons;
-    }
-
-    private void addSharedServiceResponse(ClusterApiView cluster, ClusterViewV4Response clusterResponse) {
-        SharedServiceV4Response sharedServiceResponse = new SharedServiceV4Response();
-        if (cluster.getStack().getDatalakeId() != null) {
-            sharedServiceResponse.setSharedClusterId(cluster.getStack().getDatalakeId());
-            Long datalakeId = cluster.getStack().getDatalakeId();
-            datalakeResourcesService.findById(datalakeId)
-                    .or(() -> datalakeResourcesService.findByDatalakeStackId(datalakeId))
-                    .map(DatalakeResources::getName)
-                    .ifPresent(sharedServiceResponse::setSharedClusterName);
-        }
-        clusterResponse.setSharedServiceResponse(sharedServiceResponse);
     }
 }

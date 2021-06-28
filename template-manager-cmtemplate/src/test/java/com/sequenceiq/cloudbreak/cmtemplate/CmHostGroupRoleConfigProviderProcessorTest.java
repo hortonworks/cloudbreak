@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -21,9 +22,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.cloudera.api.swagger.model.ApiClusterTemplateRoleConfigGroup;
+import com.google.common.collect.Sets;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hbase.HbaseVolumeConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs.HdfsVolumeConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.yarn.YarnVolumeConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.zookeeper.ZooKeeperVolumeConfigProvider;
+import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
+import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
@@ -40,7 +45,7 @@ public class CmHostGroupRoleConfigProviderProcessorTest {
 
     @Spy
     private final List<CmHostGroupRoleConfigProvider> configProviders = new ArrayList<>(List.of(
-            new HdfsVolumeConfigProvider(), new YarnVolumeConfigProvider(), new ZooKeeperVolumeConfigProvider()
+            new HdfsVolumeConfigProvider(), new YarnVolumeConfigProvider(), new ZooKeeperVolumeConfigProvider(), new HbaseVolumeConfigProvider()
     ));
 
     private TemplatePreparationObject templatePreparator;
@@ -246,6 +251,52 @@ public class CmHostGroupRoleConfigProviderProcessorTest {
         assertEquals("/hadoopfs/fs1/zookeeper", zkServerBase.get(0).getValue());
         assertEquals("dataLogDir", zkServerBase.get(1).getName());
         assertEquals("/hadoopfs/fs1/zookeeper", zkServerBase.get(1).getValue());
+    }
+
+    @Test
+    public void testGetRoleConfigsWithEphemeralVolumes() {
+        HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.GATEWAY, Collections.<String>emptySet(),
+                Sets.newHashSet(new VolumeTemplate()), TemporaryStorage.EPHEMERAL_VOLUMES, 1);
+        HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, Collections.<String>emptySet(),
+                Sets.newHashSet(new VolumeTemplate()), TemporaryStorage.EPHEMERAL_VOLUMES, 3);
+        setup("input/clouderamanager.bp", Builder.builder().withHostgroupViews(Set.of(master, worker)));
+
+        underTest.process(templateProcessor, templatePreparator);
+
+        Map<String, List<ApiClusterTemplateConfig>> roleConfigs = mapRoleConfigs();
+        assertEquals(
+                List.of(
+                        config("hbase_bucketcache_ioengine", "files:/hadoopfs/ephfs1/hbase_cache,/hadoopfs/ephfs2/hbase_cache,/hadoopfs/ephfs3/hbase_cache")
+                ),
+                roleConfigs.get("hbase-REGIONSERVER-BASE"));
+        assertEquals(
+                List.of(
+                        config("yarn_nodemanager_local_dirs", "/hadoopfs/ephfs1/nodemanager,/hadoopfs/ephfs2/nodemanager,/hadoopfs/ephfs3/nodemanager"),
+                        config("yarn_nodemanager_log_dirs", "/hadoopfs/fs1/nodemanager/log,/hadoopfs/fs2/nodemanager/log")
+                ),
+                roleConfigs.get("yarn-NODEMANAGER-BASE")
+        );
+    }
+
+    @Test
+    public void testGetRoleConfigsWithAttachedVolumes() {
+        HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.GATEWAY, Collections.<String>emptySet(),
+                Sets.newHashSet(new VolumeTemplate()), TemporaryStorage.ATTACHED_VOLUMES, 0);
+        HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, Collections.<String>emptySet(),
+                Sets.newHashSet(new VolumeTemplate()), TemporaryStorage.ATTACHED_VOLUMES, 0);
+        setup("input/clouderamanager.bp", Builder.builder().withHostgroupViews(Set.of(master, worker)));
+
+        underTest.process(templateProcessor, templatePreparator);
+
+        Map<String, List<ApiClusterTemplateConfig>> roleConfigs = mapRoleConfigs();
+        assertEquals(List.of(), roleConfigs.get("hbase-REGIONSERVER-BASE"));
+        assertEquals(
+                List.of(
+                        config("yarn_nodemanager_local_dirs", "/hadoopfs/fs1/nodemanager,/hadoopfs/fs2/nodemanager"),
+                        config("yarn_nodemanager_log_dirs", "/hadoopfs/fs1/nodemanager/log,/hadoopfs/fs2/nodemanager/log")
+                ),
+                roleConfigs.get("yarn-NODEMANAGER-BASE")
+        );
     }
 
     private String getBlueprintText(String path) {

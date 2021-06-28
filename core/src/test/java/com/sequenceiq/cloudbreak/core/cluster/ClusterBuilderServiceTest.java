@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.Assertions;
@@ -31,6 +32,7 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
+import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
@@ -99,6 +101,9 @@ class ClusterBuilderServiceTest {
     @Mock
     private InstanceMetaData mockInstanceMetaData;
 
+    @Mock
+    private DatalakeService datalakeService;
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
@@ -111,6 +116,7 @@ class ClusterBuilderServiceTest {
         when(mockHostGroup.getInstanceGroup()).thenReturn(mockInstanceGroup);
 
         when(mockStackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(mockStack);
+        when(datalakeService.getDatalakeStackByStackEnvironmentCrn(any())).thenReturn(Optional.of(mockStack));
         when(mockClusterApiConnectors.getConnector(mockStack)).thenReturn(mockClusterApi);
         when(mockClusterApi.clusterSetupService()).thenReturn(mockClusterSetupService);
         when(mockHostGroupService.getByClusterWithRecipes(CLUSTER_ID)).thenReturn(Set.of(mockHostGroup));

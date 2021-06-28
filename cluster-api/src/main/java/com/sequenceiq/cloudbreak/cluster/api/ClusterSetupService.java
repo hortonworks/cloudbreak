@@ -42,6 +42,8 @@ public interface ClusterSetupService {
 
     void installCluster(String template);
 
+    void autoConfigureClusterManager();
+
     void startManagementServices();
 
     void suppressWarnings();

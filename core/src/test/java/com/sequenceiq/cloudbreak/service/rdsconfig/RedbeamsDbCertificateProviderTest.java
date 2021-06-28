@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.service.rdsconfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
@@ -20,8 +19,8 @@ import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
+import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslMode;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
@@ -41,6 +40,9 @@ class RedbeamsDbCertificateProviderTest {
 
     @Mock
     private StackService stackService;
+
+    @Mock
+    private DatalakeService datalakeService;
 
     @InjectMocks
     private RedbeamsDbCertificateProvider underTest;
@@ -159,10 +161,7 @@ class RedbeamsDbCertificateProviderTest {
         stack.setType(StackType.WORKLOAD);
         stack.setDatalakeResourceId(1L);
 
-        DatalakeResources datalakeResources = new DatalakeResources();
-        datalakeResources.setDatalakeStackId(sdxStack.getId());
-        when(datalakeResourcesService.findById(anyLong())).thenReturn(Optional.of(datalakeResources));
-        when(stackService.getByIdWithListsInTransaction(sdxStack.getId())).thenReturn(sdxStack);
+        when(datalakeService.getDatalakeStackByDatahubStack(any())).thenReturn(Optional.of(sdxStack));
         when(dbServerConfigurer.isRemoteDatabaseNeeded(sdxCluster)).thenReturn(Boolean.FALSE);
         when(dbServerConfigurer.isRemoteDatabaseNeeded(cluster)).thenReturn(Boolean.TRUE);
         DatabaseServerV4Response databaseServerV4Response = new DatabaseServerV4Response();
@@ -195,10 +194,7 @@ class RedbeamsDbCertificateProviderTest {
         stack.setType(StackType.WORKLOAD);
         stack.setDatalakeResourceId(1L);
 
-        DatalakeResources datalakeResources = new DatalakeResources();
-        datalakeResources.setDatalakeStackId(sdxStack.getId());
-        when(datalakeResourcesService.findById(anyLong())).thenReturn(Optional.of(datalakeResources));
-        when(stackService.getByIdWithListsInTransaction(sdxStack.getId())).thenReturn(sdxStack);
+        when(datalakeService.getDatalakeStackByDatahubStack(any())).thenReturn(Optional.of(sdxStack));
         when(dbServerConfigurer.isRemoteDatabaseNeeded(cluster)).thenReturn(Boolean.FALSE);
         when(dbServerConfigurer.isRemoteDatabaseNeeded(sdxCluster)).thenReturn(Boolean.TRUE);
         DatabaseServerV4Response databaseServerV4ResponseB = new DatabaseServerV4Response();
@@ -232,10 +228,7 @@ class RedbeamsDbCertificateProviderTest {
         stack.setType(StackType.WORKLOAD);
         stack.setDatalakeResourceId(1L);
 
-        DatalakeResources datalakeResources = new DatalakeResources();
-        datalakeResources.setDatalakeStackId(sdxStack.getId());
-        when(datalakeResourcesService.findById(anyLong())).thenReturn(Optional.of(datalakeResources));
-        when(stackService.getByIdWithListsInTransaction(sdxStack.getId())).thenReturn(sdxStack);
+        when(datalakeService.getDatalakeStackByDatahubStack(any())).thenReturn(Optional.of(sdxStack));
         when(dbServerConfigurer.isRemoteDatabaseNeeded(any())).thenReturn(Boolean.TRUE);
         DatabaseServerV4Response databaseServerV4Response = new DatabaseServerV4Response();
         databaseServerV4Response.setSslConfig(getSslConfigV4ResponseWithCertificate(Set.of(certificateA)));
@@ -274,10 +267,7 @@ class RedbeamsDbCertificateProviderTest {
         stack.setType(StackType.WORKLOAD);
         stack.setDatalakeResourceId(1L);
 
-        DatalakeResources datalakeResources = new DatalakeResources();
-        datalakeResources.setDatalakeStackId(sdxStack.getId());
-        when(datalakeResourcesService.findById(anyLong())).thenReturn(Optional.of(datalakeResources));
-        when(stackService.getByIdWithListsInTransaction(sdxStack.getId())).thenReturn(sdxStack);
+        when(datalakeService.getDatalakeStackByDatahubStack(any())).thenReturn(Optional.of(sdxStack));
         when(dbServerConfigurer.isRemoteDatabaseNeeded(any())).thenReturn(Boolean.TRUE);
         DatabaseServerV4Response databaseServerV4Response = new DatabaseServerV4Response();
         databaseServerV4Response.setSslConfig(getSslConfigV4ResponseWithCertificate(Set.of(certificateA)));

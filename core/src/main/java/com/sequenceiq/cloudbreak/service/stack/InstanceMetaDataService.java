@@ -156,12 +156,12 @@ public class InstanceMetaDataService {
         }
     }
 
-    public InstanceMetaData save(InstanceMetaData instanceMetaData) {
-        return repository.save(instanceMetaData);
-    }
-
     public Set<InstanceMetaData> findNotTerminatedForStack(Long stackId) {
         return repository.findNotTerminatedForStack(stackId);
+    }
+
+    public InstanceMetaData save(InstanceMetaData instanceMetaData) {
+        return repository.save(instanceMetaData);
     }
 
     public Set<InstanceMetaData> findNotTerminatedForStackWithoutInstanceGroups(Long stackId) {

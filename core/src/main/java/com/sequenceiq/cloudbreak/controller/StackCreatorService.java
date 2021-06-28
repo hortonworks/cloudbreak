@@ -385,7 +385,7 @@ public class StackCreatorService {
     }
 
     private Stack prepareSharedServiceIfNeed(Stack stack) {
-        if (stack.getDatalakeResourceId() != null) {
+        if (stack.getDatalakeCrn() != null || stack.getDatalakeResourceId() != null) {
             return sharedServiceConfigProvider.prepareDatalakeConfigs(stack);
         }
         LOGGER.debug("No Data Lake resource id has been given for stack! (crn: {})", stack.getResourceCrn());

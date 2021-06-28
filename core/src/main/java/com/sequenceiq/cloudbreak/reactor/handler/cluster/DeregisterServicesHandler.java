@@ -11,13 +11,12 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.dto.datalake.DatalakeDto;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.DeregisterServicesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.DeregisterServicesResult;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
-import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
+import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
@@ -40,10 +39,10 @@ public class DeregisterServicesHandler implements EventHandler<DeregisterService
     private StackService stackService;
 
     @Inject
-    private DatalakeResourcesService datalakeResourcesService;
+    private TlsSecurityService tlsSecurityService;
 
     @Inject
-    private TlsSecurityService tlsSecurityService;
+    private DatalakeService datalakeService;
 
     @Override
     public String selector() {
@@ -58,22 +57,20 @@ public class DeregisterServicesHandler implements EventHandler<DeregisterService
             Stack stack = stackService.getByIdWithListsInTransaction(event.getData().getResourceId());
             ClusterApi clusterApi = clusterApiConnectors.getConnector(stack);
             Optional<DatalakeDto> datalakeDto = Optional.empty();
-            if (stack.getDatalakeResourceId() != null) {
-                Optional<DatalakeResources> datalakeResources = datalakeResourcesService.findById(stack.getDatalakeResourceId());
-                if (datalakeResources.isPresent()) {
-                    Stack dataLake = stackService.getByIdWithListsInTransaction(datalakeResources.get().getDatalakeStackId());
-                    HttpClientConfig httpClientConfig = tlsSecurityService.buildTLSClientConfigForPrimaryGateway(dataLake.getId(),
-                            dataLake.getClusterManagerIp(), dataLake.cloudPlatform());
-                    datalakeDto = Optional.ofNullable(
-                            DatalakeDto.DatalakeDtoBuilder.aDatalakeDto()
+            Optional<Stack> dataLakeOptional = datalakeService.getDatalakeStackByDatahubStack(stack);
+            if (dataLakeOptional.isPresent()) {
+                Stack dataLake = dataLakeOptional.get();
+                HttpClientConfig httpClientConfig = tlsSecurityService.buildTLSClientConfigForPrimaryGateway(dataLake.getId(),
+                        dataLake.getClusterManagerIp(), dataLake.cloudPlatform());
+                datalakeDto = Optional.ofNullable(
+                        DatalakeDto.DatalakeDtoBuilder.aDatalakeDto()
                                 .withGatewayPort(dataLake.getGatewayPort())
                                 .withHttpClientConfig(httpClientConfig)
                                 .withPassword(dataLake.getCluster().getPassword())
                                 .withUser(dataLake.getCluster().getUserName())
                                 .withName(dataLake.getName())
                                 .build()
-                    );
-                }
+                );
             }
             clusterApi.clusterSecurityService().deregisterServices(stack.getName(), datalakeDto);
             LOGGER.info("Finished disabling Security");

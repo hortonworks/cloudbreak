@@ -3184,6 +3184,24 @@ public final class datalakeDRProto {
      * <code>bool force = 5;</code>
      */
     boolean getForce();
+
+    /**
+     * <pre>
+     * Used this location to perform the restore.
+     * </pre>
+     *
+     * <code>string backupLocationOverride = 6;</code>
+     */
+    java.lang.String getBackupLocationOverride();
+    /**
+     * <pre>
+     * Used this location to perform the restore.
+     * </pre>
+     *
+     * <code>string backupLocationOverride = 6;</code>
+     */
+    com.google.protobuf.ByteString
+        getBackupLocationOverrideBytes();
   }
   /**
    * <pre>
@@ -3208,6 +3226,7 @@ public final class datalakeDRProto {
       backupId_ = "";
       includeDatabase_ = false;
       force_ = false;
+      backupLocationOverride_ = "";
     }
 
     @java.lang.Override
@@ -3260,6 +3279,12 @@ public final class datalakeDRProto {
             case 40: {
 
               force_ = input.readBool();
+              break;
+            }
+            case 50: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              backupLocationOverride_ = s;
               break;
             }
             default: {
@@ -3446,6 +3471,48 @@ public final class datalakeDRProto {
       return force_;
     }
 
+    public static final int BACKUPLOCATIONOVERRIDE_FIELD_NUMBER = 6;
+    private volatile java.lang.Object backupLocationOverride_;
+    /**
+     * <pre>
+     * Used this location to perform the restore.
+     * </pre>
+     *
+     * <code>string backupLocationOverride = 6;</code>
+     */
+    public java.lang.String getBackupLocationOverride() {
+      java.lang.Object ref = backupLocationOverride_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        backupLocationOverride_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Used this location to perform the restore.
+     * </pre>
+     *
+     * <code>string backupLocationOverride = 6;</code>
+     */
+    public com.google.protobuf.ByteString
+        getBackupLocationOverrideBytes() {
+      java.lang.Object ref = backupLocationOverride_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        backupLocationOverride_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -3475,6 +3542,9 @@ public final class datalakeDRProto {
       if (force_ != false) {
         output.writeBool(5, force_);
       }
+      if (!getBackupLocationOverrideBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 6, backupLocationOverride_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -3500,6 +3570,9 @@ public final class datalakeDRProto {
       if (force_ != false) {
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(5, force_);
+      }
+      if (!getBackupLocationOverrideBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, backupLocationOverride_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -3527,6 +3600,8 @@ public final class datalakeDRProto {
           == other.getIncludeDatabase());
       result = result && (getForce()
           == other.getForce());
+      result = result && getBackupLocationOverride()
+          .equals(other.getBackupLocationOverride());
       result = result && unknownFields.equals(other.unknownFields);
       return result;
     }
@@ -3550,6 +3625,8 @@ public final class datalakeDRProto {
       hash = (37 * hash) + FORCE_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
           getForce());
+      hash = (37 * hash) + BACKUPLOCATIONOVERRIDE_FIELD_NUMBER;
+      hash = (53 * hash) + getBackupLocationOverride().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -3698,6 +3775,8 @@ public final class datalakeDRProto {
 
         force_ = false;
 
+        backupLocationOverride_ = "";
+
         return this;
       }
 
@@ -3729,6 +3808,7 @@ public final class datalakeDRProto {
         result.backupId_ = backupId_;
         result.includeDatabase_ = includeDatabase_;
         result.force_ = force_;
+        result.backupLocationOverride_ = backupLocationOverride_;
         onBuilt();
         return result;
       }
@@ -3794,6 +3874,10 @@ public final class datalakeDRProto {
         }
         if (other.getForce() != false) {
           setForce(other.getForce());
+        }
+        if (!other.getBackupLocationOverride().isEmpty()) {
+          backupLocationOverride_ = other.backupLocationOverride_;
+          onChanged();
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -4163,6 +4247,95 @@ public final class datalakeDRProto {
       public Builder clearForce() {
         
         force_ = false;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object backupLocationOverride_ = "";
+      /**
+       * <pre>
+       * Used this location to perform the restore.
+       * </pre>
+       *
+       * <code>string backupLocationOverride = 6;</code>
+       */
+      public java.lang.String getBackupLocationOverride() {
+        java.lang.Object ref = backupLocationOverride_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          backupLocationOverride_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Used this location to perform the restore.
+       * </pre>
+       *
+       * <code>string backupLocationOverride = 6;</code>
+       */
+      public com.google.protobuf.ByteString
+          getBackupLocationOverrideBytes() {
+        java.lang.Object ref = backupLocationOverride_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          backupLocationOverride_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Used this location to perform the restore.
+       * </pre>
+       *
+       * <code>string backupLocationOverride = 6;</code>
+       */
+      public Builder setBackupLocationOverride(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        backupLocationOverride_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Used this location to perform the restore.
+       * </pre>
+       *
+       * <code>string backupLocationOverride = 6;</code>
+       */
+      public Builder clearBackupLocationOverride() {
+        
+        backupLocationOverride_ = getDefaultInstance().getBackupLocationOverride();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Used this location to perform the restore.
+       * </pre>
+       *
+       * <code>string backupLocationOverride = 6;</code>
+       */
+      public Builder setBackupLocationOverrideBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        backupLocationOverride_ = value;
         onChanged();
         return this;
       }
@@ -16224,59 +16397,60 @@ public final class datalakeDRProto {
       "\rinternalState\030\005 \001(\t\022\024\n\014overallState\030\006 \001" +
       "(\t\022\026\n\016startTimestamp\030\007 \001(\t\022\024\n\014endTimesta" +
       "mp\030\010 \001(\t\022\026\n\016backupLocation\030\t \001(\t\022\025\n\rfail" +
-      "ureReason\030\n \001(\t\"|\n\026RestoreDatalakeReques" +
-      "t\022\024\n\014datalakeName\030\001 \001(\t\022\022\n\nbackupName\030\002 " +
-      "\001(\t\022\020\n\010backupId\030\003 \001(\t\022\027\n\017includeDatabase" +
-      "\030\004 \001(\010\022\r\n\005force\030\005 \001(\010\"\354\001\n\027RestoreDatalak" +
-      "eResponse\022\021\n\taccountId\030\001 \001(\t\022\020\n\010backupId" +
-      "\030\002 \001(\t\022\021\n\trestoreId\030\003 \001(\t\022\017\n\007userCrn\030\004 \001" +
-      "(\t\022\025\n\rinternalState\030\005 \001(\t\022\024\n\014overallStat" +
-      "e\030\006 \001(\t\022\026\n\016startTimestamp\030\007 \001(\t\022\024\n\014endTi" +
-      "mestamp\030\010 \001(\t\022\026\n\016backupLocation\030\t \001(\t\022\025\n" +
-      "\rfailureReason\030\n \001(\t\"Y\n\033BackupDatalakeSt" +
-      "atusRequest\022\024\n\014datalakeName\030\001 \001(\t\022\020\n\010bac" +
-      "kupId\030\002 \001(\t\022\022\n\nbackupName\030\003 \001(\t\"\362\001\n\034Back" +
-      "upDatalakeStatusResponse\022\022\n\nbackupName\030\001" +
-      " \001(\t\022\021\n\taccountId\030\002 \001(\t\022\017\n\007userCrn\030\003 \001(\t" +
-      "\022\020\n\010backupId\030\004 \001(\t\022\025\n\rinternalState\030\005 \001(" +
-      "\t\022\024\n\014overallState\030\006 \001(\t\022\026\n\016startTimestam" +
-      "p\030\007 \001(\t\022\024\n\014endTimestamp\030\010 \001(\t\022\026\n\016backupL" +
-      "ocation\030\t \001(\t\022\025\n\rfailureReason\030\n \001(\t\"[\n\034" +
-      "RestoreDatalakeStatusRequest\022\024\n\014datalake" +
-      "Name\030\001 \001(\t\022\021\n\trestoreId\030\002 \001(\t\022\022\n\nbackupN" +
-      "ame\030\003 \001(\t\"\362\001\n\035RestoreDatalakeStatusRespo" +
-      "nse\022\021\n\taccountId\030\001 \001(\t\022\021\n\trestoreId\030\002 \001(" +
-      "\t\022\020\n\010backupId\030\003 \001(\t\022\017\n\007userCrn\030\004 \001(\t\022\025\n\r" +
-      "internalState\030\005 \001(\t\022\024\n\014overallState\030\006 \001(" +
-      "\t\022\026\n\016startTimestamp\030\007 \001(\t\022\024\n\014endTimestam" +
-      "p\030\010 \001(\t\022\026\n\016backupLocation\030\t \001(\t\022\025\n\rfailu" +
-      "reReason\030\n \001(\t\"\350\001\n\022DatalakeBackupInfo\022\022\n" +
-      "\nbackupName\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t\022\017\n\007" +
-      "userCrn\030\003 \001(\t\022\020\n\010backupId\030\004 \001(\t\022\025\n\rinter" +
-      "nalState\030\005 \001(\t\022\024\n\014overallState\030\006 \001(\t\022\026\n\016" +
-      "startTimestamp\030\007 \001(\t\022\024\n\014endTimestamp\030\010 \001" +
-      "(\t\022\026\n\016backupLocation\030\t \001(\t\022\025\n\rfailureRea" +
-      "son\030\n \001(\t\"1\n\031ListDatalakeBackupRequest\022\024" +
-      "\n\014datalakeName\030\001 \001(\t\"S\n\032ListDatalakeBack" +
-      "upResponse\0225\n\rdatalake_info\030\001 \003(\0132\036.data" +
-      "lakedr.DatalakeBackupInfo2\315\004\n\ndatalakeDR" +
-      "\022A\n\nGetVersion\022\027.version.VersionRequest\032" +
-      "\030.version.VersionResponse\"\000\022Y\n\016BackupDat" +
-      "alake\022!.datalakedr.BackupDatalakeRequest" +
-      "\032\".datalakedr.BackupDatalakeResponse\"\000\022\\" +
-      "\n\017RestoreDatalake\022\".datalakedr.RestoreDa" +
-      "talakeRequest\032#.datalakedr.RestoreDatala" +
-      "keResponse\"\000\022k\n\024BackupDatalakeStatus\022\'.d" +
-      "atalakedr.BackupDatalakeStatusRequest\032(." +
-      "datalakedr.BackupDatalakeStatusResponse\"" +
-      "\000\022n\n\025RestoreDatalakeStatus\022(.datalakedr." +
-      "RestoreDatalakeStatusRequest\032).datalaked" +
-      "r.RestoreDatalakeStatusResponse\"\000\022f\n\023Lis" +
-      "tDatalakeBackups\022%.datalakedr.ListDatala" +
-      "keBackupRequest\032&.datalakedr.ListDatalak" +
-      "eBackupResponse\"\000B>\n+com.cloudera.thunde" +
-      "rhead.service.datalakedrB\017datalakeDRProt" +
-      "ob\006proto3"
+      "ureReason\030\n \001(\t\"\234\001\n\026RestoreDatalakeReque" +
+      "st\022\024\n\014datalakeName\030\001 \001(\t\022\022\n\nbackupName\030\002" +
+      " \001(\t\022\020\n\010backupId\030\003 \001(\t\022\027\n\017includeDatabas" +
+      "e\030\004 \001(\010\022\r\n\005force\030\005 \001(\010\022\036\n\026backupLocation" +
+      "Override\030\006 \001(\t\"\354\001\n\027RestoreDatalakeRespon" +
+      "se\022\021\n\taccountId\030\001 \001(\t\022\020\n\010backupId\030\002 \001(\t\022" +
+      "\021\n\trestoreId\030\003 \001(\t\022\017\n\007userCrn\030\004 \001(\t\022\025\n\ri" +
+      "nternalState\030\005 \001(\t\022\024\n\014overallState\030\006 \001(\t" +
+      "\022\026\n\016startTimestamp\030\007 \001(\t\022\024\n\014endTimestamp" +
+      "\030\010 \001(\t\022\026\n\016backupLocation\030\t \001(\t\022\025\n\rfailur" +
+      "eReason\030\n \001(\t\"Y\n\033BackupDatalakeStatusReq" +
+      "uest\022\024\n\014datalakeName\030\001 \001(\t\022\020\n\010backupId\030\002" +
+      " \001(\t\022\022\n\nbackupName\030\003 \001(\t\"\362\001\n\034BackupDatal" +
+      "akeStatusResponse\022\022\n\nbackupName\030\001 \001(\t\022\021\n" +
+      "\taccountId\030\002 \001(\t\022\017\n\007userCrn\030\003 \001(\t\022\020\n\010bac" +
+      "kupId\030\004 \001(\t\022\025\n\rinternalState\030\005 \001(\t\022\024\n\014ov" +
+      "erallState\030\006 \001(\t\022\026\n\016startTimestamp\030\007 \001(\t" +
+      "\022\024\n\014endTimestamp\030\010 \001(\t\022\026\n\016backupLocation" +
+      "\030\t \001(\t\022\025\n\rfailureReason\030\n \001(\t\"[\n\034Restore" +
+      "DatalakeStatusRequest\022\024\n\014datalakeName\030\001 " +
+      "\001(\t\022\021\n\trestoreId\030\002 \001(\t\022\022\n\nbackupName\030\003 \001" +
+      "(\t\"\362\001\n\035RestoreDatalakeStatusResponse\022\021\n\t" +
+      "accountId\030\001 \001(\t\022\021\n\trestoreId\030\002 \001(\t\022\020\n\010ba" +
+      "ckupId\030\003 \001(\t\022\017\n\007userCrn\030\004 \001(\t\022\025\n\rinterna" +
+      "lState\030\005 \001(\t\022\024\n\014overallState\030\006 \001(\t\022\026\n\016st" +
+      "artTimestamp\030\007 \001(\t\022\024\n\014endTimestamp\030\010 \001(\t" +
+      "\022\026\n\016backupLocation\030\t \001(\t\022\025\n\rfailureReaso" +
+      "n\030\n \001(\t\"\350\001\n\022DatalakeBackupInfo\022\022\n\nbackup" +
+      "Name\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t\022\017\n\007userCrn" +
+      "\030\003 \001(\t\022\020\n\010backupId\030\004 \001(\t\022\025\n\rinternalStat" +
+      "e\030\005 \001(\t\022\024\n\014overallState\030\006 \001(\t\022\026\n\016startTi" +
+      "mestamp\030\007 \001(\t\022\024\n\014endTimestamp\030\010 \001(\t\022\026\n\016b" +
+      "ackupLocation\030\t \001(\t\022\025\n\rfailureReason\030\n \001" +
+      "(\t\"1\n\031ListDatalakeBackupRequest\022\024\n\014datal" +
+      "akeName\030\001 \001(\t\"S\n\032ListDatalakeBackupRespo" +
+      "nse\0225\n\rdatalake_info\030\001 \003(\0132\036.datalakedr." +
+      "DatalakeBackupInfo2\315\004\n\ndatalakeDR\022A\n\nGet" +
+      "Version\022\027.version.VersionRequest\032\030.versi" +
+      "on.VersionResponse\"\000\022Y\n\016BackupDatalake\022!" +
+      ".datalakedr.BackupDatalakeRequest\032\".data" +
+      "lakedr.BackupDatalakeResponse\"\000\022\\\n\017Resto" +
+      "reDatalake\022\".datalakedr.RestoreDatalakeR" +
+      "equest\032#.datalakedr.RestoreDatalakeRespo" +
+      "nse\"\000\022k\n\024BackupDatalakeStatus\022\'.datalake" +
+      "dr.BackupDatalakeStatusRequest\032(.datalak" +
+      "edr.BackupDatalakeStatusResponse\"\000\022n\n\025Re" +
+      "storeDatalakeStatus\022(.datalakedr.Restore" +
+      "DatalakeStatusRequest\032).datalakedr.Resto" +
+      "reDatalakeStatusResponse\"\000\022f\n\023ListDatala" +
+      "keBackups\022%.datalakedr.ListDatalakeBacku" +
+      "pRequest\032&.datalakedr.ListDatalakeBackup" +
+      "Response\"\000B>\n+com.cloudera.thunderhead.s" +
+      "ervice.datalakedrB\017datalakeDRProtob\006prot" +
+      "o3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -16308,7 +16482,7 @@ public final class datalakeDRProto {
     internal_static_datalakedr_RestoreDatalakeRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_datalakedr_RestoreDatalakeRequest_descriptor,
-        new java.lang.String[] { "DatalakeName", "BackupName", "BackupId", "IncludeDatabase", "Force", });
+        new java.lang.String[] { "DatalakeName", "BackupName", "BackupId", "IncludeDatabase", "Force", "BackupLocationOverride", });
     internal_static_datalakedr_RestoreDatalakeResponse_descriptor =
       getDescriptor().getMessageTypes().get(3);
     internal_static_datalakedr_RestoreDatalakeResponse_fieldAccessorTable = new
