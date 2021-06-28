@@ -247,6 +247,96 @@ class UsersStateDifferenceTest {
     }
 
     @Test
+    void testCalculateUsersToEnable() {
+        UsersState.Builder umsUsersStateBuilder = new UsersState.Builder();
+        UsersState.Builder ipaUsersStateBuilder = new UsersState.Builder();
+
+        addUserWithState("user1UmsEnabled", umsUsersStateBuilder, FmsUser.State.ENABLED);
+        addUserWithState("user2UmsDisabled", umsUsersStateBuilder, FmsUser.State.DISABLED);
+        addUserWithState("user3UmsEnabledIpaEnabled", umsUsersStateBuilder, FmsUser.State.ENABLED);
+        addUserWithState("user3UmsEnabledIpaEnabled", ipaUsersStateBuilder, FmsUser.State.ENABLED);
+        addUserWithState("user4UmsEnabledIpaDisabled", umsUsersStateBuilder, FmsUser.State.ENABLED);
+        addUserWithState("user4UmsEnabledIpaDisabled", ipaUsersStateBuilder, FmsUser.State.DISABLED);
+        addUserWithState("user5UmsDisabledIpaEnabled", umsUsersStateBuilder, FmsUser.State.DISABLED);
+        addUserWithState("user5UmsDisabledIpaEnabled", ipaUsersStateBuilder, FmsUser.State.ENABLED);
+        addUserWithState("user6UmsDisabledIpaDisabled", umsUsersStateBuilder, FmsUser.State.DISABLED);
+        addUserWithState("user6UmsDisabledIpaDisabled", ipaUsersStateBuilder, FmsUser.State.DISABLED);
+        addUserWithState("user7IpaEnabled", ipaUsersStateBuilder, FmsUser.State.ENABLED);
+        addUserWithState("user8IpaDisabled", ipaUsersStateBuilder, FmsUser.State.DISABLED);
+        // also check that we don't change a protected user
+        addUserWithState(FreeIpaChecks.IPA_PROTECTED_USERS.get(0), umsUsersStateBuilder, FmsUser.State.ENABLED);
+        addUserWithState(FreeIpaChecks.IPA_PROTECTED_USERS.get(0), ipaUsersStateBuilder, FmsUser.State.DISABLED);
+
+        UmsUsersState umsUsersState = new UmsUsersState.Builder()
+                .setUsersState(umsUsersStateBuilder.build())
+                .build();
+
+        UsersState ipaUsersState = ipaUsersStateBuilder.build();
+
+        ImmutableSet<String> usersToEnable = UsersStateDifference.calculateUsersToEnable(umsUsersState, ipaUsersState);
+
+        // the users that are enabled in UMS but disabled in IPA are enabled
+        // new users added to IPA do not need to be enabled
+        assertFalse(usersToEnable.contains("user1UmsEnabled"));
+        assertFalse(usersToEnable.contains("user2UmsDisabled"));
+        assertFalse(usersToEnable.contains("user3UmsEnabledIpaEnabled"));
+        assertTrue(usersToEnable.contains("user4UmsEnabledIpaDisabled"));
+        assertFalse(usersToEnable.contains("user5UmsDisabledIpaEnabled"));
+        assertFalse(usersToEnable.contains("user6UmsDisabledIpaDisabled"));
+        assertFalse(usersToEnable.contains("user7IpaEnabled"));
+        assertFalse(usersToEnable.contains("user8IpaDisabled"));
+        assertFalse(usersToEnable.contains(FreeIpaChecks.IPA_PROTECTED_USERS.get(0)));
+    }
+
+    @Test
+    void testCalculateUsersToDisable() {
+        UsersState.Builder umsUsersStateBuilder = new UsersState.Builder();
+        UsersState.Builder ipaUsersStateBuilder = new UsersState.Builder();
+
+        addUserWithState("user1UmsEnabled", umsUsersStateBuilder, FmsUser.State.ENABLED);
+        addUserWithState("user2UmsDisabled", umsUsersStateBuilder, FmsUser.State.DISABLED);
+        addUserWithState("user3UmsEnabledIpaEnabled", umsUsersStateBuilder, FmsUser.State.ENABLED);
+        addUserWithState("user3UmsEnabledIpaEnabled", ipaUsersStateBuilder, FmsUser.State.ENABLED);
+        addUserWithState("user4UmsEnabledIpaDisabled", umsUsersStateBuilder, FmsUser.State.ENABLED);
+        addUserWithState("user4UmsEnabledIpaDisabled", ipaUsersStateBuilder, FmsUser.State.DISABLED);
+        addUserWithState("user5UmsDisabledIpaEnabled", umsUsersStateBuilder, FmsUser.State.DISABLED);
+        addUserWithState("user5UmsDisabledIpaEnabled", ipaUsersStateBuilder, FmsUser.State.ENABLED);
+        addUserWithState("user6UmsDisabledIpaDisabled", umsUsersStateBuilder, FmsUser.State.DISABLED);
+        addUserWithState("user6UmsDisabledIpaDisabled", ipaUsersStateBuilder, FmsUser.State.DISABLED);
+        addUserWithState("user7IpaEnabled", ipaUsersStateBuilder, FmsUser.State.ENABLED);
+        addUserWithState("user8IpaDisabled", ipaUsersStateBuilder, FmsUser.State.DISABLED);
+        // also check that we don't change a protected user
+        addUserWithState(FreeIpaChecks.IPA_PROTECTED_USERS.get(0), umsUsersStateBuilder, FmsUser.State.ENABLED);
+        addUserWithState(FreeIpaChecks.IPA_PROTECTED_USERS.get(0), ipaUsersStateBuilder, FmsUser.State.DISABLED);
+
+        UmsUsersState umsUsersState = new UmsUsersState.Builder()
+                .setUsersState(umsUsersStateBuilder.build())
+                .build();
+
+        UsersState ipaUsersState = ipaUsersStateBuilder.build();
+
+        ImmutableSet<String> usersToDisable = UsersStateDifference.calculateUsersToDisable(umsUsersState, ipaUsersState);
+
+        // the users that are disabled in UMS but enabled in IPA are disabled
+        // new disabled users added to IPA need to be disabled
+        assertFalse(usersToDisable.contains("user1UmsEnabled"));
+        assertFalse(usersToDisable.contains("user2UmsDisabled"));
+        assertFalse(usersToDisable.contains("user3UmsEnabledIpaEnabled"));
+        assertFalse(usersToDisable.contains("user4UmsEnabledIpaDisabled"));
+        assertTrue(usersToDisable.contains("user5UmsDisabledIpaEnabled"));
+        assertFalse(usersToDisable.contains("user6UmsDisabledIpaDisabled"));
+        assertFalse(usersToDisable.contains("user7IpaEnabled"));
+        assertFalse(usersToDisable.contains("user8IpaDisabled"));
+        assertFalse(usersToDisable.contains(FreeIpaChecks.IPA_PROTECTED_USERS.get(0)));
+    }
+
+    private void addUserWithState(String username, UsersState.Builder userStateBuilder, FmsUser.State state) {
+        userStateBuilder
+                .addUser(new FmsUser().withName(username).withState(state))
+                .addMemberToGroup(UserSyncConstants.CDP_USERSYNC_INTERNAL_GROUP, username);
+    }
+
+    @Test
     void testCalculateUsersWithCredentialsToUpdateWithUpdateOptimization() {
         testCalculateUsersWithCredentialsToUpdate(true);
     }

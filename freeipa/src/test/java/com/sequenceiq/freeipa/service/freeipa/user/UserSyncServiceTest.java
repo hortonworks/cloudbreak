@@ -192,6 +192,10 @@ class UserSyncServiceTest {
         FmsUser userToAdd2 = new FmsUser().withName("userToAdd2").withFirstName("peter").withLastName("parker");
         String userToRemove1 = "userToRemove1";
         String userToRemove2 = "userToRemove2";
+        String userToDisable1 = "userToDisable1";
+        String userToDisable2 = "userToDisable2";
+        String userToEnable1 = "userToEnable1";
+        String userToEnable2 = "userToEnable2";
         Multimap<String, String> warnings = ArrayListMultimap.create();
 
         doNothing().when(freeIpaClient).callBatch(any(), any(), any(), any());
@@ -209,12 +213,14 @@ class UserSyncServiceTest {
                 ImmutableMultimap.<String, String>builder()
                         .put(groupToRemove1.getName(), userToRemove1)
                         .put(groupToRemove2.getName(), userToRemove2)
-                        .build()
+                        .build(),
+                ImmutableSet.of(userToDisable1, userToDisable2),
+                ImmutableSet.of(userToEnable1, userToEnable2)
         );
 
         underTest.applyStateDifferenceToIpa(ENV_CRN, freeIpaClient, usersStateDifference, warnings::put, true);
 
-        verify(freeIpaClient, times(6)).callBatch(any(), any(), any(), any());
+        verify(freeIpaClient, times(8)).callBatch(any(), any(), any(), any());
 
         verifyNoMoreInteractions(freeIpaClient);
     }

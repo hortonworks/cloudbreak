@@ -71,6 +71,8 @@ public class FreeIpaClient {
 
     private static final Pattern RESPONSE_CODE_PATTERN = Pattern.compile("^Server returned HTTP response code: (\\d+)");
 
+    private static final boolean USER_ENABLED = false;
+
     private JsonRpcHttpClient jsonRpcHttpClient;
 
     private final String apiVersion;
@@ -219,7 +221,20 @@ public class FreeIpaClient {
     }
 
     public User userAdd(String user, String firstName, String lastName) throws FreeIpaClientException {
-        return UserAddOperation.create(user, firstName, lastName).invoke(this).orElseThrow(() ->
+        return userAdd(user, firstName, lastName, USER_ENABLED);
+    }
+
+    /**
+     * Adds a user to FreeIPA. This overload allows the user to be created in a disabled state.
+     *
+     * @param user      the user
+     * @param firstName the user's first name
+     * @param lastName  the user's last name
+     * @param disabled  whether the user is disabled
+     * @return the user model
+     */
+    public User userAdd(String user, String firstName, String lastName, boolean disabled) throws FreeIpaClientException {
+        return UserAddOperation.create(user, firstName, lastName, disabled).invoke(this).orElseThrow(() ->
                 new FreeIpaClientException(String.format("User addition failed for user %s", user)));
     }
 
