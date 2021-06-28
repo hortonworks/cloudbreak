@@ -179,6 +179,10 @@
               {
                 "name": "hbase_regionserver_wal_codec",
                 "value": "org.apache.hadoop.hbase.regionserver.wal.IndexedWALEditCodec"
+              },
+              {
+                "name": "REGIONSERVER_role_env_safety_valve",
+                "value": "HBASE_CLASSPATH=${HBASE_CLASSPATH}:/opt/cloudera/parcels/CDH/lib/hbase_connectors/lib/hbase-spark.jar:/opt/cloudera/parcels/CDH/lib/hbase_connectors/lib/hbase-spark-protocol-shaded.jar:/opt/cloudera/parcels/CDH/lib/hbase_connectors/lib/scala-library.jar"
               }
             ],
             "base": true
