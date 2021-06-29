@@ -10,13 +10,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.cluster.model.ClusterHostAttributes;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.util.NullUtil;
 
 @Service
 class ClouderaHostGroupAssociationBuilder {
-
-    private static final String FQDN = "fqdn";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaHostGroupAssociationBuilder.class);
 
@@ -35,7 +35,8 @@ class ClouderaHostGroupAssociationBuilder {
         List<Map<String, String>> hostInfoForHostGroup = new ArrayList<>();
         for (InstanceMetaData metaData : instanceMetadataList) {
             Map<String, String> hostInfo = new HashMap<>();
-            hostInfo.put(FQDN, metaData.getDiscoveryFQDN());
+            hostInfo.put(ClusterHostAttributes.FQDN, metaData.getDiscoveryFQDN());
+            NullUtil.putIfPresent(hostInfo, ClusterHostAttributes.RACK_ID, metaData.getRackId());
             hostInfoForHostGroup.add(hostInfo);
         }
         return hostInfoForHostGroup;

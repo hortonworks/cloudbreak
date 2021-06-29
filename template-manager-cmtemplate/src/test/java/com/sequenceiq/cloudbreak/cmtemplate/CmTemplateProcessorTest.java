@@ -1,10 +1,12 @@
 package com.sequenceiq.cloudbreak.cmtemplate;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.configVar;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static java.util.Map.entry;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,12 +18,11 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.Test;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplate;
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
+import com.cloudera.api.swagger.model.ApiClusterTemplateHostInfo;
 import com.cloudera.api.swagger.model.ApiClusterTemplateInstantiator;
 import com.cloudera.api.swagger.model.ApiClusterTemplateRoleConfigGroup;
 import com.cloudera.api.swagger.model.ApiClusterTemplateRoleConfigGroupInfo;
@@ -31,6 +32,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.GatewayRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceCount;
 import com.sequenceiq.cloudbreak.cloud.model.ResizeRecommendation;
+import com.sequenceiq.cloudbreak.cluster.model.ClusterHostAttributes;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.yarn.YarnConstants;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.yarn.YarnRoles;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
@@ -40,7 +42,6 @@ import com.sequenceiq.cloudbreak.template.model.ServiceAttributes;
 import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
-@RunWith(MockitoJUnitRunner.class)
 public class CmTemplateProcessorTest {
 
     private CmTemplateProcessor underTest;
@@ -529,7 +530,7 @@ public class CmTemplateProcessorTest {
         Map<String, Map<String, ServiceAttributes>> attrs = underTest.getHostGroupBasedServiceAttributes();
         assertEquals(4, attrs.size());
 
-        Map<String, ServiceAttributes> serviceAttributesMap = null;
+        Map<String, ServiceAttributes> serviceAttributesMap;
 
         serviceAttributesMap = attrs.get("worker");
         assertEquals(1, serviceAttributesMap.get(YarnRoles.YARN).getAttributes().size());
@@ -558,6 +559,55 @@ public class CmTemplateProcessorTest {
         underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager-host-with-uppercase.bp"));
         Set<String> hosts = Set.of("master", "executor", "coordinator");
         assertTrue(underTest.getTemplate().getHostTemplates().stream().allMatch(ht -> hosts.contains(ht.getRefName())));
+    }
+
+    @Test
+    void addHostsTest() {
+        Map<String, List<Map<String, String>>> hostGroupMappings = Map.ofEntries(entry("hostGroup1", List.of()),
+                entry("hostGroup2", List.of(hostAttributes("host2_1", false, null), hostAttributes("host2_2", true, null))),
+                entry("hostGroup3", List.of(hostAttributes("host3_1", true, ""), hostAttributes("host3_2", true, "/rack3_2"))));
+
+        underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager.bp"));
+        ApiClusterTemplate template = underTest.getTemplate();
+        ApiClusterTemplateInstantiator instantiator = new ApiClusterTemplateInstantiator();
+        template.setInstantiator(instantiator);
+
+        underTest.addHosts(hostGroupMappings);
+
+        List<ApiClusterTemplateHostInfo> hosts = instantiator.getHosts();
+        assertThat(hosts).hasSize(4);
+        verifyHostInfo(hosts, "hostGroup2", "host2_1", null);
+        verifyHostInfo(hosts, "hostGroup2", "host2_2", null);
+        verifyHostInfo(hosts, "hostGroup3", "host3_1", null);
+        verifyHostInfo(hosts, "hostGroup3", "host3_2", "/rack3_2");
+    }
+
+    private Map<String, String> hostAttributes(String hostname, boolean withRackId, String rackId) {
+        Map<String, String> hostAttributes;
+        if (withRackId) {
+            if (rackId == null) {
+                hostAttributes = new HashMap<>();
+                hostAttributes.put(ClusterHostAttributes.FQDN, hostname);
+                hostAttributes.put(ClusterHostAttributes.RACK_ID, null);
+            } else {
+                hostAttributes = Map.ofEntries(entry(ClusterHostAttributes.FQDN, hostname), entry(ClusterHostAttributes.RACK_ID, rackId));
+            }
+        } else {
+            hostAttributes = Map.ofEntries(entry(ClusterHostAttributes.FQDN, hostname));
+        }
+        return hostAttributes;
+    }
+
+    private void verifyHostInfo(List<ApiClusterTemplateHostInfo> hosts, String hostTemplateRefNameExpected, String hostNameExpected, String rackIdExpected) {
+        Optional<ApiClusterTemplateHostInfo> hostInfoOptional = hosts.stream()
+                .filter(h -> h.getHostName().equals(hostNameExpected))
+                .findFirst();
+        assertThat(hostInfoOptional).isNotEmpty();
+
+        ApiClusterTemplateHostInfo hostInfo = hostInfoOptional.get();
+        assertThat(hostInfo).isNotNull();
+        assertThat(hostInfo.getHostTemplateRefName()).isEqualTo(hostTemplateRefNameExpected);
+        assertThat(hostInfo.getRackId()).isEqualTo(rackIdExpected);
     }
 
     private static void assertSortedEquals(Set<?> expected, Set<?> actual) {

@@ -49,6 +49,7 @@ import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.dto.datalake.DatalakeDto;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import com.sequenceiq.cloudbreak.util.URLUtils;
 
 @Service
 @Scope("prototype")
@@ -201,9 +202,8 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
             createNewUser(usersResourceApi, oldAdminUser.getAuthRoles(), cluster.getCloudbreakAmbariUser(), cluster.getCloudbreakAmbariPassword(), userList);
             createNewUser(usersResourceApi, oldAdminUser.getAuthRoles(), cluster.getDpAmbariUser(), cluster.getDpAmbariPassword(), userList);
             if (ADMIN_USER.equals(cluster.getUserName())) {
-                ApiUser2 oldAdmin = oldAdminUser;
-                oldAdmin.setPassword(cluster.getPassword());
-                usersResourceApi.updateUser2(oldAdminUser.getName(), oldAdmin);
+                oldAdminUser.setPassword(cluster.getPassword());
+                usersResourceApi.updateUser2(oldAdminUser.getName(), oldAdminUser);
             } else if (cluster.getUserName() != null) {
                 createUserSuppliedCMUser(userList, oldAdminUser, cluster);
             }
@@ -229,9 +229,9 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
     }
 
     private ApiClient createApiClient() throws ClusterClientInitException, ClouderaManagerClientInitException, CloudbreakException {
-        ApiClient client = null;
         try {
-            client = clouderaManagerApiClientProvider.getDefaultClient(stack.getGatewayPort(), clientConfig, ClouderaManagerApiClientProvider.API_V_31);
+            ApiClient client =
+                    clouderaManagerApiClientProvider.getDefaultClient(stack.getGatewayPort(), clientConfig, ClouderaManagerApiClientProvider.API_V_31);
             ToolsResourceApi toolsResourceApi = clouderaManagerApiFactory.getToolsResourceApi(client);
             toolsResourceApi.echo("TEST");
             LOGGER.debug("Cloudera Manager already running, old admin user's password has not been changed yet.");
@@ -386,13 +386,12 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
                 .filter(host -> host.getClusterRef() != null)
                 .map(host -> new ApiBatchRequestElement()
                         .method(HTTPMethod.POST)
-                        .url(ClouderaManagerApiClientProvider.API_V_31 + "/hosts/" + host.getHostId() + "/commands/generateHostCerts")
+                        .url(ClouderaManagerApiClientProvider.API_V_31 + "/hosts/" + URLUtils.encodeString(host.getHostId()) + "/commands/generateHostCerts")
                         .body(apiGenerateHostCertsArguments)
                         .acceptType("application/json")
                         .contentType("application/json"))
                 .collect(Collectors.toList());
-        ApiBatchRequest batchRequest = new ApiBatchRequest().items(batchRequestElements);
-        return batchRequest;
+        return new ApiBatchRequest().items(batchRequestElements);
     }
 
     private ApiGenerateHostCertsArguments createApiGenerateHostCertsArguments(String sshUser, KeyPair sshKeyPair) {
@@ -404,7 +403,7 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
     }
 
     private void processHostCertsBatchResponse(ApiClient client, ApiBatchResponse apiBatchResponse) {
-        if (apiBatchResponse.getSuccess()) {
+        if (apiBatchResponse != null && apiBatchResponse.getSuccess() != null && apiBatchResponse.getItems() != null && apiBatchResponse.getSuccess()) {
             List<BigDecimal> ids = apiBatchResponse.getItems().stream()
                     .map(bre -> new Json((String) bre.getResponse()).getSilent(ApiCommand.class).getId())
                     .collect(Collectors.toList());
@@ -422,4 +421,5 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
     private String createPrivateKeyString(KeyPair sshKeyPair) {
         return StringUtils.removeEnd(PkiUtil.convert(sshKeyPair.getPrivate()), "\n");
     }
+
 }
