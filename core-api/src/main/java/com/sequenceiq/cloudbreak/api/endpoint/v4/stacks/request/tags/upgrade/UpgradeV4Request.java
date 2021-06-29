@@ -1,9 +1,11 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade;
 
 import java.util.Objects;
+import java.util.StringJoiner;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.InternalUpgradeSettings;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.UpgradeModelDescription;
 import com.sequenceiq.cloudbreak.validation.ValidUpgradeRequest;
 import com.sequenceiq.common.model.UpgradeShowAvailableImages;
 
@@ -15,22 +17,25 @@ import io.swagger.annotations.ApiModelProperty;
 @ValidUpgradeRequest
 public class UpgradeV4Request {
 
-    @ApiModelProperty(ModelDescriptions.UpgradeModelDescription.IMAGE_ID)
+    @ApiModelProperty(UpgradeModelDescription.IMAGE_ID)
     private String imageId;
 
-    @ApiModelProperty(ModelDescriptions.UpgradeModelDescription.RUNTIME)
+    @ApiModelProperty(UpgradeModelDescription.RUNTIME)
     private String runtime;
 
-    @ApiModelProperty(ModelDescriptions.UpgradeModelDescription.LOCK_COMPONENTS)
+    @ApiModelProperty(UpgradeModelDescription.LOCK_COMPONENTS)
     private Boolean lockComponents;
 
-    @ApiModelProperty(ModelDescriptions.UpgradeModelDescription.DRY_RUN)
+    @ApiModelProperty(UpgradeModelDescription.DRY_RUN)
     private Boolean dryRun;
 
     private Boolean replaceVms = Boolean.TRUE;
 
-    @ApiModelProperty(ModelDescriptions.UpgradeModelDescription.SHOW_AVAILABLE_IMAGES)
+    @ApiModelProperty(UpgradeModelDescription.SHOW_AVAILABLE_IMAGES)
     private UpgradeShowAvailableImages showAvailableImages = UpgradeShowAvailableImages.DO_NOT_SHOW;
+
+    @ApiModelProperty(hidden = true)
+    private InternalUpgradeSettings internalUpgradeSettings;
 
     public String getImageId() {
         return imageId;
@@ -76,6 +81,14 @@ public class UpgradeV4Request {
         this.showAvailableImages = showAvailableImages;
     }
 
+    public InternalUpgradeSettings getInternalUpgradeSettings() {
+        return internalUpgradeSettings;
+    }
+
+    public void setInternalUpgradeSettings(InternalUpgradeSettings internalUpgradeSettings) {
+        this.internalUpgradeSettings = internalUpgradeSettings;
+    }
+
     public Boolean getReplaceVms() {
         return replaceVms;
     }
@@ -115,12 +128,14 @@ public class UpgradeV4Request {
 
     @Override
     public String toString() {
-        return "UpgradeV4Request{" +
-                "imageId='" + imageId + '\'' +
-                ", runtime='" + runtime + '\'' +
-                ", lockComponents=" + lockComponents +
-                ", dryRun=" + dryRun +
-                ", showAvailableImages=" + showAvailableImages +
-                '}';
+        return new StringJoiner(", ", UpgradeV4Request.class.getSimpleName() + "[", "]")
+                .add("imageId='" + imageId + "'")
+                .add("runtime='" + runtime + "'")
+                .add("lockComponents=" + lockComponents)
+                .add("dryRun=" + dryRun)
+                .add("replaceVms=" + replaceVms)
+                .add("showAvailableImages=" + showAvailableImages)
+                .add("internalUpgradeSettings=" + internalUpgradeSettings)
+                .toString();
     }
 }

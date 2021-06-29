@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.InternalUpgradeSettings;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cluster.service.ClouderaManagerProductsProvider;
@@ -32,7 +33,12 @@ public class ImageFilterParamsFactory {
     private ClouderaManagerProductsProvider clouderaManagerProductsProvider;
 
     public ImageFilterParams create(Image image, boolean lockComponents, Stack stack) {
-        return new ImageFilterParams(image, lockComponents, getStackRelatedParcels(stack), stack.getType(), getBlueprint(stack), stack.getId());
+        return create(image, lockComponents, stack, new InternalUpgradeSettings());
+    }
+
+    public ImageFilterParams create(Image image, boolean lockComponents, Stack stack, InternalUpgradeSettings internalUpgradeSettings) {
+        return new ImageFilterParams(image, lockComponents, getStackRelatedParcels(stack), stack.getType(),
+                getBlueprint(stack), stack.getId(), internalUpgradeSettings);
     }
 
     public Map<String, String> getStackRelatedParcels(Stack stack) {

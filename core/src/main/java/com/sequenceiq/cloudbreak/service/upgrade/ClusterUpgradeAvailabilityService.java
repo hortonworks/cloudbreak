@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.InternalUpgradeSettings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageComponentVersions;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
@@ -73,8 +74,8 @@ public class ClusterUpgradeAvailabilityService {
     @Inject
     private EntitlementService entitlementService;
 
-    public UpgradeV4Response checkForUpgradesByName(Stack stack, boolean lockComponents, boolean replaceVms) {
-        UpgradeV4Response upgradeOptions = checkForUpgrades(stack, lockComponents);
+    public UpgradeV4Response checkForUpgradesByName(Stack stack, boolean lockComponents, boolean replaceVms, InternalUpgradeSettings internalUpgradeSettings) {
+        UpgradeV4Response upgradeOptions = checkForUpgrades(stack, lockComponents, internalUpgradeSettings);
         upgradeOptions.setReplaceVms(replaceVms);
         if (StringUtils.isEmpty(upgradeOptions.getReason())) {
             if (!stack.getStatus().isAvailable()) {
@@ -136,7 +137,7 @@ public class ClusterUpgradeAvailabilityService {
         return upgradeCandidates;
     }
 
-    private UpgradeV4Response checkForUpgrades(Stack stack, boolean lockComponents) {
+    private UpgradeV4Response checkForUpgrades(Stack stack, boolean lockComponents, InternalUpgradeSettings internalUpgradeSettings) {
         UpgradeV4Response upgradeOptions = new UpgradeV4Response();
         try {
             LOGGER.info(String.format("Retrieving images for upgrading stack %s", stack.getName()));
@@ -146,13 +147,13 @@ public class ClusterUpgradeAvailabilityService {
             if (currentImage.getImageCatalogUrl() == null) {
                 image = imageCatalogService.getImage(currentImage.getImageCatalogUrl(), currentImage.getImageCatalogName(), currentImage.getImageId())
                         .getImage();
-                ImageFilterParams imageFilterParams = imageFilterParamsFactory.create(image, lockComponents, stack);
+                ImageFilterParams imageFilterParams = imageFilterParamsFactory.create(image, lockComponents, stack, internalUpgradeSettings);
                 imageFilterResult = filterImages(stack.getCreator().getTenant().getName(), stack.getWorkspace().getId(), currentImage.getImageCatalogName(),
                         stack.cloudPlatform(), imageFilterParams);
             } else {
                 CloudbreakImageCatalogV3 imageCatalog = getImagesFromCatalog(stack.getWorkspace(), currentImage);
                 image = getCurrentImageFromCatalog(currentImage.getImageId(), imageCatalog);
-                ImageFilterParams imageFilterParams = imageFilterParamsFactory.create(image, lockComponents, stack);
+                ImageFilterParams imageFilterParams = imageFilterParamsFactory.create(image, lockComponents, stack, internalUpgradeSettings);
                 imageFilterResult = filterImages(stack.getCreator().getTenant().getName(), imageCatalog, stack.cloudPlatform(), imageFilterParams);
             }
             LOGGER.info(String.format("%d possible image found for stack upgrade.", imageFilterResult.getAvailableImages().getCdhImages().size()));

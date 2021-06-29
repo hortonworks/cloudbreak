@@ -6,6 +6,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import org.springframework.validation.annotation.Validated;
@@ -34,6 +35,20 @@ public interface DistroXUpgradeV1Endpoint {
     @Path("/crn/{crn}/upgrade")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "upgrades the distrox cluster", nickname = "upgradeDistroxClusterByCrn")
-    DistroXUpgradeV1Response upgradeClusterByCrn(@PathParam("crn") String crn,  @Valid DistroXUpgradeV1Request distroxUpgradeRequest);
+    DistroXUpgradeV1Response upgradeClusterByCrn(@PathParam("crn") String crn, @Valid DistroXUpgradeV1Request distroxUpgradeRequest);
+
+    @POST
+    @Path("internal/{name}/upgrade")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "upgrades the distrox cluster internal", nickname = "upgradeDistroxClusterInternal")
+    DistroXUpgradeV1Response upgradeClusterByNameInternal(@PathParam("name") String name, @Valid DistroXUpgradeV1Request distroxUpgradeRequest,
+            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+
+    @POST
+    @Path("internal/crn/{crn}/upgrade")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "upgrades the distrox cluster internal", nickname = "upgradeDistroxClusterByCrnInternal")
+    DistroXUpgradeV1Response upgradeClusterByCrnInternal(@PathParam("crn") String crn, @Valid DistroXUpgradeV1Request distroxUpgradeRequest,
+            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 
 }

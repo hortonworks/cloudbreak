@@ -9,13 +9,16 @@ import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
+import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.InternalUpgradeSettings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXUpgradeV1Endpoint;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Request;
@@ -59,10 +62,31 @@ public class DistroXUpgradeV1Controller implements DistroXUpgradeV1Endpoint {
         return upgradeCluster(clusterCrn, distroxUpgradeRequest, nameOrCrn);
     }
 
+    @Override
+    @InternalOnly
+    public DistroXUpgradeV1Response upgradeClusterByNameInternal(@ResourceName String clusterName, @Valid DistroXUpgradeV1Request distroxUpgradeRequest,
+            @InitiatorUserCrn String initiatorUserCrn) {
+        NameOrCrn nameOrCrn = NameOrCrn.ofName(clusterName);
+        return upgradeCluster(clusterName, distroxUpgradeRequest, nameOrCrn, new InternalUpgradeSettings(true));
+    }
+
+    @Override
+    @InternalOnly
+    public DistroXUpgradeV1Response upgradeClusterByCrnInternal(@ResourceCrn String clusterCrn, @Valid DistroXUpgradeV1Request distroxUpgradeRequest,
+            @InitiatorUserCrn String initiatorUserCrn) {
+        NameOrCrn nameOrCrn = NameOrCrn.ofCrn(clusterCrn);
+        return upgradeCluster(clusterCrn, distroxUpgradeRequest, nameOrCrn, new InternalUpgradeSettings(true));
+    }
+
     private DistroXUpgradeV1Response upgradeCluster(String clusterNameOrCrn, DistroXUpgradeV1Request distroxUpgradeRequest, NameOrCrn nameOrCrn) {
+        return upgradeCluster(clusterNameOrCrn, distroxUpgradeRequest, nameOrCrn, new InternalUpgradeSettings());
+    }
+
+    private DistroXUpgradeV1Response upgradeCluster(String clusterNameOrCrn, DistroXUpgradeV1Request distroxUpgradeRequest, NameOrCrn nameOrCrn,
+            InternalUpgradeSettings internalUpgradeSettings) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         DistroXUpgradeV1Request modifiedRequest = componentLocker.lockComponentsIfRuntimeUpgradeIsDisabled(distroxUpgradeRequest, userCrn, clusterNameOrCrn);
-        UpgradeV4Request request = upgradeConverter.convert(modifiedRequest);
+        UpgradeV4Request request = upgradeConverter.convert(modifiedRequest, internalUpgradeSettings);
         Long workspaceId = restRequestThreadLocalService.getRequestedWorkspaceId();
         if (request.isDryRun() || request.isShowAvailableImagesSet()) {
             LOGGER.info("Checking for upgrade for cluster [{}] with request: {}", clusterNameOrCrn, request);
