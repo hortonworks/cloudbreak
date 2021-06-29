@@ -12,7 +12,7 @@ import com.sequenceiq.cloudbreak.structuredevent.event.SecurityGroupDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.VolumeDetails;
 
 @Component
-public class InstanceGroupToInstanceGroupDetailsConverter extends AbstractConversionServiceAwareConverter<InstanceGroup, InstanceGroupDetails>  {
+public class InstanceGroupToInstanceGroupDetailsConverter extends AbstractConversionServiceAwareConverter<InstanceGroup, InstanceGroupDetails> {
 
     @Override
     public InstanceGroupDetails convert(InstanceGroup source) {
@@ -22,14 +22,18 @@ public class InstanceGroupToInstanceGroupDetailsConverter extends AbstractConver
         instanceGroupDetails.setNodeCount(source.getNodeCount());
         Template template = source.getTemplate();
         if (template != null) {
-            instanceGroupDetails.setInstanceType(source.getTemplate().getInstanceType());
-            instanceGroupDetails.setVolumes(source.getTemplate().getVolumeTemplates().stream().map(volmue -> {
-                VolumeDetails volumeDetails = new VolumeDetails();
-                volumeDetails.setVolumeType(volmue.getVolumeType());
-                volumeDetails.setVolumeSize(volmue.getVolumeSize());
-                volumeDetails.setVolumeCount(volmue.getVolumeCount());
-                return volumeDetails;
-            }).collect(Collectors.toList()));
+            instanceGroupDetails.setInstanceType(template.getInstanceType());
+            instanceGroupDetails.setAttributes(template.getAttributes().getMap());
+            instanceGroupDetails.setRootVolumeSize(template.getRootVolumeSize());
+            if (template.getVolumeTemplates() != null) {
+                instanceGroupDetails.setVolumes(template.getVolumeTemplates().stream().map(volmue -> {
+                    VolumeDetails volumeDetails = new VolumeDetails();
+                    volumeDetails.setVolumeType(volmue.getVolumeType());
+                    volumeDetails.setVolumeSize(volmue.getVolumeSize());
+                    volumeDetails.setVolumeCount(volmue.getVolumeCount());
+                    return volumeDetails;
+                }).collect(Collectors.toList()));
+            }
             if (template.getTemporaryStorage() != null) {
                 instanceGroupDetails.setTemporaryStorage(template.getTemporaryStorage().name());
             }
