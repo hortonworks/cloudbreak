@@ -11,10 +11,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -25,15 +27,20 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
+import com.cloudera.api.swagger.BatchResourceApi;
 import com.cloudera.api.swagger.ClouderaManagerResourceApi;
 import com.cloudera.api.swagger.ClustersResourceApi;
 import com.cloudera.api.swagger.HostTemplatesResourceApi;
+import com.cloudera.api.swagger.HostsResourceApi;
 import com.cloudera.api.swagger.MgmtServiceResourceApi;
 import com.cloudera.api.swagger.ParcelResourceApi;
 import com.cloudera.api.swagger.ParcelsResourceApi;
 import com.cloudera.api.swagger.ServicesResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
+import com.cloudera.api.swagger.model.ApiBatchRequest;
+import com.cloudera.api.swagger.model.ApiBatchRequestElement;
+import com.cloudera.api.swagger.model.ApiBatchResponse;
 import com.cloudera.api.swagger.model.ApiCommand;
 import com.cloudera.api.swagger.model.ApiCommandList;
 import com.cloudera.api.swagger.model.ApiConfigStalenessStatus;
@@ -43,6 +50,7 @@ import com.cloudera.api.swagger.model.ApiHostRefList;
 import com.cloudera.api.swagger.model.ApiRestartClusterArgs;
 import com.cloudera.api.swagger.model.ApiService;
 import com.cloudera.api.swagger.model.ApiServiceState;
+import com.cloudera.api.swagger.model.HTTPMethod;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
@@ -68,6 +76,7 @@ import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.util.URLUtils;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
 @Service
@@ -143,26 +152,36 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     @Override
-    public List<String> upscaleCluster(HostGroup hostGroup, Collection<InstanceMetaData> instanceMetaDatas)
-            throws CloudbreakException {
+    public List<String> upscaleCluster(HostGroup hostGroup, Collection<InstanceMetaData> instanceMetaDatas) throws CloudbreakException {
         ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(apiClient);
+        String hostGroupName = hostGroup.getName();
         try {
+            LOGGER.debug("Starting cluster upscale. Host group: [{}].", hostGroupName);
             String clusterName = stack.getName();
-            List<String> upscaleHostNames = getUpscaleHosts(clustersResourceApi, clusterName, instanceMetaDatas);
-            if (!upscaleHostNames.isEmpty()) {
-                List<ApiHost> hosts = clouderaManagerApiFactory.getHostsResourceApi(apiClient).readHosts(null, null, SUMMARY).getItems();
-                ApiHostRefList body = createUpscaledHostRefList(upscaleHostNames, hosts);
+            Set<String> clusterHostnames = getClusterHostnamesFromCM(clustersResourceApi, clusterName);
+            List<ApiHost> hosts = getHostsFromCM();
+
+            LOGGER.debug("Processing outdated cluster hosts. Host group: [{}].", hostGroupName);
+            setHostRackIdForOutdatedClusterHosts(instanceMetaDatas, clusterHostnames, hosts);
+
+            LOGGER.debug("Processing upscaled cluster hosts. Host group: [{}].", hostGroupName);
+            Map<String, InstanceMetaData> upscaleInstancesMap = getInstancesMap(clusterHostnames, instanceMetaDatas, true);
+            if (!upscaleInstancesMap.isEmpty()) {
+                Map<String, ApiHost> upscaleHostsMap = getHostsMap(upscaleInstancesMap, hosts);
+                setHostRackIdBatch(upscaleInstancesMap, upscaleHostsMap);
+                ApiHostRefList body = createUpscaledHostRefList(upscaleInstancesMap, upscaleHostsMap);
                 clustersResourceApi.addHosts(clusterName, body);
                 activateParcels(clustersResourceApi);
-                applyHostGroupRolesOnUpscaledHosts(body, hostGroup.getName());
+                applyHostGroupRolesOnUpscaledHosts(body, hostGroupName);
             } else {
                 redistributeParcelsForRecovery();
                 activateParcels(clustersResourceApi);
                 clouderaManagerRoleRefreshService.refreshClusterRoles(apiClient, stack);
             }
+            LOGGER.debug("Cluster upscale completed. Host group: [{}].", hostGroupName);
             return instanceMetaDatas.stream().map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.toList());
         } catch (ApiException e) {
-            LOGGER.warn("Failed to upscale: {}", e.getResponseBody(), e);
+            LOGGER.error(String.format("Failed to upscale. Host group: [%s]. Response: %s", hostGroupName, e.getResponseBody()), e);
             throw new CloudbreakException("Failed to upscale", e);
         }
     }
@@ -321,19 +340,47 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         }
     }
 
-    private List<String> getUpscaleHosts(ClustersResourceApi clustersResourceApi, String clusterName, Collection<InstanceMetaData> instanceMetaDatas)
-            throws ApiException {
-        List<String> clusterHosts = getHostNamesFromCM(clustersResourceApi, clusterName);
-        return instanceMetaDatas.stream()
-                .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null)
-                .map(InstanceMetaData::getDiscoveryFQDN)
-                .filter(hostname -> !clusterHosts.contains(hostname))
-                .collect(Collectors.toList());
+    private List<ApiHost> getHostsFromCM() throws ApiException {
+        LOGGER.debug("Retrieving registered host details from CM.");
+        HostsResourceApi hostsResourceApi = clouderaManagerApiFactory.getHostsResourceApi(apiClient);
+        List<ApiHost> hosts = hostsResourceApi.readHosts(null, null, SUMMARY).getItems();
+        LOGGER.debug("Retrieving registered host details from CM completed. Host count: [{}]", hosts.size());
+        return hosts;
     }
 
-    private List<String> getHostNamesFromCM(ClustersResourceApi clustersResourceApi, String clusterName) throws ApiException {
+    private Map<String, InstanceMetaData> getInstancesMap(Set<String> clusterHostnames, Collection<InstanceMetaData> instanceMetaDatas, boolean forUpscale) {
+        LOGGER.debug("Creating map from instances.");
+
+        Predicate<InstanceMetaData> instanceHostnamePredicate = instanceMetaData -> clusterHostnames.contains(instanceMetaData.getDiscoveryFQDN());
+        if (forUpscale) {
+            instanceHostnamePredicate = Predicate.not(instanceHostnamePredicate);
+        }
+
+        Map<String, InstanceMetaData> instancesMap = instanceMetaDatas.stream()
+                .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null)
+                .filter(instanceHostnamePredicate)
+                .collect(Collectors.toMap(instanceMetaData -> instanceMetaData.getDiscoveryFQDN().toLowerCase(Locale.ROOT), Function.identity()));
+        LOGGER.debug("Created map from instances. Instance count: [{}]", instancesMap.size());
+        return instancesMap;
+    }
+
+    private Set<String> getClusterHostnamesFromCM(ClustersResourceApi clustersResourceApi, String clusterName) throws ApiException {
+        LOGGER.debug("Retrieving cluster host references from CM.");
         List<ApiHost> hostRefs = clustersResourceApi.listHosts(clusterName, null, null, null).getItems();
-        return hostRefs.stream().map(ApiHost::getHostname).collect(Collectors.toList());
+        Set<String> clusterHostnames = hostRefs.stream()
+                .map(ApiHost::getHostname)
+                .collect(Collectors.toSet());
+        LOGGER.debug("Retrieving cluster host references from CM completed. Host count: [{}]", clusterHostnames.size());
+        return clusterHostnames;
+    }
+
+    private Map<String, ApiHost> getHostsMap(Map<String, InstanceMetaData> instancesMap, List<ApiHost> hosts) {
+        LOGGER.debug("Creating map from hosts.");
+        Map<String, ApiHost> hostsMap = hosts.stream()
+                .filter(host -> instancesMap.containsKey(host.getHostname().toLowerCase(Locale.ROOT)))
+                .collect(Collectors.toMap(host -> host.getHostname().toLowerCase(Locale.ROOT), Function.identity()));
+        LOGGER.debug("Created map from hosts. Host count: [{}]", hostsMap.size());
+        return hostsMap;
     }
 
     private void redistributeParcelsForRecovery() throws ApiException, CloudbreakException {
@@ -460,7 +507,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
                 stack, apiClient, applyHostTemplateCommand.getId());
         handlePollingResult(hostTemplatePollingResult, "Cluster was terminated while waiting for host template to apply",
                 "Timeout while Cloudera Manager was applying host template.");
-        LOGGER.debug("Applied host template on upscaled hosts.");
+        LOGGER.debug("Applied host template on upscaled hosts. Host group: [{}]", hostGroupName);
     }
 
     private void activateParcels(ClustersResourceApi clustersResourceApi) throws ApiException, CloudbreakException {
@@ -473,20 +520,78 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         LOGGER.debug("Parcels are activated on upscaled hosts.");
     }
 
-    private ApiHostRefList createUpscaledHostRefList(List<String> upscaleHostNames, List<ApiHost> hosts) {
+    private ApiHostRefList createUpscaledHostRefList(Map<String, InstanceMetaData> upscaleInstancesMap, Map<String, ApiHost> upscaleHostsMap) {
         LOGGER.debug("Creating ApiHostRefList from upscaled hosts.");
         ApiHostRefList body = new ApiHostRefList();
-        upscaleHostNames.forEach(hostname -> {
-            hosts.stream()
-                    .filter(host -> hostname.equalsIgnoreCase(host.getHostname()))
-                    .findFirst().ifPresent(apiHost -> {
-                String hostId = apiHost.getHostId();
-                body.addItemsItem(
-                        new ApiHostRef().hostname(hostname).hostId(hostId));
-            });
-        });
+        upscaleHostsMap.forEach((hostname, host) ->
+                Optional.ofNullable(upscaleInstancesMap.get(hostname))
+                        .ifPresent(instance -> {
+                            ApiHostRef apiHostRef = new ApiHostRef()
+                                    .hostname(instance.getDiscoveryFQDN())
+                                    .hostId(host.getHostId());
+                            body.addItemsItem(apiHostRef);
+                        }));
         LOGGER.debug("Created ApiHostRefList from upscaled hosts. Host count: [{}]", body.getItems().size());
         return body;
+    }
+
+    private void setHostRackIdForOutdatedClusterHosts(Collection<InstanceMetaData> instanceMetaDatas, Set<String> clusterHostnames, List<ApiHost> hosts)
+            throws ApiException {
+        Map<String, InstanceMetaData> clusterInstancesMap = getInstancesMap(clusterHostnames, instanceMetaDatas, false);
+        Map<String, ApiHost> clusterHostsMap = getHostsMap(clusterInstancesMap, hosts);
+        setHostRackIdBatch(clusterInstancesMap, clusterHostsMap);
+    }
+
+    private void setHostRackIdBatch(Map<String, InstanceMetaData> instancesMap, Map<String, ApiHost> hostsMap) throws ApiException {
+        LOGGER.debug("Setting rack ID for hosts with batch operation.");
+        List<ApiBatchRequestElement> batchRequestElements = hostsMap.entrySet().stream()
+                .map(entry -> setRackIdForHostIfExists(instancesMap, entry.getKey(), entry.getValue()))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .map(this::getBatchRequestElementForUpdateHost)
+                .collect(Collectors.toList());
+        if (!batchRequestElements.isEmpty()) {
+            updateHostsWithRackIdUsingBatchCall(batchRequestElements);
+        } else {
+            LOGGER.debug("Setting rack ID for hosts batch operation canceled, there is nothing to update.");
+        }
+    }
+
+    private Optional<ApiHost> setRackIdForHostIfExists(Map<String, InstanceMetaData> instancesMap, String hostname, ApiHost host) {
+        return getRackId(instancesMap, hostname, host).map(host::rackId);
+    }
+
+    private Optional<String> getRackId(Map<String, InstanceMetaData> instancesMap, String hostname, ApiHost host) {
+        return Optional.ofNullable(instancesMap.get(hostname))
+                .flatMap(instance -> Optional.ofNullable(instance.getRackId()))
+                .filter(Predicate.not(String::isEmpty))
+                .filter(rackId -> !rackId.equals(host.getRackId()));
+    }
+
+    private ApiBatchRequestElement getBatchRequestElementForUpdateHost(ApiHost host) {
+        // This has the same effect as com.cloudera.api.swagger.HostsResourceApi.updateHost(String hostId, com.cloudera.api.swagger.model.ApiHost)
+        return new ApiBatchRequestElement()
+                .method(HTTPMethod.PUT)
+                .url(ClouderaManagerApiClientProvider.API_V_31 + "/hosts/" + URLUtils.encodeString(host.getHostId()))
+                .body(host)
+                .acceptType("application/json")
+                .contentType("application/json");
+    }
+
+    private void updateHostsWithRackIdUsingBatchCall(List<ApiBatchRequestElement> batchRequestElements) throws ApiException {
+        BatchResourceApi batchResourceApi = clouderaManagerApiFactory.getBatchResourceApi(apiClient);
+        ApiBatchRequest batchRequest = new ApiBatchRequest().items(batchRequestElements);
+        ApiBatchResponse batchResponse = batchResourceApi.execute(batchRequest);
+        validateBatchResponse(batchResponse);
+    }
+
+    private void validateBatchResponse(ApiBatchResponse batchResponse) {
+        if (batchResponse != null && batchResponse.getSuccess() != null && batchResponse.getItems() != null && batchResponse.getSuccess()) {
+            // batchResponse contains the updated ApiHost for each request as well, but we are going to ignore them here
+            LOGGER.debug("Setting rack ID for hosts batch operation finished. Updated host count: [{}].", batchResponse.getItems().size());
+        } else {
+            throw new ClouderaManagerOperationFailedException("Setting rack ID for hosts batch operation failed. Response: " + batchResponse);
+        }
     }
 
     @Override

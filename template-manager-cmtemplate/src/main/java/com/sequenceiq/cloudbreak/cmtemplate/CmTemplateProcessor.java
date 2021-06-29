@@ -50,6 +50,7 @@ import com.cloudera.api.swagger.model.ApiEntityTag;
 import com.cloudera.api.swagger.model.ApiProductVersion;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Enums;
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.altus.model.Entitlement;
 import com.sequenceiq.cloudbreak.cloud.model.AutoscaleRecommendation;
@@ -57,6 +58,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.GatewayRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceCount;
 import com.sequenceiq.cloudbreak.cloud.model.ResizeRecommendation;
+import com.sequenceiq.cloudbreak.cluster.model.ClusterHostAttributes;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.yarn.YarnConstants;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.yarn.YarnRoles;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
@@ -355,7 +357,7 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
                 .filter(e -> isYarnNodemanager(e.getValue()))
                 .collect(toMap(Entry::getKey, Entry::getValue));
         return hgToNonGwServiceComponentsWithYarnNMs.entrySet()
-                .stream().collect(toMap(e -> e.getKey(), e -> collectComponents(e.getValue())));
+                .stream().collect(toMap(Entry::getKey, e -> collectComponents(e.getValue())));
     }
 
     private boolean isYarnNodemanager(Set<ServiceComponent> serviceComponents) {
@@ -575,7 +577,11 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
 
     public void addHosts(Map<String, List<Map<String, String>>> hostGroupMappings) {
         hostGroupMappings.forEach((hostGroup, hostAttributes) -> hostAttributes.forEach(
-                attr -> cmTemplate.getInstantiator().addHostsItem(new ApiClusterTemplateHostInfo().hostName(attr.get("fqdn")).hostTemplateRefName(hostGroup))
+                attr -> cmTemplate.getInstantiator().addHostsItem(new ApiClusterTemplateHostInfo()
+                        .hostName(attr.get(ClusterHostAttributes.FQDN))
+                        .hostTemplateRefName(hostGroup)
+                        .rackId(Strings.isNullOrEmpty(attr.get(ClusterHostAttributes.RACK_ID)) ? null : attr.get(ClusterHostAttributes.RACK_ID))
+                )
         ));
     }
 
