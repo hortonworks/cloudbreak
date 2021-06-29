@@ -17,6 +17,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.InternalUpgradeSettings;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cluster.service.ClouderaManagerProductsProvider;
@@ -83,10 +84,11 @@ public class ImageFilterParamsFactoryTest {
         when(parcelService.getParcelComponentsByBlueprint(stack)).thenReturn(cdhClusterComponent);
         when(clouderaManagerProductsProvider.getProducts(cdhClusterComponent)).thenReturn(Set.of(spark, nifi));
 
-        ImageFilterParams actual = underTest.create(image, true, stack);
+        ImageFilterParams actual = underTest.create(image, true, stack, new InternalUpgradeSettings(true));
 
         assertEquals(image, actual.getCurrentImage());
         assertTrue(actual.isLockComponents());
+        assertTrue(actual.isSkipValidations());
         assertEquals(sparkVersion, actual.getStackRelatedParcels().get(sparkName));
         assertEquals(nifiVersion, actual.getStackRelatedParcels().get(nifiName));
         assertEquals(StackType.WORKLOAD, actual.getStackType());

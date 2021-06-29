@@ -23,19 +23,27 @@ class BlueprintUpgradeOptionValidator {
     @Inject
     private CustomTemplateUpgradeValidator customTemplateUpgradeValidator;
 
-    BlueprintValidationResult isValidBlueprint(Blueprint blueprint, boolean lockComponents) {
+    BlueprintValidationResult isValidBlueprint(Blueprint blueprint, boolean lockComponents, boolean skipValidations) {
         LOGGER.debug("Validating blueprint upgrade option. Name: {}, type: {}, upgradeOption: {}, lockComponents: {}", blueprint.getName(),
                 blueprint.getStatus(), blueprint.getBlueprintUpgradeOption(), lockComponents);
-        return isDefaultBlueprint(blueprint) ? isEnabledForDefaultBlueprint(lockComponents, blueprint) : isEnabledForCustomBlueprint(blueprint);
+        return isDefaultBlueprint(blueprint) ? isEnabledForDefaultBlueprint(lockComponents, blueprint, skipValidations)
+                : isEnabledForCustomBlueprint(blueprint, skipValidations);
     }
 
     private boolean isDefaultBlueprint(Blueprint blueprint) {
         return blueprint.getStatus().isDefault();
     }
 
-    private BlueprintValidationResult isEnabledForDefaultBlueprint(boolean lockComponents, Blueprint blueprint) {
+    private BlueprintValidationResult isEnabledForDefaultBlueprint(boolean lockComponents, Blueprint blueprint, boolean skipValidations) {
         BlueprintUpgradeOption upgradeOption = getBlueprintUpgradeOption(blueprint);
-        return createResult(lockComponents ? isOsUpgradeEnabled(upgradeOption) : isRuntimeUpgradeEnabled(upgradeOption), upgradeOption);
+        BlueprintValidationResult result;
+        if (skipValidations) {
+            LOGGER.debug("Blueprint options are not validated if the request is internal");
+            result = createResult(true, upgradeOption);
+        } else {
+            result = createResult(lockComponents ? isOsUpgradeEnabled(upgradeOption) : isRuntimeUpgradeEnabled(upgradeOption), upgradeOption);
+        }
+        return result;
     }
 
     private boolean isOsUpgradeEnabled(BlueprintUpgradeOption upgradeOption) {
@@ -50,8 +58,15 @@ class BlueprintUpgradeOptionValidator {
         return Optional.ofNullable(blueprint.getBlueprintUpgradeOption()).orElse(ENABLED);
     }
 
-    private BlueprintValidationResult isEnabledForCustomBlueprint(Blueprint blueprint) {
-        return customTemplateUpgradeValidator.isValid(blueprint);
+    private BlueprintValidationResult isEnabledForCustomBlueprint(Blueprint blueprint, boolean skipValidations) {
+        BlueprintValidationResult result;
+        if (skipValidations) {
+            LOGGER.debug("Custom blueprint options are not validated if the request is internal");
+            result = createResult(true, null);
+        } else {
+            result = customTemplateUpgradeValidator.isValid(blueprint);
+        }
+        return result;
     }
 
     private BlueprintValidationResult createResult(boolean result, BlueprintUpgradeOption upgradeOption) {

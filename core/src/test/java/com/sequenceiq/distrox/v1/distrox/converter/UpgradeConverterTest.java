@@ -1,7 +1,9 @@
 package com.sequenceiq.distrox.v1.distrox.converter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 
@@ -9,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.InternalUpgradeSettings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
@@ -46,7 +49,7 @@ class UpgradeConverterTest {
         source.setReplaceVms(DistroXUpgradeReplaceVms.DISABLED);
         source.setRuntime("runtime");
 
-        UpgradeV4Request result = underTest.convert(source);
+        UpgradeV4Request result = underTest.convert(source, new InternalUpgradeSettings());
 
         assertEquals(source.getDryRun(), result.getDryRun());
         assertEquals(source.getImageId(), result.getImageId());
@@ -54,6 +57,17 @@ class UpgradeConverterTest {
         assertEquals(source.getLockComponents(), result.getLockComponents());
         assertEquals(Boolean.FALSE, result.getReplaceVms());
         assertEquals(source.getRuntime(), result.getRuntime());
+        assertFalse(result.getInternalUpgradeSettings().isSkipValidations());
+    }
+
+    @Test
+    public void testConvertRequestWhenInternal() {
+        // GIVEN
+        DistroXUpgradeV1Request source = new DistroXUpgradeV1Request();
+        // WHEN
+        UpgradeV4Request result = underTest.convert(source, new InternalUpgradeSettings(true));
+        // THEN
+        assertTrue(result.getInternalUpgradeSettings().isSkipValidations());
     }
 
     @Test
@@ -61,7 +75,7 @@ class UpgradeConverterTest {
         // GIVEN
         DistroXUpgradeV1Request source = new DistroXUpgradeV1Request();
         // WHEN
-        UpgradeV4Request result = underTest.convert(source);
+        UpgradeV4Request result = underTest.convert(source, new InternalUpgradeSettings());
         // THEN
         assertNull(result.getReplaceVms());
     }
