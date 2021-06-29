@@ -2,3 +2,9 @@ export AMBARI_JVM_ARGS="$AMBARI_JVM_ARGS -D{{ pillar['proxy']['protocol'] }}.pro
 {% if 'user' in pillar['proxy'] %}
 export AMBARI_JVM_ARGS="$AMBARI_JVM_ARGS -D{{ pillar['proxy']['protocol'] }}.proxyUser={{ pillar['proxy']['user'] }} -D{{ pillar['proxy']['protocol'] }}.proxyPassword={{ pillar['proxy']['password'] }}"
 {% endif %}
+{% if 'https' == pillar['proxy']['protocol'] %}
+export AMBARI_JVM_ARGS="$AMBARI_JVM_ARGS -Dhttp.proxyHost={{ pillar['proxy']['host'] }} -Dhttp.proxyPort={{ pillar['proxy']['port'] }}"
+{% if 'user' in pillar['proxy'] %}
+export AMBARI_JVM_ARGS="$AMBARI_JVM_ARGS -Dhttp.proxyUser={{ pillar['proxy']['user'] }} -Dhttp.proxyPassword={{ pillar['proxy']['password'] }}"
+{% endif %}
+{% endif %}
