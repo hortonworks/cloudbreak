@@ -5,6 +5,7 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunning
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 
 import org.apache.commons.lang3.NotImplementedException;
@@ -14,8 +15,12 @@ import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.util.wait.FlowUtil;
 
 public abstract class AbstractSdxTestDto<R, S, T extends CloudbreakTestDto> extends AbstractTestDto<R, S, T, SdxClient> {
+
+    @Inject
+    private FlowUtil flowUtil;
 
     protected AbstractSdxTestDto(String newId) {
         super(newId);
@@ -108,5 +113,9 @@ public abstract class AbstractSdxTestDto<R, S, T extends CloudbreakTestDto> exte
         }
         return getTestContext().then((T) this, SdxClient.class, assertions.get(assertions.size() - 1),
                 runningParameters.get(runningParameters.size() - 1));
+    }
+
+    public FlowUtil getFlowUtil() {
+        return flowUtil;
     }
 }

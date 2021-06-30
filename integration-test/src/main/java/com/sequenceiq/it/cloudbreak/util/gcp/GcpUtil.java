@@ -38,8 +38,8 @@ public class GcpUtil {
         gcpClientActions.stopHostGroupInstances(instanceIds);
     }
 
-    public void cloudStorageListContainer(String baseLocation) {
-        listSelectedObject(baseLocation);
+    public void cloudStorageListContainer(String baseLocation, String pathToTargetObject, boolean zeroContent) {
+        gcpClientActions.listBucketSelectedObject(gcpStackUtil.getBucketName(baseLocation), "/" + pathToTargetObject, zeroContent);
     }
 
     public void cloudStorageListContainerFreeIpa(String baseLocation, String clusterName, String crn) {

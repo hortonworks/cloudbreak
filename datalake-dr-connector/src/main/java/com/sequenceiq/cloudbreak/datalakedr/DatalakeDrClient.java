@@ -6,20 +6,20 @@ import static io.grpc.internal.GrpcUtil.DEFAULT_MAX_MESSAGE_SIZE;
 import java.util.Optional;
 import java.util.UUID;
 
-import com.google.common.base.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.datalakedr.datalakeDRGrpc;
 import com.cloudera.thunderhead.service.datalakedr.datalakeDRGrpc.datalakeDRBlockingStub;
-import com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeStatusRequest;
 import com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeRequest;
+import com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeStatusRequest;
 import com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatalakeBackupInfo;
 import com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.ListDatalakeBackupRequest;
 import com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.ListDatalakeBackupResponse;
 import com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeRequest;
 import com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeStatusRequest;
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.datalakedr.config.DatalakeDrConfig;
 import com.sequenceiq.cloudbreak.datalakedr.converter.GrpcStatusResponseToDatalakeDrStatusResponseConverter;
 import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeDrStatusResponse;
@@ -97,6 +97,38 @@ public class DatalakeDrClient {
         }
     }
 
+    public DatalakeDrStatusResponse getBackupStatus(String datalakeName, String actorCrn) {
+        return getBackupStatusByBackupId(datalakeName, null, null, actorCrn);
+    }
+
+    public DatalakeDrStatusResponse getBackupStatus(String datalakeName, String backupId, String actorCrn) {
+        return getBackupStatusByBackupId(datalakeName, backupId, null, actorCrn);
+    }
+
+    public DatalakeDrStatusResponse getBackupStatus(String datalakeName, String backupId, String backupName, String actorCrn) {
+        if (!datalakeDrConfig.isConfigured()) {
+            return missingConnectorResponse();
+        }
+
+        checkNotNull(datalakeName);
+        checkNotNull(actorCrn);
+
+        try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
+            BackupDatalakeStatusRequest.Builder builder = BackupDatalakeStatusRequest.newBuilder()
+                    .setDatalakeName(datalakeName);
+            if (!Strings.isNullOrEmpty(backupId)) {
+                builder.setBackupId(backupId);
+            }
+            if (!Strings.isNullOrEmpty(backupName)) {
+                builder.setBackupName(backupName);
+            }
+            return statusConverter.convert(
+                    newStub(channelWrapper.getChannel(), UUID.randomUUID().toString(), actorCrn)
+                            .backupDatalakeStatus(builder.build())
+            );
+        }
+    }
+
     public DatalakeDrStatusResponse getBackupStatusByBackupId(String datalakeName, String backupId, String actorCrn) {
         return getBackupStatusByBackupId(datalakeName, backupId, null, actorCrn);
     }
@@ -117,9 +149,6 @@ public class DatalakeDrClient {
                 .setBackupId(backupId);
             if (!Strings.isNullOrEmpty(backupName)) {
                 builder.setBackupName(backupName);
-            }
-            if (!Strings.isNullOrEmpty(backupId)) {
-                builder.setBackupId(backupId);
             }
             return statusConverter.convert(
                 newStub(channelWrapper.getChannel(), UUID.randomUUID().toString(), actorCrn)

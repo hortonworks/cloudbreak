@@ -31,6 +31,8 @@ import com.sequenceiq.cloudbreak.validation.ValidStackNameLength;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.sdx.api.model.AdvertisedRuntime;
 import com.sequenceiq.sdx.api.model.RangerCloudIdentitySyncStatus;
+import com.sequenceiq.sdx.api.model.SdxBackupResponse;
+import com.sequenceiq.sdx.api.model.SdxBackupStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
@@ -40,15 +42,14 @@ import com.sequenceiq.sdx.api.model.SdxDatabaseBackupStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRestoreResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRestoreStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
-import com.sequenceiq.sdx.api.model.SdxValidateCloudStorageRequest;
-import com.sequenceiq.sdx.api.model.SetRangerCloudIdentityMappingRequest;
-import com.sequenceiq.sdx.api.model.SdxBackupResponse;
-import com.sequenceiq.sdx.api.model.SdxBackupStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxRestoreResponse;
 import com.sequenceiq.sdx.api.model.SdxRestoreStatusResponse;
+import com.sequenceiq.sdx.api.model.SdxValidateCloudStorageRequest;
+import com.sequenceiq.sdx.api.model.SetRangerCloudIdentityMappingRequest;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 
 @Validated
 @Path("/sdx")
@@ -205,6 +206,15 @@ public interface SdxEndpoint {
     SdxBackupStatusResponse backupDatalakeStatusByName(@PathParam("name") String name,
             @QueryParam("backupId") String backupId,
             @QueryParam("backupName") String backupName);
+
+    @GET
+    @Path("{name}/getBackupDatalakeStatus")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "backup status of the datalake by datalake name ", produces = MediaType.APPLICATION_JSON,
+            nickname = "getBackupDatalakeStatus")
+    SdxBackupStatusResponse getBackupDatalakeStatus(@ApiParam(value = "required: datalake name", required = true) @PathParam("name") String name,
+            @ApiParam(value = "optional: datalake backup id", required = false) @QueryParam("backupId") String backupId,
+            @ApiParam(value = "optional: datalake backup name", required = false) @QueryParam("backupName") String backupName);
 
     @POST
     @Path("{name}/restoreDatalake")

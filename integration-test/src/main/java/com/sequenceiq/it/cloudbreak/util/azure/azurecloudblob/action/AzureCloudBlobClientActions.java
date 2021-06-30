@@ -314,7 +314,7 @@ public class AzureCloudBlobClientActions extends AzureCloudBlobClient {
         }
     }
 
-    public void listSelectedDirectory(String baseLocation, String selectedDirectory, Boolean zeroContent) {
+    public void listSelectedDirectory(String baseLocation, String selectedDirectory, boolean zeroContent) {
         String containerName = getContainerName(baseLocation);
         CloudBlobContainer cloudBlobContainer = getCloudBlobContainer(containerName);
 

@@ -18,8 +18,8 @@ public class AmazonS3Util {
         s3ClientActions.deleteNonVersionedBucket(baseLocation);
     }
 
-    public void listBucket(String baseLocation) {
-        s3ClientActions.listBucketSelectedObject(baseLocation, "ranger", true);
+    public void listBucketSelectedObject(String baseLocation, String pathToTargetObject, boolean zeroContent) {
+        s3ClientActions.listBucketSelectedObject(baseLocation, pathToTargetObject, zeroContent);
     }
 
     public void listFreeIpaObject(String baseLocation) {

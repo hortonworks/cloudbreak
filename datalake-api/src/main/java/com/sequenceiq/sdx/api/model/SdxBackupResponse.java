@@ -30,7 +30,7 @@ public class SdxBackupResponse {
 
     @Override
     public String toString() {
-        return "SdxDatabaseBackupResponse{" +
+        return "SdxBackupResponse{" +
                 "FlowIdentifier= " + flowIdentifier.toString() +
                 "OperationId=" + operationId +
                 '}';
