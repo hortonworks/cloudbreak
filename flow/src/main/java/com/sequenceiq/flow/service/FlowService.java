@@ -123,6 +123,7 @@ public class FlowService {
             Set<String> relatedFlowIds = flowLogDBService.getFlowIdsByChainIds(relatedChainIds);
             List<FlowLog> relatedFlowLogs = flowLogDBService.getFlowLogsByFlowIdsCreatedDesc(relatedFlowIds);
             flowCheckResponse.setHasActiveFlow(!completed("Flow chain", chainId, relatedChains, relatedFlowLogs));
+            flowCheckResponse.setLatestFlowFinalizedAndFailed(firstIsFinalizedAndFailed(relatedFlowLogs));
             return flowCheckResponse;
         } else {
             flowCheckResponse.setHasActiveFlow(Boolean.FALSE);
@@ -142,6 +143,7 @@ public class FlowService {
             List<FlowLog> relatedFlowLogs = flowLogDBService.getFlowLogsByFlowIdsCreatedDesc(relatedFlowIds);
             validateResourceId(relatedFlowLogs, resourceId);
             flowCheckResponse.setHasActiveFlow(!completed("Flow chain", chainId, relatedChains, relatedFlowLogs));
+            flowCheckResponse.setLatestFlowFinalizedAndFailed(firstIsFinalizedAndFailed(relatedFlowLogs));
             return flowCheckResponse;
         } else {
             flowCheckResponse.setHasActiveFlow(Boolean.FALSE);
@@ -160,6 +162,7 @@ public class FlowService {
         FlowCheckResponse flowCheckResponse = new FlowCheckResponse();
         flowCheckResponse.setFlowId(flowId);
         flowCheckResponse.setHasActiveFlow(!completed("Flow", flowId, List.of(), allByFlowIdOrderByCreatedDesc));
+        flowCheckResponse.setLatestFlowFinalizedAndFailed(firstIsFinalizedAndFailed(allByFlowIdOrderByCreatedDesc));
         return flowCheckResponse;
     }
 

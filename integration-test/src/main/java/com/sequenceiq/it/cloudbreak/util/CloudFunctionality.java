@@ -50,7 +50,7 @@ public interface CloudFunctionality {
             maxAttempts = ATTEMPTS,
             backoff = @Backoff(delay = DELAY, multiplier = MULTIPLIER, maxDelay = MAX_DELAY)
     )
-    void cloudStorageListContainer(String baseLocation);
+    void cloudStorageListContainer(String baseLocation, String pathToTargetObject, boolean zeroContent);
 
     @Retryable(
             maxAttempts = ATTEMPTS,

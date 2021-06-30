@@ -334,6 +334,15 @@ public class SdxController implements SdxEndpoint {
     }
 
     @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.BACKUP_DATALAKE)
+    public SdxBackupStatusResponse getBackupDatalakeStatus(@ResourceName String name,
+            String backupId,
+            String backupName) {
+        return sdxBackupRestoreService.getDatalakeBackupStatus(name, backupId, backupName,
+                ThreadBasedUserCrnProvider.getUserCrn());
+    }
+
+    @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.RESTORE_DATALAKE)
     public SdxDatabaseRestoreResponse restoreDatabaseByName(@ResourceName String name, String backupId,
             String restoreId, String backupLocation) {

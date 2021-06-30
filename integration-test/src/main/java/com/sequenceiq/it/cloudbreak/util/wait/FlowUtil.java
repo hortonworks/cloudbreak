@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.flow.api.FlowPublicEndpoint;
+import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.it.TestParameter;
 import com.sequenceiq.it.cloudbreak.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
@@ -30,12 +31,18 @@ public class FlowUtil {
     @Value("#{'${integrationtest.cloudProvider}'.equals('MOCK') ? 300 : ${integrationtest.testsuite.maxRetry:2700}}")
     private int maxRetry;
 
+    private boolean flowFailed;
+
     public long getPollingInterval() {
         return pollingInterval;
     }
 
     public int getMaxRetry() {
         return maxRetry;
+    }
+
+    public boolean getFlowFailed() {
+        return flowFailed;
     }
 
     public <T extends CloudbreakTestDto> T waitBasedOnLastKnownFlow(T testDto, MicroserviceClient msClient) {
@@ -49,25 +56,35 @@ public class FlowUtil {
     private void waitForFlow(FlowPublicEndpoint flowEndpoint, String crn, String flowChainId, String flowId) {
         boolean flowRunning = true;
         int retryCount = 0;
-        while (flowRunning && retryCount < maxRetry) {
+        while (!getFlowFailed() && flowRunning && retryCount < maxRetry) {
             sleep(pollingInterval, crn, flowChainId, flowId);
             try {
                 if (StringUtils.isNotBlank(flowChainId)) {
                     LOGGER.info("Waiting for flow chain: '{}' at resource: '{}', retry count: '{}'", flowChainId, crn, retryCount);
-                    flowRunning = flowEndpoint.hasFlowRunningByChainId(flowChainId, crn).getHasActiveFlow();
+                    FlowCheckResponse flowCheckResponse = flowEndpoint.hasFlowRunningByChainId(flowChainId, crn);
+                    flowRunning = flowCheckResponse.getHasActiveFlow();
+                    flowFailed = flowCheckResponse.getLatestFlowFinalizedAndFailed();
                 } else if (StringUtils.isNoneBlank(flowId)) {
                     LOGGER.info("Waiting for flow: '{}' at resource: '{}', retry count: '{}'", flowId, crn, retryCount);
-                    flowRunning = flowEndpoint.hasFlowRunningByFlowId(flowId, crn).getHasActiveFlow();
+                    FlowCheckResponse flowCheckResponse = flowEndpoint.hasFlowRunningByFlowId(flowId, crn);
+                    flowRunning = flowCheckResponse.getHasActiveFlow();
+                    flowFailed = flowCheckResponse.getLatestFlowFinalizedAndFailed();
                 } else {
                     LOGGER.info("Flow id and flow chain id are empty so flow is not running at resource: '{}'", crn);
                     flowRunning = false;
                 }
             } catch (Exception ex) {
+                flowFailed = true;
                 LOGGER.error("Error during polling flow. Crn={}, FlowId={}, FlowChainId={}, Message={}", crn, flowId, flowChainId, ex.getMessage(), ex);
                 throw new TestFailException(String.format(" Error during polling flow. Crn=%s, FlowId=%s , FlowChainId=%s, Message=%s ",
                         crn, flowId, flowChainId, ex.getMessage()));
             }
             retryCount++;
+        }
+        if (getFlowFailed()) {
+            LOGGER.error("Flow has been finalized with failed status. Crn={}, FlowId={}, FlowChainId={}", crn, flowId, flowChainId);
+            throw new TestFailException(String.format(" Flow has been finalized with failed status. Crn=%s, FlowId=%s , FlowChainId=%s ", crn, flowId,
+                    flowChainId));
         }
     }
 

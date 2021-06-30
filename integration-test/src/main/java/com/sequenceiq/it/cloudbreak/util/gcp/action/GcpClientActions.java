@@ -3,6 +3,7 @@ package com.sequenceiq.it.cloudbreak.util.gcp.action;
 import static java.lang.String.format;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -20,6 +22,7 @@ import com.google.api.services.compute.model.AttachedDisk;
 import com.google.api.services.compute.model.Instance;
 import com.google.api.services.compute.model.Operation;
 import com.google.api.services.storage.Storage;
+import com.google.api.services.storage.model.StorageObject;
 import com.sequenceiq.it.cloudbreak.cloud.v4.gcp.GcpProperties;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
@@ -185,7 +188,12 @@ public class GcpClientActions extends GcpClient {
         Storage storage = buildStorage();
         try {
             Storage.Objects.Get operation = storage.objects().get(baseLocation, selectedObject);
-            operation.execute();
+            StorageObject storageObject = operation.execute();
+            if (storageObject.getSize().compareTo(BigInteger.ZERO) == 0 && !zeroContent) {
+                String objectPath = StringUtils.join(List.of(baseLocation, selectedObject), "/");
+                LOGGER.error("Google GCS path: {} has 0 bytes of content!", objectPath);
+                throw new TestFailException(String.format(" Google GCS path: %s has 0 bytes of content! ", objectPath));
+            }
         } catch (IOException ioException) {
             String msg = String.format("Failed to list bucket object '%s' from base location '%s'", baseLocation, selectedObject);
             LOGGER.error(msg, ioException);

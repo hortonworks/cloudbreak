@@ -18,6 +18,7 @@ import com.sequenceiq.it.cloudbreak.action.v4.imagecatalog.ImageCatalogCreateRet
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakActor;
 import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
+import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
 import com.sequenceiq.it.cloudbreak.client.KerberosTestClient;
@@ -29,6 +30,7 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.blueprint.BlueprintTestDto;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.database.RedbeamsDatabaseTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
@@ -73,6 +75,9 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
 
     @Inject
     private SdxTestClient sdxTestClient;
+
+    @Inject
+    private DistroXTestClient distroXTestClient;
 
     @Inject
     private AzureCloudBlobUtil azureCloudBlobUtil;
@@ -160,6 +165,16 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForHealthyInstances()
                 .when(sdxTestClient.describeInternal())
+                .validate();
+    }
+
+    protected void createDatahub(TestContext testContext) {
+        testContext
+                .given(DistroXTestDto.class)
+                .when(distroXTestClient.create())
+                .await(STACK_AVAILABLE)
+                .awaitForHealthyInstances()
+                .when(distroXTestClient.get())
                 .validate();
     }
 
