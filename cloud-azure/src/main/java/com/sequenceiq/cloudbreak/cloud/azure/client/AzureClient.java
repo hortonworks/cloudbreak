@@ -340,6 +340,8 @@ public class AzureClient {
         CachingTypes cachingTypes = CachingTypes.READ_WRITE;
         if (disk.sizeInGB() > MAX_AZURE_MANAGED_DISK_SIZE_WITH_CACHE) {
             cachingTypes = CachingTypes.NONE;
+        } else if (DiskSkuTypes.ULTRA_SSD_LRS.equals(disk.sku())) {
+            cachingTypes = CachingTypes.READ_ONLY;
         }
         // This is needed because of bug https://github.com/Azure/azure-libraries-for-java/issues/632
         // It affects the VM-s launched from Azure Marketplace images
