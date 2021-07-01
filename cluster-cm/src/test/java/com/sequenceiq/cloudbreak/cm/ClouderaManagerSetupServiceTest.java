@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,6 +32,7 @@ import com.cloudera.api.swagger.CdpResourceApi;
 import com.cloudera.api.swagger.ClouderaManagerResourceApi;
 import com.cloudera.api.swagger.ClustersResourceApi;
 import com.cloudera.api.swagger.HostsResourceApi;
+import com.cloudera.api.swagger.MgmtServiceResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiCluster;
@@ -137,6 +139,28 @@ public class ClouderaManagerSetupServiceTest {
         ReflectionTestUtils.setField(underTest, "clouderaManagerYarnSetupService", clouderaManagerYarnSetupService);
         ReflectionTestUtils.setField(underTest, "clusterCommandRepository", clusterCommandRepository);
         ReflectionTestUtils.setField(underTest, "apiClient", mock(ApiClient.class));
+    }
+
+    @Test
+    public void testAutoconfigureWhenItDoesItsJob() throws ApiException {
+        MgmtServiceResourceApi mgmtServiceResourceApi = mock(MgmtServiceResourceApi.class);
+        when(clouderaManagerApiFactory.getMgmtServiceResourceApi(any(ApiClient.class)))
+                .thenReturn(mgmtServiceResourceApi);
+
+        underTest.autoConfigureClusterManager();
+
+        verify(mgmtServiceResourceApi, times(1)).autoConfigure();
+    }
+
+    @Test
+    public void testAutoconfigureWhenThrowsException() throws ApiException {
+        MgmtServiceResourceApi mgmtServiceResourceApi = mock(MgmtServiceResourceApi.class);
+        when(clouderaManagerApiFactory.getMgmtServiceResourceApi(any(ApiClient.class)))
+                .thenReturn(mgmtServiceResourceApi);
+        doThrow(ApiException.class).when(mgmtServiceResourceApi).autoConfigure();
+
+        Assertions.assertThrows(ClouderaManagerOperationFailedException.class, () -> underTest.autoConfigureClusterManager());
+        verify(mgmtServiceResourceApi, times(1)).autoConfigure();
     }
 
     @Test
@@ -425,8 +449,8 @@ public class ClouderaManagerSetupServiceTest {
                         any(KerberosConfig.class)
                 );
 
-        ClouderaManagerOperationFailedException actual =  assertThrows(ClouderaManagerOperationFailedException.class,
-            () -> underTest.configureKerberos(kerberosConfig));
+        ClouderaManagerOperationFailedException actual = assertThrows(ClouderaManagerOperationFailedException.class,
+                () -> underTest.configureKerberos(kerberosConfig));
 
         verify(kerberosService, times(1)).configureKerberosViaApi(
                 any(ApiClient.class),
@@ -452,7 +476,7 @@ public class ClouderaManagerSetupServiceTest {
                         any(KerberosConfig.class)
                 );
 
-        ClouderaManagerOperationFailedException actual =  assertThrows(ClouderaManagerOperationFailedException.class,
+        ClouderaManagerOperationFailedException actual = assertThrows(ClouderaManagerOperationFailedException.class,
                 () -> underTest.configureKerberos(kerberosConfig));
 
         verify(kerberosService, times(1)).configureKerberosViaApi(
@@ -493,7 +517,7 @@ public class ClouderaManagerSetupServiceTest {
                 .thenReturn(clouderaManagerResourceApi);
         doThrow(error).when(clouderaManagerResourceApi).updateConfig(anyString(), any(ApiConfigList.class));
 
-        ClouderaManagerOperationFailedException actual =  assertThrows(ClouderaManagerOperationFailedException.class,
+        ClouderaManagerOperationFailedException actual = assertThrows(ClouderaManagerOperationFailedException.class,
                 () -> underTest.updateConfig());
 
         verify(clouderaManagerResourceApi, times(1)).updateConfig(
@@ -513,7 +537,7 @@ public class ClouderaManagerSetupServiceTest {
                 .when(clouderaManagerResourceApi).updateConfig(anyString(), any(ApiConfigList.class));
 
 
-        ClouderaManagerOperationFailedException actual =  assertThrows(ClouderaManagerOperationFailedException.class,
+        ClouderaManagerOperationFailedException actual = assertThrows(ClouderaManagerOperationFailedException.class,
                 () -> underTest.updateConfig());
 
         verify(clouderaManagerResourceApi, times(1)).updateConfig(
@@ -586,7 +610,7 @@ public class ClouderaManagerSetupServiceTest {
         when(clouderaManagerApiClientProvider.getV31Client(anyInt(), anyString(), anyString(), any(HttpClientConfig.class)))
                 .thenReturn(apiClient);
         when(clouderaManagerPollingServiceProvider.startPollingCmHostStatus(any(Stack.class), any(ApiClient.class)))
-            .thenReturn(PollingResult.EXIT);
+                .thenReturn(PollingResult.EXIT);
 
         underTest.waitForHosts(Set.of());
 
@@ -622,9 +646,9 @@ public class ClouderaManagerSetupServiceTest {
     @Test
     public void testWaitForServerWhenPollingExitedThenShouldReturnWithCancellationException() {
         when(clouderaManagerPollingServiceProvider.startPollingCmStartup(any(Stack.class), any(ApiClient.class)))
-            .thenReturn(PollingResult.EXIT);
+                .thenReturn(PollingResult.EXIT);
 
-        CancellationException actual =  assertThrows(CancellationException.class, () -> underTest.waitForServer(false));
+        CancellationException actual = assertThrows(CancellationException.class, () -> underTest.waitForServer(false));
 
         verify(clouderaManagerPollingServiceProvider, times(1)).startPollingCmStartup(
                 any(Stack.class),
@@ -638,7 +662,7 @@ public class ClouderaManagerSetupServiceTest {
         when(clouderaManagerPollingServiceProvider.startPollingCmStartup(any(Stack.class), any(ApiClient.class)))
                 .thenReturn(PollingResult.FAILURE);
 
-        CloudbreakException actual =  assertThrows(CloudbreakException.class, () -> underTest.waitForServer(false));
+        CloudbreakException actual = assertThrows(CloudbreakException.class, () -> underTest.waitForServer(false));
 
         verify(clouderaManagerPollingServiceProvider, times(1)).startPollingCmStartup(
                 any(Stack.class),
@@ -681,7 +705,7 @@ public class ClouderaManagerSetupServiceTest {
         doThrow(error).when(clouderaManagerMgmtLaunchService)
                 .startManagementServices(any(Stack.class), any(ApiClient.class));
 
-        ClouderaManagerOperationFailedException actual =  assertThrows(ClouderaManagerOperationFailedException.class,
+        ClouderaManagerOperationFailedException actual = assertThrows(ClouderaManagerOperationFailedException.class,
                 () -> underTest.startManagementServices());
 
         verify(clouderaManagerMgmtLaunchService, times(1)).startManagementServices(
@@ -734,7 +758,7 @@ public class ClouderaManagerSetupServiceTest {
         doThrow(new ClouderaManagerOperationFailedException("error")).when(clouderaManagerSupportSetupService)
                 .prepareSupportRole(any(ApiClient.class), any(StackType.class));
 
-        ClouderaManagerOperationFailedException actual =  assertThrows(ClouderaManagerOperationFailedException.class,
+        ClouderaManagerOperationFailedException actual = assertThrows(ClouderaManagerOperationFailedException.class,
                 () -> underTest.configureSupportTags(mockTemplatePreparationObject));
 
         verify(clouderaManagerSupportSetupService, times(1)).prepareSupportRole(
@@ -770,7 +794,7 @@ public class ClouderaManagerSetupServiceTest {
                 .thenReturn(clouderaManagerResourceApi);
         doThrow(error).when(clouderaManagerResourceApi).updateConfig(anyString(), any(ApiConfigList.class));
 
-        ClouderaManagerOperationFailedException actual =  assertThrows(ClouderaManagerOperationFailedException.class,
+        ClouderaManagerOperationFailedException actual = assertThrows(ClouderaManagerOperationFailedException.class,
                 () -> underTest.setupProxy(testProxyConfig()));
 
         verify(clouderaManagerResourceApi, times(1)).updateConfig(
