@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.converter.stack;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -14,6 +15,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -36,6 +38,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.customdomain.Cu
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.DatabaseResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.StackImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.loadbalancer.LoadBalancerResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.network.NetworkV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
@@ -56,10 +59,12 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
+import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
@@ -98,6 +103,9 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
     @Mock
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
+    @Mock
+    private LoadBalancerPersistenceService loadBalancerService;
+
     private CredentialResponse credentialResponse;
 
     @Before
@@ -118,6 +126,7 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         credentialResponse = new CredentialResponse();
         credentialResponse.setName("cred-name");
         credentialResponse.setCrn("crn");
+        when(loadBalancerService.findByStackId(any())).thenReturn(Set.of());
     }
 
     @Test
@@ -141,7 +150,7 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         StackV4Response result = underTest.convert(source);
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("gcp", "mock", "openstack", "aws", "yarn", "azure",
-                "environmentName", "credentialName", "credentialCrn", "telemetry", "flowIdentifier"));
+                "environmentName", "credentialName", "credentialCrn", "telemetry", "flowIdentifier", "loadBalancers"));
     }
 
     @Test
@@ -166,7 +175,7 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         StackV4Response result = underTest.convert(source);
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("gcp", "mock", "openstack", "aws", "yarn", "azure",
-                "environmentName", "credentialName", "credentialCrn", "telemetry", "flowIdentifier"));
+                "environmentName", "credentialName", "credentialCrn", "telemetry", "flowIdentifier", "loadBalancers"));
         Mockito.verify(restRequestThreadLocalService).setRequestedWorkspaceId(source.getWorkspace().getId());
     }
 
@@ -190,7 +199,7 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         StackV4Response result = underTest.convert(source);
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("cluster", "gcp", "mock", "openstack", "aws", "yarn", "azure",
-                "telemetry", "environmentName", "credentialName", "credentialCrn", "telemetry", "flowIdentifier"));
+                "telemetry", "environmentName", "credentialName", "credentialCrn", "telemetry", "flowIdentifier", "loadBalancers"));
 
         assertNull(result.getCluster());
     }
@@ -215,9 +224,35 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         StackV4Response result = underTest.convert(source);
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("network", "gcp", "mock", "openstack", "aws", "yarn", "azure",
-                "telemetry", "environmentName", "credentialName", "credentialCrn", "telemetry", "flowIdentifier"));
+                "telemetry", "environmentName", "credentialName", "credentialCrn", "telemetry", "flowIdentifier", "loadBalancers"));
 
         assertNull(result.getNetwork());
+    }
+
+    @Test
+    public void testConvertWithLoadBalancers() throws CloudbreakImageNotFoundException {
+        Set<LoadBalancer> loadBalancers = Set.of(new LoadBalancer());
+
+        Stack source = getSource();
+        // GIVEN
+        given(imageService.getImage(source.getId())).willReturn(mock(Image.class));
+        given(conversionService.convert(any(Image.class), eq(StackImageV4Response.class))).willReturn(new StackImageV4Response());
+        given(conversionService.convert(any(), eq(StackAuthenticationV4Response.class))).willReturn(new StackAuthenticationV4Response());
+        given(conversionService.convert(any(), eq(CustomDomainSettingsV4Response.class))).willReturn(new CustomDomainSettingsV4Response());
+        given(conversionService.convert(any(), eq(ClusterV4Response.class))).willReturn(new ClusterV4Response());
+        given(conversionService.convert(any(), eq(NetworkV4Response.class))).willReturn(new NetworkV4Response());
+        given(conversionService.convert(any(), eq(WorkspaceResourceV4Response.class))).willReturn(new WorkspaceResourceV4Response());
+        given(conversionService.convert(any(), eq(CloudbreakDetailsV4Response.class))).willReturn(new CloudbreakDetailsV4Response());
+        given(conversionService.convert(any(), eq(PlacementSettingsV4Response.class))).willReturn(new PlacementSettingsV4Response());
+        given(conversionService.convert(any(), eq(TelemetryResponse.class))).willReturn(new TelemetryResponse());
+        given(converterUtil.convertAll(source.getInstanceGroups(), InstanceGroupV4Response.class)).willReturn(new ArrayList<>());
+        given(converterUtil.convertAll(loadBalancers, LoadBalancerResponse.class)).willReturn(List.of(new LoadBalancerResponse()));
+        given(conversionService.convert(any(), eq(DatabaseResponse.class))).willReturn(new DatabaseResponse());
+        given(loadBalancerService.findByStackId(any())).willReturn(loadBalancers);
+        // WHEN
+        StackV4Response result = underTest.convert(source);
+        // THEN
+        assertNotNull(result.getLoadBalancers());
     }
 
     @Override

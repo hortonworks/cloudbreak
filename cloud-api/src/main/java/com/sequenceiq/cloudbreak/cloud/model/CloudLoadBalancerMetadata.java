@@ -1,8 +1,10 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
+import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
 import com.sequenceiq.common.api.type.LoadBalancerType;
+import java.util.Map;
 
-public class CloudLoadBalancerMetadata {
+public class CloudLoadBalancerMetadata extends DynamicModel {
 
     private final LoadBalancerType type;
 
@@ -14,7 +16,9 @@ public class CloudLoadBalancerMetadata {
 
     private final String name;
 
-    private CloudLoadBalancerMetadata(LoadBalancerType type, String cloudDns, String hostedZoneId, String ip, String name) {
+    private CloudLoadBalancerMetadata(LoadBalancerType type, String cloudDns, String hostedZoneId, String ip, String name,
+            Map<String, Object> parameters) {
+        super(parameters);
         this.type = type;
         this.cloudDns = cloudDns;
         this.hostedZoneId = hostedZoneId;
@@ -65,6 +69,8 @@ public class CloudLoadBalancerMetadata {
 
         private String name;
 
+        private Map<String, Object> parameters;
+
         public Builder withType(LoadBalancerType type) {
             this.type = type;
             return this;
@@ -90,8 +96,13 @@ public class CloudLoadBalancerMetadata {
             return this;
         }
 
+        public Builder withParameters(Map<String, Object> parameters) {
+            this.parameters = parameters;
+            return this;
+        }
+
         public CloudLoadBalancerMetadata build() {
-            return new CloudLoadBalancerMetadata(type, cloudDns, hostedZoneId, ip, name);
+            return new CloudLoadBalancerMetadata(type, cloudDns, hostedZoneId, ip, name, parameters);
         }
     }
 }
