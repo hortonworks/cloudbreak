@@ -27,6 +27,7 @@ import com.amazonaws.services.ec2.model.StartInstancesRequest;
 import com.amazonaws.services.ec2.model.Tag;
 import com.amazonaws.services.ec2.model.TagSpecification;
 import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
+import com.amazonaws.services.ec2.model.TerminateInstancesResult;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsMethodExecutor;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
@@ -98,9 +99,11 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
             LOGGER.info("Instance exists with name: {} ({}), check the state: {}", cloudResource.getName(), instance.getInstanceId(),
                     instance.getState().getName());
             if (!instanceRunning(instance)) {
+                LOGGER.info("Instance is existing but not running, try to start: {}, {}", instance.getInstanceId(), instance.getState());
                 amazonEc2Client.startInstances(new StartInstancesRequest().withInstanceIds(instance.getInstanceId()));
             }
         } else {
+            LOGGER.info("Create new instance with name: {}", cloudResource.getName());
             TagSpecification tagSpecification = awsTaggingService.prepareEc2TagSpecification(awsCloudStackView.getTags(),
                     com.amazonaws.services.ec2.model.ResourceType.Instance);
             tagSpecification.withTags(new Tag().withKey("Name").withValue(cloudResource.getName()));
@@ -118,6 +121,7 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
                     .withKeyName(cloudStack.getInstanceAuthentication().getPublicKeyId());
             RunInstancesResult instanceResult = amazonEc2Client.createInstance(request);
             instance = instanceResult.getReservation().getInstances().get(0);
+            LOGGER.info("Instance creation inited with name: {} and instance id: {}", cloudResource.getName(), instance.getInstanceId());
         }
         cloudResource.setInstanceId(instance.getInstanceId());
         return buildableResource;
@@ -133,9 +137,11 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
 
     @Override
     protected boolean isFinished(AwsContext context, AuthenticatedContext auth, CloudResource resource) {
-        boolean creation =  context.isBuild();
+        boolean creation = context.isBuild();
+        String operation = creation ? "creation" : "termination";
         boolean finished;
         try {
+            LOGGER.debug("Check instance {} for {}.", operation, resource.getInstanceId());
             DescribeInstancesResult describeInstancesResult = context.getAmazonEc2Client().describeInstances(new DescribeInstancesRequest()
                     .withInstanceIds(resource.getInstanceId()));
             if (creation) {
@@ -152,7 +158,6 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
                 LOGGER.info("Aws resource does not found: {}", e.getMessage());
                 finished = true;
             } else {
-                String operation = context.isBuild() ? "creation" : "termination";
                 LOGGER.error("Cannot finished instance {}: {}", operation, e.getMessage(), e);
                 throw e;
             }
@@ -161,10 +166,12 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
     }
 
     private boolean instanceRunning(Instance instance) {
+        LOGGER.debug("Check running state of {}. Current: {}", instance.getInstanceId(), instance.getState());
         return instance.getState().getCode() == AWS_INSTANCE_RUNNING_CODE;
     }
 
     private boolean instanceTerminated(Instance instance) {
+        LOGGER.debug("check termination state of {}. Current: {}", instance.getInstanceId(), instance.getState());
         return instance.getState().getCode() == AWS_INSTANCE_TERMINATED_CODE;
     }
 
@@ -178,10 +185,10 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
 
     @Override
     public CloudResource delete(AwsContext context, AuthenticatedContext auth, CloudResource resource) throws Exception {
-        TerminateInstancesRequest request = new TerminateInstancesRequest()
-                .withInstanceIds(resource.getInstanceId());
-        context.getAmazonEc2Client().deleteInstance(request);
-        return resource;
+        LOGGER.info("Terminate instance with instance id: {}", resource.getInstanceId());
+        TerminateInstancesRequest request = new TerminateInstancesRequest().withInstanceIds(resource.getInstanceId());
+        TerminateInstancesResult terminateInstancesResult = awsMethodExecutor.execute(() -> context.getAmazonEc2Client().deleteInstance(request), null);
+        return terminateInstancesResult == null ? null : resource;
     }
 
     @Override
