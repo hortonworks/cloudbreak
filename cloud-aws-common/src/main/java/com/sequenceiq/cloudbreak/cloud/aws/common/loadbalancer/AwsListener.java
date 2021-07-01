@@ -4,7 +4,7 @@ import java.util.Set;
 
 public class AwsListener {
 
-    private static final String LISTENER_NAME_PREFIX = "ListenerPort";
+    public static final String LISTENER_NAME_PREFIX = "ListenerPort";
 
     private final int port;
 

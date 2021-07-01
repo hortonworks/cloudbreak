@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.Databa
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.hardware.HardwareInfoGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.StackImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.loadbalancer.LoadBalancerResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.network.NetworkV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.tags.TagsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
@@ -134,6 +135,9 @@ public class StackV4Response extends StackV4Base implements TaggedResponse {
 
     @ApiModelProperty(StackModelDescription.EXTERNAL_DATABASE)
     private DatabaseResponse externalDatabase;
+
+    @ApiModelProperty(StackModelDescription.LOAD_BALANCER)
+    private List<LoadBalancerResponse> loadBalancers;
 
     public Long getId() {
         return id;
@@ -388,6 +392,14 @@ public class StackV4Response extends StackV4Base implements TaggedResponse {
 
     public void setVariant(String variant) {
         this.variant = variant;
+    }
+
+    public List<LoadBalancerResponse> getLoadBalancers() {
+        return loadBalancers;
+    }
+
+    public void setLoadBalancers(List<LoadBalancerResponse> loadBalancers) {
+        this.loadBalancers = loadBalancers;
     }
 
     @Override

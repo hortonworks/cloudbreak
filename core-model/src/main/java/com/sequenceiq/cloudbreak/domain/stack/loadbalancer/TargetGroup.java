@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
+import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -13,6 +14,9 @@ import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.SequenceGenerator;
 
+import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.json.JsonToString;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 import com.sequenceiq.cloudbreak.domain.converter.TargetGroupTypeConverter;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
@@ -33,6 +37,10 @@ public class TargetGroup implements ProvisionEntity {
 
     @ManyToMany(fetch = FetchType.EAGER)
     private Set<InstanceGroup> instanceGroups = new HashSet<>();
+
+    @Convert(converter = JsonToString.class)
+    @Column(columnDefinition = "TEXT")
+    private Json providerConfig;
 
     public Long getId() {
         return id;
@@ -64,6 +72,19 @@ public class TargetGroup implements ProvisionEntity {
 
     public void setInstanceGroups(Set<InstanceGroup> instanceGroups) {
         this.instanceGroups = instanceGroups;
+    }
+
+    public TargetGroupConfigDbWrapper getProviderConfig() {
+        if (providerConfig != null && providerConfig.getValue() != null) {
+            return JsonUtil.readValueOpt(providerConfig.getValue(), TargetGroupConfigDbWrapper.class).orElse(null);
+        }
+        return null;
+    }
+
+    public void setProviderConfig(TargetGroupConfigDbWrapper cloudConfig) {
+        if (cloudConfig != null) {
+            this.providerConfig = new Json(cloudConfig);
+        }
     }
 
     @Override
