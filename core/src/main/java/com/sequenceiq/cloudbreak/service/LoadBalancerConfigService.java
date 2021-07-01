@@ -138,7 +138,7 @@ public class LoadBalancerConfigService {
             case OOZIE:
                 return Set.of(new TargetGroupPortPair(Integer.parseInt(OOZIE_HTTPS_PORT), Integer.parseInt(OOZIE_HTTPS_PORT)));
             default:
-                return null;
+                return Set.of();
         }
     }
 

@@ -18,6 +18,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.amazonaws.services.cloudformation.model.ListStackResourcesResult;
+import com.amazonaws.services.cloudformation.model.StackResourceSummary;
 import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.amazonaws.services.ec2.model.DescribeSubnetsRequest;
@@ -31,7 +33,10 @@ import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPlatformResources;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
+import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.AwsListener;
 import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.AwsLoadBalancer;
+import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.AwsLoadBalancerScheme;
+import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.AwsTargetGroup;
 import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.LoadBalancerTypeConverter;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsLifeCycleMapper;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AuthenticatedContextView;
@@ -40,12 +45,14 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstanceMetaData;
-import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancerMetadata;
+import com.sequenceiq.cloudbreak.cloud.model.loadbalancer.CloudLoadBalancerMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStoreMetadata;
+import com.sequenceiq.cloudbreak.cloud.model.loadbalancer.AwsLoadBalancerMetadata;
+import com.sequenceiq.cloudbreak.cloud.model.loadbalancer.AwsTargetGroupMetadata;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 
 @Service
@@ -66,6 +73,9 @@ public class AwsMetadataCollector implements MetadataCollector {
 
     @Inject
     private AwsPlatformResources awsPlatformResources;
+
+    @Inject
+    private AwsStackRequestHelper awsStackRequestHelper;
 
     @Override
     public List<CloudVmMetaDataStatus> collect(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms,
@@ -226,17 +236,31 @@ public class AwsMetadataCollector implements MetadataCollector {
             List<CloudResource> resources) {
         LOGGER.debug("Collect AWS load balancer metadata, for cluster {}", ac.getCloudContext().getName());
 
+        String region = ac.getCloudContext().getLocation().getRegion().value();
+        String cFStackName = cloudFormationStackUtil.getCfStackName(ac);
+        AwsCredentialView credentialView = new AwsCredentialView(ac.getCloudCredential());
+        AmazonCloudFormationClient cfRetryClient = awsClient.createCloudFormationClient(credentialView, region);
+        ListStackResourcesResult result = cfRetryClient.listStackResources(awsStackRequestHelper.createListStackResourcesRequest(cFStackName));
+
         List<CloudLoadBalancerMetadata> cloudLoadBalancerMetadata = new ArrayList<>();
         for (LoadBalancerType type : loadBalancerTypes) {
-            String loadBalancerName = AwsLoadBalancer.getLoadBalancerName(loadBalancerTypeConverter.convert(type));
+            AwsLoadBalancerScheme scheme = loadBalancerTypeConverter.convert(type);
+            String loadBalancerName = AwsLoadBalancer.getLoadBalancerName(scheme);
             LOGGER.debug("Attempting to collect metadata for load balancer {}, type {}", loadBalancerName, type);
             try {
                 LoadBalancer loadBalancer = cloudFormationStackUtil.getLoadBalancerByLogicalId(ac, loadBalancerName);
+                LOGGER.debug("Parsing all listener and target group information for load balancer {}", loadBalancerName);
+                List<AwsTargetGroupMetadata> configs = parseTargetGroupCloudConfig(scheme, result.getStackResourceSummaries());
+                AwsLoadBalancerMetadata awsLoadBalancerMetadata = new AwsLoadBalancerMetadata();
+                awsLoadBalancerMetadata.setArn(loadBalancer.getLoadBalancerArn());
+                awsLoadBalancerMetadata.setTargetGroupMetadata(configs);
+
                 CloudLoadBalancerMetadata loadBalancerMetadata = new CloudLoadBalancerMetadata.Builder()
                     .withType(type)
                     .withCloudDns(loadBalancer.getDNSName())
                     .withHostedZoneId(loadBalancer.getCanonicalHostedZoneId())
                     .withName(loadBalancerName)
+                    .withCloudProviderMetadata(awsLoadBalancerMetadata)
                     .build();
                 cloudLoadBalancerMetadata.add(loadBalancerMetadata);
                 LOGGER.debug("Saved metadata for load balancer {}: DNS {}, zone id {}", loadBalancerName, loadBalancer.getDNSName(),
@@ -251,5 +275,51 @@ public class AwsMetadataCollector implements MetadataCollector {
     @Override
     public InstanceStoreMetadata collectInstanceStorageCount(AuthenticatedContext ac, List<String> instanceTypes) {
         return awsPlatformResources.collectInstanceStorageCount(ac, instanceTypes);
+    }
+
+    /**
+     * Parses the stack resource summary for the cloudformation stack and pulls out all listener and target group ARNs
+     * associated with a particular load balancer, and creates AwsTargetGroupMetadata objects using the provided
+     * resources summaries.
+     * @param scheme The scheme of the load balancer being processed, either INTERNAL or INTERNET-FACING
+     * @param summaries The list of resource summaries from cloud formation that contain both the logical resource id
+     *                  (the name), and the physical resource id (ARN).
+     * @return A list of metadata pulled from the resource summaries.
+     */
+    private List<AwsTargetGroupMetadata> parseTargetGroupCloudConfig(AwsLoadBalancerScheme scheme, List<StackResourceSummary> summaries) {
+        // Listeners and target groups have a naming convention of 'prefix + port + LB scheme'. Here we're pulling out
+        // port information for the load balancer via its associated listeners, and will use that list to construct the
+        // names of all listeners and target groups associated with the LB.
+        List<Integer> ports = summaries.stream()
+            .filter(summary -> summary.getLogicalResourceId().startsWith(AwsListener.LISTENER_NAME_PREFIX))
+            .filter(summary -> summary.getLogicalResourceId().endsWith(scheme.resourceName()))
+            .map(summary -> getPortFromListenerName(summary.getLogicalResourceId(), scheme))
+            .collect(Collectors.toList());
+
+        List<AwsTargetGroupMetadata> targetGroupConfigs = new ArrayList<>();
+        // Each configured port should have a single listener and a single target group associated with it.
+        // Build the appropriate names for each resource, and use that to pull out the physical resource id,
+        // which in this case is the resource ARN.
+        ports.forEach(port -> {
+            AwsTargetGroupMetadata config = new AwsTargetGroupMetadata();
+            String listenerArn = summaries.stream()
+                .filter(summary -> AwsListener.getListenerName(port, scheme).equals(summary.getLogicalResourceId()))
+                .map(StackResourceSummary::getPhysicalResourceId)
+                .findFirst().orElse(null);
+            String targetGroupArn = summaries.stream()
+                .filter(summary -> AwsTargetGroup.getTargetGroupName(port, scheme).equals(summary.getLogicalResourceId()))
+                .map(StackResourceSummary::getPhysicalResourceId)
+                .findFirst().orElse(null);
+            config.setTargetGroupArn(targetGroupArn);
+            config.setListenerArn(listenerArn);
+            config.setPort(port);
+            targetGroupConfigs.add(config);
+        });
+        return targetGroupConfigs;
+    }
+
+    private Integer getPortFromListenerName(String name, AwsLoadBalancerScheme scheme) {
+        return Integer.valueOf(name.replace(AwsListener.LISTENER_NAME_PREFIX, "")
+            .replace(scheme.resourceName(), ""));
     }
 }

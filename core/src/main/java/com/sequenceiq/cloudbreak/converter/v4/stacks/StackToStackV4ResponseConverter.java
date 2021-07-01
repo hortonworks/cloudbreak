@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -27,6 +28,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.Databa
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.StackImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.network.InstanceGroupNetworkV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.loadbalancer.LoadBalancerResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.network.NetworkV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.tags.TagsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
@@ -44,10 +46,12 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
+import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
@@ -80,6 +84,9 @@ public class StackToStackV4ResponseConverter extends AbstractConversionServiceAw
 
     @Inject
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
+
+    @Inject
+    private LoadBalancerPersistenceService loadBalancerService;
 
     @Override
     public StackV4Response convert(Stack source) {
@@ -122,6 +129,7 @@ public class StackToStackV4ResponseConverter extends AbstractConversionServiceAw
                 ed -> getConversionService().convert(ed, DatabaseResponse.class)));
         datalakeService.addSharedServiceResponse(source, response);
         filterExposedServicesByType(source.getType(), response.getCluster());
+        response.setLoadBalancers(convertLoadBalancers(source.getId()));
         return response;
     }
 
@@ -224,4 +232,10 @@ public class StackToStackV4ResponseConverter extends AbstractConversionServiceAw
         }
         return null;
     }
+
+    private List<LoadBalancerResponse> convertLoadBalancers(Long stackId) {
+        Set<LoadBalancer> loadBalancers = loadBalancerService.findByStackId(stackId);
+        return loadBalancers.isEmpty() ? null : converterUtil.convertAll(loadBalancers, LoadBalancerResponse.class);
+    }
+
 }

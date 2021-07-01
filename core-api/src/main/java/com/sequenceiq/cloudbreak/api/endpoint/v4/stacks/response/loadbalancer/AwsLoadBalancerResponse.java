@@ -1,0 +1,22 @@
+package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.loadbalancer;
+
+import java.io.Serializable;
+
+import javax.validation.constraints.NotNull;
+
+import io.swagger.annotations.ApiModelProperty;
+
+public class AwsLoadBalancerResponse implements Serializable {
+
+    @ApiModelProperty
+    @NotNull
+    private String arn;
+
+    public String getArn() {
+        return arn;
+    }
+
+    public void setArn(String arn) {
+        this.arn = arn;
+    }
+}

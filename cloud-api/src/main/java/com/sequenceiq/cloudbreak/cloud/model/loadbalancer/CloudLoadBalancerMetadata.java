@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.model;
+package com.sequenceiq.cloudbreak.cloud.model.loadbalancer;
 
 import com.sequenceiq.common.api.type.LoadBalancerType;
 
@@ -14,12 +14,16 @@ public class CloudLoadBalancerMetadata {
 
     private final String name;
 
-    private CloudLoadBalancerMetadata(LoadBalancerType type, String cloudDns, String hostedZoneId, String ip, String name) {
+    private final LoadBalancerMetadataBase cloudProviderMetadata;
+
+    private CloudLoadBalancerMetadata(LoadBalancerType type, String cloudDns, String hostedZoneId, String ip, String name,
+            LoadBalancerMetadataBase cloudProviderMetadata) {
         this.type = type;
         this.cloudDns = cloudDns;
         this.hostedZoneId = hostedZoneId;
         this.ip = ip;
         this.name = name;
+        this.cloudProviderMetadata = cloudProviderMetadata;
     }
 
     public LoadBalancerType getType() {
@@ -40,6 +44,10 @@ public class CloudLoadBalancerMetadata {
 
     public String getName() {
         return name;
+    }
+
+    public LoadBalancerMetadataBase getCloudProviderMetadata() {
+        return cloudProviderMetadata;
     }
 
     @Override
@@ -64,6 +72,8 @@ public class CloudLoadBalancerMetadata {
         private String ip;
 
         private String name;
+
+        private LoadBalancerMetadataBase cloudProviderMetadata;
 
         public Builder withType(LoadBalancerType type) {
             this.type = type;
@@ -90,8 +100,13 @@ public class CloudLoadBalancerMetadata {
             return this;
         }
 
+        public Builder withCloudProviderMetadata(LoadBalancerMetadataBase cloudProviderMetadata) {
+            this.cloudProviderMetadata = cloudProviderMetadata;
+            return this;
+        }
+
         public CloudLoadBalancerMetadata build() {
-            return new CloudLoadBalancerMetadata(type, cloudDns, hostedZoneId, ip, name);
+            return new CloudLoadBalancerMetadata(type, cloudDns, hostedZoneId, ip, name, cloudProviderMetadata);
         }
     }
 }

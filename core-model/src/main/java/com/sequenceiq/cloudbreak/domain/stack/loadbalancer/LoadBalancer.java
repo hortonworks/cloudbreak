@@ -1,10 +1,10 @@
 package com.sequenceiq.cloudbreak.domain.stack.loadbalancer;
 
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import java.util.HashSet;
 import java.util.Set;
 
 import java.util.stream.Collectors;
+import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -15,9 +15,13 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 
+import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.json.JsonToString;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 import com.sequenceiq.cloudbreak.domain.converter.LoadBalancerTypeConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 
 @Entity
@@ -45,6 +49,10 @@ public class LoadBalancer implements ProvisionEntity  {
     private Set<TargetGroup> targetGroupSet = new HashSet<>();
 
     private String fqdn;
+
+    @Convert(converter = JsonToString.class)
+    @Column(columnDefinition = "TEXT")
+    private Json providerConfig;
 
     public Long getId() {
         return id;
@@ -122,6 +130,19 @@ public class LoadBalancer implements ProvisionEntity  {
 
     public void setFqdn(String fqdn) {
         this.fqdn = fqdn;
+    }
+
+    public LoadBalancerConfigDbWrapper getProviderConfig() {
+        if (providerConfig != null && providerConfig.getValue() != null) {
+            return JsonUtil.readValueOpt(providerConfig.getValue(), LoadBalancerConfigDbWrapper.class).orElse(null);
+        }
+        return null;
+    }
+
+    public void setProviderConfig(LoadBalancerConfigDbWrapper cloudConfig) {
+        if (cloudConfig != null) {
+            this.providerConfig = new Json(cloudConfig);
+        }
     }
 
     @Override

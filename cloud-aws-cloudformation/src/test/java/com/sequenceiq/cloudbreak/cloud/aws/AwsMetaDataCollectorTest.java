@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.aws;
 import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -29,6 +30,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
+import com.amazonaws.services.cloudformation.model.ListStackResourcesResult;
+import com.amazonaws.services.cloudformation.model.StackResourceSummary;
 import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.amazonaws.services.ec2.model.DescribeSubnetsRequest;
@@ -40,7 +43,10 @@ import com.amazonaws.services.elasticloadbalancingv2.model.LoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
+import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.AwsListener;
+import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.AwsLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.AwsLoadBalancerScheme;
+import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.AwsTargetGroup;
 import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.LoadBalancerTypeConverter;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsLifeCycleMapper;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
@@ -51,7 +57,7 @@ import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstanceLifeCycle;
-import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancerMetadata;
+import com.sequenceiq.cloudbreak.cloud.model.loadbalancer.CloudLoadBalancerMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
@@ -59,6 +65,8 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
+import com.sequenceiq.cloudbreak.cloud.model.loadbalancer.AwsLoadBalancerMetadata;
+import com.sequenceiq.cloudbreak.cloud.model.loadbalancer.AwsTargetGroupMetadata;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.common.api.type.LoadBalancerType;
@@ -79,6 +87,12 @@ public class AwsMetaDataCollectorTest {
     private static final String INTERNAL_LB_ID = "LoadBalancerInternal";
 
     private static final String EXTERNAL_LB_ID = "LoadBalancerExternal";
+
+    private static final String TARGET_GROUP_ARN = "arn:targetgroup";
+
+    private static final String LOAD_BALANCER_ARN = "arn:loadbalancer";
+
+    private static final String LISTENER_ARN = "arn:listener";
 
     private static final String ZONE_1 = "zone1";
 
@@ -118,6 +132,9 @@ public class AwsMetaDataCollectorTest {
 
     @Mock
     private LoadBalancerTypeConverter loadBalancerTypeConverter;
+
+    @Mock
+    private AwsStackRequestHelper awsStackRequestHelper;
 
     @InjectMocks
     private AwsMetadataCollector awsMetadataCollector;
@@ -430,6 +447,9 @@ public class AwsMetaDataCollectorTest {
     public void testCollectLoadBalancers() {
         setupMethodsForLoadBalancer(true);
 
+        when(awsClient.createCloudFormationClient(any(), any())).thenReturn(amazonCFClient);
+        when(amazonCFClient.listStackResources(any())).thenReturn(new ListStackResourcesResult());
+
         AuthenticatedContext ac = authenticatedContext();
         List<CloudLoadBalancerMetadata> metadata = awsMetadataCollector.collectLoadBalancer(ac,
                 List.of(LoadBalancerType.PRIVATE, LoadBalancerType.PUBLIC), null);
@@ -454,6 +474,9 @@ public class AwsMetaDataCollectorTest {
     public void testCollectLoadBalancerOnlyDefaultGateway() {
         setupMethodsForLoadBalancer(true);
 
+        when(awsClient.createCloudFormationClient(any(), any())).thenReturn(amazonCFClient);
+        when(amazonCFClient.listStackResources(any())).thenReturn(new ListStackResourcesResult());
+
         AuthenticatedContext ac = authenticatedContext();
         List<CloudLoadBalancerMetadata> metadata = awsMetadataCollector.collectLoadBalancer(ac,
                 List.of(LoadBalancerType.PRIVATE), null);
@@ -472,6 +495,9 @@ public class AwsMetaDataCollectorTest {
     public void testCollectLoadBalancerOnlyEndpointAccessGateway() {
         setupMethodsForLoadBalancer(true);
 
+        when(awsClient.createCloudFormationClient(any(), any())).thenReturn(amazonCFClient);
+        when(amazonCFClient.listStackResources(any())).thenReturn(new ListStackResourcesResult());
+
         AuthenticatedContext ac = authenticatedContext();
         List<CloudLoadBalancerMetadata> metadata = awsMetadataCollector.collectLoadBalancer(ac,
                 List.of(LoadBalancerType.PUBLIC), null);
@@ -489,6 +515,9 @@ public class AwsMetaDataCollectorTest {
     public void testCollectLoadBalancerMissingMetadata() {
         setupMethodsForLoadBalancer(false);
 
+        when(awsClient.createCloudFormationClient(any(), any())).thenReturn(amazonCFClient);
+        when(amazonCFClient.listStackResources(any())).thenReturn(new ListStackResourcesResult());
+
         AuthenticatedContext ac = authenticatedContext();
         List<CloudLoadBalancerMetadata> metadata = awsMetadataCollector.collectLoadBalancer(ac,
                 List.of(LoadBalancerType.PRIVATE, LoadBalancerType.PUBLIC), null);
@@ -501,6 +530,46 @@ public class AwsMetaDataCollectorTest {
         assertEquals(LoadBalancerType.PUBLIC, metadata.iterator().next().getType());
         assertEquals(EXTERNAL_LB_DNS, metadata.iterator().next().getCloudDns());
         assertEquals(ZONE_2, metadata.iterator().next().getHostedZoneId());
+    }
+
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    @Test
+    public void testCollectLoadBalancersWithAwsLoadBalancerMetadata() {
+        setupMethodsForLoadBalancer(true);
+
+        int numPorts = 2;
+        ListStackResourcesResult result = new ListStackResourcesResult();
+        result.setStackResourceSummaries(createSummaries(numPorts));
+        AwsLoadBalancerScheme scheme = AwsLoadBalancerScheme.INTERNAL;
+        AwsTargetGroupMetadata expectedTg1 = new AwsTargetGroupMetadata();
+        expectedTg1.setListenerArn(LISTENER_ARN + 0 + scheme.resourceName());
+        expectedTg1.setTargetGroupArn(TARGET_GROUP_ARN + 0 + scheme.resourceName());
+        expectedTg1.setPort(0);
+        AwsTargetGroupMetadata expectedTg2 = new AwsTargetGroupMetadata();
+        expectedTg2.setListenerArn(LISTENER_ARN + 1 + scheme.resourceName());
+        expectedTg2.setTargetGroupArn(TARGET_GROUP_ARN + 1 + scheme.resourceName());
+        expectedTg2.setPort(1);
+
+        when(awsClient.createCloudFormationClient(any(), any())).thenReturn(amazonCFClient);
+        when(awsStackRequestHelper.createListStackResourcesRequest(any())).thenReturn(null);
+        when(amazonCFClient.listStackResources(any())).thenReturn(result);
+
+        AuthenticatedContext ac = authenticatedContext();
+        List<CloudLoadBalancerMetadata> metadata = awsMetadataCollector.collectLoadBalancer(ac,
+            List.of(LoadBalancerType.PRIVATE), null);
+
+        assertEquals(1, metadata.size());
+        Optional<CloudLoadBalancerMetadata> internalMetadata = metadata.stream()
+            .filter(m -> m.getType() == LoadBalancerType.PRIVATE)
+            .findFirst();
+        assertTrue(internalMetadata.isPresent());
+        CloudLoadBalancerMetadata lbMetadata = internalMetadata.get();
+        assertNotNull(lbMetadata.getCloudProviderMetadata());
+        assertTrue(lbMetadata.getCloudProviderMetadata() instanceof AwsLoadBalancerMetadata);
+        AwsLoadBalancerMetadata awsMetadata = lbMetadata.getCloudProviderMetadata().getAwsMetadata();
+        assertEquals(LOAD_BALANCER_ARN + scheme.resourceName(), awsMetadata.getArn());
+        assertEquals(numPorts, awsMetadata.getTargetGroupMetadata().size());
+        assertEquals(List.of(expectedTg1, expectedTg2), awsMetadata.getTargetGroupMetadata());
     }
 
     private Reservation getReservation(Instance... instance) {
@@ -531,10 +600,12 @@ public class AwsMetaDataCollectorTest {
     private void setupMethodsForLoadBalancer(boolean canFindInternalLB) {
         LoadBalancer internalLoadBalancer = new LoadBalancer()
                 .withDNSName(INTERNAL_LB_DNS)
-                .withCanonicalHostedZoneId(ZONE_1);
+                .withCanonicalHostedZoneId(ZONE_1)
+                .withLoadBalancerArn(LOAD_BALANCER_ARN + AwsLoadBalancerScheme.INTERNAL.resourceName());
         LoadBalancer externalLoadBalancer = new LoadBalancer()
                 .withDNSName(EXTERNAL_LB_DNS)
-                .withCanonicalHostedZoneId(ZONE_2);
+                .withCanonicalHostedZoneId(ZONE_2)
+                .withLoadBalancerArn(LOAD_BALANCER_ARN + AwsLoadBalancerScheme.INTERNET_FACING.resourceName());
 
         if (canFindInternalLB) {
             when(cloudFormationStackUtil.getLoadBalancerByLogicalId(any(), eq(INTERNAL_LB_ID))).thenReturn(internalLoadBalancer);
@@ -566,6 +637,27 @@ public class AwsMetaDataCollectorTest {
 
         assertThat(result).hasMessage("Serious problem");
         assertThat(result).hasCause(exception);
+    }
+
+    private List<StackResourceSummary> createSummaries(int numPorts) {
+        List<StackResourceSummary> summaries = new ArrayList<>();
+        for (AwsLoadBalancerScheme scheme : AwsLoadBalancerScheme.class.getEnumConstants()) {
+            StackResourceSummary lbSummary = new StackResourceSummary();
+            lbSummary.setLogicalResourceId(AwsLoadBalancer.getLoadBalancerName(scheme));
+            lbSummary.setPhysicalResourceId(LOAD_BALANCER_ARN + scheme.resourceName());
+            summaries.add(lbSummary);
+            for (int i = 0; i < numPorts; i++) {
+                StackResourceSummary tgSummary = new StackResourceSummary();
+                tgSummary.setLogicalResourceId(AwsTargetGroup.getTargetGroupName(i, scheme));
+                tgSummary.setPhysicalResourceId(TARGET_GROUP_ARN + i + scheme.resourceName());
+                summaries.add(tgSummary);
+                StackResourceSummary lSummary = new StackResourceSummary();
+                lSummary.setLogicalResourceId(AwsListener.getListenerName(i, scheme));
+                lSummary.setPhysicalResourceId(LISTENER_ARN + i + scheme.resourceName());
+                summaries.add(lSummary);
+            }
+        }
+        return summaries;
     }
 
 }
