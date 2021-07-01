@@ -28,6 +28,7 @@ import com.cloudera.api.swagger.CdpResourceApi;
 import com.cloudera.api.swagger.ClouderaManagerResourceApi;
 import com.cloudera.api.swagger.ClustersResourceApi;
 import com.cloudera.api.swagger.HostsResourceApi;
+import com.cloudera.api.swagger.MgmtServiceResourceApi;
 import com.cloudera.api.swagger.ToolsResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
@@ -289,6 +290,14 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
 
     @Override
     public void autoConfigureClusterManager() {
+        MgmtServiceResourceApi mgmtApi = clouderaManagerApiFactory.getMgmtServiceResourceApi(apiClient);
+        try {
+            mgmtApi.autoConfigure();
+        } catch (ApiException e) {
+            String msg = "Error happened when CM autoconfigure was called: " + extractMessage(e);
+            LOGGER.error(msg, e);
+            throw new ClouderaManagerOperationFailedException(msg, e);
+        }
     }
 
     @Override
