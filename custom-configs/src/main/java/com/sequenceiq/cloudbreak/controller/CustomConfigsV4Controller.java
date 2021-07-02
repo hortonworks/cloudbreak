@@ -7,9 +7,13 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Controller;
 
+import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
+import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
+import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceName;
+import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.CustomConfigsV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.requests.CloneCustomConfigsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.requests.CustomConfigsV4Request;
@@ -38,23 +42,23 @@ public class CustomConfigsV4Controller implements CustomConfigsV4Endpoint {
     }
 
     @Override
-//    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_CLUSTER_DEFINITION)
-    @DisableCheckPermissions
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_CLUSTER_TEMPLATE)
+//    @DisableCheckPermissions
     public CustomConfigsV4Response getByCrn(@ResourceCrn  String crn) {
         return converterUtil.convert(customConfigsService.getByCrn(crn), CustomConfigsV4Response.class);
     }
 
     @Override
-//    @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_CLUSTER_DEFINITION)
-    @DisableCheckPermissions
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_CLUSTER_TEMPLATE)
+//    @DisableCheckPermissions
     public CustomConfigsV4Response getByName(@ResourceName String name) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         return converterUtil.convert(customConfigsService.getByName(name, accountId), CustomConfigsV4Response.class);
     }
 
     @Override
-//    @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_CLUSTER_DEFINITION)
-    @DisableCheckPermissions
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_CLUSTER_TEMPLATE)
+//    @DisableCheckPermissions
     public CustomConfigsV4Response post(CustomConfigsV4Request request) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         CustomConfigs customConfigs = converterUtil.convert(request, CustomConfigs.class);
@@ -63,8 +67,8 @@ public class CustomConfigsV4Controller implements CustomConfigsV4Endpoint {
     }
 
     @Override
-    @DisableCheckPermissions
-//    @CheckPermissionByResourceName(action = AuthorizationResourceAction.CREATE_CLUSTER_DEFINITION)
+//    @DisableCheckPermissions
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.CREATE_CLUSTER_TEMPLATE)
     public CustomConfigsV4Response cloneByName(@ResourceName String name, CloneCustomConfigsV4Request request) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         return converterUtil.convert(customConfigsService.clone(NameOrCrn.ofName(name),
@@ -72,8 +76,8 @@ public class CustomConfigsV4Controller implements CustomConfigsV4Endpoint {
     }
 
     @Override
-    @DisableCheckPermissions
-//    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.CREATE_CLUSTER_DEFINITION)
+//    @DisableCheckPermissions
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.CREATE_CLUSTER_TEMPLATE)
     public CustomConfigsV4Response cloneByCrn(@ResourceCrn String crn, CloneCustomConfigsV4Request request) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         return converterUtil.convert(customConfigsService.clone(NameOrCrn.ofCrn(crn),
@@ -81,15 +85,15 @@ public class CustomConfigsV4Controller implements CustomConfigsV4Endpoint {
     }
 
     @Override
-//    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DELETE_CLUSTER_DEFINITION)
-    @DisableCheckPermissions
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DELETE_CLUSTER_TEMPLATE)
+//    @DisableCheckPermissions
     public CustomConfigsV4Response deleteByCrn(@ResourceCrn String crn) {
         return converterUtil.convert(customConfigsService.deleteByCrn(crn), CustomConfigsV4Response.class);
     }
 
     @Override
-//    @CheckPermissionByResourceName(action = AuthorizationResourceAction.DELETE_CLUSTER_DEFINITION)
-    @DisableCheckPermissions
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.DELETE_CLUSTER_TEMPLATE)
+//    @DisableCheckPermissions
     public CustomConfigsV4Response deleteByName(@ResourceName String name) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         return converterUtil.convert(customConfigsService.deleteByName(name, accountId), CustomConfigsV4Response.class);

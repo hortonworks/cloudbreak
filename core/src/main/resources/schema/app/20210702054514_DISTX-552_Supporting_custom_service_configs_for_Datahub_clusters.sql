@@ -66,5 +66,3 @@ DROP TABLE IF EXISTS customconfigs;
 DROP SEQUENCE IF EXISTS custom_configs_id_seq;
 DROP SEQUENCE IF EXISTS custom_config_property_id_seq;
 
-
-
