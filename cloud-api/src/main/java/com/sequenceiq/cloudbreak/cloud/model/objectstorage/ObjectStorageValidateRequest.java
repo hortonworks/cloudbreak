@@ -24,6 +24,8 @@ public class ObjectStorageValidateRequest implements CloudPlatformAware {
 
     private String logsLocationBase;
 
+    private AzureParameters azure;
+
     private MockAccountMappingSettings mockAccountMappingSettings;
 
     public ObjectStorageValidateRequest() {
@@ -36,6 +38,7 @@ public class ObjectStorageValidateRequest implements CloudPlatformAware {
         this.spiFileSystem = builder.spiFileSystem;
         this.logsLocationBase = builder.logsLocationBase;
         this.mockAccountMappingSettings = builder.mockAccountMappingSettings;
+        this.azure = builder.azure;
     }
 
     public static Builder builder() {
@@ -90,6 +93,14 @@ public class ObjectStorageValidateRequest implements CloudPlatformAware {
         this.mockAccountMappingSettings = mockAccountMappingSettings;
     }
 
+    public AzureParameters getAzure() {
+        return azure;
+    }
+
+    public void setAzure(AzureParameters azure) {
+        this.azure = azure;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -103,12 +114,13 @@ public class ObjectStorageValidateRequest implements CloudPlatformAware {
                 Objects.equals(cloudPlatform, request.cloudPlatform) &&
                 Objects.equals(cloudStorageRequest, request.cloudStorageRequest) &&
                 Objects.equals(spiFileSystem, request.spiFileSystem) &&
-                Objects.equals(logsLocationBase, request.logsLocationBase);
+                Objects.equals(logsLocationBase, request.logsLocationBase) &&
+                Objects.equals(azure, request.azure);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(credential, cloudPlatform, cloudStorageRequest, spiFileSystem, logsLocationBase);
+        return Objects.hash(credential, cloudPlatform, cloudStorageRequest, spiFileSystem, logsLocationBase, azure);
     }
 
     @Override
@@ -118,6 +130,7 @@ public class ObjectStorageValidateRequest implements CloudPlatformAware {
                 ", cloudStorageRequest='" + JsonUtil.writeValueAsStringSilent(cloudStorageRequest) + '\'' +
                 ", spiFileSystem='" + spiFileSystem + '\'' +
                 ", logsLocationBase='" + logsLocationBase + '\'' +
+                ", azureParameters='" + azure + '\'' +
                 '}';
     }
 
@@ -144,6 +157,8 @@ public class ObjectStorageValidateRequest implements CloudPlatformAware {
         private String logsLocationBase;
 
         private MockAccountMappingSettings mockAccountMappingSettings;
+
+        private AzureParameters azure;
 
         public Builder withCredential(CloudCredential credential) {
             this.credential = credential;
@@ -172,6 +187,13 @@ public class ObjectStorageValidateRequest implements CloudPlatformAware {
 
         public Builder withMockSettings(String region, String adminGroupName) {
             this.mockAccountMappingSettings = new MockAccountMappingSettings(region, adminGroupName);
+            return this;
+        }
+
+        public Builder withAzureParameters(String singleResourceGroupName) {
+            if (singleResourceGroupName != null) {
+                this.azure = new AzureParameters(singleResourceGroupName);
+            }
             return this;
         }
 

@@ -6,6 +6,8 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -24,6 +26,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.microsoft.azure.PagedList;
 import com.microsoft.azure.management.graphrbac.implementation.RoleAssignmentInner;
 import com.microsoft.azure.management.msi.Identity;
+import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azure.management.resources.Subscription;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureStorage;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
@@ -90,6 +93,10 @@ public class AzureIDBrokerObjectStorageValidatorTest {
     private static final String GROUP_IDENTITY_1 =
             "/subscriptions/a9d4456e-349f-44f6-bc73-aaaaaaaaaaaa/resourcegroups/msi/providers/Microsoft.ManagedIdentity/userAssignedIdentities/group";
 
+    private static final String RESOURCE_GROUP_NAME = "resourceGroupName";
+
+    private static final String RESOURCE_GROUP_ID = "resourceGroupId";
+
     @Mock
     private AzureClient client;
 
@@ -98,6 +105,9 @@ public class AzureIDBrokerObjectStorageValidatorTest {
 
     @Mock
     private AzureStorage azureStorage;
+
+    @Mock
+    private ResourceGroup resourceGroup;
 
     @InjectMocks
     private AzureIDBrokerObjectStorageValidator underTest;
@@ -114,6 +124,8 @@ public class AzureIDBrokerObjectStorageValidatorTest {
         when(client.getIdentityById(ASSUMER_IDENTITY)).thenReturn(assumer);
         when(client.getCurrentSubscription()).thenReturn(mock(Subscription.class));
         when(client.getCurrentSubscription().subscriptionId()).thenReturn(SUBSCRIPTION_ID);
+        when(client.getResourceGroup(RESOURCE_GROUP_NAME)).thenReturn(resourceGroup);
+        when(resourceGroup.id()).thenReturn(RESOURCE_GROUP_ID);
         AdlsGen2Config adlsGen2Config = new AdlsGen2Config("abfs://", ABFS_FILESYSTEM_NAME, ABFS_STORAGE_ACCOUNT_NAME, false);
         when(adlsGen2ConfigGenerator.generateStorageConfig(anyString())).thenReturn(adlsGen2Config);
         when(logger.id()).thenReturn(LOG_IDENTITY);
@@ -127,7 +139,7 @@ public class AzureIDBrokerObjectStorageValidatorTest {
     public void testValidateObjectStorageWithoutFileSystems() {
         SpiFileSystem fileSystem = new SpiFileSystem("test", FileSystemType.ADLS_GEN_2, null);
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
-        underTest.validateObjectStorage(client, fileSystem, "", resultBuilder);
+        underTest.validateObjectStorage(client, fileSystem, "", null, resultBuilder);
         assertFalse(resultBuilder.build().hasError());
     }
 
@@ -139,7 +151,7 @@ public class AzureIDBrokerObjectStorageValidatorTest {
                 .withAssignment(LOG_IDENTITY_PRINCIPAL_ID, ABFS_STORAGE_ACCOUNT_NAME);
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
 
-        underTest.validateObjectStorage(client, fileSystem, "", resultBuilder);
+        underTest.validateObjectStorage(client, fileSystem, "", null, resultBuilder);
 
         ValidationResult validationResult = resultBuilder.build();
         assertFalse(validationResult.hasError());
@@ -158,7 +170,7 @@ public class AzureIDBrokerObjectStorageValidatorTest {
                 .withAssignment(LOG_IDENTITY_PRINCIPAL_ID, STORAGE_RESOURCE_GROUP_NAME);
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
 
-        underTest.validateObjectStorage(client, fileSystem, "", resultBuilder);
+        underTest.validateObjectStorage(client, fileSystem, "", null, resultBuilder);
 
         ValidationResult validationResult = resultBuilder.build();
         assertFalse(validationResult.hasError());
@@ -172,7 +184,7 @@ public class AzureIDBrokerObjectStorageValidatorTest {
                 .withAssignment(LOG_IDENTITY_PRINCIPAL_ID, STORAGE_RESOURCE_GROUP_NAME);
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
 
-        underTest.validateObjectStorage(client, fileSystem, "", resultBuilder);
+        underTest.validateObjectStorage(client, fileSystem, "", null, resultBuilder);
 
         ValidationResult validationResult = resultBuilder.build();
         assertFalse(validationResult.hasError());
@@ -186,7 +198,7 @@ public class AzureIDBrokerObjectStorageValidatorTest {
         when(client.getIdentityById(ASSUMER_IDENTITY)).thenReturn(null);
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
 
-        underTest.validateObjectStorage(client, fileSystem, "", resultBuilder);
+        underTest.validateObjectStorage(client, fileSystem, "", null, resultBuilder);
 
         ValidationResult validationResult = resultBuilder.build();
         assertTrue(validationResult.hasError());
@@ -204,7 +216,7 @@ public class AzureIDBrokerObjectStorageValidatorTest {
         when(client.getIdentityById(LOG_IDENTITY)).thenReturn(null);
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
 
-        underTest.validateObjectStorage(client, fileSystem, "", resultBuilder);
+        underTest.validateObjectStorage(client, fileSystem, "", null, resultBuilder);
 
         ValidationResult validationResult = resultBuilder.build();
         assertTrue(validationResult.hasError());
@@ -227,7 +239,7 @@ public class AzureIDBrokerObjectStorageValidatorTest {
                 .withAssignment(LOG_IDENTITY_PRINCIPAL_ID, STORAGE_RESOURCE_GROUP_NAME);
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
 
-        underTest.validateObjectStorage(client, fileSystem, STORAGE_LOCATION_RANGER, resultBuilder);
+        underTest.validateObjectStorage(client, fileSystem, STORAGE_LOCATION_RANGER, null, resultBuilder);
 
         ValidationResult validationResult = resultBuilder.build();
         assertTrue(validationResult.hasError());
@@ -253,7 +265,7 @@ public class AzureIDBrokerObjectStorageValidatorTest {
                 .withAssignment(LOG_IDENTITY_PRINCIPAL_ID, STORAGE_RESOURCE_GROUP_NAME);
 
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
-        underTest.validateObjectStorage(client, fileSystem, "", resultBuilder);
+        underTest.validateObjectStorage(client, fileSystem, "", null, resultBuilder);
         ValidationResult validationResult = resultBuilder.build();
         assertFalse(validationResult.hasError());
     }
@@ -277,16 +289,18 @@ public class AzureIDBrokerObjectStorageValidatorTest {
 
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
 
-        underTest.validateObjectStorage(client, fileSystem, STORAGE_LOCATION_RANGER, resultBuilder);
+        underTest.validateObjectStorage(client, fileSystem, STORAGE_LOCATION_RANGER, null, resultBuilder);
 
         ValidationResult validationResult = resultBuilder.build();
         assertTrue(validationResult.hasError());
-        assertEquals(6, validationResult.getErrors().size());
+        assertEquals(5, validationResult.getErrors().size());
         List<String> actual = validationResult.getErrors();
         assertTrue(actual.stream().anyMatch(item ->
                 item.contains(String.format("Identity with id %s has no role assignment.", USER_IDENTITY_1))));
         assertTrue(actual.stream().anyMatch(item ->
-                item.contains(String.format("Identity with id %s has no role assignment.", GROUP_IDENTITY_1))));
+                item.contains(String.format("Identity with id %s has no role assignment on scope", GROUP_IDENTITY_1))));
+        assertTrue(actual.stream().anyMatch(item ->
+                item.contains(String.format("Identity with id %s has no role assignment on scope", USER_IDENTITY_1))));
 
     }
 
@@ -296,14 +310,15 @@ public class AzureIDBrokerObjectStorageValidatorTest {
         new RoleASsignmentBuilder(client);
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
 
-        underTest.validateObjectStorage(client, fileSystem, "", resultBuilder);
+        underTest.validateObjectStorage(client, fileSystem, "", null, resultBuilder);
 
         ValidationResult validationResult = resultBuilder.build();
         assertTrue(validationResult.hasError());
-        assertEquals(1, validationResult.getErrors().size());
-        String actual = validationResult.getErrors().get(0);
-        assertEquals(actual, "There are no role assignments for the given Azure subscription. " +
+        assertEquals(2, validationResult.getErrors().size());
+        assertEquals(validationResult.getErrors().get(1), "There are no role assignments for the given Azure subscription. " +
                 "Please check if you've used the correct Identity when setting up Data Access.");
+        assertEquals(validationResult.getErrors().get(0), String.format("Identity with id %s has no role assignment. " +
+                "Please check if you've used the correct Identity when setting up Data Access.", ASSUMER_IDENTITY));
     }
 
     @Test
@@ -313,14 +328,35 @@ public class AzureIDBrokerObjectStorageValidatorTest {
                 .withAssignment(LOG_IDENTITY_PRINCIPAL_ID, STORAGE_RESOURCE_GROUP_NAME);
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
 
-        underTest.validateObjectStorage(client, fileSystem, "", resultBuilder);
+        underTest.validateObjectStorage(client, fileSystem, "", null, resultBuilder);
 
         ValidationResult validationResult = resultBuilder.build();
         assertTrue(validationResult.hasError());
-        assertEquals(1, validationResult.getErrors().size());
-        String actual = validationResult.getErrors().get(0);
-        assertEquals(actual, String.format("Identity with id %s has no role assignment on scope(s) [/subscriptions/%s]. " +
+        assertEquals(2, validationResult.getErrors().size());
+        assertEquals(validationResult.getErrors().get(1), String.format("Identity with id %s has no role assignment. " +
+                "Please check if you've used the correct Identity when setting up Data Access.", ASSUMER_IDENTITY));
+        assertEquals(validationResult.getErrors().get(0), String.format("Identity with id %s has no role assignment on scope(s) [/subscriptions/%s]. " +
                 "Please check if you've used the correct Identity when setting up Data Access.", ASSUMER_IDENTITY, SUBSCRIPTION_ID));
+    }
+
+    @Test
+    public void testValidateObjectStorageWithSingleResourceGroupAndNoResourceGroupRoleAssignment() {
+        SpiFileSystem fileSystem = setupSpiFileSystem(false);
+        new RoleASsignmentBuilder(client)
+                .withAssignment(LOG_IDENTITY_PRINCIPAL_ID, STORAGE_RESOURCE_GROUP_NAME);
+        ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
+
+        underTest.validateObjectStorage(client, fileSystem, "", RESOURCE_GROUP_NAME, resultBuilder);
+
+        ValidationResult validationResult = resultBuilder.build();
+        verify(client, times(0)).listRoleAssignments();
+        verify(client, times(1)).listRoleAssignmentsByScopeInner(RESOURCE_GROUP_ID);
+        assertTrue(validationResult.hasError());
+        assertEquals(2, validationResult.getErrors().size());
+        assertEquals(validationResult.getErrors().get(1), String.format("Identity with id %s has no role assignment. " +
+                "Please check if you've used the correct Identity when setting up Data Access.", ASSUMER_IDENTITY));
+        assertEquals(validationResult.getErrors().get(0), String.format("Identity with id %s has no role assignment on scope(s) [/subscriptions/%s, %s]. " +
+                "Please check if you've used the correct Identity when setting up Data Access.", ASSUMER_IDENTITY, SUBSCRIPTION_ID, RESOURCE_GROUP_ID));
     }
 
     @Test
@@ -330,7 +366,7 @@ public class AzureIDBrokerObjectStorageValidatorTest {
                 .withAssignment(ASSUMER_IDENTITY_PRINCIPAL_ID, SUBSCRIPTION_FULL_ID);
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
 
-        underTest.validateObjectStorage(client, fileSystem, STORAGE_LOCATION_RANGER, resultBuilder);
+        underTest.validateObjectStorage(client, fileSystem, STORAGE_LOCATION_RANGER, null, resultBuilder);
 
         ValidationResult validationResult = resultBuilder.build();
         assertTrue(validationResult.hasError());
@@ -350,7 +386,7 @@ public class AzureIDBrokerObjectStorageValidatorTest {
         when(azureStorage.findStorageAccountIdInVisibleSubscriptions(any(), anyString())).thenReturn(Optional.empty());
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
 
-        underTest.validateObjectStorage(client, fileSystem, "", resultBuilder);
+        underTest.validateObjectStorage(client, fileSystem, "", null, resultBuilder);
 
         ValidationResult validationResult = resultBuilder.build();
         assertTrue(validationResult.hasError());
