@@ -1,7 +1,10 @@
 package com.sequenceiq.datalake.service.validation.cloudstorage;
 
 import static com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource.MOCK;
+import static com.sequenceiq.environment.api.v1.environment.model.request.azure.ResourceGroupUsage.SINGLE;
+import static com.sequenceiq.environment.api.v1.environment.model.request.azure.ResourceGroupUsage.SINGLE_WITH_DEDICATED_STORAGE_ACCOUNT;
 
+import java.util.EnumSet;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -25,6 +28,8 @@ import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.datalake.entity.Credential;
 import com.sequenceiq.datalake.service.validation.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.environment.api.v1.environment.model.base.CloudStorageValidation;
+import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Component
@@ -90,6 +95,14 @@ public class CloudStorageValidator {
                 .orElse(null);
     }
 
+    private String getSingleResourceGroupName(DetailedEnvironmentResponse env) {
+        return Optional.ofNullable(env.getAzure())
+                .map(AzureEnvironmentParameters::getResourceGroup)
+                .filter(rg -> EnumSet.of(SINGLE, SINGLE_WITH_DEDICATED_STORAGE_ACCOUNT).contains(rg.getResourceGroupUsage()))
+                .map(AzureResourceGroup::getName)
+                .orElse(null);
+    }
+
     private ObjectStorageValidateRequest createObjectStorageValidateRequest(
             CloudCredential credential,
             CloudStorageRequest cloudStorageRequest,
@@ -98,7 +111,8 @@ public class CloudStorageValidator {
                 .withCloudPlatform(environment.getCloudPlatform())
                 .withCredential(credential)
                 .withCloudStorageRequest(cloudStorageRequest)
-                .withLogsLocationBase(getLogsLocationBase(environment));
+                .withLogsLocationBase(getLogsLocationBase(environment))
+                .withAzureParameters(getSingleResourceGroupName(environment));
         if (environment.getIdBrokerMappingSource() == MOCK) {
             result.withMockSettings(environment.getLocation().getName(), environment.getAdminGroupName());
         }

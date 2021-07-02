@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.cloud.azure.util.AzureValidationMessageU
 import static com.sequenceiq.common.model.CloudIdentityType.ID_BROKER;
 import static com.sequenceiq.common.model.CloudIdentityType.LOG;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -27,6 +28,7 @@ import com.gs.collections.impl.factory.Sets;
 import com.microsoft.azure.PagedList;
 import com.microsoft.azure.management.graphrbac.implementation.RoleAssignmentInner;
 import com.microsoft.azure.management.msi.Identity;
+import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azure.management.resources.fluentcore.arm.ResourceId;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureStorage;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
@@ -55,6 +57,7 @@ public class AzureIDBrokerObjectStorageValidator {
     public ValidationResult validateObjectStorage(AzureClient client,
             SpiFileSystem spiFileSystem,
             String logsLocationBase,
+            String singleResourceGroupName,
             ValidationResultBuilder resultBuilder) {
         LOGGER.info("Validating Azure identities...");
         List<CloudFileSystemView> cloudFileSystems = spiFileSystem.getCloudFileSystems();
@@ -66,8 +69,18 @@ public class AzureIDBrokerObjectStorageValidator {
                 CloudIdentityType cloudIdentityType = cloudFileSystem.getCloudIdentityType();
                 if (identity != null) {
                     if (ID_BROKER.equals(cloudIdentityType)) {
-                        PagedList<RoleAssignmentInner> roleAssignments = client.listRoleAssignments();
-                        validateIDBroker(client, roleAssignments, identity, cloudFileSystem, resultBuilder);
+                        List<RoleAssignmentInner> roleAssignments;
+                        Optional<ResourceGroup> singleResourceGroup;
+                        if (singleResourceGroupName != null) {
+                            ResourceGroup resourceGroup = client.getResourceGroup(singleResourceGroupName);
+                            roleAssignments = client.listRoleAssignmentsByScopeInner(resourceGroup.id());
+                            singleResourceGroup = Optional.of(resourceGroup);
+                        } else {
+                            roleAssignments = client.listRoleAssignments();
+                            singleResourceGroup = Optional.empty();
+                        }
+
+                        validateIDBroker(client, roleAssignments, identity, cloudFileSystem, singleResourceGroup, resultBuilder);
                     } else if (LOG.equals(cloudIdentityType)) {
                         validateLog(client, identity, logsLocationBase, resultBuilder);
                     }
@@ -80,14 +93,16 @@ public class AzureIDBrokerObjectStorageValidator {
         return resultBuilder.build();
     }
 
-    private void validateIDBroker(AzureClient client, PagedList<RoleAssignmentInner> roleAssignments, Identity identity,
-            CloudAdlsGen2View cloudFileSystem, ValidationResultBuilder resultBuilder) {
+    private void validateIDBroker(AzureClient client, List<RoleAssignmentInner> roleAssignments, Identity identity,
+            CloudAdlsGen2View cloudFileSystem, Optional<ResourceGroup> singleResourceGroup, ValidationResultBuilder resultBuilder) {
         LOGGER.debug(String.format("Validating IDBroker identity %s", identity.principalId()));
 
         Set<Identity> allMappedExistingIdentity = validateAllMappedIdentities(client, cloudFileSystem, resultBuilder);
-        validateRoleAssigment(roleAssignments, resultBuilder, allMappedExistingIdentity);
+
+        validateRoleAssigment(roleAssignments, resultBuilder, Set.of(identity));
         validateRoleAssigmentAndScope(roleAssignments, resultBuilder, identity,
-                List.of("/subscriptions/" + client.getCurrentSubscription().subscriptionId()), false, cloudFileSystem.getCloudIdentityType());
+                getScopesForIDBrokerValidation(client.getCurrentSubscription().subscriptionId(), singleResourceGroup),
+                false, cloudFileSystem.getCloudIdentityType());
 
         List<StorageLocationBase> locations = cloudFileSystem.getLocations();
         if (Objects.nonNull(locations) && !locations.isEmpty()) {
@@ -97,6 +112,13 @@ public class AzureIDBrokerObjectStorageValidator {
         }
         LOGGER.debug("Validating IDBroker identity is finished");
 
+    }
+
+    private List<String> getScopesForIDBrokerValidation(String subscriptionId, Optional<ResourceGroup> singleResourceGroup) {
+        List<String> result = new ArrayList<>();
+        result.add("/subscriptions/" + subscriptionId);
+        singleResourceGroup.ifPresent(rg -> result.add(rg.id()));
+        return result;
     }
 
     private void validateLog(AzureClient client, Identity identity, String logsLocationBase, ValidationResultBuilder resultBuilder) {
@@ -166,7 +188,7 @@ public class AzureIDBrokerObjectStorageValidator {
         return validMappedIdentities;
     }
 
-    private void validateRoleAssigment(PagedList<RoleAssignmentInner> roleAssignments, ValidationResultBuilder resultBuilder, Set<Identity> identities) {
+    private void validateRoleAssigment(List<RoleAssignmentInner> roleAssignments, ValidationResultBuilder resultBuilder, Set<Identity> identities) {
         identities
                 .stream()
                 .dropWhile(mappedIdentity -> roleAssignments
