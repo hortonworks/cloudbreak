@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.base.ResponseStatus;
+import com.sequenceiq.cloudbreak.cloud.model.objectstorage.AzureParameters;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadataRequest;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadataResponse;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateRequest;
@@ -73,7 +74,7 @@ public class AzureObjectStorageConnector implements ObjectStorageConnector {
         ValidationResult.ValidationResultBuilder resultBuilder = new ValidationResult.ValidationResultBuilder();
         resultBuilder.prefix("Cloud Storage validation failed");
         ValidationResult validationResult = azureIDBrokerObjectStorageValidator.validateObjectStorage(
-                client, spiFileSystem, request.getLogsLocationBase(), resultBuilder);
+                client, spiFileSystem, request.getLogsLocationBase(), getSingleResourceGroupName(request), resultBuilder);
         ObjectStorageValidateResponse response;
         if (validationResult.hasError()) {
             response = ObjectStorageValidateResponse.builder()
@@ -86,6 +87,12 @@ public class AzureObjectStorageConnector implements ObjectStorageConnector {
                     .build();
         }
         return response;
+    }
+
+    private String getSingleResourceGroupName(ObjectStorageValidateRequest request) {
+        return Optional.ofNullable(request.getAzure())
+                .map(AzureParameters::getSingleResourceGroupName)
+                .orElse(null);
     }
 
     @Override
