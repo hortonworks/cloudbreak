@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.aws.resource.instance;
 
-import static com.sequenceiq.cloudbreak.cloud.aws.resource.instance.util.SecurityGroupBuilderUtil.SECURITY_GROUP_NAME;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.util.Collections;
@@ -12,6 +11,9 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
+import com.amazonaws.services.ec2.model.DeleteSecurityGroupRequest;
+import com.amazonaws.services.ec2.model.DeleteSecurityGroupResult;
+import com.sequenceiq.cloudbreak.cloud.aws.AwsMethodExecutor;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsNativeModel;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsNativeModelBuilder;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
@@ -42,11 +44,22 @@ public class AwsSecurityGroupResourceBuilder extends AbstractAwsNativeComputeBui
     @Inject
     private SecurityGroupBuilderUtil securityGroupBuilderUtil;
 
+    @Inject
+    private AwsMethodExecutor awsMethodExecutor;
+
     @Override
     public List<CloudResource> create(AwsContext context, long privateId, AuthenticatedContext auth, Group group, Image image) {
         CloudContext cloudContext = auth.getCloudContext();
-        String securityGroupName = getResourceNameService().resourceName(resourceType(), context.getName(), group.getName(), cloudContext.getId());
-        return Collections.singletonList(createNamedResource(resourceType(), securityGroupName));
+        String securityGroupId = group.getSecurity().getCloudSecurityId();
+        List<CloudResource> ret = Collections.emptyList();
+        if (securityGroupId == null) {
+            securityGroupId = getResourceNameService().resourceName(resourceType(), context.getName(), group.getName(), cloudContext.getId());
+            ret = Collections.singletonList(createNamedResource(resourceType(), securityGroupId));
+        } else {
+            LOGGER.info("Security group id exists with id: {}", securityGroupId);
+            context.putParameter(SecurityGroupBuilderUtil.SECURITY_GROUP_ID, securityGroupId);
+        }
+        return ret;
     }
 
     @Override
@@ -56,15 +69,22 @@ public class AwsSecurityGroupResourceBuilder extends AbstractAwsNativeComputeBui
         AwsCloudStackView awsCloudStackView = new AwsCloudStackView(cloudStack);
         ModelContext modelContext = awsModelService.buildDefaultModelContext(ac, cloudStack, null);
         AwsNativeModel awsNativeModel = awsNativeModelBuilder.build(modelContext);
-        Map<String, String> resources = securityGroupBuilderUtil.createSecurityGroupIfNeed(awsCloudStackView, group, amazonEc2Client, ac.getCloudContext(),
-                awsNativeModel);
+        Map<String, String> resources = securityGroupBuilderUtil
+                .createSecurityGroup(awsCloudStackView, group, amazonEc2Client, ac.getCloudContext(), awsNativeModel);
         resources.forEach(context::putParameter);
-        return Collections.singletonList(createNamedResource(resourceType(), resources.get(SECURITY_GROUP_NAME)));
+        LOGGER.info("Security group successfully created: {}", resources);
+        return List.of(CloudResource.builder().cloudResource(buildableResource.get(0))
+                .reference(resources.get(SecurityGroupBuilderUtil.SECURITY_GROUP_ID))
+                .build());
     }
 
     @Override
     public CloudResource delete(AwsContext context, AuthenticatedContext auth, CloudResource resource) throws Exception {
-        return null;
+        AmazonEc2Client amazonEc2Client = context.getAmazonEc2Client();
+        DeleteSecurityGroupRequest request = new DeleteSecurityGroupRequest()
+                .withGroupId(resource.getReference());
+        DeleteSecurityGroupResult result = awsMethodExecutor.execute(() -> amazonEc2Client.deleteSecurityGroup(request), null);
+        return result == null ? null : resource;
     }
 
     @Override

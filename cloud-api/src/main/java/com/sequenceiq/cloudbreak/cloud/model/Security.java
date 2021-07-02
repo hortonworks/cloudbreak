@@ -45,6 +45,7 @@ public class Security {
     public String toString() {
         StringBuilder sb = new StringBuilder("Security{");
         sb.append("rules=").append(rules);
+        sb.append("cloudSecurityIds=").append(cloudSecurityIds);
         sb.append('}');
         return sb.toString();
     }

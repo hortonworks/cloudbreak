@@ -2,15 +2,16 @@ package com.sequenceiq.cloudbreak.cloud.aws.resource.instance.util;
 
 import static com.sequenceiq.cloudbreak.cloud.aws.resource.instance.util.SecurityGroupBuilderUtil.TO_PORT;
 import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -81,30 +82,17 @@ public class SecurityGroupBuilderUtilTest {
     }
 
     @Test
-    public void testSecurityGroupIfNeedWhenCloudSecurityIdsNotEmptyThenCreateSecurityGroupAndIngressButNotEgressCreateCalled() {
+    public void testSecurityGroupWhenCloudSecurityIdsNotEmptyThenCreateSecurityGroupAndIngressButNotEgressCreateCalled() {
         when(group.getSecurity()).thenReturn(mock(Security.class));
-        when(awsCloudStackView.cloudSecurityIds()).thenReturn(emptyList());
         when(resourceNameService.resourceName(any(), any())).thenReturn("secGroupName");
         when(amazonEc2Client.createSecurityGroup(any())).thenReturn(new CreateSecurityGroupResult().withGroupId("groupId"));
         when(awsCloudStackView.network()).thenReturn(awsNetworkView);
-        Map<String, String> actual = underTest.createSecurityGroupIfNeed(awsCloudStackView, group, amazonEc2Client, context, awsNativeModel);
+        Map<String, String> actual = underTest.createSecurityGroup(awsCloudStackView, group, amazonEc2Client, context, awsNativeModel);
 
         Assertions.assertFalse(actual.isEmpty());
         verify(amazonEc2Client, times(1)).createSecurityGroup(any());
         verify(amazonEc2Client, times(0)).addEgress(any());
         verify(amazonEc2Client, times(1)).addIngress(any());
-    }
-
-    @Test
-    public void testSecurityGroupIfNeedWhenCloudSecurityIdsNotEmpty() {
-        String groupId = "groupId";
-        String groupName = "groupName";
-        when(awsCloudStackView.cloudSecurityIds()).thenReturn(singletonList(""));
-        when(amazonEc2Client.describeSecurityGroups(any())).thenReturn(new DescribeSecurityGroupsResult()
-                .withSecurityGroups(new SecurityGroup().withGroupId(groupId).withGroupName(groupName)));
-        Map<String, String> actual = underTest.createSecurityGroupIfNeed(awsCloudStackView, group, amazonEc2Client, context, awsNativeModel);
-        Assertions.assertTrue(actual.containsKey("SECURITY_GROUP_ID"));
-        Assertions.assertTrue(actual.containsKey("SECURITY_GROUP_NAME"));
     }
 
     @Test
@@ -186,8 +174,8 @@ public class SecurityGroupBuilderUtilTest {
         Assertions.assertEquals(1, value.getIpPermissions().size());
         IpPermission permission = new IpPermission()
                 .withIpProtocol("tcp")
-                .withFromPort(Integer.parseInt("22"))
-                .withToPort(Integer.parseInt("22"))
+                .withFromPort(22)
+                .withToPort(22)
                 .withIpv4Ranges(new IpRange().withCidrIp("0.0.0.0/10"));
         Assertions.assertEquals(permission, value.getIpPermissions().get(0));
     }
@@ -212,10 +200,48 @@ public class SecurityGroupBuilderUtilTest {
         Assertions.assertEquals(1, value.getIpPermissions().size());
         IpPermission permission = new IpPermission()
                 .withIpProtocol("tcp")
-                .withFromPort(Integer.parseInt("22"))
-                .withToPort(Integer.parseInt("22"))
+                .withFromPort(22)
+                .withToPort(22)
                 .withIpv4Ranges(new IpRange().withCidrIp("0.0.0.0/10"));
         Assertions.assertEquals(permission, value.getIpPermissions().get(0));
+    }
+
+    @Test
+    public void testIngressWhenVpcSubnetNotEmpty() {
+        Security security = mock(Security.class);
+
+        ArgumentCaptor<AuthorizeSecurityGroupIngressRequest> ingressCaptor = ArgumentCaptor.forClass(AuthorizeSecurityGroupIngressRequest.class);
+
+        when(security.getRules()).thenReturn(List.of());
+        when(group.getSecurity()).thenReturn(security);
+        when(awsNativeModel.getVpcSubnet()).thenReturn(List.of("0.0.0.0/10"));
+
+        underTest.ingress(group, amazonEc2Client, awsNativeModel, "groupId");
+
+        verify(amazonEc2Client).addIngress(ingressCaptor.capture());
+
+        AuthorizeSecurityGroupIngressRequest value = ingressCaptor.getValue();
+        //we need to sort, because we need to guaranteed a fix order to check the elements
+        List<IpPermission> sorted = value.getIpPermissions().stream().sorted(Comparator.comparing(IpPermission::getIpProtocol)).collect(Collectors.toList());
+
+        IpPermission permission = new IpPermission()
+                .withIpProtocol("icmp")
+                .withFromPort(-1)
+                .withToPort(-1)
+                .withIpv4Ranges(new IpRange().withCidrIp("0.0.0.0/10"));
+        Assertions.assertEquals(permission, sorted.get(0));
+        IpPermission permission1 = new IpPermission()
+                .withIpProtocol("tcp")
+                .withFromPort(0)
+                .withToPort(TO_PORT)
+                .withIpv4Ranges(new IpRange().withCidrIp("0.0.0.0/10"));
+        Assertions.assertEquals(permission1, sorted.get(1));
+        IpPermission permission2 = new IpPermission()
+                .withIpProtocol("udp")
+                .withFromPort(0)
+                .withToPort(TO_PORT)
+                .withIpv4Ranges(new IpRange().withCidrIp("0.0.0.0/10"));
+        Assertions.assertEquals(permission2, sorted.get(2));
     }
 
     @Test
@@ -296,7 +322,7 @@ public class SecurityGroupBuilderUtilTest {
 
     @Test
     public void testEgressWhenOutboundInternetTrafficDisabledAndPrefixListNotEmptyButVpcCidrsEmptyButContainsAlready() {
-        IpPermission ipPermission = new IpPermission() .withIpProtocol("-1")
+        IpPermission ipPermission = new IpPermission().withIpProtocol("-1")
                 .withFromPort(0)
                 .withToPort(TO_PORT)
                 .withPrefixListIds(new PrefixListId().withPrefixListId("id1"));
