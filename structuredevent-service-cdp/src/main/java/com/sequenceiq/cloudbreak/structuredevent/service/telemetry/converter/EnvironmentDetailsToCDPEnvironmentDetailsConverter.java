@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -18,6 +19,7 @@ import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.Environme
 import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.parameter.dto.AzureParametersDto;
+import com.sequenceiq.environment.parameter.dto.AzureResourceEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
 
 @Component
@@ -96,6 +98,10 @@ public class EnvironmentDetailsToCDPEnvironmentDetailsConverter {
             if (azureParametersDto != null) {
                 builder.setSingleResourceGroup(
                         azureParametersDto.getAzureResourceGroupDto().getResourceGroupUsagePattern().isSingleResourceGroup());
+                Optional<String> encryptionKeyUrl = Optional.of(azureParametersDto)
+                        .map(AzureParametersDto::getAzureResourceEncryptionParametersDto)
+                        .map(AzureResourceEncryptionParametersDto::getEncryptionKeyUrl);
+                builder.setResourceEncryptionEnabled(encryptionKeyUrl.isPresent());
             }
         }
         return builder.build();

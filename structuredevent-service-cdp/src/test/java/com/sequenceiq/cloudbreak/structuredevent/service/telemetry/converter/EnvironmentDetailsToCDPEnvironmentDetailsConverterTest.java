@@ -24,6 +24,7 @@ import com.sequenceiq.environment.network.dao.domain.RegistrationType;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.parameter.dto.AwsParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureParametersDto;
+import com.sequenceiq.environment.parameter.dto.AzureResourceEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureResourceGroupDto;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
 import com.sequenceiq.environment.parameter.dto.ResourceGroupUsagePattern;
@@ -102,6 +103,43 @@ public class EnvironmentDetailsToCDPEnvironmentDetailsConverterTest {
         UsageProto.CDPEnvironmentDetails cdpEnvironmentDetails = underTest.convert(environmentDetails);
 
         Assertions.assertFalse(cdpEnvironmentDetails.getAzureDetails().getSingleResourceGroup());
+    }
+
+    @Test
+    public void testConversionResourceEncryptionEnabledWhenAzureUsingResourceEncryptionEnabledShouldReturnResourceEncryptionEnabledTrue() {
+        ParametersDto parametersDto = ParametersDto.builder()
+                .withAzureParameters(AzureParametersDto.builder()
+                        .withResourceGroup(AzureResourceGroupDto.builder()
+                                .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_SINGLE)
+                                .build())
+                        .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder()
+                                .withEncryptionKeyUrl("dummyEncryptionKeyUrl")
+                                .build())
+                        .build())
+                .build();
+
+        when(environmentDetails.getParameters()).thenReturn(parametersDto);
+
+        UsageProto.CDPEnvironmentDetails cdpEnvironmentDetails = underTest.convert(environmentDetails);
+
+        Assertions.assertTrue(cdpEnvironmentDetails.getAzureDetails().getResourceEncryptionEnabled());
+    }
+
+    @Test
+    public void testConversionResourceEncryptionEnabledWhenAzureNOTResourceEncryptionEnabledShouldReturnResourceEncryptionEnabledFalse() {
+        ParametersDto parametersDto = ParametersDto.builder()
+                .withAzureParameters(AzureParametersDto.builder()
+                        .withResourceGroup(AzureResourceGroupDto.builder()
+                                .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_SINGLE)
+                                .build())
+                        .build())
+                .build();
+
+        when(environmentDetails.getParameters()).thenReturn(parametersDto);
+
+        UsageProto.CDPEnvironmentDetails cdpEnvironmentDetails = underTest.convert(environmentDetails);
+
+        Assertions.assertFalse(cdpEnvironmentDetails.getAzureDetails().getResourceEncryptionEnabled());
     }
 
     @Test

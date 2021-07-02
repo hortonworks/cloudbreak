@@ -759,7 +759,10 @@ message CDPFreeIPADetails {
 
 // Azure specific environment details
 message CDPEnvironmentAzureDetails {
+  // True if user provides a resource group, allowing CDP to create resources only within the specified resource group
   bool singleResourceGroup = 1;
+  // True if user provides encryption key URL to encrypt Azure managed disks with CMK
+  bool resourceEncryptionEnabled = 2;
 }
 
 // AWS specific environment details
