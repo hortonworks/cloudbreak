@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.view;
 
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
+import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonElasticLoadBalancingClient;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 
 public class AuthenticatedContextView {
@@ -26,5 +27,9 @@ public class AuthenticatedContextView {
 
     public AwsCredentialView getAwsCredentialView() {
         return new AwsCredentialView(authenticatedContext.getCloudCredential());
+    }
+
+    public AmazonElasticLoadBalancingClient getElasticLoadBalancingClient() {
+        return authenticatedContext.getParameter(AmazonElasticLoadBalancingClient.class);
     }
 }

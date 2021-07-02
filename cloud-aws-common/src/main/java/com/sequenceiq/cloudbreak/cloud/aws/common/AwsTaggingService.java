@@ -48,6 +48,14 @@ public class AwsTaggingService {
         return tags;
     }
 
+    public Collection<com.amazonaws.services.elasticloadbalancingv2.model.Tag> prepareElasticLoadBalancingTags(Map<String, String> userDefinedTags) {
+        Collection<com.amazonaws.services.elasticloadbalancingv2.model.Tag> tags = new ArrayList<>();
+        tags.addAll(userDefinedTags.entrySet().stream()
+                .map(entry -> prepareElasticLoadBalancingTag(entry.getKey(), entry.getValue()))
+                .collect(Collectors.toList()));
+        return tags;
+    }
+
     public Collection<com.amazonaws.services.elasticfilesystem.model.Tag> prepareEfsTags(Map<String, String> userDefinedTags) {
         Collection<com.amazonaws.services.elasticfilesystem.model.Tag> tags = new ArrayList<>();
         tags.addAll(userDefinedTags.entrySet().stream()
@@ -114,5 +122,9 @@ public class AwsTaggingService {
 
     private Optional<InstanceBlockDeviceMapping> getRootVolumeId(com.amazonaws.services.ec2.model.Instance instance) {
         return instance.getBlockDeviceMappings().stream().filter(mapping -> mapping.getDeviceName().equals(instance.getRootDeviceName())).findFirst();
+    }
+
+    private com.amazonaws.services.elasticloadbalancingv2.model.Tag prepareElasticLoadBalancingTag(String key, String value) {
+        return new com.amazonaws.services.elasticloadbalancingv2.model.Tag().withKey(key).withValue(value);
     }
 }

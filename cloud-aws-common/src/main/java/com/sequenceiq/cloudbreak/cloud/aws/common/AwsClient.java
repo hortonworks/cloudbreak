@@ -91,9 +91,15 @@ public abstract class AwsClient {
         try {
             AuthenticatedContextView authenticatedContextView = new AuthenticatedContextView(authenticatedContext);
             String region = authenticatedContextView.getRegion();
-            AmazonEc2Client amazonEC2Client = region != null
-                    ? createEc2Client(authenticatedContextView.getAwsCredentialView(), region)
-                    : createEc2Client(authenticatedContextView.getAwsCredentialView());
+            AwsCredentialView awsCredentialView = authenticatedContextView.getAwsCredentialView();
+            AmazonEc2Client amazonEC2Client = null;
+            if (region != null) {
+                amazonEC2Client = createEc2Client(awsCredentialView, region);
+                AmazonElasticLoadBalancingClient loadBalancingClient = createElasticLoadBalancingClient(awsCredentialView, region);
+                authenticatedContext.putParameter(AmazonElasticLoadBalancingClient.class, loadBalancingClient);
+            } else {
+                amazonEC2Client = createEc2Client(awsCredentialView);
+            }
             authenticatedContext.putParameter(AmazonEc2Client.class, amazonEC2Client);
         } catch (AmazonServiceException e) {
             throw new CredentialVerificationException(e.getErrorMessage(), e);
