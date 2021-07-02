@@ -109,15 +109,15 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
     private GcpLabelUtil gcpLabelUtil;
 
     @Override
-    public List<CloudResource> create(GcpContext context, long privateId, AuthenticatedContext auth, Group group, Image image) {
+    public List<CloudResource> create(GcpContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group, Image image) {
         CloudContext cloudContext = auth.getCloudContext();
         String resourceName = getResourceNameService().resourceName(resourceType(), cloudContext.getName(), group.getName(), privateId);
         return singletonList(createNamedResource(resourceType(), resourceName));
     }
 
     @Override
-    public List<CloudResource> build(GcpContext context, long privateId, AuthenticatedContext auth, Group group, List<CloudResource> buildableResource,
-            CloudStack cloudStack) throws Exception {
+    public List<CloudResource> build(GcpContext context, CloudInstance cloudInstance, long privateId, AuthenticatedContext auth,
+            Group group, List<CloudResource> buildableResource, CloudStack cloudStack) throws Exception {
         InstanceTemplate template = group.getReferenceInstanceTemplate();
         String projectId = context.getProjectId();
         Location location = context.getLocation();

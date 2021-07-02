@@ -87,7 +87,7 @@ public class ResourceCreationCallable implements Callable<ResourceRequestResult<
                 for (ComputeResourceBuilder<ResourceBuilderContext> builder : compute) {
                     LOGGER.info("Start building '{} ({})' resources of '{}' instance group of '{}' stack", builder.resourceType(),
                             builder.getClass().getSimpleName(), group.getName(), stackName);
-                    List<CloudResource> cloudResources = builder.create(context, privateId, auth, group, cloudStack.getImage());
+                    List<CloudResource> cloudResources = builder.create(context, instance, privateId, auth, group, cloudStack.getImage());
                     if (!CollectionUtils.isEmpty(cloudResources)) {
                         buildableResources.addAll(cloudResources);
                         persistResources(auth, cloudResources);
@@ -97,7 +97,7 @@ public class ResourceCreationCallable implements Callable<ResourceRequestResult<
                             throw new CancellationException(format("Building of %s has been cancelled", cloudResources));
                         }
 
-                        List<CloudResource> resources = builder.build(context, privateId, auth, group, cloudResources, cloudStack);
+                        List<CloudResource> resources = builder.build(context, instance, privateId, auth, group, cloudResources, cloudStack);
                         updateResource(auth, resources);
                         context.addComputeResources(privateId, resources);
 

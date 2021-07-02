@@ -74,7 +74,7 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
     private AzureResourceGroupMetadataProvider azureResourceGroupMetadataProvider;
 
     @Override
-    public List<CloudResource> create(AzureContext context, long privateId, AuthenticatedContext auth, Group group, Image image) {
+    public List<CloudResource> create(AzureContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group, Image image) {
         LOGGER.info("Creating volume resources");
         List<CloudResource> computeResources = context.getComputeResources(privateId);
         if (Objects.isNull(computeResources) || computeResources.isEmpty()) {
@@ -143,7 +143,7 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
     }
 
     @Override
-    public List<CloudResource> build(AzureContext context, long privateId, AuthenticatedContext auth, Group group,
+    public List<CloudResource> build(AzureContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group,
             List<CloudResource> buildableResource, CloudStack cloudStack) throws Exception {
         LOGGER.info("Create volumes on provider");
         AzureClient client = getAzureClient(auth);

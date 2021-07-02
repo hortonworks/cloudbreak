@@ -79,6 +79,7 @@ import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
+import com.sequenceiq.cloudbreak.service.multiaz.MultiAzCalculatorService;
 import com.sequenceiq.cloudbreak.service.recipe.RecipeService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.StackViewService;
@@ -148,6 +149,9 @@ public class StackCreatorService {
 
     @Inject
     private CredentialConverter credentialConverter;
+
+    @Inject
+    private MultiAzCalculatorService multiAzCalculatorService;
 
     @Inject
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
@@ -234,7 +238,7 @@ public class StackCreatorService {
                             "Validate cluster rds and autotls took {} ms");
                 }
 
-                measure(() -> fillInstanceMetadata(stack),
+                measure(() -> fillInstanceMetadata(environment, stack),
                         LOGGER,
                         "Fill up instance metadata took {} ms");
 
@@ -363,7 +367,7 @@ public class StackCreatorService {
         }
     }
 
-    void fillInstanceMetadata(Stack stack) {
+    void fillInstanceMetadata(DetailedEnvironmentResponse environment, Stack stack) {
         long privateIdNumber = 0;
         //Gateway HostGroups are sorted first to start with privateIdNumber 0.
         List<InstanceGroup> sortedInstanceGroups = stack.getInstanceGroups().stream()
@@ -374,6 +378,9 @@ public class StackCreatorService {
                 instanceMetaData.setPrivateId(privateIdNumber++);
                 instanceMetaData.setInstanceStatus(InstanceStatus.REQUESTED);
             }
+            multiAzCalculatorService.calculateByRoundRobin(
+                    multiAzCalculatorService.prepareSubnetAzMap(environment),
+                    instanceGroup);
         }
     }
 

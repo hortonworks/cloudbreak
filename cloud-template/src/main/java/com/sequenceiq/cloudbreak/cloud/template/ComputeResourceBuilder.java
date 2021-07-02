@@ -63,7 +63,7 @@ public interface ComputeResourceBuilder<C extends ResourceBuilderContext> extend
      * @return Returns the buildable cloud resources. If this resource builder is responsible to create the attached disks for an instance it is expected
      * to return multiple cloud resources. If this builder is responsible for the instance creation it should return 1 resource.
      */
-    List<CloudResource> create(C context, long privateId, AuthenticatedContext auth, Group group, Image image);
+    List<CloudResource> create(C context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group, Image image);
 
     /**
      * This method will be called after the {@link #create(ResourceBuilderContext, long, AuthenticatedContext, Group, Image)} method with the constructed
@@ -84,8 +84,8 @@ public interface ComputeResourceBuilder<C extends ResourceBuilderContext> extend
      * will be passed along with the extra information if it's provided so later it can be used to track the status of the deployment.
      * @throws Exception Exception can be thrown if the resource creation request fails for some reason and then the resources will be rolled back.
      */
-    List<CloudResource> build(C context, long privateId, AuthenticatedContext auth, Group group, List<CloudResource> buildableResource, CloudStack cloudStack)
-            throws Exception;
+    List<CloudResource> build(C context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group,
+            List<CloudResource> buildableResource, CloudStack cloudStack) throws Exception;
 
     /**
      * This method will be called if an instance stop/start is requested to check the state of the instance.

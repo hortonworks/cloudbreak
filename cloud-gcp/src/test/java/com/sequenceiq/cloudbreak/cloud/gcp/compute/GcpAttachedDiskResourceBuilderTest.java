@@ -108,6 +108,8 @@ public class GcpAttachedDiskResourceBuilderTest {
 
     private Group group;
 
+    private CloudInstance cloudInstance;
+
     private List<CloudResource> buildableResource;
 
     private CloudStack cloudStack;
@@ -140,6 +142,11 @@ public class GcpAttachedDiskResourceBuilderTest {
         CloudCredential cloudCredential = new CloudCredential(privateCrn, "credentialname");
         cloudCredential.putParameter("projectId", "projectId");
 
+        cloudInstance = new CloudInstance(instanceId,
+                new InstanceTemplate("flavor", "group", 1L, new ArrayList<>(), InstanceStatus.CREATE_REQUESTED,
+                        new HashMap<>(), 1L, "img", TemporaryStorage.ATTACHED_VOLUMES),
+                new InstanceAuthentication("pub", "pub", "cb"),
+                "subnet1", "az1");
         Location location = Location.location(Region.region("region"), AvailabilityZone.availabilityZone("az"));
 
         context = new GcpContext(cloudContext.getName(), location, "projectId", "serviceAccountId", compute, false, 30, false);
@@ -213,7 +220,7 @@ public class GcpAttachedDiskResourceBuilderTest {
             disk.setDiskEncryptionKey(encryptionKey);
             return invocation;
         }).when(customGcpDiskEncryptionService).addEncryptionKeyToDisk(any(InstanceTemplate.class), diskCaptor.capture());
-        List<CloudResource> build = underTest.build(context, privateId, auth, group, buildableResource, cloudStack);
+        List<CloudResource> build = underTest.build(context, cloudInstance, privateId, auth, group, buildableResource, cloudStack);
 
         assertNotNull(build);
         assertEquals(1, build.size());

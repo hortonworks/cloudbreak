@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
@@ -27,8 +28,8 @@ public class OpenStackPortBuilder extends AbstractOpenStackComputeResourceBuilde
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackPortBuilder.class);
 
     @Override
-    public List<CloudResource> build(OpenStackContext context, long privateId, AuthenticatedContext auth, Group group,
-            List<CloudResource> buildableResource, CloudStack cloudStack) {
+    public List<CloudResource> build(OpenStackContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group,
+        List<CloudResource> buildableResource, CloudStack cloudStack) {
         CloudResource resource = buildableResource.get(0);
         try {
             OSClient<?> osClient = createOSClient(auth);

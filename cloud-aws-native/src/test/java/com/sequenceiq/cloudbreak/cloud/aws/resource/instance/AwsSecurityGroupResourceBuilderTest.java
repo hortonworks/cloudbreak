@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.service.AwsResourceNameService
 import com.sequenceiq.cloudbreak.cloud.aws.resource.instance.util.SecurityGroupBuilderUtil;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
@@ -83,6 +84,9 @@ public class AwsSecurityGroupResourceBuilderTest {
     private CloudStack cloudStack;
 
     @Mock
+    private CloudInstance cloudInstance;
+
+    @Mock
     private ModelContext modelContext;
 
     @Test
@@ -93,7 +97,7 @@ public class AwsSecurityGroupResourceBuilderTest {
         when(ac.getCloudContext()).thenReturn(cloudContext);
         when(security.getCloudSecurityId()).thenReturn(null);
 
-        List<CloudResource> actual = underTest.create(awsContext, 0, ac, group, image);
+        List<CloudResource> actual = underTest.create(awsContext, cloudInstance, 0, ac, group, image);
         Assertions.assertEquals(actual.get(0).getName(), "groupId");
     }
 
@@ -103,7 +107,7 @@ public class AwsSecurityGroupResourceBuilderTest {
         when(ac.getCloudContext()).thenReturn(cloudContext);
         when(security.getCloudSecurityId()).thenReturn("sg-id");
 
-        List<CloudResource> actual = underTest.create(awsContext, 0, ac, group, image);
+        List<CloudResource> actual = underTest.create(awsContext, cloudInstance, 0, ac, group, image);
         Assertions.assertTrue(actual.isEmpty());
         verify(awsContext).putParameter(SecurityGroupBuilderUtil.SECURITY_GROUP_ID, "sg-id");
     }
@@ -126,7 +130,7 @@ public class AwsSecurityGroupResourceBuilderTest {
         when(securityGroupBuilderUtil.createSecurityGroup(any(), eq(group), eq(amazonEc2Client), eq(cloudContext), eq(awsNativeModel)))
                 .thenReturn(resources);
 
-        List<CloudResource> actual = underTest.build(awsContext, 0, ac, group, List.of(resource), cloudStack);
+        List<CloudResource> actual = underTest.build(awsContext, cloudInstance, 0, ac, group, List.of(resource), cloudStack);
         Assertions.assertEquals("groupId", actual.get(0).getReference());
     }
 

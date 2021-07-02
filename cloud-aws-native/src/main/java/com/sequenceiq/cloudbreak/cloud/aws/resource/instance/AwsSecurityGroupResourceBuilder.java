@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.resource.instance.util.SecurityGroupB
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCloudStackView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
@@ -48,7 +49,7 @@ public class AwsSecurityGroupResourceBuilder extends AbstractAwsNativeComputeBui
     private AwsMethodExecutor awsMethodExecutor;
 
     @Override
-    public List<CloudResource> create(AwsContext context, long privateId, AuthenticatedContext auth, Group group, Image image) {
+    public List<CloudResource> create(AwsContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group, Image image) {
         CloudContext cloudContext = auth.getCloudContext();
         String securityGroupId = group.getSecurity().getCloudSecurityId();
         List<CloudResource> ret = Collections.emptyList();
@@ -63,8 +64,8 @@ public class AwsSecurityGroupResourceBuilder extends AbstractAwsNativeComputeBui
     }
 
     @Override
-    public List<CloudResource> build(AwsContext context, long privateId, AuthenticatedContext ac, Group group, List<CloudResource> buildableResource,
-            CloudStack cloudStack) throws Exception {
+    public List<CloudResource> build(AwsContext context, CloudInstance instance, long privateId, AuthenticatedContext ac,
+            Group group, List<CloudResource> buildableResource, CloudStack cloudStack) throws Exception {
         AmazonEc2Client amazonEc2Client = context.getAmazonEc2Client();
         AwsCloudStackView awsCloudStackView = new AwsCloudStackView(cloudStack);
         ModelContext modelContext = awsModelService.buildDefaultModelContext(ac, cloudStack, null);

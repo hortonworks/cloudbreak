@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.controller.validation.network;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
 
 import java.util.HashMap;
@@ -16,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.network.InstanceGroupNetwork;
@@ -33,6 +35,7 @@ public class MultiAzValidatorTest {
     @BeforeEach
     void setUp() {
         ReflectionTestUtils.setField(underTest, "supportedMultiAzVariants", Set.of("AWS_NATIVE"));
+        ReflectionTestUtils.setField(underTest, "supportedInstanceMetadataPlatforms", Set.of("AWS"));
         underTest.initSupportedVariants();
     }
 
@@ -78,6 +81,28 @@ public class MultiAzValidatorTest {
         );
         underTest.validateMultiAzForStack(variant, instanceGroups, builder);
         Mockito.verify(builder, Mockito.times(1)).error(anyString());
+    }
+
+    @Test
+    public void testSupportedForInstanceMetadataGenerationWhenPlatformSupportedShouldReturnTrue() {
+        InstanceGroup instanceGroup = new InstanceGroup();
+        InstanceGroupNetwork instanceGroupNetwork = new InstanceGroupNetwork();
+        instanceGroupNetwork.setCloudPlatform(CloudPlatform.AWS.name());
+        instanceGroup.setInstanceGroupNetwork(instanceGroupNetwork);
+
+        boolean supported = underTest.supportedForInstanceMetadataGeneration(instanceGroup);
+        assertEquals(true, supported);
+    }
+
+    @Test
+    public void testNotSupportedForInstanceMetadataGenerationWhenPlatformSupportedShouldReturnFalse() {
+        InstanceGroup instanceGroup = new InstanceGroup();
+        InstanceGroupNetwork instanceGroupNetwork = new InstanceGroupNetwork();
+        instanceGroupNetwork.setCloudPlatform(CloudPlatform.AZURE.name());
+        instanceGroup.setInstanceGroupNetwork(instanceGroupNetwork);
+
+        boolean supported = underTest.supportedForInstanceMetadataGeneration(instanceGroup);
+        assertEquals(false, supported);
     }
 
     private InstanceGroup instanceGroup(Set<String> subnetIds) {

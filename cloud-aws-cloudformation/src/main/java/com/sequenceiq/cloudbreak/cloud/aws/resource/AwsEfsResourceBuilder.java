@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.common.context.AwsContext;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEfsAttributes;
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
@@ -64,7 +65,7 @@ public class AwsEfsResourceBuilder extends AbstractAwsComputeBuilder {
     private AwsCloudFormationClient awsClient;
 
     @Override
-    public List<CloudResource> create(AwsContext context, long privateId, AuthenticatedContext auth, Group group, Image image) {
+    public List<CloudResource> create(AwsContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group, Image image) {
         LOGGER.debug("Create EFS resources");
 
         // TODO: We should create EFS using CloudFormation. And may create EFS related resources here.
@@ -81,7 +82,7 @@ public class AwsEfsResourceBuilder extends AbstractAwsComputeBuilder {
     }
 
     @Override
-    public List<CloudResource> build(AwsContext context, long privateId, AuthenticatedContext auth, Group group,
+    public List<CloudResource> build(AwsContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group,
             List<CloudResource> buildableResource, CloudStack cloudStack) throws Exception {
         LOGGER.debug("Create EFS on provider" + buildableResource.stream().map(CloudResource::getName).collect(Collectors.toList()));
         AmazonEfsClient client = getAmazonEfsClient(auth);

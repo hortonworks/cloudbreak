@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.network.InstanceGroupNetwork;
@@ -29,10 +30,20 @@ public class MultiAzValidator {
     @Value("${cb.multiaz.supported.variant:AWS_NATIVE}")
     private Set<String> supportedMultiAzVariants;
 
+    @Value("${cb.multiaz.supported.instancemetadata.platforms:AWS,GCP,AZURE,YARN}")
+    private Set<String> supportedInstanceMetadataPlatforms;
+
     @PostConstruct
     public void initSupportedVariants() {
         if (supportedMultiAzVariants.isEmpty()) {
             supportedMultiAzVariants = Set.of(AWS_NATIVE_VARIANT.variant().value());
+        }
+        if (supportedInstanceMetadataPlatforms.isEmpty()) {
+            supportedInstanceMetadataPlatforms = Set.of(
+                    CloudPlatform.AWS.name(),
+                    CloudPlatform.GCP.name(),
+                    CloudPlatform.AZURE.name(),
+                    CloudPlatform.YARN.name());
         }
     }
 
@@ -46,6 +57,13 @@ public class MultiAzValidator {
                 validationBuilder.error(String.format("Multiple Availability Zone feature is not supported for %s variant", variant));
             }
         }
+    }
+
+    public boolean supportedForInstanceMetadataGeneration(InstanceGroup instanceGroup) {
+        if (instanceGroup.getInstanceGroupNetwork() != null) {
+            return supportedInstanceMetadataPlatforms.contains(instanceGroup.getInstanceGroupNetwork().cloudPlatform());
+        }
+        return false;
     }
 
     private Set<String> collectSubnetIds(Iterable<InstanceGroup> instanceGroups) {
