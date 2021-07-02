@@ -34,6 +34,7 @@ import com.sequenceiq.sdx.api.model.AdvertisedRuntime;
 import com.sequenceiq.sdx.api.model.RangerCloudIdentitySyncStatus;
 import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
+import com.sequenceiq.sdx.api.model.SdxClusterResizeRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxCustomClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
@@ -104,6 +105,12 @@ public interface SdxEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "delete SDX cluster", produces = "application/json", nickname = "deleteSdx")
     FlowIdentifier delete(@PathParam("name") String name, @QueryParam("forced") @DefaultValue("false") Boolean forced);
+
+    @POST
+    @Path("{name}/resize")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Re-size SDX cluster", produces = "application/json", nickname = "resizeSdx")
+    SdxClusterResponse resize(@PathParam("name") String name, @Valid SdxClusterResizeRequest resizeSdxClusterRequest);
 
     @DELETE
     @Path("/crn/{clusterCrn}")

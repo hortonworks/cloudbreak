@@ -37,6 +37,7 @@ public enum AuthorizationResourceAction {
     CREATE_CLUSTER_TEMPLATE("datahub/createClusterTemplate", AuthorizationResourceType.CLUSTER_TEMPLATE),
     GET_OPERATION_STATUS("environments/getFreeipaOperationStatus", AuthorizationResourceType.ENVIRONMENT),
     CREATE_DATALAKE("datalake/createDatalake", AuthorizationResourceType.DATALAKE),
+    RESIZE_DATALAKE("datalake/resizeDatalake", AuthorizationResourceType.DATALAKE),
     DESCRIBE_DATALAKE("datalake/describeDatalake", AuthorizationResourceType.DATALAKE),
     DESCRIBE_DETAILED_DATALAKE("datalake/describeDetailedDatalake", AuthorizationResourceType.DATALAKE),
     DELETE_DATALAKE("datalake/deleteDatalake", AuthorizationResourceType.DATALAKE),

@@ -27,6 +27,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CONCLUS
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_METRICS_DATABUS_PROCESSING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_NODESTATUS_CHECK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_BACKUP_ON_UPGRADE;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATA_LAKE_LIGHT_TO_MEDIUM_MIGRATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_METRICS_DATABUS_PROCESSING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_AWS_EFS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_LOAD_BALANCER;
@@ -351,6 +352,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.datalake.backup.on.upgrade.enable}")
     private boolean datalakeBackupOnUpgrade;
+
+    @Value("${auth.mock.datalake.light.to.medium.migration.enable}")
+    private boolean datalakeLightToMediumMigration;
 
     @Value("${auth.mock.cm.sync.command.poller.enable}")
     private boolean cmSyncCommandPollerEnabled;
@@ -718,6 +722,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (datalakeBackupOnUpgrade) {
             builder.addEntitlements(createEntitlement(CDP_DATALAKE_BACKUP_ON_UPGRADE));
+        }
+        if (datalakeLightToMediumMigration) {
+            builder.addEntitlements(createEntitlement(DATA_LAKE_LIGHT_TO_MEDIUM_MIGRATION));
         }
         if (cmSyncCommandPollerEnabled) {
             builder.addEntitlements(createEntitlement(CDP_USE_CM_SYNC_COMMAND_POLLER));
