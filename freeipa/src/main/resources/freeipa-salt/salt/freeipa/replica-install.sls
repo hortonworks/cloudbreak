@@ -22,3 +22,4 @@ install-freeipa-replica:
     - require:
         - file: /opt/salt/scripts/freeipa_replica_install.sh
         - file: /etc/resolv.conf.install
+        - file: /opt/salt/scripts/initdnarange.py
