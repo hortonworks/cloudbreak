@@ -114,6 +114,9 @@ public class SdxCluster implements AccountIdAwareResource {
     @Column(name = "sdx_cluster_service_version")
     private String sdxClusterServiceVersion;
 
+    @Column(nullable = false)
+    private boolean detached;
+
     public Long getId() {
         return id;
     }
@@ -343,6 +346,14 @@ public class SdxCluster implements AccountIdAwareResource {
         this.sdxClusterServiceVersion = sdxClusterServiceVersion;
     }
 
+    public boolean isDetached() {
+        return detached;
+    }
+
+    public void setDetached(boolean detached) {
+        this.detached = detached;
+    }
+
     //CHECKSTYLE:OFF
     @Override
     public boolean equals(Object o) {
@@ -364,6 +375,7 @@ public class SdxCluster implements AccountIdAwareResource {
                 Objects.equals(stackRequest, that.stackRequest) &&
                 Objects.equals(stackRequestToCloudbreak, that.stackRequestToCloudbreak) &&
                 Objects.equals(deleted, that.deleted) &&
+                Objects.equals(detached, that.detached) &&
                 Objects.equals(created, that.created) &&
                 Objects.equals(databaseCrn, that.databaseCrn) &&
                 Objects.equals(cloudStorageBaseLocation, that.cloudStorageBaseLocation) &&
@@ -389,6 +401,7 @@ public class SdxCluster implements AccountIdAwareResource {
                 ", envName='" + envName + '\'' +
                 ", envCrn='" + envCrn + '\'' +
                 ", runtime='" + runtime + '\'' +
+                ", Detached='" + detached + '\'' +
                 ", clusterShape=" + clusterShape +
                 ", createDatabase=" + createDatabase +
                 ", cloudStorageBaseLocation='" + cloudStorageBaseLocation + '\'' +

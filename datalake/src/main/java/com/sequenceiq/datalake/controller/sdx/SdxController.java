@@ -55,10 +55,9 @@ import com.sequenceiq.sdx.api.model.AdvertisedRuntime;
 import com.sequenceiq.sdx.api.model.RangerCloudIdentitySyncStatus;
 import com.sequenceiq.sdx.api.model.SdxBackupResponse;
 import com.sequenceiq.sdx.api.model.SdxBackupStatusResponse;
-import com.sequenceiq.sdx.api.model.SdxRestoreResponse;
-import com.sequenceiq.sdx.api.model.SdxRestoreStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
+import com.sequenceiq.sdx.api.model.SdxClusterResizeRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxCustomClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxDatabaseBackupResponse;
@@ -66,6 +65,8 @@ import com.sequenceiq.sdx.api.model.SdxDatabaseBackupStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRestoreResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRestoreStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
+import com.sequenceiq.sdx.api.model.SdxRestoreResponse;
+import com.sequenceiq.sdx.api.model.SdxRestoreStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxValidateCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SetRangerCloudIdentityMappingRequest;
 
@@ -139,6 +140,19 @@ public class SdxController implements SdxEndpoint {
     }
 
     @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.RESIZE_DATALAKE)
+    public SdxClusterResponse resize(String name, SdxClusterResizeRequest resizeSdxClusterRequest) {
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        Pair<SdxCluster, FlowIdentifier> result = sdxService.resizeSdx(userCrn, name, resizeSdxClusterRequest);
+        SdxCluster sdxCluster = result.getLeft();
+        metricService.incrementMetricCounter(MetricType.CUSTOM_SDX_REQUESTED, sdxCluster);
+        SdxClusterResponse sdxClusterResponse = sdxClusterConverter.sdxClusterToResponse(sdxCluster);
+        sdxClusterResponse.setName(sdxCluster.getClusterName());
+        sdxClusterResponse.setFlowIdentifier(result.getRight());
+        return null;
+    }
+
+    @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_ENVIRONMENT)
     @CheckPermissionByRequestProperty(path = "credentialCrn", type = CRN, action = DESCRIBE_CREDENTIAL)
     public ObjectStorageValidateResponse validateCloudStorage(@ValidStackNameFormat @ValidStackNameLength String clusterName,
@@ -181,6 +195,7 @@ public class SdxController implements SdxEndpoint {
     public List<SdxClusterResponse> list(@FilterParam(DataLakeFiltering.ENV_NAME) String envName) {
         List<SdxCluster> sdxClusters = dataLakeFiltering.filterDataLakesByEnvNameOrAll(AuthorizationResourceAction.DESCRIBE_DATALAKE, envName);
         return sdxClusters.stream()
+                .filter(sdx -> !sdx.isDetached())
                 .map(sdx -> sdxClusterConverter.sdxClusterToResponse(sdx))
                 .collect(Collectors.toList());
     }
@@ -191,6 +206,7 @@ public class SdxController implements SdxEndpoint {
             @TenantAwareParam String envCrn) {
         List<SdxCluster> sdxClusters = dataLakeFiltering.filterDataLakesByEnvCrn(AuthorizationResourceAction.DESCRIBE_DATALAKE, envCrn);
         return sdxClusters.stream()
+                .filter(sdx -> !sdx.isDetached())
                 .map(sdx -> sdxClusterConverter.sdxClusterToResponse(sdx))
                 .collect(Collectors.toList());
     }

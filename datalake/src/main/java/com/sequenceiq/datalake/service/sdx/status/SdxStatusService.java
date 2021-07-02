@@ -81,7 +81,7 @@ public class SdxStatusService {
         }).orElseThrow(() -> new NotFoundException("SdxCluster was not found with ID: " + datalakeId));
     }
 
-    private void setStatusForDatalake(DatalakeStatusEnum status, String statusReason, SdxCluster sdxCluster) {
+    public void setStatusForDatalake(DatalakeStatusEnum status, String statusReason, SdxCluster sdxCluster) {
         try {
             transactionService.required(() -> {
                 SdxStatusEntity previous = getActualStatusForSdx(sdxCluster);

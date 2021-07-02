@@ -17,6 +17,7 @@ import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 import org.springframework.util.StringUtils;
 
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
@@ -39,8 +40,11 @@ import com.sequenceiq.datalake.metric.MetricType;
 import com.sequenceiq.datalake.metric.SdxMetricService;
 import com.sequenceiq.datalake.service.AbstractSdxAction;
 import com.sequenceiq.datalake.service.sdx.ProvisionerService;
+import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
+import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowEvent;
+import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowState;
 
@@ -64,6 +68,12 @@ public class SdxCreateActions {
     @Inject
     private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
+    @Inject
+    private SdxService sdxService;
+
+    @Inject
+    private FlowLogService flowLogService;
+
     @Bean(name = "SDX_CREATION_STORAGE_VALIDATION_STATE")
     public Action<?, ?> storageValidation() {
         return new AbstractSdxAction<>(SdxEvent.class) {
@@ -75,6 +85,11 @@ public class SdxCreateActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) throws Exception {
+                // When SDX is created as part of re-size flow chain, SDX in payload will not have ID.
+                if (!Strings.isNullOrEmpty(payload.getSdxName())) {
+                    SdxCluster sdxCluster = sdxService.getByNameInAccount(context.getUserId(), payload.getSdxName());
+                    context.setSdxId(sdxCluster.getId());
+                }
                 StorageValidationRequest req = new StorageValidationRequest(context);
                 sendEvent(context, req.selector(), req);
             }
@@ -230,6 +245,14 @@ public class SdxCreateActions {
                 } catch (NotFoundException notFoundException) {
                     LOGGER.info("Can not set status to SDX_CREATION_FAILED because data lake was not found");
                 }
+                // When SDX is created as part of RESIZE flow chain, we should mark flow as failed to avoid
+                // subsequent flow's to be executed.
+                flowLogService.getLastFlowLog(context.getFlowParameters().getFlowId()).ifPresent(flowLog -> {
+                    if (flowLog.getFlowChainId() != null) {
+                        Flow flow = getFlow(context.getFlowParameters().getFlowId());
+                        flow.setFlowFailed(payload.getException());
+                    }
+                });
                 sendEvent(context, SDX_CREATE_FAILED_HANDLED_EVENT.event(), payload);
             }
 

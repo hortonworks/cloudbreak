@@ -33,25 +33,27 @@ public interface SdxClusterRepository extends CrudRepository<SdxCluster, Long> {
             "AND s.stackCrn is not null")
     List<SdxClusterIdView> findAllAliveView();
 
-    Optional<SdxCluster> findByAccountIdAndClusterNameAndDeletedIsNull(String accountId, String clusterName);
+    Optional<SdxCluster> findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(String accountId, String clusterName);
 
     Optional<SdxCluster> findByAccountIdAndCrnAndDeletedIsNull(String accountId, String crn);
 
-    @Query("SELECT s.envCrn FROM SdxCluster s WHERE s.accountId = :accountId AND s.crn = :crn AND s.deleted is null")
-    Optional<String> findEnvCrnByAccountIdAndCrnAndDeletedIsNull(@Param("accountId") String accountId, @Param("crn") String crn);
+    Optional<SdxCluster> findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(@Param("accountId") String accountId, @Param("crn") String crn);
 
-    @Query("SELECT s FROM SdxCluster s WHERE s.accountId = :accountId AND s.crn IN (:crns) AND s.deleted is null")
-    List<SdxCluster> findAllByAccountIdAndCrnAndDeletedIsNull(@Param("accountId") String accountId, @Param("crns") Set<String> crns);
+    @Query("SELECT s.envCrn FROM SdxCluster s WHERE s.accountId = :accountId AND s.crn = :crn AND s.deleted is null AND s.detached = false")
+    Optional<String> findEnvCrnByAccountIdAndCrnAndDeletedIsNullAndDetachedIsFalse(@Param("accountId") String accountId, @Param("crn") String crn);
+
+    @Query("SELECT s FROM SdxCluster s WHERE s.accountId = :accountId AND s.crn IN (:crns) AND s.deleted is null AND s.detached = false")
+    List<SdxCluster> findAllByAccountIdAndCrnAndDeletedIsNullAndDetachedIsFalse(@Param("accountId") String accountId, @Param("crns") Set<String> crns);
 
     @Query("SELECT s.clusterName as name, s.crn as crn FROM SdxCluster s WHERE s.accountId = :accountId AND s.crn IN (:resourceCrns)")
     List<ResourceCrnAndNameView> findResourceNamesByCrnAndAccountId(@Param("resourceCrns") Collection<String> resourceCrns,
             @Param("accountId") String accountId);
 
-    List<SdxCluster> findByAccountIdAndDeletedIsNull(String accountId);
+    List<SdxCluster> findByAccountIdAndDeletedIsNullAndDetachedIsFalse(String accountId);
 
-    List<SdxCluster> findByAccountIdAndEnvCrnAndDeletedIsNull(String accountId, String envCrn);
+    List<SdxCluster> findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsFalse(String accountId, String envCrn);
 
-    List<SdxCluster> findByAccountIdAndEnvNameAndDeletedIsNull(String accountId, String envName);
+    List<SdxCluster> findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(String accountId, String envName);
 
     @Query("SELECT s.stackCrn FROM SdxCluster s WHERE s.crn = :crn")
     Optional<String> findStackCrnByClusterCrn(@Param("crn") String crn);

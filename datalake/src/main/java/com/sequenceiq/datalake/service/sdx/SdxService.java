@@ -45,6 +45,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4R
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceTemplateV4Base;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StackResponseEntries;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateV4SpotParameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
@@ -58,12 +59,12 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouder
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.SecurityRuleV4Request;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnParseException;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
 import com.sequenceiq.cloudbreak.cloud.VersionComparator;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -99,6 +100,7 @@ import com.sequenceiq.sdx.api.model.SdxAwsBase;
 import com.sequenceiq.sdx.api.model.SdxAwsSpotParameters;
 import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
+import com.sequenceiq.sdx.api.model.SdxClusterResizeRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxCustomClusterRequest;
 
@@ -106,6 +108,8 @@ import com.sequenceiq.sdx.api.model.SdxCustomClusterRequest;
 public class SdxService implements ResourceIdProvider, ResourcePropertyProvider {
 
     public static final String MEDIUM_DUTY_REQUIRED_VERSION = "7.2.7";
+
+    public static final String SDX_RESIZE_NAME_SUFFIX = "-md";
 
     public static final long WORKSPACE_ID_DEFAULT = 0L;
 
@@ -286,7 +290,7 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider 
     public String getEnvCrnByCrn(String userCrn, String clusterCrn) {
         LOGGER.info("Searching for SDX cluster by crn {}", clusterCrn);
         String accountIdFromCrn = getAccountIdFromCrn(userCrn);
-        Optional<String> envCrn = sdxClusterRepository.findEnvCrnByAccountIdAndCrnAndDeletedIsNull(accountIdFromCrn, clusterCrn);
+        Optional<String> envCrn = sdxClusterRepository.findEnvCrnByAccountIdAndCrnAndDeletedIsNullAndDetachedIsFalse(accountIdFromCrn, clusterCrn);
         if (envCrn.isPresent()) {
             return envCrn.get();
         } else {
@@ -297,7 +301,8 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider 
     public SdxCluster getByNameInAccount(String userCrn, String name) {
         LOGGER.info("Searching for SDX cluster by name {}", name);
         String accountIdFromCrn = getAccountIdFromCrn(userCrn);
-        Optional<SdxCluster> sdxCluster = measure(() -> sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(accountIdFromCrn, name), LOGGER,
+        Optional<SdxCluster> sdxCluster = measure(() ->
+                        sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(accountIdFromCrn, name), LOGGER,
                 "Fetching SDX cluster took {}ms from DB. Name: [{}]", name);
         if (sdxCluster.isPresent()) {
             return sdxCluster.get();
@@ -328,7 +333,7 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider 
         validateEnv(environment);
         validateRuntimeAndImage(sdxClusterRequest, environment, imageSettingsV4Request, imageV4Response);
         validateRazEnablement(sdxClusterRequest, environment);
-        validateMediumDutySdxEnablement(sdxClusterRequest, environment);
+        validateMediumDutySdxEnablement(sdxClusterRequest.getClusterShape(), sdxClusterRequest.getRuntime(), environment);
         SdxCluster sdxCluster = new SdxCluster();
         sdxCluster.setInitiatorUserCrn(userCrn);
         sdxCluster.setCrn(createCrn(getAccountIdFromCrn(userCrn)));
@@ -359,7 +364,8 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider 
         sdxCluster.setRuntime(runtimeVersion);
         externalDatabaseConfigurer.configure(cloudPlatform, sdxClusterRequest.getExternalDatabase(), sdxCluster);
         updateStackV4RequestWithEnvironmentCrnIfNotExistsOnIt(internalStackV4Request, environment.getCrn());
-        StackV4Request stackRequest = getStackRequest(sdxClusterRequest, internalStackV4Request, cloudPlatform, runtimeVersion, imageSettingsV4Request);
+        StackV4Request stackRequest = getStackRequest(sdxClusterRequest.getClusterShape(), sdxClusterRequest.isEnableRangerRaz(),
+                internalStackV4Request, cloudPlatform, runtimeVersion, imageSettingsV4Request);
         prepareCloudStorageForStack(sdxClusterRequest, stackRequest, sdxCluster, environment);
         prepareDefaultSecurityConfigs(internalStackV4Request, stackRequest, cloudPlatform);
         prepareProviderSpecificParameters(stackRequest, sdxClusterRequest, cloudPlatform);
@@ -384,10 +390,66 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider 
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
         }
-
         FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerSdxCreation(savedSdxCluster);
-
         return Pair.of(savedSdxCluster, flowIdentifier);
+    }
+
+    public Pair<SdxCluster, FlowIdentifier> resizeSdx(final String userCrn, final String clusterName, final SdxClusterResizeRequest sdxClusterResizeRequest) {
+        LOGGER.info("Re-sizing SDX cluster with name {}", clusterName);
+        String accountIdFromCrn = getAccountIdFromCrn(userCrn);
+        String environmentName = sdxClusterResizeRequest.getEnvironment();
+        SdxClusterShape shape = sdxClusterResizeRequest.getClusterShape();
+
+        final SdxCluster sdxCluster = sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(accountIdFromCrn, clusterName)
+                .orElseThrow(() -> notFound("SDX cluster", clusterName).get());
+
+        MDCBuilder.buildMdcContext(sdxCluster);
+
+        validateSdxResizeRequest(sdxCluster, accountIdFromCrn, shape);
+        StackV4Response stackV4Response = getDetail(clusterName,
+                Set.of(StackResponseEntries.HARDWARE_INFO.getEntryName(), StackResponseEntries.EVENTS.getEntryName()), accountIdFromCrn);
+
+        DetailedEnvironmentResponse environment = getEnvironment(environmentName);
+        CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
+        validateEnv(environment);
+        validateMediumDutySdxEnablement(shape, sdxCluster.getRuntime(), environment);
+        SdxCluster newSdxCluster = new SdxCluster();
+        newSdxCluster.setInitiatorUserCrn(userCrn);
+        newSdxCluster.setCrn(createCrn(getAccountIdFromCrn(userCrn)));
+        newSdxCluster.setClusterName(clusterName + SDX_RESIZE_NAME_SUFFIX);
+        newSdxCluster.setAccountId(getAccountIdFromCrn(userCrn));
+        newSdxCluster.setClusterShape(shape);
+        newSdxCluster.setCreated(clock.getCurrentTimeMillis());
+        newSdxCluster.setEnvName(environment.getName());
+        newSdxCluster.setEnvCrn(environment.getCrn());
+        newSdxCluster.setRangerRazEnabled(sdxCluster.isRangerRazEnabled());
+        newSdxCluster.setSdxClusterServiceVersion(sdxClusterServiceVersion);
+        newSdxCluster.setTags(sdxCluster.getTags());
+
+        if (!Strings.isBlank(sdxCluster.getCloudStorageBaseLocation())) {
+            newSdxCluster.setCloudStorageBaseLocation(sdxCluster.getCloudStorageBaseLocation());
+            newSdxCluster.setCloudStorageFileSystemType(sdxCluster.getCloudStorageFileSystemType());
+        } else if (!CloudPlatform.YARN.equalsIgnoreCase(cloudPlatform.name()) &&
+                !CloudPlatform.GCP.equalsIgnoreCase(cloudPlatform.name()) &&
+                !CloudPlatform.MOCK.equalsIgnoreCase(cloudPlatform.name())) {
+            throw new BadRequestException("Cloud storage parameter is required.");
+        }
+
+        newSdxCluster.setRuntime(sdxCluster.getRuntime());
+        newSdxCluster.setDatabaseAvailabilityType(sdxCluster.getDatabaseAvailabilityType());
+        StackV4Request stackRequest = getStackRequest(shape, sdxCluster.isRangerRazEnabled(), null, cloudPlatform, sdxCluster.getRuntime(), null);
+        prepareCloudStorageForStack(stackRequest, stackV4Response, newSdxCluster, environment);
+        prepareDefaultSecurityConfigs(null, stackRequest, cloudPlatform);
+        stackRequest.setResourceCrn(newSdxCluster.getCrn());
+
+        try {
+            newSdxCluster.setStackRequest(JsonUtil.writeValueAsString(stackRequest));
+        } catch (JsonProcessingException e) {
+            LOGGER.error("Can not parse internal stackrequest", e);
+            throw new BadRequestException("Can not parse internal stackrequest", e);
+        }
+        FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerSdxResize(sdxCluster.getId(), newSdxCluster);
+        return Pair.of(sdxCluster, flowIdentifier);
     }
 
     private void validateEnv(DetailedEnvironmentResponse environment) {
@@ -402,18 +464,17 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider 
         }
     }
 
-    private StackV4Request getStackRequest(SdxClusterRequest sdxClusterRequest, StackV4Request internalStackV4Request, CloudPlatform cloudPlatform,
+    private StackV4Request getStackRequest(SdxClusterShape shape, boolean razEnabled, StackV4Request internalStackV4Request, CloudPlatform cloudPlatform,
             String runtimeVersion, ImageSettingsV4Request imageSettingsV4Request) {
         if (internalStackV4Request == null) {
             StackV4Request stackRequest = cdpConfigService.getConfigForKey(
-                    new CDPConfigKey(cloudPlatform, sdxClusterRequest.getClusterShape(), runtimeVersion));
+                    new CDPConfigKey(cloudPlatform, shape, runtimeVersion));
             if (stackRequest == null) {
-                LOGGER.error("Can't find template for cloudplatform: {}, shape {}, cdp version: {}", cloudPlatform, sdxClusterRequest.getClusterShape(),
-                        runtimeVersion);
-                throw new BadRequestException("Can't find template for cloudplatform: " + cloudPlatform + ", shape: " + sdxClusterRequest.getClusterShape() +
+                LOGGER.error("Can't find template for cloudplatform: {}, shape {}, cdp version: {}", cloudPlatform, shape, runtimeVersion);
+                throw new BadRequestException("Can't find template for cloudplatform: " + cloudPlatform + ", shape: " + shape +
                         ", runtime version: " + runtimeVersion);
             }
-            stackRequest.getCluster().setRangerRazEnabled(sdxClusterRequest.isEnableRangerRaz());
+            stackRequest.getCluster().setRangerRazEnabled(razEnabled);
 
             if (imageSettingsV4Request != null) {
                 stackRequest.setImage(imageSettingsV4Request);
@@ -424,7 +485,7 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider 
             // We have provided a --ranger-raz-enabled flag in the CLI, but it will
             // get overwritten if you use a custom json (using --cli-json). To avoid
             // this, we will set the raz enablement here as well. See CB-7474 for more details
-            internalStackV4Request.getCluster().setRangerRazEnabled(sdxClusterRequest.isEnableRangerRaz());
+            internalStackV4Request.getCluster().setRangerRazEnabled(razEnabled);
             return internalStackV4Request;
         }
     }
@@ -452,6 +513,13 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider 
             SdxCluster sdxCluster, DetailedEnvironmentResponse environment) {
         CloudStorageRequest cloudStorageRequest = cloudStorageManifester.initCloudStorageRequest(environment,
                 stackV4Request.getCluster(), sdxCluster, sdxClusterRequest);
+        stackV4Request.getCluster().setCloudStorage(cloudStorageRequest);
+    }
+
+    private void prepareCloudStorageForStack(StackV4Request stackV4Request, StackV4Response stackV4Response,
+            SdxCluster sdxCluster, DetailedEnvironmentResponse environment) {
+        CloudStorageRequest cloudStorageRequest = cloudStorageManifester.initCloudStorageRequestFromExistingSdxCluster(environment,
+                stackV4Response.getCluster(), sdxCluster);
         stackV4Request.getCluster().setCloudStorage(cloudStorageRequest);
     }
 
@@ -630,18 +698,18 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider 
         }
     }
 
-    private void validateMediumDutySdxEnablement(SdxClusterRequest sdxClusterRequest, DetailedEnvironmentResponse environment) {
+    private void validateMediumDutySdxEnablement(SdxClusterShape shape, String runtime, DetailedEnvironmentResponse environment) {
         ValidationResultBuilder validationBuilder = new ValidationResultBuilder();
-        if (SdxClusterShape.MEDIUM_DUTY_HA.equals(sdxClusterRequest.getClusterShape())) {
+        if (SdxClusterShape.MEDIUM_DUTY_HA.equals(shape)) {
             boolean mediumDutySdxEntitlementEnabled = entitlementService.mediumDutySdxEnabled(Crn.safeFromString(environment.getCreator()).getAccountId());
             boolean entitlementRequiredForCloudProvider = isMediumDutyEntitlementRequiredForCloudProvider(environment.getCloudPlatform());
             if (!mediumDutySdxEntitlementEnabled && entitlementRequiredForCloudProvider) {
                 validationBuilder.error(String.format("Provisioning a medium duty data lake cluster is not enabled for %s. " +
                         "Contact Cloudera support to enable CDP_MEDIUM_DUTY_SDX entitlement for the account.", environment.getCloudPlatform()));
             }
-            if (!isMediumDutySdxSupported(sdxClusterRequest.getRuntime())) {
+            if (!isMediumDutySdxSupported(runtime)) {
                 validationBuilder.error("Provisioning a Medium Duty SDX shape is only valid for CM version >= " + MEDIUM_DUTY_REQUIRED_VERSION +
-                        " and not " + sdxClusterRequest.getRuntime());
+                        " and not " + runtime);
             }
         }
         ValidationResult validationResult = validationBuilder.build();
@@ -683,14 +751,27 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider 
     }
 
     private void validateSdxRequest(String name, String envName, String accountId) {
-        sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(accountId, name)
+        sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(accountId, name)
                 .ifPresent(foundSdx -> {
                     throw new BadRequestException("SDX cluster exists with this name: " + name);
                 });
 
-        sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(accountId, envName).stream().findFirst()
+        sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(accountId, envName).stream().findFirst()
                 .ifPresent(existedSdx -> {
                     throw new BadRequestException("SDX cluster exists for environment name: " + existedSdx.getEnvName());
+                });
+    }
+
+    private void validateSdxResizeRequest(SdxCluster sdxCluster, String accountId, SdxClusterShape shape) {
+        if (!entitlementService.isDatalakeLightToMediumMigrationEnabled(accountId)) {
+            throw new BadRequestException("Resizing of the data lake is not supported");
+        }
+        if (sdxCluster.getClusterShape() == shape) {
+            throw new BadRequestException("SDX cluster already is of requested shape");
+        }
+        sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(accountId, sdxCluster.getEnvCrn())
+                .ifPresent(existedSdx -> {
+                    throw new BadRequestException("SDX which is detached already exists for the environment. SDX name: " + existedSdx.getClusterName());
                 });
     }
 
@@ -751,22 +832,22 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider 
     public List<SdxCluster> listSdxByEnvCrn(String userCrn, String envCrn) {
         LOGGER.info("Listing SDX clusters by environment crn {}", envCrn);
         String accountIdFromCrn = getAccountIdFromCrn(userCrn);
-        return sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNull(accountIdFromCrn, envCrn);
+        return sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsFalse(accountIdFromCrn, envCrn);
     }
 
     public List<SdxCluster> listSdxByEnvCrn(String envCrn) {
         LOGGER.debug("Listing SDX clusters by environment crn {}", envCrn);
         String accountIdFromCrn = getAccountIdFromCrn(envCrn);
-        return sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNull(accountIdFromCrn, envCrn);
+        return sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsFalse(accountIdFromCrn, envCrn);
     }
 
     public List<SdxCluster> listSdx(String userCrn, String envName) {
         String accountIdFromCrn = getAccountIdFromCrn(userCrn);
         if (envName != null) {
             LOGGER.info("Listing SDX clusters by environment name {}", envName);
-            return sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(accountIdFromCrn, envName);
+            return sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(accountIdFromCrn, envName);
         } else {
-            return sdxClusterRepository.findByAccountIdAndDeletedIsNull(accountIdFromCrn);
+            return sdxClusterRepository.findByAccountIdAndDeletedIsNullAndDetachedIsFalse(accountIdFromCrn);
         }
     }
 
@@ -781,7 +862,7 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider 
     public FlowIdentifier deleteSdx(String userCrn, String name, boolean forced) {
         LOGGER.info("Deleting SDX {}", name);
         String accountIdFromCrn = getAccountIdFromCrn(userCrn);
-        return sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(accountIdFromCrn, name)
+        return sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(accountIdFromCrn, name)
                 .map(sdxCluster -> deleteSdxCluster(sdxCluster, forced))
                 .orElseThrow(() -> notFound("SDX cluster", name).get());
     }
@@ -910,7 +991,8 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider 
     @Override
     public Map<String, Optional<String>> getEnvironmentCrnsByResourceCrns(Collection<String> resourceCrns) {
         Set<String> resourceCrnSet = new LinkedHashSet<>(resourceCrns);
-        List<SdxCluster> clusters = sdxClusterRepository.findAllByAccountIdAndCrnAndDeletedIsNull(getAccountIdFromCrn(ThreadBasedUserCrnProvider.getUserCrn()),
+        List<SdxCluster> clusters = sdxClusterRepository.findAllByAccountIdAndCrnAndDeletedIsNullAndDetachedIsFalse(
+                getAccountIdFromCrn(ThreadBasedUserCrnProvider.getUserCrn()),
                 resourceCrnSet);
         Map<String, Optional<String>> resourceCrnWithEnvCrn = new LinkedHashMap<>();
         clusters.forEach(cluster -> {
