@@ -66,3 +66,11 @@ disable_old_tls_for_ldap_server:
   file.append:
     - name: /usr/share/ipa/updates/20-sslciphers.update
     - text: 'only:sslVersionMin: TLS1.2'
+
+/opt/salt/scripts/initdnarange.py:
+  file.managed:
+    - makedirs: True
+    - user: root
+    - group: root
+    - mode: 700
+    - source: salt://freeipa/scripts/initdnarange.py

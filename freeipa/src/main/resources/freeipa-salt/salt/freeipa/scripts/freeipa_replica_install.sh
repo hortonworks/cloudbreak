@@ -123,3 +123,8 @@ ipa-replica-install \
           --no-ntp
 
 set +e
+
+# Id range initialization is after 'set +e' to not fail the state. FreeIPA installation/repair shouldn't fail because of this.
+echo "Try to initialize DNA ID range on replica"
+ipa -e in_server=True console /opt/salt/scripts/initdnarange.py
+echo "Finished initializing DNA ID range on replica"
