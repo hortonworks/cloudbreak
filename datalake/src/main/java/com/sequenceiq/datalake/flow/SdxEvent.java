@@ -14,6 +14,8 @@ public class SdxEvent implements Selectable, Acceptable {
 
     private final Long sdxId;
 
+    private final String sdxName;
+
     private final String userId;
 
     private final Promise<AcceptResult> accepted;
@@ -31,6 +33,15 @@ public class SdxEvent implements Selectable, Acceptable {
         this.sdxId = sdxId;
         this.userId = userId;
         accepted = new Promise<>();
+        sdxName = null;
+    }
+
+    public SdxEvent(String selector, Long sdxId, String sdxName, String userId) {
+        this.selector = selector;
+        this.sdxId = sdxId;
+        this.sdxName = sdxName;
+        this.userId = userId;
+        accepted = new Promise<>();
     }
 
     public SdxEvent(String selector, SdxContext context) {
@@ -42,6 +53,7 @@ public class SdxEvent implements Selectable, Acceptable {
         this.sdxId = sdxId;
         this.userId = userId;
         this.accepted = accepted;
+        this.sdxName = null;
     }
 
     @Override
@@ -56,6 +68,10 @@ public class SdxEvent implements Selectable, Acceptable {
     @Override
     public String selector() {
         return StringUtils.isNotEmpty(selector) ? selector : EventSelectorUtil.selector(getClass());
+    }
+
+    public String getSdxName() {
+        return sdxName;
     }
 
     @Override

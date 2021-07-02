@@ -54,6 +54,7 @@ import com.sequenceiq.sdx.api.model.AdvertisedRuntime;
 import com.sequenceiq.sdx.api.model.RangerCloudIdentitySyncStatus;
 import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
+import com.sequenceiq.sdx.api.model.SdxClusterResizeRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxCustomClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
@@ -124,6 +125,19 @@ public class SdxController implements SdxEndpoint {
         sdxClusterResponse.setName(sdxCluster.getClusterName());
         sdxClusterResponse.setFlowIdentifier(result.getRight());
         return sdxClusterResponse;
+    }
+
+    @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_DATALAKE)
+    public SdxClusterResponse resize(String name, SdxClusterResizeRequest resizeSdxClusterRequest) {
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        Pair<SdxCluster, FlowIdentifier> result = sdxService.resizeSdx(userCrn, name, resizeSdxClusterRequest);
+        SdxCluster sdxCluster = result.getLeft();
+        metricService.incrementMetricCounter(MetricType.EXTERNAL_SDX_REQUESTED, sdxCluster);
+        SdxClusterResponse sdxClusterResponse = sdxClusterConverter.sdxClusterToResponse(sdxCluster);
+        sdxClusterResponse.setName(sdxCluster.getClusterName());
+        sdxClusterResponse.setFlowIdentifier(result.getRight());
+        return null;
     }
 
     @Override
@@ -339,6 +353,7 @@ public class SdxController implements SdxEndpoint {
 
     private List<SdxClusterResponse> convertSdxClusters(List<SdxCluster> sdxClusters) {
         return sdxClusters.stream()
+                .filter(sdx -> !sdx.isDetached())
                 .map(sdx -> sdxClusterConverter.sdxClusterToResponse(sdx))
                 .collect(Collectors.toList());
     }

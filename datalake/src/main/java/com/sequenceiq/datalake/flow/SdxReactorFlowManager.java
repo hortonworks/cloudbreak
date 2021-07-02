@@ -4,6 +4,7 @@ import static com.sequenceiq.datalake.flow.create.SdxCreateEvent.STORAGE_VALIDAT
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_UPGRADE_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_UPGRADE_FLOW_CHAIN_EVENT;
 import static com.sequenceiq.datalake.flow.delete.SdxDeleteEvent.SDX_DELETE_EVENT;
+import static com.sequenceiq.datalake.flow.detach.SdxDetachEvent.SDX_RESIZE_FLOW_CHAIN_START_EVENT;
 import static com.sequenceiq.datalake.flow.diagnostics.SdxCmDiagnosticsEvent.SDX_CM_DIAGNOSTICS_COLLECTION_EVENT;
 import static com.sequenceiq.datalake.flow.diagnostics.SdxDiagnosticsEvent.SDX_DIAGNOSTICS_COLLECTION_EVENT;
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_DATABASE_BACKUP_EVENT;
@@ -38,6 +39,7 @@ import com.sequenceiq.datalake.flow.cert.rotation.event.SdxStartCertRotationEven
 import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradeFlowChainStartEvent;
 import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradeStartEvent;
 import com.sequenceiq.datalake.flow.delete.event.SdxDeleteStartEvent;
+import com.sequenceiq.datalake.flow.detach.event.DatalakeResizeFlowChainStartEvent;
 import com.sequenceiq.datalake.flow.diagnostics.event.SdxCmDiagnosticsCollectionEvent;
 import com.sequenceiq.datalake.flow.diagnostics.event.SdxDiagnosticsCollectionEvent;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeDatabaseBackupStartEvent;
@@ -87,6 +89,13 @@ public class SdxReactorFlowManager {
         String selector = STORAGE_VALIDATION_WAIT_EVENT.event();
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
         return notify(selector, new SdxEvent(selector, cluster.getId(), userId));
+    }
+
+    public FlowIdentifier triggerSdxResize(Long sdxClusterId, SdxCluster newSdxCluster) {
+        LOGGER.info("Trigger Datalake resizing for: {}", sdxClusterId);
+        String selector = SDX_RESIZE_FLOW_CHAIN_START_EVENT.event();
+        String userId = ThreadBasedUserCrnProvider.getUserCrn();
+        return notify(selector, new DatalakeResizeFlowChainStartEvent(sdxClusterId, newSdxCluster, userId));
     }
 
     public FlowIdentifier triggerSdxDeletion(SdxCluster cluster, boolean forced) {
