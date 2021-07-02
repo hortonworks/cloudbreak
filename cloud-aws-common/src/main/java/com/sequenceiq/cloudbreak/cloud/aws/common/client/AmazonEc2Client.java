@@ -19,6 +19,8 @@ import com.amazonaws.services.ec2.model.CreateVpcRequest;
 import com.amazonaws.services.ec2.model.CreateVpcResult;
 import com.amazonaws.services.ec2.model.DeleteKeyPairRequest;
 import com.amazonaws.services.ec2.model.DeleteKeyPairResult;
+import com.amazonaws.services.ec2.model.DeleteSecurityGroupRequest;
+import com.amazonaws.services.ec2.model.DeleteSecurityGroupResult;
 import com.amazonaws.services.ec2.model.DeleteVolumeRequest;
 import com.amazonaws.services.ec2.model.DeleteVolumeResult;
 import com.amazonaws.services.ec2.model.DescribeAddressesRequest;
@@ -231,5 +233,9 @@ public class AmazonEc2Client extends AmazonClient {
 
     public TerminateInstancesResult deleteInstance(TerminateInstancesRequest request) {
         return client.terminateInstances(request);
+    }
+
+    public DeleteSecurityGroupResult deleteSecurityGroup(DeleteSecurityGroupRequest request) {
+        return client.deleteSecurityGroup(request);
     }
 }

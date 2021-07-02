@@ -58,30 +58,15 @@ public class SecurityGroupBuilderUtil {
     @Inject
     private AwsTaggingService awsTaggingService;
 
-    public Map<String, String> createSecurityGroupIfNeed(AwsCloudStackView awsCloudStackView, Group group, AmazonEc2Client amazonEc2Client,
+    public Map<String, String> createSecurityGroup(AwsCloudStackView awsCloudStackView, Group group, AmazonEc2Client amazonEc2Client,
             CloudContext context, AwsNativeModel awsNativeModel) {
-        List<String> cloudSecurityIds = awsCloudStackView.cloudSecurityIds();
-        Map<String, String> resources = new HashMap<>();
-        if (cloudSecurityIds.isEmpty()) {
-            CreateSecurityGroupRequest request = new CreateSecurityGroupRequest()
-                    .withDescription("Allow access from web and bastion as well as outbound HTTP and HTTPS traffic")
-                    .withVpcId(awsCloudStackView.network().getExistingVpc())
-                    .withGroupName(awsResourceNameService.resourceName(ResourceType.AWS_SECURITY_GROUP, context.getName(), group.getName(), context.getId()))
-                    .withTagSpecifications(awsTaggingService.prepareEc2TagSpecification(awsCloudStackView.getTags(),
-                            com.amazonaws.services.ec2.model.ResourceType.SecurityGroup));
-            resources = createOrGetSecurityGroup(amazonEc2Client, request, group, awsNativeModel);
-        } else {
-            List<SecurityGroup> securityGroups = fetchSecurityGroups(cloudSecurityIds, amazonEc2Client);
-            resources.put(SECURITY_GROUP_ID, securityGroups.get(0).getGroupId());
-            resources.put(SECURITY_GROUP_NAME, securityGroups.get(0).getGroupName());
-        }
-        return resources;
-    }
-
-    private List<SecurityGroup> fetchSecurityGroups(List<String> cloudSecurityIds, AmazonEc2Client amazonEc2Client) {
-        DescribeSecurityGroupsResult describeSecurityGroupsResult = amazonEc2Client.describeSecurityGroups(
-                new DescribeSecurityGroupsRequest().withGroupIds(cloudSecurityIds));
-        return describeSecurityGroupsResult.getSecurityGroups();
+        CreateSecurityGroupRequest request = new CreateSecurityGroupRequest()
+                .withDescription("Allow access from web and bastion as well as outbound HTTP and HTTPS traffic")
+                .withVpcId(awsCloudStackView.network().getExistingVpc())
+                .withGroupName(awsResourceNameService.resourceName(ResourceType.AWS_SECURITY_GROUP, context.getName(), group.getName(), context.getId()))
+                .withTagSpecifications(awsTaggingService.prepareEc2TagSpecification(awsCloudStackView.getTags(),
+                        com.amazonaws.services.ec2.model.ResourceType.SecurityGroup));
+        return createOrGetSecurityGroup(amazonEc2Client, request, group, awsNativeModel);
     }
 
     public Map<String, String> createOrGetSecurityGroup(AmazonEc2Client amazonEc2Client, CreateSecurityGroupRequest request, Group group,
@@ -90,6 +75,7 @@ public class SecurityGroupBuilderUtil {
         String securityGroupId;
         try {
             CreateSecurityGroupResult securityGroup = amazonEc2Client.createSecurityGroup(request);
+            LOGGER.info("Security group created successfully for group: {} and vpc: {}", request.getGroupName(), request.getVpcId());
             ingress(group, amazonEc2Client, awsNativeModel, securityGroup.getGroupId());
             egress(amazonEc2Client, awsNativeModel, securityGroup.getGroupId(), Collections.emptyList());
             securityGroupId = securityGroup.getGroupId();
@@ -120,6 +106,7 @@ public class SecurityGroupBuilderUtil {
         if (securityGroupOpt.isEmpty()) {
             throw NotFoundException.notFoundException("Aws Security Group", groupName);
         }
+        LOGGER.debug("Securoty group fetched from aws by vpc id: {} and group name: {}", vpcId, groupName);
         return securityGroupOpt.get();
     }
 
@@ -155,6 +142,7 @@ public class SecurityGroupBuilderUtil {
                 .withGroupId(securityGroupId)
                 .withIpPermissions(permissions);
         amazonEc2Client.addIngress(reguest);
+        LOGGER.info("Ingress added to {}", securityGroupId);
     }
 
     public void egress(AmazonEc2Client amazonEc2Client, AwsNativeModel awsNativeModel, String securityGroupId, List<IpPermission> egress) {
@@ -184,7 +172,13 @@ public class SecurityGroupBuilderUtil {
                         .withGroupId(securityGroupId)
                         .withIpPermissions(permissions);
                 amazonEc2Client.addEgress(reguest);
+                LOGGER.info("Egress added to {}", securityGroupId);
+            } else {
+                LOGGER.debug("No permission for egress request, skip it");
             }
+        } else {
+            LOGGER.debug("Egress creation skipped: {}, prefix list size: {}, vpc cidrs size: {}",
+                    outboundInternetTraffic, prefixListIds.size(), vpcCidrs.size());
         }
     }
 }

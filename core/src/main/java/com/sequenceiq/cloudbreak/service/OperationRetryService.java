@@ -61,8 +61,9 @@ public class OperationRetryService {
         List<FlowLog> flowLogs = flowLogRepository.findAllByResourceIdOrderByCreatedDesc(stackId, PageRequest.of(0, LAST_FIFTY_FLOWLOGS));
         List<RetryableFlow> retryableFlows = getRetryableFlows(flowLogs);
         if (CollectionUtils.isEmpty(retryableFlows)) {
-            LOGGER.info("Retry cannot be performed. The last flow did not fail or not retryable. stackId: {}", stackId);
-            throw new BadRequestException("Retry cannot be performed. The last flow did not fail or not retryable.");
+            String lastKnownState = getLastKnownStateMessage(flowLogs);
+            LOGGER.info("Retry cannot be performed. The last flow did not fail or not retryable.{} stackId: {}", lastKnownState, stackId);
+            throw new BadRequestException("Retry cannot be performed. The last flow did not fail or not retryable." + lastKnownState);
         }
 
         String name = retryableFlows.get(0).getName();
@@ -81,6 +82,17 @@ public class OperationRetryService {
             LOGGER.info("Cannot restart previous flow because there is no successful state in the flow. stackId: {}", stackId);
             throw new BadRequestException("Cannot restart previous flow because there is no successful state in the flow.");
         }
+    }
+
+    private String getLastKnownStateMessage(List<FlowLog> flowLogs) {
+        String state = "unknown";
+        if (!flowLogs.isEmpty()) {
+            String currentState = flowLogs.get(0).getCurrentState();
+            if (currentState != null) {
+                state = currentState;
+            }
+        }
+        return " Last known state: " + state;
     }
 
     private FlowLog getLastSuccessfulStateLog(String failedState, List<FlowLog> flowLogs) {
