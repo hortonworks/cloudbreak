@@ -44005,9 +44005,22 @@ public final class UsageProto {
       com.google.protobuf.MessageOrBuilder {
 
     /**
+     * <pre>
+     * True if user provides a resource group, allowing CDP to create resources only within the specified resource group
+     * </pre>
+     *
      * <code>bool singleResourceGroup = 1;</code>
      */
     boolean getSingleResourceGroup();
+
+    /**
+     * <pre>
+     * True if user provides encryption key URL to encrypt Azure managed disks with CMK
+     * </pre>
+     *
+     * <code>bool resourceEncryptionEnabled = 2;</code>
+     */
+    boolean getResourceEncryptionEnabled();
   }
   /**
    * <pre>
@@ -44027,6 +44040,7 @@ public final class UsageProto {
     }
     private CDPEnvironmentAzureDetails() {
       singleResourceGroup_ = false;
+      resourceEncryptionEnabled_ = false;
     }
 
     @java.lang.Override
@@ -44056,6 +44070,11 @@ public final class UsageProto {
             case 8: {
 
               singleResourceGroup_ = input.readBool();
+              break;
+            }
+            case 16: {
+
+              resourceEncryptionEnabled_ = input.readBool();
               break;
             }
             default: {
@@ -44093,10 +44112,27 @@ public final class UsageProto {
     public static final int SINGLERESOURCEGROUP_FIELD_NUMBER = 1;
     private boolean singleResourceGroup_;
     /**
+     * <pre>
+     * True if user provides a resource group, allowing CDP to create resources only within the specified resource group
+     * </pre>
+     *
      * <code>bool singleResourceGroup = 1;</code>
      */
     public boolean getSingleResourceGroup() {
       return singleResourceGroup_;
+    }
+
+    public static final int RESOURCEENCRYPTIONENABLED_FIELD_NUMBER = 2;
+    private boolean resourceEncryptionEnabled_;
+    /**
+     * <pre>
+     * True if user provides encryption key URL to encrypt Azure managed disks with CMK
+     * </pre>
+     *
+     * <code>bool resourceEncryptionEnabled = 2;</code>
+     */
+    public boolean getResourceEncryptionEnabled() {
+      return resourceEncryptionEnabled_;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -44116,6 +44152,9 @@ public final class UsageProto {
       if (singleResourceGroup_ != false) {
         output.writeBool(1, singleResourceGroup_);
       }
+      if (resourceEncryptionEnabled_ != false) {
+        output.writeBool(2, resourceEncryptionEnabled_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -44128,6 +44167,10 @@ public final class UsageProto {
       if (singleResourceGroup_ != false) {
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(1, singleResourceGroup_);
+      }
+      if (resourceEncryptionEnabled_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(2, resourceEncryptionEnabled_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -44147,6 +44190,8 @@ public final class UsageProto {
       boolean result = true;
       result = result && (getSingleResourceGroup()
           == other.getSingleResourceGroup());
+      result = result && (getResourceEncryptionEnabled()
+          == other.getResourceEncryptionEnabled());
       result = result && unknownFields.equals(other.unknownFields);
       return result;
     }
@@ -44161,6 +44206,9 @@ public final class UsageProto {
       hash = (37 * hash) + SINGLERESOURCEGROUP_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
           getSingleResourceGroup());
+      hash = (37 * hash) + RESOURCEENCRYPTIONENABLED_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getResourceEncryptionEnabled());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -44300,6 +44348,8 @@ public final class UsageProto {
         super.clear();
         singleResourceGroup_ = false;
 
+        resourceEncryptionEnabled_ = false;
+
         return this;
       }
 
@@ -44327,6 +44377,7 @@ public final class UsageProto {
       public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails buildPartial() {
         com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails result = new com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails(this);
         result.singleResourceGroup_ = singleResourceGroup_;
+        result.resourceEncryptionEnabled_ = resourceEncryptionEnabled_;
         onBuilt();
         return result;
       }
@@ -44378,6 +44429,9 @@ public final class UsageProto {
         if (other.getSingleResourceGroup() != false) {
           setSingleResourceGroup(other.getSingleResourceGroup());
         }
+        if (other.getResourceEncryptionEnabled() != false) {
+          setResourceEncryptionEnabled(other.getResourceEncryptionEnabled());
+        }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
         return this;
@@ -44409,12 +44463,20 @@ public final class UsageProto {
 
       private boolean singleResourceGroup_ ;
       /**
+       * <pre>
+       * True if user provides a resource group, allowing CDP to create resources only within the specified resource group
+       * </pre>
+       *
        * <code>bool singleResourceGroup = 1;</code>
        */
       public boolean getSingleResourceGroup() {
         return singleResourceGroup_;
       }
       /**
+       * <pre>
+       * True if user provides a resource group, allowing CDP to create resources only within the specified resource group
+       * </pre>
+       *
        * <code>bool singleResourceGroup = 1;</code>
        */
       public Builder setSingleResourceGroup(boolean value) {
@@ -44424,11 +44486,53 @@ public final class UsageProto {
         return this;
       }
       /**
+       * <pre>
+       * True if user provides a resource group, allowing CDP to create resources only within the specified resource group
+       * </pre>
+       *
        * <code>bool singleResourceGroup = 1;</code>
        */
       public Builder clearSingleResourceGroup() {
         
         singleResourceGroup_ = false;
+        onChanged();
+        return this;
+      }
+
+      private boolean resourceEncryptionEnabled_ ;
+      /**
+       * <pre>
+       * True if user provides encryption key URL to encrypt Azure managed disks with CMK
+       * </pre>
+       *
+       * <code>bool resourceEncryptionEnabled = 2;</code>
+       */
+      public boolean getResourceEncryptionEnabled() {
+        return resourceEncryptionEnabled_;
+      }
+      /**
+       * <pre>
+       * True if user provides encryption key URL to encrypt Azure managed disks with CMK
+       * </pre>
+       *
+       * <code>bool resourceEncryptionEnabled = 2;</code>
+       */
+      public Builder setResourceEncryptionEnabled(boolean value) {
+        
+        resourceEncryptionEnabled_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * True if user provides encryption key URL to encrypt Azure managed disks with CMK
+       * </pre>
+       *
+       * <code>bool resourceEncryptionEnabled = 2;</code>
+       */
+      public Builder clearResourceEncryptionEnabled() {
+        
+        resourceEncryptionEnabled_ = false;
         onChanged();
         return this;
       }
@@ -82320,144 +82424,145 @@ public final class UsageProto {
       "etails\0227\n\014azureDetails\030\007 \001(\0132!.usage.CDP" +
       "EnvironmentAzureDetails\022\020\n\010userTags\030\010 \001(" +
       "\t\"0\n\021CDPFreeIPADetails\022\r\n\005nodes\030\001 \001(\005\022\014\n" +
-      "\004spot\030\002 \001(\010\"9\n\032CDPEnvironmentAzureDetail" +
-      "s\022\033\n\023singleResourceGroup\030\001 \001(\010\"\032\n\030CDPEnv" +
-      "ironmentAwsDetails\"a\n%CDPEnvironmentTele" +
-      "metryFeatureDetails\022\031\n\021workloadAnalytics" +
-      "\030\001 \001(\t\022\035\n\025clusterLogsCollection\030\002 \001(\t\"J\n" +
-      "\017CDPProxyDetails\022\r\n\005proxy\030\001 \001(\010\022\020\n\010proto" +
-      "col\030\002 \001(\t\022\026\n\016authentication\030\003 \001(\t\"\211\002\n\021CD" +
-      "PNetworkDetails\022\023\n\013networkType\030\001 \001(\t\022\024\n\014" +
-      "connectivity\030\002 \001(\t\022\033\n\023numberPublicSubnet" +
-      "s\030\003 \001(\005\022\034\n\024numberPrivateSubnets\030\004 \001(\005\022\037\n" +
-      "\027serviceEndpointCreation\030\005 \001(\t\022,\n\014proxyD" +
-      "etails\030\006 \001(\0132\026.usage.CDPProxyDetails\022#\n\033" +
-      "publicEndpointAccessGateway\030\007 \001(\t\022\032\n\022sec" +
-      "urityAccessType\030\010 \001(\t\"\203\002\n\027CDPEnvironment" +
-      "Requested\0224\n\020operationDetails\030\001 \001(\0132\032.us" +
-      "age.CDPOperationDetails\0228\n\022environmentDe" +
-      "tails\030\002 \001(\0132\034.usage.CDPEnvironmentDetail" +
-      "s\022M\n\027telemetryFeatureDetails\030\003 \001(\0132,.usa" +
-      "ge.CDPEnvironmentTelemetryFeatureDetails" +
-      "\022)\n\007freeIPA\030\004 \001(\0132\030.usage.CDPFreeIPADeta" +
-      "ils\"\212\003\n\033CDPEnvironmentStatusChanged\0224\n\020o" +
-      "perationDetails\030\001 \001(\0132\032.usage.CDPOperati" +
-      "onDetails\0224\n\toldStatus\030\002 \001(\0162!.usage.CDP" +
-      "EnvironmentStatus.Value\0224\n\tnewStatus\030\003 \001" +
-      "(\0162!.usage.CDPEnvironmentStatus.Value\022\025\n" +
-      "\rfailureReason\030\004 \001(\t\0228\n\022environmentDetai" +
-      "ls\030\005 \001(\0132\034.usage.CDPEnvironmentDetails\022M" +
-      "\n\027telemetryFeatureDetails\030\006 \001(\0132,.usage." +
-      "CDPEnvironmentTelemetryFeatureDetails\022)\n" +
-      "\007freeIPA\030\007 \001(\0132\030.usage.CDPFreeIPADetails" +
-      "\"8\n\017CDPImageDetails\022\017\n\007imageId\030\001 \001(\t\022\024\n\014" +
-      "imageCatalog\030\002 \001(\t\"\222\001\n\017CDPClusterShape\022\033" +
-      "\n\023clusterTemplateName\030\001 \001(\t\022\r\n\005nodes\030\002 \001" +
-      "(\005\022\032\n\022hostGroupNodeCount\030\003 \001(\t\022\031\n\021defini" +
-      "tionDetails\030\004 \001(\t\022\034\n\024temporaryStorageUse" +
-      "d\030\005 \001(\010\"\206\001\n\021CDPVersionDetails\022\021\n\tcrVersi" +
-      "on\030\001 \001(\t\022\021\n\tcmVersion\030\002 \001(\t\022\023\n\013cdpdVersi" +
-      "on\030\003 \001(\t\022\023\n\013saltVersion\030\004 \001(\t\022\024\n\014osPatch" +
-      "Level\030\005 \001(\t\022\013\n\003all\030\006 \001(\t\"\263\001\n\021CDPClusterD" +
-      "etails\022,\n\014clusterShape\030\001 \001(\0132\026.usage.CDP" +
-      "ClusterShape\0220\n\016versionDetails\030\002 \001(\0132\030.u" +
-      "sage.CDPVersionDetails\022,\n\014imageDetails\030\003" +
-      " \001(\0132\026.usage.CDPImageDetails\022\020\n\010userTags" +
-      "\030\004 \001(\t\"\223\001\n\020CDPStatusDetails\022\023\n\013stackStat" +
-      "us\030\001 \001(\t\022\033\n\023stackDetailedStatus\030\002 \001(\t\022\031\n" +
-      "\021stackStatusReason\030\003 \001(\t\022\025\n\rclusterStatu" +
-      "s\030\004 \001(\t\022\033\n\023clusterStatusReason\030\005 \001(\t\"1\n\023" +
-      "CDPDatalakeFeatures\022\032\n\003raz\030\001 \001(\0132\r.usage" +
-      ".CDPRaz\"\030\n\006CDPRaz\022\016\n\006status\030\001 \001(\t\"\304\001\n\024CD" +
-      "PDatalakeRequested\0224\n\020operationDetails\030\001" +
-      " \001(\0132\032.usage.CDPOperationDetails\022\026\n\016envi" +
-      "ronmentCrn\030\002 \001(\t\0220\n\016clusterDetails\030\003 \001(\013" +
-      "2\030.usage.CDPClusterDetails\022,\n\010features\030\004" +
-      " \001(\0132\032.usage.CDPDatalakeFeatures\"\334\002\n\030CDP" +
-      "DatalakeStatusChanged\0224\n\020operationDetail" +
-      "s\030\001 \001(\0132\032.usage.CDPOperationDetails\0220\n\to" +
-      "ldStatus\030\002 \001(\0162\035.usage.CDPClusterStatus." +
-      "Value\0220\n\tnewStatus\030\003 \001(\0162\035.usage.CDPClus" +
-      "terStatus.Value\022.\n\rstatusDetails\030\004 \001(\0132\027" +
-      ".usage.CDPStatusDetails\022\026\n\016environmentCr" +
-      "n\030\005 \001(\t\0220\n\016clusterDetails\030\006 \001(\0132\030.usage." +
-      "CDPClusterDetails\022,\n\010features\030\007 \001(\0132\032.us" +
-      "age.CDPDatalakeFeatures\"\225\001\n\023CDPDatahubRe" +
-      "quested\0224\n\020operationDetails\030\001 \001(\0132\032.usag" +
-      "e.CDPOperationDetails\022\026\n\016environmentCrn\030" +
-      "\002 \001(\t\0220\n\016clusterDetails\030\003 \001(\0132\030.usage.CD" +
-      "PClusterDetails\"\255\002\n\027CDPDatahubStatusChan" +
-      "ged\0224\n\020operationDetails\030\001 \001(\0132\032.usage.CD" +
-      "POperationDetails\0220\n\toldStatus\030\002 \001(\0162\035.u" +
-      "sage.CDPClusterStatus.Value\0220\n\tnewStatus" +
-      "\030\003 \001(\0162\035.usage.CDPClusterStatus.Value\022.\n" +
-      "\rstatusDetails\030\004 \001(\0132\027.usage.CDPStatusDe" +
-      "tails\022\026\n\016environmentCrn\030\005 \001(\t\0220\n\016cluster" +
-      "Details\030\006 \001(\0132\030.usage.CDPClusterDetails\"" +
-      "y\n\016CDPSyncDetails\022\016\n\006status\030\001 \001(\t\022\026\n\016det" +
-      "ailedStatus\030\002 \001(\t\022\036\n\026clusterCreationStar" +
-      "ted\030\003 \001(\004\022\037\n\027clusterCreationFinished\030\004 \001" +
-      "(\004\"\325\001\n\017CDPDatalakeSync\0224\n\020operationDetai" +
-      "ls\030\001 \001(\0132\032.usage.CDPOperationDetails\022*\n\013" +
-      "syncDetails\030\002 \001(\0132\025.usage.CDPSyncDetails" +
+      "\004spot\030\002 \001(\010\"\\\n\032CDPEnvironmentAzureDetail" +
+      "s\022\033\n\023singleResourceGroup\030\001 \001(\010\022!\n\031resour" +
+      "ceEncryptionEnabled\030\002 \001(\010\"\032\n\030CDPEnvironm" +
+      "entAwsDetails\"a\n%CDPEnvironmentTelemetry" +
+      "FeatureDetails\022\031\n\021workloadAnalytics\030\001 \001(" +
+      "\t\022\035\n\025clusterLogsCollection\030\002 \001(\t\"J\n\017CDPP" +
+      "roxyDetails\022\r\n\005proxy\030\001 \001(\010\022\020\n\010protocol\030\002" +
+      " \001(\t\022\026\n\016authentication\030\003 \001(\t\"\211\002\n\021CDPNetw" +
+      "orkDetails\022\023\n\013networkType\030\001 \001(\t\022\024\n\014conne" +
+      "ctivity\030\002 \001(\t\022\033\n\023numberPublicSubnets\030\003 \001" +
+      "(\005\022\034\n\024numberPrivateSubnets\030\004 \001(\005\022\037\n\027serv" +
+      "iceEndpointCreation\030\005 \001(\t\022,\n\014proxyDetail" +
+      "s\030\006 \001(\0132\026.usage.CDPProxyDetails\022#\n\033publi" +
+      "cEndpointAccessGateway\030\007 \001(\t\022\032\n\022security" +
+      "AccessType\030\010 \001(\t\"\203\002\n\027CDPEnvironmentReque" +
+      "sted\0224\n\020operationDetails\030\001 \001(\0132\032.usage.C" +
+      "DPOperationDetails\0228\n\022environmentDetails" +
+      "\030\002 \001(\0132\034.usage.CDPEnvironmentDetails\022M\n\027" +
+      "telemetryFeatureDetails\030\003 \001(\0132,.usage.CD" +
+      "PEnvironmentTelemetryFeatureDetails\022)\n\007f" +
+      "reeIPA\030\004 \001(\0132\030.usage.CDPFreeIPADetails\"\212" +
+      "\003\n\033CDPEnvironmentStatusChanged\0224\n\020operat" +
+      "ionDetails\030\001 \001(\0132\032.usage.CDPOperationDet" +
+      "ails\0224\n\toldStatus\030\002 \001(\0162!.usage.CDPEnvir" +
+      "onmentStatus.Value\0224\n\tnewStatus\030\003 \001(\0162!." +
+      "usage.CDPEnvironmentStatus.Value\022\025\n\rfail" +
+      "ureReason\030\004 \001(\t\0228\n\022environmentDetails\030\005 " +
+      "\001(\0132\034.usage.CDPEnvironmentDetails\022M\n\027tel" +
+      "emetryFeatureDetails\030\006 \001(\0132,.usage.CDPEn" +
+      "vironmentTelemetryFeatureDetails\022)\n\007free" +
+      "IPA\030\007 \001(\0132\030.usage.CDPFreeIPADetails\"8\n\017C" +
+      "DPImageDetails\022\017\n\007imageId\030\001 \001(\t\022\024\n\014image" +
+      "Catalog\030\002 \001(\t\"\222\001\n\017CDPClusterShape\022\033\n\023clu" +
+      "sterTemplateName\030\001 \001(\t\022\r\n\005nodes\030\002 \001(\005\022\032\n" +
+      "\022hostGroupNodeCount\030\003 \001(\t\022\031\n\021definitionD" +
+      "etails\030\004 \001(\t\022\034\n\024temporaryStorageUsed\030\005 \001" +
+      "(\010\"\206\001\n\021CDPVersionDetails\022\021\n\tcrVersion\030\001 " +
+      "\001(\t\022\021\n\tcmVersion\030\002 \001(\t\022\023\n\013cdpdVersion\030\003 " +
+      "\001(\t\022\023\n\013saltVersion\030\004 \001(\t\022\024\n\014osPatchLevel" +
+      "\030\005 \001(\t\022\013\n\003all\030\006 \001(\t\"\263\001\n\021CDPClusterDetail" +
+      "s\022,\n\014clusterShape\030\001 \001(\0132\026.usage.CDPClust" +
+      "erShape\0220\n\016versionDetails\030\002 \001(\0132\030.usage." +
+      "CDPVersionDetails\022,\n\014imageDetails\030\003 \001(\0132" +
+      "\026.usage.CDPImageDetails\022\020\n\010userTags\030\004 \001(" +
+      "\t\"\223\001\n\020CDPStatusDetails\022\023\n\013stackStatus\030\001 " +
+      "\001(\t\022\033\n\023stackDetailedStatus\030\002 \001(\t\022\031\n\021stac" +
+      "kStatusReason\030\003 \001(\t\022\025\n\rclusterStatus\030\004 \001" +
+      "(\t\022\033\n\023clusterStatusReason\030\005 \001(\t\"1\n\023CDPDa" +
+      "talakeFeatures\022\032\n\003raz\030\001 \001(\0132\r.usage.CDPR" +
+      "az\"\030\n\006CDPRaz\022\016\n\006status\030\001 \001(\t\"\304\001\n\024CDPData" +
+      "lakeRequested\0224\n\020operationDetails\030\001 \001(\0132" +
+      "\032.usage.CDPOperationDetails\022\026\n\016environme" +
+      "ntCrn\030\002 \001(\t\0220\n\016clusterDetails\030\003 \001(\0132\030.us" +
+      "age.CDPClusterDetails\022,\n\010features\030\004 \001(\0132" +
+      "\032.usage.CDPDatalakeFeatures\"\334\002\n\030CDPDatal" +
+      "akeStatusChanged\0224\n\020operationDetails\030\001 \001" +
+      "(\0132\032.usage.CDPOperationDetails\0220\n\toldSta" +
+      "tus\030\002 \001(\0162\035.usage.CDPClusterStatus.Value" +
+      "\0220\n\tnewStatus\030\003 \001(\0162\035.usage.CDPClusterSt" +
+      "atus.Value\022.\n\rstatusDetails\030\004 \001(\0132\027.usag" +
+      "e.CDPStatusDetails\022\026\n\016environmentCrn\030\005 \001" +
+      "(\t\0220\n\016clusterDetails\030\006 \001(\0132\030.usage.CDPCl" +
+      "usterDetails\022,\n\010features\030\007 \001(\0132\032.usage.C" +
+      "DPDatalakeFeatures\"\225\001\n\023CDPDatahubRequest" +
+      "ed\0224\n\020operationDetails\030\001 \001(\0132\032.usage.CDP" +
+      "OperationDetails\022\026\n\016environmentCrn\030\002 \001(\t" +
       "\0220\n\016clusterDetails\030\003 \001(\0132\030.usage.CDPClus" +
-      "terDetails\022.\n\rstatusDetails\030\004 \001(\0132\027.usag" +
-      "e.CDPStatusDetails\"\324\001\n\016CDPDatahubSync\0224\n" +
-      "\020operationDetails\030\001 \001(\0132\032.usage.CDPOpera" +
-      "tionDetails\022*\n\013syncDetails\030\002 \001(\0132\025.usage" +
-      ".CDPSyncDetails\0220\n\016clusterDetails\030\003 \001(\0132" +
-      "\030.usage.CDPClusterDetails\022.\n\rstatusDetai" +
-      "ls\030\004 \001(\0132\027.usage.CDPStatusDetails\"8\n\030CDP" +
-      "DFCatalogArtifactType\"\034\n\005Value\022\t\n\005UNSET\020" +
-      "\000\022\010\n\004FLOW\020\001\"\206\001\n\033CDPDFCatalogArtifactCrea" +
-      "ted\022\022\n\nartifactId\030\001 \001(\t\022\021\n\taccountId\030\002 \001" +
-      "(\t\022\013\n\003crn\030\003 \001(\t\0223\n\004type\030\004 \001(\0162%.usage.CD" +
-      "PDFCatalogArtifactType.Value\"\206\001\n\033CDPDFCa" +
-      "talogArtifactDeleted\022\022\n\nartifactId\030\001 \001(\t" +
-      "\022\021\n\taccountId\030\002 \001(\t\022\013\n\003crn\030\003 \001(\t\0223\n\004type" +
-      "\030\004 \001(\0162%.usage.CDPDFCatalogArtifactType." +
-      "Value\"k\n\"CDPDFCatalogArtifactVersionCrea" +
-      "ted\022\021\n\tversionId\030\001 \001(\t\022\022\n\nartifactId\030\002 \001" +
-      "(\t\022\013\n\003crn\030\003 \001(\t\022\021\n\taccountId\030\004 \001(\t\"k\n\"CD" +
-      "PDFCatalogArtifactVersionDeleted\022\021\n\tvers" +
-      "ionId\030\001 \001(\t\022\022\n\nartifactId\030\002 \001(\t\022\013\n\003crn\030\003" +
-      " \001(\t\022\021\n\taccountId\030\004 \001(\t\"\262\002\n\022CDPDFService" +
-      "Status\"\233\002\n\005Value\022\t\n\005UNSET\020\000\022\024\n\020ENABLE_RE" +
-      "QUESTED\020\001\022\026\n\022ENABLE_IN_PROGRESS\020\002\022\024\n\020ENA" +
-      "BLE_COMPLETED\020\003\022\021\n\rENABLE_FAILED\020\004\022\025\n\021DI" +
-      "SABLE_REQUESTED\020\005\022\027\n\023DISABLE_IN_PROGRESS" +
-      "\020\006\022\025\n\021DISABLE_COMPLETED\020\007\022\022\n\016DISABLE_FAI" +
-      "LED\020\010\022\024\n\020UPDATE_REQUESTED\020\t\022\026\n\022UPDATE_IN" +
-      "_PROGRESS\020\n\022\021\n\rUPDATE_FAILED\020\013\022\024\n\020UPDATE" +
-      "_COMPLETED\020\014\"f\n\025CDPDFOperationDetails\022\n\n" +
-      "\002id\030\001 \001(\t\022\013\n\003crn\030\002 \001(\t\022\021\n\taccountId\030\003 \001(" +
-      "\t\022\022\n\nworkflowId\030\004 \001(\t\022\r\n\005runId\030\005 \001(\t\"\365\002\n" +
-      "\025CDPDFServiceRequested\0226\n\020operationDetai" +
-      "ls\030\001 \001(\0132\034.usage.CDPDFOperationDetails\022\026" +
-      "\n\016environmentCrn\030\002 \001(\t\022D\n\017environmentTyp" +
-      "e\030\003 \001(\0162+.usage.CDPEnvironmentsEnvironme" +
-      "ntType.Value\022\024\n\014instanceType\030\004 \001(\t\022\020\n\010mi" +
-      "nNodes\030\005 \001(\005\022\020\n\010maxNodes\030\006 \001(\005\022\030\n\020k8sSer" +
-      "verVersion\030\007 \001(\t\022\017\n\007version\030\010 \001(\t\022\026\n\016pub" +
-      "licEndpoint\030\t \001(\010\022\030\n\020accessRestricted\030\n " +
-      "\001(\010\022/\n\006status\030\013 \001(\0162\037.usage.CDPDFService" +
-      "Status.Value\"\322\001\n\031CDPDFServiceStatusChang" +
-      "ed\0226\n\020operationDetails\030\001 \001(\0132\034.usage.CDP" +
-      "DFOperationDetails\0222\n\toldStatus\030\002 \001(\0162\037." +
-      "usage.CDPDFServiceStatus.Value\0222\n\tnewSta" +
-      "tus\030\003 \001(\0162\037.usage.CDPDFServiceStatus.Val" +
-      "ue\022\025\n\rfailureReason\030\004 \001(\t\"t\n\025CDPUDXBundl" +
-      "eInitiated\0221\n\rbundleDetails\030\001 \001(\0132\032.usag" +
-      "e.CDPUDXBundleDetails\022\024\n\014initiatorCrn\030\002 " +
-      "\001(\t\022\022\n\ncaseNumber\030\003 \001(\t\"g\n\024CDPUDXBundleR" +
-      "eceived\0221\n\rbundleDetails\030\001 \001(\0132\032.usage.C" +
-      "DPUDXBundleDetails\022\014\n\004host\030\002 \001(\t\022\016\n\006stat" +
-      "us\030\003 \001(\t\"q\n\023CDPUDXBundleDetails\022\021\n\taccou" +
-      "ntId\030\001 \001(\t\022\014\n\004uuid\030\002 \001(\t\022\026\n\016environmentC" +
-      "rn\030\003 \001(\t\022\023\n\013resourceCrn\030\004 \001(\t\022\014\n\004type\030\005 " +
-      "\001(\tBV\n-com.cloudera.thunderhead.service." +
-      "common.usageB\nUsageProtoZ\031com/cloudera/c" +
-      "dp/protobufb\006proto3"
+      "terDetails\"\255\002\n\027CDPDatahubStatusChanged\0224" +
+      "\n\020operationDetails\030\001 \001(\0132\032.usage.CDPOper" +
+      "ationDetails\0220\n\toldStatus\030\002 \001(\0162\035.usage." +
+      "CDPClusterStatus.Value\0220\n\tnewStatus\030\003 \001(" +
+      "\0162\035.usage.CDPClusterStatus.Value\022.\n\rstat" +
+      "usDetails\030\004 \001(\0132\027.usage.CDPStatusDetails" +
+      "\022\026\n\016environmentCrn\030\005 \001(\t\0220\n\016clusterDetai" +
+      "ls\030\006 \001(\0132\030.usage.CDPClusterDetails\"y\n\016CD" +
+      "PSyncDetails\022\016\n\006status\030\001 \001(\t\022\026\n\016detailed" +
+      "Status\030\002 \001(\t\022\036\n\026clusterCreationStarted\030\003" +
+      " \001(\004\022\037\n\027clusterCreationFinished\030\004 \001(\004\"\325\001" +
+      "\n\017CDPDatalakeSync\0224\n\020operationDetails\030\001 " +
+      "\001(\0132\032.usage.CDPOperationDetails\022*\n\013syncD" +
+      "etails\030\002 \001(\0132\025.usage.CDPSyncDetails\0220\n\016c" +
+      "lusterDetails\030\003 \001(\0132\030.usage.CDPClusterDe" +
+      "tails\022.\n\rstatusDetails\030\004 \001(\0132\027.usage.CDP" +
+      "StatusDetails\"\324\001\n\016CDPDatahubSync\0224\n\020oper" +
+      "ationDetails\030\001 \001(\0132\032.usage.CDPOperationD" +
+      "etails\022*\n\013syncDetails\030\002 \001(\0132\025.usage.CDPS" +
+      "yncDetails\0220\n\016clusterDetails\030\003 \001(\0132\030.usa" +
+      "ge.CDPClusterDetails\022.\n\rstatusDetails\030\004 " +
+      "\001(\0132\027.usage.CDPStatusDetails\"8\n\030CDPDFCat" +
+      "alogArtifactType\"\034\n\005Value\022\t\n\005UNSET\020\000\022\010\n\004" +
+      "FLOW\020\001\"\206\001\n\033CDPDFCatalogArtifactCreated\022\022" +
+      "\n\nartifactId\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t\022\013\n" +
+      "\003crn\030\003 \001(\t\0223\n\004type\030\004 \001(\0162%.usage.CDPDFCa" +
+      "talogArtifactType.Value\"\206\001\n\033CDPDFCatalog" +
+      "ArtifactDeleted\022\022\n\nartifactId\030\001 \001(\t\022\021\n\ta" +
+      "ccountId\030\002 \001(\t\022\013\n\003crn\030\003 \001(\t\0223\n\004type\030\004 \001(" +
+      "\0162%.usage.CDPDFCatalogArtifactType.Value" +
+      "\"k\n\"CDPDFCatalogArtifactVersionCreated\022\021" +
+      "\n\tversionId\030\001 \001(\t\022\022\n\nartifactId\030\002 \001(\t\022\013\n" +
+      "\003crn\030\003 \001(\t\022\021\n\taccountId\030\004 \001(\t\"k\n\"CDPDFCa" +
+      "talogArtifactVersionDeleted\022\021\n\tversionId" +
+      "\030\001 \001(\t\022\022\n\nartifactId\030\002 \001(\t\022\013\n\003crn\030\003 \001(\t\022" +
+      "\021\n\taccountId\030\004 \001(\t\"\262\002\n\022CDPDFServiceStatu" +
+      "s\"\233\002\n\005Value\022\t\n\005UNSET\020\000\022\024\n\020ENABLE_REQUEST" +
+      "ED\020\001\022\026\n\022ENABLE_IN_PROGRESS\020\002\022\024\n\020ENABLE_C" +
+      "OMPLETED\020\003\022\021\n\rENABLE_FAILED\020\004\022\025\n\021DISABLE" +
+      "_REQUESTED\020\005\022\027\n\023DISABLE_IN_PROGRESS\020\006\022\025\n" +
+      "\021DISABLE_COMPLETED\020\007\022\022\n\016DISABLE_FAILED\020\010" +
+      "\022\024\n\020UPDATE_REQUESTED\020\t\022\026\n\022UPDATE_IN_PROG" +
+      "RESS\020\n\022\021\n\rUPDATE_FAILED\020\013\022\024\n\020UPDATE_COMP" +
+      "LETED\020\014\"f\n\025CDPDFOperationDetails\022\n\n\002id\030\001" +
+      " \001(\t\022\013\n\003crn\030\002 \001(\t\022\021\n\taccountId\030\003 \001(\t\022\022\n\n" +
+      "workflowId\030\004 \001(\t\022\r\n\005runId\030\005 \001(\t\"\365\002\n\025CDPD" +
+      "FServiceRequested\0226\n\020operationDetails\030\001 " +
+      "\001(\0132\034.usage.CDPDFOperationDetails\022\026\n\016env" +
+      "ironmentCrn\030\002 \001(\t\022D\n\017environmentType\030\003 \001" +
+      "(\0162+.usage.CDPEnvironmentsEnvironmentTyp" +
+      "e.Value\022\024\n\014instanceType\030\004 \001(\t\022\020\n\010minNode" +
+      "s\030\005 \001(\005\022\020\n\010maxNodes\030\006 \001(\005\022\030\n\020k8sServerVe" +
+      "rsion\030\007 \001(\t\022\017\n\007version\030\010 \001(\t\022\026\n\016publicEn" +
+      "dpoint\030\t \001(\010\022\030\n\020accessRestricted\030\n \001(\010\022/" +
+      "\n\006status\030\013 \001(\0162\037.usage.CDPDFServiceStatu" +
+      "s.Value\"\322\001\n\031CDPDFServiceStatusChanged\0226\n" +
+      "\020operationDetails\030\001 \001(\0132\034.usage.CDPDFOpe" +
+      "rationDetails\0222\n\toldStatus\030\002 \001(\0162\037.usage" +
+      ".CDPDFServiceStatus.Value\0222\n\tnewStatus\030\003" +
+      " \001(\0162\037.usage.CDPDFServiceStatus.Value\022\025\n" +
+      "\rfailureReason\030\004 \001(\t\"t\n\025CDPUDXBundleInit" +
+      "iated\0221\n\rbundleDetails\030\001 \001(\0132\032.usage.CDP" +
+      "UDXBundleDetails\022\024\n\014initiatorCrn\030\002 \001(\t\022\022" +
+      "\n\ncaseNumber\030\003 \001(\t\"g\n\024CDPUDXBundleReceiv" +
+      "ed\0221\n\rbundleDetails\030\001 \001(\0132\032.usage.CDPUDX" +
+      "BundleDetails\022\014\n\004host\030\002 \001(\t\022\016\n\006status\030\003 " +
+      "\001(\t\"q\n\023CDPUDXBundleDetails\022\021\n\taccountId\030" +
+      "\001 \001(\t\022\014\n\004uuid\030\002 \001(\t\022\026\n\016environmentCrn\030\003 " +
+      "\001(\t\022\023\n\013resourceCrn\030\004 \001(\t\022\014\n\004type\030\005 \001(\tBV" +
+      "\n-com.cloudera.thunderhead.service.commo" +
+      "n.usageB\nUsageProtoZ\031com/cloudera/cdp/pr" +
+      "otobufb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -82662,7 +82767,7 @@ public final class UsageProto {
     internal_static_usage_CDPEnvironmentAzureDetails_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPEnvironmentAzureDetails_descriptor,
-        new java.lang.String[] { "SingleResourceGroup", });
+        new java.lang.String[] { "SingleResourceGroup", "ResourceEncryptionEnabled", });
     internal_static_usage_CDPEnvironmentAwsDetails_descriptor =
       getDescriptor().getMessageTypes().get(32);
     internal_static_usage_CDPEnvironmentAwsDetails_fieldAccessorTable = new
