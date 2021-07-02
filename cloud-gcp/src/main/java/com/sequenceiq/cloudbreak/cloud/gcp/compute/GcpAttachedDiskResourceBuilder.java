@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.cloud.gcp.service.CustomGcpDiskEncryptionServic
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpResourceNameService;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpLabelUtil;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
@@ -76,7 +77,7 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
     private GcpLabelUtil gcpLabelUtil;
 
     @Override
-    public List<CloudResource> create(GcpContext context, long privateId, AuthenticatedContext auth, Group group, Image image) {
+    public List<CloudResource> create(GcpContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group, Image image) {
         List<CloudResource> computeResources = context.getComputeResources(privateId);
         Optional<CloudResource> reattachableDiskSet = computeResources.stream()
                 .filter(resource -> resourceType().equals(resource.getType()))
@@ -116,7 +117,7 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
     }
 
     @Override
-    public List<CloudResource> build(GcpContext context, long privateId, AuthenticatedContext auth, Group group,
+    public List<CloudResource> build(GcpContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group,
             List<CloudResource> resources, CloudStack cloudStack) throws Exception {
         InstanceTemplate template = group.getReferenceInstanceTemplate();
 

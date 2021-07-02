@@ -11,8 +11,8 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
@@ -89,7 +89,7 @@ public class HostMetadataSetup {
                     String privateIp = instanceMetaData.getPrivateIp();
                     String fqdnFromTheCluster = members.get(privateIp);
                     String discoveryFQDN = instanceMetaData.getDiscoveryFQDN();
-                    if (StringUtils.isEmpty(discoveryFQDN) || !discoveryFQDN.equals(fqdnFromTheCluster)) {
+                    if (Strings.isNullOrEmpty(discoveryFQDN) || !discoveryFQDN.equals(fqdnFromTheCluster)) {
                         instanceMetaData.setDiscoveryFQDN(fqdnFromTheCluster);
                         LOGGER.info("Discovery FQDN has been updated for instance: {} original: {}, fqdn: {}", instanceMetaData.getInstanceId(),
                                 fqdnFromTheCluster, discoveryFQDN);

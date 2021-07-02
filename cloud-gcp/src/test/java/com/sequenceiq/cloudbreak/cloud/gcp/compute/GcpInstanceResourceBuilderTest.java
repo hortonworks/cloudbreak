@@ -200,7 +200,7 @@ public class GcpInstanceResourceBuilderTest {
     public void isSchedulingPreemptibleTest() throws Exception {
         // GIVEN
         Group group = newGroupWithParams(ImmutableMap.of("preemptible", true));
-        List<CloudResource> buildableResources = builder.create(context, privateId, authenticatedContext, group, image);
+        List<CloudResource> buildableResources = builder.create(context, group.getInstances().get(0), privateId, authenticatedContext, group, image);
         context.addComputeResources(0L, buildableResources);
 
         // WHEN
@@ -209,7 +209,7 @@ public class GcpInstanceResourceBuilderTest {
         when(insert.setPrettyPrint(anyBoolean())).thenReturn(insert);
         when(insert.execute()).thenReturn(operation);
 
-        builder.build(context, privateId, authenticatedContext, group, buildableResources, cloudStack);
+        builder.build(context, group.getInstances().get(0), privateId, authenticatedContext, group, buildableResources, cloudStack);
 
         // THEN
         verify(compute).instances();
@@ -222,7 +222,7 @@ public class GcpInstanceResourceBuilderTest {
     public void isSchedulingNotPreemptibleTest() throws Exception {
         // GIVEN
         Group group = newGroupWithParams(ImmutableMap.of("preemptible", false));
-        List<CloudResource> buildableResources = builder.create(context, privateId, authenticatedContext, group, image);
+        List<CloudResource> buildableResources = builder.create(context, group.getInstances().get(0), privateId, authenticatedContext, group, image);
         context.addComputeResources(0L, buildableResources);
 
         // WHEN
@@ -231,7 +231,7 @@ public class GcpInstanceResourceBuilderTest {
         when(insert.setPrettyPrint(anyBoolean())).thenReturn(insert);
         when(insert.execute()).thenReturn(operation);
 
-        builder.build(context, privateId, authenticatedContext, group, buildableResources, cloudStack);
+        builder.build(context, group.getInstances().get(0), privateId, authenticatedContext, group, buildableResources, cloudStack);
 
         // THEN
         verify(compute).instances();
@@ -244,7 +244,7 @@ public class GcpInstanceResourceBuilderTest {
     public void preemptibleParameterNotSetTest() throws Exception {
         // GIVEN
         Group group = newGroupWithParams(ImmutableMap.of());
-        List<CloudResource> buildableResources = builder.create(context, privateId, authenticatedContext, group, image);
+        List<CloudResource> buildableResources = builder.create(context, group.getInstances().get(0), privateId, authenticatedContext, group, image);
         context.addComputeResources(0L, buildableResources);
 
         // WHEN
@@ -253,7 +253,7 @@ public class GcpInstanceResourceBuilderTest {
         when(insert.setPrettyPrint(anyBoolean())).thenReturn(insert);
         when(insert.execute()).thenReturn(operation);
 
-        builder.build(context, privateId, authenticatedContext, group, buildableResources, cloudStack);
+        builder.build(context, group.getInstances().get(0), privateId, authenticatedContext, group, buildableResources, cloudStack);
 
         // THEN
         verify(compute).instances();
@@ -266,7 +266,7 @@ public class GcpInstanceResourceBuilderTest {
     public void extraxtServiceAccountWhenServiceEmailEmpty() throws Exception {
         // GIVEN
         Group group = newGroupWithParams(ImmutableMap.of(DISCOVERY_NAME, "idbroker"));
-        List<CloudResource> buildableResources = builder.create(context, privateId, authenticatedContext, group, image);
+        List<CloudResource> buildableResources = builder.create(context, group.getInstances().get(0), privateId, authenticatedContext, group, image);
         context.addComputeResources(0L, buildableResources);
 
         // WHEN
@@ -275,7 +275,7 @@ public class GcpInstanceResourceBuilderTest {
         when(insert.setPrettyPrint(anyBoolean())).thenReturn(insert);
         when(insert.execute()).thenReturn(operation);
 
-        builder.build(context, privateId, authenticatedContext, group, buildableResources, cloudStack);
+        builder.build(context, group.getInstances().get(0), privateId, authenticatedContext, group, buildableResources, cloudStack);
 
         // THEN
         verify(compute).instances();
@@ -289,7 +289,7 @@ public class GcpInstanceResourceBuilderTest {
         // GIVEN
         String ipaserver = "ipaserver";
         Group group = newGroupWithParams(ImmutableMap.of(DISCOVERY_NAME, ipaserver));
-        List<CloudResource> buildableResources = builder.create(context, privateId, authenticatedContext, group, image);
+        List<CloudResource> buildableResources = builder.create(context, group.getInstances().get(0), privateId, authenticatedContext, group, image);
         context.addComputeResources(0L, buildableResources);
         cloudStack = new CloudStack(Collections.singletonList(group), new Network(null), image,
                 ImmutableMap.of(CLOUD_STACK_TYPE_PARAMETER, FREEIPA_STACK_TYPE), emptyMap(), null,
@@ -301,7 +301,7 @@ public class GcpInstanceResourceBuilderTest {
         when(insert.setPrettyPrint(anyBoolean())).thenReturn(insert);
         when(insert.execute()).thenReturn(operation);
 
-        builder.build(context, privateId, authenticatedContext, group, buildableResources, cloudStack);
+        builder.build(context, group.getInstances().get(0), privateId, authenticatedContext, group, buildableResources, cloudStack);
 
         // THEN
         verify(compute).instances();
@@ -322,7 +322,7 @@ public class GcpInstanceResourceBuilderTest {
                 new SpiFileSystem("test", FileSystemType.GCS, List.of(cloudGcsView)));
 
         Group group = newGroupWithParams(ImmutableMap.of(), cloudGcsView);
-        List<CloudResource> buildableResources = builder.create(context, privateId, authenticatedContext, group, image);
+        List<CloudResource> buildableResources = builder.create(context, group.getInstances().get(0), privateId, authenticatedContext, group, image);
         context.addComputeResources(0L, buildableResources);
 
         // WHEN
@@ -331,7 +331,7 @@ public class GcpInstanceResourceBuilderTest {
         when(insert.setPrettyPrint(anyBoolean())).thenReturn(insert);
         when(insert.execute()).thenReturn(operation);
 
-        builder.build(context, privateId, authenticatedContext, group, buildableResources, cloudStack);
+        builder.build(context, group.getInstances().get(0), privateId, authenticatedContext, group, buildableResources, cloudStack);
 
         // THEN
         verify(compute).instances();
@@ -379,7 +379,7 @@ public class GcpInstanceResourceBuilderTest {
 
     public void doTestDefaultDiskEncryption(ImmutableMap<String, Object> params) throws Exception {
         Group group = newGroupWithParams(params);
-        List<CloudResource> buildableResources = builder.create(context, privateId, authenticatedContext, group, image);
+        List<CloudResource> buildableResources = builder.create(context, group.getInstances().get(0), privateId, authenticatedContext, group, image);
         context.addComputeResources(0L, buildableResources);
 
         when(compute.instances()).thenReturn(instances);
@@ -387,7 +387,7 @@ public class GcpInstanceResourceBuilderTest {
         when(instances.insert(anyString(), anyString(), instanceArgumentCaptor.capture())).thenReturn(insert);
         when(insert.execute()).thenReturn(operation);
 
-        builder.build(context, privateId, authenticatedContext, group, buildableResources, cloudStack);
+        builder.build(context, group.getInstances().get(0), privateId, authenticatedContext, group, buildableResources, cloudStack);
 
         verify(customGcpDiskEncryptionService, times(0)).addEncryptionKeyToDisk(any(InstanceTemplate.class), any(AttachedDisk.class));
 
@@ -457,7 +457,7 @@ public class GcpInstanceResourceBuilderTest {
             return invocation;
         }).when(customGcpDiskEncryptionService).addEncryptionKeyToDisk(any(InstanceTemplate.class), any(AttachedDisk.class));
 
-        builder.build(context, privateId, authenticatedContext, group, buildableResources, cloudStack);
+        builder.build(context, group.getInstances().get(0), privateId, authenticatedContext, group, buildableResources, cloudStack);
 
         verify(customGcpDiskEncryptionService, times(1)).addEncryptionKeyToDisk(any(InstanceTemplate.class), any(AttachedDisk.class));
 

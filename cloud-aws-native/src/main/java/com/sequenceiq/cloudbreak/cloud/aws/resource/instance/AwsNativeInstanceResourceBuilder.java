@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCloudStackView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
@@ -70,7 +71,7 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
     private AwsMethodExecutor awsMethodExecutor;
 
     @Override
-    public List<CloudResource> create(AwsContext context, long privateId, AuthenticatedContext auth, Group group, Image image) {
+    public List<CloudResource> create(AwsContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group, Image image) {
         CloudContext cloudContext = auth.getCloudContext();
         String resourceName = getResourceNameService().resourceName(resourceType(), cloudContext.getName(), group.getName(), privateId);
         return singletonList(CloudResource.builder()
@@ -84,8 +85,8 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
     }
 
     @Override
-    public List<CloudResource> build(AwsContext context, long privateId, AuthenticatedContext ac, Group group, List<CloudResource> buildableResource,
-            CloudStack cloudStack) throws Exception {
+    public List<CloudResource> build(AwsContext context, CloudInstance cloudInstance, long privateId, AuthenticatedContext ac,
+            Group group, List<CloudResource> buildableResource, CloudStack cloudStack) throws Exception {
         if (buildableResource.isEmpty()) {
             throw new CloudConnectorException("Buildable resources cannot be empty!");
         }

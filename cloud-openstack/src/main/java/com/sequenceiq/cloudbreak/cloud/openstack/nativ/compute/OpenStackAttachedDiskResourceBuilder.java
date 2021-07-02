@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
@@ -50,7 +51,7 @@ public class OpenStackAttachedDiskResourceBuilder extends AbstractOpenStackCompu
     private AsyncTaskExecutor intermediateBuilderExecutor;
 
     @Override
-    public List<CloudResource> create(OpenStackContext context, long privateId, AuthenticatedContext auth, Group group, Image image) {
+    public List<CloudResource> create(OpenStackContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group, Image image) {
         List<CloudResource> cloudResources = new ArrayList<>();
         InstanceTemplate template = getInstanceTemplate(group, privateId);
         NovaInstanceView instanceView = new NovaInstanceView(context.getName(), template, group.getType(), group.getLoginUserName());
@@ -66,7 +67,7 @@ public class OpenStackAttachedDiskResourceBuilder extends AbstractOpenStackCompu
     }
 
     @Override
-    public List<CloudResource> build(OpenStackContext context, long privateId, AuthenticatedContext auth, Group group,
+    public List<CloudResource> build(OpenStackContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group,
             List<CloudResource> buildableResource, CloudStack cloudStack) throws Exception {
         List<CloudResource> resources = new ArrayList<>();
         List<CloudResource> syncedResources = Collections.synchronizedList(resources);

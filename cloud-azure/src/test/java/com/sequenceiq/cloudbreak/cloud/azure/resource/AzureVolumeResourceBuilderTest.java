@@ -183,7 +183,7 @@ public class AzureVolumeResourceBuilderTest {
     public void testWhenComputeResourceIsNullThenNullReturns() {
         when(context.getComputeResources(anyLong())).thenReturn(null);
 
-        List<CloudResource> result = underTest.create(context, PRIVATE_ID, auth, group, image);
+        List<CloudResource> result = underTest.create(context, cloudInstance, PRIVATE_ID, auth, group, image);
 
         assertNull(result);
     }
@@ -192,7 +192,7 @@ public class AzureVolumeResourceBuilderTest {
     public void testWhenComputeResourceIsEmptyThenNullReturns() {
         when(context.getComputeResources(anyLong())).thenReturn(Collections.emptyList());
 
-        List<CloudResource> result = underTest.create(context, PRIVATE_ID, auth, group, image);
+        List<CloudResource> result = underTest.create(context, cloudInstance, PRIVATE_ID, auth, group, image);
 
         assertNull(result);
     }
@@ -205,7 +205,7 @@ public class AzureVolumeResourceBuilderTest {
                 .name("instance").params(Map.of()).build();
         when(context.getComputeResources(PRIVATE_ID)).thenReturn(List.of(volumeSetResource, newInstance));
 
-        List<CloudResource> result = underTest.create(context, PRIVATE_ID, auth, group, image);
+        List<CloudResource> result = underTest.create(context, cloudInstance, PRIVATE_ID, auth, group, image);
 
         assertNotNull(result);
         assertEquals(1, result.size());
@@ -220,7 +220,7 @@ public class AzureVolumeResourceBuilderTest {
                 .name("instance").params(Map.of()).build();
         when(context.getComputeResources(PRIVATE_ID)).thenReturn(List.of(volumeSetResource, newInstance));
 
-        List<CloudResource> result = underTest.create(context, PRIVATE_ID, auth, group, image);
+        List<CloudResource> result = underTest.create(context, cloudInstance, PRIVATE_ID, auth, group, image);
 
         assertNotNull(result);
         assertEquals(1, result.size());
@@ -235,7 +235,7 @@ public class AzureVolumeResourceBuilderTest {
                 .name("instance").params(Map.of()).build();
         when(context.getComputeResources(PRIVATE_ID)).thenReturn(List.of(volumeSetResource, newInstance));
 
-        List<CloudResource> result = underTest.create(context, PRIVATE_ID, auth, group, image);
+        List<CloudResource> result = underTest.create(context, cloudInstance, PRIVATE_ID, auth, group, image);
 
         assertNotNull(result);
         assertEquals(1, result.size());
@@ -342,7 +342,7 @@ public class AzureVolumeResourceBuilderTest {
 
     @Test
     void buildTestWhenNoVolumeSet() throws Exception {
-        List<CloudResource> result = underTest.build(context, PRIVATE_ID, auth, group, List.of(), cloudStack);
+        List<CloudResource> result = underTest.build(context, cloudInstance, PRIVATE_ID, auth, group, List.of(), cloudStack);
 
         verify(azureClient, never()).createManagedDisk(anyString(), anyInt(), any(AzureDiskType.class), anyString(), anyString(), anyMap(), anyString());
 
@@ -358,7 +358,7 @@ public class AzureVolumeResourceBuilderTest {
                 .params(Map.of(CloudResource.ATTRIBUTES, new VolumeSetAttributes(AVAILABILITY_ZONE, true, FSTAB, volumes, VOLUME_SIZE, VOLUME_TYPE)))
                 .name(VOLUME_NAME).build();
 
-        List<CloudResource> result = underTest.build(context, PRIVATE_ID, auth, group, List.of(volumeSetResource), cloudStack);
+        List<CloudResource> result = underTest.build(context, cloudInstance, PRIVATE_ID, auth, group, List.of(volumeSetResource), cloudStack);
 
         verify(azureClient, never()).createManagedDisk(anyString(), anyInt(), any(AzureDiskType.class), anyString(), anyString(), anyMap(), anyString());
 
@@ -380,7 +380,7 @@ public class AzureVolumeResourceBuilderTest {
 
         when(azureClient.getDiskByName(RESOURCE_GROUP, VOLUME_ID)).thenReturn(disk);
 
-        List<CloudResource> result = underTest.build(context, PRIVATE_ID, auth, group, List.of(volumeSetResource), cloudStack);
+        List<CloudResource> result = underTest.build(context, cloudInstance, PRIVATE_ID, auth, group, List.of(volumeSetResource), cloudStack);
 
         verify(azureClient, never()).createManagedDisk(anyString(), anyInt(), any(AzureDiskType.class), anyString(), anyString(), anyMap(), anyString());
 
@@ -402,7 +402,7 @@ public class AzureVolumeResourceBuilderTest {
 
         when(azureClient.createManagedDisk(VOLUME_ID, VOLUME_SIZE, AzureDiskType.STANDARD_SSD_LRS, REGION, RESOURCE_GROUP, Map.of(), null)).thenReturn(disk);
 
-        List<CloudResource> result = underTest.build(context, PRIVATE_ID, auth, group, List.of(volumeSetResource), cloudStack);
+        List<CloudResource> result = underTest.build(context, cloudInstance, PRIVATE_ID, auth, group, List.of(volumeSetResource), cloudStack);
 
         assertThat(result).isNotNull();
         assertThat(result).hasSize(1);
@@ -424,7 +424,7 @@ public class AzureVolumeResourceBuilderTest {
 
         when(azureClient.createManagedDisk(VOLUME_ID, VOLUME_SIZE, AzureDiskType.STANDARD_SSD_LRS, REGION, RESOURCE_GROUP, Map.of(), null)).thenReturn(disk);
 
-        List<CloudResource> result = underTest.build(context, PRIVATE_ID, auth, group, List.of(volumeSetResource), cloudStack);
+        List<CloudResource> result = underTest.build(context, cloudInstance, PRIVATE_ID, auth, group, List.of(volumeSetResource), cloudStack);
 
         assertThat(result).isNotNull();
         assertThat(result).hasSize(1);
@@ -448,7 +448,7 @@ public class AzureVolumeResourceBuilderTest {
         when(azureClient.createManagedDisk(VOLUME_ID, VOLUME_SIZE, AzureDiskType.STANDARD_SSD_LRS, REGION, RESOURCE_GROUP, Map.of(), DISK_ENCRYPTION_SET_ID))
                 .thenReturn(disk);
 
-        List<CloudResource> result = underTest.build(context, PRIVATE_ID, auth, group, List.of(volumeSetResource), cloudStack);
+        List<CloudResource> result = underTest.build(context, cloudInstance, PRIVATE_ID, auth, group, List.of(volumeSetResource), cloudStack);
 
         assertThat(result).isNotNull();
         assertThat(result).hasSize(1);

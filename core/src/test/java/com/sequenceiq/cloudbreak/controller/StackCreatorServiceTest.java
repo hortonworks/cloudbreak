@@ -3,12 +3,16 @@ package com.sequenceiq.cloudbreak.controller;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -56,6 +60,7 @@ import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClient
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
+import com.sequenceiq.cloudbreak.service.multiaz.MultiAzCalculatorService;
 import com.sequenceiq.cloudbreak.service.recipe.RecipeService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -66,6 +71,7 @@ import com.sequenceiq.cloudbreak.validation.Validator;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @RunWith(MockitoJUnitRunner.class)
 public class StackCreatorServiceTest {
@@ -164,7 +170,13 @@ public class StackCreatorServiceTest {
     private ValidationResult validationResult;
 
     @Mock
+    private MultiAzCalculatorService multiAzCalculatorService;
+
+    @Mock
     private Stack stack;
+
+    @Mock
+    private DetailedEnvironmentResponse environmentResponse;
 
     @Mock
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
@@ -341,8 +353,11 @@ public class StackCreatorServiceTest {
         InstanceGroup workerGroup = getARequestGroup("worker", 2, InstanceGroupType.CORE);
         InstanceGroup computeGroup = getARequestGroup("compute", 4, InstanceGroupType.CORE);
         stack.setInstanceGroups(Set.of(masterGroup, workerGroup, computeGroup));
+        when(multiAzCalculatorService.prepareSubnetAzMap(any(DetailedEnvironmentResponse.class)))
+                .thenReturn(new HashMap<>());
+        doNothing().when(multiAzCalculatorService).calculateByRoundRobin(anyMap(), any(InstanceGroup.class));
 
-        underTest.fillInstanceMetadata(stack);
+        underTest.fillInstanceMetadata(environmentResponse, stack);
 
         Map<String, Set<InstanceMetaData>> hostGroupInstances = stack.getInstanceGroups().stream().collect(
                 Collectors.toMap(InstanceGroup::getGroupName, instanceGroup -> instanceGroup.getAllInstanceMetaData()));
@@ -365,8 +380,11 @@ public class StackCreatorServiceTest {
         InstanceGroup workerGroup = getARequestGroup("worker", 3, InstanceGroupType.CORE);
         InstanceGroup masterGroup = getARequestGroup("master", 2, InstanceGroupType.CORE);
         stack.setInstanceGroups(Set.of(masterGroup, workerGroup, computeGroup, managerGroup, gatewayGroup));
+        when(multiAzCalculatorService.prepareSubnetAzMap(any(DetailedEnvironmentResponse.class)))
+                .thenReturn(new HashMap<>());
+        doNothing().when(multiAzCalculatorService).calculateByRoundRobin(anyMap(), any(InstanceGroup.class));
 
-        underTest.fillInstanceMetadata(stack);
+        underTest.fillInstanceMetadata(environmentResponse, stack);
 
         Map<String, Set<InstanceMetaData>> hostGroupInstances = stack.getInstanceGroups().stream().collect(
         Collectors.toMap(InstanceGroup::getGroupName, instanceGroup -> instanceGroup.getAllInstanceMetaData()));

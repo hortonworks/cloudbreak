@@ -11,6 +11,7 @@ import org.openstack4j.model.compute.Server;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
@@ -22,8 +23,8 @@ import com.sequenceiq.common.api.type.ResourceType;
 @Service
 public class OpenStackFloatingIPBuilder extends AbstractOpenStackComputeResourceBuilder {
     @Override
-    public List<CloudResource> build(OpenStackContext context, long privateId, AuthenticatedContext auth, Group group,
-            List<CloudResource> buildableResource, CloudStack cloudStack) {
+    public List<CloudResource> build(OpenStackContext context, CloudInstance cloudInstance, long privateId, AuthenticatedContext auth, Group group,
+        List<CloudResource> buildableResource, CloudStack cloudStack) {
         CloudResource resource = buildableResource.get(0);
         try {
             String publicNetId = context.getStringParameter(OpenStackConstants.PUBLIC_NET_ID);

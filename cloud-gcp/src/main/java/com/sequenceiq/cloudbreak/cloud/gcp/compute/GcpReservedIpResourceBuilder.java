@@ -17,6 +17,7 @@ import com.google.api.services.compute.model.Operation;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
@@ -29,7 +30,7 @@ public class GcpReservedIpResourceBuilder extends AbstractGcpComputeBuilder {
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpReservedIpResourceBuilder.class);
 
     @Override
-    public List<CloudResource> create(GcpContext context, long privateId, AuthenticatedContext auth, Group group, Image image) {
+    public List<CloudResource> create(GcpContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group, Image image) {
         if (group.getType() == InstanceGroupType.GATEWAY && !context.getNoPublicIp()) {
             String resourceName = getResourceNameService().resourceName(resourceType(), auth.getCloudContext().getName(), group.getName(), privateId);
             return Collections.singletonList(createNamedResource(resourceType(), resourceName));
@@ -41,7 +42,7 @@ public class GcpReservedIpResourceBuilder extends AbstractGcpComputeBuilder {
     }
 
     @Override
-    public List<CloudResource> build(GcpContext context, long privateId, AuthenticatedContext auth, Group group,
+    public List<CloudResource> build(GcpContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group,
             List<CloudResource> buildableResource, CloudStack cloudStack) throws Exception {
         List<CloudResource> result = buildableResource;
         if (!buildableResource.isEmpty()) {

@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.context.AwsContext;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
@@ -75,6 +76,9 @@ public class AwsNativeInstanceResourceBuilderTest {
     private Group group;
 
     @Mock
+    private CloudInstance cloudInstance;
+
+    @Mock
     private CloudStack cloudStack;
 
     @Mock
@@ -84,7 +88,7 @@ public class AwsNativeInstanceResourceBuilderTest {
     public void testBuildWhenBuildableResorucesAreEmpty() throws Exception {
         long privateId = 0;
         CloudConnectorException actual = Assertions.assertThrows(CloudConnectorException.class,
-                () -> underTest.build(awsContext, privateId, ac, group, Collections.emptyList(), cloudStack));
+                () -> underTest.build(awsContext, cloudInstance, privateId, ac, group, Collections.emptyList(), cloudStack));
         Assertions.assertEquals("Buildable resources cannot be empty!", actual.getMessage());
     }
 
@@ -116,7 +120,7 @@ public class AwsNativeInstanceResourceBuilderTest {
         when(cloudStack.getInstanceAuthentication()).thenReturn(authentication);
         when(awsContext.getAmazonEc2Client()).thenReturn(amazonEc2Client);
 
-        List<CloudResource> actual = underTest.build(awsContext, privateId, ac, group, Collections.singletonList(cloudResource), cloudStack);
+        List<CloudResource> actual = underTest.build(awsContext, cloudInstance, privateId, ac, group, Collections.singletonList(cloudResource), cloudStack);
         Assertions.assertEquals(actual.get(0).getInstanceId(), "instanceId");
     }
 
@@ -133,7 +137,7 @@ public class AwsNativeInstanceResourceBuilderTest {
                 .withState(new InstanceState().withCode(AwsNativeInstanceResourceBuilder.AWS_INSTANCE_RUNNING_CODE));
         when(awsMethodExecutor.execute(any(), eq(Optional.empty()))).thenReturn(Optional.of(instance));
 
-        List<CloudResource> actual = underTest.build(awsContext, privateId, ac, group, Collections.singletonList(cloudResource), cloudStack);
+        List<CloudResource> actual = underTest.build(awsContext, cloudInstance, privateId, ac, group, Collections.singletonList(cloudResource), cloudStack);
         Assertions.assertEquals(actual.get(0).getInstanceId(), "instanceId");
         verify(amazonEc2Client, times(0)).startInstances(any());
     }
@@ -152,7 +156,7 @@ public class AwsNativeInstanceResourceBuilderTest {
         when(awsMethodExecutor.execute(any(), eq(Optional.empty()))).thenReturn(Optional.of(instance));
         when(awsContext.getAmazonEc2Client()).thenReturn(amazonEc2Client);
 
-        List<CloudResource> actual = underTest.build(awsContext, privateId, ac, group, Collections.singletonList(cloudResource), cloudStack);
+        List<CloudResource> actual = underTest.build(awsContext, cloudInstance, privateId, ac, group, Collections.singletonList(cloudResource), cloudStack);
         Assertions.assertEquals(actual.get(0).getInstanceId(), "instanceId");
         verify(amazonEc2Client, times(1)).startInstances(any());
     }
@@ -187,7 +191,7 @@ public class AwsNativeInstanceResourceBuilderTest {
         when(cloudStack.getInstanceAuthentication()).thenReturn(authentication);
         when(awsContext.getAmazonEc2Client()).thenReturn(amazonEc2Client);
 
-        List<CloudResource> actual = underTest.build(awsContext, privateId, ac, group, Collections.singletonList(cloudResource), cloudStack);
+        List<CloudResource> actual = underTest.build(awsContext, cloudInstance, privateId, ac, group, Collections.singletonList(cloudResource), cloudStack);
         Assertions.assertEquals(actual.get(0).getInstanceId(), "instanceId");
     }
 

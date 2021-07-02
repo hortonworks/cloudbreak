@@ -48,7 +48,7 @@ public class OpenStackInstanceBuilder extends AbstractOpenStackComputeResourceBu
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackInstanceBuilder.class);
 
     @Override
-    public List<CloudResource> build(OpenStackContext context, long privateId, AuthenticatedContext auth, Group group,
+    public List<CloudResource> build(OpenStackContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group,
             List<CloudResource> buildableResource, CloudStack cloudStack) {
         CloudResource resource = buildableResource.get(0);
         try {

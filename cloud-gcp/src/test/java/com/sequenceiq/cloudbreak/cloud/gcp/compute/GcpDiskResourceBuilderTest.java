@@ -12,6 +12,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -118,6 +119,8 @@ class GcpDiskResourceBuilderTest {
 
     private InstanceTemplate instanceTemplate;
 
+    private CloudInstance cloudInstance;
+
     @BeforeEach
     void setUp() throws Exception {
         privateCrn = "crn";
@@ -143,6 +146,12 @@ class GcpDiskResourceBuilderTest {
         name = "master";
         String flavor = "m1.medium";
         instanceId = "SOME_ID";
+
+        cloudInstance = new CloudInstance(instanceId,
+                new InstanceTemplate("flavor", "group", 1L, new ArrayList<>(), InstanceStatus.CREATE_REQUESTED,
+                        new HashMap<>(), 1L, "img", TemporaryStorage.ATTACHED_VOLUMES),
+                new InstanceAuthentication("pub", "pub", "cb"),
+                "subnet1", "az1");
 
         auth = new AuthenticatedContext(cloudContext, cloudCredential);
 
@@ -192,7 +201,7 @@ class GcpDiskResourceBuilderTest {
             disk.setDiskEncryptionKey(encryptionKey);
             return invocation;
         }).when(customGcpDiskEncryptionService).addEncryptionKeyToDisk(any(InstanceTemplate.class), diskCaptor.capture());
-        List<CloudResource> build = underTest.build(context, privateId, auth, group, buildableResource, cloudStack);
+        List<CloudResource> build = underTest.build(context, cloudInstance, privateId, auth, group, buildableResource, cloudStack);
 
         assertNotNull(build);
         assertEquals(1, build.size());
@@ -209,7 +218,7 @@ class GcpDiskResourceBuilderTest {
     void testBuildWithVeryLargeRootVolumeSize() throws Exception {
         int rootVolumeSize = Integer.MAX_VALUE;
         Group group = createGroup(rootVolumeSize);
-        List<CloudResource> build = underTest.build(context, privateId, auth, group, buildableResource, cloudStack);
+        List<CloudResource> build = underTest.build(context, cloudInstance, privateId, auth, group, buildableResource, cloudStack);
 
         assertNotNull(build);
         verify(disks).insert(anyString(), anyString(), argThat(argument -> argument.getSizeGb().equals((long) rootVolumeSize)));
@@ -221,7 +230,7 @@ class GcpDiskResourceBuilderTest {
         int rootVolumeSize = Integer.MIN_VALUE;
         Group group = createGroup(rootVolumeSize);
 
-        List<CloudResource> build = underTest.build(context, privateId, auth, group, buildableResource, cloudStack);
+        List<CloudResource> build = underTest.build(context, cloudInstance, privateId, auth, group, buildableResource, cloudStack);
 
         assertNotNull(build);
         verify(disks).insert(anyString(), anyString(), argThat(argument -> argument.getSizeGb().equals((long) rootVolumeSize)));

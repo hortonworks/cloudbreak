@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
@@ -16,12 +17,12 @@ import com.sequenceiq.common.api.type.ResourceType;
 class TestGcpComputeBuilder extends AbstractGcpComputeBuilder {
 
     @Override
-    public List<CloudResource> create(GcpContext context, long privateId, AuthenticatedContext auth, Group group, Image image) {
+    public List<CloudResource> create(GcpContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group, Image image) {
         return null;
     }
 
     @Override
-    public List<CloudResource> build(GcpContext context, long privateId, AuthenticatedContext auth, Group group,
+    public List<CloudResource> build(GcpContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group,
         List<CloudResource> buildableResource, CloudStack cloudStack) throws Exception {
         return null;
     }

@@ -37,7 +37,7 @@ public abstract class AbstractOpenStackComputeResourceBuilder extends AbstractOp
     private OpenStackUtils utils;
 
     @Override
-    public List<CloudResource> create(OpenStackContext context, long privateId, AuthenticatedContext auth, Group group, Image image) {
+    public List<CloudResource> create(OpenStackContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group, Image image) {
         String resourceName = resourceNameService.resourceName(resourceType(), utils.getStackName(auth), group.getName(), privateId);
         return Collections.singletonList(createNamedResource(resourceType(), group.getName(), resourceName));
     }

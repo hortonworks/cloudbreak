@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.context.AzureContext;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
@@ -35,16 +36,16 @@ public class AzureAttachmentResourceBuilder extends AbstractAzureComputeBuilder 
     private AzureResourceGroupMetadataProvider azureResourceGroupMetadataProvider;
 
     @Override
-    public List<CloudResource> create(AzureContext context, long privateId, AuthenticatedContext auth, Group group, Image image) {
+    public List<CloudResource> create(AzureContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group, Image image) {
         LOGGER.info("Prepare instance resource to attach to");
         return context.getComputeResources(privateId);
     }
 
     @Override
-    public List<CloudResource> build(AzureContext context, long privateId, AuthenticatedContext auth, Group group,
+    public List<CloudResource> build(AzureContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group,
             List<CloudResource> buildableResource, CloudStack cloudStack) {
 
-        CloudResource instance = buildableResource.stream()
+        CloudResource cloudResourceInstance = buildableResource.stream()
                 .filter(cloudResource -> cloudResource.getType().equals(ResourceType.AZURE_INSTANCE))
                 .findFirst()
                 .orElseThrow(() -> new AzureResourceException("Instance resource not found"));
@@ -54,7 +55,7 @@ public class AzureAttachmentResourceBuilder extends AbstractAzureComputeBuilder 
         CloudContext cloudContext = auth.getCloudContext();
         String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, cloudStack);
         AzureClient client = getAzureClient(auth);
-        VirtualMachine vm = client.getVirtualMachineByResourceGroup(resourceGroupName, instance.getName());
+        VirtualMachine vm = client.getVirtualMachineByResourceGroup(resourceGroupName, cloudResourceInstance.getName());
         Set<String> diskIds = vm.dataDisks().values().stream().map(VirtualMachineDataDisk::id).collect(Collectors.toSet());
 
         CloudResource volumeSet = buildableResource.stream()

@@ -125,6 +125,9 @@ class AwsVolumeResourceBuilderTest {
     private CloudStack cloudStack;
 
     @Mock
+    private CloudInstance cloudInstance;
+
+    @Mock
     private CloudContext cloudContext;
 
     @Mock
@@ -154,7 +157,7 @@ class AwsVolumeResourceBuilderTest {
     void buildTestWhenNoVolumesAtAll() throws Exception {
         Group group = createGroup(emptyList(), Map.of(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, false));
 
-        List<CloudResource> result = underTest.build(awsContext, PRIVATE_ID, authenticatedContext, group, emptyList(), cloudStack);
+        List<CloudResource> result = underTest.build(awsContext, cloudInstance, PRIVATE_ID, authenticatedContext, group, emptyList(), cloudStack);
 
         assertThat(result).isEmpty();
     }
@@ -163,7 +166,8 @@ class AwsVolumeResourceBuilderTest {
     void buildTestWhenEphemeralVolumesOnly() throws Exception {
         Group group = createGroup(List.of(createVolume(TYPE_EPHEMERAL)), Map.of(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, false));
 
-        List<CloudResource> result = underTest.build(awsContext, PRIVATE_ID, authenticatedContext, group, List.of(createVolumeSet(emptyList())), cloudStack);
+        List<CloudResource> result = underTest.build(awsContext, cloudInstance, PRIVATE_ID, authenticatedContext, group,
+                List.of(createVolumeSet(emptyList())), cloudStack);
 
         List<VolumeSetAttributes.Volume> volumes = verifyResultAndGetVolumes(result);
         assertThat(volumes).isEmpty();
@@ -176,7 +180,7 @@ class AwsVolumeResourceBuilderTest {
         setUpTaskExecutors();
         when(amazonEC2Client.createVolume(isA(CreateVolumeRequest.class))).thenReturn(createCreateVolumeResult());
 
-        List<CloudResource> result = underTest.build(awsContext, PRIVATE_ID, authenticatedContext, group,
+        List<CloudResource> result = underTest.build(awsContext, cloudInstance, PRIVATE_ID, authenticatedContext, group,
                 List.of(createVolumeSet(List.of(createVolumeForVolumeSet(TYPE_GP2)))), cloudStack);
 
         List<VolumeSetAttributes.Volume> volumes = verifyResultAndGetVolumes(result);
@@ -191,7 +195,7 @@ class AwsVolumeResourceBuilderTest {
         setUpTaskExecutors();
         when(amazonEC2Client.createVolume(isA(CreateVolumeRequest.class))).thenReturn(createCreateVolumeResult());
 
-        List<CloudResource> result = underTest.build(awsContext, PRIVATE_ID, authenticatedContext, group,
+        List<CloudResource> result = underTest.build(awsContext, cloudInstance, PRIVATE_ID, authenticatedContext, group,
                 List.of(createVolumeSet(List.of(createVolumeForVolumeSet(TYPE_GP2)))), cloudStack);
 
         List<VolumeSetAttributes.Volume> volumes = verifyResultAndGetVolumes(result);
@@ -208,7 +212,7 @@ class AwsVolumeResourceBuilderTest {
         setUpTaskExecutors();
         when(amazonEC2Client.createVolume(isA(CreateVolumeRequest.class))).thenReturn(createCreateVolumeResult());
 
-        List<CloudResource> result = underTest.build(awsContext, PRIVATE_ID, authenticatedContext, group,
+        List<CloudResource> result = underTest.build(awsContext, cloudInstance, PRIVATE_ID, authenticatedContext, group,
                 List.of(createVolumeSet(List.of(createVolumeForVolumeSet(TYPE_GP2)))), cloudStack);
 
         List<VolumeSetAttributes.Volume> volumes = verifyResultAndGetVolumes(result);
@@ -225,7 +229,7 @@ class AwsVolumeResourceBuilderTest {
         setUpTaskExecutors();
         when(amazonEC2Client.createVolume(isA(CreateVolumeRequest.class))).thenReturn(createCreateVolumeResult());
 
-        List<CloudResource> result = underTest.build(awsContext, PRIVATE_ID, authenticatedContext, group,
+        List<CloudResource> result = underTest.build(awsContext, cloudInstance, PRIVATE_ID, authenticatedContext, group,
                 List.of(createVolumeSet(List.of(createVolumeForVolumeSet(TYPE_GP2)))), cloudStack);
 
         List<VolumeSetAttributes.Volume> volumes = verifyResultAndGetVolumes(result);
@@ -243,7 +247,7 @@ class AwsVolumeResourceBuilderTest {
         setUpTaskExecutors();
         when(amazonEC2Client.createVolume(isA(CreateVolumeRequest.class))).thenReturn(createCreateVolumeResult());
 
-        List<CloudResource> result = underTest.build(awsContext, PRIVATE_ID, authenticatedContext, group,
+        List<CloudResource> result = underTest.build(awsContext, cloudInstance, PRIVATE_ID, authenticatedContext, group,
                 List.of(createVolumeSet(List.of(createVolumeForVolumeSet(TYPE_GP2)))), cloudStack);
 
         List<VolumeSetAttributes.Volume> volumes = verifyResultAndGetVolumes(result);
@@ -261,7 +265,7 @@ class AwsVolumeResourceBuilderTest {
         setUpTaskExecutors();
         when(amazonEC2Client.createVolume(isA(CreateVolumeRequest.class))).thenReturn(createCreateVolumeResult());
 
-        List<CloudResource> result = underTest.build(awsContext, PRIVATE_ID, authenticatedContext, group,
+        List<CloudResource> result = underTest.build(awsContext, cloudInstance, PRIVATE_ID, authenticatedContext, group,
                 List.of(createVolumeSet(List.of(createVolumeForVolumeSet(TYPE_GP2)))), cloudStack);
 
         List<VolumeSetAttributes.Volume> volumes = verifyResultAndGetVolumes(result);

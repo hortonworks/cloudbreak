@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.context.AwsContext;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
@@ -54,13 +55,13 @@ public class AwsAttachmentResourceBuilder extends AbstractAwsComputeBuilder {
     private VolumeResourceCollector volumeResourceCollector;
 
     @Override
-    public List<CloudResource> create(AwsContext context, long privateId, AuthenticatedContext auth, Group group, Image image) {
+    public List<CloudResource> create(AwsContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group, Image image) {
         LOGGER.debug("Prepare instance resource to attach to");
         return context.getComputeResources(privateId);
     }
 
     @Override
-    public List<CloudResource> build(AwsContext context, long privateId, AuthenticatedContext auth, Group group,
+    public List<CloudResource> build(AwsContext context, CloudInstance cloudInstance, long privateId, AuthenticatedContext auth, Group group,
             List<CloudResource> buildableResource, CloudStack cloudStack) throws Exception {
         LOGGER.debug("Attach volumes to instance");
 

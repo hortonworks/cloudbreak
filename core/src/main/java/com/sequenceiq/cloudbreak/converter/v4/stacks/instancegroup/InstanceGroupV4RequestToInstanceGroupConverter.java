@@ -38,10 +38,10 @@ public class InstanceGroupV4RequestToInstanceGroupConverter extends AbstractConv
         instanceGroup.setInstanceGroupType(source.getType());
         instanceGroup.setInitialNodeCount(source.getNodeCount());
         instanceGroup.setScalabilityOption(source.getScalabilityOption() == null ? ScalabilityOption.ALLOWED : source.getScalabilityOption());
+        setNetwork(source, instanceGroup);
         if (source.getNodeCount() > 0) {
             addInstanceMetadatas(source, instanceGroup);
         }
-        setNetwork(source, instanceGroup);
         return instanceGroup;
     }
 
