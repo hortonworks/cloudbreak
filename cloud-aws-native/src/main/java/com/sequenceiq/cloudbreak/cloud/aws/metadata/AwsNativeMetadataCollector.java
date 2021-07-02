@@ -104,7 +104,7 @@ public class AwsNativeMetadataCollector implements MetadataCollector {
 
     @Override
     public InstanceStoreMetadata collectInstanceStorageCount(AuthenticatedContext ac, List<String> instanceTypes) {
-        return null;
+        return new InstanceStoreMetadata();
     }
 
     private List<CloudVmMetaDataStatus> collectInstances(List<CloudInstance> vms, List<CloudResource> resources, AmazonEc2Client ec2Client) {

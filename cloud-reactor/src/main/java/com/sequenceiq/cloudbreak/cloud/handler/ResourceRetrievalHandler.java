@@ -27,8 +27,17 @@ public class ResourceRetrievalHandler implements Consumer<Event<ResourceRetrieva
     public void accept(Event<ResourceRetrievalNotification> event) {
         LOGGER.debug("Resource retrieval notification event received: {}", event);
         ResourceRetrievalNotification data = event.getData();
-        Optional<CloudResource> resources = cloudResourceRetrieverService.findByResourceReferenceAndStatusAndType(data.getResourceReference(), data.getStatus(),
-                data.getResourceType());
+        Optional<CloudResource> resources = retrieveResource(data);
         data.getPromise().onNext(resources);
+    }
+
+    private Optional<CloudResource> retrieveResource(ResourceRetrievalNotification data) {
+        if (data.getStackId() != null) {
+            return cloudResourceRetrieverService.findByResourceReferenceAndStatusAndTypeAndStack(data.getResourceReference(),
+                    data.getStatus(), data.getResourceType(), data.getStackId());
+        } else {
+            return cloudResourceRetrieverService.findByResourceReferenceAndStatusAndType(data.getResourceReference(), data.getStatus(),
+                    data.getResourceType());
+        }
     }
 }

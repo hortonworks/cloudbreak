@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.AwsLoadBal
 
 import org.springframework.stereotype.Component;
 
+import com.amazonaws.services.elasticloadbalancingv2.model.LoadBalancerSchemeEnum;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 
 @Component
@@ -21,11 +22,11 @@ public class LoadBalancerTypeConverter {
     }
 
     public LoadBalancerType convert(String type) {
-        AwsLoadBalancerScheme awsLoadBalancerScheme = AwsLoadBalancerScheme.valueOf(type.toUpperCase());
+        LoadBalancerSchemeEnum awsLoadBalancerScheme = LoadBalancerSchemeEnum.fromValue(type);
         switch (awsLoadBalancerScheme) {
-            case INTERNET_FACING:
+            case InternetFacing:
                 return LoadBalancerType.PUBLIC;
-            case INTERNAL:
+            case Internal:
             default:
                 return LoadBalancerType.PRIVATE;
         }

@@ -34,4 +34,12 @@ public class ResourcePersistenceRetriever implements PersistenceRetriever {
         eventBus.notify("resource-retrieved", eventFactory.createEvent(notification));
         return notification.getResult();
     }
+
+    @Override
+    public Optional<CloudResource> notifyRetrieve(Long stackId, String resourceReference, CommonStatus status, ResourceType resourceType) {
+        ResourceRetrievalNotification notification = new ResourceRetrievalNotification(resourceReference, status, resourceType, stackId);
+        LOGGER.debug("Sending notification to retrieve resources by resource reference: {} and stack: {}", resourceReference, stackId);
+        eventBus.notify("resource-retrieved", eventFactory.createEvent(notification));
+        return notification.getResult();
+    }
 }

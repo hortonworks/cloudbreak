@@ -1,13 +1,13 @@
 package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 
 import static com.sequenceiq.cloudbreak.cloud.aws.scheduler.WaiterRunner.run;
+import static java.util.stream.Collectors.mapping;
+import static java.util.stream.Collectors.toList;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -23,17 +23,16 @@ import com.amazonaws.services.cloudformation.model.ResourceStatus;
 import com.amazonaws.services.cloudformation.model.StackResourceSummary;
 import com.amazonaws.waiters.Waiter;
 import com.google.common.annotations.VisibleForTesting;
+import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsStackRequestHelper;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationTemplateBuilder;
-import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.connector.resource.AwsLoadBalancerCommonService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.connector.resource.AwsModelService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.AwsListener;
 import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.AwsLoadBalancer;
-import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.AwsLoadBalancerScheme;
-import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.LoadBalancerTypeConverter;
 import com.sequenceiq.cloudbreak.cloud.aws.common.resource.ModelContext;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsNetworkView;
@@ -45,12 +44,9 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
-import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
-import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.common.api.type.CommonStatus;
-import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
@@ -77,7 +73,7 @@ public class AwsLoadBalancerLaunchService {
     private AwsCloudFormationErrorMessageProvider awsCloudFormationErrorMessageProvider;
 
     @Inject
-    private LoadBalancerTypeConverter loadBalancerTypeConverter;
+    private AwsLoadBalancerCommonService loadBalancerCommonService;
 
     public List<CloudResourceStatus> updateCloudformationWithLoadBalancers(AuthenticatedContext ac, CloudStack stack,
             PersistenceNotifier resourceNotifier) {
@@ -105,7 +101,9 @@ public class AwsLoadBalancerLaunchService {
                 modelContext = awsModelService.buildDefaultModelContext(ac, stack, resourceNotifier);
             }
 
-            List<AwsLoadBalancer> awsLoadBalancers = getAwsLoadBalancers(cloudLoadBalancers, instances, awsNetworkView);
+            Map<String, List<String>> instanceIdsByGroupName = instances.stream()
+                    .collect(Collectors.groupingBy(CloudResource::getGroup, mapping(CloudResource::getInstanceId, toList())));
+            List<AwsLoadBalancer> awsLoadBalancers = loadBalancerCommonService.getAwsLoadBalancers(cloudLoadBalancers, instanceIdsByGroupName, awsNetworkView);
 
             modelContext.withLoadBalancers(awsLoadBalancers);
             LOGGER.debug("Starting CloudFormation update to create load balancer and target groups.");
@@ -115,7 +113,7 @@ public class AwsLoadBalancerLaunchService {
                 LOGGER.debug("Load balancer and target group resources already exist, skipping creation");
                 result = cfRetryClient.listStackResources(awsStackRequestHelper.createListStackResourcesRequest(cFStackName));
             } else {
-                result = updateCloudFormationStack(ac, stack, modelContext, awsLoadBalancers);
+                result = updateCloudFormationStack(ac, stack, modelContext);
             }
 
             setLoadBalancerMetadata(awsLoadBalancers, result);
@@ -125,7 +123,7 @@ public class AwsLoadBalancerLaunchService {
                 LOGGER.debug("Listener resources already exist, skipping creation");
                 result = cfRetryClient.listStackResources(awsStackRequestHelper.createListStackResourcesRequest(cFStackName));
             } else {
-                result = updateCloudFormationStack(ac, stack, modelContext, awsLoadBalancers);
+                result = updateCloudFormationStack(ac, stack, modelContext);
             }
 
             ListStackResourcesResult finalResult = result;
@@ -137,31 +135,6 @@ public class AwsLoadBalancerLaunchService {
         return statuses;
     }
 
-    private List<AwsLoadBalancer> getAwsLoadBalancers(List<CloudLoadBalancer> cloudLoadBalancers, List<CloudResource> instances,
-            AwsNetworkView awsNetworkView) {
-        LOGGER.debug("Converting internal load balancer model to AWS cloud provider model.");
-        List<AwsLoadBalancer> awsLoadBalancers = new ArrayList<>();
-        for (CloudLoadBalancer cloudLoadBalancer : cloudLoadBalancers) {
-            LOGGER.debug("Found load balancer model of type {}", cloudLoadBalancer.getType());
-            AwsLoadBalancer loadBalancer = convertLoadBalancer(cloudLoadBalancer, instances, awsNetworkView, awsLoadBalancers);
-            if (loadBalancer != null && !awsLoadBalancers.contains(loadBalancer)) {
-                awsLoadBalancers.add(loadBalancer);
-            }
-        }
-
-        Set<String> requestedTypes = cloudLoadBalancers.stream()
-            .map(lb -> lb.getType().name())
-            .collect(Collectors.toSet());
-        Set<String> awsTypes = awsLoadBalancers.stream()
-            .map(lb -> AwsLoadBalancerScheme.INTERNAL.awsScheme().equals(lb.getAwsScheme()) ? "PRIVATE" : "PUBLIC")
-            .collect(Collectors.toSet());
-        if (!requestedTypes.equals(awsTypes)) {
-            throw new CloudConnectorException(String.format("Can not create all requested AWS load balancers. " +
-                "Types requested: [%s]; type to be created: [%s]", requestedTypes, awsTypes));
-        }
-
-        return awsLoadBalancers;
-    }
 
     @VisibleForTesting
     void setLoadBalancerMetadata(List<AwsLoadBalancer> awsLoadBalancers, ListStackResourcesResult result) {
@@ -171,29 +144,29 @@ public class AwsLoadBalancerLaunchService {
             for (AwsListener listener : loadBalancer.getListeners()) {
                 LOGGER.debug("Processing listener {} and target group {}", listener.getName(), listener.getTargetGroup().getName());
                 Optional<StackResourceSummary> targetGroupSummary = summaries.stream()
-                    .filter(stackResourceSummary -> listener.getTargetGroup().getName().equals(stackResourceSummary.getLogicalResourceId()))
-                    .findFirst();
+                        .filter(stackResourceSummary -> listener.getTargetGroup().getName().equals(stackResourceSummary.getLogicalResourceId()))
+                        .findFirst();
                 if (targetGroupSummary.isEmpty()) {
                     throw new CloudConnectorException(String.format("Could not create load balancer listeners: target group %s not found.",
-                        listener.getTargetGroup().getName()));
+                            listener.getTargetGroup().getName()));
                 }
                 if (StringUtils.isEmpty(targetGroupSummary.get().getPhysicalResourceId())) {
                     throw new CloudConnectorException(String.format("Could not create load balancer listeners: target group %s arn not found.",
-                        listener.getTargetGroup().getName()));
+                            listener.getTargetGroup().getName()));
                 }
                 listener.getTargetGroup().setArn(targetGroupSummary.get().getPhysicalResourceId());
                 LOGGER.debug("Found arn {} for target group {}", listener.getTargetGroup().getArn(), listener.getTargetGroup().getName());
             }
             Optional<StackResourceSummary> loadBalancerSummary = summaries.stream()
-                .filter(stackResourceSummary -> loadBalancer.getName().equals(stackResourceSummary.getLogicalResourceId()))
-                .findFirst();
+                    .filter(stackResourceSummary -> loadBalancer.getName().equals(stackResourceSummary.getLogicalResourceId()))
+                    .findFirst();
             if (loadBalancerSummary.isEmpty()) {
                 throw new CloudConnectorException(String.format("Could not create load balancer listeners: load balancer %s not found.",
-                    loadBalancer.getName()));
+                        loadBalancer.getName()));
             }
             if (StringUtils.isEmpty(loadBalancerSummary.get().getPhysicalResourceId())) {
                 throw new CloudConnectorException(String.format("Could not create load balancer listeners: load balancer %s arn not found.",
-                    loadBalancer.getName()));
+                        loadBalancer.getName()));
             }
             loadBalancer.setArn(loadBalancerSummary.get().getPhysicalResourceId());
             loadBalancer.validateListenerConfigIsSet();
@@ -201,61 +174,7 @@ public class AwsLoadBalancerLaunchService {
         }
     }
 
-    @VisibleForTesting
-    AwsLoadBalancer convertLoadBalancer(CloudLoadBalancer cloudLoadBalancer, List<CloudResource> instances, AwsNetworkView awsNetworkView,
-            List<AwsLoadBalancer> awsLoadBalancers) {
-        // Check and see if we already have a load balancer whose scheme matches this one.
-        AwsLoadBalancer currentLoadBalancer = null;
-        LoadBalancerType cloudLbType = cloudLoadBalancer.getType();
-        Set<String> subnetIds = selectLoadBalancerSubnetIds(cloudLbType, awsNetworkView);
-        AwsLoadBalancerScheme scheme = loadBalancerTypeConverter.convert(cloudLbType);
-
-        currentLoadBalancer = awsLoadBalancers.stream()
-            .filter(lb -> lb.getScheme() == scheme)
-            .findFirst().orElse(new AwsLoadBalancer(scheme));
-
-        currentLoadBalancer.addSubnets(subnetIds);
-        setupLoadBalancer(cloudLoadBalancer, instances, currentLoadBalancer);
-
-        return currentLoadBalancer;
-    }
-
-    @VisibleForTesting
-    Set<String> selectLoadBalancerSubnetIds(LoadBalancerType type, AwsNetworkView awsNetworkView) {
-        List<String> subnetIds;
-        if (type == LoadBalancerType.PRIVATE) {
-            LOGGER.debug("Private load balancer detected. Using instance subnet for load balancer creation.");
-            subnetIds = awsNetworkView.getSubnetList();
-        } else {
-            subnetIds = awsNetworkView.getEndpointGatewaySubnetList();
-            LOGGER.debug("Public load balancer detected. Using endpoint gateway subnet for load balancer creation.");
-            if (subnetIds.isEmpty()) {
-                LOGGER.debug("Endpoint gateway subnet is not set. Falling back to instance subnet for load balancer creation.");
-                subnetIds = awsNetworkView.getSubnetList();
-            }
-        }
-        if (subnetIds.isEmpty()) {
-            throw new CloudConnectorException("Unable to configure load balancer: Could not identify subnets.");
-        }
-        return new HashSet<>(subnetIds);
-    }
-
-    private void setupLoadBalancer(CloudLoadBalancer cloudLoadBalancer, List<CloudResource> instances,
-            AwsLoadBalancer awsLoadBalancer) {
-        LOGGER.debug("Configuring target instances for listeners.");
-        for (Map.Entry<TargetGroupPortPair, Set<Group>> entry : cloudLoadBalancer.getPortToTargetGroupMapping().entrySet()) {
-            AwsListener listener = awsLoadBalancer.getOrCreateListener(entry.getKey().getTrafficPort(), entry.getKey().getHealthCheckPort());
-            List<CloudResource> lbTargetInstances = instances.stream()
-                .filter(instance -> entry.getValue().stream().anyMatch(tg -> tg.getName().equals(instance.getGroup())))
-                .collect(Collectors.toList());
-            Set<String> instanceIds = lbTargetInstances.stream().map(CloudResource::getInstanceId).collect(Collectors.toSet());
-            LOGGER.debug(String.format("Adding instances %s to listener %s", instanceIds, listener.getName()));
-            listener.addInstancesToTargetGroup(instanceIds);
-        }
-    }
-
-    private ListStackResourcesResult updateCloudFormationStack(AuthenticatedContext ac, CloudStack stack, ModelContext modelContext,
-            List<AwsLoadBalancer> awsLoadBalancers) {
+    private ListStackResourcesResult updateCloudFormationStack(AuthenticatedContext ac, CloudStack stack, ModelContext modelContext) {
         String cFStackName = cfStackUtil.getCfStackName(ac);
         AwsCredentialView credentialView = new AwsCredentialView(ac.getCloudCredential());
         String regionName = ac.getCloudContext().getLocation().getRegion().value();
@@ -270,7 +189,7 @@ public class AwsLoadBalancerLaunchService {
         Waiter<DescribeStacksRequest> updateWaiter = cfClient.waiters().stackUpdateComplete();
         StackCancellationCheck stackCancellationCheck = new StackCancellationCheck(ac.getCloudContext().getId());
         run(updateWaiter, describeStacksRequest, stackCancellationCheck, String.format("CloudFormation stack %s update failed.", cFStackName),
-            () -> awsCloudFormationErrorMessageProvider.getErrorReason(ac, cFStackName, ResourceStatus.UPDATE_FAILED, ResourceStatus.CREATE_FAILED));
+                () -> awsCloudFormationErrorMessageProvider.getErrorReason(ac, cFStackName, ResourceStatus.UPDATE_FAILED, ResourceStatus.CREATE_FAILED));
 
         return cfClient.listStackResources(awsStackRequestHelper.createListStackResourcesRequest(cFStackName));
     }
@@ -288,19 +207,19 @@ public class AwsLoadBalancerLaunchService {
         }
 
         CloudResource.Builder cloudResource = new CloudResource.Builder()
-            .type(ResourceType.ELASTIC_LOAD_BALANCER)
-            .status(createSuccess ? CommonStatus.CREATED : CommonStatus.FAILED)
-            .name(loadBalancer.getName());
+                .type(ResourceType.ELASTIC_LOAD_BALANCER)
+                .status(createSuccess ? CommonStatus.CREATED : CommonStatus.FAILED)
+                .name(loadBalancer.getName());
 
         return new CloudResourceStatus(cloudResource.build(),
-            createSuccess ? com.sequenceiq.cloudbreak.cloud.model.ResourceStatus.CREATED :
-                com.sequenceiq.cloudbreak.cloud.model.ResourceStatus.FAILED);
+                createSuccess ? com.sequenceiq.cloudbreak.cloud.model.ResourceStatus.CREATED :
+                        com.sequenceiq.cloudbreak.cloud.model.ResourceStatus.FAILED);
     }
 
     private boolean isResourceStatusGood(List<StackResourceSummary> summaries, String name) {
         Optional<StackResourceSummary> summary = summaries.stream()
-            .filter(stackResourceSummary -> name.equals(stackResourceSummary.getLogicalResourceId()))
-            .findFirst();
+                .filter(stackResourceSummary -> name.equals(stackResourceSummary.getLogicalResourceId()))
+                .findFirst();
 
         boolean success = true;
         if (summary.isEmpty()) {
@@ -308,7 +227,7 @@ public class AwsLoadBalancerLaunchService {
             success = false;
         } else if (isFailedStatus(summary.get().getResourceStatus())) {
             LOGGER.error(String.format("Resource %s creation failed. Reason: %s",
-                name, summary.get().getResourceStatusReason()));
+                    name, summary.get().getResourceStatusReason()));
             success = false;
         }
         return success;
@@ -328,11 +247,11 @@ public class AwsLoadBalancerLaunchService {
         for (AwsLoadBalancer loadBalancer : awsLoadBalancers) {
             LOGGER.debug("Checking to see if load balancer resource {} already exists", loadBalancer.getName());
             resourcesFound = resourcesFound && summaries.stream()
-                .anyMatch(stackResourceSummary -> loadBalancer.getName().equals(stackResourceSummary.getLogicalResourceId()));
+                    .anyMatch(stackResourceSummary -> loadBalancer.getName().equals(stackResourceSummary.getLogicalResourceId()));
             for (AwsListener listener : loadBalancer.getListeners()) {
                 LOGGER.debug("Checking to see if target group resource {} already exists", listener.getTargetGroup().getName());
                 resourcesFound = resourcesFound && summaries.stream()
-                    .anyMatch(stackResourceSummary -> listener.getTargetGroup().getName().equals(stackResourceSummary.getLogicalResourceId()));
+                        .anyMatch(stackResourceSummary -> listener.getTargetGroup().getName().equals(stackResourceSummary.getLogicalResourceId()));
             }
         }
 
@@ -350,7 +269,7 @@ public class AwsLoadBalancerLaunchService {
             for (AwsListener listener : loadBalancer.getListeners()) {
                 LOGGER.debug("Checking to see if listener resource {} already exists", listener.getName());
                 resourcesFound = resourcesFound && summaries.stream()
-                    .anyMatch(stackResourceSummary -> listener.getName().equals(stackResourceSummary.getLogicalResourceId()));
+                        .anyMatch(stackResourceSummary -> listener.getName().equals(stackResourceSummary.getLogicalResourceId()));
             }
         }
 

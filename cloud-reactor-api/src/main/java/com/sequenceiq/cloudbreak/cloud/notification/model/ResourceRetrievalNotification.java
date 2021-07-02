@@ -18,13 +18,20 @@ public class ResourceRetrievalNotification {
 
     private final ResourceType resourceType;
 
+    private final Long stackId;
+
     private final Promise<Optional<CloudResource>> promise;
 
     public ResourceRetrievalNotification(String resourceReference, CommonStatus status, ResourceType resourceType) {
+        this(resourceReference, status, resourceType, null);
+    }
+
+    public ResourceRetrievalNotification(String resourceReference, CommonStatus status, ResourceType resourceType, Long stackId) {
         this.resourceReference = resourceReference;
         this.status = status;
         this.resourceType = resourceType;
         this.promise = Promises.prepare();
+        this.stackId = stackId;
     }
 
     public String getResourceReference() {
@@ -51,6 +58,10 @@ public class ResourceRetrievalNotification {
         }
     }
 
+    public Long getStackId() {
+        return stackId;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("ResourceRetrievalNotification{");
@@ -58,6 +69,7 @@ public class ResourceRetrievalNotification {
         sb.append("status=").append(status);
         sb.append("resourceType=").append(resourceType);
         sb.append(", promise=").append(promise);
+        sb.append(", stackId=").append(stackId);
         return sb.toString();
     }
 }
