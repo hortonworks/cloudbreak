@@ -38,8 +38,6 @@ public interface StackListItem {
 
     String getCloudPlatform();
 
-    Long getSharedClusterId();
-
     String getDatalakeCrn();
 
     Long getClusterId();

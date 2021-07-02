@@ -24,8 +24,6 @@ import com.sequenceiq.cloudbreak.domain.cloudstorage.CloudStorage;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.StorageLocation;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Service
 public class RemoteDataContextWorkaroundService {
@@ -33,14 +31,7 @@ public class RemoteDataContextWorkaroundService {
     private static final Logger LOGGER = LoggerFactory.getLogger(RemoteDataContextWorkaroundService.class);
 
     @Inject
-    private StackService stackService;
-
-    @Inject
     private MissingResourceNameGenerator nameGenerator;
-
-    public Set<RDSConfig> prepareRdsConfigs(Cluster requestedCluster, DatalakeResources datalakeResources) {
-        return prepareRdsConfigs(requestedCluster, datalakeResources.getRdsConfigs());
-    }
 
     public Set<RDSConfig> prepareRdsConfigs(Cluster requestedCluster, Set<RDSConfig> rdsConfigs) {
         Set<RDSConfig> rdsConfigsWithoutHive = requestedCluster.getRdsConfigs();
@@ -69,11 +60,6 @@ public class RemoteDataContextWorkaroundService {
 
     private boolean isHiveMetastoreDatabase(RDSConfig rdsConfig) {
         return DatabaseType.HIVE.name().equals(rdsConfig.getType());
-    }
-
-    public FileSystem prepareFilesytem(Cluster requestedCluster, DatalakeResources datalakeResources) {
-        Stack stack = stackService.getById(datalakeResources.getDatalakeStackId());
-        return prepareFilesytem(requestedCluster, stack);
     }
 
     public FileSystem prepareFilesytem(Cluster requestedCluster, Stack datalakeStack) {

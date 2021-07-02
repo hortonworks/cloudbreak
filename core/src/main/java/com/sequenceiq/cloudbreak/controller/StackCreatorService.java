@@ -80,7 +80,6 @@ import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
 import com.sequenceiq.cloudbreak.service.recipe.RecipeService;
-import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.StackViewService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
@@ -115,9 +114,6 @@ public class StackCreatorService {
 
     @Inject
     private ConverterUtil converterUtil;
-
-    @Inject
-    private SharedServiceConfigProvider sharedServiceConfigProvider;
 
     @Inject
     private TransactionService transactionService;
@@ -267,13 +263,10 @@ public class StackCreatorService {
                     idBrokerService.save(idBroker);
                 }, LOGGER, "Generate id broker sign keys and save");
 
-                Stack withSharedServicesIfNeeded = measure(() -> prepareSharedServiceIfNeed(newStack),
-                        LOGGER,
-                        "Shared service preparation if required took {} ms with name {}.", stackName);
                 measure(() -> assignOwnerRoleOnDataHub(user, stackRequest, newStack),
                         LOGGER,
                         "assignOwnerRoleOnDataHub to stack took {} ms with name {}.", stackName);
-                return withSharedServicesIfNeeded;
+                return newStack;
             });
         } catch (TransactionExecutionException e) {
             stackUnderOperationService.off();
@@ -382,14 +375,6 @@ public class StackCreatorService {
                 instanceMetaData.setInstanceStatus(InstanceStatus.REQUESTED);
             }
         }
-    }
-
-    private Stack prepareSharedServiceIfNeed(Stack stack) {
-        if (stack.getDatalakeCrn() != null || stack.getDatalakeResourceId() != null) {
-            return sharedServiceConfigProvider.prepareDatalakeConfigs(stack);
-        }
-        LOGGER.debug("No Data Lake resource id has been given for stack! (crn: {})", stack.getResourceCrn());
-        return stack;
     }
 
     private void createClusterIfNeed(User user, StackV4Request stackRequest, Stack stack, String stackName,

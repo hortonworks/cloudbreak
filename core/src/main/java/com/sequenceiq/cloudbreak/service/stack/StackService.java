@@ -46,11 +46,11 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.aspect.Measure;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformTemplateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
@@ -103,7 +103,6 @@ import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.orchestrator.OrchestratorService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
-import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 import com.sequenceiq.cloudbreak.service.stack.ShowTerminatedClusterConfigService.ShowTerminatedClustersAfterConfig;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
 import com.sequenceiq.cloudbreak.service.stackstatus.StackStatusService;
@@ -222,9 +221,6 @@ public class StackService implements ResourceIdProvider, ResourcePropertyProvide
     @Inject
     private RegionAwareCrnGenerator regionAwareCrnGenerator;
 
-    @Inject
-    private DatalakeService datalakeService;
-
     @Value("${cb.nginx.port}")
     private Integer nginxPort;
 
@@ -333,10 +329,6 @@ public class StackService implements ResourceIdProvider, ResourcePropertyProvide
         }
     }
 
-    public Set<StackIdView> findClustersConnectedToDatalakeByDatalakeResourceId(Long datalakeResourceId) {
-        return stackRepository.findEphemeralClusters(datalakeResourceId);
-    }
-
     public Set<StackIdView> findClustersConnectedToDatalakeByDatalakeStackId(Long datalakeStackId) {
         Stack datalakeStack = get(datalakeStackId);
         Set<StackIdView> stacksConnectedByDatalakeCrn;
@@ -346,19 +338,7 @@ public class StackService implements ResourceIdProvider, ResourcePropertyProvide
             stacksConnectedByDatalakeCrn = Collections.emptySet();
         }
 
-        Optional<Long> id = datalakeService.getDatalakeResourceId(datalakeStackId);
-        Set<StackIdView> stacksConnectedByDatalakeResource;
-        if (id.isEmpty()) {
-            stacksConnectedByDatalakeResource = Collections.emptySet();
-        } else {
-            stacksConnectedByDatalakeResource = stackRepository.findEphemeralClusters(id.get());
-        }
-
-        Set<StackIdView> result = new HashSet<>();
-        result.addAll(stacksConnectedByDatalakeCrn);
-        result.addAll(stacksConnectedByDatalakeResource);
-
-        return result;
+        return stacksConnectedByDatalakeCrn;
     }
 
     public Stack getByIdWithListsInTransaction(Long id) {
@@ -443,6 +423,10 @@ public class StackService implements ResourceIdProvider, ResourcePropertyProvide
 
     public List<StackStatusView> getByEnvironmentCrnAndStackType(String environmentCrn, StackType stackType) {
         return stackRepository.findByEnvironmentCrnAndStackType(environmentCrn, stackType);
+    }
+
+    public Long countByEnvironmentCrnAndStackType(String environmentCrn, StackType stackType) {
+        return stackRepository.countByEnvironmentCrnAndStackType(environmentCrn, stackType);
     }
 
     public StackV4Response getByNameInWorkspaceWithEntries(String name, Long workspaceId, Set<String> entries, User user, StackType stackType) {
@@ -918,10 +902,6 @@ public class StackService implements ResourceIdProvider, ResourcePropertyProvide
 
     public Long getIdByCrnInWorkspace(String crn, Long workspaceId) {
         return stackRepository.findIdByCrnAndWorkspaceId(crn, workspaceId).orElseThrow(notFound("Stack", crn));
-    }
-
-    public Set<StackIdView> findClustersConnectedToDatalake(Long datalakeResourceId) {
-        return stackRepository.findEphemeralClusters(datalakeResourceId);
     }
 
     public Set<StackListItem> getByWorkspaceId(Long workspaceId, String environmentCrn, List<StackType> stackTypes) {

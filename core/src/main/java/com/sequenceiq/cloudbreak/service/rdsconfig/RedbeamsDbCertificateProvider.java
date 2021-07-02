@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslMode;
@@ -25,18 +24,15 @@ public class RedbeamsDbCertificateProvider {
 
     private final RedbeamsDbServerConfigurer dbServerConfigurer;
 
-    private final DatalakeResourcesService datalakeResourcesService;
-
     private final StackService stackService;
 
     private final DatalakeService datalakeService;
 
     private final String certsPath;
 
-    public RedbeamsDbCertificateProvider(RedbeamsDbServerConfigurer dbServerConfigurer, DatalakeResourcesService datalakeResourcesService,
+    public RedbeamsDbCertificateProvider(RedbeamsDbServerConfigurer dbServerConfigurer,
             StackService stackService, DatalakeService datalakeService, @Value("${cb.externaldatabase.ssl.rootcerts.path:}") String certsPath) {
         this.dbServerConfigurer = dbServerConfigurer;
-        this.datalakeResourcesService = datalakeResourcesService;
         this.stackService = stackService;
         this.datalakeService = datalakeService;
         this.certsPath = certsPath;

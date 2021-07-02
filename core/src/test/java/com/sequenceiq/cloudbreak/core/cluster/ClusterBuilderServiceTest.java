@@ -30,7 +30,6 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
@@ -61,9 +60,6 @@ class ClusterBuilderServiceTest {
 
     @Mock
     private ConversionService mockConversionService;
-
-    @Mock
-    private DatalakeResourcesService mockDatalakeResourcesService;
 
     @Mock
     private KerberosConfigService mockKerberosConfigService;

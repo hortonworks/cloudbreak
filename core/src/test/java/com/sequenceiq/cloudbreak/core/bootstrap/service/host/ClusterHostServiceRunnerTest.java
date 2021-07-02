@@ -46,7 +46,6 @@ import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.blueprint.ComponentLocatorService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
-import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentConfigProvider;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigProvider;
@@ -105,9 +104,6 @@ public class ClusterHostServiceRunnerTest {
 
     @Mock
     private BlueprintService blueprintService;
-
-    @Mock
-    private DatalakeResourcesService datalakeResourcesService;
 
     @Mock
     private DefaultClouderaManagerRepoService clouderaManagerRepoService;

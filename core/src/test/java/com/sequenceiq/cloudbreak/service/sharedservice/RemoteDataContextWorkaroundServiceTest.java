@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.service.sharedservice;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType.HIVE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType.RANGER;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -31,7 +30,6 @@ import com.sequenceiq.cloudbreak.domain.cloudstorage.CloudStorage;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.StorageLocation;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.common.model.CloudStorageCdpService;
 import com.sequenceiq.common.model.FileSystemType;
@@ -55,7 +53,7 @@ public class RemoteDataContextWorkaroundServiceTest {
         Set<RDSConfig> rdsConfigs = underTest
                 .prepareRdsConfigs(
                         mockRequestedCluster(mockRds(HIVE), mockRds(RANGER)),
-                        mockDatalakeResources(mockRds(HIVE, true)));
+                        new HashSet<>(Set.of(mockRds(HIVE, true))));
 
         Assert.assertEquals(2, rdsConfigs.size());
         Assert.assertTrue(get(rdsConfigs, HIVE).getStatus().equals(ResourceStatus.DEFAULT));
@@ -66,7 +64,7 @@ public class RemoteDataContextWorkaroundServiceTest {
         Set<RDSConfig> rdsConfigs = underTest
                 .prepareRdsConfigs(
                         mockRequestedCluster(mockRds(RANGER)),
-                        mockDatalakeResources(mockRds(HIVE, true)));
+                        new HashSet<>(Set.of(mockRds(HIVE, true))));
 
         Assert.assertEquals(2, rdsConfigs.size());
         Assert.assertTrue(get(rdsConfigs, HIVE).getStatus().equals(ResourceStatus.DEFAULT));
@@ -77,7 +75,7 @@ public class RemoteDataContextWorkaroundServiceTest {
         Set<RDSConfig> rdsConfigs = underTest
                 .prepareRdsConfigs(
                         mockRequestedCluster(mockRds(RANGER), mockRds(HIVE)),
-                        mockDatalakeResources());
+                        new HashSet<>());
 
         Assert.assertEquals(2, rdsConfigs.size());
         Assert.assertTrue(get(rdsConfigs, HIVE).getStatus().equals(ResourceStatus.USER_MANAGED));
@@ -85,12 +83,10 @@ public class RemoteDataContextWorkaroundServiceTest {
 
     @Test
     public void testFileSystemWhenHivePathPresentedInDistroXButSdxDoesNotContainsItShouldReturnWithDistroXConfigs() throws IOException {
-        when(stackService.getById(anyLong())).thenReturn(mockStack());
-
         FileSystem fileSystem = underTest
                 .prepareFilesytem(
                         mockRequestedCluster(mockStorageLocation(3), mockStorageLocation(4)),
-                        mockDatalakeResources());
+                        mockStack());
 
         List<StorageLocation> locations = fileSystem.getCloudStorage().getLocations();
         Assert.assertEquals(2, locations.size());
@@ -100,12 +96,10 @@ public class RemoteDataContextWorkaroundServiceTest {
 
     @Test
     public void testFileSystemWhenHiveInSdxAndDistroXShouldReturnWithSdxHiveConfigs() throws IOException {
-        when(stackService.getById(anyLong())).thenReturn(mockStack(mockStorageLocation(1), mockStorageLocation(2)));
-
         FileSystem fileSystem = underTest
                 .prepareFilesytem(
                         mockRequestedCluster(mockStorageLocation(3), mockStorageLocation(4)),
-                        mockDatalakeResources());
+                        mockStack(mockStorageLocation(1), mockStorageLocation(2)));
 
         List<StorageLocation> locations = fileSystem.getCloudStorage().getLocations();
         Assert.assertEquals(2, locations.size());
@@ -116,12 +110,11 @@ public class RemoteDataContextWorkaroundServiceTest {
     @Test
     public void testFileSystemWhenHivePathNotPresentedInDistroXButSdxDoesContainsItShouldReturnWithSdxConfigs() throws IOException {
         when(nameGenerator.generateName(APIResourceType.FILESYSTEM)).thenReturn("appletree");
-        when(stackService.getById(anyLong())).thenReturn(mockStack(mockStorageLocation(1), mockStorageLocation(2)));
 
         FileSystem fileSystem = underTest
                 .prepareFilesytem(
                         mockRequestedCluster(mockRds(HIVE)),
-                        mockDatalakeResources());
+                        mockStack(mockStorageLocation(1), mockStorageLocation(2)));
 
         List<StorageLocation> locations = fileSystem.getCloudStorage().getLocations();
         Assert.assertEquals(2, locations.size());
@@ -132,12 +125,11 @@ public class RemoteDataContextWorkaroundServiceTest {
     @Test
     public void testFileSystemWhenHivePathNotPresentedInDistroXAndSdxDoesNotContainsItShouldReturnWithSdxConfigs() throws IOException {
         when(nameGenerator.generateName(APIResourceType.FILESYSTEM)).thenReturn("appletree");
-        when(stackService.getById(anyLong())).thenReturn(mockStack());
 
         FileSystem fileSystem = underTest
                 .prepareFilesytem(
                         mockRequestedCluster(mockRds(HIVE)),
-                        mockDatalakeResources());
+                        mockStack());
 
         List<StorageLocation> locations = fileSystem.getCloudStorage().getLocations();
         Assert.assertEquals(0, locations.size());
@@ -158,18 +150,6 @@ public class RemoteDataContextWorkaroundServiceTest {
                 .filter(r -> r.getValue().equals("hive" + index))
                 .collect(Collectors.toSet())
                 .isEmpty();
-    }
-
-    private DatalakeResources mockDatalakeResources(RDSConfig... rds) {
-        DatalakeResources datalakeResources = new DatalakeResources();
-        datalakeResources.setId(1L);
-        datalakeResources.setDatalakeStackId(1L);
-        datalakeResources.setRdsConfigs(new HashSet<>());
-        for (RDSConfig r : rds) {
-            datalakeResources.getRdsConfigs().add(r);
-        }
-
-        return datalakeResources;
     }
 
     private RDSConfig mockRds(DatabaseType type, boolean defaultType) {

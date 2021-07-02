@@ -19,7 +19,6 @@ import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslMode;
@@ -34,9 +33,6 @@ class RedbeamsDbCertificateProviderTest {
 
     @Mock
     private RedbeamsDbServerConfigurer dbServerConfigurer;
-
-    @Mock
-    private DatalakeResourcesService datalakeResourcesService;
 
     @Mock
     private StackService stackService;
@@ -159,7 +155,6 @@ class RedbeamsDbCertificateProviderTest {
         Stack stack = cluster.getStack();
         stack.setCluster(cluster);
         stack.setType(StackType.WORKLOAD);
-        stack.setDatalakeResourceId(1L);
 
         when(datalakeService.getDatalakeStackByDatahubStack(any())).thenReturn(Optional.of(sdxStack));
         when(dbServerConfigurer.isRemoteDatabaseNeeded(sdxCluster)).thenReturn(Boolean.FALSE);
@@ -192,7 +187,6 @@ class RedbeamsDbCertificateProviderTest {
         Stack stack = cluster.getStack();
         stack.setCluster(cluster);
         stack.setType(StackType.WORKLOAD);
-        stack.setDatalakeResourceId(1L);
 
         when(datalakeService.getDatalakeStackByDatahubStack(any())).thenReturn(Optional.of(sdxStack));
         when(dbServerConfigurer.isRemoteDatabaseNeeded(cluster)).thenReturn(Boolean.FALSE);
@@ -226,7 +220,6 @@ class RedbeamsDbCertificateProviderTest {
         Stack stack = cluster.getStack();
         stack.setCluster(cluster);
         stack.setType(StackType.WORKLOAD);
-        stack.setDatalakeResourceId(1L);
 
         when(datalakeService.getDatalakeStackByDatahubStack(any())).thenReturn(Optional.of(sdxStack));
         when(dbServerConfigurer.isRemoteDatabaseNeeded(any())).thenReturn(Boolean.TRUE);
@@ -265,7 +258,6 @@ class RedbeamsDbCertificateProviderTest {
         Stack stack = cluster.getStack();
         stack.setCluster(cluster);
         stack.setType(StackType.WORKLOAD);
-        stack.setDatalakeResourceId(1L);
 
         when(datalakeService.getDatalakeStackByDatahubStack(any())).thenReturn(Optional.of(sdxStack));
         when(dbServerConfigurer.isRemoteDatabaseNeeded(any())).thenReturn(Boolean.TRUE);
