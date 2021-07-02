@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.cloud.aws.resource.instance.util.Securit
 import static java.util.Collections.singletonList;
 import static org.slf4j.LoggerFactory.getLogger;
 
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -11,6 +12,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -117,7 +119,7 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
                     .withEbsOptimized(isEbsOptimized(instanceTemplate))
                     .withTagSpecifications(tagSpecification)
                     .withIamInstanceProfile(getIamInstanceProfile(group))
-                    .withUserData(getUserData())
+                    .withUserData(getUserData(cloudStack, group))
                     .withMinCount(1)
                     .withMaxCount(1)
                     .withKeyName(cloudStack.getInstanceAuthentication().getPublicKeyId());
@@ -177,8 +179,13 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
         return instance.getState().getCode() == AWS_INSTANCE_TERMINATED_CODE;
     }
 
-    private String getUserData() {
-        return "";
+    private String getUserData(CloudStack cloudStack, Group group) {
+        String userdata = cloudStack.getImage().getUserDataByType(group.getType());
+        String base64EncodedUserData = "";
+        if (StringUtils.isNotEmpty(userdata)) {
+            base64EncodedUserData = Base64.getEncoder().encodeToString(userdata.getBytes());
+        }
+        return base64EncodedUserData;
     }
 
     private IamInstanceProfileSpecification getIamInstanceProfile(Group group) {
