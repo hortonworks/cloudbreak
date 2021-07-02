@@ -61,7 +61,6 @@ import com.sequenceiq.cloudbreak.domain.cloudstorage.AccountMapping;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.CloudStorage;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.IdBroker;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -75,7 +74,6 @@ import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintViewProvider;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.InstanceGroupMetadataCollector;
-import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
 import com.sequenceiq.cloudbreak.service.environment.tag.AccountTagClientService;
@@ -184,9 +182,6 @@ public class StackToTemplatePreparationObjectConverterTest {
 
     @Mock
     private BlueprintViewProvider blueprintViewProvider;
-
-    @Mock
-    private DatalakeResourcesService datalakeResourcesService;
 
     @Mock
     private LdapConfigService ldapConfigService;
@@ -439,11 +434,8 @@ public class StackToTemplatePreparationObjectConverterTest {
     @Test
     public void testConvertWhenDataLakeIdNotNullThenExpectedSharedServiceConfigsShouldBeStored() {
         // just in case adding one to avoid matching with the class variable
-        Optional<DatalakeResources> datalakeResources = Optional.of(new DatalakeResources());
         SharedServiceConfigsView expected = new SharedServiceConfigsView();
         when(datalakeService.createSharedServiceConfigsView(stackMock)).thenReturn(expected);
-        when(stackMock.getDatalakeResourceId()).thenReturn(1L);
-        when(datalakeResourcesService.findById(anyLong())).thenReturn(datalakeResources);
 
         TemplatePreparationObject result = underTest.convert(stackMock);
 

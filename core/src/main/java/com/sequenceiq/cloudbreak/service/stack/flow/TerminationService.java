@@ -25,7 +25,6 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterTerminationService;
-import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.freeipa.FreeIpaCleanupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
@@ -57,9 +56,6 @@ public class TerminationService {
     private TransactionService transactionService;
 
     @Inject
-    private DatalakeResourcesService datalakeResourcesService;
-
-    @Inject
     private FreeIpaCleanupService freeIpaCleanupService;
 
     @Inject
@@ -73,9 +69,6 @@ public class TerminationService {
         Date now = new Date();
         cleanupFreeIpa(stack);
         String terminatedName = stack.getName() + DELIMITER + now.getTime();
-        if (stack.getType() == StackType.DATALAKE) {
-            datalakeResourcesService.deleteWithDependenciesByStackId(stack.getId());
-        }
         Cluster cluster = stack.getCluster();
         try {
             transactionService.required(() -> {

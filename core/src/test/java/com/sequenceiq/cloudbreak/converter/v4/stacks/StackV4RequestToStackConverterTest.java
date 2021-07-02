@@ -60,7 +60,6 @@ import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.service.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.account.PreferencesService;
-import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
@@ -131,9 +130,6 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
 
     @Mock
     private User user;
-
-    @Mock
-    private DatalakeResourcesService datalakeResourcesService;
 
     @Mock
     private Clock clock;
@@ -216,8 +212,8 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
                 Arrays.asList("description", "cluster", "environmentCrn", "gatewayPort", "useCcm", "network", "securityConfig",
                         "version", "created", "platformVariant", "cloudPlatform",
                         "customHostname", "customDomain", "clusterNameAsSubdomain", "hostgroupNameAsHostname", "parameters", "creator",
-                        "environmentCrn", "terminated", "datalakeResourceId", "datalakeCrn", "type", "inputs", "failurePolicy", "resourceCrn",
-                        "minaSshdServiceId", "ccmV2AgentCrn", "externalDatabaseCreationType", "stackVersion"));
+                        "environmentCrn", "terminated", "datalakeCrn", "type", "inputs", "failurePolicy", "resourceCrn", "minaSshdServiceId",
+                        "ccmV2AgentCrn", "externalDatabaseCreationType", "stackVersion"));
         assertEquals("eu-west-1", stack.getRegion());
         assertEquals("AWS", stack.getCloudPlatform());
         assertEquals("mystack", stack.getName());
@@ -245,7 +241,7 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
                 Arrays.asList("description", "cluster", "environmentCrn", "gatewayPort", "useCcm", "network", "securityConfig",
                         "version", "created", "platformVariant", "cloudPlatform", "resourceCrn",
                         "customHostname", "customDomain", "clusterNameAsSubdomain", "hostgroupNameAsHostname", "parameters", "creator",
-                        "environmentCrn", "terminated", "datalakeResourceId", "datalakeCrn", "type", "inputs", "failurePolicy", "minaSshdServiceId",
+                        "environmentCrn", "terminated", "datalakeCrn", "type", "inputs", "failurePolicy", "minaSshdServiceId",
                         "ccmV2AgentCrn", "externalDatabaseCreationType", "stackVersion"));
         assertEquals("eu-west-1", stack.getRegion());
         assertEquals("AWS", stack.getCloudPlatform());

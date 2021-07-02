@@ -330,6 +330,11 @@ public class OfflineStateGenerator {
         }
 
         @Override
+        public Long countByEnvironmentCrnAndStackType(String environmentCrn, StackType type) {
+            return 1L;
+        }
+
+        @Override
         public Optional<Stack> findByNameAndWorkspaceIdWithLists(String name, Long workspaceId, Boolean showTerminated, Long terminatedAfter) {
             return Optional.empty();
         }
@@ -362,11 +367,6 @@ public class OfflineStateGenerator {
         @Override
         public Optional<Stack> findOneWithCluster(Long id) {
             return Optional.empty();
-        }
-
-        @Override
-        public Set<StackIdView> findEphemeralClusters(Long id) {
-            return null;
         }
 
         @Override

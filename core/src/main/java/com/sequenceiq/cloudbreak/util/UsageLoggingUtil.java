@@ -59,9 +59,6 @@ public class UsageLoggingUtil {
             protoBuilder.setClusterId(cluster.getId().toString());
             if (StringUtils.hasLength(stack.getDatalakeCrn())) {
                 protoBuilder.setDatalakeCrn(stack.getDatalakeCrn());
-            } else if (stack.getDatalakeResourceId() != null) {
-                // TODO: CB-9422 Find crn of datalake for this field. Stack id is used here, but for datalake event cluster id is used.
-                protoBuilder.setDatalakeCrn(stack.getDatalakeResourceId().toString());
             }
             buildDatahubRequestedProto(cluster, stack, creator, cloudPlatformEnum, protoBuilder);
             usageReporter.cdpDatahubClusterRequested(timestamp, protoBuilder.build());

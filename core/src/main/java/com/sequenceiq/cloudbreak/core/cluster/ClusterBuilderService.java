@@ -18,11 +18,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterSetupService;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
-import com.sequenceiq.cloudbreak.cmtemplate.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -42,7 +40,6 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.telemetry.ClusterMonitorin
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
-import com.sequenceiq.cloudbreak.service.sharedservice.ClouderaManagerDatalakeConfigProvider;
 import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -67,9 +64,6 @@ public class ClusterBuilderService {
     private ClusterApiConnectors clusterApiConnectors;
 
     @Inject
-    private ClouderaManagerDatalakeConfigProvider clouderaManagerDatalakeConfigProvider;
-
-    @Inject
     private TransactionService transactionService;
 
     @Inject
@@ -89,9 +83,6 @@ public class ClusterBuilderService {
 
     @Inject
     private ClusterMonitoringEngine clusterMonitoringEngine;
-
-    @Inject
-    private BlueprintUtils blueprintUtils;
 
     @Inject
     private DatalakeService datalakeService;
@@ -257,24 +248,6 @@ public class ClusterBuilderService {
     public void executePostInstallRecipes(Long stackId) throws CloudbreakException {
         recipeEngine.executePostInstallRecipes(
                 stackService.getByIdWithListsInTransaction(stackId));
-    }
-
-    public void prepareDatalakeResource(Long stackId) {
-        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-
-        if (StackType.DATALAKE == stack.getType()) {
-            try {
-                transactionService.required(() -> {
-                    if (blueprintUtils.isClouderaManagerClusterTemplate(stack.getCluster().getBlueprint().getBlueprintText())) {
-                        clouderaManagerDatalakeConfigProvider.collectAndStoreDatalakeResources(
-                                stackService.getByIdWithListsInTransaction(stackId));
-                    }
-                    return null;
-                });
-            } catch (TransactionExecutionException e) {
-                LOGGER.info("Couldn't collect Datalake paramaters", e);
-            }
-        }
     }
 
     private String getSdxStackCrn(Stack stack) {

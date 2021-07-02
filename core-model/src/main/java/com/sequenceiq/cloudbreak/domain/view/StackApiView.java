@@ -47,8 +47,6 @@ public class StackApiView extends CompactView {
 
     private Long terminated;
 
-    private Long datalakeId;
-
     private String datalakeCrn;
 
     @Convert(converter = StackTypeConverter.class)
@@ -124,14 +122,6 @@ public class StackApiView extends CompactView {
 
     public void setCreated(Long created) {
         this.created = created;
-    }
-
-    public Long getDatalakeId() {
-        return datalakeId;
-    }
-
-    public void setDatalakeId(Long datalakeId) {
-        this.datalakeId = datalakeId;
     }
 
     public String getDatalakeCrn() {

@@ -167,7 +167,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         setTimeToLive(source, stack);
         stack.setWorkspace(workspace);
         stack.setDisplayName(source.getName());
-        datalakeService.setDatalakeIdOnStack(stack, source, workspace);
+        stack.setDatalakeCrn(datalakeService.getDatalakeCrn(source, workspace));
         stack.setStackAuthentication(getConversionService().convert(source.getAuthentication(), StackAuthentication.class));
         stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.PROVISION_REQUESTED));
         stack.setCreated(clock.getCurrentTimeMillis());

@@ -62,7 +62,6 @@ import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.saltsecurityconf.SaltSecurityConfigService;
@@ -168,9 +167,6 @@ public class StackServiceTest {
 
     @Mock
     private UserService userService;
-
-    @Mock
-    private DatalakeResourcesService datalakeResourcesService;
 
     @Mock
     private ConverterUtil converterUtil;
@@ -358,32 +354,9 @@ public class StackServiceTest {
     }
 
     @Test
-    public void testFindClustersConnectedToDatalakeByDatalakeStackIdWhereResultsAreAdded() throws TransactionExecutionException {
-        StackIdView i = new StackIdViewImpl(1L, "no", "no");
-        StackIdView j = new StackIdViewImpl(2L, "nope", "no");
-        StackIdView k = new StackIdViewImpl(3L, "none", "no");
-
-        Set<StackIdView> result = findClusterConnectedToDatalake(Set.of(i, j), Set.of(k));
-        assertEquals(3, result.size());
-    }
-
-    @Test
-    public void testFindClustersConnectedToDatalakeByDatalakeStackIdWhereResultsAreSame() throws TransactionExecutionException {
-        StackIdView i = new StackIdViewImpl(1L, "no", "no");
-        StackIdView j = new StackIdViewImpl(2L, "nope", "no");
-
-        Set<StackIdView> result = findClusterConnectedToDatalake(Set.of(i, j), Set.of(j));
-        assertEquals(2, result.size());
-    }
-
-    @Test
     public void testFindClustersConnectedToDatalakeByDatalakeStackIdWhereNoResultFromDatalakeCrn() throws TransactionExecutionException {
-        StackIdView i = new StackIdViewImpl(1L, "no", "no");
-        StackIdView j = new StackIdViewImpl(2L, "nope", "no");
-        StackIdView k = new StackIdViewImpl(3L, "none", "no");
-
-        Set<StackIdView> result = findClusterConnectedToDatalake(Set.of(i, j, k), Set.of());
-        assertEquals(3, result.size());
+        Set<StackIdView> result = findClusterConnectedToDatalake(Set.of());
+        assertEquals(0, result.size());
     }
 
     @Test
@@ -392,14 +365,13 @@ public class StackServiceTest {
         StackIdView j = new StackIdViewImpl(2L, "nope", "no");
         StackIdView k = new StackIdViewImpl(3L, "none", "no");
 
-        Set<StackIdView> result = findClusterConnectedToDatalake(Set.of(), Set.of(i, j, k));
+
+        Set<StackIdView> result = findClusterConnectedToDatalake(Set.of(i, j, k));
         assertEquals(3, result.size());
     }
 
-    private Set<StackIdView> findClusterConnectedToDatalake(Set<StackIdView> setOfStackThroughOldDatalakeResource,
+    private Set<StackIdView> findClusterConnectedToDatalake(
             Set<StackIdView> setOfStackThroughNewDatalakeCrn) throws TransactionExecutionException {
-        when(datalakeService.getDatalakeResourceId(1L)).thenReturn(Optional.of(Long.valueOf(2L)));
-        when(stackRepository.findEphemeralClusters(2L)).thenReturn(new HashSet<>(setOfStackThroughOldDatalakeResource));
         when(stackRepository.findByDatalakeCrn(anyString())).thenReturn(new HashSet<>(setOfStackThroughNewDatalakeCrn));
         Stack datalakeStack = new Stack();
         datalakeStack.setDatalakeCrn("crnofdl");
