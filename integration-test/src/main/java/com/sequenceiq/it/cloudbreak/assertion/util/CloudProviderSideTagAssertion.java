@@ -59,7 +59,7 @@ public class CloudProviderSideTagAssertion {
                     .collect(Collectors.toList());
 
             LOGGER.info(" TAG VALIDATION:\n Environment: {}\n FreeIPA: {}\n instance IDs: {}.\n", testDto.getName(), freeIpaResponse.getName(), instanceIds);
-            verifyTags(instanceIds, customTags, testContext, testDto.getName());
+            verifyTags(instanceIds, customTags, testContext, freeIpaResponse.getName());
 
             return testDto;
         };
