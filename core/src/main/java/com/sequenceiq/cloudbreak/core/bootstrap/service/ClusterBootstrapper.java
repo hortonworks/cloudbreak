@@ -391,6 +391,7 @@ public class ClusterBootstrapper {
     private Map<String, Optional<String>> createInstanceIdToFQDNMappingFromDiskResources(Stack stack) {
         List<Resource> diskResources = resourceService.findByStackIdAndType(stack.getId(), stack.getDiskResourceType());
         Map<String, Optional<String>> imIdToFQDN = diskResources.stream()
+                .filter(resource -> resource.getInstanceId() != null)
                 .collect(Collectors.toMap(Resource::getInstanceId, volumeSet -> {
                     Optional<VolumeSetAttributes> volumeSetAttributes = resourceAttributeUtil.getTypedAttributes(volumeSet, VolumeSetAttributes.class);
                     return volumeSetAttributes.map(VolumeSetAttributes::getDiscoveryFQDN);

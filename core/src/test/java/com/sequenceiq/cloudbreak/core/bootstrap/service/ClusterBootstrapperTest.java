@@ -2,12 +2,14 @@ package com.sequenceiq.cloudbreak.core.bootstrap.service;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -27,6 +29,7 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostBootstrapApiChe
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostClusterAvailabilityCheckerTask;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.context.HostBootstrapApiContext;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.context.HostOrchestratorClusterContext;
+import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -42,6 +45,7 @@ import com.sequenceiq.cloudbreak.service.orchestrator.OrchestratorService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.common.api.type.ResourceType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ClusterBootstrapperTest {
@@ -129,6 +133,48 @@ public class ClusterBootstrapperTest {
         GatewayConfig gatewayConfig = new GatewayConfig("host1", "1.1.1.1", "1.1.1.1", 22, "i-1839", false);
         when(gatewayConfigService.getAllGatewayConfigs(any())).thenReturn(List.of(gatewayConfig));
         when(componentConfigProviderService.getImage(anyLong())).thenReturn(image);
+
+        underTest.bootstrapNewNodes(1L, Set.of("1.1.1.1"), List.of("host1"));
+
+        verify(instanceMetaDataService).getReachableInstanceMetadataByStackId(1L);
+        verify(gatewayConfigService).getAllGatewayConfigs(stack);
+        verify(componentConfigProviderService).getImage(1L);
+        verify(instanceMetaDataService).saveAll(Set.of(instanceMetaData));
+        verify(hostOrchestrator, never()).removeDeadSaltMinions(gatewayConfig);
+    }
+
+    @Test
+    public void doNotThrowDuplicateKeyNullIfVolumeResourceDontHaveInstanceId() throws Exception {
+        doAnswer(invocation -> {
+            invocation.getArgument(0, Runnable.class).run();
+            return null;
+        }).when(transactionService).required(any(Runnable.class));
+        when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
+        InstanceMetaData instanceMetaData = new InstanceMetaData();
+        instanceMetaData.setPrivateIp("1.1.1.1");
+        instanceMetaData.setPublicIp("2.2.2.2");
+        instanceMetaData.setDiscoveryFQDN("FQDN");
+        InstanceGroup instanceGroup = new InstanceGroup();
+        instanceGroup.setGroupName("master");
+        Template template = new Template();
+        template.setInstanceType("GATEWAY");
+        instanceGroup.setTemplate(template);
+        instanceMetaData.setInstanceGroup(instanceGroup);
+        when(stack.getId()).thenReturn(1L);
+        when(instanceMetaDataService.getReachableInstanceMetadataByStackId(stack.getId())).thenReturn(Set.of(instanceMetaData));
+        when(stack.getCustomDomain()).thenReturn("CUSTOM_DOMAIN");
+        Cluster cluster = new Cluster();
+        cluster.setGateway(new Gateway());
+        when(stack.getCluster()).thenReturn(cluster);
+        when(stack.getDiskResourceType()).thenReturn(ResourceType.AWS_VOLUMESET);
+        GatewayConfig gatewayConfig = new GatewayConfig("host1", "1.1.1.1", "1.1.1.1", 22, "i-1839", false);
+        when(gatewayConfigService.getAllGatewayConfigs(any())).thenReturn(List.of(gatewayConfig));
+        when(componentConfigProviderService.getImage(anyLong())).thenReturn(image);
+        ArrayList<Resource> diskResources = new ArrayList<>();
+        diskResources.add(new Resource(ResourceType.AWS_VOLUMESET, "resource1", stack));
+        diskResources.add(new Resource(ResourceType.AWS_VOLUMESET, "resource2", stack));
+        diskResources.add(new Resource(ResourceType.AWS_VOLUMESET, "resource3", stack));
+        when(resourceService.findByStackIdAndType(eq(1L), eq(ResourceType.AWS_VOLUMESET))).thenReturn(diskResources);
 
         underTest.bootstrapNewNodes(1L, Set.of("1.1.1.1"), List.of("host1"));
 
