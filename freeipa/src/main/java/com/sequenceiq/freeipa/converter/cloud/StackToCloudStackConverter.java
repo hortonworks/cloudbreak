@@ -154,7 +154,7 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
                 id,
                 instanceTemplate,
                 instanceAuthentication,
-                instanceMetaData.getSubnetId(),
+                instanceMetaData != null ? instanceMetaData.getSubnetId() : null,
                 stack.getAvailabilityZone(),
                 parameters);
     }
