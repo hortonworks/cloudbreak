@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.upscale;
 
+import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.AbstractStackUpscaleAction.HOSTNAMES;
+
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -347,7 +350,9 @@ public class StackUpscaleActions {
         return new AbstractStackFailureAction<StackUpscaleState, StackUpscaleEvent>() {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
-                stackUpscaleService.handleStackUpscaleFailure(isRepair(variables), payload.getException(), payload.getResourceId());
+                Set<String> hostNames = (Set<String>) variables.getOrDefault(HOSTNAMES, new HashSet<>());
+                stackUpscaleService.handleStackUpscaleFailure(isRepair(variables), hostNames, payload.getException(),
+                        payload.getResourceId());
                 getMetricService().incrementMetricCounter(MetricType.STACK_UPSCALE_FAILED, context.getStackView(), payload.getException());
                 sendEvent(context);
             }

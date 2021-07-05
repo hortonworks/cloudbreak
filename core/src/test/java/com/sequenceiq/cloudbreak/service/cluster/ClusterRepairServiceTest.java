@@ -622,6 +622,7 @@ public class ClusterRepairServiceTest {
         instanceGroup.setGroupName(groupName);
         instanceGroup.setTemplate(createTemplate(volumeTemplates));
         InstanceMetaData instanceMetaData = createInstanceMetaData("instanceId", InstanceStatus.SERVICES_UNHEALTHY);
+        instanceMetaData.setDiscoveryFQDN("fqdn");
         instanceMetaData.setInstanceGroup(instanceGroup);
         instanceGroup.setInstanceMetaData(Set.of(instanceMetaData));
         return instanceGroup;

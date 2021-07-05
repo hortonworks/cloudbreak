@@ -341,9 +341,11 @@ public class AzureResourceConnector extends AbstractResourceConnector {
         Collection<CloudResource> result = new ArrayList<>();
         for (CloudInstance instance : instances) {
             String instanceId = instance.getInstanceId();
-            for (CloudResource resource : resources) {
-                if (instanceId.equalsIgnoreCase(resource.getName()) || instanceId.equalsIgnoreCase(resource.getInstanceId())) {
-                    result.add(resource);
+            if (instanceId != null) {
+                for (CloudResource resource : resources) {
+                    if (instanceId.equalsIgnoreCase(resource.getName()) || instanceId.equalsIgnoreCase(resource.getInstanceId())) {
+                        result.add(resource);
+                    }
                 }
             }
         }

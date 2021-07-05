@@ -194,6 +194,7 @@ public enum ResourceEvent {
     STACK_INFRASTRUCTURE_START_FAILED("stack.infrastructure.start.failed"),
     STACK_INFRASTRUCTURE_STOP_FAILED("stack.infrastructure.stop.failed"),
     STACK_REPAIR_DETECTION_STARTED("stack.repair.detection.started"),
+    STACK_INSTANCE_METADATA_RESTORED("stack.instance.metadata.restored"),
     STACK_REPAIR_FAILED("stack.repair.failed"),
     STACK_DATALAKE_UPDATE("stack.datalake.update"),
     STACK_DATALAKE_UPDATE_FINISHED("stack.datalake.update.finished"),

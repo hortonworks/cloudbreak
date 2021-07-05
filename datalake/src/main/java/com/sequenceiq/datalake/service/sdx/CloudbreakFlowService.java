@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.flow.api.FlowEndpoint;
+import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowLogResponse;
 import com.sequenceiq.flow.api.model.FlowType;
@@ -46,16 +47,16 @@ public class CloudbreakFlowService {
         try {
             if (sdxCluster.getLastCbFlowChainId() != null) {
                 LOGGER.info("Checking cloudbreak {} {}", FlowType.FLOW_CHAIN, sdxCluster.getLastCbFlowChainId());
-                Boolean hasActiveFlow = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
-                        flowEndpoint.hasFlowRunningByChainId(sdxCluster.getLastCbFlowChainId()).getHasActiveFlow());
-                logCbFlowChainStatus(sdxCluster, hasActiveFlow);
-                return getFlowState(hasActiveFlow);
+                FlowCheckResponse flowCheckResponse = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
+                        flowEndpoint.hasFlowRunningByChainId(sdxCluster.getLastCbFlowChainId()));
+                logCbFlowChainStatus(sdxCluster, flowCheckResponse.getHasActiveFlow());
+                return getFlowState(flowCheckResponse);
             } else if (sdxCluster.getLastCbFlowId() != null) {
                 LOGGER.info("Checking cloudbreak {} {}", FlowType.FLOW, sdxCluster.getLastCbFlowId());
-                Boolean hasActiveFlow = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
-                        flowEndpoint.hasFlowRunningByFlowId(sdxCluster.getLastCbFlowId()).getHasActiveFlow());
-                logCbFlowStatus(sdxCluster, hasActiveFlow);
-                return getFlowState(hasActiveFlow);
+                FlowCheckResponse flowCheckResponse = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
+                        flowEndpoint.hasFlowRunningByFlowId(sdxCluster.getLastCbFlowId()));
+                logCbFlowStatus(sdxCluster, flowCheckResponse.getHasActiveFlow());
+                return getFlowState(flowCheckResponse);
             }
             return FlowState.UNKNOWN;
         } catch (NotFoundException e) {
@@ -67,16 +68,20 @@ public class CloudbreakFlowService {
         }
     }
 
-    private FlowState getFlowState(Boolean hasActiveFlow) {
-        if (hasActiveFlow) {
+    private FlowState getFlowState(FlowCheckResponse flowCheckResponse) {
+        if (flowCheckResponse.getHasActiveFlow()) {
             return FlowState.RUNNING;
         } else {
-            return FlowState.FINISHED;
+            if (flowCheckResponse.getLatestFlowFinalizedAndFailed() != null && flowCheckResponse.getLatestFlowFinalizedAndFailed()) {
+                return FlowState.FAILED;
+            } else {
+                return FlowState.FINISHED;
+            }
         }
     }
 
     public enum FlowState {
-        RUNNING, FINISHED, UNKNOWN
+        RUNNING, FINISHED, FAILED, UNKNOWN
     }
 
     public void saveLastCloudbreakFlowChainId(SdxCluster sdxCluster, FlowIdentifier flowIdentifier) {

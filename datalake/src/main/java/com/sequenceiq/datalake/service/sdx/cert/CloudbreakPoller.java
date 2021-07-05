@@ -1,5 +1,6 @@
 package com.sequenceiq.datalake.service.sdx.cert;
 
+import static com.sequenceiq.datalake.service.sdx.CloudbreakFlowService.FlowState.FAILED;
 import static com.sequenceiq.datalake.service.sdx.CloudbreakFlowService.FlowState.FINISHED;
 import static com.sequenceiq.datalake.service.sdx.CloudbreakFlowService.FlowState.RUNNING;
 
@@ -106,7 +107,11 @@ public class CloudbreakPoller {
             Set<Status> failedStatuses) {
         StackStatusV4Response statusResponse = getStackAndClusterStatusWithInternalActor(sdxCluster);
         LOGGER.info("Response from cloudbreak: {}", statusResponse);
-        if (oneOf(statusResponse.getStatus(), targetSatuses)
+        if (FAILED.equals(flowState)) {
+            String message = sdxStatusService.getShortStatusMessage(statusResponse);
+            LOGGER.info("{} flow finished, but failed. {}", process, message);
+            return failedPolling(process, sdxCluster, message);
+        } else if (oneOf(statusResponse.getStatus(), targetSatuses)
                 && oneOf(statusResponse.getClusterStatus(), targetSatuses)) {
             return AttemptResults.finishWith(statusResponse);
         } else if (oneOf(statusResponse.getStatus(), failedStatuses)) {
