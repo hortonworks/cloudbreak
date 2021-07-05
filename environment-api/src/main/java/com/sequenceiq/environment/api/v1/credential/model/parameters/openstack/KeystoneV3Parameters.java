@@ -35,4 +35,12 @@ public class KeystoneV3Parameters implements Serializable {
     public void setDomain(DomainKeystoneV3Parameters domain) {
         this.domain = domain;
     }
+
+    @Override
+    public String toString() {
+        return "KeystoneV3Parameters{" +
+                "project=" + project +
+                ", domain=" + domain +
+                '}';
+    }
 }

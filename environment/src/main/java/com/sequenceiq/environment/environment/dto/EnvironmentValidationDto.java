@@ -34,6 +34,14 @@ public class EnvironmentValidationDto implements Payload {
         return getEnvironmentDto().getResourceId();
     }
 
+    @Override
+    public String toString() {
+        return "EnvironmentValidationDto{" +
+                "environmentDto=" + environmentDto +
+                ", validationType=" + validationType +
+                '}';
+    }
+
     public static final class Builder {
 
         private EnvironmentDto environmentDto;

@@ -24,4 +24,11 @@ public class MockParameters implements Serializable {
     public void setMockEndpoint(String mockEndpoint) {
         this.mockEndpoint = mockEndpoint;
     }
+
+    @Override
+    public String toString() {
+        return "MockParameters{" +
+                "mockEndpoint='" + mockEndpoint + '\'' +
+                '}';
+    }
 }

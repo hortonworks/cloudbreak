@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.api.v1.environment.model.request.azure;
 
+import java.io.Serializable;
+
 import javax.validation.constraints.Pattern;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -9,7 +11,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel(value = "AzureResourceEncryptionV1Parameters")
-public class AzureResourceEncryptionParameters {
+public class AzureResourceEncryptionParameters implements Serializable {
 
     @VisibleForTesting
     static final String ENCRYPTION_KEY_URL_INVALID_MSG = "It should be of format 'https://<vaultName><dnsSuffix>/keys/<keyName>/<keyVersion>'. " +

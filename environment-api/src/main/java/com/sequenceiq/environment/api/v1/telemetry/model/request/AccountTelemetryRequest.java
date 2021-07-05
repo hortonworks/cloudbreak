@@ -14,4 +14,11 @@ public class AccountTelemetryRequest extends AccountTelemetryBase {
     public void setFeatures(FeaturesRequest features) {
         this.features = features;
     }
+
+    @Override
+    public String toString() {
+        return super.toString() + ", " + "AccountTelemetryRequest{" +
+                "features=" + features +
+                '}';
+    }
 }

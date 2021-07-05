@@ -10,4 +10,9 @@ public class SecurityAccessRequest extends SecurityAccessBase {
     public static Builder<SecurityAccessRequest> builder() {
         return new Builder<>(SecurityAccessRequest.class);
     }
+
+    @Override
+    public String toString() {
+        return super.toString() + ", " + "SecurityAccessRequest{}";
+    }
 }

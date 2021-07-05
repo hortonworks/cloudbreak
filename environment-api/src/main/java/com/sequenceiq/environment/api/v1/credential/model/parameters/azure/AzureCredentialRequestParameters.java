@@ -64,4 +64,14 @@ public class AzureCredentialRequestParameters implements Serializable {
     public void setTenantId(String tenantId) {
         this.tenantId = tenantId;
     }
+
+    @Override
+    public String toString() {
+        return "AzureCredentialRequestParameters{" +
+                "subscriptionId='" + subscriptionId + '\'' +
+                ", tenantId='" + tenantId + '\'' +
+                ", appBased=" + appBased +
+                ", roleBased=" + roleBased +
+                '}';
+    }
 }

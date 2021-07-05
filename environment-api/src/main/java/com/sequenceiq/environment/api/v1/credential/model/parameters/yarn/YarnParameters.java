@@ -24,4 +24,11 @@ public class YarnParameters implements Serializable {
     public void setEndpoint(String endpoint) {
         this.endpoint = endpoint;
     }
+
+    @Override
+    public String toString() {
+        return "YarnParameters{" +
+                "endpoint='" + endpoint + '\'' +
+                '}';
+    }
 }

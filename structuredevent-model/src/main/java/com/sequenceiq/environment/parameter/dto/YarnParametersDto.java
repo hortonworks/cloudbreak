@@ -9,6 +9,11 @@ public class YarnParametersDto {
         return new Builder();
     }
 
+    @Override
+    public String toString() {
+        return "YarnParametersDto{}";
+    }
+
     public static final class Builder {
 
         private Builder() {

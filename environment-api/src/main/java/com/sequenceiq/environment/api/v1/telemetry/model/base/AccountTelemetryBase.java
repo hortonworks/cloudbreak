@@ -16,4 +16,11 @@ public class AccountTelemetryBase implements Serializable {
     public void setRules(List<AnonymizationRule> rules) {
         this.rules = rules;
     }
+
+    @Override
+    public String toString() {
+        return "AccountTelemetryBase{" +
+                "rules=" + rules +
+                '}';
+    }
 }

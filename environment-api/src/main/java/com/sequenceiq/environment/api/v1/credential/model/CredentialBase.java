@@ -127,4 +127,19 @@ public abstract class CredentialBase implements Serializable {
     public void setVerifyPermissions(boolean verifyPermissions) {
         this.verifyPermissions = verifyPermissions;
     }
+
+    @Override
+    public String toString() {
+        return "CredentialBase{" +
+                "cloudPlatform='" + cloudPlatform + '\'' +
+                ", aws=" + aws +
+                ", gcp=" + gcp +
+                ", openstack=" + openstack +
+                ", yarn=" + yarn +
+                ", mock=" + mock +
+                ", description='" + description + '\'' +
+                ", verificationStatusText='" + verificationStatusText + '\'' +
+                ", verifyPermissions=" + verifyPermissions +
+                '}';
+    }
 }

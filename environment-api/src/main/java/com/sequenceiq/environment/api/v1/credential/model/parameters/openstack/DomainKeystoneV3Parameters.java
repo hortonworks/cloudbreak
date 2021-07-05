@@ -25,4 +25,11 @@ public class DomainKeystoneV3Parameters extends KeystoneV3Base {
     public void setDomainName(String domainName) {
         this.domainName = domainName;
     }
+
+    @Override
+    public String toString() {
+        return super.toString() + ", " + "DomainKeystoneV3Parameters{" +
+                "domainName='" + domainName + '\'' +
+                '}';
+    }
 }

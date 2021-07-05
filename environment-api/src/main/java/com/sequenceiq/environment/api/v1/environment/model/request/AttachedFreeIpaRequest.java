@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.api.v1.environment.model.request;
 
+import java.io.Serializable;
+
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
@@ -12,7 +14,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel(value = "AttachedFreeIpaRequest")
-public class AttachedFreeIpaRequest {
+public class AttachedFreeIpaRequest implements Serializable {
 
     @NotNull
     @ApiModelProperty(value = EnvironmentModelDescription.CREATE_FREEIPA, required = true)

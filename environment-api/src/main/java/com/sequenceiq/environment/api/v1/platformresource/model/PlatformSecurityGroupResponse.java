@@ -46,4 +46,13 @@ public class PlatformSecurityGroupResponse implements Serializable {
     public void setProperties(Map<String, Object> properties) {
         this.properties = properties;
     }
+
+    @Override
+    public String toString() {
+        return "PlatformSecurityGroupResponse{" +
+                "groupName='" + groupName + '\'' +
+                ", groupId='" + groupId + '\'' +
+                ", properties=" + properties +
+                '}';
+    }
 }

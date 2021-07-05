@@ -17,4 +17,11 @@ public class GeneralCollectionV1Response<T> {
     public void setResponses(Collection<T> responses) {
         this.responses = responses;
     }
+
+    @Override
+    public String toString() {
+        return "GeneralCollectionV1Response{" +
+                "responses=" + responses +
+                '}';
+    }
 }

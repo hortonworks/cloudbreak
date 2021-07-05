@@ -109,4 +109,16 @@ public class AccountTelemetry implements Serializable, AuthResource, AccountIdAw
     public void setResourceCrn(String resourceCrn) {
         this.resourceCrn = resourceCrn;
     }
+
+    @Override
+    public String toString() {
+        return "AccountTelemetry{" +
+                "id=" + id +
+                ", accountId='" + accountId + '\'' +
+                ", resourceCrn='" + resourceCrn + '\'' +
+                ", rules=" + rules +
+                ", features=" + features +
+                ", archived=" + archived +
+                '}';
+    }
 }

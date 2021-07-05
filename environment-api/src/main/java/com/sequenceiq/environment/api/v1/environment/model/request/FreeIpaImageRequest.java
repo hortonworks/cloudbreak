@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.api.v1.environment.model.request;
 
+import java.io.Serializable;
+
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -12,7 +14,7 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class FreeIpaImageRequest {
+public class FreeIpaImageRequest implements Serializable {
 
     @ApiModelProperty(value = EnvironmentModelDescription.FREEIPA_IMAGE_CATALOG)
     @Size(max = 255)

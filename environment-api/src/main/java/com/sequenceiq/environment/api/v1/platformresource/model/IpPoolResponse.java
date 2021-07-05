@@ -50,4 +50,13 @@ public class IpPoolResponse implements Serializable {
     public void setProperties(Map<String, Object> properties) {
         this.properties = properties;
     }
+
+    @Override
+    public String toString() {
+        return "IpPoolResponse{" +
+                "name='" + name + '\'' +
+                ", id='" + id + '\'' +
+                ", properties=" + properties +
+                '}';
+    }
 }

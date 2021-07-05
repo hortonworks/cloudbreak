@@ -24,4 +24,11 @@ public abstract class KeystoneV3Base implements Serializable {
     public void setUserDomain(String userDomain) {
         this.userDomain = userDomain;
     }
+
+    @Override
+    public String toString() {
+        return "KeystoneV3Base{" +
+                "userDomain='" + userDomain + '\'' +
+                '}';
+    }
 }

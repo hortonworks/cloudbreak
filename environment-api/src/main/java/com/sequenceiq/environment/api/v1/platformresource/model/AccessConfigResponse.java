@@ -51,4 +51,13 @@ public class AccessConfigResponse implements Serializable {
     public void setProperties(Map<String, Object> properties) {
         this.properties = properties;
     }
+
+    @Override
+    public String toString() {
+        return "AccessConfigResponse{" +
+                "name='" + name + '\'' +
+                ", id='" + id + '\'' +
+                ", properties=" + properties +
+                '}';
+    }
 }

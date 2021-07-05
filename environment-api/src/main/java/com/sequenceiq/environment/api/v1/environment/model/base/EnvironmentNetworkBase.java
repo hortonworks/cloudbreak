@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.api.v1.environment.model.base;
 
+import java.io.Serializable;
 import java.util.Set;
 
 import javax.validation.constraints.Size;
@@ -27,7 +28,7 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ApiModel(subTypes = {EnvironmentNetworkRequest.class, EnvironmentNetworkResponse.class})
-public abstract class EnvironmentNetworkBase {
+public abstract class EnvironmentNetworkBase implements Serializable {
 
     @ApiModelProperty(value = EnvironmentModelDescription.SUBNET_IDS)
     private Set<String> subnetIds;

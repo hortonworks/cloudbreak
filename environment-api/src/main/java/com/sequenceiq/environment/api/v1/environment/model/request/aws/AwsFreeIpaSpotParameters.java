@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.api.v1.environment.model.request.aws;
 
+import java.io.Serializable;
+
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.Max;
@@ -11,7 +13,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel(value = "AttachedFreeIpaRequestAwsSpotParameters")
-public class AwsFreeIpaSpotParameters {
+public class AwsFreeIpaSpotParameters implements Serializable {
 
     @ApiModelProperty(EnvironmentModelDescription.FREEIPA_AWS_SPOT_PERCENTAGE)
     @Min(value = 0, message = "Spot percentage must be between 0 and 100 percent")

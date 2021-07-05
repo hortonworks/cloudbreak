@@ -187,4 +187,22 @@ public class Credential implements Serializable, AuthResource, AccountAwareResou
         this.verifyPermissions = verifyPermissions;
     }
 
+    @Override
+    public String toString() {
+        return "Credential{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", archived=" + archived +
+                ", cloudPlatform='" + cloudPlatform + '\'' +
+                ", govCloud=" + govCloud +
+                ", accountId='" + accountId + '\'' +
+                ", creator='" + creator + '\'' +
+                ", resourceCrn='" + resourceCrn + '\'' +
+                ", verificationStatusText='" + verificationStatusText + '\'' +
+                ", verifyPermissions=" + verifyPermissions +
+                ", type=" + type +
+                ", created=" + created +
+                '}';
+    }
 }

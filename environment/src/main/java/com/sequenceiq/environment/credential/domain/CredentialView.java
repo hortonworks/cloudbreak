@@ -133,4 +133,21 @@ public class CredentialView implements Serializable, AuthResource, AccountIdAwar
     public void setType(CredentialType type) {
         this.type = type;
     }
+
+    @Override
+    public String toString() {
+        return "CredentialView{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", archived=" + archived +
+                ", cloudPlatform='" + cloudPlatform + '\'' +
+                ", govCloud=" + govCloud +
+                ", accountId='" + accountId + '\'' +
+                ", creator='" + creator + '\'' +
+                ", resourceCrn='" + resourceCrn + '\'' +
+                ", verificationStatusText='" + verificationStatusText + '\'' +
+                ", type=" + type +
+                '}';
+    }
 }

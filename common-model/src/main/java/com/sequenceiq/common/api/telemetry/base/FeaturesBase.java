@@ -82,4 +82,14 @@ public abstract class FeaturesBase implements Serializable {
         cloudStorageLogging = new FeatureSetting();
         cloudStorageLogging.setEnabled(enabled);
     }
+
+    @Override
+    public String toString() {
+        return "FeaturesBase{" +
+                "workloadAnalytics=" + workloadAnalytics +
+                ", clusterLogsCollection=" + clusterLogsCollection +
+                ", monitoring=" + monitoring +
+                ", cloudStorageLogging=" + cloudStorageLogging +
+                '}';
+    }
 }

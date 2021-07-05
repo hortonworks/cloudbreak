@@ -24,4 +24,11 @@ public class KeystoneV2Parameters implements Serializable {
     public void setTenantName(String tenantName) {
         this.tenantName = tenantName;
     }
+
+    @Override
+    public String toString() {
+        return "KeystoneV2Parameters{" +
+                "tenantName='" + tenantName + '\'' +
+                '}';
+    }
 }

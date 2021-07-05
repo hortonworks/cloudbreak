@@ -20,4 +20,11 @@ public class AwsNetwork extends BaseNetwork {
     public String getNetworkId() {
         return vpcId;
     }
+
+    @Override
+    public String toString() {
+        return super.toString() + ", " + "AwsNetwork{" +
+                "vpcId='" + vpcId + '\'' +
+                '}';
+    }
 }

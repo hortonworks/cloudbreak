@@ -31,4 +31,12 @@ public class AnonymizationRule implements Serializable {
     public void setReplacement(String replacement) {
         this.replacement = replacement;
     }
+
+    @Override
+    public String toString() {
+        return "AnonymizationRule{" +
+                "value='" + value + '\'' +
+                ", replacement='" + replacement + '\'' +
+                '}';
+    }
 }

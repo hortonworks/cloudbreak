@@ -43,4 +43,12 @@ public class YarnNetwork extends BaseNetwork {
             super.setNetworkCidrs(networkCidr);
         }
     }
+
+    @Override
+    public String toString() {
+        return super.toString() + ", " + "YarnNetwork{" +
+                "queue='" + queue + '\'' +
+                ", lifetime=" + lifetime +
+                '}';
+    }
 }

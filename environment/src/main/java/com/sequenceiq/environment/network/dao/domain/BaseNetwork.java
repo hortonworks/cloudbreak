@@ -246,4 +246,26 @@ public abstract class BaseNetwork implements EnvironmentAwareResource {
     public void setResourceCrn(String resourceCrn) {
         this.resourceCrn = resourceCrn;
     }
+
+    @Override
+    public String toString() {
+        return "BaseNetwork{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", environment=" + environment +
+                ", archived=" + archived +
+                ", deletionTimestamp=" + deletionTimestamp +
+                ", networkCidr='" + networkCidr + '\'' +
+                ", networkCidrs='" + networkCidrs + '\'' +
+                ", registrationType=" + registrationType +
+                ", subnetMetas=" + subnetMetas +
+                ", privateSubnetCreation=" + privateSubnetCreation +
+                ", serviceEndpointCreation=" + serviceEndpointCreation +
+                ", publicEndpointAccessGateway=" + publicEndpointAccessGateway +
+                ", endpointGatewaySubnetMetas=" + endpointGatewaySubnetMetas +
+                ", outboundInternetTraffic=" + outboundInternetTraffic +
+                ", accountId='" + accountId + '\'' +
+                ", resourceCrn='" + resourceCrn + '\'' +
+                '}';
+    }
 }

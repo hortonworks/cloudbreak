@@ -6,4 +6,8 @@ import io.swagger.annotations.ApiModel;
 
 @ApiModel(value = "FeaturesRequest")
 public class FeaturesRequest extends FeaturesBase {
+    @Override
+    public String toString() {
+        return super.toString() + ", " + "FeaturesRequest{}";
+    }
 }

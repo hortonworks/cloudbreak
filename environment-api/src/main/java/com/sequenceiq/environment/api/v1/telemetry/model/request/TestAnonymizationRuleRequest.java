@@ -33,4 +33,12 @@ public class TestAnonymizationRuleRequest implements Serializable {
     public List<AnonymizationRule> getRules() {
         return rules;
     }
+
+    @Override
+    public String toString() {
+        return "TestAnonymizationRuleRequest{" +
+                "input='" + input + '\'' +
+                ", rules=" + rules +
+                '}';
+    }
 }

@@ -39,4 +39,11 @@ public class KeyBasedParameters implements Serializable {
     public void setSecretKey(String secretKey) {
         this.secretKey = secretKey;
     }
+
+    @Override
+    public String toString() {
+        return "KeyBasedParameters{" +
+                "accessKey='" + accessKey + '\'' +
+                '}';
+    }
 }

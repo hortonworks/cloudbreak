@@ -1,12 +1,14 @@
 package com.sequenceiq.environment.api.v1.environment.model.response;
 
+import java.io.Serializable;
+
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel("EnvironmentAuthenticationV1Response")
-public class EnvironmentAuthenticationResponse {
+public class EnvironmentAuthenticationResponse implements Serializable {
 
     @ApiModelProperty(EnvironmentModelDescription.PUBLIC_KEY)
     private String publicKey;
@@ -43,6 +45,15 @@ public class EnvironmentAuthenticationResponse {
 
     public static Builder builder() {
         return new Builder();
+    }
+
+    @Override
+    public String toString() {
+        return "EnvironmentAuthenticationResponse{" +
+                "publicKey='" + publicKey + '\'' +
+                ", publicKeyId='" + publicKeyId + '\'' +
+                ", loginUserName='" + loginUserName + '\'' +
+                '}';
     }
 
     public static class Builder {

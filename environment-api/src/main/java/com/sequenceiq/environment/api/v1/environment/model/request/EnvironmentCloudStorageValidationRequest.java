@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.api.v1.environment.model.request;
 
+import java.io.Serializable;
+
 import javax.validation.constraints.NotNull;
 
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
@@ -9,7 +11,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel(value = "EnvironmentCloudStorageValidationRequest")
-public class EnvironmentCloudStorageValidationRequest {
+public class EnvironmentCloudStorageValidationRequest implements Serializable {
 
     @ApiModelProperty(EnvironmentModelDescription.CREDENTIAL_CRN)
     @NotNull
@@ -35,4 +37,11 @@ public class EnvironmentCloudStorageValidationRequest {
         this.telemetry = telemetry;
     }
 
+    @Override
+    public String toString() {
+        return "EnvironmentCloudStorageValidationRequest{" +
+                "credentialCrn='" + credentialCrn + '\'' +
+                ", telemetry=" + telemetry +
+                '}';
+    }
 }

@@ -106,4 +106,17 @@ public class CredentialResponse extends CredentialBase {
     public void setAccountId(String accountId) {
         this.accountId = accountId;
     }
+
+    @Override
+    public String toString() {
+        return super.toString() + ", " + "CredentialResponse{" +
+                "name='" + name + '\'' +
+                ", azure=" + azure +
+                ", crn='" + crn + '\'' +
+                ", creator='" + creator + '\'' +
+                ", accountId='" + accountId + '\'' +
+                ", created=" + created +
+                ", type=" + type +
+                '}';
+    }
 }

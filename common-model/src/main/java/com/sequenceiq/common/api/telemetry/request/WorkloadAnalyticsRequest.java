@@ -6,4 +6,8 @@ import io.swagger.annotations.ApiModel;
 
 @ApiModel(value = "WorkloadAnalyticsRequest")
 public class WorkloadAnalyticsRequest extends WorkloadAnalyticsBase {
+    @Override
+    public String toString() {
+        return super.toString() + ", " + "WorkloadAnalyticsRequest{}";
+    }
 }

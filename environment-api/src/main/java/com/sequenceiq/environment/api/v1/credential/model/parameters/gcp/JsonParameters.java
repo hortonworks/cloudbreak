@@ -27,4 +27,9 @@ public class JsonParameters implements Serializable {
     public void setCredentialJson(String credentialJson) {
         this.credentialJson = credentialJson;
     }
+
+    @Override
+    public String toString() {
+        return "JsonParameters{}";
+    }
 }

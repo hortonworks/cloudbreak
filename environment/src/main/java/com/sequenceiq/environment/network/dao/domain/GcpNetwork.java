@@ -46,4 +46,14 @@ public class GcpNetwork extends BaseNetwork {
     public String getNetworkId() {
         return networkId;
     }
+
+    @Override
+    public String toString() {
+        return super.toString() + ", " + "GcpNetwork{" +
+                "networkId='" + networkId + '\'' +
+                ", sharedProjectId='" + sharedProjectId + '\'' +
+                ", noPublicIp=" + noPublicIp +
+                ", noFirewallRules=" + noFirewallRules +
+                '}';
+    }
 }

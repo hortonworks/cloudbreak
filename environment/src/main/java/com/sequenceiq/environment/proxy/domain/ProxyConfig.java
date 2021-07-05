@@ -200,4 +200,22 @@ public class ProxyConfig implements Serializable, AuthResource, AccountIdAwareRe
     public int hashCode() {
         return Objects.hash(id);
     }
+
+    @Override
+    public String toString() {
+        return "ProxyConfig{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", serverHost='" + serverHost + '\'' +
+                ", serverPort=" + serverPort +
+                ", protocol='" + protocol + '\'' +
+                ", accountId='" + accountId + '\'' +
+                ", resourceCrn='" + resourceCrn + '\'' +
+                ", creator='" + creator + '\'' +
+                ", archived=" + archived +
+                ", deletionTimestamp=" + deletionTimestamp +
+                ", noProxyHosts='" + noProxyHosts + '\'' +
+                '}';
+    }
 }

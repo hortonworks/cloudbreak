@@ -41,4 +41,12 @@ public class VmTypeResponse implements Serializable {
     public void setVmTypeMetaJson(VmTypeMetaJson vmTypeMetaJson) {
         this.vmTypeMetaJson = vmTypeMetaJson;
     }
+
+    @Override
+    public String toString() {
+        return "VmTypeResponse{" +
+                "value='" + value + '\'' +
+                ", vmTypeMetaJson=" + vmTypeMetaJson +
+                '}';
+    }
 }

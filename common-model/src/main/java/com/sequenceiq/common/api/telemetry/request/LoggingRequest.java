@@ -6,4 +6,8 @@ import io.swagger.annotations.ApiModel;
 
 @ApiModel(value = "LoggingRequest")
 public class LoggingRequest extends LoggingBase {
+    @Override
+    public String toString() {
+        return super.toString() + ", " + "LoggingRequest{}";
+    }
 }

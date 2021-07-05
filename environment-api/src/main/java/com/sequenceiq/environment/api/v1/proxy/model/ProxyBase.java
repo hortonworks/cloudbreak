@@ -98,4 +98,16 @@ public abstract class ProxyBase implements Serializable {
     public void setNoProxyHosts(String noProxyHosts) {
         this.noProxyHosts = noProxyHosts;
     }
+
+    @Override
+    public String toString() {
+        return "ProxyBase{" +
+                "name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", host='" + host + '\'' +
+                ", port=" + port +
+                ", protocol='" + protocol + '\'' +
+                ", noProxyHosts='" + noProxyHosts + '\'' +
+                '}';
+    }
 }

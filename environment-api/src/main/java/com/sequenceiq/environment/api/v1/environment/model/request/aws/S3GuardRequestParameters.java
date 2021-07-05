@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.api.v1.environment.model.request.aws;
 
+import java.io.Serializable;
+
 import javax.validation.constraints.Pattern;
 
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
@@ -8,7 +10,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel(value = "S3GuardV1Parameters")
-public class S3GuardRequestParameters {
+public class S3GuardRequestParameters implements Serializable {
 
     @Pattern(regexp = "^[a-zA-Z0-9\\.\\-_]{3,255}$",
             message = "Table name must be between 3 and 255 characters long and can contain only alpnahumeric charachters, dot, dash and hyphen.")

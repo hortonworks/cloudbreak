@@ -51,4 +51,12 @@ public class P12Parameters implements Serializable {
     public void setServiceAccountPrivateKey(String serviceAccountPrivateKey) {
         this.serviceAccountPrivateKey = serviceAccountPrivateKey;
     }
+
+    @Override
+    public String toString() {
+        return "P12Parameters{" +
+                "projectId='" + projectId + '\'' +
+                ", serviceAccountId='" + serviceAccountId + '\'' +
+                '}';
+    }
 }
