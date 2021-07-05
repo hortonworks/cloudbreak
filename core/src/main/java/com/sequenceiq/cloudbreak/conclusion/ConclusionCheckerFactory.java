@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.conclusion;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -22,31 +22,31 @@ public class ConclusionCheckerFactory {
     @Inject
     private List<ConclusionStep> conclusionSteps;
 
-    private Map<Class<? extends ConclusionStep>, ConclusionStep> conclusionStepMapByType;
+    private Map<Class<? extends ConclusionStep>, ConclusionStep> conclusionStepInstancesMapByType;
 
     @PostConstruct
     public void init() {
-        conclusionStepMapByType = conclusionSteps.stream().collect(Collectors.toMap(ConclusionStep::getClass, step -> step));
+        conclusionStepInstancesMapByType = conclusionSteps.stream().collect(Collectors.toMap(ConclusionStep::getClass, step -> step));
     }
 
     public ConclusionChecker getConclusionChecker(ConclusionCheckerType conclusionCheckerType) {
-        List<Class<? extends ConclusionStep>> stepClasses = conclusionCheckerType.getSteps();
-        List<ConclusionStep> actualConclusionSteps = getActualConclusionSteps(stepClasses);
-        return new ConclusionChecker(actualConclusionSteps);
+        ConclusionStepNode rootNode = ConclusionStepNodeFactory.getConclusionStepNode(conclusionCheckerType);
+        Map<Class<? extends ConclusionStep>, ConclusionStep> conclusionStepInstances = getConclusionStepInstances(rootNode);
+        return new ConclusionChecker(rootNode, conclusionStepInstances);
     }
 
-    private List<ConclusionStep> getActualConclusionSteps(List<Class<? extends ConclusionStep>> stepClasses) {
-        List<ConclusionStep> actualConclusionSteps = new ArrayList<>();
-        for (Class<? extends ConclusionStep> stepClass : stepClasses) {
-            if (!conclusionStepMapByType.containsKey(stepClass)) {
+    private Map<Class<? extends ConclusionStep>, ConclusionStep> getConclusionStepInstances(ConclusionStepNode rootNode) {
+        Map<Class<? extends ConclusionStep>, ConclusionStep> conclusionStepInstances = new HashMap<>();
+        for (Class<? extends ConclusionStep> stepClass : rootNode.getAllSteps()) {
+            if (!conclusionStepInstancesMapByType.containsKey(stepClass)) {
                 String message = "Unknown conclusion step class: " + stepClass;
                 LOGGER.error(message);
                 throw new IllegalArgumentException(message);
             } else {
-                actualConclusionSteps.add(conclusionStepMapByType.get(stepClass));
+                conclusionStepInstances.put(stepClass, conclusionStepInstancesMapByType.get(stepClass));
             }
         }
-        return actualConclusionSteps;
+        return conclusionStepInstances;
     }
 
 }
