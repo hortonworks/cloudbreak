@@ -73,4 +73,15 @@ public class PlatformNetworkResponse implements Serializable {
     public void setProperties(Map<String, Object> properties) {
         this.properties = properties;
     }
+
+    @Override
+    public String toString() {
+        return "PlatformNetworkResponse{" +
+                "name='" + name + '\'' +
+                ", id='" + id + '\'' +
+                ", subnets=" + subnets +
+                ", subnetMetadata=" + subnetMetadata +
+                ", properties=" + properties +
+                '}';
+    }
 }

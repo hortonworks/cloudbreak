@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.api.v1.environment.model;
 
+import java.io.Serializable;
+
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -12,7 +14,7 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel(value = "EnvironmentNetworkGcpV1Params")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
-public class EnvironmentNetworkGcpParams {
+public class EnvironmentNetworkGcpParams implements Serializable {
 
     @Size(max = 255)
     @ApiModelProperty(value = EnvironmentModelDescription.GCP_NETWORK_ID, required = true)
@@ -57,6 +59,16 @@ public class EnvironmentNetworkGcpParams {
 
     public void setNoFirewallRules(Boolean noFirewallRules) {
         this.noFirewallRules = noFirewallRules;
+    }
+
+    @Override
+    public String toString() {
+        return "EnvironmentNetworkGcpParams{" +
+                "networkId='" + networkId + '\'' +
+                ", sharedProjectId='" + sharedProjectId + '\'' +
+                ", noPublicIp=" + noPublicIp +
+                ", noFirewallRules=" + noFirewallRules +
+                '}';
     }
 
     public static final class EnvironmentNetworkGcpParamsBuilder {

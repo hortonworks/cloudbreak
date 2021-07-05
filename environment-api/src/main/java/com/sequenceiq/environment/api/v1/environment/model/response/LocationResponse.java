@@ -1,12 +1,14 @@
 package com.sequenceiq.environment.api.v1.environment.model.response;
 
+import java.io.Serializable;
+
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel(value = "LocationV1Response")
-public class LocationResponse {
+public class LocationResponse implements Serializable {
 
     @ApiModelProperty(EnvironmentModelDescription.LOCATION)
     private String name;
@@ -50,6 +52,16 @@ public class LocationResponse {
 
     public void setLongitude(Double longitude) {
         this.longitude = longitude;
+    }
+
+    @Override
+    public String toString() {
+        return "LocationResponse{" +
+                "name='" + name + '\'' +
+                ", displayName='" + displayName + '\'' +
+                ", latitude=" + latitude +
+                ", longitude=" + longitude +
+                '}';
     }
 
     public static final class LocationResponseBuilder {

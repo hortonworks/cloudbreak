@@ -64,7 +64,7 @@ public class BackupCloudwatchParams implements Serializable {
 
     @Override
     public String toString() {
-        return "CloudwatchParams{" +
+        return "BackupCloudwatchParams{" +
                 "instanceProfile='" + instanceProfile + '\'' +
                 ", region='" + region + '\'' +
                 ", streamKey=" + streamKey +

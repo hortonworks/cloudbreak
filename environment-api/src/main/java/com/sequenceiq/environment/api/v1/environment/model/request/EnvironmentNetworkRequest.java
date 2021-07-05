@@ -18,4 +18,8 @@ import io.swagger.annotations.ApiModel;
         message = "The network CIDR and the Subnet Ids or none of them should not be defined in the same request.")
 @ValidOutboundInternetTrafficNetworkRequest
 public class EnvironmentNetworkRequest extends EnvironmentNetworkBase {
+    @Override
+    public String toString() {
+        return super.toString() + ", " + "EnvironmentNetworkRequest{}";
+    }
 }

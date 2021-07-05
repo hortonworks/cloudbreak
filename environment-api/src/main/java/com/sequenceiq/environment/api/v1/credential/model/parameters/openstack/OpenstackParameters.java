@@ -77,4 +77,15 @@ public class OpenstackParameters implements Serializable {
     public void setKeystoneV3(KeystoneV3Parameters v3Parameter) {
         keystoneV3 = v3Parameter;
     }
+
+    @Override
+    public String toString() {
+        return "OpenstackParameters{" +
+                "endpoint='" + endpoint + '\'' +
+                ", facing='" + facing + '\'' +
+                ", userName='" + userName + '\'' +
+                ", keystoneV2=" + keystoneV2 +
+                ", keystoneV3=" + keystoneV3 +
+                '}';
+    }
 }

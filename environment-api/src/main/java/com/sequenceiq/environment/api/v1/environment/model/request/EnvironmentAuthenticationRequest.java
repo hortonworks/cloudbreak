@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.api.v1.environment.model.request;
 
+import java.io.Serializable;
+
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
@@ -11,7 +13,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel("EnvironmentAuthenticationV1Request")
-public class EnvironmentAuthenticationRequest {
+public class EnvironmentAuthenticationRequest implements Serializable {
 
     public static final String DEFAULT_USER_NAME = "cloudbreak";
 

@@ -32,4 +32,12 @@ public class EnvironmentChangeCredentialRequest implements CredentialAwareEnvReq
     public void setCredential(CredentialRequest credential) {
         this.credential = credential;
     }
+
+    @Override
+    public String toString() {
+        return "EnvironmentChangeCredentialRequest{" +
+                "credentialName='" + credentialName + '\'' +
+                ", credential=" + credential +
+                '}';
+    }
 }

@@ -35,4 +35,13 @@ public class GcpCredentialParameters implements Serializable {
     public void setJson(JsonParameters json) {
         this.json = json;
     }
+
+    @Override
+    public String toString() {
+        return "GcpCredentialParameters{" +
+                "p12=" + p12 +
+                ", json=" + json +
+                '}';
+    }
+
 }

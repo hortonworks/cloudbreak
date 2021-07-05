@@ -12,6 +12,11 @@ public class YarnEnvironmentParameters {
         return new Builder();
     }
 
+    @Override
+    public String toString() {
+        return "YarnEnvironmentParameters{}";
+    }
+
     public static final class Builder {
 
         private Builder() {

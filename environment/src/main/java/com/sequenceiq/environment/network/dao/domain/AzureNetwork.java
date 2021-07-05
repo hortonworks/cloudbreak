@@ -35,4 +35,13 @@ public class AzureNetwork extends BaseNetwork {
     public void setNoPublicIp(Boolean noPublicIp) {
         this.noPublicIp = noPublicIp;
     }
+
+    @Override
+    public String toString() {
+        return super.toString() + ", " + "AzureNetwork{" +
+                "networkId='" + networkId + '\'' +
+                ", resourceGroupName='" + resourceGroupName + '\'' +
+                ", noPublicIp=" + noPublicIp +
+                '}';
+    }
 }

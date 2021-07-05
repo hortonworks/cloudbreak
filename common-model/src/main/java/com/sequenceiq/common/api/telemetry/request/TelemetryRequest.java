@@ -46,7 +46,7 @@ public class TelemetryRequest extends TelemetryBase {
 
     @Override
     public String toString() {
-        return "TelemetryRequest{" +
+        return super.toString() + ", " + "TelemetryRequest{" +
                 "logging=" + logging +
                 ", workloadAnalytics=" + workloadAnalytics +
                 ", features=" + features +

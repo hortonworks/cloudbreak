@@ -6,4 +6,8 @@ import com.sequenceiq.environment.api.v1.tags.model.AccountTagBase;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AccountTagRequest extends AccountTagBase {
 
+    @Override
+    public String toString() {
+        return super.toString() + ", " + "AccountTagRequest{}";
+    }
 }

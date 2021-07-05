@@ -201,4 +201,23 @@ public class EnvironmentView extends CompactView implements AuthResource {
     public void setStatus(EnvironmentStatus status) {
         this.status = status;
     }
+
+    @Override
+    public String toString() {
+        return super.toString() + ", " + "EnvironmentView{" +
+                "cloudPlatform='" + cloudPlatform + '\'' +
+                ", regions=" + regions +
+                ", telemetry=" + telemetry +
+                ", credential=" + credential +
+                ", location='" + location + '\'' +
+                ", locationDisplayName='" + locationDisplayName + '\'' +
+                ", longitude=" + longitude +
+                ", latitude=" + latitude +
+                ", archived=" + archived +
+                ", network=" + network +
+                ", accountId='" + accountId + '\'' +
+                ", resourceCrn='" + resourceCrn + '\'' +
+                ", status=" + status +
+                '}';
+    }
 }

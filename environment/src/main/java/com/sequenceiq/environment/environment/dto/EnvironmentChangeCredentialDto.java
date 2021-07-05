@@ -16,6 +16,13 @@ public class EnvironmentChangeCredentialDto {
         this.credentialName = credentialName;
     }
 
+    @Override
+    public String toString() {
+        return "EnvironmentChangeCredentialDto{" +
+                "credentialName='" + credentialName + '\'' +
+                '}';
+    }
+
     public static final class EnvironmentChangeCredentialDtoBuilder {
 
         private String credentialName;

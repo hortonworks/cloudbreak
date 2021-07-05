@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.api.v1.environment.model.base;
 
+import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 
 import javax.validation.constraints.Size;
@@ -12,7 +13,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 @MutuallyExclusiveNotNull(fieldGroups = {"securityGroupIdForKnox,defaultSecurityGroupId", "cidr"},
         message = "Please set either only the CIDR field or both security group id fields")
-public abstract class SecurityAccessBase {
+public abstract class SecurityAccessBase implements Serializable {
 
     @Size(min = 1, max = 255, message = "The length of the security group ID can be minimum 1 and maximum 255 characters.")
     @ApiModelProperty(EnvironmentModelDescription.KNOX_SECURITY_GROUP)

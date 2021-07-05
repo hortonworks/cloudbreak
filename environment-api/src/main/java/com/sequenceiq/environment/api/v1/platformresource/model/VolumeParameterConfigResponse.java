@@ -59,4 +59,15 @@ public class VolumeParameterConfigResponse implements Serializable {
     public void setMaximumNumber(Integer maximumNumber) {
         this.maximumNumber = maximumNumber;
     }
+
+    @Override
+    public String toString() {
+        return "VolumeParameterConfigResponse{" +
+                "volumeParameterType='" + volumeParameterType + '\'' +
+                ", minimumSize=" + minimumSize +
+                ", maximumSize=" + maximumSize +
+                ", minimumNumber=" + minimumNumber +
+                ", maximumNumber=" + maximumNumber +
+                '}';
+    }
 }

@@ -31,4 +31,11 @@ public class RoleBasedParameters implements Serializable {
     public void setRoleArn(String roleArn) {
         this.roleArn = roleArn;
     }
+
+    @Override
+    public String toString() {
+        return "RoleBasedParameters{" +
+                "roleArn='" + roleArn + '\'' +
+                '}';
+    }
 }

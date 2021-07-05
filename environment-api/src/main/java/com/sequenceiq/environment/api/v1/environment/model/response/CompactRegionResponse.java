@@ -42,4 +42,12 @@ public class CompactRegionResponse implements Serializable {
     public void setDisplayNames(Map<String, String> displayNames) {
         this.displayNames = displayNames;
     }
+
+    @Override
+    public String toString() {
+        return "CompactRegionResponse{" +
+                "names=" + names +
+                ", displayNames=" + displayNames +
+                '}';
+    }
 }

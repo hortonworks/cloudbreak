@@ -32,4 +32,12 @@ public class VmTypeMetaJson implements Serializable {
     public void setProperties(Map<String, Object> properties) {
         this.properties = properties;
     }
+
+    @Override
+    public String toString() {
+        return "VmTypeMetaJson{" +
+                "configs=" + configs +
+                ", properties=" + properties +
+                '}';
+    }
 }

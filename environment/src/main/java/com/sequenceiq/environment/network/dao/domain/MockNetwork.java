@@ -20,4 +20,11 @@ public class MockNetwork extends BaseNetwork {
     public String getNetworkId() {
         return vpcId;
     }
+
+    @Override
+    public String toString() {
+        return super.toString() + ", " + "MockNetwork{" +
+                "vpcId='" + vpcId + '\'' +
+                '}';
+    }
 }

@@ -52,4 +52,13 @@ public class AwsCredentialParameters implements Serializable {
     public void setGovCloud(Boolean govCloud) {
         this.govCloud = govCloud;
     }
+
+    @Override
+    public String toString() {
+        return "AwsCredentialParameters{" +
+                "keyBased=" + keyBased +
+                ", roleBased=" + roleBased +
+                ", govCloud=" + govCloud +
+                '}';
+    }
 }

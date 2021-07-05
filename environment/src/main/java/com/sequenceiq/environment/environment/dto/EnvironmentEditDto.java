@@ -112,6 +112,24 @@ public class EnvironmentEditDto {
         return new EnvironmentEditDtoBuilder();
     }
 
+    @Override
+    public String toString() {
+        return "EnvironmentEditDto{" +
+                "description='" + description + '\'' +
+                ", accountId='" + accountId + '\'' +
+                ", telemetry=" + telemetry +
+                ", backup=" + backup +
+                ", network=" + network +
+                ", authentication=" + authentication +
+                ", securityAccess=" + securityAccess +
+                ", tunnel=" + tunnel +
+                ", idBrokerMappingSource=" + idBrokerMappingSource +
+                ", cloudStorageValidation=" + cloudStorageValidation +
+                ", adminGroupName='" + adminGroupName + '\'' +
+                ", parameters=" + parameters +
+                '}';
+    }
+
     public static final class EnvironmentEditDtoBuilder {
         private String description;
 

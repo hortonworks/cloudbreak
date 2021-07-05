@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.api.v1.environment.model.request;
 
+import java.io.Serializable;
+
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
@@ -9,7 +11,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel(value = "LocationV1Request")
-public class LocationRequest {
+public class LocationRequest implements Serializable {
 
     @Size(max = 100)
     @ApiModelProperty(EnvironmentModelDescription.LOCATION)

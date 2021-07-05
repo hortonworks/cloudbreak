@@ -45,4 +45,13 @@ public class DiskResponse implements Serializable {
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
     }
+
+    @Override
+    public String toString() {
+        return "DiskResponse{" +
+                "type='" + type + '\'' +
+                ", name='" + name + '\'' +
+                ", displayName='" + displayName + '\'' +
+                '}';
+    }
 }

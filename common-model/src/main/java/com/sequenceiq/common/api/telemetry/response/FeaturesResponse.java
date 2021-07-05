@@ -36,4 +36,12 @@ public class FeaturesResponse extends FeaturesBase {
     public void setUseSharedAltusCredential(FeatureSetting useSharedAltusCredential) {
         this.useSharedAltusCredential = useSharedAltusCredential;
     }
+
+    @Override
+    public String toString() {
+        return super.toString() + ", " + "FeaturesResponse{" +
+                "metering=" + metering +
+                ", useSharedAltusCredential=" + useSharedAltusCredential +
+                '}';
+    }
 }

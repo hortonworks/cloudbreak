@@ -9,6 +9,11 @@ public class GcpParametersDto {
         return new Builder();
     }
 
+    @Override
+    public String toString() {
+        return "GcpParametersDto{}";
+    }
+
     public static final class Builder {
 
         private Builder() {

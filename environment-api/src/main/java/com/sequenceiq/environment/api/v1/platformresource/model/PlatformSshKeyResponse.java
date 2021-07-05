@@ -40,4 +40,11 @@ public class PlatformSshKeyResponse implements Serializable {
         this.properties = properties;
     }
 
+    @Override
+    public String toString() {
+        return "PlatformSshKeyResponse{" +
+                "name='" + name + '\'' +
+                ", properties=" + properties +
+                '}';
+    }
 }

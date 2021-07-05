@@ -57,4 +57,14 @@ public class RoleBasedResponse implements Serializable {
     public void setAppObjectId(String appObjectId) {
         this.appObjectId = appObjectId;
     }
+
+    @Override
+    public String toString() {
+        return "RoleBasedResponse{" +
+                "deploymentAddress='" + deploymentAddress + '\'' +
+                ", spDisplayName='" + spDisplayName + '\'' +
+                ", codeGrantFlow=" + codeGrantFlow +
+                ", appObjectId='" + appObjectId + '\'' +
+                '}';
+    }
 }

@@ -1,12 +1,13 @@
 package com.sequenceiq.environment.api.v1.environment.model.response;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
 import com.sequenceiq.common.api.tag.response.TaggedResponse;
 
-public class TagResponse implements TaggedResponse {
+public class TagResponse implements TaggedResponse, Serializable {
 
     private Map<String, String> userDefined = new HashMap<>();
 
@@ -33,5 +34,13 @@ public class TagResponse implements TaggedResponse {
         return Optional.ofNullable(userDefined.get(key))
                 .or(() -> Optional.ofNullable(defaults.get(key)))
                 .orElse(null);
+    }
+
+    @Override
+    public String toString() {
+        return "TagResponse{" +
+                "userDefined=" + userDefined +
+                ", defaults=" + defaults +
+                '}';
     }
 }

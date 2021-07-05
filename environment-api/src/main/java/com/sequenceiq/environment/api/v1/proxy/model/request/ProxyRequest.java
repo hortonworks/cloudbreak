@@ -36,4 +36,11 @@ public class ProxyRequest extends ProxyBase {
     public void setPassword(String password) {
         this.password = password;
     }
+
+    @Override
+    public String toString() {
+        return super.toString() + ", " + "ProxyRequest{" +
+                "userName='" + userName + '\'' +
+                '}';
+    }
 }

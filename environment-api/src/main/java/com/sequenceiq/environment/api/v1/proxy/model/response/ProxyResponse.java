@@ -56,4 +56,12 @@ public class ProxyResponse extends ProxyBase {
     public void setCreator(String creator) {
         this.creator = creator;
     }
+
+    @Override
+    public String toString() {
+        return super.toString() + ", " + "ProxyResponse{" +
+                "crn='" + crn + '\'' +
+                ", creator='" + creator + '\'' +
+                '}';
+    }
 }

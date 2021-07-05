@@ -8,4 +8,8 @@ import io.swagger.annotations.ApiModel;
 @ApiModel(value = "BackupRequest")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class BackupRequest extends BackupBase {
+    @Override
+    public String toString() {
+        return super.toString() + ", " + "BackupRequest{}";
+    }
 }

@@ -365,4 +365,40 @@ public abstract class EnvironmentBaseResponse implements TaggedResponse {
     public void setEnvironmentServiceVersion(String environmentServiceVersion) {
         this.environmentServiceVersion = environmentServiceVersion;
     }
+
+    @Override
+    public String toString() {
+        return "EnvironmentBaseResponse{" +
+                "crn='" + crn + '\'' +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", cloudPlatform='" + cloudPlatform + '\'' +
+                ", creator='" + creator + '\'' +
+                ", createFreeIpa=" + createFreeIpa +
+                ", freeIpa=" + freeIpa +
+                ", regions=" + regions +
+                ", location=" + location +
+                ", telemetry=" + telemetry +
+                ", backup=" + backup +
+                ", network=" + network +
+                ", environmentStatus=" + environmentStatus +
+                ", authentication=" + authentication +
+                ", statusReason='" + statusReason + '\'' +
+                ", created=" + created +
+                ", tunnel=" + tunnel +
+                ", securityAccess=" + securityAccess +
+                ", idBrokerMappingSource=" + idBrokerMappingSource +
+                ", cloudStorageValidation=" + cloudStorageValidation +
+                ", adminGroupName='" + adminGroupName + '\'' +
+                ", aws=" + aws +
+                ", azure=" + azure +
+                ", tags=" + tags +
+                ", parentEnvironmentCrn='" + parentEnvironmentCrn + '\'' +
+                ", parentEnvironmentName='" + parentEnvironmentName + '\'' +
+                ", parentEnvironmentCloudPlatform='" + parentEnvironmentCloudPlatform + '\'' +
+                ", gcp=" + gcp +
+                ", yarn=" + yarn +
+                ", environmentServiceVersion='" + environmentServiceVersion + '\'' +
+                '}';
+    }
 }

@@ -73,4 +73,15 @@ public class EncryptionKeyConfigResponse implements Serializable {
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
     }
+
+    @Override
+    public String toString() {
+        return "EncryptionKeyConfigResponse{" +
+                "name='" + name + '\'' +
+                ", id='" + id + '\'' +
+                ", description='" + description + '\'' +
+                ", displayName='" + displayName + '\'' +
+                ", properties=" + properties +
+                '}';
+    }
 }

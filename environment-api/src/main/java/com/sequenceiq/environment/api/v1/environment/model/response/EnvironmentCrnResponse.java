@@ -1,9 +1,11 @@
 package com.sequenceiq.environment.api.v1.environment.model.response;
 
+import java.io.Serializable;
+
 import io.swagger.annotations.ApiModel;
 
 @ApiModel(value = "EnvironmentCrnV1Response")
-public class EnvironmentCrnResponse {
+public class EnvironmentCrnResponse implements Serializable {
 
     private String environmentName;
 
@@ -23,5 +25,13 @@ public class EnvironmentCrnResponse {
 
     public void setEnvironmentCrn(String environmentCrn) {
         this.environmentCrn = environmentCrn;
+    }
+
+    @Override
+    public String toString() {
+        return "EnvironmentCrnResponse{" +
+                "environmentName='" + environmentName + '\'' +
+                ", environmentCrn='" + environmentCrn + '\'' +
+                '}';
     }
 }

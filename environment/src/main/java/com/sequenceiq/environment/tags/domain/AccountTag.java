@@ -105,6 +105,18 @@ public class AccountTag implements Serializable, AuthResource, AccountIdAwareRes
     }
 
     @Override
+    public String toString() {
+        return "AccountTag{" +
+                "id=" + id +
+                ", tagKey='" + tagKey + '\'' +
+                ", tagValue='" + tagValue + '\'' +
+                ", accountId='" + accountId + '\'' +
+                ", resourceCrn='" + resourceCrn + '\'' +
+                ", archived=" + archived +
+                '}';
+    }
+
+    @Override
     public int hashCode() {
         return Objects.hash(id);
     }

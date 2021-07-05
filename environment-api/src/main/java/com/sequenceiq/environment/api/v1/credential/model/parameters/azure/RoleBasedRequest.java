@@ -35,4 +35,12 @@ public class RoleBasedRequest implements Serializable {
     public void setDeploymentAddress(String deploymentAddress) {
         this.deploymentAddress = deploymentAddress;
     }
+
+    @Override
+    public String toString() {
+        return "RoleBasedRequest{" +
+                "roleName='" + roleName + '\'' +
+                ", deploymentAddress='" + deploymentAddress + '\'' +
+                '}';
+    }
 }

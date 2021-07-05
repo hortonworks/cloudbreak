@@ -145,6 +145,23 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
         this.gatewayEndpointSubnetMetas = gatewayEndpointSubnetMetas;
     }
 
+    @Override
+    public String toString() {
+        return super.toString() + "EnvironmentNetworkResponse{" +
+                "crn='" + crn + '\'' +
+                ", name='" + name + '\'' +
+                ", subnetMetas=" + subnetMetas +
+                ", cbSubnets=" + cbSubnets +
+                ", dwxSubnets=" + dwxSubnets +
+                ", mlxSubnets=" + mlxSubnets +
+                ", liftieSubnets=" + liftieSubnets +
+                ", existingNetwork=" + existingNetwork +
+                ", preferedSubnetId='" + preferedSubnetId + '\'' +
+                ", networkCidrs=" + networkCidrs +
+                ", gatewayEndpointSubnetMetas=" + gatewayEndpointSubnetMetas +
+                '}';
+    }
+
     public static final class EnvironmentNetworkResponseBuilder {
         private String crn;
 

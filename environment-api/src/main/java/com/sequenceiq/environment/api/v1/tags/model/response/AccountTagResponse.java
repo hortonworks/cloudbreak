@@ -39,4 +39,13 @@ public class AccountTagResponse extends AccountTagBase {
     public void setStatus(AccountTagStatus status) {
         this.status = status;
     }
+
+    @Override
+    public String toString() {
+        return super.toString() + ", " + "AccountTagResponse{" +
+                "accountId='" + accountId + '\'' +
+                ", resourceCrn='" + resourceCrn + '\'' +
+                ", status=" + status +
+                '}';
+    }
 }

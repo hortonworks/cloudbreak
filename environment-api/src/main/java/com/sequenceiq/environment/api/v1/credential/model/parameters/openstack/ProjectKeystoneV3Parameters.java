@@ -37,4 +37,12 @@ public class ProjectKeystoneV3Parameters extends KeystoneV3Base {
     public void setProjectName(String projectName) {
         this.projectName = projectName;
     }
+
+    @Override
+    public String toString() {
+        return "ProjectKeystoneV3Parameters{" +
+                "projectDomainName='" + projectDomainName + '\'' +
+                ", projectName='" + projectName + '\'' +
+                '}';
+    }
 }

@@ -24,4 +24,11 @@ public class FeatureSetting implements Serializable {
     public void setEnabled(Boolean enabled) {
         this.enabled = enabled;
     }
+
+    @Override
+    public String toString() {
+        return "FeatureSetting{" +
+                "enabled=" + enabled +
+                '}';
+    }
 }

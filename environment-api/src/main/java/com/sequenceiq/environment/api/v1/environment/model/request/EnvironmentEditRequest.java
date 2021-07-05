@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.api.v1.environment.model.request;
 
+import java.io.Serializable;
+
 import javax.validation.Valid;
 import javax.validation.constraints.Size;
 
@@ -17,7 +19,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel(value = "EnvironmentEditV1Request")
-public class EnvironmentEditRequest {
+public class EnvironmentEditRequest implements Serializable {
 
     @Size(max = 1000)
     @ApiModelProperty(ModelDescriptions.DESCRIPTION)
@@ -153,5 +155,23 @@ public class EnvironmentEditRequest {
 
     public void setGcp(GcpEnvironmentParameters gcp) {
         this.gcp = gcp;
+    }
+
+    @Override
+    public String toString() {
+        return "EnvironmentEditRequest{" +
+                "description='" + description + '\'' +
+                ", network=" + network +
+                ", authentication=" + authentication +
+                ", telemetry=" + telemetry +
+                ", backup=" + backup +
+                ", securityAccess=" + securityAccess +
+                ", idBrokerMappingSource=" + idBrokerMappingSource +
+                ", cloudStorageValidation=" + cloudStorageValidation +
+                ", adminGroupName='" + adminGroupName + '\'' +
+                ", aws=" + aws +
+                ", azure=" + azure +
+                ", gcp=" + gcp +
+                '}';
     }
 }

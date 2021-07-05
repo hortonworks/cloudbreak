@@ -37,6 +37,16 @@ public class AuthenticationDto {
         return new Builder();
     }
 
+    @Override
+    public String toString() {
+        return "AuthenticationDto{" +
+                "publicKey='" + publicKey + '\'' +
+                ", publicKeyId='" + publicKeyId + '\'' +
+                ", loginUserName='" + loginUserName + '\'' +
+                ", managedKey=" + managedKey +
+                '}';
+    }
+
     public static final class Builder {
 
         private String loginUserName;

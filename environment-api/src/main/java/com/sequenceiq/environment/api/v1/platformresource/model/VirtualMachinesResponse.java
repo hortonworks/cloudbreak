@@ -33,4 +33,12 @@ public class VirtualMachinesResponse implements Serializable {
     public void setDefaultVirtualMachine(VmTypeResponse defaultVirtualMachine) {
         this.defaultVirtualMachine = defaultVirtualMachine;
     }
+
+    @Override
+    public String toString() {
+        return "VirtualMachinesResponse{" +
+                "virtualMachines=" + virtualMachines +
+                ", defaultVirtualMachine=" + defaultVirtualMachine +
+                '}';
+    }
 }

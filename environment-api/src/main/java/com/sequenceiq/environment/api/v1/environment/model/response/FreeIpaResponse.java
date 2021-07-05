@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.api.v1.environment.model.response;
 
+import java.io.Serializable;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsFreeIpaParameters;
@@ -7,7 +9,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsFreeIp
 import io.swagger.annotations.ApiModelProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class FreeIpaResponse {
+public class FreeIpaResponse implements Serializable {
 
     @ApiModelProperty(EnvironmentModelDescription.FREEIPA_INSTANCE_COUNT_BY_GROUP)
     private Integer instanceCountByGroup = 1;
@@ -40,5 +42,14 @@ public class FreeIpaResponse {
 
     public void setImage(FreeIpaImageResponse image) {
         this.image = image;
+    }
+
+    @Override
+    public String toString() {
+        return "FreeIpaResponse{" +
+                "instanceCountByGroup=" + instanceCountByGroup +
+                ", aws=" + aws +
+                ", image=" + image +
+                '}';
     }
 }

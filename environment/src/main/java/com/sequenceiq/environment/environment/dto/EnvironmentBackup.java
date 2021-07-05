@@ -62,4 +62,15 @@ public class EnvironmentBackup implements Serializable {
     public void setCloudwatch(BackupCloudwatchParams cloudwatch) {
         this.cloudwatch = cloudwatch;
     }
+
+    @Override
+    public String toString() {
+        return "EnvironmentBackup{" +
+                "storageLocation='" + storageLocation + '\'' +
+                ", s3=" + s3 +
+                ", adlsGen2=" + adlsGen2 +
+                ", gcs=" + gcs +
+                ", cloudwatch=" + cloudwatch +
+                '}';
+    }
 }

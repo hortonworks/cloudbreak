@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.api.v1.environment.model.request.aws;
 
+import java.io.Serializable;
+
 import javax.validation.Valid;
 
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
@@ -8,7 +10,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel(value = "AwsEnvironmentV1Parameters")
-public class AwsEnvironmentParameters {
+public class AwsEnvironmentParameters implements Serializable {
 
     @Valid
     @ApiModelProperty(EnvironmentModelDescription.S3_GUARD)

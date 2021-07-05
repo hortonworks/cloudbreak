@@ -50,4 +50,15 @@ public class EnvironmentTelemetry implements Serializable {
     public void setFluentAttributes(Map<String, Object> fluentAttributes) {
         this.fluentAttributes = fluentAttributes;
     }
+
+    @Override
+    public String toString() {
+        return "EnvironmentTelemetry{" +
+                "logging=" + logging +
+                ", workloadAnalytics=" + workloadAnalytics +
+                ", features=" + features +
+                ", fluentAttributes=" + fluentAttributes +
+                '}';
+    }
+
 }

@@ -43,4 +43,11 @@ public abstract class AccountTagBase implements Serializable {
         this.key = key;
     }
 
+    @Override
+    public String toString() {
+        return "AccountTagBase{" +
+                "key='" + key + '\'' +
+                ", value='" + value + '\'' +
+                '}';
+    }
 }

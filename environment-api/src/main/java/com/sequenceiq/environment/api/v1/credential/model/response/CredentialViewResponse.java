@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.api.v1.credential.model.response;
 
+import java.io.Serializable;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.environment.api.doc.ModelDescriptions;
 import com.sequenceiq.environment.api.doc.credential.CredentialDescriptor;
@@ -11,7 +13,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel(description = CredentialDescriptor.CREDENTIAL_VIEW, value = "CredentialViewV1Response")
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class CredentialViewResponse {
+public class CredentialViewResponse implements Serializable {
 
     @ApiModelProperty(ModelDescriptions.NAME)
     private String name;
@@ -88,5 +90,18 @@ public class CredentialViewResponse {
 
     public void setType(CredentialType type) {
         this.type = type;
+    }
+
+    @Override
+    public String toString() {
+        return "CredentialViewResponse{" +
+                "name='" + name + '\'' +
+                ", crn='" + crn + '\'' +
+                ", creator='" + creator + '\'' +
+                ", cloudPlatform='" + cloudPlatform + '\'' +
+                ", description='" + description + '\'' +
+                ", verificationStatusText='" + verificationStatusText + '\'' +
+                ", type=" + type +
+                '}';
     }
 }

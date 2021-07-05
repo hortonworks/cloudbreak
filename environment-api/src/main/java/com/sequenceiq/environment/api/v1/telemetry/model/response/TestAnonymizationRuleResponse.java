@@ -13,4 +13,11 @@ public class TestAnonymizationRuleResponse implements Serializable {
     public void setOutput(String output) {
         this.output = output;
     }
+
+    @Override
+    public String toString() {
+        return "TestAnonymizationRuleResponse{" +
+                "output='" + output + '\'' +
+                '}';
+    }
 }

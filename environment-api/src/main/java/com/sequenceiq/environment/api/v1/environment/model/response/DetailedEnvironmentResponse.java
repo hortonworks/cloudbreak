@@ -50,6 +50,14 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
         return new Builder();
     }
 
+    @Override
+    public String toString() {
+        return super.toString() + ", " + "DetailedEnvironmentResponse{" +
+                "credential=" + credential +
+                ", proxyConfig=" + proxyConfig +
+                '}';
+    }
+
     public static final class Builder {
         private String crn;
 
