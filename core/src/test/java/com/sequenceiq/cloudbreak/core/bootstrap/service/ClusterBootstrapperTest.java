@@ -134,7 +134,7 @@ public class ClusterBootstrapperTest {
 
         verify(instanceMetaDataService).getReachableInstanceMetadataByStackId(1L);
         verify(gatewayConfigService).getAllGatewayConfigs(stack);
-        verify(componentConfigProviderService).getImage(1L);
+        verify(componentConfigProviderService).getImage(1l);
         verify(instanceMetaDataService).saveAll(Set.of(instanceMetaData));
         verify(hostOrchestrator, never()).removeDeadSaltMinions(gatewayConfig);
     }
