@@ -82,7 +82,7 @@ public class StackUpscaleService {
         validateResourceResults(context, payload.getErrorDetails(), results);
         Set<Resource> resourceSet = transformResults(results, context.getStack());
         if (resourceSet.isEmpty()) {
-            metadataSetupService.cleanupRequestedInstances(context.getStack(), context.getInstanceGroupName());
+            metadataSetupService.cleanupRequestedInstancesWithoutFQDN(context.getStack(), context.getInstanceGroupName());
             throw new OperationException("Failed to upscale the cluster since all create request failed. Resource set is empty");
         }
         LOGGER.debug("Adding new instances to the stack is DONE");
@@ -138,15 +138,15 @@ public class StackUpscaleService {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.UPSCALE_COMPLETED, "Stack upscale has been finished successfully.");
     }
 
-    public void handleStackUpscaleFailure(Boolean upscaleForRepair, Exception exception, Long stackId) {
+    public void handleStackUpscaleFailure(Boolean upscaleForRepair, Set<String> hostNames, Exception exception, Long stackId) {
         LOGGER.info("Exception during the upscale of stack", exception);
         try {
             String errorReason = exception.getMessage();
-            metadataSetupService.cleanupRequestedInstances(stackId);
             if (!upscaleForRepair) {
                 stackUpdater.updateStackStatus(stackId, DetailedStackStatus.UPSCALE_FAILED, "Stack update failed. " + errorReason);
                 flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), STACK_INFRASTRUCTURE_UPDATE_FAILED, errorReason);
             } else {
+                metadataSetupService.handleRepairFail(stackId, hostNames);
                 stackUpdater.updateStackStatus(stackId, DetailedStackStatus.REPAIR_FAILED, "Stack repair failed. " + errorReason);
                 flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), STACK_REPAIR_FAILED, errorReason);
             }
@@ -182,7 +182,8 @@ public class StackUpscaleService {
         List<CloudResourceStatus> templates = results.stream().filter(result -> CommonResourceType.TEMPLATE == result.getCloudResource().getType()
                 .getCommonResourceType()).collect(Collectors.toList());
         if (!templates.isEmpty() && (templates.get(0).isFailed() || templates.get(0).isDeleted())) {
-            throw new OperationException(format("Failed to upscale the stack for %s due to: %s", context.getCloudContext(), templates.get(0).getStatusReason()));
+            throw new OperationException(format("Failed to upscale the stack for %s due to: %s",
+                    context.getCloudContext(), templates.get(0).getStatusReason()));
         }
     }
 }

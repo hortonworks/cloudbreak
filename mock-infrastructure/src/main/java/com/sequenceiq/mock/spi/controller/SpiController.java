@@ -61,6 +61,16 @@ public class SpiController {
         return vms;
     }
 
+    @PostMapping("/disable_add_instance")
+    public void disableAddInstance(@PathVariable("mock_uuid") String mockuuid) {
+        spiStoreService.disableAddInstance(mockuuid);
+    }
+
+    @PostMapping("/enable_add_instance")
+    public void enableAddInstance(@PathVariable("mock_uuid") String mockuuid) {
+        spiStoreService.enableAddInstance(mockuuid);
+    }
+
     @DeleteMapping("/terminate")
     public void terminate(@PathVariable("mock_uuid") String mockuuid) {
         spiStoreService.terminate(mockuuid);

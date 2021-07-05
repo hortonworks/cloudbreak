@@ -25,16 +25,17 @@ public class WaitOperationChecker<T extends WaitObject> extends ExceptionChecker
             throw new TestFailException(String.format("Cluster '%s' has been getting terminated (status:'%s'), waiting is cancelled.", name,
                     actualStatuses));
         }
+        if (waitObject.isInDesiredStatus()) {
+            LOGGER.info("Cluster '{}' is in desired state (status:'{}').", name, actualStatuses);
+            return true;
+        }
         if (waitObject.isFailed()) {
             Map<String, String> actualStatusReasons = waitObject.actualStatusReason();
             LOGGER.error("Cluster '{}' is in failed state (status:'{}'), waiting is cancelled.", name, actualStatuses);
             throw new TestFailException(String.format("Cluster '%s' is in failed state. Status: '%s' statusReason: '%s'",
                     name, actualStatuses, actualStatusReasons));
         }
-        if (waitObject.isInDesiredStatus()) {
-            LOGGER.info("Cluster '{}' is in desired state (status:'{}').", name, actualStatuses);
-            return true;
-        }
+
         return waitObject.isInDesiredStatus();
     }
 

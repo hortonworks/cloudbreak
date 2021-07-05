@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
@@ -100,6 +101,10 @@ public class InstanceMetaDataService {
                 instanceMetaData.setInstanceGroup(instanceGroup);
                 if (hostNameIterator.hasNext()) {
                     String hostName = hostNameIterator.next();
+                    repository.findHostInStack(stack.getId(), hostName).ifPresent(existingHost -> {
+                        throw new CloudbreakServiceException("There is an existing host with the same FQDN. It can happen if you retried a failed repair. " +
+                                "Please start the repairing process again instead of retry.");
+                    });
                     LOGGER.info("We have hostname to be allocated: {}, set it to this instanceMetadata: {}", hostName, instanceMetaData);
                     instanceMetaData.setDiscoveryFQDN(hostName);
                     subnetAzPairs = getSubnetAzPairsFilteredByHostNameIfRepair(environment, stack, repair, instanceGroup.getGroupName(), hostName);
@@ -256,6 +261,16 @@ public class InstanceMetaDataService {
             return repository.getPrimaryGatewayInstanceMetadata(stackId);
         } catch (AccessDeniedException ignore) {
             LOGGER.debug("No primary gateway for stack [{}]", stackId);
+            return Optional.empty();
+        }
+    }
+
+    public Optional<InstanceMetaData> getTerminatedInstanceMetadataWithInstanceIdByFQDNOrdered(long stackId, String hostName) {
+        try {
+            List<InstanceMetaData> result = repository.getTerminatedInstanceMetadataWithInstanceIdByFQDNOrdered(stackId, hostName, PageRequest.of(0, 1));
+            return result.isEmpty() ? Optional.empty() : Optional.of(result.get(0));
+        } catch (AccessDeniedException ignore) {
+            LOGGER.debug("Cannot fetch last terminated instance metadata for stack [{}] and hostname [{}]", stackId, hostName);
             return Optional.empty();
         }
     }

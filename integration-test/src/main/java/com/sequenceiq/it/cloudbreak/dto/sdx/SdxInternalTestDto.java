@@ -310,6 +310,10 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
         return getTestContext().await(this, Map.of("status", status), runningParameter);
     }
 
+    public SdxInternalTestDto await(SdxClusterStatusResponse status, RunningParameter runningParameter, Duration pollingInterval) {
+        return getTestContext().await(this, Map.of("status", status), runningParameter, pollingInterval);
+    }
+
     public SdxInternalTestDto awaitForFlow() {
         return awaitForFlow(emptyRunningParameter());
     }
@@ -334,6 +338,16 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
 
     private boolean checkResponseHasInstanceGroups() {
         return getResponse() != null && getResponse().getStackV4Response() != null && getResponse().getStackV4Response().getInstanceGroups() != null;
+    }
+
+    public SdxInternalTestDto awaitForMasterDeletedOnProvider() {
+        Map<List<String>, InstanceStatus> instanceStatusMap = getInstanceStatusMapIfAvailableInResponse(() ->
+                getResponse().getStackV4Response().getInstanceGroups().stream()
+                        .filter(instanceGroupV4Response -> MASTER.getName().equals(instanceGroupV4Response.getName()))
+                        .collect(Collectors.toMap(instanceGroupV4Response -> instanceGroupV4Response.getMetadata().stream()
+                                .map(InstanceMetaDataV4Response::getInstanceId).collect(Collectors.toList()),
+                        instanceMetaDataV4Response -> InstanceStatus.DELETED_ON_PROVIDER_SIDE)));
+        return awaitForInstance(instanceStatusMap);
     }
 
     public SdxInternalTestDto awaitForHealthyInstances() {

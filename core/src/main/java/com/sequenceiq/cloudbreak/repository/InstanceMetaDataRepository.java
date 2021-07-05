@@ -46,7 +46,7 @@ public interface InstanceMetaDataRepository extends CrudRepository<InstanceMetaD
     @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceGroup.stack.id= :stackId")
     Set<InstanceMetaData> findAllInStack(@Param("stackId") Long stackId);
 
-    @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceGroup.stack.id= :stackId")
+    @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceGroup.stack.id= :stackId AND i.instanceStatus <> 'TERMINATED'")
     Set<InstanceMetaData> findAllWithoutInstanceGroupInStack(@Param("stackId") Long stackId);
 
     @EntityGraph(value = "InstanceMetaData.instanceGroup", type = EntityGraphType.LOAD)
@@ -98,6 +98,11 @@ public interface InstanceMetaDataRepository extends CrudRepository<InstanceMetaD
     @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceMetadataType = 'GATEWAY_PRIMARY' AND i.instanceStatus <> 'TERMINATED' "
             + "AND i.instanceGroup.stack.id= :stackId")
     Optional<InstanceMetaData> getPrimaryGatewayInstanceMetadata(@Param("stackId") Long stackId);
+
+    @Query("SELECT i FROM InstanceMetaData i WHERE i.discoveryFQDN = :discoveryFQDN AND i.instanceStatus = 'TERMINATED' AND i.instanceId IS NOT null "
+            + "AND i.instanceGroup.stack.id= :stackId ORDER BY i.terminationDate DESC")
+    List<InstanceMetaData> getTerminatedInstanceMetadataWithInstanceIdByFQDNOrdered(@Param("stackId") Long stackId,
+            @Param("discoveryFQDN") String discoveryFQDN, Pageable pageable);
 
     @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceMetadataType = 'GATEWAY_PRIMARY' AND i.instanceStatus = 'TERMINATED' "
             + "AND i.instanceGroup.stack.id= :stackId ORDER BY i.terminationDate DESC")

@@ -80,7 +80,7 @@ public class StackDownscaleActions {
                 variables.put(INSTANCES, instances);
 
                 final Map<String, String> addressesByFqdn = candidatesInstanceMetadata.stream()
-                        .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null)
+                        .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null && instanceMetaData.getPrivateIp() != null)
                         .collect(toMap(InstanceMetaData::getDiscoveryFQDN, InstanceMetaData::getPrivateIp));
                 clusterPublicEndpointManagementService.downscale(stack, addressesByFqdn);
                 Selectable request = new DownscaleStackCollectResourcesRequest(context.getCloudContext(),

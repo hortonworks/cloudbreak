@@ -6,6 +6,7 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -23,6 +24,7 @@ import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.dto.mock.Method;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.util.SdxUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
@@ -73,6 +75,59 @@ public class MockSdxRepairTests extends AbstractMockTest {
                 List.of(MASTER),
                 instanceBasePath -> getExecuteQueryToMockInfrastructure().call(instanceBasePath + "/terminate", w -> w),
                 SdxClusterStatusResponse.NODE_FAILURE);
+    }
+
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "there is a running Cloudbreak",
+            when = "terminate instances and repair an sdx cluster",
+            then = "repair should fail and repaired instance should be in deleted on provider side"
+    )
+    public void repairTerminatedMasterAndItFailedButInstanceShouldBeDeletedOnProviderSide(MockedTestContext testContext) {
+        String sdxInternal = resourcePropertyProvider().getName();
+        String networkKey = "someOtherNetwork";
+
+        SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
+        sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NON_HA);
+        CustomDomainSettingsV4Request customDomain = new CustomDomainSettingsV4Request();
+        customDomain.setDomainName("dummydomainname");
+        customDomain.setHostname("dummyhostname");
+        customDomain.setClusterNameAsSubdomain(true);
+        customDomain.setHostgroupNameAsHostname(true);
+        testContext
+                .given(networkKey, EnvironmentNetworkTestDto.class)
+                .withMock(new EnvironmentNetworkMockParams())
+                .given(EnvironmentTestDto.class)
+                .withNetwork(networkKey)
+                .withCreateFreeIpa(Boolean.FALSE)
+                .withName(resourcePropertyProvider().getEnvironmentName())
+                .when(getEnvironmentTestClient().create())
+                .await(EnvironmentStatus.AVAILABLE)
+                .given(sdxInternal, SdxInternalTestDto.class)
+                .withDatabase(sdxDatabaseRequest)
+                .withCustomDomain(customDomain)
+                .when(sdxTestClient.createInternal(), key(sdxInternal))
+                .await(SdxClusterStatusResponse.RUNNING, key(sdxInternal))
+                .then((tc, testDto, client) -> {
+                    List<String> instancesToDelete = new ArrayList<>(sdxUtil.getInstanceIds(testDto, client, MASTER.getName()));
+                    instancesToDelete.forEach(instanceId -> getExecuteQueryToMockInfrastructure()
+                            .call("/" + testDto.getCrn() + "/spi/" + instanceId + "/terminate", w -> w));
+                    getExecuteQueryToMockInfrastructure().executeMethod(Method.build("POST"), "/" + testDto.getCrn() + "/spi/disable_add_instance",
+                            new HashMap<>(), null, response -> { }, w -> w);
+                    return testDto;
+                })
+                .await(SdxClusterStatusResponse.CLUSTER_AMBIGUOUS, Duration.ofSeconds(POLLING_INTERVAL_FOR_REPAIR_SECONDS))
+                .when(sdxTestClient.repairInternal(MASTER.getName()), key(sdxInternal))
+                .awaitForMasterDeletedOnProvider()
+                .awaitForFlowFail()
+                .then((tc, testDto, client) -> {
+                    getExecuteQueryToMockInfrastructure().executeMethod(Method.build("POST"), "/" + testDto.getCrn() + "/spi/enable_add_instance",
+                            new HashMap<>(), null, response -> { }, w -> w);
+                    return testDto;
+                })
+                .when(sdxTestClient.repairInternal(MASTER.getName()), key(sdxInternal))
+                .await(SdxClusterStatusResponse.RUNNING, key(sdxInternal))
+                .validate();
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, invocationCount = 1)

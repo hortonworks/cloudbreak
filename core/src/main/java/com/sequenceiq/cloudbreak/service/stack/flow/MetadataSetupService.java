@@ -1,7 +1,9 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.CREATED;
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.TERMINATED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_INSTANCE_METADATA_RESTORED;
 
 import java.util.Collection;
 import java.util.List;
@@ -45,6 +47,7 @@ import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
 import com.sequenceiq.cloudbreak.service.stack.TargetGroupPersistenceService;
+import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 
@@ -80,32 +83,57 @@ public class MetadataSetupService {
     @Inject
     private LoadBalancerConfigConverter loadBalancerConfigConverter;
 
-    public void cleanupRequestedInstances(Long stackId) {
-        try {
-            transactionService.required(() -> {
-                Set<InstanceMetaData> allInstanceMetadataByStackId = instanceMetaDataService.findNotTerminatedForStack(stackId);
-                List<InstanceMetaData> requestedInstances = allInstanceMetadataByStackId.stream()
-                        .filter(instanceMetaData -> InstanceStatus.REQUESTED.equals(instanceMetaData.getInstanceStatus()))
-                        .collect(Collectors.toList());
-                for (InstanceMetaData inst : requestedInstances) {
-                    inst.setTerminationDate(clock.getCurrentTimeMillis());
-                    inst.setInstanceStatus(InstanceStatus.TERMINATED);
-                }
-                instanceMetaDataService.saveAll(requestedInstances);
-            });
-        } catch (TransactionExecutionException e) {
-            throw new TransactionRuntimeExecutionException(e);
+    @Inject
+    private CloudbreakEventService eventService;
+
+    public void handleRepairFail(Long stackId, Set<String> hostNames) {
+        LOGGER.info("Handle repair fail for hostnames: {}", hostNames);
+        for (String hostName : hostNames) {
+            try {
+                transactionService.required(() -> {
+                    Optional<InstanceMetaData> instance = instanceMetaDataService.findByHostname(stackId, hostName);
+                    instance.ifPresentOrElse(instanceMetaData -> {
+                        LOGGER.info("Instance status for {}: {}", hostName, instanceMetaData.getInstanceStatus());
+                        if (InstanceStatus.REQUESTED.equals(instanceMetaData.getInstanceStatus())) {
+                            LOGGER.info("Instance in requested status is deleted: {}", hostName);
+                            restorePreviousTerminatedInstanceMetadata(stackId, hostName);
+                            instanceMetaData.setTerminationDate(clock.getCurrentTimeMillis());
+                            instanceMetaData.setInstanceStatus(InstanceStatus.TERMINATED);
+                            instanceMetaDataService.save(instanceMetaData);
+                        }
+                    }, () -> restorePreviousTerminatedInstanceMetadata(stackId, hostName));
+                });
+            } catch (TransactionExecutionException e) {
+                throw new TransactionRuntimeExecutionException(e);
+            }
         }
     }
 
-    public void cleanupRequestedInstances(Stack stack, String instanceGroupName) {
+    private void restorePreviousTerminatedInstanceMetadata(Long stackId, String hostName) {
+        LOGGER.info("Get last terminated instance for this hostname: {}", hostName);
+        Optional<InstanceMetaData> lastTerminatedInstanceMetadataWithInstanceIdByFQDN =
+                instanceMetaDataService.getTerminatedInstanceMetadataWithInstanceIdByFQDNOrdered(stackId, hostName);
+        LOGGER.info("Restore previous terminated instance for hostname: {}", lastTerminatedInstanceMetadataWithInstanceIdByFQDN);
+        lastTerminatedInstanceMetadataWithInstanceIdByFQDN.ifPresent(instanceMetaData -> {
+            instanceMetaData.setTerminationDate(null);
+            instanceMetaData.setInstanceStatus(InstanceStatus.DELETED_ON_PROVIDER_SIDE);
+            instanceMetaDataService.save(instanceMetaData);
+            eventService.fireCloudbreakEvent(stackId, UPDATE_FAILED.name(), STACK_INSTANCE_METADATA_RESTORED,
+                    List.of(hostName));
+        });
+    }
+
+    public void cleanupRequestedInstancesWithoutFQDN(Stack stack, String instanceGroupName) {
         try {
             transactionService.required(() -> {
                 Optional<InstanceGroup> ig = instanceGroupService.findOneWithInstanceMetadataByGroupNameInStack(stack.getId(), instanceGroupName);
                 if (ig.isPresent()) {
                     List<InstanceMetaData> requestedInstances = instanceMetaDataService.findAllByInstanceGroupAndInstanceStatus(ig.get(),
                             InstanceStatus.REQUESTED);
-                    for (InstanceMetaData inst : requestedInstances) {
+                    List<InstanceMetaData> requestedInstancesWithoutFQDN =
+                            requestedInstances.stream().filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() == null).collect(Collectors.toList());
+                    LOGGER.info("Set requested instances without FQDN to terminated: {}", requestedInstancesWithoutFQDN);
+                    for (InstanceMetaData inst : requestedInstancesWithoutFQDN) {
                         inst.setTerminationDate(clock.getCurrentTimeMillis());
                         inst.setInstanceStatus(InstanceStatus.TERMINATED);
                     }

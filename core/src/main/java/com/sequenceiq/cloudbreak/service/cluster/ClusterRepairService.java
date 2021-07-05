@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -307,10 +308,7 @@ public class ClusterRepairService {
     }
 
     private boolean isUnhealthyInstance(InstanceMetaData instanceMetaData) {
-        return instanceMetaData.getInstanceStatus() == InstanceStatus.SERVICES_UNHEALTHY ||
-                instanceMetaData.getInstanceStatus() == InstanceStatus.DELETED_ON_PROVIDER_SIDE ||
-                instanceMetaData.getInstanceStatus() == InstanceStatus.DELETED_BY_PROVIDER ||
-                instanceMetaData.getInstanceStatus() == InstanceStatus.STOPPED;
+        return !instanceMetaData.isHealthy();
     }
 
     private Map<HostGroupName, Set<InstanceMetaData>> selectRepairableNodes(
@@ -324,6 +322,7 @@ public class ClusterRepairService {
                         .getInstanceGroup()
                         .getNotTerminatedInstanceMetaDataSet()
                         .stream()
+                        .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null)
                         .filter(instanceSelectors.getRight())
                         .collect(toSet())))
                 .filter(entry -> !entry.getValue().isEmpty())
@@ -423,6 +422,7 @@ public class ClusterRepairService {
                     .stream()
                     .flatMap(Collection::stream)
                     .map(InstanceMetaData::getInstanceId)
+                    .filter(Objects::nonNull)
                     .collect(Collectors.toUnmodifiableSet()));
             updateVolumesDeleteFlag(stack, updateVolumesPredicate, deleteVolumes);
             LOGGER.info("Update stack status to REPAIR_IN_PROGRESS");

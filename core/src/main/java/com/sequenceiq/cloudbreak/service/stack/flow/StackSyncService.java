@@ -212,10 +212,14 @@ public class StackSyncService {
             InstanceSyncState state) {
         if (!instance.isTerminated() || !instance.isDeletedOnProvider()) {
             if (instance.getInstanceId() == null) {
-                instanceStateCounts.put(InstanceSyncState.DELETED, instanceStateCounts.get(InstanceSyncState.DELETED) + 1);
-                LOGGER.debug("Instance with private id '{}' don't have instanceId, setting its state to DELETED.",
-                        instance.getPrivateId());
-                instanceMetaDataService.updateInstanceStatus(instance, InstanceStatus.TERMINATED);
+                if (instance.getDiscoveryFQDN() == null) {
+                    instanceStateCounts.put(InstanceSyncState.DELETED, instanceStateCounts.get(InstanceSyncState.DELETED) + 1);
+                    LOGGER.debug("Instance with private id '{}' don't have instanceId and FQDN, setting its state to DELETED.",
+                            instance.getPrivateId());
+                    instanceMetaDataService.updateInstanceStatus(instance, InstanceStatus.TERMINATED);
+                } else {
+                    LOGGER.debug("Instance with private id '{}' don't have instanceId but it has FQDN", instance.getInstanceId());
+                }
             } else {
                 instanceStateCounts.put(state, instanceStateCounts.get(state) + 1);
                 LOGGER.debug("Instance '{}' is reported as deleted on the cloud provider, setting its state to {}.",
