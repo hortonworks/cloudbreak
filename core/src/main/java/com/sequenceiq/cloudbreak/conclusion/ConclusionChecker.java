@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,22 +16,22 @@ public class ConclusionChecker {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConclusionChecker.class);
 
-    private final List<ConclusionStep> conclusionSteps;
+    private ConclusionStepNode rootNode;
 
-    private int actualStep;
+    private Map<Class<? extends ConclusionStep>, ConclusionStep> conclusionStepInstances;
 
-    private boolean doNext = true;
-
-    public ConclusionChecker(List<ConclusionStep> conclusionSteps) {
-        this.conclusionSteps = conclusionSteps;
+    public ConclusionChecker(ConclusionStepNode rootNode, Map<Class<? extends ConclusionStep>, ConclusionStep> conclusionStepInstances) {
+        this.rootNode = rootNode;
+        this.conclusionStepInstances = conclusionStepInstances;
     }
 
     public ConclusionResult doCheck(Long resourceId) {
-        LOGGER.info("Conclusion checker started, steps: {}, resourceId: {}", conclusionSteps, resourceId);
+        LOGGER.info("Conclusion checker started, steps: {}, resourceId: {}", rootNode, resourceId);
         List<Conclusion> conclusions = new ArrayList<>();
+        ConclusionStepNode actualStepNode = rootNode;
         try {
-            while (hasMoreSteps() && doNext()) {
-                ConclusionStep conclusionStep = conclusionSteps.get(actualStep++);
+            while (actualStepNode != null) {
+                ConclusionStep conclusionStep = conclusionStepInstances.get(actualStepNode.getStepClass());
                 LOGGER.debug("Conclusion step: {}", conclusionStep);
 
                 Conclusion conclusion = measure(() -> conclusionStep.check(resourceId),
@@ -41,10 +42,10 @@ public class ConclusionChecker {
                     LOGGER.debug("Conclusion step succeeded");
                 }
                 conclusions.add(conclusion);
-                doNext = !conclusion.isFailureFound();
+                actualStepNode = actualStepNode.getChildNode(conclusion.isFailureFound());
             }
             ConclusionResult result = new ConclusionResult(conclusions);
-            LOGGER.info("Conclusion checker finished: {}", result.isFailureFound() ? "failure not found" : conclusions);
+            LOGGER.info("Conclusion checker finished: {}", result.isFailureFound() ? conclusions : "failure not found");
             return result;
         } catch (RuntimeException e) {
             LOGGER.error("Conclusion checker error: {}, collected conclusions before error happened: {}", e.getMessage(), conclusions, e);
@@ -52,11 +53,4 @@ public class ConclusionChecker {
         }
     }
 
-    private boolean hasMoreSteps() {
-        return actualStep < conclusionSteps.size();
-    }
-
-    private boolean doNext() {
-        return doNext;
-    }
 }
