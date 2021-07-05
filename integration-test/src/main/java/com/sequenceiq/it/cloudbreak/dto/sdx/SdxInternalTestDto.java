@@ -310,6 +310,10 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
         return getTestContext().await(this, Map.of("status", status), runningParameter);
     }
 
+    public SdxInternalTestDto await(SdxClusterStatusResponse status, RunningParameter runningParameter, Duration pollingInterval) {
+        return getTestContext().await(this, Map.of("status", status), runningParameter, pollingInterval);
+    }
+
     public SdxInternalTestDto awaitForFlow() {
         return awaitForFlow(emptyRunningParameter());
     }

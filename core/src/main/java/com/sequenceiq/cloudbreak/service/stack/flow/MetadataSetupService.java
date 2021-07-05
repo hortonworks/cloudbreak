@@ -80,32 +80,47 @@ public class MetadataSetupService {
     @Inject
     private LoadBalancerConfigConverter loadBalancerConfigConverter;
 
-    public void cleanupRequestedInstances(Long stackId) {
-        try {
-            transactionService.required(() -> {
-                Set<InstanceMetaData> allInstanceMetadataByStackId = instanceMetaDataService.findNotTerminatedForStack(stackId);
-                List<InstanceMetaData> requestedInstances = allInstanceMetadataByStackId.stream()
-                        .filter(instanceMetaData -> InstanceStatus.REQUESTED.equals(instanceMetaData.getInstanceStatus()))
-                        .collect(Collectors.toList());
-                for (InstanceMetaData inst : requestedInstances) {
-                    inst.setTerminationDate(clock.getCurrentTimeMillis());
-                    inst.setInstanceStatus(InstanceStatus.TERMINATED);
+    public void handleRepairFail(Long stackId, Set<String> hostNames) {
+            for (String hostName : hostNames) {
+                try {
+                    transactionService.required(() -> {
+                        Optional<InstanceMetaData> instance = instanceMetaDataService.findByHostname(stackId, hostName);
+                        instance.ifPresentOrElse(instanceMetaData -> {
+                            if (InstanceStatus.REQUESTED.equals(instanceMetaData.getInstanceStatus())) {
+                                restorePreviousTerminatedInstanceMetadata(stackId, hostName);
+                                instanceMetaData.setTerminationDate(clock.getCurrentTimeMillis());
+                                instanceMetaData.setInstanceStatus(InstanceStatus.TERMINATED);
+                                instanceMetaDataService.save(instanceMetaData);
+                            }
+                        }, () -> restorePreviousTerminatedInstanceMetadata(stackId, hostName));
+                    });
+                } catch (TransactionExecutionException e) {
+                    throw new TransactionRuntimeExecutionException(e);
                 }
-                instanceMetaDataService.saveAll(requestedInstances);
-            });
-        } catch (TransactionExecutionException e) {
-            throw new TransactionRuntimeExecutionException(e);
-        }
+            }
     }
 
-    public void cleanupRequestedInstances(Stack stack, String instanceGroupName) {
+    private void restorePreviousTerminatedInstanceMetadata(Long stackId, String hostName) {
+        Optional<InstanceMetaData> lastTerminatedInstanceMetadataWithInstanceIdByFQDN =
+                instanceMetaDataService.getTerminatedInstanceMetadataWithInstanceIdByFQDNOrdered(stackId, hostName);
+        lastTerminatedInstanceMetadataWithInstanceIdByFQDN.ifPresent(instanceMetaData -> {
+            instanceMetaData.setTerminationDate(null);
+            instanceMetaData.setInstanceStatus(InstanceStatus.DELETED_ON_PROVIDER_SIDE);
+            instanceMetaDataService.save(instanceMetaData);
+        });
+    }
+
+    public void cleanupRequestedInstancesWithoutFQDN(Stack stack, String instanceGroupName) {
         try {
             transactionService.required(() -> {
                 Optional<InstanceGroup> ig = instanceGroupService.findOneWithInstanceMetadataByGroupNameInStack(stack.getId(), instanceGroupName);
                 if (ig.isPresent()) {
                     List<InstanceMetaData> requestedInstances = instanceMetaDataService.findAllByInstanceGroupAndInstanceStatus(ig.get(),
                             InstanceStatus.REQUESTED);
-                    for (InstanceMetaData inst : requestedInstances) {
+                    List<InstanceMetaData> requestedInstancesWithoutFQDN =
+                            requestedInstances.stream().filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() == null).collect(Collectors.toList());
+                    LOGGER.info("Set requested instances without FQDN to terminated: {}", requestedInstancesWithoutFQDN);
+                    for (InstanceMetaData inst : requestedInstancesWithoutFQDN) {
                         inst.setTerminationDate(clock.getCurrentTimeMillis());
                         inst.setInstanceStatus(InstanceStatus.TERMINATED);
                     }

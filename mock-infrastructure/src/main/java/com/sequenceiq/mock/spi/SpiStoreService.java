@@ -11,6 +11,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -75,10 +76,25 @@ public class SpiStoreService {
     public List<CloudVmMetaDataStatus> resize(String mockUuid, List<Group> groups) {
         LOGGER.info("Resize {}", mockUuid);
         SpiDto spiDto = read(mockUuid);
+        if (spiDto.isAddInstanceDisabled()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Add instance disabled");
+        }
         List<CloudVmMetaDataStatus> instances = defaultModelService.createInstances(mockUuid, spiDto, groups);
         LOGGER.info("{} will be resized with {}", mockUuid, instances);
         spiDto.getVmMetaDataStatuses().addAll(instances);
         return instances;
+    }
+
+    public void disableAddInstance(String mockUuid) {
+        LOGGER.info("Disable add instance for uuid: {}", mockUuid);
+        SpiDto spiDto = read(mockUuid);
+        spiDto.setAddInstanceDisabled(true);
+    }
+
+    public void enableAddInstance(String mockUuid) {
+        LOGGER.info("Enable add instance for uuid: {}", mockUuid);
+        SpiDto spiDto = read(mockUuid);
+        spiDto.setAddInstanceDisabled(false);
     }
 
     public void terminate(String mockUuid) {

@@ -248,7 +248,7 @@ public class InstanceMetaData implements ProvisionEntity {
         return InstanceStatus.SERVICES_HEALTHY.equals(instanceStatus) || InstanceStatus.SERVICES_RUNNING.equals(instanceStatus);
     }
 
-    public boolean isUnhealthy() {
+    public boolean isServicesUnhealthy() {
         return InstanceStatus.SERVICES_UNHEALTHY.equals(instanceStatus);
     }
 

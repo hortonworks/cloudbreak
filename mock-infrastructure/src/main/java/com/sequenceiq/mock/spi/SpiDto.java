@@ -14,6 +14,8 @@ public class SpiDto {
 
     private List<CloudVmMetaDataStatus> vmMetaDataStatuses;
 
+    private boolean addInstanceDisabled;
+
     public SpiDto(String mockuuid, CloudStack cloudStack) {
         this.cloudStack = cloudStack;
         this.mockuuid = mockuuid;
@@ -31,4 +33,13 @@ public class SpiDto {
     public CloudStack getCloudStack() {
         return cloudStack;
     }
+
+    public boolean isAddInstanceDisabled() {
+        return addInstanceDisabled;
+    }
+
+    public void setAddInstanceDisabled(boolean addInstanceDisabled) {
+        this.addInstanceDisabled = addInstanceDisabled;
+    }
+
 }

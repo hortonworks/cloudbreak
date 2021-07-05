@@ -68,7 +68,7 @@ public class RemoveHostsHandler implements EventHandler<RemoveHostsRequest> {
         Selectable result;
         try {
             Stack stack = stackService.getByIdWithListsInTransaction(request.getResourceId());
-            if (stack.getPrimaryGatewayInstance().isReachable()) {
+            if (stack.getPrimaryGatewayInstance() != null && stack.getPrimaryGatewayInstance().isReachable()) {
                 List<GatewayConfig> allGatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
                 PollingResult orchestratorRemovalPollingResult =
                         removeHostsFromOrchestrator(stack, new ArrayList<>(hostNames), hostOrchestrator, allGatewayConfigs);
