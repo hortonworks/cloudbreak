@@ -56,8 +56,6 @@ import com.sequenceiq.common.api.type.ResourceType;
 @RunWith(MockitoJUnitRunner.class)
 public class AwsTerminateServiceTest {
 
-    private static final String USER_ID = "horton@hortonworks.com";
-
     private static final Long WORKSPACE_ID = 1L;
 
     @Rule
@@ -220,7 +218,6 @@ public class AwsTerminateServiceTest {
                 .withPlatform("platform")
                 .withVariant("variant")
                 .withLocation(location)
-                .withUserId(USER_ID)
                 .withWorkspaceId(WORKSPACE_ID)
                 .build();
         CloudCredential credential = new CloudCredential("crn", null);

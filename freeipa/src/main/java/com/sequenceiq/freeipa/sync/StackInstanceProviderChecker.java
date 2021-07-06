@@ -56,10 +56,8 @@ public class StackInstanceProviderChecker {
                 .withPlatform(stack.getCloudPlatform())
                 .withVariant(stack.getCloudPlatform())
                 .withLocation(location)
-                .withUserId(stack.getOwner())
                 .withUserName(stack.getOwner())
                 .withAccountId(stack.getAccountId())
-                .withAccountUUID(stack.getAccountId())
                 .build();
         CloudCredential cloudCredential = credentialConverter.convert(credentialService.getCredentialByEnvCrn(stack.getEnvironmentCrn()));
         List<CloudInstance> instances = metadataConverter.convert(notTerminatedForStack);

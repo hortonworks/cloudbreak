@@ -105,8 +105,6 @@ import com.sequenceiq.common.model.FileSystemType;
 @RunWith(MockitoJUnitRunner.class)
 public class GcpInstanceResourceBuilderTest {
 
-    private static final String USER_ID = "horton@hortonworks.com";
-
     private static final Long WORKSPACE_ID = 1L;
 
     private long privateId;
@@ -186,7 +184,6 @@ public class GcpInstanceResourceBuilderTest {
                 .withName("testname")
                 .withCrn("crn")
                 .withPlatform("GCP")
-                .withUserId(USER_ID)
                 .withWorkspaceId(WORKSPACE_ID)
                 .build();
         CloudCredential cloudCredential = new CloudCredential(privateCrn, "credentialname");

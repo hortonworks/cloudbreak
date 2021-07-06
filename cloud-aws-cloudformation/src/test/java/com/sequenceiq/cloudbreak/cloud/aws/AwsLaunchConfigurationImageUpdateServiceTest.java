@@ -35,8 +35,6 @@ import com.sequenceiq.common.api.type.ResourceType;
 
 public class AwsLaunchConfigurationImageUpdateServiceTest {
 
-    private static final String USER_ID = "horton@hortonworks.com";
-
     private static final Long WORKSPACE_ID = 1L;
 
     private static final String IMAGE_NAME = "imageName";
@@ -78,7 +76,6 @@ public class AwsLaunchConfigurationImageUpdateServiceTest {
                 .withPlatform("AWS")
                 .withVariant("variant")
                 .withLocation(location)
-                .withUserId(USER_ID)
                 .withWorkspaceId(WORKSPACE_ID)
                 .build();
         CloudCredential cc = new CloudCredential("crn", "cc");

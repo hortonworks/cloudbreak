@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cm;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -16,7 +18,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
-import com.sequenceiq.cloudbreak.workspace.model.User;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ClouderaManagerLicenseServiceTest {
@@ -38,33 +39,25 @@ public class ClouderaManagerLicenseServiceTest {
 
     @Test
     public void validWhenLicenseIsNotEmpty() {
-        User user = createUser();
         UserManagementProto.Account account = UserManagementProto.Account.newBuilder().setClouderaManagerLicenseKey(LICENSE).build();
         when(umsClient.getAccountDetails(ACCOUNT_ID, Optional.empty())).thenReturn(account);
 
-        underTest.validateClouderaManagerLicense(user);
+        underTest.validateClouderaManagerLicense(ACCOUNT_ID);
 
-        verify(umsClient).getAccountDetails(ACCOUNT_ID, Optional.empty());
+        verify(umsClient).getAccountDetails(eq(ACCOUNT_ID), any());
     }
 
     @Test
     public void invalidWhenLicenseIsEmpty() {
-        User user = createUser();
         UserManagementProto.Account account = UserManagementProto.Account.newBuilder().setClouderaManagerLicenseKey("").build();
         when(umsClient.getAccountDetails(ACCOUNT_ID, Optional.empty())).thenReturn(account);
 
         expectedException.expect(RuntimeException.class);
-        expectedException.expectMessage("User doesn't have a valid cloudera manager license.");
+        expectedException.expectMessage("For this tenant there is no valid cloudera manager license.");
 
-        underTest.validateClouderaManagerLicense(user);
+        underTest.validateClouderaManagerLicense(ACCOUNT_ID);
 
-        verify(umsClient).getAccountDetails(ACCOUNT_ID, Optional.empty());
-    }
-
-    private User createUser() {
-        User user = new User();
-        user.setUserCrn(USER_CRN);
-        return user;
+        verify(umsClient).getAccountDetails(eq(ACCOUNT_ID), any());
     }
 
 }

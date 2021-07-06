@@ -163,9 +163,9 @@ public class CredentialService extends AbstractCredentialService implements Reso
                 .orElseThrow(notFound("Credential with environmentName:", environmentName));
     }
 
-    public Map<String, String> interactiveLogin(String accountId, String userId, Credential credential) {
+    public Map<String, String> interactiveLogin(String accountId, Credential credential) {
         validateDeploymentAddress(credential);
-        return credentialAdapter.interactiveLogin(credential, accountId, userId);
+        return credentialAdapter.interactiveLogin(credential, accountId);
     }
 
     public Credential verify(Credential credential) {
@@ -251,7 +251,7 @@ public class CredentialService extends AbstractCredentialService implements Reso
         LOGGER.debug("Validating credential for cloudPlatform {} and creator {}.", credential.getCloudPlatform(), creatorUserCrn);
         credentialValidator.validateCredentialCloudPlatform(credential.getCloudPlatform(), creatorUserCrn, ENVIRONMENT);
         validateDeploymentAddress(credential);
-        Credential created = credentialAdapter.initCodeGrantFlow(credential, accountId, creatorUserCrn);
+        Credential created = credentialAdapter.initCodeGrantFlow(credential, accountId);
         created.setResourceCrn(createCRN(accountId));
         created.setAccountId(accountId);
         created.setCreator(creatorUserCrn);
@@ -259,14 +259,14 @@ public class CredentialService extends AbstractCredentialService implements Reso
         return getCodeGrantFlowAppLoginUrl(created);
     }
 
-    public String initCodeGrantFlow(String accountId, String name, String userId) {
+    public String initCodeGrantFlow(String accountId, String name) {
         Credential original = repository.findByNameAndAccountId(name, accountId, getEnabledPlatforms(), ENVIRONMENT)
                 .orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, name));
         String originalAttributes = original.getAttributes();
         if (getAzureCodeGrantFlowAttributes(original) == null) {
             throw new UnsupportedOperationException("This operation is only allowed on Authorization Code Grant flow based credentails.");
         }
-        Credential updated = credentialAdapter.initCodeGrantFlow(original, accountId, userId);
+        Credential updated = credentialAdapter.initCodeGrantFlow(original, accountId);
         updated = repository.save(updated);
         secretService.delete(originalAttributes);
         return getCodeGrantFlowAppLoginUrl(updated);

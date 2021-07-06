@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
@@ -209,7 +210,7 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
             }
             String envCrnForVirtualGroups = getEnvironmentCrnForVirtualGroups(environment);
             VirtualGroupRequest virtualGroupRequest = new VirtualGroupRequest(envCrnForVirtualGroups, ldapView.map(LdapView::getAdminGroup).orElse(""));
-            String accountId = source.getCreator().getTenant().getName();
+            String accountId = Crn.safeFromString(source.getResourceCrn()).getAccountId();
             List<UserManagementProto.ServicePrincipalCloudIdentities> servicePrincipalCloudIdentities =
                     grpcUmsClient.listServicePrincipalCloudIdentities(accountId,
                             source.getEnvironmentCrn(),
@@ -381,7 +382,7 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
         if (StackType.DATALAKE.equals(source.getType())
                 && AZURE.equals(source.cloudPlatform())
                 && source.getCluster().isRangerRazEnabled()
-                && entitlementService.cloudIdentityMappingEnabled(source.getCreator().getTenant().getName())) {
+                && entitlementService.cloudIdentityMappingEnabled(Crn.safeFromString(source.getResourceCrn()).getAccountId())) {
 
             ImmutableMap.Builder<String, String> azureObjectIdMap = ImmutableMap.builder();
             servicePrincipalCloudIdentities.forEach(spCloudId -> {

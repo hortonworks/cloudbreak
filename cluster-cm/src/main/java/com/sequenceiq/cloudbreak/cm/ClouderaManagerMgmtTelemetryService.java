@@ -104,8 +104,8 @@ public class ClouderaManagerMgmtTelemetryService {
             final ApiRoleList mgmtRoles, final Telemetry telemetry) throws ApiException {
         if (isWorkflowAnalyticsEnabled(stack, telemetry)) {
             WorkloadAnalytics workloadAnalytics = telemetry.getWorkloadAnalytics();
-            Crn userCrn = Crn.fromString(stack.getCreator().getUserCrn());
-            boolean useDbusCnameEndpoint = entitlementService.useDataBusCNameEndpointEnabled(userCrn.getAccountId());
+            String accountId = Crn.safeFromString(stack.getResourceCrn()).getAccountId();
+            boolean useDbusCnameEndpoint = entitlementService.useDataBusCNameEndpointEnabled(accountId);
             String databusEndpoint = dataBusEndpointProvider.getDataBusEndpoint(workloadAnalytics.getDatabusEndpoint(), useDbusCnameEndpoint);
 
             ClouderaManagerResourceApi cmResourceApi = clouderaManagerApiFactory.getClouderaManagerResourceApi(client);

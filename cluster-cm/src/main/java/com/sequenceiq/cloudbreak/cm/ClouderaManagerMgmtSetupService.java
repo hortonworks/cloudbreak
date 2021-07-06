@@ -30,6 +30,7 @@ import com.cloudera.api.swagger.model.ApiService;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.config.CmConfigService;
 import com.sequenceiq.cloudbreak.cm.database.DatabaseProperties;
@@ -83,7 +84,6 @@ public class ClouderaManagerMgmtSetupService {
      * @param stack      the stack
      * @param apiClient     the CM API apiClient
      * @param cmHostRef  reference to the CM host
-     * @param rdsConfigs the set of all database configs
      * @param telemetry  telemetry (logging/workload/billing etc.) details
      * @param sdxContextName sdx name holder
      * @param sdxStackCrn sdx stack crn holder
@@ -94,7 +94,7 @@ public class ClouderaManagerMgmtSetupService {
             String sdxContextName, String sdxStackCrn, ProxyConfig proxyConfig)
             throws ApiException {
         LOGGER.debug("Setting up Cloudera Management Services.");
-        licenseService.validateClouderaManagerLicense(stack.getCreator());
+        licenseService.validateClouderaManagerLicense(Crn.safeFromString(stack.getResourceCrn()).getAccountId());
         MgmtServiceResourceApi mgmtServiceResourceApi = clouderaManagerApiFactory.getMgmtServiceResourceApi(apiClient);
         MgmtRolesResourceApi mgmtRolesResourceApi = clouderaManagerApiFactory.getMgmtRolesResourceApi(apiClient);
 

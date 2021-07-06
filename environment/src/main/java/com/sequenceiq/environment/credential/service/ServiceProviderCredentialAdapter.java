@@ -1,7 +1,5 @@
 package com.sequenceiq.environment.credential.service;
 
-import static com.sequenceiq.environment.TempConstants.TEMP_USER_ID;
-
 import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -83,7 +81,6 @@ public class ServiceProviderCredentialAdapter {
                 .withCrn(credential.getResourceCrn())
                 .withPlatform(credential.getCloudPlatform())
                 .withVariant(credential.getCloudPlatform())
-                .withUserId(TEMP_USER_ID)
                 .withAccountId(accountId)
                 .build();
         CloudCredential cloudCredential = credentialConverter.convert(credential);
@@ -139,18 +136,17 @@ public class ServiceProviderCredentialAdapter {
         return changed;
     }
 
-    public Map<String, String> interactiveLogin(Credential credential, String accountId, String userId) {
+    public Map<String, String> interactiveLogin(Credential credential, String accountId) {
         CloudContext cloudContext = CloudContext.Builder.builder()
                 .withId(credential.getId())
                 .withName(credential.getName())
                 .withCrn(credential.getResourceCrn())
                 .withPlatform(credential.getCloudPlatform())
                 .withVariant(credential.getCloudPlatform())
-                .withUserId(userId)
                 .withAccountId(accountId)
                 .build();
         ExtendedCloudCredential cloudCredential = extendedCloudCredentialConverter.convert(credential);
-        LOGGER.debug("Requesting interactive login cloudPlatform {} and creator {}.", credential.getCloudPlatform(), userId);
+        LOGGER.debug("Requesting interactive login cloudPlatform {} and creator {}.", credential.getCloudPlatform());
         InteractiveLoginRequest request = requestProvider.getInteractiveLoginRequest(cloudContext, cloudCredential);
         LOGGER.debug("Triggering event: {}", request);
         eventBus.notify(request.selector(), eventFactory.createEvent(request));
@@ -173,18 +169,17 @@ public class ServiceProviderCredentialAdapter {
         return credential;
     }
 
-    public Credential initCodeGrantFlow(Credential credential, String accountId, String userId) {
+    public Credential initCodeGrantFlow(Credential credential, String accountId) {
         CloudContext cloudContext = CloudContext.Builder.builder()
                 .withId(credential.getId())
                 .withName(credential.getName())
                 .withCrn(credential.getResourceCrn())
                 .withPlatform(credential.getCloudPlatform())
                 .withVariant(credential.getCloudPlatform())
-                .withUserId(userId)
                 .withAccountId(accountId)
                 .build();
         CloudCredential cloudCredential = credentialConverter.convert(credential);
-        LOGGER.debug("Requesting code grant flow cloudPlatform {} and creator {}.", credential.getCloudPlatform(), userId);
+        LOGGER.debug("Requesting code grant flow cloudPlatform {} and creator {}.", credential.getCloudPlatform());
         InitCodeGrantFlowRequest request = requestProvider.getInitCodeGrantFlowRequest(cloudContext, cloudCredential);
         LOGGER.info("Triggering event: {}", request);
         eventBus.notify(request.selector(), eventFactory.createEvent(request));

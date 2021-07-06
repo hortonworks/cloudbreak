@@ -76,9 +76,7 @@ public abstract class AbstractRedbeamsStartAction<P extends Payload>
                 .withVariant(dbStack.getPlatformVariant())
                 .withLocation(location)
                 .withUserName(userName)
-                .withUserId(userName)
                 .withAccountId(accountId)
-                .withAccountUUID(accountId)
                 .build();
         Credential credential = credentialService.getCredentialByEnvCrn(dbStack.getEnvironmentId());
         CloudCredential cloudCredential = credentialConverter.convert(credential);

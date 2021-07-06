@@ -30,8 +30,6 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.PlatformResourceClientService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
-import com.sequenceiq.cloudbreak.workspace.model.Tenant;
-import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.common.api.type.EncryptionType;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -39,7 +37,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 @RunWith(MockitoJUnitRunner.class)
 public class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBase {
 
-    private static final String ENV_CRN = "someEnv";
+    private static final String ENV_CRN = "crn:cdp:environments:us-west-1:account:environment:env";
 
     private static final String TEST_ENCRYPTION_KEY = "arn:aws:kms:eu-west-2:123456789012:key/1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p";
 
@@ -70,15 +68,9 @@ public class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBa
         CredentialResponse credentialResponse = new CredentialResponse();
         credentialResponse.setName("cred");
 
-        Tenant tenant = new Tenant();
-        tenant.setName("tenant1");
-
-        User user = new User();
-        user.setTenant(tenant);
-
         when(subject.getEnvironmentCrn()).thenReturn(ENV_CRN);
         when(subject.getRegion()).thenReturn("region");
-        when(subject.getCreator()).thenReturn(user);
+        when(subject.getResourceCrn()).thenReturn(ENV_CRN);
         DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
         environmentResponse.setCredential(credentialResponse);
         environmentResponse.setCrn(ENV_CRN);

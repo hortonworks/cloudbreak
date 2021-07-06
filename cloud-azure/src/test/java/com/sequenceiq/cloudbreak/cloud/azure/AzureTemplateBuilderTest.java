@@ -116,8 +116,6 @@ import freemarker.template.Configuration;
 @ExtendWith(MockitoExtension.class)
 public class AzureTemplateBuilderTest {
 
-    private static final String USER_ID = "horton@hortonworks.com";
-
     private static final Long WORKSPACE_ID = 1L;
 
     private static final String CORE_CUSTOM_DATA = "CORE";
@@ -234,7 +232,6 @@ public class AzureTemplateBuilderTest {
                 .withCrn("crn")
                 .withPlatform("dummy1")
                 .withLocation(Location.location(Region.region("westus2"), new AvailabilityZone("availabilityZone")))
-                .withUserId(USER_ID)
                 .withWorkspaceId(WORKSPACE_ID)
                 .build();
         azureCredentialView = new AzureCredentialView(cloudCredential());

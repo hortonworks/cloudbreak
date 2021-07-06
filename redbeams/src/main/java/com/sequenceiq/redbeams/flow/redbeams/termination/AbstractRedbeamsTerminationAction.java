@@ -94,10 +94,8 @@ public abstract class AbstractRedbeamsTerminationAction<P extends RedbeamsEvent>
                     .withPlatform(dbStack.getCloudPlatform())
                     .withVariant(dbStack.getPlatformVariant())
                     .withUserName(userName)
-                    .withUserId(userName)
                     .withLocation(location)
                     .withAccountId(accountId)
-                    .withAccountUUID(accountId)
                     .build();
             try {
                 Credential credential = credentialService.getCredentialByEnvCrn(dbStack.getEnvironmentId());

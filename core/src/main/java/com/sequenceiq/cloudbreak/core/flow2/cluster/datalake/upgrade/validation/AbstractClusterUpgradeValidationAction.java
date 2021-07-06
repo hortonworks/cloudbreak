@@ -58,10 +58,7 @@ public abstract class AbstractClusterUpgradeValidationAction<P extends Payload>
                 .withVariant(stack.getPlatformVariant())
                 .withLocation(location)
                 .withWorkspaceId(stack.getWorkspace().getId())
-                .withUserId(stack.getCreator().getUserId())
                 .withUserName(stack.getCreator().getUserName())
-                .withAccountId(stack.getWorkspace().getId())
-                .withAccountUUID(stack.getTenant().getName())
                 .withAccountId(stack.getTenant().getId())
                 .build();
         CloudCredential cloudCredential = credentialConverter.convert(credentialClientService.getByEnvironmentCrn(stack.getEnvironmentCrn()));

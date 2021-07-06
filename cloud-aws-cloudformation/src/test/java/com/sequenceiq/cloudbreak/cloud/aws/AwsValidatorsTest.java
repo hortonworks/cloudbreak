@@ -126,7 +126,6 @@ public class AwsValidatorsTest {
                 .withPlatform("AWS")
                 .withVariant("AWS")
                 .withLocation(Location.location(Region.region("region"), AvailabilityZone.availabilityZone("az")))
-                .withUserId("user")
                 .withAccountId("account")
                 .build();
         CloudCredential cloudCredential = null;

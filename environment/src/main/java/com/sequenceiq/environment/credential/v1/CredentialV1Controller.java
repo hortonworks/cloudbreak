@@ -160,10 +160,9 @@ public class CredentialV1Controller extends NotificationController implements Cr
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_CREDENTIAL)
     public InteractiveCredentialResponse interactiveLogin(@Valid CredentialRequest credentialRequest) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         Credential credential = credentialConverter.convert(credentialRequest);
         credential.setType(ENVIRONMENT);
-        Map<String, String> result = credentialService.interactiveLogin(accountId, userCrn, credential);
+        Map<String, String> result = credentialService.interactiveLogin(accountId, credential);
         return new InteractiveCredentialResponse(result.get("user_code"), result.get("verification_url"));
     }
 
@@ -189,8 +188,7 @@ public class CredentialV1Controller extends NotificationController implements Cr
     @CheckPermissionByResourceName(action = EDIT_CREDENTIAL)
     public Response initCodeGrantFlowOnExisting(@ResourceName String name) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        String loginURL = credentialService.initCodeGrantFlow(accountId, name, userCrn);
+        String loginURL = credentialService.initCodeGrantFlow(accountId, name);
         return Response.status(Status.FOUND).header("Referrer-Policy", "origin-when-cross-origin").header("Location", loginURL).build();
     }
 

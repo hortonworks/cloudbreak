@@ -173,7 +173,6 @@ public class StopDatabaseServerFailedActionTest {
         assertEquals(DB_STACK_PLATFORM_VARIANT, redbeamsStopContext.getCloudContext().getVariant().value());
         assertEquals(DB_STACK_REGION, redbeamsStopContext.getCloudContext().getLocation().getRegion().value());
         assertEquals(DB_STACK_AZ, redbeamsStopContext.getCloudContext().getLocation().getAvailabilityZone().value());
-        assertEquals(USER_NAME, redbeamsStopContext.getCloudContext().getUserId());
         assertEquals(ACCOUNT_ID, redbeamsStopContext.getCloudContext().getAccountId());
         assertEquals(flowParameters, redbeamsStopContext.getFlowParameters());
         assertEquals(cloudCredential, redbeamsStopContext.getCloudCredential());

@@ -48,7 +48,6 @@ import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.UpdateNodeCountValidator;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
-import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
@@ -137,9 +136,7 @@ public class ClusterCommonService {
         }
         updateNodeCountValidator.validateScalabilityOfInstanceGroup(stack, updateJson.getHostGroupAdjustment());
         if (blueprintService.isClouderaManagerTemplate(blueprint)) {
-            User creator = stack.getCreator();
-            String userCrn = creator.getUserCrn();
-            String accountId = Crn.safeFromString(userCrn).getAccountId();
+            String accountId = Crn.safeFromString(stack.getResourceCrn()).getAccountId();
             cmTemplateValidator.validateHostGroupScalingRequest(
                     accountId,
                     blueprint,

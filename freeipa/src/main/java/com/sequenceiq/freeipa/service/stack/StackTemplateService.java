@@ -42,10 +42,8 @@ public class StackTemplateService {
                 .withPlatform(stack.getCloudPlatform())
                 .withVariant(stack.getCloudPlatform())
                 .withLocation(location)
-                .withUserId(stack.getOwner())
                 .withUserName(stack.getOwner())
                 .withAccountId(stack.getAccountId())
-                .withAccountUUID(stack.getAccountId())
                 .build();
         CloudCredential cloudCredential = credentialConverter.convert(credential);
         GetPlatformTemplateRequest getPlatformTemplateRequest = new GetPlatformTemplateRequest(cloudContext, cloudCredential);

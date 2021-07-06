@@ -43,6 +43,7 @@ import com.cloudera.api.swagger.model.ApiRemoteDataContext;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
@@ -192,7 +193,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
     @Override
     public void validateLicence() {
         try {
-            clouderaManagerLicenseService.validateClouderaManagerLicense(stack.getCreator());
+            clouderaManagerLicenseService.validateClouderaManagerLicense(Crn.safeFromString(stack.getResourceCrn()).getAccountId());
         } catch (Exception e) {
             throw mapException(e);
         }

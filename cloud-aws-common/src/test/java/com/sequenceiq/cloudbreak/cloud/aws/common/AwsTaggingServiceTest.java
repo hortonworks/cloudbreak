@@ -42,8 +42,6 @@ import com.sequenceiq.common.api.type.ResourceType;
 @RunWith(MockitoJUnitRunner.class)
 public class AwsTaggingServiceTest {
 
-    private static final String USER_ID = "horton@hortonworks.com";
-
     private static final Long WORKSPACE_ID = 1L;
 
     private static final String INSTANCE_ID = "i-nstance";
@@ -202,7 +200,6 @@ public class AwsTaggingServiceTest {
                 .withName("testname")
                 .withCrn("crn")
                 .withPlatform("AWS")
-                .withUserId(USER_ID)
                 .withWorkspaceId(WORKSPACE_ID)
                 .build();
         CloudCredential cloudCredential = new CloudCredential("crn", "credentialname");

@@ -173,7 +173,6 @@ public class StartDatabaseServerFailedActionTest {
         assertEquals(DB_STACK_PLATFORM_VARIANT, redbeamsStartContext.getCloudContext().getVariant().value());
         assertEquals(DB_STACK_REGION, redbeamsStartContext.getCloudContext().getLocation().getRegion().value());
         assertEquals(DB_STACK_AZ, redbeamsStartContext.getCloudContext().getLocation().getAvailabilityZone().value());
-        assertEquals(USER_NAME, redbeamsStartContext.getCloudContext().getUserId());
         assertEquals(ACCOUNT_ID, redbeamsStartContext.getCloudContext().getAccountId());
         assertEquals(flowParameters, redbeamsStartContext.getFlowParameters());
         assertEquals(cloudCredential, redbeamsStartContext.getCloudCredential());

@@ -46,9 +46,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
 import com.sequenceiq.cloudbreak.service.stack.StackViewService;
-import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
-import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowParameters;
@@ -91,9 +89,6 @@ public class CloudConfigValidationActions {
     @Inject
     private MultiAzValidator multiAzValidator;
 
-    @Inject
-    private UserService userService;
-
     @Bean(name = "VALIDATE_CLOUD_CONFIG_STATE")
     public Action<?, ?> cloudConfigValidationAction() {
         return new AbstractStackCreationAction<>(StackEvent.class) {
@@ -109,9 +104,6 @@ public class CloudConfigValidationActions {
                 ValidationResult.ValidationResultBuilder validationBuilder = ValidationResult.builder();
 
                 stackValidator.validate(stack, validationBuilder);
-                Optional<User> user = userService.getByUserIdAndTenantId(
-                        stack.getCreator().getUserId(),
-                        stack.getCreator().getTenant().getId());
 
                 Set<InstanceGroup> instanceGroups = context.getStack().getInstanceGroups();
                 measure(() -> {
@@ -123,7 +115,7 @@ public class CloudConfigValidationActions {
                                 instanceGroup,
                                 stack,
                                 fromStackType(type == null ? null : type.name()),
-                                user,
+                                Optional.of(stack.getCreator()),
                                 validationBuilder);
 
                     }
@@ -134,9 +126,7 @@ public class CloudConfigValidationActions {
                         stack.getCloudPlatform(),
                         cloudCredential,
                         stack.getParameters(),
-                        stack.getCreator().getUserId(),
-                        stack.getWorkspace().getId(),
-                        validationBuilder);
+                        stack.getWorkspace().getId());
                 parametersValidator.waitResult(parametersValidationRequest, validationBuilder);
 
                 if (!StackType.LEGACY.equals(stack.getType())) {
@@ -146,7 +136,6 @@ public class CloudConfigValidationActions {
                 environmentValidator.validate(
                         stack,
                         environment,
-                        stack.getCreator(),
                         stack.getType().equals(StackType.WORKLOAD),
                         validationBuilder);
 

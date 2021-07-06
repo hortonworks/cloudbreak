@@ -25,7 +25,6 @@ import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackDownscaleValidatorService;
-import com.sequenceiq.cloudbreak.workspace.model.User;
 
 @Component
 public class UpdateNodeCountValidator {
@@ -84,9 +83,7 @@ public class UpdateNodeCountValidator {
                 .filter(e -> e.getName().equals(instanceGroup))
                 .findFirst();
         if (hostGroup.isPresent()) {
-            User creator = stack.getCreator();
-            String userCrn = creator.getUserCrn();
-            String accountId = Crn.safeFromString(userCrn).getAccountId();
+            String accountId = Crn.safeFromString(stack.getResourceCrn()).getAccountId();
             cmTemplateValidator.validateHostGroupScalingRequest(
                     accountId,
                     stack.getCluster().getBlueprint(),

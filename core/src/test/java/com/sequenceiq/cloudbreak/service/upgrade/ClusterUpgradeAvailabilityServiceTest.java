@@ -519,6 +519,7 @@ public class ClusterUpgradeAvailabilityServiceTest {
         stack.setCluster(cluster);
         stack.setType(stackType);
         stack.setRegion(REGION);
+        stack.setResourceCrn("crn:cdp:datahub:us-west-1:account1:cluster:cluster");
         Tenant t = new Tenant();
         t.setName(accountId);
         User creator = new User();
