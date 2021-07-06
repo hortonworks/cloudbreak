@@ -29,6 +29,7 @@ public class User {
     @JsonDeserialize(using = ListFlatteningDeserializer.class)
     private String title;
 
+    @JsonDeserialize(using = ListFlatteningDeserializer.class)
     private Boolean nsAccountLock;
 
     public String getDn() {
