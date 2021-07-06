@@ -66,8 +66,6 @@ import com.sequenceiq.common.api.type.LoadBalancerType;
 @ExtendWith(MockitoExtension.class)
 public class AwsMetaDataCollectorTest {
 
-    private static final String USER_ID = "horton@hortonworks.com";
-
     private static final Long WORKSPACE_ID = 1L;
 
     private static final CloudInstanceLifeCycle CLOUD_INSTANCE_LIFE_CYCLE = CloudInstanceLifeCycle.SPOT;
@@ -519,7 +517,6 @@ public class AwsMetaDataCollectorTest {
                 .withPlatform("platform")
                 .withVariant("variant")
                 .withLocation(location)
-                .withUserId(USER_ID)
                 .withWorkspaceId(WORKSPACE_ID)
                 .build();
         CloudCredential credential = new CloudCredential("crn", null, null, false);

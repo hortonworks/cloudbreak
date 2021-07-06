@@ -445,7 +445,6 @@ public class AzureNetworkConnectorTest {
                 .withCrn("")
                 .withPlatform("")
                 .withLocation(Location.location(Region.region("us-west-1"), AvailabilityZone.availabilityZone("us-west-1")))
-                .withUserId("")
                 .build();
         return cloudContext;
     }

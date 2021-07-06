@@ -67,10 +67,8 @@ public abstract class AbstractUpscaleAction<P extends Payload> extends AbstractC
                 .withPlatform(stack.getCloudPlatform())
                 .withVariant(stack.getCloudPlatform())
                 .withLocation(location)
-                .withUserId(stack.getOwner())
                 .withUserName(stack.getOwner())
                 .withAccountId(stack.getAccountId())
-                .withAccountUUID(stack.getAccountId())
                 .build();
         CloudCredential cloudCredential = credentialConverter.convert(credentialService.getCredentialByEnvCrn(stack.getEnvironmentCrn()));
         CloudStack cloudStack = cloudStackConverter.convert(stack);

@@ -14,6 +14,8 @@ public interface WorkspaceAwareResourceService<T extends WorkspaceAwareResource>
 
     T createWithMdcContextRestore(T resource, Workspace workspace, User user);
 
+    T createWithMdcContextRestoreForCurrentUser(T resource, Workspace workspace);
+
     T create(T resource, Workspace workspace, User user);
 
     T getByNameForWorkspaceId(String name, Long workspaceId);

@@ -223,7 +223,6 @@ public class GcpNetworkConnector extends AbstractGcpResourceBuilder implements D
                 .withPlatform(CloudPlatform.GCP.name())
                 .withVariant(CloudPlatform.GCP.name())
                 .withLocation(location(networkRequest.getRegion()))
-                .withUserId(networkRequest.getCreatorCrn())
                 .withAccountId(networkRequest.getAccountId())
                 .build();
     }
@@ -235,7 +234,6 @@ public class GcpNetworkConnector extends AbstractGcpResourceBuilder implements D
                 .withPlatform(CloudPlatform.GCP.name())
                 .withVariant(CloudPlatform.GCP.name())
                 .withLocation(location(region(networkRequest.getRegion())))
-                .withUserId(networkRequest.getUserId())
                 .withAccountId(networkRequest.getAccountId())
                 .build();
     }

@@ -64,7 +64,7 @@ public class AbstractRdsConfigProviderTest {
 
     @Test
     public void createServicePillarForLocalRdsConfig() {
-        when(rdsConfigService.createIfNotExists(any(), any(), any())).thenAnswer(i -> i.getArguments()[1]);
+        when(rdsConfigService.createIfNotExists(any(), any())).thenAnswer(i -> i.getArguments()[1]);
         Stack testStack = TestUtil.stack();
         InstanceMetaData metaData = testStack.getGatewayInstanceMetadata().iterator().next();
         metaData.setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
@@ -81,7 +81,7 @@ public class AbstractRdsConfigProviderTest {
 
     @Test
     public void createServicePillarForRemoteRdsConfig() {
-        when(rdsConfigService.createIfNotExists(any(), any(), any())).thenAnswer(i -> i.getArguments()[1]);
+        when(rdsConfigService.createIfNotExists(any(), any())).thenAnswer(i -> i.getArguments()[1]);
         RDSConfig config = TestUtil.rdsConfig(DatabaseType.CLOUDERA_MANAGER);
         when(dbServerConfigurer.createNewRdsConfig(any(), any(), any(), any(), any())).thenReturn(config);
         when(dbServerConfigurer.isRemoteDatabaseNeeded(any())).thenReturn(true);

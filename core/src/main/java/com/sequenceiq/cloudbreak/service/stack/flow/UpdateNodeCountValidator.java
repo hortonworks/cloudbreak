@@ -77,9 +77,7 @@ public class UpdateNodeCountValidator {
                 .filter(e -> e.getName().equals(instanceGroup))
                 .findFirst();
         if (hostGroup.isPresent()) {
-            User creator = stack.getCreator();
-            String userCrn = creator.getUserCrn();
-            String accountId = Crn.safeFromString(userCrn).getAccountId();
+            String accountId = Crn.safeFromString(stack.getResourceCrn()).getAccountId();
             cmTemplateValidator.validateHostGroupScalingRequest(
                     accountId,
                     stack.getCluster().getBlueprint(),

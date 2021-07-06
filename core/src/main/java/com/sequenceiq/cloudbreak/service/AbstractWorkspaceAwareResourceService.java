@@ -63,6 +63,16 @@ public abstract class AbstractWorkspaceAwareResourceService<T extends WorkspaceA
     }
 
     @Override
+    public T createWithMdcContextRestoreForCurrentUser(T resource, Workspace workspace) {
+        Map<String, String> mdcContextMap = MDCBuilder.getMdcContextMap();
+        try {
+            return createInternal(resource, workspace, getLoggedInUser());
+        } finally {
+            MDCBuilder.buildMdcContextFromMap(mdcContextMap);
+        }
+    }
+
+    @Override
     public T create(T resource, Workspace workspace, User user) {
         return createInternal(resource, workspace, user);
     }

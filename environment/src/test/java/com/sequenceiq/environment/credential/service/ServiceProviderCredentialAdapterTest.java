@@ -46,8 +46,6 @@ class ServiceProviderCredentialAdapterTest {
 
     private static final String ACCOUNT_ID = "anAccountID";
 
-    private static final String USER_ID = "1";
-
     private static final Long CREDENTIAL_ID = 1L;
 
     private static final String CREDENTIAL_NAME = "someTestCredential";
@@ -135,7 +133,7 @@ class ServiceProviderCredentialAdapterTest {
         doThrow(new InterruptedException("Error while executing initialization of authorization code grant based credential creation:"))
                 .when(initCodeGrantFlowRequest).await();
 
-        OperationException operationException = assertThrows(OperationException.class, () -> underTest.initCodeGrantFlow(credential, ACCOUNT_ID, USER_ID));
+        OperationException operationException = assertThrows(OperationException.class, () -> underTest.initCodeGrantFlow(credential, ACCOUNT_ID));
         assertThat(operationException.getMessage())
                 .contains("Error while executing initialization of authorization code grant based credential creation:");
     }
@@ -146,7 +144,7 @@ class ServiceProviderCredentialAdapterTest {
         when(initCodeGrantFlowResponse.getErrorDetails()).thenReturn(exceptionFromResponse);
         when(initCodeGrantFlowResponse.getStatus()).thenReturn(EventStatus.FAILED);
 
-        BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> underTest.initCodeGrantFlow(credential, ACCOUNT_ID, USER_ID));
+        BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> underTest.initCodeGrantFlow(credential, ACCOUNT_ID));
         assertThat(badRequestException.getMessage())
                 .contains(String.format("Authorization code grant based credential creation couldn't be initialized: %s", exceptionFromResponse));
     }
@@ -174,7 +172,7 @@ class ServiceProviderCredentialAdapterTest {
         when(credentialConverter.convert(credential)).thenReturn(convertedCredential);
         when(initCodeGrantFlowResponse.getCodeGrantFlowInitParams()).thenReturn(Map.of(expectedAdditionalAttributeKey, expectedAdditionalAttributeValue));
 
-        Credential result = underTest.initCodeGrantFlow(credential, ACCOUNT_ID, USER_ID);
+        Credential result = underTest.initCodeGrantFlow(credential, ACCOUNT_ID);
 
         assertNotEquals(initialCredentialAttriute, result.getAttributes());
         var attributeMap = new Json(result.getAttributes()).getMap();

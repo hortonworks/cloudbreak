@@ -137,9 +137,7 @@ public class ClusterCommonService {
         }
         updateNodeCountValidator.validateScalabilityOfInstanceGroup(stack, updateJson.getHostGroupAdjustment());
         if (blueprintService.isClouderaManagerTemplate(blueprint)) {
-            User creator = stack.getCreator();
-            String userCrn = creator.getUserCrn();
-            String accountId = Crn.safeFromString(userCrn).getAccountId();
+            String accountId = Crn.safeFromString(stack.getResourceCrn()).getAccountId();
             cmTemplateValidator.validateHostGroupScalingRequest(
                     accountId,
                     blueprint,

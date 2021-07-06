@@ -88,7 +88,6 @@ public class ComponentTestUtil {
                 .withPlatform(AwsConstants.AWS_PLATFORM.value())
                 .withVariant(AwsConstants.AWS_DEFAULT_VARIANT.value())
                 .withLocation(location)
-                .withUserId("owner@company.com")
                 .withAccountId("5")
                 .build();
         CloudCredential cloudCredential = new CloudCredential("crn", "credentialName");

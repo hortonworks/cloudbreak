@@ -44,9 +44,7 @@ public class StackParameterService {
                     .withName(name)
                     .withCrn(credential.getCrn())
                     .withPlatform(credential.cloudPlatform())
-                    .withUserId(stack.getCreator().getUserId())
                     .withWorkspaceId(stack.getWorkspace().getId())
-                    .withAccountUUID(stack.getTenant().getName())
                     .withAccountId(stack.getTenant().getId())
                     .build();
 

@@ -18,14 +18,13 @@ import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.RdsConfigRepository;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
 
@@ -75,11 +74,11 @@ public class RdsConfigService extends AbstractWorkspaceAwareResourceService<RDSC
         return rdsConfig;
     }
 
-    public RDSConfig createIfNotExists(User user, RDSConfig rdsConfig, Long workspaceId) {
+    public RDSConfig createIfNotExists(RDSConfig rdsConfig, Long workspaceId) {
         Optional<RDSConfig> configByName = rdsConfigRepository.findByNameAndWorkspaceId(rdsConfig.getName(), workspaceId);
         if (configByName.isEmpty()) {
-            Workspace workspace = getWorkspaceService().get(workspaceId, user);
-            return createWithMdcContextRestore(rdsConfig, workspace, user);
+            Workspace workspace = getWorkspaceService().getByIdForCurrentUser(workspaceId);
+            return createWithMdcContextRestoreForCurrentUser(rdsConfig, workspace);
         }
         return rdsConfig;
 

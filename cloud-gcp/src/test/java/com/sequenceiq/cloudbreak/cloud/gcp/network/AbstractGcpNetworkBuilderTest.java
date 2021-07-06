@@ -63,7 +63,6 @@ public class AbstractGcpNetworkBuilderTest {
                 .withPlatform("AWS")
                 .withVariant("AWS")
                 .withLocation(Location.location(Region.region("country")))
-                .withUserId("user")
                 .withAccountId("account")
                 .build();
         CloudCredential credential = new CloudCredential();
@@ -93,7 +92,6 @@ public class AbstractGcpNetworkBuilderTest {
                 .withPlatform("AWS")
                 .withVariant("AWS")
                 .withLocation(Location.location(Region.region("country")))
-                .withUserId("user")
                 .withAccountId("account")
                 .build();
         CloudCredential credential = new CloudCredential();

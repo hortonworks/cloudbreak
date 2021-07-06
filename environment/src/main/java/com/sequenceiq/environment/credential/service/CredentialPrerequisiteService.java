@@ -2,7 +2,6 @@ package com.sequenceiq.environment.credential.service;
 
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AWS_RESTRICTED_POLICY;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
-import static com.sequenceiq.environment.TempConstants.TEMP_USER_ID;
 import static com.sequenceiq.environment.TempConstants.TEMP_WORKSPACE_ID;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
@@ -88,7 +87,6 @@ public class CredentialPrerequisiteService {
     public CredentialPrerequisitesResponse getCloudbreakPrerequisites(String cloudPlatform, String deploymentAddress, CredentialType type) {
         CloudContext cloudContext = CloudContext.Builder.builder()
                 .withPlatform(cloudPlatform)
-                .withUserId(TEMP_USER_ID)
                 .withWorkspaceId(TEMP_WORKSPACE_ID)
                 .build();
         CredentialPrerequisitesRequest request = new CredentialPrerequisitesRequest(cloudContext,
@@ -113,7 +111,6 @@ public class CredentialPrerequisiteService {
     public Map<String, String> getExperiencePrerequisites(String cloudPlatform) {
         CloudContext cloudContext = CloudContext.Builder.builder()
                 .withPlatform(cloudPlatform)
-                .withUserId(TEMP_USER_ID)
                 .withWorkspaceId(TEMP_WORKSPACE_ID)
                 .build();
         CredentialExperiencePolicyRequest request = new CredentialExperiencePolicyRequest(cloudContext);

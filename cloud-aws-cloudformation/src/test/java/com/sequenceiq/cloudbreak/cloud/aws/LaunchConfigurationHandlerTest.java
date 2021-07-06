@@ -35,8 +35,6 @@ import com.sequenceiq.cloudbreak.cloud.notification.ResourceNotifier;
 
 public class LaunchConfigurationHandlerTest {
 
-    private static final String USER_ID = "horton@hortonworks.com";
-
     private static final Long WORKSPACE_ID = 1L;
 
     @Mock
@@ -79,7 +77,6 @@ public class LaunchConfigurationHandlerTest {
                 .withName("cloudContext")
                 .withCrn("crn")
                 .withPlatform("AWS")
-                .withUserId(USER_ID)
                 .withWorkspaceId(WORKSPACE_ID)
                 .withLocation(location(region("region"), availabilityZone("az1")))
                 .build();
@@ -101,7 +98,6 @@ public class LaunchConfigurationHandlerTest {
                 .withName("cloudContext")
                 .withCrn("crn")
                 .withPlatform("AWS")
-                .withUserId(USER_ID)
                 .withWorkspaceId(WORKSPACE_ID)
                 .withLocation(location(region("region"), availabilityZone("az1")))
                 .build();

@@ -113,7 +113,7 @@ public abstract class AbstractRdsConfigProvider {
     }
 
     private Set<RDSConfig> populateNewRdsConfig(Set<RDSConfig> rdsConfigs, Stack stack, Cluster cluster, RDSConfig rdsConfig) {
-        rdsConfig = rdsConfigService.createIfNotExists(stack.getCreator(), rdsConfig, stack.getWorkspace().getId());
+        rdsConfig = rdsConfigService.createIfNotExists(rdsConfig, stack.getWorkspace().getId());
         rdsConfigs.add(rdsConfig);
         cluster.setRdsConfigs(rdsConfigs);
         clusterService.save(cluster);

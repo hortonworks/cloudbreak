@@ -85,10 +85,8 @@ public class ServiceProviderConnectorAdapter {
                 .withCrn(stack.getResourceCrn())
                 .withPlatform(stack.getCloudPlatform())
                 .withVariant(stack.getPlatformVariant())
-                .withUserId(stack.getCreator().getUserId())
                 .withLocation(location)
                 .withWorkspaceId(stack.getWorkspace().getId())
-                .withAccountUUID(stack.getTenant().getName())
                 .withAccountId(stack.getTenant().getId())
                 .build();
         Credential credential = credentialClientService.getByEnvironmentCrn(stack.getEnvironmentCrn());
@@ -130,10 +128,8 @@ public class ServiceProviderConnectorAdapter {
                 .withCrn(stack.getResourceCrn())
                 .withPlatform(stack.getCloudPlatform())
                 .withVariant(stack.getPlatformVariant())
-                .withUserId(stack.getCreator().getUserId())
                 .withLocation(location)
                 .withWorkspaceId(stack.getWorkspace().getId())
-                .withAccountUUID(stack.getTenant().getName())
                 .withAccountId(stack.getTenant().getId())
                 .build();
         Credential credential = credentialClientService.getByEnvironmentCrn(stack.getEnvironmentCrn());
@@ -176,10 +172,8 @@ public class ServiceProviderConnectorAdapter {
                 .withCrn(stack.getResourceCrn())
                 .withPlatform(stack.getCloudPlatform())
                 .withVariant(stack.getPlatformVariant())
-                .withUserId(stack.getCreator().getUserId())
                 .withLocation(location)
                 .withWorkspaceId(stack.getWorkspace().getId())
-                .withAccountUUID(stack.getTenant().getName())
                 .withAccountId(stack.getTenant().getId())
                 .build();
         Credential credential = ThreadBasedUserCrnProvider
@@ -207,10 +201,8 @@ public class ServiceProviderConnectorAdapter {
                     .withCrn(stack.getResourceCrn())
                     .withPlatform(stack.getCloudPlatform())
                     .withVariant(stack.getPlatformVariant())
-                    .withUserId(stack.getCreator().getUserId())
                     .withLocation(location)
                     .withWorkspaceId(stack.getWorkspace().getId())
-                    .withAccountUUID(stack.getTenant().getName())
                     .withAccountId(stack.getTenant().getId())
                     .build();
             LOGGER.error("Error while getting template: " + cloudContext, e);
@@ -231,10 +223,8 @@ public class ServiceProviderConnectorAdapter {
                 .withCrn(stack.getResourceCrn())
                 .withPlatform(stack.getCloudPlatform())
                 .withVariant(stack.getPlatformVariant())
-                .withUserId(stack.getCreator().getUserId())
                 .withLocation(location)
                 .withWorkspaceId(stack.getWorkspace().getId())
-                .withAccountUUID(stack.getTenant().getName())
                 .withAccountId(stack.getTenant().getId())
                 .build();
         Credential credential = credentialClientService.getByEnvironmentCrn(stack.getEnvironmentCrn());
@@ -264,10 +254,8 @@ public class ServiceProviderConnectorAdapter {
                 .withCrn(stack.getResourceCrn())
                 .withPlatform(stack.getCloudPlatform())
                 .withVariant(stack.getPlatformVariant())
-                .withUserId(stack.getCreator().getUserId())
                 .withLocation(location)
                 .withWorkspaceId(stack.getWorkspace().getId())
-                .withAccountUUID(stack.getTenant().getName())
                 .withAccountId(stack.getTenant().getId())
                 .build();
         Credential credential = ThreadBasedUserCrnProvider

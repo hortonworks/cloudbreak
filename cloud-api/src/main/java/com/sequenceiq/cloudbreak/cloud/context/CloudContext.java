@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.context;
 
-import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
@@ -23,15 +22,11 @@ public class CloudContext {
 
     private final Location location;
 
-    private final String userId;
-
     private final String userName;
 
     private final String accountId;
 
     private final String crn;
-
-    private final String accountUUID;
 
     private CloudContext(
             Long id,
@@ -40,20 +35,16 @@ public class CloudContext {
             String platform,
             String variant,
             Location location,
-            String userId,
             String accountId,
-            String userName,
-            String accountUUID) {
+            String userName) {
         this.id = id;
         this.name = name;
         this.crn = crn;
         this.platform = Platform.platform(platform);
         this.variant = Variant.variant(variant);
         this.location = location;
-        this.userId = userId;
         this.accountId = accountId;
         this.userName = userName;
-        this.accountUUID = Strings.isNullOrEmpty(accountUUID) ? accountId : accountUUID;
     }
 
     public Long getId() {
@@ -80,14 +71,6 @@ public class CloudContext {
         return location;
     }
 
-    public String getUserId() {
-        return userId;
-    }
-
-    public String getAccountUUID() {
-        return accountUUID;
-    }
-
     public String getAccountId() {
         return accountId;
     }
@@ -108,7 +91,6 @@ public class CloudContext {
                 ", platform=" + platform +
                 ", variant=" + variant +
                 ", location=" + location +
-                ", userId='" + userId + '\'' +
                 ", userName='" + userName + '\'' +
                 ", accountId='" + accountId + '\'' +
                 ", crn='" + crn + '\'' +
@@ -126,13 +108,9 @@ public class CloudContext {
 
         private Location location;
 
-        private String userId;
-
         private String userName;
 
         private String accountId;
-
-        private String accountUUID;
 
         private String crn;
 
@@ -161,11 +139,6 @@ public class CloudContext {
             return this;
         }
 
-        public Builder withUserId(String userId) {
-            this.userId = userId;
-            return this;
-        }
-
         public Builder withUserName(String userName) {
             this.userName = userName;
             return this;
@@ -186,11 +159,6 @@ public class CloudContext {
             return this;
         }
 
-        public Builder withAccountUUID(String accountUUID) {
-            this.accountUUID = accountUUID;
-            return this;
-        }
-
         public Builder withCrn(String crn) {
             this.crn = crn;
             return this;
@@ -208,10 +176,8 @@ public class CloudContext {
                     platform,
                     variant,
                     location,
-                    userId,
                     accountId,
-                    userName,
-                    accountUUID
+                    userName
             );
         }
     }

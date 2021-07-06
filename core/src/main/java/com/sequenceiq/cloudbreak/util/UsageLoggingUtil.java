@@ -8,11 +8,12 @@ import org.springframework.util.StringUtils;
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.usage.LoggingUsageReporter;
 import com.sequenceiq.cloudbreak.usage.UsageReporter;
-import com.sequenceiq.cloudbreak.workspace.model.User;
 
 /**
  * Utility class for logging usage events.
@@ -36,7 +37,6 @@ public class UsageLoggingUtil {
         }
         long timestamp = System.currentTimeMillis();
         // Datahub clusters will have datalake resource id set.
-        User creator = stack.getCreator();
         String cloudPlatform = stack.getCloudPlatform();
         UsageProto.CDPEnvironmentsEnvironmentType.Value cloudPlatformEnum =
                 UsageProto.CDPEnvironmentsEnvironmentType.Value.UNSET;
@@ -51,7 +51,7 @@ public class UsageLoggingUtil {
             UsageProto.CDPDatalakeClusterRequested.Builder protoBuilder =
                     UsageProto.CDPDatalakeClusterRequested.newBuilder();
             protoBuilder.setDatalakeId(cluster.getId().toString());
-            buildDatalakeRequestedProto(cluster, stack, creator, cloudPlatformEnum, protoBuilder);
+            buildDatalakeRequestedProto(cluster, cloudPlatformEnum, protoBuilder);
             usageReporter.cdpDatalakeClusterRequested(timestamp, protoBuilder.build());
         } else {
             UsageProto.CDPDatahubClusterRequested.Builder protoBuilder =
@@ -60,7 +60,7 @@ public class UsageLoggingUtil {
             if (StringUtils.hasLength(stack.getDatalakeCrn())) {
                 protoBuilder.setDatalakeCrn(stack.getDatalakeCrn());
             }
-            buildDatahubRequestedProto(cluster, stack, creator, cloudPlatformEnum, protoBuilder);
+            buildDatahubRequestedProto(cluster, cloudPlatformEnum, protoBuilder);
             usageReporter.cdpDatahubClusterRequested(timestamp, protoBuilder.build());
         }
     }
@@ -110,23 +110,16 @@ public class UsageLoggingUtil {
 
     private void buildDatalakeRequestedProto(
             Cluster cluster,
-            Stack stack,
-            User creator,
             UsageProto.CDPEnvironmentsEnvironmentType.Value cloudPlatformEnum,
             UsageProto.CDPDatalakeClusterRequested.Builder protoBuilder) {
-        if (creator != null) {
-            if (creator.getTenant() != null && creator.getTenant().getName() != null) {
-                protoBuilder.setAccountId(creator.getTenant().getName());
-            }
-            if (creator.getUserCrn() != null) {
-                protoBuilder.setCreatorCrn(creator.getUserCrn());
-            }
-        }
+        Stack stack = cluster.getStack();
+        protoBuilder.setCreatorCrn(ThreadBasedUserCrnProvider.getUserCrn());
         if (cluster.getName() != null) {
             protoBuilder.setDatalakeName(cluster.getName());
         }
         if (stack.getResourceCrn() != null) {
             protoBuilder.setCrn(stack.getResourceCrn());
+            protoBuilder.setAccountId(Crn.safeFromString(stack.getResourceCrn()).getAccountId());
         }
         if (stack.getEnvironmentCrn() != null) {
             protoBuilder.setEnvironmentCrn(stack.getEnvironmentCrn());
@@ -139,23 +132,16 @@ public class UsageLoggingUtil {
 
     private void buildDatahubRequestedProto(
             Cluster cluster,
-            Stack stack,
-            User creator,
             UsageProto.CDPEnvironmentsEnvironmentType.Value cloudPlatformEnum,
             UsageProto.CDPDatahubClusterRequested.Builder protoBuilder) {
-        if (creator != null) {
-            if (creator.getTenant() != null && creator.getTenant().getName() != null) {
-                protoBuilder.setAccountId(creator.getTenant().getName());
-            }
-            if (creator.getUserCrn() != null) {
-                protoBuilder.setCreatorCrn(creator.getUserCrn());
-            }
-        }
+        Stack stack = cluster.getStack();
+        protoBuilder.setCreatorCrn(ThreadBasedUserCrnProvider.getUserCrn());
         if (cluster.getName() != null) {
             protoBuilder.setClusterName(cluster.getName());
         }
         if (stack.getResourceCrn() != null) {
             protoBuilder.setCrn(stack.getResourceCrn());
+            protoBuilder.setAccountId(Crn.safeFromString(stack.getResourceCrn()).getAccountId());
         }
         if (stack.getEnvironmentCrn() != null) {
             protoBuilder.setEnvironmentCrn(stack.getEnvironmentCrn());

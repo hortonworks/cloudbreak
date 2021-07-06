@@ -60,7 +60,7 @@ public class GcpBucketRegisterServiceTest {
         when(authenticatedContext.getCloudCredential()).thenReturn(cloudCredential);
         when(cloudContext.getName()).thenReturn("name");
         when(gcpStackUtil.getProjectId(cloudCredential)).thenReturn("project-id");
-        when(cloudContext.getAccountUUID()).thenReturn("id");
+        when(cloudContext.getAccountId()).thenReturn("id");
         when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
         when(cloudContext.getLocation()).thenReturn(location);
         when(gcpStorageFactory.buildStorage(any(CloudCredential.class), anyString())).thenReturn(storage);
@@ -90,7 +90,7 @@ public class GcpBucketRegisterServiceTest {
         when(authenticatedContext.getCloudCredential()).thenReturn(cloudCredential);
         when(cloudContext.getName()).thenReturn("name");
         when(gcpStackUtil.getProjectId(cloudCredential)).thenReturn("project-id");
-        when(cloudContext.getAccountUUID()).thenReturn("id");
+        when(cloudContext.getAccountId()).thenReturn("id");
         when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
         when(cloudContext.getLocation()).thenReturn(location);
         when(gcpStorageFactory.buildStorage(any(CloudCredential.class), anyString())).thenReturn(storage);
@@ -122,7 +122,7 @@ public class GcpBucketRegisterServiceTest {
         when(authenticatedContext.getCloudCredential()).thenReturn(cloudCredential);
         when(cloudContext.getName()).thenReturn("name");
         when(gcpStackUtil.getProjectId(cloudCredential)).thenReturn("project-id");
-        when(cloudContext.getAccountUUID()).thenReturn("id");
+        when(cloudContext.getAccountId()).thenReturn("id");
         when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
         when(cloudContext.getLocation()).thenReturn(location);
         when(gcpStorageFactory.buildStorage(any(CloudCredential.class), anyString())).thenReturn(storage);
@@ -156,7 +156,7 @@ public class GcpBucketRegisterServiceTest {
         when(authenticatedContext.getCloudCredential()).thenReturn(cloudCredential);
         when(cloudContext.getName()).thenReturn("name");
         when(gcpStackUtil.getProjectId(cloudCredential)).thenReturn("project-id");
-        when(cloudContext.getAccountUUID()).thenReturn("id");
+        when(cloudContext.getAccountId()).thenReturn("id");
         when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
         when(cloudContext.getLocation()).thenReturn(location);
         when(gcpStorageFactory.buildStorage(any(CloudCredential.class), anyString())).thenReturn(storage);
@@ -187,7 +187,7 @@ public class GcpBucketRegisterServiceTest {
         when(authenticatedContext.getCloudCredential()).thenReturn(cloudCredential);
         when(cloudContext.getName()).thenReturn("name");
         when(gcpStackUtil.getProjectId(cloudCredential)).thenReturn("project-id");
-        when(cloudContext.getAccountUUID()).thenReturn("id");
+        when(cloudContext.getAccountId()).thenReturn("id");
         when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
         when(cloudContext.getLocation()).thenReturn(location);
         when(gcpStorageFactory.buildStorage(any(CloudCredential.class), anyString())).thenReturn(storage);
@@ -225,7 +225,7 @@ public class GcpBucketRegisterServiceTest {
         when(authenticatedContext.getCloudCredential()).thenReturn(cloudCredential);
         when(cloudContext.getName()).thenReturn("name");
         when(gcpStackUtil.getProjectId(cloudCredential)).thenReturn("project-id");
-        when(cloudContext.getAccountUUID()).thenReturn("id");
+        when(cloudContext.getAccountId()).thenReturn("id");
         when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
         when(cloudContext.getLocation()).thenReturn(location);
         when(gcpStorageFactory.buildStorage(any(CloudCredential.class), anyString())).thenReturn(storage);
@@ -263,7 +263,7 @@ public class GcpBucketRegisterServiceTest {
         when(authenticatedContext.getCloudCredential()).thenReturn(cloudCredential);
         when(cloudContext.getName()).thenReturn("name");
         when(gcpStackUtil.getProjectId(cloudCredential)).thenReturn("project-id");
-        when(cloudContext.getAccountUUID()).thenReturn("id");
+        when(cloudContext.getAccountId()).thenReturn("id");
         when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
         when(cloudContext.getLocation()).thenReturn(location);
         when(gcpStorageFactory.buildStorage(any(CloudCredential.class), anyString())).thenReturn(storage);

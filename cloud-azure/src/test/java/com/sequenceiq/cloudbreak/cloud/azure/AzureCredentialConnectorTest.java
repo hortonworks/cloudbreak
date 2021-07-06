@@ -47,7 +47,6 @@ public class AzureCredentialConnectorTest {
             .withName("test")
             .withCrn("crn")
             .withPlatform(PLATFORM)
-            .withUserId(USER_ID)
             .withWorkspaceId(WORKSPACE_ID)
             .build();
 

@@ -32,12 +32,10 @@ public class GcpAuthenticatorTest {
     public void testAuthenticate() {
         CloudContext cloudContext = CloudContext.Builder.builder()
                 .withAccountId("accountId")
-                .withAccountUUID("accountUUID")
                 .withCrn("crn")
                 .withId(1L)
                 .withLocation(location(region("region")))
                 .withPlatform("platform")
-                .withUserId("userId")
                 .withUserName("userName")
                 .withWorkspaceId(1L)
                 .build();

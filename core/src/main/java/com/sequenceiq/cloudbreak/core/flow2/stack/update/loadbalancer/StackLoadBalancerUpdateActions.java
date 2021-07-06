@@ -264,7 +264,6 @@ public class StackLoadBalancerUpdateActions {
                 .withPlatform(stack.getCloudPlatform())
                 .withVariant(stack.getPlatformVariant())
                 .withLocation(location)
-                .withUserId(stack.getCreator().getUserId())
                 .withUserName(stack.getCreator().getUserName())
                 .withAccountId(stack.getWorkspace().getId())
                 .build();

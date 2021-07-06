@@ -64,10 +64,8 @@ public abstract class AbstractStackStopAction<P extends Payload>
                 .withPlatform(stack.getCloudPlatform())
                 .withVariant(stack.getCloudPlatform())
                 .withLocation(location)
-                .withUserId(stack.getOwner())
                 .withUserName(stack.getOwner())
                 .withAccountId(stack.getAccountId())
-                .withAccountUUID(stack.getAccountId())
                 .build();
         Credential credential = credentialService.getCredentialByEnvCrn(stack.getEnvironmentCrn());
         CloudCredential cloudCredential = credentialConverter.convert(credential);

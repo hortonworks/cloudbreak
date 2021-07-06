@@ -14,6 +14,7 @@ import org.springframework.util.StringUtils;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.GcpInstanceTemplateV4Parameters;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKey;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -54,7 +55,7 @@ public class StackValidator {
 
     private void validateVariant(Stack source, ValidationResultBuilder validationBuilder) {
         String variant = source.getPlatformVariant();
-        boolean awsNativeEnabled = entitlementService.awsNativeEnabled(source.getCreator().getTenant().getName());
+        boolean awsNativeEnabled = entitlementService.awsNativeEnabled(Crn.safeFromString(source.getResourceCrn()).getAccountId());
         if (AWS_NATIVE_VARIANT.variant().value().equals(variant) && !awsNativeEnabled) {
             validationBuilder.error(String.format("%s entitlement was not granted to your tenant. "
                     + "Please get in contact with Cloudera support to request it.",

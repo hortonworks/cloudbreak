@@ -75,8 +75,6 @@ class AwsRdsLaunchServiceTest {
 
     private static final String AVAILABILITY_ZONE = "eu-central-1b";
 
-    private static final String USER_ID = UUID.randomUUID().toString();
-
     private static final String ACCOUNT_ID = UUID.randomUUID().toString();
 
     private static final String SUBNET_CIDR = "0.0.0.0/0";
@@ -157,7 +155,6 @@ class AwsRdsLaunchServiceTest {
                 .withPlatform(PLATFORM)
                 .withVariant(VARIANT)
                 .withLocation(Location.location(region, availabilityZone))
-                .withUserId(USER_ID)
                 .withAccountId(ACCOUNT_ID)
                 .build();
 

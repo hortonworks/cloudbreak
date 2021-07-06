@@ -106,7 +106,6 @@ class AwsDownscaleServiceTest {
                 .withPlatform("AWS")
                 .withVariant("AWS")
                 .withLocation(Location.location(Region.region("eu-west-1"), AvailabilityZone.availabilityZone("eu-west-1a")))
-                .withUserId("1")
                 .withAccountId("1")
                 .build();
         AuthenticatedContext authenticatedContext = new AuthenticatedContext(context, new CloudCredential());
@@ -158,7 +157,6 @@ class AwsDownscaleServiceTest {
                 .withPlatform("AWS")
                 .withVariant("AWS")
                 .withLocation(Location.location(Region.region("eu-west-1"), AvailabilityZone.availabilityZone("eu-west-1a")))
-                .withUserId("1")
                 .withAccountId("1")
                 .build();
         AuthenticatedContext authenticatedContext = new AuthenticatedContext(context, new CloudCredential());
@@ -210,7 +208,6 @@ class AwsDownscaleServiceTest {
                 .withPlatform("AWS")
                 .withVariant("AWS")
                 .withLocation(Location.location(Region.region("eu-west-1"), AvailabilityZone.availabilityZone("eu-west-1a")))
-                .withUserId("1")
                 .withAccountId("1")
                 .build();
         AuthenticatedContext authenticatedContext = new AuthenticatedContext(context, new CloudCredential());
@@ -260,7 +257,6 @@ class AwsDownscaleServiceTest {
                 .withPlatform("AWS")
                 .withVariant("AWS")
                 .withLocation(Location.location(Region.region("eu-west-1"), AvailabilityZone.availabilityZone("eu-west-1a")))
-                .withUserId("1")
                 .withAccountId("1")
                 .build();
         AuthenticatedContext authenticatedContext = new AuthenticatedContext(context, new CloudCredential());
@@ -316,7 +312,6 @@ class AwsDownscaleServiceTest {
                 .withPlatform("AWS")
                 .withVariant("AWS")
                 .withLocation(Location.location(Region.region("eu-west-1"), AvailabilityZone.availabilityZone("eu-west-1a")))
-                .withUserId("1")
                 .withAccountId("1")
                 .build();
         AuthenticatedContext authenticatedContext = new AuthenticatedContext(context, new CloudCredential());
@@ -413,7 +408,6 @@ class AwsDownscaleServiceTest {
                 .withPlatform("AWS")
                 .withVariant("AWS")
                 .withLocation(Location.location(Region.region("eu-west-1"), AvailabilityZone.availabilityZone("eu-west-1a")))
-                .withUserId("1")
                 .withAccountId("1")
                 .build();
         AuthenticatedContext authenticatedContext = new AuthenticatedContext(context, new CloudCredential());

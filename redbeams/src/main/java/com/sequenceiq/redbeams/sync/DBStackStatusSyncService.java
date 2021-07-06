@@ -111,10 +111,8 @@ public class DBStackStatusSyncService {
                     .withPlatform(dbStack.getCloudPlatform())
                     .withVariant(dbStack.getPlatformVariant())
                     .withLocation(location)
-                    .withUserId(dbStack.getOwnerCrn().getUserId())
                     .withUserName(dbStack.getUserName())
                     .withAccountId(accountId)
-                    .withAccountUUID(accountId)
                     .build();
             Credential credential = credentialService.getCredentialByEnvCrn(dbStack.getEnvironmentId());
             CloudCredential cloudCredential = credentialConverter.convert(credential);

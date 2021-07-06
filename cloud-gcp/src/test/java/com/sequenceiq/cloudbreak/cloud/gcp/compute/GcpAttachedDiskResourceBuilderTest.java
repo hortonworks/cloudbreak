@@ -70,8 +70,6 @@ import com.sequenceiq.common.api.type.ResourceType;
 @ExtendWith(MockitoExtension.class)
 public class GcpAttachedDiskResourceBuilderTest {
 
-    private static final String USER_ID = "horton@hortonworks.com";
-
     private static final Long WORKSPACE_ID = 1L;
 
     @InjectMocks
@@ -136,7 +134,6 @@ public class GcpAttachedDiskResourceBuilderTest {
                 .withName("testname")
                 .withCrn("crn")
                 .withPlatform("GCP")
-                .withUserId(USER_ID)
                 .withWorkspaceId(WORKSPACE_ID)
                 .build();
         CloudCredential cloudCredential = new CloudCredential(privateCrn, "credentialname");

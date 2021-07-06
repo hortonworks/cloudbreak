@@ -148,10 +148,8 @@ public class StackStopActions {
                     .withCrn(stack.getResourceCrn())
                     .withPlatform(stack.getCloudPlatform())
                     .withVariant(stack.getPlatformVariant())
-                    .withUserId(stack.getCreator().getUserId())
                     .withLocation(location)
                     .withWorkspaceId(stack.getWorkspace().getId())
-                    .withAccountUUID(stack.getTenant().getName())
                     .withAccountId(stack.getTenant().getId())
                     .build();
             CloudCredential cloudCredential = stackUtil.getCloudCredential(stack);

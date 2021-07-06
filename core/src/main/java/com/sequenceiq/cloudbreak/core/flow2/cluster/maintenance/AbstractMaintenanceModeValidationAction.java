@@ -64,9 +64,7 @@ abstract class AbstractMaintenanceModeValidationAction<P extends Payload> extend
                 .withPlatform(stack.cloudPlatform())
                 .withVariant(stack.getPlatformVariant())
                 .withLocation(location)
-                .withUserId(stack.getCreator().getUserId())
                 .withWorkspaceId(stack.getWorkspace().getId())
-                .withAccountUUID(stack.getTenant().getName())
                 .withAccountId(stack.getTenant().getId())
                 .build();
         CloudCredential cloudCredential = stackUtil.getCloudCredential(stack);

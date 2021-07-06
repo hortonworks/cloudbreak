@@ -172,7 +172,7 @@ public class RdsConfigServiceTest {
         when(workspaceService.retrieveForUser(any())).thenReturn(Collections.singleton(defaultWorkspace));
         when(rdsConfigRepository.save(any())).thenReturn(testRdsConfig);
 
-        RDSConfig rdsConfig = underTest.createIfNotExists(new User(), testRdsConfig, 1L);
+        RDSConfig rdsConfig = underTest.createIfNotExists(testRdsConfig, 1L);
 
         assertEquals(testRdsConfig, rdsConfig);
     }
@@ -181,7 +181,7 @@ public class RdsConfigServiceTest {
     public void testExistingRdsConfigCreation() {
         when(rdsConfigRepository.findByNameAndWorkspaceId(eq(TEST_RDS_CONFIG_NAME), eq(1L))).thenReturn(Optional.ofNullable(testRdsConfig));
 
-        RDSConfig rdsConfig = underTest.createIfNotExists(new User(), testRdsConfig, 1L);
+        RDSConfig rdsConfig = underTest.createIfNotExists(testRdsConfig, 1L);
 
         verify(workspaceService, never()).get(anyLong(), any(User.class));
         assertEquals(testRdsConfig, rdsConfig);

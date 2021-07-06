@@ -41,12 +41,12 @@ public class InteractiveCredentialCreationStatusHandler implements EventHandler<
     @Override
     public void accept(Event<InteractiveCredentialCreationStatus> interactiveCredentialCreationStatusEvent) {
         InteractiveCredentialCreationStatus interactiveCredentialCreationStatus = interactiveCredentialCreationStatusEvent.getData();
-        String userCrn = interactiveCredentialCreationStatus.getCloudContext().getUserId();
+        String userCrn = interactiveCredentialCreationStatus.getExtendedCloudCredential().getUserCrn();
         ThreadBasedUserCrnProvider.doAs(userCrn, () -> {
             String message = interactiveCredentialCreationStatus.getMessage();
             InteractiveCredentialNotification notification = new InteractiveCredentialNotification()
                     .withEventTimestamp(new Date().getTime())
-                    .withUserId(interactiveCredentialCreationStatus.getCloudContext().getUserId())
+                    .withUserId(interactiveCredentialCreationStatus.getExtendedCloudCredential().getUserCrn())
                     .withCloud(interactiveCredentialCreationStatus.getExtendedCloudCredential().getCloudPlatform())
                     .withEventMessage(message);
             ResourceEvent event;

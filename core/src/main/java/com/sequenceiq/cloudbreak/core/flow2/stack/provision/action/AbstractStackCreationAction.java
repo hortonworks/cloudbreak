@@ -58,11 +58,9 @@ public abstract class AbstractStackCreationAction<P extends Payload> extends Abs
                 .withCrn(stack.getResourceCrn())
                 .withPlatform(stack.getCloudPlatform())
                 .withVariant(stack.getPlatformVariant())
-                .withUserId(stack.getCreator().getUserId())
                 .withUserName(stack.getCreator().getUserName())
                 .withLocation(location)
                 .withWorkspaceId(stack.getWorkspace().getId())
-                .withAccountUUID(stack.getTenant().getName())
                 .withAccountId(stack.getTenant().getId())
                 .build();
         CloudCredential cloudCredential = stackUtil.getCloudCredential(stack);

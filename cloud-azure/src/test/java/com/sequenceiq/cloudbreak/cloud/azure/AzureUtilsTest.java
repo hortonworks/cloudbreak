@@ -56,8 +56,6 @@ import rx.schedulers.Schedulers;
 @ExtendWith(MockitoExtension.class)
 public class AzureUtilsTest {
 
-    private static final String USER_ID = "horton@hortonworks.com";
-
     private static final Long WORKSPACE_ID = 1L;
 
     private static final int MAX_RESOURCE_NAME_LENGTH = 50;
@@ -98,7 +96,6 @@ public class AzureUtilsTest {
                 .withName("thisisaverylongazureresourcenamewhichneedstobeshortened")
                 .withCrn("crn")
                 .withPlatform("dummy1")
-                .withUserId(USER_ID)
                 .withWorkspaceId(WORKSPACE_ID)
                 .build();
 

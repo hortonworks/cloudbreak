@@ -83,8 +83,6 @@ import freemarker.template.Configuration;
 @ExtendWith(MockitoExtension.class)
 public class CloudFormationTemplateBuilderTest {
 
-    private static final String USER_ID = "horton@hortonworks.com";
-
     private static final Long WORKSPACE_ID = 1L;
 
     private static final String CIDR = "10.0.0.0/16";
@@ -1574,7 +1572,6 @@ public class CloudFormationTemplateBuilderTest {
                 .withPlatform("platform")
                 .withVariant("variant")
                 .withLocation(location)
-                .withUserId(USER_ID)
                 .withWorkspaceId(WORKSPACE_ID)
                 .build();
         CloudCredential credential = new CloudCredential("crn", null);

@@ -127,7 +127,6 @@ public class AwsInstanceConnectorTest {
                 .withPlatform("AWS")
                 .withVariant("AWS")
                 .withLocation(Location.location(Region.region("region")))
-                .withUserId("user")
                 .withAccountId("account")
                 .build();
         CloudCredential credential = new CloudCredential("id", "alma",
