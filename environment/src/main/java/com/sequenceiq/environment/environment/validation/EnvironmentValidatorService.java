@@ -2,10 +2,12 @@ package com.sequenceiq.environment.environment.validation;
 
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
+import static com.sequenceiq.cloudbreak.util.SecurityGroupSeparator.getSecurityGroupIds;
 import static com.sequenceiq.common.model.CredentialType.ENVIRONMENT;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.apache.logging.log4j.util.Strings.isEmpty;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -211,7 +213,14 @@ public class EnvironmentValidatorService {
     }
 
     private Set<String> getSecurityGroupIdSet(EnvironmentEditDto editDto) {
-        return Set.of(editDto.getSecurityAccess().getSecurityGroupIdForKnox(), editDto.getSecurityAccess().getDefaultSecurityGroupId());
+        Set<String> groups = new HashSet<>();
+        groups.addAll(getGroups(editDto.getSecurityAccess().getSecurityGroupIdForKnox()));
+        groups.addAll(getGroups(editDto.getSecurityAccess().getDefaultSecurityGroupId()));
+        return groups;
+    }
+
+    private Set<String> getGroups(String securityGroupIds) {
+        return getSecurityGroupIds(securityGroupIds);
     }
 
     private boolean isAnySecurityGroupMissing(SecurityAccessDto securityAccessDto) {

@@ -1,11 +1,15 @@
 package com.sequenceiq.environment.environment.validation.securitygroup.gcp;
 
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
+import static com.sequenceiq.cloudbreak.util.SecurityGroupSeparator.getSecurityGroupIds;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
@@ -25,6 +29,8 @@ import com.sequenceiq.environment.platformresource.PlatformResourceRequest;
 
 @Component
 public class GcpEnvironmentSecurityGroupValidator implements EnvironmentSecurityGroupValidator {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(GcpEnvironmentSecurityGroupValidator.class);
 
     private PlatformParameterService platformParameterService;
 
@@ -50,7 +56,7 @@ public class GcpEnvironmentSecurityGroupValidator implements EnvironmentSecurity
         }
     }
 
-    private void validateSecurityGroup(EnvironmentDto environmentDto, ValidationResult.ValidationResultBuilder resultBuilder, String securityGroupId) {
+    private void validateSecurityGroup(EnvironmentDto environmentDto, ValidationResult.ValidationResultBuilder resultBuilder, String securityGroupIds) {
         Region region = environmentDto.getRegions().iterator().next();
         PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(
                 environmentDto.getAccountId(),
@@ -70,18 +76,28 @@ public class GcpEnvironmentSecurityGroupValidator implements EnvironmentSecurity
         CloudSecurityGroups securityGroups = platformParameterService.getSecurityGroups(request);
 
         boolean securityGroupFoundInRegion = false;
-        if (Objects.nonNull(securityGroups.getCloudSecurityGroupsResponses())
-                && Objects.nonNull(securityGroups.getCloudSecurityGroupsResponses().get(region.getName()))) {
-            for (CloudSecurityGroup cloudSecurityGroup : securityGroups.getCloudSecurityGroupsResponses().get(region.getName())) {
-                String groupId = cloudSecurityGroup.getGroupId();
-                if (groupId.equalsIgnoreCase(securityGroupId)) {
-                    securityGroupFoundInRegion = true;
+        Map<String, Set<CloudSecurityGroup>> cloudSecurityGroupsResponses = securityGroups.getCloudSecurityGroupsResponses();
+        if (Objects.nonNull(cloudSecurityGroupsResponses)) {
+            Set<CloudSecurityGroup> cloudSecurityGroups = cloudSecurityGroupsResponses.get(region.getName());
+            for (String securityGroupId : getSecurityGroupIds(securityGroupIds)) {
+                securityGroupFoundInRegion = false;
+                if (Objects.nonNull(cloudSecurityGroups)) {
+                    for (CloudSecurityGroup cloudSecurityGroup : cloudSecurityGroups) {
+                        String groupId = cloudSecurityGroup.getGroupId();
+                        if (!Strings.isNullOrEmpty(groupId) && groupId.equalsIgnoreCase(securityGroupId)) {
+                            securityGroupFoundInRegion = true;
+                            break;
+                        }
+                    }
+                }
+                if (!securityGroupFoundInRegion) {
                     break;
                 }
             }
         }
         if (!securityGroupFoundInRegion) {
-            resultBuilder.error(securityGroupNotInTheSameRegion(securityGroupId, region.getName()));
+            LOGGER.info("The security groups {} are not presented in the region {}", securityGroupIds, region.getName());
+            resultBuilder.error(securityGroupNotInTheSameRegion(securityGroupIds, region.getName()));
         }
     }
 

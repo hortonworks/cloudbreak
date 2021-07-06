@@ -116,10 +116,10 @@ public class Environment implements AuthResource, AccountAwareResource {
 
     private Long created;
 
-    @Column(name = "securitygroup_id_knox")
+    @Column(length = 4000, name = "securitygroup_id_knox")
     private String securityGroupIdForKnox;
 
-    @Column(name = "securitygroup_id_default")
+    @Column(length = 4000, name = "securitygroup_id_default")
     private String defaultSecurityGroupId;
 
     private String cidr;

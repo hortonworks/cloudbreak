@@ -2,6 +2,7 @@ package com.sequenceiq.environment.environment.flow.creation.handler.freeipa;
 
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 import static com.sequenceiq.cloudbreak.polling.PollingResult.SUCCESS;
+import static com.sequenceiq.cloudbreak.util.SecurityGroupSeparator.getSecurityGroupIds;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.CREATE_FREEIPA_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.FINISH_ENV_CREATION_EVENT;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.CREATE_IN_PROGRESS;
@@ -292,7 +293,7 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
             }
             securityGroupRequest.setSecurityGroupIds(new HashSet<>());
         } else if (!Strings.isNullOrEmpty(securityAccess.getDefaultSecurityGroupId())) {
-            securityGroupRequest.setSecurityGroupIds(Set.of(securityAccess.getDefaultSecurityGroupId()));
+            securityGroupRequest.setSecurityGroupIds(getSecurityGroupIds(securityAccess.getDefaultSecurityGroupId()));
             securityGroupRequest.setSecurityRules(new ArrayList<>());
         } else {
             securityGroupRequest.setSecurityRules(new ArrayList<>());
