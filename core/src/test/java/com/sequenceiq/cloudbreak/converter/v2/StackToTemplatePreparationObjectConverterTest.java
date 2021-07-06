@@ -287,7 +287,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(stackInputs.get(StackInputs.class)).thenReturn(null);
         when(stackMock.getEnvironmentCrn()).thenReturn(TestConstants.CRN);
         when(stackMock.getCluster()).thenReturn(sourceCluster);
-        when(stackMock.getResourceCrn()).thenReturn("crn");
+        when(stackMock.getResourceCrn()).thenReturn("crn:cdp:datahub:us-west-1:account:cluster:cluster");
         when(accountTagClientService.list()).thenReturn(new HashMap<>());
         when(entitlementService.internalTenant(anyString())).thenReturn(true);
         when(loadBalancerConfigService.getLoadBalancerUserFacingFQDN(anyLong())).thenReturn(null);

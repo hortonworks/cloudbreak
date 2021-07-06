@@ -32,8 +32,7 @@ public class ClouderaManagerDatabusService {
      * @return credential
      */
     AltusCredential createMachineUserAndGenerateKeys(Stack stack) {
-        String userCrn = stack.getCreator().getUserCrn();
-        String machineUserName = getWAMachineUserName(userCrn, stack);
+        String machineUserName = getWAMachineUserName(stack);
         return ThreadBasedUserCrnProvider.doAsInternalActor(
                 () -> altusIAMService.generateMachineUserWithAccessKeyForLegacyCm(
                         machineUserName,
@@ -47,8 +46,7 @@ public class ClouderaManagerDatabusService {
      */
     void cleanUpMachineUser(Stack stack) {
         try {
-            String userCrn = stack.getCreator().getUserCrn();
-            String machineUserName = getWAMachineUserName(userCrn, stack);
+            String machineUserName = getWAMachineUserName(stack);
             ThreadBasedUserCrnProvider.doAsInternalActor(
                     () ->  altusIAMService.clearLegacyMachineUser(
                             machineUserName,
@@ -75,12 +73,12 @@ public class ClouderaManagerDatabusService {
         return new String(privateKey).trim().replace("\n", "\\n");
     }
 
-    private String getWAMachineUserName(String userCrn, Stack stack) {
+    private String getWAMachineUserName(Stack stack) {
         String machineUserSuffix = null;
         if (StringUtils.isNotEmpty(stack.getResourceCrn())) {
             machineUserSuffix = Crn.fromString(stack.getResourceCrn()).getResource();
         } else {
-            machineUserSuffix = String.format("%s-%s", Crn.fromString(userCrn).getAccountId(), stack.getCluster().getId());
+            machineUserSuffix = String.format("%s-%s", Crn.fromString(stack.getResourceCrn()).getAccountId(), stack.getCluster().getId());
         }
         return String.format(DATABUS_CRN_PATTERN, machineUserSuffix);
     }

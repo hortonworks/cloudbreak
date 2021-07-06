@@ -165,22 +165,22 @@ public class ClouderaManagerSetupServiceTest {
 
     @Test
     public void testValidateLicenceWhenEverythingWorkAsExpectedShouldNotThrowException() {
-        doNothing().when(clouderaManagerLicenseService).validateClouderaManagerLicense(any(User.class));
+        doNothing().when(clouderaManagerLicenseService).validateClouderaManagerLicense(any());
 
         underTest.validateLicence();
 
-        verify(clouderaManagerLicenseService, times(1)).validateClouderaManagerLicense(any(User.class));
+        verify(clouderaManagerLicenseService, times(1)).validateClouderaManagerLicense(any());
     }
 
     @Test
     public void testValidateLicenceWhenItThrowExceptionShouldMapToClouderaManagerOperationFailedException() {
-        doThrow(new RuntimeException()).when(clouderaManagerLicenseService).validateClouderaManagerLicense(any(User.class));
+        doThrow(new RuntimeException()).when(clouderaManagerLicenseService).validateClouderaManagerLicense(any());
 
         ClouderaManagerOperationFailedException actual =
                 assertThrows(ClouderaManagerOperationFailedException.class, () -> underTest.validateLicence());
 
         assertEquals(ClouderaManagerOperationFailedException.class, actual.getClass());
-        verify(clouderaManagerLicenseService, times(1)).validateClouderaManagerLicense(any(User.class));
+        verify(clouderaManagerLicenseService, times(1)).validateClouderaManagerLicense(any());
     }
 
     @Test
@@ -892,6 +892,7 @@ public class ClouderaManagerSetupServiceTest {
         stack.setGatewayPort(1);
         stack.setCluster(testCluster());
         stack.setType(StackType.DATALAKE);
+        stack.setResourceCrn("crn:cdp:datahub:us-west-1:accountId:cluster:name");
         return stack;
     }
 }

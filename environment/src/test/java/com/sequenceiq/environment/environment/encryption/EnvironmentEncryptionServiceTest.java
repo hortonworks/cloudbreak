@@ -292,7 +292,6 @@ class EnvironmentEncryptionServiceTest {
         Region region = location.getRegion();
         assertThat(region).isNotNull();
         assertThat(region.getRegionName()).isEqualTo(REGION);
-        assertThat(cloudContext.getUserId()).isEqualTo(USER_NAME);
         assertThat(cloudContext.getUserName()).isEqualTo(USER_NAME);
         assertThat(cloudContext.getAccountId()).isEqualTo(ACCOUNT_ID);
     }

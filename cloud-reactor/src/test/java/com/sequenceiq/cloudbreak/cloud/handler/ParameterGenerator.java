@@ -49,8 +49,6 @@ import com.sequenceiq.common.api.type.ResourceType;
 @Component
 public class ParameterGenerator {
 
-    private static final String USER_ID = "horton@hortonworks.com";
-
     private static final Long WORKSPACE_ID = 1L;
 
     private static final long STACK_ID = 5L;
@@ -65,7 +63,6 @@ public class ParameterGenerator {
                 .withPlatform("TESTCONNECTOR")
                 .withVariant("TESTVARIANT")
                 .withCrn("testCrn")
-                .withUserId(USER_ID)
                 .build();
     }
 

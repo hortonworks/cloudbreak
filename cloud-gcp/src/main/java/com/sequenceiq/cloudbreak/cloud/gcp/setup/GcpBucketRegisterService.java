@@ -39,7 +39,7 @@ public class GcpBucketRegisterService {
         CloudCredential credential = authenticatedContext.getCloudCredential();
         String projectId = gcpStackUtil.getProjectId(credential);
         CloudContext cloudContext = authenticatedContext.getCloudContext();
-        String accountId = authenticatedContext.getCloudContext().getAccountUUID();
+        String accountId = authenticatedContext.getCloudContext().getAccountId();
         Storage storage = gcpStorageFactory.buildStorage(credential, cloudContext.getName());
         Bucket bucket = new Bucket();
         String bucketName = gcpLabelUtil.transformLabelKeyOrValue(String.format("%s-%s", accountId, projectId));

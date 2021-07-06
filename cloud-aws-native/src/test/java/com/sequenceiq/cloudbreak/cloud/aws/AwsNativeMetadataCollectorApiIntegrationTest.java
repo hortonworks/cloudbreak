@@ -106,7 +106,6 @@ class AwsNativeMetadataCollectorApiIntegrationTest {
                 .withPlatform("AWS")
                 .withVariant("AWS")
                 .withLocation(Location.location(Region.region("eu-central-1")))
-                .withUserId("user")
                 .withAccountId("account")
                 .build();
         Map<String, Object> credentialParams = Map.of("aws",

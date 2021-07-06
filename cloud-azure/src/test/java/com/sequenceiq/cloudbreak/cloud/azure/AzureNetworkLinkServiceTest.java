@@ -70,7 +70,6 @@ public class AzureNetworkLinkServiceTest {
                 .withId(STACK_ID)
                 .withCrn("")
                 .withPlatform("")
-                .withUserId("")
                 .build();
         CloudCredential cloudCredential = new CloudCredential(STACK_ID.toString(), "");
         ac = new AuthenticatedContext(cloudContext, cloudCredential);

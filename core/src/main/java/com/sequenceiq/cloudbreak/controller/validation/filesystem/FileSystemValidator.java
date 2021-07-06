@@ -40,14 +40,13 @@ public class FileSystemValidator {
     private CloudStorageConverter cloudStorageConverter;
 
     public void validate(String platform, CloudCredential cloudCredential, CloudStorageBase cloudStorageRequest,
-            String userId, Long workspaceId) {
+            Long workspaceId) {
         if (cloudStorageRequest == null) {
             return;
         }
         LOGGER.info("Sending fileSystemRequest to {} to validate the file system", platform);
         CloudContext cloudContext = CloudContext.Builder.builder()
                 .withPlatform(platform)
-                .withUserId(userId)
                 .withWorkspaceId(workspaceId)
                 .build();
         SpiFileSystem spiFileSystem = cloudStorageConverter.requestToSpiFileSystem(cloudStorageRequest);
@@ -68,14 +67,13 @@ public class FileSystemValidator {
 
     @Measure(FileSystemValidator.class)
     public void validateFileSystem(String platform, CloudCredential cloudCredential, FileSystemValidationV4Request fileSystemValidationV4Request,
-            String userId, Long workspaceId) {
+            Long workspaceId) {
         if (fileSystemValidationV4Request == null) {
             return;
         }
         LOGGER.info("Sending fileSystemRequest to {} to validate the file system", platform);
         CloudContext cloudContext = CloudContext.Builder.builder()
                 .withPlatform(platform)
-                .withUserId(userId)
                 .withWorkspaceId(workspaceId)
                 .build();
         SpiFileSystem spiFileSystem = converterUtil.convert(fileSystemValidationV4Request, SpiFileSystem.class);

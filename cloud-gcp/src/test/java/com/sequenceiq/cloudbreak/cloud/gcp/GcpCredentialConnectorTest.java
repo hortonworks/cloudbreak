@@ -45,8 +45,6 @@ import com.sequenceiq.common.model.CredentialType;
 @ExtendWith(MockitoExtension.class)
 public class GcpCredentialConnectorTest {
 
-    private static final String USER_ID = "horton@hortonworks.com";
-
     private static final Long WORKSPACE_ID = 1L;
 
     private static final Map<String, Object> CREDENTIAL_PARAMETERS = new HashMap<>();
@@ -251,7 +249,6 @@ public class GcpCredentialConnectorTest {
                 .withName("name")
                 .withCrn("crn")
                 .withPlatform("platform")
-                .withUserId(USER_ID)
                 .withWorkspaceId(WORKSPACE_ID)
                 .build();
     }

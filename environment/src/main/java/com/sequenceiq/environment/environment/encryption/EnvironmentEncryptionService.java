@@ -113,7 +113,6 @@ public class EnvironmentEncryptionService {
                 .withPlatform(environment.getCloudPlatform())
                 .withVariant(environment.getCloudPlatform())
                 .withLocation(location(region(environment.getLocation().getName())))
-                .withUserId(environment.getCreator())
                 .withUserName(environment.getCreator())
                 .withAccountId(environment.getAccountId())
                 .build();

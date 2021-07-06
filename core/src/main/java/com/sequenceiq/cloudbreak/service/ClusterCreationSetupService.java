@@ -94,7 +94,7 @@ public class ClusterCreationSetupService {
             credential = stackUtil.getCloudCredential(stack);
         }
         fileSystemValidator.validate(stack.cloudPlatform(), credential, request.getCloudStorage(),
-                stack.getCreator().getUserId(), stack.getWorkspace().getId());
+                stack.getWorkspace().getId());
         rdsConfigValidator.validateRdsConfigs(request, user, workspace);
         ValidationResult.ValidationResultBuilder resultBuilder = ValidationResult.builder();
 
@@ -121,7 +121,7 @@ public class ClusterCreationSetupService {
 
         if (request.getCloudStorage() != null) {
             FileSystem fileSystem = cloudStorageConverter.requestToFileSystem(request.getCloudStorage());
-            measure(() -> fileSystemConfigService.createWithMdcContextRestore(fileSystem, stack.getWorkspace(), stack.getCreator()),
+            measure(() -> fileSystemConfigService.createWithMdcContextRestore(fileSystem, stack.getWorkspace(), user),
                     LOGGER, "File system saving took {} ms for stack {}", stackName);
         }
 

@@ -40,25 +40,7 @@ import com.sequenceiq.cloudbreak.workspace.model.User;
 @RunWith(MockitoJUnitRunner.class)
 public class StackValidatorTest extends StackRequestValidatorTestBase {
 
-    private static final Long WORKSPACE_ID = 1L;
-
-    private static final String TEST_HIVE_RDS_NAME = "hive-rds";
-
-    private static final String TEST_RANGER_RDS_NAME = "ranger-rds";
-
-    private static final String TEST_LDAP_NAME = "ldap";
-
     private static final String TEST_BP_NAME = "testBpName";
-
-    private static final String CREDENTIAL_NAME = "someCred";
-
-    private static final String ENVIRONMENT_NAME = "someEnvironment";
-
-    private static final String RDS_ERROR_MESSAGE_FORMAT = "For a Datalake cluster (since you have selected a datalake ready blueprint) "
-            + "you should provide at least one %s rds/database configuration to the Cluster request";
-
-    private static final String LACK_OF_LDAP_MESSAGE = "For a Datalake cluster (since you have selected a datalake ready blueprint) you should provide"
-            + " an LDAP configuration or its name/id to the Cluster request";
 
     @Spy
     private final InstanceTemplateValidator templateValidator = new InstanceTemplateValidator();
@@ -207,6 +189,7 @@ public class StackValidatorTest extends StackRequestValidatorTestBase {
         stackRequest.setInstanceGroups(instanceGroupRequests);
         stackRequest.setEnvironmentCrn("envCrn");
         stackRequest.setRegion("region");
+        stackRequest.setResourceCrn("crn:cdp:datahub:us-west-1:account:cluster:cluster");
         return stackRequest;
     }
 

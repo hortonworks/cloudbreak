@@ -140,8 +140,8 @@ public class TelemetryDecorator {
                 ? FluentClusterType.DATALAKE.value() : FluentClusterType.DATAHUB.value();
         String serviceType = StackType.WORKLOAD.equals(stack.getType()) ? FluentClusterType.DATAHUB.value() : "";
 
-        Crn userCrn = Crn.fromString(stack.getCreator().getUserCrn());
-        boolean useDbusCnameEndpoint = entitlementService.useDataBusCNameEndpointEnabled(userCrn.getAccountId());
+        String accountId = Crn.safeFromString(stack.getResourceCrn()).getAccountId();
+        boolean useDbusCnameEndpoint = entitlementService.useDataBusCNameEndpointEnabled(accountId);
         String databusEndpoint = dataBusEndpointProvider.getDataBusEndpoint(telemetry.getDatabusEndpoint(), useDbusCnameEndpoint);
 
         DatabusConfigView databusConfigView = databusConfigService.createDatabusConfigs(
@@ -251,8 +251,8 @@ public class TelemetryDecorator {
         if (StringUtils.isNotBlank(stack.getCluster().getCdpNodeStatusMonitorPassword())) {
             passwordInput = stack.getCluster().getCdpNodeStatusMonitorPassword().toCharArray();
         }
-        Crn userCrn = Crn.fromString(stack.getCreator().getUserCrn());
-        boolean saltPingEnabled = entitlementService.nodestatusSaltPingEnabled(userCrn.getAccountId());
+        String accountId = Crn.safeFromString(stack.getResourceCrn()).getAccountId();
+        boolean saltPingEnabled = entitlementService.nodestatusSaltPingEnabled(accountId);
         NodeStatusConfigView nodeStatusConfigView = nodeStatusConfigService
                 .createNodeStatusConfig(stack.getCluster().getCdpNodeStatusMonitorUser(), passwordInput, saltPingEnabled);
         Map<String, Object> nodeStatusConfig = nodeStatusConfigView.toMap();

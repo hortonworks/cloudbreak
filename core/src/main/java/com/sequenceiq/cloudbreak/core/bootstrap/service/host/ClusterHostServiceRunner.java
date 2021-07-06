@@ -79,6 +79,7 @@ import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
+import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorCancelledException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
@@ -515,8 +516,8 @@ public class ClusterHostServiceRunner {
     }
 
     public Optional<String> decoratePillarWithClouderaManagerLicense(Long stackId, Map<String, SaltPillarProperties> servicePillar) {
-        String userCrn = stackService.get(stackId).getCreator().getUserCrn();
-        Account account = umsClient.getAccountDetails(Crn.safeFromString(userCrn).getAccountId(), Optional.empty());
+        String accountId = Crn.safeFromString(stackService.get(stackId).getResourceCrn()).getAccountId();
+        Account account = umsClient.getAccountDetails(accountId, MDCUtils.getRequestId());
         Optional<String> licenseOpt = Optional.ofNullable(account.getClouderaManagerLicenseKey());
         if (licenseOpt.isPresent() && isNotEmpty(licenseOpt.get())) {
             String license = licenseOpt.get();

@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageComp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -138,6 +139,7 @@ public class ClusterUpgradeAvailabilityService {
     }
 
     private UpgradeV4Response checkForUpgrades(Stack stack, boolean lockComponents, InternalUpgradeSettings internalUpgradeSettings) {
+        String accountId = Crn.safeFromString(stack.getResourceCrn()).getAccountId();
         UpgradeV4Response upgradeOptions = new UpgradeV4Response();
         try {
             LOGGER.info(String.format("Retrieving images for upgrading stack %s", stack.getName()));
@@ -148,13 +150,13 @@ public class ClusterUpgradeAvailabilityService {
                 image = imageCatalogService.getImage(currentImage.getImageCatalogUrl(), currentImage.getImageCatalogName(), currentImage.getImageId())
                         .getImage();
                 ImageFilterParams imageFilterParams = imageFilterParamsFactory.create(image, lockComponents, stack, internalUpgradeSettings);
-                imageFilterResult = filterImages(stack.getCreator().getTenant().getName(), stack.getWorkspace().getId(), currentImage.getImageCatalogName(),
+                imageFilterResult = filterImages(accountId, stack.getWorkspace().getId(), currentImage.getImageCatalogName(),
                         stack.cloudPlatform(), imageFilterParams);
             } else {
                 CloudbreakImageCatalogV3 imageCatalog = getImagesFromCatalog(stack.getWorkspace(), currentImage);
                 image = getCurrentImageFromCatalog(currentImage.getImageId(), imageCatalog);
                 ImageFilterParams imageFilterParams = imageFilterParamsFactory.create(image, lockComponents, stack, internalUpgradeSettings);
-                imageFilterResult = filterImages(stack.getCreator().getTenant().getName(), imageCatalog, stack.cloudPlatform(), imageFilterParams);
+                imageFilterResult = filterImages(accountId, imageCatalog, stack.cloudPlatform(), imageFilterParams);
             }
             LOGGER.info(String.format("%d possible image found for stack upgrade.", imageFilterResult.getAvailableImages().getCdhImages().size()));
             upgradeOptions = createResponse(image, imageFilterResult, stack.getCloudPlatform(), stack.getRegion(), currentImage.getImageCatalogName());

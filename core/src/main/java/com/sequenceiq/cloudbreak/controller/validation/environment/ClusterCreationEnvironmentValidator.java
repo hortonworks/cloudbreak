@@ -34,7 +34,6 @@ import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.type.KerberosType;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
-import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 
@@ -61,7 +60,7 @@ public class ClusterCreationEnvironmentValidator {
     @Inject
     private SdxClientService sdxClientService;
 
-    public void validate(Stack stack, DetailedEnvironmentResponse environment, User user, boolean distroxRequest,
+    public void validate(Stack stack, DetailedEnvironmentResponse environment, boolean distroxRequest,
         ValidationResult.ValidationResultBuilder validationBuilder) {
         String regionName = cloudPlatformConnectors.getDefault(platform(stack.cloudPlatform()))
                 .displayNameToRegion(stack.getRegion());
@@ -77,7 +76,7 @@ public class ClusterCreationEnvironmentValidator {
                         environment.getName(), environment.getRegions().getNames().stream().sorted().collect(Collectors.joining(","))));
             }
         }
-        validateDatalakeConfig(stack, validationBuilder, user, distroxRequest);
+        validateDatalakeConfig(stack, validationBuilder, distroxRequest);
     }
 
     public void validateRdsConfigNames(Set<String> rdsConfigNames, ValidationResultBuilder resultBuilder, Long workspaceId) {
@@ -133,7 +132,7 @@ public class ClusterCreationEnvironmentValidator {
                 .orElse(Boolean.FALSE);
     }
 
-    private void validateDatalakeConfig(Stack stack, ValidationResultBuilder resultBuilder, User user, boolean distroxRequest) {
+    private void validateDatalakeConfig(Stack stack, ValidationResultBuilder resultBuilder, boolean distroxRequest) {
         if (CloudPlatform.MOCK.name().equalsIgnoreCase(stack.cloudPlatform())) {
             LOGGER.info("No Data Lake validation for MOCK provider");
         } else if (validateDatalakeAvailability && distroxRequest) {

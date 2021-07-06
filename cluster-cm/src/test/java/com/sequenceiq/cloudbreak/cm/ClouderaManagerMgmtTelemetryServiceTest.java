@@ -77,6 +77,7 @@ public class ClouderaManagerMgmtTelemetryServiceTest {
         User user = new User();
         user.setUserCrn("crn:cdp:iam:us-west-1:accountId:user:name");
         stack.setCreator(user);
+        stack.setResourceCrn("crn:cdp:datahub:us-west-1:accountId:cluster:name");
         WorkloadAnalytics wa = new WorkloadAnalytics();
         Telemetry telemetry = new Telemetry();
         telemetry.setWorkloadAnalytics(wa);
