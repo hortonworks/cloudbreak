@@ -22,6 +22,8 @@ public class ExperimentalFeatures implements Serializable {
     @Convert(converter = TunnelConverter.class)
     private Tunnel tunnel;
 
+    private boolean overrideTunnel;
+
     @Convert(converter = IdBrokerMappingSourceConverter.class)
     @Column(name = "idbroker_mapping_source")
     private IdBrokerMappingSource idBrokerMappingSource;
@@ -53,6 +55,14 @@ public class ExperimentalFeatures implements Serializable {
         this.cloudStorageValidation = cloudStorageValidation;
     }
 
+    public boolean isOverrideTunnel() {
+        return overrideTunnel;
+    }
+
+    public void setOverrideTunnel(boolean overrideTunnel) {
+        this.overrideTunnel = overrideTunnel;
+    }
+
     @JsonIgnore
     public boolean isEmpty() {
         return tunnel == null && idBrokerMappingSource == null && cloudStorageValidation == null;
@@ -66,6 +76,8 @@ public class ExperimentalFeatures implements Serializable {
 
         private Tunnel tunnel;
 
+        private boolean overrideTunnel;
+
         private IdBrokerMappingSource idBrokerMappingSource;
 
         private CloudStorageValidation cloudStorageValidation;
@@ -75,6 +87,15 @@ public class ExperimentalFeatures implements Serializable {
 
         public Builder withTunnel(Tunnel tunnel) {
             this.tunnel = tunnel;
+            return this;
+        }
+
+        public Builder withOverrideTunnel(Boolean overrideTunnel) {
+            if (overrideTunnel == null || !overrideTunnel) {
+                this.overrideTunnel = false;
+            } else {
+                this.overrideTunnel = true;
+            }
             return this;
         }
 
@@ -93,7 +114,10 @@ public class ExperimentalFeatures implements Serializable {
             experimentalFeatures.setTunnel(tunnel);
             experimentalFeatures.setIdBrokerMappingSource(idBrokerMappingSource);
             experimentalFeatures.setCloudStorageValidation(cloudStorageValidation);
+            experimentalFeatures.setOverrideTunnel(overrideTunnel);
             return experimentalFeatures;
         }
+
     }
+
 }

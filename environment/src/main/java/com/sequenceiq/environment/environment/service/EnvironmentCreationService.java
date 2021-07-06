@@ -142,16 +142,18 @@ public class EnvironmentCreationService {
     private void initializeEnvironmentTunnel(Environment environment) {
         Tunnel tunnel = environment.getExperimentalFeaturesJson().getTunnel();
         boolean ccmV2Enabled = entitlementService.ccmV2Enabled(environment.getAccountId());
-        if ((Tunnel.CCMV2 == tunnel || Tunnel.CCMV2_JUMPGATE == tunnel) && !ccmV2Enabled) {
-            throw new BadRequestException("CCMV2 not enabled for account.");
-        } else if ((Tunnel.CCM == tunnel || Tunnel.CCMV2 == tunnel) && ccmV2Enabled) {
-            ExperimentalFeatures experimentalFeaturesJson = environment.getExperimentalFeaturesJson();
-            experimentalFeaturesJson.setTunnel(Tunnel.CCMV2_JUMPGATE);
-            environment.setExperimentalFeaturesJson(experimentalFeaturesJson);
-            LOGGER.info("Environment is initialized with CCMV2_JUMPGATE tunnel.");
-        } else {
-            LOGGER.info("Environment is initialized with [{}] tunnel.", tunnel);
+        boolean overrideTunnel = environment.getExperimentalFeaturesJson().isOverrideTunnel();
+        if (!overrideTunnel) {
+            if ((Tunnel.CCMV2 == tunnel || Tunnel.CCMV2_JUMPGATE == tunnel) && !ccmV2Enabled) {
+                throw new BadRequestException("CCMV2 not enabled for account.");
+            } else if ((Tunnel.CCM == tunnel || Tunnel.CCMV2 == tunnel) && ccmV2Enabled) {
+                ExperimentalFeatures experimentalFeaturesJson = environment.getExperimentalFeaturesJson();
+                experimentalFeaturesJson.setTunnel(Tunnel.CCMV2_JUMPGATE);
+                environment.setExperimentalFeaturesJson(experimentalFeaturesJson);
+                LOGGER.info("Environment is initialized with CCMV2_JUMPGATE tunnel.");
+            }
         }
+        LOGGER.info("Environment is initialized with [{}] tunnel.", tunnel);
     }
 
     private void createAndSetParameters(Environment environment, ParametersDto parameters) {
