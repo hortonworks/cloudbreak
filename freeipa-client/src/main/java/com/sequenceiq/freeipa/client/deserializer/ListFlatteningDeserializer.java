@@ -22,6 +22,7 @@ public class ListFlatteningDeserializer<T> extends JsonDeserializer<T> implement
         JsonNode node = oc.readTree(p);
 
         ObjectMapper mapper = (ObjectMapper) p.getCodec();
+        mapper.addHandler(new BooleanDeserializationProblemHandler());
 
         if (node.iterator().hasNext()) {
             JsonNode actual = node;
