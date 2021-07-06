@@ -96,14 +96,36 @@ public class AwsEnvironmentSecurityGroupValidatorTest {
     }
 
     @Test
+    public void testValidationWhenGroupsWhenGroupHasMoreGroupIdInTheSameVpcReturnIsValid() {
+        Region region = getRegion();
+        String sec1 = "sec-1,sec-2";
+        String sec2 = "sec-2,sec-1";
+        String requestVpcId = "vpc-124";
+        when(platformParameterService.getSecurityGroups(any(PlatformResourceRequest.class)))
+                .thenReturn(cloudSecurityGroups(region.getName(), requestVpcId, "sec-1", "sec-2"));
+        EnvironmentDto environmentDto = EnvironmentDto.builder()
+                .withRegions(Set.of(region))
+                .withSecurityAccess(getSecurityAccessDto(sec1, sec2))
+                .withNetwork(getNetworkDto(requestVpcId))
+                .withCredential(getCredential())
+                .build();
+        EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
+        ValidationResultBuilder builder = ValidationResult.builder();
+
+        underTest.validate(environmentValidationDto, builder);
+
+        requestIsValid(builder);
+    }
+
+    @Test
     public void testValidationWhenGroupsInDifferentVpcReturnInValid() {
         Region region = getRegion();
-        String sec1 = "sec-1";
+        String sec1 = "sec-1,sec-2";
         String sec2 = "sec-2";
         String vpcId = "vpc-123";
         String requestVpcId = "vpc-124";
         when(platformParameterService.getSecurityGroups(any(PlatformResourceRequest.class)))
-                .thenReturn(cloudSecurityGroups(region.getName(), vpcId, sec1, sec2));
+                .thenReturn(cloudSecurityGroups(region.getName(), vpcId, "sec-1", "sec-2"));
         EnvironmentDto environmentDto = EnvironmentDto.builder()
                 .withRegions(Set.of(region))
                 .withSecurityAccess(getSecurityAccessDto(sec1, sec2))

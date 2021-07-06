@@ -1,5 +1,6 @@
 package com.sequenceiq.redbeams.converter.stack;
 
+import static com.sequenceiq.cloudbreak.util.SecurityGroupSeparator.getSecurityGroupIds;
 import static com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request.RDS_NAME_MAX_LENGTH;
 
 import java.time.Instant;
@@ -443,7 +444,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
         if (source != null) {
             securityGroup.setSecurityGroupIds(source.getSecurityGroupIds());
         } else if (securityAccessResponse.getDefaultSecurityGroupId() != null) {
-            securityGroup.setSecurityGroupIds(Set.of(securityAccessResponse.getDefaultSecurityGroupId()));
+            securityGroup.setSecurityGroupIds(getSecurityGroupIds(securityAccessResponse.getDefaultSecurityGroupId()));
         }
 
         return securityGroup;
