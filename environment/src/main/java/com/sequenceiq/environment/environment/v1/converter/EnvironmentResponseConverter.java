@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.environment.v1.converter;
 
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
+import static com.sequenceiq.cloudbreak.util.SecurityGroupSeparator.getSecurityGroupIds;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -164,7 +165,9 @@ public class EnvironmentResponseConverter {
         return SecurityAccessResponse.builder()
                 .withCidr(securityAccess.getCidr())
                 .withSecurityGroupIdForKnox(securityAccess.getSecurityGroupIdForKnox())
+                .withSecurityGroupIdsForKnox(getSecurityGroupIds(securityAccess.getSecurityGroupIdForKnox()))
                 .withDefaultSecurityGroupId(securityAccess.getDefaultSecurityGroupId())
+                .withDefaultSecurityGroupIds(getSecurityGroupIds(securityAccess.getDefaultSecurityGroupId()))
                 .build();
     }
 

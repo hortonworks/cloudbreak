@@ -1,9 +1,10 @@
 package com.sequenceiq.datalake.service.sdx;
 
+import static com.sequenceiq.cloudbreak.util.SecurityGroupSeparator.getSecurityGroupIds;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -33,7 +34,7 @@ public class SecurityAccessManifester {
                     }
                     if (!internalApiCallCalculator.isInternalApiCall(securityGroup)) {
                         if (!Strings.isNullOrEmpty(securityGroupId)) {
-                            securityGroup.setSecurityGroupIds(Set.of(securityGroupId));
+                            securityGroup.setSecurityGroupIds(getSecurityGroupIds(securityGroupId));
                             securityGroup.setSecurityRules(new ArrayList<>());
                         } else if (!Strings.isNullOrEmpty(cidrs)) {
                             List<SecurityRuleV4Request> generatedSecurityRules = new ArrayList<>();

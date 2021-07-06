@@ -1,6 +1,9 @@
 package com.sequenceiq.environment.environment.validation.securitygroup.aws;
 
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
+import static com.sequenceiq.cloudbreak.util.SecurityGroupSeparator.getSecurityGroupIds;
+
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,8 +18,8 @@ import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentValidationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
-import com.sequenceiq.environment.network.dao.domain.RegistrationType;
 import com.sequenceiq.environment.environment.validation.securitygroup.EnvironmentSecurityGroupValidator;
+import com.sequenceiq.environment.network.dao.domain.RegistrationType;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.platformresource.PlatformParameterService;
 import com.sequenceiq.environment.platformresource.PlatformResourceRequest;
@@ -63,7 +66,7 @@ public class AwsEnvironmentSecurityGroupValidator implements EnvironmentSecurity
         }
     }
 
-    private void checkSecurityGroupVpc(EnvironmentDto environmentDto, ValidationResult.ValidationResultBuilder resultBuilder, String securityGroupId) {
+    private void checkSecurityGroupVpc(EnvironmentDto environmentDto, ValidationResult.ValidationResultBuilder resultBuilder, String securityGroupIds) {
         Region region = environmentDto.getRegions().iterator().next();
         PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(
                 environmentDto.getAccountId(),
@@ -76,19 +79,27 @@ public class AwsEnvironmentSecurityGroupValidator implements EnvironmentSecurity
         CloudSecurityGroups securityGroups = platformParameterService.getSecurityGroups(request);
 
         boolean securityGroupInVpc = false;
-        for (CloudSecurityGroup cloudSecurityGroup : securityGroups.getCloudSecurityGroupsResponses().get(region.getName())) {
-            Object vpcId = cloudSecurityGroup.getProperties().get("vpcId");
-            if (cloudSecurityGroup.getGroupId().equals(securityGroupId)) {
-                LOGGER.info("Security group {} was found on AWS side.", securityGroupId);
-                if (vpcId != null && vpcId.toString().equals(environmentDto.getNetwork().getAws().getVpcId())) {
-                    securityGroupInVpc = true;
-                    break;
+        String awsVpcId = environmentDto.getNetwork().getAws().getVpcId();
+        Set<CloudSecurityGroup> cloudSecurityGroups = securityGroups.getCloudSecurityGroupsResponses().get(region.getName());
+        for (String securityGroupId : getSecurityGroupIds(securityGroupIds)) {
+            securityGroupInVpc = false;
+            for (CloudSecurityGroup cloudSecurityGroup : cloudSecurityGroups) {
+                Object vpcId = cloudSecurityGroup.getProperties().get("vpcId");
+                if (cloudSecurityGroup.getGroupId().equals(securityGroupId)) {
+                    LOGGER.info("Security group {} was found on AWS side.", securityGroupId);
+                    if (vpcId != null && vpcId.toString().equals(awsVpcId)) {
+                        securityGroupInVpc = true;
+                        break;
+                    }
                 }
+            }
+            if (!securityGroupInVpc) {
+                break;
             }
         }
         if (!securityGroupInVpc) {
-            LOGGER.error("Security group {} does not belongs to the {} network.", securityGroupId, environmentDto.getNetwork());
-            resultBuilder.error(securityGroupNotInTheSameVpc(securityGroupId));
+            LOGGER.error("Security group {} does not belongs to the {} network.", securityGroupIds, environmentDto.getNetwork());
+            resultBuilder.error(securityGroupNotInTheSameVpc(securityGroupIds));
             return;
         }
     }
