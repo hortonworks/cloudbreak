@@ -74,13 +74,24 @@ public class DatabaseBackupHandler extends ExceptionCatcherEventHandler<Database
         try {
             Stack stack = stackService.getByIdWithListsInTransaction(stackId);
             Cluster cluster = stack.getCluster();
+
+            String masterNodeIp = stack.getInstanceGroups().stream()
+                    .filter(instanceGroup -> "master".equalsIgnoreCase(instanceGroup.getGroupName())) // find the master instance group
+                    .flatMap(instanceGroup -> instanceGroup.getAllInstanceMetaData().stream())
+                    .map(InstanceMetaData::getPrivateIp) // retrieve the private ip addresses of nodes in the master instance group.
+                    .findFirst() // we only need one of them
+                    .orElseThrow(() -> new RuntimeException("Could not locate a master node IP to run the backup on.")); // throwing in a try block, fix later
+
             InstanceMetaData gatewayInstance = stack.getPrimaryGatewayInstance();
             GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, gatewayInstance, cluster.hasGateway());
-            Set<String> gatewayFQDN = Collections.singleton(gatewayInstance.getDiscoveryFQDN());
+
+            // this is the set of nodes that we'll actually run the salt command on. We want it to be exactly one node in the `master` host group.
+            Set<String> backupTargetNode = Collections.singleton(masterNodeIp);
+
             ExitCriteriaModel exitModel = ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel(stackId, cluster.getId());
             String rangerAdminGroup = rangerVirtualGroupService.getRangerVirtualGroup(stack);
             SaltConfig saltConfig = saltConfigGenerator.createSaltConfig(request.getBackupLocation(), request.getBackupId(), rangerAdminGroup, stack);
-            hostOrchestrator.backupDatabase(gatewayConfig, gatewayFQDN, stackUtil.collectReachableNodes(stack), saltConfig, exitModel);
+            hostOrchestrator.backupDatabase(gatewayConfig, backupTargetNode, stackUtil.collectReachableNodes(stack), saltConfig, exitModel);
 
             result = new DatabaseBackupSuccess(stackId);
         } catch (Exception e) {
