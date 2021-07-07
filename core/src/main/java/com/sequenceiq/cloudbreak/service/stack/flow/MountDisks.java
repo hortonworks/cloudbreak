@@ -74,21 +74,21 @@ public class MountDisks {
         }
 
         Set<Node> allNodes = stackUtil.collectNodes(stack);
-        Set<Node> nodes = stackUtil.collectNodesWithDiskData(stack);
-        mountDisks(stack, nodes, allNodes);
+        Set<Node> nodesWithDiskData = stackUtil.collectNodesWithDiskData(stack);
+        mountDisks(stack, nodesWithDiskData, allNodes);
     }
 
-    public void mountDisksOnNewNodes(Long stackId, Set<String> upscaleCandidateAddresses, Set<Node> reachableNodes) throws CloudbreakException {
+    public void mountDisksOnNewNodes(Long stackId, Set<String> upscaleCandidateAddresses, Set<Node> allNodes) throws CloudbreakException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         stack.setResources(new HashSet<>(resourceService.getAllByStackId(stackId)));
         if (!StackService.REATTACH_COMPATIBLE_PLATFORMS.contains(stack.getPlatformVariant())) {
             return;
         }
-        Set<Node> nodes = stackUtil.collectNewNodesWithDiskData(stack, upscaleCandidateAddresses);
-        mountDisks(stack, nodes, reachableNodes);
+        Set<Node> nodesWithDiskData = stackUtil.collectNewNodesWithDiskData(stack, upscaleCandidateAddresses);
+        mountDisks(stack, nodesWithDiskData, allNodes);
     }
 
-    private void mountDisks(Stack stack, Set<Node> nodes, Set<Node> allNodes) throws CloudbreakException {
+    private void mountDisks(Stack stack, Set<Node> nodesWithDiskData, Set<Node> allNodes) throws CloudbreakException {
         Cluster cluster = stack.getCluster();
         try {
             List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
@@ -96,9 +96,11 @@ public class MountDisks {
 
             Map<String, Map<String, String>> mountInfo;
             if (isCbVersionPostOptimisation(stack)) {
-                mountInfo = hostOrchestrator.formatAndMountDisksOnNodes(gatewayConfigs, nodes, allNodes, exitCriteriaModel, stack.getPlatformVariant());
+                mountInfo = hostOrchestrator.formatAndMountDisksOnNodes(gatewayConfigs, nodesWithDiskData, allNodes, exitCriteriaModel,
+                        stack.getPlatformVariant());
             } else {
-                mountInfo = hostOrchestrator.formatAndMountDisksOnNodesLegacy(gatewayConfigs, nodes, allNodes, exitCriteriaModel, stack.getPlatformVariant());
+                mountInfo = hostOrchestrator.formatAndMountDisksOnNodesLegacy(gatewayConfigs, nodesWithDiskData, allNodes, exitCriteriaModel,
+                        stack.getPlatformVariant());
             }
 
             mountInfo.forEach((hostname, value) -> {

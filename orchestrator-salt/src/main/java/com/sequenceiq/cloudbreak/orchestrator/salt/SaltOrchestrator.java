@@ -192,23 +192,27 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
-    public Map<String, Map<String, String>> formatAndMountDisksOnNodes(List<GatewayConfig> allGateway, Set<Node> nodes, Set<Node> allNodes,
+    public Map<String, Map<String, String>> formatAndMountDisksOnNodes(List<GatewayConfig> allGateway, Set<Node> nodesWithDiskData, Set<Node> allNodes,
             ExitCriteriaModel exitModel, String platformVariant) throws CloudbreakOrchestratorFailedException {
         GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(allGateway);
         Set<String> gatewayTargetIpAddresses = getGatewayPrivateIps(allGateway);
-        Target<String> allHosts = new HostList(nodes.stream().map(Node::getHostname).collect(Collectors.toSet()));
+        Target<String> allHosts = new HostList(nodesWithDiskData.stream().map(Node::getHostname).collect(Collectors.toSet()));
         try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
             initializePillar(allNodes, exitModel, gatewayTargetIpAddresses, sc);
             Callable<Boolean> saltPillarRunner;
 
-            Map<String, String> dataVolumeMap = nodes.stream().collect(Collectors.toMap(Node::getHostname, node -> node.getNodeVolumes().getDataVolumes()));
-            Map<String, String> serialIdMap = nodes.stream().collect(Collectors.toMap(Node::getHostname, node -> node.getNodeVolumes().getSerialIds()));
-            Map<String, String> fstabMap = nodes.stream().collect(Collectors.toMap(Node::getHostname, node -> node.getNodeVolumes().getFstab()));
-            Map<String, String> temporaryStorageMap = nodes.stream().collect(Collectors.toMap(Node::getHostname, node -> node.getTemporaryStorage().name()));
+            Map<String, String> dataVolumeMap = nodesWithDiskData.stream()
+                    .collect(Collectors.toMap(Node::getHostname, node -> node.getNodeVolumes().getDataVolumes()));
+            Map<String, String> serialIdMap = nodesWithDiskData.stream()
+                    .collect(Collectors.toMap(Node::getHostname, node -> node.getNodeVolumes().getSerialIds()));
+            Map<String, String> fstabMap = nodesWithDiskData.stream()
+                    .collect(Collectors.toMap(Node::getHostname, node -> node.getNodeVolumes().getFstab()));
+            Map<String, String> temporaryStorageMap = nodesWithDiskData.stream()
+                    .collect(Collectors.toMap(Node::getHostname, node -> node.getTemporaryStorage().name()));
             Map<String, Integer> dataBaseVolumeIndexMap =
-                    nodes.stream().collect(Collectors.toMap(Node::getHostname, node -> node.getNodeVolumes().getDatabaseVolumeIndex()));
+                    nodesWithDiskData.stream().collect(Collectors.toMap(Node::getHostname, node -> node.getNodeVolumes().getDatabaseVolumeIndex()));
 
-            Map<String, Object> hostnameDiskMountMap = nodes.stream().map(Node::getHostname).collect(Collectors.toMap(hn -> hn, hn -> Map.of(
+            Map<String, Object> hostnameDiskMountMap = nodesWithDiskData.stream().map(Node::getHostname).collect(Collectors.toMap(hn -> hn, hn -> Map.of(
                     "attached_volume_name_list", dataVolumeMap.getOrDefault(hn, ""),
                     "attached_volume_serial_list", serialIdMap.getOrDefault(hn, ""),
                     "cloud_platform", platformVariant,
@@ -235,7 +239,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             saltCommandRunner.runModifyGrainCommand(sc,
                     new GrainRemoveRunner(hostnameDiskMountMap.keySet(), allNodes, "mount_disks"), exitModel, exitCriteria);
             Map<String, String> fstabResponse = SaltStates.runCommandOnHosts(retry, sc, allHosts, "cat /etc/fstab");
-            return nodes.stream()
+            return nodesWithDiskData.stream()
                     .map(node -> {
                         String fstab = fstabResponse.getOrDefault(node.getHostname(), "");
                         String uuidList = uuidResponse.getOrDefault(node.getHostname(), "");
@@ -832,16 +836,16 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
-    public Map<String, Map<String, String>> formatAndMountDisksOnNodesLegacy(List<GatewayConfig> gatewayConfigs, Set<Node> nodes, Set<Node> allNodes,
+    public Map<String, Map<String, String>> formatAndMountDisksOnNodesLegacy(List<GatewayConfig> gatewayConfigs, Set<Node> nodesWithDiskData, Set<Node> allNodes,
             ExitCriteriaModel exitCriteriaModel, String platformVariant) throws CloudbreakOrchestratorFailedException {
         GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(gatewayConfigs);
-        Set<String> allTargets = nodes.stream().map(Node::getHostname).collect(Collectors.toSet());
-        Target<String> allHosts = new HostList(nodes.stream().map(Node::getHostname).collect(Collectors.toSet()));
+        Set<String> allTargets = nodesWithDiskData.stream().map(Node::getHostname).collect(Collectors.toSet());
+        Target<String> allHosts = new HostList(nodesWithDiskData.stream().map(Node::getHostname).collect(Collectors.toSet()));
         try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
-            uploadMountScriptsAndMakeThemExecutable(nodes, exitCriteriaModel, allTargets, allHosts, sc);
+            uploadMountScriptsAndMakeThemExecutable(nodesWithDiskData, exitCriteriaModel, allTargets, allHosts, sc);
 
             SaltStates.runCommandOnHosts(retry, sc, allHosts, "(cd " + SRV_SALT_DISK + ";./" + DISK_INITIALIZE + ')');
-            return nodes.stream()
+            return nodesWithDiskData.stream()
                     .map(node -> {
                         Glob hostname = new Glob(node.getHostname());
                         String uuidList = formatDisks(platformVariant, sc, node, hostname);
@@ -950,7 +954,7 @@ public class SaltOrchestrator implements HostOrchestrator {
                 Set<String> allHostnames = responsiveNodesUnderStopping.stream().map(Node::getHostname).collect(Collectors.toSet());
                 runSyncAll(sc, allHostnames, responsiveNodesUnderStopping, exitCriteriaModel);
 
-                refreshPillars(gatewayConfig, responsiveNodes, exitCriteriaModel, sc);
+                refreshPillars(gatewayConfig, allNodes, exitCriteriaModel, sc);
                 runNewService(sc, new HighStateAllRunner(allHostnames, responsiveNodesUnderStopping), exitCriteriaModel, maxRetry, true);
 
                 saltCommandRunner.runModifyGrainCommand(sc, new GrainRemoveRunner(targetHostnames, responsiveNodesUnderStopping, "roles",
