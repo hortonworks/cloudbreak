@@ -50,7 +50,7 @@ public class AzureAttachmentResourceBuilder extends AbstractAzureComputeBuilder 
                 .findFirst()
                 .orElseThrow(() -> new AzureResourceException("Instance resource not found"));
 
-        LOGGER.info("Attach disk to the instance {}", instance);
+        LOGGER.info("Attach disk to the instance {}", cloudResourceInstance);
 
         CloudContext cloudContext = auth.getCloudContext();
         String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, cloudStack);
@@ -60,7 +60,7 @@ public class AzureAttachmentResourceBuilder extends AbstractAzureComputeBuilder 
 
         CloudResource volumeSet = buildableResource.stream()
                 .filter(cloudResource -> cloudResource.getType().equals(ResourceType.AZURE_VOLUMESET))
-                .filter(cloudResource -> !instance.getInstanceId().equals(cloudResource.getInstanceId()))
+                .filter(cloudResource -> !cloudResourceInstance.getInstanceId().equals(cloudResource.getInstanceId()))
                 .findFirst()
                 .orElseThrow(() -> new AzureResourceException("Volume set resource not found"));
 
@@ -77,7 +77,7 @@ public class AzureAttachmentResourceBuilder extends AbstractAzureComputeBuilder 
                         LOGGER.info("Managed disk {} is already attached to VM {}", disk, vm);
                     }
                 });
-        volumeSet.setInstanceId(instance.getInstanceId());
+        volumeSet.setInstanceId(cloudResourceInstance.getInstanceId());
         volumeSet.setStatus(CommonStatus.CREATED);
         LOGGER.info("Volume set {} attached successfully", volumeSet);
         return List.of(volumeSet);
