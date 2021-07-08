@@ -121,7 +121,7 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
                 resultBuilder.error(message);
             } else if (subnetMetas.size() != network.getSubnetIds().size()) {
                 String message = String.format("If networkId (%s) and resourceGroupName (%s) are specified then subnet ids must be specified and should exist " +
-                                "on azure as well. Given subnetids: [%s], exisiting ones: [%s]", azureParams.getNetworkId(), azureParams.getResourceGroupName(),
+                                "on azure as well. Given subnetids: [%s], existing ones: [%s]", azureParams.getNetworkId(), azureParams.getResourceGroupName(),
                         network.getSubnetIds().stream().map(s -> "\"" + s + "\"").collect(Collectors.joining(", ")),
                         subnetMetas.keySet().stream().map(s -> "\"" + s + "\"").collect(Collectors.joining(", ")));
                 LOGGER.info(message);

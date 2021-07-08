@@ -42,7 +42,6 @@ import com.sequenceiq.environment.parameter.dto.ResourceGroupUsagePattern;
 
 @ExtendWith(MockitoExtension.class)
 class AzureEnvironmentNetworkValidatorTest {
-
     private static final String MY_SINGLE_RG = "mySingleRg";
 
     private AzureEnvironmentNetworkValidator underTest;
@@ -311,7 +310,7 @@ class AzureEnvironmentNetworkValidatorTest {
         underTest.validateDuringFlow(environmentValidationDto, networkDto, resultBuilder);
 
         NetworkTestUtils.checkErrorsPresent(resultBuilder, List.of("If networkId (aNetworkId) and resourceGroupName (aResourceGroupId) are specified then" +
-                " subnet ids must be specified and should exist on azure as well. Given subnetids: [\"key1\", \"key0\"], exisiting ones: [\"key1\"]"));
+                " subnet ids must be specified and should exist on azure as well. Given subnetids: [\"key1\", \"key0\"], existing ones: [\"key1\"]"));
     }
 
     @Test
