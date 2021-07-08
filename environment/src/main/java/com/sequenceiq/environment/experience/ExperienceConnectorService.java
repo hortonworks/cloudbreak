@@ -26,6 +26,8 @@ public class ExperienceConnectorService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ExperienceConnectorService.class);
 
+    private static final String EXPERIENCE_SCAN = "${environment.experience.scan.enabled}";
+
     private static final String XP_SCAN_DISABLED_BASE_MSG = "Scanning experience(s) has disabled due to {}, which means the returning amount of connected " +
             "experiences may not represent the reality!";
 
@@ -36,7 +38,7 @@ public class ExperienceConnectorService {
     private final List<Experience> experiences;
 
     public ExperienceConnectorService(List<Experience> experiences, EntitlementService entitlementService,
-            @Value("${environment.experience.scan.enabled}") boolean experienceScanEnabled) {
+            @Value(EXPERIENCE_SCAN) boolean experienceScanEnabled) {
         this.experienceScanEnabled = experienceScanEnabled;
         this.entitlementService = entitlementService;
         this.experiences = experiences;
@@ -49,10 +51,12 @@ public class ExperienceConnectorService {
     public Set<ExperienceCluster> getConnectedExperiences(EnvironmentExperienceDto environmentExperienceDto) {
         checkEnvironmentExperienceDto(environmentExperienceDto);
         if (experienceScanEnabled) {
+            LOGGER.debug("The {} config property is enabled, therefore scanning for experience shall happen", EXPERIENCE_SCAN);
             if (isEntitlementEnabledForExperienceInteraction(environmentExperienceDto)) {
+                LOGGER.debug("The {} entitlement is enabled, which means experience deletion through CB can be performed.",
+                        CDP_EXPERIENCE_DELETION_BY_ENVIRONMENT.name());
                 if (!experiences.isEmpty()) {
                     LOGGER.debug("Collecting connected experiences for environment: {}", environmentExperienceDto.getName());
-
                     return experiences.stream()
                             .map(experience -> experience.getConnectedClustersForEnvironment(environmentExperienceDto))
                             .flatMap(Collection::stream)
