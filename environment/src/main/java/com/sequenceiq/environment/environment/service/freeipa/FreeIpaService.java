@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.exception.ExceptionResponse;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
+import com.sequenceiq.flow.api.model.operation.OperationView;
 import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.attachchildenv.AttachChildEnvironmentRequest;
@@ -24,6 +25,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.HealthDetailsFre
 import com.sequenceiq.freeipa.api.v1.freeipa.user.UserV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeAllUsersRequest;
+import com.sequenceiq.freeipa.api.v1.operation.OperationV1Endpoint;
 
 @Service
 public class FreeIpaService {
@@ -32,14 +34,18 @@ public class FreeIpaService {
 
     private final FreeIpaV1Endpoint freeIpaV1Endpoint;
 
+    private final OperationV1Endpoint operationV1Endpoint;
+
     private final UserV1Endpoint userV1Endpoint;
 
     private final WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
     public FreeIpaService(FreeIpaV1Endpoint freeIpaV1Endpoint,
+            OperationV1Endpoint operationV1Endpoint,
             UserV1Endpoint userV1Endpoint,
             WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor) {
         this.freeIpaV1Endpoint = freeIpaV1Endpoint;
+        this.operationV1Endpoint = operationV1Endpoint;
         this.userV1Endpoint = userV1Endpoint;
         this.webApplicationExceptionMessageExtractor = webApplicationExceptionMessageExtractor;
     }
@@ -139,6 +145,14 @@ public class FreeIpaService {
             LOGGER.error(String.format("Failed to get health details for the freeIpa of the given environment: '%s' due to: '%s'",
                     environmentCrn, errorMessage), e);
             throw new FreeIpaOperationFailedException(errorMessage, e);
+        }
+    }
+
+    public Optional<OperationView> getFreeIpaOperation(String environmentCrn, boolean detailed) {
+        try {
+            return Optional.ofNullable(operationV1Endpoint.getOperationProgressByEnvironmentCrn(environmentCrn, detailed));
+        } catch (WebApplicationException e) {
+            return Optional.empty();
         }
     }
 

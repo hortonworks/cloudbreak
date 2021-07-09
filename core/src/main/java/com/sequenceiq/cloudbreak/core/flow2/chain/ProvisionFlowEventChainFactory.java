@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
+import com.sequenceiq.flow.api.model.operation.OperationType;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 
@@ -33,5 +34,10 @@ public class ProvisionFlowEventChainFactory implements FlowEventChainFactory<Sta
         flowEventChain.add(new StackEvent(START_CREATION_EVENT.event(), event.getResourceId(), event.accepted()));
         flowEventChain.add(new StackEvent(CLUSTER_CREATION_EVENT.event(), event.getResourceId()));
         return new FlowTriggerEventQueue(getName(), flowEventChain);
+    }
+
+    @Override
+    public OperationType getFlowOperationType() {
+        return OperationType.PROVISION;
     }
 }

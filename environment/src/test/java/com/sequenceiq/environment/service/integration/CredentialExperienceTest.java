@@ -70,6 +70,7 @@ import com.sequenceiq.environment.metrics.EnvironmentMetricService;
 import com.sequenceiq.environment.user.UserPreferences;
 import com.sequenceiq.environment.user.UserPreferencesRepository;
 import com.sequenceiq.environment.user.UserPreferencesService;
+import com.sequenceiq.flow.core.stats.FlowOperationStatisticsService;
 import com.sequenceiq.flow.repository.FlowChainLogRepository;
 import com.sequenceiq.flow.repository.FlowLogRepository;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
@@ -297,6 +298,9 @@ public class CredentialExperienceTest {
 
         @MockBean
         private Scheduler scheduler;
+
+        @MockBean
+        private FlowOperationStatisticsService flowOperationStatisticsService;
 
         @Bean
         public Dispatcher dispatcher(MDCCleanerThreadPoolExecutor threadPoolExecutor) {

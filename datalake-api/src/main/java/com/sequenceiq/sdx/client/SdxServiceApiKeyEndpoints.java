@@ -8,6 +8,8 @@ import com.sequenceiq.flow.api.FlowEndpoint;
 import com.sequenceiq.flow.api.FlowPublicEndpoint;
 import com.sequenceiq.sdx.api.endpoint.DatabaseServerEndpoint;
 import com.sequenceiq.sdx.api.endpoint.DiagnosticsEndpoint;
+import com.sequenceiq.sdx.api.endpoint.OperationEndpoint;
+import com.sequenceiq.sdx.api.endpoint.ProgressEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxInternalEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxUpgradeEndpoint;
@@ -36,6 +38,16 @@ public class SdxServiceApiKeyEndpoints extends AbstractKeyBasedServiceEndpoint i
     @Override
     public FlowEndpoint flowEndpoint() {
         return getEndpoint(FlowEndpoint.class);
+    }
+
+    @Override
+    public ProgressEndpoint progressEndpoint() {
+        return getEndpoint(ProgressEndpoint.class);
+    }
+
+    @Override
+    public OperationEndpoint operationEndpoint() {
+        return getEndpoint(OperationEndpoint.class);
     }
 
     @Override

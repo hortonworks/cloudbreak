@@ -63,6 +63,8 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.retry.RetryableFlow;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterDiagnosticsService;
 import com.sequenceiq.cloudbreak.service.diagnostics.DiagnosticsService;
+import com.sequenceiq.cloudbreak.service.operation.OperationService;
+import com.sequenceiq.cloudbreak.service.progress.ProgressService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackOperationService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
@@ -89,7 +91,7 @@ import com.sequenceiq.distrox.v1.distrox.converter.cli.DelegatingRequestToCliReq
 import com.sequenceiq.distrox.v1.distrox.service.DistroXService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowProgressResponse;
-import com.sequenceiq.flow.service.FlowService;
+import com.sequenceiq.flow.api.model.operation.OperationView;
 
 @Controller
 public class DistroXV1Controller implements DistroXV1Endpoint {
@@ -125,7 +127,10 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     private DiagnosticsService diagnosticsService;
 
     @Inject
-    private FlowService flowService;
+    private ProgressService progressService;
+
+    @Inject
+    private OperationService operationService;
 
     @Inject
     private VmLogsService vmLogsService;
@@ -531,13 +536,19 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     @Override
     @CheckPermissionByResourceCrn(action = DESCRIBE_DATAHUB)
     public FlowProgressResponse getLastFlowLogProgressByResourceCrn(@TenantAwareParam @ResourceCrn String resourceCrn) {
-        return flowService.getLastFlowProgressByResourceCrn(resourceCrn);
+        return progressService.getLastFlowProgressByResourceCrn(resourceCrn);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = DESCRIBE_DATAHUB)
     public List<FlowProgressResponse> getFlowLogsProgressByResourceCrn(@TenantAwareParam @ResourceCrn String resourceCrn) {
-        return flowService.getFlowProgressListByResourceCrn(resourceCrn);
+        return progressService.getFlowProgressListByResourceCrn(resourceCrn);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = DESCRIBE_DATAHUB)
+    public OperationView getOperationProgressByResourceCrn(@TenantAwareParam @ResourceCrn String resourceCrn, boolean detailed) {
+        return operationService.getOperationProgressByResourceCrn(resourceCrn, detailed);
     }
 
     @Override

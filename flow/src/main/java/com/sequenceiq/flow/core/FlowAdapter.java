@@ -81,8 +81,8 @@ public class FlowAdapter<S extends FlowState, E extends FlowEvent> implements Fl
     }
 
     @Override
-    public void sendEvent(String key, String flowTriggerUserCrn, Object payload, SpanContext spanContext) {
-        flowMachine.sendEvent(messageFactory.createMessage(flowId, flowTriggerUserCrn, eventConverter.convert(key), payload, spanContext));
+    public void sendEvent(String key, String flowTriggerUserCrn, Object payload, SpanContext spanContext, String operationType) {
+        flowMachine.sendEvent(messageFactory.createMessage(flowId, flowTriggerUserCrn, eventConverter.convert(key), payload, spanContext, operationType));
     }
 
     @Override

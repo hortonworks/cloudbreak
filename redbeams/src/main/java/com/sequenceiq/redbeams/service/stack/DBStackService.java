@@ -9,13 +9,15 @@ import javax.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.common.event.PayloadContext;
+import com.sequenceiq.flow.core.PayloadContextProvider;
 import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.exception.NotFoundException;
 import com.sequenceiq.redbeams.repository.DBStackRepository;
 
 @Service
-public class DBStackService {
+public class DBStackService implements PayloadContextProvider {
 
     @Inject
     private DBStackRepository dbStackRepository;
@@ -61,6 +63,16 @@ public class DBStackService {
 
     public DBStack save(DBStack dbStack) {
         return dbStackRepository.save(dbStack);
+    }
+
+    @Override
+    public PayloadContext getPayloadContext(Long resourceId) {
+        Optional<DBStack> dbStackOpt = findById(resourceId);
+        if (dbStackOpt.isPresent()) {
+            DBStack dbStack = dbStackOpt.get();
+            return PayloadContext.create(dbStack.getResourceCrn().toString(), dbStack.getCloudPlatform());
+        }
+        return null;
     }
 
     @Transactional

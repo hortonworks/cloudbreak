@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
+import com.sequenceiq.flow.api.model.operation.OperationType;
 import com.sequenceiq.flow.core.Flow2Handler;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.StateStatus;
@@ -92,7 +93,7 @@ public class OperationRetryServiceTest {
     }
 
     private FlowLog createFlowLog(String currentState, StateStatus stateStatus, long created, String name) {
-        FlowLog flowLog = new FlowLog(STACK_ID, FLOW_ID, currentState, true, stateStatus);
+        FlowLog flowLog = new FlowLog(STACK_ID, FLOW_ID, currentState, true, stateStatus, OperationType.UNKNOWN);
         flowLog.setCreated(created);
         flowLog.setFlowType(flowConfig.getClass());
         flowLog.setNextEvent(name);

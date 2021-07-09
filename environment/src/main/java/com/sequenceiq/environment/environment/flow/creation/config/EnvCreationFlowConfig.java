@@ -27,6 +27,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.environment.environment.flow.creation.EnvCreationState;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors;
+import com.sequenceiq.flow.api.model.operation.OperationType;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
@@ -116,5 +117,10 @@ public class EnvCreationFlowConfig extends AbstractFlowConfiguration<EnvCreation
     @Override
     protected FlowEdgeConfig<EnvCreationState, EnvCreationStateSelectors> getEdgeConfig() {
         return EDGE_CONFIG;
+    }
+
+    @Override
+    public OperationType getFlowOperationType() {
+        return OperationType.PROVISION;
     }
 }

@@ -46,6 +46,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
         "com.sequenceiq.cloudbreak.common.dbmigration",
         "com.sequenceiq.cloudbreak.converter",
         "com.sequenceiq.cloudbreak.telemetry.fluent.cloud",
+        "com.sequenceiq.cloudbreak.progress",
+        "com.sequenceiq.cloudbreak.operation",
         "com.sequenceiq.cloudbreak.validation",
         "com.sequenceiq.cloudbreak.common.converter",
         "com.sequenceiq.cloudbreak.json",

@@ -83,52 +83,52 @@ public class AbstractFlowConfigurationTest {
 
     @Test
     public void testHappyFlowConfiguration() {
-        flow.sendEvent(Event.START.name(), null, null, null);
-        flow.sendEvent(Event.CONTINUE.name(), null, null, null);
-        flow.sendEvent(Event.FINISHED.name(), null, null, null);
-        flow.sendEvent(Event.FINALIZED.name(), null, null, null);
+        flow.sendEvent(Event.START.name(), null, null, null, null);
+        flow.sendEvent(Event.CONTINUE.name(), null, null, null, null);
+        flow.sendEvent(Event.FINISHED.name(), null, null, null, null);
+        flow.sendEvent(Event.FINALIZED.name(), null, null, null, null);
     }
 
     @Test
     public void testUnhappyFlowConfigurationWithDefaultFailureHandler() {
-        flow.sendEvent(Event.START.name(), null, null, null);
-        flow.sendEvent(Event.FAILURE.name(), null, null, null);
-        flow.sendEvent(Event.FAIL_HANDLED.name(), null, null, null);
+        flow.sendEvent(Event.START.name(), null, null, null, null);
+        flow.sendEvent(Event.FAILURE.name(), null, null, null, null);
+        flow.sendEvent(Event.FAIL_HANDLED.name(), null, null, null, null);
     }
 
     @Test
     public void testUnhappyFlowConfigurationWithCustomFailureHandler() {
-        flow.sendEvent(Event.START.name(), null, null, null);
-        flow.sendEvent(Event.CONTINUE.name(), null, null, null);
-        flow.sendEvent(Event.FAILURE2.name(), null, null, null);
+        flow.sendEvent(Event.START.name(), null, null, null, null);
+        flow.sendEvent(Event.CONTINUE.name(), null, null, null, null);
+        flow.sendEvent(Event.FAILURE2.name(), null, null, null, null);
         assertEquals("Must be on the FAILED2 state", State.FAILED2, flow.getCurrentState());
-        flow.sendEvent(Event.FAIL_HANDLED.name(), null, null, null);
+        flow.sendEvent(Event.FAIL_HANDLED.name(), null, null, null, null);
     }
 
     @Test(expected = NotAcceptedException.class)
     public void testUnacceptedFlowConfiguration1() {
-        flow.sendEvent(Event.START.name(), null, null, null);
-        flow.sendEvent(Event.FINISHED.name(), null, null, null);
+        flow.sendEvent(Event.START.name(), null, null, null, null);
+        flow.sendEvent(Event.FINISHED.name(), null, null, null, null);
     }
 
     @Test(expected = NotAcceptedException.class)
     public void testUnacceptedFlowConfiguration2() {
-        flow.sendEvent(Event.START.name(), null, null, null);
-        flow.sendEvent(Event.FAILURE2.name(), null, null, null);
+        flow.sendEvent(Event.START.name(), null, null, null, null);
+        flow.sendEvent(Event.FAILURE2.name(), null, null, null, null);
     }
 
     @Test(expected = NotAcceptedException.class)
     public void testUnacceptedFlowConfiguration3() {
-        flow.sendEvent(Event.START.name(), null, null, null);
-        flow.sendEvent(Event.CONTINUE.name(), null, null, null);
-        flow.sendEvent(Event.FAIL_HANDLED.name(), null, null, null);
+        flow.sendEvent(Event.START.name(), null, null, null, null);
+        flow.sendEvent(Event.CONTINUE.name(), null, null, null, null);
+        flow.sendEvent(Event.FAIL_HANDLED.name(), null, null, null, null);
     }
 
     @Test(expected = NotAcceptedException.class)
     public void testUnacceptedFlowConfiguration4() {
-        flow.sendEvent(Event.START.name(), null, null, null);
-        flow.sendEvent(Event.CONTINUE.name(), null, null, null);
-        flow.sendEvent(Event.FAILURE.name(), null, null, null);
+        flow.sendEvent(Event.START.name(), null, null, null, null);
+        flow.sendEvent(Event.CONTINUE.name(), null, null, null, null);
+        flow.sendEvent(Event.FAILURE.name(), null, null, null, null);
     }
 
     enum State implements FlowState {

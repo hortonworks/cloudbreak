@@ -29,6 +29,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.flow2.diagnostics.DiagnosticsCollectionsState;
 import com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.DiagnosticsCollectionStateSelectors;
+import com.sequenceiq.flow.api.model.operation.OperationType;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
@@ -114,6 +115,11 @@ public class DiagnosticsCollectionFlowConfig extends AbstractFlowConfiguration<D
         return new DiagnosticsCollectionStateSelectors[] {
                 START_DIAGNOSTICS_SALT_VALIDATION_EVENT
         };
+    }
+
+    @Override
+    public OperationType getFlowOperationType() {
+        return OperationType.DIAGNOSTICS;
     }
 
     @Override

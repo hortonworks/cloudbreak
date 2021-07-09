@@ -16,6 +16,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.flow.api.model.operation.OperationType;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
@@ -93,5 +94,10 @@ public class SdxCreateFlowConfig extends AbstractFlowConfiguration<SdxCreateStat
     @Override
     public SdxCreateEvent getRetryableEvent() {
         return SDX_CREATE_FAILED_HANDLED_EVENT;
+    }
+
+    @Override
+    public OperationType getFlowOperationType() {
+        return OperationType.PROVISION;
     }
 }

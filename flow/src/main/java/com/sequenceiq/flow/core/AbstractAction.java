@@ -166,6 +166,7 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
         headers.put(FlowConstants.FLOW_ID, flowParameters.getFlowId());
         headers.put(FlowConstants.FLOW_TRIGGER_USERCRN, flowParameters.getFlowTriggerUserCrn());
         headers.put(FlowConstants.SPAN_CONTEXT, flowParameters.getSpanContext());
+        headers.put(FlowConstants.FLOW_OPERATION_TYPE, flowParameters.getFlowOperationType());
         String flowChainId = runningFlows.getFlowChainId(flowParameters.getFlowId());
         if (flowChainId != null) {
             headers.put(FlowConstants.FLOW_CHAIN_ID, flowChainId);

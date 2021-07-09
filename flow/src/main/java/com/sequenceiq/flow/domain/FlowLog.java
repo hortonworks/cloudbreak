@@ -1,5 +1,7 @@
 package com.sequenceiq.flow.domain;
 
+import com.sequenceiq.flow.api.model.operation.OperationType;
+import com.sequenceiq.flow.converter.OperationTypeConverter;
 import com.sequenceiq.flow.converter.StateStatusConverter;
 
 import java.util.Date;
@@ -60,16 +62,20 @@ public class FlowLog {
 
     private String flowTriggerUserCrn;
 
+    @Convert(converter = OperationTypeConverter.class)
+    private OperationType operationType = OperationType.UNKNOWN;
+
     public FlowLog() {
 
     }
 
-    public FlowLog(Long resourceId, String flowId, String currentState, Boolean finalized, StateStatus stateStatus) {
+    public FlowLog(Long resourceId, String flowId, String currentState, Boolean finalized, StateStatus stateStatus, OperationType operationType) {
         this.resourceId = resourceId;
         this.flowId = flowId;
         this.currentState = currentState;
         this.finalized = finalized;
         this.stateStatus = stateStatus;
+        this.operationType = operationType;
     }
 
     public FlowLog(Long resourceId, String flowId, String flowChainId, String flowTriggerUserCrn, String nextEvent, String payload,
@@ -222,6 +228,14 @@ public class FlowLog {
         this.flowTriggerUserCrn = flowTriggerUserCrn;
     }
 
+    public OperationType getOperationType() {
+        return operationType;
+    }
+
+    public void setOperationType(OperationType operationType) {
+        this.operationType = operationType;
+    }
+
     public String minimizedString() {
         return "FlowLog{" +
                 "resourceId=" + resourceId +
@@ -230,6 +244,7 @@ public class FlowLog {
                 ", currentState='" + currentState + '\'' +
                 ", stateStatus=" + stateStatus +
                 ", nextEvent=" + nextEvent +
+                ", operationType=" + operationType +
                 '}';
     }
 
