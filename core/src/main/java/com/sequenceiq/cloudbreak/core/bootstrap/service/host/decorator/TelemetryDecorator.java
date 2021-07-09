@@ -172,7 +172,7 @@ public class TelemetryDecorator {
                 new SaltPillarProperties("/telemetry/init.sls", Collections.singletonMap("telemetry", telemetryCommonConfigs.toMap())));
 
         FluentConfigView fluentConfigView = fluentConfigService.createFluentConfigs(clusterDetails,
-                databusConfigView.isEnabled(), meteringEnabled, telemetry);
+                databusConfigView.isEnabled(), meteringEnabled, stack.getRegion(), telemetry);
         if (fluentConfigView.isEnabled()) {
 
             Map<String, Object> fluentConfig = fluentConfigView.toMap();
