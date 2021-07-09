@@ -16,13 +16,16 @@
 {% else %}
     {% set cloud_logging_service_enabled = False %}
 {% endif %}
-{% if cloud_logging_service_enabled or cloud_storage_logging_enabled %}
-    {% if salt['pillar.get']('fluent:platform') == "AWS" %}
-      {%- set instanceDetails = salt.cmd.run('curl -s http://169.254.169.254/latest/dynamic/instance-identity/document') | load_json %}
-      {%- set region = instanceDetails['region'] %}
-    {% else %}
-      {%- set region = salt['pillar.get']('fluent:region') %}
-    {% endif %}
+
+{% if salt['pillar.get']('fluent:region') %}
+  {%- set region = salt['pillar.get']('fluent:region') %}
+{% else %}
+  {% if (cloud_logging_service_enabled or cloud_storage_logging_enabled) and salt['pillar.get']('fluent:platform') == "AWS"%}
+    {%- set instanceDetails = salt.cmd.run('curl -s http://169.254.169.254/latest/dynamic/instance-identity/document') | load_json %}
+    {%- set region = instanceDetails['region'] %}
+  {% else %}
+    {%- set region = None %}
+  {% endif %}
 {% endif %}
 {% if grains['init'] == 'upstart' %}
     {% set is_systemd = False %}
