@@ -16,6 +16,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.ha.domain.Node;
 import com.sequenceiq.cloudbreak.ha.service.EvenFlowDistributor;
+import com.sequenceiq.flow.api.model.operation.OperationType;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.StateStatus;
 
@@ -103,7 +104,8 @@ public class EvenFlowDistributorTest {
         int flowId = random.nextInt(5000);
         long stackId = random.nextLong();
         for (int i = 0; i < flowCount; i++) {
-            flows.add(new FlowLog(stackId + i, "" + flowId + i, "RUNNING", false, StateStatus.PENDING));
+            flows.add(new FlowLog(stackId + i, "" + flowId + i, "RUNNING",
+                    false, StateStatus.PENDING, OperationType.UNKNOWN));
         }
         return flows;
     }

@@ -9,6 +9,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.database.DatabaseV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.FileSystemV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.ImageCatalogV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.info.CloudbreakInfoV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.operation.OperationV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.progress.ProgressV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.providerservices.CloudProviderServicesV4Endopint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.RecipeV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.DatalakeV4Endpoint;
@@ -61,6 +63,10 @@ public interface CloudbreakClient {
     FlowEndpoint flowEndpoint();
 
     FlowPublicEndpoint flowPublicEndpoint();
+
+    ProgressV4Endpoint progressV4Endpoint();
+
+    OperationV4Endpoint operationV4Endpoint();
 
     DistroXDatabaseServerV1Endpoint distroXDatabaseServerV1Endpoint();
 

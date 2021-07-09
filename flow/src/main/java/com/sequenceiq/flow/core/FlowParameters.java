@@ -1,5 +1,7 @@
 package com.sequenceiq.flow.core;
 
+import com.sequenceiq.flow.api.model.operation.OperationType;
+
 import io.opentracing.SpanContext;
 
 public class FlowParameters {
@@ -7,11 +9,21 @@ public class FlowParameters {
 
     private String flowTriggerUserCrn;
 
+    private String flowOperationType;
+
     private SpanContext spanContext;
 
     public FlowParameters(String flowId, String flowTriggerUserCrn, SpanContext spanContext) {
         this.flowId = flowId;
         this.flowTriggerUserCrn = flowTriggerUserCrn;
+        this.flowOperationType = OperationType.UNKNOWN.name();
+        this.spanContext = spanContext;
+    }
+
+    public FlowParameters(String flowId, String flowTriggerUserCrn, String flowOperationType, SpanContext spanContext) {
+        this.flowId = flowId;
+        this.flowTriggerUserCrn = flowTriggerUserCrn;
+        this.flowOperationType = flowOperationType;
         this.spanContext = spanContext;
     }
 
@@ -37,5 +49,13 @@ public class FlowParameters {
 
     public void setSpanContext(SpanContext spanContext) {
         this.spanContext = spanContext;
+    }
+
+    public String getFlowOperationType() {
+        return flowOperationType;
+    }
+
+    public void setFlowOperationType(String flowOperationType) {
+        this.flowOperationType = flowOperationType;
     }
 }

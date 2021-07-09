@@ -16,6 +16,7 @@ import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.DEL
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.GET_BY_CRN;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.GET_BY_NAME;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.GET_LAST_FLOW_PROGRESS;
+import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.GET_OPERATION;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.GET_STACK_REQUEST_BY_CRN;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.GET_STACK_REQUEST_BY_NAME;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.GET_STATUS_BY_CRN;
@@ -78,6 +79,7 @@ import com.sequenceiq.distrox.api.v1.distrox.model.diagnostics.model.CmDiagnosti
 import com.sequenceiq.distrox.api.v1.distrox.model.diagnostics.model.DiagnosticsCollectionV1Request;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowProgressResponse;
+import com.sequenceiq.flow.api.model.operation.OperationView;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -407,6 +409,14 @@ public interface DistroXV1Endpoint {
     @ApiOperation(value = LIST_FLOW_PROGRESS, produces = "application/json", notes = Notes.FLOW_OPERATION_PROGRESS_NOTES,
             nickname = "getDistroXFlowLogsProgressByResourceCrn")
     List<FlowProgressResponse> getFlowLogsProgressByResourceCrn(@PathParam("resourceCrn") String resourceCrn);
+
+    @GET
+    @Path("operation/resource/crn/{resourceCrn}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = GET_OPERATION, produces = "application/json", notes = Notes.FLOW_OPERATION_PROGRESS_NOTES,
+            nickname = "getDistroXOperationProgressByResourceCrn")
+    OperationView getOperationProgressByResourceCrn(@PathParam("resourceCrn") String resourceCrn,
+            @DefaultValue("false") @QueryParam("detailed") boolean detailed);
 
     @POST
     @Path("crn/{crn}/renew_certificate")

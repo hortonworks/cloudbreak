@@ -11,6 +11,8 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.quartz.TracedQuartzJob;
 import com.sequenceiq.flow.core.FlowLogService;
+import com.sequenceiq.flow.core.FlowRegister;
+import com.sequenceiq.flow.core.cache.FlowStatCache;
 import com.sequenceiq.flow.service.flowlog.FlowChainLogService;
 
 import io.opentracing.Tracer;
@@ -29,6 +31,12 @@ public class FlowCleanupJob extends TracedQuartzJob {
     @Inject
     private FlowChainLogService flowChainLogService;
 
+    @Inject
+    private FlowRegister runningFlows;
+
+    @Inject
+    private FlowStatCache flowStatCache;
+
     public FlowCleanupJob(Tracer tracer) {
         super(tracer, "Flow Cleanup Job");
     }
@@ -42,10 +50,15 @@ public class FlowCleanupJob extends TracedQuartzJob {
     protected void executeTracedJob(JobExecutionContext context) throws JobExecutionException {
         try {
             purgeFinalisedFlowLogs();
+            purgeFlowStatCache();
         } catch (TransactionService.TransactionExecutionException e) {
             LOGGER.error("Transaction failed for flow cleanup.", e);
             throw new JobExecutionException(e);
         }
+    }
+
+    private void purgeFlowStatCache() {
+        flowStatCache.cleanOldCacheEntries(runningFlows.getRunningFlowIds());
     }
 
     public void purgeFinalisedFlowLogs() throws TransactionService.TransactionExecutionException {

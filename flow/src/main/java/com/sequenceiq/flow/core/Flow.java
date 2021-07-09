@@ -13,7 +13,8 @@ public interface Flow {
 
     void stop();
 
-    void sendEvent(String key, String flowTriggerUserCrn, Object object, SpanContext spanContext);
+    void sendEvent(String key, String flowTriggerUserCrn, Object object,
+            SpanContext spanContext, String operationType);
 
     FlowState getCurrentState();
 

@@ -24,6 +24,8 @@ public class FlowProgressResponse implements Serializable {
 
     private Boolean finalized;
 
+    private Integer maxNumberOfTransitions;
+
     public Integer getProgress() {
         return progress;
     }
@@ -86,5 +88,13 @@ public class FlowProgressResponse implements Serializable {
 
     public void setResourceCrn(String resourceCrn) {
         this.resourceCrn = resourceCrn;
+    }
+
+    public Integer getMaxNumberOfTransitions() {
+        return maxNumberOfTransitions;
+    }
+
+    public void setMaxNumberOfTransitions(Integer maxNumberOfTransitions) {
+        this.maxNumberOfTransitions = maxNumberOfTransitions;
     }
 }

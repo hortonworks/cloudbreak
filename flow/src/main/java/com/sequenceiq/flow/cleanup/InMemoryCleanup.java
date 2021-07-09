@@ -8,6 +8,7 @@ import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryResourceStateStore;
 import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.core.chain.FlowChains;
+import com.sequenceiq.flow.core.cache.FlowStatCache;
 
 @Component
 public class InMemoryCleanup {
@@ -17,6 +18,9 @@ public class InMemoryCleanup {
 
     @Inject
     private FlowChains flowChains;
+
+    @Inject
+    private FlowStatCache flowStatCache;
 
     public void cancelEveryFlowWithoutDbUpdate() {
         for (String resourceType : InMemoryResourceStateStore.getResourceTypes()) {
@@ -32,9 +36,10 @@ public class InMemoryCleanup {
     public void cancelFlowWithoutDbUpdate(String flowId) {
         String flowChainId = runningFlows.getFlowChainId(flowId);
         if (flowChainId != null) {
-            flowChains.removeFullFlowChain(flowChainId);
+            flowChains.removeFullFlowChain(flowChainId, false);
         }
         runningFlows.remove(flowId);
+        flowStatCache.remove(flowId, false);
     }
 
 }

@@ -70,6 +70,8 @@ public interface FlowLogRepository extends CrudRepository<FlowLog, Long> {
 
     List<FlowLog> findAllByFlowIdOrderByCreatedDesc(String flowId);
 
+    List<FlowLog> findAllByFlowChainIdOrderByCreatedDesc(String flowChainId);
+
     List<FlowLog> findAllByResourceIdOrderByCreatedDesc(Long resourceId, Pageable page);
 
     @Query("SELECT COUNT(fl.id) > 0 FROM FlowLog fl WHERE fl.resourceId = :resourceId AND fl.stateStatus = :status")

@@ -19,6 +19,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.flow.api.model.operation.OperationType;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
@@ -75,5 +76,10 @@ public class RedbeamsProvisionFlowConfig extends AbstractFlowConfiguration<Redbe
     @Override
     public RedbeamsProvisionEvent getRetryableEvent() {
         return REDBEAMS_PROVISION_FAILURE_HANDLED_EVENT;
+    }
+
+    @Override
+    public OperationType getFlowOperationType() {
+        return OperationType.PROVISION;
     }
 }

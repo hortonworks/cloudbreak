@@ -66,7 +66,9 @@ import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
 import com.sequenceiq.cloudbreak.cloud.VersionComparator;
+import com.sequenceiq.cloudbreak.common.event.PayloadContext;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -93,6 +95,7 @@ import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.datalake.service.validation.cloudstorage.CloudStorageLocationValidator;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.core.PayloadContextProvider;
 import com.sequenceiq.flow.core.ResourceIdProvider;
 import com.sequenceiq.flow.service.FlowCancelService;
 import com.sequenceiq.sdx.api.model.SdxAwsBase;
@@ -103,7 +106,7 @@ import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxCustomClusterRequest;
 
 @Service
-public class SdxService implements ResourceIdProvider, ResourcePropertyProvider {
+public class SdxService implements ResourceIdProvider, ResourcePropertyProvider, PayloadContextProvider {
 
     public static final String MEDIUM_DUTY_REQUIRED_VERSION = "7.2.7";
 
@@ -900,6 +903,20 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider 
         return resourceNames.stream()
                 .map(resourceName -> getByNameInAccount(ThreadBasedUserCrnProvider.getUserCrn(), resourceName).getCrn())
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public PayloadContext getPayloadContext(Long resourceId) {
+        try {
+            SdxCluster sdxCluster = getById(resourceId);
+            DetailedEnvironmentResponse envResp = environmentClientService.getByCrn(sdxCluster.getEnvCrn());
+            return PayloadContext.create(sdxCluster.getCrn(), envResp.getCloudPlatform());
+        } catch (NotFoundException nfe) {
+            // skip
+        } catch (Exception e) {
+            LOGGER.warn("Error happened during fetching payload context for datalake with environment response.", e);
+        }
+        return null;
     }
 
     @Override

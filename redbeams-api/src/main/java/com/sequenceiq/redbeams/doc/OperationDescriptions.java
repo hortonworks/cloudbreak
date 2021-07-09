@@ -50,4 +50,13 @@ public final class OperationDescriptions {
         }
     }
 
+    public static final class OperationOpDescriptions {
+
+        public static final String NOTES = "Flow operation details";
+        public static final String GET_OPERATIONS = "Get flow operation progress details for resource by resource crn";
+
+        private OperationOpDescriptions() {
+        }
+    }
+
 }
