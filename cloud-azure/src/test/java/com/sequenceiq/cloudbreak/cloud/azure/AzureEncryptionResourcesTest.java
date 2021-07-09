@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static com.sequenceiq.common.api.type.CommonStatus.CREATED;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_DISK_ENCRYPTION_SET;
+import static com.sequenceiq.common.api.type.ResourceType.AZURE_RESOURCE_GROUP;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -13,6 +14,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -41,6 +43,7 @@ import com.microsoft.azure.management.compute.EncryptionSetIdentity;
 import com.microsoft.azure.management.compute.KeyVaultAndKeyReference;
 import com.microsoft.azure.management.compute.SourceVault;
 import com.microsoft.azure.management.compute.implementation.DiskEncryptionSetInner;
+import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azure.management.resources.Subscription;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClientService;
@@ -60,6 +63,8 @@ import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.notification.model.ResourcePersisted;
 import com.sequenceiq.cloudbreak.cloud.transform.CloudResourceHelper;
 import com.sequenceiq.cloudbreak.service.Retry;
+import com.sequenceiq.common.api.type.CommonStatus;
+import com.sequenceiq.common.api.type.ResourceType;
 
 @ExtendWith(MockitoExtension.class)
 public class AzureEncryptionResourcesTest {
@@ -292,6 +297,24 @@ public class AzureEncryptionResourcesTest {
         assertThat(cloudResourceCaptured.getStatus()).isEqualTo(CREATED);
     }
 
+    private void verifyPersistedResourceGroupAndDiskEncryptionSetCloudResource(String resourceGroupId) {
+        ArgumentCaptor<CloudResource> cloudResourceCaptor = ArgumentCaptor.forClass(CloudResource.class);
+        verify(persistenceNotifier, times(2)).notifyAllocation(cloudResourceCaptor.capture(), eq(cloudContext));
+        verifyCloudResource(cloudResourceCaptor.getAllValues(), AZURE_DISK_ENCRYPTION_SET, DES_RESOURCE_ID, CREATED);
+        verifyCloudResource(cloudResourceCaptor.getAllValues(), AZURE_RESOURCE_GROUP, resourceGroupId, CREATED);
+    }
+
+    private void verifyCloudResource(List<CloudResource> updatedCloudResources, ResourceType type, String expectedReference, CommonStatus expectedStatus) {
+        updatedCloudResources
+                .stream()
+                .filter(cloudResource -> cloudResource.getType().equals(type))
+                .findFirst()
+                .ifPresent(cloudResource -> {
+                            assertThat(cloudResource.getReference()).isEqualTo(expectedReference);
+                            assertThat(cloudResource.getStatus()).isEqualTo(expectedStatus);
+                        });
+    }
+
     private void initRetry() {
         when(retryService.testWith2SecDelayMax15Times(any(Supplier.class))).thenAnswer(invocation -> invocation.getArgument(0, Supplier.class).get());
     }
@@ -494,6 +517,75 @@ public class AzureEncryptionResourcesTest {
         verify(azureClient).grantKeyVaultAccessPolicyToServicePrincipal("dummyVaultResourceGroup", "dummyVaultName", DES_PRINCIPAL_ID);
 
         verifyPersistedCloudResource();
+    }
+
+    @Test
+    public void testCreateDiskEncryptionSetThrowsExceptionWhenNotSingleResourceGroupAndVaultResourceGroupNameIsNotPresent() {
+        DiskEncryptionSetCreationRequest requestedSet = new DiskEncryptionSetCreationRequest.Builder()
+                .withCloudCredential(cloudCredential)
+                .withCloudContext(cloudContext)
+                .withDiskEncryptionSetResourceGroupName(null)
+                .withTags(new HashMap<>())
+                .withEncryptionKeyUrl("https://dummyVaultName.vault.azure.net/keys/dummyKeyName/dummyKeyVersion")
+                .build();
+        when(azureClientService.createAuthenticatedContext(cloudContext, cloudCredential)).thenReturn(authenticatedContext);
+        when(authenticatedContext.getParameter(AzureClient.class)).thenReturn(azureClient);
+        initExceptionConversion();
+
+        verifyException(IllegalArgumentException.class, () -> underTest.createDiskEncryptionSet(requestedSet),
+                "Encryption key resource group name should be present if resource group is not provided during environment creation. " +
+                        "At least one of --resource-group-name or --encryption-key-resource-group-name should be specified.");
+    }
+
+    @Test
+    public void testCreateDiskEncryptionSetShouldReturnNewlyCreatedDiskEncryptionSetIfNotAlreadyExistsAndCreateNewResourceGroupWhenIsNotSingleResourceGroup() {
+        DiskEncryptionSetCreationRequest requestedSet = new DiskEncryptionSetCreationRequest.Builder()
+                .withId("uniqueId")
+                .withCloudContext(cloudContext)
+                .withCloudCredential(cloudCredential)
+                .withEncryptionKeyResourceGroupName("dummyResourceGroup")
+                .withDiskEncryptionSetResourceGroupName(null)
+                .withTags(new HashMap<>())
+                .withEncryptionKeyUrl("https://dummyVaultName.vault.azure.net/keys/dummyKeyName/dummyKeyVersion")
+                .build();
+        EncryptionSetIdentity identity = new EncryptionSetIdentity().withType(DiskEncryptionSetIdentityType.SYSTEM_ASSIGNED);
+        ReflectionTestUtils.setField(identity, "principalId", DES_PRINCIPAL_ID);
+        DiskEncryptionSetInner des = (DiskEncryptionSetInner) new DiskEncryptionSetInner()
+                .withEncryptionType(DiskEncryptionSetType.ENCRYPTION_AT_REST_WITH_CUSTOMER_KEY)
+                .withActiveKey(new KeyVaultAndKeyReference()
+                        .withKeyUrl("https://dummyVaultName.vault.azure.net/keys/dummyKeyName/dummyKeyVersion")
+                        .withSourceVault(new SourceVault()
+                                .withId("/subscriptions/dummySubs/resourceGroups/dummyResourceGroup/providers/Microsoft.KeyVault/vaults/dummyVaultName")))
+                .withIdentity(identity)
+                .withLocation("dummyRegion")
+                .withTags(new HashMap<>());
+        ResourceGroup resourceGroup = mock(ResourceGroup.class);
+        ReflectionTestUtils.setField(des, "id", DES_RESOURCE_ID);
+        Subscription subscription = mock(Subscription.class);
+        when(persistenceNotifier.notifyAllocation(any(CloudResource.class), eq(cloudContext))).thenReturn(new ResourcePersisted());
+        when(subscription.subscriptionId()).thenReturn("dummySubscriptionId");
+        when(azureUtils.generateDesNameByNameAndId(any(String.class), any(String.class))).thenReturn("dummyEnvName-DES-uniqueId");
+        when(azureClientService.createAuthenticatedContext(cloudContext, cloudCredential)).thenReturn(authenticatedContext);
+        when(authenticatedContext.getParameter(AzureClient.class)).thenReturn(azureClient);
+        when(azureClient.getCurrentSubscription()).thenReturn(subscription);
+        when(azureClient.getDiskEncryptionSetByName(any(String.class), any(String.class))).thenReturn(null);
+        when(azureUtils.generateResourceGroupNameByNameAndId(any(String.class), any(String.class))).thenReturn("envName-CDP_DES-uniqueId");
+        when(azureClient.resourceGroupExists(eq("envName-CDP_DES-uniqueId"))).thenReturn(Boolean.FALSE);
+        when(azureClient.createResourceGroup(eq("envName-CDP_DES-uniqueId"), eq("dummyRegion"), any(HashMap.class))).thenReturn(resourceGroup);
+        when(azureClient.createDiskEncryptionSet(any(String.class), any(String.class), any(String.class),
+                any(String.class), any(String.class), any(Map.class))).thenReturn(des);
+        initRetry();
+        // Return the same DES instance to simulate that the poller checker task instantly completed
+        when(diskEncryptionSetCreationPoller.startPolling(eq(authenticatedContext), any(DiskEncryptionSetCreationCheckerContext.class), eq(des)))
+                .thenReturn(des);
+
+        CreatedDiskEncryptionSet createdDes = underTest.createDiskEncryptionSet(requestedSet);
+
+        assertEquals(createdDes.getDiskEncryptionSetLocation(), "dummyRegion");
+        assertEquals(createdDes.getDiskEncryptionSetResourceGroupName(), "envName-CDP_DES-uniqueId");
+        verify(azureClient).grantKeyVaultAccessPolicyToServicePrincipal("dummyResourceGroup", "dummyVaultName", DES_PRINCIPAL_ID);
+        verify(azureClient).createResourceGroup(eq("envName-CDP_DES-uniqueId"), eq("dummyRegion"), any(HashMap.class));
+        verifyPersistedResourceGroupAndDiskEncryptionSetCloudResource(resourceGroup.id());
     }
 
     private void verifyActionFailedException(Class<? extends Throwable> expectedType, Executable executable, String messageExpected) {
@@ -705,6 +797,87 @@ public class AzureEncryptionResourcesTest {
 
         verify(azureClient, never()).deleteDiskEncryptionSet("dummyResourceGroup", "dummyDesId");
         verify(persistenceNotifier, never()).notifyDeletion(deletionRequest.getCloudResources().iterator().next(), deletionRequest.getCloudContext());
+    }
+
+    @Test
+    public void testDeleteDiskEncryptionSetShouldDeduceValidDiskEncryptionSetNameAndCheckAndDeleteResourceGroupWhenDesResourceGroupIsCreatedByCDP() {
+        CloudResource desCloudResource = new CloudResource.Builder()
+                .name("Des")
+                .type(AZURE_DISK_ENCRYPTION_SET)
+                .reference("/subscriptions/dummySubscriptionId/resourceGroups/dummy-CDP_DES-ResourceGroup/providers/" +
+                        "Microsoft.Compute/diskEncryptionSets/dummyDesId")
+                .status(CREATED)
+                .build();
+        CloudResource rgCloudResource = new CloudResource.Builder()
+                .name("dummy-CDP_DES-ResourceGroup")
+                .type(AZURE_RESOURCE_GROUP)
+                .reference("uniqueDummyId")
+                .status(CREATED)
+                .build();
+        List<CloudResource> resources = List.of(desCloudResource, rgCloudResource);
+        DiskEncryptionSetDeletionRequest deletionRequest = new DiskEncryptionSetDeletionRequest.Builder()
+                .withCloudCredential(cloudCredential)
+                .withCloudContext(cloudContext)
+                .withCloudResources(resources)
+                .build();
+        EncryptionSetIdentity identity = new EncryptionSetIdentity().withType(DiskEncryptionSetIdentityType.SYSTEM_ASSIGNED);
+        ReflectionTestUtils.setField(identity, "principalId", DES_PRINCIPAL_ID);
+        DiskEncryptionSetInner des = (DiskEncryptionSetInner) new DiskEncryptionSetInner()
+                .withEncryptionType(DiskEncryptionSetType.ENCRYPTION_AT_REST_WITH_CUSTOMER_KEY)
+                .withActiveKey(new KeyVaultAndKeyReference()
+                        .withKeyUrl("https://dummyVaultName.vault.azure.net/keys/dummyKeyName/dummyKeyVersion")
+                        .withSourceVault(new SourceVault()
+                                .withId("/subscriptions/dummySubs/resourceGroups/dummyVaultResourceGroup/providers/Microsoft.KeyVault/vaults/dummyVaultName")))
+                .withIdentity(identity)
+                .withLocation("dummyRegion");
+        when(cloudResourceHelper.getResourceTypeFromList(AZURE_DISK_ENCRYPTION_SET, resources))
+                .thenReturn(resources.isEmpty() ? Optional.empty() : Optional.of(resources.get(0)));
+        when(cloudResourceHelper.getResourceTypeFromList(AZURE_RESOURCE_GROUP, resources))
+                .thenReturn(resources.isEmpty() ? Optional.empty() : Optional.of(resources.get(1)));
+        when(azureClient.getDiskEncryptionSetByName(any(), any())).thenReturn(des);
+        when(azureClientService.getClient(cloudCredential)).thenReturn(azureClient);
+        when(azureClient.resourceGroupExists(eq("dummy-CDP_DES-ResourceGroup"))).thenReturn(Boolean.TRUE);
+        initRetry();
+
+        underTest.deleteDiskEncryptionSet(deletionRequest);
+
+        verify(azureClient).deleteDiskEncryptionSet("dummy-CDP_DES-ResourceGroup", "dummyDesId");
+        verify(azureClient).removeKeyVaultAccessPolicyFromServicePrincipal("dummyVaultResourceGroup", "dummyVaultName", DES_PRINCIPAL_ID);
+        verify(azureClient).deleteResourceGroup("dummy-CDP_DES-ResourceGroup");
+        verify(persistenceNotifier).notifyDeletion(deletionRequest.getCloudResources().get(0), deletionRequest.getCloudContext());
+        verify(persistenceNotifier).notifyDeletion(deletionRequest.getCloudResources().get(1), deletionRequest.getCloudContext());
+    }
+
+    @Test
+    public void testDeleteDiskEncryptionSetShouldDeduceValidDiskEncryptionSetNameAndShouldNotDeleteResourceGroupWhenNotCreatedByCDP() {
+        List<CloudResource> resources = getResources("/subscriptions/dummySubscriptionId/resourceGroups/dummyResourceGroup/providers/" +
+                "Microsoft.Compute/diskEncryptionSets/dummyDesId");
+        DiskEncryptionSetDeletionRequest deletionRequest = new DiskEncryptionSetDeletionRequest.Builder()
+                .withCloudCredential(cloudCredential)
+                .withCloudContext(cloudContext)
+                .withCloudResources(resources)
+                .build();
+        EncryptionSetIdentity identity = new EncryptionSetIdentity().withType(DiskEncryptionSetIdentityType.SYSTEM_ASSIGNED);
+        ReflectionTestUtils.setField(identity, "principalId", DES_PRINCIPAL_ID);
+        DiskEncryptionSetInner des = (DiskEncryptionSetInner) new DiskEncryptionSetInner()
+                .withEncryptionType(DiskEncryptionSetType.ENCRYPTION_AT_REST_WITH_CUSTOMER_KEY)
+                .withActiveKey(new KeyVaultAndKeyReference()
+                        .withKeyUrl("https://dummyVaultName.vault.azure.net/keys/dummyKeyName/dummyKeyVersion")
+                        .withSourceVault(new SourceVault()
+                                .withId("/subscriptions/dummySubs/resourceGroups/dummyVaultResourceGroup/providers/Microsoft.KeyVault/vaults/dummyVaultName")))
+                .withIdentity(identity)
+                .withLocation("dummyRegion");
+        initCloudResourceHelper(resources);
+        when(azureClient.getDiskEncryptionSetByName(any(), any())).thenReturn(des);
+        when(azureClientService.getClient(cloudCredential)).thenReturn(azureClient);
+        initRetry();
+
+        underTest.deleteDiskEncryptionSet(deletionRequest);
+
+        verify(azureClient).deleteDiskEncryptionSet("dummyResourceGroup", "dummyDesId");
+        verify(azureClient, never()).deleteResourceGroup("dummyResourceGroup");
+        verify(azureClient).removeKeyVaultAccessPolicyFromServicePrincipal("dummyVaultResourceGroup", "dummyVaultName", DES_PRINCIPAL_ID);
+        verify(persistenceNotifier).notifyDeletion(deletionRequest.getCloudResources().get(0), deletionRequest.getCloudContext());
     }
 
     private List<CloudResource> getResources(String desId) {

@@ -177,6 +177,33 @@ public class AzureParameterValidatorTest {
     }
 
     @Test
+    public void testWhenMultipleResourceGroupAndEncryptionKeyUrlAndNoEncryptionKeyResourceGroupNameThenError() {
+        EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
+                .withAzureParameters(AzureParametersDto.builder()
+                        .withResourceGroup(AzureResourceGroupDto.builder()
+                                .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_MULTIPLE)
+                                .build())
+                        .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder()
+                                .withEncryptionKeyUrl("dummyKeyUrl")
+                                .build())
+                        .build())
+                .build();
+        EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
+
+        when(credentialToCloudCredentialConverter.convert(any())).thenReturn(new CloudCredential());
+        AzureClient azureClient = mock(AzureClient.class);
+        when(azureClientService.getClient(any())).thenReturn(azureClient);
+
+        ValidationResult validationResult = underTest.validate(environmentValidationDto, environmentDto.getParameters(), ValidationResult.builder());
+
+        assertTrue(validationResult.hasError());
+        assertEquals(String.format("To use Server Side Encryption for Azure Managed disks with CMK, at least one of --encryption-key-resource-group-name or " +
+                        "--resource-group-name should be specified. Please provide --resource-group-name, if encryption key is present in the same " +
+                        "resource group you wish to create the environment in, or provide --encryption-key-resource-group-name."),
+                validationResult.getFormattedErrors());
+    }
+
+    @Test
     public void testWhenUseExistingResourceGroupAndEmptyNameAndNoEncryptionParametersThenError() {
         EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
                 .withAzureParameters(AzureParametersDto.builder()
@@ -347,13 +374,15 @@ public class AzureParameterValidatorTest {
     }
 
     @Test
-    public void testWhenUseMultipleResourceGroupsAndResourceEncryptionParameterKeyUrlAndEntitlementEnabledThenNoError() {
+    public void testWhenUseMultipleResourceGroupsAndResourceEncryptionParameterKeyUrlAndEncryptionKeyResourceGroupAndEntitlementEnabledThenNoError() {
         EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
                 .withAzureParameters(AzureParametersDto.builder()
                         .withResourceGroup(AzureResourceGroupDto.builder()
                                 .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_MULTIPLE).build())
                         .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder()
-                                .withEncryptionKeyUrl(KEY_URL).build())
+                                .withEncryptionKeyUrl(KEY_URL)
+                                .withEncryptionKeyResourceGroupName(RESOURCE_GROUP_NAME)
+                                .build())
                         .build())
                 .build();
         EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();

@@ -60,7 +60,7 @@ public class AzureParameterValidator implements ParameterValidator {
         ValidationResult validationResult;
         AzureResourceEncryptionParametersDto azureResourceEncryptionParametersDto = azureParametersDto.getAzureResourceEncryptionParametersDto();
         if (azureResourceEncryptionParametersDto != null) {
-            validationResult = validateEncryptionParameters(validationResultBuilder, azureResourceEncryptionParametersDto,
+            validationResult = validateEncryptionParameters(validationResultBuilder, azureParametersDto,
                     environmentDto.getAccountId());
             if (validationResult.hasError()) {
                 return validationResult;
@@ -145,9 +145,11 @@ public class AzureParameterValidator implements ParameterValidator {
     //CHECKSTYLE:ON
 
     private ValidationResult validateEncryptionParameters(ValidationResultBuilder validationResultBuilder,
-            AzureResourceEncryptionParametersDto azureResourceEncryptionParametersDto, String accountId) {
+            AzureParametersDto azureParametersDto, String accountId) {
 
+        AzureResourceEncryptionParametersDto azureResourceEncryptionParametersDto = azureParametersDto.getAzureResourceEncryptionParametersDto();
         String encryptionKeyUrl = azureResourceEncryptionParametersDto.getEncryptionKeyUrl();
+        String encryptionKeyResourceGroupName = azureResourceEncryptionParametersDto.getEncryptionKeyResourceGroupName();
         if (encryptionKeyUrl != null) {
             if (!entitlementService.isAzureDiskSSEWithCMKEnabled(accountId)) {
                 LOGGER.info("Invalid request, CDP_CB_AZURE_DISK_SSE_WITH_CMK entitlement turned off for account {}", accountId);
@@ -156,8 +158,16 @@ public class AzureParameterValidator implements ParameterValidator {
                                 + "but that feature is currently disabled. Get 'CDP_CB_AZURE_DISK_SSE_WITH_CMK' enabled for your account to use SSE with CMK.").
                         build();
             }
+            if (encryptionKeyResourceGroupName == null && USE_MULTIPLE.equals(azureParametersDto.getAzureResourceGroupDto().getResourceGroupUsagePattern())) {
+                LOGGER.info("Invalid request, neither --encryption-key-resource-group-name nor --resource-group-name is present.");
+                return validationResultBuilder.error(
+                        "To use Server Side Encryption for Azure Managed disks with CMK, at least one of --encryption-key-resource-group-name or " +
+                                "--resource-group-name should be specified. Please provide --resource-group-name, if encryption key is present in the same " +
+                                "resource group you wish to create the environment in, or provide --encryption-key-resource-group-name.").
+                        build();
+            }
         }
-        String encryptionKeyResourceGroupName = azureResourceEncryptionParametersDto.getEncryptionKeyResourceGroupName();
+
         if (encryptionKeyResourceGroupName != null) {
             if (!entitlementService.isAzureDiskSSEWithCMKEnabled(accountId)) {
                 LOGGER.info("Invalid request, CDP_CB_AZURE_DISK_SSE_WITH_CMK entitlement turned off for account {}", accountId);

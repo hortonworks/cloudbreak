@@ -3,6 +3,7 @@ package com.sequenceiq.environment.environment.encryption;
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -119,9 +120,16 @@ public class EnvironmentEncryptionService {
     }
 
     private List<CloudResource> getResourcesForDeletion(EnvironmentDto environment) {
+        List<CloudResource> resources = new ArrayList<>();
         Optional<CloudResource> desCloudResourceOptional = resourceRetriever.findByEnvironmentIdAndType(environment.getId(),
                 ResourceType.AZURE_DISK_ENCRYPTION_SET);
-        return desCloudResourceOptional.map(List::of).orElse(List.of());
-    }
+        desCloudResourceOptional.ifPresent(resources::add);
 
+        // Resource group is persisted in cloudResource only when it is created by CDP, as part of disk encryption set creation in case of
+        // multi-resource group.
+        Optional<CloudResource> rgCloudResourceOptional = resourceRetriever.findByEnvironmentIdAndType(environment.getId(),
+                ResourceType.AZURE_RESOURCE_GROUP);
+        rgCloudResourceOptional.ifPresent(resources::add);
+        return resources;
+    }
 }
