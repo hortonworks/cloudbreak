@@ -1,13 +1,12 @@
 package com.sequenceiq.freeipa.service.client;
 
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.ws.rs.InternalServerErrorException;
 
-import org.apache.commons.lang3.StringUtils;
+import com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -80,17 +79,16 @@ public class FreeipaClientTestService {
         try {
             LOGGER.info("Checking if group [{}] has users [{}] in environment {}", requestedGroup,
                     Joiner.on(",").join(requestedUsers), environmentCrn);
-            Set<Group> freeipaGroups = freeIpaClient.groupFindAll();
-            LOGGER.debug("Groups in freeipa: {}", Joiner.on(",").join(freeipaGroups.stream().map(Group::getCn).collect(Collectors.toSet())));
-            Optional<Group> freeipaGroup = freeipaGroups.stream().filter(ipaGroup ->
-                    StringUtils.equals(ipaGroup.getCn(), requestedGroup)).findFirst();
-            if (freeipaGroup.isPresent()) {
-                LOGGER.debug("Group [{}] found in freeipa, it has users [{}].", freeipaGroup.get().getCn(), freeipaGroup.get().getMemberUser());
-            }
-            return freeipaGroup.isPresent() && freeipaGroup.get().getMemberUser().containsAll(requestedUsers);
+            Group freeipaGroup = freeIpaClient.groupShow(requestedGroup);
+            LOGGER.debug("Group [{}] found in freeipa, it has users [{}].", freeipaGroup.getCn(), freeipaGroup.getMemberUser());
+            return freeipaGroup.getMemberUser() != null && freeipaGroup.getMemberUser().containsAll(requestedUsers);
         } catch (FreeIpaClientException e) {
-            LOGGER.error("Find group FreeIPA call failed!", e);
-            throw new InternalServerErrorException("Find group FreeIPA call failed!");
+            if (FreeIpaClientExceptionUtil.isNotFoundException(e)) {
+                LOGGER.debug("Group [{}] not found in freeipa", requestedGroup);
+                return false;
+            }
+            LOGGER.error("Show group FreeIPA call failed!", e);
+            throw new InternalServerErrorException("Show group FreeIPA call failed!");
         }
     }
 
