@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.diagnostics;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 
+import java.lang.module.ModuleDescriptor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -44,6 +45,13 @@ public class DiagnosticsFlowService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DiagnosticsFlowService.class);
 
+    private static final String STABLE_NETWORK_CHECK_VERSION = "0.4.8";
+
+    private static final String AWS_METADATA_SERVER_V2_SUPPORT_VERSION = "0.4.9";
+
+    private static final String AWS_EC2_METADATA_SERVICE_WARNING = "Could be related with unavailable instance metadata service response " +
+            "from ec2 node. (region, domain)";
+
     @Inject
     private StackService stackService;
 
@@ -69,16 +77,16 @@ public class DiagnosticsFlowService {
     private DataBusEndpointProvider dataBusEndpointProvider;
 
     public void nodeStatusNetworkReport(Long stackId) {
-        nodeStatusNetworkReport(stackId, true);
-    }
-
-    public void nodeStatusNetworkReport(Long stackId, boolean useNotifications) {
         try {
             RPCResponse<NodeStatusProto.NodeStatusReport> rpcResponse = nodeStatusService.getNetworkReport(stackId);
             if (rpcResponse != null) {
                 LOGGER.debug("Diagnostics network report response: {}", rpcResponse.getFirstTextMessage());
-                if (rpcResponse.getResult() != null && useNotifications) {
-                    List<NodeStatusProto.NetworkDetails> networkNodes = rpcResponse.getResult().getNodesList().stream()
+                NodeStatusProto.NodeStatusReport nodeStatusReport = rpcResponse.getResult();
+                if (nodeStatusReport != null && nodeStatusReport.getNodesList() != null) {
+                    String cdpTelemetryVersion = nodeStatusReport.getCdpTelemetryVersion();
+                    boolean stableNetworkCheckSupported = isVersionGreaterOrEqual(cdpTelemetryVersion, STABLE_NETWORK_CHECK_VERSION);
+                    boolean awsMetadataServerV2Supported = isVersionGreaterOrEqual(cdpTelemetryVersion, AWS_METADATA_SERVER_V2_SUPPORT_VERSION);
+                    List<NodeStatusProto.NetworkDetails> networkNodes = nodeStatusReport.getNodesList().stream()
                             .map(NodeStatusProto.NodeStatus::getNetworkDetails)
                             .collect(Collectors.toList());
                     String globalDatabusEndpoint = altusDatabusConfiguration.getAltusDatabusEndpoint();
@@ -91,14 +99,14 @@ public class DiagnosticsFlowService {
                     String databusS3Endpoint = dataBusEndpointProvider.getDatabusS3Endpoint(databusEndpoint);
                     if (StringUtils.isNotBlank(databusS3Endpoint)) {
                         firePreFlightCheckEvents(stackId, String.format("DataBus S3 API ('%s') accessibility", databusS3Endpoint),
-                                networkNodes, NodeStatusProto.NetworkDetails::getDatabusS3Accessible);
+                                networkNodes, NodeStatusProto.NetworkDetails::getDatabusS3Accessible, stableNetworkCheckSupported);
                     }
-                    firePreFlightCheckEvents(stackId, "'.cloudera.com' accessibility",
-                            networkNodes, NodeStatusProto.NetworkDetails::getClouderaComAccessible);
+                    firePreFlightCheckEvents(stackId, "'archive.cloudera.com' accessibility",
+                            networkNodes, NodeStatusProto.NetworkDetails::getArchiveClouderaComAccessible, stableNetworkCheckSupported);
                     firePreFlightCheckEvents(stackId, "S3 endpoint accessibility",
-                            networkNodes, NodeStatusProto.NetworkDetails::getS3Accessible);
+                            networkNodes, NodeStatusProto.NetworkDetails::getS3Accessible, awsMetadataServerV2Supported, AWS_EC2_METADATA_SERVICE_WARNING);
                     firePreFlightCheckEvents(stackId, "STS endpoint accessibility",
-                            networkNodes, NodeStatusProto.NetworkDetails::getStsAccessible);
+                            networkNodes, NodeStatusProto.NetworkDetails::getStsAccessible, awsMetadataServerV2Supported, AWS_EC2_METADATA_SERVICE_WARNING);
                     firePreFlightCheckEvents(stackId, "ADLSv2 ('<storage_account>.dfs.core.windows.net') endpoint accessibility",
                             networkNodes, NodeStatusProto.NetworkDetails::getAdlsV2Accessible);
                     firePreFlightCheckEvents(stackId, "'management.azure.com' accessibility",
@@ -257,12 +265,33 @@ public class DiagnosticsFlowService {
 
     private void firePreFlightCheckEvents(Long resourceId, String checkType, List<NodeStatusProto.NetworkDetails> networkNodes,
             Function<NodeStatusProto.NetworkDetails, NodeStatusProto.HealthStatus> healthEvaluator) {
+        firePreFlightCheckEvents(resourceId, checkType, networkNodes, healthEvaluator, null);
+    }
+
+    private void firePreFlightCheckEvents(Long resourceId, String checkType, List<NodeStatusProto.NetworkDetails> networkNodes,
+            Function<NodeStatusProto.NetworkDetails, NodeStatusProto.HealthStatus> healthEvaluator, boolean condition) {
+        if (condition) {
+            firePreFlightCheckEvents(resourceId, checkType, networkNodes, healthEvaluator, null);
+        }
+    }
+
+    private void firePreFlightCheckEvents(Long resourceId, String checkType, List<NodeStatusProto.NetworkDetails> networkNodes,
+            Function<NodeStatusProto.NetworkDetails, NodeStatusProto.HealthStatus> healthEvaluator, boolean condition, String conditionalErrorMsg) {
+        if (condition) {
+            firePreFlightCheckEvents(resourceId, checkType, networkNodes, healthEvaluator, null);
+        } else {
+            firePreFlightCheckEvents(resourceId, checkType, networkNodes, healthEvaluator, conditionalErrorMsg);
+        }
+    }
+
+    private void firePreFlightCheckEvents(Long resourceId, String checkType, List<NodeStatusProto.NetworkDetails> networkNodes,
+            Function<NodeStatusProto.NetworkDetails, NodeStatusProto.HealthStatus> healthEvaluator, String conditionalErrorMsg) {
         if (allNetworkNodesInUnknownStatus(networkNodes, healthEvaluator)) {
             LOGGER.debug("All network details are in UNKNOWN state, this could mean responses does not support this network check type yet. Skip processing..");
         } else {
             List<String> unhealthyNetworkHosts =
                     getUnhealthyHosts(networkNodes, healthEvaluator);
-            List<String> eventMessageParameters = getPreFlightStatusParameters(checkType, unhealthyNetworkHosts);
+            List<String> eventMessageParameters = getPreFlightStatusParameters(checkType, unhealthyNetworkHosts, conditionalErrorMsg);
             String eventType = CollectionUtils.isEmpty(unhealthyNetworkHosts) ? UPDATE_IN_PROGRESS.name() : UPDATE_FAILED.name();
             cloudbreakEventService.fireCloudbreakEvent(resourceId, eventType,
                     ResourceEvent.STACK_DIAGNOSTICS_PREFLIGHT_CHECK_FINISHED, eventMessageParameters);
@@ -274,12 +303,14 @@ public class DiagnosticsFlowService {
         return networkNodes.stream().allMatch(n -> NodeStatusProto.HealthStatus.UNKNOWN.equals(healthEvaluator.apply(n)));
     }
 
-    private List<String> getPreFlightStatusParameters(String checkType, List<String> unhealthyNetworkHosts) {
+    private List<String> getPreFlightStatusParameters(String checkType, List<String> unhealthyNetworkHosts, String conditionalErrorMsg) {
         List<String> result = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(unhealthyNetworkHosts)) {
+            String additionalErrorMessage = conditionalErrorMsg != null ? String.format(" %s.", conditionalErrorMsg) : "";
             result.add("WARNING - ");
             result.add(checkType);
-            result.add(String.format("FAILED. The following hosts are affected: [%s]", StringUtils.join(unhealthyNetworkHosts, ", ")));
+            result.add(String.format("FAILED.%s The following hosts are affected: [%s]",
+                    additionalErrorMessage, StringUtils.join(unhealthyNetworkHosts, ", ")));
             return result;
         } else {
             result.add("");
@@ -295,6 +326,12 @@ public class DiagnosticsFlowService {
                 .filter(nd -> NodeStatusProto.HealthStatus.NOK.equals(healthEvaluator.apply(nd)))
                 .map(NodeStatusProto.NetworkDetails::getHost)
                 .collect(Collectors.toList());
+    }
+
+    public boolean isVersionGreaterOrEqual(String actualVersion, String versionToCompare) {
+        ModuleDescriptor.Version actVersion = ModuleDescriptor.Version.parse(actualVersion);
+        ModuleDescriptor.Version versionToCmp = ModuleDescriptor.Version.parse(versionToCompare);
+        return actVersion.compareTo(versionToCmp) >= 0;
     }
 
 }
