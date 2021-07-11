@@ -49,7 +49,6 @@ auth:
     endpointgateway.enable.azure: false
     endpointgateway.skip.validation: false
     cm.sync.command.poller.enable: true
-    network.preflight.notifications.enable: true
     datahub.nodestatus.check.enable: true
     nodestatus.salt.ping.enable: true
     metrics.databus.processing.enable: false

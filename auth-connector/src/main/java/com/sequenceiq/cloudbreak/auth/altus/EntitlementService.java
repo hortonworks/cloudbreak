@@ -40,7 +40,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_GCP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MEDIUM_DUTY_SDX;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_NETWORK_PREFLIGHT_NOTIFICATIONS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_NODESTATUS_ENABLE_SALT_PING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_AZURE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RAZ;
@@ -119,10 +118,6 @@ public class EntitlementService {
 
     public boolean cmAutoBundleCollectionDisabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_CM_DISABLE_AUTO_BUNDLE_COLLECTION);
-    }
-
-    public boolean networkPreflightNotificationsEnabled(String accountId) {
-        return isEntitlementRegistered(accountId, CDP_NETWORK_PREFLIGHT_NOTIFICATIONS);
     }
 
     public boolean datahubNodestatusCheckEnabled(String accountId) {
