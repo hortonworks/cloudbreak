@@ -6,13 +6,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cm.exception.CloudStorageConfigurationFailedException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.AccountMapping;
+import com.sequenceiq.cloudbreak.domain.cloudstorage.AdlsGen2Identity;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.CloudIdentity;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.CloudStorage;
+import com.sequenceiq.cloudbreak.domain.cloudstorage.GcsIdentity;
+import com.sequenceiq.cloudbreak.domain.cloudstorage.S3Identity;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.StorageLocation;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.util.DocumentationLinkProvider;
@@ -24,39 +28,55 @@ public class ClouderaManagerStorageErrorMapper {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerStorageErrorMapper.class);
 
+    private static final String MESSAGE_VALIDATION_ERROR = "No surprise that cluster creation has failed, probably something was not validated properly " +
+            "in cloud storage config. This is most probably a control plane bug: ";
+
     public String map(CloudStorageConfigurationFailedException e, String cloudPlatform, Cluster cluster) {
 
         String errorMessage = e.getMessage();
 
         if (cluster.isRangerRazEnabled()) {
-            errorMessage += "Ranger RAZ is enabled on this cluster.";
+            errorMessage = getRazError(errorMessage);
         } else {
-            try {
-                CloudStorage cloudStorage = cluster.getFileSystem().getCloudStorage();
-                switch (cloudPlatform) {
-                    case CloudConstants.AWS:
-                        errorMessage = awsError(cloudStorage);
-                        break;
-                    case CloudConstants.AZURE:
-                        errorMessage = azureError(cloudStorage);
-                        break;
-                    case CloudConstants.GCP:
-                        errorMessage = gcpError(cloudStorage);
-                        break;
-                    default:
-                        LOGGER.debug("We don't have error massage mapper for platform: {}", cloudPlatform);
+            CloudStorage cloudStorage = Optional.of(cluster)
+                    .map(Cluster::getFileSystem)
+                    .map(FileSystem::getCloudStorage)
+                    .orElse(null);
+            if (cloudStorage != null && cloudStorage.getCloudIdentities() != null && cloudStorage.getAccountMapping() != null
+                    && cloudStorage.getAccountMapping().getUserMappings() != null) {
+                try {
+                    switch (cloudPlatform) {
+                        case CloudConstants.AWS:
+                            errorMessage = awsError(cloudStorage);
+                            break;
+                        case CloudConstants.AZURE:
+                            errorMessage = azureError(cloudStorage);
+                            break;
+                        case CloudConstants.GCP:
+                            errorMessage = gcpError(cloudStorage);
+                            break;
+                        default:
+                            LOGGER.debug("We don't have error message mapper for platform: {}", cloudPlatform);
+                    }
+                } catch (RuntimeException runtimeException) {
+                    LOGGER.error(MESSAGE_VALIDATION_ERROR + JsonUtil.writeValueAsStringSilent(cloudStorage), runtimeException);
                 }
-            } catch (RuntimeException runtimeException) {
-                CloudStorage cloudStorage = Optional.ofNullable(cluster).map(Cluster::getFileSystem)
-                        .map(FileSystem::getCloudStorage).orElse(null);
-                LOGGER.error("No surprise that cluster creation has failed, probably something was not validated properly " +
-                                "in cloud storage config. This is most probably a control plane bug: {}",
-                        JsonUtil.writeValueAsStringSilent(cloudStorage), runtimeException);
+            } else {
+                LOGGER.warn(MESSAGE_VALIDATION_ERROR + JsonUtil.writeValueAsStringSilent(cloudStorage));
             }
         }
 
         LOGGER.debug("Mapped error message: {} original: {}", errorMessage, e.getMessage());
         return errorMessage;
+    }
+
+    private String getRazError(String errorMessage) {
+        StringBuilder sb = new StringBuilder();
+        if (!Strings.isNullOrEmpty(errorMessage)) {
+            sb.append(errorMessage);
+            sb.append(errorMessage.endsWith(".") ? " " : ". ");
+        }
+        return sb.append("Ranger RAZ is enabled on this cluster.").toString();
     }
 
     private String awsError(CloudStorage cloudStorage) {
@@ -65,7 +85,7 @@ public class ClouderaManagerStorageErrorMapper {
 
         for (CloudIdentity cloudIdentity : cloudStorage.getCloudIdentities()) {
             if (CloudIdentityType.ID_BROKER == cloudIdentity.getIdentityType()) {
-                assumerInstanceProfile = cloudIdentity.getS3Identity().getInstanceProfile();
+                assumerInstanceProfile = Optional.ofNullable(cloudIdentity.getS3Identity()).map(S3Identity::getInstanceProfile).orElse("");
                 break;
             }
         }
@@ -94,7 +114,7 @@ public class ClouderaManagerStorageErrorMapper {
 
         for (CloudIdentity cloudIdentity : cloudStorage.getCloudIdentities()) {
             if (CloudIdentityType.ID_BROKER == cloudIdentity.getIdentityType()) {
-                serviceAccountEmail = cloudIdentity.getGcsIdentity().getServiceAccountEmail();
+                serviceAccountEmail = Optional.ofNullable(cloudIdentity.getGcsIdentity()).map(GcsIdentity::getServiceAccountEmail).orElse("");
                 break;
             }
         }
@@ -123,7 +143,7 @@ public class ClouderaManagerStorageErrorMapper {
 
         for (CloudIdentity cloudIdentity : cloudStorage.getCloudIdentities()) {
             if (CloudIdentityType.ID_BROKER == cloudIdentity.getIdentityType()) {
-                assumerIdentity = cloudIdentity.getAdlsGen2Identity().getManagedIdentity();
+                assumerIdentity = Optional.ofNullable(cloudIdentity.getAdlsGen2Identity()).map(AdlsGen2Identity::getManagedIdentity).orElse("");
                 break;
             }
         }
