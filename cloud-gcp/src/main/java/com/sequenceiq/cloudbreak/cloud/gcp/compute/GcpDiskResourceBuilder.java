@@ -28,7 +28,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
-import com.sequenceiq.cloudbreak.cloud.model.Location;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @Component
@@ -49,20 +49,20 @@ public class GcpDiskResourceBuilder extends AbstractGcpComputeBuilder {
     public List<CloudResource> create(GcpContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group, Image image) {
         CloudContext cloudContext = auth.getCloudContext();
         String resourceName = getResourceNameService().resourceName(resourceType(), cloudContext.getName(), group.getName(), privateId);
-        return Collections.singletonList(createNamedResource(resourceType(), resourceName));
+        return Collections.singletonList(createNamedResource(resourceType(), resourceName, instance.getAvailabilityZone()));
     }
 
     @Override
     public List<CloudResource> build(GcpContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group,
             List<CloudResource> buildableResources, CloudStack cloudStack) throws Exception {
         String projectId = context.getProjectId();
-        Location location = context.getLocation();
+        String location = instance.getAvailabilityZone();
 
         Disk disk = new Disk();
         disk.setDescription(description());
         disk.setSizeGb((long) group.getRootVolumeSize());
         disk.setName(buildableResources.get(0).getName());
-        disk.setKind(GcpDiskType.SSD.getUrl(projectId, location.getAvailabilityZone()));
+        disk.setKind(GcpDiskType.SSD.getUrl(projectId, location));
 
         InstanceTemplate template = group.getReferenceInstanceTemplate();
         customGcpDiskEncryptionService.addEncryptionKeyToDisk(template, disk);
@@ -70,8 +70,8 @@ public class GcpDiskResourceBuilder extends AbstractGcpComputeBuilder {
         Map<String, String> labels = gcpLabelUtil.createLabelsFromTags(cloudStack);
         disk.setLabels(labels);
 
-        Insert insDisk = context.getCompute().disks().insert(projectId, location.getAvailabilityZone().value(), disk);
-        insDisk.setSourceImage(gcpStackUtil.getAmbariImage(projectId, cloudStack.getImage().getImageName()));
+        Insert insDisk = context.getCompute().disks().insert(projectId, location, disk);
+        insDisk.setSourceImage(gcpStackUtil.getCDPImage(projectId, cloudStack.getImage().getImageName()));
         try {
             Operation operation = insDisk.execute();
             if (operation.getHttpErrorStatusCode() != null) {
@@ -86,11 +86,14 @@ public class GcpDiskResourceBuilder extends AbstractGcpComputeBuilder {
     @Override
     public CloudResource delete(GcpContext context, AuthenticatedContext auth, CloudResource resource) throws Exception {
         String resourceName = resource.getName();
+        VolumeSetAttributes volumeSetAttributes = resource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
+
+        String zone = volumeSetAttributes.getAvailabilityZone();
         try {
             LOGGER.info("Creating operation to delete disk [name: {}] in project [id: {}] in the following availability zone: {}", resourceName,
-                    context.getProjectId(), context.getLocation().getAvailabilityZone().value());
+                    context.getProjectId(), zone);
             Operation operation = context.getCompute().disks()
-                    .delete(context.getProjectId(), context.getLocation().getAvailabilityZone().value(), resourceName).execute();
+                    .delete(context.getProjectId(), zone, resourceName).execute();
             return createOperationAwareCloudResource(resource, operation);
         } catch (GoogleJsonResponseException e) {
             exceptionHandler(e, resourceName, resourceType());

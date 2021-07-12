@@ -31,7 +31,7 @@ public class GcpNetworkResourceBuilder extends AbstractGcpNetworkBuilder {
         String name = gcpStackUtil.isExistingNetwork(network) ?
                 gcpStackUtil.getCustomNetworkId(network) :
                 getResourceNameService().resourceName(resourceType(), context.getName());
-        return createNamedResource(resourceType(), name);
+        return createNamedResource(resourceType(), name, null);
     }
 
     @Override

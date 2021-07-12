@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
+import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
+import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
+import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -78,6 +81,7 @@ public class LaunchConfigurationHandlerTest {
                 .withPlatform("AWS")
                 .withUserId(USER_ID)
                 .withWorkspaceId(WORKSPACE_ID)
+                .withLocation(location(region("region"), availabilityZone("az1")))
                 .build();
         String imageName = "imageName";
         String launchConfigurationName = underTest.createNewLaunchConfiguration(imageName, autoScalingClient,
@@ -99,6 +103,7 @@ public class LaunchConfigurationHandlerTest {
                 .withPlatform("AWS")
                 .withUserId(USER_ID)
                 .withWorkspaceId(WORKSPACE_ID)
+                .withLocation(location(region("region"), availabilityZone("az1")))
                 .build();
         String launchConfigurationName = "old";
         underTest.removeOldLaunchConfiguration(new LaunchConfiguration().withLaunchConfigurationName(launchConfigurationName), autoScalingClient, context);

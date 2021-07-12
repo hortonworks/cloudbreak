@@ -126,6 +126,7 @@ public class CloudFormationStackUtil {
                                     .name(id)
                                     .group(group.getName())
                                     .status(CommonStatus.CREATED)
+                                    .availabilityZone(ac.getCloudContext().getLocation().getAvailabilityZone().value())
                                     .persistent(false)
                                     .build());
                 })

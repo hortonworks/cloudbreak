@@ -248,7 +248,7 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         stack.setClusterNameAsSubdomain(false);
         stack.setType(StackType.WORKLOAD);
         stack.setParameters(Map.of(PlatformParametersConsts.TTL_MILLIS, String.valueOf(System.currentTimeMillis())));
-        Resource s3ArnResource = new Resource(ResourceType.S3_ACCESS_ROLE_ARN, "s3Arn", stack);
+        Resource s3ArnResource = new Resource(ResourceType.S3_ACCESS_ROLE_ARN, "s3Arn", stack, "az1");
         stack.setResources(Collections.singleton(s3ArnResource));
         stack.setEnvironmentCrn("");
         stack.setTerminated(100L);

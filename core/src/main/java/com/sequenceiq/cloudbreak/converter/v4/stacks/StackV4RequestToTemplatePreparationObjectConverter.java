@@ -217,7 +217,10 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
         BaseFileSystemConfigurationsView fileSystemConfigurationView = null;
         if (isCloudStorageConfigured(source)) {
             FileSystem fileSystem = cloudStorageConverter.requestToFileSystem(source.getCluster().getCloudStorage());
-            fileSystemConfigurationView = fileSystemConfigurationProvider.fileSystemConfiguration(fileSystem, source, credentialAttributes,
+            fileSystemConfigurationView = fileSystemConfigurationProvider.fileSystemConfiguration(
+                    fileSystem,
+                    source,
+                    credentialAttributes,
                     cmCloudStorageConfigProvider.getConfigQueryEntries());
         }
         return fileSystemConfigurationView;

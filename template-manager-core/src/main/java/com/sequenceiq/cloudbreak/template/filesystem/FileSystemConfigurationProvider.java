@@ -35,13 +35,19 @@ public class FileSystemConfigurationProvider {
             Collection<Resource> stackResources = resourceFuction.apply(ResourceType.ARM_TEMPLATE);
             resource = stackResources.stream().findFirst();
         }
-        return fileSystemConfiguration(fileSystem, stack.getId(), stack.getUuid(), credentialAttributes,
-                stack.getPlatformVariant(), resource, configQueryEntries);
+        return fileSystemConfiguration(
+                fileSystem,
+                stack.getId(),
+                stack.getUuid(),
+                credentialAttributes,
+                stack.getPlatformVariant(),
+                resource,
+                configQueryEntries);
     }
 
     public BaseFileSystemConfigurationsView fileSystemConfiguration(FileSystem fileSystem, StackV4Request request,
             Json credentialAttributes, ConfigQueryEntries configQueryEntries) throws IOException {
-        Resource resource = new Resource(ResourceType.ARM_TEMPLATE, request.getName(), null);
+        Resource resource = new Resource(ResourceType.ARM_TEMPLATE, request.getName(), null, null);
         return fileSystemConfiguration(fileSystem, 0L, "fake-uuid", credentialAttributes,
                 request.getCloudPlatform().name(), Optional.of(resource), configQueryEntries);
     }

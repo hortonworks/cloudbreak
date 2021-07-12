@@ -25,6 +25,7 @@ public class CloudResourceToResourceConverter extends AbstractConversionServiceA
         domainResource.setResourceStatus(source.getStatus());
         domainResource.setInstanceGroup(source.getGroup());
         domainResource.setInstanceId(source.getInstanceId());
+        domainResource.setAvailabilityZone(source.getAvailabilityZone());
         Optional.ofNullable(source.getParameters().get(CloudResource.ATTRIBUTES)).ifPresent(attributes -> {
             try {
                 Json attributesJson = new Json(attributes);

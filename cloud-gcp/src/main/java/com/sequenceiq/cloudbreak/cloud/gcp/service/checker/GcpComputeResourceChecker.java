@@ -14,10 +14,13 @@ import org.springframework.stereotype.Component;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.model.Operation;
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
+import com.sequenceiq.cloudbreak.cloud.model.Region;
 
 @Component
 public class GcpComputeResourceChecker {
@@ -27,7 +30,7 @@ public class GcpComputeResourceChecker {
     private GcpStackUtil gcpStackUtil;
 
     @Retryable(value = CloudConnectorException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000))
-    public Operation check(GcpContext context,  String operationId) throws IOException {
+    public Operation check(GcpContext context,  String operationId, Iterable<CloudResource> resources) throws IOException {
         if (operationId == null) {
             return null;
         }
@@ -44,7 +47,7 @@ public class GcpComputeResourceChecker {
             String message = String.format("Failed to check the '%s' operation on the resource for '%s'.", operationId,
                     context.getName());
             LOGGER.warn(message, e);
-            return handleException(context, operationId, e);
+            return handleException(context, operationId, resources, e);
         }
     }
 
@@ -62,17 +65,22 @@ public class GcpComputeResourceChecker {
         }
     }
 
-    protected Operation handleException(GcpContext context, String operationId, GoogleJsonResponseException e) throws IOException {
+    protected Operation handleException(GcpContext context, String operationId, Iterable<CloudResource> resources,
+        GoogleJsonResponseException e) throws IOException {
         if (e.getDetails().get("code").equals(HttpStatus.SC_NOT_FOUND) || e.getDetails().get("code").equals(HttpStatus.SC_FORBIDDEN)) {
             Location location = context.getLocation();
+            Region region = location.getRegion();
+            CloudResource cloudResource = resources.iterator().next();
+            String availabilityZone = Strings.isNullOrEmpty(cloudResource.getAvailabilityZone())
+                    ? location.getAvailabilityZone().value() : cloudResource.getAvailabilityZone();
             try {
-                Operation execute = gcpStackUtil.regionOperations(context.getCompute(), context.getProjectId(), operationId, location.getRegion()).execute();
+                Operation execute = gcpStackUtil.regionOperations(context.getCompute(), context.getProjectId(), operationId, region).execute();
                 checkComputeOperationError(execute);
                 return execute;
             } catch (GoogleJsonResponseException e1) {
                 if (e1.getDetails().get("code").equals(HttpStatus.SC_NOT_FOUND) || e1.getDetails().get("code").equals(HttpStatus.SC_FORBIDDEN)) {
                     Operation execute = gcpStackUtil.zoneOperations(context.getCompute(), context.getProjectId(), operationId,
-                            location.getAvailabilityZone()).execute();
+                            availabilityZone).execute();
                     checkComputeOperationError(execute);
                     return execute;
                 } else {

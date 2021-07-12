@@ -45,7 +45,7 @@ public abstract class AbstractGcpComputeBaseResourceChecker extends AbstractGcpB
             LOGGER.debug("Check {} resource: {}", type, resource);
             try {
                 String operationId = resource.getStringParameter(OPERATION_ID);
-                Operation operation = resourceChecker.check(context, operationId);
+                Operation operation = resourceChecker.check(context, operationId, resources);
                 boolean finished = operation == null || gcpStackUtil.isOperationFinished(operation);
                 ResourceStatus successStatus = context.isBuild() ? ResourceStatus.CREATED : ResourceStatus.DELETED;
                 result.add(new CloudResourceStatus(resource, finished ? successStatus : ResourceStatus.IN_PROGRESS));

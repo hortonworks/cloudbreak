@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.sql;
 
+import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
+import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
+import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -33,6 +36,7 @@ import com.google.api.services.sqladmin.model.Operation;
 import com.google.api.services.sqladmin.model.Settings;
 import com.google.api.services.sqladmin.model.User;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpComputeFactory;
 import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpSQLAdminFactory;
@@ -67,12 +71,15 @@ public class GcpDatabaseServerLaunchServiceTest {
     @Mock
     private GcpStackUtil gcpStackUtil;
 
+    @Mock
+    private CloudContext cloudContext;
+
     @InjectMocks
     private GcpDatabaseServerLaunchService underTest;
 
     @Test
     public void testGetGcpDatabase() {
-        CloudResource gcpDatabase = underTest.getGcpDatabase("test");
+        CloudResource gcpDatabase = underTest.getGcpDatabase("test", "az1");
 
         Assert.assertEquals(ResourceType.GCP_DATABASE, gcpDatabase.getType());
         Assert.assertEquals("test", gcpDatabase.getName());
@@ -80,7 +87,7 @@ public class GcpDatabaseServerLaunchServiceTest {
 
     @Test
     public void testGetRdsPort() {
-        CloudResource rdsPort = underTest.getRdsPort();
+        CloudResource rdsPort = underTest.getRdsPort("az1");
 
         Assert.assertEquals(ResourceType.RDS_PORT, rdsPort.getType());
         Assert.assertEquals("5432", rdsPort.getName());
@@ -95,7 +102,7 @@ public class GcpDatabaseServerLaunchServiceTest {
 
         when(databaseInstance.getIpAddresses()).thenReturn(List.of(ipMapping));
 
-        CloudResource rdsHostName = underTest.getRdsHostName(databaseInstance, new CloudResource.Builder(), "id-1");
+        CloudResource rdsHostName = underTest.getRdsHostName(databaseInstance, new CloudResource.Builder(), "id-1", "az1");
 
         Assert.assertEquals(ResourceType.RDS_HOSTNAME, rdsHostName.getType());
         Assert.assertEquals("10.0.0.0", rdsHostName.getName());
@@ -132,6 +139,8 @@ public class GcpDatabaseServerLaunchServiceTest {
         settings.setActivationPolicy("ALWAYS");
         databaseInstance.setSettings(settings);
         when(instancesListResponse.getItems()).thenReturn(List.of(databaseInstance));
+        when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
+        when(cloudContext.getLocation()).thenReturn(location(region("region"), availabilityZone("az1")));
 
         List<CloudResource> launch = underTest.launch(authenticatedContext, databaseStack, persistenceNotifier);
 
@@ -211,6 +220,8 @@ public class GcpDatabaseServerLaunchServiceTest {
         when(sqlAdmin.users()).thenReturn(users);
         when(users.insert(anyString(), anyString(), any(User.class))).thenReturn(usersInsert);
         when(usersInsert.execute()).thenReturn(operation);
+        when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
+        when(cloudContext.getLocation()).thenReturn(location(region("region"), availabilityZone("az1")));
 
         List<CloudResource> launch = underTest.launch(authenticatedContext, databaseStack, persistenceNotifier);
 
@@ -289,6 +300,8 @@ public class GcpDatabaseServerLaunchServiceTest {
         when(sqlAdmin.users()).thenReturn(users);
         when(users.insert(anyString(), anyString(), any(User.class))).thenReturn(usersInsert);
         when(usersInsert.execute()).thenReturn(operation);
+        when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
+        when(cloudContext.getLocation()).thenReturn(location(region("region"), availabilityZone("az1")));
 
         List<CloudResource> launch = underTest.launch(authenticatedContext, databaseStack, persistenceNotifier);
 
@@ -336,6 +349,8 @@ public class GcpDatabaseServerLaunchServiceTest {
         when(gcpSQLAdminFactory.buildSQLAdmin(any(CloudCredential.class), anyString())).thenReturn(sqlAdmin);
         when(gcpComputeFactory.buildCompute(any(CloudCredential.class))).thenReturn(compute);
         when(gcpStackUtil.getProjectId(any(CloudCredential.class))).thenReturn("project-id");
+        when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
+        when(cloudContext.getLocation()).thenReturn(location(region("region"), availabilityZone("az1")));
         when(sqlAdmin.instances()).thenReturn(sqlAdminInstances);
         when(sqlAdminInstances.list(anyString())).thenReturn(sqlAdminInstancesList);
         when(sqlAdminInstancesList.execute()).thenThrow(googleJsonResponseException);
@@ -422,6 +437,8 @@ public class GcpDatabaseServerLaunchServiceTest {
         when(sqlAdmin.users()).thenReturn(users);
         when(users.insert(anyString(), anyString(), any(User.class))).thenReturn(usersInsert);
         when(usersInsert.execute()).thenThrow(googleJsonResponseException);
+        when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
+        when(cloudContext.getLocation()).thenReturn(location(region("region"), availabilityZone("az1")));
 
         GcpResourceException gcpResourceException = assertThrows(GcpResourceException.class,
                 () -> underTest.launch(authenticatedContext, databaseStack, persistenceNotifier));

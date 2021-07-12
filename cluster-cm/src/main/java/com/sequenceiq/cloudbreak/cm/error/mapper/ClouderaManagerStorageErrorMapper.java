@@ -127,11 +127,13 @@ public class ClouderaManagerStorageErrorMapper {
 
         return String.format("Services running on the cluster were unable to write to %s location. " +
                         "This problem usually occurs due to cloud storage permission misconfiguration. " +
-                        "Services on the cluster are using Data Access Role (%s) and Ranger Audit Role (%s) to write to the Ranger Audit location (%s), " +
+                        "Services on the cluster are using Data Access Service Account (%s) and Ranger " +
+                        "Audit Service Account (%s) to write to the Ranger Audit location (%s), " +
                         "therefore please verify that these roles have write access to this location. " +
-                        "During Data Lake cluster creation, CDP Control Plane attaches Assumer Instance Profile (%s) to the IDBroker Virtual Machine. " +
-                        "IDBroker will then use it to assume the Data Access Role and Ranger Audit Role, therefore Assumer Instance Profile (%s) " +
-                        "permissions must, at a minimum, allow to assume Data Access Role and Ranger Audit Role." +
+                        "During Data Lake cluster creation, CDP Control Plane attaches Service Account (%s) to the IDBroker Virtual Machine. " +
+                        "IDBroker will then use it to assume the Data Access Service Account and Ranger Audit Service Account, " +
+                        "therefore Assumer Service Account (%s) " +
+                        "permissions must, at a minimum, allow to assume Data Access Service Account and Ranger Audit Service Account." +
                         "Refer to Cloudera documentation at %s for the required rights.",
                 auditLocation, dataAccessRole, rangerAuditRole, auditLocation, serviceAccountEmail, serviceAccountEmail,
                 DocumentationLinkProvider.googleCloudStorageSetupLink());

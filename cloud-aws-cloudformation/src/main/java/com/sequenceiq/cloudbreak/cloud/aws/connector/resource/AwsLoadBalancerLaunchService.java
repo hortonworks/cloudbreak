@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 
 import static com.sequenceiq.cloudbreak.cloud.aws.scheduler.WaiterRunner.run;
+import static com.sequenceiq.common.api.type.ResourceType.ELASTIC_LOAD_BALANCER;
 import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toList;
 
@@ -47,7 +48,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.common.api.type.CommonStatus;
-import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
 public class AwsLoadBalancerLaunchService {
@@ -127,7 +127,7 @@ public class AwsLoadBalancerLaunchService {
             }
 
             ListStackResourcesResult finalResult = result;
-            awsLoadBalancers.forEach(lb -> statuses.add(createLoadBalancerStatus(lb, finalResult)));
+            awsLoadBalancers.forEach(lb -> statuses.add(createLoadBalancerStatus(ac, lb, finalResult)));
         } else {
             LOGGER.debug("No load balancers in stack");
         }
@@ -193,7 +193,7 @@ public class AwsLoadBalancerLaunchService {
         return cfClient.listStackResources(awsStackRequestHelper.createListStackResourcesRequest(cFStackName));
     }
 
-    private CloudResourceStatus createLoadBalancerStatus(AwsLoadBalancer loadBalancer, ListStackResourcesResult result) {
+    private CloudResourceStatus createLoadBalancerStatus(AuthenticatedContext ac, AwsLoadBalancer loadBalancer, ListStackResourcesResult result) {
         LOGGER.debug(String.format("Checking final status of AWS load balancer %s", loadBalancer.getName()));
         List<StackResourceSummary> summaries = result.getStackResourceSummaries();
         boolean createSuccess = isResourceStatusGood(summaries, loadBalancer.getName());
@@ -206,9 +206,10 @@ public class AwsLoadBalancerLaunchService {
         }
 
         CloudResource.Builder cloudResource = new CloudResource.Builder()
-                .type(ResourceType.ELASTIC_LOAD_BALANCER)
-                .status(createSuccess ? CommonStatus.CREATED : CommonStatus.FAILED)
-                .name(loadBalancer.getName());
+            .status(createSuccess ? CommonStatus.CREATED : CommonStatus.FAILED)
+            .type(ELASTIC_LOAD_BALANCER)
+            .availabilityZone(ac.getCloudContext().getLocation().getAvailabilityZone().value())
+            .name(loadBalancer.getName());
 
         return new CloudResourceStatus(cloudResource.build(),
                 createSuccess ? com.sequenceiq.cloudbreak.cloud.model.ResourceStatus.CREATED :

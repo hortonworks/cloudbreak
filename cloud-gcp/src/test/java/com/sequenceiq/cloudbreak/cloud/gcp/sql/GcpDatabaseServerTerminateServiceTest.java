@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.sql;
 
+import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
+import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
+import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -26,6 +29,7 @@ import com.google.api.services.sqladmin.model.InstancesListResponse;
 import com.google.api.services.sqladmin.model.Operation;
 import com.google.api.services.sqladmin.model.Settings;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpSQLAdminFactory;
 import com.sequenceiq.cloudbreak.cloud.gcp.poller.DatabasePollerService;
@@ -47,6 +51,9 @@ public class GcpDatabaseServerTerminateServiceTest {
 
     @Mock
     private GcpStackUtil gcpStackUtil;
+
+    @Mock
+    private CloudContext cloudContext;
 
     @InjectMocks
     private GcpDatabaseServerTerminateService underTest;
@@ -88,6 +95,9 @@ public class GcpDatabaseServerTerminateServiceTest {
         when(delete.execute()).thenReturn(operation);
         when(delete.setPrettyPrint(anyBoolean())).thenReturn(delete);
         when(operation.getError()).thenReturn(null);
+        when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
+        when(cloudContext.getLocation()).thenReturn(location(region("region"), availabilityZone("az1")));
+
         doNothing().when(databasePollerService).terminateDatabasePoller(any(AuthenticatedContext.class), anyList());
 
         List<CloudResource> terminate = underTest.terminate(authenticatedContext, databaseStack, persistenceNotifier);
@@ -113,6 +123,8 @@ public class GcpDatabaseServerTerminateServiceTest {
         when(databaseServer.getServerId()).thenReturn("server-1");
         when(gcpSQLAdminFactory.buildSQLAdmin(any(CloudCredential.class), anyString())).thenReturn(sqlAdmin);
         when(gcpStackUtil.getProjectId(any(CloudCredential.class))).thenReturn("project-id");
+        when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
+        when(cloudContext.getLocation()).thenReturn(location(region("region"), availabilityZone("az1")));
         when(sqlAdmin.instances()).thenReturn(sqlAdminInstances);
         when(sqlAdminInstances.list(anyString())).thenReturn(sqlAdminInstancesList);
         when(sqlAdminInstancesList.execute()).thenReturn(instancesListResponse);
@@ -157,6 +169,8 @@ public class GcpDatabaseServerTerminateServiceTest {
         when(cloudCredential.getName()).thenReturn("credential");
         when(databaseStack.getDatabaseServer()).thenReturn(databaseServer);
         when(databaseServer.getServerId()).thenReturn("server-1");
+        when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
+        when(cloudContext.getLocation()).thenReturn(location(region("region"), availabilityZone("az1")));
         when(gcpSQLAdminFactory.buildSQLAdmin(any(CloudCredential.class), anyString())).thenReturn(sqlAdmin);
         when(gcpStackUtil.getProjectId(any(CloudCredential.class))).thenReturn("project-id");
         when(sqlAdmin.instances()).thenReturn(sqlAdminInstances);

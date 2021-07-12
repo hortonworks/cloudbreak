@@ -248,7 +248,13 @@ public class FreeIpaUpscaleActions {
                     if (!cloudResourceStatus.isFailed()) {
                         CloudResource cloudResource = cloudResourceStatus.getCloudResource();
                         Resource resource = new Resource(
-                                cloudResource.getType(), cloudResource.getName(), cloudResource.getReference(), cloudResource.getStatus(), stack, null);
+                                cloudResource.getType(),
+                                cloudResource.getName(),
+                                cloudResource.getReference(),
+                                cloudResource.getStatus(),
+                                stack,
+                                null,
+                                cloudResource.getAvailabilityZone());
                         retSet.add(resource);
                     }
                 }

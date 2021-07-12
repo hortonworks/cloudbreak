@@ -20,18 +20,6 @@ public class NetworkV4StackBase extends ProviderParametersBase {
     @ApiModelProperty(NetworkModelDescriptions.GCP_PARAMETERS)
     private GcpNetworkV4Parameters gcp;
 
-    // @ApiModelProperty(NetworkModelDescriptions.AZURE_PARAMETERS)
-    // private AzureNetworkV4Parameters azure;
-
-    // @ApiModelProperty(NetworkModelDescriptions.OPEN_STACK_PARAMETERS)
-    // private OpenStackNetworkV4Parameters openstack;
-
-    // @ApiModelProperty(hidden = true)
-    // private MockNetworkV4Parameters mock;
-
-    // @ApiModelProperty(hidden = true)
-    // private YarnNetworkV4Parameters yarn;
-
     @Override
     public AwsNetworkV4Parameters createAws() {
         if (aws == null) {

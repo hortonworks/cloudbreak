@@ -35,7 +35,7 @@ public class GcpSubnetResourceBuilder extends AbstractGcpNetworkBuilder {
         String resourceName = gcpStackUtil.isExistingSubnet(network) ?
                 gcpStackUtil.getSubnetId(network) :
                 getResourceNameService().resourceName(resourceType(), context.getName());
-        return createNamedResource(resourceType(), resourceName);
+        return createNamedResource(resourceType(), resourceName, null);
     }
 
     @Override

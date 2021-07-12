@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.resource.volume;
 
+import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.Map.entry;
@@ -147,6 +148,7 @@ class AwsVolumeResourceBuilderTest {
         when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
         when(cloudContext.getLocation()).thenReturn(location);
         when(location.getRegion()).thenReturn(region);
+        when(location.getAvailabilityZone()).thenReturn(availabilityZone("az1"));
         when(region.value()).thenReturn(REGION_NAME);
         when(awsClient.createEc2Client(isA(AwsCredentialView.class), eq(REGION_NAME))).thenReturn(amazonEC2Client);
         when(cloudStack.getTags()).thenReturn(TAGS);

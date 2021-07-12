@@ -31,7 +31,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
@@ -77,6 +79,7 @@ import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
+import com.sequenceiq.cloudbreak.service.multiaz.MultiAzCalculatorService;
 import com.sequenceiq.cloudbreak.service.stack.DefaultRootVolumeSizeProvider;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
@@ -129,6 +132,9 @@ public class StackToCloudStackConverter {
     @Inject
     private LoadBalancerConfigService loadBalancerConfigService;
 
+    @Inject
+    private MultiAzCalculatorService multiAzCalculatorService;
+
     public CloudStack convert(Stack stack) {
         return convert(stack, Collections.emptySet());
     }
@@ -176,7 +182,7 @@ public class StackToCloudStackConverter {
     }
 
     public CloudInstance buildInstance(InstanceMetaData instanceMetaData, InstanceGroup instanceGroup,
-            StackAuthentication stackAuthentication, Long privateId, InstanceStatus status) {
+            StackAuthentication stackAuthentication, Long privateId, InstanceStatus status, String environmentCrn) {
         LOGGER.debug("Instance metadata is {}", instanceMetaData);
         String id = instanceMetaData == null ? null : instanceMetaData.getInstanceId();
         String instanceImageId = instanceMetaData == null ? null : instanceMetadataToImageIdConverter.convert(instanceMetaData);
@@ -187,12 +193,32 @@ public class StackToCloudStackConverter {
 
         Map<String, Object> parameters = buildCloudInstanceParameters(
                 stack.getEnvironmentCrn(), instanceMetaData, CloudPlatform.valueOf(stack.getCloudPlatform()));
-        return new CloudInstance(id,
+        CloudInstance cloudInstance = new CloudInstance(
+                id,
                 instanceTemplate,
                 instanceAuthentication,
                 instanceMetaData == null ? null : instanceMetaData.getSubnetId(),
                 instanceMetaData == null ? null : instanceMetaData.getAvailabilityZone(),
                 parameters);
+        prepareCloudInstanceSubnetAndAvailabilityZone(environmentCrn, instanceGroup, cloudInstance);
+        return cloudInstance;
+    }
+
+    private void prepareCloudInstanceSubnetAndAvailabilityZone(String environmentCrn, InstanceGroup instanceGroup, CloudInstance cloudInstance) {
+        if (Strings.isNullOrEmpty(cloudInstance.getSubnetId()) && Strings.isNullOrEmpty(cloudInstance.getAvailabilityZone())) {
+            DetailedEnvironmentResponse environment = measure(() ->
+                            ThreadBasedUserCrnProvider.doAsInternalActor(() ->
+                                    environmentClientService.getByCrn(environmentCrn)),
+                    LOGGER,
+                    "Get Environment from Environment service took {} ms");
+            if (environment != null) {
+                multiAzCalculatorService.calculateByRoundRobin(
+                        multiAzCalculatorService.prepareSubnetAzMap(environment),
+                        instanceGroup,
+                        cloudInstance
+                );
+            }
+        }
     }
 
     InstanceTemplate buildInstanceTemplate(Template template, String name, Long privateId, InstanceStatus status, String instanceImageId) {
@@ -257,6 +283,7 @@ public class StackToCloudStackConverter {
         Collections.sort(instanceGroups);
         List<Group> groups = new ArrayList<>();
         Cluster cluster = stack.getCluster();
+        String environmentCrn = stack.getEnvironmentCrn();
         if (cluster != null) {
             String blueprintText = cluster.getBlueprint() != null ? cluster.getBlueprint().getBlueprintText() : cluster.getExtendedBlueprintText();
             if (blueprintText != null) {
@@ -270,16 +297,16 @@ public class StackToCloudStackConverter {
                         groups.add(
                                 new Group(instanceGroup.getGroupName(),
                                         instanceGroup.getInstanceGroupType(),
-                                        buildCloudInstances(stackAuthentication, deleteRequests, instanceGroup),
+                                        buildCloudInstances(environmentCrn, stackAuthentication, deleteRequests, instanceGroup),
                                         buildSecurity(instanceGroup),
-                                        buildCloudInstanceSkeleton(stackAuthentication, instanceGroup),
+                                        buildCloudInstanceSkeleton(environmentCrn, stackAuthentication, instanceGroup),
                                         getFields(instanceGroup),
                                         instanceAuthentication,
                                         instanceAuthentication.getLoginUserName(),
                                         instanceAuthentication.getPublicKey(),
                                         getRootVolumeSize(instanceGroup),
                                         cloudFileSystemView,
-                                        buildDeletedCloudInstances(stackAuthentication, deleteRequests, instanceGroup),
+                                        buildDeletedCloudInstances(environmentCrn, stackAuthentication, deleteRequests, instanceGroup),
                                         buildGroupNetwork(stack.getNetwork(), instanceGroup))
                         );
                     }
@@ -319,23 +346,23 @@ public class StackToCloudStackConverter {
                 stackAuthentication.getLoginUserName());
     }
 
-    private List<CloudInstance> buildCloudInstances(StackAuthentication stackAuthentication, Collection<String> deleteRequests,
+    private List<CloudInstance> buildCloudInstances(String environmentCrn, StackAuthentication stackAuthentication, Collection<String> deleteRequests,
             InstanceGroup instanceGroup) {
         List<CloudInstance> instances = new ArrayList<>();
         // existing instances
         for (InstanceMetaData metaData : instanceGroup.getNotDeletedInstanceMetaDataSet()) {
             InstanceStatus status = getInstanceStatus(metaData, deleteRequests);
-            instances.add(buildInstance(metaData, instanceGroup, stackAuthentication, metaData.getPrivateId(), status));
+            instances.add(buildInstance(metaData, instanceGroup, stackAuthentication, metaData.getPrivateId(), status, environmentCrn));
         }
         return instances;
     }
 
-    private List<CloudInstance> buildDeletedCloudInstances(StackAuthentication stackAuthentication, Collection<String> deleteRequests,
+    private List<CloudInstance> buildDeletedCloudInstances(String environmentCrn, StackAuthentication stackAuthentication, Collection<String> deleteRequests,
             InstanceGroup instanceGroup) {
         List<CloudInstance> instances = new ArrayList<>();
         for (InstanceMetaData metaData : instanceGroup.getDeletedInstanceMetaDataSet()) {
             InstanceStatus status = TERMINATED;
-            instances.add(buildInstance(metaData, instanceGroup, stackAuthentication, metaData.getPrivateId(), status));
+            instances.add(buildInstance(metaData, instanceGroup, stackAuthentication, metaData.getPrivateId(), status, environmentCrn));
         }
         return instances;
     }
@@ -364,11 +391,11 @@ public class StackToCloudStackConverter {
         return new Security(rules, securityGroup.getSecurityGroupIds(), true);
     }
 
-    private CloudInstance buildCloudInstanceSkeleton(StackAuthentication stackAuthentication, InstanceGroup instanceGroup) {
+    private CloudInstance buildCloudInstanceSkeleton(String environmentCrn, StackAuthentication stackAuthentication, InstanceGroup instanceGroup) {
         CloudInstance skeleton = null;
         if (instanceGroup.getNodeCount() == 0) {
             skeleton = buildInstance(null, instanceGroup, stackAuthentication, 0L,
-                    CREATE_REQUESTED);
+                    CREATE_REQUESTED, environmentCrn);
         }
         return skeleton;
     }
