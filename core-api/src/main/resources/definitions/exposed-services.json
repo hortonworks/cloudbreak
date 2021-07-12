@@ -673,7 +673,7 @@
     },
     {
       "name": "SSB-SSC-UI",
-      "displayName": "Streaming SQL Console UI",
+      "displayName": "Streaming SQL Console",
       "serviceName": "STREAMING_SQL_CONSOLE",
       "knoxService": "SSB-SSC-UI",
       "knoxUrl": "/ssb-ssc-ui/",
