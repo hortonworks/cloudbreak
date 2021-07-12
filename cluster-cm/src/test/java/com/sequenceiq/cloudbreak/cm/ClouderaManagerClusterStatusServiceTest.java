@@ -39,6 +39,7 @@ import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostList;
 import com.cloudera.api.swagger.model.ApiRole;
 import com.cloudera.api.swagger.model.ApiRoleList;
+import com.cloudera.api.swagger.model.ApiRoleRef;
 import com.cloudera.api.swagger.model.ApiRoleState;
 import com.cloudera.api.swagger.model.ApiService;
 import com.cloudera.api.swagger.model.ApiServiceList;
@@ -266,7 +267,7 @@ public class ClouderaManagerClusterStatusServiceTest {
                 .map(e -> Pair.of(e.getKey(), e.getValue().getClusterManagerStatus()))
                 .collect(Collectors.toMap(Pair::getLeft, Pair::getRight)));
         assertEquals(expected, actual);
-        assertEquals("HOST_SCM_HEALTH: BAD. Reason: explanation", extendedStateMap.get(hostName("host3")).getStatusReason());
+        assertEquals("HOST_SCM_HEALTH: BAD. Reason: explanation. ", extendedStateMap.get(hostName("host3")).getStatusReason());
         assertTrue(extendedHostStatuses.isHostCertExpiring());
     }
 
@@ -291,6 +292,36 @@ public class ClouderaManagerClusterStatusServiceTest {
         assertEquals(expected.keySet(), extendedStateMap.keySet());
         extendedStateMap.values().forEach(state -> assertEquals(ClusterManagerStatus.HEALTHY, state.getClusterManagerStatus()));
         assertTrue(extendedHostStatuses.isHostCertExpiring());
+    }
+
+    @Test
+    public void testServiceBadHealth() throws ApiException {
+        hostsAre(
+                new ApiHost().hostname("host1")
+                        .addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.BAD)
+                            .explanation("explanation"))
+                        .addHealthChecksItem(new ApiHealthCheck().name(HOST_AGENT_CERTIFICATE_EXPIRY).summary(ApiHealthSummary.GOOD))
+                        .addRoleRefsItem(roleRef("badservice", ApiHealthSummary.BAD)),
+                new ApiHost().hostname("host2")
+                        .addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.GOOD))
+                        .addHealthChecksItem(new ApiHealthCheck().name(HOST_AGENT_CERTIFICATE_EXPIRY).summary(ApiHealthSummary.GOOD)
+                                .explanation("in 30 days"))
+                        .addRoleRefsItem(roleRef("badservice2", ApiHealthSummary.BAD))
+                        .addRoleRefsItem(roleRef("badservice3", ApiHealthSummary.BAD))
+        );
+
+        ExtendedHostStatuses extendedHostStatuses = subject.getExtendedHostStatuses();
+        Map<HostName, ClusterManagerState> extendedStateMap = extendedHostStatuses.getHostHealth();
+
+        Map<HostName, ClusterManagerState> expected = Map.of(
+                hostName("host1"), new ClusterManagerState(ClusterManagerStatus.UNHEALTHY,
+                        "HOST_SCM_HEALTH: BAD. Reason: explanation. The following service are in bad health: badservice"),
+                hostName("host2"), new ClusterManagerState(ClusterManagerStatus.UNHEALTHY,
+                        "The following service are in bad health: badservice2,badservice3"));
+
+        assertEquals(expected.keySet(), extendedStateMap.keySet());
+        extendedStateMap.values().forEach(state -> assertEquals(ClusterManagerStatus.UNHEALTHY, state.getClusterManagerStatus()));
+        assertFalse(extendedHostStatuses.isHostCertExpiring());
     }
 
     @Test
@@ -343,7 +374,19 @@ public class ClouderaManagerClusterStatusServiceTest {
         assertEquals(Collections.emptyMap(), subject.getHostStatuses());
     }
 
+    private ApiRoleRef roleRef(String serviceName, ApiHealthSummary apiHealthSummary) {
+        return new ApiRoleRef()
+                .roleName("testRole")
+                .serviceName(serviceName)
+                .healthSummary(apiHealthSummary);
+    }
+
+    private ApiRoleRef roleRef(ApiHealthSummary apiHealthSummary) {
+        return roleRef("testService", apiHealthSummary);
+    }
+
     private void hostsAre(ApiHost... hosts) throws ApiException {
+        Arrays.stream(hosts).forEach(host -> host.addRoleRefsItem(roleRef(ApiHealthSummary.GOOD)));
         ApiHostList list = new ApiHostList().items(Arrays.asList(hosts));
         when(hostsApi.readHosts(null, null, FULL_VIEW)).thenReturn(list);
         when(hostsApi.readHosts(null, null, FULL_WITH_EXPLANATION_VIEW)).thenReturn(list);
