@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Strings;
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.controller.validation.network.MultiAzValidator;
@@ -70,6 +71,24 @@ public class MultiAzCalculatorService {
         }
     }
 
+    public void calculateByRoundRobin(Map<String, String> subnetAzPairs, InstanceGroup instanceGroup, CloudInstance cloudInstance) {
+        Map<String, Integer> subnetUsage = new HashMap<>();
+        Set<String> subnetIds = collectSubnetIds(instanceGroup);
+        initializeSubnetUsage(subnetAzPairs, subnetIds, subnetUsage);
+        collectCurrentSubnetUsage(instanceGroup, subnetUsage);
+
+        if (!subnetIds.isEmpty() && multiAzValidator.supportedForInstanceMetadataGeneration(instanceGroup)) {
+            if (Strings.isNullOrEmpty(cloudInstance.getSubnetId())) {
+                Integer numberOfInstanceInASubnet = searchTheSmallestInstanceCountForSubnets(subnetUsage);
+                String leastUsedSubnetId = searchTheSmallestUsedSubnetID(subnetUsage, numberOfInstanceInASubnet);
+
+                cloudInstance.setSubnetId(leastUsedSubnetId);
+                cloudInstance.setAvailabilityZone(subnetAzPairs.get(leastUsedSubnetId));
+                subnetUsage.put(leastUsedSubnetId, numberOfInstanceInASubnet + 1);
+            }
+        }
+    }
+
     private Integer searchTheSmallestInstanceCountForSubnets(Map<String, Integer> subnetUsage) {
         return Collections.min(subnetUsage.values());
     }
@@ -84,9 +103,9 @@ public class MultiAzCalculatorService {
     }
 
     private void initializeSubnetUsage(Map<String, String> subnetAzPairs, Set<String> subnetIds, Map<String, Integer> subnetUsage) {
-        for (String key : subnetAzPairs.keySet()) {
-            if (subnetIds.contains(key)) {
-                subnetUsage.put(key, 0);
+        for (String subnetId : subnetAzPairs.keySet()) {
+            if (subnetIds.contains(subnetId)) {
+                subnetUsage.put(subnetId, 0);
             }
         }
     }
@@ -100,7 +119,8 @@ public class MultiAzCalculatorService {
                 if (countOfInstances != null) {
                     subnetUsage.put(subnetId, countOfInstances++);
                 } else {
-                    LOGGER.warn("Subnet id {} is not presented in the environment networks.", subnetId);
+                    LOGGER.warn("Subnet ID {} is not present in the environment networks. Current usage: {}",
+                            subnetId, subnetUsage.keySet());
                 }
             }
         }

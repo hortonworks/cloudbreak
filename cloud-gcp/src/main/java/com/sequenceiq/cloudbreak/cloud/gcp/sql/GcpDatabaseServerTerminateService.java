@@ -50,6 +50,7 @@ public class GcpDatabaseServerTerminateService extends GcpDatabaseServerBaseServ
                 new CloudResource.Builder()
                 .type(ResourceType.GCP_DATABASE)
                 .name(deploymentName)
+                .availabilityZone(ac.getCloudContext().getLocation().getAvailabilityZone().value())
                 .build());
 
         try {

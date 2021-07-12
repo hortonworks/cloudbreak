@@ -42,7 +42,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
-import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
@@ -84,16 +83,15 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
                 .findFirst();
 
         return List.of(reattachableDiskSet
-                .orElseGet(() -> createAttachedDiskSet(context, privateId, auth, group)));
+                .orElseGet(() -> createAttachedDiskSet(context, privateId, auth, group, instance)));
     }
 
-    private CloudResource createAttachedDiskSet(GcpContext context, long privateId, AuthenticatedContext auth, Group group) {
+    private CloudResource createAttachedDiskSet(GcpContext context, long privateId, AuthenticatedContext auth, Group group, CloudInstance instance) {
         InstanceTemplate template = group.getReferenceInstanceTemplate();
         GcpResourceNameService resourceNameService = getResourceNameService();
         String groupName = group.getName();
         CloudContext cloudContext = auth.getCloudContext();
         String stackName = cloudContext.getName();
-        Location location = context.getLocation();
 
         List<VolumeSetAttributes.Volume> volumes = new ArrayList<>();
         DeviceNameGenerator generator = new DeviceNameGenerator(DEVICE_NAME_TEMPLATE, 0);
@@ -104,7 +102,7 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
         }
         String resourceName = resourceNameService.resourceName(resourceType(), stackName, groupName, privateId, 0);
         Map<String, Object> attributes = new HashMap<>(Map.of(CloudResource.ATTRIBUTES, new VolumeSetAttributes.Builder()
-                .withAvailabilityZone(location.getAvailabilityZone().value())
+                .withAvailabilityZone(instance.getAvailabilityZone())
                 .withDeleteOnTermination(Boolean.TRUE)
                 .withVolumes(volumes).build()));
         return new Builder()
@@ -112,6 +110,7 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
                 .status(CommonStatus.REQUESTED)
                 .name(resourceName)
                 .group(groupName)
+                .availabilityZone(instance.getAvailabilityZone())
                 .params(attributes)
                 .build();
     }
@@ -254,7 +253,7 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
             boolean finished = operationIds.isEmpty() || operationIds.stream()
                     .allMatch(operationId -> {
                         try {
-                            Operation operation = getResourceChecker().check(context, operationId);
+                            Operation operation = getResourceChecker().check(context, operationId, resources);
                             return operation == null || gcpStackUtil.isOperationFinished(operation);
                         } catch (Exception e) {
                             CloudContext cloudContext = auth.getCloudContext();

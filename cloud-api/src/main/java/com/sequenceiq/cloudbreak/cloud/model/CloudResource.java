@@ -29,6 +29,8 @@ public class CloudResource extends DynamicModel {
 
     private final String group;
 
+    private final String availabilityZone;
+
     private final boolean persistent;
 
     private final boolean stackAware;
@@ -36,7 +38,7 @@ public class CloudResource extends DynamicModel {
     private String instanceId;
 
     private CloudResource(ResourceType type, CommonStatus status, String name, String reference, String group, boolean persistent, Map<String, Object> params,
-            String instanceId, boolean stackAware) {
+            String instanceId, boolean stackAware, String availabilityZone) {
         super(params);
         this.type = type;
         this.status = status;
@@ -46,6 +48,7 @@ public class CloudResource extends DynamicModel {
         this.persistent = persistent;
         this.instanceId = instanceId;
         this.stackAware = stackAware;
+        this.availabilityZone = availabilityZone;
     }
 
     public ResourceType getType() {
@@ -92,6 +95,10 @@ public class CloudResource extends DynamicModel {
         this.instanceId = instanceId;
     }
 
+    public String getAvailabilityZone() {
+        return availabilityZone;
+    }
+
     @Override
     public String toString() {
         return new StringJoiner(", ", CloudResource.class.getSimpleName() + "[", "]")
@@ -103,6 +110,7 @@ public class CloudResource extends DynamicModel {
                 .add("persistent=" + persistent)
                 .add("stackAware=" + stackAware)
                 .add("instanceId='" + instanceId + "'")
+                .add("availabilityZone='" + availabilityZone + "'")
                 .toString();
     }
 
@@ -125,6 +133,8 @@ public class CloudResource extends DynamicModel {
 
         private Boolean stackAware;
 
+        private String availabilityZone;
+
         public Builder cloudResource(CloudResource cloudResource) {
             type = cloudResource.getType();
             status = cloudResource.getStatus();
@@ -134,6 +144,7 @@ public class CloudResource extends DynamicModel {
             group = cloudResource.getGroup();
             instanceId = cloudResource.getInstanceId();
             stackAware = cloudResource.isStackAware();
+            availabilityZone = cloudResource.getAvailabilityZone();
             return this;
         }
 
@@ -182,15 +193,20 @@ public class CloudResource extends DynamicModel {
             return this;
         }
 
+        public Builder availabilityZone(String availabilityZone) {
+            this.availabilityZone = availabilityZone;
+            return this;
+        }
+
         public CloudResource build() {
             Preconditions.checkNotNull(type);
             Preconditions.checkNotNull(status);
             Preconditions.checkNotNull(name);
             Preconditions.checkNotNull(parameters);
             if (Objects.isNull(stackAware)) {
-                return new CloudResource(type, status, name, reference, group, persistent, parameters, instanceId, true);
+                return new CloudResource(type, status, name, reference, group, persistent, parameters, instanceId, true, availabilityZone);
             } else {
-                return new CloudResource(type, status, name, reference, group, persistent, parameters, instanceId, stackAware);
+                return new CloudResource(type, status, name, reference, group, persistent, parameters, instanceId, stackAware, availabilityZone);
             }
         }
     }

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.util;
 
+import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_IDS;
 import static org.apache.commons.lang3.StringUtils.isAnyEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
@@ -25,7 +26,6 @@ import com.google.api.services.sqladmin.model.OperationError;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialVerificationException;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
-import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
@@ -172,9 +172,9 @@ public class GcpStackUtil {
         return sqlAdmin.operations().get(projectId, operationName);
     }
 
-    public ZoneOperations.Get zoneOperations(Compute compute, String projectId, String operationName, AvailabilityZone region)
+    public ZoneOperations.Get zoneOperations(Compute compute, String projectId, String operationName, String availabilityZone)
             throws IOException {
-        return compute.zoneOperations().get(projectId, region.value(), operationName);
+        return compute.zoneOperations().get(projectId, availabilityZone, operationName);
     }
 
     public Get regionOperations(Compute compute, String projectId, String operationName, Region region) throws IOException {
@@ -235,7 +235,7 @@ public class GcpStackUtil {
         return image.trim();
     }
 
-    public String getAmbariImage(String projectId, String image) {
+    public String getCDPImage(String projectId, String image) {
         return String.format(GCP_IMAGE_TYPE_PREFIX, projectId, getImageName(image));
     }
 
@@ -266,6 +266,10 @@ public class GcpStackUtil {
 
     public String getSubnetId(Network network) {
         return network.getStringParameter(SUBNET_ID);
+    }
+
+    public String getSubnetIds(Network network) {
+        return network.getStringParameter(SUBNET_IDS);
     }
 
     public String getSharedProjectId(Network network) {

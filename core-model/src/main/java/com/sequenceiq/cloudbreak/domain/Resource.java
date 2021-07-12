@@ -51,26 +51,38 @@ public class Resource implements ProvisionEntity {
     @Column(columnDefinition = "TEXT")
     private Json attributes;
 
+    private String availabilityZone;
+
     public Resource() {
 
     }
 
-    public Resource(ResourceType resourceType, String resourceName, Stack stack) {
-        this(resourceType, resourceName, null, CommonStatus.CREATED, stack, null);
+    public Resource(ResourceType resourceType, String resourceName, Stack stack, String availabilityZone) {
+        this(resourceType, resourceName, null, CommonStatus.CREATED, stack, null, availabilityZone);
     }
 
-    public Resource(ResourceType resourceType, String resourceName, Stack stack, String instanceGroup) {
-        this(resourceType, resourceName, null, CommonStatus.CREATED, stack, instanceGroup);
+    public Resource(ResourceType resourceType, String resourceName, Stack stack, String instanceGroup, String availabilityZone) {
+        this(resourceType, resourceName, null, CommonStatus.CREATED, stack, instanceGroup, availabilityZone);
     }
 
-    public Resource(ResourceType resourceType, String resourceName, String resourceReference, CommonStatus status, Stack stack, String instanceGroup) {
+    // CHECKSTYLE:OFF
+    public Resource(
+            ResourceType resourceType,
+            String resourceName,
+            String resourceReference,
+            CommonStatus status,
+            Stack stack,
+            String instanceGroup,
+            String availabilityZone) {
         this.resourceType = resourceType;
         this.resourceName = resourceName;
         this.resourceReference = resourceReference;
         resourceStatus = status;
         this.instanceGroup = instanceGroup;
         this.stack = stack;
+        this.availabilityZone = availabilityZone;
     }
+    // CHECKSTYLE:ON
 
     public String getInstanceGroup() {
         return instanceGroup;
@@ -142,5 +154,13 @@ public class Resource implements ProvisionEntity {
 
     public void setAttributes(Json attributes) {
         this.attributes = attributes;
+    }
+
+    public String getAvailabilityZone() {
+        return availabilityZone;
+    }
+
+    public void setAvailabilityZone(String availabilityZone) {
+        this.availabilityZone = availabilityZone;
     }
 }

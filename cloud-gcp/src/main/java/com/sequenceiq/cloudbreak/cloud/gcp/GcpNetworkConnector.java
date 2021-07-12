@@ -287,7 +287,7 @@ public class GcpNetworkConnector extends AbstractGcpResourceBuilder implements D
 
     private void deleteNetwork(GcpContext context, AuthenticatedContext auth, Network network, String networkId) throws IOException {
         if (StringUtils.isNotEmpty(networkId)) {
-            CloudResource networkResource = createNamedResource(GCP_NETWORK, networkId);
+            CloudResource networkResource = createNamedResource(GCP_NETWORK, networkId, context.getLocation().getAvailabilityZone().value());
             try {
                 CloudResource deletedResource = gcpNetworkResourceBuilder.delete(context, auth, networkResource, network);
                 if (deletedResource != null) {
@@ -304,7 +304,7 @@ public class GcpNetworkConnector extends AbstractGcpResourceBuilder implements D
     }
 
     private void deleteSubnet(GcpContext context, AuthenticatedContext auth, Network network, String subnetId) throws IOException {
-        CloudResource subnetResource = createNamedResource(GCP_SUBNET, subnetId);
+        CloudResource subnetResource = createNamedResource(GCP_SUBNET, subnetId, null);
         try {
             CloudResource deletedResource = gcpSubnetResourceBuilder.delete(context, auth, subnetResource, network);
             if (deletedResource != null) {
@@ -333,8 +333,12 @@ public class GcpNetworkConnector extends AbstractGcpResourceBuilder implements D
         return gcpCloudSubnetProvider.provide(networkRequest, collect);
     }
 
-    protected CloudResource createNamedResource(ResourceType type, String name) {
-        return new CloudResource.Builder().type(type).name(name).build();
+    protected CloudResource createNamedResource(ResourceType type, String name, String availabilityZone) {
+        return new CloudResource.Builder()
+                .type(type)
+                .name(name)
+                .availabilityZone(availabilityZone)
+                .build();
     }
 
     protected String checkException(GoogleJsonResponseException execute) {

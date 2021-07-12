@@ -677,6 +677,7 @@ public class TestUtil {
         resource.setInstanceGroup(instanceGroup);
         resource.setResourceName("testResource");
         resource.setResourceType(ResourceType.GCP_INSTANCE);
+        resource.setAvailabilityZone("az1");
         return resource;
     }
 

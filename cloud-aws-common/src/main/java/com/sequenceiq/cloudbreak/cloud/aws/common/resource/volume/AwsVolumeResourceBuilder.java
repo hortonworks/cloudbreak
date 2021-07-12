@@ -147,6 +147,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
                     .persistent(true)
                     .type(resourceType())
                     .name(resourceNameService.resourceName(resourceType(), stackName, groupName, privateId))
+                    .availabilityZone(availabilityZone)
                     .group(group.getName())
                     .status(CommonStatus.REQUESTED)
                     .params(Map.of(CloudResource.ATTRIBUTES, new VolumeSetAttributes.Builder()
@@ -178,6 +179,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
         LOGGER.debug("Create volumes on provider" + buildableResource.stream().map(CloudResource::getName).collect(Collectors.toList()));
         AmazonEc2Client client = getAmazonEC2Client(auth);
 
+        String availabilityZone = auth.getCloudContext().getLocation().getAvailabilityZone().value();
         Map<String, List<Volume>> volumeSetMap = Collections.synchronizedMap(new HashMap<>());
 
         List<Future<?>> futures = new ArrayList<>();
@@ -224,17 +226,18 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
                         resource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class).setVolumes(volumes);
                     }
                 })
-                .map(copyResourceWithCreatedStatus())
+                .map(copyResourceWithCreatedStatus(availabilityZone))
                 .collect(Collectors.toList());
     }
 
-    private Function<CloudResource, CloudResource> copyResourceWithCreatedStatus() {
+    private Function<CloudResource, CloudResource> copyResourceWithCreatedStatus(String availabilityZone) {
         return resource -> new Builder()
                 .persistent(true)
                 .group(resource.getGroup())
                 .type(resource.getType())
                 .status(CommonStatus.CREATED)
                 .name(resource.getName())
+                .availabilityZone(availabilityZone)
                 .params(resource.getParameters())
                 .build();
     }

@@ -40,7 +40,7 @@ public class GcpFirewallInternalResourceBuilder extends AbstractGcpNetworkBuilde
             throw new ResourceNotNeededException("Firewall rules won't be created.");
         }
         String resourceName = getResourceNameService().resourceName(resourceType(), context.getName());
-        return createNamedResource(resourceType(), resourceName);
+        return createNamedResource(resourceType(), resourceName, null);
     }
 
     @Override

@@ -87,6 +87,7 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
                 .group(group.getName())
                 .type(resourceType())
                 .status(CommonStatus.CREATED)
+                .availabilityZone(context.getLocation().getAvailabilityZone().value())
                 .name(resourceName)
                 .persistent(true)
                 .reference(String.valueOf(privateId))

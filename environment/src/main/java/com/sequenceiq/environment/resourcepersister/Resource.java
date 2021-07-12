@@ -47,7 +47,12 @@ public class Resource {
         this(resourceType, resourceName, null, CommonStatus.CREATED, environment);
     }
 
-    public Resource(ResourceType resourceType, String resourceName, String resourceReference, CommonStatus status, Environment environment) {
+    public Resource(
+            ResourceType resourceType,
+            String resourceName,
+            String resourceReference,
+            CommonStatus status,
+            Environment environment) {
         this.resourceType = resourceType;
         this.resourceName = resourceName;
         this.resourceReference = resourceReference;

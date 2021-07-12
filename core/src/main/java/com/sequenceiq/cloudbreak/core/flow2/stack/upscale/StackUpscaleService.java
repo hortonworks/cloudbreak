@@ -169,8 +169,14 @@ public class StackUpscaleService {
         for (CloudResourceStatus cloudResourceStatus : cloudResourceStatuses) {
             if (!cloudResourceStatus.isFailed()) {
                 CloudResource cloudResource = cloudResourceStatus.getCloudResource();
-                Resource resource = new Resource(cloudResource.getType(), cloudResource.getName(), cloudResource.getReference(), cloudResource.getStatus(),
-                        stack, null);
+                Resource resource = new Resource(
+                        cloudResource.getType(),
+                        cloudResource.getName(),
+                        cloudResource.getReference(),
+                        cloudResource.getStatus(),
+                        stack,
+                        null,
+                        cloudResource.getAvailabilityZone());
                 retSet.add(resource);
             }
         }
@@ -197,8 +203,13 @@ public class StackUpscaleService {
         List<CloudInstance> newInstances = new ArrayList<>();
         if (extendedInstanceGroup.isPresent()) {
             for (long i = 0; i < count; i++) {
-                newInstances.add(cloudStackConverter.buildInstance(null, extendedInstanceGroup.get(),
-                        stack.getStackAuthentication(), privateId++, InstanceStatus.CREATE_REQUESTED));
+                newInstances.add(cloudStackConverter.buildInstance(
+                        null,
+                        extendedInstanceGroup.get(),
+                        stack.getStackAuthentication(),
+                        privateId++,
+                        InstanceStatus.CREATE_REQUESTED,
+                        stack.getEnvironmentCrn()));
             }
         }
         return newInstances;

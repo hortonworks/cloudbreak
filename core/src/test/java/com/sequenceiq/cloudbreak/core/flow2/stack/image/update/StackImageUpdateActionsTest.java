@@ -343,7 +343,7 @@ public class StackImageUpdateActionsTest {
         when(stateContext.getMessageHeader(HEADERS.DATA.name())).thenReturn(payload);
         when(state.getId()).thenReturn(StackImageUpdateState.SET_IMAGE_STATE);
         when(resourceService.getAllByStackId(anyLong()))
-                .thenReturn(Collections.singletonList(new Resource(ResourceType.CLOUDFORMATION_STACK, "cf", stack)));
+                .thenReturn(Collections.singletonList(new Resource(ResourceType.CLOUDFORMATION_STACK, "cf", stack, "az1")));
         when(resourceToCloudResourceConverter.convert(any(Resource.class)))
                 .thenReturn(CloudResource.builder().type(ResourceType.CLOUDFORMATION_STACK).name("cfresource").build());
 

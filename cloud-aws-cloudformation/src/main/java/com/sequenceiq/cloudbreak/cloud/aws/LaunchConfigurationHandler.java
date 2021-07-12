@@ -50,6 +50,7 @@ public class LaunchConfigurationHandler {
                 .type(ResourceType.AWS_LAUNCHCONFIGURATION)
                 .params(Collections.emptyMap())
                 .name(createLaunchConfigurationRequest.getLaunchConfigurationName())
+                .availabilityZone(cloudContext.getLocation().getAvailabilityZone().value())
                 .build();
         resourceNotifier.notifyAllocation(cloudResource, cloudContext);
         return createLaunchConfigurationRequest.getLaunchConfigurationName();
@@ -70,6 +71,7 @@ public class LaunchConfigurationHandler {
                 new DeleteLaunchConfigurationRequest().withLaunchConfigurationName(oldLaunchConfiguration.getLaunchConfigurationName()));
         CloudResource cloudResource = CloudResource.builder()
                 .name(oldLaunchConfiguration.getLaunchConfigurationName())
+                .availabilityZone(cloudContext.getLocation().getAvailabilityZone().value())
                 .type(ResourceType.AWS_LAUNCHCONFIGURATION)
                 .build();
         resourceNotifier.notifyDeletion(cloudResource, cloudContext);

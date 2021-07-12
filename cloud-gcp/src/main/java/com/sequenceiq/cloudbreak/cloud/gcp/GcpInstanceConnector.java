@@ -125,7 +125,7 @@ public class GcpInstanceConnector extends AbstractInstanceConnector {
         for (CloudInstance instance : vms) {
             InstanceStatus status = InstanceStatus.UNKNOWN;
             try {
-                Instance executeInstance = getInstance(cloudContext, credential, compute, instance.getInstanceId());
+                Instance executeInstance = getInstance(cloudContext, credential, compute, instance);
                 if ("RUNNING".equals(executeInstance.getStatus())) {
                     status = InstanceStatus.STARTED;
                 } else if ("TERMINATED".equals(executeInstance.getStatus())) {
@@ -154,15 +154,15 @@ public class GcpInstanceConnector extends AbstractInstanceConnector {
         try {
             GetSerialPortOutput instanceGet = computeClient.buildCompute(credential).instances()
                     .getSerialPortOutput(gcpStackUtil.getProjectId(credential),
-                            authenticatedContext.getCloudContext().getLocation().getAvailabilityZone().value(), vm.getInstanceId());
+                            vm.getAvailabilityZone(), vm.getInstanceId());
             return instanceGet.execute().getContents();
         } catch (Exception e) {
             throw new GcpResourceException("Couldn't parse SSH fingerprint from console output.", e);
         }
     }
 
-    private Instance getInstance(CloudContext context, CloudCredential credential, Compute compute, String instanceName) throws IOException {
+    private Instance getInstance(CloudContext context, CloudCredential credential, Compute compute, CloudInstance instance) throws IOException {
         return compute.instances().get(gcpStackUtil.getProjectId(credential),
-                context.getLocation().getAvailabilityZone().value(), instanceName).execute();
+                instance.getAvailabilityZone(), instance.getInstanceId()).execute();
     }
 }

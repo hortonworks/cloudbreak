@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 
+import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.ENDPOINT_GATEWAY_SUBNET_ID;
 import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_ID;
 import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.VPC_ID;
@@ -171,6 +172,9 @@ public class AwsLaunchServiceLoadBalancerTest {
                 .thenReturn(firstUpdateSummaries)
                 .thenReturn(firstUpdateSummaries)
                 .thenReturn(secondUpdateSummaries);
+        when(ac.getCloudContext()).thenReturn(cloudContext);
+        when(cloudContext.getLocation()).thenReturn(location);
+        when(location.getAvailabilityZone()).thenReturn(availabilityZone("az1"));
 
         underTest.updateCloudformationWithLoadBalancers(ac, cloudStack, null, null);
 
@@ -193,6 +197,9 @@ public class AwsLaunchServiceLoadBalancerTest {
                 .thenReturn(firstUpdateSummaries)
                 .thenReturn(firstUpdateSummaries)
                 .thenReturn(secondUpdateSummaries);
+        when(ac.getCloudContext()).thenReturn(cloudContext);
+        when(cloudContext.getLocation()).thenReturn(location);
+        when(location.getAvailabilityZone()).thenReturn(availabilityZone("az1"));
 
         underTest.updateCloudformationWithLoadBalancers(ac, cloudStack, null, null);
 
@@ -215,6 +222,9 @@ public class AwsLaunchServiceLoadBalancerTest {
                 .thenReturn(firstUpdateSummaries)
                 .thenReturn(firstUpdateSummaries)
                 .thenReturn(secondUpdateSummaries);
+        when(ac.getCloudContext()).thenReturn(cloudContext);
+        when(cloudContext.getLocation()).thenReturn(location);
+        when(location.getAvailabilityZone()).thenReturn(availabilityZone("az1"));
 
         underTest.updateCloudformationWithLoadBalancers(ac, cloudStack, null, null);
 
@@ -367,6 +377,9 @@ public class AwsLaunchServiceLoadBalancerTest {
                 .thenReturn(firstUpdateSummaries)
                 .thenReturn(firstUpdateSummaries)
                 .thenReturn(secondUpdateSummaries);
+        when(ac.getCloudContext()).thenReturn(cloudContext);
+        when(cloudContext.getLocation()).thenReturn(location);
+        when(location.getAvailabilityZone()).thenReturn(availabilityZone("az1"));
 
         List<CloudResourceStatus> statuses = underTest.updateCloudformationWithLoadBalancers(ac, cloudStack, null, null);
 
@@ -392,6 +405,9 @@ public class AwsLaunchServiceLoadBalancerTest {
                 .thenReturn(firstUpdateSummaries)
                 .thenReturn(firstUpdateSummaries)
                 .thenReturn(secondUpdateSummaries);
+        when(ac.getCloudContext()).thenReturn(cloudContext);
+        when(cloudContext.getLocation()).thenReturn(location);
+        when(location.getAvailabilityZone()).thenReturn(availabilityZone("az1"));
 
         List<CloudResourceStatus> statuses = underTest.updateCloudformationWithLoadBalancers(ac, cloudStack, null, null);
 
@@ -417,6 +433,9 @@ public class AwsLaunchServiceLoadBalancerTest {
                 .thenReturn(firstUpdateSummaries)
                 .thenReturn(firstUpdateSummaries)
                 .thenReturn(secondUpdateSummaries);
+        when(ac.getCloudContext()).thenReturn(cloudContext);
+        when(cloudContext.getLocation()).thenReturn(location);
+        when(location.getAvailabilityZone()).thenReturn(availabilityZone("az1"));
 
         List<CloudResourceStatus> statuses = underTest.updateCloudformationWithLoadBalancers(ac, cloudStack, null, null);
 
@@ -442,6 +461,9 @@ public class AwsLaunchServiceLoadBalancerTest {
                 .thenReturn(firstUpdateSummaries)
                 .thenReturn(firstUpdateSummaries)
                 .thenReturn(secondUpdateSummaries);
+        when(ac.getCloudContext()).thenReturn(cloudContext);
+        when(cloudContext.getLocation()).thenReturn(location);
+        when(location.getAvailabilityZone()).thenReturn(availabilityZone("az1"));
 
         List<CloudResourceStatus> statuses = underTest.updateCloudformationWithLoadBalancers(ac, cloudStack, null, null);
 

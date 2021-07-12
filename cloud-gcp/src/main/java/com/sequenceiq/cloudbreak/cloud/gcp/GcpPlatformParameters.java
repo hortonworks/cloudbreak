@@ -25,7 +25,6 @@ import org.springframework.stereotype.Service;
 import com.google.api.client.util.Lists;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.TagValidator;
-import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
 import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
 import com.sequenceiq.cloudbreak.cloud.model.DisplayName;
@@ -180,10 +179,6 @@ public class GcpPlatformParameters implements PlatformParameters {
             this.displayName = displayName;
         }
 
-        public static String getUrl(String projectId, AvailabilityZone zone, String volumeId) {
-            return getUrl(projectId, zone.value(), volumeId);
-        }
-
         public static String getUrl(String projectId, String zone, String volumeId) {
             return String.format("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/diskTypes/%s", projectId, zone, volumeId);
         }
@@ -196,7 +191,7 @@ public class GcpPlatformParameters implements PlatformParameters {
             return displayName;
         }
 
-        public String getUrl(String projectId, AvailabilityZone zone) {
+        public String getUrl(String projectId, String zone) {
             return getUrl(projectId, zone, value);
         }
 

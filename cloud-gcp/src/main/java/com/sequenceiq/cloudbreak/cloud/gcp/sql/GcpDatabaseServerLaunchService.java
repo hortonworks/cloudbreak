@@ -70,8 +70,9 @@ public class GcpDatabaseServerLaunchService extends GcpDatabaseServerBaseService
 
         String projectId = gcpStackUtil.getProjectId(ac.getCloudCredential());
         List<CloudResource> buildableResource = new ArrayList<>();
-        buildableResource.add(getGcpDatabase(deploymentName));
-        buildableResource.add(getRdsPort());
+        String availabilityZone = ac.getCloudContext().getLocation().getAvailabilityZone().value();
+        buildableResource.add(getGcpDatabase(deploymentName, availabilityZone));
+        buildableResource.add(getRdsPort(availabilityZone));
 
         try {
             InstancesListResponse list = sqlAdmin.instances().list(projectId).execute();
@@ -95,7 +96,7 @@ public class GcpDatabaseServerLaunchService extends GcpDatabaseServerBaseService
                     if (instance != null) {
                         CloudResource.Builder rdsInstance = new CloudResource.Builder();
                         String instanceName = instance.getName();
-                        buildableResource.add(getRdsHostName(instance, rdsInstance, instanceName));
+                        buildableResource.add(getRdsHostName(instance, rdsInstance, instanceName, availabilityZone));
                         User rootUser = getRootUser(stack, projectId, instanceName);
                         operation = sqlAdmin.users()
                                 .insert(projectId, instanceName, rootUser)
@@ -118,25 +119,29 @@ public class GcpDatabaseServerLaunchService extends GcpDatabaseServerBaseService
         return List.of();
     }
 
-    public CloudResource getRdsPort() {
+    public CloudResource getRdsPort(String availabilityZone) {
         return new CloudResource.Builder()
                 .type(ResourceType.RDS_PORT)
                 .name(Integer.toString(POSTGRESQL_SERVER_PORT))
+                .availabilityZone(availabilityZone)
                 .build();
     }
 
-    public CloudResource getGcpDatabase(String deploymentName) {
+    public CloudResource getGcpDatabase(String deploymentName, String availabilityZone) {
         return new CloudResource.Builder()
                 .type(ResourceType.GCP_DATABASE)
                 .name(deploymentName)
+                .availabilityZone(availabilityZone)
                 .build();
     }
 
-    public CloudResource getRdsHostName(DatabaseInstance instance, CloudResource.Builder rdsInstance, String instanceName) {
+    public CloudResource getRdsHostName(DatabaseInstance instance, CloudResource.Builder rdsInstance,
+        String instanceName, String availabilityZone) {
         return rdsInstance
                 .type(ResourceType.RDS_HOSTNAME)
                 .instanceId(instanceName)
                 .name(getPrivateIpAddressOfDbInstance(instance, instanceName))
+                .availabilityZone(availabilityZone)
                 .build();
     }
 

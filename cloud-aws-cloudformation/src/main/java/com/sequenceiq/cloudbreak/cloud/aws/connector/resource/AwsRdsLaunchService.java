@@ -94,7 +94,11 @@ public class AwsRdsLaunchService {
             if (!existingSubnet) {
                 throw new CloudConnectorException("Can only create RDS instance with existing subnets", exception);
             }
-            CloudResource cloudFormationStack = new Builder().type(ResourceType.CLOUDFORMATION_STACK).name(cFStackName).build();
+            CloudResource cloudFormationStack = new Builder()
+                    .type(ResourceType.CLOUDFORMATION_STACK)
+                    .name(cFStackName)
+                    .availabilityZone(ac.getCloudContext().getLocation().getAvailabilityZone().value())
+                    .build();
             resourceNotifier.notifyAllocation(cloudFormationStack, ac.getCloudContext());
 
             RDSModelContext rdsModelContext = new RDSModelContext()
@@ -130,17 +134,42 @@ public class AwsRdsLaunchService {
         List<CloudResource> resources = new ArrayList<>();
 
         Map<String, String> outputs = getCfStackOutputs(cFStackName, client);
+        String availabilityZone = ac.getCloudContext().getLocation().getAvailabilityZone().value();
 
-        resources.add(new Builder().type(ResourceType.RDS_HOSTNAME).name(getHostname(outputs, cFStackName)).build());
-        resources.add(new Builder().type(ResourceType.RDS_PORT).name(getPort(outputs, cFStackName)).build());
-        resources.add(new Builder().type(ResourceType.RDS_INSTANCE).name(getCreatedDBInstance(outputs, cFStackName)).build());
-        resources.add(new Builder().type(ResourceType.RDS_DB_SUBNET_GROUP).name(getCreatedDBSubnetGroup(outputs, cFStackName)).build());
+        resources.add(new Builder()
+                .type(ResourceType.RDS_HOSTNAME)
+                .name(getHostname(outputs, cFStackName))
+                .availabilityZone(availabilityZone)
+                .build());
+        resources.add(new Builder()
+                .type(ResourceType.RDS_PORT)
+                .name(getPort(outputs, cFStackName))
+                .availabilityZone(availabilityZone)
+                .build());
+        resources.add(new Builder()
+                .type(ResourceType.RDS_INSTANCE)
+                .name(getCreatedDBInstance(outputs, cFStackName))
+                .availabilityZone(availabilityZone)
+                .build());
+        resources.add(new Builder()
+                .type(ResourceType.RDS_DB_SUBNET_GROUP)
+                .name(getCreatedDBSubnetGroup(outputs, cFStackName))
+                .availabilityZone(availabilityZone)
+                .build());
         if (useSslEnforcement) {
-            resources.add(new Builder().type(ResourceType.RDS_DB_PARAMETER_GROUP).name(getCreatedDBParameterGroup(outputs, cFStackName)).build());
+            resources.add(new Builder()
+                    .type(ResourceType.RDS_DB_PARAMETER_GROUP)
+                    .name(getCreatedDBParameterGroup(outputs, cFStackName))
+                    .availabilityZone(availabilityZone)
+                    .build());
         }
         // The idea here is to record the CloudFormation stack name so that we can later manipulate it.
         // This may be unnecessary, but for now this is trivial to add.
-        CloudResource cfNameResource = new Builder().type(ResourceType.CLOUDFORMATION_STACK).name(cFStackName).build();
+        CloudResource cfNameResource = new Builder()
+                .type(ResourceType.CLOUDFORMATION_STACK)
+                .name(cFStackName)
+                .availabilityZone(availabilityZone)
+                .build();
         resources.add(cfNameResource);
 
         return resources;

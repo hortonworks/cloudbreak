@@ -41,7 +41,7 @@ public abstract class AbstractGcpDatabaseServerStartStopService extends GcpDatab
         SQLAdmin sqlAdmin = gcpSQLAdminFactory.buildSQLAdmin(ac.getCloudCredential(), ac.getCloudCredential().getName());
 
         String projectId = gcpStackUtil.getProjectId(ac.getCloudCredential());
-        List<CloudResource> gcpDatabase = getGcpDatabase(stack);
+        List<CloudResource> gcpDatabase = getGcpDatabase(stack, ac.getCloudContext().getLocation().getAvailabilityZone().value());
 
         try {
             InstancesListResponse list = sqlAdmin.instances().list(projectId).execute();
@@ -76,12 +76,13 @@ public abstract class AbstractGcpDatabaseServerStartStopService extends GcpDatab
         return new DatabaseInstance().setSettings(new Settings().setActivationPolicy(policy));
     }
 
-    protected List<CloudResource> getGcpDatabase(DatabaseStack stack) {
+    protected List<CloudResource> getGcpDatabase(DatabaseStack stack, String availabilityZone) {
         GcpDatabaseServerView databaseServerView = new GcpDatabaseServerView(stack.getDatabaseServer());
 
         return List.of(new CloudResource.Builder()
                 .type(ResourceType.GCP_DATABASE)
                 .name(databaseServerView.getDbServerName())
+                .availabilityZone(availabilityZone)
                 .build());
     }
 }

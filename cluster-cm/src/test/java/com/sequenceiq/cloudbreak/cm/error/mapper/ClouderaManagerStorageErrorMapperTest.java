@@ -289,16 +289,17 @@ class ClouderaManagerStorageErrorMapperTest {
     void mapTestWhenGcpAndNoIdentity() {
         String result = underTest.map(exception, CloudPlatform.GCP.name(), cluster);
 
-        assertThat(result).isEqualTo("Services running on the cluster were unable to write to myRangerAuditLocation location. " +
-                "This problem usually occurs due to cloud storage permission misconfiguration. " +
-                "Services on the cluster are using Data Access Role (myDataAccessRole) and Ranger Audit Role (myRangerAuditRole) to write to the Ranger " +
-                "Audit location (myRangerAuditLocation), " +
-                "therefore please verify that these roles have write access to this location. " +
-                "During Data Lake cluster creation, CDP Control Plane attaches Assumer Instance Profile () to the IDBroker Virtual Machine. " +
-                "IDBroker will then use it to assume the Data Access Role and Ranger Audit Role, therefore Assumer Instance Profile () " +
-                "permissions must, at a minimum, allow to assume Data Access Role and Ranger Audit Role." +
-                "Refer to Cloudera documentation at " +
-                "https://docs.cloudera.com/cdp/latest/requirements-gcp/topics/mc-gcp_minimum_setup_for_cloud_storage.html for the required rights.");
+        assertThat(result).isEqualTo("Services running on the cluster were unable to write to myRangerAuditLocation " +
+                "location. This problem usually occurs due to cloud storage permission misconfiguration. " +
+                "Services on the cluster are using Data Access Service Account (myDataAccessRole) and Ranger " +
+                "Audit Service Account (myRangerAuditRole) to write to the Ranger Audit location " +
+                "(myRangerAuditLocation), therefore please verify that these roles have write access to this location. " +
+                "During Data Lake cluster creation, CDP Control Plane attaches Service Account () to the IDBroker " +
+                "Virtual Machine. IDBroker will then use it to assume the Data Access Service Account and Ranger " +
+                "Audit Service Account, therefore Assumer Service Account () permissions must, at a minimum, " +
+                "allow to assume Data Access Service Account and Ranger Audit Service Account.Refer to Cloudera " +
+                "documentation at https://docs.cloudera.com/cdp/latest/requirements-gcp/topics/mc-gcp_minimum_setup_for_cloud_storage.html " +
+                "for the required rights.");
     }
 
     @Test
@@ -311,17 +312,17 @@ class ClouderaManagerStorageErrorMapperTest {
 
         String result = underTest.map(exception, CloudPlatform.GCP.name(), cluster);
 
-        assertThat(result).isEqualTo("Services running on the cluster were unable to write to  location. " +
-                "This problem usually occurs due to cloud storage permission misconfiguration. " +
-                "Services on the cluster are using Data Access Role (myDataAccessRole) and Ranger Audit Role (myRangerAuditRole) to write to the Ranger " +
-                "Audit location (), " +
-                "therefore please verify that these roles have write access to this location. " +
-                "During Data Lake cluster creation, CDP Control Plane attaches Assumer Instance Profile (myServiceAccountEmail) " +
-                "to the IDBroker Virtual Machine. " +
-                "IDBroker will then use it to assume the Data Access Role and Ranger Audit Role, therefore Assumer Instance Profile (myServiceAccountEmail) " +
-                "permissions must, at a minimum, allow to assume Data Access Role and Ranger Audit Role." +
-                "Refer to Cloudera documentation at " +
-                "https://docs.cloudera.com/cdp/latest/requirements-gcp/topics/mc-gcp_minimum_setup_for_cloud_storage.html for the required rights.");
+        assertThat(result).isEqualTo("Services running on the cluster were unable to write to  location. This problem " +
+                "usually occurs due to cloud storage permission misconfiguration. Services on the cluster are " +
+                "using Data Access Service Account (myDataAccessRole) and Ranger Audit Service Account " +
+                "(myRangerAuditRole) to write to the Ranger Audit location (), therefore please verify that these " +
+                "roles have write access to this location. During Data Lake cluster creation, CDP Control Plane " +
+                "attaches Service Account (myServiceAccountEmail) to the IDBroker Virtual Machine. IDBroker will " +
+                "then use it to assume the Data Access Service Account and Ranger Audit Service Account, therefore " +
+                "Assumer Service Account (myServiceAccountEmail) permissions must, at a minimum, allow to assume Data " +
+                "Access Service Account and Ranger Audit Service Account.Refer to Cloudera documentation at " +
+                "https://docs.cloudera.com/cdp/latest/requirements-gcp/topics/mc-gcp_minimum_setup_for_cloud_storage.html " +
+                "for the required rights.");
     }
 
     @Test
@@ -333,17 +334,17 @@ class ClouderaManagerStorageErrorMapperTest {
 
         String result = underTest.map(exception, CloudPlatform.GCP.name(), cluster);
 
-        assertThat(result).isEqualTo("Services running on the cluster were unable to write to myRangerAuditLocation location. " +
-                "This problem usually occurs due to cloud storage permission misconfiguration. " +
-                "Services on the cluster are using Data Access Role (myDataAccessRole) and Ranger Audit Role (myRangerAuditRole) to write to the Ranger " +
-                "Audit location (myRangerAuditLocation), " +
-                "therefore please verify that these roles have write access to this location. " +
-                "During Data Lake cluster creation, CDP Control Plane attaches Assumer Instance Profile (myServiceAccountEmail) " +
-                "to the IDBroker Virtual Machine. " +
-                "IDBroker will then use it to assume the Data Access Role and Ranger Audit Role, therefore Assumer Instance Profile (myServiceAccountEmail) " +
-                "permissions must, at a minimum, allow to assume Data Access Role and Ranger Audit Role." +
-                "Refer to Cloudera documentation at " +
-                "https://docs.cloudera.com/cdp/latest/requirements-gcp/topics/mc-gcp_minimum_setup_for_cloud_storage.html for the required rights.");
+        assertThat(result).isEqualTo("Services running on the cluster were unable to write to myRangerAuditLocation " +
+                "location. This problem usually occurs due to cloud storage permission misconfiguration. " +
+                "Services on the cluster are using Data Access Service Account (myDataAccessRole) and Ranger " +
+                "Audit Service Account (myRangerAuditRole) to write to the Ranger Audit location (myRangerAuditLocation), " +
+                "therefore please verify that these roles have write access to this location. During Data Lake " +
+                "cluster creation, CDP Control Plane attaches Service Account (myServiceAccountEmail) to the IDBroker " +
+                "Virtual Machine. IDBroker will then use it to assume the Data Access Service Account and Ranger Audit " +
+                "Service Account, therefore Assumer Service Account (myServiceAccountEmail) permissions must, at a " +
+                "minimum, allow to assume Data Access Service Account and Ranger Audit Service Account.Refer to Cloudera " +
+                "documentation at https://docs.cloudera.com/cdp/latest/requirements-gcp/topics/mc-gcp_minimum_setup_for_cloud_storage.html " +
+                "for the required rights.");
     }
 
     @Test
