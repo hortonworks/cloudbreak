@@ -72,6 +72,7 @@ public class EnvironmentModelDescription {
     public static final String PUBLIC_KEY_ID = "Public key ID registered at the cloud provider.";
     public static final String LOGIN_USER_NAME = "User name created on the nodes for SSH access";
 
+
     public static final String SECURITY_ACCESS = "Security control for FreeIPA and Datalake deployment.";
     public static final String KNOX_SECURITY_GROUP = "Security group where Knox-enabled hosts are placed.";
     public static final String DEFAULT_SECURITY_GROUP = "Security group where all other hosts are placed.";
