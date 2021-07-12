@@ -343,6 +343,12 @@ public class SdxController implements SdxEndpoint {
     }
 
     @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.BACKUP_DATALAKE)
+    public String getDatalakeBackupId(@ResourceName String name, String backupName) {
+        return sdxBackupRestoreService.getDatalakeBackupId(name, backupName, ThreadBasedUserCrnProvider.getUserCrn());
+    }
+
+    @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.RESTORE_DATALAKE)
     public SdxDatabaseRestoreResponse restoreDatabaseByName(@ResourceName String name, String backupId,
             String restoreId, String backupLocation) {
@@ -368,8 +374,20 @@ public class SdxController implements SdxEndpoint {
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.RESTORE_DATALAKE)
     public SdxRestoreStatusResponse getRestoreDatalakeStatusByName(@ResourceName String name,
                                                                 String restoreId) {
-        return sdxBackupRestoreService.getDatalakeRestoreStatus(name, restoreId,
-                ThreadBasedUserCrnProvider.getUserCrn());
+        return sdxBackupRestoreService.getDatalakeRestoreStatus(name, restoreId, null, ThreadBasedUserCrnProvider.getUserCrn());
+    }
+
+    @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.RESTORE_DATALAKE)
+    public SdxRestoreStatusResponse getRestoreDatalakeStatus(@ResourceName String name,
+            String restoreId, String backupName) {
+        return sdxBackupRestoreService.getDatalakeRestoreStatus(name, restoreId, backupName, ThreadBasedUserCrnProvider.getUserCrn());
+    }
+
+    @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.RESTORE_DATALAKE)
+    public String getDatalakeRestoreId(@ResourceName String name, String backupName) {
+        return sdxBackupRestoreService.getDatalakeRestoreId(name, backupName, ThreadBasedUserCrnProvider.getUserCrn());
     }
 
     @Override

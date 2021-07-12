@@ -1,5 +1,5 @@
-name: "aws-sdx-backup-tests"
+name: "aws-sdx-backup-restore-tests"
 tests:
-  - name: "aws_sdx_backup_e2e_tests"
+  - name: "aws_sdx_backup_restore_e2e_tests"
     classes:
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.l0promotion.SdxBackupTest
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.l0promotion.SdxBackupRestoreTest

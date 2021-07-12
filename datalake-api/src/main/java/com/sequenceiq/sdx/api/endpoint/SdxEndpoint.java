@@ -216,6 +216,13 @@ public interface SdxEndpoint {
             @ApiParam(value = "optional: datalake backup id", required = false) @QueryParam("backupId") String backupId,
             @ApiParam(value = "optional: datalake backup name", required = false) @QueryParam("backupName") String backupName);
 
+    @GET
+    @Path("{name}/getDatalakeBackupId")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "backup Id of the datalake backup by datalake name ", produces = MediaType.APPLICATION_JSON, nickname = "getDatalakeBackupId")
+    String getDatalakeBackupId(@ApiParam(value = "required: datalake name", required = true) @PathParam("name") String name,
+            @ApiParam(value = "optional: datalake backup name", required = false) @QueryParam("backupName") String backupName);
+
     @POST
     @Path("{name}/restoreDatalake")
     @Produces(MediaType.APPLICATION_JSON)
@@ -229,6 +236,22 @@ public interface SdxEndpoint {
     @ApiOperation(value = "restore status of the datalake ", produces = MediaType.APPLICATION_JSON, nickname = "restoreDatalakeStatus")
     SdxRestoreStatusResponse getRestoreDatalakeStatusByName(@PathParam("name") String name,
             @QueryParam("restoreId") String restoreId);
+
+    @GET
+    @Path("{name}/getRestoreDatalakeStatus")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "restore status of the datalake by datalake name ", produces = MediaType.APPLICATION_JSON,
+            nickname = "getRestoreDatalakeStatus")
+    SdxRestoreStatusResponse getRestoreDatalakeStatus(@ApiParam(value = "required: datalake name", required = true) @PathParam("name") String name,
+            @ApiParam(value = "optional: datalake restore id", required = false) @QueryParam("restoreId") String restoreId,
+            @ApiParam(value = "optional: datalake backup name", required = false) @QueryParam("backupName") String backupName);
+
+    @GET
+    @Path("{name}/getDatalakeRestoreId")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "restore Id of the datalake restore by datalake name ", produces = MediaType.APPLICATION_JSON, nickname = "getDatalakeRestoreId")
+    String getDatalakeRestoreId(@ApiParam(value = "required: datalake name", required = true) @PathParam("name") String name,
+            @ApiParam(value = "optional: datalake backup name", required = false) @QueryParam("backupName") String backupName);
 
     @POST
     @Path("{name}/backupDatabase")

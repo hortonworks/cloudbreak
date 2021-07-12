@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxAutotlsCertRotationAction;
+import com.sequenceiq.it.cloudbreak.action.sdx.SdxBackupAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxCheckForUpgradeAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxCollectCMDiagnosticsAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxCollectDiagnosticsAction;
@@ -26,13 +27,13 @@ import com.sequenceiq.it.cloudbreak.action.sdx.SdxRefreshCustomAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxRefreshInternalAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxRepairAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxRepairInternalAction;
+import com.sequenceiq.it.cloudbreak.action.sdx.SdxRestoreAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxStartAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxStopAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxSyncAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxSyncInternalAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxUpgradeAction;
 import com.sequenceiq.it.cloudbreak.action.v4.util.RenewDatalakeCertificateAction;
-import com.sequenceiq.it.cloudbreak.action.sdx.SdxBackupAction;
 import com.sequenceiq.it.cloudbreak.action.v4.util.SdxRetryAction;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCMDiagnosticsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCustomTestDto;
@@ -164,4 +165,7 @@ public class SdxTestClient {
         return new SdxBackupAction(backupLocation, backupName);
     }
 
+    public Action<SdxInternalTestDto, SdxClient> restore(String backupId, String backupLocation) {
+        return new SdxRestoreAction(backupId, backupLocation);
+    }
 }

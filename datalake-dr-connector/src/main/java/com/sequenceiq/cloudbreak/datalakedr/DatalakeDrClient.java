@@ -98,11 +98,11 @@ public class DatalakeDrClient {
     }
 
     public DatalakeDrStatusResponse getBackupStatus(String datalakeName, String actorCrn) {
-        return getBackupStatusByBackupId(datalakeName, null, null, actorCrn);
+        return getBackupStatus(datalakeName, null, null, actorCrn);
     }
 
     public DatalakeDrStatusResponse getBackupStatus(String datalakeName, String backupId, String actorCrn) {
-        return getBackupStatusByBackupId(datalakeName, backupId, null, actorCrn);
+        return getBackupStatus(datalakeName, backupId, null, actorCrn);
     }
 
     public DatalakeDrStatusResponse getBackupStatus(String datalakeName, String backupId, String backupName, String actorCrn) {
@@ -126,6 +126,24 @@ public class DatalakeDrClient {
                     newStub(channelWrapper.getChannel(), UUID.randomUUID().toString(), actorCrn)
                             .backupDatalakeStatus(builder.build())
             );
+        }
+    }
+
+    public String getBackupId(String datalakeName, String backupName, String actorCrn) {
+        if (!datalakeDrConfig.isConfigured()) {
+            throw new IllegalStateException("altus.datalakedr.endpoint is not enabled or configured appropriately!");
+        }
+
+        checkNotNull(datalakeName);
+        checkNotNull(actorCrn);
+
+        try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
+            BackupDatalakeStatusRequest.Builder builder = BackupDatalakeStatusRequest.newBuilder()
+                    .setDatalakeName(datalakeName);
+            if (!Strings.isNullOrEmpty(backupName)) {
+                builder.setBackupName(backupName);
+            }
+            return newStub(channelWrapper.getChannel(), UUID.randomUUID().toString(), actorCrn).backupDatalakeStatus(builder.build()).getBackupId();
         }
     }
 
@@ -175,6 +193,56 @@ public class DatalakeDrClient {
                     newStub(channelWrapper.getChannel(), UUID.randomUUID().toString(), actorCrn)
                             .restoreDatalakeStatus(builder.build())
             );
+        }
+    }
+
+    public DatalakeDrStatusResponse getRestoreStatus(String datalakeName, String actorCrn) {
+        return getRestoreStatus(datalakeName, null, null, actorCrn);
+    }
+
+    public DatalakeDrStatusResponse getRestoreStatus(String datalakeName, String restoreId, String actorCrn) {
+        return getRestoreStatus(datalakeName, restoreId, null, actorCrn);
+    }
+
+    public DatalakeDrStatusResponse getRestoreStatus(String datalakeName, String restoreId, String backupName, String actorCrn) {
+        if (!datalakeDrConfig.isConfigured()) {
+            return missingConnectorResponse();
+        }
+
+        checkNotNull(datalakeName);
+        checkNotNull(actorCrn);
+
+        try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
+            RestoreDatalakeStatusRequest.Builder builder = RestoreDatalakeStatusRequest.newBuilder()
+                    .setDatalakeName(datalakeName);
+            if (!Strings.isNullOrEmpty(restoreId)) {
+                builder.setRestoreId(restoreId);
+            }
+            if (!Strings.isNullOrEmpty(backupName)) {
+                builder.setBackupName(backupName);
+            }
+            return statusConverter.convert(
+                    newStub(channelWrapper.getChannel(), UUID.randomUUID().toString(), actorCrn)
+                            .restoreDatalakeStatus(builder.build())
+            );
+        }
+    }
+
+    public String getRestoreId(String datalakeName, String backupName, String actorCrn) {
+        if (!datalakeDrConfig.isConfigured()) {
+            throw new IllegalStateException("altus.datalakedr.endpoint is not enabled or configured appropriately!");
+        }
+
+        checkNotNull(datalakeName);
+        checkNotNull(actorCrn);
+
+        try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
+            RestoreDatalakeStatusRequest.Builder builder = RestoreDatalakeStatusRequest.newBuilder()
+                    .setDatalakeName(datalakeName);
+            if (!Strings.isNullOrEmpty(backupName)) {
+                builder.setBackupName(backupName);
+            }
+            return newStub(channelWrapper.getChannel(), UUID.randomUUID().toString(), actorCrn).restoreDatalakeStatus(builder.build()).getRestoreId();
         }
     }
 
