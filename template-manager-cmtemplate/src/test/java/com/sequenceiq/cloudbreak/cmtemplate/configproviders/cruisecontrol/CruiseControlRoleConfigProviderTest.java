@@ -79,13 +79,21 @@ public class CruiseControlRoleConfigProviderTest {
                         "com.linkedin.kafka.cruisecontrol.analyzer.goals.DiskCapacityGoal," +
                         "com.linkedin.kafka.cruisecontrol.analyzer.goals.NetworkInboundCapacityGoal," +
                         "com.linkedin.kafka.cruisecontrol.analyzer.goals.NetworkOutboundCapacityGoal," +
-                        "com.linkedin.kafka.cruisecontrol.analyzer.goals.CpuCapacityGoal"),
+                        "com.linkedin.kafka.cruisecontrol.analyzer.goals.CpuCapacityGoal," +
+                        "com.linkedin.kafka.cruisecontrol.analyzer.goals.ReplicaDistributionGoal," +
+                        "com.linkedin.kafka.cruisecontrol.analyzer.goals.DiskUsageDistributionGoal," +
+                        "com.linkedin.kafka.cruisecontrol.analyzer.goals.CpuUsageDistributionGoal," +
+                        "com.linkedin.kafka.cruisecontrol.analyzer.goals.TopicReplicaDistributionGoal," +
+                        "com.linkedin.kafka.cruisecontrol.analyzer.goals.LeaderReplicaDistributionGoal"),
                 config("hard.goals", "com.linkedin.kafka.cruisecontrol.analyzer.goals.RackAwareGoal," +
                         "com.linkedin.kafka.cruisecontrol.analyzer.goals.ReplicaCapacityGoal," +
                         "com.linkedin.kafka.cruisecontrol.analyzer.goals.DiskCapacityGoal," +
                         "com.linkedin.kafka.cruisecontrol.analyzer.goals.NetworkInboundCapacityGoal," +
                         "com.linkedin.kafka.cruisecontrol.analyzer.goals.NetworkOutboundCapacityGoal," +
-                        "com.linkedin.kafka.cruisecontrol.analyzer.goals.CpuCapacityGoal")
+                        "com.linkedin.kafka.cruisecontrol.analyzer.goals.CpuCapacityGoal"),
+                config("auth_method", "Trusted Proxy"),
+                config("auth_admins", "kafka"),
+                config("trusted.proxy.spnego.fallback.enabled", "true")
         );
     }
 

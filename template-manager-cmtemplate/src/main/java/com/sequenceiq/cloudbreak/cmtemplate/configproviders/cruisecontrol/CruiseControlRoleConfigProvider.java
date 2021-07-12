@@ -50,6 +50,12 @@ public class CruiseControlRoleConfigProvider implements CmHostGroupRoleConfigPro
 
     private static final String LEADER_REPLICA_COUNT_BALANCE_THRESHOLD = "leader.replica.count.balance.threshold";
 
+    private static final String AUTHENTICATION_METHOD = "auth_method";
+
+    private static final String ADMIN_LEVEL_USERS = "auth_admins";
+
+    private static final String TRUSTED_PROXY_SPNEGO_FALLBACK_ENABLED = "trusted.proxy.spnego.fallback.enabled";
+
     @Override
     public String getServiceType() {
         return CruiseControlRoles.CRUISECONTROL;
@@ -92,13 +98,21 @@ public class CruiseControlRoleConfigProvider implements CmHostGroupRoleConfigPro
                             "com.linkedin.kafka.cruisecontrol.analyzer.goals.DiskCapacityGoal," +
                             "com.linkedin.kafka.cruisecontrol.analyzer.goals.NetworkInboundCapacityGoal," +
                             "com.linkedin.kafka.cruisecontrol.analyzer.goals.NetworkOutboundCapacityGoal," +
-                            "com.linkedin.kafka.cruisecontrol.analyzer.goals.CpuCapacityGoal"),
+                            "com.linkedin.kafka.cruisecontrol.analyzer.goals.CpuCapacityGoal," +
+                            "com.linkedin.kafka.cruisecontrol.analyzer.goals.ReplicaDistributionGoal," +
+                            "com.linkedin.kafka.cruisecontrol.analyzer.goals.DiskUsageDistributionGoal," +
+                            "com.linkedin.kafka.cruisecontrol.analyzer.goals.CpuUsageDistributionGoal," +
+                            "com.linkedin.kafka.cruisecontrol.analyzer.goals.TopicReplicaDistributionGoal," +
+                            "com.linkedin.kafka.cruisecontrol.analyzer.goals.LeaderReplicaDistributionGoal"),
                     config(HARD_GOALS, "com.linkedin.kafka.cruisecontrol.analyzer.goals.RackAwareGoal," +
                             "com.linkedin.kafka.cruisecontrol.analyzer.goals.ReplicaCapacityGoal," +
                             "com.linkedin.kafka.cruisecontrol.analyzer.goals.DiskCapacityGoal," +
                             "com.linkedin.kafka.cruisecontrol.analyzer.goals.NetworkInboundCapacityGoal," +
                             "com.linkedin.kafka.cruisecontrol.analyzer.goals.NetworkOutboundCapacityGoal," +
-                            "com.linkedin.kafka.cruisecontrol.analyzer.goals.CpuCapacityGoal")
+                            "com.linkedin.kafka.cruisecontrol.analyzer.goals.CpuCapacityGoal"),
+                    config(AUTHENTICATION_METHOD, "Trusted Proxy"),
+                    config(ADMIN_LEVEL_USERS, "kafka"),
+                    config(TRUSTED_PROXY_SPNEGO_FALLBACK_ENABLED, "true")
             );
         }
         return List.of();

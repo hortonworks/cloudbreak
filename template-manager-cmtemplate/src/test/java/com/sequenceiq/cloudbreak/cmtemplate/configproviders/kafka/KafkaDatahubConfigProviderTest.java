@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.kafka.KafkaCo
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.kafka.KafkaDatahubConfigProvider.GENERATED_RANGER_SERVICE_NAME;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.kafka.KafkaDatahubConfigProvider.PRODUCER_METRICS_ENABLE;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.kafka.KafkaDatahubConfigProvider.RANGER_PLUGIN_KAFKA_SERVICE_NAME;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.kafka.KafkaDatahubConfigProvider.KAFKA_DECOMMISSION_HOOK_ENABLED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
@@ -35,11 +36,13 @@ import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 class KafkaDatahubConfigProviderTest {
 
     private static final Set<ApiClusterTemplateConfig> CONFIG_WITHOUT_RANGER = Set.of(
-            config(PRODUCER_METRICS_ENABLE, "true"));
+            config(PRODUCER_METRICS_ENABLE, "true"),
+            config(KAFKA_DECOMMISSION_HOOK_ENABLED, "true"));
 
     private static final Set<ApiClusterTemplateConfig> CONFIG_WITH_RANGER = Set.of(
             config(PRODUCER_METRICS_ENABLE, "true"),
-            config(RANGER_PLUGIN_KAFKA_SERVICE_NAME, GENERATED_RANGER_SERVICE_NAME));
+            config(RANGER_PLUGIN_KAFKA_SERVICE_NAME, GENERATED_RANGER_SERVICE_NAME),
+            config(KAFKA_DECOMMISSION_HOOK_ENABLED, "true"));
 
     @Mock
     private CmTemplateProcessor cmTemplateProcessor;
