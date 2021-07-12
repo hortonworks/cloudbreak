@@ -32,49 +32,49 @@ public class ClouderaManagerStorageErrorMapper {
             "in cloud storage config. This is most probably a control plane bug: ";
 
     public String map(CloudStorageConfigurationFailedException e, String cloudPlatform, Cluster cluster) {
-
-        String errorMessage = e.getMessage();
-
-        if (cluster.isRangerRazEnabled()) {
-            errorMessage = getRazError(errorMessage);
-        } else {
-            CloudStorage cloudStorage = Optional.of(cluster)
-                    .map(Cluster::getFileSystem)
-                    .map(FileSystem::getCloudStorage)
-                    .orElse(null);
-            if (cloudStorage != null && cloudStorage.getCloudIdentities() != null && cloudStorage.getAccountMapping() != null
-                    && cloudStorage.getAccountMapping().getUserMappings() != null) {
-                try {
-                    switch (cloudPlatform) {
-                        case CloudConstants.AWS:
-                            errorMessage = awsError(cloudStorage);
-                            break;
-                        case CloudConstants.AZURE:
-                            errorMessage = azureError(cloudStorage);
-                            break;
-                        case CloudConstants.GCP:
-                            errorMessage = gcpError(cloudStorage);
-                            break;
-                        default:
-                            LOGGER.debug("We don't have error message mapper for platform: {}", cloudPlatform);
-                    }
-                } catch (RuntimeException runtimeException) {
-                    LOGGER.error(MESSAGE_VALIDATION_ERROR + JsonUtil.writeValueAsStringSilent(cloudStorage), runtimeException);
-                }
-            } else {
-                LOGGER.warn(MESSAGE_VALIDATION_ERROR + JsonUtil.writeValueAsStringSilent(cloudStorage));
-            }
-        }
-
-        LOGGER.debug("Mapped error message: {} original: {}", errorMessage, e.getMessage());
-        return errorMessage;
+        String originalMessage = e.getMessage();
+        String mappedMessage = cluster.isRangerRazEnabled() ? getRazError(originalMessage) : mapNonRazMessage(originalMessage, cloudPlatform, cluster);
+        LOGGER.debug("Mapped error message: {} original: {}", mappedMessage, originalMessage);
+        return mappedMessage;
     }
 
-    private String getRazError(String errorMessage) {
+    private String mapNonRazMessage(String originalMessage, String cloudPlatform, Cluster cluster) {
+        Optional<CloudStorage> cloudStorage = Optional.of(cluster)
+                .map(Cluster::getFileSystem)
+                .map(FileSystem::getCloudStorage);
+        if (cloudStorage.isPresent() && cloudStorage.get().getCloudIdentities() != null && cloudStorage.get().getAccountMapping() != null
+                && cloudStorage.get().getAccountMapping().getUserMappings() != null) {
+            return mapCloudPlatformSpecificMessage(originalMessage, cloudPlatform, cloudStorage.get());
+        } else {
+            LOGGER.warn(MESSAGE_VALIDATION_ERROR + JsonUtil.writeValueAsStringSilent(cloudStorage.orElse(null)));
+            return originalMessage;
+        }
+    }
+
+    private String mapCloudPlatformSpecificMessage(String originalMessage, String cloudPlatform, CloudStorage cloudStorage) {
+        try {
+            switch (cloudPlatform) {
+                case CloudConstants.AWS:
+                    return awsError(cloudStorage);
+                case CloudConstants.AZURE:
+                    return azureError(cloudStorage);
+                case CloudConstants.GCP:
+                    return gcpError(cloudStorage);
+                default:
+                    LOGGER.debug("We don't have error message mapper for platform: {}", cloudPlatform);
+                    return originalMessage;
+            }
+        } catch (RuntimeException runtimeException) {
+            LOGGER.error(MESSAGE_VALIDATION_ERROR + JsonUtil.writeValueAsStringSilent(cloudStorage), runtimeException);
+            return originalMessage;
+        }
+    }
+
+    private String getRazError(String originalMessage) {
         StringBuilder sb = new StringBuilder();
-        if (!Strings.isNullOrEmpty(errorMessage)) {
-            sb.append(errorMessage);
-            sb.append(errorMessage.endsWith(".") ? " " : ". ");
+        if (!Strings.isNullOrEmpty(originalMessage)) {
+            sb.append(originalMessage);
+            sb.append(originalMessage.endsWith(".") ? " " : ". ");
         }
         return sb.append("Ranger RAZ is enabled on this cluster.").toString();
     }
