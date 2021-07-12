@@ -3,28 +3,34 @@ package com.sequenceiq.environment.api.v1.environment.model.request.aws;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+
+
+import javax.annotation.RegEx;
 import javax.validation.ConstraintViolation;
+import javax.validation.constraints.Pattern;
 
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
 import org.hibernate.validator.HibernateValidator;
+import org.intellij.lang.annotations.RegExp;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 class AWSDiskEncryptionParametersTest {
 
     private static final String ENCRYPTION_KEY_ARN = "encryptionKeyArn";
 
-    private LocalValidatorFactoryBean localValidatorFactory;
 
-    @BeforeEach
-    void setUp() {
-        localValidatorFactory = new LocalValidatorFactoryBean();
-        localValidatorFactory.setProviderClass(HibernateValidator.class);
-        localValidatorFactory.afterPropertiesSet();
-    }
 
     @Test
     void defaultConstructorTest() {
@@ -96,6 +102,18 @@ class AWSDiskEncryptionParametersTest {
         AwsDiskEncryptionParameters underTest = AwsDiskEncryptionParameters.builder()
                 .withEncryptionKeyArn(encryptionKeyArn)
                 .build();
+        ;
+
+        Matcher match = Pattern.compile("^arn:(aws|aws-cn|aws-us-gov):kms:[a-zA-Z0-9-]+:[0-9]+:key/[a-zA-Z0-9-]+$");
+
+        if (expectedValid) {
+            assertTrue(match.matches());
+            assertEquals(testCaseName, match);
+
+        } else
+            assertFalse(testCaseName, match);
+
+        MatcherAssert.assertThat(testCaseName, match, expectedValid);
 
         Set<ConstraintViolation<AwsDiskEncryptionParameters>> constraintViolations = localValidatorFactory.validate(underTest);
 
