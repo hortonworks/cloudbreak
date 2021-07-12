@@ -30,8 +30,16 @@ public class CruiseControlRoleConfigProviderTest {
     private CmTemplateProcessor processor;
 
     @Test
-    void testRoleConfigWithCdpVersionIsAtLeast7211() {
+    void testRoleConfigWithCdpVersionIs7211() {
         cdpMainVersionIs("7.2.11");
+        HostgroupView hostGroup = new HostgroupView("test group");
+        assertEquals(createExpectedConfigWithStackVersionAtLeast7211(),
+                provider.getRoleConfigs(CruiseControlRoles.CRUISE_CONTROL_SERVER, hostGroup, getTemplatePreparationObject(hostGroup)));
+    }
+
+    @Test
+    void testRoleConfigWithCdpVersionIsHigherThan7211() {
+        cdpMainVersionIs("7.2.12");
         HostgroupView hostGroup = new HostgroupView("test group");
         assertEquals(createExpectedConfigWithStackVersionAtLeast7211(),
                 provider.getRoleConfigs(CruiseControlRoles.CRUISE_CONTROL_SERVER, hostGroup, getTemplatePreparationObject(hostGroup)));
@@ -79,13 +87,21 @@ public class CruiseControlRoleConfigProviderTest {
                         "com.linkedin.kafka.cruisecontrol.analyzer.goals.DiskCapacityGoal," +
                         "com.linkedin.kafka.cruisecontrol.analyzer.goals.NetworkInboundCapacityGoal," +
                         "com.linkedin.kafka.cruisecontrol.analyzer.goals.NetworkOutboundCapacityGoal," +
-                        "com.linkedin.kafka.cruisecontrol.analyzer.goals.CpuCapacityGoal"),
+                        "com.linkedin.kafka.cruisecontrol.analyzer.goals.CpuCapacityGoal," +
+                        "com.linkedin.kafka.cruisecontrol.analyzer.goals.ReplicaDistributionGoal," +
+                        "com.linkedin.kafka.cruisecontrol.analyzer.goals.DiskUsageDistributionGoal," +
+                        "com.linkedin.kafka.cruisecontrol.analyzer.goals.CpuUsageDistributionGoal," +
+                        "com.linkedin.kafka.cruisecontrol.analyzer.goals.TopicReplicaDistributionGoal," +
+                        "com.linkedin.kafka.cruisecontrol.analyzer.goals.LeaderReplicaDistributionGoal"),
                 config("hard.goals", "com.linkedin.kafka.cruisecontrol.analyzer.goals.RackAwareGoal," +
                         "com.linkedin.kafka.cruisecontrol.analyzer.goals.ReplicaCapacityGoal," +
                         "com.linkedin.kafka.cruisecontrol.analyzer.goals.DiskCapacityGoal," +
                         "com.linkedin.kafka.cruisecontrol.analyzer.goals.NetworkInboundCapacityGoal," +
                         "com.linkedin.kafka.cruisecontrol.analyzer.goals.NetworkOutboundCapacityGoal," +
-                        "com.linkedin.kafka.cruisecontrol.analyzer.goals.CpuCapacityGoal")
+                        "com.linkedin.kafka.cruisecontrol.analyzer.goals.CpuCapacityGoal"),
+                config("auth_method", "Trusted Proxy"),
+                config("auth_admins", "kafka"),
+                config("trusted.proxy.spnego.fallback.enabled", "true")
         );
     }
 

@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.kafka.KafkaCo
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.kafka.KafkaDatahubConfigProvider.GENERATED_RANGER_SERVICE_NAME;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.kafka.KafkaDatahubConfigProvider.PRODUCER_METRICS_ENABLE;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.kafka.KafkaDatahubConfigProvider.RANGER_PLUGIN_KAFKA_SERVICE_NAME;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.kafka.KafkaDatahubConfigProvider.KAFKA_DECOMMISSION_HOOK_ENABLED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
@@ -41,6 +42,13 @@ class KafkaDatahubConfigProviderTest {
             config(PRODUCER_METRICS_ENABLE, "true"),
             config(RANGER_PLUGIN_KAFKA_SERVICE_NAME, GENERATED_RANGER_SERVICE_NAME));
 
+    private static final Set<ApiClusterTemplateConfig> CONFIG_WITH_KAFKA = Set.of(
+            config(RANGER_PLUGIN_KAFKA_SERVICE_NAME, GENERATED_RANGER_SERVICE_NAME),
+            config(KAFKA_DECOMMISSION_HOOK_ENABLED, "true"));
+
+    private static final Set<ApiClusterTemplateConfig> CONFIG_WITHOUT_KAFKA = Set.of(
+            config(RANGER_PLUGIN_KAFKA_SERVICE_NAME, GENERATED_RANGER_SERVICE_NAME));
+
     @Mock
     private CmTemplateProcessor cmTemplateProcessor;
 
@@ -58,6 +66,7 @@ class KafkaDatahubConfigProviderTest {
     @MethodSource("testArgsForGetServiceConfigs")
     void getServiceConfigs(String cdhMainVersion, String cdhParcelVersion, Collection<ApiClusterTemplateConfig> expectedConfigs) {
         when(blueprintView.getProcessor()).thenReturn(cmTemplateProcessor);
+        when(cmTemplateProcessor.getStackVersion()).thenReturn(cdhMainVersion);
         when(cmTemplateProcessor.getVersion()).thenReturn(Optional.ofNullable(cdhMainVersion));
         TemplatePreparationObject tpo = templatePreparationObject(StackType.WORKLOAD, cdhParcelVersion);
         List<ApiClusterTemplateConfig> serviceConfigs = configProviderUnderTest.getServiceConfigs(cmTemplateProcessor, tpo);
@@ -73,7 +82,10 @@ class KafkaDatahubConfigProviderTest {
                 Arguments.of("7.0.2", "irregularCdhVersion-123", CONFIG_WITHOUT_RANGER),
                 Arguments.of("7.0.3", cdhParcelVersion("7.0.2", 0), CONFIG_WITHOUT_RANGER),
                 Arguments.of("7.0.3", cdhParcelVersion("7.0.2", 3), CONFIG_WITHOUT_RANGER),
-                Arguments.of("7.1.0", cdhParcelVersion("7.1.0", 0), CONFIG_WITH_RANGER));
+                Arguments.of("7.1.0", cdhParcelVersion("7.1.0", 0), CONFIG_WITH_RANGER),
+                Arguments.of("7.2.11", cdhParcelVersion("7.2.11", 0), CONFIG_WITHOUT_KAFKA),
+                Arguments.of("7.2.12", cdhParcelVersion("7.2.12", 0), CONFIG_WITH_KAFKA),
+                Arguments.of("7.2.13", cdhParcelVersion("7.2.13", 0), CONFIG_WITH_KAFKA));
     }
 
     @ParameterizedTest
