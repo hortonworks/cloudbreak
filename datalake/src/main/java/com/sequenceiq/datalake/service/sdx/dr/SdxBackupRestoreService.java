@@ -401,14 +401,18 @@ public class SdxBackupRestoreService {
                 sdxCluster.getClusterName(), backupLocation, backupName, userCrn);
     }
 
-    public SdxBackupStatusResponse getDatalakeBackupStatus(String datalakeName, String backupId, String backupName,
-            String userCrn) {
+    public SdxBackupStatusResponse getDatalakeBackupStatus(String datalakeName, String backupId, String backupName, String userCrn) {
         LOGGER.info("Requesting datalake backup status for datalake: '{}'", datalakeName);
         DatalakeDrStatusResponse datalakeDrStatusResponse = datalakeDrClient.getBackupStatus(
                 datalakeName, backupId, backupName, userCrn);
         return new SdxBackupStatusResponse(datalakeDrStatusResponse.getDrOperationId(),
                 datalakeDrStatusResponse.getState().name(),
                 datalakeDrStatusResponse.getFailureReason());
+    }
+
+    public String getDatalakeBackupId(String datalakeName, String backupName, String userCrn) {
+        LOGGER.info("Requesting datalake backup Id for datalake: '{}'", datalakeName);
+        return datalakeDrClient.getBackupId(datalakeName, backupName, userCrn);
     }
 
     public DatalakeDrStatusResponse triggerDatalakeRestore(Long id, String backupId, String backupLocationOverride, String userCrn) {
@@ -419,14 +423,18 @@ public class SdxBackupRestoreService {
                 sdxCluster.getClusterName(), backupId, backupLocationOverride, userCrn);
     }
 
-    public SdxRestoreStatusResponse getDatalakeRestoreStatus(String datalakeName, String restoreId,
-            String userCrn) {
+    public SdxRestoreStatusResponse getDatalakeRestoreStatus(String datalakeName, String restoreId, String backupName, String userCrn) {
         LOGGER.info("Requesting datalake restore status for datalake: '{}' with restoreId '{}'", datalakeName, restoreId);
-        DatalakeDrStatusResponse datalakeDrStatusResponse = datalakeDrClient.getRestoreStatusByRestoreId(
-                datalakeName, restoreId, userCrn);
+        DatalakeDrStatusResponse datalakeDrStatusResponse = datalakeDrClient.getRestoreStatus(
+                datalakeName, restoreId, backupName, userCrn);
         return new SdxRestoreStatusResponse(datalakeDrStatusResponse.getDrOperationId(),
                 datalakeDrStatusResponse.getState().name(),
                 datalakeDrStatusResponse.getFailureReason());
+    }
+
+    public String getDatalakeRestoreId(String datalakeName, String backupName, String userCrn) {
+        LOGGER.info("Requesting datalake restore Id for datalake: '{}'", datalakeName);
+        return datalakeDrClient.getRestoreId(datalakeName, backupName, userCrn);
     }
 
     public void waitForDatalakeDrRestoreToComplete(Long id, String restoreId, String userCrn, PollingConfig pollingConfig,

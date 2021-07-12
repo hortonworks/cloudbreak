@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak.util.wait.service.cloudbreak;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.BACKUP_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.CREATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COMPLETED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_FAILED;
@@ -9,7 +10,11 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.ENABLE_SEC
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.EXTERNAL_DATABASE_CREATION_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.EXTERNAL_DATABASE_DELETION_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.EXTERNAL_DATABASE_DELETION_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.EXTERNAL_DATABASE_START_FAILED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.EXTERNAL_DATABASE_STOP_FAILED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.LOAD_BALANCER_UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.PRE_DELETE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.RESTORE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.START_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOP_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
@@ -101,8 +106,9 @@ public class CloudbreakWaitObject implements WaitObject {
 
     @Override
     public boolean isFailed() {
-        List<Status> failedStatuses = List.of(UPDATE_FAILED, CREATE_FAILED, ENABLE_SECURITY_FAILED, DELETE_FAILED, START_FAILED, STOP_FAILED,
-                EXTERNAL_DATABASE_CREATION_FAILED, EXTERNAL_DATABASE_DELETION_FAILED);
+        List<Status> failedStatuses = List.of(UPDATE_FAILED, BACKUP_FAILED, RESTORE_FAILED, CREATE_FAILED, ENABLE_SECURITY_FAILED, DELETE_FAILED,
+                START_FAILED, STOP_FAILED, EXTERNAL_DATABASE_CREATION_FAILED, EXTERNAL_DATABASE_DELETION_FAILED, EXTERNAL_DATABASE_START_FAILED,
+                EXTERNAL_DATABASE_STOP_FAILED, LOAD_BALANCER_UPDATE_FAILED);
         return !ListUtils.retainAll(failedStatuses, actualStatusesEnumValues()).isEmpty();
     }
 

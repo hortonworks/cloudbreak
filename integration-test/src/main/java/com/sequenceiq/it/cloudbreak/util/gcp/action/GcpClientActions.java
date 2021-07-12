@@ -4,6 +4,9 @@ import static java.lang.String.format;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -184,10 +187,13 @@ public class GcpClientActions extends GcpClient {
         return operation == null ? null : operation.getError();
     }
 
-    public void listBucketSelectedObject(String bucketName, String objectPath, boolean zeroContent) {
+    public void listBucketSelectedObject(URI baseLocationUri, boolean zeroContent) {
         Storage storage = buildStorage();
-        String keyPrefix = StringUtils.split(objectPath, "/")[0];
-        String selectedObjectPath = objectPath.substring(objectPath.indexOf("/") + 1);
+        String bucketName = baseLocationUri.getHost();
+        String selectedObjectPath = baseLocationUri.getPath();
+        String keyPrefix = Arrays.stream(StringUtils.split(selectedObjectPath, "/"))
+                        .filter(StringUtils::isNotEmpty)
+                        .collect(Collectors.toList()).get(0);
         List<StorageObject> filteredObjects;
 
         Log.log(LOGGER, format(" Google GCS Bucket: %s", bucketName));
@@ -204,9 +210,17 @@ public class GcpClientActions extends GcpClient {
                     throw new TestFailException(String.format(" Google GCS path: '%s' does not exist! ", keyPrefix));
                 }
 
-                String selectedObject = StringUtils.replace(selectedObjectPath, "/", "%2F");
                 filteredObjects = storageObjects.getItems().stream()
-                        .filter(storageObject -> storageObject.getSelfLink().contains(selectedObject))
+                        .filter(storageObject -> {
+                            try {
+                                URI selfLink = new URI(storageObject.getSelfLink());
+                                return selfLink.getPath().contains(selectedObjectPath);
+                            } catch (URISyntaxException e) {
+                                LOGGER.error("Google GCS object: '{}' path: '{}' is not a valid URI!", storageObject.getName(), storageObject.getSelfLink());
+                                throw new TestFailException(String.format(" Google GCS object: '%s' path: '%s' is not a valid URI!",
+                                        storageObject.getName(), storageObject.getSelfLink()));
+                            }
+                        })
                         .collect(Collectors.toList());
 
                 listObjectsOperation.setPageToken(storageObjects.getNextPageToken());
@@ -221,7 +235,7 @@ public class GcpClientActions extends GcpClient {
                 }
             }
         } catch (Exception e) {
-            String msg = String.format("Failed to list bucket object '%s' from base location '%s'", bucketName, objectPath);
+            String msg = String.format("Failed to list bucket object '%s' from base location '%s'", bucketName, baseLocationUri);
             LOGGER.error(msg, e);
             throw new TestFailException(msg, e);
         }
