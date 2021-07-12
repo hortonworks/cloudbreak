@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cm.polling.task;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -16,13 +17,18 @@ import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.function.Executable;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.api.swagger.CommandsResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiCommand;
 import com.cloudera.api.swagger.model.ApiCommandList;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cm.exception.CloudStorageConfigurationFailedException;
@@ -30,6 +36,7 @@ import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerCommandPollerObject;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 
+@ExtendWith(MockitoExtension.class)
 class ClouderaManagerTemplateInstallationCheckerTest {
 
     private static final BigDecimal TEMPLATE_INSTALL_ID = new BigDecimal(1);
@@ -52,26 +59,35 @@ class ClouderaManagerTemplateInstallationCheckerTest {
 
     private static final String AUDIT_DIR_COMMAND_NAME = "CreateRangerKafkaPluginAuditDirCommand";
 
-    private ApiClient apiClient = Mockito.mock(ApiClient.class);
+    @Mock
+    private ApiClient apiClient;
 
-    private ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory = Mockito.mock(ClouderaManagerApiPojoFactory.class);
+    @Mock
+    private ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory;
 
-    private CommandsResourceApi commandsResourceApi = Mockito.mock(CommandsResourceApi.class);
+    @Mock
+    private CommandsResourceApi commandsResourceApi;
 
-    private ApiCommand apiCommand = Mockito.mock(ApiCommand.class);
+    @Mock
+    private ApiCommand apiCommand;
 
-    private CloudbreakEventService cloudbreakEventService = Mockito.mock(CloudbreakEventService.class);
+    @Mock
+    private CloudbreakEventService cloudbreakEventService;
 
-    private ClouderaManagerTemplateInstallationChecker underTest
-            = new ClouderaManagerTemplateInstallationChecker(clouderaManagerApiPojoFactory, cloudbreakEventService);
+    @InjectMocks
+    private ClouderaManagerTemplateInstallationChecker underTest;
 
     private ClouderaManagerCommandPollerObject pollerObject;
+
+    private Stack stack;
 
     @BeforeEach
     void setUp() throws ApiException {
         when(commandsResourceApi.readCommand(any())).thenReturn(apiCommand);
         when(clouderaManagerApiPojoFactory.getCommandsResourceApi(eq(apiClient))).thenReturn(commandsResourceApi);
-        pollerObject = new ClouderaManagerCommandPollerObject(new Stack(), apiClient, TEMPLATE_INSTALL_ID);
+        stack = new Stack();
+        stack.setType(StackType.DATALAKE);
+        pollerObject = new ClouderaManagerCommandPollerObject(stack, apiClient, TEMPLATE_INSTALL_ID);
     }
 
     @Test
@@ -82,9 +98,18 @@ class ClouderaManagerTemplateInstallationCheckerTest {
         ApiCommand templateInstallCmd = templateInstallCmd(addRepositoriesCmd, deployParcelsCmd);
         expectReadCommandForFailedCommands(templateInstallCmd);
 
-        ClouderaManagerOperationFailedException ex = assertThrows(ClouderaManagerOperationFailedException.class, () -> underTest.checkStatus(pollerObject));
+        ClouderaManagerOperationFailedException ex = assertThrowsExact(ClouderaManagerOperationFailedException.class,
+                () -> underTest.checkStatus(pollerObject));
         String expected = expectMessageForCommands(deployParcelsCmd);
         assertEquals(expected, ex.getMessage());
+    }
+
+    // Ensures an exact class match in order to avoid accepting a subclass. So, e.g., CloudStorageConfigurationFailedException (which is a subclass of
+    // ClouderaManagerOperationFailedException) will not match as a ClouderaManagerOperationFailedException.
+    private <T extends Throwable> T assertThrowsExact(Class<T> expectedType, Executable executable) {
+        T ex = assertThrows(expectedType, executable);
+        assertThat(ex.getClass()).isSameAs(expectedType);
+        return ex;
     }
 
     @Test
@@ -97,7 +122,8 @@ class ClouderaManagerTemplateInstallationCheckerTest {
                 .resultMessage("Failed to import cluster template");
         expectReadCommandForFailedCommands(templateInstallCmd);
 
-        ClouderaManagerOperationFailedException ex = assertThrows(ClouderaManagerOperationFailedException.class, () -> underTest.checkStatus(pollerObject));
+        ClouderaManagerOperationFailedException ex = assertThrowsExact(ClouderaManagerOperationFailedException.class,
+                () -> underTest.checkStatus(pollerObject));
         String expected = expectMessageForCommands(firstRunCmd);
         assertEquals(expected, ex.getMessage());
     }
@@ -114,7 +140,8 @@ class ClouderaManagerTemplateInstallationCheckerTest {
                 .resultMessage("Failed to import cluster template");
         expectReadCommandForFailedCommands(templateInstallCmd);
 
-        ClouderaManagerOperationFailedException ex = assertThrows(ClouderaManagerOperationFailedException.class, () -> underTest.checkStatus(pollerObject));
+        ClouderaManagerOperationFailedException ex = assertThrowsExact(ClouderaManagerOperationFailedException.class,
+                () -> underTest.checkStatus(pollerObject));
         String expected = expectMessageForCommands(addRepositoriesCmd, deployParcelsCmd, firstRunCmd);
         assertEquals(expected, ex.getMessage());
     }
@@ -127,7 +154,8 @@ class ClouderaManagerTemplateInstallationCheckerTest {
                 .resultMessage("IllegalArgumentException: Unknown configuration attribute 'process_autorestart_enabled'.");
         expectReadCommandForFailedCommands(templateInstallCmd);
 
-        ClouderaManagerOperationFailedException ex = assertThrows(ClouderaManagerOperationFailedException.class, () -> underTest.checkStatus(pollerObject));
+        ClouderaManagerOperationFailedException ex = assertThrowsExact(ClouderaManagerOperationFailedException.class,
+                () -> underTest.checkStatus(pollerObject));
         String expected = expectMessageForCommands(templateInstallCmd);
         assertEquals(expected, ex.getMessage());
     }
@@ -144,7 +172,8 @@ class ClouderaManagerTemplateInstallationCheckerTest {
                 .resultMessage("Failed to import cluster template");
         expectReadCommandForFailedCommands(templateInstallCmd);
 
-        ClouderaManagerOperationFailedException ex = assertThrows(ClouderaManagerOperationFailedException.class, () -> underTest.checkStatus(pollerObject));
+        ClouderaManagerOperationFailedException ex = assertThrowsExact(ClouderaManagerOperationFailedException.class,
+                () -> underTest.checkStatus(pollerObject));
         String expected = expectMessageForCommands(addRepositoriesCmd, deployParcelsCmd, firstRunCmd);
         assertEquals(expected, ex.getMessage());
     }
@@ -162,6 +191,26 @@ class ClouderaManagerTemplateInstallationCheckerTest {
         expectReadCommandForFailedCommands(templateInstallCmd);
 
         CloudStorageConfigurationFailedException ex = assertThrows(CloudStorageConfigurationFailedException.class, () -> underTest.checkStatus(pollerObject));
+        String expected = expectMessageForCommands(auditDirCmd, deployParcelsCmd, firstRunCmd);
+        assertEquals(expected, ex.getMessage());
+    }
+
+    @Test
+    void testCloudStorageFailureWhenDatahub() throws ApiException {
+        ApiCommand auditDirCmd = auditDirCmd().success(Boolean.FALSE)
+                .resultMessage("Aborted");
+        ApiCommand deployParcelsCmd = deployParcelsCmd().success(Boolean.FALSE)
+                .resultMessage("Host not found");
+        ApiCommand firstRunCmd = firstRunCmd().success(Boolean.FALSE)
+                .resultMessage("Failed to perform First Run of services.");
+        ApiCommand templateInstallCmd = templateInstallCmd(auditDirCmd, deployParcelsCmd, firstRunCmd)
+                .resultMessage("Failed to import cluster template");
+        expectReadCommandForFailedCommands(templateInstallCmd);
+
+        stack.setType(StackType.WORKLOAD);
+
+        ClouderaManagerOperationFailedException ex = assertThrowsExact(ClouderaManagerOperationFailedException.class,
+                () -> underTest.checkStatus(pollerObject));
         String expected = expectMessageForCommands(auditDirCmd, deployParcelsCmd, firstRunCmd);
         assertEquals(expected, ex.getMessage());
     }
