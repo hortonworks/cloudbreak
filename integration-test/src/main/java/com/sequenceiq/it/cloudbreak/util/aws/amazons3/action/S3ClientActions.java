@@ -78,8 +78,6 @@ public class S3ClientActions extends S3Client {
 
         if (StringUtils.isEmpty(selectedObject)) {
             selectedObject = "ranger";
-        } else {
-            selectedObject = getPath(selectedObject).replace(bucketName + "/", "") + "/";
         }
 
         Log.log(LOGGER, format(" Amazon S3 URI: %s", amazonS3URI));

@@ -50,8 +50,8 @@ public class AwsCloudFunctionality implements CloudFunctionality {
     }
 
     @Override
-    public void cloudStorageListContainer(String baseLocation, String pathToTargetObject, boolean zeroContent) {
-        amazonS3Util.listBucketSelectedObject(baseLocation, pathToTargetObject, zeroContent);
+    public void cloudStorageListContainer(String baseLocation, String selectedObject, boolean zeroContent) {
+        amazonS3Util.listBucketSelectedObject(baseLocation, selectedObject, zeroContent);
     }
 
     @Override

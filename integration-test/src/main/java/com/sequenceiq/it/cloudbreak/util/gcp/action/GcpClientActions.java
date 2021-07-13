@@ -22,6 +22,7 @@ import com.google.api.services.compute.model.AttachedDisk;
 import com.google.api.services.compute.model.Instance;
 import com.google.api.services.compute.model.Operation;
 import com.google.api.services.storage.Storage;
+import com.google.api.services.storage.model.Objects;
 import com.google.api.services.storage.model.StorageObject;
 import com.sequenceiq.it.cloudbreak.cloud.v4.gcp.GcpProperties;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
@@ -183,21 +184,46 @@ public class GcpClientActions extends GcpClient {
         return operation == null ? null : operation.getError();
     }
 
-    public void listBucketSelectedObject(String baseLocation, String selectedObject, boolean zeroContent) {
-        LOGGER.info("List bucket from base location: '{}', with selected object: '{}', without content: '{}'", baseLocation, selectedObject, zeroContent);
+    public void listBucketSelectedObject(String bucketName, String objectPath, boolean zeroContent) {
         Storage storage = buildStorage();
+        String keyPrefix = StringUtils.split(objectPath, "/")[0];
+        String selectedObjectPath = objectPath.substring(objectPath.indexOf("/") + 1);
+        List<StorageObject> filteredObjects;
+
+        Log.log(LOGGER, format(" Google GCS Bucket: %s", bucketName));
+        Log.log(LOGGER, format(" Google GCS Key Prefix: %s", keyPrefix));
+        Log.log(LOGGER, format(" Google GCS Object: %s", selectedObjectPath));
         try {
-            Storage.Objects.Get operation = storage.objects().get(baseLocation, selectedObject);
-            StorageObject storageObject = operation.execute();
-            if (storageObject.getSize().compareTo(BigInteger.ZERO) == 0 && !zeroContent) {
-                String objectPath = StringUtils.join(List.of(baseLocation, selectedObject), "/");
-                LOGGER.error("Google GCS path: {} has 0 bytes of content!", objectPath);
-                throw new TestFailException(String.format(" Google GCS path: %s has 0 bytes of content! ", objectPath));
+            Storage.Objects.List listObjectsOperation = storage.objects().list(bucketName).setPrefix(keyPrefix);
+            Objects storageObjects;
+
+            do {
+                storageObjects = listObjectsOperation.execute();
+                if (storageObjects == null || storageObjects.getItems() == null) {
+                    LOGGER.error("Google GCS path: '{}' does not exist!", keyPrefix);
+                    throw new TestFailException(String.format(" Google GCS path: '%s' does not exist! ", keyPrefix));
+                }
+
+                String selectedObject = StringUtils.replace(selectedObjectPath, "/", "%2F");
+                filteredObjects = storageObjects.getItems().stream()
+                        .filter(storageObject -> storageObject.getSelfLink().contains(selectedObject))
+                        .collect(Collectors.toList());
+
+                listObjectsOperation.setPageToken(storageObjects.getNextPageToken());
+            } while (StringUtils.isNotEmpty(storageObjects.getNextPageToken()));
+
+            Log.log(LOGGER, format(" Google GCS object: '%s' contains '%d' sub-objects.", selectedObjectPath, filteredObjects.size()));
+
+            for (StorageObject objectSummary : filteredObjects.stream().limit(10).collect(Collectors.toList())) {
+                if (objectSummary.getSize().compareTo(BigInteger.ZERO) == 0 && !zeroContent) {
+                    LOGGER.error("Google GCS path: '{}' has 0 bytes of content!", selectedObjectPath);
+                    throw new TestFailException(String.format(" Google GCS path: '%s' has 0 bytes of content! ", selectedObjectPath));
+                }
             }
-        } catch (IOException ioException) {
-            String msg = String.format("Failed to list bucket object '%s' from base location '%s'", baseLocation, selectedObject);
-            LOGGER.error(msg, ioException);
-            throw new TestFailException(msg, ioException);
+        } catch (Exception e) {
+            String msg = String.format("Failed to list bucket object '%s' from base location '%s'", bucketName, objectPath);
+            LOGGER.error(msg, e);
+            throw new TestFailException(msg, e);
         }
     }
 

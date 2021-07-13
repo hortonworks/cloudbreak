@@ -47,8 +47,8 @@ public class AzureCloudFunctionality implements CloudFunctionality {
     }
 
     @Override
-    public void cloudStorageListContainer(String baseLocation, String pathToTargetObject, boolean zeroContent) {
-        azureCloudBlobUtil.listSelectedFoldersInAContaier(baseLocation, pathToTargetObject, zeroContent);
+    public void cloudStorageListContainer(String baseLocation, String selectedDirectory, boolean zeroContent) {
+        azureCloudBlobUtil.listSelectedFoldersInAContaier(baseLocation, selectedDirectory, zeroContent);
     }
 
     @Override
