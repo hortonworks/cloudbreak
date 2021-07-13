@@ -128,7 +128,7 @@ class AzureClientTest {
     }
 
     @Test
-    public void testAttachDiskToVmWhenEverythingIsNormalShouldUseCachingREADWRITE() {
+    public void testAttachDiskToVmWhenEverythingIsNormalShouldUseCachingREAD() {
         int sizeInGb = 4095;
         DiskSkuTypes diskSkuTypes = DiskSkuTypes.PREMIUM_LRS;
 
@@ -149,7 +149,7 @@ class AzureClientTest {
 
         underTest.attachDiskToVm(disk, virtualMachine);
         verify(virtualMachineUpdate, times(1)).withDataDiskDefaultCachingType(captor.capture());
-        Assert.assertEquals(CachingTypes.READ_WRITE, captor.getValue());
+        Assert.assertEquals(CachingTypes.READ_ONLY, captor.getValue());
     }
 
     @Test
