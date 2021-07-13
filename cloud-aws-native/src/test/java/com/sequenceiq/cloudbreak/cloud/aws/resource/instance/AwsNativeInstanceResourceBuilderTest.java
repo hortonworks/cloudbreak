@@ -27,7 +27,7 @@ import com.amazonaws.services.ec2.model.InstanceState;
 import com.amazonaws.services.ec2.model.Reservation;
 import com.amazonaws.services.ec2.model.RunInstancesResult;
 import com.amazonaws.services.ec2.model.TagSpecification;
-import com.sequenceiq.cloudbreak.cloud.aws.AwsMethodExecutor;
+import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsMethodExecutor;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.context.AwsContext;

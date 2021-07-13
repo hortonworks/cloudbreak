@@ -120,7 +120,8 @@ import com.sequenceiq.flow.core.ResourceIdProvider;
 @Service
 public class StackService implements ResourceIdProvider, ResourcePropertyProvider {
 
-    public static final Set<String> REATTACH_COMPATIBLE_PLATFORMS = Set.of(CloudConstants.AWS, CloudConstants.AZURE, CloudConstants.GCP, CloudConstants.MOCK);
+    public static final Set<String> REATTACH_COMPATIBLE_PLATFORMS = Set.of(CloudConstants.AWS, CloudConstants.AZURE, CloudConstants.GCP, CloudConstants.MOCK,
+            CloudConstants.AWS_NATIVE);
 
     private static final String STACK_NOT_FOUND_BY_ID_EXCEPTION_MESSAGE = "Stack not found by id '%d'";
 

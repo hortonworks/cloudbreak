@@ -7,6 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.amazonaws.services.ec2.model.AmazonEC2Exception;
+import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsMethodExecutor;
 
 @ExtendWith(MockitoExtension.class)
 public class AwsMethodExecutorTest {

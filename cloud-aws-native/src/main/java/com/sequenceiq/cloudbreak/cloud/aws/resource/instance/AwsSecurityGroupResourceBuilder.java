@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.resource.instance;
 
+import static com.sequenceiq.cloudbreak.cloud.aws.resource.AwsNativeResourceBuilderOrderConstants.NATIVE_SECURITY_GROUP_RESOURCE_BUILDER_ORDER;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.util.Collections;
@@ -13,7 +14,7 @@ import org.springframework.stereotype.Component;
 
 import com.amazonaws.services.ec2.model.DeleteSecurityGroupRequest;
 import com.amazonaws.services.ec2.model.DeleteSecurityGroupResult;
-import com.sequenceiq.cloudbreak.cloud.aws.AwsMethodExecutor;
+import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsMethodExecutor;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsNativeModel;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsNativeModelBuilder;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
@@ -95,6 +96,6 @@ public class AwsSecurityGroupResourceBuilder extends AbstractAwsNativeComputeBui
 
     @Override
     public int order() {
-        return 0;
+        return NATIVE_SECURITY_GROUP_RESOURCE_BUILDER_ORDER;
     }
 }

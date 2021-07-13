@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws.resource.loadbalancer;
 
+import static com.sequenceiq.cloudbreak.cloud.aws.resource.AwsNativeResourceBuilderOrderConstants.NATIVE_LOAD_BALANCER_LISTENER_RESOURCE_BUILDER_ORDER;
+
 import java.util.List;
 
 import javax.inject.Inject;
@@ -23,8 +25,6 @@ import com.sequenceiq.common.api.type.ResourceType;
 public class AwsNativeLoadBalancerListenerResourceBuilder extends AbstractAwsNativeComputeBuilder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsNativeLoadBalancerListenerResourceBuilder.class);
-
-    private static final int COMPUTE_BUILDER_ORDER = 4;
 
     @Inject
     private AwsMethodExecutor awsMethodExecutor;
@@ -58,6 +58,6 @@ public class AwsNativeLoadBalancerListenerResourceBuilder extends AbstractAwsNat
 
     @Override
     public int order() {
-        return COMPUTE_BUILDER_ORDER;
+        return NATIVE_LOAD_BALANCER_LISTENER_RESOURCE_BUILDER_ORDER;
     }
 }

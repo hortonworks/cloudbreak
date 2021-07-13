@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.resource.instance;
 
+import static com.sequenceiq.cloudbreak.cloud.aws.resource.AwsNativeResourceBuilderOrderConstants.NATIVE_INSTANCE_RESOURCE_BUILDER_ORDER;
 import static com.sequenceiq.cloudbreak.cloud.aws.resource.instance.util.SecurityGroupBuilderUtil.SECURITY_GROUP_ID;
 import static java.util.Collections.singletonList;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -30,7 +31,7 @@ import com.amazonaws.services.ec2.model.Tag;
 import com.amazonaws.services.ec2.model.TagSpecification;
 import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
 import com.amazonaws.services.ec2.model.TerminateInstancesResult;
-import com.sequenceiq.cloudbreak.cloud.aws.AwsMethodExecutor;
+import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsMethodExecutor;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.context.AwsContext;
@@ -60,8 +61,6 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
     public static final int AWS_INSTANCE_TERMINATED_CODE = 48;
 
     private static final Logger LOGGER = getLogger(AwsNativeInstanceResourceBuilder.class);
-
-    private static final int ORDER = 3;
 
     @Value("${cb.aws.vpcendpoints.enabled.gateway.services}")
     private Set<String> enabledGatewayServices;
@@ -207,7 +206,7 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
 
     @Override
     public int order() {
-        return ORDER;
+        return NATIVE_INSTANCE_RESOURCE_BUILDER_ORDER;
     }
 
     private Boolean isEbsOptimized(InstanceTemplate instanceTemplate) {

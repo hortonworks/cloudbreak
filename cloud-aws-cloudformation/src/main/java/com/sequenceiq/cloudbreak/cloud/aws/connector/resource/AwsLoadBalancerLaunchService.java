@@ -135,7 +135,6 @@ public class AwsLoadBalancerLaunchService {
         return statuses;
     }
 
-
     @VisibleForTesting
     void setLoadBalancerMetadata(List<AwsLoadBalancer> awsLoadBalancers, ListStackResourcesResult result) {
         List<StackResourceSummary> summaries = result.getStackResourceSummaries();

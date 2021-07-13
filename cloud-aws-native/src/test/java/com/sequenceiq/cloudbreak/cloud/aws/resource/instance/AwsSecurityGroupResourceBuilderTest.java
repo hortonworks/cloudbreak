@@ -18,7 +18,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.amazonaws.services.ec2.model.DeleteSecurityGroupResult;
-import com.sequenceiq.cloudbreak.cloud.aws.AwsMethodExecutor;
+import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsMethodExecutor;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsNativeModel;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsNativeModelBuilder;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;

@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws.resource.loadbalancer;
 
+import static com.sequenceiq.cloudbreak.cloud.aws.resource.AwsNativeResourceBuilderOrderConstants.NATIVE_LOAD_BALANCER_RESOURCE_BUILDER_ORDER;
+
 import java.util.List;
 
 import javax.inject.Inject;
@@ -10,9 +12,9 @@ import org.springframework.stereotype.Service;
 
 import com.amazonaws.services.elasticloadbalancingv2.model.DeleteLoadBalancerRequest;
 import com.amazonaws.services.elasticloadbalancingv2.model.DeleteLoadBalancerResult;
-import com.sequenceiq.cloudbreak.cloud.aws.AwsMethodExecutor;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonElasticLoadBalancingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.context.AwsContext;
+import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsMethodExecutor;
 import com.sequenceiq.cloudbreak.cloud.aws.resource.instance.AbstractAwsNativeComputeBuilder;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -20,16 +22,12 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
-import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
-import com.sequenceiq.cloudbreak.cloud.notification.PersistenceRetriever;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
 public class AwsNativeLoadBalancerResourceBuilder extends AbstractAwsNativeComputeBuilder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsNativeLoadBalancerResourceBuilder.class);
-
-    private static final int COMPUTE_BUILDER_ORDER = 5;
 
     @Inject
     private AwsMethodExecutor awsMethodExecutor;
@@ -63,6 +61,6 @@ public class AwsNativeLoadBalancerResourceBuilder extends AbstractAwsNativeCompu
 
     @Override
     public int order() {
-        return COMPUTE_BUILDER_ORDER;
+        return NATIVE_LOAD_BALANCER_RESOURCE_BUILDER_ORDER;
     }
 }

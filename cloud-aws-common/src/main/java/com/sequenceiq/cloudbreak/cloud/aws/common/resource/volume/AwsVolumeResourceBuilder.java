@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.aws.resource;
+package com.sequenceiq.cloudbreak.cloud.aws.common.resource.volume;
 
 import static com.sequenceiq.cloudbreak.cloud.model.ResourceStatus.ATTACHED;
 import static com.sequenceiq.cloudbreak.cloud.model.ResourceStatus.CREATED;
@@ -43,11 +43,12 @@ import com.amazonaws.services.ec2.model.ModifyInstanceAttributeRequest;
 import com.amazonaws.services.ec2.model.ModifyInstanceAttributeResult;
 import com.amazonaws.services.ec2.model.Subnet;
 import com.amazonaws.services.ec2.model.TagSpecification;
-import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
+import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.context.AwsContext;
 import com.sequenceiq.cloudbreak.cloud.aws.common.service.AwsResourceNameService;
+import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsMethodExecutor;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsInstanceView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -89,10 +90,13 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
     private AwsTaggingService awsTaggingService;
 
     @Inject
-    private AwsCloudFormationClient awsClient;
+    private CommonAwsClient awsClient;
 
     @Inject
     private VolumeResourceCollector volumeResourceCollector;
+
+    @Inject
+    private AwsMethodExecutor awsMethodExecutor;
 
     private Function<Volume, InstanceBlockDeviceMappingSpecification> toInstanceBlockDeviceMappingSpecification = volume -> {
         EbsInstanceBlockDeviceSpecification device = new EbsInstanceBlockDeviceSpecification()
@@ -119,12 +123,16 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
                 .filter(resource -> ResourceType.AWS_VOLUMESET.equals(resource.getType()))
                 .findFirst();
 
-        CloudResource subnet = context.getNetworkResources().stream()
-                .filter(cloudResource -> ResourceType.AWS_SUBNET.equals(cloudResource.getType())).findFirst().get();
-        return List.of(reattachableVolumeSet.orElseGet(createVolumeSet(privateId, auth, group, subnet)));
+        String subnetId = getSubnetId(context, instance);
+        return List.of(reattachableVolumeSet.orElseGet(createVolumeSet(privateId, auth, group, subnetId)));
     }
 
-    private Supplier<CloudResource> createVolumeSet(long privateId, AuthenticatedContext auth, Group group, CloudResource subnetResource) {
+    protected String getSubnetId(AwsContext context, CloudInstance cloudInstance) {
+        return context.getNetworkResources().stream()
+                .filter(cloudResource -> ResourceType.AWS_SUBNET.equals(cloudResource.getType())).findFirst().get().getName();
+    }
+
+    private Supplier<CloudResource> createVolumeSet(long privateId, AuthenticatedContext auth, Group group, String subnetId) {
         return () -> {
             AwsResourceNameService resourceNameService = getResourceNameService();
 
@@ -133,7 +141,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
             CloudContext cloudContext = auth.getCloudContext();
             String stackName = cloudContext.getName();
 
-            String availabilityZone = getAvailabilityZoneFromSubnet(auth, subnetResource);
+            String availabilityZone = getAvailabilityZoneFromSubnet(auth, subnetId);
 
             return new Builder()
                     .persistent(true)
@@ -153,12 +161,12 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
         };
     }
 
-    private String getAvailabilityZoneFromSubnet(AuthenticatedContext auth, CloudResource subnetResource) {
+    private String getAvailabilityZoneFromSubnet(AuthenticatedContext auth, String subnetId) {
         AmazonEc2Client amazonEC2Client = getAmazonEC2Client(auth);
         DescribeSubnetsResult describeSubnetsResult = amazonEC2Client.describeSubnets(new DescribeSubnetsRequest()
-                .withSubnetIds(subnetResource.getName()));
+                .withSubnetIds(subnetId));
         return describeSubnetsResult.getSubnets().stream()
-                .filter(subnet -> subnetResource.getName().equals(subnet.getSubnetId()))
+                .filter(subnet -> subnetId.equals(subnet.getSubnetId()))
                 .map(Subnet::getAvailabilityZone)
                 .findFirst()
                 .orElse(auth.getCloudContext().getLocation().getAvailabilityZone().value());
@@ -292,8 +300,13 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
                 .withInstanceId(resource.getInstanceId())
                 .withBlockDeviceMappings(deviceMappingSpecifications);
 
-        ModifyInstanceAttributeResult modifyIdentityIdFormatResult = client.modifyInstanceAttribute(modifyInstanceAttributeRequest);
-        LOGGER.debug("Delete on termination set to true. {}", modifyIdentityIdFormatResult);
+        ModifyInstanceAttributeResult modifyIdentityIdFormatResult = awsMethodExecutor.execute(
+                () -> client.modifyInstanceAttribute(modifyInstanceAttributeRequest), null);
+        String result = resource.getInstanceId() + " not found on the provider.";
+        if (modifyIdentityIdFormatResult != null) {
+            result = modifyIdentityIdFormatResult.toString();
+        }
+        LOGGER.debug("Delete on termination set to true. {}", result);
     }
 
     private void deleteOrphanedVolumes(List<CloudResourceStatus> cloudResourceStatuses, AmazonEc2Client client) {

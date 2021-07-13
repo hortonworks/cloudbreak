@@ -73,6 +73,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.AwsMetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonCloudWatchClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEfsClient;
@@ -192,6 +193,9 @@ public class AwsRepairTest {
     private AmazonEfsClient amazonEfsClient;
 
     @MockBean
+    private CommonAwsClient commonAwsClient;
+
+    @MockBean
     private AmazonAutoScalingClient amazonAutoScalingClient;
 
     @MockBean
@@ -245,6 +249,7 @@ public class AwsRepairTest {
 
     private void setup() {
         when(awsClient.createEc2Client(any(), anyString())).thenReturn(amazonEC2Client);
+        when(commonAwsClient.createEc2Client(any(), anyString())).thenReturn(amazonEC2Client);
         when(awsClient.createElasticFileSystemClient(any(), anyString())).thenReturn(amazonEfsClient);
         when(awsClient.createCloudFormationClient(any(), anyString())).thenReturn(amazonCloudFormationClient);
         when(amazonCloudFormationClient.waiters()).thenReturn(cfWaiters);

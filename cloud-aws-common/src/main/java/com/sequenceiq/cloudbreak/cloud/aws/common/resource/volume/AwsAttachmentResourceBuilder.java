@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.aws.resource;
+package com.sequenceiq.cloudbreak.cloud.aws.common.resource.volume;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
 import com.amazonaws.services.ec2.model.AttachVolumeRequest;
 import com.amazonaws.services.ec2.model.DescribeVolumesRequest;
 import com.amazonaws.services.ec2.model.DescribeVolumesResult;
-import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.context.AwsContext;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
@@ -49,7 +49,7 @@ public class AwsAttachmentResourceBuilder extends AbstractAwsComputeBuilder {
     private AsyncTaskExecutor intermediateBuilderExecutor;
 
     @Inject
-    private AwsCloudFormationClient awsClient;
+    private CommonAwsClient awsClient;
 
     @Inject
     private VolumeResourceCollector volumeResourceCollector;

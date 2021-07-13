@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.aws.resource;
+package com.sequenceiq.cloudbreak.cloud.aws.common.resource.volume;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -30,8 +30,8 @@ import com.amazonaws.services.ec2.model.CreateVolumeRequest;
 import com.amazonaws.services.ec2.model.CreateVolumeResult;
 import com.amazonaws.services.ec2.model.Tag;
 import com.amazonaws.services.ec2.model.TagSpecification;
-import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
+import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.context.AwsContext;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
@@ -110,7 +110,7 @@ class AwsVolumeResourceBuilderTest {
     private AwsTaggingService awsTaggingService;
 
     @Mock
-    private AwsCloudFormationClient awsClient;
+    private CommonAwsClient awsClient;
 
     @InjectMocks
     private AwsVolumeResourceBuilder underTest;
