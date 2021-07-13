@@ -38,16 +38,16 @@ public class GcpUtil {
         gcpClientActions.stopHostGroupInstances(instanceIds);
     }
 
-    public void cloudStorageListContainer(String baseLocation, String pathToTargetObject, boolean zeroContent) {
-        gcpClientActions.listBucketSelectedObject(gcpStackUtil.getBucketName(baseLocation), "/" + pathToTargetObject, zeroContent);
+    public void cloudStorageListContainer(String baseLocation, String selectedObject, boolean zeroContent) {
+        listSelectedObject(baseLocation + selectedObject, zeroContent);
     }
 
     public void cloudStorageListContainerFreeIpa(String baseLocation, String clusterName, String crn) {
-        listSelectedObject(baseLocation);
+        listSelectedObject(baseLocation + "/cluster-logs/freeipa");
     }
 
     public void cloudStorageListContainerDataLake(String baseLocation, String clusterName, String crn) {
-        listSelectedObject(baseLocation);
+        listSelectedObject(baseLocation + "/cluster-logs/datalake");
     }
 
     public void cloudStorageDeleteContainer(String baseLocation) {
@@ -56,11 +56,15 @@ public class GcpUtil {
     }
 
     private void listSelectedObject(String baseLocation) {
+        listSelectedObject(baseLocation, false);
+    }
+
+    private void listSelectedObject(String baseLocation, boolean zeroContent) {
         String bucketName = gcpStackUtil.getBucketName(baseLocation);
         String objectPath = gcpStackUtil
                 .getPath(baseLocation)
                 .replace(bucketName + "/", "")
                 + "/";
-        gcpClientActions.listBucketSelectedObject(bucketName, objectPath, false);
+        gcpClientActions.listBucketSelectedObject(bucketName, objectPath, zeroContent);
     }
 }

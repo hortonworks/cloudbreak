@@ -41,17 +41,17 @@ public class AzureCloudBlobUtil {
         azureCloudBlobClientActions.listAllFolders(baseLocation);
     }
 
-    public void listSelectedFoldersInAContaier(String baseLocation, String pathToTargetObject, boolean zeroContent) {
-        azureCloudBlobClientActions.listSelectedDirectory(baseLocation, pathToTargetObject, zeroContent);
+    public void listSelectedFoldersInAContaier(String baseLocation, String selectedDirectory, boolean zeroContent) {
+        azureCloudBlobClientActions.listSelectedDirectory(baseLocation, selectedDirectory, zeroContent);
     }
 
     public void listDataLakeFoldersInAContaier(String baseLocation, String clusterName, String crn) {
         azureCloudBlobClientActions.listSelectedDirectory(baseLocation,
-                "datalake/" + clusterName + "_" + Crn.fromString(crn).getResource(), false);
+                "cluster-logs/datalake/" + clusterName + "_" + Crn.fromString(crn).getResource(), false);
     }
 
     public void listFreeIpaFoldersInAContaier(String baseLocation, String clusterName, String crn) {
         azureCloudBlobClientActions.listSelectedDirectory(baseLocation,
-                "freeipa/" + clusterName + "_" + Crn.fromString(crn).getResource(), false);
+                "cluster-logs/freeipa/" + clusterName + "_" + Crn.fromString(crn).getResource(), false);
     }
 }
