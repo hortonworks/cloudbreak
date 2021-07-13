@@ -41,12 +41,14 @@ import com.sequenceiq.datalake.service.sdx.SdxDatabaseOperation;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.flow.api.model.operation.OperationView;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslConfigV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslMode;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerStatusV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
+import com.sequenceiq.redbeams.api.endpoint.v4.operation.OperationV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackRequest;
 
 @Service
@@ -87,6 +89,9 @@ public class DatabaseService {
 
     @Inject
     private DatabaseServerV4Endpoint databaseServerV4Endpoint;
+
+    @Inject
+    private OperationV4Endpoint operationV4Endpoint;
 
     @Inject
     private EntitlementService entitlementService;
@@ -248,6 +253,10 @@ public class DatabaseService {
                     }
                 });
         return response;
+    }
+
+    public OperationView getOperationProgressStatus(String databaseCrn, boolean detailed) {
+        return ThreadBasedUserCrnProvider.doAsInternalActor(() -> operationV4Endpoint.getRedbeamsOperationProgressByResourceCrn(databaseCrn, detailed));
     }
 
     private DatabaseServerStatusV4Response getDatabaseStatus(String databaseCrn) {

@@ -995,7 +995,16 @@ public abstract class TestContext implements ApplicationContextAware {
                     Log.await(LOGGER, String.format(" Cloudbreak await for flow '%s' is failed for '%s', because of %s",
                             awaitEntity, awaitEntity.getName(), e.getMessage()));
                 }
-                getExceptionMap().put("Cloudbreak await for flow " + awaitEntity, e);
+                getExceptionMap().put(String.format("Cloudbreak await for flow %s", awaitEntity), e);
+            }
+            if (flowUtilSingleStatus.getFlowFailed()) {
+                if (runningParameter.isLogError()) {
+                    LOGGER.error("Cloudbreak await for flow '{}' is failed for: '{}', because of latest flow status is FAILED", awaitEntity,
+                            awaitEntity.getName());
+                    Log.await(LOGGER, String.format(" Cloudbreak await for flow '%s' is failed for '%s', because of latest flow status is FAILED ",
+                            awaitEntity, awaitEntity.getName()));
+                }
+                getExceptionMap().put(String.format("Cloudbreak await for flow %s", awaitEntity), new TestFailException("Latest flow status is FAILED!"));
             }
         }
         entity.setLastKnownFlowId(null);

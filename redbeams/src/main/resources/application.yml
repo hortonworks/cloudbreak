@@ -605,6 +605,8 @@ cb:
         prewarmed: true
 
 altus:
+  audit:
+    enabled: false
   ums:
     host: localhost
 

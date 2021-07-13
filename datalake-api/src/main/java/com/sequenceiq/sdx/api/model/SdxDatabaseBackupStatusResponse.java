@@ -12,7 +12,6 @@ public class SdxDatabaseBackupStatusResponse {
     public SdxDatabaseBackupStatusResponse(DatalakeDatabaseDrStatus status, String statusReason) {
         this.status = status;
         this.statusReason = statusReason;
-
     }
 
     public DatalakeDatabaseDrStatus getStatus() {

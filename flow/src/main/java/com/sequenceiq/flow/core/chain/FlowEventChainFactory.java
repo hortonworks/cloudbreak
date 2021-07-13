@@ -1,6 +1,7 @@
 package com.sequenceiq.flow.core.chain;
 
 import com.sequenceiq.cloudbreak.common.event.Payload;
+import com.sequenceiq.flow.api.model.operation.OperationType;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 
 public interface FlowEventChainFactory<P extends Payload> {
@@ -11,5 +12,9 @@ public interface FlowEventChainFactory<P extends Payload> {
 
     default String getName() {
         return getClass().getSimpleName();
+    }
+
+    default OperationType getFlowOperationType() {
+        return OperationType.UNKNOWN;
     }
 }

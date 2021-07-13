@@ -201,7 +201,7 @@
                  <#assign createAndNoSecGroup = !isUpscale && (! securityGroups[instance.groupName]?? || ! securityGroups[instance.groupName]?has_content)>
                  <#if !noPublicIp>
                  {
-                   "apiVersion": "2015-05-01-preview",
+                   "apiVersion": "2017-08-01",
                    "type": "Microsoft.Network/publicIPAddresses",
                    "name": "[concat(parameters('publicIPNamePrefix'), '${instance.instanceId}')]",
                    "location": "[parameters('region')]",
@@ -212,8 +212,14 @@
                         </#list>
                      </#if>
                      },
+                   <#if instance.availabilitySetName?? && instance.availabilitySetName?has_content>
+                     "sku": {
+                         "name": "Standard",
+                         "tier": "Regional"
+                     },
+                   </#if>
                    "properties": {
-                       <#if instanceGroup == "GATEWAY">
+                       <#if instanceGroup == "GATEWAY" || (instance.availabilitySetName?? && instance.availabilitySetName?has_content)>
                        "publicIPAllocationMethod": "Static"
                        <#else>
                        "publicIPAllocationMethod": "Dynamic"
@@ -303,7 +309,7 @@
                                                only a single LB pool
                                            -->
                                        <#list loadBalancerMapping[instance.groupName] as loadBalancer>
-                                       { "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', '${loadBalancer.name}', 'address-pool')]" }
+                                       { "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', '${loadBalancer.name}', '${instance.groupName}-pool')]" }
                                        <#sep>, </#sep>
                                        </#list>
                                    ]
@@ -445,11 +451,13 @@
                   },
                   "properties": {
                     "backendAddressPools": [
-                      {
-<#--                todo: when additional lbs and pools are added we'll have to handle associating the appropriate address pool names-->
-                        "name": "address-pool",
-                        "properties": {}
-                      }
+                       <#list loadBalancer.instanceGroupNames as groupName>
+                       {
+                         "name": "${groupName}-pool",
+                         "properties": {
+                         }
+                       }<#sep>,</#sep>
+                       </#list>
                     ],
                     "frontendIPConfigurations": [
                       <#if loadBalancer.type == "PUBLIC">
@@ -488,7 +496,7 @@
                                 "name": "${rule.name}",
                                 "properties": {
                                     "backendAddressPool": {
-                                        "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', '${loadBalancer.name}', 'address-pool')]"
+                                        "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', '${loadBalancer.name}', '${rule.groupName}-pool')]"
                                     },
                                     "backendPort": ${rule.backendPort},
                                     "enableFloatingIP": false,
@@ -522,7 +530,7 @@
                     ]
                   },
                   "sku": {
-                    "name": "Basic"
+                    "name": "Standard"
                   }
                 }
                 <#if loadBalancer.type == "PUBLIC">
@@ -532,7 +540,7 @@
                     "name": "${loadBalancer.name}-publicIp",
                     "location": "[parameters('region')]",
                     "sku": {
-                        "name": "Basic"
+                        "name": "Standard"
                     },
                     "properties": {
                         "publicIPAddressVersion": "IPv4",

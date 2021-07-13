@@ -6,6 +6,8 @@ import static com.sequenceiq.freeipa.client.FreeIpaChecks.IPA_UNMANAGED_GROUPS;
 import java.util.Optional;
 import java.util.Set;
 
+import com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil;
+import com.sequenceiq.freeipa.client.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -66,9 +68,10 @@ public class FreeIpaUsersStateProvider {
             if (IPA_PROTECTED_USERS.contains(userName)) {
                 continue;
             }
-            Optional<com.sequenceiq.freeipa.client.model.User> ipaUserOptional = freeIpaClient.userFind(userName);
-            if (ipaUserOptional.isPresent()) {
-                com.sequenceiq.freeipa.client.model.User ipaUser = ipaUserOptional.get();
+            Optional<User> userOptional = FreeIpaClientExceptionUtil.ignoreNotFoundExceptionWithValue(
+                    () -> freeIpaClient.userShow(userName), null);
+            if (userOptional.isPresent()) {
+                User ipaUser = userOptional.get();
                 builder.addUser(fromIpaUser(ipaUser));
                 userMetadataConverter.toUserMetadata(ipaUser).ifPresent(meta -> builder.addUserMetadata(ipaUser.getUid(), meta));
                 if (ipaUser.getMemberOfGroup() != null) {

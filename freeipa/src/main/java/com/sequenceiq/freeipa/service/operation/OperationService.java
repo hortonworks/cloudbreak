@@ -16,11 +16,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.flow.api.model.operation.OperationFlowsView;
+import com.sequenceiq.flow.api.model.operation.OperationResource;
+import com.sequenceiq.flow.api.model.operation.OperationView;
+import com.sequenceiq.flow.converter.OperationDetailsPopulator;
+import com.sequenceiq.flow.service.FlowService;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.FailureDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SuccessDetails;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
 import com.sequenceiq.freeipa.entity.Operation;
+import com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionFlowConfig;
+import com.sequenceiq.freeipa.flow.stack.provision.StackProvisionFlowConfig;
 import com.sequenceiq.freeipa.repository.OperationRepository;
 import com.sequenceiq.freeipa.service.freeipa.user.AcceptResult;
 
@@ -33,6 +40,12 @@ public class OperationService {
 
     @Inject
     private List<OperationAcceptor> operationAcceptorList;
+
+    @Inject
+    private FlowService flowService;
+
+    @Inject
+    private OperationDetailsPopulator operationDetailsPopulator;
 
     private Map<OperationType, OperationAcceptor> operationAcceptorMap = new HashMap<>();
 
@@ -124,5 +137,22 @@ public class OperationService {
         operation.setError(reason);
         LOGGER.warn("Operation rejected: {}. Operation duration was {} ms.", operation, operation.getEndTime() - operation.getStartTime());
         return operationRepository.save(operation);
+    }
+
+    public OperationView getOperationProgressByEnvironmentCrn(String resourceCrn, boolean detailed) {
+        OperationView operationView = new OperationView();
+        Optional<OperationFlowsView> operationFlowsViewOpt = flowService.getLastFlowOperationByResourceCrn(resourceCrn);
+        if (operationFlowsViewOpt.isPresent()) {
+            OperationFlowsView operationFlowsView = operationFlowsViewOpt.get();
+            OperationResource operationResource = OperationResource.FREEIPA;
+            com.sequenceiq.flow.api.model.operation.OperationType operationType = operationFlowsView.getOperationType();
+            if (com.sequenceiq.flow.api.model.operation.OperationType.PROVISION.equals(operationType)) {
+                operationView = operationDetailsPopulator.createOperationView(operationFlowsView, operationResource,
+                        List.of(StackProvisionFlowConfig.class, FreeIpaProvisionFlowConfig.class));
+            } else {
+                operationView = operationDetailsPopulator.createOperationView(operationFlowsView, operationResource);
+            }
+        }
+        return operationView;
     }
 }

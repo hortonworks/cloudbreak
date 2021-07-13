@@ -5,6 +5,8 @@ import java.net.URISyntaxException;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -13,6 +15,7 @@ import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.it.cloudbreak.cloud.v4.aws.AwsProperties;
 
 @Service
@@ -39,16 +42,36 @@ public class S3Client {
     }
 
     public String getBucketName() {
+        String baseLocation = awsProperties.getCloudStorage().getBaseLocation();
         try {
-            URI uri = new URI(awsProperties.getCloudStorage().getBaseLocation());
+            URI uri = new URI(baseLocation);
             return uri.getHost();
         } catch (URISyntaxException e) {
-            LOGGER.error("Amazon S3 Base Location could not been parsed, because of error!", e);
-            return "cloudbreaktest";
+            String[] parts = getObjects(baseLocation.replaceAll(FileSystemType.S3.getProtocol() + "://", ""));
+            if (!StringUtils.isEmpty(baseLocation) && parts.length > 1) {
+                return parts[0];
+            } else {
+                LOGGER.error("Amazon S3 Base Location could not been parsed, because of error!", e);
+                return "cloudbreak-test";
+            }
+        }
+    }
+
+    public String getPath(String objectPath) {
+        String[] parts = getObjects(objectPath);
+        if (!StringUtils.isEmpty(objectPath) && parts.length > 3) {
+            return StringUtils.join(ArrayUtils.removeAll(parts, 0, 1), "/");
+        } else {
+            LOGGER.debug("No path found in S3 location.");
+            return "";
         }
     }
 
     public String getEUWestS3Uri() {
         return String.join(".", "http://" + getBucketName(), "s3", awsProperties.getRegion(), "amazonaws.com");
+    }
+
+    private String[] getObjects(String splittable) {
+        return splittable.split("/");
     }
 }

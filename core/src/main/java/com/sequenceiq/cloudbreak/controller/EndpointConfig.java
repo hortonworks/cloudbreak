@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.controller.v4.DiagnosticsV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.EventV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.FileSystemV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.ImageCatalogV4Controller;
+import com.sequenceiq.cloudbreak.controller.v4.OperationV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.ProgressV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.RecipesV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.StackV4Controller;
@@ -80,6 +81,7 @@ public class EndpointConfig extends ResourceConfig {
             DatalakeV4Controller.class,
             DiagnosticsV4Controller.class,
             ProgressV4Controller.class,
+            OperationV4Controller.class,
             CloudProviderServicesV4Controller.class,
             FlowController.class,
             FlowPublicController.class,

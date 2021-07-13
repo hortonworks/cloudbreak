@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service;
 
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.oozie.OozieHAConfigProvider.OOZIE_HTTPS_PORT;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static java.util.Map.entry;
@@ -31,6 +32,7 @@ import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AzureInstanceGroupParameters;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.knox.KnoxRoles;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.oozie.OozieRoles;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -107,6 +109,20 @@ public class LoadBalancerConfigService {
         return groupNames;
     }
 
+    public Set<String> getOozieGroups(Stack stack) {
+        LOGGER.debug("Fetching list of instance groups with Oozie installed");
+        Cluster cluster = stack.getCluster();
+        if (cluster != null) {
+            CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(cluster.getBlueprint().getBlueprintText());
+            Set<String> groupNames = cmTemplateProcessor.getHostGroupsWithComponent(OozieRoles.OOZIE_SERVER);
+            LOGGER.info("Oozie instance groups are {}", groupNames);
+            return groupNames;
+        } else {
+            LOGGER.info("No Oozie instance groups found");
+            return Set.of();
+        }
+    }
+
     public String generateLoadBalancerEndpoint(Stack stack) {
         StringBuilder name = new StringBuilder()
             .append(stack.getName())
@@ -119,6 +135,8 @@ public class LoadBalancerConfigService {
         switch (targetGroup.getType()) {
             case KNOX:
                 return Set.of(new TargetGroupPortPair(Integer.parseInt(httpsPort), Integer.parseInt(knoxServicePort)));
+            case OOZIE:
+                return Set.of(new TargetGroupPortPair(Integer.parseInt(OOZIE_HTTPS_PORT), Integer.parseInt(OOZIE_HTTPS_PORT)));
             default:
                 return null;
         }
@@ -194,17 +212,21 @@ public class LoadBalancerConfigService {
     }
 
     /**
-     * Adds availability sets to instance groups associated with Knox target groups.
+     * Adds availability sets to instance groups associated with Knox and Oozie target groups.
      * This method updates the JSON parameters associated with certain instance groups.
      *
      * It's only necessary to add availability sets to the Azure deployment while we
-     * use the {@code basic} Azure Load Balancer SKU.
+     * use the {@code basic} Azure Load Balancer SKU. We use {@code standard} Load Balancer
+     * we still use availability set to indicate that we need a {@code standard} IP addresses
+     * for the instances in those availability sets.
      *
      * @param availabilitySetPrefix A string prefix. Should be a stack name normally.
      * @param loadBalancers the list of load balancers to look up target groups from.
      */
     public void configureLoadBalancerAvailabilitySets(String availabilitySetPrefix, Set<LoadBalancer> loadBalancers) {
         getKnoxInstanceGroups(loadBalancers)
+                .forEach(instanceGroup -> attachAvailabilitySetParameters(availabilitySetPrefix, instanceGroup));
+        getOozieInstanceGroups(loadBalancers)
                 .forEach(instanceGroup -> attachAvailabilitySetParameters(availabilitySetPrefix, instanceGroup));
     }
 
@@ -218,11 +240,19 @@ public class LoadBalancerConfigService {
     }
 
     private Set<InstanceGroup> getKnoxInstanceGroups(Set<LoadBalancer> loadBalancers) {
+        return getInstanceGroups(loadBalancers, TargetGroupType.KNOX);
+    }
+
+    private Set<InstanceGroup> getOozieInstanceGroups(Set<LoadBalancer> loadBalancers) {
+        return getInstanceGroups(loadBalancers, TargetGroupType.OOZIE);
+    }
+
+    private Set<InstanceGroup> getInstanceGroups(Set<LoadBalancer> loadBalancers, TargetGroupType type) {
         return loadBalancers.stream()
-                .flatMap(loadBalancer -> loadBalancer.getTargetGroupSet().stream())
-                .filter(targetGroup -> TargetGroupType.KNOX.equals(targetGroup.getType()))
-                .flatMap(targetGroup -> targetGroup.getInstanceGroups().stream())
-                .collect(Collectors.toSet());
+            .flatMap(loadBalancer -> loadBalancer.getTargetGroupSet().stream())
+            .filter(targetGroup -> type.equals(targetGroup.getType()))
+            .flatMap(targetGroup -> targetGroup.getInstanceGroups().stream())
+            .collect(Collectors.toSet());
     }
 
     public Set<LoadBalancer> setupLoadBalancers(Stack stack, DetailedEnvironmentResponse environment, boolean dryRun, boolean loadBalancerFlagEnabled) {
@@ -239,21 +269,8 @@ public class LoadBalancerConfigService {
             } else {
                 LOGGER.debug("Load balancer is explicitly defined for the stack.");
             }
-            Optional<TargetGroup> knoxTargetGroup = setupKnoxTargetGroup(stack, dryRun);
-            if (knoxTargetGroup.isPresent()) {
-                if (isNetworkUsingPrivateSubnet(stack.getNetwork(), environment.getNetwork())) {
-                    setupLoadBalancer(dryRun, stack, loadBalancers, knoxTargetGroup.get(), LoadBalancerType.PRIVATE);
-                } else {
-                    LOGGER.debug("Private subnet is not available. The internal load balancer will not be created.");
-                }
-                if (shouldCreateExternalKnoxLoadBalancer(stack.getNetwork(), environment.getNetwork(), stack.getCloudPlatform())) {
-                    setupLoadBalancer(dryRun, stack, loadBalancers, knoxTargetGroup.get(), LoadBalancerType.PUBLIC);
-                } else {
-                    LOGGER.debug("External load balancer creation is disabled.");
-                }
-            } else {
-                LOGGER.debug("No Knox instance groups found. If load balancer creation is enabled, Knox routing in the load balancer will be skipped.");
-            }
+            setupKnoxLoadbalancing(stack, environment, dryRun, loadBalancers);
+            setupOozieLoadbalancing(stack, dryRun, loadBalancers);
 
             // TODO CB-9368 - create target group for CM instances
         }
@@ -262,18 +279,45 @@ public class LoadBalancerConfigService {
         return loadBalancers;
     }
 
-    private void setupLoadBalancer(boolean dryRun, Stack stack, Set<LoadBalancer> loadBalancers, TargetGroup knoxTargetGroup,
-            LoadBalancerType type) {
+    private void setupOozieLoadbalancing(Stack stack, boolean dryRun, Set<LoadBalancer> loadBalancers) {
+        Optional<TargetGroup> oozieTargetGroup = setupOozieHATargetGroup(stack, dryRun);
+        if (oozieTargetGroup.isPresent()) {
+            setupLoadBalancer(dryRun, stack, loadBalancers, oozieTargetGroup.get(), LoadBalancerType.PRIVATE);
+        } else {
+            LOGGER.debug("No Oozie HA instance group found.");
+        }
+    }
+
+    private void setupKnoxLoadbalancing(Stack stack, DetailedEnvironmentResponse environment,
+        boolean dryRun, Set<LoadBalancer> loadBalancers) {
+        Optional<TargetGroup> knoxTargetGroup = setupKnoxTargetGroup(stack, dryRun);
+        if (knoxTargetGroup.isPresent()) {
+            if (isNetworkUsingPrivateSubnet(stack.getNetwork(), environment.getNetwork())) {
+                setupLoadBalancer(dryRun, stack, loadBalancers, knoxTargetGroup.get(), LoadBalancerType.PRIVATE);
+            } else {
+                LOGGER.debug("Private subnet is not available. The internal load balancer will not be created.");
+            }
+            if (shouldCreateExternalKnoxLoadBalancer(stack.getNetwork(), environment.getNetwork(), stack.getCloudPlatform())) {
+                setupLoadBalancer(dryRun, stack, loadBalancers, knoxTargetGroup.get(), LoadBalancerType.PUBLIC);
+            } else {
+                LOGGER.debug("External load balancer creation is disabled.");
+            }
+        } else {
+            LOGGER.debug("No Knox instance groups found. If load balancer creation is enabled, Knox routing in the load balancer will be skipped.");
+        }
+    }
+
+    private void setupLoadBalancer(boolean dryRun, Stack stack, Set<LoadBalancer> loadBalancers, TargetGroup targetGroup, LoadBalancerType type) {
         if (dryRun) {
             LOGGER.debug("{} load balancer can be configured for stack {}. Adding mock LB to configurable LB list.", type, stack.getName());
             LoadBalancer mockLb = new LoadBalancer();
             mockLb.setType(type);
             loadBalancers.add(mockLb);
         } else {
-            LOGGER.debug("Found Knox enabled instance groups in stack. Setting up {} Knox load balancer.", type);
-            setupKnoxLoadBalancer(
+            LOGGER.debug("Found {} enabled instance groups in stack. Setting up {} load balancer.", targetGroup.getType(), type);
+            setupLoadBalancerWithTargetGroup(
                 createLoadBalancerIfNotExists(loadBalancers, type, stack),
-                knoxTargetGroup);
+                targetGroup);
         }
     }
 
@@ -389,6 +433,35 @@ public class LoadBalancerConfigService {
         return Optional.ofNullable(knoxTargetGroup);
     }
 
+    private Optional<TargetGroup> setupOozieHATargetGroup(Stack stack, boolean dryRun) {
+        Optional<InstanceGroup> oozieInstanceGroup = getOozieInstanceGroup(stack);
+
+        if (oozieInstanceGroup.isPresent()) {
+            LOGGER.info("Oozie HA instance group found; enabling Oozie load balancer configuration.");
+            TargetGroup oozieTargetGroup = new TargetGroup();
+            oozieTargetGroup.setType(TargetGroupType.OOZIE);
+            oozieTargetGroup.setInstanceGroups(Set.of(oozieInstanceGroup.get()));
+            if (!dryRun) {
+                LOGGER.debug("Adding target group to Oozie HA instance group.");
+                oozieInstanceGroup.get().addTargetGroup(oozieTargetGroup);
+            } else {
+                LOGGER.debug("Dry run, skipping instance group/target group linkage for Oozie.");
+            }
+            return Optional.of(oozieTargetGroup);
+        } else {
+            LOGGER.info("Oozie HA instance group not found; not enabling Oozie load balancer configuration.");
+            return Optional.empty();
+        }
+    }
+
+    private Optional<InstanceGroup> getOozieInstanceGroup(Stack stack) {
+        Set<String> oozieGroupNames = getOozieGroups(stack);
+        return stack.getInstanceGroups().stream()
+            .filter(ig -> oozieGroupNames.contains(ig.getGroupName()))
+            .filter(ig -> ig.getNodeCount() > 1)
+            .findFirst();
+    }
+
     private LoadBalancer createLoadBalancerIfNotExists(Set<LoadBalancer> loadBalancers, LoadBalancerType type, Stack stack) {
         LoadBalancer loadBalancer;
         Optional<LoadBalancer> existingLoadBalancer = loadBalancers.stream()
@@ -405,9 +478,9 @@ public class LoadBalancerConfigService {
         return loadBalancer;
     }
 
-    private void setupKnoxLoadBalancer(LoadBalancer loadBalancer, TargetGroup knoxTargetGroup) {
-        loadBalancer.addTargetGroup(knoxTargetGroup);
-        knoxTargetGroup.addLoadBalancer(loadBalancer);
+    private void setupLoadBalancerWithTargetGroup(LoadBalancer loadBalancer, TargetGroup targetGroup) {
+        loadBalancer.addTargetGroup(targetGroup);
+        targetGroup.addLoadBalancer(loadBalancer);
     }
 
     private List<String> getSupportedPlatforms() {

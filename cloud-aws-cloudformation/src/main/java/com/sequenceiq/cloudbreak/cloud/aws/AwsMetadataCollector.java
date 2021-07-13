@@ -8,7 +8,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -45,12 +44,8 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancerMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
-import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStoreMetadata;
-import com.sequenceiq.cloudbreak.cloud.model.Location;
-import com.sequenceiq.cloudbreak.cloud.model.VmType;
-import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterConfig;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 
 @Service
@@ -255,19 +250,6 @@ public class AwsMetadataCollector implements MetadataCollector {
 
     @Override
     public InstanceStoreMetadata collectInstanceStorageCount(AuthenticatedContext ac, List<String> instanceTypes) {
-        Location location = ac.getCloudContext().getLocation();
-        try {
-            CloudVmTypes cloudVmTypes = awsPlatformResources.virtualMachines(ac.getCloudCredential(), location.getRegion(), Map.of());
-            Map<String, Set<VmType>> cloudVmResponses = cloudVmTypes.getCloudVmResponses();
-            Map<String, VolumeParameterConfig> instanceTypeToInstanceStorageMap = cloudVmResponses.getOrDefault(location.getAvailabilityZone().value(), Set.of())
-                    .stream()
-                    .filter(vmType -> instanceTypes.contains(vmType.value()))
-                    .filter(vmType -> Objects.nonNull(vmType.getMetaData().getEphemeralConfig()))
-                    .collect(Collectors.toMap(VmType::value, vmType -> vmType.getMetaData().getEphemeralConfig()));
-            return new InstanceStoreMetadata(instanceTypeToInstanceStorageMap);
-        } catch (Exception e) {
-        LOGGER.warn("Failed to get vm type data: {}", instanceTypes, e);
-        throw new CloudConnectorException(e.getMessage(), e);
-    }
+        return awsPlatformResources.collectInstanceStorageCount(ac, instanceTypes);
     }
 }

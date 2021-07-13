@@ -16,6 +16,9 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.googlecode.jsonrpc4j.JsonRpcClientException;
+import com.sequenceiq.freeipa.client.FreeIpaClientException;
+import com.sequenceiq.freeipa.client.FreeIpaErrorCodes;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -121,6 +124,7 @@ class FreeIpaUsersStateProviderTest {
         List<String> groupsWithoutMembers = List.of("group4");
 
         com.sequenceiq.freeipa.client.model.User user1 = createIpaUser("user1", user1GroupNames);
+        String userNotFound = "userNotFound";
 
         Set<com.sequenceiq.freeipa.client.model.Group> groupsFindAll = Stream.of(user1GroupNames.stream(),
                 user2GroupNames.stream(), groupsWithoutMembers.stream(), IPA_UNMANAGED_GROUPS.stream())
@@ -128,7 +132,13 @@ class FreeIpaUsersStateProviderTest {
                 .map(this::createIpaGroup)
                 .collect(Collectors.toSet());
 
-        when(freeIpaClient.userFind(user1.getUid())).thenReturn(Optional.of(user1));
+        JsonRpcClientException jsonRpcException = new JsonRpcClientException(
+                FreeIpaErrorCodes.NOT_FOUND.getValue(), "group not found", null);
+        FreeIpaClientException notFoundException = new FreeIpaClientException(
+                "Invoke FreeIPA failed", jsonRpcException);
+
+        when(freeIpaClient.userShow(user1.getUid())).thenReturn(user1);
+        when(freeIpaClient.userShow(userNotFound)).thenThrow(notFoundException);
         when(freeIpaClient.groupFindAll()).thenReturn(groupsFindAll);
 
         Set<String> expectedUsers = Sets.newHashSet(user1.getUid());
@@ -142,7 +152,7 @@ class FreeIpaUsersStateProviderTest {
         doReturn(Optional.of(user1Metadata)).when(userMetadataConverter).toUserMetadata(argThat(arg -> user1.getUid().equals(arg.getUid())));
         Map<String, UserMetadata> expectedUserMetadata = Map.of(user1.getUid(), user1Metadata);
 
-        UsersState ipaState = underTest.getFilteredFreeIpaState(freeIpaClient, Set.of(user1.getUid()));
+        UsersState ipaState = underTest.getFilteredFreeIpaState(freeIpaClient, Set.of(user1.getUid(), userNotFound));
 
         for (FmsUser fmsUser : ipaState.getUsers()) {
             assertTrue(expectedUsers.contains(fmsUser.getName()));

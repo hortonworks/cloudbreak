@@ -21,6 +21,8 @@ public class FlowProgressResponseConverter {
 
     private static final int UNKNOWN_PROGRESS_PERCENTAGE = -1;
 
+    private static final int FINISHED_PERCENTAGE = 100;
+
     private static final double MILLISEC_TO_SEC_DOUBLE_DEVIDER = 1000d;
 
     private final FlowProgressHolder flowProgressHolder;
@@ -51,6 +53,9 @@ public class FlowProgressResponseConverter {
             response.setProgress(flowTypeOpt.map(s ->
                     flowProgressHolder.getProgressPercentageForState(s, lastFlowLog.getCurrentState()))
                     .orElse(UNKNOWN_PROGRESS_PERCENTAGE));
+            response.setMaxNumberOfTransitions(flowTypeOpt
+                    .map(flowProgressHolder::getTransitionsSize)
+                    .orElse(null));
             List<FlowLog> reversedFlowLogs = flowLogs.stream().
                     sorted(Comparator.comparingLong(FlowLog::getCreated))
                     .collect(Collectors.toList());
@@ -59,6 +64,7 @@ public class FlowProgressResponseConverter {
             response.setCreated(firstFlowLog.getCreated());
             if (lastFlowLog.getFinalized()) {
                 response.setElapsedTimeInSeconds(getRoundedTimeInSeconds(firstFlowLog.getCreated(), lastFlowLog.getCreated()));
+                response.setProgress(FINISHED_PERCENTAGE);
             } else {
                 response.setElapsedTimeInSeconds(getRoundedTimeInSeconds(firstFlowLog.getCreated(), new Date().getTime()));
             }

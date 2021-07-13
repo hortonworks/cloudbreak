@@ -58,6 +58,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
+import com.sequenceiq.cloudbreak.common.event.PayloadContext;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -115,10 +116,11 @@ import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.CloudStorageFolderResolv
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
+import com.sequenceiq.flow.core.PayloadContextProvider;
 import com.sequenceiq.flow.core.ResourceIdProvider;
 
 @Service
-public class StackService implements ResourceIdProvider, ResourcePropertyProvider {
+public class StackService implements ResourceIdProvider, ResourcePropertyProvider, PayloadContextProvider {
 
     public static final Set<String> REATTACH_COMPATIBLE_PLATFORMS = Set.of(CloudConstants.AWS, CloudConstants.AZURE, CloudConstants.GCP, CloudConstants.MOCK);
 
@@ -740,6 +742,16 @@ public class StackService implements ResourceIdProvider, ResourcePropertyProvide
     public Long getResourceIdByResourceName(String resourceName) {
         Long workspaceId = workspaceService.getForCurrentUser().getId();
         return Optional.ofNullable(getIdByNameInWorkspace(resourceName, workspaceId)).orElseThrow(notFound("Stack", resourceName));
+    }
+
+    @Override
+    public PayloadContext getPayloadContext(Long resourceId) {
+        Optional<Stack> stackOpt = findById(resourceId);
+        if (stackOpt.isPresent()) {
+            Stack stack = stackOpt.get();
+            return PayloadContext.create(stack.getResourceCrn(), stack.getCloudPlatform());
+        }
+        return null;
     }
 
     private Optional<Stack> findByNameAndWorkspaceIdWithLists(String name, Long workspaceId, StackType stackType, ShowTerminatedClustersAfterConfig config) {

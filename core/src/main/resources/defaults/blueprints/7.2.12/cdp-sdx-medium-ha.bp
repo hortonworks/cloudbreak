@@ -2,7 +2,6 @@
   "tags": {
     "shared_services_ready": true
   },
-  "blueprintUpgradeOption" : "DISABLED",
   "description": "7.2.12 - Medium SDX template with Atlas, HMS, Ranger and other services they are dependent on.  Services like HDFS, HBASE, RANGER, HMS have HA",
   "blueprint": {
     "cdhVersion": "7.2.12",

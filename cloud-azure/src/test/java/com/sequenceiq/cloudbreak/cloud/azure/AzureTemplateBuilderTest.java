@@ -578,9 +578,9 @@ public class AzureTemplateBuilderTest {
         assertEquals(2, StringUtils.countMatches(templateString,
             "\"[resourceId('Microsoft.Network/loadBalancers'"));
         assertEquals(2, StringUtils.countMatches(templateString,
-            "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', 'LoadBalancertestStackPUBLIC', 'address-pool')]"));
+            "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', 'LoadBalancertestStackPUBLIC', 'gateway-group-pool')]"));
         assertEquals(2, StringUtils.countMatches(templateString,
-            "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', 'LoadBalancertestStackPRIVATE', 'address-pool')]"));
+            "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', 'LoadBalancertestStackPRIVATE', 'gateway-group-pool')]"));
         assertEquals(2, StringUtils.countMatches(templateString,
             "\"type\": \"Microsoft.Network/loadBalancers\","));
         assertEquals(1, StringUtils.countMatches(templateString,

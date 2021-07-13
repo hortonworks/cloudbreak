@@ -14,10 +14,10 @@ public class MessageFactory<E> {
         FLOW_ID, FLOW_TRIGGER_USERCRN, DATA, FLOW_PARAMETERS
     }
 
-    public Message<E> createMessage(String flowId, String flowTriggerUserCrn, E key, Object data, SpanContext spanContext) {
+    public Message<E> createMessage(String flowId, String flowTriggerUserCrn, E key, Object data, SpanContext spanContext, String operationType) {
         Map<String, Object> headers = new HashMap<>();
         headers.put(HEADERS.DATA.name(), data);
-        headers.put(HEADERS.FLOW_PARAMETERS.name(), new FlowParameters(flowId, flowTriggerUserCrn, spanContext));
+        headers.put(HEADERS.FLOW_PARAMETERS.name(), new FlowParameters(flowId, flowTriggerUserCrn, operationType, spanContext));
         return new GenericMessage<>(key, headers);
     }
 }

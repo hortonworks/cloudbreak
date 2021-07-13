@@ -494,8 +494,7 @@
           "hive-HIVESERVER2-BASE",
           "hms-GATEWAY-BASE",
           "hms-HIVEMETASTORE-BASE",
-          "hue-HUE_LOAD_BALANCER-BASE",
-          "hue-HUE_SERVER-BASE",
+          "oozie-OOZIE_SERVER-BASE",
           "livy-GATEWAY-BASE",
           "spark_on_yarn-GATEWAY-BASE",
           "tez-GATEWAY-BASE",
@@ -520,7 +519,6 @@
           "spark_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
           "tez-GATEWAY-BASE",
           "yarn-JOBHISTORY-BASE",
-          "oozie-OOZIE_SERVER-BASE",
           "sqoop-SQOOP_CLIENT-GATEWAY-BASE",
           "zeppelin-ZEPPELIN_SERVER-BASE",
           "das-DAS_EVENT_PROCESSOR",
@@ -529,7 +527,9 @@
           "zookeeper-SERVER-BASE",
           "yarn-QUEUEMANAGER_WEBAPP-BASE",
           "yarn-QUEUEMANAGER_STORE-BASE",
-          "yarn-GATEWAY-BASE"
+          "yarn-GATEWAY-BASE",
+          "hue-HUE_LOAD_BALANCER-BASE",
+          "hue-HUE_SERVER-BASE"
         ]
       },
       {
@@ -551,7 +551,9 @@
         "refName": "manager",
         "cardinality": 1,
         "roleConfigGroupsRefNames": [
-          "knox-KNOX_GATEWAY-BASE"
+          "knox-KNOX_GATEWAY-BASE",
+          "hue-HUE_LOAD_BALANCER-BASE",
+          "hue-HUE_SERVER-BASE"
         ]
       }
     ]

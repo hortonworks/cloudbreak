@@ -8,6 +8,15 @@ import static com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreEvent.DATAL
 import static com.sequenceiq.datalake.service.sdx.CloudbreakFlowService.FlowState.FINISHED;
 import static com.sequenceiq.datalake.service.sdx.CloudbreakFlowService.FlowState.RUNNING;
 
+import java.util.Collections;
+
+import javax.inject.Inject;
+import javax.ws.rs.WebApplicationException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
 import com.cloudera.thunderhead.service.datalakedr.datalakeDRProto;
 import com.dyngr.Polling;
 import com.dyngr.core.AttemptResult;
@@ -47,23 +56,14 @@ import com.sequenceiq.datalake.service.sdx.CloudbreakFlowService;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.sdx.api.model.DatalakeDatabaseDrStatus;
+import com.sequenceiq.sdx.api.model.SdxBackupResponse;
+import com.sequenceiq.sdx.api.model.SdxBackupStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseBackupResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseBackupStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRestoreResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRestoreStatusResponse;
-import com.sequenceiq.sdx.api.model.SdxBackupResponse;
-import com.sequenceiq.sdx.api.model.SdxBackupStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxRestoreResponse;
 import com.sequenceiq.sdx.api.model.SdxRestoreStatusResponse;
-
-import java.util.Collections;
-
-import javax.inject.Inject;
-import javax.ws.rs.WebApplicationException;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
 /**
  * Service to perform backup/restore of the database backing SDX.
@@ -404,11 +404,11 @@ public class SdxBackupRestoreService {
     public SdxBackupStatusResponse getDatalakeBackupStatus(String datalakeName, String backupId, String backupName,
             String userCrn) {
         LOGGER.info("Requesting datalake backup status for datalake: '{}'", datalakeName);
-        DatalakeDrStatusResponse datalakeDrStatusResponse = datalakeDrClient.getBackupStatusByBackupId(
+        DatalakeDrStatusResponse datalakeDrStatusResponse = datalakeDrClient.getBackupStatus(
                 datalakeName, backupId, backupName, userCrn);
         return new SdxBackupStatusResponse(datalakeDrStatusResponse.getDrOperationId(),
-                                            datalakeDrStatusResponse.getState().name(),
-                                            datalakeDrStatusResponse.getFailureReason());
+                datalakeDrStatusResponse.getState().name(),
+                datalakeDrStatusResponse.getFailureReason());
     }
 
     public DatalakeDrStatusResponse triggerDatalakeRestore(Long id, String backupId, String backupLocationOverride, String userCrn) {

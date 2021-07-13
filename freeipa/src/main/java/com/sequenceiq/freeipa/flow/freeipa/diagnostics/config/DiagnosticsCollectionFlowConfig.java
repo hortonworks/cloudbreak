@@ -27,6 +27,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.flow.api.model.operation.OperationType;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 import com.sequenceiq.freeipa.flow.freeipa.diagnostics.DiagnosticsCollectionsState;
@@ -124,5 +125,10 @@ public class DiagnosticsCollectionFlowConfig extends AbstractFlowConfiguration<D
     @Override
     public DiagnosticsCollectionStateSelectors getRetryableEvent() {
         return HANDLED_FAILED_DIAGNOSTICS_COLLECTION_EVENT;
+    }
+
+    @Override
+    public OperationType getFlowOperationType() {
+        return OperationType.DIAGNOSTICS;
     }
 }

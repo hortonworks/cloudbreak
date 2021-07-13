@@ -52,8 +52,8 @@ public class GcpCloudFunctionality implements CloudFunctionality {
     }
 
     @Override
-    public void cloudStorageListContainer(String baseLocation) {
-        gcpUtil.cloudStorageListContainer(baseLocation);
+    public void cloudStorageListContainer(String baseLocation, String pathToTargetObject, boolean zeroContent) {
+        gcpUtil.cloudStorageListContainer(baseLocation, pathToTargetObject, zeroContent);
     }
 
     @Override

@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import com.cloudera.api.swagger.CommandsResourceApi;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiCommand;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cm.exception.CloudStorageConfigurationFailedException;
@@ -34,7 +35,7 @@ public class ClouderaManagerTemplateInstallationChecker extends AbstractCloudera
         } else if (apiCommand.getSuccess()) {
             return true;
         } else {
-            fail("", apiCommand, commandsResourceApi);
+            fail("", apiCommand, commandsResourceApi, pollerObject.getStack().getType());
         }
         return false;
     }
@@ -45,7 +46,7 @@ public class ClouderaManagerTemplateInstallationChecker extends AbstractCloudera
         try {
             CommandsResourceApi commandsResourceApi = clouderaManagerApiPojoFactory.getCommandsResourceApi(pollerObject.getApiClient());
             ApiCommand apiCommand = commandsResourceApi.readCommand(pollerObject.getId());
-            fail(msg, apiCommand, commandsResourceApi);
+            fail(msg, apiCommand, commandsResourceApi, pollerObject.getStack().getType());
         } catch (ApiException e) {
             LOGGER.info("Cloudera Manager had run into a timeout, and we were unable to determine the failure reason", e);
         }
@@ -63,20 +64,23 @@ public class ClouderaManagerTemplateInstallationChecker extends AbstractCloudera
         return "Template install";
     }
 
-    private void fail(String messagePrefix, ApiCommand apiCommand, CommandsResourceApi commandsResourceApi) {
+    private void fail(String messagePrefix, ApiCommand apiCommand, CommandsResourceApi commandsResourceApi, StackType stackType) {
         List<String> errorReasons = ClouderaManagerCommandApiErrorParserUtil.getErrors(apiCommand, commandsResourceApi);
         String msg = messagePrefix + "Installation of CDP with Cloudera Manager has failed: [" + String.join(", ", errorReasons) + "]";
         LOGGER.info(msg);
-        for (String errorReason : errorReasons) {
-            // Unfortunately CM is not giving back too much details about the errors, and what is returned usually nondeterministic:
-            // In a good case it returns "Failed to create HDFS directory",
-            // but sometines it just returns "Aborted command" or "Command timed-out after 186 seconds", so matching on such generic error error messages
-            // has no added value, therefore we are just checing whether AuditDir related commands are failing or not.
-            if (errorReason.matches(".*[RangerPluginCreateAuditDir|CreateRangerAuditDir|CreateRangerKafkaPluginAuditDirCommand|" +
-                    "CreateHiveWarehouseExternalDir|CreateHiveWarehouseDir|CreateRangerKnoxPluginAuditDirCommand].*")) {
-                throw new CloudStorageConfigurationFailedException(msg);
+        if (stackType == StackType.DATALAKE) {
+            for (String errorReason : errorReasons) {
+                // Unfortunately CM is not giving back too many details about the errors, and what is returned usually nondeterministic:
+                // In a good case it returns "Failed to create HDFS directory",
+                // but sometimes it just returns "Aborted command" or "Command timed-out after 186 seconds", so matching on such generic error messages
+                // has no added value, therefore we are just checking whether AuditDir related commands are failing or not.
+                if (errorReason.matches(".*(RangerPluginCreateAuditDir|CreateRangerAuditDir|CreateRangerKafkaPluginAuditDirCommand|" +
+                        "CreateHiveWarehouseExternalDir|CreateHiveWarehouseDir|CreateRangerKnoxPluginAuditDirCommand).*")) {
+                    throw new CloudStorageConfigurationFailedException(msg);
+                }
             }
         }
         throw new ClouderaManagerOperationFailedException(msg);
     }
+
 }

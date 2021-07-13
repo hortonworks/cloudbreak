@@ -69,12 +69,18 @@ public class S3ClientActions extends S3Client {
         }
     }
 
-    public void listBucketSelectedObject(String baseLocation, String selectedObject, Boolean zeroContent) {
+    public void listBucketSelectedObject(String baseLocation, String selectedObject, boolean zeroContent) {
         AmazonS3 s3Client = buildS3Client();
         String bucketName = getBucketName();
         AmazonS3URI amazonS3URI = new AmazonS3URI(getEUWestS3Uri());
         List<S3ObjectSummary> filteredObjectSummaries;
         String keyPrefix = StringUtils.substringAfterLast(baseLocation, "/");
+
+        if (StringUtils.isEmpty(selectedObject)) {
+            selectedObject = "ranger";
+        } else {
+            selectedObject = getPath(selectedObject).replace(bucketName + "/", "") + "/";
+        }
 
         Log.log(LOGGER, format(" Amazon S3 URI: %s", amazonS3URI));
         Log.log(LOGGER, format(" Amazon S3 Bucket: %s", bucketName));
@@ -89,8 +95,9 @@ public class S3ClientActions extends S3Client {
                 ObjectListing objectListing = s3Client.listObjects(listObjectsRequest);
 
                 do {
+                    String finalSelectedObject = selectedObject;
                     filteredObjectSummaries = objectListing.getObjectSummaries().stream()
-                            .filter(objectSummary -> objectSummary.getKey().contains(selectedObject))
+                            .filter(objectSummary -> objectSummary.getKey().contains(finalSelectedObject))
                             .collect(Collectors.toList());
 
                     if (objectListing.isTruncated()) {

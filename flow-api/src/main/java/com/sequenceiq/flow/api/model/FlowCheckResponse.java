@@ -11,6 +11,8 @@ public class FlowCheckResponse {
 
     private Boolean hasActiveFlow;
 
+    private Boolean latestFlowFinalizedAndFailed;
+
     public String getFlowId() {
         return flowId;
     }
@@ -33,5 +35,13 @@ public class FlowCheckResponse {
 
     public void setHasActiveFlow(Boolean hasActiveFlow) {
         this.hasActiveFlow = hasActiveFlow;
+    }
+
+    public Boolean getLatestFlowFinalizedAndFailed() {
+        return latestFlowFinalizedAndFailed;
+    }
+
+    public void setLatestFlowFinalizedAndFailed(Boolean latestFlowFinalizedAndFailed) {
+        this.latestFlowFinalizedAndFailed = latestFlowFinalizedAndFailed;
     }
 }

@@ -41,6 +41,10 @@ public class AzureCloudBlobUtil {
         azureCloudBlobClientActions.listAllFolders(baseLocation);
     }
 
+    public void listSelectedFoldersInAContaier(String baseLocation, String pathToTargetObject, boolean zeroContent) {
+        azureCloudBlobClientActions.listSelectedDirectory(baseLocation, pathToTargetObject, zeroContent);
+    }
+
     public void listDataLakeFoldersInAContaier(String baseLocation, String clusterName, String crn) {
         azureCloudBlobClientActions.listSelectedDirectory(baseLocation,
                 "datalake/" + clusterName + "_" + Crn.fromString(crn).getResource(), false);

@@ -273,12 +273,17 @@ public class FreeIpaClient {
         List<Object> flags = List.of();
         Map<String, Object> params = Map.of(
                 "sizelimit", 0,
-                "timelimit", 0,
-                "all", true
+                "timelimit", 0
         );
         ParameterizedType type = TypeUtils
                 .parameterize(Set.class, Group.class);
         return (Set<Group>) invoke("group_find", flags, params, type).getResult();
+    }
+
+    public Group groupShow(String groupName) throws FreeIpaClientException {
+        List<Object> flags = List.of(groupName);
+        Map<String, Object> params = Map.of();
+        return (Group) invoke("group_show", flags, params, Group.class).getResult();
     }
 
     public String getRootCertificate() throws FreeIpaClientException {

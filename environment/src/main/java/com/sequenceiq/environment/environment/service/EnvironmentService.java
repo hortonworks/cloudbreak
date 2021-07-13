@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.service.RoleCrnGenerator;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
+import com.sequenceiq.cloudbreak.common.event.PayloadContext;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -53,13 +54,15 @@ import com.sequenceiq.environment.environment.v1.cli.DelegatingCliEnvironmentReq
 import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
 import com.sequenceiq.environment.platformresource.PlatformParameterService;
 import com.sequenceiq.environment.platformresource.PlatformResourceRequest;
+import com.sequenceiq.flow.core.PayloadContextProvider;
 import com.sequenceiq.flow.core.ResourceIdProvider;
 
 import io.grpc.Status.Code;
 import io.grpc.StatusRuntimeException;
 
 @Service
-public class EnvironmentService extends AbstractAccountAwareResourceService<Environment> implements ResourceIdProvider, ResourcePropertyProvider {
+public class EnvironmentService extends AbstractAccountAwareResourceService<Environment>
+        implements ResourceIdProvider, ResourcePropertyProvider, PayloadContextProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentService.class);
 
@@ -348,6 +351,16 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
     @Override
     public Long getResourceIdByResourceName(String resourceName) {
         return getByNameAndAccountId(resourceName, ThreadBasedUserCrnProvider.getAccountId()).getId();
+    }
+
+    @Override
+    public PayloadContext getPayloadContext(Long resourceId) {
+        Optional<EnvironmentDto> environmentDtoOpt = findById(resourceId);
+        if (environmentDtoOpt.isPresent()) {
+            EnvironmentDto environmentDto = environmentDtoOpt.get();
+            return PayloadContext.create(environmentDto.getResourceCrn(), environmentDto.getCloudPlatform());
+        }
+        return null;
     }
 
     @Override

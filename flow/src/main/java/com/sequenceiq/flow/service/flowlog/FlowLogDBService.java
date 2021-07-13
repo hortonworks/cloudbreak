@@ -1,5 +1,6 @@
 package com.sequenceiq.flow.service.flowlog;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -25,6 +27,7 @@ import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.flow.api.model.operation.OperationType;
 import com.sequenceiq.flow.core.ApplicationFlowInformation;
 import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.core.FlowLogService;
@@ -74,6 +77,9 @@ public class FlowLogDBService implements FlowLogService {
         String variablesJson = getSerializedString(variables);
         FlowLog flowLog = new FlowLog(payload.getResourceId(), flowParameters.getFlowId(), flowChanId, flowParameters.getFlowTriggerUserCrn(), key,
                 payloadAsString, payload.getClass(), variablesJson, flowType, currentState.toString());
+        flowLog.setOperationType(StringUtils.isNotBlank(flowParameters.getFlowOperationType())
+                ? OperationType.valueOf(flowParameters.getFlowOperationType())
+                : OperationType.UNKNOWN);
         flowLog.setCloudbreakNodeId(nodeConfig.getId());
         return flowLogRepository.save(flowLog);
     }
@@ -113,8 +119,14 @@ public class FlowLogDBService implements FlowLogService {
     private FlowLog finalize(Long stackId, String flowId, String state) throws TransactionExecutionException {
         return transactionService.required(() -> {
             flowLogRepository.finalizeByFlowId(flowId);
-            getLastFlowLog(flowId).ifPresent(flowLog -> updateLastFlowLogStatus(flowLog, false));
-            FlowLog flowLog = new FlowLog(stackId, flowId, state, Boolean.TRUE, StateStatus.SUCCESSFUL);
+            Optional<FlowLog> lastFlowLogOpt = getLastFlowLog(flowId);
+            OperationType operationType = OperationType.UNKNOWN;
+            if (lastFlowLogOpt.isPresent()) {
+                FlowLog lastFlowLog = lastFlowLogOpt.get();
+                updateLastFlowLogStatus(lastFlowLog, false);
+                operationType = lastFlowLog.getOperationType();
+            }
+            FlowLog flowLog = new FlowLog(stackId, flowId, state, Boolean.TRUE, StateStatus.SUCCESSFUL, operationType);
             flowLog.setCloudbreakNodeId(nodeConfig.getId());
             return flowLogRepository.save(flowLog);
         });
@@ -305,6 +317,20 @@ public class FlowLogDBService implements FlowLogService {
     public <T extends AbstractFlowConfiguration> List<FlowLog> getLatestFlowLogsByCrnAndType(String resourceCrn, Class<T> clazz) {
         Long resourceId = getResourceIdByCrnOrName(resourceCrn);
         return flowLogRepository.findLastFlowLogsByTypeAndResourceId(resourceId, clazz);
+    }
+
+    public List<FlowLog> getLatestFlowLogsByCrnInFlowChain(String resourceCrn) {
+        Long resourceId = getResourceIdByCrnOrName(resourceCrn);
+        Optional<FlowLog> flowLogOpt = flowLogRepository.findFirstByResourceIdOrderByCreatedDesc(resourceId);
+        if (flowLogOpt.isPresent()) {
+            FlowLog flowLog = flowLogOpt.get();
+            if (StringUtils.isNotBlank(flowLog.getFlowChainId())) {
+                return flowLogRepository.findAllByFlowChainIdOrderByCreatedDesc(flowLog.getFlowChainId());
+            } else {
+                return flowLogRepository.findAllByFlowIdOrderByCreatedDesc(flowLog.getFlowId());
+            }
+        }
+        return new ArrayList<>();
     }
 
     public Predicate<FlowLog> pendingFlowLogPredicate() {

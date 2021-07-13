@@ -1,3 +1,4 @@
+{%- set internal_loadbalancer_san = salt['pillar.get']('cloudera-manager:communication:internal_loadbalancer_san') %}
 #!/bin/bash
 
 set -ex
@@ -7,6 +8,7 @@ date '+%Y-%m-%d %H:%M:%S'
 CERTMANAGER_DIR="/etc/cloudera-scm-server/certs"
 declare -A AGENT_FQDN_TOKENDIR_MAP=( {%- for ip, args in pillar.get('hosts', {}).items() %}["{{ args['fqdn'] }}"]="{{ args['fqdn'] }}-{{ args['instance_id'] }}" {% endfor %})
 TOKEN_DIR="/srv/salt/agent-tls-tokens"
+LOADBALANCER_SAN={{ internal_loadbalancer_san }}
 
 source /bin/activate_salt_env
 
@@ -14,9 +16,13 @@ for fqdn in "${!AGENT_FQDN_TOKENDIR_MAP[@]}"
 do
   tokendir=$TOKEN_DIR/${AGENT_FQDN_TOKENDIR_MAP[${fqdn}]}
   if [[ ! -e ${tokendir}/agent_token_generated ]]; then
-    #host=$(echo ${fqdn} | cut -d"." -f1)
+    HOSTNAME=" --hostname ${fqdn} "
+    if [ -n "$LOADBALANCER_SAN" ]; then
+      PATTERN=" --hostname-pattern (${fqdn}|${LOADBALANCER_SAN}) "
+      HOSTNAME=${PATTERN//./\\.}
+    fi
     mkdir -p ${tokendir}
-    /opt/cloudera/cm-agent/bin/certmanager --location $CERTMANAGER_DIR gen_cert_request_token --output ${tokendir}/cmagent.token --hostname ${fqdn} --lifetime 3600
+    /opt/cloudera/cm-agent/bin/certmanager --location $CERTMANAGER_DIR gen_cert_request_token --output ${tokendir}/cmagent.token $HOSTNAME --lifetime 3600
     echo $(date +%Y-%m-%d:%H:%M:%S) >> ${tokendir}/agent_token_generated
   else
     echo "CM agnet token generation for ${fqdn} will be skipped as it was already generated in ${tokendir}."

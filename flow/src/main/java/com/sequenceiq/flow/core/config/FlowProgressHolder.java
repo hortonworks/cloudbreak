@@ -22,6 +22,8 @@ public class FlowProgressHolder {
 
     private final Map<String, Map<String, Integer>> flowProgressState = new HashMap<>();
 
+    private final Map<String, Integer> transitionsSizeMap = new HashMap<>();
+
     private final List<? extends AbstractFlowConfiguration> flowConfigurations;
 
     public FlowProgressHolder(List<? extends AbstractFlowConfiguration> flowConfigurations) {
@@ -38,7 +40,9 @@ public class FlowProgressHolder {
             progressMap.put(edgeConfig.getInitState().toString(), MIN_PERCENT);
             progressMap.put(edgeConfig.getFinalState().toString(), MAX_PERCENT);
             progressMap.put(edgeConfig.getDefaultFailureState().toString(), MAX_PERCENT);
-            Iterator<AbstractFlowConfiguration.Transition> it = flowConfiguration.getTransitions().iterator();
+            List<AbstractFlowConfiguration.Transition> transitionList = flowConfiguration.getTransitions();
+            transitionsSizeMap.put(flowKey, transitionList.size());
+            Iterator<AbstractFlowConfiguration.Transition> it = transitionList.iterator();
             for (int index = 0; it.hasNext(); index++) {
                 AbstractFlowConfiguration.Transition transition = it.next();
                 double progress = calculatePercentage(index + 1, numberOfTransitions);
@@ -71,6 +75,10 @@ public class FlowProgressHolder {
             result = MAX_PERCENT;
         }
         return result;
+    }
+
+    public int getTransitionsSize(String className) {
+        return transitionsSizeMap.getOrDefault(className, 0);
     }
 
     private double calculatePercentage(double obtained, double total) {

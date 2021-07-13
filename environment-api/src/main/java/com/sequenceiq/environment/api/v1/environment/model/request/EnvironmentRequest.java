@@ -81,6 +81,9 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
     @ApiModelProperty(EnvironmentModelDescription.TUNNEL)
     private Tunnel tunnel;
 
+    @ApiModelProperty(EnvironmentModelDescription.OVERRIDE_TUNNEL)
+    private Boolean overrideTunnel;
+
     @ApiModelProperty(EnvironmentModelDescription.IDBROKER_MAPPING_SOURCE)
     private IdBrokerMappingSource idBrokerMappingSource = IdBrokerMappingSource.IDBMMS;
 
@@ -203,6 +206,14 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
 
     public void setTunnel(Tunnel tunnel) {
         this.tunnel = tunnel;
+    }
+
+    public Boolean getOverrideTunnel() {
+        return overrideTunnel;
+    }
+
+    public void setOverrideTunnel(Boolean overrideTunnel) {
+        this.overrideTunnel = overrideTunnel;
     }
 
     public IdBrokerMappingSource getIdBrokerMappingSource() {

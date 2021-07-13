@@ -32,6 +32,7 @@ import com.sequenceiq.it.cloudbreak.action.sdx.SdxSyncAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxSyncInternalAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxUpgradeAction;
 import com.sequenceiq.it.cloudbreak.action.v4.util.RenewDatalakeCertificateAction;
+import com.sequenceiq.it.cloudbreak.action.sdx.SdxBackupAction;
 import com.sequenceiq.it.cloudbreak.action.v4.util.SdxRetryAction;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCMDiagnosticsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCustomTestDto;
@@ -158,4 +159,9 @@ public class SdxTestClient {
     public Action<SdxInternalTestDto, SdxClient> retry() {
         return new SdxRetryAction();
     }
+
+    public Action<SdxInternalTestDto, SdxClient> backup(String backupLocation, String backupName) {
+        return new SdxBackupAction(backupLocation, backupName);
+    }
+
 }

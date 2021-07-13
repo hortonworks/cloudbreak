@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import com.googlecode.jsonrpc4j.JsonRpcClientException;
+import com.sequenceiq.freeipa.client.FreeIpaErrorCodes;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -68,7 +70,12 @@ public class FreeipaClientTestServiceTest {
 
     @Test
     public void testCheckUsersInGroup() throws FreeIpaClientException {
-        when(freeIpaClient.groupFindAll()).thenReturn(Sets.newHashSet(createGroup(ADMIN_GROUP, ADMIN_USER)));
+        JsonRpcClientException jsonRpcException = new JsonRpcClientException(
+                FreeIpaErrorCodes.NOT_FOUND.getValue(), "group not found", null);
+        FreeIpaClientException notFound = new FreeIpaClientException(
+                "Invoke FreeIPA failed", jsonRpcException);
+        when(freeIpaClient.groupShow(OTHER_USER_OR_GROUP)).thenThrow(notFound);
+        when(freeIpaClient.groupShow(ADMIN_GROUP)).thenReturn(createGroup(ADMIN_GROUP, ADMIN_USER));
         assertTrue(ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                 underTest.checkUsersInGroup(ENV_CRN, Sets.newHashSet(ADMIN_USER), ADMIN_GROUP)));
         assertFalse(ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->

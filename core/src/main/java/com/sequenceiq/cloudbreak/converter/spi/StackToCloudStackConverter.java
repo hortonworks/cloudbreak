@@ -82,6 +82,7 @@ import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
 import com.sequenceiq.cloudbreak.service.stack.TargetGroupPersistenceService;
 import com.sequenceiq.cloudbreak.template.VolumeUtils;
+import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.ResourceGroupUsage;
@@ -422,7 +423,7 @@ public class StackToCloudStackConverter {
                     subnets.add(groupSubnet);
                 }
             }
-            groupNetwork = new GroupNetwork(stackNetwork.getOutboundInternetTraffic(), subnets, params);
+            groupNetwork = new GroupNetwork(getOutboundInternetTraffic(stackNetwork), subnets, params);
         }
         return groupNetwork;
     }
@@ -437,6 +438,10 @@ public class StackToCloudStackConverter {
             result = new Network(subnet, stackNetwork.getNetworkCidrs(), stackNetwork.getOutboundInternetTraffic(), params);
         }
         return result;
+    }
+
+    private OutboundInternetTraffic getOutboundInternetTraffic(com.sequenceiq.cloudbreak.domain.Network stackNetwork) {
+        return stackNetwork == null ? OutboundInternetTraffic.ENABLED : stackNetwork.getOutboundInternetTraffic();
     }
 
     private InstanceStatus getInstanceStatus(InstanceMetaData metaData, Collection<String> deleteRequests) {

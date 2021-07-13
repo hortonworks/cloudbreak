@@ -26,6 +26,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -99,6 +100,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonKmsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonRdsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsPageCollector;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
+import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudUnauthorizedException;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
@@ -122,6 +124,8 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.ConfigSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
 import com.sequenceiq.cloudbreak.cloud.model.DisplayName;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceStoreMetadata;
+import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.RegionCoordinateSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.RegionCoordinateSpecifications;
@@ -1033,6 +1037,23 @@ public class AwsPlatformResources implements PlatformResources {
         properties.put("creationDate", creationDate);
         properties.put("roleArn", roleArn);
         return properties;
+    }
+
+    public InstanceStoreMetadata collectInstanceStorageCount(AuthenticatedContext ac, List<String> instanceTypes) {
+        Location location = ac.getCloudContext().getLocation();
+        try {
+            CloudVmTypes cloudVmTypes = virtualMachines(ac.getCloudCredential(), location.getRegion(), Map.of());
+            Map<String, Set<VmType>> cloudVmResponses = cloudVmTypes.getCloudVmResponses();
+            Map<String, VolumeParameterConfig> instanceTypeToInstanceStorageMap = cloudVmResponses.getOrDefault(location.getAvailabilityZone().value(), Set.of())
+                    .stream()
+                    .filter(vmType -> instanceTypes.contains(vmType.value()))
+                    .filter(vmType -> Objects.nonNull(vmType.getMetaData().getEphemeralConfig()))
+                    .collect(Collectors.toMap(VmType::value, vmType -> vmType.getMetaData().getEphemeralConfig()));
+            return new InstanceStoreMetadata(instanceTypeToInstanceStorageMap);
+        } catch (Exception e) {
+            LOGGER.warn("Failed to get vm type data: {}", instanceTypes, e);
+            throw new CloudConnectorException(e.getMessage(), e);
+        }
     }
 
 }

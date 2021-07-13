@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.AwsAuthenticator;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsDefaultZoneProvider;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsEnvironmentVariableChecker;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPlatformParameters;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPlatformResources;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsSessionCredentialClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTagValidator;
 import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
@@ -77,6 +78,9 @@ class AwsNativeMetadataCollectorApiIntegrationTest {
 
     @MockBean(answer = Answers.RETURNS_DEEP_STUBS)
     private Tracer tracer;
+
+    @MockBean
+    private AwsPlatformResources awsPlatformResources;
 
     @Inject
     private AwsAuthenticator awsAuthenticator;

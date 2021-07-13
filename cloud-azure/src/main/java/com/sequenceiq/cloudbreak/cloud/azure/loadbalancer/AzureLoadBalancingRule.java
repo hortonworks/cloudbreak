@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.azure.loadbalancer;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
 
 public final class AzureLoadBalancingRule {
@@ -11,11 +14,14 @@ public final class AzureLoadBalancingRule {
 
     private final AzureLoadBalancerProbe probe;
 
-    public AzureLoadBalancingRule(TargetGroupPortPair portPair) {
+    private final String groupName;
+
+    public AzureLoadBalancingRule(TargetGroupPortPair portPair, Group group) {
         this.backendPort = portPair.getTrafficPort();
         this.frontendPort = portPair.getTrafficPort();
         this.name = defaultNameFromPort(portPair.getTrafficPort());
         this.probe = new AzureLoadBalancerProbe(portPair.getHealthCheckPort());
+        this.groupName = checkNotNull(group, "Group must be provided.").getName();
     }
 
     private String defaultNameFromPort(int port) {
@@ -38,6 +44,10 @@ public final class AzureLoadBalancingRule {
         return probe;
     }
 
+    public String getGroupName() {
+        return groupName;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -46,6 +56,7 @@ public final class AzureLoadBalancingRule {
         sb.append("    backendPort: ").append(backendPort).append("\n");
         sb.append("    frontendPort: ").append(frontendPort).append("\n");
         sb.append("    probe: ").append(toIndentedString(probe)).append("\n");
+        sb.append("    groupName: ").append(toIndentedString(groupName)).append("\n");
         sb.append("}");
 
         return sb.toString();

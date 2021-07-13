@@ -35,7 +35,7 @@ public class SdxBackupStatusResponse {
 
     @Override
     public String toString() {
-        return "SdxDatabaseBackupResponse{" +
+        return "SdxBackupStatusResponse{" +
                 "OperationId=" + operationId +
                 "Status=" + status +
                 "Reason=" + reason +

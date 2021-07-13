@@ -43,6 +43,7 @@ public class DistroXOpDescription {
     public static final String GET_DATABASE_SERVER_BY_CLUSTER_CRN = "get database server for Distrox cluster by cluster crn";
     public static final String GET_LAST_FLOW_PROGRESS = "Get last flow operation progress details for resource by resource crn";
     public static final String LIST_FLOW_PROGRESS = "List recent flow operations progress details for resource by resource crn";
+    public static final String GET_OPERATION = "Get flow operation progress details for resource by resource crn";
 
     private DistroXOpDescription() {
     }

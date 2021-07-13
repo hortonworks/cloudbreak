@@ -29,6 +29,8 @@ public class FlowConstants {
 
     public static final String TERMINATED_STATE = "TERMINATED";
 
+    public static final String FLOW_OPERATION_TYPE = "FLOW_OPERATION_TYPE";
+
     private FlowConstants() {
     }
 }

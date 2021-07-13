@@ -52,6 +52,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentLo
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentCrnResponse;
+import com.sequenceiq.environment.environment.service.EnvironmentProgressService;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponses;
 import com.sequenceiq.environment.authorization.EnvironmentFiltering;
@@ -77,7 +78,6 @@ import com.sequenceiq.environment.environment.service.cloudstorage.CloudStorageV
 import com.sequenceiq.environment.environment.v1.converter.EnvironmentApiConverter;
 import com.sequenceiq.environment.environment.v1.converter.EnvironmentResponseConverter;
 import com.sequenceiq.flow.api.model.FlowProgressResponse;
-import com.sequenceiq.flow.service.FlowService;
 
 @Controller
 @Transactional(TxType.NEVER)
@@ -112,7 +112,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     private final EnvironmentLoadBalancerService environmentLoadBalancerService;
 
-    private final FlowService flowService;
+    private final EnvironmentProgressService environmentProgressService;
 
     private final EnvironmentFiltering environmentFiltering;
 
@@ -124,6 +124,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
             EnvironmentService environmentService,
             EnvironmentCreationService environmentCreationService,
             EnvironmentDeletionService environmentDeletionService,
+            EnvironmentProgressService environmentProgressService,
             EnvironmentModificationService environmentModificationService,
             EnvironmentStartService environmentStartService,
             EnvironmentStopService environmentStopService,
@@ -132,7 +133,6 @@ public class EnvironmentController implements EnvironmentEndpoint {
             EnvironmentStackConfigUpdateService stackConfigUpdateService,
             EntitlementService entitlementService,
             EnvironmentLoadBalancerService environmentLoadBalancerService,
-            FlowService flowService,
             EnvironmentFiltering environmentFiltering,
             CloudStorageValidator cloudStorageValidator) {
         this.environmentApiConverter = environmentApiConverter;
@@ -140,6 +140,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
         this.environmentService = environmentService;
         this.environmentCreationService = environmentCreationService;
         this.environmentDeletionService = environmentDeletionService;
+        this.environmentProgressService = environmentProgressService;
         this.environmentModificationService = environmentModificationService;
         this.environmentStartService = environmentStartService;
         this.environmentStopService = environmentStopService;
@@ -148,7 +149,6 @@ public class EnvironmentController implements EnvironmentEndpoint {
         this.stackConfigUpdateService = stackConfigUpdateService;
         this.entitlementService = entitlementService;
         this.environmentLoadBalancerService = environmentLoadBalancerService;
-        this.flowService = flowService;
         this.environmentFiltering = environmentFiltering;
         this.cloudStorageValidator = cloudStorageValidator;
     }
@@ -400,13 +400,13 @@ public class EnvironmentController implements EnvironmentEndpoint {
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
     public FlowProgressResponse getLastFlowLogProgressByResourceCrn(@ResourceCrn String resourceCrn) {
-        return flowService.getLastFlowProgressByResourceCrn(resourceCrn);
+        return environmentProgressService.getLastFlowProgressByResourceCrn(resourceCrn);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
     public List<FlowProgressResponse> getFlowLogsProgressByResourceCrn(@ResourceCrn String resourceCrn) {
-        return flowService.getFlowProgressListByResourceCrn(resourceCrn);
+        return environmentProgressService.getFlowProgressListByResourceCrn(resourceCrn);
     }
 
     @Override
