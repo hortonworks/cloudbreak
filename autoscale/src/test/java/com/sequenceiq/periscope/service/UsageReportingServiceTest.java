@@ -74,7 +74,8 @@ public class UsageReportingServiceTest {
         assertEquals("Alert Policy Type should match", "LOAD_BASED",
                 actual.getAutoscaleTriggerDetails().getAutoscalingPolicyDefinition().getAutoscalePolicyType().name());
         assertEquals("Alert Policy Parameters should match",
-                "{parameters=LoadAlertConfiguration{minResourceValue=10, maxResourceValue=100, coolDownMinutes=5}}",
+                "{parameters=LoadAlertConfiguration{minResourceValue=10, maxResourceValue=100, coolDownMinutes=5, scaleUpCoolDownMinutes=null," +
+                        " scaleDownCoolDownMinutes=null, maxScaleDownStepSize=100, maxScaleUpStepSize=100}}",
                 actual.getAutoscaleTriggerDetails().getAutoscalingPolicyDefinition().getAutoscalePolicyParameters());
     }
 

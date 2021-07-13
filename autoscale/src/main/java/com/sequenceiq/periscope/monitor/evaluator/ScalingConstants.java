@@ -14,7 +14,11 @@ public class ScalingConstants {
 
     public static final int DEFAULT_MAX_SCALE_UP_STEP_SIZE = 100;
 
+    public static final int DEFAULT_MAX_SCALE_DOWN_STEP_SIZE = 100;
+
     public static final int DEFAULT_LOAD_BASED_AUTOSCALING_COOLDOWN_MINS = 2;
+
+    public static final int DEFAULT_MAX_LOAD_BASED_AUTOSCALING_COOLDOWN_MINS = 180;
 
     private ScalingConstants() {
     }

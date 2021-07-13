@@ -97,7 +97,7 @@ public class YarnLoadEvaluator extends EvaluatorExecutor {
             loadAlertConfiguration = loadAlert.getLoadAlertConfiguration();
             policyHostGroup = loadAlert.getScalingPolicy().getHostGroup();
 
-            if (isCoolDownTimeElapsed(cluster.getStackCrn(), loadAlertConfiguration.getCoolDownMillis(),
+            if (isCoolDownTimeElapsed(cluster.getStackCrn(), "polled", loadAlertConfiguration.getPollingCoolDownMillis(),
                     cluster.getLastScalingActivity())) {
                 pollYarnMetricsAndScaleCluster();
             }
@@ -129,15 +129,17 @@ public class YarnLoadEvaluator extends EvaluatorExecutor {
         YarnScalingServiceV1Response yarnResponse = yarnMetricsClient
                 .getYarnMetricsForCluster(cluster, stackV4Response, policyHostGroup, mandatoryDownScaleCount);
 
-        int yarnRecommendedScaleUpCount = yarnResponseUtils.
-                getYarnRecommendedScaleUpCount(yarnResponse, policyHostGroup, maxAllowedUpScale, mandatoryUpScaleCount);
+        int yarnRecommendedScaleUpCount = yarnResponseUtils.getYarnRecommendedScaleUpCount(yarnResponse, policyHostGroup,
+                maxAllowedUpScale, mandatoryUpScaleCount, loadAlertConfiguration.getMaxScaleUpStepSize());
         List<String> yarnRecommendedDecommissionHosts = yarnResponseUtils.
                 getYarnRecommendedDecommissionHostsForHostGroup(cluster.getStackCrn(), yarnResponse,
-                        hostFqdnsToInstanceId, maxAllowedDownScale, mandatoryDownScaleCount);
+                        hostFqdnsToInstanceId, maxAllowedDownScale, mandatoryDownScaleCount, loadAlertConfiguration.getMaxScaleDownStepSize());
 
-        if (yarnRecommendedScaleUpCount > 0) {
+        if (yarnRecommendedScaleUpCount > 0 && isCoolDownTimeElapsed(cluster.getStackCrn(), "scaled-up",
+                loadAlertConfiguration.getScaleUpCoolDownMillis(), cluster.getLastScalingActivity()))  {
             sendScaleUpEvent(existingHostGroupSize, yarnRecommendedScaleUpCount);
-        } else if (!yarnRecommendedDecommissionHosts.isEmpty()) {
+        } else if (!yarnRecommendedDecommissionHosts.isEmpty() && isCoolDownTimeElapsed(cluster.getStackCrn(), "scaled-down",
+                loadAlertConfiguration.getScaleDownCoolDownMillis(), cluster.getLastScalingActivity()))  {
             sendScaleDownEvent(existingHostGroupSize, yarnRecommendedDecommissionHosts);
         }
     }

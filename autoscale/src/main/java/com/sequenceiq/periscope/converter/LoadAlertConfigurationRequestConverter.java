@@ -13,7 +13,11 @@ public class LoadAlertConfigurationRequestConverter extends AbstractConverter<Lo
         LoadAlertConfiguration loadAlertConfiguration = new LoadAlertConfiguration();
         loadAlertConfiguration.setMaxResourceValue(source.getMaxResourceValue());
         loadAlertConfiguration.setMinResourceValue(source.getMinResourceValue());
+        loadAlertConfiguration.setMaxScaleUpStepSize(source.getMaxScaleUpStepSize());
+        loadAlertConfiguration.setMaxScaleDownStepSize(source.getMaxScaleDownStepSize());
         loadAlertConfiguration.setCoolDownMinutes(source.getCoolDownMinutes());
+        loadAlertConfiguration.setScaleUpCoolDownMinutes(source.getScaleUpCoolDownMinutes());
+        loadAlertConfiguration.setScaleDownCoolDownMinutes(source.getScaleDownCoolDownMinutes());
         return loadAlertConfiguration;
     }
 }

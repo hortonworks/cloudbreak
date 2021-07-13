@@ -153,7 +153,12 @@ public class ApiDescription {
     public static class LoadAlertJsonProperties {
         public static final String LOAD_ALERT_CONFIGURATION_MIN_RESOUCE_VALUE = "The lower bound for the resource";
         public static final String LOAD_ALERT_CONFIGURATION_MAX_RESOUCE_VALUE = "The upper bound for the resource";
-        public static final String LOAD_ALERT_CONFIGURATION_COOL_DOWN_MINS_VALUE = "CoolDown between successive cluster autoscaling actions.";
+        public static final String LOAD_ALERT_CONFIGURATION_COOL_DOWN_MINS_VALUE = "CoolDown Mins between successive cluster autoscaling actions." +
+                " This is overridden by the scaleUpCoolDownMinutes/scaleDownCoolDownMinutes if they are specified";
+        public static final String LOAD_ALERT_CONFIGURATION_SCALE_UP_COOL_DOWN_MINS_VALUE = "CoolDown Mins for scaleup after last autoscaling action.";
+        public static final String LOAD_ALERT_CONFIGURATION_SCALE_DOWN_COOL_DOWN_MINS_VALUE = "CoolDown Mins for scaledown after last autoscaling action.";
+        public static final String LOAD_ALERT_CONFIGURATION_MAX_SCALEUP_STEP_SIZE_VALUE = "The max step size for scaleup.";
+        public static final String LOAD_ALERT_CONFIGURATION_MAX_SCALEDOWN_STEP_SIZE_VALUE = "The max step size for scaledown.";
         public static final String LOAD_ALERT_CONFIGURATION = "Configuration of Load Alert";
     }
 
