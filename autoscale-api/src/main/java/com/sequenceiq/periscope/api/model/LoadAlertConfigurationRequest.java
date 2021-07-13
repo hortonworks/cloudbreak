@@ -35,6 +35,30 @@ public class LoadAlertConfigurationRequest implements Json {
     @Digits(fraction = 0, integer = 3)
     private @Valid Integer coolDownMinutes;
 
+    @ApiModelProperty(LoadAlertJsonProperties.LOAD_ALERT_CONFIGURATION_SCALE_UP_COOL_DOWN_MINS_VALUE)
+    @Min(value = 2)
+    @Max(value = 180)
+    @Digits(fraction = 0, integer = 3)
+    private @Valid Integer scaleUpCoolDownMinutes;
+
+    @ApiModelProperty(LoadAlertJsonProperties.LOAD_ALERT_CONFIGURATION_SCALE_DOWN_COOL_DOWN_MINS_VALUE)
+    @Min(value = 2)
+    @Max(value = 180)
+    @Digits(fraction = 0, integer = 3)
+    private @Valid Integer scaleDownCoolDownMinutes;
+
+    @ApiModelProperty(LoadAlertJsonProperties.LOAD_ALERT_CONFIGURATION_MAX_SCALEUP_STEP_SIZE_VALUE)
+    @Min(value = 2)
+    @Max(value = 1000)
+    @Digits(fraction = 0, integer = 3)
+    private @Valid Integer maxScaleUpStepSize;
+
+    @ApiModelProperty(LoadAlertJsonProperties.LOAD_ALERT_CONFIGURATION_MAX_SCALEDOWN_STEP_SIZE_VALUE)
+    @Min(value = 2)
+    @Max(value = 1000)
+    @Digits(fraction = 0, integer = 3)
+    private @Valid Integer maxScaleDownStepSize;
+
     public Integer getMinResourceValue() {
         return minResourceValue;
     }
@@ -57,5 +81,37 @@ public class LoadAlertConfigurationRequest implements Json {
 
     public void setCoolDownMinutes(Integer coolDownMinutes) {
         this.coolDownMinutes = coolDownMinutes;
+    }
+
+    public Integer getScaleUpCoolDownMinutes() {
+        return scaleUpCoolDownMinutes;
+    }
+
+    public void setScaleUpCoolDownMinutes(Integer scaleUpCoolDownMinutes) {
+        this.scaleUpCoolDownMinutes = scaleUpCoolDownMinutes;
+    }
+
+    public Integer getScaleDownCoolDownMinutes() {
+        return scaleDownCoolDownMinutes;
+    }
+
+    public void setScaleDownCoolDownMinutes(Integer scaleDownCoolDownMinutes) {
+        this.scaleDownCoolDownMinutes = scaleDownCoolDownMinutes;
+    }
+
+    public Integer getMaxScaleUpStepSize() {
+        return maxScaleUpStepSize;
+    }
+
+    public void setMaxScaleUpStepSize(Integer maxScaleUpStepSize) {
+        this.maxScaleUpStepSize = maxScaleUpStepSize;
+    }
+
+    public Integer getMaxScaleDownStepSize() {
+        return maxScaleDownStepSize;
+    }
+
+    public void setMaxScaleDownStepSize(Integer maxScaleDownStepSize) {
+        this.maxScaleDownStepSize = maxScaleDownStepSize;
     }
 }

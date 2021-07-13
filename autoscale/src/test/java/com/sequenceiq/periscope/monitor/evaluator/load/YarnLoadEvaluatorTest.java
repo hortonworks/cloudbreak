@@ -147,6 +147,7 @@ public class YarnLoadEvaluatorTest {
                 Arguments.of("DOWN_SCALE_FORCED", TEST_HOSTGROUP_MAX_SIZE + 20, 20, 20),
                 Arguments.of("DOWN_SCALE_FORCED_AND_EXTRA", TEST_HOSTGROUP_MAX_SIZE + 20, 30, 20),
                 Arguments.of("DOWN_SCALE_RECOMMENDED", TEST_HOSTGROUP_MAX_SIZE, 100, 100),
+                Arguments.of("DOWN_SCALE_BEYOND_STEP_LIMIT", 200, 150, 100),
                 Arguments.of("DOWN_SCALE_ALLOWED_MIN_LIMIT", 10, 10, 10 - TEST_HOSTGROUP_MIN_SIZE),
                 Arguments.of("DOWN_SCALE_ALLOWED_AT_MIN_LIMIT", 20, 20 - TEST_HOSTGROUP_MIN_SIZE, 20 - TEST_HOSTGROUP_MIN_SIZE),
                 Arguments.of("DOWN_SCALE_BEYOND_MIN_LIMIT", 10, 52, 10 - TEST_HOSTGROUP_MIN_SIZE),
@@ -198,10 +199,10 @@ public class YarnLoadEvaluatorTest {
         when(stackResponseUtils.getCloudInstanceIdsForHostGroup(any(), any())).thenCallRealMethod();
         when(yarnMetricsClient.getYarnMetricsForCluster(any(Cluster.class), any(StackV4Response.class), anyString(), any(Optional.class)))
                 .thenReturn(upScale);
-        when(yarnResponseUtils.getYarnRecommendedScaleUpCount(any(YarnScalingServiceV1Response.class), anyString(), anyInt(), any(Optional.class)))
+        when(yarnResponseUtils.getYarnRecommendedScaleUpCount(any(YarnScalingServiceV1Response.class), anyString(), anyInt(), any(Optional.class), anyInt()))
                 .thenCallRealMethod();
         when(yarnResponseUtils.getYarnRecommendedDecommissionHostsForHostGroup(anyString(), any(YarnScalingServiceV1Response.class),
-                any(Map.class), anyInt(), any(Optional.class))).thenCallRealMethod();
+                any(Map.class), anyInt(), any(Optional.class), anyInt())).thenCallRealMethod();
 
         underTest.setContext(new ClusterIdEvaluatorContext(AUTOSCALE_CLUSTER_ID));
         underTest.execute();

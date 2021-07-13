@@ -1,5 +1,7 @@
 package com.sequenceiq.periscope.monitor.evaluator;
 
+import static com.sequenceiq.periscope.monitor.evaluator.ScalingConstants.DEFAULT_MAX_SCALE_DOWN_STEP_SIZE;
+
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
@@ -168,7 +170,7 @@ public class CronTimeEvaluator extends EvaluatorExecutor {
             Map<String, String> hostFqdnsToInstanceId = stackResponseUtils.getCloudInstanceIdsForHostGroup(stackV4Response, policy.getHostGroup());
 
             List<String> decommissionNodes = yarnResponseUtils.getYarnRecommendedDecommissionHostsForHostGroup(cluster.getStackCrn(), yarnResponse,
-                    hostFqdnsToInstanceId, mandatoryDownScaleCount, Optional.of(mandatoryDownScaleCount));
+                    hostFqdnsToInstanceId, mandatoryDownScaleCount, Optional.of(mandatoryDownScaleCount), DEFAULT_MAX_SCALE_DOWN_STEP_SIZE);
             event.setDecommissionNodeIds(decommissionNodes);
         } catch (Exception ex) {
             LOGGER.error("Error retrieving decommission candidates for  policy '{}', adjustment type '{}', cluster '{}'",
