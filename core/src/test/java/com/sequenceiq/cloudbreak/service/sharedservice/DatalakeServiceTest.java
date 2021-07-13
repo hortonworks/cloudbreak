@@ -27,7 +27,9 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.domain.projection.StackStatusView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.template.views.SharedServiceConfigsView;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @ExtendWith({MockitoExtension.class})
@@ -146,9 +148,42 @@ public class DatalakeServiceTest {
     @Test
     public void testCreateSharedServiceConfigsViewByCrn() {
         Stack stack = new Stack();
+        Cluster cluster = new Cluster();
+        stack.setCluster(cluster);
         stack.setDatalakeCrn("crn");
-        underTest.createSharedServiceConfigsView(stack);
+        stack.setType(StackType.WORKLOAD);
+
+        SharedServiceConfigsView res = underTest.createSharedServiceConfigsView(stack);
+
         verify(stackService, times(1)).getByCrn("crn");
+        Assertions.assertFalse(res.isDatalakeCluster());
+
+    }
+
+    @Test
+    public void testCreateSharedServiceConfigsViewFromBlueprintUtilsWhenDatalake() {
+        Stack stack = new Stack();
+        Cluster cluster = new Cluster();
+        stack.setCluster(cluster);
+        stack.setType(StackType.DATALAKE);
+
+        SharedServiceConfigsView res = underTest.createSharedServiceConfigsView(stack);
+
+        verify(stackService, times(0)).getByCrn("crn");
+        Assertions.assertTrue(res.isDatalakeCluster());
+    }
+
+    @Test
+    public void testCreateSharedServiceConfigsViewWhenDatahubButDatalakeCrnIsMissing() {
+        Stack stack = new Stack();
+        Cluster cluster = new Cluster();
+        stack.setCluster(cluster);
+        stack.setType(StackType.WORKLOAD);
+
+        SharedServiceConfigsView res = underTest.createSharedServiceConfigsView(stack);
+
+        verify(stackService, times(0)).getByCrn("crn");
+        Assertions.assertFalse(res.isDatalakeCluster());
     }
 
     @Test
