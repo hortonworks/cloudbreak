@@ -13,6 +13,8 @@ public interface EntitledForServiceScale {
 
     Optional<String> getBlockedUntilCDPVersion();
 
+    Optional<String> getRequiredService();
+
     Versioned getBlockedUntilCDPVersionAsVersion();
 
 }
