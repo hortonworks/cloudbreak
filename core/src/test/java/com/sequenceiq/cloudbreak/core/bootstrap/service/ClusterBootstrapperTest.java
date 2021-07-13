@@ -140,6 +140,42 @@ public class ClusterBootstrapperTest {
     }
 
     @Test
+    public void doNotThrowDuplicateKeyNullIfVolumeResourceDontHaveInstanceId() throws Exception {
+        doAnswer(invocation -> {
+            invocation.getArgument(0, Runnable.class).run();
+            return null;
+        }).when(transactionService).required(any(Runnable.class));
+        when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
+        InstanceMetaData instanceMetaData = new InstanceMetaData();
+        instanceMetaData.setPrivateIp("1.1.1.1");
+        instanceMetaData.setPublicIp("2.2.2.2");
+        instanceMetaData.setDiscoveryFQDN("FQDN");
+        InstanceGroup instanceGroup = new InstanceGroup();
+        instanceGroup.setGroupName("master");
+        Template template = new Template();
+        template.setInstanceType("GATEWAY");
+        instanceGroup.setTemplate(template);
+        instanceMetaData.setInstanceGroup(instanceGroup);
+        when(stack.getId()).thenReturn(1L);
+        when(instanceMetaDataService.getReachableInstanceMetadataByStackId(stack.getId())).thenReturn(Set.of(instanceMetaData));
+        when(stack.getCustomDomain()).thenReturn("CUSTOM_DOMAIN");
+        Cluster cluster = new Cluster();
+        cluster.setGateway(new Gateway());
+        when(stack.getCluster()).thenReturn(cluster);
+        GatewayConfig gatewayConfig = new GatewayConfig("host1", "1.1.1.1", "1.1.1.1", 22, "i-1839", false);
+        when(gatewayConfigService.getAllGatewayConfigs(any())).thenReturn(List.of(gatewayConfig));
+        when(componentConfigProviderService.getImage(anyLong())).thenReturn(image);
+
+        underTest.bootstrapNewNodes(1L, Set.of("1.1.1.1"));
+
+        verify(instanceMetaDataService).getReachableInstanceMetadataByStackId(1L);
+        verify(gatewayConfigService).getAllGatewayConfigs(stack);
+        verify(componentConfigProviderService).getImage(1L);
+        verify(instanceMetaDataService).saveAll(Set.of(instanceMetaData));
+        verify(hostOrchestrator, never()).removeDeadSaltMinions(gatewayConfig);
+    }
+
+    @Test
     public void testcleanupOldSaltState() throws Exception {
         doAnswer(invocation -> {
             invocation.getArgument(0, Runnable.class).run();
