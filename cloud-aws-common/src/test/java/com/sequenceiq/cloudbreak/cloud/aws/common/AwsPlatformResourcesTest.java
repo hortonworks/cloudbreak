@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.VmType.vmType;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -81,6 +82,9 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonIdentityManagemen
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonKmsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonRdsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
+import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.context.CloudContext.Builder;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -88,6 +92,8 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudNetworks;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceStoreMetadata;
+import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCertificate;
 import com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCertificateType;
 import com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCertificates;
@@ -515,5 +521,36 @@ public class AwsPlatformResourcesTest {
 
         CloudDatabaseServerSslCertificate sslCertificate = match.get();
         assertThat(sslCertificate.getCertificateType()).isEqualTo(CloudDatabaseServerSslCertificateType.ROOT);
+    }
+
+    @Test
+    void collectInstanceStorageCountTest() {
+        ReflectionTestUtils.setField(underTest, "disabledInstanceTypes", Collections.emptyList());
+        CloudContext cloudContext = new Builder().withLocation(Location.location(region, availabilityZone(AZ_NAME))).build();
+        AuthenticatedContext ac = new AuthenticatedContext(cloudContext, cloudCredential);
+
+        InstanceStoreMetadata instanceStoreMetadata = underTest.collectInstanceStorageCount(ac, Collections.singletonList("m5.2xlarge"));
+
+        assertEquals(2, instanceStoreMetadata.mapInstanceTypeToInstanceStoreCount("m5.2xlarge"));
+        assertEquals(0, instanceStoreMetadata.mapInstanceTypeToInstanceStoreCountNullHandled("unsupported"));
+    }
+
+    @Test
+    void collectInstanceStorageCountWhenInstanceTypeIsNotFoundTest() {
+        ReflectionTestUtils.setField(underTest, "disabledInstanceTypes", Collections.emptyList());
+        CloudContext cloudContext = new Builder().withLocation(Location.location(region, availabilityZone(AZ_NAME))).build();
+        AuthenticatedContext ac = new AuthenticatedContext(cloudContext, cloudCredential);
+
+        InstanceStoreMetadata instanceStoreMetadata = underTest.collectInstanceStorageCount(ac, Collections.singletonList("unsupported"));
+
+        assertNull(instanceStoreMetadata.mapInstanceTypeToInstanceStoreCount("unsupported"));
+        assertEquals(0, instanceStoreMetadata.mapInstanceTypeToInstanceStoreCountNullHandled("unsupported"));
+        assertNull(instanceStoreMetadata.mapInstanceTypeToInstanceStoreCount("m5.2xlarge"));
+        assertEquals(0, instanceStoreMetadata.mapInstanceTypeToInstanceStoreCountNullHandled("m5.2xlarge"));
+
+        instanceStoreMetadata = underTest.collectInstanceStorageCount(ac, new ArrayList<>());
+
+        assertNull(instanceStoreMetadata.mapInstanceTypeToInstanceStoreCount("m5.2xlarge"));
+        assertEquals(0, instanceStoreMetadata.mapInstanceTypeToInstanceStoreCountNullHandled("m5.2xlarge"));
     }
 }
