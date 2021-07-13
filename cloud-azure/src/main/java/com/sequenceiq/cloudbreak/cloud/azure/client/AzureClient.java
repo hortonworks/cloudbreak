@@ -1,5 +1,9 @@
 package com.sequenceiq.cloudbreak.cloud.azure.client;
 
+import static com.microsoft.azure.management.compute.DiskSkuTypes.PREMIUM_LRS;
+import static com.microsoft.azure.management.compute.DiskSkuTypes.STANDARD_LRS;
+import static com.microsoft.azure.management.compute.DiskSkuTypes.STANDARD_SSD_LRS;
+import static com.microsoft.azure.management.compute.DiskSkuTypes.ULTRA_SSD_LRS;
 import static com.microsoft.azure.management.privatedns.v2018_09_01.ProvisioningState.SUCCEEDED;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static java.util.Collections.emptyMap;
@@ -340,7 +344,10 @@ public class AzureClient {
         CachingTypes cachingTypes = CachingTypes.READ_WRITE;
         if (disk.sizeInGB() > MAX_AZURE_MANAGED_DISK_SIZE_WITH_CACHE) {
             cachingTypes = CachingTypes.NONE;
-        } else if (DiskSkuTypes.ULTRA_SSD_LRS.equals(disk.sku())) {
+        } else if (ULTRA_SSD_LRS.equals(disk.sku())
+                || PREMIUM_LRS.equals(disk.sku())
+                || STANDARD_LRS.equals(disk.sku())
+                || STANDARD_SSD_LRS.equals(disk.sku())) {
             cachingTypes = CachingTypes.READ_ONLY;
         }
         // This is needed because of bug https://github.com/Azure/azure-libraries-for-java/issues/632
