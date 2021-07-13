@@ -244,4 +244,30 @@ public class CmTemplateValidatorTest {
         assertDoesNotThrow(() -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, 2));
     }
 
+    @Test
+    public void testValidationIfKafka7212PresentedAndDownScaleThenValidationShouldNOTThrowError() {
+        Blueprint blueprint = new Blueprint();
+        blueprint.setBlueprintText(FileReaderUtils.readFileFromClasspathQuietly("input/kafka-cc_7_2_12.bp"));
+
+        HostGroup hostGroup = new HostGroup();
+        hostGroup.setName("broker");
+
+        when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(true);
+
+        assertDoesNotThrow(() -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, -2));
+    }
+
+    @Test
+    public void testValidationIfKafka7212WithoutCruiseControlPresentedAndDownScaleThenValidationShouldThrowError() {
+        Blueprint blueprint = new Blueprint();
+        blueprint.setBlueprintText(FileReaderUtils.readFileFromClasspathQuietly("input/kafka-no-cc_7_2_12.bp"));
+
+        HostGroup hostGroup = new HostGroup();
+        hostGroup.setName("broker");
+
+        when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(false);
+
+        assertThrows(BadRequestException.class, () -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, -2));
+    }
+
 }

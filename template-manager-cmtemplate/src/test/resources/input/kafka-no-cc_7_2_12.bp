@@ -1,0 +1,168 @@
+{
+  "cdhVersion": "7.2.12",
+  "displayName": "CDP HA Streaming Cluster",
+  "cmVersion": "7.x.0",
+  "repositories": [
+    "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/__CDH_GBN__/cdh/7.x/parcels/",
+    "http://s3.amazonaws.com/dev.hortonworks.com/CSP/centos7/3.x/BUILDS/__CSP_BUILD__/tars/parcel/"
+  ],
+  "products": [
+    {
+      "version": "0.8.0.__CSP_BUILD__",
+      "product": "SCHEMAREGISTRY"
+    },
+    {
+      "version": "2.1.0.__CSP_BUILD__",
+      "product": "STREAMS_MESSAGING_MANAGER"
+    },
+    {
+      "version": "7.0.0-1.cdh7.0.0.p0.__CDH_GBN__",
+      "product": "CDH"
+    }
+  ],
+  "services": [
+    {
+      "refName": "streams_messaging_manager",
+      "serviceType": "STREAMS_MESSAGING_MANAGER",
+      "serviceConfigs": [
+        {
+          "name": "zookeeper_service",
+          "ref": "zookeeper"
+        },
+        {
+          "name": "kafka_service",
+          "ref": "kafka"
+        },
+        {
+          "name": "cm.metrics.username",
+          "value": "admin"
+        },
+        {
+          "name": "cm.metrics.password",
+          "value": "admin"
+        },
+        {
+          "name": "cm.metrics.host",
+          "value": "localhost"
+        }
+      ],
+      "roleConfigGroups": [
+        {
+          "refName": "streams_messaging_manager-STREAMS_MESSAGING_MANAGER_SERVER-BASE",
+          "roleType": "STREAMS_MESSAGING_MANAGER_SERVER",
+          "configs": [
+            {
+              "name": "streams.messaging.manager.storage.connector.connectURI",
+              "value": "jdbc:mysql://localhost:3306/smm"
+            },
+            {
+              "name": "streams.messaging.manager.storage.connector.user",
+              "value": "cdpd"
+            },
+            {
+              "name": "streams.messaging.manager.storage.connector.password",
+              "value": "cdpd"
+            }
+          ],
+          "base": true
+        },
+        {
+          "refName": "streams_messaging_manager-STREAMS_MESSAGING_MANAGER_UI-BASE",
+          "roleType": "STREAMS_MESSAGING_MANAGER_UI",
+          "base": true
+        }
+      ]
+    },
+    {
+      "refName": "kafka",
+      "serviceType": "KAFKA",
+      "serviceConfigs": [
+        {
+          "name": "zookeeper_service",
+          "ref": "zookeeper"
+        }
+      ],
+      "roleConfigGroups": [
+        {
+          "refName": "kafka-GATEWAY-BASE",
+          "roleType": "GATEWAY",
+          "base": true
+        },
+        {
+          "refName": "kafka-KAFKA_BROKER-BASE",
+          "roleType": "KAFKA_BROKER",
+          "base": true
+        }
+      ]
+    },
+    {
+      "refName": "zookeeper",
+      "serviceType": "ZOOKEEPER",
+      "roleConfigGroups": [
+        {
+          "refName": "zookeeper-SERVER-BASE",
+          "roleType": "SERVER",
+          "base": true
+        }
+      ]
+    },
+    {
+      "refName": "schemaregistry",
+      "serviceType": "SCHEMAREGISTRY",
+      "serviceConfigs": [
+        {
+          "name": "zookeeper_service",
+          "ref": "zookeeper"
+        }
+      ],
+      "roleConfigGroups": [
+        {
+          "refName": "schemaregistry-SCHEMA_REGISTRY_SERVER-BASE",
+          "roleType": "SCHEMA_REGISTRY_SERVER",
+          "configs": [
+            {
+              "name": "schema.registry.storage.connector.connectURI",
+              "value": "jdbc:mysql://localhost:3306/registry"
+            },
+            {
+              "name": "schema.registry.storage.connector.user",
+              "value": "cdpd"
+            },
+            {
+              "name": "schema.registry.storage.connector.password",
+              "value": "cdpd"
+            }
+          ],
+          "base": true
+        }
+      ]
+    }
+  ],
+  "hostTemplates": [
+    {
+      "refName": "master",
+      "cardinality": 1,
+      "roleConfigGroupsRefNames": [
+        "hdfs-DATANODE-BASE",
+        "schemaregistry-SCHEMA_REGISTRY_SERVER-BASE",
+        "streams_messaging_manager-STREAMS_MESSAGING_MANAGER_SERVER-BASE",
+        "streams_messaging_manager-STREAMS_MESSAGING_MANAGER_UI-BASE"
+      ]
+    },
+    {
+      "refName": "broker",
+      "cardinality": 3,
+      "roleConfigGroupsRefNames": [
+        "kafka-GATEWAY-BASE",
+        "kafka-KAFKA_BROKER-BASE"
+      ]
+    },
+    {
+      "refName": "quorum",
+      "cardinality": 3,
+      "roleConfigGroupsRefNames": [
+        "zookeeper-SERVER-BASE"
+      ]
+    }
+  ]
+}

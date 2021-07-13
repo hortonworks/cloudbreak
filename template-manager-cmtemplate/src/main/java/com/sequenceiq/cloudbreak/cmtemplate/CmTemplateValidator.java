@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVer
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -12,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.cloudera.api.swagger.model.ApiClusterTemplateService;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceCount;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -53,17 +55,17 @@ public class CmTemplateValidator implements BlueprintValidator {
         Set<String> services = templateProcessor.getComponentsByHostGroup().get(hostGroup.getName());
         for (BlackListedDownScaleRole role : BlackListedDownScaleRole.values()) {
             if (services.contains(role.name()) && adjustment < 0) {
-                validateRole(accountId, role, blueprintVersion);
+                validateRole(accountId, role, blueprintVersion, templateProcessor);
             }
         }
         for (BlackListedUpScaleRole role : BlackListedUpScaleRole.values()) {
             if (services.contains(role.name()) && adjustment > 0) {
-                validateRole(accountId, role, blueprintVersion);
+                validateRole(accountId, role, blueprintVersion, templateProcessor);
             }
         }
     }
 
-    private void validateRole(String accountId, EntitledForServiceScale role, Versioned blueprintVersion) {
+    private void validateRole(String accountId, EntitledForServiceScale role, Versioned blueprintVersion, CmTemplateProcessor templateProcessor) {
         boolean versionEnablesScaling = isVersionEnablesScaling(blueprintVersion, role);
         boolean entitledFor = entitlementService.isEntitledFor(accountId, role.getEntitledFor());
         if (role.getBlockedUntilCDPVersion().isPresent() && !versionEnablesScaling && !entitledFor) {
@@ -72,6 +74,9 @@ public class CmTemplateValidator implements BlueprintValidator {
         } else if (role.getBlockedUntilCDPVersion().isEmpty() && !entitledFor) {
             throw new BadRequestException(String.format("'%s' service is not enabled to scale",
                     role.name()));
+        } else if (!requiredServiceIsPresented(role.getRequiredService(), templateProcessor) && versionEnablesScaling) {
+            throw new BadRequestException(String.format("'%s' service is not presented on the cluster, and that is required",
+                    role.getRequiredService().get()));
         } else {
             LOGGER.info("Account is entitled for {} so scaling is enabled.", role.getEntitledFor());
         }
@@ -80,5 +85,18 @@ public class CmTemplateValidator implements BlueprintValidator {
     public boolean isVersionEnablesScaling(Versioned blueprintVersion, EntitledForServiceScale role) {
         return role.getBlockedUntilCDPVersion().isPresent()
                 && isVersionNewerOrEqualThanLimited(blueprintVersion, role.getBlockedUntilCDPVersionAsVersion());
+    }
+
+    private boolean requiredServiceIsPresented(Optional<String> requiredService, CmTemplateProcessor templateProcessor) {
+        boolean requiredServiceIsPresented = false;
+        if (requiredService.isPresent()) {
+            Optional<ApiClusterTemplateService> serviceByType = templateProcessor.getServiceByType(requiredService.get());
+            if (serviceByType.isPresent()) {
+                requiredServiceIsPresented = true;
+            }
+        } else {
+            requiredServiceIsPresented = true;
+        }
+        return requiredServiceIsPresented;
     }
 }
