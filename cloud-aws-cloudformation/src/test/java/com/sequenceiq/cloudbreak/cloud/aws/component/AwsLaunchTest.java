@@ -272,6 +272,7 @@ public class AwsLaunchTest {
         when(awsClient.createEc2Client(any(), anyString())).thenReturn(amazonEc2Client);
         when(awsClient.createElasticFileSystemClient(any(), anyString())).thenReturn(amazonEfsClient);
         when(awsClient.createCloudFormationClient(any(), anyString())).thenReturn(amazonCloudFormationClient);
+        when(commonAwsClient.createEc2Client(any(), any())).thenReturn(amazonEc2Client);
         when(amazonCloudFormationClient.waiters()).thenReturn(cfWaiters);
         when(cfWaiters.stackCreateComplete()).thenReturn(cfStackWaiter);
         when(cfWaiters.stackDeleteComplete()).thenReturn(cfStackWaiter);

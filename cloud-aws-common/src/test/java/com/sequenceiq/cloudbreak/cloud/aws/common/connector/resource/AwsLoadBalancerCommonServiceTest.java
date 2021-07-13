@@ -239,6 +239,4 @@ class AwsLoadBalancerCommonServiceTest {
         }
         return new Network(new Subnet(CIDR), params);
     }
-
-
 }

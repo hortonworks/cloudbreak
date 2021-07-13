@@ -438,6 +438,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
     public List<Resource> getDiskResources() {
         switch (platformVariant) {
             case CloudConstants.AWS:
+            case CloudConstants.AWS_NATIVE:
                 return getResourcesByType(ResourceType.AWS_VOLUMESET);
             case CloudConstants.GCP:
                 return getResourcesByType(ResourceType.GCP_ATTACHED_DISKSET);
@@ -451,6 +452,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
     public ResourceType getDiskResourceType() {
         switch (platformVariant) {
             case CloudConstants.AWS:
+            case CloudConstants.AWS_NATIVE   :
                 return ResourceType.AWS_VOLUMESET;
             case CloudConstants.GCP:
                 return ResourceType.GCP_ATTACHED_DISKSET;

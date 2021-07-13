@@ -58,6 +58,12 @@ public class AwsNativeLoadBalancerLaunchService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsNativeLoadBalancerLaunchService.class);
 
+    private static final int TARGET_GROUP_HEALTH_CHECK_INTERVAL_SECONDS = 10;
+
+    private static final int HEALTHY_THRESHOLD_COUNT = 2;
+
+    private static final int UNHEALTHY_THRESHOLD_COUNT = 2;
+
     @Inject
     private AwsLoadBalancerCommonService loadBalancerCommonService;
 
@@ -121,9 +127,9 @@ public class AwsNativeLoadBalancerLaunchService {
                             .withProtocol(ProtocolEnum.TCP)
                             .withTargetType(TargetTypeEnum.Instance)
                             .withHealthCheckPort(targetGroup.getHealthCheckPort())
-                            .withHealthCheckIntervalSeconds(10)
-                            .withHealthyThresholdCount(2)
-                            .withUnhealthyThresholdCount(2)
+                            .withHealthCheckIntervalSeconds(TARGET_GROUP_HEALTH_CHECK_INTERVAL_SECONDS)
+                            .withHealthyThresholdCount(HEALTHY_THRESHOLD_COUNT)
+                            .withUnhealthyThresholdCount(UNHEALTHY_THRESHOLD_COUNT)
                             .withVpcId(awsNetworkView.getExistingVpc())
                             .withTags(tags);
                     CreateTargetGroupResult targetGroupResult = elasticLoadBalancingClient.createTargetGroup(targetGroupRequest);
@@ -187,7 +193,8 @@ public class AwsNativeLoadBalancerLaunchService {
                     RegisterTargetsRequest registerTargetsRequest = new RegisterTargetsRequest()
                             .withTargetGroupArn(targetGroupArn)
                             .withTargets(targetDescriptions);
-                    LOGGER.info("Registering target group of load balancer('{}') to instances: '{}'", loadBalancerName, String.join(",", targetGroup.getInstanceIds()));
+                    LOGGER.info("Registering target group of load balancer('{}') to instances: '{}'", loadBalancerName,
+                            String.join(",", targetGroup.getInstanceIds()));
                     RegisterTargetsResult registerTargetsResult = elasticLoadBalancingClient.registerTargets(registerTargetsRequest);
                 }
             }

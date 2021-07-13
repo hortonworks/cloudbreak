@@ -56,7 +56,7 @@ was_script_executed() {
 is_cloud_platform_supported() {
     local log_file=$1
     case $CLOUD_PLATFORM in
-        AWS|AZURE|GCP) ;; # "Cloud platform is supported"
+        AWS|AWS_NATIVE|AZURE|GCP) ;; # "Cloud platform is supported"
         *)         log $log_file "Cloud platform is NOT supported. Cloud platform currently: $CLOUD_PLATFORM. Exiting"
                    exit;;
     esac
