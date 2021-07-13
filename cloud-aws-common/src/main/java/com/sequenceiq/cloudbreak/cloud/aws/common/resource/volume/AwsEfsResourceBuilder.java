@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.aws.resource;
+package com.sequenceiq.cloudbreak.cloud.aws.common.resource.volume;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -33,11 +33,11 @@ import com.amazonaws.services.elasticfilesystem.model.DescribeMountTargetsResult
 import com.amazonaws.services.elasticfilesystem.model.FileSystemDescription;
 import com.amazonaws.services.elasticfilesystem.model.MountTargetDescription;
 import com.amazonaws.services.elasticfilesystem.model.Tag;
-import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
+import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEfsClient;
-import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.common.context.AwsContext;
+import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEfsAttributes;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -62,7 +62,7 @@ public class AwsEfsResourceBuilder extends AbstractAwsComputeBuilder {
     private AwsTaggingService awsTaggingService;
 
     @Inject
-    private AwsCloudFormationClient awsClient;
+    private CommonAwsClient awsClient;
 
     @Override
     public List<CloudResource> create(AwsContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group, Image image) {

@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.aws.resource;
+package com.sequenceiq.cloudbreak.cloud.aws.common.resource.volume;
 
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.common.api.type.ResourceType;

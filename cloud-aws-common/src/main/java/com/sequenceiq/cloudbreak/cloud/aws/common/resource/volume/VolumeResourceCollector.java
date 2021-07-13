@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.aws.resource;
+package com.sequenceiq.cloudbreak.cloud.aws.common.resource.volume;
 
 import static com.sequenceiq.cloudbreak.util.NullUtil.throwIfNull;
 import static java.util.stream.Collectors.toList;

@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.aws;
+package com.sequenceiq.cloudbreak.cloud.aws.common.util;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
