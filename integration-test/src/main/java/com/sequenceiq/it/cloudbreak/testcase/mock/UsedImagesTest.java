@@ -97,7 +97,7 @@ public class UsedImagesTest extends AbstractMockTest {
                 .when(freeIpaTestClient.describe())
 
                 .given(SdxInternalTestDto.class)
-                    .withImageCatalogNameAndImageId(cbImageCatalogName, sdxImageUuid)
+                    .withImageSettings(cbImageCatalogName, sdxImageUuid, null)
                 .when(sdxTestClient.createInternal())
                 .await(SdxClusterStatusResponse.RUNNING)
                 .when(sdxTestClient.describeInternal())

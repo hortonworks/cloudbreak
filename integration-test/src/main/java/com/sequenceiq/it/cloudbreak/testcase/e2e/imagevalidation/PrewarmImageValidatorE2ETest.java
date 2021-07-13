@@ -34,8 +34,9 @@ public class PrewarmImageValidatorE2ETest extends AbstractImageValidatorE2ETest 
                 .withCloudStorage(getCloudStorageRequest(testContext))
                 .withTemplate(commonClusterManagerProperties().getInternalSdxBlueprintName())
                 .withRuntimeVersion(commonClusterManagerProperties().getRuntimeVersion())
-                .withImageCatalogNameAndImageId(commonCloudProperties().getImageValidation().getSourceCatalogName(),
-                        commonCloudProperties().getImageValidation().getImageUuid())
+                .withImageSettings(commonCloudProperties().getImageValidation().getSourceCatalogName(),
+                        commonCloudProperties().getImageValidation().getImageUuid(),
+                        commonCloudProperties().getImageValidation().getOs())
                 .when(sdxTestClient.createInternal())
                 .await(SdxClusterStatusResponse.RUNNING)
                 .when(sdxTestClient.describeInternal())
