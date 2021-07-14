@@ -74,7 +74,9 @@ public class CmTemplateValidator implements BlueprintValidator {
         } else if (role.getBlockedUntilCDPVersion().isEmpty() && !entitledFor) {
             throw new BadRequestException(String.format("'%s' service is not enabled to scale",
                     role.name()));
-        } else if (!requiredServiceIsPresented(role.getRequiredService(), templateProcessor) && versionEnablesScaling) {
+        } else if (role.getRequiredService().isPresent()
+                && !requiredServiceIsPresented(role.getRequiredService(), templateProcessor)
+                && versionEnablesScaling) {
             throw new BadRequestException(String.format("'%s' service is not presented on the cluster, and that is required",
                     role.getRequiredService().get()));
         } else {
@@ -89,12 +91,8 @@ public class CmTemplateValidator implements BlueprintValidator {
 
     private boolean requiredServiceIsPresented(Optional<String> requiredService, CmTemplateProcessor templateProcessor) {
         boolean requiredServiceIsPresented = false;
-        if (requiredService.isPresent()) {
-            Optional<ApiClusterTemplateService> serviceByType = templateProcessor.getServiceByType(requiredService.get());
-            if (serviceByType.isPresent()) {
-                requiredServiceIsPresented = true;
-            }
-        } else {
+        Optional<ApiClusterTemplateService> serviceByType = templateProcessor.getServiceByType(requiredService.get());
+        if (serviceByType.isPresent()) {
             requiredServiceIsPresented = true;
         }
         return requiredServiceIsPresented;
