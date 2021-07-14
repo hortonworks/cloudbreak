@@ -1,5 +1,6 @@
-package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
+package com.sequenceiq.cloudbreak.cloud.aws.common.connector.resource;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import com.amazonaws.services.ec2.model.Address;
 import com.amazonaws.services.ec2.model.AssociateAddressRequest;
+import com.amazonaws.services.ec2.model.AssociateAddressResult;
 import com.amazonaws.services.ec2.model.DescribeAddressesRequest;
 import com.amazonaws.services.ec2.model.DescribeAddressesResult;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
@@ -30,21 +32,25 @@ public class AwsElasticIpService {
                 .collect(Collectors.toList());
     }
 
-    public void associateElasticIpsToInstances(AmazonEc2Client amazonEC2Client, List<String> eipAllocationIds, List<String> instanceIds) {
+    public List<AssociateAddressResult> associateElasticIpsToInstances(AmazonEc2Client amazonEC2Client, List<String> eipAllocationIds,
+            List<String> instanceIds) {
+        List<AssociateAddressResult> ret = new ArrayList<>();
         if (eipAllocationIds.size() == instanceIds.size()) {
             for (int i = 0; i < eipAllocationIds.size(); i++) {
-                associateElasticIpToInstance(amazonEC2Client, eipAllocationIds.get(i), instanceIds.get(i));
+                ret.add(associateElasticIpToInstance(amazonEC2Client, eipAllocationIds.get(i), instanceIds.get(i)));
             }
         } else {
             LOGGER.warn("The number of elastic ips are not equals with the number of instances. EIP association will be skipped!");
         }
+        return ret;
     }
 
-    private void associateElasticIpToInstance(AmazonEc2Client amazonEC2Client, String eipAllocationId, String instanceId) {
+    private AssociateAddressResult associateElasticIpToInstance(AmazonEc2Client amazonEC2Client, String eipAllocationId, String instanceId) {
+        LOGGER.debug("{} eip associated to {}", eipAllocationId, instanceId);
         AssociateAddressRequest associateAddressRequest = new AssociateAddressRequest()
                 .withAllocationId(eipAllocationId)
                 .withInstanceId(instanceId);
-        amazonEC2Client.associateAddress(associateAddressRequest);
+        return amazonEC2Client.associateAddress(associateAddressRequest);
     }
 
     public Map<String, String> getElasticIpAllocationIds(Map<String, String> outputs, String cFStackName) {

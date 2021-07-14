@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
-import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.Resource;
@@ -27,7 +26,7 @@ public class ResourceToCloudResourceConverter extends AbstractConversionServiceA
 
     @Override
     public CloudResource convert(Resource resource) {
-        Optional<VolumeSetAttributes> attributes = resourceAttributeUtil.getTypedAttributes(resource, VolumeSetAttributes.class);
+        Optional<Object> attributes = resourceAttributeUtil.getTypedAttributes(resource);
 
         Map<String, Object> paramsMap = new HashMap<>();
         attributes.ifPresent(attr -> paramsMap.put(CloudResource.ATTRIBUTES, attr));
