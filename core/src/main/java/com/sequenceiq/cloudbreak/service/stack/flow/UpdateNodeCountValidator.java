@@ -71,7 +71,10 @@ public class UpdateNodeCountValidator {
     }
 
     public void validateServiceRoles(Stack stack, InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson) {
-        String instanceGroup = instanceGroupAdjustmentJson.getInstanceGroup();
+        validateServiceRoles(stack, instanceGroupAdjustmentJson.getInstanceGroup(), instanceGroupAdjustmentJson.getScalingAdjustment());
+    }
+
+    public void validateServiceRoles(Stack stack, String instanceGroup, int scalingAdjustment) {
         Optional<HostGroup> hostGroup = stack.getCluster().getHostGroups()
                 .stream()
                 .filter(e -> e.getName().equals(instanceGroup))
@@ -84,7 +87,7 @@ public class UpdateNodeCountValidator {
                     accountId,
                     stack.getCluster().getBlueprint(),
                     hostGroup.get(),
-                    instanceGroupAdjustmentJson.getScalingAdjustment());
+                    scalingAdjustment);
         }
     }
 
@@ -104,18 +107,22 @@ public class UpdateNodeCountValidator {
     }
 
     public void validateScalabilityOfInstanceGroup(Stack stack, HostGroupAdjustmentV4Request hostGroupAdjustmentV4Request) {
-        InstanceGroup instanceGroup = stack.getInstanceGroupByInstanceGroupName(hostGroupAdjustmentV4Request.getHostGroup());
-        validateGroupAdjustment(
-                stack,
-                hostGroupAdjustmentV4Request.getScalingAdjustment(),
-                instanceGroup);
+        validateScalabilityOfInstanceGroup(stack,
+                hostGroupAdjustmentV4Request.getHostGroup(),
+                hostGroupAdjustmentV4Request.getScalingAdjustment());
     }
 
     public void validateScalabilityOfInstanceGroup(Stack stack, InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson) {
-        InstanceGroup instanceGroup = stack.getInstanceGroupByInstanceGroupName(instanceGroupAdjustmentJson.getInstanceGroup());
+        validateScalabilityOfInstanceGroup(stack,
+                instanceGroupAdjustmentJson.getInstanceGroup(),
+                instanceGroupAdjustmentJson.getScalingAdjustment());
+    }
+
+    public void validateScalabilityOfInstanceGroup(Stack stack, String instanceGroupName, int scalingAdjustment) {
+        InstanceGroup instanceGroup = stack.getInstanceGroupByInstanceGroupName(instanceGroupName);
         validateGroupAdjustment(
                 stack,
-                instanceGroupAdjustmentJson.getScalingAdjustment(),
+                scalingAdjustment,
                 instanceGroup);
     }
 
@@ -176,21 +183,35 @@ public class UpdateNodeCountValidator {
     }
 
     public void validateScalingAdjustment(InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson, Stack stack) {
-        if (0 == instanceGroupAdjustmentJson.getScalingAdjustment()) {
-            throw new BadRequestException(format("Requested scaling adjustment on Data Hub '%s' is 0. Nothing to do.", stack.getName()));
-        }
-        if (upscaleEvent(instanceGroupAdjustmentJson.getScalingAdjustment())) {
-            InstanceGroup instanceGroup = stack.getInstanceGroupByInstanceGroupName(instanceGroupAdjustmentJson.getInstanceGroup());
-            if (-1 * instanceGroupAdjustmentJson.getScalingAdjustment() > instanceGroup.getNodeCount()) {
-                throw new BadRequestException(format("There are %s instances in '%s' group. CDP Cannot remove %s instances.",
-                        instanceGroup.getNodeCount(), instanceGroup.getGroupName(),
-                        -1 * instanceGroupAdjustmentJson.getScalingAdjustment()));
+        validateScalingAdjustment(instanceGroupAdjustmentJson.getInstanceGroup(),
+                instanceGroupAdjustmentJson.getScalingAdjustment(),
+                stack);
+    }
+
+    public void validateScalingAdjustment(String instanceGroupName, Integer scalingAdjustment, Stack stack) {
+        InstanceGroup instanceGroup = stack.getInstanceGroupByInstanceGroupName(instanceGroupName);
+        if (upscaleEvent(scalingAdjustment)) {
+            if (!instanceGroup.getScalabilityOption().upscalable()) {
+                throw new BadRequestException(format("Requested scaling up is forbidden on %s Data Hub %s group.",
+                        stack.getName(),
+                        instanceGroup.getGroupName()));
             }
-            int removableHosts = instanceMetaDataService.findRemovableInstances(stack.getId(), instanceGroupAdjustmentJson.getInstanceGroup()).size();
-            if (removableHosts < -1 * instanceGroupAdjustmentJson.getScalingAdjustment()) {
-                throw new BadRequestException(
-                        format("There are %s unregistered instances in '%s' group '%s' but %s were requested. Decommission nodes from the Data Hub!",
-                                removableHosts, instanceGroup.getGroupName(), instanceGroupAdjustmentJson.getScalingAdjustment() * -1));
+        } else if (downScaleEvent(scalingAdjustment)) {
+            if (nodeCountIsLowerThanMinimalNodeCountAfterTheScalingEvent(instanceGroup, scalingAdjustment)) {
+                throw new BadRequestException(format("Requested scaling down is forbidden on %s Data Hub %s group because the " +
+                                "the current node count is %s node the node count after the downscale action will be %s and the minimal " +
+                                "node count in the %s group is %s node. You can not go under the minimal node count.",
+                        stack.getName(),
+                        instanceGroup.getGroupName(),
+                        instanceGroup.getNodeCount(),
+                        getNodeCountAfterScaling(instanceGroup, scalingAdjustment),
+                        instanceGroup.getGroupName(),
+                        instanceGroup.getMinimumNodeCount()));
+            }
+            if (!instanceGroup.getScalabilityOption().downscalable()) {
+                throw new BadRequestException(format("Requested scaling down is forbidden on %s Data Hub's %s group.",
+                        stack.getName(),
+                        instanceGroup.getGroupName()));
             }
         }
     }

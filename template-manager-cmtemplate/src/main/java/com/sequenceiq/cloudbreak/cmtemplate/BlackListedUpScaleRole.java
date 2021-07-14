@@ -4,7 +4,6 @@ import java.util.Objects;
 import java.util.Optional;
 
 import com.sequenceiq.cloudbreak.auth.altus.model.Entitlement;
-import com.sequenceiq.cloudbreak.cmtemplate.configproviders.cruisecontrol.CruiseControlRoles;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
 
 public enum BlackListedUpScaleRole implements EntitledForServiceScale {

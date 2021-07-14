@@ -97,7 +97,14 @@ public class StackOperationService {
 
     public FlowIdentifier removeInstance(Stack stack, Long workspaceId, String instanceId, boolean forced, User user) {
         InstanceMetaData metaData = updateNodeCountValidator.validateInstanceForDownscale(instanceId, stack);
-        return flowManager.triggerStackRemoveInstance(stack.getId(), metaData.getInstanceGroupName(), metaData.getPrivateId(), forced);
+        String instanceGroupName = metaData.getInstanceGroupName();
+        if (!forced) {
+            int scalingAdjustment = -1;
+            updateNodeCountValidator.validateServiceRoles(stack, instanceGroupName, scalingAdjustment);
+            updateNodeCountValidator.validateScalabilityOfInstanceGroup(stack, instanceGroupName, scalingAdjustment);
+            updateNodeCountValidator.validateScalingAdjustment(instanceGroupName, scalingAdjustment, stack);
+        }
+        return flowManager.triggerStackRemoveInstance(stack.getId(), instanceGroupName, metaData.getPrivateId(), forced);
     }
 
     public FlowIdentifier removeInstances(Stack stack, Long workspaceId, Collection<String> instanceIds, boolean forced, User user) {
@@ -105,6 +112,15 @@ public class StackOperationService {
         for (String instanceId : instanceIds) {
             InstanceMetaData metaData = updateNodeCountValidator.validateInstanceForDownscale(instanceId, stack);
             instanceIdsByHostgroupMap.computeIfAbsent(metaData.getInstanceGroupName(), s -> new LinkedHashSet<>()).add(metaData.getPrivateId());
+        }
+        if (!forced) {
+            for (Map.Entry<String, Set<Long>> entry : instanceIdsByHostgroupMap.entrySet()) {
+                String instanceGroupName = entry.getKey();
+                int scalingAdjustment = entry.getValue().size() * -1;
+                updateNodeCountValidator.validateServiceRoles(stack, instanceGroupName, scalingAdjustment);
+                updateNodeCountValidator.validateScalabilityOfInstanceGroup(stack, instanceGroupName, scalingAdjustment);
+                updateNodeCountValidator.validateScalingAdjustment(instanceGroupName, scalingAdjustment, stack);
+            }
         }
         return flowManager.triggerStackRemoveInstances(stack.getId(), instanceIdsByHostgroupMap, forced);
     }
