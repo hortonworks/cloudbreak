@@ -6,6 +6,8 @@ import javax.ws.rs.ext.Provider;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.exception.mapper.BaseExceptionMapper;
+
 @Provider
 @Component
 public class DefaultExceptionMapper extends BaseExceptionMapper<Exception> {
@@ -16,12 +18,12 @@ public class DefaultExceptionMapper extends BaseExceptionMapper<Exception> {
     }
 
     @Override
-    Status getResponseStatus(Exception exception) {
+    public Status getResponseStatus(Exception exception) {
         return Status.INTERNAL_SERVER_ERROR;
     }
 
     @Override
-    Class<Exception> getExceptionType() {
+    public Class<Exception> getExceptionType() {
         return Exception.class;
     }
 }

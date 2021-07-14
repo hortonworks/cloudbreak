@@ -10,12 +10,12 @@ import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 public class CloudbreakApiExceptionMapper extends SendNotificationExceptionMapper<CloudbreakApiException> {
 
     @Override
-    Status getResponseStatus(CloudbreakApiException exception) {
+    public Status getResponseStatus(CloudbreakApiException exception) {
         return Status.CONFLICT;
     }
 
     @Override
-    Class<CloudbreakApiException> getExceptionType() {
+    public Class<CloudbreakApiException> getExceptionType() {
         return CloudbreakApiException.class;
     }
 }

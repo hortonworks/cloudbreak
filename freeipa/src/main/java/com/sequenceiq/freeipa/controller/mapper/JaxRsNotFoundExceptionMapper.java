@@ -9,6 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.exception.mapper.BaseExceptionMapper;
+
 @Component
 public class JaxRsNotFoundExceptionMapper extends BaseExceptionMapper<NotFoundException> {
 
@@ -18,12 +20,12 @@ public class JaxRsNotFoundExceptionMapper extends BaseExceptionMapper<NotFoundEx
     private UriInfo uriInfo;
 
     @Override
-    Response.Status getResponseStatus(NotFoundException exception) {
+    public Response.Status getResponseStatus(NotFoundException exception) {
         return Response.Status.NOT_FOUND;
     }
 
     @Override
-    Class<NotFoundException> getExceptionType() {
+    public Class<NotFoundException> getExceptionType() {
         return NotFoundException.class;
     }
 

@@ -5,17 +5,18 @@ import javax.ws.rs.core.Response.Status;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.crn.CrnParseException;
+import com.sequenceiq.cloudbreak.exception.mapper.BaseExceptionMapper;
 
 @Component
 public class CrnParseExceptionMapper extends BaseExceptionMapper<CrnParseException> {
 
     @Override
-    Status getResponseStatus(CrnParseException exception) {
+    public Status getResponseStatus(CrnParseException exception) {
         return Status.BAD_REQUEST;
     }
 
     @Override
-    Class<CrnParseException> getExceptionType() {
+    public Class<CrnParseException> getExceptionType() {
         return CrnParseException.class;
     }
 

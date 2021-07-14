@@ -10,12 +10,12 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 public class CloudbreakImageCatalogExceptionMapper extends SendNotificationExceptionMapper<CloudbreakImageCatalogException> {
 
     @Override
-    Status getResponseStatus(CloudbreakImageCatalogException exception) {
+    public Status getResponseStatus(CloudbreakImageCatalogException exception) {
         return Status.NOT_FOUND;
     }
 
     @Override
-    Class<CloudbreakImageCatalogException> getExceptionType() {
+    public Class<CloudbreakImageCatalogException> getExceptionType() {
         return CloudbreakImageCatalogException.class;
     }
 }

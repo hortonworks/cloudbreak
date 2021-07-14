@@ -6,18 +6,19 @@ import javax.ws.rs.ext.Provider;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.exception.mapper.BaseExceptionMapper;
 
 @Provider
 @Component
 public class SpringBadRequestExceptionMapper extends BaseExceptionMapper<BadRequestException> {
 
     @Override
-    Status getResponseStatus(BadRequestException exception) {
+    public Status getResponseStatus(BadRequestException exception) {
         return Status.BAD_REQUEST;
     }
 
     @Override
-    Class<BadRequestException> getExceptionType() {
+    public Class<BadRequestException> getExceptionType() {
         return BadRequestException.class;
     }
 

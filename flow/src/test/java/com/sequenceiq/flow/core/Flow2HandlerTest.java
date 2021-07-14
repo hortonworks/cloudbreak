@@ -14,6 +14,7 @@ import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -33,7 +34,6 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.BDDMockito;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.context.ApplicationContext;
 import org.springframework.statemachine.ExtendedState;
@@ -45,6 +45,8 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.cedarsoftware.util.io.JsonWriter;
 import com.google.common.collect.Lists;
+import com.sequenceiq.cloudbreak.common.event.AcceptResult;
+import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
@@ -55,6 +57,7 @@ import com.sequenceiq.flow.core.cache.FlowStatCache;
 import com.sequenceiq.flow.core.chain.FlowChainHandler;
 import com.sequenceiq.flow.core.chain.FlowChains;
 import com.sequenceiq.flow.core.config.FlowConfiguration;
+import com.sequenceiq.flow.core.exception.FlowNotTriggerableException;
 import com.sequenceiq.flow.core.helloworld.config.HelloWorldFlowConfig;
 import com.sequenceiq.flow.core.restart.DefaultRestartAction;
 import com.sequenceiq.flow.domain.FlowLog;
@@ -69,6 +72,7 @@ import io.opentracing.SpanContext;
 import io.opentracing.Tracer;
 import reactor.bus.Event;
 import reactor.bus.Event.Headers;
+import reactor.rx.Promise;
 
 @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT")
 public class Flow2HandlerTest {
@@ -204,7 +208,7 @@ public class Flow2HandlerTest {
         given(flowConfig.createFlow(anyString(), any(), anyLong(), any())).willReturn(flow);
         given(flowConfig.getFlowTriggerCondition()).willReturn(flowTriggerCondition);
         given(flowConfig.getFlowOperationType()).willReturn(OperationType.UNKNOWN);
-        given(flowTriggerCondition.isFlowTriggerable(anyLong())).willReturn(true);
+        given(flowTriggerCondition.isFlowTriggerable(anyLong())).willReturn(FlowTriggerConditionResult.OK);
         given(flow.getCurrentState()).willReturn(flowState);
         Event<Payload> event = new Event<>(payload);
         event.setKey("KEY");
@@ -222,7 +226,7 @@ public class Flow2HandlerTest {
         given(flowConfig.createFlow(anyString(), any(), anyLong(), any())).willReturn(flow);
         given(flowConfig.getFlowTriggerCondition()).willReturn(flowTriggerCondition);
         given(flowConfig.getFlowOperationType()).willReturn(OperationType.UNKNOWN);
-        given(flowTriggerCondition.isFlowTriggerable(anyLong())).willReturn(true);
+        given(flowTriggerCondition.isFlowTriggerable(anyLong())).willReturn(FlowTriggerConditionResult.OK);
         given(flow.getCurrentState()).willReturn(flowState);
         Event<Payload> event = new Event<>(payload);
         event.setKey("KEY");
@@ -239,15 +243,41 @@ public class Flow2HandlerTest {
     }
 
     @Test
+    public void testFlowRejectedBecauseNotTriggerable() {
+        BDDMockito.<FlowConfiguration<?>>given(flowConfigurationMap.get(any())).willReturn(flowConfig);
+        given(flowConfig.createFlow(anyString(), any(), anyLong(), any())).willReturn(flow);
+        given(flowConfig.getFlowTriggerCondition()).willReturn(flowTriggerCondition);
+        given(flow.getCurrentState()).willReturn(flowState);
+        when(flowTriggerCondition.isFlowTriggerable(anyLong()))
+                .thenReturn(new FlowTriggerConditionResult("It's not triggerable!"));
+
+        Promise accepted = mock(Promise.class);
+        Payload mockPayload = new MockPayload(accepted);
+        Event<Payload> event = new Event<>(mockPayload);
+        event.setKey("KEY");
+
+        underTest.accept(event);
+
+        verify(accepted, times(1)).onError(any(FlowNotTriggerableException.class));
+
+        verify(flowConfigurationMap, times(1)).get(anyString());
+        verify(runningFlows, times(0)).put(eq(flow), isNull(String.class));
+        verify(flowLogService, times(0))
+                .save(any(FlowParameters.class), nullable(String.class), eq("KEY"), any(Payload.class), any(), eq(flowConfig.getClass()), eq(flowState));
+        verify(runningFlows, times(0)).remove(anyString());
+        verify(flow, times(0)).sendEvent(anyString(), anyString(), isNull(), any(), any());
+    }
+
+    @Test
     public void testNewSyncFlowMaintenanceActive() {
-        HelloWorldFlowConfig helloWorldFlowConfig = Mockito.mock(HelloWorldFlowConfig.class);
+        HelloWorldFlowConfig helloWorldFlowConfig = mock(HelloWorldFlowConfig.class);
         given(helloWorldFlowConfig.getFlowTriggerCondition()).willReturn(new DefaultFlowTriggerCondition());
 
         BDDMockito.<FlowConfiguration<?>>given(flowConfigurationMap.get(any())).willReturn(helloWorldFlowConfig);
         given(helloWorldFlowConfig.createFlow(anyString(), any(), anyLong(), any())).willReturn(flow);
         given(helloWorldFlowConfig.getFlowTriggerCondition()).willReturn(flowTriggerCondition);
         given(helloWorldFlowConfig.getFlowOperationType()).willReturn(OperationType.UNKNOWN);
-        given(flowTriggerCondition.isFlowTriggerable(anyLong())).willReturn(true);
+        given(flowTriggerCondition.isFlowTriggerable(anyLong())).willReturn(FlowTriggerConditionResult.OK);
         given(flow.getCurrentState()).willReturn(flowState);
         Event<Payload> event = new Event<>(payload);
         event.setKey("KEY");
@@ -548,6 +578,7 @@ public class Flow2HandlerTest {
     }
 
     private static class OwnFlowState implements FlowState {
+
         @Override
         public String name() {
             return null;
@@ -556,6 +587,26 @@ public class Flow2HandlerTest {
         @Override
         public Class<? extends RestartAction> restartAction() {
             return DefaultRestartAction.class;
+        }
+
+    }
+
+    private static class MockPayload implements Payload, Acceptable {
+
+        private Promise<AcceptResult> accepted;
+
+        MockPayload(Promise<AcceptResult> promise) {
+            accepted = promise;
+        }
+
+        @Override
+        public Promise<AcceptResult> accepted() {
+            return accepted;
+        }
+
+        @Override
+        public Long getResourceId() {
+            return 1L;
         }
     }
 }

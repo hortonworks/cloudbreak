@@ -5,6 +5,7 @@ import javax.ws.rs.core.Response.Status;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.exception.ExceptionResponse;
+import com.sequenceiq.cloudbreak.exception.mapper.BaseExceptionMapper;
 import com.sequenceiq.freeipa.client.InvalidFreeIpaStateException;
 
 @Component
@@ -16,12 +17,12 @@ public class InvalidFreeIpaStateExceptionMapper extends BaseExceptionMapper<Inva
     }
 
     @Override
-    Status getResponseStatus(InvalidFreeIpaStateException exception) {
+    public Status getResponseStatus(InvalidFreeIpaStateException exception) {
         return Status.BAD_GATEWAY;
     }
 
     @Override
-    Class<InvalidFreeIpaStateException> getExceptionType() {
+    public Class<InvalidFreeIpaStateException> getExceptionType() {
         return InvalidFreeIpaStateException.class;
     }
 }

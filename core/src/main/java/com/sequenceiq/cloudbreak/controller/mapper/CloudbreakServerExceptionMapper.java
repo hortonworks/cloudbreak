@@ -5,17 +5,18 @@ import javax.ws.rs.core.Response.Status;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.exception.mapper.BaseExceptionMapper;
 
 @Component
 public class CloudbreakServerExceptionMapper extends BaseExceptionMapper<CloudbreakServiceException> {
 
     @Override
-    Status getResponseStatus(CloudbreakServiceException exception) {
+    public Status getResponseStatus(CloudbreakServiceException exception) {
         return Status.BAD_REQUEST;
     }
 
     @Override
-    Class<CloudbreakServiceException> getExceptionType() {
+    public Class<CloudbreakServiceException> getExceptionType() {
         return CloudbreakServiceException.class;
     }
 }

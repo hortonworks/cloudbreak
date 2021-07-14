@@ -6,16 +6,18 @@ import javax.ws.rs.core.Response;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.exception.mapper.BaseExceptionMapper;
+
 @Component
 public class UnknownHostExceptionMapper extends BaseExceptionMapper<UnknownHostException> {
 
     @Override
-    Response.Status getResponseStatus(UnknownHostException exception) {
+    public Response.Status getResponseStatus(UnknownHostException exception) {
         return Response.Status.SERVICE_UNAVAILABLE;
     }
 
     @Override
-    Class<UnknownHostException> getExceptionType() {
+    public Class<UnknownHostException> getExceptionType() {
         return UnknownHostException.class;
     }
 }
