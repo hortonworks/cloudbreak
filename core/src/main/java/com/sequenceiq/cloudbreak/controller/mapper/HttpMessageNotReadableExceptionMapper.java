@@ -7,6 +7,8 @@ import javax.ws.rs.core.Response.Status;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.exception.mapper.BaseExceptionMapper;
+
 import ch.qos.logback.classic.Level;
 
 @Component
@@ -18,12 +20,12 @@ public class HttpMessageNotReadableExceptionMapper extends BaseExceptionMapper<H
     }
 
     @Override
-    Status getResponseStatus(HttpMessageNotReadableException exception) {
+    public Status getResponseStatus(HttpMessageNotReadableException exception) {
         return Status.BAD_REQUEST;
     }
 
     @Override
-    Class<HttpMessageNotReadableException> getExceptionType() {
+    public Class<HttpMessageNotReadableException> getExceptionType() {
         return HttpMessageNotReadableException.class;
     }
 }

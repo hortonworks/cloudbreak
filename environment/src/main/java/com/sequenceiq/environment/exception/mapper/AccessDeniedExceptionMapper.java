@@ -6,15 +6,15 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
 @Component
-public class AccessDeniedExceptionMapper extends BaseExceptionMapper<AccessDeniedException> {
+public class AccessDeniedExceptionMapper extends EnvironmentBaseExceptionMapper<AccessDeniedException> {
 
     @Override
-    Status getResponseStatus(AccessDeniedException exception) {
+    public Status getResponseStatus(AccessDeniedException exception) {
         return Status.FORBIDDEN;
     }
 
     @Override
-    Class<AccessDeniedException> getExceptionType() {
+    public Class<AccessDeniedException> getExceptionType() {
         return AccessDeniedException.class;
     }
 }

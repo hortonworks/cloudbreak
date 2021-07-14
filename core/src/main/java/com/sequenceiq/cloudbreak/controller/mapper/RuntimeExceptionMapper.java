@@ -5,6 +5,7 @@ import javax.ws.rs.core.Response.Status;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.exception.ExceptionResponse;
+import com.sequenceiq.cloudbreak.exception.mapper.BaseExceptionMapper;
 
 @Component
 public class RuntimeExceptionMapper extends BaseExceptionMapper<RuntimeException> {
@@ -15,12 +16,12 @@ public class RuntimeExceptionMapper extends BaseExceptionMapper<RuntimeException
     }
 
     @Override
-    Status getResponseStatus(RuntimeException exception) {
+    public Status getResponseStatus(RuntimeException exception) {
         return Status.INTERNAL_SERVER_ERROR;
     }
 
     @Override
-    Class<RuntimeException> getExceptionType() {
+    public Class<RuntimeException> getExceptionType() {
         return RuntimeException.class;
     }
 }

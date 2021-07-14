@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 
 import com.sequenceiq.cloudbreak.common.exception.ExceptionResponse;
+import com.sequenceiq.cloudbreak.exception.mapper.BaseExceptionMapper;
 
 @Component
 public class HttpRequestMethodNotSupportedExceptionMapper extends BaseExceptionMapper<HttpRequestMethodNotSupportedException> {
@@ -16,12 +17,12 @@ public class HttpRequestMethodNotSupportedExceptionMapper extends BaseExceptionM
     }
 
     @Override
-    Status getResponseStatus(HttpRequestMethodNotSupportedException exception) {
+    public Status getResponseStatus(HttpRequestMethodNotSupportedException exception) {
         return Status.METHOD_NOT_ALLOWED;
     }
 
     @Override
-    Class<HttpRequestMethodNotSupportedException> getExceptionType() {
+    public Class<HttpRequestMethodNotSupportedException> getExceptionType() {
         return HttpRequestMethodNotSupportedException.class;
     }
 }

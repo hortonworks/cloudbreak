@@ -8,6 +8,7 @@ import javax.ws.rs.core.Response.Status;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
+import com.sequenceiq.cloudbreak.exception.mapper.BaseExceptionMapper;
 
 @Component
 public class TransactionRuntimeExecutionExceptionMapper extends SendNotificationExceptionMapper<TransactionRuntimeExecutionException> {
@@ -31,7 +32,7 @@ public class TransactionRuntimeExecutionExceptionMapper extends SendNotification
     }
 
     @Override
-    Status getResponseStatus(TransactionRuntimeExecutionException exception) {
+    public Status getResponseStatus(TransactionRuntimeExecutionException exception) {
         TransactionRuntimeExecutionException deepest = getDeepestTransactionException(CURRENT_EXCEPTION.get());
         return exceptionMappers.stream()
                 .filter(m -> m.getExceptionType().equals(deepest.getOriginalCause().getClass()))
@@ -47,12 +48,12 @@ public class TransactionRuntimeExecutionExceptionMapper extends SendNotification
     }
 
     @Override
-    Class<TransactionRuntimeExecutionException> getExceptionType() {
+    public Class<TransactionRuntimeExecutionException> getExceptionType() {
         return TransactionRuntimeExecutionException.class;
     }
 
     @Override
-    protected String getErrorMessage(TransactionRuntimeExecutionException exception) {
+    public String getErrorMessage(TransactionRuntimeExecutionException exception) {
         TransactionRuntimeExecutionException deepest = getDeepestTransactionException(exception);
         return exceptionMappers.stream()
                 .filter(mapper -> mapper.getExceptionType().equals(deepest.getOriginalCause().getClass()))

@@ -6,6 +6,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.exception.mapper.BaseExceptionMapper;
+
 import io.grpc.StatusRuntimeException;
 
 @Component
@@ -14,7 +16,7 @@ public class StatusRuntimeExceptionMapper extends BaseExceptionMapper<StatusRunt
     private static final Logger LOGGER = LoggerFactory.getLogger(StatusRuntimeExceptionMapper.class);
 
     @Override
-    Response.Status getResponseStatus(StatusRuntimeException exception) {
+    public Response.Status getResponseStatus(StatusRuntimeException exception) {
         switch (exception.getStatus().getCode()) {
             case OK:
                 return Response.Status.OK;
@@ -40,7 +42,7 @@ public class StatusRuntimeExceptionMapper extends BaseExceptionMapper<StatusRunt
     }
 
     @Override
-    Class<StatusRuntimeException> getExceptionType() {
+    public Class<StatusRuntimeException> getExceptionType() {
         return StatusRuntimeException.class;
     }
 }

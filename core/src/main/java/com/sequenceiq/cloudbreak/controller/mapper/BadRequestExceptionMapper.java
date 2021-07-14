@@ -10,12 +10,12 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 public class BadRequestExceptionMapper extends SendNotificationExceptionMapper<BadRequestException> {
 
     @Override
-    Status getResponseStatus(BadRequestException exception) {
+    public Status getResponseStatus(BadRequestException exception) {
         return Status.BAD_REQUEST;
     }
 
     @Override
-    Class<BadRequestException> getExceptionType() {
+    public Class<BadRequestException> getExceptionType() {
         return BadRequestException.class;
     }
 

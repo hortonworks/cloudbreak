@@ -7,6 +7,7 @@ import javax.ws.rs.core.Response.Status;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.exception.ExceptionResponse;
+import com.sequenceiq.cloudbreak.exception.mapper.BaseExceptionMapper;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 
 import ch.qos.logback.classic.Level;
@@ -25,12 +26,12 @@ public class DuplicatedKeyValueExceptionMapper extends BaseExceptionMapper<Dupli
     }
 
     @Override
-    Status getResponseStatus(DuplicateKeyValueException exception) {
+    public Status getResponseStatus(DuplicateKeyValueException exception) {
         return Status.CONFLICT;
     }
 
     @Override
-    Class<DuplicateKeyValueException> getExceptionType() {
+    public Class<DuplicateKeyValueException> getExceptionType() {
         return DuplicateKeyValueException.class;
     }
 

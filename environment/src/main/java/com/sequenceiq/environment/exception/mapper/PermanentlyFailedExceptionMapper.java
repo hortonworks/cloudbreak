@@ -8,7 +8,7 @@ import com.sequenceiq.cloudbreak.util.PermanentlyFailedException;
     public class PermanentlyFailedExceptionMapper extends SearchCauseExceptionMapper<PermanentlyFailedException> {
 
     @Override
-    Class<PermanentlyFailedException> getExceptionType() {
+    public Class<PermanentlyFailedException> getExceptionType() {
         return PermanentlyFailedException.class;
     }
 

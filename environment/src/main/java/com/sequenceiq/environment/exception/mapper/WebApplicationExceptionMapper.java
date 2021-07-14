@@ -6,15 +6,15 @@ import javax.ws.rs.core.Response;
 import org.springframework.stereotype.Component;
 
 @Component
-public class WebApplicationExceptionMapper extends BaseExceptionMapper<WebApplicationException> {
+public class WebApplicationExceptionMapper extends EnvironmentBaseExceptionMapper<WebApplicationException> {
 
     @Override
-    Response.Status getResponseStatus(WebApplicationException exception) {
+    public Response.Status getResponseStatus(WebApplicationException exception) {
         return Response.Status.fromStatusCode(exception.getResponse().getStatus());
     }
 
     @Override
-    Class<WebApplicationException> getExceptionType() {
+    public Class<WebApplicationException> getExceptionType() {
         return WebApplicationException.class;
     }
 

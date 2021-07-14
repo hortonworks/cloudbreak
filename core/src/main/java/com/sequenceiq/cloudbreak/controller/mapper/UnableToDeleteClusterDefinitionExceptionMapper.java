@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.exception.ExceptionResponse;
 import com.sequenceiq.cloudbreak.exception.UnableToDeleteClusterDefinitionException;
+import com.sequenceiq.cloudbreak.exception.mapper.BaseExceptionMapper;
 
 @Component
 public class UnableToDeleteClusterDefinitionExceptionMapper extends BaseExceptionMapper<UnableToDeleteClusterDefinitionException> {
@@ -16,12 +17,12 @@ public class UnableToDeleteClusterDefinitionExceptionMapper extends BaseExceptio
     }
 
     @Override
-    Status getResponseStatus(UnableToDeleteClusterDefinitionException exception) {
+    public Status getResponseStatus(UnableToDeleteClusterDefinitionException exception) {
         return Status.INTERNAL_SERVER_ERROR;
     }
 
     @Override
-    Class<UnableToDeleteClusterDefinitionException> getExceptionType() {
+    public Class<UnableToDeleteClusterDefinitionException> getExceptionType() {
         return UnableToDeleteClusterDefinitionException.class;
     }
 

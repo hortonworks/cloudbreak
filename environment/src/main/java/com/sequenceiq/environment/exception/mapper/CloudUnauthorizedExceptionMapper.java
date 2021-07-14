@@ -5,10 +5,10 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudUnauthorizedException;
 
 @Component
-    public class CloudUnauthorizedExceptionMapper extends SearchCauseExceptionMapper<CloudUnauthorizedException> {
+public class CloudUnauthorizedExceptionMapper extends SearchCauseExceptionMapper<CloudUnauthorizedException> {
 
     @Override
-    Class<CloudUnauthorizedException> getExceptionType() {
+    public Class<CloudUnauthorizedException> getExceptionType() {
         return CloudUnauthorizedException.class;
     }
 

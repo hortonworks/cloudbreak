@@ -8,12 +8,12 @@ import org.springframework.stereotype.Component;
 public class DefaultExceptionMapper extends SearchCauseExceptionMapper<Exception> {
 
     @Override
-    Status getResponseStatus(Exception exception) {
+    public Status getResponseStatus(Exception exception) {
         return Status.INTERNAL_SERVER_ERROR;
     }
 
     @Override
-    Class<Exception> getExceptionType() {
+    public Class<Exception> getExceptionType() {
         return Exception.class;
     }
 

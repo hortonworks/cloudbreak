@@ -6,18 +6,19 @@ import javax.ws.rs.ext.Provider;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
+import com.sequenceiq.cloudbreak.exception.mapper.BaseExceptionMapper;
 
 @Provider
 @Component
 public class CloudbreakApiExceptionMapper extends BaseExceptionMapper<CloudbreakApiException> {
 
     @Override
-    Status getResponseStatus(CloudbreakApiException exception) {
+    public Status getResponseStatus(CloudbreakApiException exception) {
         return Status.CONFLICT;
     }
 
     @Override
-    Class<CloudbreakApiException> getExceptionType() {
+    public Class<CloudbreakApiException> getExceptionType() {
         return CloudbreakApiException.class;
     }
 }

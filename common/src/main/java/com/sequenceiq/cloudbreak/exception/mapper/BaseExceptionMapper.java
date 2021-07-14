@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.controller.mapper;
+package com.sequenceiq.cloudbreak.exception.mapper;
 
 import static ch.qos.logback.classic.Level.DEBUG;
 import static ch.qos.logback.classic.Level.DEBUG_INT;
@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.common.exception.ExceptionResponse;
 
 import ch.qos.logback.classic.Level;
 
-abstract class BaseExceptionMapper<E extends Throwable> implements ExceptionMapper<E> {
+public abstract class BaseExceptionMapper<E extends Throwable> implements ExceptionMapper<E> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseExceptionMapper.class);
 
@@ -52,7 +52,7 @@ abstract class BaseExceptionMapper<E extends Throwable> implements ExceptionMapp
         return message;
     }
 
-    protected String getErrorMessageFromThrowable(Throwable e) {
+    public String getErrorMessageFromThrowable(Throwable e) {
         if (getExceptionType().equals(e.getClass())) {
             return getErrorMessage((E) e);
         }
@@ -72,7 +72,7 @@ abstract class BaseExceptionMapper<E extends Throwable> implements ExceptionMapp
         return DEBUG;
     }
 
-    abstract Status getResponseStatus(E exception);
+    public abstract Status getResponseStatus(E exception);
 
-    abstract Class<E> getExceptionType();
+    public abstract Class<E> getExceptionType();
 }

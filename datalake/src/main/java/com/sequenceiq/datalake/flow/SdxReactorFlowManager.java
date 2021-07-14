@@ -112,16 +112,17 @@ public class SdxReactorFlowManager {
             LOGGER.info("Triggering backup before an upgrade");
             return notify(DATALAKE_UPGRADE_FLOW_CHAIN_EVENT.event(),
                     new DatalakeUpgradeFlowChainStartEvent(DATALAKE_UPGRADE_FLOW_CHAIN_EVENT.event(), cluster.getId(),
-                    userId, imageId, replaceVms.getBooleanValue(), environmentClientService.getBackupLocation(cluster.getEnvCrn())));
+                            userId, imageId, replaceVms.getBooleanValue(), environmentClientService.getBackupLocation(cluster.getEnvCrn())));
         } else {
-        return notify(DATALAKE_UPGRADE_EVENT.event(), new DatalakeUpgradeStartEvent(DATALAKE_UPGRADE_EVENT.event(), cluster.getId(),
-                userId, imageId, replaceVms.getBooleanValue()));
+            return notify(DATALAKE_UPGRADE_EVENT.event(), new DatalakeUpgradeStartEvent(DATALAKE_UPGRADE_EVENT.event(), cluster.getId(),
+                    userId, imageId, replaceVms.getBooleanValue()));
         }
     }
 
     /**
      * Checks if Sdx backup can be performed.
      * Uses Cloud storage file system type to find the cloud provider.
+     *
      * @param cluster Sdx cluster
      * @return true if backup can performed, False otherwise.
      */
@@ -146,7 +147,7 @@ public class SdxReactorFlowManager {
             LOGGER.info("Backup not triggered. Reason: " + reason);
         }
         return retVal;
-}
+    }
 
     private static boolean isVersionOlderThan(SdxCluster cluster, String baseVersion) {
         LOGGER.info("Compared: String version {} with Versioned {}", cluster.getRuntime(), baseVersion);

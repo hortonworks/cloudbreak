@@ -29,6 +29,7 @@ import com.sequenceiq.flow.core.chain.FlowChainHandler;
 import com.sequenceiq.flow.core.chain.FlowChains;
 import com.sequenceiq.flow.core.config.FlowConfiguration;
 import com.sequenceiq.flow.core.exception.FlowNotFoundException;
+import com.sequenceiq.flow.core.exception.FlowNotTriggerableException;
 import com.sequenceiq.flow.core.model.FlowAcceptResult;
 import com.sequenceiq.flow.core.cache.FlowStatCache;
 import com.sequenceiq.flow.domain.FlowLog;
@@ -151,42 +152,41 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
                 if (flowId == null) {
                     LOGGER.debug("flow trigger arrived: key: {}, payload: {}", key, payload);
                     FlowConfiguration<?> flowConfig = flowConfigurationMap.get(key);
-                    if (flowConfig != null && flowConfig.getFlowTriggerCondition().isFlowTriggerable(payload.getResourceId())) {
-                        if (!isFlowAcceptable(key, payload)) {
-                            LOGGER.info("Flow operation not allowed, other flow is running. Stack ID {}, event {}", payload.getResourceId(), key);
-                            return;
-                        }
-                        flowId = UUID.randomUUID().toString();
-                        FlowAcceptResult acceptResult;
-                        if (flowChainId != null) {
-                            acceptResult = FlowAcceptResult.runningInFlowChain(flowChainId);
+                    if (flowConfig != null) {
+                        FlowTriggerConditionResult flowTriggerConditionResult = flowConfig.getFlowTriggerCondition().isFlowTriggerable(payload.getResourceId());
+                        if (flowTriggerConditionResult.isTriggerable()) {
+                            if (!isFlowAcceptable(key, payload)) {
+                                LOGGER.info("Flow operation not allowed, other flow is running. Stack ID {}, event {}", payload.getResourceId(), key);
+                                return;
+                            }
+                            flowId = UUID.randomUUID().toString();
+                            FlowAcceptResult acceptResult = getFlowAcceptResult(flowParameters, flowChainId, flowId, flowConfig.getFlowOperationType().name());
+                            flowParameters.setFlowId(flowId);
+                            Flow flow = flowConfig.createFlow(flowId, flowChainId, payload.getResourceId(), flowChainType);
+                            flow.initialize(contextParams);
+                            runningFlows.put(flow, flowChainId);
+                            flowStatCache.put(flowId, flowChainId, payload.getResourceId(),
+                                    flowConfig.getFlowOperationType().name(), flow.getFlowConfigClass(), false);
+                            try {
+                                transactionService.required(() -> {
+                                    flowLogService.save(flowParameters, flowChainId, key, payload, null, flowConfig.getClass(), flow.getCurrentState());
+                                    if (flowChainId != null) {
+                                        flowChains.removeLastTriggerEvent(flowChainId, flowParameters.getFlowTriggerUserCrn());
+                                    }
+                                });
+                            } catch (Exception e) {
+                                LOGGER.error("Can't save flow: {}", flowId);
+                                runningFlows.remove(flowId);
+                                flowStatCache.remove(flowId, false);
+                                throw e;
+                            }
+                            acceptFlow(payload, acceptResult);
+                            logFlowId(flowId);
+                            flow.sendEvent(key, flowParameters.getFlowTriggerUserCrn(), payload,
+                                    flowParameters.getSpanContext(), flowParameters.getFlowOperationType());
                         } else {
-                            flowParameters.setFlowOperationType(flowConfig.getFlowOperationType().name());
-                            acceptResult = FlowAcceptResult.runningInFlow(flowId);
+                            declineFlow(payload, flowTriggerConditionResult.getErrorMessage());
                         }
-                        flowParameters.setFlowId(flowId);
-                        Flow flow = flowConfig.createFlow(flowId, flowChainId, payload.getResourceId(), flowChainType);
-                        flow.initialize(contextParams);
-                        runningFlows.put(flow, flowChainId);
-                        flowStatCache.put(flowId, flowChainId, payload.getResourceId(),
-                                flowConfig.getFlowOperationType().name(), flow.getFlowConfigClass(), false);
-                        try {
-                            transactionService.required(() -> {
-                                flowLogService.save(flowParameters, flowChainId, key, payload, null, flowConfig.getClass(), flow.getCurrentState());
-                                if (flowChainId != null) {
-                                    flowChains.removeLastTriggerEvent(flowChainId, flowParameters.getFlowTriggerUserCrn());
-                                }
-                            });
-                        } catch (Exception e) {
-                            LOGGER.error("Can't save flow: {}", flowId);
-                            runningFlows.remove(flowId);
-                            flowStatCache.remove(flowId, false);
-                            throw e;
-                        }
-                        acceptFlow(payload, acceptResult);
-                        logFlowId(flowId);
-                        flow.sendEvent(key, flowParameters.getFlowTriggerUserCrn(), payload,
-                                flowParameters.getSpanContext(), flowParameters.getFlowOperationType());
                     }
                 } else {
                     handleFlowControlEvent(key, payload, flowParameters, flowChainId);
@@ -195,7 +195,19 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
         }
     }
 
-    private void handleFlowControlEvent(String key, Payload payload, FlowParameters flowParameters, String flowChainId) throws TransactionExecutionException {
+    private FlowAcceptResult getFlowAcceptResult(FlowParameters flowParameters, String flowChainId, String flowId, String flowOperationType) {
+        FlowAcceptResult acceptResult;
+        if (flowChainId != null) {
+            acceptResult = FlowAcceptResult.runningInFlowChain(flowChainId);
+        } else {
+            flowParameters.setFlowOperationType(flowOperationType);
+            acceptResult = FlowAcceptResult.runningInFlow(flowId);
+        }
+        return acceptResult;
+    }
+
+    private void handleFlowControlEvent(String key, Payload payload, FlowParameters flowParameters, String flowChainId) throws
+            TransactionExecutionException {
         String flowId = flowParameters.getFlowId();
         LOGGER.debug("flow control event arrived: key: {}, flowid: {}, usercrn: {}, payload: {}", key, flowId, flowParameters.getFlowTriggerUserCrn(), payload);
         Flow flow = runningFlows.get(flowId);
@@ -259,6 +271,15 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
             Acceptable acceptable = (Acceptable) payload;
             if (!acceptable.accepted().isComplete()) {
                 acceptable.accepted().accept(acceptResult);
+            }
+        }
+    }
+
+    private void declineFlow(Payload payload, String errorMessage) {
+        if (payload instanceof Acceptable && ((Acceptable) payload).accepted() != null) {
+            Acceptable acceptable = (Acceptable) payload;
+            if (!acceptable.accepted().isComplete()) {
+                acceptable.accepted().onError(new FlowNotTriggerableException(errorMessage));
             }
         }
     }

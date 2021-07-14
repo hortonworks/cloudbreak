@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class DefaultFlowTriggerCondition implements FlowTriggerCondition {
     @Override
-    public boolean isFlowTriggerable(Long stackId) {
-        return true;
+    public FlowTriggerConditionResult isFlowTriggerable(Long stackId) {
+        return FlowTriggerConditionResult.OK;
     }
 }

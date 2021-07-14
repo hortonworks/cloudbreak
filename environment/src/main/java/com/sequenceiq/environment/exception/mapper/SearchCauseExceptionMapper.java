@@ -6,13 +6,15 @@ import javax.ws.rs.ext.Providers;
 
 import org.apache.commons.lang3.tuple.Pair;
 
-public abstract class SearchCauseExceptionMapper<T extends Throwable> extends BaseExceptionMapper<T> {
+import com.sequenceiq.cloudbreak.exception.mapper.BaseExceptionMapper;
+
+public abstract class SearchCauseExceptionMapper<T extends Throwable> extends EnvironmentBaseExceptionMapper<T> {
 
     @Context
     private Providers providers;
 
     @Override
-    Response.Status getResponseStatus(T exception) {
+    public Response.Status getResponseStatus(T exception) {
         Response.Status defaultResponse = Response.Status.BAD_REQUEST;
         if (exception != null) {
             Pair<BaseExceptionMapper, ? extends Throwable> pair = searchRecursively(exception);
