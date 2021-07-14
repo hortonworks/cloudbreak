@@ -72,12 +72,19 @@ public class AwsNetworkService {
     public boolean isMapPublicOnLaunch(AwsNetworkView awsNetworkView, AmazonEc2Client amazonEC2Client) {
         boolean mapPublicIpOnLaunch = true;
         if (awsNetworkView.isExistingVPC() && awsNetworkView.isExistingSubnet()) {
-            DescribeSubnetsRequest describeSubnetsRequest = new DescribeSubnetsRequest();
-            describeSubnetsRequest.setSubnetIds(awsNetworkView.getSubnetList());
-            DescribeSubnetsResult describeSubnetsResult = amazonEC2Client.describeSubnets(describeSubnetsRequest);
-            if (!describeSubnetsResult.getSubnets().isEmpty()) {
-                mapPublicIpOnLaunch = describeSubnetsResult.getSubnets().get(0).isMapPublicIpOnLaunch();
-            }
+            mapPublicIpOnLaunch = isMapPublicOnLaunch(awsNetworkView.getSubnetList(), amazonEC2Client);
+        }
+        return mapPublicIpOnLaunch;
+    }
+
+    public boolean isMapPublicOnLaunch(List<String> subnetIds, AmazonEc2Client amazonEC2Client) {
+        boolean mapPublicIpOnLaunch = true;
+        DescribeSubnetsRequest describeSubnetsRequest = new DescribeSubnetsRequest();
+        describeSubnetsRequest.setSubnetIds(subnetIds);
+        DescribeSubnetsResult describeSubnetsResult = amazonEC2Client.describeSubnets(describeSubnetsRequest);
+        if (!describeSubnetsResult.getSubnets().isEmpty()) {
+            mapPublicIpOnLaunch = describeSubnetsResult.getSubnets().get(0).isMapPublicIpOnLaunch();
+            LOGGER.debug("The {} subnet is mapPublicIpOnLaunch: {}", describeSubnetsResult.getSubnets().get(0).getSubnetId(), mapPublicIpOnLaunch);
         }
         return mapPublicIpOnLaunch;
     }

@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.client;
 
 import com.amazonaws.services.ec2.AmazonEC2;
+import com.amazonaws.services.ec2.model.AllocateAddressRequest;
+import com.amazonaws.services.ec2.model.AllocateAddressResult;
 import com.amazonaws.services.ec2.model.AssociateAddressRequest;
 import com.amazonaws.services.ec2.model.AssociateAddressResult;
 import com.amazonaws.services.ec2.model.AttachVolumeRequest;
@@ -15,8 +17,6 @@ import com.amazonaws.services.ec2.model.CreateTagsRequest;
 import com.amazonaws.services.ec2.model.CreateTagsResult;
 import com.amazonaws.services.ec2.model.CreateVolumeRequest;
 import com.amazonaws.services.ec2.model.CreateVolumeResult;
-import com.amazonaws.services.ec2.model.CreateVpcRequest;
-import com.amazonaws.services.ec2.model.CreateVpcResult;
 import com.amazonaws.services.ec2.model.DeleteKeyPairRequest;
 import com.amazonaws.services.ec2.model.DeleteKeyPairResult;
 import com.amazonaws.services.ec2.model.DeleteSecurityGroupRequest;
@@ -53,12 +53,16 @@ import com.amazonaws.services.ec2.model.DescribeVolumesResult;
 import com.amazonaws.services.ec2.model.DescribeVpcEndpointServicesResult;
 import com.amazonaws.services.ec2.model.DescribeVpcsRequest;
 import com.amazonaws.services.ec2.model.DescribeVpcsResult;
+import com.amazonaws.services.ec2.model.DisassociateAddressRequest;
+import com.amazonaws.services.ec2.model.DisassociateAddressResult;
 import com.amazonaws.services.ec2.model.GetConsoleOutputRequest;
 import com.amazonaws.services.ec2.model.GetConsoleOutputResult;
 import com.amazonaws.services.ec2.model.ImportKeyPairRequest;
 import com.amazonaws.services.ec2.model.ImportKeyPairResult;
 import com.amazonaws.services.ec2.model.ModifyInstanceAttributeRequest;
 import com.amazonaws.services.ec2.model.ModifyInstanceAttributeResult;
+import com.amazonaws.services.ec2.model.ReleaseAddressRequest;
+import com.amazonaws.services.ec2.model.ReleaseAddressResult;
 import com.amazonaws.services.ec2.model.RunInstancesRequest;
 import com.amazonaws.services.ec2.model.RunInstancesResult;
 import com.amazonaws.services.ec2.model.StartInstancesRequest;
@@ -68,8 +72,6 @@ import com.amazonaws.services.ec2.model.StopInstancesResult;
 import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
 import com.amazonaws.services.ec2.model.TerminateInstancesResult;
 import com.amazonaws.services.ec2.waiters.AmazonEC2Waiters;
-import com.sequenceiq.cloudbreak.cloud.model.Network;
-import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.service.Retry;
 
 public class AmazonEc2Client extends AmazonClient {
@@ -220,11 +222,16 @@ public class AmazonEc2Client extends AmazonClient {
         return client.authorizeSecurityGroupEgress(reguest);
     }
 
-    // WIP
-    public CreateVpcResult createVpc(Network network, Security security) {
-        CreateVpcRequest request = new CreateVpcRequest();
-        request.withCidrBlock(security.getCloudSecurityId());
-        return client.createVpc(request);
+    public AllocateAddressResult allocateAddress(AllocateAddressRequest reguest) {
+        return client.allocateAddress(reguest);
+    }
+
+    public ReleaseAddressResult releaseAddress(ReleaseAddressRequest reguest) {
+        return client.releaseAddress(reguest);
+    }
+
+    public DisassociateAddressResult disassociateAddress(DisassociateAddressRequest reguest) {
+        return client.disassociateAddress(reguest);
     }
 
     public RunInstancesResult createInstance(RunInstancesRequest request) {

@@ -19,13 +19,15 @@ public class CloudResource extends DynamicModel {
 
     public static final String ATTRIBUTES = "attributes";
 
+    public static final String ATTRIBUTE_TYPE = "attributeType";
+
     private final ResourceType type;
 
     private CommonStatus status;
 
     private final String name;
 
-    private final String reference;
+    private String reference;
 
     private final String group;
 

@@ -26,6 +26,8 @@ public class AwsResourceNameService extends CloudbreakResourceNameService {
 
     private static final int SECURITY_GROUP_PART_COUNT = 3;
 
+    private static final int EIP_PART_COUNT = 3;
+
     @Value("${cb.max.aws.resource.name.length:}")
     private int maxResourceNameLength;
 
@@ -39,6 +41,8 @@ public class AwsResourceNameService extends CloudbreakResourceNameService {
             resourceName = instanceName(parts);
         } else if (resourceType == ResourceType.AWS_SECURITY_GROUP) {
             resourceName = securityGroup(parts);
+        } else if (resourceType == ResourceType.AWS_RESERVED_IP) {
+            resourceName = eip(parts);
         } else {
             throw new IllegalStateException("Unsupported resource type: " + resourceType);
         }
@@ -83,6 +87,23 @@ public class AwsResourceNameService extends CloudbreakResourceNameService {
         name = adjustPartLength(name);
         name = appendPart(name, stackId);
         name = appendPart(name, "ClusterNodeSecurityGroup");
+        name = appendPart(name, StringUtils.capitalize(normalize(instanceGroupName)));
+        name = adjustBaseLength(name, maxResourceNameLength);
+
+        return name;
+    }
+
+    private String eip(Object[] parts) {
+        checkArgs(EIP_PART_COUNT, parts);
+        String name;
+        String stackName = String.valueOf(parts[0]);
+        String instanceGroupName = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, String.valueOf(parts[1]).toLowerCase());
+        String stackId = String.valueOf(parts[2]);
+
+        name = normalize(stackName);
+        name = adjustPartLength(name);
+        name = appendPart(name, stackId);
+        name = appendPart(name, "EIPAllocationID");
         name = appendPart(name, StringUtils.capitalize(normalize(instanceGroupName)));
         name = adjustBaseLength(name, maxResourceNameLength);
 
