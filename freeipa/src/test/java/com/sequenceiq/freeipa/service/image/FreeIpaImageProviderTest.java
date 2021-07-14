@@ -51,6 +51,8 @@ public class FreeIpaImageProviderTest {
 
     private static final String IMAGE_UUID = "61851893-8340-411d-afb7-e1b55107fb10";
 
+    private static final String NON_DEFAULT_OS_IMAGE_UUID = "91851893-8340-411d-afb7-e1b55107fb10";
+
     @Mock
     private ImageCatalogProvider imageCatalogProvider;
 
@@ -140,6 +142,13 @@ public class FreeIpaImageProviderTest {
 
         Optional<ImageWrapper> result = underTest.getImage(is, DEFAULT_REGION, DEFAULT_PLATFORM);
         assertFalse(result.isPresent());
+    }
+
+    @Test
+    public void testGetImageGivenUuidInputFoundWithNotDefaultOs() {
+        ImageSettingsRequest is = setupImageSettingsRequest(NON_DEFAULT_OS_IMAGE_UUID, null, null);
+        Image image = underTest.getImage(is, DEFAULT_REGION, DEFAULT_PLATFORM).get().getImage();
+        assertEquals(NON_DEFAULT_OS_IMAGE_UUID, image.getUuid());
     }
 
     private ImageCatalog setupImageCatalogProvider(String catalogUrl, String catalogFile) throws IOException {

@@ -45,12 +45,12 @@ class ExperienceDeletionRetrievalTaskTest {
 
     @Test
     void testExperienceRetryingIntervalShouldBeTheExpected() {
-        assertEquals(5000, ExperienceDeletionRetrievalTask.EXPERIENCE_RETRYING_INTERVAL);
+        assertEquals(6000, ExperienceDeletionRetrievalTask.EXPERIENCE_RETRYING_INTERVAL);
     }
 
     @Test
     void testExperienceRetryingCountShouldBeTheExpected() {
-        assertEquals(900, ExperienceDeletionRetrievalTask.EXPERIENCE_RETRYING_COUNT);
+        assertEquals(1500, ExperienceDeletionRetrievalTask.EXPERIENCE_RETRYING_COUNT);
     }
 
     @Test

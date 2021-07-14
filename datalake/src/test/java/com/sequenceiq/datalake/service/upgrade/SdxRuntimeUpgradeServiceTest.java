@@ -614,7 +614,7 @@ public class SdxRuntimeUpgradeServiceTest {
 
     @Test
     @DisplayName("Test checkForUpgradeByCrn() when Runtime Upgrade is disabled and patch updates are available")
-    public void testCheckForUgradeByCrnWhenDisabledAndPatchUpdatesAvailable() {
+    public void testCheckForUpgradeByCrnWhenDisabledAndPatchUpdatesAvailable() {
         ImageInfoV4Response currentImageInfo = new ImageInfoV4Response();
         currentImageInfo.setImageId(IMAGE_ID);
         currentImageInfo.setCreated(1);
@@ -649,7 +649,7 @@ public class SdxRuntimeUpgradeServiceTest {
 
     @Test
     @DisplayName("Test checkForUpgradeByCrn() when Runtime Upgrade is disabled and patch updates are not available")
-    public void testCheckForUgradeByCrnWhenDisabledAndPatchUpdatesNotAvailable() {
+    public void testCheckForUpgradeByCrnWhenDisabledAndPatchUpdatesNotAvailable() {
         ImageInfoV4Response currentImageInfo = new ImageInfoV4Response();
         currentImageInfo.setImageId(IMAGE_ID);
         currentImageInfo.setCreated(1);
@@ -682,7 +682,7 @@ public class SdxRuntimeUpgradeServiceTest {
 
     @Test
     @DisplayName("Test checkForUpgradeByCrn() when Runtime Upgrade is disabled and request runtime param is wrong")
-    public void testCheckForUgradeByCrnWhenDisabledAndRequestRuntimeParamIsWrong() {
+    public void testCheckForUpgradeByCrnWhenDisabledAndRequestRuntimeParamIsWrong() {
         SdxUpgradeRequest sdxUpgradeRequest = new SdxUpgradeRequest();
         sdxUpgradeRequest.setRuntime("7.2.0");
         ImageInfoV4Response currentImageInfo = new ImageInfoV4Response();
@@ -718,7 +718,7 @@ public class SdxRuntimeUpgradeServiceTest {
 
     @Test
     @DisplayName("Test checkForUpgradeByCrn() when Runtime Upgrade is disabled and request imageid param is wrong")
-    public void testCheckForUgradeByCrnWhenDisabledAndRequestImageIdParamIsWrong() {
+    public void testCheckForUpgradeByCrnWhenDisabledAndRequestImageIdParamIsWrong() {
         SdxUpgradeRequest sdxUpgradeRequest = new SdxUpgradeRequest();
         sdxUpgradeRequest.setImageId(IMAGE_ID_LAST);
         ImageInfoV4Response currentImageInfo = new ImageInfoV4Response();

@@ -192,6 +192,7 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
+    @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
     public Map<String, Map<String, String>> formatAndMountDisksOnNodes(List<GatewayConfig> allGateway, Set<Node> nodesWithDiskData, Set<Node> allNodes,
             ExitCriteriaModel exitModel, String platformVariant) throws CloudbreakOrchestratorFailedException {
         GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(allGateway);

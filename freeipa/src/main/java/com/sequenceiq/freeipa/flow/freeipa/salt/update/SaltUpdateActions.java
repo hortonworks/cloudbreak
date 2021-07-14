@@ -12,17 +12,13 @@ import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
-import com.sequenceiq.freeipa.flow.freeipa.provision.event.bootstrap.BootstrapMachinesRequest;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.bootstrap.BootstrapMachinesSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.orchestrator.OrchestratorConfigRequest;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.orchestrator.OrchestratorConfigSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.services.InstallFreeIpaServicesRequest;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.services.InstallFreeIpaServicesSuccess;
-import com.sequenceiq.freeipa.flow.stack.AbstractStackFailureAction;
 import com.sequenceiq.freeipa.flow.stack.StackContext;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
-import com.sequenceiq.freeipa.flow.stack.StackFailureContext;
-import com.sequenceiq.freeipa.flow.stack.StackFailureEvent;
 import com.sequenceiq.freeipa.flow.stack.provision.action.AbstractStackProvisionAction;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
 
@@ -36,19 +32,7 @@ public class SaltUpdateActions {
 
     @Bean(name = "UPDATE_SALT_STATE_FILES_STATE")
     public Action<?, ?> updateSaltFilesAction() {
-        return new AbstractStackProvisionAction<>(StackEvent.class) {
-            @Override
-            protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
-                stackUpdater.updateStackStatus(payload.getResourceId(), DetailedStackStatus.SALT_STATE_UPDATE_IN_PROGRESS, "Salt state update in progress");
-                LOGGER.info("Reupload salt state files");
-                sendEvent(context);
-            }
-
-            @Override
-            protected Selectable createRequest(StackContext context) {
-                return new BootstrapMachinesRequest(context.getStack().getId());
-            }
-        };
+        return new UpdateSaltFilesAction(SaltUpdateTriggerEvent.class);
     }
 
     @Bean(name = "UPDATE_ORCHESTRATOR_CONFIG_STATE")
@@ -103,19 +87,7 @@ public class SaltUpdateActions {
 
     @Bean(name = "SALT_UPDATE_FAILED_STATE")
     public Action<?, ?> saltUpdateFailedAction() {
-        return new AbstractStackFailureAction<SaltUpdateState, SaltUpdateEvent>() {
-            @Override
-            protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
-                LOGGER.error("Salt state update failed", payload.getException());
-                stackUpdater.updateStackStatus(payload.getResourceId(), DetailedStackStatus.SALT_STATE_UPDATE_FAILED,
-                        "Salt update failed with: " + payload.getException().getMessage());
-                sendEvent(context);
-            }
-
-            @Override
-            protected Selectable createRequest(StackFailureContext context) {
-                return new StackEvent(SaltUpdateEvent.SALT_UPDATE_FAILURE_HANDLED_EVENT.event(), context.getStack().getId());
-            }
-        };
+        return new SaltUpdateFailureAction();
     }
+
 }

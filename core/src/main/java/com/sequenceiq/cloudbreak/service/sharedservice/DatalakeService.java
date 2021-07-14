@@ -105,13 +105,6 @@ public class DatalakeService {
         }
     }
 
-    public SharedServiceConfigsView createSharedServiceConfigsView(Stack source) {
-        if (!Strings.isNullOrEmpty(source.getDatalakeCrn())) {
-            return createSharedServiceConfigView(source);
-        }
-        return new SharedServiceConfigsView();
-    }
-
     public String getDatalakeCrn(StackV4Request source, Workspace workspace) {
         if (source.getSharedService() != null && isNotBlank(source.getSharedService().getDatalakeName())) {
             Optional<Stack> result = stackService
@@ -125,20 +118,44 @@ public class DatalakeService {
         return null;
     }
 
-    private SharedServiceConfigsView createSharedServiceConfigView(Stack stack) {
+    public SharedServiceConfigsView createSharedServiceConfigsView(Stack stack) {
         SharedServiceConfigsView sharedServiceConfigsView = new SharedServiceConfigsView();
-        if (!Strings.isNullOrEmpty(stack.getDatalakeCrn())) {
-            Stack datalakeStack = stackService.getByCrn(stack.getDatalakeCrn());
-            if (datalakeStack != null) {
+        String password = stack.getCluster().getPassword();
+
+        switch (stack.getType()) {
+            case DATALAKE:
+                setRangerAttributes(password, sharedServiceConfigsView);
+                sharedServiceConfigsView.setDatalakeCluster(true);
+                break;
+            case WORKLOAD:
+                sharedServiceConfigsView.setRangerAdminPort(DEFAULT_RANGER_PORT);
+                sharedServiceConfigsView.setDatalakeCluster(false);
+                sharedServiceConfigsView.setAttachedCluster(true);
+
+                if (Strings.isNullOrEmpty(stack.getDatalakeCrn())) {
+                    break;
+                }
+                Stack datalakeStack = stackService.getByCrn(stack.getDatalakeCrn());
+                if (datalakeStack == null) {
+                    break;
+                }
+
                 sharedServiceConfigsView.setDatalakeClusterManagerFqdn(getDatalakeClusterManagerFqdn(datalakeStack));
                 sharedServiceConfigsView.setDatalakeClusterManagerIp(datalakeStack.getClusterManagerIp());
-            }
-            sharedServiceConfigsView.setRangerAdminPort(DEFAULT_RANGER_PORT);
-            sharedServiceConfigsView.setDatalakeCluster(false);
-            sharedServiceConfigsView.setAttachedCluster(true);
+                break;
+            default:
+                setRangerAttributes(password, sharedServiceConfigsView);
+                sharedServiceConfigsView.setDatalakeCluster(false);
+                break;
         }
 
         return sharedServiceConfigsView;
+    }
+
+    private void setRangerAttributes(String ambariPassword, SharedServiceConfigsView sharedServiceConfigsView) {
+        sharedServiceConfigsView.setRangerAdminPassword(ambariPassword);
+        sharedServiceConfigsView.setAttachedCluster(false);
+        sharedServiceConfigsView.setRangerAdminPort(DEFAULT_RANGER_PORT);
     }
 
     private String getDatalakeClusterManagerFqdn(Stack datalakeStack) {

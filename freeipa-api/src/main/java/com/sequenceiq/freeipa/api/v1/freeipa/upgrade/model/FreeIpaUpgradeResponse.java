@@ -19,6 +19,13 @@ public class FreeIpaUpgradeResponse {
 
     private String operationId;
 
+    public FreeIpaUpgradeResponse(FlowIdentifier flowIdentifier, ImageInfoResponse targetImage, ImageInfoResponse originalImage, String operationId) {
+        this.flowIdentifier = flowIdentifier;
+        this.targetImage = targetImage;
+        this.originalImage = originalImage;
+        this.operationId = operationId;
+    }
+
     public FlowIdentifier getFlowIdentifier() {
         return flowIdentifier;
     }

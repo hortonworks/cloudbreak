@@ -36,6 +36,7 @@ public class ImageChangeAction extends AbstractImageChangeAction<ImageChangeEven
 
     @Override
     protected void doExecute(StackContext context, ImageChangeEvent payload, Map<Object, Object> variables) throws Exception {
+        setOperationId(variables, payload.getOperationId());
         ImageEntity originalImageEntity = storeOriginalImageRevision(payload, variables);
         ImageEntity newImageEntity = imageService.changeImage(context.getStack(), payload.getRequest());
         variables.put(ImageChangeActions.IMAGE_CHANGED_IN_DB, Boolean.TRUE);

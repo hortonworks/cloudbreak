@@ -16,9 +16,9 @@ import io.micrometer.core.instrument.util.StringUtils;
 
 public class ExperienceDeletionRetrievalTask extends SimpleStatusCheckerTask<ExperiencePollerObject> {
 
-    public static final int EXPERIENCE_RETRYING_INTERVAL = 5000;
+    public static final int EXPERIENCE_RETRYING_INTERVAL = 6000;
 
-    public static final int EXPERIENCE_RETRYING_COUNT = 900;
+    public static final int EXPERIENCE_RETRYING_COUNT = 1500;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ExperienceDeletionRetrievalTask.class);
 

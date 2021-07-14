@@ -1,16 +1,14 @@
 package com.sequenceiq.datalake.flow;
 
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.common.event.Acceptable;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.datalakedr.config.DatalakeDrConfig;
-import com.sequenceiq.datalake.entity.SdxCluster;
-import com.sequenceiq.datalake.service.EnvironmentClientService;
-import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
-import com.sequenceiq.flow.reactor.api.event.BaseFlowEvent;
-import com.sequenceiq.sdx.api.model.SdxClusterShape;
-import com.sequenceiq.sdx.api.model.SdxUpgradeReplaceVms;
+import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_UPGRADE_EVENT;
+import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_UPGRADE_FLOW_CHAIN_EVENT;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyMap;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -18,18 +16,22 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import static org.mockito.Mockito.anyMap;
-import static org.mockito.Mockito.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.common.event.Acceptable;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.datalakedr.config.DatalakeDrConfig;
+import com.sequenceiq.common.model.FileSystemType;
+import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.service.EnvironmentClientService;
+import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
+import com.sequenceiq.flow.reactor.api.event.BaseFlowEvent;
+import com.sequenceiq.sdx.api.model.SdxClusterShape;
+import com.sequenceiq.sdx.api.model.SdxUpgradeReplaceVms;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
-
-import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_UPGRADE_EVENT;
-import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_UPGRADE_FLOW_CHAIN_EVENT;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SdxReactorFlowManagerTest {
@@ -77,7 +79,10 @@ public class SdxReactorFlowManagerTest {
     }
 
     @Test
-    public void testSdxBackupOnUpgradeRequestEnabled() {
+    public void testSdxBackupOnUpgradeAwsSupported() {
+        sdxCluster = getValidSdxCluster("7.2.10");
+        sdxCluster.setRangerRazEnabled(false);
+        sdxCluster.setCloudStorageFileSystemType(FileSystemType.S3);
         when(environmentClientService.getBackupLocation(ENV_CRN)).thenReturn(BACKUP_LOCATION);
         when(entitlementService.isDatalakeBackupOnUpgradeEnabled(any())).thenReturn(true);
         when(datalakeDrConfig.isConfigured()).thenReturn(true);
@@ -87,10 +92,89 @@ public class SdxReactorFlowManagerTest {
         } catch (Exception e) {
         }
         verify(reactor, times(1)).notify(eq(DATALAKE_UPGRADE_FLOW_CHAIN_EVENT.event()), any(Event.class));
+
+        reset(reactor);
+        sdxCluster = getValidSdxCluster("7.2.1");
+        sdxCluster.setCloudStorageFileSystemType(FileSystemType.S3);
+        try {
+            ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                    underTest.triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, SdxUpgradeReplaceVms.DISABLED));
+        } catch (Exception e) {
+        }
+        verify(reactor, times(1)).notify(eq(DATALAKE_UPGRADE_FLOW_CHAIN_EVENT.event()), any(Event.class));
+    }
+
+    @Test
+    public void testSdxBackupOnUpgradeAzureSupported() {
+        sdxCluster = getValidSdxCluster("7.2.2");
+        sdxCluster.setRangerRazEnabled(false);
+        sdxCluster.setCloudStorageFileSystemType(FileSystemType.S3);
+        when(environmentClientService.getBackupLocation(ENV_CRN)).thenReturn(BACKUP_LOCATION);
+        when(entitlementService.isDatalakeBackupOnUpgradeEnabled(any())).thenReturn(true);
+        when(datalakeDrConfig.isConfigured()).thenReturn(true);
+
+        sdxCluster.setCloudStorageFileSystemType(FileSystemType.ADLS_GEN_2);
+        try {
+            ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                    underTest.triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, SdxUpgradeReplaceVms.DISABLED));
+        } catch (Exception e) {
+        }
+        verify(reactor, times(1)).notify(eq(DATALAKE_UPGRADE_FLOW_CHAIN_EVENT.event()), any(Event.class));
+    }
+
+    @Test
+    public void testSdxBackupOnUpgradeUnSupportedRuntimes() {
+        sdxCluster = getValidSdxCluster("7.2.0");
+        sdxCluster.setRangerRazEnabled(false);
+        sdxCluster.setCloudStorageFileSystemType(FileSystemType.S3);
+        when(entitlementService.isDatalakeBackupOnUpgradeEnabled(any())).thenReturn(true);
+        when(datalakeDrConfig.isConfigured()).thenReturn(true);
+        try {
+            ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                    underTest.triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, SdxUpgradeReplaceVms.DISABLED));
+        } catch (Exception e) {
+        }
+        verify(reactor, times(0)).notify(eq(DATALAKE_UPGRADE_FLOW_CHAIN_EVENT.event()), any(Event.class));
+
+        sdxCluster = getValidSdxCluster("7.2.1");
+        sdxCluster.setRangerRazEnabled(false);
+        sdxCluster.setCloudStorageFileSystemType(FileSystemType.ADLS_GEN_2);
+        try {
+            ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                    underTest.triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, SdxUpgradeReplaceVms.DISABLED));
+        } catch (Exception e) {
+        }
+        verify(reactor, times(0)).notify(eq(DATALAKE_UPGRADE_FLOW_CHAIN_EVENT.event()), any(Event.class));
+
+        sdxCluster = getValidSdxCluster("7.2.10");
+        sdxCluster.setRangerRazEnabled(false);
+        sdxCluster.setCloudStorageFileSystemType(FileSystemType.GCS);
+        try {
+            ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                    underTest.triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, SdxUpgradeReplaceVms.DISABLED));
+        } catch (Exception e) {
+        }
+        verify(reactor, times(0)).notify(eq(DATALAKE_UPGRADE_FLOW_CHAIN_EVENT.event()), any(Event.class));
+    }
+
+    @Test
+    public void testSdxBackupOnUpgradeRazEnabled() {
+        sdxCluster = getValidSdxCluster("7.2.10");
+        sdxCluster.setRangerRazEnabled(true);
+        sdxCluster.setCloudStorageFileSystemType(FileSystemType.S3);
+        try {
+            ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                    underTest.triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, SdxUpgradeReplaceVms.DISABLED));
+        } catch (Exception e) {
+        }
+        verify(reactor, times(0)).notify(eq(DATALAKE_UPGRADE_FLOW_CHAIN_EVENT.event()), any(Event.class));
     }
 
     @Test (expected = BadRequestException.class)
     public void testSdxBackupOnUpgradeRequestEnabledFailure() {
+        sdxCluster = getValidSdxCluster("7.2.10");
+        sdxCluster.setRangerRazEnabled(false);
+        sdxCluster.setCloudStorageFileSystemType(FileSystemType.S3);
         when(environmentClientService.getBackupLocation(ENV_CRN)).thenThrow(new BadRequestException("No backup location"));
         when(entitlementService.isDatalakeBackupOnUpgradeEnabled(any())).thenReturn(true);
         when(datalakeDrConfig.isConfigured()).thenReturn(true);
@@ -99,6 +183,9 @@ public class SdxReactorFlowManagerTest {
 
     @Test
     public void testSdxBackupOnUpgradeRequestDisabled() {
+        sdxCluster = getValidSdxCluster("7.2.10");
+        sdxCluster.setRangerRazEnabled(false);
+        sdxCluster.setCloudStorageFileSystemType(FileSystemType.S3);
         when(entitlementService.isDatalakeBackupOnUpgradeEnabled(any())).thenReturn(false);
         try {
             ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
@@ -116,6 +203,18 @@ public class SdxReactorFlowManagerTest {
         sdxCluster.setId(1L);
         sdxCluster.setAccountId("accountid");
         sdxCluster.setEnvCrn(ENV_CRN);
+        return sdxCluster;
+    }
+
+    private SdxCluster getValidSdxCluster(String runtime) {
+        SdxCluster sdxCluster = new SdxCluster();
+        sdxCluster.setClusterName("test-sdx-cluster");
+        sdxCluster.setClusterShape(SdxClusterShape.MEDIUM_DUTY_HA);
+        sdxCluster.setEnvName("test-env");
+        sdxCluster.setId(1L);
+        sdxCluster.setAccountId("accountid");
+        sdxCluster.setEnvCrn(ENV_CRN);
+        sdxCluster.setRuntime(runtime);
         return sdxCluster;
     }
 }

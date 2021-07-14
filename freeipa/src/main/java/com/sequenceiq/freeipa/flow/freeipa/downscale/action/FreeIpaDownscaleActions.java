@@ -45,7 +45,6 @@ import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.PayloadConverter;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.FailureDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SuccessDetails;
-import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.freeipa.cleanup.CleanupEvent;
@@ -96,9 +95,6 @@ public class FreeIpaDownscaleActions {
     @Inject
     private TerminationService terminationService;
 
-    @Inject
-    private InstanceGroupService instanceGroupService;
-
     @Bean(name = "STARTING_DOWNSCALE_STATE")
     public Action<?, ?> startingDownscaleAction() {
         return new AbstractDownscaleAction<>(DownscaleEvent.class) {
@@ -115,6 +111,8 @@ public class FreeIpaDownscaleActions {
                         .collect(Collectors.toList());
                 setDownscaleHosts(variables, fqdns);
                 setRepair(variables, payload.isRepair());
+                setChainedAction(variables, payload.isChained());
+                setFinalChain(variables, payload.isFinalChain());
                 setInstanceCountByGroup(variables, payload.getInstanceCountByGroup());
                 LOGGER.info("Starting downscale {}", payload);
                 stackUpdater.updateStackStatus(stack.getId(), getInProgressStatus(variables), "Starting downscale");
@@ -323,20 +321,22 @@ public class FreeIpaDownscaleActions {
     @Bean(name = "DOWNSCALE_UPDATE_METADATA_STATE")
     public Action<?, ?> updateMetadataAction() {
         return new AbstractDownscaleAction<>(RemoveHostsFromOrchestrationSuccess.class) {
+            @Inject
+            private InstanceGroupService instanceGroupService;
+
             @Override
             protected void doExecute(StackContext context, RemoveHostsFromOrchestrationSuccess payload, Map<Object, Object> variables) {
                 Stack stack = context.getStack();
                 stackUpdater.updateStackStatus(stack.getId(), getInProgressStatus(variables), "Updating metadata");
                 List<String> repairInstanceIds = getInstanceIds(variables);
                 terminationService.finalizeTermination(stack.getId(), repairInstanceIds);
-                if (isRepair(variables)) {
-                    terminationService.finalizeTerminationForInstancesWithoutInstanceIds(stack.getId());
-                } else {
+                terminationService.finalizeTerminationForInstancesWithoutInstanceIds(stack.getId());
+                if (!isRepair(variables)) {
                     int nodeCount = getInstanceCountByGroup(variables);
-                    for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
+                    instanceGroupService.findByStackId(stack.getId()).forEach(instanceGroup -> {
                         instanceGroup.setNodeCount(nodeCount);
                         instanceGroupService.save(instanceGroup);
-                    }
+                    });
                 }
                 sendEvent(context, UPDATE_METADATA_FINISHED_EVENT.selector(), new StackEvent(stack.getId()));
             }
@@ -379,10 +379,8 @@ public class FreeIpaDownscaleActions {
                 Stack stack = context.getStack();
                 stackUpdater.updateStackStatus(stack.getId(), getInProgressStatus(variables), "Updating environment stack config");
                 try {
-                    if (!isRepair(variables)) {
-                        ThreadBasedUserCrnProvider.doAsInternalActor(() -> {
-                            environmentEndpoint.updateConfigsInEnvironmentByCrn(stack.getEnvironmentCrn());
-                        });
+                    if (!isRepair(variables) || !isChainedAction(variables) || isFinalChain(variables)) {
+                        ThreadBasedUserCrnProvider.doAsInternalActor(() -> environmentEndpoint.updateConfigsInEnvironmentByCrn(stack.getEnvironmentCrn()));
                     }
                     sendEvent(context, DOWNSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_FINISHED_EVENT.selector(), new StackEvent(stack.getId()));
                 } catch (ClientErrorException e) {
@@ -409,7 +407,7 @@ public class FreeIpaDownscaleActions {
             protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
                 Stack stack = context.getStack();
                 stackUpdater.updateStackStatus(stack.getId(), getDownscaleCompleteStatus(variables), "Downscale complete");
-                if (!isRepair(variables)) {
+                if (!isRepair(variables) || !isChainedAction(variables) || isFinalChain(variables)) {
                     SuccessDetails successDetails = new SuccessDetails(stack.getEnvironmentCrn());
                     successDetails.getAdditionalDetails().put("Hosts", getDownscaleHosts(variables));
                     operationService.completeOperation(stack.getAccountId(), getOperationId(variables), List.of(successDetails), Collections.emptyList());

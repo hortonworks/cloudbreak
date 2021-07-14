@@ -3,9 +3,11 @@ package com.sequenceiq.it.cloudbreak.testcase.e2e.l0promotion;
 import static java.lang.String.format;
 
 import java.util.Collections;
+import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
@@ -65,16 +67,16 @@ public class SdxBackupTest extends PreconditionSdxE2ETest {
 
         SdxInternalTestDto sdxInternalTestDto = testContext.given(SdxInternalTestDto.class);
         String cloudStorageBaseLocation = sdxInternalTestDto.getResponse().getCloudStorageBaseLocation();
-        String backupLocation = cloudStorageBaseLocation + "/backups";
+        String backupObject = "backups";
         testContext
                 .given(SdxInternalTestDto.class)
-                .when(sdxTestClient.backup(backupLocation, null))
+                .when(sdxTestClient.backup(StringUtils.join(List.of(cloudStorageBaseLocation, backupObject), "/"), null))
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForHealthyInstances()
                 .then(this::validateDatalakeBackupStatus)
                 .then(this::validateDatalakeStatus)
                 .then((tc, testDto, client) -> {
-                    getCloudFunctionality(tc).cloudStorageListContainer(cloudStorageBaseLocation, backupLocation, false);
+                    getCloudFunctionality(tc).cloudStorageListContainer(cloudStorageBaseLocation, backupObject, false);
                     return testDto;
                 })
                 .validate();

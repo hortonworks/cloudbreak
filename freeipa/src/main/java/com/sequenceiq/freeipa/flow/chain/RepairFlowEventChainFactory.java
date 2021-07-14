@@ -1,11 +1,11 @@
 package com.sequenceiq.freeipa.flow.chain;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
@@ -31,18 +31,17 @@ public class RepairFlowEventChainFactory implements FlowEventChainFactory<Repair
     public FlowTriggerEventQueue createFlowTriggerEventQueue(RepairEvent event) {
         Set<String> terminatedOrRemovedInstanceIdsSet = new HashSet<>(event.getRepairInstanceIds());
         terminatedOrRemovedInstanceIdsSet.addAll(event.getAdditionalTerminatedInstanceIds());
-        List<String> terminatedOrRemovedInstanceIds = terminatedOrRemovedInstanceIdsSet.stream().collect(Collectors.toList());
-
+        List<String> terminatedOrRemovedInstanceIds = new ArrayList<>(terminatedOrRemovedInstanceIdsSet);
 
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
         flowEventChain.add(new ChangePrimaryGatewayEvent(ChangePrimaryGatewayFlowEvent.CHANGE_PRIMARY_GATEWAY_EVENT.event(), event.getResourceId(),
                 terminatedOrRemovedInstanceIds, Boolean.FALSE, event.getOperationId(), event.accepted()));
         flowEventChain.add(new DownscaleEvent(DownscaleFlowEvent.DOWNSCALE_EVENT.event(),
-                event.getResourceId(), terminatedOrRemovedInstanceIds, event.getInstanceCountByGroup(), Boolean.TRUE, event.getOperationId()));
+                event.getResourceId(), terminatedOrRemovedInstanceIds, event.getInstanceCountByGroup(), true, true, false, event.getOperationId()));
         flowEventChain.add(new UpscaleEvent(UpscaleFlowEvent.UPSCALE_EVENT.event(),
-                event.getResourceId(), event.getInstanceCountByGroup(), Boolean.TRUE, event.getOperationId()));
+                event.getResourceId(), event.getInstanceCountByGroup(), true, true, false, event.getOperationId()));
         flowEventChain.add(new ChangePrimaryGatewayEvent(ChangePrimaryGatewayFlowEvent.CHANGE_PRIMARY_GATEWAY_EVENT.event(), event.getResourceId(),
-                terminatedOrRemovedInstanceIds, Boolean.TRUE, event.getOperationId()));
+                terminatedOrRemovedInstanceIds, true, event.getOperationId()));
         return new FlowTriggerEventQueue(getName(), flowEventChain);
     }
 }

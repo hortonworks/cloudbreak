@@ -8,7 +8,6 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.freeipa.entity.InstanceGroup;
-import com.sequenceiq.freeipa.entity.SecurityGroup;
 import com.sequenceiq.freeipa.repository.InstanceGroupRepository;
 
 @Service
@@ -30,10 +29,6 @@ public class InstanceGroupService {
 
     public InstanceGroup save(InstanceGroup instanceGroup) {
         return repository.save(instanceGroup);
-    }
-
-    public Set<InstanceGroup> findBySecurityGroup(SecurityGroup securityGroup) {
-        return repository.findBySecurityGroup(securityGroup);
     }
 
     public Iterable<InstanceGroup> saveAll(Iterable<InstanceGroup> instanceGroups) {

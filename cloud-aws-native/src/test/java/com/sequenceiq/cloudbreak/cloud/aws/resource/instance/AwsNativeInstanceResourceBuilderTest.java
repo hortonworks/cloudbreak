@@ -8,6 +8,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -21,6 +22,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.amazonaws.services.ec2.model.AmazonEC2Exception;
+import com.amazonaws.services.ec2.model.BlockDeviceMapping;
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.InstanceState;
@@ -31,6 +33,8 @@ import com.sequenceiq.cloudbreak.cloud.aws.AwsMethodExecutor;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.context.AwsContext;
+import com.sequenceiq.cloudbreak.cloud.aws.common.resource.VolumeBuilderUtil;
+import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsInstanceView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -84,6 +88,12 @@ public class AwsNativeInstanceResourceBuilderTest {
     @Mock
     private Supplier<Object> supplier;
 
+    @Mock
+    private VolumeBuilderUtil volumeBuilderUtil;
+
+    @Mock
+    private InstanceTemplate instanceTemplate;
+
     @Test
     public void testBuildWhenBuildableResorucesAreEmpty() throws Exception {
         long privateId = 0;
@@ -95,7 +105,6 @@ public class AwsNativeInstanceResourceBuilderTest {
     @Test
     public void testBuildWhenInstanceNoExist() throws Exception {
         RunInstancesResult runInstancesResult = mock(RunInstancesResult.class);
-        InstanceTemplate instanceTemplate = mock(InstanceTemplate.class);
         InstanceAuthentication authentication = mock(InstanceAuthentication.class);
         Instance instance = new Instance().withInstanceId("instanceId");
         CloudResource cloudResource = CloudResource.builder()
@@ -331,5 +340,15 @@ public class AwsNativeInstanceResourceBuilderTest {
         when(amazonEc2Client.describeInstances(any())).thenThrow(amazonEC2Exception);
         AmazonEC2Exception actual = Assertions.assertThrows(AmazonEC2Exception.class, () -> underTest.isFinished(awsContext, ac, cloudResource));
         Assertions.assertEquals("AnyOther", actual.getErrorCode());
+    }
+
+    @Test
+    public void testBlocksWhenEphemeralNull() {
+        BlockDeviceMapping root = new BlockDeviceMapping();
+        when(group.getReferenceInstanceTemplate()).thenReturn(instanceTemplate);
+        when(volumeBuilderUtil.getEphemeral(any())).thenReturn(null);
+        when(volumeBuilderUtil.getRootVolume(any(AwsInstanceView.class), eq(group), eq(cloudStack), eq(ac))).thenReturn(root);
+        Collection<BlockDeviceMapping> actual = underTest.blocks(group, cloudStack, ac);
+        Assertions.assertEquals(1, actual.size());
     }
 }

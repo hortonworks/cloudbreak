@@ -10,6 +10,8 @@ public class ImageChangeEvent extends StackEvent {
 
     private final ImageSettingsRequest request;
 
+    private String operationId;
+
     public ImageChangeEvent(Long stackId, ImageSettingsRequest request) {
         super(stackId);
         this.request = request;
@@ -29,11 +31,20 @@ public class ImageChangeEvent extends StackEvent {
         return request;
     }
 
+    public ImageChangeEvent withOperationId(String operationId) {
+        this.operationId = operationId;
+        return this;
+    }
+
+    public String getOperationId() {
+        return operationId;
+    }
+
     @Override
     public String toString() {
         return "ImageChangeEvent{" +
-                "super: " + super.toString() +
                 "request=" + request +
-                '}';
+                ", operationId='" + operationId + '\'' +
+                "} " + super.toString();
     }
 }

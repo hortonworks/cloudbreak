@@ -99,7 +99,8 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                 .getResponse();
 
         SdxTestDto sdxTestDto = testContext
-                .given(sdx, SdxTestDto.class).withCloudStorage()
+                .given(sdx, SdxTestDto.class)
+                    .withCloudStorage(getCloudStorageRequest(testContext))
                 .when(sdxTestClient.create(), key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .awaitForHealthyInstances();

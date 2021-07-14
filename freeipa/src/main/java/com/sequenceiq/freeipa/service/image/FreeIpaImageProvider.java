@@ -74,9 +74,6 @@ public class FreeIpaImageProvider implements ImageProvider {
     }
 
     private List<Image> findImage(String imageId, String imageOs, List<Image> images, String region, String platform) {
-        if (Objects.nonNull(imageOs) && !imageOs.isEmpty()) {
-            images = filterImages(images, imageOs, platform, region);
-        }
         if (Objects.nonNull(imageId) && !imageId.isEmpty()) {
             return images.stream()
                     .filter(img -> img.getImageSetsByProvider().containsKey(platform) && filterRegion(region, platform, img))
@@ -85,6 +82,10 @@ public class FreeIpaImageProvider implements ImageProvider {
                     .filter(img -> img.getUuid().equalsIgnoreCase(imageId) || img.getImageSetsByProvider().get(platform).get(region).equalsIgnoreCase(imageId))
                     .collect(Collectors.toList());
         } else {
+            if (Objects.nonNull(imageOs) && !imageOs.isEmpty()) {
+                images = filterImages(images, imageOs, platform, region);
+            }
+
             return images.stream().filter(image -> image.getImageSetsByProvider().containsKey(platform))
                     .collect(Collectors.toList());
         }

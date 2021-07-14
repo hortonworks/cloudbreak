@@ -18,15 +18,16 @@ public class AmazonS3Util {
         s3ClientActions.deleteNonVersionedBucket(baseLocation);
     }
 
-    public void listBucketSelectedObject(String baseLocation, String pathToTargetObject, boolean zeroContent) {
-        s3ClientActions.listBucketSelectedObject(baseLocation, pathToTargetObject, zeroContent);
+    public void listBucketSelectedObject(String baseLocation, String selectedObject, boolean zeroContent) {
+        s3ClientActions.listBucketSelectedObject(baseLocation, selectedObject, zeroContent);
     }
 
     public void listFreeIpaObject(String baseLocation) {
-        s3ClientActions.listBucketSelectedObject(baseLocation, "freeipa", false);
+        s3ClientActions.listBucketSelectedObject(baseLocation, "cluster-logs/freeipa",
+                false);
     }
 
     public void listDataLakeObject(String baseLocation) {
-        s3ClientActions.listBucketSelectedObject(baseLocation, "datalake", false);
+        s3ClientActions.listBucketSelectedObject(baseLocation, "cluster-logs/datalake", false);
     }
 }

@@ -9,10 +9,16 @@ public class UpscaleEvent extends StackEvent {
 
     private final String operationId;
 
-    public UpscaleEvent(String selector, Long stackId, Integer instanceCountByGroup, Boolean repair, String operationId) {
+    private final boolean chained;
+
+    private final boolean finalChain;
+
+    public UpscaleEvent(String selector, Long stackId, Integer instanceCountByGroup, Boolean repair, boolean chained, boolean finalChain, String operationId) {
         super(selector, stackId);
         this.instanceCountByGroup = instanceCountByGroup;
         this.repair = repair;
+        this.chained = chained;
+        this.finalChain = finalChain;
         this.operationId = operationId;
     }
 
@@ -28,13 +34,22 @@ public class UpscaleEvent extends StackEvent {
         return operationId;
     }
 
+    public boolean isChained() {
+        return chained;
+    }
+
+    public boolean isFinalChain() {
+        return finalChain;
+    }
+
     @Override
     public String toString() {
-        return "UpscaleEvent{"
-                + "stackId=" + getResourceId()
-                + ", instanceCountByGroup=" + instanceCountByGroup
-                + ", repair='" + repair + '\''
-                + ", operationId='" + operationId + '\''
-                + "}";
+        return "UpscaleEvent{" +
+                "instanceCountByGroup=" + instanceCountByGroup +
+                ", repair=" + repair +
+                ", operationId='" + operationId + '\'' +
+                ", chained=" + chained +
+                ", finalChain=" + finalChain +
+                "} " + super.toString();
     }
 }

@@ -323,11 +323,10 @@ public class AzureCloudBlobClientActions extends AzureCloudBlobClient {
         Log.log(LOGGER, format(" Azure Blob Directory: %s", selectedDirectory));
 
         try {
-            CloudBlobDirectory logsDirectory = cloudBlobContainer.getDirectoryReference("cluster-logs");
-            CloudBlobDirectory selectedLogsDirectory = logsDirectory.getDirectoryReference(selectedDirectory);
+            CloudBlobDirectory selectedLogsDirectory = cloudBlobContainer.getDirectoryReference(selectedDirectory);
             Set<String> blobsWithZeroLength = new HashSet<>();
 
-            Iterable<ListBlobItem> blobListing = cloudBlobContainer.listBlobs("cluster-logs/" + selectedDirectory, true);
+            Iterable<ListBlobItem> blobListing = cloudBlobContainer.listBlobs(selectedDirectory, true);
             List<ListBlobItem> listBlobItems = StreamSupport
                     .stream(blobListing.spliterator(), false)
                     .collect(Collectors.toList());

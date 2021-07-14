@@ -12,21 +12,29 @@ public class DownscaleEvent extends StackEvent {
 
     private final boolean repair;
 
+    private final boolean chained;
+
+    private final boolean finalChain;
+
     private final String operationId;
 
     private final int instanceCountByGroup;
 
-    public DownscaleEvent(String selector, Long stackId, List<String> instanceIds, int instanceCountByGroup, boolean repair, String operationId) {
-        this(selector, stackId, instanceIds, instanceCountByGroup, repair, operationId, new Promise<>());
+    public DownscaleEvent(String selector, Long stackId, List<String> instanceIds, int instanceCountByGroup, boolean repair, boolean chained,
+            boolean finalChain, String operationId) {
+        this(selector, stackId, instanceIds, instanceCountByGroup, repair, chained, finalChain, operationId, new Promise<>());
     }
 
-    public DownscaleEvent(String selector, Long stackId, List<String> instanceIds, int instanceCountByGroup, boolean repair, String operationId,
-            Promise<AcceptResult> accepted) {
+    @SuppressWarnings("ExecutableStatementCount")
+    public DownscaleEvent(String selector, Long stackId, List<String> instanceIds, int instanceCountByGroup, boolean repair, boolean chained,
+            boolean finalChain, String operationId, Promise<AcceptResult> accepted) {
         super(selector, stackId, accepted);
         this.instanceIds = instanceIds;
         this.instanceCountByGroup = instanceCountByGroup;
         this.repair = repair;
         this.operationId = operationId;
+        this.chained = chained;
+        this.finalChain = finalChain;
     }
 
     public List<String> getInstanceIds() {
@@ -45,14 +53,23 @@ public class DownscaleEvent extends StackEvent {
         return operationId;
     }
 
+    public boolean isChained() {
+        return chained;
+    }
+
+    public boolean isFinalChain() {
+        return finalChain;
+    }
+
     @Override
     public String toString() {
-        return "DownscaleEvent{"
-                + "stackId=" + getResourceId()
-                + ", instanceIds='" + instanceIds + '\''
-                + ", instanceCountByGroup=" + instanceCountByGroup
-                + ", repair='" + repair + '\''
-                + ", operationId='" + operationId + '\''
-                + "}";
+        return "DownscaleEvent{" +
+                "instanceIds=" + instanceIds +
+                ", repair=" + repair +
+                ", chained=" + chained +
+                ", finalChain=" + finalChain +
+                ", operationId='" + operationId + '\'' +
+                ", instanceCountByGroup=" + instanceCountByGroup +
+                "} " + super.toString();
     }
 }

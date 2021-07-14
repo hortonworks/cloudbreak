@@ -1,7 +1,6 @@
 package com.sequenceiq.freeipa.flow.stack.image.change.action;
 
 import static com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEvents.IMAGE_CHANGE_FAILED_EVENT;
-import static com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEvents.IMAGE_CHANGE_FAILURE_HANDLED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEvents.IMAGE_CHANGE_FINISHED_EVENT;
 
 import java.util.Collection;
@@ -28,16 +27,11 @@ import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.flow.core.PayloadConverter;
 import com.sequenceiq.freeipa.converter.cloud.ResourceToCloudResourceConverter;
 import com.sequenceiq.freeipa.converter.image.ImageConverter;
-import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.Resource;
-import com.sequenceiq.freeipa.flow.stack.AbstractStackFailureAction;
 import com.sequenceiq.freeipa.flow.stack.StackContext;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
-import com.sequenceiq.freeipa.flow.stack.StackFailureContext;
 import com.sequenceiq.freeipa.flow.stack.StackFailureEvent;
-import com.sequenceiq.freeipa.flow.stack.image.change.ImageChangeState;
 import com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEvent;
-import com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEvents;
 import com.sequenceiq.freeipa.service.image.ImageService;
 import com.sequenceiq.freeipa.service.resource.ResourceService;
 
@@ -136,24 +130,7 @@ public class ImageChangeActions {
 
     @Bean(name = "IMAGE_CHANGE_FAILED_STATE")
     public Action<?, ?> handleImageChangeFailure() {
-        return new AbstractStackFailureAction<ImageChangeState, ImageChangeEvents>() {
-            @Inject
-            private ImageService imageService;
-
-            @Override
-            protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) throws Exception {
-                LOGGER.error("Image change failed", payload.getException());
-                if (variables.containsKey(ORIGINAL_IMAGE_REVISION) && variables.containsKey(IMAGE_CHANGED_IN_DB)) {
-                    LOGGER.info("Reverting to original image using revision [{}]", variables.get(ORIGINAL_IMAGE_REVISION));
-                    imageService.revertImageToRevision((Long) variables.get(IMAGE_ENTITY_ID), (Number) variables.get(ORIGINAL_IMAGE_REVISION));
-                } else if (variables.containsKey(ORIGINAL_IMAGE) && variables.containsKey(IMAGE_CHANGED_IN_DB)) {
-                    LOGGER.info("Reverting to original image using entity stored in variables");
-                    ImageEntity originalImage = (ImageEntity) variables.get(ORIGINAL_IMAGE);
-                    imageService.save(originalImage);
-                }
-                sendEvent(context, new StackEvent(IMAGE_CHANGE_FAILURE_HANDLED_EVENT.event(), context.getStack().getId()));
-            }
-        };
+        return new ImageChangeFailureHandlerAction();
     }
 
 }

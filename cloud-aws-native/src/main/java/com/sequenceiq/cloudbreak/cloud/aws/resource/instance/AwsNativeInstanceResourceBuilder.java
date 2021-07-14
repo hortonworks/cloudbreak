@@ -4,7 +4,9 @@ import static com.sequenceiq.cloudbreak.cloud.aws.resource.instance.util.Securit
 import static java.util.Collections.singletonList;
 import static org.slf4j.LoggerFactory.getLogger;
 
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -18,6 +20,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.amazonaws.services.ec2.model.AmazonEC2Exception;
+import com.amazonaws.services.ec2.model.BlockDeviceMapping;
 import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.amazonaws.services.ec2.model.Filter;
@@ -34,6 +37,8 @@ import com.sequenceiq.cloudbreak.cloud.aws.AwsMethodExecutor;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.context.AwsContext;
+import com.sequenceiq.cloudbreak.cloud.aws.common.resource.VolumeBuilderUtil;
+import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsInstanceView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCloudStackView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -71,6 +76,9 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
 
     @Inject
     private AwsMethodExecutor awsMethodExecutor;
+
+    @Inject
+    private VolumeBuilderUtil volumeBuilderUtil;
 
     @Override
     public List<CloudResource> create(AwsContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group, Image image) {
@@ -122,6 +130,7 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
                     .withUserData(getUserData(cloudStack, group))
                     .withMinCount(1)
                     .withMaxCount(1)
+                    .withBlockDeviceMappings(blocks(group, cloudStack, ac))
                     .withKeyName(cloudStack.getInstanceAuthentication().getPublicKeyId());
             RunInstancesResult instanceResult = amazonEc2Client.createInstance(request);
             instance = instanceResult.getReservation().getInstances().get(0);
@@ -129,6 +138,17 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
         }
         cloudResource.setInstanceId(instance.getInstanceId());
         return buildableResource;
+    }
+
+    Collection<BlockDeviceMapping> blocks(Group group, CloudStack cloudStack, AuthenticatedContext ac) {
+        AwsInstanceView awsInstanceView = new AwsInstanceView(group.getReferenceInstanceTemplate());
+        List<BlockDeviceMapping> blocks = new ArrayList<>();
+        blocks.add(volumeBuilderUtil.getRootVolume(awsInstanceView, group, cloudStack, ac));
+        BlockDeviceMapping ephemeral = volumeBuilderUtil.getEphemeral(awsInstanceView);
+        if (ephemeral != null) {
+            blocks.add(ephemeral);
+        }
+        return blocks;
     }
 
     private Optional<Instance> resourceByName(AmazonEc2Client amazonEc2Client, String name) {
