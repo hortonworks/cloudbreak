@@ -6,6 +6,7 @@ import static com.sequenceiq.common.api.type.ResourceType.GCP_NETWORK;
 import static com.sequenceiq.common.api.type.ResourceType.GCP_SUBNET;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -176,7 +177,7 @@ public class GcpNetworkConnector extends AbstractGcpResourceBuilder implements D
                 throw new GcpResourceException(String.format("Subnet with id %s did not found.", subnetId));
             }
             String ipCidrRange = subnet.getIpCidrRange();
-            return new NetworkCidr(ipCidrRange, Collections.singletonList(ipCidrRange));
+            return new NetworkCidr(ipCidrRange, secondaryRanges(subnet));
         } catch (TokenResponseException e) {
             throw gcpStackUtil.getMissingServiceAccountKeyError(e, projectId);
         } catch (GoogleJsonResponseException e) {
@@ -184,6 +185,20 @@ public class GcpNetworkConnector extends AbstractGcpResourceBuilder implements D
         } catch (IOException e) {
             throw new GcpResourceException("Describe subnets failed due to IO exception" + e.getMessage(), GCP_NETWORK, subnetId);
         }
+    }
+
+    private List<String> secondaryRanges(Subnetwork subnet) {
+        List<String> cidrs = new ArrayList<>();
+        cidrs.add(subnet.getIpCidrRange());
+        if (subnet.getSecondaryIpRanges() != null) {
+            cidrs.addAll(subnet
+                    .getSecondaryIpRanges()
+                    .stream()
+                    .map(e -> e.getIpCidrRange())
+                    .collect(Collectors.toList())
+            );
+        }
+        return cidrs;
     }
 
     @Override
