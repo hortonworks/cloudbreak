@@ -19,6 +19,7 @@ import com.sequenceiq.flow.api.model.operation.OperationView;
 import com.sequenceiq.freeipa.api.v1.operation.OperationV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
 import com.sequenceiq.freeipa.converter.operation.OperationToOperationStatusConverter;
+import com.sequenceiq.freeipa.service.operation.FlowOperationService;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 
 @Controller
@@ -26,6 +27,9 @@ public class OperationV1Controller implements OperationV1Endpoint {
 
     @Inject
     private OperationService operationService;
+
+    @Inject
+    private FlowOperationService flowOperationService;
 
     @Inject
     private OperationToOperationStatusConverter operationToOperationStatusConverter;
@@ -40,6 +44,6 @@ public class OperationV1Controller implements OperationV1Endpoint {
     @Override
     @CheckPermissionByResourceCrn(action = DESCRIBE_ENVIRONMENT)
     public OperationView getOperationProgressByEnvironmentCrn(@ResourceCrn String resourceCrn, boolean detailed) {
-        return operationService.getOperationProgressByEnvironmentCrn(resourceCrn, detailed);
+        return flowOperationService.getOperationProgressByEnvironmentCrn(resourceCrn, detailed);
     }
 }
