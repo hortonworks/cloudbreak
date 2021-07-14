@@ -43,7 +43,7 @@ public class OperationV1Controller implements OperationV1Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = DESCRIBE_ENVIRONMENT)
-    public OperationView getOperationProgressByEnvironmentCrn(@ResourceCrn String resourceCrn, boolean detailed) {
-        return flowOperationService.getOperationProgressByEnvironmentCrn(resourceCrn, detailed);
+    public OperationView getOperationProgressByEnvironmentCrn(@ResourceCrn String environmentCrn, boolean detailed) {
+        return flowOperationService.getOperationProgressByEnvironmentCrn(environmentCrn, detailed);
     }
 }
