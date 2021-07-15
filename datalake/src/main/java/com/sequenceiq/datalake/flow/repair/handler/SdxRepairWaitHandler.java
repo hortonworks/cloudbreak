@@ -31,7 +31,7 @@ public class SdxRepairWaitHandler extends ExceptionCatcherEventHandler<SdxRepair
     @Value("${sdx.stack.repair.sleeptime_sec:20}")
     private int sleepTimeInSec;
 
-    @Value("${sdx.stack.repair.duration_min:60}")
+    @Value("${sdx.stack.repair.duration_min:120}")
     private int durationInMinutes;
 
     @Inject
