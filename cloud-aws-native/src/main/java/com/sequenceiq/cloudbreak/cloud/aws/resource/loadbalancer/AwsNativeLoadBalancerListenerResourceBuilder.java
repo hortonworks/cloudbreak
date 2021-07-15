@@ -4,11 +4,17 @@ import static com.sequenceiq.cloudbreak.cloud.aws.resource.AwsNativeResourceBuil
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.amazonaws.services.elasticloadbalancingv2.model.DeleteListenerRequest;
+import com.amazonaws.services.elasticloadbalancingv2.model.DeleteListenerResult;
+import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonElasticLoadBalancingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.context.AwsContext;
+import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsMethodExecutor;
 import com.sequenceiq.cloudbreak.cloud.aws.resource.instance.AbstractAwsNativeComputeBuilder;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -22,6 +28,9 @@ import com.sequenceiq.common.api.type.ResourceType;
 public class AwsNativeLoadBalancerListenerResourceBuilder extends AbstractAwsNativeComputeBuilder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsNativeLoadBalancerListenerResourceBuilder.class);
+
+    @Inject
+    private AwsMethodExecutor awsMethodExecutor;
 
     @Override
     public List<CloudResource> create(AwsContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group, Image image) {
@@ -39,10 +48,14 @@ public class AwsNativeLoadBalancerListenerResourceBuilder extends AbstractAwsNat
     @Override
     public CloudResource delete(AwsContext context, com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext auth, CloudResource resource)
             throws Exception {
-        LOGGER.info("Based on the order of resource builders, the listener '{}' has already been deleted with it's related load balancer '{}'",
+        LOGGER.info("Trying to delete listener '{}', may it has already been deleted with it's related load balancer '{}'",
                 resource.getReference(),
                 resource.getInstanceId());
-        return null;
+        AmazonElasticLoadBalancingClient loadBalancingClient = context.getLoadBalancingClient();
+        DeleteListenerRequest deleteListenerRequest = new DeleteListenerRequest()
+                .withListenerArn(resource.getReference());
+        DeleteListenerResult deleteResult = awsMethodExecutor.execute(() -> loadBalancingClient.deleteListener(deleteListenerRequest), null);
+        return deleteResult != null ? resource : null;
     }
 
     @Override
