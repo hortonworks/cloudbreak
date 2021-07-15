@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
@@ -32,7 +33,7 @@ public class AwsImageUpdateServiceTest {
     private AwsLaunchConfigurationImageUpdateService awsLaunchConfigurationImageUpdateService;
 
     @Mock
-    private AwsLaunchTemplateImageUpdateService awsLaunchTemplateImageUpdateService;
+    private AwsLaunchTemplateUpdateService awsLaunchTemplateUpdateService;
 
     @InjectMocks
     private AwsImageUpdateService underTest;
@@ -44,7 +45,7 @@ public class AwsImageUpdateServiceTest {
         underTest.updateImage(ac, stack, cfResource);
 
         verify(awsLaunchConfigurationImageUpdateService).updateImage(ac, stack, cfResource);
-        verify(awsLaunchTemplateImageUpdateService, never()).updateImage(ac, stack, cfResource);
+        verify(awsLaunchTemplateUpdateService, never()).updateFields(ac, cfResource, anyMap());
     }
 
     @Test
@@ -53,7 +54,7 @@ public class AwsImageUpdateServiceTest {
 
         underTest.updateImage(ac, stack, cfResource);
 
-        verify(awsLaunchTemplateImageUpdateService).updateImage(ac, stack, cfResource);
+        verify(awsLaunchTemplateUpdateService).updateFields(ac, cfResource, anyMap());
         verify(awsLaunchConfigurationImageUpdateService, never()).updateImage(ac, stack, cfResource);
     }
 
@@ -63,7 +64,7 @@ public class AwsImageUpdateServiceTest {
 
         Assertions.assertThrows(NotImplementedException.class, () -> underTest.updateImage(ac, stack, cfResource));
 
-        verify(awsLaunchTemplateImageUpdateService, never()).updateImage(ac, stack, cfResource);
+        verify(awsLaunchTemplateUpdateService, never()).updateFields(ac, cfResource, anyMap());
         verify(awsLaunchConfigurationImageUpdateService, never()).updateImage(ac, stack, cfResource);
     }
 }
