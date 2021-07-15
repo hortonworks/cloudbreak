@@ -33,7 +33,7 @@ public class DatalakeUpgradeWaitHandler extends ExceptionCatcherEventHandler<Dat
     @Value("${sdx.stack.upgrade.sleeptime_sec:20}")
     private int sleepTimeInSec;
 
-    @Value("${sdx.stack.upgrade.duration_min:90}")
+    @Value("${sdx.stack.upgrade.duration_min:120}")
     private int durationInMinutes;
 
     @Inject
