@@ -35,6 +35,7 @@ public class FlowPayloadToDiagnosticDetailsConverter {
                     fillStrFieldIfExists(parametersNode, "description", "description", properties);
                     fillStrFieldIfExists(parametersNode, "clusterType", "clusterType", properties);
                     fillStrFieldIfExists(parametersNode, "clusterVersion", "clusterVersion", properties);
+                    fillStrFieldIfExists(parametersNode, "statusReason", "statusReason", properties);
                     fillDestinationData(properties, parametersNode);
                 }
             }

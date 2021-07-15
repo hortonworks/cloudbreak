@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.common.event.ResourceCrnPayload;
 import com.sequenceiq.cloudbreak.logger.MdcContext;
+import com.sequenceiq.common.model.diagnostics.DiagnosticParameters;
 import com.sequenceiq.flow.core.AbstractAction;
 import com.sequenceiq.flow.core.CommonContext;
 import com.sequenceiq.flow.core.FlowParameters;
@@ -181,11 +182,15 @@ public class DiagnosticsCollectionActions {
                 String resourceCrn = payload.getResourceCrn();
                 LOGGER.debug("Flow entered into DIAGNOSTICS_COLLECTION_FAILED_STATE. resourceCrn: '{}'", resourceCrn);
                 InMemoryStateStore.deleteStack(payload.getResourceId());
+                DiagnosticParameters parameters = payload.getParameters();
+                if (payload.getException() != null) {
+                    parameters.setStatusReason(payload.getException().getMessage());
+                }
                 DiagnosticsCollectionEvent event = DiagnosticsCollectionEvent.builder()
                         .withResourceId(payload.getResourceId())
                         .withResourceCrn(payload.getResourceCrn())
                         .withSelector(DiagnosticsCollectionStateSelectors.HANDLED_FAILED_DIAGNOSTICS_COLLECTION_EVENT.selector())
-                        .withParameters(payload.getParameters())
+                        .withParameters(parameters)
                         .build();
                 sendEvent(context, event);
             }

@@ -71,6 +71,8 @@ public class DiagnosticParameters {
 
     private String supportBundleDbusStreamName;
 
+    private String statusReason;
+
     private CloudStorageDiagnosticsParameters cloudStorageDiagnosticsParameters;
 
     public Map<String, Object> toMap() {
@@ -104,6 +106,7 @@ public class DiagnosticParameters {
         parameters.put("supportBundleDbusPrivateKey", supportBundleDbusPrivateKey);
         parameters.put("supportBundleDbusStreamName", supportBundleDbusStreamName);
         parameters.put("supportBundleDbusAppName", supportBundleDbusAppName);
+        parameters.put("statusReason", statusReason);
         if (cloudStorageDiagnosticsParameters != null) {
             for (Map.Entry<String, Object> cloudStorageEntry : cloudStorageDiagnosticsParameters.toMap().entrySet()) {
                 parameters.put(cloudStorageEntry.getKey(), cloudStorageEntry.getValue());
@@ -330,6 +333,14 @@ public class DiagnosticParameters {
         this.root = root;
     }
 
+    public String getStatusReason() {
+        return statusReason;
+    }
+
+    public void setStatusReason(String statusReason) {
+        this.statusReason = statusReason;
+    }
+
     public CloudStorageDiagnosticsParameters getCloudStorageDiagnosticsParameters() {
         return cloudStorageDiagnosticsParameters;
     }
@@ -466,6 +477,11 @@ public class DiagnosticParameters {
 
         public DiagnosticParametersBuilder withRoot(String root) {
             diagnosticParameters.setRoot(root);
+            return this;
+        }
+
+        public DiagnosticParametersBuilder withStatusReason(String statusReason) {
+            diagnosticParameters.setStatusReason(statusReason);
             return this;
         }
 
