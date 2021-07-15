@@ -244,25 +244,22 @@ public class ClusterService {
         return clusterApiConnectors.getConnector(stack).clusterModificationService().getStackRepositoryJson(repoDetails, stackRepoId);
     }
 
-    public void cleanupCluster(final Long stackId) {
-        try {
-            transactionService.required(() -> {
-                Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-                if (StringUtils.isEmpty(stack.getCluster().getClusterManagerIp())) {
-                    LOGGER.debug("Cluster server IP was not set before, cleanup cluster operation can be skipped.");
-                } else {
-                    Telemetry telemetry = componentConfigProviderService.getTelemetry(stackId);
-                    try {
-                        clusterApiConnectors.getConnector(stack).clusterModificationService().cleanupCluster(telemetry);
-                        altusMachineUserService.clearFluentMachineUser(stack, telemetry);
-                    } catch (CloudbreakException e) {
-                        LOGGER.error("Cluster specific cleanup failed.", e);
-                    }
+    public void cleanupCluster(final Cluster cluster) {
+        if (StringUtils.isEmpty(cluster.getClusterManagerIp())) {
+            LOGGER.debug("Cluster server IP was not set before, cleanup cluster operation can be skipped.");
+        } else {
+            Stack stack = cluster.getStack();
+            if (stack != null) {
+                try {
+                    Telemetry telemetry = componentConfigProviderService.getTelemetry(stack.getId());
+                    clusterApiConnectors.getConnector(stack).clusterModificationService().cleanupCluster(telemetry);
+                    altusMachineUserService.clearFluentMachineUser(stack, telemetry);
+                } catch (CloudbreakServiceException se) {
+                    LOGGER.error("Cluster specific cleanup failed during obtaining telemetry component.", se);
+                } catch (CloudbreakException e) {
+                    LOGGER.error("Cluster specific cleanup failed.", e);
                 }
-                return stack;
-            });
-        } catch (TransactionExecutionException e) {
-            throw new TransactionRuntimeExecutionException(e);
+            }
         }
     }
 
