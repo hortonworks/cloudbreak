@@ -32,4 +32,12 @@ public class AwsDefaultZoneProvider {
         return awsZoneParameterDefault;
     }
 
+    @Override
+    public String toString() {
+        return "AwsDefaultZoneProvider{" +
+                "awsZoneParameterDefault='" + awsZoneParameterDefault + '\'' +
+                ", awsGovZoneParameterDefault='" + awsGovZoneParameterDefault + '\'' +
+                '}';
+    }
+
 }
