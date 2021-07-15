@@ -70,7 +70,7 @@ public class ClusterTerminationService {
         Long stackId = cluster.getStack().getId();
         String terminatedName = cluster.getName() + DELIMITER + new Date().getTime();
         cluster.setName(terminatedName);
-        clusterService.cleanupCluster(stackId);
+        clusterService.cleanupCluster(cluster);
         FileSystem fs = cluster.getFileSystem();
         if (fs != null) {
             deleteFileSystemResources(stackId, fs, force);
