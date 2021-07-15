@@ -311,6 +311,10 @@ public class DiagnosticsCollectionActions {
                 cloudbreakEventService.fireCloudbreakEvent(resourceId, UPDATE_FAILED.name(),
                         ResourceEvent.STACK_DIAGNOSTICS_COLLECTION_FAILED, List.of(payload.getException().getMessage()));
                 InMemoryStateStore.deleteStack(resourceId);
+                DiagnosticParameters parameters = payload.getParameters();
+                if (payload.getException() != null) {
+                    parameters.setStatusReason(payload.getException().getMessage());
+                }
                 DiagnosticsCollectionEvent event = DiagnosticsCollectionEvent.builder()
                         .withResourceId(resourceId)
                         .withResourceCrn(payload.getResourceCrn())
