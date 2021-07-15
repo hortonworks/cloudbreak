@@ -36,7 +36,7 @@ public class SdxBackupAction implements Action<SdxInternalTestDto, SdxClient> {
         Log.whenJson(LOGGER, " SDX backup request: ", testDto.getRequest());
         LOGGER.info(format(" SDX '%s' backup has been started to '%s' as '%s'... ", sdxName, backupLocation, backupName));
         SdxBackupResponse sdxBackupResponse = client.getDefaultClient()
-                .sdxEndpoint()
+                .sdxBackupEndpoint()
                 .backupDatalakeByName(sdxName, backupLocation, backupName);
         testDto.setFlow("SDX backup", sdxBackupResponse.getFlowIdentifier());
 

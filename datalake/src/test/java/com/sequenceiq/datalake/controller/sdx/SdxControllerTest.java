@@ -8,16 +8,11 @@ import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.reset;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
-import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
 import org.apache.commons.lang3.tuple.Pair;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -41,8 +36,6 @@ import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
-import com.sequenceiq.sdx.api.model.SdxDatabaseBackupStatusResponse;
-import com.sequenceiq.sdx.api.model.DatalakeDatabaseDrStatus;
 
 @ExtendWith(MockitoExtension.class)
 class SdxControllerTest {
@@ -64,18 +57,11 @@ class SdxControllerTest {
     @Mock
     private SdxMetricService metricService;
 
-    @Mock
-    private SdxBackupRestoreService sdxBackupRestoreService;
-
     @InjectMocks
     private SdxController sdxController;
 
-    @BeforeEach
-    void init() {
-    }
-
     @Test
-    void createTest() throws NoSuchFieldException {
+    void createTest() {
         SdxCluster sdxCluster = getValidSdxCluster();
         when(sdxService.createSdx(anyString(), anyString(), any(SdxClusterRequest.class), nullable(StackV4Request.class)))
                 .thenReturn(Pair.of(sdxCluster, new FlowIdentifier(FlowType.FLOW, "FLOW_ID")));
@@ -104,7 +90,7 @@ class SdxControllerTest {
     }
 
     @Test
-    void getTest() throws NoSuchFieldException {
+    void getTest() {
         SdxCluster sdxCluster = getValidSdxCluster();
         when(sdxService.getByNameInAccount(anyString(), anyString())).thenReturn(sdxCluster);
 
@@ -121,23 +107,6 @@ class SdxControllerTest {
         assertEquals("crn:sdxcluster", sdxClusterResponse.getCrn());
         assertEquals(SdxClusterStatusResponse.REQUESTED, sdxClusterResponse.getStatus());
         assertEquals("statusreason", sdxClusterResponse.getStatusReason());
-    }
-
-    @Test
-    public void testBackupDatabaseByName() {
-        SdxCluster sdxCluster = getValidSdxCluster();
-        when(sdxService.getByNameInAccount(any(), anyString())).thenReturn(sdxCluster);
-        String backupId = UUID.randomUUID().toString();
-
-        when(sdxBackupRestoreService.getDatabaseBackupStatus(sdxCluster, backupId)).thenThrow(new NotFoundException("Status entry not found"));
-        sdxController.backupDatabaseByName(sdxCluster.getClusterName(), backupId, "");
-        verify(sdxBackupRestoreService, times(1)).triggerDatabaseBackup(any(), anyString(), anyString());
-
-        reset(sdxBackupRestoreService);
-        when(sdxBackupRestoreService.getDatabaseBackupStatus(sdxCluster, backupId))
-                .thenReturn(new SdxDatabaseBackupStatusResponse(DatalakeDatabaseDrStatus.SUCCEEDED, null));
-        sdxController.backupDatabaseByName(sdxCluster.getClusterName(), backupId, "");
-        verify(sdxBackupRestoreService, times(0)).triggerDatabaseBackup(any(), anyString(), anyString());
     }
 
     private SdxCluster getValidSdxCluster() {
