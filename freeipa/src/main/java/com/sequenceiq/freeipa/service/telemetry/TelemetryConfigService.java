@@ -128,7 +128,7 @@ public class TelemetryConfigService {
                 .withPlatform(stack.getCloudPlatform())
                 .withVersion(version)
                 .build();
-        return fluentConfigService.createFluentConfigs(clusterDetails, databusEnabled, false, telemetry);
+        return fluentConfigService.createFluentConfigs(clusterDetails, databusEnabled, false, stack.getRegion(), telemetry);
     }
 
     private Map<String, ? extends SaltPillarProperties> getCdpNodeStatusPillarConfig(Stack stack) {

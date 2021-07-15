@@ -72,7 +72,7 @@ public class FluentConfigService {
     }
 
     public FluentConfigView createFluentConfigs(TelemetryClusterDetails clusterDetails,
-            boolean databusEnabled, boolean meteringEnabled, Telemetry telemetry) {
+            boolean databusEnabled, boolean meteringEnabled, String region, Telemetry telemetry) {
         final FluentConfigView.Builder builder = new FluentConfigView.Builder();
         boolean enabled = false;
         if (telemetry != null) {
@@ -97,6 +97,7 @@ public class FluentConfigService {
 
         return builder
                 .withEnabled(enabled)
+                .withRegion(region)
                 .withClusterDetails(clusterDetails)
                 .build();
     }
