@@ -17,6 +17,7 @@ public enum ResourceType {
     AWS_VOLUMESET,
     AWS_EFS,
     AWS_INSTANCE,
+    AWS_CLOUD_WATCH,
     RDS_INSTANCE,
     RDS_HOSTNAME,
     RDS_PORT,

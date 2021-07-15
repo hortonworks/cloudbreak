@@ -50,6 +50,7 @@ import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
 public class AwsNativeMetadataCollector implements MetadataCollector {
+
     public static final String LOAD_BALANCER_NOT_FOUND_ERROR_CODE = "LoadBalancerNotFound";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsNativeMetadataCollector.class);
@@ -244,4 +245,5 @@ public class AwsNativeMetadataCollector implements MetadataCollector {
         }
         return result;
     }
+
 }

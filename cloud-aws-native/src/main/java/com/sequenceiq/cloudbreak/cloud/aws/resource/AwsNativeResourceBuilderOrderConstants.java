@@ -16,6 +16,9 @@ public class AwsNativeResourceBuilderOrderConstants {
 
     public static final int NATIVE_LOAD_BALANCER_RESOURCE_BUILDER_ORDER = 6;
 
+    public static final int NATIVE_CLOUD_WATCH_RESOURCE_BUILDER_ORDER = 7;
+
     private AwsNativeResourceBuilderOrderConstants() {
     }
+
 }
