@@ -10,8 +10,10 @@ import com.sequenceiq.sdx.api.endpoint.DatabaseServerEndpoint;
 import com.sequenceiq.sdx.api.endpoint.DiagnosticsEndpoint;
 import com.sequenceiq.sdx.api.endpoint.OperationEndpoint;
 import com.sequenceiq.sdx.api.endpoint.ProgressEndpoint;
+import com.sequenceiq.sdx.api.endpoint.SdxBackupEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxInternalEndpoint;
+import com.sequenceiq.sdx.api.endpoint.SdxRestoreEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxUpgradeEndpoint;
 
 public class SdxServiceApiKeyEndpoints extends AbstractKeyBasedServiceEndpoint implements SdxClient {
@@ -68,5 +70,15 @@ public class SdxServiceApiKeyEndpoints extends AbstractKeyBasedServiceEndpoint i
     @Override
     public AuthorizationUtilEndpoint authorizationUtilEndpoint() {
         return getEndpoint(AuthorizationUtilEndpoint.class);
+    }
+
+    @Override
+    public SdxBackupEndpoint sdxBackupEndpoint() {
+        return getEndpoint(SdxBackupEndpoint.class);
+    }
+
+    @Override
+    public SdxRestoreEndpoint sdxRestoreEndpoint() {
+        return getEndpoint(SdxRestoreEndpoint.class);
     }
 }
