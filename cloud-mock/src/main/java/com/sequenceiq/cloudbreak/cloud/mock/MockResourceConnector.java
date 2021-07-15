@@ -133,6 +133,11 @@ public class MockResourceConnector implements ResourceConnector<Object> {
     }
 
     @Override
+    public void checkUpdate(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) throws Exception {
+        return;
+    }
+
+    @Override
     public List<CloudResourceStatus> upscale(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) {
         CloudContext cloudContext = authenticatedContext.getCloudContext();
         List<Group> scaledGroups = cloudResourceHelper.getScaledGroups(stack);

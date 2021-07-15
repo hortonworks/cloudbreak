@@ -229,6 +229,11 @@ public abstract class AbstractResourceConnector implements ResourceConnector<Lis
     }
 
     @Override
+    public void checkUpdate(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) throws Exception {
+        return;
+    }
+
+    @Override
     public List<CloudResourceStatus> check(AuthenticatedContext authenticatedContext, List<CloudResource> resources) {
         throw new UnsupportedOperationException();
     }

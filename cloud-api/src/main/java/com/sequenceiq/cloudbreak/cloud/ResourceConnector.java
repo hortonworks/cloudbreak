@@ -179,6 +179,19 @@ public interface ResourceConnector<R> {
     }
 
     /**
+     * Check the possibility of update of infrastructure on Cloud platform. (e.g change Security groups).
+     * <br>
+     * Note: this method is a bit generic at the moment, but complex changes like replace the existing network with a new one or add/remove instances
+     * are not executed over this method.
+     *
+     * @param authenticatedContext the authenticated context which holds the client object
+     * @param stack                contains the full description of the new infrastructure (e.g new security groups)
+     * @param resources            resources that needs to be updated
+     * @throws Exception in case if update is not possible
+     */
+    void checkUpdate(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) throws Exception;
+
+    /**
      * Update of infrastructure on Cloud platform. (e.g change Security groups). It does not need to wait/block until the infrastructure update is
      * finished, but it can return immediately and the {@link #check(AuthenticatedContext, List)} method is invoked to check regularly whether the
      * infrastructure and all resources have already been updated or not.
