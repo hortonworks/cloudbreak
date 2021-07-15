@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.service.upgrade.sync;
 
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -12,15 +12,11 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Service
-public class CmParcelInfoRetrieverService {
+public class CmServerQueryService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CmParcelInfoRetrieverService.class);
-
-    @Inject
-    private StackService stackService;
+    private static final Logger LOGGER = LoggerFactory.getLogger(CmServerQueryService.class);
 
     @Inject
     private ClusterApiConnectors apiConnectors;
@@ -31,17 +27,26 @@ public class CmParcelInfoRetrieverService {
      * <p>
      * TODO: the call is blocking for some time. Check if it is possible to block for shorter period of time.
      *
-     * @param stackId The id of the stack of which CM cloudbreak should query
+     * @param stack The stack, to get the coordinates of the CM to query
      * @return List of parcels found in the CM
      */
-    List<ParcelInfo> getActiveParcelsFromServer(long stackId) {
-        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-//        String cmVersion = apiConnectors.getConnector(stack).clusterStatusService().getClusterManagerVersion();
+    Set<ParcelInfo> queryActiveParcels(Stack stack) {
         Map<String, String> installedParcels = apiConnectors.getConnector(stack).gatherInstalledParcels(stack.getName());
         LOGGER.debug("Reading parcel info from CM server, found parcels: " + installedParcels);
         return installedParcels.entrySet().stream()
                 .map(es -> new ParcelInfo(es.getKey(), es.getValue()))
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
+    }
+
+    /**
+     * Will query the CM server for the CM version
+     * @param stack The stack, to get the coordinates of the CM to query
+     * @return The actual CM version
+     */
+    String queryCmVersion(Stack stack) {
+        String cmVersion = apiConnectors.getConnector(stack).clusterStatusService().getClusterManagerVersion();
+        LOGGER.debug("Reading CM version info from CM server, found version: {}", cmVersion);
+        return cmVersion;
     }
 
 }

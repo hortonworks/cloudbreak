@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -85,7 +84,7 @@ public class ImageService {
     private CloudPlatformConnectors cloudPlatformConnectors;
 
     @Inject
-    private ClouderaManagerProductConverter clouderaManagerProductConverter;
+    private ComponentConverter componentConverter;
 
     public Image getImage(Long stackId) throws CloudbreakImageNotFoundException {
         return componentConfigProviderService.getImage(stackId);
@@ -250,7 +249,7 @@ public class ImageService {
     }
 
     private void addPrewarmParcels(Stack stack, StatedImage statedImage, Set<Component> components) {
-        components.addAll(clouderaManagerProductConverter.clouderaManagerProductListToComponent(getPreWarmParcels(statedImage), stack));
+        components.addAll(componentConverter.fromClouderaManagerProductList(getPreWarmParcels(statedImage), stack));
     }
 
     private void addStackRepo(Stack stack, Set<Component> components, com.sequenceiq.cloudbreak.cloud.model.catalog.Image catalogBasedImage)
@@ -268,7 +267,8 @@ public class ImageService {
         if (catalogBasedImage.getStackDetails() != null) {
             StackDetails stackDetails = catalogBasedImage.getStackDetails();
             StackType stackType = determineStackType(stackDetails);
-            components.add(getClusterManagerComponent(stack, catalogBasedImage, stackType));
+            ClouderaManagerRepo clouderaManagerRepo = getClouderaManagerRepo(catalogBasedImage, stackType);
+            components.add(new Component(CM_REPO_DETAILS, CM_REPO_DETAILS.name(), new Json(clouderaManagerRepo), stack));
         }
     }
 
@@ -286,12 +286,12 @@ public class ImageService {
      * @param statedImage an image from the image catalog
      * @return List of prewarmed parcels as a form of ClouderaManagerProducts
      */
-    public List<ClouderaManagerProduct> getPreWarmParcels(StatedImage statedImage) {
+    public Set<ClouderaManagerProduct> getPreWarmParcels(StatedImage statedImage) {
         return statedImage.getImage().getPreWarmParcels().stream()
                 .map(p -> preWarmParcelParser.parseProductFromParcel(p, statedImage.getImage().getPreWarmCsd()))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
     }
 
     private Component getStackComponent(Stack stack, StackDetails stackDetails, StackType stackType, String osType) {
@@ -305,7 +305,14 @@ public class ImageService {
         }
     }
 
-    private Component getClusterManagerComponent(Stack stack, com.sequenceiq.cloudbreak.cloud.model.catalog.Image imgFromCatalog, StackType stackType)
+    public Optional<ClouderaManagerRepo> getClouderaManagerRepo(com.sequenceiq.cloudbreak.cloud.model.catalog.Image imgFromCatalog)
+            throws CloudbreakImageCatalogException {
+        return imgFromCatalog.getStackDetails() != null
+                ? Optional.of(getClouderaManagerRepo(imgFromCatalog, determineStackType(imgFromCatalog.getStackDetails())))
+                : Optional.empty();
+    }
+
+    private ClouderaManagerRepo getClouderaManagerRepo(com.sequenceiq.cloudbreak.cloud.model.catalog.Image imgFromCatalog, StackType stackType)
             throws CloudbreakImageCatalogException {
         if (imgFromCatalog.getRepo() != null) {
             if (StackType.CDH.equals(stackType)) {
@@ -314,7 +321,7 @@ public class ImageService {
                     throw new CloudbreakImageCatalogException(
                             String.format("Cloudera Manager repo was not found in image for os: '%s'.", imgFromCatalog.getOsType()));
                 }
-                return new Component(CM_REPO_DETAILS, CM_REPO_DETAILS.name(), new Json(clouderaManagerRepo), stack);
+                return clouderaManagerRepo;
             } else {
                 throw new CloudbreakImageCatalogException(String.format("Invalid Ambari repo present in image catalog: '%s'.", imgFromCatalog.getRepo()));
             }

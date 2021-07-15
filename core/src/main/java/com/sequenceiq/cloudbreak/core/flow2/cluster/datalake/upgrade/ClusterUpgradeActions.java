@@ -35,7 +35,7 @@ import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.upgrade.ImageComponentUpdaterService;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradeImageInfo;
-import com.sequenceiq.cloudbreak.service.upgrade.sync.CmVersionSyncerService;
+import com.sequenceiq.cloudbreak.service.upgrade.sync.CmSyncerService;
 import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowParameters;
@@ -186,7 +186,7 @@ public class ClusterUpgradeActions {
             private boolean syncAfterFailureEnabled;
 
             @Inject
-            private CmVersionSyncerService cmVersionSyncerService;
+            private CmSyncerService cmSyncerService;
 
             @Override
             protected ClusterUpgradeContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
@@ -201,10 +201,14 @@ public class ClusterUpgradeActions {
             @Override
             protected void doExecute(ClusterUpgradeContext context, ClusterUpgradeFailedEvent payload, Map<Object, Object> variables) {
                 if (syncAfterFailureEnabled) {
-                    StatedImage currentImage = getCurrentImage(variables);
-                    StatedImage targetImage = getTargetImage(variables);
-                    Stack stack = stackService.getById(payload.getResourceId());
-                    cmVersionSyncerService.syncCmParcelsToDb(stack, Set.of(currentImage, targetImage));
+                    try {
+                        StatedImage currentImage = getCurrentImage(variables);
+                        StatedImage targetImage = getTargetImage(variables);
+                        Stack stack = stackService.getById(payload.getResourceId());
+                        cmSyncerService.syncFromCmToDb(stack, Set.of(currentImage, targetImage));
+                    } catch (Exception e) {
+                        LOGGER.warn("Error during syncing CM version to DB, syncing skipped.", e);
+                    }
                 }
                 clusterUpgradeService.handleUpgradeClusterFailure(context.getStackId(), payload.getException().getMessage(), payload.getDetailedStatus());
                 sendEvent(context, CLUSTER_UPGRADE_FAIL_HANDLED_EVENT.event(), payload);

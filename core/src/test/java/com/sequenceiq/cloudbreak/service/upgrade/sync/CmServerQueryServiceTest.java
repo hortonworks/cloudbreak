@@ -6,8 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,7 +22,7 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @ExtendWith(MockitoExtension.class)
-public class CmParcelInfoRetrieverServiceTest {
+public class CmServerQueryServiceTest {
 
     private static final String STACK_NAME = "stackName";
 
@@ -35,19 +35,18 @@ public class CmParcelInfoRetrieverServiceTest {
     private ClusterApiConnectors apiConnectors;
 
     @InjectMocks
-    private CmParcelInfoRetrieverService underTest;
-
-    @Mock
-    private Stack stack;
+    private CmServerQueryService underTest;
 
     @Mock
     private ClusterApi clusterApi;
+
+    @Mock
+    private Stack stack;
 
     @BeforeEach
     void setup() {
         when(stack.getName()).thenReturn(STACK_NAME);
         when(apiConnectors.getConnector(any(Stack.class))).thenReturn(clusterApi);
-        when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
     }
 
     @Test
@@ -55,11 +54,12 @@ public class CmParcelInfoRetrieverServiceTest {
         Map<String, String> parcelNameToVersionMap = Map.of("CDH", "7.2.7-1.cdh7.2.7.p7.12569826");
         when(clusterApi.gatherInstalledParcels(STACK_NAME)).thenReturn(parcelNameToVersionMap);
 
-        List<ParcelInfo> foundParcels = underTest.getActiveParcelsFromServer(STACK_ID);
+        Set<ParcelInfo> foundParcels = underTest.queryActiveParcels(stack);
 
         assertThat(foundParcels, hasSize(1));
-        assertEquals("CDH", foundParcels.get(0).getName());
-        assertEquals("7.2.7-1.cdh7.2.7.p7.12569826", foundParcels.get(0).getVersion());
+        ParcelInfo activeParcel = foundParcels.iterator().next();
+        assertEquals("CDH", activeParcel.getName());
+        assertEquals("7.2.7-1.cdh7.2.7.p7.12569826", activeParcel.getVersion());
     }
 
     @Test
@@ -67,7 +67,7 @@ public class CmParcelInfoRetrieverServiceTest {
         Map<String, String> parcelNameToVersionMap = Map.of();
         when(clusterApi.gatherInstalledParcels(STACK_NAME)).thenReturn(parcelNameToVersionMap);
 
-        List<ParcelInfo> foundParcels = underTest.getActiveParcelsFromServer(STACK_ID);
+        Set<ParcelInfo> foundParcels = underTest.queryActiveParcels(stack);
 
         assertThat(foundParcels, hasSize(0));
     }
