@@ -9,6 +9,8 @@ import com.amazonaws.services.ec2.model.AuthorizeSecurityGroupEgressRequest;
 import com.amazonaws.services.ec2.model.AuthorizeSecurityGroupEgressResult;
 import com.amazonaws.services.ec2.model.AuthorizeSecurityGroupIngressRequest;
 import com.amazonaws.services.ec2.model.AuthorizeSecurityGroupIngressResult;
+import com.amazonaws.services.ec2.model.CreateLaunchTemplateVersionRequest;
+import com.amazonaws.services.ec2.model.CreateLaunchTemplateVersionResult;
 import com.amazonaws.services.ec2.model.CreateSecurityGroupRequest;
 import com.amazonaws.services.ec2.model.CreateSecurityGroupResult;
 import com.amazonaws.services.ec2.model.CreateTagsRequest;
@@ -59,6 +61,8 @@ import com.amazonaws.services.ec2.model.ImportKeyPairRequest;
 import com.amazonaws.services.ec2.model.ImportKeyPairResult;
 import com.amazonaws.services.ec2.model.ModifyInstanceAttributeRequest;
 import com.amazonaws.services.ec2.model.ModifyInstanceAttributeResult;
+import com.amazonaws.services.ec2.model.ModifyLaunchTemplateRequest;
+import com.amazonaws.services.ec2.model.ModifyLaunchTemplateResult;
 import com.amazonaws.services.ec2.model.RunInstancesRequest;
 import com.amazonaws.services.ec2.model.RunInstancesResult;
 import com.amazonaws.services.ec2.model.StartInstancesRequest;
@@ -237,5 +241,13 @@ public class AmazonEc2Client extends AmazonClient {
 
     public DeleteSecurityGroupResult deleteSecurityGroup(DeleteSecurityGroupRequest request) {
         return client.deleteSecurityGroup(request);
+    }
+
+    public CreateLaunchTemplateVersionResult createLaunchTemplateVersion(CreateLaunchTemplateVersionRequest request) {
+        return client.createLaunchTemplateVersion(request);
+    }
+
+    public ModifyLaunchTemplateResult modifyLaunchTemplate(ModifyLaunchTemplateRequest request) {
+        return client.modifyLaunchTemplate(request);
     }
 }
