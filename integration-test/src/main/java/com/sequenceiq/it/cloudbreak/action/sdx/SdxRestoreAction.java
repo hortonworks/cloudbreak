@@ -36,7 +36,7 @@ public class SdxRestoreAction implements Action<SdxInternalTestDto, SdxClient> {
         Log.whenJson(LOGGER, " SDX restore request: ", testDto.getRequest());
         LOGGER.info(format(" SDX '%s' restore has been started to '%s'... ", sdxName, backupLocation));
         SdxRestoreResponse sdxRestoreResponse = client.getDefaultClient()
-                .sdxEndpoint()
+                .sdxRestoreEndpoint()
                 .restoreDatalakeByName(sdxName, backupId, backupLocation);
         testDto.setFlow("SDX restore", sdxRestoreResponse.getFlowIdentifier());
 
