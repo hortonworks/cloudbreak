@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -22,6 +23,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
@@ -30,6 +32,7 @@ import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.service.NoSqlTableCreationModeDeterminerService;
 import com.sequenceiq.environment.environment.validation.ValidationType;
 import com.sequenceiq.environment.parameter.dto.s3guard.S3GuardTableCreation;
+import com.sequenceiq.environment.parameter.dto.AwsDiskEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.AwsParametersDto;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
 import com.sequenceiq.environment.parameters.service.ParametersService;
@@ -45,6 +48,9 @@ class AwsParameterValidatorTest {
 
     @Mock
     private ParametersService parametersService;
+
+    @Mock
+    private EntitlementService entitlementService;
 
     @InjectMocks
     private AwsParameterValidator underTest;
@@ -68,11 +74,16 @@ class AwsParameterValidatorTest {
     void validateAndDetermineAwsParametersAttached() {
         AwsParametersDto awsParameters = AwsParametersDto.builder()
                 .withDynamoDbTableName("tablename")
+                .withAwsDiskEncryptionParameters(AwsDiskEncryptionParametersDto.builder()
+                .withEncryptionKeyArn("dummy-key-arn")
+                .build())
                 .build();
+
         ParametersDto parametersDto = ParametersDto.builder()
                 .withAwsParameters(awsParameters)
                 .build();
         when(parametersService.isS3GuardTableUsed(any(), any(), any(), any())).thenReturn(true);
+        when(entitlementService.isAWSDiskEncryptionWithCMKEnabled(anyString())).thenReturn(true);
 
         ValidationResult validationResult = underTest.validate(environmentValidationDto, parametersDto, ValidationResult.builder());
 
@@ -103,6 +114,47 @@ class AwsParameterValidatorTest {
         verify(noSqlTableCreationModeDeterminerService).determineCreationMode(any(), any());
         assertEquals(creation, awsParameters.getDynamoDbTableCreation());
         verify(parametersService, times(1)).saveParameters(ENV_ID, parametersDto);
+    }
+
+    @Test
+    public void testWhenEncryptionKeyArnPresentAndEntitlementDisabledThenError() {
+        AwsParametersDto awsParameters = AwsParametersDto.builder()
+                .withAwsDiskEncryptionParameters(AwsDiskEncryptionParametersDto.builder()
+                        .withEncryptionKeyArn("dummy-key-arn")
+                        .build())
+                .build();
+        ParametersDto parametersDto = ParametersDto.builder()
+                .withAwsParameters(awsParameters)
+                .build();
+        when(entitlementService.isAWSDiskEncryptionWithCMKEnabled(anyString())).thenReturn(false);
+        ValidationResult validationResult = underTest.validate(environmentValidationDto, parametersDto, ValidationResult.builder());
+        assertTrue(validationResult.hasError());
+    }
+
+    @Test
+    public void testWhenEncryptionKeyArnPresentAndEntitlementEnabledThenNoError() {
+        AwsParametersDto awsParameters = AwsParametersDto.builder()
+                .withAwsDiskEncryptionParameters(AwsDiskEncryptionParametersDto.builder()
+                        .withEncryptionKeyArn("dummy-key-arn")
+                        .build())
+                .build();
+        ParametersDto parametersDto = ParametersDto.builder()
+                .withAwsParameters(awsParameters)
+                .build();
+        when(entitlementService.isAWSDiskEncryptionWithCMKEnabled(anyString())).thenReturn(false);
+        ValidationResult validationResult = underTest.validate(environmentValidationDto, parametersDto, ValidationResult.builder());
+        assertFalse(validationResult.hasError());
+    }
+
+    @Test
+    public void testNoEncryptionKeyArnAndEntitlementEnabledThenNoError() {
+        ParametersDto parametersDto = ParametersDto.builder()
+                .withAwsParameters(AwsParametersDto.builder().build())
+                .build();
+        when(entitlementService.isAWSDiskEncryptionWithCMKEnabled(anyString())).thenReturn(true);
+        ValidationResult validationResult = underTest.validate(environmentValidationDto, parametersDto, ValidationResult.builder());
+
+        assertFalse(validationResult.hasError());
     }
 
     @ParameterizedTest(name = "FreeIpa Spot percentage {0} is validated as {1}")
