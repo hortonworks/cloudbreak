@@ -10,6 +10,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.vali
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_IMAGE_VALIDATION_EVENT;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -27,6 +28,8 @@ import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeContext;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.config.ClusterUpgradeCredentialValidationFailedToClusterUpgradeValidationFailureEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeCredentialValidationRequest;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationFailureEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationFinishedEvent;
@@ -43,10 +46,10 @@ import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.flow.core.AbstractAction;
 import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowParameters;
+import com.sequenceiq.flow.core.PayloadConverter;
 
 @Configuration
 public class ClusterUpgradeValidationActions {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterUpgradeValidationActions.class);
 
     @Inject
@@ -67,7 +70,7 @@ public class ClusterUpgradeValidationActions {
 
             @Override
             protected void doExecute(StackContext context, ClusterUpgradeValidationEvent payload, Map<Object, Object> variables) {
-                LOGGER.info("Starting cluster upgrade validation flow. Target image: {}", payload.getImageId());
+                LOGGER.info("Starting cluster upgrade validation flow");
                 cloudbreakEventService.fireCloudbreakEvent(payload.getResourceId(), UPDATE_IN_PROGRESS.name(),
                         ResourceEvent.CLUSTER_UPGRADE_VALIDATION_STARTED);
                 ClusterUpgradeValidationEvent event = new ClusterUpgradeValidationEvent(START_CLUSTER_UPGRADE_IMAGE_VALIDATION_EVENT.name(),
@@ -148,6 +151,25 @@ public class ClusterUpgradeValidationActions {
         };
     }
 
+    @Bean(name = "CLUSTER_UPGRADE_CREDENTIAL_VALIDATION_STATE")
+    public Action<?, ?> clusterUpgradeCredentialValidation() {
+        return new AbstractClusterUpgradeValidationAction<>(ClusterUpgradeValidationEvent.class) {
+
+            @Override
+            protected void doExecute(StackContext context, ClusterUpgradeValidationEvent payload, Map<Object, Object> variables) {
+                ClusterUpgradeCredentialValidationRequest clusterUpgradeCredentialValidationRequest = new ClusterUpgradeCredentialValidationRequest(
+                        payload.getResourceId(), context.getCloudStack(), context.getCloudCredential(), context.getCloudContext());
+                LOGGER.info("Validating credential for upgrade {}...", context.getCloudCredential().getName());
+                sendEvent(context, clusterUpgradeCredentialValidationRequest.selector(), clusterUpgradeCredentialValidationRequest);
+            }
+
+            @Override
+            protected Object getFailurePayload(ClusterUpgradeValidationEvent payload, Optional<StackContext> flowContext, Exception ex) {
+                return new ClusterUpgradeValidationFailureEvent(payload.getResourceId(), ex);
+            }
+        };
+    }
+
     @Bean(name = "CLUSTER_UPGRADE_VALIDATION_FINISHED_STATE")
     public Action<?, ?> clusterUpgradeValidationFinished() {
         return new AbstractClusterUpgradeValidationAction<>(ClusterUpgradeValidationFinishedEvent.class) {
@@ -207,7 +229,10 @@ public class ClusterUpgradeValidationActions {
                 return null;
             }
 
+            @Override
+            protected void initPayloadConverterMap(List<PayloadConverter<ClusterUpgradeValidationFailureEvent>> payloadConverters) {
+                payloadConverters.add(new ClusterUpgradeCredentialValidationFailedToClusterUpgradeValidationFailureEvent());
+            }
         };
     }
-
 }

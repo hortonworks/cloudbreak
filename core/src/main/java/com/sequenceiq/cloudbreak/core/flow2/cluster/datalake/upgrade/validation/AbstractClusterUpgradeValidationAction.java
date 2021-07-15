@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 
 import java.util.Collections;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -24,6 +25,7 @@ import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClient
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.flow.core.AbstractAction;
 import com.sequenceiq.flow.core.FlowParameters;
+import com.sequenceiq.flow.core.PayloadConverter;
 
 public abstract class AbstractClusterUpgradeValidationAction<P extends Payload>
         extends AbstractAction<ClusterUpgradeValidationState, ClusterUpgradeValidationStateSelectors, StackContext, P> {
@@ -42,6 +44,10 @@ public abstract class AbstractClusterUpgradeValidationAction<P extends Payload>
 
     protected AbstractClusterUpgradeValidationAction(Class<P> payloadClass) {
         super(payloadClass);
+    }
+
+    protected void initPayloadConverterMap(List<PayloadConverter<P>> payloadConverters) {
+        // By default payloadConverter map is empty.
     }
 
     @Override

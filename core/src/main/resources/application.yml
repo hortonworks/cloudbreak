@@ -718,7 +718,7 @@ cb:
   upgrade:
     validation:
       distrox:
-        enabled: false
+        enabled: true
       sdx:
         enabled: false
     permittedServicesForUpgrade: >
