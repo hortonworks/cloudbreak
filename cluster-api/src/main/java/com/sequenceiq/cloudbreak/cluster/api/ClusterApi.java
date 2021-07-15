@@ -73,6 +73,16 @@ public interface ClusterApi {
         return clusterModificationService().startCluster();
     }
 
+    default void startClusterMgmtServices() throws CloudbreakException {
+        clusterModificationService().startClusterMgmtServices();
+    }
+
+    default int startClusterServices() throws CloudbreakException {
+        return clusterModificationService().startClusterServices();
+    }
+
+
+
     default Map<String, String> gatherInstalledParcels(String stackName) {
         return clusterModificationService().gatherInstalledParcels(stackName);
     }

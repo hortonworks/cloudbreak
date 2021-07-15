@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.reactor.handler.cluster;
 
 import javax.inject.Inject;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.core.cluster.ClusterBuilderService;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -21,6 +23,9 @@ public class ClusterStartHandler implements EventHandler<ClusterStartRequest> {
     private ClusterApiConnectors apiConnectors;
 
     @Inject
+    private ClusterBuilderService clusterBuilderService;
+
+    @Inject
     private StackService stackService;
 
     @Inject
@@ -37,7 +42,11 @@ public class ClusterStartHandler implements EventHandler<ClusterStartRequest> {
         ClusterStartResult result;
         try {
             Stack stack = stackService.getByIdWithListsInTransaction(request.getResourceId());
-            int requestId = apiConnectors.getConnector(stack).startCluster();
+            apiConnectors.getConnector(stack).startClusterMgmtServices();
+            if(stack.getType() == StackType.WORKLOAD) {
+              clusterBuilderService.configureManagementServices(stack.getId());
+            }
+            int requestId = apiConnectors.getConnector(stack).startClusterServices();
             result = new ClusterStartResult(request, requestId);
         } catch (Exception e) {
             result = new ClusterStartResult(e.getMessage(), e, request);
