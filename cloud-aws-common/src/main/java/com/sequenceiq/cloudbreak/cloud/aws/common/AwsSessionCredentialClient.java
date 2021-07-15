@@ -101,4 +101,13 @@ public class AwsSessionCredentialClient {
                 .EndpointConfiguration(String.format("https://sts.%s.amazonaws.com", defaultZone), defaultZone);
     }
 
+    @Override
+    public String toString() {
+        return "AwsSessionCredentialClient{" +
+                "deprecatedExternalId='" + deprecatedExternalId + '\'' +
+                ", roleSessionName='" + roleSessionName + '\'' +
+                ", awsDefaultZoneProvider=" + awsDefaultZoneProvider.toString() +
+                '}';
+    }
+
 }
