@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -291,25 +292,30 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
 
     private void turnOnDeleteOnterminationOnAttachedVolumes(CloudResource resource, List<CloudResourceStatus> cloudResourceStatuses,
             AmazonEc2Client client) {
-        List<InstanceBlockDeviceMappingSpecification> deviceMappingSpecifications = cloudResourceStatuses.stream()
-                .filter(cloudResourceStatus -> ATTACHED.equals(cloudResourceStatus.getStatus()))
-                .map(CloudResourceStatus::getCloudResource)
-                .map(cloudResource -> cloudResource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class))
-                .map(VolumeSetAttributes::getVolumes)
-                .flatMap(List::stream)
-                .map(toInstanceBlockDeviceMappingSpecification)
-                .collect(Collectors.toList());
-        ModifyInstanceAttributeRequest modifyInstanceAttributeRequest = new ModifyInstanceAttributeRequest()
-                .withInstanceId(resource.getInstanceId())
-                .withBlockDeviceMappings(deviceMappingSpecifications);
+        String instanceId = resource.getInstanceId();
+        if (StringUtils.isNotEmpty(instanceId)) {
+            List<InstanceBlockDeviceMappingSpecification> deviceMappingSpecifications = cloudResourceStatuses.stream()
+                    .filter(cloudResourceStatus -> ATTACHED.equals(cloudResourceStatus.getStatus()))
+                    .map(CloudResourceStatus::getCloudResource)
+                    .map(cloudResource -> cloudResource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class))
+                    .map(VolumeSetAttributes::getVolumes)
+                    .flatMap(List::stream)
+                    .map(toInstanceBlockDeviceMappingSpecification)
+                    .collect(Collectors.toList());
+            ModifyInstanceAttributeRequest modifyInstanceAttributeRequest = new ModifyInstanceAttributeRequest()
+                    .withInstanceId(instanceId)
+                    .withBlockDeviceMappings(deviceMappingSpecifications);
 
-        ModifyInstanceAttributeResult modifyIdentityIdFormatResult = awsMethodExecutor.execute(
-                () -> client.modifyInstanceAttribute(modifyInstanceAttributeRequest), null);
-        String result = resource.getInstanceId() + " not found on the provider.";
-        if (modifyIdentityIdFormatResult != null) {
-            result = modifyIdentityIdFormatResult.toString();
+            ModifyInstanceAttributeResult modifyIdentityIdFormatResult = awsMethodExecutor.execute(
+                    () -> client.modifyInstanceAttribute(modifyInstanceAttributeRequest), null);
+            String result = instanceId + " not found on the provider.";
+            if (modifyIdentityIdFormatResult != null) {
+                result = modifyIdentityIdFormatResult.toString();
+            }
+            LOGGER.info("Delete on termination set to true on instance '{}'. {}", instanceId, result);
+        } else {
+            LOGGER.info("No instance id found for volume set resource, skipping the modify instance attributes call to AWS.");
         }
-        LOGGER.debug("Delete on termination set to true. {}", result);
     }
 
     private void deleteOrphanedVolumes(List<CloudResourceStatus> cloudResourceStatuses, AmazonEc2Client client) {
