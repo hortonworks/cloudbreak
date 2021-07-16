@@ -119,10 +119,10 @@ public class SdxBackupRestoreTest extends PreconditionSdxE2ETest {
     private SdxInternalTestDto validateDatalakeBackupStatus(TestContext testContext, SdxInternalTestDto testDto, SdxClient client) {
         String sdxName = testDto.getName();
         backupId = client.getDefaultClient()
-                .sdxEndpoint()
+                .sdxBackupEndpoint()
                 .getDatalakeBackupId(sdxName, null);
         SdxBackupStatusResponse sdxBackupStatusResponse = client.getDefaultClient()
-                .sdxEndpoint()
+                .sdxBackupEndpoint()
                 .getBackupDatalakeStatus(sdxName, backupId, null);
         String status = sdxBackupStatusResponse.getStatus();
         String statusReason = sdxBackupStatusResponse.getReason();
@@ -144,10 +144,10 @@ public class SdxBackupRestoreTest extends PreconditionSdxE2ETest {
 
         try {
             restoreId = client.getDefaultClient()
-                    .sdxEndpoint()
+                    .sdxRestoreEndpoint()
                     .getDatalakeRestoreId(sdxName, null);
             SdxRestoreStatusResponse sdxRestoreStatusResponse = client.getDefaultClient()
-                    .sdxEndpoint()
+                    .sdxRestoreEndpoint()
                     .getRestoreDatalakeStatus(sdxName, restoreId, null);
             status = sdxRestoreStatusResponse.getStatus();
             statusReason = sdxRestoreStatusResponse.getReason();

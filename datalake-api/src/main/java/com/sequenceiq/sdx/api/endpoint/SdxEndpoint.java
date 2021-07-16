@@ -31,25 +31,16 @@ import com.sequenceiq.cloudbreak.validation.ValidStackNameLength;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.sdx.api.model.AdvertisedRuntime;
 import com.sequenceiq.sdx.api.model.RangerCloudIdentitySyncStatus;
-import com.sequenceiq.sdx.api.model.SdxBackupResponse;
-import com.sequenceiq.sdx.api.model.SdxBackupStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxCustomClusterRequest;
-import com.sequenceiq.sdx.api.model.SdxDatabaseBackupResponse;
-import com.sequenceiq.sdx.api.model.SdxDatabaseBackupStatusResponse;
-import com.sequenceiq.sdx.api.model.SdxDatabaseRestoreResponse;
-import com.sequenceiq.sdx.api.model.SdxDatabaseRestoreStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
-import com.sequenceiq.sdx.api.model.SdxRestoreResponse;
-import com.sequenceiq.sdx.api.model.SdxRestoreStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxValidateCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SetRangerCloudIdentityMappingRequest;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 
 @Validated
 @Path("/sdx")
@@ -190,97 +181,6 @@ public interface SdxEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "list advertised datalake versions", produces = MediaType.APPLICATION_JSON, nickname = "advertisedruntimes")
     List<AdvertisedRuntime> advertisedRuntimes(@QueryParam("cloudPlatform") String cloudPlatform);
-
-    @POST
-    @Path("{name}/backupDatalake")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "backup the datalake ", produces = MediaType.APPLICATION_JSON, nickname = "backupDatalake")
-    SdxBackupResponse backupDatalakeByName(@PathParam("name") String name,
-            @QueryParam("backupLocation") String backupLocation,
-            @QueryParam("backupName") String backupName);
-
-    @POST
-    @Path("{name}/backupDatalakeStatus")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "backup status of the datalake ", produces = MediaType.APPLICATION_JSON, nickname = "backupDatalakeStatus")
-    SdxBackupStatusResponse backupDatalakeStatusByName(@PathParam("name") String name,
-            @QueryParam("backupId") String backupId,
-            @QueryParam("backupName") String backupName);
-
-    @GET
-    @Path("{name}/getBackupDatalakeStatus")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "backup status of the datalake by datalake name ", produces = MediaType.APPLICATION_JSON,
-            nickname = "getBackupDatalakeStatus")
-    SdxBackupStatusResponse getBackupDatalakeStatus(@ApiParam(value = "required: datalake name", required = true) @PathParam("name") String name,
-            @ApiParam(value = "optional: datalake backup id", required = false) @QueryParam("backupId") String backupId,
-            @ApiParam(value = "optional: datalake backup name", required = false) @QueryParam("backupName") String backupName);
-
-    @GET
-    @Path("{name}/getDatalakeBackupId")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "backup Id of the datalake backup by datalake name ", produces = MediaType.APPLICATION_JSON, nickname = "getDatalakeBackupId")
-    String getDatalakeBackupId(@ApiParam(value = "required: datalake name", required = true) @PathParam("name") String name,
-            @ApiParam(value = "optional: datalake backup name", required = false) @QueryParam("backupName") String backupName);
-
-    @POST
-    @Path("{name}/restoreDatalake")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "restore the datalake ", produces = MediaType.APPLICATION_JSON, nickname = "restoreDatalake")
-    SdxRestoreResponse restoreDatalakeByName(@PathParam("name") String name,
-            @QueryParam("backupId") String backupId, @QueryParam("backupLocationOverride") String backupLocationOverride);
-
-    @POST
-    @Path("{name}/restoreDatalakeStatus")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "restore status of the datalake ", produces = MediaType.APPLICATION_JSON, nickname = "restoreDatalakeStatus")
-    SdxRestoreStatusResponse getRestoreDatalakeStatusByName(@PathParam("name") String name,
-            @QueryParam("restoreId") String restoreId);
-
-    @GET
-    @Path("{name}/getRestoreDatalakeStatus")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "restore status of the datalake by datalake name ", produces = MediaType.APPLICATION_JSON,
-            nickname = "getRestoreDatalakeStatus")
-    SdxRestoreStatusResponse getRestoreDatalakeStatus(@ApiParam(value = "required: datalake name", required = true) @PathParam("name") String name,
-            @ApiParam(value = "optional: datalake restore id", required = false) @QueryParam("restoreId") String restoreId,
-            @ApiParam(value = "optional: datalake backup name", required = false) @QueryParam("backupName") String backupName);
-
-    @GET
-    @Path("{name}/getDatalakeRestoreId")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "restore Id of the datalake restore by datalake name ", produces = MediaType.APPLICATION_JSON, nickname = "getDatalakeRestoreId")
-    String getDatalakeRestoreId(@ApiParam(value = "required: datalake name", required = true) @PathParam("name") String name,
-            @ApiParam(value = "optional: datalake backup name", required = false) @QueryParam("backupName") String backupName);
-
-    @POST
-    @Path("{name}/backupDatabase")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "backup the database backing datalake ", produces = MediaType.APPLICATION_JSON, nickname = "backupDatabase")
-    SdxDatabaseBackupResponse backupDatabaseByName(@PathParam("name") String name,
-            @QueryParam("backupId") String backupId, @QueryParam("backupLocation") String backupLocation);
-
-    @POST
-    @Path("{name}/restoreDatabase")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "restore the database backing datalake ", produces = MediaType.APPLICATION_JSON, nickname = "restoreDatabase")
-    SdxDatabaseRestoreResponse restoreDatabaseByName(@PathParam("name") String name,
-            @QueryParam("backupId") String backupId, @QueryParam("restoreId") String restoreId,
-            @QueryParam("backupLocation") String backupLocation);
-
-    @GET
-    @Path("{name}/backupDatabaseStatus")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Get the status of datalake database backup operation", produces = MediaType.APPLICATION_JSON, nickname = "backupDatabaseStatus")
-    SdxDatabaseBackupStatusResponse getBackupDatabaseStatusByName(@PathParam("name") String name,
-            @QueryParam("operationId") String operationId);
-
-    @GET
-    @Path("{name}/restoreDatabaseStatus")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Get the status of datalake database restore operation", produces = MediaType.APPLICATION_JSON, nickname = "restoreDatabaseStatus")
-    SdxDatabaseRestoreStatusResponse getRestoreDatabaseStatusByName(@PathParam("name") String name,
-            @QueryParam("operationId") String operationId);
 
     @POST
     @Path("/envcrn/{envCrn}/ranger_cloud_identity_mapping")
