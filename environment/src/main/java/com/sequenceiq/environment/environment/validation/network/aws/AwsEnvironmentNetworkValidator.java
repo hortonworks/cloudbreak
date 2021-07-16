@@ -61,7 +61,16 @@ public class AwsEnvironmentNetworkValidator implements EnvironmentNetworkValidat
             Map<String, Long> zones = cloudmetadata.values().stream()
                     .collect(Collectors.groupingBy(CloudSubnet::getAvailabilityZone, Collectors.counting()));
             if (zones.size() < 2) {
-                message = "The Subnets in the VPC should be present at least in two different availability zones";
+                message = String.format("The Subnets in the VPC (%s) should be present at least in two different " +
+                        "availability zones, but they are present only in availability zone %s. Please add " +
+                        "subnets to the environment from the required number of different availability zones.",
+                        String.join(", ", zones.keySet()
+                                .stream()
+                                .collect(Collectors.toList())),
+                        String.join(", ", cloudmetadata.values()
+                                .stream()
+                                .map(e -> e.getName())
+                                .collect(Collectors.toList())));
                 LOGGER.info(message);
                 resultBuilder.error(message);
             }
