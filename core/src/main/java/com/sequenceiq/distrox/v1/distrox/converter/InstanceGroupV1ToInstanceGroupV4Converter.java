@@ -1,6 +1,7 @@
 package com.sequenceiq.distrox.v1.distrox.converter;
 
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
+import static com.sequenceiq.cloudbreak.util.SecurityGroupSeparator.getSecurityGroupIds;
 import static org.apache.commons.lang3.ObjectUtils.anyNotNull;
 
 import java.util.ArrayList;
@@ -144,7 +145,7 @@ public class InstanceGroupV1ToInstanceGroupV4Converter {
 
     private void setSecurityAccess(SecurityGroupV4Request securityGroup, String securityGroupId, String cidrs) {
         if (!Strings.isNullOrEmpty(securityGroupId)) {
-            securityGroup.setSecurityGroupIds(Set.of(securityGroupId));
+            securityGroup.setSecurityGroupIds(getSecurityGroupIds(securityGroupId));
             securityGroup.setSecurityRules(new ArrayList<>());
         } else if (!Strings.isNullOrEmpty(cidrs)) {
             List<SecurityRuleV4Request> generatedSecurityRules = new ArrayList<>();
