@@ -60,7 +60,7 @@ public class AwsNativeLoadBalancerListenerResourceBuilder extends AbstractAwsNat
                 .withListenerArn(resource.getReference());
         DeleteListenerResult deleteResult = null;
         try {
-             deleteResult = awsMethodExecutor.execute(() -> loadBalancingClient.deleteListener(deleteListenerRequest), null);
+            deleteResult = awsMethodExecutor.execute(() -> loadBalancingClient.deleteListener(deleteListenerRequest), null);
         } catch (AmazonServiceException awsException) {
             if (StringUtils.isNotEmpty(awsException.getErrorCode()) && LISTENER_NOT_FOUND_ERROR_CODE.equals(awsException.getErrorCode())) {
                 LOGGER.info("Listener doesn't exist with id: '{}'", resource.getReference());
