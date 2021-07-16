@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.ws.rs.ClientErrorException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -49,6 +50,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.transform.ResourceLists;
+import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.common.api.type.CommonResourceType;
@@ -89,6 +91,8 @@ import com.sequenceiq.freeipa.flow.freeipa.upscale.failure.PostInstallFreeIpaFai
 import com.sequenceiq.freeipa.flow.freeipa.upscale.failure.UpscaleStackResultToUpscaleFailureEventConverter;
 import com.sequenceiq.freeipa.flow.stack.StackContext;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
+import com.sequenceiq.freeipa.flow.stack.provision.event.clusterproxy.ClusterProxyRegistrationRequest;
+import com.sequenceiq.freeipa.flow.stack.provision.event.clusterproxy.ClusterProxyRegistrationSuccess;
 import com.sequenceiq.freeipa.service.TlsSetupService;
 import com.sequenceiq.freeipa.service.config.KerberosConfigUpdateService;
 import com.sequenceiq.freeipa.service.operation.OperationService;
@@ -349,11 +353,28 @@ public class FreeIpaUpscaleActions {
         };
     }
 
-    @Bean(name = "UPSCALE_BOOTSTRAPPING_MACHINES_STATE")
-    public Action<?, ?> bootstrappingMachinesAction() {
+    @Bean(name = "UPSCALE_UPDATE_CLUSTERPROXY_REGISTRATION_PRE_BOOTSTRAP_STATE")
+    public Action<?, ?> updateClusterProxyRegistrationPreBootstrapAction() {
         return new AbstractUpscaleAction<>(StackEvent.class) {
             @Override
             protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
+                Stack stack = context.getStack();
+                stackUpdater.updateStackStatus(stack.getId(), getInProgressStatus(variables), "Update cluster proxy registration before bootstrap");
+                List<String> instanceIds = getInstanceIds(variables);
+                Set<InstanceMetaData> newInstances = instanceMetaDataService.getByInstanceIds(instanceIds);
+                boolean allNewInstanceHasFqdn = newInstances.stream().allMatch(im -> StringUtils.isNotBlank(im.getDiscoveryFQDN()));
+                Selectable event = allNewInstanceHasFqdn ? new ClusterProxyRegistrationRequest(stack.getId())
+                        : new ClusterProxyRegistrationSuccess(stack.getId());
+                sendEvent(context, event.selector(), event);
+            }
+        };
+    }
+
+    @Bean(name = "UPSCALE_BOOTSTRAPPING_MACHINES_STATE")
+    public Action<?, ?> bootstrappingMachinesAction() {
+        return new AbstractUpscaleAction<>(ClusterProxyRegistrationSuccess.class) {
+            @Override
+            protected void doExecute(StackContext context, ClusterProxyRegistrationSuccess payload, Map<Object, Object> variables) {
                 Stack stack = context.getStack();
                 stackUpdater.updateStackStatus(stack.getId(), getInProgressStatus(variables), "Bootstrapping machines");
                 BootstrapMachinesRequest request = new BootstrapMachinesRequest(stack.getId());
@@ -438,7 +459,7 @@ public class FreeIpaUpscaleActions {
             @Override
             protected void doExecute(StackContext context, InstallFreeIpaServicesSuccess payload, Map<Object, Object> variables) {
                 Stack stack = context.getStack();
-                stackUpdater.updateStackStatus(stack.getId(), getInProgressStatus(variables), "Update cluster proxy registration");
+                stackUpdater.updateStackStatus(stack.getId(), getInProgressStatus(variables), "Update cluster proxy registration after bootstrap");
                 ClusterProxyUpdateRegistrationRequest request = new ClusterProxyUpdateRegistrationRequest(stack.getId());
                 sendEvent(context, request.selector(), request);
             }
@@ -541,7 +562,7 @@ public class FreeIpaUpscaleActions {
             protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
                 Stack stack = context.getStack();
                 stackUpdater.updateStackStatus(stack.getId(), getUpscaleCompleteStatus(variables), "Upscale complete");
-                if (!isRepair(variables) || !isChainedAction(variables) || isFinalChain(variables)) {
+                if (shouldCompleteOperation(variables)) {
                     SuccessDetails successDetails = new SuccessDetails(stack.getEnvironmentCrn());
                     successDetails.getAdditionalDetails().put("Hosts", getUpscaleHosts(variables));
                     operationService.completeOperation(stack.getAccountId(), getOperationId(variables), List.of(successDetails), Collections.emptyList());

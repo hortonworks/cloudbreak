@@ -67,7 +67,7 @@ public abstract class AbstractCommonChainAction<S extends FlowState, E extends F
     }
 
     protected Boolean isRepair(Map<Object, Object> variable) {
-        return (Boolean) variable.get(REPAIR);
+        return (Boolean) variable.getOrDefault(REPAIR, Boolean.FALSE);
     }
 
     protected void setInstanceCountByGroup(Map<Object, Object> variables, Integer instanceCountByGroup) {
@@ -81,5 +81,9 @@ public abstract class AbstractCommonChainAction<S extends FlowState, E extends F
     protected void enableStatusChecker(Stack stack, String reason) {
         LOGGER.info("Enabling the status checker for stack ID {}. {}", stack.getId(), reason);
         jobService.schedule(stack);
+    }
+
+    protected boolean shouldCompleteOperation(Map<Object, Object> variables) {
+        return (!isRepair(variables) && !isChainedAction(variables)) || isFinalChain(variables);
     }
 }

@@ -14,11 +14,13 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
+import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.projection.StackAuthenticationView;
 import com.sequenceiq.freeipa.repository.InstanceMetaDataRepository;
+import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 
 @Service
 public class InstanceMetaDataService {
@@ -26,6 +28,9 @@ public class InstanceMetaDataService {
 
     @Inject
     private InstanceMetaDataRepository instanceMetaDataRepository;
+
+    @Inject
+    private FreeIpaService freeIpaService;
 
     public void saveInstanceRequests(Stack stack, List<Group> groups) {
         Set<InstanceGroup> instanceGroups = stack.getInstanceGroups();
@@ -95,14 +100,18 @@ public class InstanceMetaDataService {
     }
 
     public Stack saveInstanceAndGetUpdatedStack(Stack stack, List<CloudInstance> cloudInstances) {
+        FreeIpa freeIpa = freeIpaService.findByStack(stack);
         for (CloudInstance cloudInstance : cloudInstances) {
             InstanceGroup instanceGroup = getInstanceGroup(stack.getInstanceGroups(), cloudInstance.getTemplate().getGroupName());
             if (instanceGroup != null) {
                 InstanceMetaData instanceMetaData = new InstanceMetaData();
-                instanceMetaData.setPrivateId(cloudInstance.getTemplate().getPrivateId());
+                Long privateId = cloudInstance.getTemplate().getPrivateId();
+                instanceMetaData.setPrivateId(privateId);
                 instanceMetaData.setInstanceStatus(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus.REQUESTED);
                 instanceMetaData.setInstanceGroup(instanceGroup);
+                instanceMetaData.setDiscoveryFQDN(freeIpa.getHostname() + String.format("%d.", privateId) + freeIpa.getDomain());
                 instanceMetaDataRepository.save(instanceMetaData);
+                LOGGER.debug("Saved InstanceMetaData: {}", instanceMetaData);
                 instanceGroup.getInstanceMetaDataSet().add(instanceMetaData);
             }
         }

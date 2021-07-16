@@ -9,16 +9,20 @@ public class SaltUpdateTriggerEvent extends StackEvent {
 
     private String operationId;
 
-    public SaltUpdateTriggerEvent(Long stackId) {
-        super(stackId);
-    }
+    private final boolean chained;
+
+    private final boolean finalChain;
 
     public SaltUpdateTriggerEvent(String selector, Long stackId) {
         super(selector, stackId);
+        chained = false;
+        finalChain = false;
     }
 
-    public SaltUpdateTriggerEvent(String selector, Long stackId, Promise<AcceptResult> accepted) {
+    public SaltUpdateTriggerEvent(String selector, Long stackId, Promise<AcceptResult> accepted, boolean chained, boolean finalChain) {
         super(selector, stackId, accepted);
+        this.chained = chained;
+        this.finalChain = finalChain;
     }
 
     public SaltUpdateTriggerEvent withOperationId(String operationId) {
@@ -30,10 +34,20 @@ public class SaltUpdateTriggerEvent extends StackEvent {
         return operationId;
     }
 
+    public boolean isChained() {
+        return chained;
+    }
+
+    public boolean isFinalChain() {
+        return finalChain;
+    }
+
     @Override
     public String toString() {
         return "SaltUpdateTriggerEvent{" +
                 "operationId='" + operationId + '\'' +
+                ", chained=" + chained +
+                ", finalChain=" + finalChain +
                 "} " + super.toString();
     }
 }

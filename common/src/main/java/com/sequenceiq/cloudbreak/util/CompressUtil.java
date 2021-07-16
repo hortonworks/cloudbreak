@@ -16,7 +16,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.stereotype.Component;
 
+@Component
 public class CompressUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CompressUtil.class);
@@ -24,7 +26,7 @@ public class CompressUtil {
     private CompressUtil() {
     }
 
-    public static byte[] generateCompressedOutputFromFolders(String... classpathFolders) throws IOException {
+    public byte[] generateCompressedOutputFromFolders(String... classpathFolders) throws IOException {
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             try (ZipOutputStream zout = new ZipOutputStream(baos)) {
                 Map<String, List<Resource>> structure = new TreeMap<>();
@@ -50,7 +52,7 @@ public class CompressUtil {
         }
     }
 
-    private static void fillStructureWithResources(Map<String, List<Resource>> structure,
+    private void fillStructureWithResources(Map<String, List<Resource>> structure,
             String folder) throws IOException {
         ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
         for (Resource resource : resolver.getResources(String.format("classpath*:%s/**", folder))) {

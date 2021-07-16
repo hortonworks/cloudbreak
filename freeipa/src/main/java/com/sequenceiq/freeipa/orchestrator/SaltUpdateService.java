@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.flow.freeipa.salt.update.SaltUpdateTriggerEvent;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.stack.StackService;
@@ -28,7 +29,7 @@ public class SaltUpdateService {
     public FlowIdentifier updateSaltStates(String environmentCrn, String accountId) {
         Stack stack = stackService.getByEnvironmentCrnAndAccountId(environmentCrn, accountId);
         MDCBuilder.buildMdcContext(stack);
-        StackEvent event = new StackEvent(SALT_UPDATE_EVENT.event(), stack.getId());
+        StackEvent event = new SaltUpdateTriggerEvent(SALT_UPDATE_EVENT.event(), stack.getId());
         LOGGER.info("Triggering salt update flow with event: {}", event);
         return flowManager.notify(event.selector(), event);
     }

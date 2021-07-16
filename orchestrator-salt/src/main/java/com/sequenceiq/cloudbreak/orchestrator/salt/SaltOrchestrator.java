@@ -168,6 +168,9 @@ public class SaltOrchestrator implements HostOrchestrator {
     @Inject
     private SaltService saltService;
 
+    @Inject
+    private CompressUtil compressUtil;
+
     @Override
     public void bootstrap(List<GatewayConfig> allGatewayConfigs, Set<Node> targets, BootstrapParams params,
             ExitCriteriaModel exitModel) throws CloudbreakOrchestratorException {
@@ -523,19 +526,19 @@ public class SaltOrchestrator implements HostOrchestrator {
             ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
         Set<String> freeIpaMasterHostname = new HashSet<>(
                 getHostnamesForRoles(primaryGateway, Set.of(FREEIPA_MASTER_ROLE, FREEIPA_MASTER_REPLACEMENT_ROLE), allNodes));
-        Set<String> existingFreeIpaReplaceHostnames = new HashSet<>(getHostnamesForRoles(primaryGateway, Set.of(FREEIPA_REPLICA_ROLE), allNodes));
+        Set<String> existingFreeIpaReplicaHostnames = new HashSet<>(getHostnamesForRoles(primaryGateway, Set.of(FREEIPA_REPLICA_ROLE), allNodes));
 
         Set<String> unassignedHostnames = allGatewayConfigs.stream()
                 .map(GatewayConfig::getHostname)
                 .filter(hostname -> !freeIpaMasterHostname.contains(hostname))
-                .filter(hostname -> !existingFreeIpaReplaceHostnames.contains(hostname))
+                .filter(hostname -> !existingFreeIpaReplicaHostnames.contains(hostname))
                 .collect(Collectors.toCollection(HashSet::new));
 
         try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
 
-            installFreeIpaUpdateExistingReplicas(sc, existingFreeIpaReplaceHostnames, allNodes, exitCriteriaModel);
+            installFreeIpaUpdateExistingReplicas(sc, existingFreeIpaReplicaHostnames, allNodes, exitCriteriaModel);
 
-            unassignedHostnames.removeAll(installFreeIpaPrimary(sc, primaryGateway, freeIpaMasterHostname, unassignedHostnames, existingFreeIpaReplaceHostnames,
+            unassignedHostnames.removeAll(installFreeIpaPrimary(sc, primaryGateway, freeIpaMasterHostname, unassignedHostnames, existingFreeIpaReplicaHostnames,
                     allNodes, exitCriteriaModel));
 
             installFreeIpaReplicas(sc, unassignedHostnames, allNodes, exitCriteriaModel);
@@ -556,46 +559,67 @@ public class SaltOrchestrator implements HostOrchestrator {
         }
     }
 
-    private void installFreeIpaUpdateExistingReplicas(SaltConnector sc, Set<String> existingFreeIpaReplaceHostnames, Set<Node> allNodes,
+    private void installFreeIpaUpdateExistingReplicas(SaltConnector sc, Set<String> existingFreeIpaReplicaHostnames, Set<Node> allNodes,
             ExitCriteriaModel exitCriteriaModel) throws Exception {
-        LOGGER.debug("Exsting Replica FreeIPAs: [{}]", existingFreeIpaReplaceHostnames);
+        LOGGER.debug("Exsting Replica FreeIPAs: [{}]", existingFreeIpaReplicaHostnames);
         // The existing replicas need to be serialized into high state. See the comments in CB-7335 for more details.
-        for (String existingReplicaHostname : existingFreeIpaReplaceHostnames) {
+        for (String existingReplicaHostname : existingFreeIpaReplicaHostnames) {
             LOGGER.debug("Applying changes to FreeIPA replica {}", existingReplicaHostname);
             runNewService(sc, new HighStateRunner(Set.of(existingReplicaHostname), allNodes), exitCriteriaModel);
         }
     }
 
-    private void installFreeIpaReplicas(SaltConnector sc, Set<String> newFreeIpaReplaceHostnames, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
+    private void installFreeIpaReplicas(SaltConnector sc, Set<String> newFreeIpaReplicaHostnames, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
             throws Exception {
-        LOGGER.debug("New Replica FreeIPAs: [{}]", newFreeIpaReplaceHostnames);
-        if (!newFreeIpaReplaceHostnames.isEmpty()) {
-            saltCommandRunner.runModifyGrainCommand(sc, new GrainAddRunner(newFreeIpaReplaceHostnames, allNodes, FREEIPA_REPLICA_ROLE), exitCriteriaModel,
+        LOGGER.debug("New Replica FreeIPAs: [{}]", newFreeIpaReplicaHostnames);
+        if (!newFreeIpaReplicaHostnames.isEmpty()) {
+            saltCommandRunner.runModifyGrainCommand(sc, new GrainAddRunner(newFreeIpaReplicaHostnames, allNodes, FREEIPA_REPLICA_ROLE), exitCriteriaModel,
                     exitCriteria);
-            runNewService(sc, new HighStateRunner(newFreeIpaReplaceHostnames, allNodes), exitCriteriaModel);
+            runNewService(sc, new HighStateRunner(newFreeIpaReplicaHostnames, allNodes), exitCriteriaModel);
         }
     }
 
     private Set<String> installFreeIpaPrimary(SaltConnector sc, GatewayConfig primaryGateway, Set<String> freeIpaMasterHostname, Set<String> unassignedHostnames,
-            Set<String> existingFreeIpaReplaceHostnames, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel) throws Exception {
-        freeIpaMasterHostname = new HashSet<>(freeIpaMasterHostname);
-        if (!freeIpaMasterHostname.isEmpty()) {
-            LOGGER.debug("Existing primary FreeIPA: {}", freeIpaMasterHostname);
-        } else if (existingFreeIpaReplaceHostnames.isEmpty()) {
-            freeIpaMasterHostname.add(primaryGateway.getHostname());
-            LOGGER.debug("Initial primary FreeIPA: {}", freeIpaMasterHostname);
-            saltCommandRunner.runModifyGrainCommand(sc,
-                    new GrainAddRunner(freeIpaMasterHostname, allNodes, FREEIPA_MASTER_ROLE), exitCriteriaModel, exitCriteria);
+            Set<String> existingFreeIpaReplicaHostnames, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel) throws Exception {
+        Set<String> freeIpaMasterHostnames = new HashSet<>(freeIpaMasterHostname);
+        if (!freeIpaMasterHostnames.isEmpty()) {
+            LOGGER.debug("Existing primary FreeIPA: {}", freeIpaMasterHostnames);
+        } else if (existingFreeIpaReplicaHostnames.isEmpty()) {
+            selectPrimaryGwAsFreeIpaMasterForInitialDeployment(sc, primaryGateway, allNodes, exitCriteriaModel, freeIpaMasterHostnames);
         } else {
-            freeIpaMasterHostname.add(unassignedHostnames.stream().findFirst()
-                    .orElseThrow(() ->
-                            new NotFoundException("A primary FreeIPA instance is requried and there are no unassigned roles to assign as a primary")));
-            LOGGER.debug("Replacement primary FreeIPA: {}", freeIpaMasterHostname);
-            saltCommandRunner.runModifyGrainCommand(sc,
-                    new GrainAddRunner(freeIpaMasterHostname, allNodes, FREEIPA_MASTER_REPLACEMENT_ROLE), exitCriteriaModel, exitCriteria);
+            selectNewMasterReplacement(sc, primaryGateway, unassignedHostnames, existingFreeIpaReplicaHostnames, allNodes, exitCriteriaModel,
+                    freeIpaMasterHostnames);
         }
-        runNewService(sc, new HighStateRunner(freeIpaMasterHostname, allNodes), exitCriteriaModel);
-        return freeIpaMasterHostname;
+        runNewService(sc, new HighStateRunner(freeIpaMasterHostnames, allNodes), exitCriteriaModel);
+        return freeIpaMasterHostnames;
+    }
+
+    private void selectPrimaryGwAsFreeIpaMasterForInitialDeployment(SaltConnector sc, GatewayConfig primaryGateway, Set<Node> allNodes,
+            ExitCriteriaModel exitCriteriaModel, Set<String> freeIpaMasterHostnames) throws Exception {
+        freeIpaMasterHostnames.add(primaryGateway.getHostname());
+        LOGGER.debug("Initial primary FreeIPA: {}", freeIpaMasterHostnames);
+        saltCommandRunner.runModifyGrainCommand(sc,
+                new GrainAddRunner(freeIpaMasterHostnames, allNodes, FREEIPA_MASTER_ROLE), exitCriteriaModel, exitCriteria);
+    }
+
+    private void selectNewMasterReplacement(SaltConnector sc, GatewayConfig primaryGateway, Set<String> unassignedHostnames,
+            Set<String> existingFreeIpaReplicaHostnames, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel, Set<String> freeIpaMasterHostnames)
+            throws Exception {
+        freeIpaMasterHostnames.add(unassignedHostnames.stream().findFirst()
+                .orElseGet(() -> choosePrimaryGatewayAsMasterReplacement(primaryGateway, existingFreeIpaReplicaHostnames)
+                        .orElseThrow(() ->
+                                new NotFoundException("A primary FreeIPA instance is required and there are no unassigned roles to assign as a primary"))));
+        LOGGER.debug("Replacement primary FreeIPA: {}", freeIpaMasterHostnames);
+        saltCommandRunner.runModifyGrainCommand(sc,
+                new GrainAddRunner(freeIpaMasterHostnames, allNodes, FREEIPA_MASTER_REPLACEMENT_ROLE), exitCriteriaModel, exitCriteria);
+        saltCommandRunner.runModifyGrainCommand(sc, new GrainRemoveRunner(freeIpaMasterHostnames, allNodes, FREEIPA_REPLICA_ROLE), exitCriteriaModel,
+                exitCriteria);
+    }
+
+    private Optional<String> choosePrimaryGatewayAsMasterReplacement(GatewayConfig primaryGateway, Set<String> existingFreeIpaReplicaHostnames) {
+        LOGGER.debug("No new candidate found. Trying to choose the primary gateway [{}] from existing replicas: {}",
+                primaryGateway.getHostname(), existingFreeIpaReplicaHostnames);
+        return existingFreeIpaReplicaHostnames.stream().filter(replica -> primaryGateway.getHostname().equals(replica)).findFirst();
     }
 
     @Override
@@ -897,7 +921,7 @@ public class SaltOrchestrator implements HostOrchestrator {
 
     @Override
     public byte[] getStateConfigZip() throws IOException {
-        return CompressUtil.generateCompressedOutputFromFolders("salt-common", "salt");
+        return compressUtil.generateCompressedOutputFromFolders("salt-common", "salt");
     }
 
     @Override
