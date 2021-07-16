@@ -1,8 +1,11 @@
 package com.sequenceiq.cloudbreak.cm;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -16,12 +19,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
@@ -30,7 +36,9 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.stubbing.Answer;
 
+import com.cloudera.api.swagger.BatchResourceApi;
 import com.cloudera.api.swagger.ClouderaManagerResourceApi;
 import com.cloudera.api.swagger.ClustersResourceApi;
 import com.cloudera.api.swagger.HostTemplatesResourceApi;
@@ -41,6 +49,10 @@ import com.cloudera.api.swagger.ParcelsResourceApi;
 import com.cloudera.api.swagger.ServicesResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
+import com.cloudera.api.swagger.model.ApiBatchRequest;
+import com.cloudera.api.swagger.model.ApiBatchRequestElement;
+import com.cloudera.api.swagger.model.ApiBatchResponse;
+import com.cloudera.api.swagger.model.ApiBatchResponseElement;
 import com.cloudera.api.swagger.model.ApiCommand;
 import com.cloudera.api.swagger.model.ApiCommandList;
 import com.cloudera.api.swagger.model.ApiConfigStalenessStatus;
@@ -50,6 +62,7 @@ import com.cloudera.api.swagger.model.ApiHostRefList;
 import com.cloudera.api.swagger.model.ApiRestartClusterArgs;
 import com.cloudera.api.swagger.model.ApiService;
 import com.cloudera.api.swagger.model.ApiServiceList;
+import com.cloudera.api.swagger.model.HTTPMethod;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
@@ -92,7 +105,7 @@ class ClouderaManagerModificationServiceTest {
     private ApiClient apiClientMock;
 
     @Spy
-    private Stack stack = new Stack();
+    private Stack stack;
 
     @Mock
     private HttpClientConfig clientConfig;
@@ -123,6 +136,9 @@ class ClouderaManagerModificationServiceTest {
 
     @Mock
     private ParcelsResourceApi parcelsResourceApi;
+
+    @Mock
+    private BatchResourceApi batchResourceApi;
 
     @Mock
     private ClusterComponentConfigProvider clusterComponentProvider;
@@ -163,7 +179,7 @@ class ClouderaManagerModificationServiceTest {
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
 
         stack.setName(STACK_NAME);
         cluster = new Cluster();
@@ -176,15 +192,18 @@ class ClouderaManagerModificationServiceTest {
 
     @Test
     void upscaleClusterListHostsException() throws Exception {
-        when(clustersResourceApi.listHosts(eq(STACK_NAME), eq(null), eq(null), eq(null))).thenThrow(new ApiException("Failed to get hosts"));
+        ApiException apiException = new ApiException("Failed to get hosts");
+        when(clustersResourceApi.listHosts(eq(STACK_NAME), eq(null), eq(null), eq(null))).thenThrow(apiException);
         when(clouderaManagerApiFactory.getClustersResourceApi(eq(apiClientMock))).thenReturn(clustersResourceApi);
 
         InstanceMetaData instanceMetaData = new InstanceMetaData();
         instanceMetaData.setDiscoveryFQDN("upscaled");
         List<InstanceMetaData> instanceMetaDataList = List.of(instanceMetaData);
 
-        Exception exception = assertThrows(CloudbreakException.class, () -> underTest.upscaleCluster(hostGroup, instanceMetaDataList));
+        CloudbreakException exception = assertThrows(CloudbreakException.class, () -> underTest.upscaleCluster(hostGroup, instanceMetaDataList));
+
         assertEquals("Failed to upscale", exception.getMessage());
+        assertThat(exception).hasCauseReference(apiException);
     }
 
     @Test
@@ -196,14 +215,69 @@ class ClouderaManagerModificationServiceTest {
         when(clouderaManagerPollingServiceProvider.startPollingCmParcelRepositoryRefresh(stack, apiClientMock, REFRESH_PARCEL_REPOS_ID))
                 .thenReturn(PollingResult.SUCCESS);
         setUpListClusterHosts();
+        setUpReadHosts(false);
 
         InstanceMetaData instanceMetaData = new InstanceMetaData();
         instanceMetaData.setDiscoveryFQDN("original");
         List<InstanceMetaData> instanceMetaDataList = List.of(instanceMetaData);
 
         underTest.upscaleCluster(hostGroup, instanceMetaDataList);
-        verify(clouderaManagerApiFactory, never()).getHostsResourceApi(any());
+
+        verify(clustersResourceApi, never()).addHosts(anyString(), any(ApiHostRefList.class));
         verify(clouderaManagerRoleRefreshService).refreshClusterRoles(apiClientMock, stack);
+        verify(clouderaManagerApiFactory, never()).getBatchResourceApi(any(ApiClient.class));
+    }
+
+    @Test
+    void upscaleClusterTestWhenNoHostToUpscaleButRackIdUpdatedForOutdatedClusterHost() throws Exception {
+        setUpDeployClientConfigPolling(PollingResult.SUCCESS);
+
+        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any())).thenReturn(clouderaManagerResourceApi);
+        when(clouderaManagerResourceApi.refreshParcelRepos()).thenReturn(new ApiCommand().id(REFRESH_PARCEL_REPOS_ID));
+        when(clouderaManagerPollingServiceProvider.startPollingCmParcelRepositoryRefresh(stack, apiClientMock, REFRESH_PARCEL_REPOS_ID))
+                .thenReturn(PollingResult.SUCCESS);
+        setUpListClusterHosts();
+        setUpReadHosts(false);
+
+        setUpBatchSuccess();
+
+        InstanceMetaData instanceMetaData = new InstanceMetaData();
+        instanceMetaData.setDiscoveryFQDN("original");
+        instanceMetaData.setRackId("/originalRack");
+        List<InstanceMetaData> instanceMetaDataList = List.of(instanceMetaData);
+
+        underTest.upscaleCluster(hostGroup, instanceMetaDataList);
+
+        verify(clustersResourceApi, never()).addHosts(anyString(), any(ApiHostRefList.class));
+        verify(clouderaManagerRoleRefreshService).refreshClusterRoles(apiClientMock, stack);
+
+        ArgumentCaptor<ApiBatchRequest> batchRequestCaptor = ArgumentCaptor.forClass(ApiBatchRequest.class);
+        verify(batchResourceApi).execute(batchRequestCaptor.capture());
+
+        verifyRackIdBatch(batchRequestCaptor.getValue(), "originalId", "/originalRack");
+    }
+
+    @Test
+    void upscaleClusterTestWhenNoHostToUpscaleAndRackIdNotUpdatedForClusterHost() throws Exception {
+        setUpDeployClientConfigPolling(PollingResult.SUCCESS);
+
+        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any())).thenReturn(clouderaManagerResourceApi);
+        when(clouderaManagerResourceApi.refreshParcelRepos()).thenReturn(new ApiCommand().id(REFRESH_PARCEL_REPOS_ID));
+        when(clouderaManagerPollingServiceProvider.startPollingCmParcelRepositoryRefresh(stack, apiClientMock, REFRESH_PARCEL_REPOS_ID))
+                .thenReturn(PollingResult.SUCCESS);
+        setUpListClusterHosts();
+        setUpReadHosts(false, "/originalRack");
+
+        InstanceMetaData instanceMetaData = new InstanceMetaData();
+        instanceMetaData.setDiscoveryFQDN("original");
+        instanceMetaData.setRackId("/originalRack");
+        List<InstanceMetaData> instanceMetaDataList = List.of(instanceMetaData);
+
+        underTest.upscaleCluster(hostGroup, instanceMetaDataList);
+
+        verify(clustersResourceApi, never()).addHosts(anyString(), any(ApiHostRefList.class));
+        verify(clouderaManagerRoleRefreshService).refreshClusterRoles(apiClientMock, stack);
+        verify(clouderaManagerApiFactory, never()).getBatchResourceApi(any(ApiClient.class));
     }
 
     @Test
@@ -215,6 +289,7 @@ class ClouderaManagerModificationServiceTest {
         when(clouderaManagerPollingServiceProvider.startPollingCmParcelActivation(stack, apiClientMock, REFRESH_PARCEL_REPOS_ID))
                 .thenReturn(PollingResult.SUCCESS);
         setUpListClusterHosts();
+        setUpReadHosts(false);
         setUpDeployClientConfigPolling(PollingResult.SUCCESS);
 
         InstanceMetaData instanceMetaData = new InstanceMetaData();
@@ -222,14 +297,16 @@ class ClouderaManagerModificationServiceTest {
         List<InstanceMetaData> instanceMetaDataList = List.of(instanceMetaData);
 
         underTest.upscaleCluster(hostGroup, instanceMetaDataList);
-        verify(clouderaManagerApiFactory, never()).getHostsResourceApi(any());
+
+        verify(clustersResourceApi, never()).addHosts(anyString(), any(ApiHostRefList.class));
         verify(clouderaManagerRoleRefreshService).refreshClusterRoles(apiClientMock, stack);
+        verify(clouderaManagerApiFactory, never()).getBatchResourceApi(any(ApiClient.class));
     }
 
     @Test
     void upscaleClusterTerminationOnDeployConfig() throws Exception {
         setUpListClusterHosts();
-        setUpReadHosts();
+        setUpReadHosts(true);
         PollingResult pollingResult = PollingResult.EXIT;
         setUpDeployClientConfigPolling(pollingResult);
 
@@ -238,7 +315,9 @@ class ClouderaManagerModificationServiceTest {
         List<InstanceMetaData> instanceMetaDataList = List.of(instanceMetaData);
         String exceptionMessage = "Cluster was terminated while waiting for config deploy";
         doThrow(new CancellationException(exceptionMessage)).when(pollingResultErrorHandler).handlePollingResult(eq(pollingResult), any(), any());
-        Exception exception = assertThrows(CancellationException.class, () -> underTest.upscaleCluster(hostGroup, instanceMetaDataList));
+
+        CancellationException exception = assertThrows(CancellationException.class, () -> underTest.upscaleCluster(hostGroup, instanceMetaDataList));
+
         assertEquals(exceptionMessage, exception.getMessage());
 
         ArgumentCaptor<ApiHostRefList> bodyCatcher = ArgumentCaptor.forClass(ApiHostRefList.class);
@@ -246,6 +325,9 @@ class ClouderaManagerModificationServiceTest {
 
         assertEquals(1, bodyCatcher.getValue().getItems().size());
         assertEquals("upscaled", bodyCatcher.getValue().getItems().get(0).getHostname());
+
+        verify(clouderaManagerRoleRefreshService, never()).refreshClusterRoles(any(ApiClient.class), any(Stack.class));
+        verify(clouderaManagerApiFactory, never()).getBatchResourceApi(any(ApiClient.class));
     }
 
     private void setUpListClusterHosts() throws ApiException {
@@ -257,7 +339,7 @@ class ClouderaManagerModificationServiceTest {
     @Test
     void upscaleClusterTimeoutOnDeployConfig() throws Exception {
         setUpListClusterHosts();
-        setUpReadHosts();
+        setUpReadHosts(true);
         PollingResult pollingResult = PollingResult.TIMEOUT;
         setUpDeployClientConfigPolling(pollingResult);
 
@@ -267,7 +349,9 @@ class ClouderaManagerModificationServiceTest {
         String exceptionMessage = "Timeout while Cloudera Manager was config deploying services.";
 
         doThrow(new CloudbreakException(exceptionMessage)).when(pollingResultErrorHandler).handlePollingResult(eq(pollingResult), any(), any());
-        Exception exception = assertThrows(CloudbreakException.class, () -> underTest.upscaleCluster(hostGroup, instanceMetaDataList));
+
+        CloudbreakException exception = assertThrows(CloudbreakException.class, () -> underTest.upscaleCluster(hostGroup, instanceMetaDataList));
+
         assertEquals(exceptionMessage, exception.getMessage());
 
         ArgumentCaptor<ApiHostRefList> bodyCatcher = ArgumentCaptor.forClass(ApiHostRefList.class);
@@ -275,12 +359,134 @@ class ClouderaManagerModificationServiceTest {
 
         assertEquals(1, bodyCatcher.getValue().getItems().size());
         assertEquals("upscaled", bodyCatcher.getValue().getItems().get(0).getHostname());
+
+        verify(clouderaManagerRoleRefreshService, never()).refreshClusterRoles(any(ApiClient.class), any(Stack.class));
+        verify(clouderaManagerApiFactory, never()).getBatchResourceApi(any(ApiClient.class));
     }
 
     @Test
     void upscaleCluster() throws Exception {
         setUpListClusterHosts();
-        setUpReadHosts();
+        setUpReadHosts(true);
+        setUpDeployClientConfigPolling(PollingResult.SUCCESS);
+
+        setUpBatchSuccess();
+
+        BigDecimal applyHostTemplateCommandId = new BigDecimal(200);
+        when(hostTemplatesResourceApi.applyHostTemplate(eq(STACK_NAME), eq(HOST_GROUP_NAME), eq(Boolean.TRUE), any(ApiHostRefList.class)))
+                .thenReturn(new ApiCommand().id(applyHostTemplateCommandId));
+        when(clouderaManagerApiFactory.getHostTemplatesResourceApi(eq(apiClientMock))).thenReturn(hostTemplatesResourceApi);
+
+        PollingResult applyTemplatePollingResult = PollingResult.SUCCESS;
+        when(clouderaManagerPollingServiceProvider.startPollingCmApplyHostTemplate(eq(stack), eq(apiClientMock), eq(applyHostTemplateCommandId)))
+                .thenReturn(applyTemplatePollingResult);
+
+        InstanceMetaData instanceMetaData = new InstanceMetaData();
+        instanceMetaData.setDiscoveryFQDN("upscaled");
+        instanceMetaData.setRackId("/upscaledRack");
+        List<InstanceMetaData> instanceMetaDataList = List.of(instanceMetaData);
+
+        List<String> result = underTest.upscaleCluster(hostGroup, instanceMetaDataList);
+
+        assertThat(result).isEqualTo(List.of("upscaled"));
+
+        ArgumentCaptor<ApiHostRefList> bodyCatcher = ArgumentCaptor.forClass(ApiHostRefList.class);
+        verify(clustersResourceApi, times(1)).addHosts(eq(STACK_NAME), bodyCatcher.capture());
+        verify(clouderaManagerRoleRefreshService, never()).refreshClusterRoles(any(ApiClient.class), any(Stack.class));
+
+        assertEquals(1, bodyCatcher.getValue().getItems().size());
+        assertEquals("upscaled", bodyCatcher.getValue().getItems().get(0).getHostname());
+
+        ArgumentCaptor<ApiHostRefList> applyTemplateBodyCatcher = ArgumentCaptor.forClass(ApiHostRefList.class);
+        verify(hostTemplatesResourceApi, times(1))
+                .applyHostTemplate(eq(STACK_NAME), eq(HOST_GROUP_NAME), eq(Boolean.TRUE), applyTemplateBodyCatcher.capture());
+
+        assertEquals(1, applyTemplateBodyCatcher.getValue().getItems().size());
+        assertEquals("upscaled", applyTemplateBodyCatcher.getValue().getItems().get(0).getHostname());
+
+        ArgumentCaptor<ApiBatchRequest> batchRequestCaptor = ArgumentCaptor.forClass(ApiBatchRequest.class);
+        verify(batchResourceApi).execute(batchRequestCaptor.capture());
+
+        verifyRackIdBatch(batchRequestCaptor.getValue(), "upscaledId", "/upscaledRack");
+    }
+
+    private void setUpBatchWithResponseAnswer(Answer<ApiBatchResponse> batchResponseAnswer) throws ApiException {
+        when(clouderaManagerApiFactory.getBatchResourceApi(apiClientMock)).thenReturn(batchResourceApi);
+        when(batchResourceApi.execute(any(ApiBatchRequest.class))).thenAnswer(batchResponseAnswer);
+    }
+
+    private void setUpBatchSuccess() throws ApiException {
+        setUpBatchWithResponseAnswer(invocation -> {
+            ApiBatchRequest batchRequest = invocation.getArgument(0, ApiBatchRequest.class);
+            int responseItemCount = batchRequest.getItems().size();
+            ApiBatchResponse batchResponse = new ApiBatchResponse().success(true).items(new ArrayList<>());
+            for (int i = 0; i < responseItemCount; i++) {
+                batchResponse.addItemsItem(new ApiBatchResponseElement());
+            }
+            return batchResponse;
+        });
+    }
+
+    private void verifyRackIdBatch(ApiBatchRequest batchRequest, String hostIdExpected, String rackIdExpected) {
+        assertThat(batchRequest).isNotNull();
+
+        List<ApiBatchRequestElement> batchRequestElements = batchRequest.getItems();
+        assertThat(batchRequestElements).isNotNull();
+        assertThat(batchRequestElements).hasSize(1);
+
+        ApiBatchRequestElement batchRequestElement = batchRequestElements.get(0);
+        assertThat(batchRequestElement.getMethod()).isEqualTo(HTTPMethod.PUT);
+        assertThat(batchRequestElement.getUrl()).isEqualTo("/api/v31/hosts/" + hostIdExpected);
+        assertThat(batchRequestElement.getAcceptType()).isEqualTo("application/json");
+        assertThat(batchRequestElement.getContentType()).isEqualTo("application/json");
+        assertThat(batchRequestElement.getBody()).isInstanceOf(ApiHost.class);
+        ApiHost host = (ApiHost) batchRequestElement.getBody();
+        assertThat(host.getRackId()).isEqualTo(rackIdExpected);
+    }
+
+    static Object[][] upscaleClusterTestWhenRackIdBatchExecutionFailureDataProvider() {
+        return new Object[][]{
+                // testCaseName batchResponseFactory
+                {"response=null", (Supplier<ApiBatchResponse>) () -> null},
+                {"success=null", (Supplier<ApiBatchResponse>) () -> new ApiBatchResponse().success(null).items(List.of())},
+                {"items=null", (Supplier<ApiBatchResponse>) () -> new ApiBatchResponse().success(true).items(null)},
+                {"success=false", (Supplier<ApiBatchResponse>) () -> new ApiBatchResponse().success(false).items(List.of())},
+        };
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("upscaleClusterTestWhenRackIdBatchExecutionFailureDataProvider")
+    void upscaleClusterTestWhenRackIdBatchExecutionFailure(String testCaseName, Supplier<ApiBatchResponse> batchResponseFactory) throws Exception {
+        setUpListClusterHosts();
+        setUpReadHosts(true);
+
+        setUpBatchWithResponseAnswer(invocation -> batchResponseFactory.get());
+
+        InstanceMetaData instanceMetaData = new InstanceMetaData();
+        instanceMetaData.setDiscoveryFQDN("upscaled");
+        instanceMetaData.setRackId("/upscaledRack");
+        List<InstanceMetaData> instanceMetaDataList = List.of(instanceMetaData);
+
+        ClouderaManagerOperationFailedException exception = assertThrows(ClouderaManagerOperationFailedException.class,
+                () -> underTest.upscaleCluster(hostGroup, instanceMetaDataList));
+
+        assertThat(exception).hasMessageStartingWith("Setting rack ID for hosts batch operation failed. Response: ");
+
+        verify(clustersResourceApi, never()).addHosts(anyString(), any(ApiHostRefList.class));
+        verify(clouderaManagerRoleRefreshService, never()).refreshClusterRoles(any(ApiClient.class), any(Stack.class));
+
+        verify(hostTemplatesResourceApi, never()).applyHostTemplate(anyString(), anyString(), anyBoolean(), any(ApiHostRefList.class));
+
+        ArgumentCaptor<ApiBatchRequest> batchRequestCaptor = ArgumentCaptor.forClass(ApiBatchRequest.class);
+        verify(batchResourceApi).execute(batchRequestCaptor.capture());
+
+        verifyRackIdBatch(batchRequestCaptor.getValue(), "upscaledId", "/upscaledRack");
+    }
+
+    @Test
+    void upscaleClusterTestWhenRackIdOfUpscaledInstanceIsEmpty() throws Exception {
+        setUpListClusterHosts();
+        setUpReadHosts(true);
         setUpDeployClientConfigPolling(PollingResult.SUCCESS);
 
         BigDecimal applyHostTemplateCommandId = new BigDecimal(200);
@@ -294,12 +500,16 @@ class ClouderaManagerModificationServiceTest {
 
         InstanceMetaData instanceMetaData = new InstanceMetaData();
         instanceMetaData.setDiscoveryFQDN("upscaled");
+        instanceMetaData.setRackId("");
         List<InstanceMetaData> instanceMetaDataList = List.of(instanceMetaData);
 
-        underTest.upscaleCluster(hostGroup, instanceMetaDataList);
+        List<String> result = underTest.upscaleCluster(hostGroup, instanceMetaDataList);
+
+        assertThat(result).isEqualTo(List.of("upscaled"));
 
         ArgumentCaptor<ApiHostRefList> bodyCatcher = ArgumentCaptor.forClass(ApiHostRefList.class);
         verify(clustersResourceApi, times(1)).addHosts(eq(STACK_NAME), bodyCatcher.capture());
+        verify(clouderaManagerRoleRefreshService, never()).refreshClusterRoles(any(ApiClient.class), any(Stack.class));
 
         assertEquals(1, bodyCatcher.getValue().getItems().size());
         assertEquals("upscaled", bodyCatcher.getValue().getItems().get(0).getHostname());
@@ -310,6 +520,109 @@ class ClouderaManagerModificationServiceTest {
 
         assertEquals(1, applyTemplateBodyCatcher.getValue().getItems().size());
         assertEquals("upscaled", applyTemplateBodyCatcher.getValue().getItems().get(0).getHostname());
+
+        verify(clouderaManagerApiFactory, never()).getBatchResourceApi(any(ApiClient.class));
+    }
+
+    @Test
+    void upscaleClusterTestWhenRackIdUpdatedForOutdatedClusterHostAndUpscaledHost() throws Exception {
+        setUpListClusterHosts();
+        setUpReadHosts(true);
+        setUpDeployClientConfigPolling(PollingResult.SUCCESS);
+
+        setUpBatchSuccess();
+
+        BigDecimal applyHostTemplateCommandId = new BigDecimal(200);
+        when(hostTemplatesResourceApi.applyHostTemplate(eq(STACK_NAME), eq(HOST_GROUP_NAME), eq(Boolean.TRUE), any(ApiHostRefList.class)))
+                .thenReturn(new ApiCommand().id(applyHostTemplateCommandId));
+        when(clouderaManagerApiFactory.getHostTemplatesResourceApi(eq(apiClientMock))).thenReturn(hostTemplatesResourceApi);
+
+        PollingResult applyTemplatePollingResult = PollingResult.SUCCESS;
+        when(clouderaManagerPollingServiceProvider.startPollingCmApplyHostTemplate(eq(stack), eq(apiClientMock), eq(applyHostTemplateCommandId)))
+                .thenReturn(applyTemplatePollingResult);
+
+        InstanceMetaData instanceMetaDataOriginal = new InstanceMetaData();
+        instanceMetaDataOriginal.setDiscoveryFQDN("original");
+        instanceMetaDataOriginal.setRackId("/originalRack");
+        InstanceMetaData instanceMetaDataUpscaled = new InstanceMetaData();
+        instanceMetaDataUpscaled.setDiscoveryFQDN("upscaled");
+        instanceMetaDataUpscaled.setRackId("/upscaledRack");
+        List<InstanceMetaData> instanceMetaDataList = List.of(instanceMetaDataOriginal, instanceMetaDataUpscaled);
+
+        List<String> result = underTest.upscaleCluster(hostGroup, instanceMetaDataList);
+
+        assertThat(result).isEqualTo(List.of("original", "upscaled"));
+
+        ArgumentCaptor<ApiHostRefList> bodyCatcher = ArgumentCaptor.forClass(ApiHostRefList.class);
+        verify(clustersResourceApi, times(1)).addHosts(eq(STACK_NAME), bodyCatcher.capture());
+        verify(clouderaManagerRoleRefreshService, never()).refreshClusterRoles(any(ApiClient.class), any(Stack.class));
+
+        assertEquals(1, bodyCatcher.getValue().getItems().size());
+        assertEquals("upscaled", bodyCatcher.getValue().getItems().get(0).getHostname());
+
+        ArgumentCaptor<ApiHostRefList> applyTemplateBodyCatcher = ArgumentCaptor.forClass(ApiHostRefList.class);
+        verify(hostTemplatesResourceApi, times(1))
+                .applyHostTemplate(eq(STACK_NAME), eq(HOST_GROUP_NAME), eq(Boolean.TRUE), applyTemplateBodyCatcher.capture());
+
+        assertEquals(1, applyTemplateBodyCatcher.getValue().getItems().size());
+        assertEquals("upscaled", applyTemplateBodyCatcher.getValue().getItems().get(0).getHostname());
+
+        ArgumentCaptor<ApiBatchRequest> batchRequestCaptor = ArgumentCaptor.forClass(ApiBatchRequest.class);
+        verify(batchResourceApi, times(2)).execute(batchRequestCaptor.capture());
+
+        List<ApiBatchRequest> batchRequests = batchRequestCaptor.getAllValues();
+        assertThat(batchRequests).hasSize(2);
+        verifyRackIdBatch(batchRequests.get(0), "originalId", "/originalRack");
+        verifyRackIdBatch(batchRequests.get(1), "upscaledId", "/upscaledRack");
+    }
+
+    @Test
+    void upscaleClusterTestWhenRackIdNotUpdatedForClusterHostButSetForUpscaledHost() throws Exception {
+        setUpListClusterHosts();
+        setUpReadHosts(true, "/originalRack");
+        setUpDeployClientConfigPolling(PollingResult.SUCCESS);
+
+        setUpBatchSuccess();
+
+        BigDecimal applyHostTemplateCommandId = new BigDecimal(200);
+        when(hostTemplatesResourceApi.applyHostTemplate(eq(STACK_NAME), eq(HOST_GROUP_NAME), eq(Boolean.TRUE), any(ApiHostRefList.class)))
+                .thenReturn(new ApiCommand().id(applyHostTemplateCommandId));
+        when(clouderaManagerApiFactory.getHostTemplatesResourceApi(eq(apiClientMock))).thenReturn(hostTemplatesResourceApi);
+
+        PollingResult applyTemplatePollingResult = PollingResult.SUCCESS;
+        when(clouderaManagerPollingServiceProvider.startPollingCmApplyHostTemplate(eq(stack), eq(apiClientMock), eq(applyHostTemplateCommandId)))
+                .thenReturn(applyTemplatePollingResult);
+
+        InstanceMetaData instanceMetaDataOriginal = new InstanceMetaData();
+        instanceMetaDataOriginal.setDiscoveryFQDN("original");
+        instanceMetaDataOriginal.setRackId("/originalRack");
+        InstanceMetaData instanceMetaDataUpscaled = new InstanceMetaData();
+        instanceMetaDataUpscaled.setDiscoveryFQDN("upscaled");
+        instanceMetaDataUpscaled.setRackId("/upscaledRack");
+        List<InstanceMetaData> instanceMetaDataList = List.of(instanceMetaDataOriginal, instanceMetaDataUpscaled);
+
+        List<String> result = underTest.upscaleCluster(hostGroup, instanceMetaDataList);
+
+        assertThat(result).isEqualTo(List.of("original", "upscaled"));
+
+        ArgumentCaptor<ApiHostRefList> bodyCatcher = ArgumentCaptor.forClass(ApiHostRefList.class);
+        verify(clustersResourceApi, times(1)).addHosts(eq(STACK_NAME), bodyCatcher.capture());
+        verify(clouderaManagerRoleRefreshService, never()).refreshClusterRoles(any(ApiClient.class), any(Stack.class));
+
+        assertEquals(1, bodyCatcher.getValue().getItems().size());
+        assertEquals("upscaled", bodyCatcher.getValue().getItems().get(0).getHostname());
+
+        ArgumentCaptor<ApiHostRefList> applyTemplateBodyCatcher = ArgumentCaptor.forClass(ApiHostRefList.class);
+        verify(hostTemplatesResourceApi, times(1))
+                .applyHostTemplate(eq(STACK_NAME), eq(HOST_GROUP_NAME), eq(Boolean.TRUE), applyTemplateBodyCatcher.capture());
+
+        assertEquals(1, applyTemplateBodyCatcher.getValue().getItems().size());
+        assertEquals("upscaled", applyTemplateBodyCatcher.getValue().getItems().get(0).getHostname());
+
+        ArgumentCaptor<ApiBatchRequest> batchRequestCaptor = ArgumentCaptor.forClass(ApiBatchRequest.class);
+        verify(batchResourceApi).execute(batchRequestCaptor.capture());
+
+        verifyRackIdBatch(batchRequestCaptor.getValue(), "upscaledId", "/upscaledRack");
     }
 
     @Test
@@ -513,7 +826,7 @@ class ClouderaManagerModificationServiceTest {
     }
 
     @Test
-    public void removeUnusedParcels() throws CloudbreakException {
+    public void removeUnusedParcels() {
         // GIVEN
         ClouderaManagerProduct cmProduct1 = createClouderaManagerProduct("product1", "version1");
         ClouderaManagerProduct cmProduct2 = createClouderaManagerProduct("product2", "version2");
@@ -545,9 +858,18 @@ class ClouderaManagerModificationServiceTest {
         return product;
     }
 
-    private void setUpReadHosts() throws ApiException {
-        ApiHostList apiHostsRef = new ApiHostList().items(
-                List.of(new ApiHost().hostname("original"), new ApiHost().hostname("upscaled")));
+    private void setUpReadHosts(boolean withUpscaled) throws ApiException {
+        setUpReadHosts(withUpscaled, null);
+    }
+
+    private void setUpReadHosts(boolean withUpscaled, String originalRackId) throws ApiException {
+        ApiHostList apiHostsRef;
+        ApiHost originalHost = new ApiHost().hostname("original").hostId("originalId").rackId(originalRackId);
+        if (withUpscaled) {
+            apiHostsRef = new ApiHostList().items(List.of(originalHost, new ApiHost().hostname("upscaled").hostId("upscaledId")));
+        } else {
+            apiHostsRef = new ApiHostList().items(List.of(originalHost));
+        }
         when(hostResourceApi.readHosts(eq(null), eq(null), eq("SUMMARY"))).thenReturn(apiHostsRef);
         when(clouderaManagerApiFactory.getHostsResourceApi(eq(apiClientMock))).thenReturn(hostResourceApi);
     }
