@@ -15,9 +15,11 @@ import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.FileSystemV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.responses.FileSystemParameterV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.common.api.cloudstorage.AwsStorageParameters;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
+import com.sequenceiq.common.api.cloudstorage.CloudStorageResponse;
 import com.sequenceiq.common.api.cloudstorage.S3Guard;
 import com.sequenceiq.common.api.cloudstorage.StorageIdentityBase;
 import com.sequenceiq.common.api.cloudstorage.StorageLocationBase;
@@ -72,8 +74,19 @@ public class CloudStorageManifester {
         return cloudStorageRequest;
     }
 
-    public CloudStorageRequest initSdxCloudStorageRequest(String cloudPlatform,
-            String blueprint, String clusterName, SdxCloudStorageRequest cloudStorage) {
+    public CloudStorageRequest initCloudStorageRequestFromExistingSdxCluster(DetailedEnvironmentResponse environment,
+            ClusterV4Response clusterV4Response, SdxCluster sdxCluster) {
+        boolean anyCloudStorageIsConfigured = !Strings.isNullOrEmpty(sdxCluster.getCloudStorageBaseLocation());
+        CloudStorageRequest cloudStorageRequest = new CloudStorageRequest();
+        if (anyCloudStorageIsConfigured) {
+            LOGGER.debug("Cloud storage configurations found in SDX cluster request.");
+            CloudStorageResponse cloudStorageResponse = clusterV4Response.getCloudStorage();
+            cloudStorageRequest.copy(cloudStorageResponse);
+        }
+        return cloudStorageRequest;
+    }
+
+    public CloudStorageRequest initSdxCloudStorageRequest(String cloudPlatform, String blueprint, String clusterName, SdxCloudStorageRequest cloudStorage) {
         CloudStorageRequest cloudStorageRequest = new CloudStorageRequest();
         normalizeCloudStorageRequest(cloudStorage);
         storageValidationService.validateCloudStorage(cloudPlatform, cloudStorage);

@@ -59,4 +59,12 @@ public abstract class CloudStorageBase implements Serializable {
         this.accountMapping = accountMapping;
 
     }
+
+    public CloudStorageBase copy(CloudStorageBase other) {
+        this.aws = other.aws;
+        this.locations = other.locations;
+        this.identities = other.identities;
+        this.accountMapping = other.accountMapping;
+        return this;
+    }
 }

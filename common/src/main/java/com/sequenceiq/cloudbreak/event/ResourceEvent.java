@@ -32,6 +32,7 @@ public enum ResourceEvent {
     SDX_START_FAILED("resource.sdx.start.failed"),
     SDX_STOP_STARTED("resource.sdx.stop.started"),
     SDX_STOP_FINISHED("resource.sdx.stop.finished"),
+    SDX_DETACH_FINISHED("resource.sdx.detach.finished"),
     SDX_STOP_FAILED("resource.sdx.stop.failed"),
     SDX_CHANGE_IMAGE_STARTED("resource.sdx.change.image.started"),
     DATALAKE_UPGRADE_STARTED("resource.sdx.datalake.upgrade.started"),
@@ -371,7 +372,7 @@ public enum ResourceEvent {
     DATALAKE_RESTORE_FINISHED("datalake.restore.finised"),
     DATALAKE_BACKUP_FAILED("datalake.backup.failed"),
     DATALAKE_RESTORE_FAILED("datalake.restore.failed"),
-
+    DATALAKE_DETACHED("datalake.detached"),
     SDX_CERT_ROTATION_STARTED("resource.sdx.cert.rotation.started"),
     SDX_CERT_ROTATION_FAILED("resource.sdx.cert.rotation.failed"),
     SDX_CERT_ROTATION_FINISHED("resource.sdx.cert.rotation.finished");

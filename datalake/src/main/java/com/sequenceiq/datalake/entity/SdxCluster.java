@@ -13,8 +13,15 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.converter.CertExpirationStateConverter;
 import com.sequenceiq.cloudbreak.converter.FileSystemTypeConverter;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
@@ -31,6 +38,8 @@ import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"accountid", "envname"}))
 public class SdxCluster implements AccountIdAwareResource {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SdxCluster.class);
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "sdx_cluster_generator")
@@ -113,6 +122,9 @@ public class SdxCluster implements AccountIdAwareResource {
 
     @Column(name = "sdx_cluster_service_version")
     private String sdxClusterServiceVersion;
+
+    @Column(nullable = false)
+    private boolean detached;
 
     public Long getId() {
         return id;
@@ -206,8 +218,13 @@ public class SdxCluster implements AccountIdAwareResource {
         return stackRequest.getRaw();
     }
 
-    public void setStackRequest(String stackRequest) {
-        this.stackRequest = new Secret(stackRequest);
+    public void setStackRequest(StackV4Request stackRequest) {
+        try {
+            this.stackRequest = new Secret(JsonUtil.writeValueAsString(stackRequest));
+        } catch (JsonProcessingException e) {
+            LOGGER.error("Can not parse internal stack request", e);
+            throw new BadRequestException("Can not parse internal stack request", e);
+        }
     }
 
     public String getStackRequestToCloudbreak() {
@@ -343,6 +360,14 @@ public class SdxCluster implements AccountIdAwareResource {
         this.sdxClusterServiceVersion = sdxClusterServiceVersion;
     }
 
+    public boolean isDetached() {
+        return detached;
+    }
+
+    public void setDetached(boolean detached) {
+        this.detached = detached;
+    }
+
     //CHECKSTYLE:OFF
     @Override
     public boolean equals(Object o) {
@@ -364,6 +389,7 @@ public class SdxCluster implements AccountIdAwareResource {
                 Objects.equals(stackRequest, that.stackRequest) &&
                 Objects.equals(stackRequestToCloudbreak, that.stackRequestToCloudbreak) &&
                 Objects.equals(deleted, that.deleted) &&
+                Objects.equals(detached, that.detached) &&
                 Objects.equals(created, that.created) &&
                 Objects.equals(databaseCrn, that.databaseCrn) &&
                 Objects.equals(cloudStorageBaseLocation, that.cloudStorageBaseLocation) &&
@@ -389,6 +415,7 @@ public class SdxCluster implements AccountIdAwareResource {
                 ", envName='" + envName + '\'' +
                 ", envCrn='" + envCrn + '\'' +
                 ", runtime='" + runtime + '\'' +
+                ", Detached='" + detached + '\'' +
                 ", clusterShape=" + clusterShape +
                 ", createDatabase=" + createDatabase +
                 ", cloudStorageBaseLocation='" + cloudStorageBaseLocation + '\'' +

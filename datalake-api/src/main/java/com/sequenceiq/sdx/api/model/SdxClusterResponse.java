@@ -48,6 +48,8 @@ public class SdxClusterResponse {
 
     private String sdxClusterServiceVersion;
 
+    private boolean detached;
+
     public SdxClusterResponse() {
     }
 
@@ -56,7 +58,7 @@ public class SdxClusterResponse {
             SdxClusterShape clusterShape, String cloudStorageBaseLocation,
             FileSystemType cloudStorageFileSystemType, String runtime,
             boolean rangerRazEnabled, Map<String, String> tags, CertExpirationState certExpirationState,
-            String sdxClusterServiceVersion) {
+            String sdxClusterServiceVersion, boolean detached) {
         this.crn = crn;
         this.name = name;
         this.status = status;
@@ -72,6 +74,7 @@ public class SdxClusterResponse {
         this.tags = tags;
         this.certExpirationState = certExpirationState;
         this.sdxClusterServiceVersion = sdxClusterServiceVersion;
+        this.detached = detached;
     }
 
     public String getCrn() {
@@ -218,6 +221,14 @@ public class SdxClusterResponse {
         this.sdxClusterServiceVersion = sdxClusterServiceVersion;
     }
 
+    public boolean isDetached() {
+        return detached;
+    }
+
+    public void setDetached(boolean detached) {
+        this.detached = detached;
+    }
+
     @Override
     public String toString() {
         return "SdxClusterResponse{" +
@@ -239,6 +250,7 @@ public class SdxClusterResponse {
                 ", tags=" + tags +
                 ", certExpirationState=" + certExpirationState +
                 ", sdxClusterServiceVersion=" + sdxClusterServiceVersion +
+                ", Detached=" + detached +
                 '}';
     }
 }
