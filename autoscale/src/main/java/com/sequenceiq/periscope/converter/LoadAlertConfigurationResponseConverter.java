@@ -14,6 +14,10 @@ public class LoadAlertConfigurationResponseConverter extends AbstractConverter<L
         json.setMaxResourceValue(source.getMaxResourceValue());
         json.setMinResourceValue(source.getMinResourceValue());
         json.setCoolDownMinutes(source.getCoolDownMinutes());
+        json.setScaleUpCoolDownMinutes(source.getScaleUpCoolDownMinutes());
+        json.setScaleDownCoolDownMinutes(source.getScaleDownCoolDownMinutes());
+        json.setMaxScaleDownStepSize(source.getMaxScaleDownStepSize());
+        json.setMaxScaleUpStepSize(source.getMaxScaleUpStepSize());
         return json;
     }
 }

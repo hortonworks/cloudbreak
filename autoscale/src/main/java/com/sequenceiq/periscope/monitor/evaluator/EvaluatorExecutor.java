@@ -7,14 +7,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.periscope.monitor.context.EvaluatorContext;
-import com.sequenceiq.periscope.monitor.evaluator.load.YarnLoadEvaluator;
 import com.sequenceiq.periscope.monitor.executor.ExecutorServiceWithRegistry;
 import com.sequenceiq.periscope.utils.ClusterUtils;
 import com.sequenceiq.periscope.utils.TimeUtil;
 
 public abstract class EvaluatorExecutor implements Runnable {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(YarnLoadEvaluator.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(EvaluatorExecutor.class);
 
     @Inject
     private ExecutorServiceWithRegistry executorServiceWithRegistry;
@@ -38,14 +37,14 @@ public abstract class EvaluatorExecutor implements Runnable {
 
     protected abstract void execute();
 
-    protected boolean isCoolDownTimeElapsed(String clusterCrn, long expectedCoolDownMillis, long lastClusterScalingActivity) {
+    protected boolean isCoolDownTimeElapsed(String clusterCrn, String coolDownAction, long expectedCoolDownMillis, long lastClusterScalingActivity) {
         long remainingTime = ClusterUtils.getRemainingCooldownTime(
                 expectedCoolDownMillis, lastClusterScalingActivity);
 
         if (remainingTime <= 0) {
             return true;
         } else {
-            LOGGER.debug("Cluster {} cannot be scaled for {} min(s)", clusterCrn,
+            LOGGER.debug("Cluster {} cannot be {} for {} min(s)", clusterCrn, coolDownAction,
                     ClusterUtils.TIME_FORMAT.format((double) remainingTime / TimeUtil.MIN_IN_MS));
         }
         return false;

@@ -179,7 +179,7 @@ public class CronTimeEvaluatorTest {
             when(yarnMetricsClient.getYarnMetricsForCluster(any(Cluster.class), any(StackV4Response.class), anyString(), any(Optional.class)))
                     .thenReturn(yarnScalingServiceV1Response);
             when(yarnResponseUtils.getYarnRecommendedDecommissionHostsForHostGroup(anyString(), any(YarnScalingServiceV1Response.class),
-                    any(Map.class), anyInt(), any(Optional.class))).thenCallRealMethod();
+                    any(Map.class), anyInt(), any(Optional.class), anyInt())).thenCallRealMethod();
         }
 
         underTest.publishIfNeeded(List.of(alert));
@@ -190,7 +190,7 @@ public class CronTimeEvaluatorTest {
         verify(stackResponseUtils, verificationMode).getCloudInstanceIdsForHostGroup(any(), any());
         verify(yarnMetricsClient, verificationMode).getYarnMetricsForCluster(any(Cluster.class), any(StackV4Response.class), anyString(), any(Optional.class));
         verify(yarnResponseUtils, verificationMode).getYarnRecommendedDecommissionHostsForHostGroup(anyString(), any(YarnScalingServiceV1Response.class),
-                any(Map.class), anyInt(), any(Optional.class));
+                any(Map.class), anyInt(), any(Optional.class), anyInt());
 
         return captor.getValue();
     }
