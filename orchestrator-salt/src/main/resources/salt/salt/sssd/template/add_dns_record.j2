@@ -17,19 +17,20 @@ FQDN=$(hostname -f)
 IPADDR=$(hostname -i)
 REVERSE_IP=$(hostname -i | awk -F. '{print $4"."$3"." $2"."$1}')
 
-# add dns a-record 3 times with a 10 seconds interval (see CDPSDX-1981)
+# add dns a-record 3 times with a 10 seconds interval (see CDPSDX-1981, CB-13379)
 for attempt in {1..3}
 do
-  echo "add dns a-record hostname for ${HOSTNAME}, attempt ${attempt}"
-  if ! ipa dnsrecord-find {{ pillar['sssd-ipa']['domain'] }}. "--name=${HOSTNAME}" "--a-rec=${IPADDR}"  --ttl {{ pillar['sssd-ipa']['dns_ttl'] }} --all; then
-    ipa dnsrecord-add {{ pillar['sssd-ipa']['domain'] }}. "${HOSTNAME}" "--a-rec=${IPADDR}" --ttl {{ pillar['sssd-ipa']['dns_ttl'] }}
-  fi
   sleep 10
+  echo "add dns a-record hostname for ${HOSTNAME}, attempt ${attempt}"
+  retVal=0
+  ipa dnsrecord-mod {{ pillar['sssd-ipa']['domain'] }}. "${HOSTNAME}" "--a-rec=${IPADDR}" --ttl {{ pillar['sssd-ipa']['dns_ttl'] }} || retVal=$?
+  if [[ "$retVal" -le 1 ]]; then
+    break
+  elif [[ "$attempt" -eq 3 ]]; then
+    echo "Failed to set DNS A-record for ${HOSTNAME}"
+    false
+  fi
 done
-if ! ipa dnsrecord-find {{ pillar['sssd-ipa']['domain'] }}. "--name=${HOSTNAME}" "--a-rec=${IPADDR}"  --ttl {{ pillar['sssd-ipa']['dns_ttl'] }} --all; then
-  echo "Failed to set DNS A-record for ${HOSTNAME}"
-  false
-fi
 
 for zone in $(ipa dnszone-find --raw | grep "idnsname:.*\.in-addr\.arpa\." | cut -d':' -f2 | awk '{ print length, $0 }' | sort -n -r | awk '{ print $2 }' | xargs)
 do
