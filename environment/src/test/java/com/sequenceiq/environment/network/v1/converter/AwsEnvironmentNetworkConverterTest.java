@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -260,6 +261,15 @@ class AwsEnvironmentNetworkConverterTest {
         environment.setNetwork(new AwsNetwork());
         environment.setRegions(Collections.singleton(new Region()));
         return environment;
+    }
+
+    @Test
+    public void testGetNetworkCidrWhenDuplicated() {
+        AwsNetwork awsNetwork = createAwsNetwork();
+        awsNetwork.setNetworkCidrs("10.0.0.0/16,10.0.0.0/16");
+        Set<String> actual = underTest.getNetworkCidrs(awsNetwork);
+        Assertions.assertEquals(1, actual.size());
+        Assertions.assertEquals("10.0.0.0/16", actual.iterator().next());
     }
 
 }
