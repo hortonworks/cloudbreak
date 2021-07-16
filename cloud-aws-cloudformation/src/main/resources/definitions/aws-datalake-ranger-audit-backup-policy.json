@@ -2,13 +2,9 @@
   "Version": "2012-10-17",
   "Statement": [
     {
-      "Sid": "DatalakeAdminBackupPermissions",
+      "Sid": "RangerAuditBackupPermission",
       "Effect": "Allow",
-      "Action": [
-        "s3:PutObject",
-        "s3:GetObject",
-        "s3:DeleteObject"
-      ],
+      "Action": "s3:PutObject",
       "Resource": [
         "arn:aws:s3:::<BACKUP_BUCKET>/*"
       ]
