@@ -43,12 +43,13 @@ class UpgradeFlowEventChainFactoryTest {
 
         assertEquals("FreeIPA upgrade flow", eventQueue.getFlowChainName());
         Queue<Selectable> queue = eventQueue.getQueue();
-        assertEquals(9, queue.size());
+        assertEquals(10, queue.size());
 
         SaltUpdateTriggerEvent saltUpdateTriggerEvent = (SaltUpdateTriggerEvent) queue.poll();
         assertEquals(OPERATION_ID, saltUpdateTriggerEvent.getOperationId());
         assertEquals(STACK_ID, saltUpdateTriggerEvent.getResourceId());
         assertEquals(SaltUpdateEvent.SALT_UPDATE_EVENT.event(), saltUpdateTriggerEvent.selector());
+        assertFalse(saltUpdateTriggerEvent.isFinalChain());
 
         ImageChangeEvent imageChangeEvent = (ImageChangeEvent) queue.poll();
         assertEquals(OPERATION_ID, imageChangeEvent.getOperationId());
@@ -121,12 +122,19 @@ class UpgradeFlowEventChainFactoryTest {
         assertEquals(OPERATION_ID, downscaleEvent3.getOperationId());
         assertEquals(STACK_ID, downscaleEvent3.getResourceId());
         assertTrue(downscaleEvent3.isChained());
-        assertTrue(downscaleEvent3.isFinalChain());
+        assertFalse(downscaleEvent3.isFinalChain());
         assertFalse(downscaleEvent3.isRepair());
         assertEquals(DownscaleFlowEvent.DOWNSCALE_EVENT.event(), downscaleEvent3.selector());
         assertEquals(3, downscaleEvent3.getInstanceCountByGroup());
         assertEquals(1, downscaleEvent3.getInstanceIds().size());
         assertEquals("pgw", downscaleEvent3.getInstanceIds().get(0));
+
+        SaltUpdateTriggerEvent saltUpdateTriggerEvent2 = (SaltUpdateTriggerEvent) queue.poll();
+        assertEquals(OPERATION_ID, saltUpdateTriggerEvent2.getOperationId());
+        assertEquals(STACK_ID, saltUpdateTriggerEvent2.getResourceId());
+        assertEquals(SaltUpdateEvent.SALT_UPDATE_EVENT.event(), saltUpdateTriggerEvent2.selector());
+        assertTrue(saltUpdateTriggerEvent2.isChained());
+        assertTrue(saltUpdateTriggerEvent2.isFinalChain());
     }
 
     @Test

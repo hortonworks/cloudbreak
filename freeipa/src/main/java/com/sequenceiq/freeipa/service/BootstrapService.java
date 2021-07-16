@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -56,6 +57,9 @@ public class BootstrapService {
     @Inject
     private ImageService imageService;
 
+    @Inject
+    private CompressUtil compressUtil;
+
     public void bootstrap(Long stackId) throws CloudbreakOrchestratorException {
         bootstrap(stackId, null);
     }
@@ -70,9 +74,9 @@ public class BootstrapService {
 
         Set<Node> allNodes = instanceMetaDatas.stream()
                 .map(im -> {
-                    String generatedHostName = hostDiscoveryService.generateHostname(freeIpa.getHostname(), null, im.getPrivateId(), false);
+                    String hostname = getHostname(freeIpa, im);
                     return new Node(im.getPrivateIp(), im.getPublicIpWrapper(), im.getInstanceId(), im.getInstanceGroup().getTemplate().getInstanceType(),
-                            generatedHostName, freeIpa.getDomain(), im.getInstanceGroup().getGroupName());
+                            hostname, freeIpa.getDomain(), im.getInstanceGroup().getGroupName());
                 }).collect(Collectors.toSet());
         BootstrapParams params = new BootstrapParams();
         params.setCloud(stack.getCloudPlatform());
@@ -94,7 +98,18 @@ public class BootstrapService {
         }
     }
 
+    private String getHostname(FreeIpa freeIpa, InstanceMetaData im) {
+        if (StringUtils.isNotBlank(im.getDiscoveryFQDN()) && StringUtils.endsWith(im.getDiscoveryFQDN(), freeIpa.getDomain())) {
+            LOGGER.info("Using already set hostname [{}] from InstanceMetaData for [{}]", im.getDiscoveryFQDN(), im.getInstanceId());
+            return StringUtils.removeEnd(StringUtils.removeEnd(im.getDiscoveryFQDN(), freeIpa.getDomain()), ".");
+        } else {
+            String generateHostname = hostDiscoveryService.generateHostname(freeIpa.getHostname(), null, im.getPrivateId(), false);
+            LOGGER.info("Hostname is not set in InstanceMetaData for [{}], generated hostname: [{}]", im.getDiscoveryFQDN(), generateHostname);
+            return generateHostname;
+        }
+    }
+
     private byte[] getStateConfigZip() throws IOException {
-        return CompressUtil.generateCompressedOutputFromFolders("salt-common", "freeipa-salt");
+        return compressUtil.generateCompressedOutputFromFolders("salt-common", "freeipa-salt");
     }
 }

@@ -55,6 +55,8 @@ import org.powermock.reflect.Whitebox;
 import org.springframework.util.ReflectionUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.common.service.HostDiscoveryService;
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
@@ -67,6 +69,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
+import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.HostAndRoleTarget;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Target;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionIpAddressesResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionStatus;
@@ -90,6 +93,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.service.Retry;
+import com.sequenceiq.cloudbreak.util.CompressUtil;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({SaltOrchestrator.class, SaltStates.class})
@@ -125,6 +129,9 @@ public class SaltOrchestratorTest {
     @Mock
     private Retry retry;
 
+    @Mock
+    private CompressUtil compressUtil;
+
     @InjectMocks
     private SaltOrchestrator saltOrchestrator;
 
@@ -158,6 +165,7 @@ public class SaltOrchestratorTest {
         whenNew(OrchestratorBootstrapRunner.class)
                 .withArguments(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class), isNull(), anyInt(), anyInt(), anyInt())
                 .thenReturn(mock(OrchestratorBootstrapRunner.class));
+        when(compressUtil.generateCompressedOutputFromFolders("salt-common", "salt")).thenReturn(new byte[]{});
 
         BootstrapParams bootstrapParams = mock(BootstrapParams.class);
         List<GatewayConfig> allGatewayConfigs = Collections.singletonList(gatewayConfig);
@@ -177,6 +185,7 @@ public class SaltOrchestratorTest {
                 .withArguments(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class), isNull(), anyInt(), anyInt(), anyInt())
                 .thenReturn(mock(OrchestratorBootstrapRunner.class));
         BootstrapParams bootstrapParams = mock(BootstrapParams.class);
+        when(compressUtil.generateCompressedOutputFromFolders("salt-common", "salt")).thenReturn(new byte[]{});
 
         saltOrchestrator.bootstrapNewNodes(Collections.singletonList(gatewayConfig), targets, targets, null, bootstrapParams, exitCriteriaModel);
 
@@ -590,6 +599,101 @@ public class SaltOrchestratorTest {
         assertTrue(target3.contains("primary.example.com"));
         assertTrue(target3.contains("new_replica1.example.com"));
         assertTrue(target3.contains("new_replica2.example.com"));
+    }
+
+    @Test
+    public void testExistingIsPrimaryReplacement() throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+
+        GatewayConfig replica1 = mock(GatewayConfig.class);
+        GatewayConfig replica2 = mock(GatewayConfig.class);
+        Node replicaNode1 = mock(Node.class);
+        Node replicaNode2 = mock(Node.class);
+
+        when(replica1.getHostname()).thenReturn("replica1.domain");
+        when(replica2.getHostname()).thenReturn("replica2.domain");
+        when(replicaNode1.getHostname()).thenReturn("replica1.domain");
+        when(replicaNode2.getHostname()).thenReturn("replica2.domain");
+
+        PowerMockito.mockStatic(SaltStates.class);
+        HostAndRoleTarget replicaTarget = new HostAndRoleTarget("freeipa_replica", Set.of("replica1.domain", "replica2.domain"));
+        ArrayNode replicaRole = mapper.createArrayNode();
+        replicaRole.add("freeipa_replica");
+        PowerMockito.when(SaltStates.getGrains(eq(saltConnector), eq(replicaTarget), eq("roles")))
+                .thenReturn(Map.of("replica1.domain", replicaRole,
+                        "replica2.domain", replicaRole));
+
+        saltOrchestrator.installFreeIpa(replica1, List.of(replica1, replica2), Set.of(replicaNode1, replicaNode2), exitCriteriaModel);
+
+        ArgumentCaptor<ModifyGrainBase> modifyGrainCaptor = ArgumentCaptor.forClass(ModifyGrainBase.class);
+        verify(saltCommandRunner, times(2)).runModifyGrainCommand(eq(saltConnector), modifyGrainCaptor.capture(), eq(exitCriteriaModel), eq(exitCriteria));
+        List<ModifyGrainBase> modifyGrains = modifyGrainCaptor.getAllValues();
+        GrainAddRunner addReplacementRole = (GrainAddRunner) modifyGrains.get(0);
+        assertEquals("freeipa_primary_replacement", addReplacementRole.getValue());
+        assertEquals(Set.of("replica1.domain"), addReplacementRole.getTargetHostnames());
+        GrainRemoveRunner removeReplicaRole = (GrainRemoveRunner) modifyGrains.get(1);
+        assertEquals("freeipa_replica", removeReplicaRole.getValue());
+        assertEquals(Set.of("replica1.domain"), removeReplicaRole.getTargetHostnames());
+
+        ArgumentCaptor<SaltJobIdTracker> saltJobIdTrackerCaptor = ArgumentCaptor.forClass(SaltJobIdTracker.class);
+        verify(saltRunner, times(3)).runner(saltJobIdTrackerCaptor.capture(), eq(exitCriteria), eq(exitCriteriaModel), anyInt(), anyBoolean());
+        List<SaltJobIdTracker> saltJobIdTrackers = saltJobIdTrackerCaptor.getAllValues();
+        HighStateRunner highStateRunner = (HighStateRunner) saltJobIdTrackers.get(0).getSaltJobRunner();
+        assertTrue(highStateRunner.getTargetHostnames().contains("replica1.domain")
+                || highStateRunner.getTargetHostnames().contains("replica2.domain"));
+        assertEquals(1, highStateRunner.getTargetHostnames().size());
+        HighStateRunner highStateRunner2 = (HighStateRunner) saltJobIdTrackers.get(1).getSaltJobRunner();
+        assertTrue(highStateRunner2.getTargetHostnames().contains("replica2.domain")
+                || highStateRunner2.getTargetHostnames().contains("replica1.domain"));
+        assertEquals(1, highStateRunner2.getTargetHostnames().size());
+        assertFalse(highStateRunner.getTargetHostnames().containsAll(highStateRunner2.getTargetHostnames()));
+        HighStateRunner highStateRunner3 = (HighStateRunner) saltJobIdTrackers.get(2).getSaltJobRunner();
+        assertTrue(highStateRunner3.getTargetHostnames().contains("replica1.domain"));
+        assertEquals(1, highStateRunner3.getTargetHostnames().size());
+    }
+
+    @Test
+    public void testNewInstanceIsPrimaryReplacement() throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+
+        GatewayConfig newInstance = mock(GatewayConfig.class);
+        GatewayConfig replica2 = mock(GatewayConfig.class);
+        Node newInstanceNode = mock(Node.class);
+        Node replicaNode2 = mock(Node.class);
+
+        when(newInstance.getHostname()).thenReturn("newInstance.domain");
+        when(replica2.getHostname()).thenReturn("replica2.domain");
+        when(newInstanceNode.getHostname()).thenReturn("newInstance.domain");
+        when(replicaNode2.getHostname()).thenReturn("replica2.domain");
+
+        PowerMockito.mockStatic(SaltStates.class);
+        HostAndRoleTarget replicaTarget = new HostAndRoleTarget("freeipa_replica", Set.of("newInstance.domain", "replica2.domain"));
+        ArrayNode replicaRole = mapper.createArrayNode();
+        replicaRole.add("freeipa_replica");
+        PowerMockito.when(SaltStates.getGrains(eq(saltConnector), eq(replicaTarget), eq("roles")))
+                .thenReturn(Map.of("replica2.domain", replicaRole));
+
+        saltOrchestrator.installFreeIpa(newInstance, List.of(newInstance, replica2), Set.of(newInstanceNode, replicaNode2), exitCriteriaModel);
+
+        ArgumentCaptor<ModifyGrainBase> modifyGrainCaptor = ArgumentCaptor.forClass(ModifyGrainBase.class);
+        verify(saltCommandRunner, times(2)).runModifyGrainCommand(eq(saltConnector), modifyGrainCaptor.capture(), eq(exitCriteriaModel), eq(exitCriteria));
+        List<ModifyGrainBase> modifyGrains = modifyGrainCaptor.getAllValues();
+        GrainAddRunner addReplacementRole = (GrainAddRunner) modifyGrains.get(0);
+        assertEquals("freeipa_primary_replacement", addReplacementRole.getValue());
+        assertEquals(Set.of("newInstance.domain"), addReplacementRole.getTargetHostnames());
+        GrainRemoveRunner removeReplicaRole = (GrainRemoveRunner) modifyGrains.get(1);
+        assertEquals("freeipa_replica", removeReplicaRole.getValue());
+        assertEquals(Set.of("newInstance.domain"), removeReplicaRole.getTargetHostnames());
+
+        ArgumentCaptor<SaltJobIdTracker> saltJobIdTrackerCaptor = ArgumentCaptor.forClass(SaltJobIdTracker.class);
+        verify(saltRunner, times(2)).runner(saltJobIdTrackerCaptor.capture(), eq(exitCriteria), eq(exitCriteriaModel), anyInt(), anyBoolean());
+        List<SaltJobIdTracker> saltJobIdTrackers = saltJobIdTrackerCaptor.getAllValues();
+        HighStateRunner highStateRunner = (HighStateRunner) saltJobIdTrackers.get(0).getSaltJobRunner();
+        assertTrue(highStateRunner.getTargetHostnames().contains("replica2.domain"));
+        assertEquals(1, highStateRunner.getTargetHostnames().size());
+        HighStateRunner highStateRunner2 = (HighStateRunner) saltJobIdTrackers.get(1).getSaltJobRunner();
+        assertTrue(highStateRunner2.getTargetHostnames().contains("newInstance.domain"));
+        assertEquals(1, highStateRunner2.getTargetHostnames().size());
     }
 
     @Test

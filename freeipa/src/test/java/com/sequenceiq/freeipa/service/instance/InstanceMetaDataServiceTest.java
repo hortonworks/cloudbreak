@@ -23,11 +23,13 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
+import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.repository.InstanceMetaDataRepository;
 import com.sequenceiq.freeipa.repository.StackRepository;
+import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 
 @ExtendWith(MockitoExtension.class)
@@ -56,6 +58,9 @@ public class InstanceMetaDataServiceTest {
     @Mock
     private InstanceMetaDataRepository instanceMetaDataRepository;
 
+    @Mock
+    private FreeIpaService freeIpaService;
+
     @BeforeAll
     public static void init() {
         stack = new Stack();
@@ -69,9 +74,11 @@ public class InstanceMetaDataServiceTest {
         instanceGroup.setGroupName(GROUP_NAME);
         instanceMetaData.setDiscoveryFQDN("host1.domain");
         instanceMetaData.setInstanceId(INSTANCE_ID_1);
+        instanceMetaData.setPrivateId(1L);
         instanceMetaData = new InstanceMetaData();
         instanceMetaData.setDiscoveryFQDN("host2.domain");
         instanceMetaData.setInstanceId(INSTANCE_ID_2);
+        instanceMetaData.setPrivateId(2L);
         instanceGroup.getInstanceMetaData().add(instanceMetaData);
     }
 
@@ -103,11 +110,21 @@ public class InstanceMetaDataServiceTest {
 
     @Test
     public void testSaveInstanceAndGetUpdatedStack() {
+        FreeIpa freeIpa = new FreeIpa();
+        freeIpa.setHostname("ipa");
+        freeIpa.setDomain("dom");
+        when(freeIpaService.findByStack(stack)).thenReturn(freeIpa);
         InstanceTemplate template = mock(InstanceTemplate.class);
         when(template.getGroupName()).thenReturn(GROUP_NAME);
+        when(template.getPrivateId()).thenReturn(3L);
         List<CloudInstance> cloudInstances = List.of(new CloudInstance(INSTANCE_ID_3, template, null, "subnet-1", "az1"));
         Stack stack1 = underTest.saveInstanceAndGetUpdatedStack(stack, cloudInstances);
         verify(instanceMetaDataRepository).save(any());
         assertEquals(3, stack1.getAllInstanceMetaDataList().size());
+        InstanceGroup instanceGroup = stack1.getInstanceGroups().stream().filter(ig -> GROUP_NAME.equals(ig.getGroupName())).findFirst().get();
+        InstanceMetaData instanceMetaData = instanceGroup.getInstanceMetaData().stream()
+                .filter(im -> 3L == im.getPrivateId())
+                .findFirst().get();
+        assertEquals("ipa3.dom", instanceMetaData.getDiscoveryFQDN());
     }
 }

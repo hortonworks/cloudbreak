@@ -20,6 +20,8 @@ import com.sequenceiq.freeipa.flow.freeipa.provision.event.postinstall.PostInsta
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.services.InstallFreeIpaServicesFailed;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.services.InstallFreeIpaServicesSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleFailureEvent;
+import com.sequenceiq.freeipa.flow.stack.provision.event.clusterproxy.ClusterProxyRegistrationFailed;
+import com.sequenceiq.freeipa.flow.stack.provision.event.clusterproxy.ClusterProxyRegistrationSuccess;
 
 public enum UpscaleFlowEvent implements FlowEvent {
     UPSCALE_EVENT("UPSCALE_EVENT"),
@@ -33,6 +35,8 @@ public enum UpscaleFlowEvent implements FlowEvent {
     UPSCALE_SAVE_METADATA_FINISHED_EVENT("UPSCALE_SAVE_METADATA_FINISHED_EVENT"),
     UPSCALE_TLS_SETUP_FINISHED_EVENT("UPSCALE_TLS_SETUP_FINISHED_EVENT"),
     UPSCALE_TLS_SETUP_FAILED_EVENT(EventSelectorUtil.selector(UpscaleFailureEvent.class)),
+    UPSCALE_CLUSTER_PROXY_REGISTRATION_FINISHED_EVENT(EventSelectorUtil.selector(ClusterProxyRegistrationSuccess.class)),
+    UPSCALE_CLUSTER_PROXY_REGISTRATION_FAILED_EVENT(EventSelectorUtil.selector(ClusterProxyRegistrationFailed.class)),
     UPSCALE_BOOTSTRAP_MACHINES_FINISHED_EVENT(EventSelectorUtil.selector(BootstrapMachinesSuccess.class)),
     UPSCALE_BOOTSTRAP_MACHINES_FAILED_EVENT(EventSelectorUtil.selector(BootstrapMachinesFailed.class)),
     UPSCALE_HOST_METADATASETUP_FINISHED_EVENT(EventSelectorUtil.selector(HostMetadataSetupSuccess.class)),

@@ -33,7 +33,7 @@ public class UpgradeFlowEventChainFactory implements FlowEventChainFactory<Upgra
     @Override
     public FlowTriggerEventQueue createFlowTriggerEventQueue(UpgradeEvent event) {
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
-        flowEventChain.add(new SaltUpdateTriggerEvent(SaltUpdateEvent.SALT_UPDATE_EVENT.event(), event.getResourceId(), event.accepted())
+        flowEventChain.add(new SaltUpdateTriggerEvent(SaltUpdateEvent.SALT_UPDATE_EVENT.event(), event.getResourceId(), event.accepted(), true, false)
                 .withOperationId(event.getOperationId()));
         flowEventChain.add(new ImageChangeEvent(IMAGE_CHANGE_EVENT.event(), event.getResourceId(), event.getImageSettingsRequest())
                 .withOperationId(event.getOperationId()));
@@ -42,6 +42,8 @@ public class UpgradeFlowEventChainFactory implements FlowEventChainFactory<Upgra
         int instanceCountForDownscale = event.getInstanceIds().size() + 1;
         addScaleEventsForNonPgwInstances(event, flowEventChain, instanceCountForUpscale, instanceCountForDownscale);
         addScaleEventsAndChangePgw(event, flowEventChain, instanceCountForUpscale, instanceCountForDownscale);
+        flowEventChain.add(new SaltUpdateTriggerEvent(SaltUpdateEvent.SALT_UPDATE_EVENT.event(), event.getResourceId(), event.accepted(), true, true)
+                .withOperationId(event.getOperationId()));
         return new FlowTriggerEventQueue(getName(), flowEventChain);
     }
 
@@ -53,7 +55,7 @@ public class UpgradeFlowEventChainFactory implements FlowEventChainFactory<Upgra
         flowEventChain.add(new ChangePrimaryGatewayEvent(ChangePrimaryGatewayFlowEvent.CHANGE_PRIMARY_GATEWAY_EVENT.event(), event.getResourceId(),
                 oldInstances, Boolean.FALSE, event.getOperationId()));
         flowEventChain.add(new DownscaleEvent(DownscaleFlowEvent.DOWNSCALE_EVENT.event(),
-                event.getResourceId(), List.of(event.getPrimareGwInstanceId()), instanceCountForDownscale, false, true, true, event.getOperationId()));
+                event.getResourceId(), List.of(event.getPrimareGwInstanceId()), instanceCountForDownscale, false, true, false, event.getOperationId()));
     }
 
     private void addScaleEventsForNonPgwInstances(UpgradeEvent event, Queue<Selectable> flowEventChain, int instanceCountForUpscale,
