@@ -147,6 +147,33 @@ public class DiagnosticsFlowServiceTest {
         assertFalse(result);
     }
 
+    @Test
+    public void testIsVersionGreaterOrEqualIfVersionEquals() {
+        // GIVEN
+        // WHEN
+        boolean result = underTest.isVersionGreaterOrEqual("0.4.8", "0.4.8");
+        // THEN
+        assertTrue(result);
+    }
+
+    @Test
+    public void testIsVersionGreaterOrEqualIfVersionLess() {
+        // GIVEN
+        // WHEN
+        boolean result = underTest.isVersionGreaterOrEqual("0.4.7", "0.4.8");
+        // THEN
+        assertFalse(result);
+    }
+
+    @Test
+    public void testIsVersionGreaterOrEqualIfVersionGreater() {
+        // GIVEN
+        // WHEN
+        boolean result = underTest.isVersionGreaterOrEqual("0.4.9", "0.4.8");
+        // THEN
+        assertTrue(result);
+    }
+
     private Node createNode() {
         return new Node("privateIp", "publicIp", "instanceId",
                 "instanceType", "host1", "master");

@@ -36,7 +36,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_GCP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MEDIUM_DUTY_SDX;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_NETWORK_PREFLIGHT_NOTIFICATIONS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_NODESTATUS_ENABLE_SALT_PING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_AZURE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RAW_S3;
@@ -355,9 +354,6 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.cm.sync.command.poller.enable}")
     private boolean cmSyncCommandPollerEnabled;
-
-    @Value("${auth.mock.network.preflight.notifications.enable}")
-    private boolean networkPreflightNotifications;
 
     @Value("${auth.mock.conclusion.checker.send.user.event.enable}")
     private boolean conclusionCheckerSendUserEvent;
@@ -725,9 +721,6 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (cmSyncCommandPollerEnabled) {
             builder.addEntitlements(createEntitlement(CDP_USE_CM_SYNC_COMMAND_POLLER));
-        }
-        if (networkPreflightNotifications) {
-            builder.addEntitlements(createEntitlement(CDP_NETWORK_PREFLIGHT_NOTIFICATIONS));
         }
         if (conclusionCheckerSendUserEvent) {
             builder.addEntitlements(createEntitlement(CDP_CONCLUSION_CHECKER_SEND_USER_EVENT));
