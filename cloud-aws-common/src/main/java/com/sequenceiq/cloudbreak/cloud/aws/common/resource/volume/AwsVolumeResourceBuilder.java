@@ -125,7 +125,8 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
                 .findFirst();
 
         String subnetId = getSubnetId(context, instance);
-        return List.of(reattachableVolumeSet.orElseGet(createVolumeSet(privateId, auth, group, subnetId)));
+        Optional<String> availabilityZone = getAvailabilityZone(context, instance);
+        return List.of(reattachableVolumeSet.orElseGet(createVolumeSet(privateId, auth, group, subnetId, availabilityZone)));
     }
 
     protected String getSubnetId(AwsContext context, CloudInstance cloudInstance) {
@@ -133,7 +134,12 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
                 .filter(cloudResource -> ResourceType.AWS_SUBNET.equals(cloudResource.getType())).findFirst().get().getName();
     }
 
-    private Supplier<CloudResource> createVolumeSet(long privateId, AuthenticatedContext auth, Group group, String subnetId) {
+    protected Optional<String> getAvailabilityZone(AwsContext context, CloudInstance cloudInstance) {
+        return Optional.empty();
+    }
+
+    private Supplier<CloudResource> createVolumeSet(long privateId, AuthenticatedContext auth, Group group,
+        String subnetId, Optional<String> availabilityZone) {
         return () -> {
             AwsResourceNameService resourceNameService = getResourceNameService();
 
@@ -142,17 +148,17 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
             CloudContext cloudContext = auth.getCloudContext();
             String stackName = cloudContext.getName();
 
-            String availabilityZone = getAvailabilityZoneFromSubnet(auth, subnetId);
+            String targetAvailabilityZone = getAvailabilityZoneFromSubnet(auth, subnetId, availabilityZone);
 
             return new Builder()
                     .persistent(true)
                     .type(resourceType())
                     .name(resourceNameService.resourceName(resourceType(), stackName, groupName, privateId))
-                    .availabilityZone(availabilityZone)
+                    .availabilityZone(targetAvailabilityZone)
                     .group(group.getName())
                     .status(CommonStatus.REQUESTED)
                     .params(Map.of(CloudResource.ATTRIBUTES, new VolumeSetAttributes.Builder()
-                            .withAvailabilityZone(availabilityZone)
+                            .withAvailabilityZone(targetAvailabilityZone)
                             .withDeleteOnTermination(Boolean.TRUE)
                             .withVolumes(template.getVolumes().stream()
                                     .filter(vol -> !AwsDiskType.Ephemeral.value().equalsIgnoreCase(vol.getType()))
@@ -163,15 +169,27 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
         };
     }
 
-    private String getAvailabilityZoneFromSubnet(AuthenticatedContext auth, String subnetId) {
-        AmazonEc2Client amazonEC2Client = getAmazonEC2Client(auth);
-        DescribeSubnetsResult describeSubnetsResult = amazonEC2Client.describeSubnets(new DescribeSubnetsRequest()
-                .withSubnetIds(subnetId));
-        return describeSubnetsResult.getSubnets().stream()
-                .filter(subnet -> subnetId.equals(subnet.getSubnetId()))
-                .map(Subnet::getAvailabilityZone)
-                .findFirst()
-                .orElse(auth.getCloudContext().getLocation().getAvailabilityZone().value());
+    private String getAvailabilityZoneFromSubnet(AuthenticatedContext auth, String subnetId, Optional<String> availabilityZone) {
+        if (availabilityZone.isPresent()) {
+            return availabilityZone.get();
+        } else {
+            String defaultAvailabilityZone = auth.getCloudContext().getLocation().getAvailabilityZone().value();
+            AmazonEc2Client amazonEC2Client = getAmazonEC2Client(auth);
+            DescribeSubnetsRequest describeSubnetsRequest = new DescribeSubnetsRequest().withSubnetIds(subnetId);
+            DescribeSubnetsResult describeSubnetsResult = awsMethodExecutor
+                    .execute(() -> amazonEC2Client.describeSubnets(describeSubnetsRequest), null);
+
+            if (describeSubnetsResult == null) {
+                return defaultAvailabilityZone;
+            } else {
+                return describeSubnetsResult.getSubnets()
+                        .stream()
+                        .filter(subnet -> subnetId.equals(subnet.getSubnetId()))
+                        .map(Subnet::getAvailabilityZone)
+                        .findFirst()
+                        .orElse(defaultAvailabilityZone);
+            }
+        }
     }
 
     @Override

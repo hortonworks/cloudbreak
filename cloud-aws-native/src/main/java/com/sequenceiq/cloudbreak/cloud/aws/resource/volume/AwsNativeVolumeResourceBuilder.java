@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.cloud.aws.resource.volume;
 import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants.AwsVariant.AWS_NATIVE_VARIANT;
 import static com.sequenceiq.cloudbreak.cloud.aws.resource.AwsNativeResourceBuilderOrderConstants.NATIVE_VOLUME_RESOURCE_BUILDER_ORDER;
 
+import java.util.Optional;
+
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.aws.common.context.AwsContext;
@@ -21,6 +23,10 @@ public class AwsNativeVolumeResourceBuilder extends AwsVolumeResourceBuilder {
     @Override
     protected String getSubnetId(AwsContext context, CloudInstance cloudInstance) {
         return cloudInstance.getSubnetId();
+    }
+
+    protected Optional<String> getAvailabilityZone(AwsContext context, CloudInstance cloudInstance) {
+        return Optional.ofNullable(cloudInstance.getAvailabilityZone());
     }
 
     @Override

@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.aws.resource.instance;
 
-import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -100,8 +99,6 @@ public class AwsSecurityGroupResourceBuilderTest {
         when(resourceNameService.resourceName(any(), any())).thenReturn("groupId");
         when(group.getSecurity()).thenReturn(security);
         when(ac.getCloudContext()).thenReturn(cloudContext);
-        when(cloudContext.getLocation()).thenReturn(location);
-        when(location.getAvailabilityZone()).thenReturn(availabilityZone("az1"));
         when(security.getCloudSecurityId()).thenReturn(null);
 
         List<CloudResource> actual = underTest.create(awsContext, cloudInstance, 0, ac, group, image);
@@ -113,8 +110,6 @@ public class AwsSecurityGroupResourceBuilderTest {
         when(group.getSecurity()).thenReturn(security);
         when(ac.getCloudContext()).thenReturn(cloudContext);
         when(security.getCloudSecurityId()).thenReturn("sg-id");
-        when(cloudContext.getLocation()).thenReturn(location);
-        when(location.getAvailabilityZone()).thenReturn(availabilityZone("az1"));
 
         List<CloudResource> actual = underTest.create(awsContext, cloudInstance, 0, ac, group, image);
         Assertions.assertTrue(actual.isEmpty());

@@ -190,26 +190,4 @@ public class AwsNativeModel {
         this.efsFileSystem = efsFileSystem;
     }
 
-    /*
-    model.put("instanceGroups", awsGroupViews);
-        model.put("gatewayGroups", awsGatewayGroupViews);
-        model.put("existingVPC", context.isExistingVPC());
-        model.put("existingIGW", context.isExistingIGW());
-        model.put("existingSubnet", !isNullOrEmptyList(context.getExistingSubnetCidr()));
-        model.put("enableInstanceProfile", context.isEnableInstanceProfile() || context.isInstanceProfileAvailable());
-        model.put("existingRole", context.isInstanceProfileAvailable());
-        model.put("cbSubnet", (isNullOrEmptyList(context.getExistingSubnetCidr())) ? Lists.newArrayList(context.getDefaultSubnet())
-                : context.getExistingSubnetCidr());
-        model.put("vpcSubnet", context.getExistingVpcCidr() == null ? Collections.emptyList() : context.getExistingVpcCidr());
-        model.put("dedicatedInstances", areDedicatedInstancesRequested(context.getStack()));
-        model.put("availabilitySetNeeded", context.getAc().getCloudContext().getLocation().getAvailabilityZone() != null
-                && context.getAc().getCloudContext().getLocation().getAvailabilityZone().value() != null);
-        model.put("mapPublicIpOnLaunch", context.isMapPublicIpOnLaunch());
-        model.put("outboundInternetTraffic", context.getOutboundInternetTraffic());
-        model.put("vpcCidrs", context.getVpcCidrs());
-        model.put("prefixListIds", context.getPrefixListIds());
-        model.put("loadBalancers", Optional.ofNullable(context.getLoadBalancers()).orElse(Collections.emptyList()));
-        model.put("enableEfs", context.isEnableEfs());
-        model.put("efsFileSystem", context.getEfsFileSystem());
-     */
 }
