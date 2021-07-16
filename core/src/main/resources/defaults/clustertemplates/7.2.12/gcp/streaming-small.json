@@ -2,11 +2,10 @@
   "name": "7.2.12 - Streams Messaging Light Duty for Google Cloud",
   "description": "",
   "type": "STREAMING",
-  "featureState": "RELEASED",
   "cloudPlatform": "GCP",
   "distroXTemplate": {
     "cluster": {
-      "blueprintName": "7.2.12 - Streams Messaging Light Duty: Apache Kafka, Schema Registry, Streams Messaging Manager, Streams Replication Manager"
+      "blueprintName": "7.2.12 - Streams Messaging Light Duty: Apache Kafka, Schema Registry, Streams Messaging Manager, Streams Replication Manager, Cruise Control"
     },
     "externalDatabase": {
       "availabilityType": "NON_HA"
@@ -14,6 +13,7 @@
     "instanceGroups": [
       {
         "name": "master",
+        "scalabilityOption": "FORBIDDEN",
         "template": {
           "instanceType": "e2-highmem-8",
           "attachedVolumes": [
@@ -29,7 +29,8 @@
         "recoveryMode": "MANUAL"
       },
       {
-        "name": "broker",
+        "name": "core_broker",
+        "scalabilityOption": "FORBIDDEN",
         "template": {
           "instanceType": "e2-standard-8",
           "attachedVolumes": [
@@ -41,6 +42,23 @@
           ]
         },
         "nodeCount": 3,
+        "type": "CORE",
+        "recoveryMode": "MANUAL",
+        "recipeNames": []
+      },
+      {
+        "name": "broker",
+        "template": {
+          "instanceType": "e2-standard-8",
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 1000,
+              "type": "pd-standard"
+            }
+          ]
+        },
+        "nodeCount": 0,
         "type": "CORE",
         "recoveryMode": "MANUAL",
         "recipeNames": []
