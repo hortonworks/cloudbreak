@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.event.loadbalancer;
 import java.util.List;
 
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
-import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancerMetadata;
+import com.sequenceiq.cloudbreak.cloud.model.loadbalancer.CloudLoadBalancerMetadata;
 
 public class CollectLoadBalancerMetadataResult extends CloudPlatformResult {
 
