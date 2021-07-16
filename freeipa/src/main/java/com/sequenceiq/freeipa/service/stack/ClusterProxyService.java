@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.clusterproxy.ClusterServiceHealthCheck;
 import com.sequenceiq.cloudbreak.clusterproxy.ConfigRegistrationRequest;
 import com.sequenceiq.cloudbreak.clusterproxy.ConfigRegistrationRequestBuilder;
 import com.sequenceiq.cloudbreak.clusterproxy.ConfigRegistrationResponse;
+import com.sequenceiq.cloudbreak.clusterproxy.ReadConfigResponse;
 import com.sequenceiq.cloudbreak.clusterproxy.TunnelEntry;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -135,6 +136,10 @@ public class ClusterProxyService {
         return registerFreeIpa(stackService.getByEnvironmentCrnAndAccountId(environmentCrn, accountId), null, false, false);
     }
 
+    public Optional<ConfigRegistrationResponse> registerFreeIpa(Long stackId) {
+        return registerFreeIpa(stackService.getStackById(stackId), null, false, false);
+    }
+
     public Optional<ConfigRegistrationResponse> updateFreeIpaRegistrationAndWait(Long stackId, List<String> instanceIdsToRegister) {
         return registerFreeIpa(stackService.getStackById(stackId), instanceIdsToRegister, false, true);
     }
@@ -164,6 +169,7 @@ public class ClusterProxyService {
 
         if (bootstrap) {
             tunnelGatewayConfigs = List.of(primaryGatewayConfig);
+            serviceConfigs.add(createServiceConfig(stack, generateFreeIpaFqdn(stack), primaryGatewayConfig, clientCertificate, usePrivateIpToTls));
         } else if (clusterProxyServiceAvailabilityChecker.isDnsBasedServiceNameAvailable(stack)) {
             List<GatewayConfig> targetGatewayConfigs = gatewayConfigs.stream()
                     .filter(gatewayConfig -> Objects.nonNull(gatewayConfig.getInstanceId()))
@@ -246,14 +252,18 @@ public class ClusterProxyService {
         List<String> endpoints = gatewayConfigs.stream()
                 .map(gatewayConfig -> getNginxEndpointForRegistration(stack, gatewayConfig, usePrivateIpToTls))
                 .collect(Collectors.toList());
-        FreeIpa freeIpa = freeIpaService.findByStack(stack);
-        serviceConfigs.add(new ClusterServiceConfig(FreeIpaDomainUtils.getFreeIpaFqdn(freeIpa.getDomain()),
+        serviceConfigs.add(new ClusterServiceConfig(generateFreeIpaFqdn(stack),
                 endpoints,
                 List.of(),
                 clientCertificate,
                 getHealthCheck(stack)
         ));
         return serviceConfigs;
+    }
+
+    private String generateFreeIpaFqdn(Stack stack) {
+        FreeIpa freeIpa = freeIpaService.findByStack(stack);
+        return FreeIpaDomainUtils.getFreeIpaFqdn(freeIpa.getDomain());
     }
 
     private ClusterServiceHealthCheck getHealthCheck(Stack stack) {
@@ -300,9 +310,36 @@ public class ClusterProxyService {
     }
 
     public String getProxyPath(Stack stack, Optional<String> serviceName) {
-        FreeIpa freeIpa = freeIpaService.findByStack(stack);
-        String proxyServiceName = serviceName.orElse(FreeIpaDomainUtils.getFreeIpaFqdn(freeIpa.getDomain()));
+        String freeIpaFqdn = generateFreeIpaFqdn(stack);
+        return getProxyPath(stack, serviceName, freeIpaFqdn);
+    }
+
+    public String getProxyPathPgwAsFallBack(Stack stack, Optional<String> serviceName) {
+        return getProxyPath(stack, serviceName, FREEIPA_SERVICE_NAME);
+    }
+
+    private String getProxyPath(Stack stack, Optional<String> serviceName, String defaultServiceName) {
+        Optional<String> registeredServiceName = getRegisteredServiceNameOrEmpty(stack.getResourceCrn(), serviceName);
+        String proxyServiceName = registeredServiceName.orElse(defaultServiceName);
+        LOGGER.info("Service name used for connection: [{}]", proxyServiceName);
         return String.format("%s/proxy/%s/%s", clusterProxyConfiguration.getClusterProxyBasePath(), stack.getResourceCrn(), proxyServiceName);
+    }
+
+    private Optional<String> getRegisteredServiceNameOrEmpty(String crn, Optional<String> serviceName) {
+        if (serviceName.isPresent() && isServiceEndpointWithIdentityIsRegistered(crn, serviceName.get())) {
+            LOGGER.info("ServiceName [{}] is registered", serviceName);
+            return serviceName;
+        } else {
+            LOGGER.info("ServiceName [{}] is not registered or not defined", serviceName);
+            return Optional.empty();
+        }
+    }
+
+    private boolean isServiceEndpointWithIdentityIsRegistered(String crn, String serviceName) {
+        ReadConfigResponse readConfigResponse = clusterProxyRegistrationClient.readConfig(crn);
+        LOGGER.debug("Check if internal endpoint with serviceName [{}] is registered", serviceName);
+        return readConfigResponse.getServices() != null && readConfigResponse.getServices().stream()
+                .anyMatch(readConfigService -> serviceName.equals(readConfigService.getName()));
     }
 
     private String vaultPath(String vaultSecretJsonString) {

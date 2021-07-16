@@ -4,6 +4,7 @@ import static org.apache.commons.codec.binary.Base64.decodeBase64;
 
 import java.security.KeyPair;
 import java.security.cert.X509Certificate;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -121,7 +122,7 @@ public class TlsSecurityService {
                         null, null);
         if (clusterProxyService.isCreateConfigForClusterProxy(stack)) {
             gatewayConfig
-                    .withPath(clusterProxyService.getProxyPath(stack.getResourceCrn()))
+                    .withPath(clusterProxyService.getProxyPathPgwAsFallBack(stack, Optional.ofNullable(gatewayInstance.getDiscoveryFQDN())))
                     .withProtocol(clusterProxyConfiguration.getClusterProxyProtocol());
         }
         return gatewayConfig;

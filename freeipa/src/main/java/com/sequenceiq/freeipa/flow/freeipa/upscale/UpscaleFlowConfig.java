@@ -6,6 +6,8 @@ import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCA
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_ADD_INSTANCES_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_BOOTSTRAP_MACHINES_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_BOOTSTRAP_MACHINES_FINISHED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_CLUSTER_PROXY_REGISTRATION_FAILED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_CLUSTER_PROXY_REGISTRATION_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_EXTEND_METADATA_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_EXTEND_METADATA_FINISHED_EVENT;
@@ -49,6 +51,7 @@ import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.UPSCALE_R
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.UPSCALE_SAVE_METADATA_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.UPSCALE_STARTING_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.UPSCALE_TLS_SETUP_STATE;
+import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.UPSCALE_UPDATE_CLUSTERPROXY_REGISTRATION_PRE_BOOTSTRAP_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.UPSCALE_UPDATE_CLUSTERPROXY_REGISTRATION_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.UPSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.UPSCALE_UPDATE_KERBEROS_NAMESERVERS_CONFIG_STATE;
@@ -92,9 +95,13 @@ public class UpscaleFlowConfig extends AbstractFlowConfiguration<UpscaleState, U
                     .event(UPSCALE_SAVE_METADATA_FINISHED_EVENT)
                     .failureEvent(UPSCALE_TLS_SETUP_FAILED_EVENT)
 
-                    .from(UPSCALE_TLS_SETUP_STATE).to(UPSCALE_BOOTSTRAPPING_MACHINES_STATE)
+                    .from(UPSCALE_TLS_SETUP_STATE).to(UPSCALE_UPDATE_CLUSTERPROXY_REGISTRATION_PRE_BOOTSTRAP_STATE)
                     .event(UPSCALE_TLS_SETUP_FINISHED_EVENT)
                     .failureEvent(UPSCALE_TLS_SETUP_FAILED_EVENT)
+
+                    .from(UPSCALE_UPDATE_CLUSTERPROXY_REGISTRATION_PRE_BOOTSTRAP_STATE).to(UPSCALE_BOOTSTRAPPING_MACHINES_STATE)
+                    .event(UPSCALE_CLUSTER_PROXY_REGISTRATION_FINISHED_EVENT)
+                    .failureEvent(UPSCALE_CLUSTER_PROXY_REGISTRATION_FAILED_EVENT)
 
                     .from(UPSCALE_BOOTSTRAPPING_MACHINES_STATE).to(UPSCALE_COLLECTING_HOST_METADATA_STATE)
                     .event(UPSCALE_BOOTSTRAP_MACHINES_FINISHED_EVENT)

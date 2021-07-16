@@ -2,8 +2,6 @@ package com.sequenceiq.freeipa.flow.freeipa.salt.update;
 
 import java.util.Map;
 
-import javax.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -11,24 +9,17 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.bootstrap.BootstrapMachinesSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.orchestrator.OrchestratorConfigRequest;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.orchestrator.OrchestratorConfigSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.services.InstallFreeIpaServicesRequest;
-import com.sequenceiq.freeipa.flow.freeipa.provision.event.services.InstallFreeIpaServicesSuccess;
 import com.sequenceiq.freeipa.flow.stack.StackContext;
-import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.flow.stack.provision.action.AbstractStackProvisionAction;
-import com.sequenceiq.freeipa.service.stack.StackUpdater;
 
 @Configuration
 public class SaltUpdateActions {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SaltUpdateActions.class);
-
-    @Inject
-    private StackUpdater stackUpdater;
 
     @Bean(name = "UPDATE_SALT_STATE_FILES_STATE")
     public Action<?, ?> updateSaltFilesAction() {
@@ -70,19 +61,7 @@ public class SaltUpdateActions {
 
     @Bean(name = "SALT_UPDATE_FINISHED_STATE")
     public Action<?, ?> saltUpdateFinishedAction() {
-        return new AbstractStackProvisionAction<>(InstallFreeIpaServicesSuccess.class) {
-            @Override
-            protected void doExecute(StackContext context, InstallFreeIpaServicesSuccess payload, Map<Object, Object> variables) {
-                stackUpdater.updateStackStatus(payload.getResourceId(), DetailedStackStatus.AVAILABLE, "Salt update finished");
-                LOGGER.info("Salt state update finished successfully");
-                sendEvent(context);
-            }
-
-            @Override
-            protected Selectable createRequest(StackContext context) {
-                return new StackEvent(SaltUpdateEvent.SALT_UPDATE_FINISHED_EVENT.event(), context.getStack().getId());
-            }
-        };
+        return new SaltUpdateFinishedAction();
     }
 
     @Bean(name = "SALT_UPDATE_FAILED_STATE")
