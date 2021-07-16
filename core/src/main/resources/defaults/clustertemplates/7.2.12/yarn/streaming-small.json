@@ -5,11 +5,12 @@
   "cloudPlatform": "YARN",
   "distroXTemplate": {
     "cluster": {
-      "blueprintName": "7.2.12 - Streams Messaging Light Duty: Apache Kafka, Schema Registry, Streams Messaging Manager, Streams Replication Manager"
+      "blueprintName": "7.2.12 - Streams Messaging Light Duty: Apache Kafka, Schema Registry, Streams Messaging Manager, Streams Replication Manager, Cruise Control"
     },
     "instanceGroups": [
       {
         "name": "master",
+        "scalabilityOption": "FORBIDDEN",
         "template": {
           "yarn": {
             "cpus": 4,
@@ -24,7 +25,8 @@
         "recoveryMode": "MANUAL"
       },
       {
-        "name": "broker",
+        "name": "core_broker",
+        "scalabilityOption": "FORBIDDEN",
         "template": {
           "yarn": {
             "cpus": 4,
@@ -35,6 +37,22 @@
           }
         },
         "nodeCount": 3,
+        "type": "CORE",
+        "recoveryMode": "MANUAL",
+        "recipeNames": []
+      },
+      {
+        "name": "broker",
+        "template": {
+          "yarn": {
+            "cpus": 4,
+            "memory": 16384
+          },
+          "rootVolume": {
+            "size": 50
+          }
+        },
+        "nodeCount": 0,
         "type": "CORE",
         "recoveryMode": "MANUAL",
         "recipeNames": []

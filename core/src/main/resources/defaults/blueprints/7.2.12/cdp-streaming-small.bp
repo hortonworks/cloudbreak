@@ -1,5 +1,5 @@
 {
-  "description": "7.2.12 - Streams Messaging Light Duty with Apache Kafka, Schema Registry, Streams Messaging Manager, Streams Replication Manager",
+  "description": "7.2.12 - Streams Messaging Light Duty with Apache Kafka, Schema Registry, Streams Messaging Manager, Streams Replication Manager, Cruise Control",
   "blueprint": {
     "cdhVersion": "7.2.12",
     "displayName": "streams-messaging",
@@ -84,6 +84,17 @@
             "base" : true
           }
         ]
+      },
+      {
+        "refName": "cruise_control",
+        "serviceType": "CRUISE_CONTROL",
+        "roleConfigGroups": [
+          {
+            "refName": "cruise_control-CRUISE_CONTROL_SERVER-BASE",
+            "roleType": "CRUISE_CONTROL_SERVER",
+            "base": true
+          }
+        ]
       }
     ],
     "hostTemplates": [
@@ -95,14 +106,24 @@
           "streams_replication_manager-STREAMS_REPLICATION_MANAGER_SERVICE-BASE",
           "schemaregistry-SCHEMA_REGISTRY_SERVER-BASE",
           "streams_messaging_manager-STREAMS_MESSAGING_MANAGER_SERVER-BASE",
-          "streams_messaging_manager-STREAMS_MESSAGING_MANAGER_UI-BASE"
+          "streams_messaging_manager-STREAMS_MESSAGING_MANAGER_UI-BASE",
+          "cruise_control-CRUISE_CONTROL_SERVER-BASE"
+        ]
+      },
+      {
+        "refName": "core_broker",
+        "cardinality": 3,
+        "roleConfigGroupsRefNames": [
+          "zookeeper-SERVER-BASE",
+          "streams_replication_manager-STREAMS_REPLICATION_MANAGER_DRIVER-BASE",
+          "kafka-GATEWAY-BASE",
+          "kafka-KAFKA_BROKER-BASE"
         ]
       },
       {
         "refName": "broker",
-        "cardinality": 3,
+        "cardinality": 0,
         "roleConfigGroupsRefNames": [
-          "zookeeper-SERVER-BASE",
           "streams_replication_manager-STREAMS_REPLICATION_MANAGER_DRIVER-BASE",
           "kafka-GATEWAY-BASE",
           "kafka-KAFKA_BROKER-BASE"

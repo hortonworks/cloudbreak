@@ -5,7 +5,7 @@
   "cloudPlatform": "AZURE",
   "distroXTemplate": {
     "cluster": {
-      "blueprintName": "7.2.12 - Streams Messaging Light Duty: Apache Kafka, Schema Registry, Streams Messaging Manager, Streams Replication Manager"
+      "blueprintName": "7.2.12 - Streams Messaging Light Duty: Apache Kafka, Schema Registry, Streams Messaging Manager, Streams Replication Manager, Cruise Control"
     },
     "externalDatabase": {
       "availabilityType": "NON_HA"
@@ -13,6 +13,7 @@
     "instanceGroups": [
       {
         "name": "master",
+        "scalabilityOption": "FORBIDDEN",
         "template": {
           "instanceType": "Standard_E8s_v3",
           "attachedVolumes": [
@@ -28,6 +29,24 @@
         "recoveryMode": "MANUAL"
       },
       {
+        "name": "core_broker",
+        "scalabilityOption": "FORBIDDEN",
+        "template": {
+          "instanceType": "Standard_D8s_v3",
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 1000,
+              "type": "Standard_LRS"
+            }
+          ]
+        },
+        "nodeCount": 3,
+        "type": "CORE",
+        "recoveryMode": "MANUAL",
+        "recipeNames": []
+      },
+      {
         "name": "broker",
         "template": {
           "instanceType": "Standard_D8_v3",
@@ -39,7 +58,7 @@
             }
           ]
         },
-        "nodeCount": 3,
+        "nodeCount": 0,
         "type": "CORE",
         "recoveryMode": "MANUAL",
         "recipeNames": []
