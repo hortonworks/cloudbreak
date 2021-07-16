@@ -351,11 +351,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             Callable<Boolean> saltPillarRunner = saltRunner.runner(hostSave, exitCriteria, exitModel);
             saltPillarRunner.call();
 
-            for (Entry<String, SaltPillarProperties> propertiesEntry : saltConfig.getServicePillarConfig().entrySet()) {
-                OrchestratorBootstrap pillarSave = new PillarSave(sc, gatewayTargetIpAddresses, propertiesEntry.getValue());
-                saltPillarRunner = saltRunner.runner(pillarSave, exitCriteria, exitModel);
-                saltPillarRunner.call();
-            }
+            savePillars(saltConfig, exitModel, gatewayTargetIpAddresses, sc);
 
             setAdMemberRoleIfNeeded(allNodes, saltConfig, exitModel, sc, reachableHostnames);
             setIpaMemberRoleIfNeeded(allNodes, saltConfig, exitModel, sc, reachableHostnames);
@@ -390,6 +386,15 @@ public class SaltOrchestrator implements HostOrchestrator {
         }
     }
 
+    private void savePillars(SaltConfig saltConfig, ExitCriteriaModel exitModel, Set<String> gatewayTargetIpAddresses, SaltConnector sc) throws Exception {
+        Callable<Boolean> saltPillarRunner;
+        for (Entry<String, SaltPillarProperties> propertiesEntry : saltConfig.getServicePillarConfig().entrySet()) {
+            OrchestratorBootstrap pillarSave = new PillarSave(sc, gatewayTargetIpAddresses, propertiesEntry.getValue());
+            saltPillarRunner = saltRunner.runner(pillarSave, exitCriteria, exitModel);
+            saltPillarRunner.call();
+        }
+    }
+
     @Override
     public void initSaltConfig(List<GatewayConfig> allGateway, Set<Node> allNodes, SaltConfig saltConfig, ExitCriteriaModel exitModel)
             throws CloudbreakOrchestratorFailedException {
@@ -400,11 +405,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             Callable<Boolean> saltPillarRunner = saltRunner.runner(hostSave, exitCriteria, exitModel);
             saltPillarRunner.call();
 
-            for (Entry<String, SaltPillarProperties> propertiesEntry : saltConfig.getServicePillarConfig().entrySet()) {
-                OrchestratorBootstrap pillarSave = new PillarSave(sc, gatewayTargets, propertiesEntry.getValue());
-                saltPillarRunner = saltRunner.runner(pillarSave, exitCriteria, exitModel);
-                saltPillarRunner.call();
-            }
+            savePillars(saltConfig, exitModel, gatewayTargets, sc);
         } catch (ExecutionException e) {
             LOGGER.warn("Error occurred during bootstrap", e);
             if (e.getCause() instanceof CloudbreakOrchestratorFailedException) {

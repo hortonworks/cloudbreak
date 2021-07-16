@@ -11,6 +11,8 @@ import javax.ws.rs.core.MediaType;
 import org.springframework.validation.annotation.Validated;
 
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
+import com.sequenceiq.sdx.api.model.SdxRecoveryRequest;
+import com.sequenceiq.sdx.api.model.SdxRecoveryResponse;
 import com.sequenceiq.sdx.api.model.SdxUpgradeRequest;
 import com.sequenceiq.sdx.api.model.SdxUpgradeResponse;
 
@@ -35,5 +37,17 @@ public interface SdxUpgradeEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "upgrades the datalake cluster", nickname = "upgradeDatalakeClusterByCrn")
     SdxUpgradeResponse upgradeClusterByCrn(@PathParam("crn") String crn,  @Valid SdxUpgradeRequest upgradeSdxClusterRequest);
+
+    @POST
+    @Path("{name}/recover_failed_upgrade")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "recovers the failed datalake upgrade", nickname = "recoverDatalakeCluster")
+    SdxRecoveryResponse recoverClusterByName(@PathParam("name") String name, @Valid SdxRecoveryRequest recoverSdxClusterRequest);
+
+    @POST
+    @Path("/crn/{crn}/recover_failed_upgrade")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "recovers the failed datalake upgrade", nickname = "recoverDatalakeClusterByCrn")
+    SdxRecoveryResponse recoverClusterByCrn(@PathParam("crn") String crn,  @Valid SdxRecoveryRequest recoverSdxClusterRequest);
 
 }

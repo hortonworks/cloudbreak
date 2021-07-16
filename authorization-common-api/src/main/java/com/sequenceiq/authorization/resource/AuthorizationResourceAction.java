@@ -45,6 +45,7 @@ public enum AuthorizationResourceAction {
     START_DATALAKE("datalake/startDatalake", AuthorizationResourceType.DATALAKE),
     STOP_DATALAKE("datalake/stopDatalake", AuthorizationResourceType.DATALAKE),
     UPGRADE_DATALAKE("datalake/upgradeDatalake", AuthorizationResourceType.DATALAKE),
+    RECOVER_DATALAKE("datalake/recoverDatalake", AuthorizationResourceType.DATALAKE),
     ROTATE_CERT_DATALAKE("datalake/rotateAutoTlsCertDatalake", AuthorizationResourceType.DATALAKE),
     ENVIRONMENT_CREATE_DATAHUB("environments/createDatahub", AuthorizationResourceType.ENVIRONMENT),
     DESCRIBE_DATAHUB("datahub/describeDatahub", AuthorizationResourceType.DATAHUB),

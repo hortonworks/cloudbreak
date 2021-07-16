@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.TerminationEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.TerminationType;
 import com.sequenceiq.flow.core.ApplicationFlowInformation;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.domain.FlowLog;
@@ -246,7 +247,7 @@ public class TerminationTriggerServiceTest {
             assertEquals(FlowChainTriggers.TERMINATION_TRIGGER_EVENT, selector);
             assertEquals(FlowChainTriggers.TERMINATION_TRIGGER_EVENT, event.selector());
         }
-        assertEquals(forced, event.getForced());
+        assertEquals(forced, event.getTerminationType().isForced());
     }
 
     private void verifyNoTerminationEventFired() {
@@ -266,7 +267,7 @@ public class TerminationTriggerServiceTest {
         FlowLog flowLog = new FlowLog();
         flowLog.setFlowType(StackTerminationFlowConfig.class);
         flowLog.setCurrentState("INIT_STATE");
-        TerminationEvent event = new TerminationEvent("selector", 1L, forced);
+        TerminationEvent event = new TerminationEvent("selector", 1L, forced ? TerminationType.FORCEDTERMINATION : TerminationType.REGULAR);
         flowLog.setPayload(JsonWriter.objectToJson(event));
         flowLog.setPayloadType(TerminationEvent.class);
         return flowLog;

@@ -109,15 +109,15 @@ public class ClusterDownscaleService {
     }
 
     public void handleClusterDownscaleFailure(long stackId, Exception error) {
-        String errorDetailes = error.getMessage();
+        String errorDetails = error.getMessage();
         LOGGER.warn("Error during Cluster downscale flow: ", error);
         Status status = UPDATE_FAILED;
         if (error instanceof NotEnoughNodeException) {
             status = AVAILABLE;
         }
-        clusterService.updateClusterStatusByStackId(stackId, status, errorDetailes);
-        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.AVAILABLE, "Node(s) could not be removed from the cluster: " + errorDetailes);
-        flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), CLUSTER_SCALING_FAILED, "removed from", errorDetailes);
+        clusterService.updateClusterStatusByStackId(stackId, status, errorDetails);
+        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.AVAILABLE, "Node(s) could not be removed from the cluster: " + errorDetails);
+        flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), CLUSTER_SCALING_FAILED, "removed from", errorDetails);
     }
 
 }

@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.core.flow2.stack.termination;
 
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.event.resource.TerminateStackRequest;
@@ -9,6 +11,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.recipe.CcmKeyDeregisterSucces
 
 @Component("StackTerminationAction")
 public class StackTerminationAction extends AbstractStackTerminationAction<CcmKeyDeregisterSuccess> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(StackTerminationAction.class);
 
     public StackTerminationAction() {
         super(CcmKeyDeregisterSuccess.class);

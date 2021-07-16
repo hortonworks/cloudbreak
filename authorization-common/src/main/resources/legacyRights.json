@@ -30,6 +30,7 @@
   "datalake/describeDetailedDatalake": "datalake/read",
   "datalake/deleteDatalake": "datalake/write",
   "datalake/repairDatalake": "datalake/write",
+  "datalake/recoverDatalake": "datalake/write",
   "datalake/syncDatalake": "datalake/write",
   "datalake/retryDatalakeOperation": "datalake/write",
   "datalake/startDatalake": "datalake/write",

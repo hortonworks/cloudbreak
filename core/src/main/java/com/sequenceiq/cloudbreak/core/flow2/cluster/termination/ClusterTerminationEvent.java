@@ -10,6 +10,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterTerminat
 public enum ClusterTerminationEvent implements FlowEvent {
     TERMINATION_EVENT("CLUSTER_TERMINATION_TRIGGER_EVENT"),
     PROPER_TERMINATION_EVENT("PROPER_TERMINATION_EVENT"),
+    RECOVERY_TERMINATION_EVENT("CLUSTER_RECOVERY_TERMINATION_EVENT"),
     PREPARE_CLUSTER_FINISHED_EVENT(EventSelectorUtil.selector(PrepareClusterTerminationResult.class)),
     PREPARE_CLUSTER_FAILED_EVENT(EventSelectorUtil.failureSelector(PrepareClusterTerminationResult.class)),
     DEREGISTER_SERVICES_FINISHED_EVENT(EventSelectorUtil.selector(DeregisterServicesResult.class)),

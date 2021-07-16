@@ -194,7 +194,7 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
         if (!StringUtils.isEmpty(blueprintName)) {
             blueprint = blueprintService.getByNameForWorkspaceAndLoadDefaultsIfNecessary(blueprintName, workspace);
             if (blueprint == null) {
-                throw new NotFoundException("Cluster definition does not exists by name: " + blueprintName);
+                throw new NotFoundException("Cluster definition does not exist by name: " + blueprintName);
             }
         }
         return blueprint;
@@ -205,7 +205,7 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
         if (!CollectionUtils.isEmpty(databases)) {
             Set<RDSConfig> rdsConfigs = rdsConfigService.findByNamesInWorkspace(databases, workspace.getId());
             if (rdsConfigs.isEmpty()) {
-                throw new NotFoundException("RDS config names dont exists");
+                throw new NotFoundException("RDS config names do not exist");
             }
             cluster.setRdsConfigs(rdsConfigs);
         }

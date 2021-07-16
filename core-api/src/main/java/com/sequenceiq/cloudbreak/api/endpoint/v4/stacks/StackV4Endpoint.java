@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.ClusterOpDescr
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.ClusterOpDescription.SET_MAINTENANCE_MODE_BY_NAME;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.ClusterOpDescription.UPDATE_PILLAR_CONFIG;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.ClusterOpDescription.UPDATE_SALT;
+import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.RECOVER_CLUSTER_IN_WORKSPACE_INTERNAL;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.UPDATE_LOAD_BALANCERS;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.CHECK_FOR_UPGRADE_CLUSTER_IN_WORKSPACE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.CHECK_IMAGE_IN_WORKSPACE;
@@ -77,6 +78,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.dr.BackupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.dr.RestoreV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.RecoveryV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeOptionV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
@@ -415,6 +417,13 @@ public interface StackV4Endpoint {
     @ApiOperation(value = DATABASE_RESTORE_INTERNAL, nickname = "databaseRestoreInternal")
     RestoreV4Response restoreDatabaseByNameInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @QueryParam("backupLocation") String backupLocation, @QueryParam("backupId") String backupId,
+            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+
+    @POST
+    @Path("internal/{name}/cluster_recover")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = RECOVER_CLUSTER_IN_WORKSPACE_INTERNAL, nickname = "recoverClusterInternal")
+    RecoveryV4Response recoverClusterByNameInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 
     @PUT

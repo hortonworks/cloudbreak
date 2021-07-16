@@ -37,6 +37,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.dr.BackupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.dr.RestoreV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.RecoveryV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeOptionV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
@@ -351,6 +352,13 @@ public class StackV4Controller extends NotificationController implements StackV4
         FlowIdentifier flowIdentifier = stackOperations.restoreClusterDatabase(NameOrCrn.ofName(name),
                 restRequestThreadLocalService.getRequestedWorkspaceId(), backupLocation, backupId);
         return new RestoreV4Response(flowIdentifier);
+    }
+
+    @Override
+    @InternalOnly
+    public RecoveryV4Response recoverClusterByNameInternal(Long workspaceId, String name, @InitiatorUserCrn String initiatorUserCrn) {
+        FlowIdentifier flowIdentifier = stackOperations.recoverCluster(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId());
+        return new RecoveryV4Response(flowIdentifier);
     }
 
     @Override

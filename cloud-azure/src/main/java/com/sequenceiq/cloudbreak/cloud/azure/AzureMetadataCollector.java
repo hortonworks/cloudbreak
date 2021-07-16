@@ -99,7 +99,7 @@ public class AzureMetadataCollector implements MetadataCollector {
             LOGGER.debug("Failed to collect vm metadata due to an exception: ", e);
             throw new CloudConnectorException(e.getMessage(), e);
         }
-        LOGGER.debug("Metadata collection finished");
+        LOGGER.debug("Metadata collection finished with result {}", results);
         return results;
     }
 

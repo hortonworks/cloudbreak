@@ -41,7 +41,7 @@ public class ExternalDatabaseTerminationActions {
             protected void doExecute(ExternalDatabaseContext context, TerminationEvent payload, Map<Object, Object> variables) {
                 Stack stack = context.getStack();
                 TerminateExternalDatabaseRequest request = new TerminateExternalDatabaseRequest(stack.getId(), "TerminateExternalDatabaseRequest",
-                        stack.getName(), stack.getResourceCrn(), stack, payload.getForced());
+                        stack.getName(), stack.getResourceCrn(), stack, payload.getTerminationType().isForced());
                 sendEvent(context, request);
             }
         };

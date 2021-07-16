@@ -22,9 +22,9 @@ public class HostGroupDecorator {
     @Inject
     private RecipeService recipeService;
 
-    public HostGroup decorate(HostGroup subject, HostGroupV4Request hostGroupV4Request, Stack stack, boolean postRequest) {
+    public HostGroup decorate(HostGroup subject, HostGroupV4Request hostGroupV4Request, Stack stack) {
         Set<String> recipeNames = hostGroupV4Request.getRecipeNames();
-        LOGGER.debug("Decorating hostgroup on [{}] request.", postRequest ? "POST" : "PUT");
+        LOGGER.debug("Decorating hostgroup {} on request.", subject.getName());
         subject.getRecipes().clear();
         if (recipeNames != null && !recipeNames.isEmpty()) {
             prepareRecipesByName(subject, stack.getWorkspace(), recipeNames);

@@ -1,9 +1,8 @@
 package com.sequenceiq.cloudbreak.workspace.model;
 
-import com.sequenceiq.cloudbreak.workspace.util.WorkspaceStatusConverter;
-
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.StringJoiner;
 
 import javax.persistence.Column;
 import javax.persistence.Convert;
@@ -13,6 +12,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
+
+import com.sequenceiq.cloudbreak.workspace.util.WorkspaceStatusConverter;
 
 @Entity
 public class Workspace implements TenantAwareResource, Serializable {
@@ -104,6 +105,19 @@ public class Workspace implements TenantAwareResource, Serializable {
         }
         Workspace that = (Workspace) o;
         return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", Workspace.class.getSimpleName() + "[", "]")
+                .add("id=" + id)
+                .add("name='" + name + "'")
+                .add("description='" + description + "'")
+                .add("tenant=" + tenant)
+                .add("status=" + status)
+                .add("resourceCrn='" + resourceCrn + "'")
+                .add("deletionTimestamp=" + deletionTimestamp)
+                .toString();
     }
 
     @Override

@@ -17,7 +17,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import com.sequenceiq.cloudbreak.core.flow2.event.DatabaseBackupTriggerEvent;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,6 +34,7 @@ import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers;
+import com.sequenceiq.cloudbreak.core.flow2.event.DatabaseBackupTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.MaintenanceModeValidationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackImageUpdateTriggerEvent;
@@ -103,7 +103,7 @@ public class ReactorFlowManagerTest {
         underTest.triggerStackStart(STACK_ID);
         underTest.triggerClusterStop(STACK_ID);
         underTest.triggerClusterStart(STACK_ID);
-        underTest.triggerTermination(STACK_ID, false);
+        underTest.triggerTermination(STACK_ID);
         underTest.triggerStackUpscale(STACK_ID, instanceGroupAdjustment, true);
         underTest.triggerStackDownscale(STACK_ID, instanceGroupAdjustment);
         underTest.triggerStackRemoveInstance(STACK_ID, "hostgroup", 5L);

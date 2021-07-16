@@ -150,10 +150,15 @@ public class UtilAuthorizationServiceTest {
                 .setRight(RightV4.SDX_UPGRADE.getAction().getRight()).setResource("dlCrn").build();
         AuthorizationProto.RightCheck dlUpgradeEnvRightCheck = AuthorizationProto.RightCheck.newBuilder()
                 .setRight(RightV4.SDX_UPGRADE.getAction().getRight()).setResource("env2crn").build();
+        AuthorizationProto.RightCheck dlRecoveryRightCheck = AuthorizationProto.RightCheck.newBuilder()
+                .setRight(RightV4.SDX_RECOVER.getAction().getRight()).setResource("dlCrn").build();
+        AuthorizationProto.RightCheck dlRecoveryEnvRightCheck = AuthorizationProto.RightCheck.newBuilder()
+                .setRight(RightV4.SDX_RECOVER.getAction().getRight()).setResource("env2crn").build();
         when(grpcUmsClient.hasRights(anyString(), eq(Arrays.asList(dhStartRightCheck, dhStartEnvRightCheck, dhStopRightCheck,
-                dhStopEnvRightCheck, dlRepairRightCheck, dlRepairEnvRightCheck, dlUpgradeRightCheck, dlUpgradeEnvRightCheck)), any()))
-                .thenReturn(Lists.newArrayList(Boolean.FALSE, Boolean.FALSE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE, Boolean.TRUE, Boolean.TRUE,
-                        Boolean.FALSE));
+                dhStopEnvRightCheck, dlRepairRightCheck, dlRepairEnvRightCheck, dlUpgradeRightCheck, dlUpgradeEnvRightCheck, dlRecoveryRightCheck,
+                dlRecoveryEnvRightCheck)), any()))
+                .thenReturn(Lists.newArrayList(Boolean.FALSE, Boolean.FALSE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE, Boolean.TRUE,  Boolean.TRUE,
+                        Boolean.FALSE, Boolean.TRUE, Boolean.FALSE));
 
         when(resourceCrnAthorizationFactory.calcAuthorization(eq("dhCrn"), eq(RightV4.DH_START.getAction())))
                 .thenReturn(Optional.of(new HasRightOnAny(RightV4.DH_START.getAction(), Arrays.asList("dhCrn", "envCrn"))));
@@ -163,10 +168,13 @@ public class UtilAuthorizationServiceTest {
                 .thenReturn(Optional.of(new HasRightOnAny(RightV4.SDX_REPAIR.getAction(), Arrays.asList("dlCrn", "env2crn"))));
         when(resourceCrnAthorizationFactory.calcAuthorization(eq("dlCrn"), eq(RightV4.SDX_UPGRADE.getAction())))
                 .thenReturn(Optional.of(new HasRightOnAny(RightV4.SDX_UPGRADE.getAction(), Arrays.asList("dlCrn", "env2crn"))));
+        when(resourceCrnAthorizationFactory.calcAuthorization(eq("dlCrn"), eq(RightV4.SDX_RECOVER.getAction())))
+                .thenReturn(Optional.of(new HasRightOnAny(RightV4.SDX_RECOVER.getAction(), Arrays.asList("dlCrn", "env2crn"))));
 
         CheckResourceRightsV4Request rightReq = new CheckResourceRightsV4Request();
         rightReq.setResourceRights(Lists.newArrayList(createResourceRightV4("dhCrn", RightV4.DH_START, RightV4.DH_STOP),
-                createResourceRightV4("dlCrn", RightV4.SDX_REPAIR, RightV4.SDX_UPGRADE)));
+
+                createResourceRightV4("dlCrn", RightV4.SDX_REPAIR, RightV4.SDX_UPGRADE, RightV4.SDX_RECOVER)));
         CheckResourceRightsV4Response rightResult = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.checkRightsOnResources(rightReq));
 
         rightResult.getResponses().forEach(checkResourceRightV4SingleResponse -> checkResourceRightV4SingleResponse.getRights()
@@ -181,6 +189,9 @@ public class UtilAuthorizationServiceTest {
                         assertTrue(checkRightV4SingleResponse.getResult());
                     }
                     if (checkRightV4SingleResponse.getRight().equals(RightV4.SDX_UPGRADE)) {
+                        assertTrue(checkRightV4SingleResponse.getResult());
+                    }
+                    if (checkRightV4SingleResponse.getRight().equals(RightV4.SDX_RECOVER)) {
                         assertTrue(checkRightV4SingleResponse.getResult());
                     }
                 }));

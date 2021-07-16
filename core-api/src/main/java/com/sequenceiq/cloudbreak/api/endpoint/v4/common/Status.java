@@ -23,6 +23,9 @@ public enum Status {
     RESTORE_IN_PROGRESS(StatusKind.PROGRESS),
     RESTORE_FAILED(StatusKind.FINAL),
     RESTORE_FINISHED(StatusKind.FINAL),
+    RECOVERY_IN_PROGRESS(StatusKind.PROGRESS),
+    RECOVERY_REQUESTED(StatusKind.PROGRESS),
+    RECOVERY_FAILED(StatusKind.FINAL),
     CREATE_FAILED(StatusKind.FINAL),
     ENABLE_SECURITY_FAILED(StatusKind.FINAL),
     PRE_DELETE_IN_PROGRESS(StatusKind.PROGRESS),
@@ -105,6 +108,7 @@ public enum Status {
                 REQUESTED,
                 CREATE_IN_PROGRESS,
                 UPDATE_IN_PROGRESS,
+                RECOVERY_IN_PROGRESS,
                 DELETE_IN_PROGRESS,
                 PRE_DELETE_IN_PROGRESS,
                 START_IN_PROGRESS,
@@ -120,6 +124,8 @@ public enum Status {
                 AVAILABLE,
                 UPDATE_REQUESTED,
                 UPDATE_FAILED,
+                RECOVERY_REQUESTED,
+                RECOVERY_FAILED,
                 BACKUP_FAILED,
                 RESTORE_FAILED,
                 CREATE_FAILED,
@@ -169,6 +175,8 @@ public enum Status {
                 return CREATE_FAILED;
             case UPDATE_IN_PROGRESS:
                 return UPDATE_FAILED;
+            case RECOVERY_IN_PROGRESS:
+                return RECOVERY_FAILED;
             case DELETE_IN_PROGRESS:
             case PRE_DELETE_IN_PROGRESS:
                 return DELETE_FAILED;

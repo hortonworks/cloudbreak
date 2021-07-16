@@ -17,9 +17,9 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.AbstractClusterAction;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterViewContext;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.service.ClusterCreationService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
-import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.action.AbstractStackCreationAction;
+import com.sequenceiq.cloudbreak.core.flow2.stack.start.StackCreationContext;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.job.StackJobAdapter;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
@@ -79,6 +79,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.HostMetadataSet
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.HostMetadataSetupSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.PreFlightCheckRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.PreFlightCheckSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.SetupRecoveryRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.SetupRecoverySuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StartAmbariServicesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StartClusterManagerServicesSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ValidateCloudStorageRequest;
@@ -86,6 +88,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ValidateCloudSt
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UploadRecipesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UploadRecipesSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.CleanupFreeIpaEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.ProvisionEvent;
 import com.sequenceiq.cloudbreak.service.freeipa.InstanceMetadataProcessor;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
@@ -111,12 +114,19 @@ public class ClusterCreationActions {
 
     @Bean(name = "CLUSTER_PROXY_REGISTRATION_STATE")
     public Action<?, ?> clusterProxyRegistrationAction() {
-        return new AbstractStackCreationAction<>(StackEvent.class) {
+        return new AbstractStackCreationAction<>(ProvisionEvent.class) {
+
+            @Override
+            protected void prepareExecution(ProvisionEvent payload, Map<Object, Object> variables) {
+                super.prepareExecution(payload, variables);
+                variables.put(PROVISION_TYPE, payload.getProvisionType());
+            }
+
             @Inject
             private ClusterProxyEnablementService clusterProxyEnablementService;
 
             @Override
-            protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
+            protected void doExecute(StackCreationContext context, ProvisionEvent payload, Map<Object, Object> variables) {
                 if (clusterProxyEnablementService.isClusterProxyApplicable(context.getStack().cloudPlatform())) {
                     clusterCreationService.registeringToClusterProxy(context.getStack());
                     sendEvent(context);
@@ -127,7 +137,7 @@ public class ClusterCreationActions {
             }
 
             @Override
-            protected Selectable createRequest(StackContext context) {
+            protected Selectable createRequest(StackCreationContext context) {
                 return new ClusterProxyRegistrationRequest(context.getStack().getId(), context.getStack().cloudPlatform());
             }
         };
@@ -137,13 +147,13 @@ public class ClusterCreationActions {
     public Action<?, ?> bootstrappingMachinesAction() {
         return new AbstractStackCreationAction<>(ClusterProxyRegistrationSuccess.class) {
             @Override
-            protected void doExecute(StackContext context, ClusterProxyRegistrationSuccess payload, Map<Object, Object> variables) {
+            protected void doExecute(StackCreationContext context, ClusterProxyRegistrationSuccess payload, Map<Object, Object> variables) {
                 clusterCreationService.bootstrappingMachines(context.getStack());
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(StackContext context) {
+            protected Selectable createRequest(StackCreationContext context) {
                 return new BootstrapMachinesRequest(context.getStack().getId());
             }
         };
@@ -153,13 +163,13 @@ public class ClusterCreationActions {
     public Action<?, ?> collectingHostMetadataAction() {
         return new AbstractStackCreationAction<>(BootstrapMachinesSuccess.class) {
             @Override
-            protected void doExecute(StackContext context, BootstrapMachinesSuccess payload, Map<Object, Object> variables) {
+            protected void doExecute(StackCreationContext context, BootstrapMachinesSuccess payload, Map<Object, Object> variables) {
                 clusterCreationService.collectingHostMetadata(context.getStack());
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(StackContext context) {
+            protected Selectable createRequest(StackCreationContext context) {
                 return new HostMetadataSetupRequest(context.getStack().getId());
             }
         };
@@ -169,32 +179,47 @@ public class ClusterCreationActions {
     public Action<?, ?> validateCloudStorageAction() {
         return new AbstractStackCreationAction<>(HostMetadataSetupSuccess.class) {
             @Override
-            protected void doExecute(StackContext context, HostMetadataSetupSuccess payload, Map<Object, Object> variables) {
+            protected void doExecute(StackCreationContext context, HostMetadataSetupSuccess payload, Map<Object, Object> variables) {
                 clusterCreationService.validatingCloudStorageOnVm(context.getStack());
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(StackContext context) {
+            protected Selectable createRequest(StackCreationContext context) {
                 return new ValidateCloudStorageRequest(context.getStack().getId());
+            }
+        };
+    }
+
+    @Bean(name = "SETUP_RECOVERY_STATE")
+    public Action<?, ?> setupRecoveryAction() {
+        return new AbstractStackCreationAction<>(ValidateCloudStorageSuccess.class) {
+            @Override
+            protected void doExecute(StackCreationContext context, ValidateCloudStorageSuccess payload, Map<Object, Object> variables) {
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(StackCreationContext context) {
+                return new SetupRecoveryRequest(context.getStack().getId(), context.getProvisionType());
             }
         };
     }
 
     @Bean(name = "CLEANUP_FREEIPA_STATE")
     public Action<?, ?> cleanupFreeIpaAction() {
-        return new AbstractStackCreationAction<>(ValidateCloudStorageSuccess.class) {
+        return new AbstractStackCreationAction<>(SetupRecoverySuccess.class) {
 
             @Inject
             private InstanceMetaDataService instanceMetaDataService;
 
             @Override
-            protected void doExecute(StackContext context, ValidateCloudStorageSuccess payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(StackCreationContext context, SetupRecoverySuccess payload, Map<Object, Object> variables) throws Exception {
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(StackContext context) {
+            protected Selectable createRequest(StackCreationContext context) {
                 Set<InstanceMetaData> instanceMetaData = instanceMetaDataService.findNotTerminatedForStack(context.getStack().getId());
                 Set<String> hostNames = instanceMetadataProcessor.extractFqdn(instanceMetaData);
                 Set<String> ips = instanceMetadataProcessor.extractIps(instanceMetaData);
@@ -207,13 +232,13 @@ public class ClusterCreationActions {
     public Action<?, ?> bootStrappingPublicEndpointAction() {
         return new AbstractStackCreationAction<>(StackEvent.class) {
             @Override
-            protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
+            protected void doExecute(StackCreationContext context, StackEvent payload, Map<Object, Object> variables) {
                 clusterCreationService.bootstrapPublicEndpoints(context.getStack());
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(StackContext context) {
+            protected Selectable createRequest(StackCreationContext context) {
                 return new BootstrapPublicEndpointSuccess(context.getStack().getId());
             }
         };
@@ -223,13 +248,13 @@ public class ClusterCreationActions {
     public Action<?, ?> bootStrappingPrivateEndpointAction() {
         return new AbstractStackCreationAction<>(BootstrapPublicEndpointSuccess.class) {
             @Override
-            protected void doExecute(StackContext context, BootstrapPublicEndpointSuccess payload, Map<Object, Object> variables) {
+            protected void doExecute(StackCreationContext context, BootstrapPublicEndpointSuccess payload, Map<Object, Object> variables) {
                 clusterCreationService.bootstrapPrivateEndpoints(context.getStack());
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(StackContext context) {
+            protected Selectable createRequest(StackCreationContext context) {
                 return new BootstrapFreeIPAEndpointSuccess(context.getStack().getId());
             }
         };
@@ -603,12 +628,12 @@ public class ClusterCreationActions {
     public Action<?, ?> clusterProxyGatewayRegistrationAction() {
         return new AbstractStackCreationAction<>(FinalizeClusterInstallSuccess.class) {
             @Override
-            protected void doExecute(StackContext context, FinalizeClusterInstallSuccess payload, Map<Object, Object> variables) {
+            protected void doExecute(StackCreationContext context, FinalizeClusterInstallSuccess payload, Map<Object, Object> variables) {
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(StackContext context) {
+            protected Selectable createRequest(StackCreationContext context) {
                 return new ClusterProxyGatewayRegistrationRequest(context.getStack().getId(), context.getStack().cloudPlatform());
             }
         };

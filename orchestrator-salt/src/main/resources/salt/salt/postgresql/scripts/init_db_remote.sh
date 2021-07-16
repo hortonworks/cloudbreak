@@ -15,7 +15,7 @@ echo "Check if database already exists for {{ service }}"
 PGPASSWORD={{ values['remote_admin_pw'] }} psql --host={{ values['remote_db_url'] }} --port={{ values['remote_db_port'] }} --username={{ values['remote_admin'] }} -v "ON_ERROR_STOP=1" -lqt | awk {'print $1'} | grep -qw {{ values['database'] }}
 result=$?
 
-set -e
+set -ex
 if [[ $result -eq 0 ]]; then
     echo "Database already exists for {{ service }}, skipping initialization."
 else
@@ -30,7 +30,7 @@ else
     echo "GRANT $username TO $admin_username" | PGPASSWORD={{ values['remote_admin_pw'] }} psql --host={{ values['remote_db_url'] }} --port={{ values['remote_db_port'] }} --username={{ values['remote_admin'] }} -v "ON_ERROR_STOP=1" {{ values['database'] }}
     echo "ALTER SCHEMA public OWNER TO $username" | PGPASSWORD={{ values['remote_admin_pw'] }} psql --host={{ values['remote_db_url'] }} --port={{ values['remote_db_port'] }} --username={{ values['remote_admin'] }} -v "ON_ERROR_STOP=1" {{ values['database'] }}
 fi
-set +e
+set +ex
 
 {% endif %}
 

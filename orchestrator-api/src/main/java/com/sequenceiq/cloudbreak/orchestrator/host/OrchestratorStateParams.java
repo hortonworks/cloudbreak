@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.orchestrator.host;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.StringJoiner;
 
 import org.apache.commons.collections.MapUtils;
 
@@ -11,6 +12,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 
 public class OrchestratorStateParams {
+
     private String state;
 
     private GatewayConfig primaryGatewayConfig;
@@ -103,5 +105,20 @@ public class OrchestratorStateParams {
 
     public void setErrorMessage(String errorMessage) {
         this.errorMessage = errorMessage;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", OrchestratorStateParams.class.getSimpleName() + "[", "]")
+                .add("state='" + state + "'")
+                .add("primaryGatewayConfig=" + primaryGatewayConfig)
+                .add("targetHostNames=" + targetHostNames)
+                .add("allNodes=" + allNodes)
+                .add("exitCriteriaModel=" + exitCriteriaModel)
+                .add("stateRetryParams=" + stateRetryParams)
+                .add("stateParams=" + stateParams)
+                .add("concurrent=" + concurrent)
+                .add("errorMessage='" + errorMessage + "'")
+                .toString();
     }
 }

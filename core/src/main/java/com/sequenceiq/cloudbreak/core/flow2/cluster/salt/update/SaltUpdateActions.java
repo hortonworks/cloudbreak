@@ -14,9 +14,9 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterViewContext;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
-import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.action.AbstractStackCreationAction;
+import com.sequenceiq.cloudbreak.core.flow2.stack.start.StackCreationContext;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.kerberos.KeytabConfigurationRequest;
@@ -38,13 +38,13 @@ public class SaltUpdateActions {
     public Action<?, ?> updateSaltFilesAction() {
         return new AbstractStackCreationAction<>(StackEvent.class) {
             @Override
-            protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
+            protected void doExecute(StackCreationContext context, StackEvent payload, Map<Object, Object> variables) {
                 saltUpdateService.bootstrappingMachines(context.getStack());
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(StackContext context) {
+            protected Selectable createRequest(StackCreationContext context) {
                 return new BootstrapMachinesRequest(context.getStack().getId(), true);
             }
         };

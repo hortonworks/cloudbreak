@@ -10,6 +10,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTe
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTerminationEvent.PREPARE_CLUSTER_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTerminationEvent.PREPARE_CLUSTER_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTerminationEvent.PROPER_TERMINATION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTerminationEvent.RECOVERY_TERMINATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTerminationEvent.TERMINATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTerminationEvent.TERMINATION_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTerminationEvent.TERMINATION_FINISHED_EVENT;
@@ -43,12 +44,17 @@ public class ClusterTerminationFlowConfig extends AbstractFlowConfiguration<Clus
                         .failureEvent(DEREGISTER_SERVICES_FAILED_EVENT)
                     .from(DISABLE_KERBEROS_STATE).to(CLUSTER_TERMINATING_STATE).event(DISABLE_KERBEROS_FINISHED_EVENT)
                         .failureEvent(DISABLE_KERBEROS_FAILED_EVENT)
+
                     .from(INIT_STATE).to(CLUSTER_TERMINATING_STATE).event(TERMINATION_EVENT)
                         .noFailureEvent()
                     .from(CLUSTER_TERMINATING_STATE).to(CLUSTER_TERMINATION_FINISH_STATE).event(TERMINATION_FINISHED_EVENT)
                         .failureEvent(TERMINATION_FAILED_EVENT)
                     .from(CLUSTER_TERMINATION_FINISH_STATE).to(FINAL_STATE).event(FINALIZED_EVENT)
                         .defaultFailureEvent()
+
+                    .from(INIT_STATE).to(CLUSTER_TERMINATING_STATE).event(RECOVERY_TERMINATION_EVENT)
+                    .noFailureEvent()
+
                     .build();
 
     private static final FlowEdgeConfig<ClusterTerminationState, ClusterTerminationEvent> EDGE_CONFIG =
@@ -75,7 +81,7 @@ public class ClusterTerminationFlowConfig extends AbstractFlowConfiguration<Clus
 
     @Override
     public ClusterTerminationEvent[] getInitEvents() {
-        return new ClusterTerminationEvent[]{ TERMINATION_EVENT, PROPER_TERMINATION_EVENT };
+        return new ClusterTerminationEvent[]{ TERMINATION_EVENT, PROPER_TERMINATION_EVENT, RECOVERY_TERMINATION_EVENT };
     }
 
     @Override

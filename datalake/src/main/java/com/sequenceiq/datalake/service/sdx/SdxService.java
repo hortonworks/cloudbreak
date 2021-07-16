@@ -194,6 +194,12 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
         return sdxStatusEntities.stream().map(sdxStatusEntity -> sdxStatusEntity.getDatalake().getId()).collect(Collectors.toSet());
     }
 
+    public Optional<SdxStatusEntity> findByIdAndStatuses(Long id, Set<DatalakeStatusEnum> statuses) {
+        LOGGER.info("Searching for SDX cluster by id and statuses.");
+        List<SdxStatusEntity> sdxStatusEntities = sdxStatusService.findDistinctFirstByStatusInAndDatalakeIdOrderByIdDesc(statuses, Set.of(id));
+        return sdxStatusEntities.stream().findFirst();
+    }
+
     public SdxCluster getById(Long id) {
         LOGGER.info("Searching for SDX cluster by id {}", id);
         Optional<SdxCluster> sdxClusters = sdxClusterRepository.findById(id);

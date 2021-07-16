@@ -1,6 +1,7 @@
 package com.sequenceiq.datalake.flow;
 
 import static com.sequenceiq.datalake.flow.create.SdxCreateEvent.STORAGE_VALIDATION_WAIT_EVENT;
+import static com.sequenceiq.datalake.flow.datalake.recovery.DatalakeUpgradeRecoveryEvent.DATALAKE_RECOVERY_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_UPGRADE_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_UPGRADE_FLOW_CHAIN_EVENT;
 import static com.sequenceiq.datalake.flow.delete.SdxDeleteEvent.SDX_DELETE_EVENT;
@@ -36,6 +37,7 @@ import com.sequenceiq.cloudbreak.exception.FlowsAlreadyRunningException;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.cert.rotation.event.SdxStartCertRotationEvent;
 import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradeFlowChainStartEvent;
+import com.sequenceiq.datalake.flow.datalake.recovery.event.DatalakeRecoveryStartEvent;
 import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradeStartEvent;
 import com.sequenceiq.datalake.flow.delete.event.SdxDeleteStartEvent;
 import com.sequenceiq.datalake.flow.diagnostics.event.SdxCmDiagnosticsCollectionEvent;
@@ -54,6 +56,7 @@ import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.core.model.FlowAcceptResult;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
+import com.sequenceiq.sdx.api.model.SdxRecoveryType;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
 import com.sequenceiq.sdx.api.model.SdxUpgradeReplaceVms;
 
@@ -152,6 +155,13 @@ public class SdxReactorFlowManager {
         LOGGER.info("Compared: String version {} with Versioned {}", cluster.getRuntime(), baseVersion);
         Comparator<Versioned> versionComparator = new VersionComparator();
         return versionComparator.compare(() -> cluster.getRuntime(), () -> baseVersion) < 0;
+    }
+
+    public FlowIdentifier triggerDatalakeRuntimeUpgradeRecoveryFlow(SdxCluster cluster, SdxRecoveryType recoveryType) {
+        LOGGER.info("Trigger recovery of failed runtime upgrade for: {} with recovery type: {}", cluster, recoveryType);
+        String selector = DATALAKE_RECOVERY_EVENT.event();
+        String userId = ThreadBasedUserCrnProvider.getUserCrn();
+        return notify(selector, new DatalakeRecoveryStartEvent(selector, cluster.getId(), userId, recoveryType));
     }
 
     public FlowIdentifier triggerSdxStartFlow(SdxCluster cluster) {

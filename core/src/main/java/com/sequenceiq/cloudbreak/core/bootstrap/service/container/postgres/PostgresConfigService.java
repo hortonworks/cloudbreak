@@ -4,12 +4,14 @@ import static java.util.Collections.singletonMap;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -22,6 +24,9 @@ import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbServerConfigurer;
 
 @Service
 public class PostgresConfigService {
+
+    @Value("${cb.recovery.database.reuse}")
+    private List<String> reuseDuringRecovery;
 
     @Inject
     private RdsConfigProviderFactory rdsConfigProviderFactory;
@@ -63,6 +68,7 @@ public class PostgresConfigService {
         } else {
             postgresConfig.putAll(embeddedDatabaseConfigProvider.collectEmbeddedDatabaseConfigs(stack));
         }
+        postgresConfig.put("recovery_reused_databases", reuseDuringRecovery);
         rdsConfigProviderFactory.getAllSupportedRdsConfigProviders().forEach(provider ->
                 postgresConfig.putAll(provider.createServicePillarConfigMapIfNeeded(stack, cluster)));
         return postgresConfig;

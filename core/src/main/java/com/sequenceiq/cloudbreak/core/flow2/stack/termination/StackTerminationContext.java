@@ -8,26 +8,27 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.TerminationType;
 import com.sequenceiq.flow.core.FlowParameters;
 
 public class StackTerminationContext extends StackContext {
 
     private final List<CloudResource> cloudResources;
 
-    private final boolean terminationForced;
+    private final TerminationType terminationType;
 
     public StackTerminationContext(FlowParameters flowParameters, Stack stack, CloudContext cloudContext, CloudCredential cloudCredential, CloudStack cloudStack,
-            List<CloudResource> cloudResources, boolean terminationForced) {
+            List<CloudResource> cloudResources, TerminationType terminationType) {
         super(flowParameters, stack, cloudContext, cloudCredential, cloudStack);
         this.cloudResources = cloudResources;
-        this.terminationForced = terminationForced;
+        this.terminationType = terminationType;
     }
 
     public List<CloudResource> getCloudResources() {
         return cloudResources;
     }
 
-    public boolean getTerminationForced() {
-        return terminationForced;
+    public TerminationType getTerminationType() {
+        return terminationType;
     }
 }

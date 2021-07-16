@@ -93,13 +93,13 @@ public class ClusterRepairService {
     private HostGroupService hostGroupService;
 
     @Inject
+    private ReactorFlowManager flowManager;
+
+    @Inject
     private ResourceService resourceService;
 
     @Inject
     private ResourceAttributeUtil resourceAttributeUtil;
-
-    @Inject
-    private ReactorFlowManager flowManager;
 
     @Inject
     private CloudbreakEventService eventService;

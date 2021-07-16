@@ -46,6 +46,8 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCrea
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.PREPARE_EXTENDED_TEMPLATE_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.PREPARE_PROXY_CONFIG_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.PREPARE_PROXY_CONFIG_FINISHED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.SETUP_RECOVERY_CONFIG_FAILED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.SETUP_RECOVERY_CONFIG_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.REFRESH_PARCEL_REPOS_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.REFRESH_PARCEL_REPOS_SUCCESS_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.SETUP_MONITORING_FAILED_EVENT;
@@ -93,6 +95,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCrea
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.PREPARE_PROXY_CONFIG_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.REFRESH_PARCEL_REPOS_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.SETUP_MONITORING_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.SETUP_RECOVERY_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.STARTING_CLUSTER_MANAGER_SERVICES_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.STARTING_CLUSTER_MANAGER_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.START_MANAGEMENT_SERVICES_STATE;
@@ -137,9 +140,13 @@ public class ClusterCreationFlowConfig extends AbstractFlowConfiguration<Cluster
                     .event(HOST_METADATASETUP_FINISHED_EVENT)
                     .failureEvent(HOST_METADATASETUP_FAILED_EVENT)
             .from(VALIDATE_CLOUD_STORAGE_STATE)
-                    .to(CLEANUP_FREEIPA_STATE)
+                    .to(SETUP_RECOVERY_STATE)
                     .event(VALIDATE_CLOUD_STORAGE_FINISHED_EVENT)
                     .failureEvent(VALIDATE_CLOUD_STORAGE_FAILED_EVENT)
+            .from(SETUP_RECOVERY_STATE)
+                    .to(CLEANUP_FREEIPA_STATE)
+                    .event(SETUP_RECOVERY_CONFIG_FINISHED_EVENT)
+                    .failureEvent(SETUP_RECOVERY_CONFIG_FAILED_EVENT)
             .from(CLEANUP_FREEIPA_STATE)
                     .to(BOOTSTRAPPING_PUBLIC_ENDPOINT_STATE)
                     .event(CLEANUP_FREEIPA_FINISHED_EVENT)

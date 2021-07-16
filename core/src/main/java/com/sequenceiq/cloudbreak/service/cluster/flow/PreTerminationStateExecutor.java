@@ -13,7 +13,7 @@ public class PreTerminationStateExecutor {
     @Inject
     private ClusterKerberosService clusterKerberosService;
 
-    public void runPreteraminationTasks(Stack stack) throws CloudbreakException {
+    public void runPreTerminationTasks(Stack stack) throws CloudbreakException {
         clusterKerberosService.leaveDomains(stack);
     }
 }

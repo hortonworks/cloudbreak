@@ -212,6 +212,7 @@ public class StackUpscaleService {
                         stack.getEnvironmentCrn()));
             }
         }
+        LOGGER.debug("New instances have been built: {}", newInstances.stream().map(CloudInstance::getInstanceId).collect(Collectors.toList()));
         return newInstances;
     }
 

@@ -36,6 +36,7 @@ public enum RightV4 {
     DH_UPGRADE(AuthorizationResourceAction.UPGRADE_DATAHUB),
     // sdx level
     SDX_UPGRADE(AuthorizationResourceAction.UPGRADE_DATALAKE),
+    SDX_RECOVER(AuthorizationResourceAction.RECOVER_DATALAKE),
     SDX_REPAIR(AuthorizationResourceAction.REPAIR_DATALAKE),
     SDX_RETRY(AuthorizationResourceAction.RETRY_DATALAKE_OPERATION),
     SDX_DESCRIBE(AuthorizationResourceAction.DESCRIBE_DATALAKE),

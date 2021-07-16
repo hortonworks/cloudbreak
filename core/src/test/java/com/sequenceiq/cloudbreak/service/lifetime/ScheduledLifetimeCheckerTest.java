@@ -50,7 +50,7 @@ public class ScheduledLifetimeCheckerTest {
 
         underTest.validate();
 
-        verify(flowManager, times(0)).triggerTermination(stack.getId(), false);
+        verify(flowManager, times(0)).triggerTermination(stack.getId());
     }
 
     @Test
@@ -62,7 +62,7 @@ public class ScheduledLifetimeCheckerTest {
 
         underTest.validate();
 
-        verify(flowManager, times(0)).triggerTermination(stack.getId(), false);
+        verify(flowManager, times(0)).triggerTermination(stack.getId());
     }
 
     @Test
@@ -74,7 +74,7 @@ public class ScheduledLifetimeCheckerTest {
 
         underTest.validate();
 
-        verify(flowManager, times(0)).triggerTermination(stack.getId(), false);
+        verify(flowManager, times(0)).triggerTermination(stack.getId());
     }
 
     @Test
@@ -89,7 +89,7 @@ public class ScheduledLifetimeCheckerTest {
 
         underTest.validate();
 
-        verify(flowManager, times(0)).triggerTermination(stack.getId(), false);
+        verify(flowManager, times(0)).triggerTermination(stack.getId());
     }
 
     @Test
@@ -104,7 +104,7 @@ public class ScheduledLifetimeCheckerTest {
 
         underTest.validate();
 
-        verify(flowManager, times(0)).triggerTermination(stack.getId(), false);
+        verify(flowManager, times(0)).triggerTermination(stack.getId());
     }
 
     @Test
@@ -119,7 +119,7 @@ public class ScheduledLifetimeCheckerTest {
 
         underTest.validate();
 
-        verify(flowManager, times(0)).triggerTermination(stack.getId(), false);
+        verify(flowManager, times(0)).triggerTermination(stack.getId());
     }
 
     @Test
@@ -134,7 +134,7 @@ public class ScheduledLifetimeCheckerTest {
 
         underTest.validate();
 
-        verify(flowManager, times(0)).triggerTermination(stack.getId(), false);
+        verify(flowManager, times(0)).triggerTermination(stack.getId());
     }
 
     @Test
@@ -149,7 +149,7 @@ public class ScheduledLifetimeCheckerTest {
 
         underTest.validate();
 
-        verify(flowManager, times(0)).triggerTermination(stack.getId(), false);
+        verify(flowManager, times(0)).triggerTermination(stack.getId());
     }
 
     @Test
@@ -175,7 +175,7 @@ public class ScheduledLifetimeCheckerTest {
 
         underTest.validate();
 
-        verify(flowManager, times(1)).triggerTermination(stack.getId(), false);
+        verify(flowManager, times(1)).triggerTermination(stack.getId());
     }
 
     @Test
@@ -196,7 +196,7 @@ public class ScheduledLifetimeCheckerTest {
 
         underTest.validate();
 
-        verify(flowManager, times(0)).triggerTermination(stack.getId(), false);
+        verify(flowManager, times(0)).triggerTermination(stack.getId());
     }
 
     private static class StackTtlViewImpl implements StackTtlView {

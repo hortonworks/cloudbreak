@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 public abstract class AbstractStackFailureAction<S extends FlowState, E extends FlowEvent>
         extends AbstractStackAction<S, E, StackFailureContext, StackFailureEvent> {
+
     @Inject
     private StackService stackService;
 
