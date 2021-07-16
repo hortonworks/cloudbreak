@@ -36,6 +36,7 @@ integrationtest:
   redbeams:
     server: http://localhost
   ums:
+    host: ums.thunderhead-dev.cloudera.com
     # Possible values: default, legacy
     accountKey: default
     # Possible values: dev, int, stage, prod

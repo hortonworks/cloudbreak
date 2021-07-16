@@ -52,11 +52,11 @@ public class UmsClient extends MicroserviceClient<GrpcUmsClient, Void> {
         return umsClient;
     }
 
-    public static synchronized UmsClient createProxyUmsClient(Tracer tracer) {
+    public static synchronized UmsClient createProxyUmsClient(Tracer tracer, String umsHost) {
         UmsClient clientEntity = new UmsClient();
         UmsClientConfig clientConfig = new UmsClientConfig();
         clientEntity.umsClient = GrpcUmsClient.createClient(
-                UmsChannelConfig.newManagedChannelWrapper("ums.thunderhead-dev.cloudera.com", 8982), clientConfig, tracer);
+                UmsChannelConfig.newManagedChannelWrapper(umsHost, 8982), clientConfig, tracer);
         return clientEntity;
     }
 

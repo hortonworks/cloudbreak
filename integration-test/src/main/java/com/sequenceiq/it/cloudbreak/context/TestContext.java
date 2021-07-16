@@ -112,6 +112,9 @@ public abstract class TestContext implements ApplicationContextAware {
     @Value("#{'${integrationtest.cloudProvider}'.equals('MOCK') ? 300 : ${integrationtest.testsuite.maxRetry:2700}}")
     private int maxRetry;
 
+    @Value("${integrationtest.ums.host:localhost}")
+    private String umsHost;
+
     @Inject
     private CloudProviderProxy cloudProvider;
 
@@ -400,7 +403,7 @@ public abstract class TestContext implements ApplicationContextAware {
             FreeIpaClient freeIpaClient = FreeIpaClient.createProxyFreeIpaClient(testParameter, cloudbreakUser);
             EnvironmentClient environmentClient = EnvironmentClient.createProxyEnvironmentClient(testParameter, cloudbreakUser);
             SdxClient sdxClient = SdxClient.createProxySdxClient(testParameter, cloudbreakUser);
-            UmsClient umsClient = UmsClient.createProxyUmsClient(tracer);
+            UmsClient umsClient = UmsClient.createProxyUmsClient(tracer, umsHost);
             RedbeamsClient redbeamsClient = RedbeamsClient.createProxyRedbeamsClient(testParameter, cloudbreakUser);
             Map<Class<? extends MicroserviceClient>, MicroserviceClient> clientMap = Map.of(CloudbreakClient.class, cloudbreakClient,
                     FreeIpaClient.class, freeIpaClient, EnvironmentClient.class, environmentClient, SdxClient.class, sdxClient,
@@ -418,7 +421,7 @@ public abstract class TestContext implements ApplicationContextAware {
             FreeIpaClient freeIpaClient = FreeIpaClient.createProxyFreeIpaClient(testParameter, accountAdmin);
             EnvironmentClient environmentClient = EnvironmentClient.createProxyEnvironmentClient(testParameter, accountAdmin);
             SdxClient sdxClient = SdxClient.createProxySdxClient(testParameter, accountAdmin);
-            UmsClient umsClient = UmsClient.createProxyUmsClient(tracer);
+            UmsClient umsClient = UmsClient.createProxyUmsClient(tracer, umsHost);
             RedbeamsClient redbeamsClient = RedbeamsClient.createProxyRedbeamsClient(testParameter, accountAdmin);
             Map<Class<? extends MicroserviceClient>, MicroserviceClient> clientMap = Map.of(CloudbreakClient.class, cloudbreakClient,
                     FreeIpaClient.class, freeIpaClient, EnvironmentClient.class, environmentClient, SdxClient.class, sdxClient,
