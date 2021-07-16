@@ -458,28 +458,31 @@ public class AwsPlatformResources implements PlatformResources {
     @Override
     public CloudSshKeys sshKeys(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         Map<String, Set<CloudSshKey>> result = new HashMap<>();
-        for (Region actualRegion : regions(cloudCredential, region, new HashMap<>(), true).getCloudRegions().keySet()) {
-            // If region is provided then should filter for those region
-            if (regionMatch(actualRegion, region)) {
-                Set<CloudSshKey> cloudSshKeys = new HashSet<>();
-                AmazonEc2Client ec2Client = awsClient.createEc2Client(new AwsCredentialView(cloudCredential), actualRegion.value());
+        if (region != null && !Strings.isNullOrEmpty(region.value())) {
+            CloudRegions regions = regions(cloudCredential, region, new HashMap<>(), true);
+            for (Region actualRegion : regions.getCloudRegions().keySet()) {
+                // If region is provided then should filter for those region
+                if (regionMatch(actualRegion, region)) {
+                    Set<CloudSshKey> cloudSshKeys = new HashSet<>();
+                    AmazonEc2Client ec2Client = awsClient.createEc2Client(new AwsCredentialView(cloudCredential), actualRegion.value());
 
-                //create sshkey filter view
-                PlatformResourceSshKeyFilterView filter = new PlatformResourceSshKeyFilterView(filters);
+                    //create sshkey filter view
+                    PlatformResourceSshKeyFilterView filter = new PlatformResourceSshKeyFilterView(filters);
 
-                DescribeKeyPairsRequest describeKeyPairsRequest = new DescribeKeyPairsRequest();
+                    DescribeKeyPairsRequest describeKeyPairsRequest = new DescribeKeyPairsRequest();
 
-                // If the filtervalue is provided then we should filter only for those securitygroups
-                if (!Strings.isNullOrEmpty(filter.getKeyName())) {
-                    describeKeyPairsRequest.withKeyNames(filter.getKeyName());
+                    // If the filtervalue is provided then we should filter only for those securitygroups
+                    if (!Strings.isNullOrEmpty(filter.getKeyName())) {
+                        describeKeyPairsRequest.withKeyNames(filter.getKeyName());
+                    }
+
+                    for (KeyPairInfo keyPairInfo : ec2Client.describeKeyPairs(describeKeyPairsRequest).getKeyPairs()) {
+                        Map<String, Object> properties = new HashMap<>();
+                        properties.put("fingerPrint", keyPairInfo.getKeyFingerprint());
+                        cloudSshKeys.add(new CloudSshKey(keyPairInfo.getKeyName(), properties));
+                    }
+                    result.put(actualRegion.value(), cloudSshKeys);
                 }
-
-                for (KeyPairInfo keyPairInfo : ec2Client.describeKeyPairs(describeKeyPairsRequest).getKeyPairs()) {
-                    Map<String, Object> properties = new HashMap<>();
-                    properties.put("fingerPrint", keyPairInfo.getKeyFingerprint());
-                    cloudSshKeys.add(new CloudSshKey(keyPairInfo.getKeyName(), properties));
-                }
-                result.put(actualRegion.value(), cloudSshKeys);
             }
         }
         return new CloudSshKeys(result);
@@ -637,36 +640,35 @@ public class AwsPlatformResources implements PlatformResources {
 
     private CloudVmTypes getCloudVmTypes(CloudCredential cloudCredential, Region region, Map<String, String> filters,
             Predicate<VmType> enabledInstanceTypeFilter, boolean enableMinimalHardwareFilter) {
-        CloudRegions regions = regions(cloudCredential, region, filters, true);
-
         Map<String, Set<VmType>> cloudVmResponses = new HashMap<>();
         Map<String, VmType> defaultCloudVmResponses = new HashMap<>();
+        if (region != null && !Strings.isNullOrEmpty(region.value())) {
+            CloudRegions regions = regions(cloudCredential, region, filters, true);
+            AwsCredentialView awsCredentialView = new AwsCredentialView(cloudCredential);
+            AmazonEc2Client ec2Client = awsClient.createEc2Client(awsCredentialView, region.getRegionName());
 
-        AwsCredentialView awsCredentialView = new AwsCredentialView(cloudCredential);
-        AmazonEc2Client ec2Client = awsClient.createEc2Client(awsCredentialView, region.getRegionName());
+            List<String> instanceTypes = ec2Client
+                    .describeInstanceTypeOfferings(getOfferingsRequest(region))
+                    .getInstanceTypeOfferings()
+                    .stream()
+                    .map(e -> e.getInstanceType())
+                    .collect(Collectors.toList());
 
-        List<String> instanceTypes = ec2Client
-                .describeInstanceTypeOfferings(getOfferingsRequest(region))
-                .getInstanceTypeOfferings()
-                .stream()
-                .map(e -> e.getInstanceType())
-                .collect(Collectors.toList());
-
-        Set<VmType> awsInstances = new HashSet<>();
-        for (int actualSegment = 0; actualSegment < instanceTypes.size(); actualSegment += SEGMENT) {
-            DescribeInstanceTypesRequest request = new DescribeInstanceTypesRequest();
-            request.setInstanceTypes(getInstanceTypes(instanceTypes, actualSegment));
-            getVmTypesWithAwsCall(awsInstances, ec2Client.describeInstanceTypes(request));
+            Set<VmType> awsInstances = new HashSet<>();
+            for (int actualSegment = 0; actualSegment < instanceTypes.size(); actualSegment += SEGMENT) {
+                DescribeInstanceTypesRequest request = new DescribeInstanceTypesRequest();
+                request.setInstanceTypes(getInstanceTypes(instanceTypes, actualSegment));
+                getVmTypesWithAwsCall(awsInstances, ec2Client.describeInstanceTypes(request));
+            }
+            if (enableMinimalHardwareFilter) {
+                awsInstances = awsInstances.stream()
+                        .filter(e -> minimalHardwareFilter
+                                .suitableAsMinimumHardware(e.getMetaData().getCPU(), e.getMetaData().getMemoryInGb()))
+                        .collect(Collectors.toSet());
+            }
+            fillUpAvailabilityZones(region, enabledInstanceTypeFilter, regions, cloudVmResponses, defaultCloudVmResponses, awsInstances);
+            filterInstancesByFilters(enabledInstanceTypeFilter, cloudVmResponses);
         }
-        if (enableMinimalHardwareFilter) {
-            awsInstances = awsInstances.stream()
-                    .filter(e -> minimalHardwareFilter
-                            .suitableAsMinimumHardware(e.getMetaData().getCPU(), e.getMetaData().getMemoryInGb()))
-                    .collect(Collectors.toSet());
-        }
-        fillUpAvailabilityZones(region, enabledInstanceTypeFilter, regions, cloudVmResponses, defaultCloudVmResponses, awsInstances);
-        filterInstancesByFilters(enabledInstanceTypeFilter, cloudVmResponses);
-
         return new CloudVmTypes(cloudVmResponses, defaultCloudVmResponses);
     }
 
@@ -771,31 +773,32 @@ public class AwsPlatformResources implements PlatformResources {
     @Override
     public CloudGateWays gateways(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         Map<String, Set<CloudGateWay>> resultCloudGateWayMap = new HashMap<>();
-        CloudRegions regions = regions(cloudCredential, region, filters, true);
+        if (region != null && !Strings.isNullOrEmpty(region.value())) {
+            CloudRegions regions = regions(cloudCredential, region, filters, true);
+            for (Entry<Region, List<AvailabilityZone>> regionListEntry : regions.getCloudRegions().entrySet()) {
+                if (regionListEntry.getKey().value().equals(region.value())) {
+                    AmazonEc2Client ec2Client = awsClient.createEc2Client(new AwsCredentialView(cloudCredential), regionListEntry.getKey().value());
 
-        for (Entry<Region, List<AvailabilityZone>> regionListEntry : regions.getCloudRegions().entrySet()) {
-            if (region == null || Strings.isNullOrEmpty(region.value()) || regionListEntry.getKey().value().equals(region.value())) {
-                AmazonEc2Client ec2Client = awsClient.createEc2Client(new AwsCredentialView(cloudCredential), regionListEntry.getKey().value());
+                    DescribeInternetGatewaysRequest describeInternetGatewaysRequest = new DescribeInternetGatewaysRequest();
+                    DescribeInternetGatewaysResult describeInternetGatewaysResult = ec2Client.describeInternetGateways(describeInternetGatewaysRequest);
 
-                DescribeInternetGatewaysRequest describeInternetGatewaysRequest = new DescribeInternetGatewaysRequest();
-                DescribeInternetGatewaysResult describeInternetGatewaysResult = ec2Client.describeInternetGateways(describeInternetGatewaysRequest);
-
-                Set<CloudGateWay> gateWays = new HashSet<>();
-                for (InternetGateway internetGateway : describeInternetGatewaysResult.getInternetGateways()) {
-                    CloudGateWay cloudGateWay = new CloudGateWay();
-                    cloudGateWay.setId(internetGateway.getInternetGatewayId());
-                    cloudGateWay.setName(internetGateway.getInternetGatewayId());
-                    Collection<String> vpcs = new ArrayList<>();
-                    for (InternetGatewayAttachment internetGatewayAttachment : internetGateway.getAttachments()) {
-                        vpcs.add(internetGatewayAttachment.getVpcId());
+                    Set<CloudGateWay> gateWays = new HashSet<>();
+                    for (InternetGateway internetGateway : describeInternetGatewaysResult.getInternetGateways()) {
+                        CloudGateWay cloudGateWay = new CloudGateWay();
+                        cloudGateWay.setId(internetGateway.getInternetGatewayId());
+                        cloudGateWay.setName(internetGateway.getInternetGatewayId());
+                        Collection<String> vpcs = new ArrayList<>();
+                        for (InternetGatewayAttachment internetGatewayAttachment : internetGateway.getAttachments()) {
+                            vpcs.add(internetGatewayAttachment.getVpcId());
+                        }
+                        Map<String, Object> properties = new HashMap<>();
+                        properties.put("attachment", vpcs);
+                        cloudGateWay.setProperties(properties);
+                        gateWays.add(cloudGateWay);
                     }
-                    Map<String, Object> properties = new HashMap<>();
-                    properties.put("attachment", vpcs);
-                    cloudGateWay.setProperties(properties);
-                    gateWays.add(cloudGateWay);
-                }
-                for (AvailabilityZone availabilityZone : regionListEntry.getValue()) {
-                    resultCloudGateWayMap.put(availabilityZone.value(), gateWays);
+                    for (AvailabilityZone availabilityZone : regionListEntry.getValue()) {
+                        resultCloudGateWayMap.put(availabilityZone.value(), gateWays);
+                    }
                 }
             }
         }

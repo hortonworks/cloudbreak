@@ -224,7 +224,9 @@ class AwsEnvironmentNetworkValidatorTest {
         underTest.validateDuringFlow(environmentValidationDto, networkDto, validationResultBuilder);
 
         NetworkTestUtils.checkErrorsPresent(validationResultBuilder, List.of(
-                "The Subnets in the VPC should be present at least in two different availability zones"
+                "The Subnets in the VPC (eu-west-1-a) should be present at least in two different availability zones, " +
+                        "but they are present only in availability zone name, name. Please add subnets to the environment " +
+                        "from the required number of different availability zones."
         ));
     }
 
