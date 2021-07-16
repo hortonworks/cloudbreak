@@ -39,6 +39,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.AwsListener;
 import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.AwsLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.AwsLoadBalancerScheme;
 import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.AwsTargetGroup;
+import com.sequenceiq.cloudbreak.cloud.aws.common.service.AwsResourceNameService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsNetworkView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCloudStackView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -73,6 +74,9 @@ public class AwsNativeLoadBalancerLaunchService {
     @Inject
     private PersistenceRetriever persistenceRetriever;
 
+    @Inject
+    private AwsResourceNameService resourceNameService;
+
     public List<CloudResourceStatus> launchLoadBalancerResources(AuthenticatedContext authenticatedContext, CloudStack stack,
             PersistenceNotifier persistenceNotifier, AmazonElasticLoadBalancingClient elasticLoadBalancingClient) {
         List<CloudResourceStatus> result = new ArrayList<>();
@@ -84,14 +88,15 @@ public class AwsNativeLoadBalancerLaunchService {
         List<AwsLoadBalancer> loadBalancers = loadBalancerCommonService.getAwsLoadBalancers(stack.getLoadBalancers(), privateIdsByGroupName, awsNetworkView);
         AwsCloudStackView awsCloudStackView = new AwsCloudStackView(stack);
         Long stackId = authenticatedContext.getCloudContext().getId();
+        String stackName = authenticatedContext.getCloudContext().getName();
 
 
         Collection<Tag> tags = awsTaggingService.prepareElasticLoadBalancingTags(awsCloudStackView.getTags());
         try {
             for (AwsLoadBalancer awsLoadBalancer : loadBalancers) {
-                String loadBalancerName = awsLoadBalancer.getName();
                 Set<String> subnetIds = awsLoadBalancer.getSubnetIds();
                 AwsLoadBalancerScheme scheme = awsLoadBalancer.getScheme();
+                String loadBalancerName = resourceNameService.resourceName(ResourceType.ELASTIC_LOAD_BALANCER, stackName, scheme.resourceName());
                 LOGGER.info("Creating load balancer with name '{}', subnet ids: '{}' and scheme: '{}'", loadBalancerName, String.join(",", subnetIds), scheme);
                 CreateLoadBalancerRequest request = new CreateLoadBalancerRequest()
                         .withName(loadBalancerName)
@@ -118,12 +123,14 @@ public class AwsNativeLoadBalancerLaunchService {
 
                 for (AwsListener listener : awsLoadBalancer.getListeners()) {
                     AwsTargetGroup targetGroup = listener.getTargetGroup();
-                    String targetGroupName = targetGroup.getName();
+                    int targetGroupPort = targetGroup.getPort();
+                    String targetGroupName = resourceNameService.resourceName(ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, stackName, scheme.resourceName(),
+                            targetGroupPort);
                     LOGGER.info("Creating target group for load balancer('{}') with name: '{}' port: '{}'", loadBalancerName, targetGroupName,
-                            targetGroup.getPort());
+                            targetGroupPort);
                     CreateTargetGroupRequest targetGroupRequest = new CreateTargetGroupRequest()
                             .withName(targetGroupName)
-                            .withPort(targetGroup.getPort())
+                            .withPort(targetGroupPort)
                             .withProtocol(ProtocolEnum.TCP)
                             .withTargetType(TargetTypeEnum.Instance)
                             .withHealthCheckPort(targetGroup.getHealthCheckPort())
@@ -186,7 +193,7 @@ public class AwsNativeLoadBalancerLaunchService {
                                         .orElseThrow(() -> new CloudConnectorException(notFoundMsg))
                                         .getInstanceId();
                                 return new TargetDescription()
-                                        .withPort(targetGroup.getPort())
+                                        .withPort(targetGroupPort)
                                         .withId(instanceId);
                             })
                             .collect(toSet());

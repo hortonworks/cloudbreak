@@ -47,6 +47,7 @@ cb:
 
   max:
     aws.resource.name.length: 50
+    aws.loadbalancer.resource.name.length: 32
 
   address.resolving.timeout: 60000
 

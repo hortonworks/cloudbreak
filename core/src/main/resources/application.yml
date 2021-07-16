@@ -566,6 +566,7 @@ cb:
     azure.resource.name.length: 120
     gcp.resource.name.length: 63
     aws.resource.name.length: 50
+    aws.loadbalancer.resource.name.length: 32
     openstack.resource.name.length: 120
     yarn.resource.name.length: 63
 
