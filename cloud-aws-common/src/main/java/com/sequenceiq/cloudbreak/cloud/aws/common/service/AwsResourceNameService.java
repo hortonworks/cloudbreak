@@ -28,8 +28,15 @@ public class AwsResourceNameService extends CloudbreakResourceNameService {
 
     private static final int EIP_PART_COUNT = 3;
 
+    private static final int LOAD_BALANCER_PART_COUNT = 2;
+
+    private static final int LOAD_BALANCER_TARGET_GROUP_PART_COUNT = 3;
+
     @Value("${cb.max.aws.resource.name.length:}")
     private int maxResourceNameLength;
+
+    @Value("${cb.max.aws.loadbalancer.resource.name.length:32}")
+    private int maxLoadBalancerResourceNameLength;
 
     @Override
     public String resourceName(ResourceType resourceType, Object... parts) {
@@ -43,6 +50,10 @@ public class AwsResourceNameService extends CloudbreakResourceNameService {
             resourceName = securityGroup(parts);
         } else if (resourceType == ResourceType.AWS_RESERVED_IP) {
             resourceName = eip(parts);
+        } else if (resourceType == ResourceType.ELASTIC_LOAD_BALANCER) {
+            resourceName = loadBalancer(parts);
+        } else if (resourceType == ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP) {
+            resourceName = loadBalancerTargetGroup(parts);
         } else {
             throw new IllegalStateException("Unsupported resource type: " + resourceType);
         }
@@ -106,6 +117,43 @@ public class AwsResourceNameService extends CloudbreakResourceNameService {
         name = appendPart(name, "EIPAllocationID");
         name = appendPart(name, StringUtils.capitalize(normalize(instanceGroupName)));
         name = adjustBaseLength(name, maxResourceNameLength);
+
+        return name;
+    }
+
+    private String loadBalancer(Object[] parts) {
+        checkArgs(LOAD_BALANCER_PART_COUNT, parts);
+        String name;
+        String stackName = String.valueOf(parts[0]);
+        String scheme = String.valueOf(parts[1]);
+        String resourceNameWithScheme = "LB" + scheme;
+        int numberOfAppends = 2;
+        int maxLengthOfStackName = maxLoadBalancerResourceNameLength - getDefaultHashLength() - resourceNameWithScheme.length() - numberOfAppends;
+        String reducedStackName = stackName.substring(0, maxLengthOfStackName);
+        name = normalize(reducedStackName);
+        name = adjustPartLength(name);
+        name = appendPart(name, resourceNameWithScheme);
+        name = appendHash(name, new Date());
+        name = adjustBaseLength(name, maxLoadBalancerResourceNameLength);
+
+        return name;
+    }
+
+    private String loadBalancerTargetGroup(Object[] parts) {
+        checkArgs(LOAD_BALANCER_TARGET_GROUP_PART_COUNT, parts);
+        String name;
+        String stackName = String.valueOf(parts[0]);
+        String scheme = String.valueOf(parts[1]);
+        String port = String.valueOf(parts[2]);
+        String resourceNameWithScheme = "TG" + port + scheme;
+        int numberOfAppends = 2;
+        int maxLengthOfStackName = maxLoadBalancerResourceNameLength - getDefaultHashLength() - resourceNameWithScheme.length() - numberOfAppends;
+        String reducedStackName = stackName.substring(0, maxLengthOfStackName);
+        name = normalize(reducedStackName);
+        name = adjustPartLength(name);
+        name = appendPart(name, resourceNameWithScheme);
+        name = appendHash(name, new Date());
+        name = adjustBaseLength(name, maxLoadBalancerResourceNameLength);
 
         return name;
     }
