@@ -10,12 +10,13 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.flow.OperationAwareAction;
+import com.sequenceiq.freeipa.flow.chain.FlowChainAwareAction;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.bootstrap.BootstrapMachinesRequest;
 import com.sequenceiq.freeipa.flow.stack.StackContext;
 import com.sequenceiq.freeipa.flow.stack.provision.action.AbstractStackProvisionAction;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
 
-public class UpdateSaltFilesAction extends AbstractStackProvisionAction<SaltUpdateTriggerEvent> implements OperationAwareAction {
+public class UpdateSaltFilesAction extends AbstractStackProvisionAction<SaltUpdateTriggerEvent> implements OperationAwareAction, FlowChainAwareAction {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UpdateSaltFilesAction.class);
 
@@ -30,6 +31,8 @@ public class UpdateSaltFilesAction extends AbstractStackProvisionAction<SaltUpda
     protected void doExecute(StackContext context, SaltUpdateTriggerEvent payload, Map<Object, Object> variables) {
         stackUpdater.updateStackStatus(payload.getResourceId(), DetailedStackStatus.SALT_STATE_UPDATE_IN_PROGRESS, "Salt state update in progress");
         setOperationId(variables, payload.getOperationId());
+        setChainedAction(variables, payload.isChained());
+        setFinalChain(variables, payload.isFinalChain());
         LOGGER.info("Reupload salt state files");
         sendEvent(context);
     }

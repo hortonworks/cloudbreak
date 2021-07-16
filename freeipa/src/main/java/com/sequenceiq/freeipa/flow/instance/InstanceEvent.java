@@ -53,4 +53,14 @@ public class InstanceEvent implements Selectable, Acceptable {
     public Promise<AcceptResult> accepted() {
         return accepted;
     }
+
+    @Override
+    public String toString() {
+        return "InstanceEvent{" +
+                "selector='" + selector + '\'' +
+                ", resourceId=" + resourceId +
+                ", accepted=" + accepted +
+                ", instanceIds=" + instanceIds +
+                '}';
+    }
 }
