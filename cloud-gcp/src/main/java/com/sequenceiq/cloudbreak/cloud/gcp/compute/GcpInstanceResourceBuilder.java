@@ -25,6 +25,7 @@ import com.google.api.client.auth.oauth2.TokenResponseException;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.Compute.Addresses;
+import com.google.api.services.compute.Compute.InstanceGroups.AddInstances;
 import com.google.api.services.compute.Compute.Instances.Get;
 import com.google.api.services.compute.Compute.Instances.Insert;
 import com.google.api.services.compute.model.AccessConfig;
@@ -32,6 +33,9 @@ import com.google.api.services.compute.model.AttachedDisk;
 import com.google.api.services.compute.model.CustomerEncryptionKey;
 import com.google.api.services.compute.model.CustomerEncryptionKeyProtectedDisk;
 import com.google.api.services.compute.model.Instance;
+import com.google.api.services.compute.model.InstanceGroupList;
+import com.google.api.services.compute.model.InstanceGroupsAddInstancesRequest;
+import com.google.api.services.compute.model.InstanceReference;
 import com.google.api.services.compute.model.InstancesStartWithEncryptionKeyRequest;
 import com.google.api.services.compute.model.Metadata;
 import com.google.api.services.compute.model.Metadata.Items;
@@ -89,6 +93,8 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
     private static final int MAX_TAG_LENGTH = 63;
 
     private static final int ORDER = 3;
+
+    private static final String INSTANCE_REFERENCE_URI = "https://www.googleapis.com/compute/v1/projects/%s/zones/%s/instances/%s";
 
     @Inject
     private CustomGcpDiskEncryptionCreatorService customGcpDiskEncryptionCreatorService;
@@ -209,10 +215,50 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
             Operation operation = insert.execute();
             verifyOperation(operation, buildableResource);
             updateDiskSetWithInstanceName(auth, computeResources, instance);
+            assignToExistingInstanceGroup(context, group, instance, buildableResource);
             return singletonList(createOperationAwareCloudResource(buildableResource.get(0), operation));
         } catch (GoogleJsonResponseException e) {
             throw new GcpResourceException(checkException(e), resourceType(), buildableResource.get(0).getName());
         }
+    }
+
+    /**
+     * if a InstanceGroup was created in GCP for this Instance's group, then after creating this compute instance assign it to that group.
+     * the group in general can be used to manage all instances in the same group, specifiaclly one way is used to assign to a load balancer.
+     * also provides aggrigated monitoring
+     */
+    private void assignToExistingInstanceGroup(GcpContext context,
+            Group group, Instance instance, List<CloudResource> buildableResource) throws IOException {
+        Compute compute = context.getCompute();
+        String projectId = context.getProjectId();
+        String zone = context.getLocation().getAvailabilityZone().value();
+
+        List<CloudResource> instanceGroupResources = filterResourcesByType(context.getGroupResources(group.getName()), ResourceType.GCP_INSTANCE_GROUP);
+        if (!instanceGroupResources.isEmpty()  && doesGcpInstanceGroupExist(compute, projectId, zone, instanceGroupResources.get(0))) {
+            LOGGER.info("adding instance {} to group {} in project {}", instance.getName(), group.getName(), projectId);
+            AddInstances addInstances = compute.instanceGroups().addInstances(projectId,
+                    zone,
+                    instanceGroupResources.get(0).getName(),
+                    new InstanceGroupsAddInstancesRequest().setInstances(List.of(new InstanceReference()
+                            .setInstance(String.format(INSTANCE_REFERENCE_URI,
+                            projectId, zone, instance.getName())))));
+            try {
+                Operation execute = addInstances.execute();
+                verifyOperation(execute, buildableResource);
+            } catch (GoogleJsonResponseException e) {
+                LOGGER.error("Error in Google response, unable to add instance {} to group {} : {} for {}",
+                        instance.getName(), group.getName(), e.getMessage(), e.getDetails().getMessage());
+                throw new GcpResourceException(checkException(e), resourceType(), buildableResource.get(0).getName());
+            }
+        } else {
+            LOGGER.info("skipping group assignment {} doesn't exist in project {}", group.getName(), projectId);
+        }
+
+    }
+
+    private boolean doesGcpInstanceGroupExist(Compute compute, String projectId, String zone, CloudResource instanceGroupResource) throws IOException {
+        InstanceGroupList instanceGroupList = compute.instanceGroups().list(projectId, zone).execute();
+        return instanceGroupList.getItems().stream().anyMatch(item -> item.getName().equals(instanceGroupResource.getName()));
     }
 
     private void addTag(List<String> tagList, String actualTag) {
@@ -438,9 +484,11 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
 
     private List<CloudResource> filterResourcesByType(Iterable<CloudResource> resources, ResourceType resourceType) {
         List<CloudResource> resourcesTemp = new ArrayList<>();
-        for (CloudResource resource : resources) {
-            if (resourceType.equals(resource.getType())) {
-                resourcesTemp.add(resource);
+        if (resources != null) {
+            for (CloudResource resource : resources) {
+                if (resourceType.equals(resource.getType())) {
+                    resourcesTemp.add(resource);
+                }
             }
         }
         return resourcesTemp;
