@@ -284,6 +284,26 @@ public class AwsNetworkConnectorTest {
     }
 
     @Test
+    public void testGetNetworkCidrWithDuplicatedCidr() {
+        String existingVpc = "vpc-1";
+        String cidrBlock = "10.0.0.0/16";
+
+        Network network = new Network(null, Map.of(NetworkConstants.VPC_ID, existingVpc, "region", "us-west-2"));
+        CloudCredential credential = new CloudCredential();
+        AmazonEc2Client amazonEC2Client = mock(AmazonEc2Client.class);
+        DescribeVpcsResult describeVpcsResult = describeVpcsResult(cidrBlock, cidrBlock);
+        describeVpcsResult.getVpcs().get(0).getCidrBlockAssociationSet().add(new VpcCidrBlockAssociation().withCidrBlock(cidrBlock));
+
+        when(awsClient.createEc2Client(any(AwsCredentialView.class), eq("us-west-2"))).thenReturn(amazonEC2Client);
+        when(amazonEC2Client.describeVpcs(new DescribeVpcsRequest().withVpcIds(existingVpc))).thenReturn(describeVpcsResult);
+
+        NetworkCidr result = underTest.getNetworkCidr(network, credential);
+        assertEquals(cidrBlock, result.getCidr());
+        assertEquals(1, result.getCidrs().size());
+        assertEquals(cidrBlock, result.getCidrs().get(0));
+    }
+
+    @Test
     public void testGetNetworkCidrWithoutResult() {
         String existingVpc = "vpc-1";
 

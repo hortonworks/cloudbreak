@@ -6,10 +6,12 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest.STACK_DELETED;
 
 import java.time.Duration;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -166,12 +168,26 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
         return getTestContext().await(this, statuses, runningParameter);
     }
 
+    private Map<List<String>, InstanceStatus> getInstanceStatusMapIfAvailableInResponse(Supplier<Map<List<String>, InstanceStatus>> instanceStatusMapSupplier) {
+        if (checkResponseHasInstanceGroups()) {
+            return instanceStatusMapSupplier.get();
+        } else {
+            LOGGER.info("Response doesn't has instance groups");
+            return Collections.emptyMap();
+        }
+    }
+
+    private boolean checkResponseHasInstanceGroups() {
+        return getResponse() != null && getResponse().getInstanceGroups() != null;
+    }
+
     public DistroXTestDto awaitForHealthyInstances() {
-        Map<List<String>, InstanceStatus> instanceStatusMap = getResponse().getInstanceGroups().stream()
-                .collect(Collectors.toMap(
-                        instanceGroupV4Response -> instanceGroupV4Response.getMetadata().stream()
-                                .map(InstanceMetaDataV4Response::getInstanceId).collect(Collectors.toList()),
-                        instanceMetaDataV4Response -> InstanceStatus.SERVICES_HEALTHY));
+        Map<List<String>, InstanceStatus> instanceStatusMap = getInstanceStatusMapIfAvailableInResponse(() ->
+            getResponse().getInstanceGroups().stream()
+                    .collect(Collectors.toMap(
+                            instanceGroupV4Response -> instanceGroupV4Response.getMetadata().stream()
+                                    .map(InstanceMetaDataV4Response::getInstanceId).collect(Collectors.toList()),
+                            instanceMetaDataV4Response -> InstanceStatus.SERVICES_HEALTHY)));
         return awaitForInstance(instanceStatusMap);
     }
 
