@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.network.v1.converter;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -67,8 +68,8 @@ public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetw
         return setProviderSpecificFields(builder, source);
     }
 
-    private Set<String> getNetworkCidrs(BaseNetwork source) {
-        return Strings.isNullOrEmpty(source.getNetworkCidrs()) ? null : Set.of(source.getNetworkCidrs().split(","));
+    Set<String> getNetworkCidrs(BaseNetwork source) {
+        return Strings.isNullOrEmpty(source.getNetworkCidrs()) ? null : Arrays.stream(source.getNetworkCidrs().split(",")).collect(Collectors.toSet());
     }
 
     public void convertSubnets(BaseNetwork source, NetworkDto.Builder targetBuilder) {
