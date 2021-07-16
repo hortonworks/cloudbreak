@@ -4,18 +4,19 @@ import javax.ws.rs.core.Response.Status;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.exception.mapper.BaseExceptionMapper;
 import com.sequenceiq.cloudbreak.template.validation.BlueprintValidationException;
 
 @Component
 public class BlueprintValidationExceptionMapper extends BaseExceptionMapper<BlueprintValidationException> {
 
     @Override
-    Status getResponseStatus(BlueprintValidationException exception) {
+    public Status getResponseStatus(BlueprintValidationException exception) {
         return Status.BAD_REQUEST;
     }
 
     @Override
-    Class<BlueprintValidationException> getExceptionType() {
+    public Class<BlueprintValidationException> getExceptionType() {
         return BlueprintValidationException.class;
     }
 

@@ -6,9 +6,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.flow.core.FlowTriggerCondition;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.flow.core.FlowTriggerCondition;
+import com.sequenceiq.flow.core.FlowTriggerConditionResult;
 
 @Component
 public class InstanceTerminationFlowTriggerCondition implements FlowTriggerCondition {
@@ -18,11 +19,13 @@ public class InstanceTerminationFlowTriggerCondition implements FlowTriggerCondi
     private StackService stackService;
 
     @Override
-    public boolean isFlowTriggerable(Long stackId) {
+    public FlowTriggerConditionResult isFlowTriggerable(Long stackId) {
+        FlowTriggerConditionResult result = FlowTriggerConditionResult.OK;
         StackView stack = stackService.getViewByIdWithoutAuth(stackId);
-        boolean result = !stack.isDeleteInProgress();
-        if (result) {
-            LOGGER.debug("Couldn't start instance termination flow because the stack has been terminating.");
+        if (stack.isDeleteInProgress()) {
+            String msg = "Couldn't start instance termination flow because the stack has been terminating.";
+            LOGGER.debug(msg);
+            result = new FlowTriggerConditionResult(msg);
         }
         return result;
     }

@@ -5,16 +5,18 @@ import javax.ws.rs.core.Response.Status;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.exception.mapper.BaseExceptionMapper;
+
 @Component
 public class EntityNotFoundExceptionMapper extends BaseExceptionMapper<EntityNotFoundException> {
 
     @Override
-    Status getResponseStatus(EntityNotFoundException exception) {
+    public Status getResponseStatus(EntityNotFoundException exception) {
         return Status.NOT_FOUND;
     }
 
     @Override
-    Class<EntityNotFoundException> getExceptionType() {
+    public Class<EntityNotFoundException> getExceptionType() {
         return EntityNotFoundException.class;
     }
 }

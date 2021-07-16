@@ -5,17 +5,18 @@ import javax.ws.rs.core.Response.Status;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.exception.FlowsAlreadyRunningException;
+import com.sequenceiq.cloudbreak.exception.mapper.BaseExceptionMapper;
 
 @Component
 public class FlowsAlreadyRunningExceptionMapper extends BaseExceptionMapper<FlowsAlreadyRunningException> {
 
     @Override
-    Status getResponseStatus(FlowsAlreadyRunningException exception) {
+    public Status getResponseStatus(FlowsAlreadyRunningException exception) {
         return Status.CONFLICT;
     }
 
     @Override
-    Class<FlowsAlreadyRunningException> getExceptionType() {
+    public Class<FlowsAlreadyRunningException> getExceptionType() {
         return FlowsAlreadyRunningException.class;
     }
 }

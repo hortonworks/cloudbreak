@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.exception.mapper.BaseExceptionMapper;
 
 import ch.qos.logback.classic.Level;
 
@@ -16,12 +17,12 @@ public class NotFoundExceptionMapper extends BaseExceptionMapper<NotFoundExcepti
     private static final Logger LOGGER = LoggerFactory.getLogger(NotFoundExceptionMapper.class);
 
     @Override
-    Status getResponseStatus(NotFoundException exception) {
+    public Status getResponseStatus(NotFoundException exception) {
         return Status.NOT_FOUND;
     }
 
     @Override
-    Class<NotFoundException> getExceptionType() {
+    public Class<NotFoundException> getExceptionType() {
         return NotFoundException.class;
     }
 

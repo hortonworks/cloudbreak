@@ -4,16 +4,18 @@ import javax.ws.rs.core.Response.Status;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.exception.mapper.BaseExceptionMapper;
+
 @Component
 public class UnsupportedOperationFailedExceptionMapper extends BaseExceptionMapper<UnsupportedOperationException> {
 
     @Override
-    Status getResponseStatus(UnsupportedOperationException exception) {
+    public Status getResponseStatus(UnsupportedOperationException exception) {
         return Status.BAD_REQUEST;
     }
 
     @Override
-    Class<UnsupportedOperationException> getExceptionType() {
+    public Class<UnsupportedOperationException> getExceptionType() {
         return UnsupportedOperationException.class;
     }
 }

@@ -5,15 +5,15 @@ import javax.ws.rs.core.Response.Status;
 import org.springframework.stereotype.Component;
 
 @Component
-public class IllegalStateExceptionMapper extends BaseExceptionMapper<IllegalStateException> {
+public class IllegalStateExceptionMapper extends EnvironmentBaseExceptionMapper<IllegalStateException> {
 
     @Override
-    Status getResponseStatus(IllegalStateException exception) {
+    public Status getResponseStatus(IllegalStateException exception) {
         return Status.BAD_REQUEST;
     }
 
     @Override
-    Class<IllegalStateException> getExceptionType() {
+    public Class<IllegalStateException> getExceptionType() {
         return IllegalStateException.class;
     }
 }

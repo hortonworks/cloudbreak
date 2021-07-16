@@ -7,15 +7,15 @@ import org.springframework.stereotype.Component;
 import com.amazonaws.AmazonServiceException;
 
 @Component
-public class AmazonServiceExceptionMapper extends BaseExceptionMapper<AmazonServiceException> {
+public class AmazonServiceExceptionMapper extends EnvironmentBaseExceptionMapper<AmazonServiceException> {
 
     @Override
-    Status getResponseStatus(AmazonServiceException exception) {
+    public Status getResponseStatus(AmazonServiceException exception) {
         return Status.fromStatusCode(exception.getStatusCode());
     }
 
     @Override
-    Class<AmazonServiceException> getExceptionType() {
+    public Class<AmazonServiceException> getExceptionType() {
         return AmazonServiceException.class;
     }
 }

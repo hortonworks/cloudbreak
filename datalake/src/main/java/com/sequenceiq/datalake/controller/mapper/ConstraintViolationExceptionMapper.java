@@ -6,6 +6,8 @@ import javax.ws.rs.core.Response.Status;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.exception.mapper.BaseExceptionMapper;
+
 @Component
 public class ConstraintViolationExceptionMapper extends BaseExceptionMapper<ConstraintViolationException> {
 
@@ -34,12 +36,12 @@ public class ConstraintViolationExceptionMapper extends BaseExceptionMapper<Cons
     }
 
     @Override
-    Status getResponseStatus(ConstraintViolationException exception) {
+    public Status getResponseStatus(ConstraintViolationException exception) {
         return Status.BAD_REQUEST;
     }
 
     @Override
-    Class<ConstraintViolationException> getExceptionType() {
+    public Class<ConstraintViolationException> getExceptionType() {
         return ConstraintViolationException.class;
     }
 

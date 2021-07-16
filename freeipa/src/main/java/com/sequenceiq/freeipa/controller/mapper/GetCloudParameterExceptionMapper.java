@@ -7,17 +7,18 @@ import javax.ws.rs.core.Response.Status;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.service.GetCloudParameterException;
+import com.sequenceiq.cloudbreak.exception.mapper.BaseExceptionMapper;
 
 @Component
 public class GetCloudParameterExceptionMapper extends BaseExceptionMapper<GetCloudParameterException> {
 
     @Override
-    Status getResponseStatus(GetCloudParameterException exception) {
+    public Status getResponseStatus(GetCloudParameterException exception) {
         return INTERNAL_SERVER_ERROR;
     }
 
     @Override
-    Class<GetCloudParameterException> getExceptionType() {
+    public Class<GetCloudParameterException> getExceptionType() {
         return GetCloudParameterException.class;
     }
 

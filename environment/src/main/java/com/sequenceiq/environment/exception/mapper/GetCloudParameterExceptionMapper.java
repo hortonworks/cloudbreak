@@ -8,7 +8,7 @@ import com.sequenceiq.cloudbreak.cloud.service.GetCloudParameterException;
     public class GetCloudParameterExceptionMapper extends SearchCauseExceptionMapper<GetCloudParameterException> {
 
     @Override
-    Class<GetCloudParameterException> getExceptionType() {
+    public Class<GetCloudParameterException> getExceptionType() {
         return GetCloudParameterException.class;
     }
 

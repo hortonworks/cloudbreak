@@ -5,6 +5,7 @@ import javax.ws.rs.core.Response.Status;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.exception.ExceptionResponse;
+import com.sequenceiq.cloudbreak.exception.mapper.BaseExceptionMapper;
 import com.sequenceiq.freeipa.service.freeipa.dns.DnsRecordConflictException;
 
 @Component
@@ -16,12 +17,12 @@ public class DnsRecordConflictExceptionMapper extends BaseExceptionMapper<DnsRec
     }
 
     @Override
-    Status getResponseStatus(DnsRecordConflictException exception) {
+    public Status getResponseStatus(DnsRecordConflictException exception) {
         return Status.CONFLICT;
     }
 
     @Override
-    Class<DnsRecordConflictException> getExceptionType() {
+    public Class<DnsRecordConflictException> getExceptionType() {
         return DnsRecordConflictException.class;
     }
 }

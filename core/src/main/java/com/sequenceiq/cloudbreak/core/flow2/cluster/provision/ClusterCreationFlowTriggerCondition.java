@@ -6,9 +6,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.flow.core.FlowTriggerCondition;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.flow.core.FlowTriggerCondition;
+import com.sequenceiq.flow.core.FlowTriggerConditionResult;
 
 @Component
 public class ClusterCreationFlowTriggerCondition implements FlowTriggerCondition {
@@ -18,11 +19,14 @@ public class ClusterCreationFlowTriggerCondition implements FlowTriggerCondition
     private StackService stackService;
 
     @Override
-    public boolean isFlowTriggerable(Long stackId) {
+    public FlowTriggerConditionResult isFlowTriggerable(Long stackId) {
+        FlowTriggerConditionResult result = FlowTriggerConditionResult.OK;
         StackView stackView = stackService.getViewByIdWithoutAuth(stackId);
-        boolean result = stackView.isAvailable() && stackView.getClusterView() != null && stackView.getClusterView().isRequested();
-        if (!result) {
-            LOGGER.debug("Cluster creation cannot be triggered, because cluster is not in requested status or stack is not available.");
+        boolean triggerable = stackView.isAvailable() && stackView.getClusterView() != null && stackView.getClusterView().isRequested();
+        if (!triggerable) {
+            String msg = "Cluster creation cannot be triggered, because cluster is not in requested status or stack is not available.";
+            LOGGER.debug(msg);
+            result = new FlowTriggerConditionResult(msg);
         }
         return result;
     }

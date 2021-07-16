@@ -7,15 +7,15 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.aws.common.exception.AwsDefaultRegionSelectionFailed;
 
 @Component
-public class AwsDefaultRegionSelectionExceptionMapper extends BaseExceptionMapper<AwsDefaultRegionSelectionFailed> {
+public class AwsDefaultRegionSelectionExceptionMapper extends EnvironmentBaseExceptionMapper<AwsDefaultRegionSelectionFailed> {
 
     @Override
-    Response.Status getResponseStatus(AwsDefaultRegionSelectionFailed exception) {
+    public Response.Status getResponseStatus(AwsDefaultRegionSelectionFailed exception) {
         return Response.Status.FORBIDDEN;
     }
 
     @Override
-    Class<AwsDefaultRegionSelectionFailed> getExceptionType() {
+    public Class<AwsDefaultRegionSelectionFailed> getExceptionType() {
         return AwsDefaultRegionSelectionFailed.class;
     }
 

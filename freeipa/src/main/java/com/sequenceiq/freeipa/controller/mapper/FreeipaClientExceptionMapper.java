@@ -5,6 +5,7 @@ import javax.ws.rs.core.Response.Status;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.exception.ExceptionResponse;
+import com.sequenceiq.cloudbreak.exception.mapper.BaseExceptionMapper;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 
 @Component
@@ -16,12 +17,12 @@ public class FreeipaClientExceptionMapper extends BaseExceptionMapper<FreeIpaCli
     }
 
     @Override
-    Status getResponseStatus(FreeIpaClientException exception) {
+    public Status getResponseStatus(FreeIpaClientException exception) {
         return Status.INTERNAL_SERVER_ERROR;
     }
 
     @Override
-    Class<FreeIpaClientException> getExceptionType() {
+    public Class<FreeIpaClientException> getExceptionType() {
         return FreeIpaClientException.class;
     }
 }

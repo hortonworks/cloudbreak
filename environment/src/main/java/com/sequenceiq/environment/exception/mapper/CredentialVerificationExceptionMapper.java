@@ -8,7 +8,7 @@ import com.sequenceiq.environment.credential.exception.CredentialVerificationExc
 public class CredentialVerificationExceptionMapper extends SearchCauseExceptionMapper<CredentialVerificationException> {
 
     @Override
-    Class<CredentialVerificationException> getExceptionType() {
+    public Class<CredentialVerificationException> getExceptionType() {
         return CredentialVerificationException.class;
     }
 

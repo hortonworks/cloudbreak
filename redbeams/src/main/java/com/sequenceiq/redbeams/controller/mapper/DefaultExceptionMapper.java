@@ -4,6 +4,7 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Provider;
 
 import com.sequenceiq.cloudbreak.common.exception.ExceptionResponse;
+import com.sequenceiq.cloudbreak.exception.mapper.BaseExceptionMapper;
 
 @Provider
 public class DefaultExceptionMapper extends BaseExceptionMapper<Exception> {
@@ -14,12 +15,12 @@ public class DefaultExceptionMapper extends BaseExceptionMapper<Exception> {
     }
 
     @Override
-    Status getResponseStatus(Exception exception) {
+    public Status getResponseStatus(Exception exception) {
         return Status.INTERNAL_SERVER_ERROR;
     }
 
     @Override
-    Class<Exception> getExceptionType() {
+    public Class<Exception> getExceptionType() {
         return Exception.class;
     }
 }

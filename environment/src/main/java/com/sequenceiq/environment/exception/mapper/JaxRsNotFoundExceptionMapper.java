@@ -10,18 +10,18 @@ import org.springframework.stereotype.Component;
 import ch.qos.logback.classic.Level;
 
 @Component
-public class JaxRsNotFoundExceptionMapper extends BaseExceptionMapper<NotFoundException> {
+public class JaxRsNotFoundExceptionMapper extends EnvironmentBaseExceptionMapper<NotFoundException> {
 
     @Context
     private UriInfo uriInfo;
 
     @Override
-    Response.Status getResponseStatus(NotFoundException notFoundException) {
+    public Response.Status getResponseStatus(NotFoundException notFoundException) {
         return Response.Status.NOT_FOUND;
     }
 
     @Override
-    Class<NotFoundException> getExceptionType() {
+    public Class<NotFoundException> getExceptionType() {
         return NotFoundException.class;
     }
 

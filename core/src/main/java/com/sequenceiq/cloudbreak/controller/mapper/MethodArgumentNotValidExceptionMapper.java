@@ -8,6 +8,7 @@ import org.springframework.messaging.handler.annotation.support.MethodArgumentNo
 import org.springframework.stereotype.Component;
 import org.springframework.validation.FieldError;
 
+import com.sequenceiq.cloudbreak.exception.mapper.BaseExceptionMapper;
 import com.sequenceiq.cloudbreak.json.ValidationResult;
 
 import ch.qos.logback.classic.Level;
@@ -30,12 +31,12 @@ public class MethodArgumentNotValidExceptionMapper extends BaseExceptionMapper<M
     }
 
     @Override
-    Status getResponseStatus(MethodArgumentNotValidException exception) {
+    public Status getResponseStatus(MethodArgumentNotValidException exception) {
         return Status.BAD_REQUEST;
     }
 
     @Override
-    Class<MethodArgumentNotValidException> getExceptionType() {
+    public Class<MethodArgumentNotValidException> getExceptionType() {
         return MethodArgumentNotValidException.class;
     }
 }
