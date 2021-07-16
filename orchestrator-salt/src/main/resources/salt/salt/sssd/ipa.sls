@@ -28,7 +28,7 @@ join_ipa:
 {% else %}
     - name: runuser -l root -c 'export PW="{{salt['pillar.get']('sssd-ipa:password')}}" && /opt/salt/scripts/join_ipa.sh && echo $(date +%Y-%m-%d:%H:%M:%S) >> /var/log/ipa-join-executed'
 {% endif %}
-    - unless: test -f /var/log/ipa-join-executed
+    - unless: test -f /var/log/ipa-join-executed && test -f /var/log/dnsrecord-add-executed
     - runas: root
     - failhard: True
     - require:
