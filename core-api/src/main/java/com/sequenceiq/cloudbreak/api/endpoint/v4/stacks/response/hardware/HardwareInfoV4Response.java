@@ -75,6 +75,10 @@ public class HardwareInfoV4Response implements JsonEntity {
 
     private Map<String, String> packageVersions;
 
+    private String availabilityZone;
+
+    private String subnetId;
+
     @ApiModelProperty(InstanceGroupModelDescription.TEMPLATE)
     private InstanceTemplateV4Response template;
 
@@ -236,6 +240,22 @@ public class HardwareInfoV4Response implements JsonEntity {
 
     public void setPackageVersions(Map<String, String> packageVersions) {
         this.packageVersions = packageVersions;
+    }
+
+    public String getAvailabilityZone() {
+        return availabilityZone;
+    }
+
+    public void setAvailabilityZone(String availabilityZone) {
+        this.availabilityZone = availabilityZone;
+    }
+
+    public String getSubnetId() {
+        return subnetId;
+    }
+
+    public void setSubnetId(String subnetId) {
+        this.subnetId = subnetId;
     }
 
     @Override

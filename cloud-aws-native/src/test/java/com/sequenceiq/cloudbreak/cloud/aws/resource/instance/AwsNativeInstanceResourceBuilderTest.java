@@ -125,7 +125,6 @@ public class AwsNativeInstanceResourceBuilderTest {
         when(group.getReferenceInstanceTemplate()).thenReturn(instanceTemplate);
         when(cloudStack.getImage()).thenReturn(image);
         when(image.getImageName()).thenReturn("img-name");
-        when(cloudStack.getNetwork()).thenReturn(network);
         when(cloudStack.getInstanceAuthentication()).thenReturn(authentication);
         when(awsContext.getAmazonEc2Client()).thenReturn(amazonEc2Client);
 
@@ -196,7 +195,6 @@ public class AwsNativeInstanceResourceBuilderTest {
         when(group.getReferenceInstanceTemplate()).thenReturn(instanceTemplate);
         when(cloudStack.getImage()).thenReturn(image);
         when(image.getImageName()).thenReturn("img-name");
-        when(cloudStack.getNetwork()).thenReturn(network);
         when(cloudStack.getInstanceAuthentication()).thenReturn(authentication);
         when(awsContext.getAmazonEc2Client()).thenReturn(amazonEc2Client);
 

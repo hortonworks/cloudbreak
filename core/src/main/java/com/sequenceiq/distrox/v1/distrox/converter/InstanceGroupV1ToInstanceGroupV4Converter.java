@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 import static org.apache.commons.lang3.ObjectUtils.anyNotNull;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -162,14 +163,14 @@ public class InstanceGroupV1ToInstanceGroupV4Converter {
         }
     }
 
-    private InstanceGroupNetworkV4Request getInstanceGroupNetworkV4Request(NetworkV4Request distroxNetwork, InstanceGroupV1Request source,
+    private InstanceGroupNetworkV4Request getInstanceGroupNetworkV4Request(NetworkV4Request distroxNetwork, InstanceGroupV1Request instanceGroupV1Request,
         DetailedEnvironmentResponse environment) {
-        if (requestContainsSingleAvailabilityZone(distroxNetwork, environment) || distroxNetwork == null) {
-            source.setNetwork(getInstanceGroupNetworkV1Request(distroxNetwork, environment));
+        if (!instanceGroupRequestHasSubnet(instanceGroupV1Request, environment) || distroxNetwork == null) {
+            instanceGroupV1Request.setNetwork(getInstanceGroupNetworkV1Request(distroxNetwork, environment));
         }
-        if (source.getNetwork() != null) {
+        if (instanceGroupV1Request.getNetwork() != null) {
             InstanceGroupNetworkV4Request network =
-                    networkConverter.convertToInstanceGroupNetworkV4Request(new ImmutablePair<>(source.getNetwork(), environment));
+                    networkConverter.convertToInstanceGroupNetworkV4Request(new ImmutablePair<>(instanceGroupV1Request.getNetwork(), environment));
             validateSubnetIds(network, environment);
             return network;
         }
@@ -226,26 +227,66 @@ public class InstanceGroupV1ToInstanceGroupV4Converter {
         return request;
     }
 
-    private boolean requestContainsSingleAvailabilityZone(NetworkV4Request distroxNetwork, DetailedEnvironmentResponse environment) {
-        boolean requestContainsSingleAvailabilityZone = false;
-        if (distroxNetwork != null && environment != null && !Strings.isNullOrEmpty(environment.getCloudPlatform())) {
+    private boolean instanceGroupRequestHasSubnet(InstanceGroupV1Request instanceGroupV1Request, DetailedEnvironmentResponse environment) {
+        boolean instanceGroupRequestHasSubnet = false;
+        if (instanceGroupV1Request != null && instanceGroupV1Request.getNetwork() != null) {
             switch (environment.getCloudPlatform()) {
                 case "AWS":
-                    requestContainsSingleAvailabilityZone = !Strings.isNullOrEmpty(distroxNetwork.getAws().getSubnetId());
+                    instanceGroupRequestHasSubnet = hasAwsSubnets(instanceGroupV1Request);
                     break;
                 case "AZURE":
-                    requestContainsSingleAvailabilityZone = !Strings.isNullOrEmpty(distroxNetwork.getAzure().getSubnetId());
+                    instanceGroupRequestHasSubnet = hasAzureSubnets(instanceGroupV1Request);
                     break;
                 case "GCP":
-                    requestContainsSingleAvailabilityZone = !Strings.isNullOrEmpty(distroxNetwork.getGcp().getSubnetId());
+                    instanceGroupRequestHasSubnet = hasGcpSubnets(instanceGroupV1Request);
                     break;
                 case "MOCK":
-                    requestContainsSingleAvailabilityZone = !Strings.isNullOrEmpty(distroxNetwork.getMock().getSubnetId());
+                    instanceGroupRequestHasSubnet = hasMockSubnets(instanceGroupV1Request);
                     break;
                 default:
             }
         }
-        return requestContainsSingleAvailabilityZone;
+        return instanceGroupRequestHasSubnet;
+    }
+
+    private boolean hasMockSubnets(InstanceGroupV1Request instanceGroupV1Request) {
+        boolean instanceGroupRequestHasSubnet = false;
+        InstanceGroupMockNetworkV1Parameters mock = instanceGroupV1Request.getNetwork().getMock();
+        if (mock != null) {
+            instanceGroupRequestHasSubnet = isNotEmptyOrNull(mock.getSubnetIds());
+        }
+        return instanceGroupRequestHasSubnet;
+    }
+
+    private boolean hasGcpSubnets(InstanceGroupV1Request instanceGroupV1Request) {
+        boolean instanceGroupRequestHasSubnet = false;
+        InstanceGroupGcpNetworkV1Parameters gcp = instanceGroupV1Request.getNetwork().getGcp();
+        if (gcp != null) {
+            instanceGroupRequestHasSubnet = isNotEmptyOrNull(gcp.getSubnetIds());
+        }
+        return instanceGroupRequestHasSubnet;
+    }
+
+    private boolean hasAzureSubnets(InstanceGroupV1Request instanceGroupV1Request) {
+        boolean instanceGroupRequestHasSubnet = false;
+        InstanceGroupAzureNetworkV1Parameters azure = instanceGroupV1Request.getNetwork().getAzure();
+        if (azure != null) {
+            instanceGroupRequestHasSubnet = isNotEmptyOrNull(azure.getSubnetIds());
+        }
+        return instanceGroupRequestHasSubnet;
+    }
+
+    private boolean hasAwsSubnets(InstanceGroupV1Request instanceGroupV1Request) {
+        boolean instanceGroupRequestHasSubnet = false;
+        InstanceGroupAwsNetworkV1Parameters aws = instanceGroupV1Request.getNetwork().getAws();
+        if (aws != null) {
+            instanceGroupRequestHasSubnet = isNotEmptyOrNull(aws.getSubnetIds());
+        }
+        return instanceGroupRequestHasSubnet;
+    }
+
+    public boolean isNotEmptyOrNull(Collection<String> collection) {
+        return !(collection == null || collection.isEmpty());
     }
 
     private void validateSubnetIds(InstanceGroupNetworkV4Request network, DetailedEnvironmentResponse environment) {

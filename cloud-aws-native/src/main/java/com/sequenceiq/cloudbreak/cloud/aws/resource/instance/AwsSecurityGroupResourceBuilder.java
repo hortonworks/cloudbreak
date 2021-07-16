@@ -53,7 +53,7 @@ public class AwsSecurityGroupResourceBuilder extends AbstractAwsNativeComputeBui
     public List<CloudResource> create(AwsContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group, Image image) {
         CloudContext cloudContext = auth.getCloudContext();
         String securityGroupId = group.getSecurity().getCloudSecurityId();
-        String availabilityZone = cloudContext.getLocation().getAvailabilityZone().value();
+        String availabilityZone = instance.getAvailabilityZone();
         List<CloudResource> ret = Collections.emptyList();
         if (securityGroupId == null) {
             securityGroupId = getResourceNameService().resourceName(resourceType(), context.getName(), group.getName(), cloudContext.getId());

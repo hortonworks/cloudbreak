@@ -73,6 +73,8 @@ public class StackResponseHardwareInfoProvider implements ResponseProvider {
             hardwareInfoResponse.setInstanceStatus(instanceMetaData.getInstanceStatus());
             hardwareInfoResponse.setInstanceMetadataType(instanceMetaData.getInstanceMetadataType());
             hardwareInfoResponse.setPrivateIp(instanceMetaData.getPrivateIp());
+            hardwareInfoResponse.setSubnetId(instanceMetaData.getSubnetId());
+            hardwareInfoResponse.setAvailabilityZone(instanceMetaData.getAvailabilityZone());
             hardwareInfoResponse.setPublicIp(instanceMetaData.getPublicIp());
             hardwareInfoResponse.setSshPort(instanceMetaData.getSshPort());
             hardwareInfoResponse.setGroupName(instanceMetaData.getInstanceGroupName());
