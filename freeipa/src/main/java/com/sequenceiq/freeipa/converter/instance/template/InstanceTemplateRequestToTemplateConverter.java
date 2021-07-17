@@ -26,6 +26,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.VolumeR
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.aws.AwsInstanceTemplateParameters;
 import com.sequenceiq.freeipa.entity.Template;
 import com.sequenceiq.freeipa.service.DefaultRootVolumeSizeProvider;
+import com.sequenceiq.freeipa.service.DefaultRootVolumeTypeProvider;
 import com.sequenceiq.freeipa.service.stack.instance.DefaultInstanceTypeProvider;
 
 @Component
@@ -36,6 +37,9 @@ public class InstanceTemplateRequestToTemplateConverter {
 
     @Inject
     private DefaultRootVolumeSizeProvider defaultRootVolumeSizeProvider;
+
+    @Inject
+    private DefaultRootVolumeTypeProvider defaultRootVolumeTypeProvider;
 
     @Inject
     private DefaultInstanceTypeProvider defaultInstanceTypeProvider;
@@ -73,10 +77,11 @@ public class InstanceTemplateRequestToTemplateConverter {
     }
 
     private void setVolumesProperty(Set<VolumeRequest> attachedVolumes, Template template, CloudPlatform cloudPlatform) {
+        String diskType = defaultRootVolumeTypeProvider.getForPlatform(cloudPlatform.name());
         if (!CollectionUtils.isEmpty(attachedVolumes)) {
             attachedVolumes.stream().findFirst().ifPresent(v -> {
                 String volumeType = v.getType();
-                template.setVolumeType(volumeType == null ? "HDD" : volumeType);
+                template.setVolumeType(volumeType == null ? diskType : volumeType);
                 Integer volumeCount = v.getCount();
                 template.setVolumeCount(volumeCount == null ? Integer.valueOf(0) : volumeCount);
                 Integer volumeSize = v.getSize();
