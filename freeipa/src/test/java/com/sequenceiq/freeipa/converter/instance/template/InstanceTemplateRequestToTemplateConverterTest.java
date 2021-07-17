@@ -22,6 +22,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.aws.Aws
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.aws.AwsInstanceTemplateSpotParameters;
 import com.sequenceiq.freeipa.entity.Template;
 import com.sequenceiq.freeipa.service.DefaultRootVolumeSizeProvider;
+import com.sequenceiq.freeipa.service.DefaultRootVolumeTypeProvider;
 import com.sequenceiq.freeipa.service.stack.instance.DefaultInstanceTypeProvider;
 
 @ExtendWith(MockitoExtension.class)
@@ -42,6 +43,9 @@ class InstanceTemplateRequestToTemplateConverterTest {
 
     @Mock
     private DefaultRootVolumeSizeProvider defaultRootVolumeSizeProvider;
+
+    @Mock
+    private DefaultRootVolumeTypeProvider defaultRootVolumeTypeProvider;
 
     @Mock
     private DefaultInstanceTypeProvider defaultInstanceTypeProvider;

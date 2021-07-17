@@ -178,6 +178,8 @@ cb:
     AWS: 100
     AZURE: 100
     GCP: 100
+  platform.default.rootVolumeType:
+    GCP: SSD
   enabled.linux.types: redhat6,redhat7,centos6,centos7,amazonlinux,amazonlinux2
   publicip:
   etc.config.dir: /etc/freeipa
