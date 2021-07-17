@@ -73,10 +73,15 @@ public class InstanceTemplateRequestToTemplateConverter {
     }
 
     private void setVolumesProperty(Set<VolumeRequest> attachedVolumes, Template template, CloudPlatform cloudPlatform) {
+        String type = "HDD";
+        if (CloudPlatform.GCP == cloudPlatform) {
+            type = "SSD";
+        }
+        final String diskType = type;
         if (!CollectionUtils.isEmpty(attachedVolumes)) {
             attachedVolumes.stream().findFirst().ifPresent(v -> {
                 String volumeType = v.getType();
-                template.setVolumeType(volumeType == null ? "HDD" : volumeType);
+                template.setVolumeType(volumeType == null ? diskType : volumeType);
                 Integer volumeCount = v.getCount();
                 template.setVolumeCount(volumeCount == null ? Integer.valueOf(0) : volumeCount);
                 Integer volumeSize = v.getSize();
