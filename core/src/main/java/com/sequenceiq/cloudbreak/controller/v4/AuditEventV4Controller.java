@@ -11,7 +11,11 @@ import javax.ws.rs.core.StreamingOutput;
 
 import org.springframework.stereotype.Controller;
 
+import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
+import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
+import com.sequenceiq.authorization.annotation.ResourceCrn;
+import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.AuditEventV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.responses.AuditEventV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.responses.AuditEventV4Responses;
@@ -30,6 +34,7 @@ public class AuditEventV4Controller implements AuditEventV4Endpoint {
     private CloudbreakRestRequestThreadLocalService threadLocalService;
 
     @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
     public AuditEventV4Response getAuditEventById(Long workspaceId, Long auditId) {
         return auditEventService.getAuditEventByWorkspaceId(workspaceId, auditId);
     }
@@ -43,9 +48,25 @@ public class AuditEventV4Controller implements AuditEventV4Endpoint {
     }
 
     @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
+    public AuditEventV4Responses getAuditEvents(Long workspaceId, String resourceType, @ResourceCrn String resourceCrn) {
+        List<AuditEventV4Response> auditEventsByWorkspaceId = auditEventService.getAuditEventsByWorkspaceIdAndResourceCrn(
+                threadLocalService.getRequestedWorkspaceId(), resourceType, resourceCrn);
+        return new AuditEventV4Responses(auditEventsByWorkspaceId);
+    }
+
+    @Override
     public Response getAuditEventsZip(Long workspaceId, String resourceType, Long resourceId, String resourceCrn) {
         Collection<AuditEventV4Response> auditEvents = getAuditEvents(threadLocalService.getRequestedWorkspaceId(),
                 resourceType, resourceId, resourceCrn).getResponses();
+        return getAuditEventsZipResponse(auditEvents, resourceType);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
+    public Response getAuditEventsZip(Long workspaceId, String resourceType, @ResourceCrn String resourceCrn) {
+        List<AuditEventV4Response> auditEvents = auditEventService.getAuditEventsByWorkspaceIdAndResourceCrn(
+                threadLocalService.getRequestedWorkspaceId(), resourceType, resourceCrn);
         return getAuditEventsZipResponse(auditEvents, resourceType);
     }
 
@@ -60,4 +81,5 @@ public class AuditEventV4Controller implements AuditEventV4Endpoint {
         String fileName = String.format("audit-%s.zip", resourceType);
         return Response.ok(streamingOutput).header("content-disposition", String.format("attachment; filename = %s", fileName)).build();
     }
+
 }

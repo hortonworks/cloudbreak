@@ -13,8 +13,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 
+import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.CustomPermissionCheck;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
+import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType;
@@ -30,10 +32,22 @@ public class CDPStructuredEventV1Controller implements CDPStructuredEventV1Endpo
     private CDPStructuredEventDBService structuredEventDBService;
 
     @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
+    public List<CDPStructuredEvent> getAuditEventsForCrn(@ResourceCrn String resourceCrn, List<StructuredEventType> types, Integer page, Integer size) {
+        return getAuditEvents(resourceCrn, types, page, size);
+    }
+
+    @Override
     @CustomPermissionCheck
     public List<CDPStructuredEvent> getAuditEvents(@ResourceCrn String resourceCrn, List<StructuredEventType> types, Integer page, Integer size) {
         PageRequest pageable = PageRequest.of(page, size, Sort.by("timestamp").descending());
         return structuredEventDBService.getPagedEventsOfResource(types, resourceCrn, pageable).getContent();
+    }
+
+    @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
+    public Response getAuditEventsZipForCrn(@ResourceCrn String resourceCrn, List<StructuredEventType> types) {
+        return getAuditEventsZip(resourceCrn, types);
     }
 
     @Override
@@ -55,4 +69,5 @@ public class CDPStructuredEventV1Controller implements CDPStructuredEventV1Endpo
         String fileName = String.format("audit-%s.zip", resourceType);
         return Response.ok(streamingOutput).header("content-disposition", String.format("attachment; filename = %s", fileName)).build();
     }
+
 }
