@@ -67,6 +67,8 @@ public class LiftieConnectorService implements LiftieApi {
         putIfPresent(queryParams, "workloads", workload);
         putIfPresent(queryParams, "page", page != null ? page.toString() : null);
         webTarget = setQueryParams(webTarget, queryParams);
+        LOGGER.info("WebTarget has created for getting Kubernetes clusters related to the given environment environment [name: {}]: {}",
+                env, webTarget.toString());
         Invocation.Builder call = invocationBuilderProvider.createInvocationBuilder(webTarget);
         try (Response result = executeCall(webTarget.getUri(), () -> retryableWebTarget.get(call))) {
             return responseReader.read(webTarget.getUri().toString(), result, ListClustersResponse.class)
@@ -81,6 +83,8 @@ public class LiftieConnectorService implements LiftieApi {
     public DeleteClusterResponse deleteCluster(@NotNull String clusterId) {
         LOGGER.debug("About to connect Kubernetes Experience API to delete cluster {}", clusterId);
         WebTarget webTarget = client.target(liftiePathProvider.getPathToClusterEndpoint(clusterId));
+        LOGGER.info("WebTarget has created for deleting Kubernetes cluster with the following cluster id [id: {}]: {}",
+                clusterId, webTarget.toString());
         Invocation.Builder call = invocationBuilderProvider.createInvocationBuilder(webTarget);
         try (Response result = executeCall(webTarget.getUri(), () -> retryableWebTarget.delete(call))) {
             return responseReader.read(webTarget.getUri().toString(), result, DeleteClusterResponse.class)
@@ -94,6 +98,8 @@ public class LiftieConnectorService implements LiftieApi {
     @Override
     public ExperiencePolicyResponse getPolicy(String cloudPlatform) {
         WebTarget webTarget = client.target(liftiePathProvider.getPathToPolicyEndpoint(cloudPlatform));
+        LOGGER.info("WebTarget has created for getting Kubernetes clusters related minimal policies for cloud platform [platform: {}]: {}",
+                cloudPlatform, webTarget.toString());
         Invocation.Builder call = invocationBuilderProvider.createInvocationBuilderForInternalActor(webTarget);
         try (Response result = executeCall(webTarget.getUri(), () -> retryableWebTarget.get(call))) {
             return responseReader.read(webTarget.getUri().toString(), result, ExperiencePolicyResponse.class)

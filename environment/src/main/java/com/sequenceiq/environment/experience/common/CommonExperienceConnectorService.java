@@ -11,6 +11,7 @@ import javax.validation.constraints.NotNull;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,15 +54,20 @@ public class CommonExperienceConnectorService implements CommonExperienceApi {
     @Override
     public Set<CpInternalCluster> getExperienceClustersConnectedToEnv(String experienceBasePath, String environmentCrn) {
         WebTarget webTarget = commonExperienceWebTargetProvider.createWebTargetForClusterFetch(experienceBasePath, environmentCrn);
+        LOGGER.info("WebTarget has created for getting workspaces for environment [crn: {}]: {}",
+                environmentCrn, webTarget.toString());
         Invocation.Builder call = invocationBuilderProvider.createInvocationBuilder(webTarget);
         Optional<Response> result = executeCall(webTarget.getUri(), () -> retryableWebTarget.get(call));
         if (result.isPresent()) {
-            if (result.get().getStatus() != NOT_FOUND.getStatusCode()) {
+            Status status = Status.fromStatusCode(result.get().getStatus());
+            if (status != NOT_FOUND) {
                 Optional<CpInternalEnvironmentResponse> response = responseReader
                         .read(webTarget.getUri().toString(), result.get(), CpInternalEnvironmentResponse.class);
                 return response.map(CpInternalEnvironmentResponse::getResults)
                         .orElseThrow(() -> new ExperienceOperationFailedException(COMMON_XP_RESPONSE_RESOLVE_ERROR_MSG));
             } else {
+                LOGGER.info("The response's status was [{}], but for cluster fetch this is not acceptable, therefore an empty set will be returned",
+                        status.name());
                 return Set.of();
             }
         }
@@ -72,6 +78,8 @@ public class CommonExperienceConnectorService implements CommonExperienceApi {
     @Override
     public DeleteCommonExperienceWorkspaceResponse deleteWorkspaceForEnvironment(String experienceBasePath, String environmentCrn) {
         WebTarget webTarget = commonExperienceWebTargetProvider.createWebTargetForClusterFetch(experienceBasePath, environmentCrn);
+        LOGGER.info("WebTarget has created for deleting workspaces for environment [crn: {}]: {}",
+                environmentCrn, webTarget.toString());
         Invocation.Builder call = invocationBuilderProvider.createInvocationBuilder(webTarget);
         Optional<Response> response = executeCall(webTarget.getUri(), () -> retryableWebTarget.delete(call));
         if (response.isPresent()) {
@@ -84,6 +92,7 @@ public class CommonExperienceConnectorService implements CommonExperienceApi {
     @Override
     public ExperiencePolicyResponse collectPolicy(String experienceBasePath, String cloudPlatform) {
         WebTarget webTarget = commonExperienceWebTargetProvider.createWebTargetForPolicyFetch(experienceBasePath, cloudPlatform);
+        LOGGER.info("WebTarget has created for collecting policies: {}", webTarget.toString());
         Invocation.Builder call = invocationBuilderProvider.createInvocationBuilderForInternalActor(webTarget);
         Optional<Response> response = executeCall(webTarget.getUri(), () -> retryableWebTarget.get(call));
         if (response.isPresent()) {

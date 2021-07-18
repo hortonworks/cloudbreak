@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.experience.common;
 
 import static com.sequenceiq.cloudbreak.util.NullUtil.throwIfNull;
+import static com.sequenceiq.environment.experience.ResponseReaderUtility.logInputResponseContentIfPossible;
 import static javax.ws.rs.core.Response.Status.Family.SUCCESSFUL;
 
 import java.util.Optional;
@@ -24,6 +25,7 @@ public class CommonExperienceResponseReader implements ResponseReader {
         throwIfNull(response, () -> new IllegalArgumentException("Response should not be null!"));
         T experienceCallResponse = null;
         LOGGER.debug("Going to read response from experience call");
+        logInputResponseContentIfPossible(LOGGER, response, "Common experience response: ");
         if (response.getStatusInfo().getFamily().equals(SUCCESSFUL)) {
             try {
                 experienceCallResponse = response.readEntity(expectedType);

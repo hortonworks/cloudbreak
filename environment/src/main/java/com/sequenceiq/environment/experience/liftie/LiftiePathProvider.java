@@ -28,15 +28,21 @@ public class LiftiePathProvider {
     }
 
     public String getPathToPolicyEndpoint(String provider) {
-        return (basePath + policyPath).replace(pathConfig.getToReplace().get("cloudProvider"), provider);
+        String path = (basePath + policyPath).replace(pathConfig.getToReplace().get("cloudProvider"), provider);
+        LOGGER.info("Path has created to liftie for policy fetching: {}", path);
+        return path;
     }
 
     public String getPathToClustersEndpoint() {
-        return basePath + "/cluster";
+        String path = basePath + "/cluster";
+        LOGGER.info("Path for Liftie's clusters endpoint: {}", path);
+        return path;
     }
 
     public String getPathToClusterEndpoint(String clusterId) {
-        return String.format("%s/%s", getPathToClustersEndpoint(), clusterId);
+        String path = String.format("%s/%s", getPathToClustersEndpoint(), clusterId);
+        LOGGER.info("Path for Liftie's clusters endpoint with the cluster id of [{}]: {}", clusterId, path);
+        return path;
     }
 
 }
