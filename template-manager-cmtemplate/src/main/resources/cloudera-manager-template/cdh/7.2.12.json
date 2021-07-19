@@ -143,6 +143,10 @@
     {
       "name": "STREAMS_REPLICATION_MANAGER",
       "version": "1.0.0"
+    },
+    {
+      "name": "CRUISE_CONTROL",
+      "version": "2.0.100"
     }
   ],
   "version": "7.2.12",
