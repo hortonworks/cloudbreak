@@ -113,15 +113,16 @@ public class AwsNativeMetadataCollector implements MetadataCollector {
 
     private List<CloudVmMetaDataStatus> collectInstances(List<CloudInstance> vms, List<CloudResource> resources, AmazonEc2Client ec2Client) {
         List<CloudVmMetaDataStatus> result = new ArrayList<>();
-        Set<String> knownInstanceIds = resources.stream()
+        Set<String> preferredInstanceIds = resources.stream()
                 .filter(resource -> ResourceType.AWS_INSTANCE.equals(resource.getType()))
+                .filter(resource -> vms.stream().anyMatch(vm -> String.valueOf(vm.getTemplate().getPrivateId()).equals(resource.getReference())))
                 .map(CloudResource::getInstanceId)
                 .collect(Collectors.toSet());
         Map<String, CloudResource> resourcesByInstanceId = resources.stream()
                 .filter(resource -> ResourceType.AWS_INSTANCE.equals(resource.getType()))
                 .collect(Collectors.toMap(CloudResource::getInstanceId, Function.identity()));
         final AtomicInteger counter = new AtomicInteger(0);
-        Map<Integer, List<String>> instanceIdBatches = knownInstanceIds.stream()
+        Map<Integer, List<String>> instanceIdBatches = preferredInstanceIds.stream()
                 .collect(Collectors.groupingBy(s -> counter.getAndIncrement() / instanceFetchMaxBatchSize));
 
         for (Map.Entry<Integer, List<String>> instanceIdBatchEntry : instanceIdBatches.entrySet()) {
