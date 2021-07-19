@@ -60,6 +60,9 @@ auth:
     aws:
       disk:
         EncryptionWithCMK.enable: true
+    gcp:
+      disk:
+        EncryptionWithCMEK.enable: true
     cm.ha.enable: false
     conclusion.checker.send.user.event.enable: true
     ha.repair.enable: true

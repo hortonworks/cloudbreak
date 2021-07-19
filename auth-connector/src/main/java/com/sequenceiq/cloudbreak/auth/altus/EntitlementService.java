@@ -6,7 +6,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_H
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_HA_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AUTOMATIC_USERSYNC_POLLER;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_NATIVE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AWS_RESTRICTED_POLICY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_IMAGE_MARKETPLACE;
@@ -14,8 +13,10 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_S
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_SINGLE_RESOURCE_GROUP_DEDICATED_STORAGE_ACCOUNT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_BASE_IMAGE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_DISK_ENCRYPTION_WITH_CMK;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_NATIVE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_DISK_SSE_WITH_CMK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_DATABASE_WIRE_ENCRYPTION;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_GCP_DISK_ENCRYPTION_WITH_CMEK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CCM_V2;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_IDENTITY_MAPPING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION;
@@ -319,6 +320,10 @@ public class EntitlementService {
 
     public boolean isFreeIpaUpgradeEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_FREEIPA_UPGRADE);
+    }
+
+    public boolean isGcpDiskEncryptionWithCMEKEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_CB_GCP_DISK_ENCRYPTION_WITH_CMEK);
     }
 
     public List<String> getEntitlements(String accountId) {

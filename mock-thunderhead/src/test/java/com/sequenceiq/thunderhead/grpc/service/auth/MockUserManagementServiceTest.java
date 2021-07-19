@@ -265,6 +265,9 @@ public class MockUserManagementServiceTest {
 
                 {"ephemeralDisksForTempDataEnabled false", "ephemeralDisksForTempDataEnabled", false, "EPHEMERAL_DISKS_FOR_TEMP_DATA", false},
                 {"ephemeralDisksForTempDataEnabled true", "ephemeralDisksForTempDataEnabled", true, "EPHEMERAL_DISKS_FOR_TEMP_DATA", true},
+
+                {"enableGcpDiskEncryptionWithCMEK false", "enableGcpDiskEncryptionWithCMEK", false, "CDP_CB_GCP_DISK_ENCRYPTION_WITH_CMEK", false},
+                {"enableGcpDiskEncryptionWithCMEK true", "enableGcpDiskEncryptionWithCMEK", true, "CDP_CB_GCP_DISK_ENCRYPTION_WITH_CMEK", true},
         };
     }
 
