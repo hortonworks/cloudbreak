@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.blueprint;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.DEFAULT;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.SERVICE_MANAGED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.USER_MANAGED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COMPLETED;
@@ -126,12 +127,9 @@ public class BlueprintServiceTest {
     @InjectMocks
     private BlueprintService underTest;
 
-    private Blueprint blueprint = new Blueprint();
-
     @BeforeEach
     public void setup() {
         CrnTestUtil.mockCrnGenerator(regionAwareCrnGenerator);
-        blueprint = getBlueprint("name", USER_MANAGED);
         Whitebox.setInternalState(blueprintListFilters, "supportedRuntimes", new SupportedRuntimes());
         lenient().when(legacyRestRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
         lenient().when(userService.getOrCreate(cloudbreakUser)).thenReturn(user);
@@ -141,6 +139,24 @@ public class BlueprintServiceTest {
 
     @Test
     public void testDeleteByWorkspaceWhenDtoNameFilledThenDeleteCalled() {
+        Blueprint blueprint = getBlueprint("name", USER_MANAGED);
+        when(blueprintRepository.findByNameAndWorkspaceId(blueprint.getName(),
+                blueprint.getWorkspace().getId())).thenReturn(Optional.of(blueprint));
+
+        Blueprint result = underTest.deleteByWorkspace(NameOrCrn.ofName(blueprint.getName()), blueprint.getWorkspace().getId());
+
+        assertEquals(blueprint, result);
+        verify(blueprintRepository, times(1))
+                .findByNameAndWorkspaceId(anyString(), anyLong());
+        verify(blueprintRepository, times(1))
+                .findByNameAndWorkspaceId(blueprint.getName(), blueprint.getWorkspace().getId());
+        verify(blueprintRepository, times(1)).delete(any(Blueprint.class));
+        verify(blueprintRepository, times(1)).delete(blueprint);
+    }
+
+    @Test
+    public void testDeleteServiceManaged() {
+        Blueprint blueprint = getBlueprint("name", SERVICE_MANAGED);
         when(blueprintRepository.findByNameAndWorkspaceId(blueprint.getName(),
                 blueprint.getWorkspace().getId())).thenReturn(Optional.of(blueprint));
 
@@ -157,6 +173,7 @@ public class BlueprintServiceTest {
 
     @Test
     public void testDeleteByWorkspaceWhenDtoCrnFilledThenDeleteCalled() {
+        Blueprint blueprint = getBlueprint("name", USER_MANAGED);
         when(blueprintRepository.findByResourceCrnAndWorkspaceId(blueprint.getResourceCrn(),
                 blueprint.getWorkspace().getId())).thenReturn(Optional.of(blueprint));
 
@@ -173,6 +190,7 @@ public class BlueprintServiceTest {
 
     @Test
     public void testGetByWorkspaceWhenDtoNameFilledThenProperGetCalled() {
+        Blueprint blueprint = getBlueprint("name", USER_MANAGED);
         when(blueprintRepository.findByNameAndWorkspaceId(blueprint.getName(),
                 blueprint.getWorkspace().getId())).thenReturn(Optional.of(blueprint));
 
@@ -187,6 +205,7 @@ public class BlueprintServiceTest {
 
     @Test
     public void testGetByWorkspaceWhenDtoCrnFilledThenProperGetCalled() {
+        Blueprint blueprint = getBlueprint("name", USER_MANAGED);
         when(blueprintRepository.findByResourceCrnAndWorkspaceId(blueprint.getResourceCrn(),
                 blueprint.getWorkspace().getId())).thenReturn(Optional.of(blueprint));
 
@@ -201,6 +220,7 @@ public class BlueprintServiceTest {
 
     @Test
     public void testDeletionWithZeroClusters() {
+        Blueprint blueprint = getBlueprint("name", USER_MANAGED);
         when(clusterService.findByBlueprint(any())).thenReturn(Collections.emptySet());
 
         Blueprint deleted = underTest.delete(blueprint);
@@ -210,6 +230,7 @@ public class BlueprintServiceTest {
 
     @Test
     public void testDeletionWithNonTerminatedClusterAndStack() {
+        Blueprint blueprint = getBlueprint("name", USER_MANAGED);
         Cluster cluster = getCluster("c1", 1L, blueprint, AVAILABLE, AVAILABLE);
         when(clusterService.findByBlueprint(any())).thenReturn(Set.of(cluster));
 
@@ -220,6 +241,7 @@ public class BlueprintServiceTest {
 
     @Test
     public void testDeletionWithTerminatedClustersNonTerminatedStacks() {
+        Blueprint blueprint = getBlueprint("name", USER_MANAGED);
         Set<Cluster> clusters = new HashSet<>();
         clusters.add(getCluster("c1", 1L, blueprint, PRE_DELETE_IN_PROGRESS, AVAILABLE));
         clusters.add(getCluster("c2", 1L, blueprint, DELETE_COMPLETED, DELETE_IN_PROGRESS));
@@ -234,6 +256,7 @@ public class BlueprintServiceTest {
 
     @Test
     public void testDeletionWithTerminatedAndNonTerminatedClusters() {
+        Blueprint blueprint = getBlueprint("name", USER_MANAGED);
         Set<Cluster> clusters = new HashSet<>();
         clusters.add(getCluster("c1", 1L, blueprint, PRE_DELETE_IN_PROGRESS, AVAILABLE));
         clusters.add(getCluster("c2", 1L, blueprint, DELETE_COMPLETED, DELETE_COMPLETED));

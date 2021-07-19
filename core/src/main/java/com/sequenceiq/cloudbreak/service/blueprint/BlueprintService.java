@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.blueprint;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.DEFAULT;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.DEFAULT_DELETED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.SERVICE_MANAGED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.USER_MANAGED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COMPLETED;
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
@@ -326,7 +327,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
     public Blueprint delete(Blueprint blueprint) {
         LOGGER.debug("Deleting blueprint with name: {}", blueprint.getName());
         prepareDeletion(blueprint);
-        if (USER_MANAGED.equals(blueprint.getStatus())) {
+        if (Set.of(USER_MANAGED, SERVICE_MANAGED).contains(blueprint.getStatus())) {
             blueprintRepository.delete(blueprint);
         } else {
             LOGGER.error("Tried to delete DEFAULT blueprint");

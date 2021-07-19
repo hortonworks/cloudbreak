@@ -109,15 +109,15 @@ public class BlueprintV4Controller extends NotificationController implements Blu
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DELETE_CLUSTER_TEMPLATE)
     public BlueprintV4Response deleteByName(Long workspaceId, @NotNull @ResourceName String name) {
-        Blueprint deleted = blueprintService.deleteByWorkspace(NameOrCrn.ofName(name), workspaceId);
+        Blueprint deleted = blueprintService.deleteByWorkspace(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId());
         notify(ResourceEvent.BLUEPRINT_DELETED);
         return converterUtil.convert(deleted, BlueprintV4Response.class);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DELETE_CLUSTER_TEMPLATE)
-    public BlueprintV4Response deleteByCrn(Long workspaceId, @NotNull @ResourceCrn String crn) {
-        Blueprint deleted = blueprintService.deleteByWorkspace(NameOrCrn.ofCrn(crn), workspaceId);
+    public BlueprintV4Response deleteByCrn(Long workspaceId, @NotNull @ResourceCrn @TenantAwareParam String crn) {
+        Blueprint deleted = blueprintService.deleteByWorkspace(NameOrCrn.ofCrn(crn), restRequestThreadLocalService.getRequestedWorkspaceId());
         notify(ResourceEvent.BLUEPRINT_DELETED);
         return converterUtil.convert(deleted, BlueprintV4Response.class);
     }
@@ -125,7 +125,7 @@ public class BlueprintV4Controller extends NotificationController implements Blu
     @Override
     @CheckPermissionByResourceNameList(action = AuthorizationResourceAction.DELETE_CLUSTER_TEMPLATE)
     public BlueprintV4Responses deleteMultiple(Long workspaceId, @ResourceNameList Set<String> names) {
-        Set<Blueprint> deleted = blueprintService.deleteMultipleByNameFromWorkspace(names, workspaceId);
+        Set<Blueprint> deleted = blueprintService.deleteMultipleByNameFromWorkspace(names, restRequestThreadLocalService.getRequestedWorkspaceId());
         notify(ResourceEvent.BLUEPRINT_DELETED);
         return new BlueprintV4Responses(converterUtil.convertAllAsSet(deleted, BlueprintV4Response.class));
     }
@@ -133,7 +133,7 @@ public class BlueprintV4Controller extends NotificationController implements Blu
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_CLUSTER_TEMPLATE)
     public BlueprintV4Request getRequest(Long workspaceId, @ResourceName String name) {
-        Blueprint blueprint = blueprintService.getByNameForWorkspaceId(name, workspaceId);
+        Blueprint blueprint = blueprintService.getByNameForWorkspaceId(name, restRequestThreadLocalService.getRequestedWorkspaceId());
         return converterUtil.convert(blueprint, BlueprintV4Request.class);
     }
 
@@ -141,7 +141,7 @@ public class BlueprintV4Controller extends NotificationController implements Blu
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_CLUSTER_TEMPLATE)
     public ParametersQueryV4Response getParameters(Long workspaceId, @ResourceName String name) {
         ParametersQueryV4Response parametersQueryV4Response = new ParametersQueryV4Response();
-        parametersQueryV4Response.setCustom(blueprintService.queryCustomParametersMap(name, workspaceId));
+        parametersQueryV4Response.setCustom(blueprintService.queryCustomParametersMap(name, restRequestThreadLocalService.getRequestedWorkspaceId()));
         return parametersQueryV4Response;
     }
 
