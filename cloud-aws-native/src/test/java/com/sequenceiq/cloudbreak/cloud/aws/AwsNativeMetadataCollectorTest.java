@@ -283,7 +283,7 @@ class AwsNativeMetadataCollectorTest {
     void collectInstanceMetadataWhenNotExpectedAmazonServiceExceptionOccurs() {
         List<CloudInstance> allInstances = List.of();
         String anInstanceId = "anInstanceId";
-        CloudResource cloudResource = getCloudResource("aCrn", "instanceName", anInstanceId, AWS_INSTANCE);
+        CloudResource cloudResource = getCloudResource("1", "instanceName", anInstanceId, AWS_INSTANCE);
         List<CloudResource> resources = List.of(cloudResource);
 
         InstanceTemplate instanceTemplate =
@@ -304,7 +304,7 @@ class AwsNativeMetadataCollectorTest {
     void collectInstanceMetadataWhenRuntimeExceptionOccurs() {
         List<CloudInstance> allInstances = List.of();
         String anInstanceId = "anInstanceId";
-        CloudResource cloudResource = getCloudResource("aCrn", "instanceName", anInstanceId, AWS_INSTANCE);
+        CloudResource cloudResource = getCloudResource("1", "instanceName", anInstanceId, AWS_INSTANCE);
         List<CloudResource> resources = List.of(cloudResource);
 
         InstanceTemplate instanceTemplate =
