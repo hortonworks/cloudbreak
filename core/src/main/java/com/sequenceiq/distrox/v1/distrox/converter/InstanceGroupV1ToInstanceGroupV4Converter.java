@@ -193,7 +193,7 @@ public class InstanceGroupV1ToInstanceGroupV4Converter {
                 if (distroxNetwork.getAws() != null) {
                     request = new InstanceGroupNetworkV1Request();
                     InstanceGroupAwsNetworkV1Parameters aws = new InstanceGroupAwsNetworkV1Parameters();
-                    aws.setSubnetIds(List.of(distroxNetwork.getAws().getSubnetId()));
+                    aws.setSubnetIds(getSubnetIds(distroxNetwork.getAws().getSubnetId()));
                     request.setAws(aws);
                 }
                 break;
@@ -201,7 +201,7 @@ public class InstanceGroupV1ToInstanceGroupV4Converter {
                 if (distroxNetwork.getAzure() != null) {
                     request = new InstanceGroupNetworkV1Request();
                     InstanceGroupAzureNetworkV1Parameters azure = new InstanceGroupAzureNetworkV1Parameters();
-                    azure.setSubnetIds(List.of(distroxNetwork.getAzure().getSubnetId()));
+                    azure.setSubnetIds(getSubnetIds(distroxNetwork.getAzure().getSubnetId()));
                     request.setAzure(azure);
                 }
                 break;
@@ -209,7 +209,7 @@ public class InstanceGroupV1ToInstanceGroupV4Converter {
                 if (distroxNetwork.getMock() != null) {
                     request = new InstanceGroupNetworkV1Request();
                     InstanceGroupMockNetworkV1Parameters mock = new InstanceGroupMockNetworkV1Parameters();
-                    mock.setSubnetIds(List.of(distroxNetwork.getMock().getSubnetId()));
+                    mock.setSubnetIds(getSubnetIds(distroxNetwork.getMock().getSubnetId()));
                     request.setMock(mock);
                 }
                 break;
@@ -217,13 +217,21 @@ public class InstanceGroupV1ToInstanceGroupV4Converter {
                 if (distroxNetwork.getGcp() != null) {
                     request = new InstanceGroupNetworkV1Request();
                     InstanceGroupGcpNetworkV1Parameters gcp = new InstanceGroupGcpNetworkV1Parameters();
-                    gcp.setSubnetIds(List.of(distroxNetwork.getGcp().getSubnetId()));
+                    gcp.setSubnetIds(getSubnetIds(distroxNetwork.getGcp().getSubnetId()));
                     request.setGcp(gcp);
                 }
                 break;
             default:
         }
         return request;
+    }
+
+    private List<String> getSubnetIds(String subnet) {
+        if (Strings.isNullOrEmpty(subnet)) {
+            return List.of();
+        } else {
+            return List.of(subnet);
+        }
     }
 
     private boolean requestContainsSingleAvailabilityZone(NetworkV4Request distroxNetwork, DetailedEnvironmentResponse environment) {
