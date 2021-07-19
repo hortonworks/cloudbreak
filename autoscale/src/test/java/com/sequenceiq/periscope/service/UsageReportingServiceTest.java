@@ -137,8 +137,14 @@ public class UsageReportingServiceTest {
         alert1.setTimeZone("GMT");
         alert1.setScalingPolicy(scalingPolicy);
 
+        ClusterPertain clusterPertain = new ClusterPertain();
+        clusterPertain.setTenant("testAccount");
+
         Cluster cluster = new Cluster();
         cluster.setTimeAlerts(Set.of(alert, alert1));
+        cluster.setClusterPertain(clusterPertain);
+        cluster.setStackName("testCluster");
+        cluster.setStackCrn("testStackCrn");
 
         underTest.reportAutoscalingConfigChanged("testUserCrn", cluster);
 
@@ -147,6 +153,9 @@ public class UsageReportingServiceTest {
         UsageProto.CDPDatahubAutoscaleConfigChanged actual = captor.getValue();
 
         assertEquals("UserCrn should match", "testUserCrn", actual.getUserCrn());
+        assertEquals("CluterName should match", "testCluster", actual.getClusterName());
+        assertEquals("CluterCrn should match", "testStackCrn", actual.getClusterCrn());
+        assertEquals("AccountId should match", "testAccount", actual.getAccountId());
         assertEquals("Policy Count should match", 2, actual.getAutoscalingPolicyDefinitionCount());
     }
 }

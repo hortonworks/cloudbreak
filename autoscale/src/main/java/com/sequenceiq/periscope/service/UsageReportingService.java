@@ -51,6 +51,9 @@ public class UsageReportingService {
         UsageProto.CDPDatahubAutoscaleConfigChanged.Builder cdpAutoscaleConfigChangedBuilder = UsageProto.CDPDatahubAutoscaleConfigChanged.newBuilder();
         cdpAutoscaleConfigChangedBuilder.setUserCrn(userCrn);
         cdpAutoscaleConfigChangedBuilder.setAutoscalingEnabled(cluster.isAutoscalingEnabled());
+        cdpAutoscaleConfigChangedBuilder.setAccountId(cluster.getClusterPertain().getTenant());
+        cdpAutoscaleConfigChangedBuilder.setClusterCrn(cluster.getStackCrn());
+        cdpAutoscaleConfigChangedBuilder.setClusterName(defaultIfEmpty(cluster.getStackName(), ""));
         Stream.of(cluster.getLoadAlerts(), cluster.getTimeAlerts())
                 .flatMap(Set::stream)
                 .forEach(alert -> cdpAutoscaleConfigChangedBuilder.addAutoscalingPolicyDefinition(withAlert(alert)));
