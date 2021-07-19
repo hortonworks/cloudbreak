@@ -1246,6 +1246,12 @@ message CDPDatahubAutoscaleConfigChanged {
   string userCrn = 1;
   // Is autoscaling enabled for cluster.
   bool autoscalingEnabled = 2;
-   // The autoscaling policy definition.
+  // The autoscaling policy definition.
   repeated CDPAutoscalePolicyDefinition autoscalingPolicyDefinition = 3;
+  // The CDP account ID of the datahub cluster.
+  string accountId = 4;
+  // The user-supplied cluster name.
+  string clusterName = 5;
+  // The cluster crn.
+  string clusterCrn = 6;
 }

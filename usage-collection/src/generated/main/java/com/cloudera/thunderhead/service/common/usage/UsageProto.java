@@ -87027,6 +87027,60 @@ public final class UsageProto {
      */
     com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinitionOrBuilder getAutoscalingPolicyDefinitionOrBuilder(
         int index);
+
+    /**
+     * <pre>
+     * The CDP account ID of the datahub cluster.
+     * </pre>
+     *
+     * <code>string accountId = 4;</code>
+     */
+    java.lang.String getAccountId();
+    /**
+     * <pre>
+     * The CDP account ID of the datahub cluster.
+     * </pre>
+     *
+     * <code>string accountId = 4;</code>
+     */
+    com.google.protobuf.ByteString
+        getAccountIdBytes();
+
+    /**
+     * <pre>
+     * The user-supplied cluster name.
+     * </pre>
+     *
+     * <code>string clusterName = 5;</code>
+     */
+    java.lang.String getClusterName();
+    /**
+     * <pre>
+     * The user-supplied cluster name.
+     * </pre>
+     *
+     * <code>string clusterName = 5;</code>
+     */
+    com.google.protobuf.ByteString
+        getClusterNameBytes();
+
+    /**
+     * <pre>
+     * The cluster crn.
+     * </pre>
+     *
+     * <code>string clusterCrn = 6;</code>
+     */
+    java.lang.String getClusterCrn();
+    /**
+     * <pre>
+     * The cluster crn.
+     * </pre>
+     *
+     * <code>string clusterCrn = 6;</code>
+     */
+    com.google.protobuf.ByteString
+        getClusterCrnBytes();
   }
   /**
    * <pre>
@@ -87048,6 +87102,9 @@ public final class UsageProto {
       userCrn_ = "";
       autoscalingEnabled_ = false;
       autoscalingPolicyDefinition_ = java.util.Collections.emptyList();
+      accountId_ = "";
+      clusterName_ = "";
+      clusterCrn_ = "";
     }
 
     @java.lang.Override
@@ -87092,6 +87149,24 @@ public final class UsageProto {
               }
               autoscalingPolicyDefinition_.add(
                   input.readMessage(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAutoscalePolicyDefinition.parser(), extensionRegistry));
+              break;
+            }
+            case 34: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              accountId_ = s;
+              break;
+            }
+            case 42: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              clusterName_ = s;
+              break;
+            }
+            case 50: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              clusterCrn_ = s;
               break;
             }
             default: {
@@ -87240,6 +87315,132 @@ public final class UsageProto {
       return autoscalingPolicyDefinition_.get(index);
     }
 
+    public static final int ACCOUNTID_FIELD_NUMBER = 4;
+    private volatile java.lang.Object accountId_;
+    /**
+     * <pre>
+     * The CDP account ID of the datahub cluster.
+     * </pre>
+     *
+     * <code>string accountId = 4;</code>
+     */
+    public java.lang.String getAccountId() {
+      java.lang.Object ref = accountId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        accountId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The CDP account ID of the datahub cluster.
+     * </pre>
+     *
+     * <code>string accountId = 4;</code>
+     */
+    public com.google.protobuf.ByteString
+        getAccountIdBytes() {
+      java.lang.Object ref = accountId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        accountId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int CLUSTERNAME_FIELD_NUMBER = 5;
+    private volatile java.lang.Object clusterName_;
+    /**
+     * <pre>
+     * The user-supplied cluster name.
+     * </pre>
+     *
+     * <code>string clusterName = 5;</code>
+     */
+    public java.lang.String getClusterName() {
+      java.lang.Object ref = clusterName_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        clusterName_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The user-supplied cluster name.
+     * </pre>
+     *
+     * <code>string clusterName = 5;</code>
+     */
+    public com.google.protobuf.ByteString
+        getClusterNameBytes() {
+      java.lang.Object ref = clusterName_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        clusterName_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int CLUSTERCRN_FIELD_NUMBER = 6;
+    private volatile java.lang.Object clusterCrn_;
+    /**
+     * <pre>
+     * The cluster crn.
+     * </pre>
+     *
+     * <code>string clusterCrn = 6;</code>
+     */
+    public java.lang.String getClusterCrn() {
+      java.lang.Object ref = clusterCrn_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        clusterCrn_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The cluster crn.
+     * </pre>
+     *
+     * <code>string clusterCrn = 6;</code>
+     */
+    public com.google.protobuf.ByteString
+        getClusterCrnBytes() {
+      java.lang.Object ref = clusterCrn_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        clusterCrn_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -87263,6 +87464,15 @@ public final class UsageProto {
       for (int i = 0; i < autoscalingPolicyDefinition_.size(); i++) {
         output.writeMessage(3, autoscalingPolicyDefinition_.get(i));
       }
+      if (!getAccountIdBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, accountId_);
+      }
+      if (!getClusterNameBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 5, clusterName_);
+      }
+      if (!getClusterCrnBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 6, clusterCrn_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -87282,6 +87492,15 @@ public final class UsageProto {
       for (int i = 0; i < autoscalingPolicyDefinition_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(3, autoscalingPolicyDefinition_.get(i));
+      }
+      if (!getAccountIdBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, accountId_);
+      }
+      if (!getClusterNameBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, clusterName_);
+      }
+      if (!getClusterCrnBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, clusterCrn_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -87305,6 +87524,12 @@ public final class UsageProto {
           == other.getAutoscalingEnabled());
       result = result && getAutoscalingPolicyDefinitionList()
           .equals(other.getAutoscalingPolicyDefinitionList());
+      result = result && getAccountId()
+          .equals(other.getAccountId());
+      result = result && getClusterName()
+          .equals(other.getClusterName());
+      result = result && getClusterCrn()
+          .equals(other.getClusterCrn());
       result = result && unknownFields.equals(other.unknownFields);
       return result;
     }
@@ -87325,6 +87550,12 @@ public final class UsageProto {
         hash = (37 * hash) + AUTOSCALINGPOLICYDEFINITION_FIELD_NUMBER;
         hash = (53 * hash) + getAutoscalingPolicyDefinitionList().hashCode();
       }
+      hash = (37 * hash) + ACCOUNTID_FIELD_NUMBER;
+      hash = (53 * hash) + getAccountId().hashCode();
+      hash = (37 * hash) + CLUSTERNAME_FIELD_NUMBER;
+      hash = (53 * hash) + getClusterName().hashCode();
+      hash = (37 * hash) + CLUSTERCRN_FIELD_NUMBER;
+      hash = (53 * hash) + getClusterCrn().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -87473,6 +87704,12 @@ public final class UsageProto {
         } else {
           autoscalingPolicyDefinitionBuilder_.clear();
         }
+        accountId_ = "";
+
+        clusterName_ = "";
+
+        clusterCrn_ = "";
+
         return this;
       }
 
@@ -87512,6 +87749,9 @@ public final class UsageProto {
         } else {
           result.autoscalingPolicyDefinition_ = autoscalingPolicyDefinitionBuilder_.build();
         }
+        result.accountId_ = accountId_;
+        result.clusterName_ = clusterName_;
+        result.clusterCrn_ = clusterCrn_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -87593,6 +87833,18 @@ public final class UsageProto {
               autoscalingPolicyDefinitionBuilder_.addAllMessages(other.autoscalingPolicyDefinition_);
             }
           }
+        }
+        if (!other.getAccountId().isEmpty()) {
+          accountId_ = other.accountId_;
+          onChanged();
+        }
+        if (!other.getClusterName().isEmpty()) {
+          clusterName_ = other.clusterName_;
+          onChanged();
+        }
+        if (!other.getClusterCrn().isEmpty()) {
+          clusterCrn_ = other.clusterCrn_;
+          onChanged();
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -88061,6 +88313,273 @@ public final class UsageProto {
           autoscalingPolicyDefinition_ = null;
         }
         return autoscalingPolicyDefinitionBuilder_;
+      }
+
+      private java.lang.Object accountId_ = "";
+      /**
+       * <pre>
+       * The CDP account ID of the datahub cluster.
+       * </pre>
+       *
+       * <code>string accountId = 4;</code>
+       */
+      public java.lang.String getAccountId() {
+        java.lang.Object ref = accountId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          accountId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The CDP account ID of the datahub cluster.
+       * </pre>
+       *
+       * <code>string accountId = 4;</code>
+       */
+      public com.google.protobuf.ByteString
+          getAccountIdBytes() {
+        java.lang.Object ref = accountId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          accountId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The CDP account ID of the datahub cluster.
+       * </pre>
+       *
+       * <code>string accountId = 4;</code>
+       */
+      public Builder setAccountId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        accountId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The CDP account ID of the datahub cluster.
+       * </pre>
+       *
+       * <code>string accountId = 4;</code>
+       */
+      public Builder clearAccountId() {
+        
+        accountId_ = getDefaultInstance().getAccountId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The CDP account ID of the datahub cluster.
+       * </pre>
+       *
+       * <code>string accountId = 4;</code>
+       */
+      public Builder setAccountIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        accountId_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object clusterName_ = "";
+      /**
+       * <pre>
+       * The user-supplied cluster name.
+       * </pre>
+       *
+       * <code>string clusterName = 5;</code>
+       */
+      public java.lang.String getClusterName() {
+        java.lang.Object ref = clusterName_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          clusterName_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The user-supplied cluster name.
+       * </pre>
+       *
+       * <code>string clusterName = 5;</code>
+       */
+      public com.google.protobuf.ByteString
+          getClusterNameBytes() {
+        java.lang.Object ref = clusterName_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          clusterName_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The user-supplied cluster name.
+       * </pre>
+       *
+       * <code>string clusterName = 5;</code>
+       */
+      public Builder setClusterName(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        clusterName_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The user-supplied cluster name.
+       * </pre>
+       *
+       * <code>string clusterName = 5;</code>
+       */
+      public Builder clearClusterName() {
+        
+        clusterName_ = getDefaultInstance().getClusterName();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The user-supplied cluster name.
+       * </pre>
+       *
+       * <code>string clusterName = 5;</code>
+       */
+      public Builder setClusterNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        clusterName_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object clusterCrn_ = "";
+      /**
+       * <pre>
+       * The cluster crn.
+       * </pre>
+       *
+       * <code>string clusterCrn = 6;</code>
+       */
+      public java.lang.String getClusterCrn() {
+        java.lang.Object ref = clusterCrn_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          clusterCrn_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The cluster crn.
+       * </pre>
+       *
+       * <code>string clusterCrn = 6;</code>
+       */
+      public com.google.protobuf.ByteString
+          getClusterCrnBytes() {
+        java.lang.Object ref = clusterCrn_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          clusterCrn_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The cluster crn.
+       * </pre>
+       *
+       * <code>string clusterCrn = 6;</code>
+       */
+      public Builder setClusterCrn(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        clusterCrn_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The cluster crn.
+       * </pre>
+       *
+       * <code>string clusterCrn = 6;</code>
+       */
+      public Builder clearClusterCrn() {
+        
+        clusterCrn_ = getDefaultInstance().getClusterCrn();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The cluster crn.
+       * </pre>
+       *
+       * <code>string clusterCrn = 6;</code>
+       */
+      public Builder setClusterCrnBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        clusterCrn_ = value;
+        onChanged();
+        return this;
       }
       @java.lang.Override
       public final Builder setUnknownFields(
@@ -88857,13 +89376,15 @@ public final class UsageProto {
       "s\030\010 \001(\0162\'.usage.AutoscaleScalingStatusTy" +
       "pe.Value\"b\n\034CDPDatahubAutoscaleTriggered" +
       "\022B\n\027autoscaleTriggerDetails\030\001 \001(\0132!.usag" +
-      "e.CDPAutoscaleTriggerDetails\"\231\001\n CDPData" +
+      "e.CDPAutoscaleTriggerDetails\"\325\001\n CDPData" +
       "hubAutoscaleConfigChanged\022\017\n\007userCrn\030\001 \001" +
       "(\t\022\032\n\022autoscalingEnabled\030\002 \001(\010\022H\n\033autosc" +
       "alingPolicyDefinition\030\003 \003(\0132#.usage.CDPA" +
-      "utoscalePolicyDefinitionBV\n-com.cloudera" +
-      ".thunderhead.service.common.usageB\nUsage" +
-      "ProtoZ\031com/cloudera/cdp/protobufb\006proto3"
+      "utoscalePolicyDefinition\022\021\n\taccountId\030\004 " +
+      "\001(\t\022\023\n\013clusterName\030\005 \001(\t\022\022\n\nclusterCrn\030\006" +
+      " \001(\tBV\n-com.cloudera.thunderhead.service" +
+      ".common.usageB\nUsageProtoZ\031com/cloudera/" +
+      "cdp/protobufb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -89296,7 +89817,7 @@ public final class UsageProto {
     internal_static_usage_CDPDatahubAutoscaleConfigChanged_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPDatahubAutoscaleConfigChanged_descriptor,
-        new java.lang.String[] { "UserCrn", "AutoscalingEnabled", "AutoscalingPolicyDefinition", });
+        new java.lang.String[] { "UserCrn", "AutoscalingEnabled", "AutoscalingPolicyDefinition", "AccountId", "ClusterName", "ClusterCrn", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)
