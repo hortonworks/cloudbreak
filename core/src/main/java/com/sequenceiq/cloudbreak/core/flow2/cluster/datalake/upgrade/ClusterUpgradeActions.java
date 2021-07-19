@@ -2,13 +2,16 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade;
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeEvent.CLUSTER_UPGRADE_FAIL_HANDLED_EVENT;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.StateContext;
@@ -33,6 +36,7 @@ import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.upgrade.ImageComponentUpdaterService;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradeImageInfo;
+import com.sequenceiq.cloudbreak.service.upgrade.sync.CmSyncerService;
 import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowParameters;
@@ -64,7 +68,7 @@ public class ClusterUpgradeActions {
                     variables.put(TARGET_IMAGE, images.getTargetStatedImage());
                     clusterUpgradeService.initUpgradeCluster(context.getStackId(), getTargetImage(variables));
                     Selectable event = new ClusterUpgradeInitRequest(context.getStackId(), isPatchUpgrade(images.getCurrentStatedImage().getImage(),
-                                    images.getTargetStatedImage().getImage()));
+                            images.getTargetStatedImage().getImage()));
                     sendEvent(context, event.selector(), event);
                 } catch (Exception e) {
                     LOGGER.error("Error during updating cluster components with image id: [{}]", payload.getImageId(), e);
@@ -179,6 +183,12 @@ public class ClusterUpgradeActions {
     public Action<?, ?> clusterUpgradeFailedAction() {
         return new AbstractClusterUpgradeAction<>(ClusterUpgradeFailedEvent.class) {
 
+            @Value("${cb.upgrade.failure.sync.sdx.enabled}")
+            private boolean syncAfterFailureEnabled;
+
+            @Inject
+            private CmSyncerService cmSyncerService;
+
             @Override
             protected ClusterUpgradeContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
                     ClusterUpgradeFailedEvent payload) {
@@ -191,6 +201,17 @@ public class ClusterUpgradeActions {
 
             @Override
             protected void doExecute(ClusterUpgradeContext context, ClusterUpgradeFailedEvent payload, Map<Object, Object> variables) {
+                if (syncAfterFailureEnabled) {
+                    try {
+                        Set<Image> candidateImages = new HashSet<>();
+                        Optional.ofNullable(getCurrentImage(variables)).ifPresent(si -> candidateImages.add(si.getImage()));
+                        Optional.ofNullable(getTargetImage(variables)).ifPresent(si -> candidateImages.add(si.getImage()));
+                        Stack stack = stackService.getById(payload.getResourceId());
+                        cmSyncerService.syncFromCmToDb(stack, candidateImages);
+                    } catch (Exception e) {
+                        LOGGER.warn("Error during syncing CM version to DB, syncing skipped.", e);
+                    }
+                }
                 clusterUpgradeService.handleUpgradeClusterFailure(context.getStackId(), payload.getException().getMessage(), payload.getDetailedStatus());
                 sendEvent(context, CLUSTER_UPGRADE_FAIL_HANDLED_EVENT.event(), payload);
             }
