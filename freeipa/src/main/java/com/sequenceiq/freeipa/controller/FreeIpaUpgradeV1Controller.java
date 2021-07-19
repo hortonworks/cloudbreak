@@ -1,6 +1,6 @@
 package com.sequenceiq.freeipa.controller;
 
-import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.EDIT_ENVIRONMENT;
+import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.UPGRADE_FREEIPA;
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CRN;
 
 import javax.inject.Inject;
@@ -28,16 +28,15 @@ public class FreeIpaUpgradeV1Controller implements FreeIpaUpgradeV1Endpoint {
     @Inject
     private CrnService crnService;
 
-    //TODO introduce freeipa upgrade permission
     @Override
-    @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = EDIT_ENVIRONMENT)
+    @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = UPGRADE_FREEIPA)
     public FreeIpaUpgradeResponse upgradeFreeIpa(@RequestObject FreeIpaUpgradeRequest request) {
         String accountId = crnService.getCurrentAccountId();
         return upgradeService.upgradeFreeIpa(accountId, request);
     }
 
     @Override
-    @CheckPermissionByResourceCrn(action = EDIT_ENVIRONMENT)
+    @CheckPermissionByResourceCrn(action = UPGRADE_FREEIPA)
     public FreeIpaUpgradeOptions getFreeIpaUpgradeOptions(@ResourceCrn String environmentCrn, String catalog) {
         throw new BadRequestException("Not implemented");
     }
