@@ -36,12 +36,12 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsSubnetRequestProvider;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
-import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
-import com.sequenceiq.cloudbreak.cloud.aws.scheduler.EnvironmentCancellationCheck;
 import com.sequenceiq.cloudbreak.cloud.aws.common.subnetselector.SubnetFilterStrategy;
 import com.sequenceiq.cloudbreak.cloud.aws.common.subnetselector.SubnetFilterStrategyType;
-import com.sequenceiq.cloudbreak.cloud.aws.util.AwsCloudFormationErrorMessageProvider;
+import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsNetworkView;
+import com.sequenceiq.cloudbreak.cloud.aws.scheduler.EnvironmentCancellationCheck;
+import com.sequenceiq.cloudbreak.cloud.aws.util.AwsCloudFormationErrorMessageProvider;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
@@ -136,6 +136,8 @@ public class AwsNetworkConnector implements DefaultNetworkConnector {
                 List<String> cidrs = vpc.getCidrBlockAssociationSet()
                         .stream()
                         .map(VpcCidrBlockAssociation::getCidrBlock)
+                        .distinct()
+                        .filter(e -> !vpcCidrs.contains(e))
                         .collect(Collectors.toList());
                 LOGGER.info("The VPC {} CIDRs block are {}.", vpc.getVpcId(), cidrs);
                 vpcCidrs.addAll(cidrs);
@@ -144,10 +146,10 @@ public class AwsNetworkConnector implements DefaultNetworkConnector {
                 vpcCidrs.add(vpc.getCidrBlock());
             }
         }
-
         if (vpcCidrs.isEmpty()) {
             throw new BadRequestException("VPC cidr could not fetch from AWS: " + existingVpc);
         }
+
         if (vpcCidrs.size() > 1) {
             LOGGER.info("More than one vpc cidrs for VPC {}. We will use the first one: {}", existingVpc, vpcCidrs.get(0));
         }

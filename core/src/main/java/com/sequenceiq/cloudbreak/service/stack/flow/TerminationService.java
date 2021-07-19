@@ -71,6 +71,7 @@ public class TerminationService {
         String terminatedName = stack.getName() + DELIMITER + now.getTime();
         Cluster cluster = stack.getCluster();
         try {
+            LOGGER.info("Starting to update the stack and cluster to delete completed");
             transactionService.required(() -> {
                 if (cluster != null) {
                     try {
@@ -81,7 +82,7 @@ public class TerminationService {
                 }
                 terminateInstanceGroups(stack);
                 terminateMetaDataInstances(stack);
-                updateToDeleteCompleted(stack, terminatedName, "Stack was terminated successfully.");
+                updateToDeleteCompleted(stack.getId(), terminatedName, "Stack was terminated successfully.");
                 return null;
             });
         } catch (TransactionExecutionException ex) {
@@ -93,6 +94,7 @@ public class TerminationService {
 
     private void cleanupFreeIpa(Stack stack) {
         try {
+            LOGGER.info("Cleaning up the related FreeIpa");
             freeIpaCleanupService.cleanupButIp(stack);
         } catch (Exception e) {
             LOGGER.warn("FreeIPA cleanup has failed during termination finalization, ignoring error", e);
@@ -101,19 +103,22 @@ public class TerminationService {
 
     private void deleteOnlyIfForced(Stack stack, boolean force, String terminatedName) {
         if (force) {
-            updateToDeleteCompleted(stack, terminatedName, "Finalization of stack termination failed, stack marked as deleted based on force flag.");
+            updateToDeleteCompleted(stack.getId(), terminatedName, "Finalization of stack termination failed, stack marked as deleted based on force flag.");
         } else {
             stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.DELETE_FAILED, "Finalization of stack termination failed.");
         }
     }
 
-    private void updateToDeleteCompleted(Stack stack, String terminatedName, String statusReason) {
+    private void updateToDeleteCompleted(Long stackId, String terminatedName, String statusReason) {
         try {
-            transactionService.required(() -> {
-                stack.setName(terminatedName);
-                stack.setTerminated(clock.getCurrentTimeMillis());
-                stackService.save(stack);
-                stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.DELETE_COMPLETED, statusReason);
+            LOGGER.info("Updating the stack to delete completed status");
+            Stack stack = transactionService.required(() -> {
+                Stack updatedStack = stackService.get(stackId);
+                updatedStack.setName(terminatedName);
+                updatedStack.setTerminated(clock.getCurrentTimeMillis());
+                updatedStack = stackService.save(updatedStack);
+                stackUpdater.updateStackStatus(updatedStack.getId(), DetailedStackStatus.DELETE_COMPLETED, statusReason);
+                return updatedStack;
             });
             if (stack.getType().equals(StackType.WORKLOAD)) {
                 ownerAssignmentService.notifyResourceDeleted(stack.getResourceCrn(), MDCUtils.getRequestId());
