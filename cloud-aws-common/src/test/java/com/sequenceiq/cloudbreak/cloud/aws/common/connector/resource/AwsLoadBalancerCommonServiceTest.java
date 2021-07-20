@@ -64,6 +64,9 @@ class AwsLoadBalancerCommonServiceTest {
     @Mock
     private LoadBalancerTypeConverter loadBalancerTypeConverter;
 
+    @Mock
+    private CloudLoadBalancer cloudLoadBalancer;
+
     @InjectMocks
     private AwsLoadBalancerCommonService underTest;
 
@@ -74,21 +77,21 @@ class AwsLoadBalancerCommonServiceTest {
     @Test
     public void testSelectLoadBalancerSubnetIdsPrivate() {
         AwsNetworkView awsNetworkView = createNetworkView(PRIVATE_ID_1, null);
-        Set<String> subnetIds = underTest.selectLoadBalancerSubnetIds(LoadBalancerType.PRIVATE, awsNetworkView);
+        Set<String> subnetIds = underTest.selectLoadBalancerSubnetIds(LoadBalancerType.PRIVATE, awsNetworkView, cloudLoadBalancer);
         assertEquals(Set.of(PRIVATE_ID_1), subnetIds);
     }
 
     @Test
     public void testSelectLoadBalancerSubnetIdsPublicEndpointGatway() {
         AwsNetworkView awsNetworkView = createNetworkView(PRIVATE_ID_1, PUBLIC_ID_1);
-        Set<String> subnetIds = underTest.selectLoadBalancerSubnetIds(LoadBalancerType.PUBLIC, awsNetworkView);
+        Set<String> subnetIds = underTest.selectLoadBalancerSubnetIds(LoadBalancerType.PUBLIC, awsNetworkView, cloudLoadBalancer);
         assertEquals(Set.of(PUBLIC_ID_1), subnetIds);
     }
 
     @Test
     public void testSelectLoadBalancerSubnetIdsPublicNoEndpointGateway() {
         AwsNetworkView awsNetworkView = createNetworkView(PUBLIC_ID_1, null);
-        Set<String> subnetIds = underTest.selectLoadBalancerSubnetIds(LoadBalancerType.PUBLIC, awsNetworkView);
+        Set<String> subnetIds = underTest.selectLoadBalancerSubnetIds(LoadBalancerType.PUBLIC, awsNetworkView, cloudLoadBalancer);
         assertEquals(Set.of(PUBLIC_ID_1), subnetIds);
     }
 
@@ -97,7 +100,7 @@ class AwsLoadBalancerCommonServiceTest {
         AwsNetworkView awsNetworkView = createNetworkView(null, null);
         String expectedError = "Unable to configure load balancer: Could not identify subnets.";
         CloudConnectorException exception =
-                assertThrows(CloudConnectorException.class, () -> underTest.selectLoadBalancerSubnetIds(LoadBalancerType.PRIVATE, awsNetworkView));
+                assertThrows(CloudConnectorException.class, () -> underTest.selectLoadBalancerSubnetIds(LoadBalancerType.PRIVATE, awsNetworkView, cloudLoadBalancer));
         assertEquals(expectedError, exception.getMessage());
     }
 
@@ -106,14 +109,14 @@ class AwsLoadBalancerCommonServiceTest {
         AwsNetworkView awsNetworkView = createNetworkView(null, null);
         String expectedError = "Unable to configure load balancer: Could not identify subnets.";
         CloudConnectorException exception =
-                assertThrows(CloudConnectorException.class, () -> underTest.selectLoadBalancerSubnetIds(LoadBalancerType.PUBLIC, awsNetworkView));
+                assertThrows(CloudConnectorException.class, () -> underTest.selectLoadBalancerSubnetIds(LoadBalancerType.PUBLIC, awsNetworkView, cloudLoadBalancer));
         assertEquals(expectedError, exception.getMessage());
     }
 
     @Test
     public void testSelectLoadBalancerSubnetIdsOnlyEndpointGatwaySet() {
         AwsNetworkView awsNetworkView = createNetworkView(null, PUBLIC_ID_1);
-        Set<String> subnetIds = underTest.selectLoadBalancerSubnetIds(LoadBalancerType.PUBLIC, awsNetworkView);
+        Set<String> subnetIds = underTest.selectLoadBalancerSubnetIds(LoadBalancerType.PUBLIC, awsNetworkView, cloudLoadBalancer);
         assertEquals(Set.of(PUBLIC_ID_1), subnetIds);
     }
 
