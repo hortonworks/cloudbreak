@@ -131,4 +131,18 @@ public class GcpResourceNameServiceTest {
         Assert.assertTrue("The resource name length is wrong", resourceName.length() < Integer.parseInt(MAX_RESOURCE_NAME_LENGTH));
 
     }
+
+    @Test
+    public void shouldGenerateGcpInstanceGroupResourceWehenPartsProvided() {
+        // GIVEN
+        Object[] parts = {"stack", "group"};
+
+        // WHEN
+        String resourceName = subject.resourceName(ResourceType.GCP_INSTANCE_GROUP, parts);
+
+        // THEN
+        Assert.assertNotNull("The generated name must not be null!", resourceName);
+        Assert.assertEquals("The timestamp must be appended", 3L, resourceName.split("-").length);
+        Assert.assertTrue("The resource name is not the expected one!", resourceName.startsWith("stack-group"));
+    }
 }
