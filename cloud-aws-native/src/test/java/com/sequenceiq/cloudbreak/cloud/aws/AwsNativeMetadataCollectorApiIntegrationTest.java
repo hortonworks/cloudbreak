@@ -1,12 +1,13 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -59,7 +60,7 @@ import io.opentracing.Tracer;
 
 /*
     This is an integration test to check our API integration in case of missing resources during metadata collection.
-    The `cb.aws.native.test.accesskey` and `cb.aws.native.test.secretkey` are required for operation.
+    The properties `cb.aws.native.test.accesskey` and `cb.aws.native.test.secretkey` are required for operation.
  */
 @ExtendWith(SpringExtension.class)
 @TestPropertySource(properties = {
@@ -124,7 +125,7 @@ class AwsNativeMetadataCollectorApiIntegrationTest {
 
         List<CloudVmMetaDataStatus> collect = underTest.collect(authenticatedContext, List.of(), vms, vms);
 
-        Assertions.assertTrue(collect.isEmpty());
+        assertTrue(collect.isEmpty());
     }
 
     @Test
@@ -144,7 +145,7 @@ class AwsNativeMetadataCollectorApiIntegrationTest {
 
         List<CloudLoadBalancerMetadata> cloudLoadBalancerMetadata = underTest.collectLoadBalancer(authenticatedContext, loadbalancerTypes, resources);
 
-        Assertions.assertTrue(cloudLoadBalancerMetadata.isEmpty());
+        assertTrue(cloudLoadBalancerMetadata.isEmpty());
     }
 
     @Configuration
