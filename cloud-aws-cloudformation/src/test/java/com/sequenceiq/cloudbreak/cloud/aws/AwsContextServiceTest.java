@@ -51,10 +51,18 @@ class AwsContextServiceTest {
     @Test
     void addResourcesToContextTest() {
         List<CloudResource> resources = new ArrayList<>();
-        resources.add(CloudResource.builder().type(ResourceType.AWS_INSTANCE).status(CommonStatus.REQUESTED).name("worker1").group("worker").build());
-        resources.add(CloudResource.builder().type(ResourceType.AWS_INSTANCE).status(CommonStatus.REQUESTED).name("worker2").group("worker").build());
-        resources.add(CloudResource.builder().type(ResourceType.AWS_INSTANCE).status(CommonStatus.REQUESTED).name("compute2").group("compute").build());
-        resources.add(CloudResource.builder().type(ResourceType.AWS_INSTANCE).status(CommonStatus.REQUESTED).name("compute3").group("compute").build());
+        resources.add(CloudResource.builder().type(ResourceType.AWS_INSTANCE).status(CommonStatus.REQUESTED).name("worker1")
+                .params(Map.of("privateId", 1L)).group("worker").build());
+        resources.add(CloudResource.builder().type(ResourceType.AWS_INSTANCE).status(CommonStatus.REQUESTED).name("worker2")
+                .params(Map.of("privateId", 2L)).group("worker").build());
+        resources.add(CloudResource.builder().type(ResourceType.AWS_INSTANCE).status(CommonStatus.REQUESTED).name("worker3")
+                .params(Map.of("privateId", 3L)).group("worker").build());
+        resources.add(CloudResource.builder().type(ResourceType.AWS_INSTANCE).status(CommonStatus.REQUESTED).name("compute2")
+                .params(Map.of("privateId", 5L)).group("compute").build());
+        resources.add(CloudResource.builder().type(ResourceType.AWS_INSTANCE).status(CommonStatus.REQUESTED).name("compute3")
+                .params(Map.of("privateId", 6L)).group("compute").build());
+        resources.add(CloudResource.builder().type(ResourceType.AWS_INSTANCE).status(CommonStatus.REQUESTED).name("compute4")
+                .params(Map.of("privateId", 7L)).group("compute").build());
         VolumeSetAttributes volume1attributes = new VolumeSetAttributes("az1", false, "fstab", new ArrayList<>(), 100, "general");
         volume1attributes.setDiscoveryFQDN("worker3.example.com");
         resources.add(CloudResource.builder().type(ResourceType.AWS_VOLUMESET).status(CommonStatus.REQUESTED).name("volume1").group("worker")
@@ -95,11 +103,11 @@ class AwsContextServiceTest {
 
         List<CloudResource> worker2 = context.getComputeResources(2L);
         assertEquals(1, worker2.size());
-        assertTrue(worker2.stream().anyMatch(cloudResource -> "worker1".equals(cloudResource.getName())));
+        assertTrue(worker2.stream().anyMatch(cloudResource -> "worker2".equals(cloudResource.getName())));
 
         List<CloudResource> worker3 = context.getComputeResources(3L);
         assertEquals(2, worker3.size());
-        assertTrue(worker3.stream().anyMatch(cloudResource -> "worker2".equals(cloudResource.getName())));
+        assertTrue(worker3.stream().anyMatch(cloudResource -> "worker3".equals(cloudResource.getName())));
         assertTrue(worker3.stream().anyMatch(cloudResource -> "volume1".equals(cloudResource.getName())));
 
         assertNull(context.getComputeResources(4L));

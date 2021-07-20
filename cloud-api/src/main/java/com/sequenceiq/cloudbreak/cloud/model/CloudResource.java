@@ -19,6 +19,8 @@ public class CloudResource extends DynamicModel {
 
     public static final String ATTRIBUTES = "attributes";
 
+    public static final String PRIVATE_ID = "privateId";
+
     private final ResourceType type;
 
     private CommonStatus status;
@@ -103,6 +105,7 @@ public class CloudResource extends DynamicModel {
                 .add("persistent=" + persistent)
                 .add("stackAware=" + stackAware)
                 .add("instanceId='" + instanceId + "'")
+                .add("parameters='" + getParameters() + "'")
                 .toString();
     }
 

@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_GROUP_NAME_PARAMETER;
+import static com.sequenceiq.cloudbreak.cloud.model.CloudResource.PRIVATE_ID;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -183,7 +184,8 @@ public class AzureCloudResourceService {
                                                 Long.toString(cloudInstance.getTemplate().getPrivateId()))))
                                 .peek(cloudInstance -> LOGGER.debug("The following resource is categorized as VM instance {}", cloudInstance.toString()))
                                 .forEach(filteredInstance ->
-                                        vmResourceList.add(buildVm(instance, filteredInstance.getTemplate().getGroupName(), resourceGroupName))
+                                        vmResourceList.add(buildVm(instance, filteredInstance.getTemplate().getPrivateId(),
+                                                filteredInstance.getTemplate().getGroupName(), resourceGroupName))
                                 )
                         )
                 );
@@ -201,7 +203,7 @@ public class AzureCloudResourceService {
                 .build();
     }
 
-    private CloudResource buildVm(CloudResource sourceResource, String instanceGroupName, String resourceGroupName) {
+    private CloudResource buildVm(CloudResource sourceResource, Long privateId, String instanceGroupName, String resourceGroupName) {
         return CloudResource.builder()
                 .type(sourceResource.getType())
                 .instanceId(sourceResource.getInstanceId())
@@ -209,7 +211,7 @@ public class AzureCloudResourceService {
                 .group(instanceGroupName)
                 .status(sourceResource.getStatus())
                 .persistent(sourceResource.isPersistent())
-                .params(Map.of(RESOURCE_GROUP_NAME_PARAMETER, resourceGroupName))
+                .params(Map.of(RESOURCE_GROUP_NAME_PARAMETER, resourceGroupName, PRIVATE_ID, privateId))
                 .build();
     }
 
