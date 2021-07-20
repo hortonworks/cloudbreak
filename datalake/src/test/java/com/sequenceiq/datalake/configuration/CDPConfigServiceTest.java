@@ -12,6 +12,7 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -37,26 +38,26 @@ class CDPConfigServiceTest {
     void cdpStackRequests() {
         when(supportedRuntimes.isEmpty()).thenReturn(true);
         cdpConfigService.initCdpStackRequests();
-        assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.AWS, SdxClusterShape.LIGHT_DUTY, "7.0.2")));
+        assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.AWS, SdxClusterShape.LIGHT_DUTY, "7.2.12")));
         assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.AWS, SdxClusterShape.LIGHT_DUTY, "7.1.0")));
-        assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.AZURE, SdxClusterShape.LIGHT_DUTY, "7.0.2")));
-        assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.AZURE, SdxClusterShape.LIGHT_DUTY, "7.1.0")));
-        assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.YARN, SdxClusterShape.LIGHT_DUTY, "7.0.2")));
+        assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.AZURE, SdxClusterShape.LIGHT_DUTY, "7.2.12")));
+        assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.AZURE, SdxClusterShape.LIGHT_DUTY, "7.2.12")));
+        assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.YARN, SdxClusterShape.LIGHT_DUTY, "7.2.12")));
         assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.YARN, SdxClusterShape.LIGHT_DUTY, "7.1.0")));
-        assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.MOCK, SdxClusterShape.LIGHT_DUTY, "7.0.2")));
+        assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.MOCK, SdxClusterShape.LIGHT_DUTY, "7.2.12")));
         assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.MOCK, SdxClusterShape.LIGHT_DUTY, "7.1.0")));
     }
 
     @Test
     void cdpEnableStackRequests() {
         when(supportedRuntimes.isEmpty()).thenReturn(false);
-        when(supportedRuntimes.contains("7.0.2")).thenReturn(false);
-        when(supportedRuntimes.contains("7.1.0")).thenReturn(true);
+        when(supportedRuntimes.contains(Mockito.anyString())).thenReturn(true);
+        when(supportedRuntimes.contains("7.2.12")).thenReturn(false);
         cdpConfigService.initCdpStackRequests();
-        assertNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.AWS, SdxClusterShape.LIGHT_DUTY, "7.0.2")));
-        assertNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.AZURE, SdxClusterShape.LIGHT_DUTY, "7.0.2")));
-        assertNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.YARN, SdxClusterShape.LIGHT_DUTY, "7.0.2")));
-        assertNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.MOCK, SdxClusterShape.LIGHT_DUTY, "7.0.2")));
+        assertNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.AWS, SdxClusterShape.LIGHT_DUTY, "7.2.12")));
+        assertNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.AZURE, SdxClusterShape.LIGHT_DUTY, "7.2.12")));
+        assertNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.YARN, SdxClusterShape.LIGHT_DUTY, "7.2.12")));
+        assertNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.MOCK, SdxClusterShape.LIGHT_DUTY, "7.2.12")));
         assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.AWS, SdxClusterShape.LIGHT_DUTY, "7.1.0")));
         assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.AZURE, SdxClusterShape.LIGHT_DUTY, "7.1.0")));
         assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.YARN, SdxClusterShape.LIGHT_DUTY, "7.1.0")));
@@ -66,13 +67,12 @@ class CDPConfigServiceTest {
     @Test
     void cdpEnableEveryStackRequests() {
         when(supportedRuntimes.isEmpty()).thenReturn(false);
-        when(supportedRuntimes.contains("7.0.2")).thenReturn(true);
-        when(supportedRuntimes.contains("7.1.0")).thenReturn(true);
+        when(supportedRuntimes.contains(Mockito.anyString())).thenReturn(true);
         cdpConfigService.initCdpStackRequests();
-        assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.AWS, SdxClusterShape.LIGHT_DUTY, "7.0.2")));
-        assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.AZURE, SdxClusterShape.LIGHT_DUTY, "7.0.2")));
-        assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.YARN, SdxClusterShape.LIGHT_DUTY, "7.0.2")));
-        assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.MOCK, SdxClusterShape.LIGHT_DUTY, "7.0.2")));
+        assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.AWS, SdxClusterShape.LIGHT_DUTY, "7.2.12")));
+        assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.AZURE, SdxClusterShape.LIGHT_DUTY, "7.2.12")));
+        assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.YARN, SdxClusterShape.LIGHT_DUTY, "7.2.12")));
+        assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.MOCK, SdxClusterShape.LIGHT_DUTY, "7.2.12")));
         assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.AWS, SdxClusterShape.LIGHT_DUTY, "7.1.0")));
         assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.AZURE, SdxClusterShape.LIGHT_DUTY, "7.1.0")));
         assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.YARN, SdxClusterShape.LIGHT_DUTY, "7.1.0")));
@@ -84,14 +84,15 @@ class CDPConfigServiceTest {
         ReflectionTestUtils.setField(cdpConfigService, "defaultRuntime", "7.1.0");
 
         when(supportedRuntimes.isEmpty()).thenReturn(false);
-        when(supportedRuntimes.contains("7.0.2")).thenReturn(true);
+        when(supportedRuntimes.contains(Mockito.anyString())).thenReturn(false);
+        when(supportedRuntimes.contains("7.2.12")).thenReturn(true);
         when(supportedRuntimes.contains("7.1.0")).thenReturn(true);
 
         when(advertisedRuntimes.isEmpty()).thenReturn(true);
 
         cdpConfigService.initCdpStackRequests();
 
-        List<AdvertisedRuntime> expected = List.of(rt("7.1.0", true), rt("7.0.2", false));
+        List<AdvertisedRuntime> expected = List.of(rt("7.2.12", false), rt("7.1.0", true));
         List<AdvertisedRuntime> actual = cdpConfigService.getAdvertisedRuntimes(null);
 
         assertArrayEquals(expected.toArray(), actual.toArray());
@@ -99,7 +100,7 @@ class CDPConfigServiceTest {
 
     @Test
     void testFilteredDlVersions() {
-        List<String> supportedVersions = List.of("7.2.6", "7.0.2");
+        List<String> supportedVersions = List.of("7.2.6", "7.2.12");
         mockSupportedRuntimes(supportedVersions);
         cdpConfigService.initCdpStackRequests();
         assertArrayEquals(supportedVersions.toArray(), cdpConfigService.getDatalakeVersions("").toArray());
@@ -107,7 +108,7 @@ class CDPConfigServiceTest {
 
     @Test
     void testFilteredDlVersionsForGcp() {
-        List<String> supportedVersions = List.of("7.2.6", "7.0.2");
+        List<String> supportedVersions = List.of("7.2.6", "7.2.2");
         mockSupportedRuntimes(supportedVersions);
         cdpConfigService.initCdpStackRequests();
         List<String> gcpSupportedVersions = List.of("7.2.6");
@@ -117,10 +118,10 @@ class CDPConfigServiceTest {
 
     @Test
     void testFilteredDlVersionsForAws() {
-        List<String> supportedVersions = List.of("7.2.6", "7.0.2");
+        List<String> supportedVersions = List.of("7.2.6", "7.2.12");
         mockSupportedRuntimes(supportedVersions);
         cdpConfigService.initCdpStackRequests();
-        List<String> gcpSupportedVersions = List.of("7.2.6", "7.0.2");
+        List<String> gcpSupportedVersions = List.of("7.2.6", "7.2.12");
         assertArrayEquals(gcpSupportedVersions.toArray(), cdpConfigService.getDatalakeVersions("AWS").toArray());
     }
 
@@ -128,11 +129,11 @@ class CDPConfigServiceTest {
     void testAdvertisedRuntimes() {
         ReflectionTestUtils.setField(cdpConfigService, "defaultRuntime", "7.1.0");
 
-        List<String> supportedVersions = List.of("7.1.0", "7.0.2");
+        List<String> supportedVersions = List.of("7.1.0", "7.2.12");
         mockSupportedRuntimes(supportedVersions);
 
         when(advertisedRuntimes.isEmpty()).thenReturn(false);
-        when(advertisedRuntimes.contains("7.0.2")).thenReturn(false);
+        when(advertisedRuntimes.contains("7.2.12")).thenReturn(false);
         when(advertisedRuntimes.contains("7.1.0")).thenReturn(true);
 
         cdpConfigService.initCdpStackRequests();
@@ -147,7 +148,7 @@ class CDPConfigServiceTest {
     void testAdvertisedRuntimesForGcp() {
         ReflectionTestUtils.setField(cdpConfigService, "defaultRuntime", "7.2.6");
 
-        List<String> supportedVersions = List.of("7.2.6", "7.0.2");
+        List<String> supportedVersions = List.of("7.2.6", "7.2.2");
         mockSupportedRuntimes(supportedVersions);
 
         List<String> advertisedVersions = List.of("7.2.6");

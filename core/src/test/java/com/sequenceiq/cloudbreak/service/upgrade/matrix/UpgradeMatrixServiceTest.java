@@ -52,14 +52,12 @@ public class UpgradeMatrixServiceTest {
                 {"7.1.0", "7.2.01", false},
 
                 {"7.0.1", "7.2.2", false},
-                {"7.0.2", "7.2.2", true},
                 {"7.1.0", "7.2.2", true},
                 {"7.1.1", "7.2.2", false},
                 {"7.2.0", "7.2.2", true},
                 {"7.2.1", "7.2.2", true},
                 {"7.2.2", "7.2.2", false},
 
-                {"7.0.2", "7.2.6", false},
                 {"7.1.0", "7.2.6", true},
                 {"7.1.1", "7.2.6", false},
                 {"7.2.0", "7.2.6", true},
@@ -68,7 +66,6 @@ public class UpgradeMatrixServiceTest {
                 {"7.2.3", "7.2.6", false},
                 {"7.2.6", "7.2.6", false},
 
-                {"7.0.2", "7.2.7", false},
                 {"7.1.0", "7.2.7", true},
                 {"7.1.1", "7.2.7", false},
                 {"7.2.0", "7.2.7", true},
@@ -78,7 +75,6 @@ public class UpgradeMatrixServiceTest {
                 {"7.2.6", "7.2.7", true},
                 {"7.2.7", "7.2.7", false},
 
-                {"7.0.2", "7.2.8", false},
                 {"7.1.0", "7.2.8", true},
                 {"7.1.1", "7.2.8", false},
                 {"7.2.0", "7.2.8", true},
@@ -89,7 +85,6 @@ public class UpgradeMatrixServiceTest {
                 {"7.2.7", "7.2.8", true},
                 {"7.2.8", "7.2.8", false},
 
-                {"7.0.2", "7.2.9", false},
                 {"7.1.0", "7.2.9", true},
                 {"7.1.1", "7.2.9", false},
                 {"7.2.0", "7.2.9", true},
@@ -101,7 +96,6 @@ public class UpgradeMatrixServiceTest {
                 {"7.2.8", "7.2.9", true},
                 {"7.2.9", "7.2.9", false},
 
-                {"7.0.2", "7.2.10", false},
                 {"7.1.0", "7.2.10", true},
                 {"7.1.1", "7.2.10", false},
                 {"7.2.0", "7.2.10", true},
@@ -114,7 +108,6 @@ public class UpgradeMatrixServiceTest {
                 {"7.2.9", "7.2.10", true},
                 {"7.2.10", "7.2.10", false},
 
-                {"7.0.2", "7.2.11", false},
                 {"7.1.0", "7.2.11", true},
                 {"7.1.1", "7.2.11", false},
                 {"7.2.0", "7.2.11", true},
