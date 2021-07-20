@@ -6,8 +6,10 @@ import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.CREATED;
 import static com.sequenceiq.common.api.type.ResourceType.AWS_INSTANCE;
 import static com.sequenceiq.common.api.type.ResourceType.ELASTIC_LOAD_BALANCER;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -18,6 +20,7 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.Assertions;
@@ -125,8 +128,8 @@ class AwsNativeMetadataCollectorTest {
         Instance secondInstance = getAnInstance(secondInstanceId);
         Reservation reservation = new Reservation().withInstances(anInstance, secondInstance);
         List<Reservation> reservations = List.of(reservation);
-        DescribeInstancesResult value = new DescribeInstancesResult().withReservations(reservations);
-        when(ec2Client.describeInstances(any())).thenReturn(value);
+        DescribeInstancesResult describeInstancesResult = new DescribeInstancesResult().withReservations(reservations);
+        when(ec2Client.describeInstances(any())).thenReturn(describeInstancesResult);
 
         List<CloudVmMetaDataStatus> metaDataStatuses = underTest.collect(authenticatedContext, resources, cloudInstances, allInstances);
 
@@ -135,6 +138,9 @@ class AwsNativeMetadataCollectorTest {
         assertEquals(resources.size(), metaDataStatuses.size());
         assertTrue(metaDataStatuses.stream()
                 .allMatch(vmMetaDataStatus -> isNotEmpty(vmMetaDataStatus.getCloudVmInstanceStatus().getCloudInstance().getInstanceId())));
+
+        verifyCloudInstance(metaDataStatuses, anInstanceId, "subnet-123", "az1");
+        verifyCloudInstance(metaDataStatuses, secondInstanceId, "subnet-123", "az1");
     }
 
     @Test
@@ -188,7 +194,7 @@ class AwsNativeMetadataCollectorTest {
         Reservation reservation = new Reservation().withInstances(anInstance);
         List<Reservation> reservations = List.of(reservation);
         DescribeInstancesResult describeInstancesResult = new DescribeInstancesResult().withReservations(reservations);
-        String instancesNotFoundMessage = String.format("Instance with id could not be found: '%s'", secondInstanceId);
+        String instancesNotFoundMessage = String.format("Instance with ID could not be found: '%s'", secondInstanceId);
         AmazonServiceException amazonServiceException = new AmazonServiceException(instancesNotFoundMessage);
         amazonServiceException.setErrorCode(INSTANCE_NOT_FOUND_ERROR_CODE);
         when(ec2Client.describeInstances(any())).thenThrow(amazonServiceException).thenReturn(describeInstancesResult);
@@ -202,6 +208,9 @@ class AwsNativeMetadataCollectorTest {
                 .anyMatch(metaDataStatus -> InstanceStatus.TERMINATED.equals(metaDataStatus.getCloudVmInstanceStatus().getStatus())));
         assertTrue(metaDataStatuses.stream()
                 .allMatch(vmMetaDataStatus -> isNotEmpty(vmMetaDataStatus.getCloudVmInstanceStatus().getCloudInstance().getInstanceId())));
+
+        verifyCloudInstance(metaDataStatuses, anInstanceId, "subnet-123", "az1");
+        verifyCloudInstance(metaDataStatuses, String.valueOf(2L), "subnet-123", "az1");
     }
 
     @Test
@@ -236,6 +245,10 @@ class AwsNativeMetadataCollectorTest {
         verify(ec2Client, times(3)).describeInstances(any());
         assertFalse(metaDataStatuses.isEmpty());
         assertEquals(cloudInstances.size(), metaDataStatuses.size());
+
+        for (int i = 0; i < 15; i++) {
+            verifyCloudInstance(metaDataStatuses, "anInstanceId" + i, "subnet-123", "az1");
+        }
     }
 
     @Test
@@ -276,7 +289,12 @@ class AwsNativeMetadataCollectorTest {
 
         verify(ec2Client, times(5)).describeInstances(any());
         assertFalse(metaDataStatuses.isEmpty());
-        assertEquals(cloudInstances.size() - 2, metaDataStatuses.size());
+        assertEquals(cloudInstances.size(), metaDataStatuses.size());
+
+        for (int i = 0; i < 15; i++) {
+            String instanceId = i == 0 || i == 5 ? String.valueOf(i) : "anInstanceId" + i;
+            verifyCloudInstance(metaDataStatuses, instanceId, "subnet-123", "az1");
+        }
     }
 
     @Test
@@ -291,11 +309,14 @@ class AwsNativeMetadataCollectorTest {
         CloudInstance cloudInstance = new CloudInstance(anInstanceId, instanceTemplate, null, "subnet-123", "az1");
         List<CloudInstance> cloudInstances = List.of(cloudInstance);
         when(awsClient.createEc2Client(any(), anyString())).thenReturn(ec2Client);
-        when(ec2Client.describeInstances(any())).thenThrow(new AmazonServiceException("Something unexpected happened..."));
+        AmazonServiceException amazonServiceException = new AmazonServiceException("Something unexpected happened...");
+        when(ec2Client.describeInstances(any())).thenThrow(amazonServiceException);
 
-        Assertions.assertThrows(CloudConnectorException.class, () -> {
-            underTest.collect(authenticatedContext, resources, cloudInstances, allInstances);
-        });
+        CloudConnectorException cloudConnectorException = assertThrows(CloudConnectorException.class,
+                () -> underTest.collect(authenticatedContext, resources, cloudInstances, allInstances));
+
+        assertThat(cloudConnectorException).hasMessageStartingWith("Something unexpected happened...");
+        assertThat(cloudConnectorException).hasCauseReference(amazonServiceException);
 
         verify(ec2Client, times(1)).describeInstances(any());
     }
@@ -312,11 +333,14 @@ class AwsNativeMetadataCollectorTest {
         CloudInstance cloudInstance = new CloudInstance(anInstanceId, instanceTemplate, null, "subnet-123", "az1");
         List<CloudInstance> cloudInstances = List.of(cloudInstance);
         when(awsClient.createEc2Client(any(), anyString())).thenReturn(ec2Client);
-        when(ec2Client.describeInstances(any())).thenThrow(new RuntimeException("Something really bad happened..."));
+        RuntimeException runtimeException = new RuntimeException("Something really bad happened...");
+        when(ec2Client.describeInstances(any())).thenThrow(runtimeException);
 
-        Assertions.assertThrows(CloudConnectorException.class, () -> {
-            underTest.collect(authenticatedContext, resources, cloudInstances, allInstances);
-        });
+        CloudConnectorException cloudConnectorException = assertThrows(CloudConnectorException.class,
+                () -> underTest.collect(authenticatedContext, resources, cloudInstances, allInstances));
+
+        assertThat(cloudConnectorException).hasMessageStartingWith("Something really bad happened...");
+        assertThat(cloudConnectorException).hasCauseReference(runtimeException);
 
         verify(ec2Client, times(1)).describeInstances(any());
     }
@@ -365,8 +389,6 @@ class AwsNativeMetadataCollectorTest {
         CloudResource secondCloudResource = getCloudResource("secondCrn", "lbnamesecond", null, ELASTIC_LOAD_BALANCER);
         List<CloudResource> cloudResources = List.of(cloudResource, secondCloudResource);
         when(awsClient.createElasticLoadBalancingClient(any(), any())).thenReturn(loadBalancingClient);
-        LoadBalancerNotFoundException loadBalancerNotFoundException = new LoadBalancerNotFoundException("One or more elastic lb not found");
-        loadBalancerNotFoundException.setErrorCode(LOAD_BALANCER_NOT_FOUND_ERROR_CODE);
         LoadBalancer loadBalancer = new LoadBalancer();
         loadBalancer.setScheme(LoadBalancerSchemeEnum.Internal);
         when(loadBalancingClient.describeLoadBalancers(any()))
@@ -388,9 +410,11 @@ class AwsNativeMetadataCollectorTest {
         LoadBalancerNotFoundException loadBalancerNotFoundException = new LoadBalancerNotFoundException("One or more elastic lb not found");
         when(loadBalancingClient.describeLoadBalancers(any())).thenThrow(loadBalancerNotFoundException);
 
-        Assertions.assertThrows(CloudConnectorException.class, () -> {
-            underTest.collectLoadBalancer(authenticatedContext, loadBalancerTypes, cloudResources);
-        });
+        CloudConnectorException cloudConnectorException = assertThrows(CloudConnectorException.class,
+                () -> underTest.collectLoadBalancer(authenticatedContext, loadBalancerTypes, cloudResources));
+
+        assertThat(cloudConnectorException).hasMessage("Metadata collection of load balancers failed");
+        assertThat(cloudConnectorException).hasCauseReference(loadBalancerNotFoundException);
 
         verify(loadBalancingClient, times(1)).describeLoadBalancers(any());
     }
@@ -401,21 +425,24 @@ class AwsNativeMetadataCollectorTest {
         CloudResource cloudResource = getCloudResource("secondCrn", "secondInstanceName", null, ELASTIC_LOAD_BALANCER);
         List<CloudResource> cloudResources = List.of(cloudResource);
         when(awsClient.createElasticLoadBalancingClient(any(), any())).thenReturn(loadBalancingClient);
-        when(loadBalancingClient.describeLoadBalancers(any())).thenThrow(new RuntimeException("Something really bad happened..."));
+        RuntimeException runtimeException = new RuntimeException("Something really bad happened...");
+        when(loadBalancingClient.describeLoadBalancers(any())).thenThrow(runtimeException);
 
-        Assertions.assertThrows(CloudConnectorException.class, () -> {
-            underTest.collectLoadBalancer(authenticatedContext, loadBalancerTypes, cloudResources);
-        });
+        CloudConnectorException cloudConnectorException = assertThrows(CloudConnectorException.class,
+                () -> underTest.collectLoadBalancer(authenticatedContext, loadBalancerTypes, cloudResources));
+
+        assertThat(cloudConnectorException).hasMessage("Metadata collection of load balancers failed");
+        assertThat(cloudConnectorException).hasCauseReference(runtimeException);
 
         verify(loadBalancingClient, times(1)).describeLoadBalancers(any());
     }
 
-    private CloudResource getCloudResource(String aCrn, String name, String anInstanceId, ResourceType resourceType) {
+    private CloudResource getCloudResource(String reference, String name, String instanceId, ResourceType resourceType) {
         return new CloudResource.Builder()
                 .type(resourceType)
-                .reference(aCrn)
+                .reference(reference)
                 .name(name)
-                .instanceId(anInstanceId)
+                .instanceId(instanceId)
                 .build();
     }
 
@@ -426,4 +453,17 @@ class AwsNativeMetadataCollectorTest {
                 .withPublicIpAddress("52.0.0.0")
                 .withPrivateIpAddress("10.0.0.0");
     }
+
+    private void verifyCloudInstance(List<CloudVmMetaDataStatus> metaDataStatuses, String instanceId, String subnetIdExpected,
+            String availabilityZoneExpected) {
+        Optional<CloudInstance> foundInstanceOptional = metaDataStatuses.stream()
+                .map(vmMetaDataStatus -> vmMetaDataStatus.getCloudVmInstanceStatus().getCloudInstance())
+                .filter(cloudInstance -> instanceId.equals(cloudInstance.getInstanceId()))
+                .findFirst();
+        assertThat(foundInstanceOptional).isPresent();
+        CloudInstance foundInstance = foundInstanceOptional.get();
+        assertThat(foundInstance.getSubnetId()).isEqualTo(subnetIdExpected);
+        assertThat(foundInstance.getAvailabilityZone()).isEqualTo(availabilityZoneExpected);
+    }
+
 }
