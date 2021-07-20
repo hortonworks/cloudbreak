@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRota
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
+import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateResponse;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -167,9 +168,14 @@ public class SdxController implements SdxEndpoint {
     @FilterListBasedOnPermissions
     public List<SdxClusterResponse> list(@FilterParam(DataLakeFiltering.ENV_NAME) String envName) {
         List<SdxCluster> sdxClusters = dataLakeFiltering.filterDataLakesByEnvNameOrAll(AuthorizationResourceAction.DESCRIBE_DATALAKE, envName);
-        return sdxClusters.stream()
-                .map(sdx -> sdxClusterConverter.sdxClusterToResponse(sdx))
-                .collect(Collectors.toList());
+        return convertSdxClusters(sdxClusters);
+    }
+
+    @Override
+    @InternalOnly
+    public List<SdxClusterResponse> internalList(@AccountId String accountId) {
+        List<SdxCluster> sdxClusters = sdxService.listSdx(ThreadBasedUserCrnProvider.getUserCrn(), null);
+        return convertSdxClusters(sdxClusters);
     }
 
     @Override
@@ -177,9 +183,7 @@ public class SdxController implements SdxEndpoint {
     public List<SdxClusterResponse> getByEnvCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @FilterParam(DataLakeFiltering.ENV_CRN)
             @TenantAwareParam String envCrn) {
         List<SdxCluster> sdxClusters = dataLakeFiltering.filterDataLakesByEnvCrn(AuthorizationResourceAction.DESCRIBE_DATALAKE, envCrn);
-        return sdxClusters.stream()
-                .map(sdx -> sdxClusterConverter.sdxClusterToResponse(sdx))
-                .collect(Collectors.toList());
+        return convertSdxClusters(sdxClusters);
     }
 
     @Override
@@ -331,6 +335,12 @@ public class SdxController implements SdxEndpoint {
         SdxCluster sdxCluster = sdxService.getByCrn(userCrn, crn);
         MDCBuilder.buildMdcContext(sdxCluster);
         return sdxCluster;
+    }
+
+    private List<SdxClusterResponse> convertSdxClusters(List<SdxCluster> sdxClusters) {
+        return sdxClusters.stream()
+                .map(sdx -> sdxClusterConverter.sdxClusterToResponse(sdx))
+                .collect(Collectors.toList());
     }
 
 }

@@ -23,6 +23,7 @@ import org.springframework.validation.annotation.Validated;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
+import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateResponse;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
@@ -61,6 +62,12 @@ public interface SdxEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "list SDX clusters", produces = MediaType.APPLICATION_JSON, nickname = "listSdx")
     List<SdxClusterResponse> list(@QueryParam("envName") String envName);
+
+    @GET
+    @Path("list/internal")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "list SDX clusters internally", produces = MediaType.APPLICATION_JSON, nickname = "listSdxInternal")
+    List<SdxClusterResponse> internalList(@AccountId @QueryParam("accountId") String accountId);
 
     @GET
     @Path("{name}")
