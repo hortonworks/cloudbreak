@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
-import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -37,6 +36,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPlatformResources;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPublicKeyConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTagValidator;
 import com.sequenceiq.cloudbreak.cloud.aws.metadata.AwsNativeMetadataCollector;
+import com.sequenceiq.cloudbreak.cloud.aws.validator.AwsGatewaySubnetMultiAzValidator;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
@@ -81,6 +81,9 @@ public class AwsNativeConnector implements CloudConnector<List<CloudResource>> {
     private AwsTagValidator awsTagValidator;
 
     @Inject
+    private AwsGatewaySubnetMultiAzValidator awsGatewaySubnetMultiAzValidator;
+
+    @Inject
     private AwsNativeMetadataCollector nativeMetadataCollector;
 
     @Inject
@@ -101,7 +104,7 @@ public class AwsNativeConnector implements CloudConnector<List<CloudResource>> {
         if (ValidatorType.IMAGE.equals(validatorType)) {
             return List.of();
         }
-        return Collections.singletonList(awsTagValidator);
+        return List.of(awsTagValidator, awsGatewaySubnetMultiAzValidator);
     }
 
     @Override
