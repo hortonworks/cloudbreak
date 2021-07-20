@@ -125,7 +125,7 @@ class EnvironmentCreationServiceTest {
     }
 
     @Test
-    void testCreateForCcmV2JumpgateTunnelInitialization() {
+    void testCreateForCcmV2TunnelInitialization() {
         EnvironmentCreationDto environmentCreationDto = EnvironmentCreationDto.builder()
                 .withName(ENVIRONMENT_NAME).withAccountId(ACCOUNT_ID).withAuthentication(AuthenticationDto.builder().build())
                 .build();
@@ -152,7 +152,7 @@ class EnvironmentCreationServiceTest {
         ArgumentCaptor<Environment> captor = ArgumentCaptor.forClass(Environment.class);
         verify(environmentService).save(captor.capture());
         Environment capturedEnvironment = captor.getValue();
-        assertEquals(Tunnel.CCMV2_JUMPGATE, capturedEnvironment.getExperimentalFeaturesJson().getTunnel(), "Tunnel should be CCMV2_JUMPGATE");
+        assertEquals(Tunnel.CCMV2, capturedEnvironment.getExperimentalFeaturesJson().getTunnel(), "Tunnel should be CCMV2");
     }
 
     @Test

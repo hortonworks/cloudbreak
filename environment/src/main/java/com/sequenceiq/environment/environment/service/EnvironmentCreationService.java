@@ -146,11 +146,11 @@ public class EnvironmentCreationService {
         if (!overrideTunnel) {
             if ((Tunnel.CCMV2 == tunnel || Tunnel.CCMV2_JUMPGATE == tunnel) && !ccmV2Enabled) {
                 throw new BadRequestException("CCMV2 not enabled for account.");
-            } else if ((Tunnel.CCM == tunnel || Tunnel.CCMV2 == tunnel) && ccmV2Enabled) {
+            } else if (Tunnel.CCM == tunnel && ccmV2Enabled) {
                 ExperimentalFeatures experimentalFeaturesJson = environment.getExperimentalFeaturesJson();
-                experimentalFeaturesJson.setTunnel(Tunnel.CCMV2_JUMPGATE);
+                experimentalFeaturesJson.setTunnel(Tunnel.CCMV2);
                 environment.setExperimentalFeaturesJson(experimentalFeaturesJson);
-                LOGGER.info("Environment is initialized with CCMV2_JUMPGATE tunnel.");
+                LOGGER.info("Environment is initialized with CCMV2 tunnel.");
             }
         }
         LOGGER.info("Environment is initialized with [{}] tunnel.", tunnel);
