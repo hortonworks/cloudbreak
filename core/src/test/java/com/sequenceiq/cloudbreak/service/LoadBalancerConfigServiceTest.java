@@ -675,6 +675,7 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
     @Test
     public void testCreateAzurePrivateLoadBalancerWithOozieHA() {
         Stack stack = createAzureStack(StackType.DATALAKE, PRIVATE_ID_1, true);
+        stack.setStackVersion("7.2.11");
         CloudSubnet subnet = getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1);
         DetailedEnvironmentResponse environment = createEnvironment(subnet, false);
 
@@ -834,6 +835,7 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
         }
         network.setAttributes(new Json(attributes));
         stack.setNetwork(network);
+        stack.setStackVersion("7.2.10");
         return stack;
     }
 
