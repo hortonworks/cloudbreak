@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackDownscaleValidatorService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
@@ -34,6 +35,9 @@ public class UpdateNodeCountValidator {
 
     @Inject
     private StackDownscaleValidatorService downscaleValidatorService;
+
+    @Inject
+    private HostGroupService hostGroupService;
 
     @Inject
     private CmTemplateValidator cmTemplateValidator;
@@ -75,7 +79,7 @@ public class UpdateNodeCountValidator {
     }
 
     public void validateServiceRoles(Stack stack, String instanceGroup, int scalingAdjustment) {
-        Optional<HostGroup> hostGroup = stack.getCluster().getHostGroups()
+        Optional<HostGroup> hostGroup = hostGroupService.findHostGroupsInCluster(stack.getCluster().getId())
                 .stream()
                 .filter(e -> e.getName().equals(instanceGroup))
                 .findFirst();
