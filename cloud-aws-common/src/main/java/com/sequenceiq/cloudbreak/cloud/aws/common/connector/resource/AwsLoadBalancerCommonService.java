@@ -101,6 +101,7 @@ public class AwsLoadBalancerCommonService {
                 .stream()
                 .flatMap(groups -> groups.stream().flatMap(group -> group.getNetwork().getSubnets().stream().map(GroupSubnet::getSubnetId)))
                 .collect(Collectors.toSet());
+        LOGGER.info("Adding subnets that have been configured via multi-AZ support: '{}'", String.join(",", multiAzSubnets));
         subnetIds.addAll(multiAzSubnets);
         return new HashSet<>(subnetIds);
     }
