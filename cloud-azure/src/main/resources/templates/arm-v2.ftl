@@ -530,7 +530,11 @@
                     ]
                   },
                   "sku": {
-                    "name": "Standard"
+                      <#if (loadBalancer.instanceGroupNames?size > 1)>
+                          "name": "Standard"
+                      <#else>
+                          "name": "Basic"
+                      </#if>
                   }
                 }
                 <#if loadBalancer.type == "PUBLIC">
@@ -540,7 +544,11 @@
                     "name": "${loadBalancer.name}-publicIp",
                     "location": "[parameters('region')]",
                     "sku": {
-                        "name": "Standard"
+                        <#if (loadBalancer.instanceGroupNames?size > 1)>
+                            "name": "Standard"
+                        <#else>
+                            "name": "Basic"
+                        </#if>
                     },
                     "properties": {
                         "publicIPAddressVersion": "IPv4",
