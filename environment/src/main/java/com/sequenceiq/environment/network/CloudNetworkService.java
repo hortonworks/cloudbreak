@@ -123,9 +123,8 @@ public class CloudNetworkService {
     }
 
     private void buildSubnetIdFilter(Set<String> subnetIds, Map<String, String> filter) {
-        Optional<String> subnet = subnetIds.stream().findFirst();
-        if (subnet.isPresent()) {
-            filter.put("subnetId", subnet.get());
+        if (!subnetIds.isEmpty()) {
+            filter.put("subnetIds", String.join(",", subnetIds));
         }
     }
 
