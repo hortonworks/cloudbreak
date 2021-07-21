@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
+import static com.sequenceiq.cloudbreak.cloud.model.CloudInstance.FQDN;
 import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_ID;
 
 import java.util.ArrayList;
@@ -46,7 +47,9 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStoreMetadata;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.common.api.type.LoadBalancerType;
+import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
 public class AwsMetadataCollector implements MetadataCollector {
@@ -78,14 +81,14 @@ public class AwsMetadataCollector implements MetadataCollector {
                     .map(CloudInstance::getInstanceId)
                     .collect(Collectors.toList());
 
-            return collectCloudVmMetaDataStatuses(ac, vms, knownInstanceIdList);
+            return collectCloudVmMetaDataStatuses(ac, vms, resources, knownInstanceIdList);
         } catch (RuntimeException e) {
             throw new CloudConnectorException(e.getMessage(), e);
         }
     }
 
     private List<CloudVmMetaDataStatus> collectCloudVmMetaDataStatuses(AuthenticatedContext ac, List<CloudInstance> vms,
-            List<String> knownInstanceIdList) {
+            List<CloudResource> resources, List<String> knownInstanceIdList) {
         LOGGER.debug("Collect Cloud VM metadata statuses");
 
         List<CloudVmMetaDataStatus> collectedCloudVmMetaDataStatuses = new ArrayList<>();
@@ -101,19 +104,22 @@ public class AwsMetadataCollector implements MetadataCollector {
         Multimap<String, Instance> instancesOnAWSForGroup = ArrayListMultimap.create();
         for (String group : instanceGroupMap.keySet()) {
             List<Instance> instancesForGroup = collectInstancesForGroup(ac, amazonASClient, amazonEC2Client, amazonCFClient, group);
+            LOGGER.info("Collected instances for group: {}", instancesForGroup.stream().map(Instance::getInstanceId));
             instancesOnAWSForGroup.putAll(group, instancesForGroup);
             subnetIds.addAll(getSubnetIdsForInstances(instancesForGroup));
         }
+        LOGGER.info("Collected subnet IDs: {}", subnetIds);
         Map<String, String> subnetIdToAvailabilityZoneMap = buildSubnetIdToAvailabilityZoneMap(subnetIds, amazonEC2Client);
-
+        LOGGER.info("Subnet id to availability zone map: {}", subnetIdToAvailabilityZoneMap);
         Multimap<String, Instance> unknownInstancesForGroup = getUnknownInstancesForGroup(knownInstanceIdList, instancesOnAWSForGroup);
         for (CloudInstance vm : vms) {
             if (vm.getInstanceId() == null) {
-                addFromUnknownMap(vm, unknownInstancesForGroup, collectedCloudVmMetaDataStatuses, subnetIdToAvailabilityZoneMap);
+                addFromUnknownMap(vm, resources, unknownInstancesForGroup, collectedCloudVmMetaDataStatuses, subnetIdToAvailabilityZoneMap);
             } else {
                 addKnownInstance(vm, instancesOnAWSForGroup, collectedCloudVmMetaDataStatuses, subnetIdToAvailabilityZoneMap);
             }
         }
+        LOGGER.info("Collected cloud VM metadata and statuses: {}", collectedCloudVmMetaDataStatuses);
         return collectedCloudVmMetaDataStatuses;
     }
 
@@ -140,33 +146,108 @@ public class AwsMetadataCollector implements MetadataCollector {
                     .collect(Collectors.toList());
             unknownInstancesForGroup.putAll(group, unknownInstances);
         }
+        LOGGER.info("Collected unknown instances from AWS: {}", unknownInstancesForGroup.values().stream().map(Instance::getInstanceId));
         return unknownInstancesForGroup;
     }
 
-    private void addFromUnknownMap(CloudInstance cloudInstance, Multimap<String, Instance> unknownMap,
+    private void addFromUnknownMap(CloudInstance cloudInstance, List<CloudResource> resources, Multimap<String, Instance> unknownMap,
             List<CloudVmMetaDataStatus> collectedCloudVmMetaDataStatuses, Map<String, String> subnetIdToAvailabilityZoneMap) {
-        LOGGER.debug("Collect from unknown map, cloudInstance: {}, unknownMap: {}", cloudInstance.getInstanceId(), unknownMap.keySet());
         String groupName = cloudInstance.getTemplate().getGroupName();
+        LOGGER.info("CloudInstance group: {}", groupName);
         Collection<Instance> unknownInstancesForGroup = unknownMap.get(groupName);
         if (!unknownInstancesForGroup.isEmpty()) {
-            Optional<Instance> found = unknownInstancesForGroup.stream().findFirst();
-            Instance foundInstance = found.get();
-            CloudInstance newCloudInstance = new CloudInstance(foundInstance.getInstanceId(),
+            LOGGER.info("Unknown instances from AWS for group {}: {}", groupName, unknownInstancesForGroup.stream().map(Instance::getInstanceId));
+            Instance selectedInstance = findInstance(cloudInstance, resources, unknownInstancesForGroup);
+            CloudInstance newCloudInstance = new CloudInstance(selectedInstance.getInstanceId(),
                     cloudInstance.getTemplate(),
                     cloudInstance.getAuthentication(),
                     cloudInstance.getSubnetId(),
                     cloudInstance.getAvailabilityZone(),
                     cloudInstance.getParameters());
-            addCloudInstanceNetworkParameters(newCloudInstance, foundInstance, subnetIdToAvailabilityZoneMap);
+            addCloudInstanceNetworkParameters(newCloudInstance, selectedInstance, subnetIdToAvailabilityZoneMap);
             CloudInstanceMetaData cloudInstanceMetaData = new CloudInstanceMetaData(
-                    foundInstance.getPrivateIpAddress(),
-                    foundInstance.getPublicIpAddress(),
-                    awsLifeCycleMapper.getLifeCycle(foundInstance));
+                    selectedInstance.getPrivateIpAddress(),
+                    selectedInstance.getPublicIpAddress(),
+                    awsLifeCycleMapper.getLifeCycle(selectedInstance));
+            LOGGER.info("New CloudInstance: {}", newCloudInstance);
+            LOGGER.info("Cloud instance metadata: {}", cloudInstanceMetaData);
             CloudVmInstanceStatus cloudVmInstanceStatus = new CloudVmInstanceStatus(newCloudInstance, InstanceStatus.CREATED);
             CloudVmMetaDataStatus newMetadataStatus = new CloudVmMetaDataStatus(cloudVmInstanceStatus, cloudInstanceMetaData);
             collectedCloudVmMetaDataStatuses.add(newMetadataStatus);
-            unknownMap.remove(groupName, foundInstance);
+            unknownMap.remove(groupName, selectedInstance);
         }
+    }
+
+    private Instance findInstance(CloudInstance cloudInstance, List<CloudResource> resources, Collection<Instance> unknownInstancesForGroup) {
+        List<CloudResource> volumeResources =
+                resources.stream().filter(cloudResource -> ResourceType.AWS_VOLUMESET.equals(cloudResource.getType())).collect(Collectors.toList());
+        List<String> allKnownVolumes = listVolumes(volumeResources);
+        LOGGER.info("All known volumes: {}", allKnownVolumes);
+        List<String> volumesWithoutFQDN = listVolumesWithoutFQDN(volumeResources);
+        LOGGER.info("Volumes without FQDN: {}", volumesWithoutFQDN);
+        String instanceFQDN = cloudInstance.getStringParameter(FQDN);
+        Long privateId = cloudInstance.getTemplate().getPrivateId();
+        Optional<Instance> selectedInstance;
+        if (instanceFQDN == null) {
+            LOGGER.info("Instance (private id: {}) does not have FQDN parameter, lets find an instance from AWS which has an attached volume, but the volume " +
+                    "does not have FQDN", privateId);
+            selectedInstance = findInstanceByVolumes(unknownInstancesForGroup, volumesWithoutFQDN);
+        } else {
+            LOGGER.info("Instance (private id: {}) has FQDN ({}), lets find an instance from AWS which has attached volume with the same FQDN",
+                    privateId, instanceFQDN);
+            List<String> volumesForFqdn = listVolumesForFQDN(volumeResources, instanceFQDN);
+            LOGGER.info("Volumes for FQDN ({}), {}", instanceFQDN, volumesForFqdn);
+            selectedInstance = findInstanceByVolumes(unknownInstancesForGroup, volumesForFqdn);
+        }
+        return selectedInstance.or(() -> {
+            List<Instance> instancesWithoutKnownVolumes = getInstancesWithoutKnownVolumes(unknownInstancesForGroup, allKnownVolumes);
+            if (!instancesWithoutKnownVolumes.isEmpty()) {
+                return Optional.of(instancesWithoutKnownVolumes.get(0));
+            } else {
+                return Optional.empty();
+            }
+        }).orElseThrow(() -> new IllegalStateException("Can't find any instance"));
+    }
+
+    private Optional<Instance> findInstanceByVolumes(Collection<Instance> unknownInstancesForGroup, List<String> volumes) {
+        return unknownInstancesForGroup.stream().filter(instance -> instance.getBlockDeviceMappings().stream()
+                .anyMatch(instanceBlockDeviceMapping -> volumes.contains(instanceBlockDeviceMapping.getEbs().getVolumeId())))
+                .findFirst();
+    }
+
+    private List<Instance> getInstancesWithoutKnownVolumes(Collection<Instance> unknownInstancesForGroup, List<String> allKnownVolumes) {
+        return unknownInstancesForGroup.stream().filter(instance -> instance.getBlockDeviceMappings().stream()
+                .noneMatch(instanceBlockDeviceMapping -> allKnownVolumes.contains(instanceBlockDeviceMapping.getEbs().getVolumeId())))
+                .collect(Collectors.toList());
+    }
+
+    private List<String> listVolumes(List<CloudResource> volumeResources) {
+        return volumeResources.stream().map(cloudResource -> cloudResource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class))
+                .map(VolumeSetAttributes::getVolumes)
+                .flatMap(Collection::stream)
+                .map(VolumeSetAttributes.Volume::getId)
+                .collect(Collectors.toList());
+    }
+
+    private List<String> listVolumesWithoutFQDN(List<CloudResource> volumeResources) {
+        return volumeResources.stream().map(cloudResource -> cloudResource.getParameter(CloudResource.ATTRIBUTES,
+                VolumeSetAttributes.class))
+                .filter(volumeSetAttributes -> volumeSetAttributes.getDiscoveryFQDN() == null)
+                .map(VolumeSetAttributes::getVolumes)
+                .flatMap(Collection::stream)
+                .map(VolumeSetAttributes.Volume::getId)
+                .collect(Collectors.toList());
+    }
+
+    private List<String> listVolumesForFQDN(List<CloudResource> volumeResources, String fqdn) {
+        return volumeResources.stream().map(cloudResource -> cloudResource.getParameter(CloudResource.ATTRIBUTES,
+                VolumeSetAttributes.class))
+                .filter(volumeSetAttributes -> volumeSetAttributes.getDiscoveryFQDN() != null)
+                .filter(volumeSetAttributes -> volumeSetAttributes.getDiscoveryFQDN().equals(fqdn))
+                .map(VolumeSetAttributes::getVolumes)
+                .flatMap(Collection::stream)
+                .map(VolumeSetAttributes.Volume::getId)
+                .collect(Collectors.toList());
     }
 
     private void addCloudInstanceNetworkParameters(CloudInstance cloudInstance, Instance instance, Map<String, String> subnetIdToAvailabilityZoneMap) {
