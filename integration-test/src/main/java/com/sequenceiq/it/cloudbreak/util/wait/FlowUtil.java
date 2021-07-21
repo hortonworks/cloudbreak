@@ -4,6 +4,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +43,7 @@ public class FlowUtil {
     }
 
     public boolean getFlowFailed() {
-        return flowFailed;
+        return BooleanUtils.toBooleanDefaultIfNull(flowFailed, false);
     }
 
     public <T extends CloudbreakTestDto> T waitBasedOnLastKnownFlow(T testDto, MicroserviceClient msClient) {
@@ -63,7 +64,6 @@ public class FlowUtil {
                     LOGGER.info("Waiting for flow chain: '{}' at resource: '{}', retry count: '{}'", flowChainId, crn, retryCount);
                     FlowCheckResponse flowCheckResponse = flowEndpoint.hasFlowRunningByChainId(flowChainId, crn);
                     flowRunning = flowCheckResponse.getHasActiveFlow();
-                    flowFailed = flowCheckResponse.getLatestFlowFinalizedAndFailed();
                 } else if (StringUtils.isNoneBlank(flowId)) {
                     LOGGER.info("Waiting for flow: '{}' at resource: '{}', retry count: '{}'", flowId, crn, retryCount);
                     FlowCheckResponse flowCheckResponse = flowEndpoint.hasFlowRunningByFlowId(flowId, crn);

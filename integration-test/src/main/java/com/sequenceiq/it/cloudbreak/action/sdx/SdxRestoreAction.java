@@ -10,12 +10,12 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
 import com.sequenceiq.sdx.api.model.SdxRestoreResponse;
 
-public class SdxRestoreAction implements Action<SdxInternalTestDto, SdxClient> {
+public class SdxRestoreAction implements Action<SdxTestDto, SdxClient> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxRestoreAction.class);
 
@@ -29,7 +29,7 @@ public class SdxRestoreAction implements Action<SdxInternalTestDto, SdxClient> {
     }
 
     @Override
-    public SdxInternalTestDto action(TestContext testContext, SdxInternalTestDto testDto, SdxClient client) throws Exception {
+    public SdxTestDto action(TestContext testContext, SdxTestDto testDto, SdxClient client) throws Exception {
         String sdxName = testDto.getName();
 
         Log.when(LOGGER, format(" SDX '%s' restore has been started to '%s' ", sdxName, backupLocation));
@@ -44,7 +44,7 @@ public class SdxRestoreAction implements Action<SdxInternalTestDto, SdxClient> {
                 .sdxEndpoint()
                 .getDetail(sdxName, Collections.emptySet());
         testDto.setResponse(detailedResponse);
-        Log.whenJson(LOGGER, " SDX restore response: ", client.getDefaultClient().sdxEndpoint().get(sdxName));
+        Log.whenJson(LOGGER, " SDX response after restore: ", client.getDefaultClient().sdxEndpoint().get(sdxName));
         return testDto;
     }
 }

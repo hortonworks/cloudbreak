@@ -161,11 +161,11 @@ public class SdxTestClient {
         return new SdxRetryAction();
     }
 
-    public Action<SdxInternalTestDto, SdxClient> backup(String backupLocation, String backupName) {
+    public Action<SdxTestDto, SdxClient> backup(String backupLocation, String backupName) {
         return new SdxBackupAction(backupLocation, backupName);
     }
 
-    public Action<SdxInternalTestDto, SdxClient> restore(String backupId, String backupLocation) {
+    public Action<SdxTestDto, SdxClient> restore(String backupId, String backupLocation) {
         return new SdxRestoreAction(backupId, backupLocation);
     }
 }
