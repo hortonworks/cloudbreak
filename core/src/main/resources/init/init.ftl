@@ -67,6 +67,7 @@ export IS_CCM_V2_JUMPGATE_ENABLED=true
 <#else>
 export IS_CCM_V2_JUMPGATE_ENABLED=false
 </#if>
+export START_CCM_V2_JUMPGATE_AGENT=false
 
 ${customUserData}
 

@@ -24,6 +24,7 @@ export PROXY_NO_PROXY_HOSTS="noproxy.com"
 export IS_CCM_ENABLED=false
 export IS_CCM_V2_ENABLED=false
 export IS_CCM_V2_JUMPGATE_ENABLED=false
+export START_CCM_V2_JUMPGATE_AGENT=false
 
 date >> /tmp/time.txt
 

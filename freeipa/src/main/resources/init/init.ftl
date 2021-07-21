@@ -64,8 +64,10 @@ export IS_CCM_V2_ENABLED=false
 </#if>
 <#if ccmV2JumpgateEnabled!false>
 export IS_CCM_V2_JUMPGATE_ENABLED=true
+export START_CCM_V2_JUMPGATE_AGENT=true
 <#else>
 export IS_CCM_V2_JUMPGATE_ENABLED=false
+export START_CCM_V2_JUMPGATE_AGENT=false
 </#if>
 
 ${customUserData}

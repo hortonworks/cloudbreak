@@ -26,6 +26,7 @@ export CCM_ENCIPHERED_PRIVATE_KEY="cHJpdmF0ZS1rZXk="
 export CCM_GATEWAY_PORT=9443
 export IS_CCM_V2_ENABLED=false
 export IS_CCM_V2_JUMPGATE_ENABLED=false
+export START_CCM_V2_JUMPGATE_AGENT=false
 
 date >> /tmp/time.txt
 

@@ -27,6 +27,7 @@ export CCM_GATEWAY_PORT=9443
 export CCM_KNOX_PORT=8443
 export IS_CCM_V2_ENABLED=false
 export IS_CCM_V2_JUMPGATE_ENABLED=false
+export START_CCM_V2_JUMPGATE_AGENT=false
 
 date >> /tmp/time.txt
 
