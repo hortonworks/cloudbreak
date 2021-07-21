@@ -1,22 +1,33 @@
 package com.sequenceiq.flow.core.model;
 
+import java.util.Collections;
+import java.util.Set;
+
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
+import com.sequenceiq.flow.domain.FlowLogIdWithTypeAndTimestamp;
 
 public class FlowAcceptResult implements AcceptResult {
-
-    private static final FlowAcceptResult ALREADY_EXISTING_FLOW_ACCEPT_RESULT = new FlowAcceptResult(ResultType.ALREADY_EXISTING_FLOW, null);
 
     private final ResultType resultType;
 
     private final String pollableId;
 
+    private final Set<FlowLogIdWithTypeAndTimestamp> alreadyRunningFlows;
+
     public FlowAcceptResult(ResultType resultType, String pollableId) {
         this.resultType = resultType;
         this.pollableId = pollableId;
+        this.alreadyRunningFlows = Collections.EMPTY_SET;
     }
 
-    public static FlowAcceptResult alreadyExistingFlow() {
-        return ALREADY_EXISTING_FLOW_ACCEPT_RESULT;
+    public FlowAcceptResult(ResultType resultType, Set<FlowLogIdWithTypeAndTimestamp> alreadyRunningFlows) {
+        this.resultType = resultType;
+        this.pollableId = null;
+        this.alreadyRunningFlows = alreadyRunningFlows;
+    }
+
+    public static FlowAcceptResult alreadyExistingFlow(Set<FlowLogIdWithTypeAndTimestamp> alreadyRunningFlows) {
+        return new FlowAcceptResult(ResultType.ALREADY_EXISTING_FLOW, alreadyRunningFlows);
     }
 
     public static FlowAcceptResult runningInFlow(String flowId) {
@@ -29,6 +40,10 @@ public class FlowAcceptResult implements AcceptResult {
 
     public ResultType getResultType() {
         return resultType;
+    }
+
+    public Set<FlowLogIdWithTypeAndTimestamp> getAlreadyRunningFlows() {
+        return alreadyRunningFlows;
     }
 
     public String getAsFlowId() {

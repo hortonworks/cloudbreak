@@ -161,6 +161,16 @@ public class FlowLogDBService implements FlowLogService {
         });
     }
 
+    @Override
+    public Set<FlowLogIdWithTypeAndTimestamp> findAllRunningNonTerminationFlowsByResourceId(Long resourceId) {
+        Set<FlowLogIdWithTypeAndTimestamp> allRunningFlowIdsByResourceId = flowLogRepository.findAllRunningFlowLogByResourceId(resourceId);
+        return allRunningFlowIdsByResourceId.stream()
+                .filter(flowLog -> applicationFlowInformation.getTerminationFlow().stream()
+                        .map(Class::getName)
+                        .noneMatch(terminationFlowClassName -> terminationFlowClassName.equals(flowLog.getFlowType().getName())))
+                .collect(Collectors.toSet());
+    }
+
     private Set<String> findAllRunningNonTerminationFlowIdsByResourceId(Long resourceId) {
         Set<FlowLogIdWithTypeAndTimestamp> allRunningFlowIdsByResourceId = flowLogRepository.findAllRunningFlowLogByResourceId(resourceId);
         return allRunningFlowIdsByResourceId.stream()

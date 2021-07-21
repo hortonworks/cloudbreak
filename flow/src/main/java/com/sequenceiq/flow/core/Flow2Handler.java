@@ -33,6 +33,7 @@ import com.sequenceiq.flow.core.exception.FlowNotTriggerableException;
 import com.sequenceiq.flow.core.model.FlowAcceptResult;
 import com.sequenceiq.flow.core.cache.FlowStatCache;
 import com.sequenceiq.flow.domain.FlowLog;
+import com.sequenceiq.flow.domain.FlowLogIdWithTypeAndTimestamp;
 import com.sequenceiq.flow.ha.NodeConfig;
 import com.sequenceiq.flow.service.flowlog.FlowChainLogService;
 
@@ -257,9 +258,10 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
     private boolean isFlowAcceptable(String key, Payload payload) {
         if (payload instanceof Acceptable && ((Acceptable) payload).accepted() != null) {
             Acceptable acceptable = (Acceptable) payload;
+            Set<FlowLogIdWithTypeAndTimestamp> flowLogItems = flowLogService.findAllRunningNonTerminationFlowsByResourceId(payload.getResourceId());
             if (!applicationFlowInformation.getAllowedParallelFlows().contains(key)
-                    && flowLogService.isOtherNonTerminationFlowRunning(payload.getResourceId())) {
-                acceptable.accepted().accept(FlowAcceptResult.alreadyExistingFlow());
+                    && !flowLogItems.isEmpty()) {
+                acceptable.accepted().accept(FlowAcceptResult.alreadyExistingFlow(flowLogItems));
                 return false;
             }
         }
