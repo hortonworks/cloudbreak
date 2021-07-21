@@ -35,6 +35,8 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
@@ -58,6 +60,8 @@ class DistroXUpgradeServiceTest {
     private static final Long WS_ID = 1L;
 
     private static final Long STACK_ID = 3L;
+
+    private static final boolean LOCK_COMPONENTS = false;
 
     @Mock
     private DistroXUpgradeAvailabilityService upgradeAvailabilityService;
@@ -139,8 +143,9 @@ class DistroXUpgradeServiceTest {
     }
 
     @Test
-    public void testTriggerFlowWithPaywallCheck() {
+    public void testTriggerFlowWithPaywallCheck() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         UpgradeV4Request request = new UpgradeV4Request();
+        request.setLockComponents(LOCK_COMPONENTS);
         UpgradeV4Response response = new UpgradeV4Response();
         response.setUpgradeCandidates(List.of(mock(ImageInfoV4Response.class)));
         when(upgradeAvailabilityService.checkForUpgrade(CLUSTER, WS_ID, request, USER_CRN)).thenReturn(response);
@@ -156,7 +161,15 @@ class DistroXUpgradeServiceTest {
                 .thenReturn(imageChangeDto);
         when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WS_ID)).thenReturn(stack);
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, "asdf");
-        when(reactorFlowManager.triggerDistroXUpgrade(eq(STACK_ID), eq(imageChangeDto), anyBoolean())).thenReturn(flowIdentifier);
+        when(reactorFlowManager.triggerDistroXUpgrade(eq(STACK_ID), eq(imageChangeDto), anyBoolean(), eq(LOCK_COMPONENTS))).thenReturn(flowIdentifier);
+        Image currentImage = new Image("imageName", Map.of(), "redhat6", "redhat6", "", "default", "default-id", Map.of());
+        when(componentConfigProviderService.getImage(stack.getId())).thenReturn(currentImage);
+        CloudbreakImageCatalogV3 imageCatalog = new CloudbreakImageCatalogV3(null, null);
+        when(imageCatalogProvider.getImageCatalogV3(currentImage.getImageCatalogUrl())).thenReturn(imageCatalog);
+        com.sequenceiq.cloudbreak.cloud.model.catalog.Image currentCatalogImage = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
+        com.sequenceiq.cloudbreak.cloud.model.catalog.Image targetCatalogImage = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
+        when(imageProvider.getCurrentImageFromCatalog(currentImage.getImageId(), imageCatalog)).thenReturn(currentCatalogImage);
+        when(imageProvider.getCurrentImageFromCatalog(imageInfoV4Response.getImageId(), imageCatalog)).thenReturn(targetCatalogImage);
 
         UpgradeV4Response result = underTest.triggerUpgrade(CLUSTER, WS_ID, USER_CRN, request);
 
@@ -169,8 +182,9 @@ class DistroXUpgradeServiceTest {
     }
 
     @Test
-    public void testTriggerFlowWithoutPaywallCheck() {
+    public void testTriggerFlowWithoutPaywallCheck() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         UpgradeV4Request request = new UpgradeV4Request();
+        request.setLockComponents(LOCK_COMPONENTS);
         UpgradeV4Response response = new UpgradeV4Response();
         response.setUpgradeCandidates(List.of(mock(ImageInfoV4Response.class)));
         when(upgradeAvailabilityService.checkForUpgrade(CLUSTER, WS_ID, request, USER_CRN)).thenReturn(response);
@@ -185,7 +199,15 @@ class DistroXUpgradeServiceTest {
                 .thenReturn(imageChangeDto);
         when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WS_ID)).thenReturn(stack);
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, "asdf");
-        when(reactorFlowManager.triggerDistroXUpgrade(eq(STACK_ID), eq(imageChangeDto), anyBoolean())).thenReturn(flowIdentifier);
+        when(reactorFlowManager.triggerDistroXUpgrade(eq(STACK_ID), eq(imageChangeDto), anyBoolean(), eq(LOCK_COMPONENTS))).thenReturn(flowIdentifier);
+        Image currentImage = new Image("imageName", Map.of(), "redhat6", "redhat6", "", "default", "default-id", Map.of());
+        when(componentConfigProviderService.getImage(stack.getId())).thenReturn(currentImage);
+        CloudbreakImageCatalogV3 imageCatalog = new CloudbreakImageCatalogV3(null, null);
+        when(imageCatalogProvider.getImageCatalogV3(currentImage.getImageCatalogUrl())).thenReturn(imageCatalog);
+        com.sequenceiq.cloudbreak.cloud.model.catalog.Image currentCatalogImage = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
+        com.sequenceiq.cloudbreak.cloud.model.catalog.Image targetCatalogImage = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
+        when(imageProvider.getCurrentImageFromCatalog(currentImage.getImageId(), imageCatalog)).thenReturn(currentCatalogImage);
+        when(imageProvider.getCurrentImageFromCatalog(imageInfoV4Response.getImageId(), imageCatalog)).thenReturn(targetCatalogImage);
 
         UpgradeV4Response result = underTest.triggerUpgrade(CLUSTER, WS_ID, USER_CRN, request);
 
@@ -201,6 +223,7 @@ class DistroXUpgradeServiceTest {
     public void testTriggerFlowWithTurnOffReplaceVmsParam() throws Exception {
         // GIVEN
         UpgradeV4Request request = new UpgradeV4Request();
+        request.setLockComponents(LOCK_COMPONENTS);
         UpgradeV4Response response = new UpgradeV4Response();
         response.setReplaceVms(true);
         response.setUpgradeCandidates(List.of(mock(ImageInfoV4Response.class)));
@@ -227,11 +250,11 @@ class DistroXUpgradeServiceTest {
         when(imageFilterParamsFactory.getStackRelatedParcels(stack)).thenReturn(activatedParcels);
         when(lockedComponentChecker.isUpgradePermitted(currentCatalogImage, targetCatalogImage, activatedParcels)).thenReturn(false);
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, "asdf");
-        when(reactorFlowManager.triggerDistroXUpgrade(eq(STACK_ID), eq(imageChangeDto), anyBoolean())).thenReturn(flowIdentifier);
+        when(reactorFlowManager.triggerDistroXUpgrade(eq(STACK_ID), eq(imageChangeDto), anyBoolean(), eq(LOCK_COMPONENTS))).thenReturn(flowIdentifier);
         // WHEN
         UpgradeV4Response result = underTest.triggerUpgrade(CLUSTER, WS_ID, USER_CRN, request);
         // THEN
-        verify(reactorFlowManager).triggerDistroXUpgrade(STACK_ID, imageChangeDto, false);
+        verify(reactorFlowManager).triggerDistroXUpgrade(STACK_ID, imageChangeDto, false, LOCK_COMPONENTS);
         assertFalse(result.isReplaceVms());
     }
 
@@ -239,6 +262,7 @@ class DistroXUpgradeServiceTest {
     public void testTriggerFlowWithoutTurnOffReplaceVmsParam() throws Exception {
         // GIVEN
         UpgradeV4Request request = new UpgradeV4Request();
+        request.setLockComponents(LOCK_COMPONENTS);
         UpgradeV4Response response = new UpgradeV4Response();
         response.setReplaceVms(true);
         response.setUpgradeCandidates(List.of(mock(ImageInfoV4Response.class)));
@@ -265,18 +289,19 @@ class DistroXUpgradeServiceTest {
         when(imageFilterParamsFactory.getStackRelatedParcels(stack)).thenReturn(activatedParcels);
         when(lockedComponentChecker.isUpgradePermitted(currentCatalogImage, targetCatalogImage, activatedParcels)).thenReturn(true);
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, "asdf");
-        when(reactorFlowManager.triggerDistroXUpgrade(eq(STACK_ID), eq(imageChangeDto), anyBoolean())).thenReturn(flowIdentifier);
+        when(reactorFlowManager.triggerDistroXUpgrade(eq(STACK_ID), eq(imageChangeDto), anyBoolean(), anyBoolean())).thenReturn(flowIdentifier);
         // WHEN
         UpgradeV4Response result = underTest.triggerUpgrade(CLUSTER, WS_ID, USER_CRN, request);
         // THEN
-        verify(reactorFlowManager).triggerDistroXUpgrade(STACK_ID, imageChangeDto, true);
+        verify(reactorFlowManager).triggerDistroXUpgrade(STACK_ID, imageChangeDto, true, true);
         assertTrue(result.isReplaceVms());
     }
 
     @Test
-    public void testTriggerFlowWhenReplaceVmsParamIsFalse() {
+    public void testTriggerFlowWhenReplaceVmsParamIsFalse() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         // GIVEN
         UpgradeV4Request request = new UpgradeV4Request();
+        request.setLockComponents(LOCK_COMPONENTS);
         UpgradeV4Response response = new UpgradeV4Response();
         response.setReplaceVms(false);
         response.setUpgradeCandidates(List.of(mock(ImageInfoV4Response.class)));
@@ -291,17 +316,20 @@ class DistroXUpgradeServiceTest {
         ImageChangeDto imageChangeDto = new ImageChangeDto(STACK_ID, imageInfoV4Response.getImageId());
         when(stackCommonService.createImageChangeDto(eq(CLUSTER), eq(WS_ID), imageChangeRequestArgumentCaptor.capture())).thenReturn(imageChangeDto);
         when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WS_ID)).thenReturn(stack);
+        Image currentImage = new Image("imageName", Map.of(), "redhat6", "redhat6", "", "default", "default-id", Map.of());
+        when(componentConfigProviderService.getImage(stack.getId())).thenReturn(currentImage);
+        CloudbreakImageCatalogV3 imageCatalog = new CloudbreakImageCatalogV3(null, null);
+        when(imageCatalogProvider.getImageCatalogV3(currentImage.getImageCatalogUrl())).thenReturn(imageCatalog);
+        com.sequenceiq.cloudbreak.cloud.model.catalog.Image currentCatalogImage = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
+        com.sequenceiq.cloudbreak.cloud.model.catalog.Image targetCatalogImage = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
+        when(imageProvider.getCurrentImageFromCatalog(currentImage.getImageId(), imageCatalog)).thenReturn(currentCatalogImage);
+        when(imageProvider.getCurrentImageFromCatalog(imageInfoV4Response.getImageId(), imageCatalog)).thenReturn(targetCatalogImage);
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, "asdf");
-        when(reactorFlowManager.triggerDistroXUpgrade(eq(STACK_ID), eq(imageChangeDto), anyBoolean())).thenReturn(flowIdentifier);
+        when(reactorFlowManager.triggerDistroXUpgrade(eq(STACK_ID), eq(imageChangeDto), anyBoolean(), eq(LOCK_COMPONENTS))).thenReturn(flowIdentifier);
         // WHEN
         UpgradeV4Response result = underTest.triggerUpgrade(CLUSTER, WS_ID, USER_CRN, request);
         // THEN
-        verifyNoInteractions(imageCatalogProvider);
-        verifyNoInteractions(imageProvider);
-        verifyNoInteractions(imageProvider);
-        verifyNoInteractions(imageFilterParamsFactory);
-        verifyNoInteractions(lockedComponentChecker);
-        verify(reactorFlowManager).triggerDistroXUpgrade(STACK_ID, imageChangeDto, false);
+        verify(reactorFlowManager).triggerDistroXUpgrade(STACK_ID, imageChangeDto, false, LOCK_COMPONENTS);
         assertFalse(result.isReplaceVms());
     }
 }

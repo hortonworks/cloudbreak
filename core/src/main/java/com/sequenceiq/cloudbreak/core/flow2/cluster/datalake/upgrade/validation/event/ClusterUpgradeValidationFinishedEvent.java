@@ -9,11 +9,11 @@ public class ClusterUpgradeValidationFinishedEvent extends ClusterUpgradeValidat
     private Exception exception;
 
     public ClusterUpgradeValidationFinishedEvent(Long resourceId) {
-        super(FINISH_CLUSTER_UPGRADE_VALIDATION_EVENT.name(), resourceId, null);
+        super(FINISH_CLUSTER_UPGRADE_VALIDATION_EVENT.name(), resourceId, null, false);
     }
 
     public ClusterUpgradeValidationFinishedEvent(Long resourceId, Exception exception) {
-        super(FINISH_CLUSTER_UPGRADE_VALIDATION_EVENT.name(), resourceId, null);
+        super(FINISH_CLUSTER_UPGRADE_VALIDATION_EVENT.name(), resourceId, null, false);
         this.exception = exception;
     }
 

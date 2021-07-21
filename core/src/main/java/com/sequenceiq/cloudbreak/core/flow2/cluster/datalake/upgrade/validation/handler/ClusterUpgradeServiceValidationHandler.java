@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.handler;
 
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationHandlerSelectors.VALIDATE_DISK_SPACE_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationHandlerSelectors.VALIDATE_SERVICES_EVENT;
+
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -13,48 +15,41 @@ import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedExcepti
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationFailureEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationFinishedEvent;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
-import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.service.upgrade.validation.DiskSpaceValidationService;
+import com.sequenceiq.cloudbreak.service.upgrade.validation.service.ServiceUpgradeValidationRequest;
+import com.sequenceiq.cloudbreak.service.upgrade.validation.service.ServiceUpgradeValidator;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 import reactor.bus.Event;
 
 @Component
-public class ClusterUpgradeDiskSpaceValidationHandler extends ExceptionCatcherEventHandler<ClusterUpgradeValidationEvent> {
+public class ClusterUpgradeServiceValidationHandler extends ExceptionCatcherEventHandler<ClusterUpgradeValidationEvent> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterUpgradeDiskSpaceValidationHandler.class);
-
-    @Inject
-    private DiskSpaceValidationService diskSpaceValidationService;
-
-    @Inject
-    private ImageCatalogService imageCatalogService;
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterUpgradeServiceValidationHandler.class);
 
     @Inject
     private StackService stackService;
 
+    @Inject
+    private List<ServiceUpgradeValidator> serviceUpgradeValidators;
+
     @Override
     protected Selectable doAccept(HandlerEvent<ClusterUpgradeValidationEvent> event) {
-        LOGGER.debug("Accepting Cluster upgrade validation event.");
+        LOGGER.debug("Accepting Cluster upgrade service validation event.");
         ClusterUpgradeValidationEvent request = event.getData();
         Long stackId = request.getResourceId();
         Selectable result;
         try {
-            StatedImage image = imageCatalogService.getImage(request.getImageId());
-            diskSpaceValidationService.validateFreeSpaceForUpgrade(getStack(stackId), image.getImageCatalogUrl(), image.getImageCatalogName(),
-                    request.getImageId());
-            result = new ClusterUpgradeValidationEvent(ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_SERVICE_VALIDATION_EVENT.selector(),
-                    request.getResourceId(), request.getImageId(), request.isLockComponents());
+            Stack stack = getStack(stackId);
+            serviceUpgradeValidators.forEach(validator -> validator.validate(new ServiceUpgradeValidationRequest(stack, request.isLockComponents())));
+            result = new ClusterUpgradeValidationFinishedEvent(stackId);
         } catch (UpgradeValidationFailedException e) {
-            LOGGER.warn("Cluster upgrade validation failed", e);
+            LOGGER.warn("Cluster upgrade service validation failed", e);
             result = new ClusterUpgradeValidationFailureEvent(stackId, e);
         } catch (Exception e) {
-            LOGGER.warn("Cluster upgrade validation was unsuccessful due to an internal error", e);
+            LOGGER.warn("Cluster upgrade service validation was unsuccessful due to an internal error", e);
             result = new ClusterUpgradeValidationFinishedEvent(stackId, e);
         }
         return result;
@@ -66,7 +61,7 @@ public class ClusterUpgradeDiskSpaceValidationHandler extends ExceptionCatcherEv
 
     @Override
     public String selector() {
-        return VALIDATE_DISK_SPACE_EVENT.selector();
+        return VALIDATE_SERVICES_EVENT.selector();
     }
 
     @Override

@@ -17,13 +17,14 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.Upgrade
 import com.sequenceiq.cloudbreak.auth.ClouderaManagerLicenseProvider;
 import com.sequenceiq.cloudbreak.auth.JsonCMLicense;
 import com.sequenceiq.cloudbreak.auth.PaywallAccessChecker;
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogProvider;
@@ -92,8 +93,9 @@ public class DistroXUpgradeService {
         ImageInfoV4Response image = imageSelector.determineImageId(request, upgradeV4Response.getUpgradeCandidates());
         ImageChangeDto imageChangeDto = createImageChangeDto(cluster, workspaceId, image);
         Stack stack = stackService.getByNameOrCrnInWorkspace(cluster, workspaceId);
-        boolean replaceVms = determineReplaceVmsParam(upgradeV4Response, stack, image);
-        FlowIdentifier flowIdentifier = reactorFlowManager.triggerDistroXUpgrade(stack.getId(), imageChangeDto, replaceVms);
+        boolean lockComponents = isComponentsLocked(stack, image);
+        boolean replaceVms = determineReplaceVmsParam(upgradeV4Response, lockComponents, stack);
+        FlowIdentifier flowIdentifier = reactorFlowManager.triggerDistroXUpgrade(stack.getId(), imageChangeDto, replaceVms, lockComponents);
         UpgradeV4Response response = new UpgradeV4Response("Upgrade started with Image: " + image.getImageId(), flowIdentifier);
         response.setReplaceVms(replaceVms);
         return response;
@@ -136,20 +138,29 @@ public class DistroXUpgradeService {
         paywallAccessChecker.checkPaywallAccess(license, paywallUrl);
     }
 
-    private boolean determineReplaceVmsParam(UpgradeV4Response upgradeV4Response, Stack stack, ImageInfoV4Response targetImage) {
+    private boolean isComponentsLocked(Stack stack, ImageInfoV4Response targetImage) {
+        try {
+            Image currentImage = componentConfigProviderService.getImage(stack.getId());
+            CloudbreakImageCatalogV3 imageCatalog = imageCatalogProvider.getImageCatalogV3(currentImage.getImageCatalogUrl());
+            com.sequenceiq.cloudbreak.cloud.model.catalog.Image currentCatalogImage = imageProvider.getCurrentImageFromCatalog(currentImage.getImageId(),
+                    imageCatalog);
+            com.sequenceiq.cloudbreak.cloud.model.catalog.Image targetCatalogImage = imageProvider.getCurrentImageFromCatalog(targetImage.getImageId(),
+                    imageCatalog);
+            LOGGER.info("Determining that the stack {} component versions are the same on the current image {} and the target image {}", stack.getName(),
+                    currentCatalogImage.getUuid(), targetCatalogImage.getUuid());
+            return lockedComponentChecker.isUpgradePermitted(currentCatalogImage, targetCatalogImage, imageFilterParamsFactory.getStackRelatedParcels(stack));
+        } catch (Exception ex) {
+            LOGGER.warn("Exception during determining the lockComponents parameter.", ex);
+            throw new CloudbreakRuntimeException("");
+        }
+    }
+
+    private boolean determineReplaceVmsParam(UpgradeV4Response upgradeV4Response, boolean lockComponents, Stack stack) {
         boolean originalReplaceVms = upgradeV4Response.isReplaceVms();
         if (originalReplaceVms) {
             try {
-                Image currentImage = componentConfigProviderService.getImage(stack.getId());
-                CloudbreakImageCatalogV3 imageCatalog = imageCatalogProvider.getImageCatalogV3(currentImage.getImageCatalogUrl());
-                com.sequenceiq.cloudbreak.cloud.model.catalog.Image currentCatalogImage =
-                        imageProvider.getCurrentImageFromCatalog(currentImage.getImageId(), imageCatalog);
-                com.sequenceiq.cloudbreak.cloud.model.catalog.Image targetCatalogImage =
-                        imageProvider.getCurrentImageFromCatalog(targetImage.getImageId(), imageCatalog);
-                if (!lockedComponentChecker.isUpgradePermitted(
-                        currentCatalogImage, targetCatalogImage, imageFilterParamsFactory.getStackRelatedParcels(stack))) {
-                    LOGGER.info("ReplaceVms parameter has been overridden to false for stack {} in case of distrox runtime upgrade." +
-                            " Current image: {}, target image: {}", stack.getName(), currentCatalogImage.getUuid(), targetCatalogImage.getUuid());
+                if (!lockComponents) {
+                    LOGGER.info("ReplaceVms parameter has been overridden to false for stack {} in case of distrox runtime upgrade.", stack.getName());
                     return false;
                 }
             } catch (Exception ex) {

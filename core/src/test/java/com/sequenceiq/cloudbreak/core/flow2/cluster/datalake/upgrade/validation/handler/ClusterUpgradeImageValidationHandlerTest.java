@@ -112,7 +112,7 @@ public class ClusterUpgradeImageValidationHandlerTest {
 
     private HandlerEvent<ClusterUpgradeImageValidationEvent> getHandlerEvent() {
         ClusterUpgradeImageValidationEvent clusterUpgradeImageValidationEvent =
-                new ClusterUpgradeImageValidationEvent(1L, "imageId", cloudStack, cloudCredential, cloudContext);
+                new ClusterUpgradeImageValidationEvent(1L, "imageId", false, cloudStack, cloudCredential, cloudContext);
         HandlerEvent<ClusterUpgradeImageValidationEvent> handlerEvent = mock(HandlerEvent.class);
         when(handlerEvent.getData()).thenReturn(clusterUpgradeImageValidationEvent);
         return handlerEvent;

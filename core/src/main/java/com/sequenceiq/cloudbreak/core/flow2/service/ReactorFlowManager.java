@@ -169,9 +169,9 @@ public class ReactorFlowManager {
         return reactorNotifier.notify(stackId, selector, new ClusterUpgradeTriggerEvent(selector, stackId, imageId));
     }
 
-    public FlowIdentifier triggerDistroXUpgrade(Long stackId, ImageChangeDto imageChangeDto, boolean replaceVms) {
+    public FlowIdentifier triggerDistroXUpgrade(Long stackId, ImageChangeDto imageChangeDto, boolean replaceVms, boolean lockComponents) {
         String selector = FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT;
-        return reactorNotifier.notify(stackId, selector, new DistroXUpgradeTriggerEvent(selector, stackId, imageChangeDto, replaceVms));
+        return reactorNotifier.notify(stackId, selector, new DistroXUpgradeTriggerEvent(selector, stackId, imageChangeDto, replaceVms, lockComponents));
     }
 
     public FlowIdentifier triggerClusterCredentialReplace(Long stackId, String userName, String password) {

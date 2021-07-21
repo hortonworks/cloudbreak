@@ -46,7 +46,7 @@ public class ClusterUpgradeImageValidationHandler extends ExceptionCatcherEventH
             }
             LOGGER.debug("Cluster upgrade image validation succeeded.");
             result = new ClusterUpgradeValidationEvent(ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_DISK_SPACE_VALIDATION_EVENT.selector(),
-                    request.getResourceId(), request.getImageId());
+                    request.getResourceId(), request.getImageId(), request.isLockComponents());
         } catch (RuntimeException e) {
             LOGGER.warn("Cluster upgrade image validation failed: ", e);
             result = new ClusterUpgradeValidationFailureEvent(request.getResourceId(), e);

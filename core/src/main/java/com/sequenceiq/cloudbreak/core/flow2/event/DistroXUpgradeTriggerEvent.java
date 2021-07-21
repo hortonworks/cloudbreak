@@ -11,10 +11,13 @@ public class DistroXUpgradeTriggerEvent extends StackEvent {
 
     private final boolean replaceVms;
 
-    public DistroXUpgradeTriggerEvent(String selector, Long stackId, ImageChangeDto imageChangeDto, boolean replaceVms) {
+    private final boolean lockComponents;
+
+    public DistroXUpgradeTriggerEvent(String selector, Long stackId, ImageChangeDto imageChangeDto, boolean replaceVms, boolean lockComponents) {
         super(selector, stackId);
         this.imageChangeDto = imageChangeDto;
         this.replaceVms = replaceVms;
+        this.lockComponents = lockComponents;
     }
 
     public ImageChangeDto getImageChangeDto() {
@@ -25,11 +28,16 @@ public class DistroXUpgradeTriggerEvent extends StackEvent {
         return replaceVms;
     }
 
+    public boolean isLockComponents() {
+        return lockComponents;
+    }
+
     @Override
     public String toString() {
         return new StringJoiner(", ", DistroXUpgradeTriggerEvent.class.getSimpleName() + "[", "]")
                 .add("imageChangeDto=" + imageChangeDto)
                 .add("replaceVms=" + replaceVms)
+                .add("lockComponents=" + lockComponents)
                 .toString();
     }
 }

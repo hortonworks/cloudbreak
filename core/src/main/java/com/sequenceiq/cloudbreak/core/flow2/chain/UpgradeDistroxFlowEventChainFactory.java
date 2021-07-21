@@ -70,7 +70,7 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
     private void addUpgradeValidationToChain(DistroXUpgradeTriggerEvent event, Queue<Selectable> flowEventChain) {
         if (upgradeValidationEnabled) {
             flowEventChain.add(new ClusterUpgradeValidationEvent(START_CLUSTER_UPGRADE_VALIDATION_INIT_EVENT.event(), event.getResourceId(), event.accepted(),
-                    event.getImageChangeDto().getImageId()));
+                    event.getImageChangeDto().getImageId(), event.isLockComponents()));
         }
     }
 

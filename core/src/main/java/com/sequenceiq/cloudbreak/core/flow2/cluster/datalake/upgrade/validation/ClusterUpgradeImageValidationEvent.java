@@ -15,9 +15,9 @@ public class ClusterUpgradeImageValidationEvent extends ClusterUpgradeValidation
 
     private final CloudContext cloudContext;
 
-    public ClusterUpgradeImageValidationEvent(Long resourceId, String imageId, CloudStack cloudStack, CloudCredential cloudCredential,
+    public ClusterUpgradeImageValidationEvent(Long resourceId, String imageId, boolean lockComponents, CloudStack cloudStack, CloudCredential cloudCredential,
             CloudContext cloudContext) {
-        super(VALIDATE_IMAGE_EVENT.selector(), resourceId, imageId);
+        super(VALIDATE_IMAGE_EVENT.selector(), resourceId, imageId, lockComponents);
         this.cloudStack = cloudStack;
         this.cloudCredential = cloudCredential;
         this.cloudContext = cloudContext;

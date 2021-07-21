@@ -9,7 +9,7 @@ public class ClusterUpgradeValidationFailureEvent extends ClusterUpgradeValidati
     private final Exception exception;
 
     public ClusterUpgradeValidationFailureEvent(Long resourceId, Exception exception) {
-        super(FAILED_CLUSTER_UPGRADE_VALIDATION_EVENT.event(), resourceId, null);
+        super(FAILED_CLUSTER_UPGRADE_VALIDATION_EVENT.event(), resourceId, null, false);
         this.exception = exception;
     }
 
