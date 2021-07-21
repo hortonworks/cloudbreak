@@ -29,6 +29,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.common.ScalingHardLimitsService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -324,10 +326,13 @@ public class StackCommonService {
     }
 
     private void validateHardLimits(Integer scalingAdjustment) {
-        if (scalingHardLimitsService.isViolatingMaxUpscaleStepInNodeCount(scalingAdjustment)) {
+        boolean violatingMaxNodeCount =
+                InternalCrnBuilder.isInternalCrnForService(restRequestThreadLocalService.getCloudbreakUser().getUserCrn(), Crn.Service.AUTOSCALE) ?
+                        scalingHardLimitsService.isViolatingAutoscaleMaxStepInNodeCount(scalingAdjustment) :
+                        scalingHardLimitsService.isViolatingMaxUpscaleStepInNodeCount(scalingAdjustment);
+        if (violatingMaxNodeCount) {
             throw new BadRequestException(String.format("Upscaling by more than %d nodes is not supported",
                     scalingHardLimitsService.getMaxUpscaleStepInNodeCount()));
         }
     }
-
 }
