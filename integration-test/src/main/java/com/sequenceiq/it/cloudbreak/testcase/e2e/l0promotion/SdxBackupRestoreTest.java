@@ -10,23 +10,19 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
-import com.sequenceiq.it.cloudbreak.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.PreconditionSdxE2ETest;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.sdx.api.model.SdxBackupStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
-import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
-import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 import com.sequenceiq.sdx.api.model.SdxRestoreStatusResponse;
 
 public class SdxBackupRestoreTest extends PreconditionSdxE2ETest {
@@ -35,9 +31,6 @@ public class SdxBackupRestoreTest extends PreconditionSdxE2ETest {
 
     @Inject
     private SdxTestClient sdxTestClient;
-
-    @Inject
-    private StackTestClient stackTestClient;
 
     private String backupId;
 
@@ -50,10 +43,10 @@ public class SdxBackupRestoreTest extends PreconditionSdxE2ETest {
         initializeDefaultBlueprints(testContext);
         createDefaultCredential(testContext);
         createEnvironmentWithNetworkAndFreeIpa(testContext);
+        createSdx(testContext);
     }
 
-    @Ignore(value = "We need to wait the CB-13322 (Data Lake database backup request to Cloudbreak failed with status: 409) to be fixed!")
-    @Test(dataProvider = TEST_CONTEXT)
+    @Test(dataProvider = TEST_CONTEXT, description = "We need to wait the CB-13322 to be resolved")
     @UseSpotInstances
     @Description(
             given = "there is a running Manowar SDX cluster in available state",
@@ -61,35 +54,27 @@ public class SdxBackupRestoreTest extends PreconditionSdxE2ETest {
             then = "SDX restore should be done successfully"
     )
     public void testSDXBackupRestoreCanBeSuccessful(TestContext testContext) {
-        SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
-        sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NON_HA);
-        testContext
-                .given(SdxInternalTestDto.class)
-                    .withDatabase(sdxDatabaseRequest)
-                    .withCloudStorage(getCloudStorageRequest(testContext))
-                .when(sdxTestClient.createInternal())
-                .await(SdxClusterStatusResponse.RUNNING)
-                .awaitForHealthyInstances()
-                .validate();
-
-        SdxInternalTestDto sdxInternalTestDto = testContext.given(SdxInternalTestDto.class);
-        String cloudStorageBaseLocation = sdxInternalTestDto.getResponse().getCloudStorageBaseLocation();
+        SdxTestDto sdxTestDto = testContext.given(SdxTestDto.class);
+        String cloudStorageBaseLocation = sdxTestDto.getResponse().getCloudStorageBaseLocation();
         String backupObject = "backups";
         testContext
-                .given(SdxInternalTestDto.class)
+                .given(SdxTestDto.class)
+                .when(sdxTestClient.sync())
+                .await(SdxClusterStatusResponse.RUNNING)
+                .awaitForHealthyInstances()
                 .when(sdxTestClient.backup(StringUtils.join(List.of(cloudStorageBaseLocation, backupObject), "/"), null))
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForHealthyInstances()
                 .then(this::validateDatalakeBackupStatus)
                 .then(this::validateDatalakeStatus)
                 .then((tc, testDto, client) -> {
-                    getCloudFunctionality(tc).cloudStorageListContainer(cloudStorageBaseLocation, backupObject, false);
+                    getCloudFunctionality(tc).cloudStorageListContainer(cloudStorageBaseLocation, backupObject, true);
                     return testDto;
                 })
                 .validate();
 
         testContext
-                .given(SdxInternalTestDto.class)
+                .given(SdxTestDto.class)
                 .when(sdxTestClient.restore(backupId, null))
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForHealthyInstances()
@@ -98,7 +83,7 @@ public class SdxBackupRestoreTest extends PreconditionSdxE2ETest {
                 .validate();
     }
 
-    private SdxInternalTestDto validateDatalakeStatus(TestContext testContext, SdxInternalTestDto testDto, SdxClient client) {
+    private SdxTestDto validateDatalakeStatus(TestContext testContext, SdxTestDto testDto, SdxClient client) {
         String statuReason = client.getDefaultClient()
                 .sdxEndpoint()
                 .getDetailByCrn(testDto.getCrn(), Collections.emptySet())
@@ -116,7 +101,7 @@ public class SdxBackupRestoreTest extends PreconditionSdxE2ETest {
         return testDto;
     }
 
-    private SdxInternalTestDto validateDatalakeBackupStatus(TestContext testContext, SdxInternalTestDto testDto, SdxClient client) {
+    private SdxTestDto validateDatalakeBackupStatus(TestContext testContext, SdxTestDto testDto, SdxClient client) {
         String sdxName = testDto.getName();
         backupId = client.getDefaultClient()
                 .sdxBackupEndpoint()
@@ -137,7 +122,7 @@ public class SdxBackupRestoreTest extends PreconditionSdxE2ETest {
         return testDto;
     }
 
-    private SdxInternalTestDto validateDatalakeRestoreStatus(TestContext testContext, SdxInternalTestDto testDto, SdxClient client) {
+    private SdxTestDto validateDatalakeRestoreStatus(TestContext testContext, SdxTestDto testDto, SdxClient client) {
         String sdxName = testDto.getName();
         String status;
         String statusReason;

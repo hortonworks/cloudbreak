@@ -103,14 +103,19 @@ public class S3ClientActions extends S3Client {
                     }
                 } while (filteredObjectSummaries.isEmpty() && objectListing.isTruncated());
 
-                Log.log(LOGGER, format(" Amazon S3 object: %s contains %d sub-objects.",
-                        selectedObject, filteredObjectSummaries.size()));
+                if (filteredObjectSummaries.size() == 0) {
+                    LOGGER.error("Amazon S3 object: {} has 0 sub-objects!", selectedObject);
+                    throw new TestFailException(String.format("Amazon S3 object: %s has 0 sub-objects!", selectedObject));
+                } else {
+                    Log.log(LOGGER, format(" Amazon S3 object: %s contains %d sub-objects.",
+                            selectedObject, filteredObjectSummaries.size()));
+                }
 
                 for (S3ObjectSummary objectSummary : filteredObjectSummaries.stream().limit(10).collect(Collectors.toList())) {
                     S3Object object = s3Client.getObject(bucketName, objectSummary.getKey());
                     S3ObjectInputStream inputStream = object.getObjectContent();
 
-                    if (object.getObjectMetadata().getContentLength() == 0 && !zeroContent) {
+                    if (!zeroContent && object.getObjectMetadata().getContentLength() == 0) {
                         LOGGER.error("Amazon S3 path: {} has 0 bytes of content!", object.getKey());
                         throw new TestFailException(String.format("Amazon S3 path: %s has 0 bytes of content!", object.getKey()));
                     }

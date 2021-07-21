@@ -49,4 +49,13 @@ public class TelemetryTestDto extends AbstractCloudbreakTestDto<TelemetryRequest
         getRequest().setFluentAttributes(fluentAttributes);
         return this;
     }
+
+    public TelemetryTestDto withOnlyCloudStorageLogging() {
+        FeaturesRequest featuresRequest = new FeaturesRequest();
+        featuresRequest.addClusterLogsCollection(false);
+        featuresRequest.addWorkloadAnalytics(false);
+        featuresRequest.addCloudStorageLogging(true);
+        getRequest().setFeatures(featuresRequest);
+        return this;
+    }
 }
