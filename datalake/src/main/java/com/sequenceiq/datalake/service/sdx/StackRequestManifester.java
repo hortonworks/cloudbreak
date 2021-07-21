@@ -182,10 +182,8 @@ public class StackRequestManifester {
         if (cluster != null && cluster.getBlueprintName() == null) {
             throw new BadRequestException("BlueprintName not defined, should only happen on private API");
         }
-        if (cluster != null && cluster.getUserName() == null) {
-            cluster.setUserName("admin");
-        }
         if (cluster != null && cluster.getPassword() == null) {
+            // default password needed for ranger
             cluster.setPassword(PasswordUtil.generatePassword());
         }
     }
