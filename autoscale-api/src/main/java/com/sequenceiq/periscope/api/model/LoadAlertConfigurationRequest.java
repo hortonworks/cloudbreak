@@ -17,14 +17,14 @@ import io.swagger.annotations.ApiModelProperty;
 public class LoadAlertConfigurationRequest implements Json {
     @ApiModelProperty(LoadAlertJsonProperties.LOAD_ALERT_CONFIGURATION_MIN_RESOUCE_VALUE)
     @Min(value = 0)
-    @Max(value = 200)
+    @Max(value = 500)
     @Digits(fraction = 0, integer = 3)
     @NotNull
     private @Valid Integer minResourceValue;
 
     @ApiModelProperty(LoadAlertJsonProperties.LOAD_ALERT_CONFIGURATION_MAX_RESOUCE_VALUE)
     @Min(value = 0)
-    @Max(value = 200)
+    @Max(value = 500)
     @Digits(fraction = 0, integer = 3)
     @NotNull
     private @Valid Integer maxResourceValue;
@@ -49,13 +49,13 @@ public class LoadAlertConfigurationRequest implements Json {
 
     @ApiModelProperty(LoadAlertJsonProperties.LOAD_ALERT_CONFIGURATION_MAX_SCALEUP_STEP_SIZE_VALUE)
     @Min(value = 2)
-    @Max(value = 1000)
+    @Max(value = 500)
     @Digits(fraction = 0, integer = 3)
     private @Valid Integer maxScaleUpStepSize;
 
     @ApiModelProperty(LoadAlertJsonProperties.LOAD_ALERT_CONFIGURATION_MAX_SCALEDOWN_STEP_SIZE_VALUE)
     @Min(value = 2)
-    @Max(value = 1000)
+    @Max(value = 500)
     @Digits(fraction = 0, integer = 3)
     private @Valid Integer maxScaleDownStepSize;
 

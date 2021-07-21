@@ -108,10 +108,10 @@ public class ScalingRequest implements Runnable {
 
     private void scaleUp(int scalingAdjustment, int totalNodes) {
         metricService.incrementMetricCounter(MetricType.CLUSTER_UPSCALE_TRIGGERED);
-        if (scalingHardLimitsService.isViolatingMaxUpscaleStepInNodeCount(scalingAdjustment)) {
+        if (scalingHardLimitsService.isViolatingAutoscaleMaxStepInNodeCount(scalingAdjustment)) {
             LOGGER.debug("Upscale requested for '{}' nodes. Upscaling with the maximum allowed of '{}' node(s)",
-                    scalingAdjustment, scalingHardLimitsService.getMaxUpscaleStepInNodeCount());
-            scalingAdjustment = scalingHardLimitsService.getMaxUpscaleStepInNodeCount();
+                    scalingAdjustment, scalingHardLimitsService.getMaxAutoscaleStepInNodeCount());
+            scalingAdjustment = scalingHardLimitsService.getMaxAutoscaleStepInNodeCount();
         }
         String hostGroup = policy.getHostGroup();
         String statusReason = null;

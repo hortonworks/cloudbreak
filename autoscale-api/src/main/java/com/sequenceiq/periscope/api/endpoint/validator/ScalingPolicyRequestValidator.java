@@ -22,8 +22,8 @@ public class ScalingPolicyRequestValidator implements ConstraintValidator<ValidS
     @Override
     public boolean isValid(ScalingPolicyBase value, ConstraintValidatorContext context) {
         if (AdjustmentType.NODE_COUNT.equals(value.getAdjustmentType())
-                && scalingHardLimitsService.isViolatingMaxUpscaleStepInNodeCount(value.getScalingAdjustment())) {
-            String message = String.format("Maximum upscale step is %d node(s)", scalingHardLimitsService.getMaxUpscaleStepInNodeCount());
+                && scalingHardLimitsService.isViolatingAutoscaleMaxStepInNodeCount(value.getScalingAdjustment())) {
+            String message = String.format("Maximum upscale step is %d node(s)", scalingHardLimitsService.getMaxAutoscaleStepInNodeCount());
             ValidatorUtil.addConstraintViolation(context, message, "scalingAdjustment")
                     .disableDefaultConstraintViolation();
             return false;
