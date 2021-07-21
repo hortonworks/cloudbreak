@@ -118,6 +118,7 @@ public class AwsNativeEIPResourceBuilder extends AbstractAwsNativeComputeBuilder
             CloudResource cloudResource = CloudResource.builder()
                     .cloudResource(buildableResource.get(0))
                     .persistent(true)
+                    .instanceId(instanceResource.getInstanceId())
                     .reference(allocateAddressResult.getAllocationId())
                     .params(Map.of(CloudResource.ATTRIBUTES, EIpAttributes.EIpAttributesBuilder.builder()
                             .withAllocateId(allocateAddressResult.getAllocationId())

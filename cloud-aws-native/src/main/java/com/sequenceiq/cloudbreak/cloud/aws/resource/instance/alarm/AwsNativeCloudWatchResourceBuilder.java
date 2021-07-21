@@ -53,7 +53,7 @@ public class AwsNativeCloudWatchResourceBuilder extends AbstractAwsNativeCompute
                 .type(resourceType())
                 .status(CREATED)
                 .name(resourceName)
-                .reference(instanceResourceOpt.get().getInstanceId())
+                .instanceId(instanceResourceOpt.get().getInstanceId())
                 .persistent(true)
                 .build());
     }
@@ -74,13 +74,14 @@ public class AwsNativeCloudWatchResourceBuilder extends AbstractAwsNativeCompute
     public CloudResource delete(AwsContext context, AuthenticatedContext auth, CloudResource resource) throws Exception {
         String region = context.getLocation().getRegion().getRegionName();
         AwsCredentialView credential = new AwsCredentialView(auth.getCloudCredential());
-        boolean instanceHasAlarm = !nativeCloudWatchService.getMetricAlarmsForInstances(region, credential, Set.of(resource.getReference())).isEmpty();
+        String instanceId = resource.getInstanceId() == null ? resource.getReference() : resource.getInstanceId();
+        boolean instanceHasAlarm = !nativeCloudWatchService.getMetricAlarmsForInstances(region, credential, Set.of(instanceId)).isEmpty();
         if (instanceHasAlarm) {
-            LOGGER.info("About to remove CloudWatch alarm for instance: {}", resource.getInstanceId());
-            nativeCloudWatchService.deleteCloudWatchAlarmsForSystemFailures(region, credential, List.of(resource.getReference()));
+            LOGGER.info("About to remove CloudWatch alarm for instance: {}", instanceId);
+            nativeCloudWatchService.deleteCloudWatchAlarmsForSystemFailures(region, credential, List.of(instanceId));
             return resource;
         }
-        LOGGER.info("No alarm has found for instance: {}", resource.getReference());
+        LOGGER.info("No alarm has found for instance: {}", instanceId);
         return null;
     }
 

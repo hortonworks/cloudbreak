@@ -75,4 +75,9 @@ public class AwsNativeResourceConnector extends AbstractResourceConnector {
     protected List<CloudResource> collectProviderSpecificResources(List<CloudResource> resources, List<CloudInstance> vms) {
         return List.of();
     }
+
+    @Override
+    protected boolean isCloudResourceAndCloudInstanceEquals(CloudInstance instance, CloudResource resource) {
+        return instance.getInstanceId().equals(resource.getReference()) || instance.getInstanceId().equals(resource.getInstanceId());
+    }
 }
