@@ -11,6 +11,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -35,6 +36,7 @@ import com.sequenceiq.flow.core.model.FlowAcceptResult;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.flow.reactor.api.event.BaseFlowEvent;
 import com.sequenceiq.flow.reactor.config.EventBusStatisticReporter;
+import com.sequenceiq.flow.service.FlowNameFormatService;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
@@ -57,6 +59,9 @@ public class ReactorNotifierTest {
 
     @Mock
     private ErrorHandlerAwareReactorEventFactory eventFactory;
+
+    @Mock
+    private FlowNameFormatService flowNameFormatService;
 
     @InjectMocks
     private ReactorNotifier underTest;
@@ -140,7 +145,7 @@ public class ReactorNotifierTest {
         Event<Acceptable> event = new Event<>(data);
         when(eventFactory.createEventWithErrHandler(anyMap(), any(Acceptable.class)))
                 .thenReturn(event);
-        when(accepted.await(10L, TimeUnit.SECONDS)).thenReturn(FlowAcceptResult.alreadyExistingFlow());
+        when(accepted.await(10L, TimeUnit.SECONDS)).thenReturn(FlowAcceptResult.alreadyExistingFlow(Collections.EMPTY_SET));
 
         underTest.notify(1L, "RANDOM", data, stackService::getByIdWithTransaction);
 

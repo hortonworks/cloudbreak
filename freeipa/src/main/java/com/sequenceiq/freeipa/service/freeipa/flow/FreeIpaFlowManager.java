@@ -22,6 +22,7 @@ import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.core.model.FlowAcceptResult;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.flow.reactor.api.event.BaseFlowEvent;
+import com.sequenceiq.flow.service.FlowNameFormatService;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
@@ -39,6 +40,9 @@ public class FreeIpaFlowManager {
 
     @Inject
     private ErrorHandlerAwareReactorEventFactory eventFactory;
+
+    @Inject
+    private FlowNameFormatService flowNameFormatService;
 
     public FlowIdentifier notify(String selector, Acceptable acceptable) {
         Map<String, Object> headerWithUserCrn = getHeaderWithUserCrn(null);
@@ -79,7 +83,9 @@ public class FreeIpaFlowManager {
                 case RUNNING_IN_FLOW_CHAIN:
                     return new FlowIdentifier(FlowType.FLOW_CHAIN, accepted.getAsFlowChainId());
                 case ALREADY_EXISTING_FLOW:
-                    throw new FlowsAlreadyRunningException("Flow is under operation, request not allowed.");
+                    throw new FlowsAlreadyRunningException(String.format("Request not allowed, freeipa cluster already has a running operation. " +
+                            "Running operation(s): [%s]",
+                            flowNameFormatService.formatFlows(accepted.getAlreadyRunningFlows())));
                 default:
                     throw new IllegalStateException("Illegal resultType: " + accepted.getResultType());
             }

@@ -50,6 +50,7 @@ import com.sequenceiq.datalake.flow.repair.event.SdxRepairStartEvent;
 import com.sequenceiq.datalake.flow.start.event.SdxStartStartEvent;
 import com.sequenceiq.datalake.flow.stop.event.SdxStartStopEvent;
 import com.sequenceiq.datalake.service.EnvironmentClientService;
+import com.sequenceiq.flow.service.FlowNameFormatService;
 import com.sequenceiq.datalake.settings.SdxRepairSettings;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
@@ -83,6 +84,9 @@ public class SdxReactorFlowManager {
 
     @Inject
     private DatalakeDrConfig datalakeDrConfig;
+
+    @Inject
+    private FlowNameFormatService flowNameFormatService;
 
     public FlowIdentifier triggerSdxCreation(SdxCluster cluster) {
         LOGGER.info("Trigger Datalake creation for: {}", cluster);
@@ -225,8 +229,10 @@ public class SdxReactorFlowManager {
             } else {
                 switch (accepted.getResultType()) {
                     case ALREADY_EXISTING_FLOW:
-                        throw new FlowsAlreadyRunningException(String.format("Sdx cluster %s has flows under operation, request not allowed.",
-                                event.getData().getResourceId()));
+                        throw new FlowsAlreadyRunningException(String.format("Request not allowed, datalake cluster '%s' already has a running operation. " +
+                                        "Running operation(s): [%s]",
+                                event.getData().getResourceId(),
+                                flowNameFormatService.formatFlows(accepted.getAlreadyRunningFlows())));
                     case RUNNING_IN_FLOW:
                         return new FlowIdentifier(FlowType.FLOW, accepted.getAsFlowId());
                     case RUNNING_IN_FLOW_CHAIN:
@@ -238,6 +244,6 @@ public class SdxReactorFlowManager {
         } catch (InterruptedException e) {
             throw new CloudbreakApiException(e.getMessage());
         }
-
     }
+
 }
