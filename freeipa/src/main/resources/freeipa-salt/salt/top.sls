@@ -1,5 +1,6 @@
 base:
            '*':
+             - freeipa.grow-disk
              - nginx
              - tags
              - telemetry
