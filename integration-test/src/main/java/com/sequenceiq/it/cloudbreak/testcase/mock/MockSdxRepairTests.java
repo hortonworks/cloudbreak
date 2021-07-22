@@ -4,6 +4,7 @@ import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.IDBROKER;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -29,6 +30,12 @@ import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
 public class MockSdxRepairTests extends AbstractMockTest {
+
+    /**
+     * statuschecker.intervalsec by default is 180 seconds. we need to wait for 2 syncs, one in SDX, one in CB.
+     * We need at least 2 times that interval, testframework only waits for 1000*300 ms
+     **/
+    private static final long POLLING_INTERVAL_FOR_REPAIR_SECONDS = 2;
 
     @Inject
     private SdxTestClient sdxTestClient;
@@ -118,7 +125,7 @@ public class MockSdxRepairTests extends AbstractMockTest {
                     instancesToDelete.forEach(instanceId -> actionOnNode.accept("/" + testDto.getCrn() + "/spi/" + instanceId));
                     return testDto;
                 })
-                .await(stateBeforeRepair)
+                .await(stateBeforeRepair, Duration.ofSeconds(POLLING_INTERVAL_FOR_REPAIR_SECONDS))
                 .when(sdxTestClient.repairInternal(hostGroups.stream().map(HostGroupType::getName).toArray(String[]::new)), key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdxInternal))
                 .validate();
