@@ -54,25 +54,30 @@ public class CredentialValidator {
         credentialDefinitionService.checkPropertiesRemoveSensitives(platform, json);
     }
 
-    public void validateCredentialCloudPlatform(String cloudPlatform, String userCrn) {
-        validateCredentialCloudPlatformInternal(cloudPlatform, Crn.safeFromString(userCrn).getAccountId());
+    public void validateCredentialCloudPlatform(String cloudPlatform, String userCrn, CredentialType type) {
+        validateCredentialCloudPlatformInternal(cloudPlatform, Crn.safeFromString(userCrn).getAccountId(), type);
     }
 
-    private void validateCredentialCloudPlatformInternal(String cloudPlatform, String accountId) {
+    private void validateCredentialCloudPlatformInternal(String cloudPlatform, String accountId, CredentialType type) {
         if (!enabledPlatforms.contains(cloudPlatform)) {
             throw new BadRequestException(String.format("There is no such cloud platform as '%s'", cloudPlatform));
         }
         if (AZURE.name().equalsIgnoreCase(cloudPlatform) && !entitlementService.azureEnabled(accountId)) {
             throw new BadRequestException("Provisioning in Microsoft Azure is not enabled for this account.");
         }
-        if (GCP.name().equalsIgnoreCase(cloudPlatform) && !entitlementService.gcpEnabled(accountId)) {
+        if (GCP.name().equalsIgnoreCase(cloudPlatform) && CredentialType.ENVIRONMENT.equals(type)
+            && !entitlementService.gcpEnabled(accountId)) {
             throw new BadRequestException("Provisioning in Google Cloud is not enabled for this account.");
+        }
+        if (GCP.name().equalsIgnoreCase(cloudPlatform) && CredentialType.AUDIT.equals(type)
+            && !entitlementService.gcpAuditEnabled(accountId))  {
+            throw new BadRequestException("Auditing in Google Cloud is not enabled for this account.");
         }
     }
 
-    public boolean isCredentialCloudPlatformValid(String cloudPlatform, String accountId) {
+    public boolean isCredentialCloudPlatformValid(String cloudPlatform, String accountId, CredentialType type) {
         try {
-            validateCredentialCloudPlatformInternal(cloudPlatform, accountId);
+            validateCredentialCloudPlatformInternal(cloudPlatform, accountId, type);
             return true;
         } catch (BadRequestException e) {
             return false;

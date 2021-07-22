@@ -102,11 +102,11 @@ public class CredentialService extends AbstractCredentialService implements Reso
     }
 
     public Set<Credential> listAvailablesByAccountId(String accountId, CredentialType type) {
-        return repository.findAllByAccountId(accountId, getValidPlatformsForAccountId(accountId), type);
+        return repository.findAllByAccountId(accountId, getValidPlatformsForAccountId(accountId, type), type);
     }
 
     public List<ResourceWithId> findAsAuthorizationResourcesInAccountByType(String accountId, CredentialType type) {
-        return repository.findAsAuthorizationResourcesInAccountByType(accountId, getValidPlatformsForAccountId(accountId), type);
+        return repository.findAsAuthorizationResourcesInAccountByType(accountId, getValidPlatformsForAccountId(accountId, type), type);
     }
 
     public Set<Credential> findAllById(Iterable<Long> ids) {
@@ -114,10 +114,10 @@ public class CredentialService extends AbstractCredentialService implements Reso
     }
 
     @Cacheable(cacheNames = "credentialCloudPlatformCache")
-    public Set<String> getValidPlatformsForAccountId(String accountId) {
+    public Set<String> getValidPlatformsForAccountId(String accountId, CredentialType type) {
         return getEnabledPlatforms()
                 .stream()
-                .filter(cloudPlatform -> credentialValidator.isCredentialCloudPlatformValid(cloudPlatform, accountId))
+                .filter(cloudPlatform -> credentialValidator.isCredentialCloudPlatformValid(cloudPlatform, accountId, type))
                 .collect(Collectors.toSet());
     }
 
@@ -211,7 +211,7 @@ public class CredentialService extends AbstractCredentialService implements Reso
                     throw new BadRequestException("Credential already exists with name: " + name);
                 });
         LOGGER.debug("Validating credential for cloudPlatform {} and creator {}.", credential.getCloudPlatform(), creatorUserCrn);
-        credentialValidator.validateCredentialCloudPlatform(credential.getCloudPlatform(), creatorUserCrn);
+        credentialValidator.validateCredentialCloudPlatform(credential.getCloudPlatform(), creatorUserCrn, type);
         LOGGER.debug("Validating credential parameters for cloudPlatform {} and creator {}.", credential.getCloudPlatform(), creatorUserCrn);
         credentialValidator.validateParameters(Platform.platform(credential.getCloudPlatform()), new Json(credential.getAttributes()));
         String credentialCrn = createCRN(accountId);
@@ -238,7 +238,7 @@ public class CredentialService extends AbstractCredentialService implements Reso
 
     public CredentialPrerequisitesResponse getPrerequisites(String cloudPlatform, String deploymentAddress, String userCrn, CredentialType type) {
         String cloudPlatformInUpperCase = cloudPlatform.toUpperCase();
-        credentialValidator.validateCredentialCloudPlatform(cloudPlatformInUpperCase, userCrn);
+        credentialValidator.validateCredentialCloudPlatform(cloudPlatformInUpperCase, userCrn, type);
         return credentialPrerequisiteService.getPrerequisites(cloudPlatformInUpperCase, deploymentAddress, type);
     }
 
@@ -249,7 +249,7 @@ public class CredentialService extends AbstractCredentialService implements Reso
                     throw new BadRequestException("Credential already exists with name: " + name);
                 });
         LOGGER.debug("Validating credential for cloudPlatform {} and creator {}.", credential.getCloudPlatform(), creatorUserCrn);
-        credentialValidator.validateCredentialCloudPlatform(credential.getCloudPlatform(), creatorUserCrn);
+        credentialValidator.validateCredentialCloudPlatform(credential.getCloudPlatform(), creatorUserCrn, ENVIRONMENT);
         validateDeploymentAddress(credential);
         Credential created = credentialAdapter.initCodeGrantFlow(credential, accountId, creatorUserCrn);
         created.setResourceCrn(createCRN(accountId));

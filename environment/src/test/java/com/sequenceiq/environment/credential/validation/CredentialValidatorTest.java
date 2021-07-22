@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.credential.validation;
 
+import static com.sequenceiq.common.model.CredentialType.AUDIT;
+import static com.sequenceiq.common.model.CredentialType.ENVIRONMENT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -42,11 +44,21 @@ class CredentialValidatorTest {
 
     private static final String AZURE = "AZURE";
 
+    private static final String GCP = "GCP";
+
     private static final String FOO = "FOO";
 
     private static final String AZURE_DISABLED = " & Azure disabled";
 
     private static final String AZURE_ENABLED = " & Azure enabled";
+
+    private static final String GCP_ENABLED = " & Google enabled";
+
+    private static final String GCP_DISABLED = " & Google disabled";
+
+    private static final String GCP_AUDIT_ENABLED = " & Google audit enabled";
+
+    private static final String GCP_AUDIT_DISABLED = " & Google audit disabled";
 
     @Mock
     private CredentialDefinitionService credentialDefinitionService;
@@ -58,20 +70,25 @@ class CredentialValidatorTest {
 
     @BeforeEach
     void setUp() {
-        underTest = new CredentialValidator(Set.of(AWS, AZURE), credentialDefinitionService, Collections.emptyList(), entitlementService);
+        underTest = new CredentialValidator(Set.of(AWS, AZURE, GCP), credentialDefinitionService, Collections.emptyList(), entitlementService);
     }
 
     // @formatter:off
     // CHECKSTYLE:OFF
     static Object[][] validateCredentialCloudPlatformDataProvider() {
         return new Object[][]{
-                // testCaseName             cloudPlatform   azureEnabled    validExpected
-                {AWS + AZURE_DISABLED, AWS, false, true},
-                {AZURE + AZURE_DISABLED, AZURE, false, false},
-                {FOO + AZURE_DISABLED, FOO, false, false},
-                {AWS + AZURE_ENABLED, AWS, true, true},
-                {AZURE + AZURE_ENABLED, AZURE, true, true},
-                {FOO + AZURE_ENABLED, FOO, true, false},
+                //testCaseName             cloudPlatform   azureEnabled    gcpEnabled      gcpAuditEnabled  validExpected   credentialType
+                {AWS + AZURE_DISABLED,      AWS,            false,          false,          false,              true,           ENVIRONMENT},
+                {AZURE + AZURE_DISABLED,    AZURE,          false,          false,          false,              false,          ENVIRONMENT},
+                {FOO + AZURE_DISABLED,      FOO,            false,          false,          false,              false,          ENVIRONMENT},
+                {AWS + AZURE_ENABLED,       AWS,            true,           false,          false,              true,           ENVIRONMENT},
+                {AZURE + AZURE_ENABLED,     AZURE,          true,           false,          false,              true,           ENVIRONMENT},
+                {FOO + AZURE_ENABLED,       FOO,            true,           false,          false,              false,          ENVIRONMENT},
+                {FOO + AZURE_ENABLED,       FOO,            true,           false,          false,              false,          ENVIRONMENT},
+                {GCP + GCP_ENABLED,         GCP,            true,           true,           false,              true,           ENVIRONMENT},
+                {GCP + GCP_DISABLED,        GCP,            true,           false,          false,              false,          ENVIRONMENT},
+                {GCP + GCP_AUDIT_ENABLED,   GCP,            true,           true,           true,               true,           AUDIT},
+                {GCP + GCP_AUDIT_DISABLED,  GCP,            true,           true,           false,              false,          AUDIT},
         };
     }
     // CHECKSTYLE:ON
@@ -79,24 +96,48 @@ class CredentialValidatorTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("validateCredentialCloudPlatformDataProvider")
-    void testValidateCredentialCloudPlatform(String testCaseName, String cloudPlatform, boolean azureEnabled, boolean validExpected) {
+    void testValidateCredentialCloudPlatform(String testCaseName,
+        String cloudPlatform,
+        boolean azureEnabled,
+        boolean gcpEnabled,
+        boolean gcpAuditEnabled,
+        boolean validExpected,
+        CredentialType credentialType) {
         if (CloudPlatform.AZURE.equalsIgnoreCase(cloudPlatform)) {
             when(entitlementService.azureEnabled(ACCOUNT_ID)).thenReturn(azureEnabled);
         }
+        if (CloudPlatform.GCP.equalsIgnoreCase(cloudPlatform) && credentialType.equals(AUDIT)) {
+            when(entitlementService.gcpAuditEnabled(ACCOUNT_ID)).thenReturn(gcpAuditEnabled);
+        }
+        if (CloudPlatform.GCP.equalsIgnoreCase(cloudPlatform) && credentialType.equals(ENVIRONMENT)) {
+            when(entitlementService.gcpEnabled(ACCOUNT_ID)).thenReturn(gcpEnabled);
+        }
         if (validExpected) {
-            underTest.validateCredentialCloudPlatform(cloudPlatform, USER_CRN);
+            underTest.validateCredentialCloudPlatform(cloudPlatform, USER_CRN, credentialType);
         } else {
-            assertThrows(BadRequestException.class, () -> underTest.validateCredentialCloudPlatform(cloudPlatform, USER_CRN));
+            assertThrows(BadRequestException.class, () -> underTest.validateCredentialCloudPlatform(cloudPlatform, USER_CRN, credentialType));
         }
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("validateCredentialCloudPlatformDataProvider")
-    void testIsCredentialCloudPlatformValid(String testCaseName, String cloudPlatform, boolean azureEnabled, boolean validExpected) {
+    void testIsCredentialCloudPlatformValid(String testCaseName,
+        String cloudPlatform,
+        boolean azureEnabled,
+        boolean gcpEnabled,
+        boolean gcpAuditEnabled,
+        boolean validExpected,
+        CredentialType credentialType) {
         if (CloudPlatform.AZURE.equalsIgnoreCase(cloudPlatform)) {
             when(entitlementService.azureEnabled(ACCOUNT_ID)).thenReturn(azureEnabled);
         }
-        assertThat(underTest.isCredentialCloudPlatformValid(cloudPlatform, ACCOUNT_ID)).isEqualTo(validExpected);
+        if (CloudPlatform.GCP.equalsIgnoreCase(cloudPlatform) && credentialType.equals(AUDIT)) {
+            when(entitlementService.gcpAuditEnabled(ACCOUNT_ID)).thenReturn(gcpAuditEnabled);
+        }
+        if (CloudPlatform.GCP.equalsIgnoreCase(cloudPlatform) && credentialType.equals(ENVIRONMENT)) {
+            when(entitlementService.gcpEnabled(ACCOUNT_ID)).thenReturn(gcpEnabled);
+        }
+        assertThat(underTest.isCredentialCloudPlatformValid(cloudPlatform, ACCOUNT_ID, credentialType)).isEqualTo(validExpected);
     }
 
     @Test
@@ -106,7 +147,7 @@ class CredentialValidatorTest {
         Credential newCred = new Credential();
         newCred.setCloudPlatform(CloudPlatform.AWS.name());
 
-        ValidationResult result = underTest.validateCredentialUpdate(original, newCred, CredentialType.ENVIRONMENT);
+        ValidationResult result = underTest.validateCredentialUpdate(original, newCred, ENVIRONMENT);
         assertFalse(result.hasError());
     }
 
@@ -117,7 +158,7 @@ class CredentialValidatorTest {
         Credential newCred = new Credential();
         newCred.setCloudPlatform(CloudPlatform.AZURE.name());
 
-        ValidationResult result = underTest.validateCredentialUpdate(original, newCred, CredentialType.ENVIRONMENT);
+        ValidationResult result = underTest.validateCredentialUpdate(original, newCred, ENVIRONMENT);
         assertEquals(1, result.getErrors().size());
         assertThat(result.getErrors().get(0)).contains("CloudPlatform of the credential cannot be changed! Original: 'AWS' New: 'AZURE'.");
     }
