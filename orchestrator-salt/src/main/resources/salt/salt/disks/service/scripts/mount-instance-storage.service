@@ -1,0 +1,8 @@
+[Unit]
+Description=Mount Instance Storage On StartUp
+
+[Service]
+ExecStart=/opt/salt/scripts/mount-instance-storage.sh
+
+[Install]
+WantedBy=multi-user.target

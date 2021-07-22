@@ -1,0 +1,121 @@
+#!/usr/bin/env bash
+
+source /opt/salt/scripts/format-and-mount-common.sh
+
+MOUNT_PATH="{{ (salt['pillar.get']('mount')[salt['grains.get']('fqdn')])['mount_path'] }}"
+LOG_FILE="/var/log/mount-instance-storage.log"
+FS_TYPE=ext4
+
+format_disks_if_unformatted() {
+    local device_name_list=("$@")
+    log $LOG_FILE "format disk arguments: ${device_name_list[@]}"
+    local return_value=0
+    for devicename in ${device_name_list[@]}; do
+        log $LOG_FILE device: $devicename
+        if [ -z "$(blkid $devicename)" ]; then
+            log $LOG_FILE "formatting: $devicename"
+            $(mkfs -E lazy_itable_init=1 -O uninit_bg -F -t $FS_TYPE $devicename >> $LOG_FILE 2>&1)
+            if [ ! $? -eq 0 ]; then
+            log $LOG_FILE "formatting of device $devicename failed"
+            return_value=1
+            fi
+            log $LOG_FILE $format_result
+        fi
+    done
+    return $((return_value))
+}
+
+mount_one() {
+      local return_value=0
+      local success=0
+      local fstab_line=$1
+      local path=$(echo $fstab_line | cut -d' ' -f2)
+
+      log $LOG_FILE "mounting to path $path, line in fstab: $fstab_line"
+      mkdir $path >> $LOG_FILE 2>&1
+      echo $fstab_line >> /etc/fstab
+      log $LOG_FILE result of editing fstab: $?
+      mount $path >> $LOG_FILE 2>&1
+      if [ ! $? -eq 0 ]; then
+        log $LOG_FILE "error mounting device on $path"
+        return_value=1
+      fi
+      log $LOG_FILE "result of mounting $path: $?"
+      chmod 777 $path >> $LOG_FILE 2>&1
+      return $((return_value))
+}
+
+mount_all_sequential() {
+    local device_uuids_arr=("$@")
+    local return_value=0
+    log $LOG_FILE "mounting storage devices ${device_uuids_arr[@]}"
+    local hadoop_fs_dir_counter=1
+    for uuid in ${device_uuids_arr[@]}; do
+        mount_one "UUID=$uuid /hadoopfs/$MOUNT_PATH${hadoop_fs_dir_counter} $FS_TYPE defaults,noatime,nofail 0 2"
+        ((hadoop_fs_dir_counter++))
+        return_value=$(($? || return_value ))
+    done
+
+    log $LOG_FILE "mount all result: $return_value"
+    return $((return_value))
+}
+
+clean_up_fstab() {
+    log $LOG_FILE "clean up fstab"
+    sed_expr="/"
+    valid_uuids_expr=$(blkid -s UUID -o value | tr '\n' "|")
+    sed_expr+=${valid_uuids_expr%?}'/!d'
+    sed -i -E $sed_expr /etc/fstab
+}
+
+main () {
+    log $LOG_FILE "script 'instance-storage-format-and-mount' starts"
+    declare -a devices_arr
+    declare -a inst_storage_devices_arr
+    declare -a devices_log_arr
+    declare -a device_uuids_arr
+
+    clean_up_fstab
+
+    log $LOG_FILE "collecting NVMe instance storage devices"
+    readarray -t inst_storage_devices_arr < <(sudo nvme list -o json | jq -r  '.Devices[] | select(.ModelNumber == "Amazon EC2 NVMe Instance Storage") | .DevicePath')
+
+    if [ ${{ '{#' }}inst_storage_devices_arr[@]} -eq 0 ]; then
+        log $LOG_FILE "no NVMe instance storage found. Checking for other unmounted storage."
+        readarray -t devices_arr < <(lsblk -n -oKNAME)
+        devices_log=$(printf '%s ' "${devices_arr[@]}")
+        log $LOG_FILE "All devices: $devices_log"
+
+        for device in "${devices_arr[@]}"; do
+            path="/dev/$device"
+            if [[ $path == $root_disk* ]]; then
+                log $LOG_FILE "skipping root disk/partition: $path"
+            else [[ -z $(grep "$path" /proc/mounts | cut -d ' ' -f1) ]]
+                log $LOG_FILE "device '$path' is not mounted. Adding to devices to format and mount."
+                inst_storage_devices_arr+=($path)
+            fi
+        done
+        devices_log_arr=$(printf '%s ' "${inst_storage_devices_arr[@]}")
+        log $LOG_FILE "unmounted devices: $devices_log_arr"
+    else
+        devices_log_arr=$(printf '%s ' "${inst_storage_devices_arr[@]}")
+        log $LOG_FILE "NVMe instance storage devices: $devices_log_arr"
+    fi
+
+    format_disks_if_unformatted "${inst_storage_devices_arr[@]}"
+    [[ ! $return_code -eq 0 ]] && exit_with_code $LOG_FILE $EXIT_CODE_ERROR "could not format all devices"
+
+    for device in "${inst_storage_devices_arr[@]}"; do
+      local dev_uuid=$(blkid $device -s UUID -o value)
+      log $LOG_FILE "NVMe instance storage device: $device UUID: $dev_uuid"
+      device_uuids_arr+=($dev_uuid)
+    done
+
+    mount_all_sequential ${device_uuids_arr[@]}
+    return_code=$?
+    [[ ! $return_code -eq 0 ]] && exit_with_code $LOG_FILE $return_code "Not all devices were mounted"
+
+    exit_with_code $LOG_FILE 0 "script 'instance-storage-format-and-mount' ended"
+}
+
+[[ "$0" == "$BASH_SOURCE" ]] && main "$@"

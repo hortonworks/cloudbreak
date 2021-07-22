@@ -29,7 +29,7 @@ public interface HostOrchestrator extends HostRecipeExecutor {
     boolean isBootstrapApiAvailable(GatewayConfig gatewayConfig);
 
     void initServiceRun(List<GatewayConfig> allGatewayConfigs, Set<Node> allNodes, Set<Node> reachableNodes,
-            SaltConfig pillarConfig, ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException;
+            SaltConfig pillarConfig, ExitCriteriaModel exitCriteriaModel, String cloudPlatform) throws CloudbreakOrchestratorException;
 
     void initSaltConfig(List<GatewayConfig> allGateway, Set<Node> allNodes, SaltConfig saltConfig, ExitCriteriaModel exitModel)
             throws CloudbreakOrchestratorFailedException;

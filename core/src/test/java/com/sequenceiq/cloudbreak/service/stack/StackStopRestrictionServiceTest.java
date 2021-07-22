@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
+import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
@@ -20,11 +21,13 @@ public class StackStopRestrictionServiceTest {
 
     private final StackStopRestrictionService underTest = new StackStopRestrictionService();
 
+    private TemporaryStorage temporaryStorage = TemporaryStorage.ATTACHED_VOLUMES;
+
     @Test
     public void infrastructureShouldNotBeStoppableForEphemeralStorage() {
         Set<InstanceGroup> groups = new HashSet<>();
-        groups.add(createGroup(List.of("ebs")));
-        groups.add(createGroup(List.of(AwsDiskType.Ephemeral.value())));
+        groups.add(createGroup(List.of("ebs"), temporaryStorage));
+        groups.add(createGroup(List.of(AwsDiskType.Ephemeral.value()), temporaryStorage));
 
         StopRestrictionReason actual = underTest.isInfrastructureStoppable("AWS", groups);
 
@@ -32,10 +35,21 @@ public class StackStopRestrictionServiceTest {
     }
 
     @Test
+    public void infrastructureShouldBeStoppableIfTemporaryStorageIsEphemeralVolumes() {
+        Set<InstanceGroup> groups = new HashSet<>();
+        groups.add(createGroup(List.of("ebs"), temporaryStorage));
+        groups.add(createGroup(List.of(AwsDiskType.Ephemeral.value()), TemporaryStorage.EPHEMERAL_VOLUMES));
+
+        StopRestrictionReason actual = underTest.isInfrastructureStoppable("AWS", groups);
+
+        assertEquals(StopRestrictionReason.NONE, actual);
+    }
+
+    @Test
     public void infrastructureShouldBeStoppableForMixedStorage() {
         Set<InstanceGroup> groups = new HashSet<>();
-        groups.add(createGroup(List.of("ebs")));
-        groups.add(createGroup(List.of(AwsDiskType.Ephemeral.value(), AwsDiskType.Gp2.value())));
+        groups.add(createGroup(List.of("ebs"), temporaryStorage));
+        groups.add(createGroup(List.of(AwsDiskType.Ephemeral.value(), AwsDiskType.Gp2.value()), temporaryStorage));
 
         StopRestrictionReason actual = underTest.isInfrastructureStoppable("AWS", groups);
 
@@ -51,8 +65,8 @@ public class StackStopRestrictionServiceTest {
     @Test
     public void infrastructureShouldBeStoppableForValidInstanceGroups() {
         Set<InstanceGroup> groups = new HashSet<>();
-        groups.add(createGroup(List.of("ebs")));
-        InstanceGroup master = createGroup(List.of("ebs"));
+        groups.add(createGroup(List.of("ebs"), temporaryStorage));
+        InstanceGroup master = createGroup(List.of("ebs"), temporaryStorage);
         master.getTemplate().setAttributes(
                 new JsonToString().convertToEntityAttribute(
                         "{\"sshLocation\":\"0.0.0.0/0\",\"encrypted\":false}"));
@@ -63,15 +77,16 @@ public class StackStopRestrictionServiceTest {
         assertEquals(StopRestrictionReason.NONE, actual);
     }
 
-    private InstanceGroup createGroup(List<String> volumeTypes) {
+    private InstanceGroup createGroup(List<String> volumeTypes, TemporaryStorage temporaryStorage) {
         InstanceGroup group = new InstanceGroup();
-        Template ephemeralTemplate = new Template();
-        group.setTemplate(ephemeralTemplate);
-        ephemeralTemplate.setVolumeTemplates(Sets.newHashSet());
+        Template template = new Template();
+        template.setTemporaryStorage(temporaryStorage);
+        group.setTemplate(template);
+        template.setVolumeTemplates(Sets.newHashSet());
         for (String volumeType: volumeTypes) {
             VolumeTemplate volumeTemplate = new VolumeTemplate();
             volumeTemplate.setVolumeType(volumeType);
-            ephemeralTemplate.getVolumeTemplates().add(volumeTemplate);
+            template.getVolumeTemplates().add(volumeTemplate);
         }
         return group;
     }

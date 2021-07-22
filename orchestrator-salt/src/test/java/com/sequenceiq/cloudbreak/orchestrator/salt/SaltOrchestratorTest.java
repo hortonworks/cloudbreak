@@ -231,7 +231,7 @@ public class SaltOrchestratorTest {
         PowerMockito.when(SaltStates.getGrains(any(), any(), any())).thenReturn(new HashMap<>());
 
         SaltConfig saltConfig = new SaltConfig();
-        saltOrchestrator.initServiceRun(Collections.singletonList(gatewayConfig), targets, targets, saltConfig, exitCriteriaModel);
+        saltOrchestrator.initServiceRun(Collections.singletonList(gatewayConfig), targets, targets, saltConfig, exitCriteriaModel, "testPlatform");
         saltOrchestrator.runService(Collections.singletonList(gatewayConfig), targets, saltConfig, exitCriteriaModel);
 
         Set<String> allNodes = targets.stream().map(Node::getHostname).collect(Collectors.toSet());
