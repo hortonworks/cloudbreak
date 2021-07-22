@@ -1,12 +1,9 @@
-package com.sequenceiq.cloudbreak.cloud.aws;
+package com.sequenceiq.cloudbreak.cloud.aws.common.validator;
 
-import static com.sequenceiq.cloudbreak.common.type.TemporaryStorage.ATTACHED_VOLUMES;
+import static com.sequenceiq.cloudbreak.common.type.TemporaryStorage.EPHEMERAL_VOLUMES;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -16,6 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.IntStream;
 
 import javax.inject.Inject;
@@ -26,9 +24,7 @@ import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -36,10 +32,6 @@ import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import com.amazonaws.AmazonServiceException;
-import com.amazonaws.SdkClientException;
-import com.amazonaws.services.cloudformation.AmazonCloudFormation;
-import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsAuthenticator;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsDefaultZoneProvider;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsEnvironmentVariableChecker;
@@ -62,12 +54,19 @@ import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.GroupNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
+import com.sequenceiq.cloudbreak.cloud.model.VmType;
+import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
+import com.sequenceiq.cloudbreak.cloud.model.Volume;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterConfig;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.cloudbreak.service.RetryService;
@@ -79,7 +78,7 @@ import io.opentracing.Tracer;
 @ExtendWith(SpringExtension.class)
     @TestPropertySource(properties = "cb.max.aws.resource.name.length=5")
 @Import(SdkClientExceptionMapper.class)
-public class AwsValidatorsTest {
+public class AwsStorageValidatorsTest {
 
     public static final String EMPTY = "";
 
@@ -89,22 +88,16 @@ public class AwsValidatorsTest {
     private AwsTagValidator awsTagValidatorUnderTest;
 
     @Inject
-    private AwsStackValidator awsStackValidatorUnderTest;
+    private AwsStorageValidator awsStorageValidatorUnderTest;
 
     @Inject
     private AwsAuthenticator awsAuthenticator;
-
-    @Mock
-    private AmazonCloudFormationClient amazonCloudFormationClient;
 
     @Inject
     private SdkClientExceptionMapper sdkClientExceptionMapper;
 
     @Inject
     private Retry retry;
-
-    @SpyBean
-    private AwsCloudFormationClient awsClient;
 
     @MockBean
     private Tracer tracer;
@@ -136,35 +129,31 @@ public class AwsValidatorsTest {
     }
 
     @Test
-    public void testStackValidatorStackAlreadyExist() {
-        doReturn(amazonCloudFormationClient).when(awsClient).createCloudFormationClient(any(), anyString());
-        Assertions.assertThrows(CloudConnectorException.class, () -> awsStackValidatorUnderTest.validate(authenticatedContext, null));
-    }
+    public void testStackValidatorNoInstanceStorage() {
+        Volume volume = new Volume("SSD", "SSD", 100, CloudVolumeUsageType.GENERAL);
+        InstanceTemplate noStorageTemplate =
+                new InstanceTemplate("noStorage", "worker", 0L, List.of(volume), InstanceStatus.CREATE_REQUESTED, Map.of(), 0L, "", EPHEMERAL_VOLUMES);
+        InstanceTemplate storageTemplate =
+                new InstanceTemplate("storage", "compute", 0L, List.of(volume), InstanceStatus.CREATE_REQUESTED, Map.of(), 0L, "", EPHEMERAL_VOLUMES);
+        CloudInstance noStorageInstance = new CloudInstance("", noStorageTemplate, null, "subnet-1", "az1");
+        CloudInstance storageInstance = new CloudInstance("", storageTemplate, null, "subnet-1", "az1");
+        Group noStoragegroup = new Group("worker", InstanceGroupType.CORE,
+                List.of(noStorageInstance), null, null, null, "", "", 0, Optional.empty(), createGroupNetwork());
+        Group storageGroup = new Group("compute", InstanceGroupType.CORE,
+                List.of(storageInstance), null, null, null, "", "", 0, Optional.empty(), createGroupNetwork());
+        CloudStack cloudStack = new CloudStack(List.of(noStoragegroup, storageGroup), null, null, Map.of(), Map.of(), "", null, "", "", null);
 
-    @Test
-    public void testStackValidatorStackUnexistent() {
-        doReturn(amazonCloudFormationClient).when(awsClient).createCloudFormationClient(any(), anyString());
-        when(amazonCloudFormationClient.describeStacks(any())).thenThrow(new AmazonServiceException("stackName does not exist"));
-        InstanceTemplate template =
-                new InstanceTemplate("noStorage", "worker", 0L, List.of(), InstanceStatus.CREATE_REQUESTED, Map.of(), 0L, "", ATTACHED_VOLUMES);
-        CloudInstance instance = new CloudInstance("", template, null, "subnet-1", "az1");
-        Group group = new Group("worker", InstanceGroupType.CORE, List.of(instance), null, null, null, "", "", 0, Optional.empty(), createGroupNetwork());
-        CloudStack cloudStack = new CloudStack(List.of(group), null, null, Map.of(), Map.of(), "", null, "", "", null);
-        awsStackValidatorUnderTest.validate(authenticatedContext, cloudStack);
-    }
-
-    @Test
-    public void testStackValidatorStackUseRetryClient() {
-        AmazonCloudFormation client = mock(AmazonCloudFormation.class);
-        doReturn(client).when(awsClient).createCloudFormation(any(), anyString());
-        when(client.describeStacks(any()))
-                .thenThrow(new SdkClientException("repeat1 Rate exceeded"))
-                .thenThrow(new SdkClientException("repeat2Request limit exceeded"))
-                .thenReturn(null);
-//        doReturn(new AmazonCloudFormationClient(client, mock(AwsCredentialView.class), retry))
-//                .when(awsClient).createCloudFormationRetryClient(any(), anyString());
-        Assertions.assertThrows(CloudConnectorException.class, () -> awsStackValidatorUnderTest.validate(authenticatedContext, null));
-        verify(client, times(3)).describeStacks(any());
+        CloudVmTypes cloudVmTypes = new CloudVmTypes();
+        VmType storageType = VmType.vmTypeWithMeta("storage", VmTypeMeta.VmTypeMetaBuilder.builder()
+                .withEphemeralConfig(new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1))
+                .create(), true);
+        VmType noStorageType = VmType.vmTypeWithMeta("noStorage", VmTypeMeta.VmTypeMetaBuilder.builder().create(), true);
+        Map<String, Set<VmType>> responses = Map.of("az", Set.of(storageType, noStorageType));
+        cloudVmTypes.setCloudVmResponses(responses);
+        when(awsPlatformResources.virtualMachines(any(), eq(Region.region("region")), any())).thenReturn(cloudVmTypes);
+        Assertions.assertThrows(CloudConnectorException.class,
+                () -> awsStorageValidatorUnderTest.validate(authenticatedContext, cloudStack),
+                "The following instance types does not support instance storage: [noStorage]");
     }
 
     @TestFactory
@@ -194,7 +183,7 @@ public class AwsValidatorsTest {
                 () -> testTagsWithExpectedTeBeFair(VALID, testStringWithLength(1))));
         tests.add(DynamicTest.dynamicTest("value is valid strange chars", () -> testTagsWithExpectedTeBeFair(VALID, "+-=._:/@")));
         tests.add(DynamicTest.dynamicTest("value is valid numeric chars", () -> testTagsWithExpectedTeBeFair(VALID, "1234567890")));
-        tests.add(DynamicTest.dynamicTest("value is valid alphabetic chars",
+        tests.add(DynamicTest.dynamicTest("value is valid alphaAwsLogRolePermissionValidatorbetic chars",
                 () -> testTagsWithExpectedTeBeFair("sheep", "A aB bC cD dE eF fG gH hI iJ jK kL lM mN nO oP pQ qR rS sT tU uV vW wX xY yZ z")));
         tests.add(DynamicTest.dynamicTest("value could start with aws", () -> testTagsWithExpectedTeBeFair(VALID, "aws1234567890")));
 
@@ -255,8 +244,7 @@ public class AwsValidatorsTest {
             AwsDefaultZoneProvider.class,
             AwsEnvironmentVariableChecker.class,
             RetryService.class,
-            AwsStackValidator.class,
-            CloudFormationStackUtil.class,
+            AwsStorageValidator.class,
             LoadBalancerTypeConverter.class,
             SdkClientExceptionMapper.class,
             SubnetFilterStrategyMultiplePreferPublic.class,

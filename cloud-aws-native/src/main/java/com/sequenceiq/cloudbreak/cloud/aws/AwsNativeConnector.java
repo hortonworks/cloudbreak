@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPlatformResources;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPublicKeyConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTagValidator;
+import com.sequenceiq.cloudbreak.cloud.aws.common.validator.AwsStorageValidator;
 import com.sequenceiq.cloudbreak.cloud.aws.metadata.AwsNativeMetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.aws.validator.AwsGatewaySubnetMultiAzValidator;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -89,6 +90,9 @@ public class AwsNativeConnector implements CloudConnector<List<CloudResource>> {
     @Inject
     private AwsNativeResourceConnector awsNativeResourceConnector;
 
+    @Inject
+    private AwsStorageValidator awsStorageValidator;
+
     @Override
     public Authenticator authentication() {
         return awsAuthenticator;
@@ -104,7 +108,7 @@ public class AwsNativeConnector implements CloudConnector<List<CloudResource>> {
         if (ValidatorType.IMAGE.equals(validatorType)) {
             return List.of();
         }
-        return List.of(awsTagValidator, awsGatewaySubnetMultiAzValidator);
+        return List.of(awsTagValidator, awsGatewaySubnetMultiAzValidator, awsStorageValidator);
     }
 
     @Override
