@@ -49,6 +49,9 @@ class EntitlementServiceTest {
                 {"CDP_GCP", (EntitlementCheckFunction) EntitlementService::gcpEnabled, false},
                 {"CDP_GCP", (EntitlementCheckFunction) EntitlementService::gcpEnabled, true},
 
+                {"AUDIT_ARCHIVING_GCP", (EntitlementCheckFunction) EntitlementService::gcpAuditEnabled, false},
+                {"AUDIT_ARCHIVING_GCP", (EntitlementCheckFunction) EntitlementService::gcpAuditEnabled, true},
+
                 {"CDP_CB_AWS_NATIVE", (EntitlementCheckFunction) EntitlementService::awsNativeEnabled, false},
                 {"CDP_CB_AWS_NATIVE", (EntitlementCheckFunction) EntitlementService::awsNativeEnabled, true},
 

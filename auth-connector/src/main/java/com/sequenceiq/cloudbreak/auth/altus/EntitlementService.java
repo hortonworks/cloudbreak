@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.auth.altus;
 
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.AUDIT_ARCHIVING_GCP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CB_AUTHZ_POWER_USERS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_DIFFERENT_DATAHUB_VERSION_THAN_DATALAKE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_HA_REPAIR;
@@ -100,6 +101,10 @@ public class EntitlementService {
 
     public boolean gcpEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_GCP);
+    }
+
+    public boolean gcpAuditEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, AUDIT_ARCHIVING_GCP);
     }
 
     public boolean awsNativeEnabled(String accountId) {
