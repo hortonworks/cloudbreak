@@ -55,7 +55,7 @@ setup_autotls_san:
     - name: /etc/cloudera-scm-agent/config.ini
     - mode: ensure
     - content: "subject_alt_names={{ internal_loadbalancer_san }}"
-    - after: "# subject_alt_names.*"
+    - after: "# client_cert_file.*"
     - backup: False
     - quiet: True
 
