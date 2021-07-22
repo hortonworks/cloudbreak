@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPlatformResources;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPublicKeyConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTagValidator;
+import com.sequenceiq.cloudbreak.cloud.aws.common.validator.AwsStorageValidator;
 import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.AwsResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
@@ -90,6 +91,9 @@ public class AwsConnector implements CloudConnector<Object> {
 
     @Inject
     private AwsPublicKeyConnector awsPublicKeyConnector;
+
+    @Inject
+    private AwsStorageValidator awsStorageValidator;
 
     @Override
     public Platform platform() {
@@ -146,7 +150,7 @@ public class AwsConnector implements CloudConnector<Object> {
         if (ValidatorType.IMAGE.equals(validatorType)) {
             return List.of();
         }
-        return Arrays.asList(awsTagValidator, awsStackValidator);
+        return Arrays.asList(awsTagValidator, awsStackValidator, awsStorageValidator);
     }
 
     @Override
