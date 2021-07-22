@@ -44,12 +44,12 @@ import com.sequenceiq.cloudbreak.api.service.ExposedService;
 import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
 import com.sequenceiq.cloudbreak.auth.CMLicenseParser;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
@@ -60,6 +60,8 @@ import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.CsdParcelDecorator;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.HostAttributeDecorator;
@@ -83,7 +85,9 @@ import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorCancelledException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
+import com.sequenceiq.cloudbreak.orchestrator.host.GrainOperation;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
+import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorGrainRunnerParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
@@ -245,7 +249,8 @@ public class ClusterHostServiceRunner {
             List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
             SaltConfig saltConfig = createSaltConfig(stack, cluster, primaryGatewayConfig, gatewayConfigs, allNodes, reachableNodes);
             ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stack.getId(), cluster.getId());
-            hostOrchestrator.initServiceRun(gatewayConfigs, allNodes, reachableNodes, saltConfig, exitCriteriaModel);
+            modifyStartupMountRole(stack, reachableNodes, GrainOperation.ADD);
+            hostOrchestrator.initServiceRun(gatewayConfigs, allNodes, reachableNodes, saltConfig, exitCriteriaModel, stack.getCloudPlatform());
             if (CollectionUtils.isEmpty(candidateAddresses)) {
                 mountDisks.mountAllDisks(stack.getId());
             } else {
@@ -253,6 +258,7 @@ public class ClusterHostServiceRunner {
             }
             recipeEngine.executePreClusterManagerRecipes(stack, hostGroupService.getRecipesByCluster(cluster.getId()));
             hostOrchestrator.runService(gatewayConfigs, reachableNodes, saltConfig, exitCriteriaModel);
+            modifyStartupMountRole(stack, reachableNodes, GrainOperation.REMOVE);
         } catch (CloudbreakOrchestratorCancelledException e) {
             throw new CancellationException(e.getMessage());
         } catch (CloudbreakOrchestratorException | IOException | CloudbreakException e) {
@@ -357,11 +363,26 @@ public class ClusterHostServiceRunner {
         saveSssdIpaPillar(servicePillar, kerberosConfig, serviceLocations);
         saveDockerPillar(cluster.getExecutorType(), servicePillar);
 
+        Map<String, Map<String, String>> mountPathMap = stack.getInstanceGroups().stream().flatMap(group -> group.getInstanceMetaDataSet().stream()
+                .collect(Collectors.toMap(
+                        InstanceMetaData::getDiscoveryFQDN,
+                        node -> singletonMap("mount_path", getMountPath(group)),
+                        (l, r) -> singletonMap("mount_path", getMountPath(group)))).entrySet().stream())
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        servicePillar.put("startup", new SaltPillarProperties("/mount/startup.sls", singletonMap("mount", mountPathMap)));
+
         proxyConfigProvider.decoratePillarWithProxyDataIfNeeded(servicePillar, cluster);
 
         decoratePillarWithJdbcConnectors(cluster, servicePillar);
 
         return new SaltConfig(servicePillar, grainPropertiesService.createGrainProperties(gatewayConfigs, cluster, reachableNodes));
+    }
+
+    private String getMountPath(InstanceGroup group) {
+        if (TemporaryStorage.EPHEMERAL_VOLUMES.equals(group.getTemplate().getTemporaryStorage())) {
+            return "ephfs";
+        }
+        return "fs";
     }
 
     private void addKerberosConfig(Map<String, SaltPillarProperties> servicePillar, KerberosConfig kerberosConfig) throws IOException {
@@ -814,5 +835,29 @@ public class ClusterHostServiceRunner {
             Map<String, Object> jdbcConnectors = singletonMap("jdbc_connectors", connectorJarUrlsByVendor);
             servicePillar.put("jdbc-connectors", new SaltPillarProperties("/jdbc/connectors.sls", jdbcConnectors));
         }
+    }
+
+    private void modifyStartupMountRole(Stack stack, Set<Node> nodes, GrainOperation operation) throws CloudbreakOrchestratorFailedException {
+        OrchestratorGrainRunnerParams stateParams = createStartupMountGrainRunnerParams(stack, nodes, operation);
+        LOGGER.debug("{} 'startup' role with params {}", operation.name().toLowerCase(), stateParams);
+        hostOrchestrator.runOrchestratorGrainRunner(stateParams);
+    }
+
+    private OrchestratorGrainRunnerParams createStartupMountGrainRunnerParams(Stack stack, Set<Node> nodes, GrainOperation operation) {
+        return createOrchestratorGrainRunnerParams(stack, stack.getCluster(), nodes, operation);
+    }
+
+    private OrchestratorGrainRunnerParams createOrchestratorGrainRunnerParams(Stack stack, Cluster cluster, Set<Node> nodes, GrainOperation grainOperation) {
+        Set<String> reachableHostnames = nodes.stream().map(Node::getHostname).collect(Collectors.toSet());
+        OrchestratorGrainRunnerParams grainRunnerParams = new OrchestratorGrainRunnerParams();
+        InstanceMetaData gatewayInstance = stack.getPrimaryGatewayInstance();
+        grainRunnerParams.setPrimaryGatewayConfig(gatewayConfigService.getGatewayConfig(stack, gatewayInstance, stack.getCluster().hasGateway()));
+        grainRunnerParams.setTargetHostNames(reachableHostnames);
+        grainRunnerParams.setAllNodes(nodes);
+        grainRunnerParams.setExitCriteriaModel(ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel(stack.getId(), cluster.getId()));
+        grainRunnerParams.setKey("roles");
+        grainRunnerParams.setValue("startup_mount");
+        grainRunnerParams.setGrainOperation(grainOperation);
+        return grainRunnerParams;
     }
 }

@@ -92,3 +92,7 @@ base:
     - match: grain
     - smartsense
     - smartsense.credentials
+
+  'roles:startup_mount':
+      - match: grain
+      - mount.startup

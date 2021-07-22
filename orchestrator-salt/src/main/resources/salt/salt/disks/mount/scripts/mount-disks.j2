@@ -4,7 +4,7 @@ DATABASE_VOLUME_INDEX="{{ (salt['pillar.get']('mount_data')[salt['grains.get']('
 ATTACHED_VOLUME_NAME_LIST="{{ (salt['pillar.get']('mount_data')[salt['grains.get']('fqdn')])['attached_volume_name_list'] }}"
 ATTACHED_VOLUME_SERIAL_LIST="{{ (salt['pillar.get']('mount_data')[salt['grains.get']('fqdn')])['attached_volume_serial_list'] }}"
 TEMPORARY_STORAGE="{{ (salt['pillar.get']('mount_data')[salt['grains.get']('fqdn')])['temporary_storage'] }}"
-CLOUD_PLATFORM={{ (salt['pillar.get']('mount_data')[salt['grains.get']('fqdn')])['cloud_platform'] }}
+CLOUD_PLATFORM="{{ (salt['pillar.get']('mount_data')[salt['grains.get']('fqdn')])['cloud_platform'] }}"
 PREVIOUS_FSTAB="{{ (salt['pillar.get']('mount_data')[salt['grains.get']('fqdn')])['previous_fstab'] }}"
 
 source /opt/salt/scripts/format-and-mount-common.sh

@@ -55,6 +55,10 @@ base:
     - match: grain
     - postgresql
 
+  'roles:startup_mount':
+    - match: grain
+    - disks.service
+
   # The reason why we need gateway and knox is becuse the knox role is not applied if the CM template does have Knox in it, and CB injects it automatically
   # CB-10699 DH HA has knox nodes on non-gateway nodes, so nginx shouldn't be installed there, but gateway's have knox.
   'G@roles:gateway':

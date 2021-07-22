@@ -348,7 +348,7 @@ public class SaltOrchestrator implements HostOrchestrator {
     @SuppressFBWarnings("REC_CATCH_EXCEPTION")
     @Override
     public void initServiceRun(List<GatewayConfig> allGateway, Set<Node> allNodes, Set<Node> reachableNodes, SaltConfig saltConfig,
-            ExitCriteriaModel exitModel) throws CloudbreakOrchestratorException {
+            ExitCriteriaModel exitModel, String cloudPlatform) throws CloudbreakOrchestratorException {
         GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(allGateway);
         Set<String> gatewayTargetIpAddresses = getGatewayPrivateIps(allGateway);
         Set<String> gatewayTargetHostnames = getGatewayHostnames(allGateway);
