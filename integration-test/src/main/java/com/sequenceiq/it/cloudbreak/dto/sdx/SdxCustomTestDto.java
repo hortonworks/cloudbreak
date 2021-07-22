@@ -78,7 +78,7 @@ public class SdxCustomTestDto extends AbstractSdxTestDto<SdxCustomClusterRequest
         ImageCatalogTestDto imageCatalogTestDto = getTestContext().get(ImageCatalogTestDto.class);
 
         withName(getResourcePropertyProvider().getName(getCloudPlatform()))
-                .withEnvironmentName(getTestContext().get(EnvironmentTestDto.class).getResponse().getName())
+                .withEnvironmentName(getTestContext().get(EnvironmentTestDto.class).getRequest().getName())
                 .withClusterShape(getCloudProvider().getClusterShape())
                 .withTags(getCloudProvider().getTags())
                 .withImageCatalogNameAndImageId(imageCatalogTestDto.getName(), imageSettingsV4Request.getId());
