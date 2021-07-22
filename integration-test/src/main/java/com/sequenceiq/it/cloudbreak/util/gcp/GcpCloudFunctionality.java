@@ -37,6 +37,12 @@ public class GcpCloudFunctionality implements CloudFunctionality {
     }
 
     @Override
+    public Map<String, String> getInstanceSubnetMap(List<String> instanceIds) {
+        return null;
+        //TODO
+    }
+
+    @Override
     public void deleteInstances(String clusterName, List<String> instanceIds) {
         gcpUtil.deleteHostGroupInstances(instanceIds);
     }

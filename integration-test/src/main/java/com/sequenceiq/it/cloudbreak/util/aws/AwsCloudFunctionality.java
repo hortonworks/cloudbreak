@@ -73,4 +73,9 @@ public class AwsCloudFunctionality implements CloudFunctionality {
     public Map<String, Boolean> enaSupport(List<String> instanceIds) {
         return amazonEC2Util.enaSupport(instanceIds);
     }
+
+    @Override
+    public Map<String, String> getInstanceSubnetMap(List<String> instanceIds) {
+        return amazonEC2Util.instanceSubnet(instanceIds);
+    }
 }

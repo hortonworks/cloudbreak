@@ -76,6 +76,12 @@ public interface CloudFunctionality {
     )
     Map<String, Boolean> enaSupport(List<String> instanceIds);
 
+    @Retryable(
+            maxAttempts = ATTEMPTS,
+            backoff = @Backoff(delay = DELAY, multiplier = MULTIPLIER, maxDelay = MAX_DELAY)
+    )
+    Map<String, String> getInstanceSubnetMap(List<String> instanceIds);
+
     default String transformTagKeyOrValue(String originalValue) {
         return originalValue;
     }

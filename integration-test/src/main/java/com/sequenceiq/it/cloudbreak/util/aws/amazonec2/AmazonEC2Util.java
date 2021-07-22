@@ -36,4 +36,8 @@ public class AmazonEC2Util {
     public Map<String, Boolean> enaSupport(List<String> instanceIds) {
         return ec2ClientActions.enaSupport(instanceIds);
     }
+
+    public Map<String, String> instanceSubnet(List<String> instanceIds) {
+        return ec2ClientActions.instanceSubnet(instanceIds);
+    }
 }

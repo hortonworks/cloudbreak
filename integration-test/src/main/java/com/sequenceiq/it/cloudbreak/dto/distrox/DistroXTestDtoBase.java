@@ -33,7 +33,8 @@ public class DistroXTestDtoBase<T extends DistroXTestDtoBase> extends AbstractCl
         withName(name)
                 .withInstanceGroupsEntity(DistroXInstanceGroupTestDto.defaultHostGroup(getTestContext()))
                 .withCluster(getTestContext().given(DistroXClusterTestDto.class))
-                .withImageSettings(getTestContext().given(DistroXImageTestDto.class));
+                .withImageSettings(getTestContext().given(DistroXImageTestDto.class))
+                .withVariant(getCloudProvider().getVariant());
         return getCloudProvider().distrox(this);
     }
 
@@ -60,6 +61,11 @@ public class DistroXTestDtoBase<T extends DistroXTestDtoBase> extends AbstractCl
     public DistroXTestDtoBase<T> withName(String name) {
         getRequest().setName(name);
         setName(name);
+        return this;
+    }
+
+    public DistroXTestDtoBase<T> withVariant(String variant) {
+        getRequest().setVariant(variant);
         return this;
     }
 

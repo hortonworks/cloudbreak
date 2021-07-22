@@ -70,4 +70,10 @@ public class AzureCloudFunctionality implements CloudFunctionality {
     public Map<String, Boolean> enaSupport(List<String> instanceIds) {
         return Collections.emptyMap();
     }
+
+    @Override
+    public Map<String, String> getInstanceSubnetMap(List<String> instanceIds) {
+        //TODO
+        return null;
+    }
 }
