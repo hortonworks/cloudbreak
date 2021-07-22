@@ -18,6 +18,7 @@ import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.AbstractCloudbreakTestDto;
+import com.sequenceiq.it.cloudbreak.dto.SubnetId;
 
 @Prototype
 public class DistroXInstanceGroupTestDto extends AbstractCloudbreakTestDto<InstanceGroupV1Request, InstanceGroupV4Response, DistroXInstanceGroupTestDto> {
@@ -74,6 +75,7 @@ public class DistroXInstanceGroupTestDto extends AbstractCloudbreakTestDto<Insta
                 .withGroup(hostGroupType.getName())
                 .withType(hostGroupType.getInstanceGroupType())
                 .withName(hostGroupType.getName())
+                .withNetwork(SubnetId.all())
                 .withTemplate(testContext.given(DistroXInstanceTemplateTestDto.class));
     }
 
@@ -91,6 +93,11 @@ public class DistroXInstanceGroupTestDto extends AbstractCloudbreakTestDto<Insta
 
     public DistroXInstanceGroupTestDto withGroup(String group) {
         getRequest().setName(group);
+        return this;
+    }
+
+    public DistroXInstanceGroupTestDto withNetwork(SubnetId subnetId) {
+        getRequest().setNetwork(getCloudProvider().instanceGroupNetworkV1Request(subnetId));
         return this;
     }
 

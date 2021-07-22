@@ -52,6 +52,21 @@ public class InstanceGroupTestDto extends AbstractCloudbreakTestDto<InstanceGrou
                 .withTemplate(getTestContext().given("InstanceGroupTestDto" + hostGroupType.getName(), InstanceTemplateV4TestDto.class, getCloudPlatform()));
     }
 
+    public InstanceGroupTestDto withNetwork() {
+        getRequest().setNetwork(getCloudProvider().instanceGroupNetworkV4Request(SubnetId.ordinals()));
+        return this;
+    }
+
+    public InstanceGroupTestDto withNetwork(SubnetId ids) {
+        getRequest().setNetwork(getCloudProvider().instanceGroupNetworkV4Request(ids));
+        return this;
+    }
+
+    public InstanceGroupTestDto withoutNetwork() {
+        getRequest().setNetwork(null);
+        return this;
+    }
+
     public static InstanceGroupTestDto hostGroup(TestContext testContext, HostGroupType hostGroupType) {
         return create(testContext, hostGroupType);
     }

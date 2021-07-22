@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsCloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.WasbCloudStorageV1Parameters;
+import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
 import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.distrox.api.v1.distrox.model.AzureDistroXV1Parameters;
@@ -189,6 +190,17 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     public DistroXRootVolumeTestDto distroXRootVolume(DistroXRootVolumeTestDto distroXRootVolume) {
         int rootVolumeSize = azureProperties.getInstance().getRootVolumeSize();
         return distroXRootVolume.withSize(rootVolumeSize);
+    }
+
+    @Override
+    public LoggingRequest loggingRequest(TelemetryTestDto dto) {
+        LoggingRequest loggingRequest = new LoggingRequest();
+        AdlsGen2CloudStorageV1Parameters adlsGen2CloudStorageV1Parameters = new AdlsGen2CloudStorageV1Parameters();
+        adlsGen2CloudStorageV1Parameters.setManagedIdentity(getLoggerIdentity());
+        adlsGen2CloudStorageV1Parameters.setSecure(getSecure());
+        loggingRequest.setAdlsGen2(adlsGen2CloudStorageV1Parameters);
+        loggingRequest.setStorageLocation(getBaseLocation());
+        return loggingRequest;
     }
 
     @Override

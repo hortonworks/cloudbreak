@@ -12,7 +12,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.BaseImageV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.network.InstanceGroupNetworkV4Request;
+import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
 import com.sequenceiq.common.api.type.ServiceEndpointCreation;
+import com.sequenceiq.distrox.api.v1.distrox.model.network.InstanceGroupNetworkV1Request;
 import com.sequenceiq.environment.api.v1.environment.model.request.AttachedFreeIpaRequest;
 import com.sequenceiq.it.TestParameter;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
@@ -20,6 +23,7 @@ import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ImageSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.PlacementSettingsTestDto;
+import com.sequenceiq.it.cloudbreak.dto.SubnetId;
 import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.DistroXClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.image.DistroXImageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentAuthenticationTestDto;
@@ -32,6 +36,7 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxRepairTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
+import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
@@ -146,6 +151,21 @@ public abstract class AbstractCloudProvider implements CloudProvider {
     }
 
     @Override
+    public LoggingRequest loggingRequest(TelemetryTestDto dto) {
+        return null;
+    }
+
+    @Override
+    public InstanceGroupNetworkV4Request instanceGroupNetworkV4Request(SubnetId subnetId) {
+        return null;
+    }
+
+    @Override
+    public InstanceGroupNetworkV1Request instanceGroupNetworkV1Request(SubnetId subnetId) {
+        return null;
+    }
+
+    @Override
     public Integer gatewayPort(StackTestDtoBase stackEntity) {
         return commonCloudProperties.getGatewayPort();
     }
@@ -226,6 +246,11 @@ public abstract class AbstractCloudProvider implements CloudProvider {
 
     @Override
     public String getFreeIpaImageCatalogUrl() {
+        return null;
+    }
+
+    @Override
+    public String getVariant() {
         return null;
     }
 

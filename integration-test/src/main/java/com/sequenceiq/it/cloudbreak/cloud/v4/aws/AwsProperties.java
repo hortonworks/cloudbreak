@@ -23,6 +23,8 @@ public class AwsProperties {
 
     private String dynamoTableName;
 
+    private Boolean multiaz;
+
     private final Instance instance = new Instance();
 
     private final Credential credential = new Credential();
@@ -45,6 +47,17 @@ public class AwsProperties {
 
     public void setRegion(String region) {
         this.region = region;
+    }
+
+    public Boolean getMultiaz() {
+        if (multiaz == null) {
+            return Boolean.FALSE;
+        }
+        return multiaz;
+    }
+
+    public void setMultiaz(Boolean multiaz) {
+        this.multiaz = multiaz;
     }
 
     public String getLocation() {

@@ -3,10 +3,13 @@ package com.sequenceiq.it.cloudbreak.cloud.v4;
 import java.util.Map;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.StackV4ParameterBase;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.network.InstanceGroupNetworkV4Request;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
 import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.InstanceTemplateV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.network.InstanceGroupNetworkV1Request;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
@@ -16,6 +19,7 @@ import com.sequenceiq.it.cloudbreak.dto.NetworkV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.PlacementSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.RootVolumeV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.StackAuthenticationTestDto;
+import com.sequenceiq.it.cloudbreak.dto.SubnetId;
 import com.sequenceiq.it.cloudbreak.dto.VolumeV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDtoBase;
@@ -68,6 +72,12 @@ public interface CloudProvider {
     DistroXVolumeTestDto attachedVolume(DistroXVolumeTestDto volume);
 
     RootVolumeV4TestDto rootVolume(RootVolumeV4TestDto rootVolume);
+
+    InstanceGroupNetworkV4Request instanceGroupNetworkV4Request(SubnetId subnetId);
+
+    InstanceGroupNetworkV1Request instanceGroupNetworkV1Request(SubnetId subnetId);
+
+    LoggingRequest loggingRequest(TelemetryTestDto dto);
 
     DistroXRootVolumeTestDto distroXRootVolume(DistroXRootVolumeTestDto distroXRootVolume);
 
@@ -154,4 +164,6 @@ public interface CloudProvider {
     void setInstanceTemplateV1Parameters(InstanceTemplateV1Request instanceTemplateV1Request);
 
     String getFreeIpaImageCatalogUrl();
+
+    String getVariant();
 }
