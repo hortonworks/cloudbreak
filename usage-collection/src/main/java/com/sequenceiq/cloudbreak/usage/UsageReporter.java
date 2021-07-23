@@ -121,4 +121,11 @@ public interface UsageReporter {
      */
     void cdpDatahubAutoscaleConfigChanged(
             UsageProto.CDPDatahubAutoscaleConfigChanged details);
+
+    /**
+     * Reports CDP datalake/datahub network check results.
+     * @param details the event details
+     */
+    void cdpNetworkCheckEvent(
+            UsageProto.CDPNetworkCheck details);
 }

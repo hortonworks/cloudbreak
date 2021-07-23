@@ -136,6 +136,14 @@ public class LoggingUsageReporter implements UsageReporter {
                 .build());
     }
 
+    @Override
+    public void cdpNetworkCheckEvent(UsageProto.CDPNetworkCheck details) {
+        checkNotNull(details);
+        log(eventBuilder()
+                .setCdpNetworkCheck(details)
+                .build());
+    }
+
     private UsageProto.Event.Builder eventBuilder() {
         return UsageProto.Event.newBuilder()
                 .setId(UUID.randomUUID().toString())
