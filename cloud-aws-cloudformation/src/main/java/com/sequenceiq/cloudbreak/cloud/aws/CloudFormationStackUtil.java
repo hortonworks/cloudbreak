@@ -124,7 +124,10 @@ public class CloudFormationStackUtil {
                 .flatMap(entry -> {
                     Group group = entry.getKey();
                     List<CloudResource> cloudResources = new ArrayList<>();
-                    Iterator<CloudInstance> groupInstancesIterator = group.getInstances().iterator();
+                    Iterator<CloudInstance> groupInstancesIterator = group.getInstances().stream()
+                            .filter(cloudInstance -> cloudInstance.getInstanceId() == null)
+                            .collect(Collectors.toList())
+                            .iterator();
                     for (String instanceId : entry.getValue()) {
                         CloudResource cloudResource = CloudResource.builder()
                                 .type(ResourceType.AWS_INSTANCE)
