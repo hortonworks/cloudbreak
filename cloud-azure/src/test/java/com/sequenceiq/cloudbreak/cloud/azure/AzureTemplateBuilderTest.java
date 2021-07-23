@@ -530,7 +530,6 @@ public class AzureTemplateBuilderTest {
         assertTrue(templateString.contains("\"name\": \"port-8443-probe\","));
         assertTrue(templateString.contains("\"type\": \"Microsoft.Network/publicIPAddresses\","));
         assertTrue(templateString.contains("\"name\": \"Basic\""));
-        assertFalse(templateString.contains("\"name\": \"Standard\""));
     }
 
     @ParameterizedTest(name = "buildWithGatewayInstanceGroupTypeAndMultipleLoadBalancers {0}")
@@ -578,7 +577,6 @@ public class AzureTemplateBuilderTest {
         assertTrue(templateString.contains("\"name\": \"port-8443-probe\","));
         assertTrue(templateString.contains("\"type\": \"Microsoft.Network/publicIPAddresses\","));
         assertTrue(templateString.contains("\"name\": \"Basic\""));
-        assertFalse(templateString.contains("\"name\": \"Standard\""));
         assertEquals(2, StringUtils.countMatches(templateString,
             "\"[resourceId('Microsoft.Network/loadBalancers'"));
         assertEquals(2, StringUtils.countMatches(templateString,

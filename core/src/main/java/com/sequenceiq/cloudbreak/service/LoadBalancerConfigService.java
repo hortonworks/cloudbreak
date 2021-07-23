@@ -210,11 +210,6 @@ public class LoadBalancerConfigService {
      * Adds availability sets to instance groups associated with Knox and Oozie target groups.
      * This method updates the JSON parameters associated with certain instance groups.
      *
-     * It's only necessary to add availability sets to the Azure deployment while we
-     * use the {@code basic} Azure Load Balancer SKU. We use {@code standard} Load Balancer
-     * we still use availability set to indicate that we need a {@code standard} IP addresses
-     * for the instances in those availability sets.
-     *
      * @param availabilitySetPrefix A string prefix. Should be a stack name normally.
      * @param loadBalancers the list of load balancers to look up target groups from.
      */
@@ -450,11 +445,11 @@ public class LoadBalancerConfigService {
     }
 
     private Optional<InstanceGroup> getOozieHAInstanceGroup(Stack stack) {
-        if (stack.getStackVersion() != null &&
-            isVersionNewerOrEqualThanLimited(stack.getStackVersion(), CLOUDERA_STACK_VERSION_7_2_11)) {
-            Cluster cluster = stack.getCluster();
-            if (cluster != null) {
-                CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(cluster.getBlueprint().getBlueprintText());
+        Cluster cluster = stack.getCluster();
+        if (cluster != null) {
+            CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(cluster.getBlueprint().getBlueprintText());
+            String cdhVersion = cmTemplateProcessor.getStackVersion();
+            if (cdhVersion != null && isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERA_STACK_VERSION_7_2_11)) {
                 Set<String> oozieGroupNames = getOozieGroups(cmTemplateProcessor);
                 return stack.getInstanceGroups().stream()
                     .filter(ig -> oozieGroupNames.contains(ig.getGroupName()))

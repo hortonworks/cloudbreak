@@ -494,7 +494,6 @@
           "hive-HIVESERVER2-BASE",
           "hms-GATEWAY-BASE",
           "hms-HIVEMETASTORE-BASE",
-          "oozie-OOZIE_SERVER-BASE",
           "livy-GATEWAY-BASE",
           "spark_on_yarn-GATEWAY-BASE",
           "tez-GATEWAY-BASE",
@@ -502,7 +501,9 @@
           "hdfs-JOURNALNODE-BASE",
           "zookeeper-SERVER-BASE",
           "yarn-GATEWAY-BASE",
-          "sqoop-SQOOP_CLIENT-GATEWAY-BASE"
+          "sqoop-SQOOP_CLIENT-GATEWAY-BASE",
+          "hue-HUE_LOAD_BALANCER-BASE",
+          "hue-HUE_SERVER-BASE"
         ]
       },
       {
@@ -527,9 +528,7 @@
           "zookeeper-SERVER-BASE",
           "yarn-QUEUEMANAGER_WEBAPP-BASE",
           "yarn-QUEUEMANAGER_STORE-BASE",
-          "yarn-GATEWAY-BASE",
-          "hue-HUE_LOAD_BALANCER-BASE",
-          "hue-HUE_SERVER-BASE"
+          "yarn-GATEWAY-BASE"
         ]
       },
       {
@@ -552,8 +551,8 @@
         "cardinality": 1,
         "roleConfigGroupsRefNames": [
           "knox-KNOX_GATEWAY-BASE",
-          "hue-HUE_LOAD_BALANCER-BASE",
-          "hue-HUE_SERVER-BASE"
+          "oozie-OOZIE_SERVER-BASE",
+          "spark_on_yarn-GATEWAY-BASE"
         ]
       }
     ]
