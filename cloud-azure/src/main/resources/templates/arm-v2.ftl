@@ -212,7 +212,7 @@
                         </#list>
                      </#if>
                      },
-                   <#if instance.availabilitySetName?? && instance.availabilitySetName?has_content>
+                   <#if loadBalancers?? && (loadBalancers?filter(loadBalancer -> loadBalancer.instanceGroupNames?size > 1)?size > 0)>
                      "sku": {
                          "name": "Standard",
                          "tier": "Regional"
@@ -530,7 +530,7 @@
                     ]
                   },
                   "sku": {
-                      <#if (loadBalancer.instanceGroupNames?size > 1)>
+                      <#if (loadBalancers?filter(loadBalancer -> loadBalancer.instanceGroupNames?size > 1)?size > 0)>
                           "name": "Standard"
                       <#else>
                           "name": "Basic"
@@ -544,7 +544,7 @@
                     "name": "${loadBalancer.name}-publicIp",
                     "location": "[parameters('region')]",
                     "sku": {
-                        <#if (loadBalancer.instanceGroupNames?size > 1)>
+                        <#if (loadBalancers?filter(loadBalancer -> loadBalancer.instanceGroupNames?size > 1)?size > 0)>
                             "name": "Standard"
                         <#else>
                             "name": "Basic"
