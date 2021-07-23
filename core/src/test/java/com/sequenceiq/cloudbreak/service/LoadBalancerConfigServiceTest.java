@@ -180,7 +180,10 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
             Set<LoadBalancer> loadBalancers = underTest.createLoadBalancers(stack, environment, false);
             assertEquals(1, loadBalancers.size());
             assertEquals(LoadBalancerType.PRIVATE, loadBalancers.iterator().next().getType());
-            assertEquals(1, stack.getInstanceGroups().iterator().next().getTargetGroups().size());
+            InstanceGroup masterInstanceGroup = stack.getInstanceGroups().stream()
+                .filter(ig -> "master".equals(ig.getGroupName()))
+                .findFirst().get();
+            assertEquals(1, masterInstanceGroup.getTargetGroups().size());
         });
     }
 
@@ -277,7 +280,10 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
             Set<LoadBalancer> loadBalancers = underTest.createLoadBalancers(stack, environment, false);
             assertEquals(1, loadBalancers.size());
             assertEquals(LoadBalancerType.PRIVATE, loadBalancers.iterator().next().getType());
-            assertEquals(1, stack.getInstanceGroups().iterator().next().getTargetGroups().size());
+            InstanceGroup masterInstanceGroup = stack.getInstanceGroups().stream()
+                .filter(ig -> "master".equals(ig.getGroupName()))
+                .findFirst().get();
+            assertEquals(1, masterInstanceGroup.getTargetGroups().size());
         });
     }
 
@@ -675,7 +681,6 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
     @Test
     public void testCreateAzurePrivateLoadBalancerWithOozieHA() {
         Stack stack = createAzureStack(StackType.DATALAKE, PRIVATE_ID_1, true);
-        stack.setStackVersion("7.2.11");
         CloudSubnet subnet = getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1);
         DetailedEnvironmentResponse environment = createEnvironment(subnet, false);
 
@@ -687,10 +692,10 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
             Set<LoadBalancer> loadBalancers = underTest.createLoadBalancers(stack, environment, false);
             assertEquals(1, loadBalancers.size());
             assertEquals(LoadBalancerType.PRIVATE, loadBalancers.iterator().next().getType());
-            InstanceGroup masterInstanceGroup = stack.getInstanceGroups().stream()
-                .filter(ig -> "master".equals(ig.getGroupName()))
+            InstanceGroup managerInstanceGroup = stack.getInstanceGroups().stream()
+                .filter(ig -> "manager".equals(ig.getGroupName()))
                 .findFirst().get();
-            assertEquals(2, masterInstanceGroup.getTargetGroups().size());
+            assertEquals(2, managerInstanceGroup.getTargetGroups().size());
 
             checkAvailabilitySetAttributes(loadBalancers);
         });
@@ -812,11 +817,16 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
         InstanceGroup instanceGroup1 = new InstanceGroup();
         instanceGroup1.setGroupName("master");
         instanceGroup1.setAttributes(new Json(new HashMap<String, Object>()));
+        InstanceGroup instanceGroup2 = new InstanceGroup();
+        instanceGroup2.setGroupName("manager");
+        instanceGroup2.setAttributes(new Json(new HashMap<String, Object>()));
         instanceGroups.add(instanceGroup1);
+        instanceGroups.add(instanceGroup2);
         InstanceMetaData imd1 = new InstanceMetaData();
         InstanceMetaData imd2 = new InstanceMetaData();
         Set<InstanceMetaData> imdSet = Set.of(imd1, imd2);
         instanceGroup1.setInstanceMetaData(imdSet);
+        instanceGroup2.setInstanceMetaData(imdSet);
         Stack stack = new Stack();
         stack.setType(type);
         stack.setCluster(cluster);
@@ -829,13 +839,12 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
         }
         if (AZURE.equals(cloudPlatform)) {
             attributes.put("noPublicIp", makePrivate);
-            InstanceGroup instanceGroup2 = new InstanceGroup();
-            instanceGroup2.setGroupName("worker");
-            instanceGroups.add(instanceGroup2);
+            InstanceGroup instanceGroup3 = new InstanceGroup();
+            instanceGroup3.setGroupName("worker");
+            instanceGroups.add(instanceGroup3);
         }
         network.setAttributes(new Json(attributes));
         stack.setNetwork(network);
-        stack.setStackVersion("7.2.10");
         return stack;
     }
 

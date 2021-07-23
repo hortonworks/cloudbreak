@@ -256,11 +256,11 @@
              {% if 'OOZIE' in exposed and 'OOZIE_SERVER' in salt['pillar.get']('gateway:location') -%}
              <param>
                  <name>OOZIEUI</name>
-                 <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000</value>
+                 <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;enableStickySession=false;noFallback=false;enableLoadBalancing=true</value>
              </param>
              <param>
                  <name>OOZIE</name>
-                 <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000</value>
+                 <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;enableStickySession=false;noFallback=false;enableLoadBalancing=true</value>
              </param>
              {%- endif %}
              {% if 'RANGER' in exposed and 'RANGER_ADMIN' in salt['pillar.get']('gateway:location') -%}
