@@ -105,6 +105,26 @@ message Event {
     CDPUDXBundleInitiated cdpUDXBundleInitiated = 46;
     // A CDP UDX Bundle was received
     CDPUDXBundleReceived cdpUDXBundleReceived = 47;
+    // A CDP DataFlow Deployment was requested to be created, updated, or terminated.
+    CDPDFDeploymentRequested cdpDFDeploymentRequested = 48;
+    // A CDP DataFlow Deployment's status changed.
+    CDPDFDeploymentStatusChanged cdpDFDeploymentStatusChanged = 49;
+    // A CDP DataFlow Service cluster scaled up or down.
+    CDPDFServiceNodesChanged cdpDFServiceNodesChanged = 50;
+    // A CDP Flow Deployment (NiFi cluster) scaled up or down
+    CDPDFDeploymentPodsChanged cdpDFDeploymentPodsChanged = 51;
+    // A CDP Liftie cluster was requested to create / update / upgrade / delete.
+    CDPLiftieRequested cdpLiftieRequested = 52;
+    // A CDP Liftie cluster's status changed.
+    CDPLiftieClusterStatusChanged cdpLiftieClusterStatusChanged = 53;
+    // A KPI was added to a DataFlow deployment.
+    CDPDFDeploymentKpiCreated cdpDFDeploymentKpiCreated = 54;
+    // A KPI of a DataFlow deployment was modified.
+    CDPDFDeploymentKpiUpdated cdpDFDeploymentKpiUpdated = 55;
+    // A KPI of a DataFlow deployment was deleted.
+    CDPDFDeploymentKpiDeleted cdpDFDeploymentKpiDeleted = 56;
+    // A CDP preflight network check result reported
+    CDPNetworkCheck cdpNetworkCheck = 57;
   }
 }
 
@@ -477,6 +497,13 @@ message CDPCMLWorkspaceStatus {
     VALIDATION_SUCCEEDED = 24;
     // The status when the pre-flight validation of a workspace results in validation failure.
     VALIDATION_FAILED = 25;
+
+    // The status when the pre-install validation of a workspace request is started.
+    PRE_INSTALL_VALIDATION_STARTED = 26;
+    // The status when the pre-install validation of a workspace results in validation success.
+    PRE_INSTALL_VALIDATION_SUCCEEDED = 27;
+    // The status when the pre-install validation of a workspace results in validation failure.
+    PRE_INSTALL_VALIDATION_FAILED = 28;
   }
 }
 
@@ -566,6 +593,182 @@ message CDPCMLWorkspaceStatusChanged {
   // added tags that are product-specific. The format of this is a map serialized
   // into a string as json. e.g.:   "tags": "{\"key1\":\"value1\",\"key2\":\"value2\"}"
   string userTags = 9;
+}
+
+// The status of a CDP Liftie managed cluster.
+message CDPLiftieClusterStatus {
+  enum Value {
+    // A value indicating the enum is unset.
+    UNSET = 0;
+    // The status when liftie is trying to create a kubernetes cluster.
+    PROVISION_STARTED = 1;
+    // The status when liftie is done creating a kubernetes cluster.
+    PROVISION_FINISHED = 2;
+    // The status when liftie failed to provision a kubernetes cluster.
+    PROVISION_FAILED = 3;
+
+    // The status when liftie is trying to install deployments in the kubernetes cluster.
+    DEPLOYMENT_STARTED = 4;
+    // The status when liftie is done installing deployments in the kubernetes cluster.
+    DEPLOYMENT_FINISHED = 5;
+    // The status when liftie failed to install deployments in the kubernetes cluster.
+    DEPLOYMENT_FAILED = 6;
+
+    // The status when liftie is trying to delete a running kubernetes cluster.
+    DELETE_STARTED = 7;
+    // The status when liftie is done deleting a kubernetes cluster.
+    DELETE_FINISHED = 8;
+    // The status when liftie failed to delete a kubernetes cluster.
+    DELETE_FAILED = 9;
+
+    // The status when lifite is trying to update a cluster.
+    UPDATE_STARTED = 10;
+    // The status when lifite is done updating a cluster.
+    UPDATE_FINISHED = 11;
+    // The status when lifite failed to update a cluster.
+    UPDATE_FAILED = 12;
+
+    // The status when lifite is trying to upgrade a cluster.
+    UPGRADE_STARTED = 13;
+    // The status when lifite is done upgrading a cluster.
+    UPGRADE_FINISHED = 14;
+    // The status when lifite failed to upgrade a cluster.
+    UPGRADE_FAILED = 15;
+
+    // The status when liftie is trying to rollback failed provisioned kubernetes cluster.
+    ROLLBACK_STARTED = 16;
+    // The status when liftie is done rolling back kubernetes cluster.
+    ROLLBACK_FINISHED = 17;
+    // The status when liftie failed to rollback the kubernetes cluster.
+    ROLLBACK_FAILED = 18;
+
+    // The status when liftie is trying to validate a request.
+    VALIDATION_STARTED = 19;
+    // The status when liftie is done validating the request.
+    VALIDATION_FINISHED = 20;
+    // The status when liftie failed to validate the request.
+    VALIDATION_FAILED = 21;
+  }
+}
+
+// Autoscaling InstanceGroup metadata about the cluster when it was created or updated.
+message CDPLiftieInstanceGroupMetadata {
+  // auto scaling instance group name.
+  string instanceGroupName = 1;
+  // Requested instance type for the auto scaling instance group.
+  string instanceType = 2;
+  // Requested instance tier (SPOT/ON_DEMAND) for the auto scaling instance group.
+  string instanceTier = 3;
+  // Requested min workers for the auto scaling instance group.
+  int32 minWorkers = 4;
+  // Requested max workers for the auto scaling instance group.
+  int32 maxWorkers = 5;
+  // Requested instance count
+  int32 instanceCount = 6;
+  // Requested instance root volume
+  int32 rootVolume = 7;
+  // Reqested instance group is single zone
+  bool singleZone = 8;
+}
+
+// Collection of Autoscaling Instance Groups metadata
+message CDPLiftieInstanceGroups {
+  repeated CDPLiftieInstanceGroupMetadata instanceGroup = 1;
+}
+
+// AWS metadata about the cluster when it was created or updated.
+message CDPLiftieAWSMetadata {
+  // AWS region
+  string region = 1;
+}
+
+// Azure metadata about the cluster when it was created or updated.
+message CDPLiftieAzureMetadata {
+  // Azure availability zone
+  string region = 1;
+}
+
+// GCP metadata about the cluster when it was created or updated.
+message CDPLiftieGCPMetadata {
+  string region = 1;
+}
+
+// Generated when a valid CDP Liftie cluster provisioning request has been made.
+message CDPLiftieRequested {
+  // The CDP actor CRN of the request.
+  string actorCrn = 1;
+  // The tenant of the request.
+  string tenant = 2;
+  // The CRN of the environment.
+  string envCrn = 3;
+  // The Liftie cluster Id.
+  string clusterId = 4;
+  // The Liftie app version.
+  string liftieVersion = 5;
+  // instance groups metadata
+  CDPLiftieInstanceGroups cdpLiftieInstanceGroups = 6;
+  // entitlements. The format of this is a map serialized
+  // into a string as json. e.g.: "cdpLiftieAddons": "{\"key1\":\"value1\",\"key2\":\"value2\"}"
+  string cdpLiftieEntitlements = 7;
+  // add-ons. The format of this is a map serialized
+  // into a string as json. e.g.: "cdpLiftieAddons": "{\"key\":\"val\"}"
+  string cdpLiftieAddons = 8;
+  // metadata
+  oneof metadata {
+    // AWS specific metadata about the workspace.
+    CDPLiftieAWSMetadata cdpLiftieAWSMetadata = 9;
+    // AZURE specific metadata about the workspace.
+    CDPLiftieAzureMetadata cdpLiftieAzureMetadata = 10;
+    // GCP specific metadata about the workspace.
+    CDPLiftieGCPMetadata cdpLiftieGCPMetadata = 11;
+  }
+  // the kubernetes version requested
+  string kubernetesVersion = 12;
+  // the request id of the create event
+  string requestId = 13;
+  // the experience that send the request, (CML, DEX, etc.)
+  string experience = 14;
+  // operation type (Create, Update, etc.)
+  string opType = 15;
+  // api type (Cluster, User, etc.)
+  string apiType = 16;
+}
+
+// Generated when a CDP Liftie cluster's status changed.
+message CDPLiftieClusterStatusChanged {
+  // Deprecated/Removed fields
+  reserved 5;
+  // The tenant of the request.
+  string tenant = 1;
+  // The CRN of the environment.
+  string envCrn = 2;
+  // The Liftie app version.
+  string clusterId = 3;
+  // The cloud provider
+  string provider = 4;
+  // the Liftie Cluster's status before the change.
+  CDPLiftieClusterStatus.Value oldStatus = 6;
+  // the Liftie Cluster's status after the change.
+  CDPLiftieClusterStatus.Value newStatus = 7;
+  // A failure message for the Liftie Cluster. This will only be set if newStatus is
+  // *_FAILED.
+  string failureReason = 8;
+  // old kubernetes version.
+  string oldVersion = 9;
+  // new kubernetes version
+  string newVersion = 10;
+  // old instance groups.
+  CDPLiftieInstanceGroups oldInstanceGroups = 11;
+  // new instance groups.
+  CDPLiftieInstanceGroups newInstanceGroups = 12;
+  // the request id to track the whole event.  Can be any event. (delete, update, create, install, etc)
+  string requestId = 13;
+  // the experience that send the request, (CML, DEX, etc.)
+  string experience = 14;
+  // operation type (Create, Update, etc.)
+  string opType = 15;
+  // api type (Cluster, User, etc.)
+  string apiType = 16;
 }
 
 // The status of a CDP request
@@ -1124,10 +1327,12 @@ message CDPDFServiceRequested {
   string version = 8;
   // Is the load balancer publicly available on the internet?
   bool publicEndpoint = 9;
-  // Is access restricted by ip ranges (CIDR)?
+  // Is K8S API access restricted by ip ranges (CIDR)?
   bool accessRestricted = 10;
   // The initial status of the df service. Should be ENABLE_REQUESTED, UPDATE_REQUESTED, or DISABLE_REQUESTED.
   CDPDFServiceStatus.Value status = 11;
+  // Is the load balancer (if configured) restricting access by ip ranges?
+  bool loadBalancerAccessRestricted = 12;
 }
 
 message CDPDFServiceStatusChanged {
@@ -1137,6 +1342,75 @@ message CDPDFServiceStatusChanged {
   CDPDFServiceStatus.Value oldStatus = 2;
   // The status of the df service after the change
   CDPDFServiceStatus.Value newStatus = 3;
+  // A failure message for the df service. This will only be set if newStatus is
+  // *_FAILED.
+  string failureReason = 4;
+}
+
+// The status of a CDP Deployment.
+message CDPDFDeploymentStatus {
+  enum Value {
+    // A value indicating the enum is unset.
+    UNSET = 0;
+    // The status of a deployment that is being requested.
+    CREATE_REQUESTED = 1;
+    // The status of a deployment.
+    CREATE_IN_PROGRESS = 2;
+    // The status of a deployment that is available for use.
+    CREATE_COMPLETED = 3;
+    // The status of a deployment that failed.
+    CREATE_FAILED = 4;
+    // The status of a deployment that is being requested.
+    TERMINATE_REQUESTED = 5;
+    // The status of a deployment that is being terminated.
+    TERMINATE_IN_PROGRESS = 6;
+    // The status of a deployment that is successfully terminated.
+    TERMINATE_COMPLETED = 7;
+    // The status of a deployment that failed to terminate.
+    TERMINATE_FAILED = 8;
+    // The status of a deployment that is being requested to terminate.
+    UPDATE_REQUESTED = 9;
+    // The status of a deployment that is being updated.
+    UPDATE_IN_PROGRESS = 10;
+    // The status of a deployment was updated successfully.
+    UPDATE_COMPLETED = 11;
+    // The status of a deployment that failed to update.
+    UPDATE_FAILED = 12;
+  }
+}
+
+message CDPDFDeploymentRequested {
+  // Operation metadata
+  CDPDFOperationDetails operationDetails = 1;
+  // The crn of the CDP environment where the deployment is to land.
+  string environmentCrn = 2;
+  // The number of parameters defined for the deployment
+  int32 parameterCount = 3;
+  // The number of KPIs monitored in the deployment
+  int32 kpiCount = 4;
+  // Is autoscaling of the NiFi cluster enabled?
+  bool autoscalingEnabled = 5;
+  // Minimum number of nodes.
+  int32 minNodes = 6;
+  // Maximum number of nodes to scale to.
+  int32 maxNodes = 7;
+  // The node type selected (small, medium, large, x-large).
+  string nodeType = 8;
+  // The version of NiFi to run as part of the deployment
+  string nifiVersion = 9;
+  // The initial status of the Deployment. Should be CREATE_REQUESTED, UPDATE_REQUESTED, or TERMINATE_REQUESTED
+  CDPDFDeploymentStatus.Value status = 10;
+  // Does the deployment have asset references?
+  bool assetReferences = 11;
+}
+
+message CDPDFDeploymentStatusChanged {
+  // Operation metadata
+  CDPDFOperationDetails operationDetails = 1;
+  // The status of the deployment before the change
+  CDPDFDeploymentStatus.Value oldStatus = 2;
+  // The status of the deployment after the change
+  CDPDFDeploymentStatus.Value newStatus = 3;
   // A failure message for the df service. This will only be set if newStatus is
   // *_FAILED.
   string failureReason = 4;
@@ -1174,6 +1448,85 @@ message CDPUDXBundleDetails {
   string resourceCrn = 4;
   // The type of the diagnostics bundle.
   string type = 5;
+}
+
+// Generated when a DataFlow Service's number of nodes change.
+message CDPDFServiceNodesChanged {
+  // The id of the DataFlow Service.
+  string id = 1;
+  // The crn of the DataFlow Service.
+  string crn = 2;
+  // The CDP account ID.
+  string accountId = 3;
+  // The crn of the CDP environment.
+  string environmentCrn = 4;
+  // The number of nodes before the scaling event occurred.
+  int32 oldNodeCount = 5;
+  // The number of nodes after the scaling event occurred.
+  int32 newNodeCount = 6;
+}
+
+message CDPDFDeploymentPodsChanged {
+  // The id of the DataFlow Deployment.
+  string id = 1;
+  // The crn of the DataFlow Deployment.
+  string crn = 2;
+  // The CDP account ID.
+  string accountId = 3;
+  // The crn of the CDP environment.
+  string environmentCrn = 4;
+  // The id of the DataFlow Service.
+  string dataFlowServiceId = 5;
+  // The crn of the DataFlow Service.
+  string dataFlowServiceCrn = 6;
+  // The number of pods before the scaling event occurred.
+  int32 oldPodCount = 7;
+  // The number of pods after the scaling event occurred.
+  int32 newPodCount = 8;
+}
+
+// General information regarding a KPI created by a user.
+message CDPDFKpiDetails {
+  // The scope of the kpi. (SYSTEM, NIFI_FLOW, NIFI_PROCESSOR, NIFI_PROCESS_GROUP, NIFI_CONNECTION, ...)
+  string scope = 1;
+  // The actual metric being monitored. (cpu, data in, data out, bytes read, bytes written, ...)
+  string metric = 2;
+  // Whether or not an alert was set to trigger at a threshold or not.
+  bool alert = 3;
+}
+
+// Generated when a user creates a new KPI for a deployment
+message CDPDFDeploymentKpiCreated {
+  // The id of the deployment kpi.
+  string id = 1;
+  // The id of the deployment that the kpi is associated with.
+  string deploymentId = 2;
+  // The CDP account ID.
+  string accountId = 3;
+  // The crn of the CDP environment.
+  string environmentCrn = 4;
+  // The details about the kpi created
+  CDPDFKpiDetails kpiDetails = 5;
+}
+
+// Generated when a user modifies an existing KPI.
+message CDPDFDeploymentKpiUpdated {
+  // The id of the deployment kpi.
+  string id = 1;
+  // The id of the deployment that the kpi is associated with.
+  string deploymentId = 2;
+  // The CDP account ID.
+  string accountId = 3;
+  // The crn of the CDP environment.
+  string environmentCrn = 4;
+  // The details about the kpi created
+  CDPDFKpiDetails kpiDetails = 5;
+}
+
+// Generated when a user deletes a KPI. The details are not important. Just tracking the fact it happened.
+message CDPDFDeploymentKpiDeleted {
+  // The id of the deployment kpi.
+  string id = 1;
 }
 
 //Autoscale Policy Type
@@ -1228,7 +1581,7 @@ message CDPAutoscaleTriggerDetails {
   int32 originalHostGroupNodeCount = 5;
   // The desired hostGroup node count.
   int32 desiredHostGroupNodeCount = 6;
-   // The autoscaling action that was performed.
+  // The autoscaling action that was performed.
   string autoscalingAction = 7;
   // The status of the trigger
   AutoscaleScalingStatusType.Value autoscaleStatus = 8;
@@ -1244,7 +1597,7 @@ message CDPDatahubAutoscaleTriggered {
 message CDPDatahubAutoscaleConfigChanged {
   // The user crn who updated the autoscale config.
   string userCrn = 1;
-  // Is autoscaling enabled for cluster.
+  // True if autoscaling is enabled for the cluster.
   bool autoscalingEnabled = 2;
   // The autoscaling policy definition.
   repeated CDPAutoscalePolicyDefinition autoscalingPolicyDefinition = 3;
@@ -1255,3 +1608,55 @@ message CDPDatahubAutoscaleConfigChanged {
   // The cluster crn.
   string clusterCrn = 6;
 }
+
+// Holds network check result
+message CDPNetworkCheckResult {
+    enum Value {
+      // A value indicating the enum is unset.
+      UNSET = 0;
+      // Successful result for a network check
+      SUCCESSFUL = 1;
+      // Failed result for a network check
+      FAILED = 2;
+    }
+  }
+  
+  // Holds network check type
+  message CDPNetworkCheckType {
+    enum Value {
+      // A value indicating the enum is unset.
+      UNSET = 0;
+      // AWS S3 endpoint.
+      S3 = 1;
+      // AWS Security Token Service endpoint.
+      STS = 2;
+      // ADLS v2 (ABFS) endpoint (<azure_storage_account>.dfs.core.windows.net).
+      ADLSV2 = 3;
+      // Azure management endpoint (management.azure.com).
+      AZURE_MGMT = 4;
+      // GCS endpoint (storage.googleapis.com).
+      GCS = 5;
+      // Cloudera archive endpoint (archive.cloudera.com).
+      CLOUDERA_ARCHIVE = 6;
+      // DataBus API endpoint.
+      DATABUS = 7;
+      // DataBus S3 endpoint.
+      DATABUS_S3 = 8;
+      // Cloudera service delivery cache S3 address (cloudera-service-delivery-cache.s3.amazonaws.com).
+      SERVICE_DELIVERY_CACHE_S3 = 9;
+    }
+  }
+  
+  // Pre flight network check result for VM based clusters.
+  message CDPNetworkCheck {
+    // Type of the pre flight network check.
+    CDPNetworkCheckType.Value type = 1;
+    // Result of the pre flight network check.
+    CDPNetworkCheckResult.Value result = 2;
+    // CDP account id. This uniquely identifies the account within CDP
+    string accountId = 3;
+    // The crn of the cluster resource.
+    string crn = 4;
+    // List of hosts where network check failed
+    repeated string failedHosts = 5;
+  }
