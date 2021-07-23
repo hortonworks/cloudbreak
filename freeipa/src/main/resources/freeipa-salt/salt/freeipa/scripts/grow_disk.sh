@@ -32,6 +32,10 @@ get_root_disk_partition_number() {
     echo $(lsblk --output MAJ:MIN,MOUNTPOINT --raw | grep /$ | cut -f1 -d' ' | cut -f2 -d':')
 }
 
+get_root_disk_type() {
+    echo $(lsblk --output FSTYPE,MOUNTPOINT --raw | grep /$ | cut -f1 -d' ')
+}
+
 grow_mount_partition() {
     set -x
     if growpart -N $(get_root_disk) $(get_root_disk_partition_number) ; then
