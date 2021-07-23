@@ -593,8 +593,9 @@ public class ClusterHostServiceRunner {
         Optional<Stack> datalakeStackOptional = datalakeService.getDatalakeStackByDatahubStack(stack);
         if (datalakeStackOptional.isPresent()) {
             Stack dataLakeStack = datalakeStackOptional.get();
-            String datalakeDomain = dataLakeStack.getGatewayInstanceMetadata().get(0).getDomain();
-            List<String> ipList = dataLakeStack.getGatewayInstanceMetadata().stream().map(InstanceMetaData::getPrivateIp).collect(Collectors.toList());
+            String datalakeDomain = dataLakeStack.getNotTerminatedGatewayInstanceMetadata().get(0).getDomain();
+            List<String> ipList = dataLakeStack.getNotTerminatedGatewayInstanceMetadata().stream().map(InstanceMetaData::getPrivateIp)
+                    .collect(Collectors.toList());
             servicePillar.put("forwarder-zones", new SaltPillarProperties("/unbound/forwarders.sls",
                     singletonMap("forwarder-zones", singletonMap(datalakeDomain, singletonMap("nameservers", ipList)))));
         }

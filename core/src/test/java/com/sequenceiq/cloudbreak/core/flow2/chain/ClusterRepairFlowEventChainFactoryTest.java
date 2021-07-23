@@ -167,8 +167,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
         List<String> triggeredOperations = eventQueues.getQueue().stream().map(Selectable::selector).collect(Collectors.toList());
         assertEquals(List.of(
                 "FLOWCHAIN_INIT_TRIGGER_EVENT",
-                "CHANGE_PRIMARY_GATEWAY_TRIGGER_EVENT",
-                "FULL_DOWNSCALE_TRIGGER_EVENT",
+                "STACK_DOWNSCALE_TRIGGER_EVENT",
                 "FULL_UPSCALE_TRIGGER_EVENT",
                 "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT",
                 "FLOWCHAIN_FINALIZE_TRIGGER_EVENT"), triggeredOperations);
@@ -190,8 +189,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
         List<String> triggeredOperations = eventQueues.getQueue().stream().map(Selectable::selector).collect(Collectors.toList());
         assertEquals(List.of(
                 "FLOWCHAIN_INIT_TRIGGER_EVENT",
-                "CHANGE_PRIMARY_GATEWAY_TRIGGER_EVENT",
-                "FULL_DOWNSCALE_TRIGGER_EVENT",
+                "STACK_DOWNSCALE_TRIGGER_EVENT",
                 "FULL_UPSCALE_TRIGGER_EVENT",
                 "EPHEMERAL_CLUSTERS_UPDATE_TRIGGER_EVENT",
                 "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT",

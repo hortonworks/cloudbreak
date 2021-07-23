@@ -56,7 +56,7 @@ public class DiskSpaceValidationService {
         long parcelSize = parcelSizeService.getAllParcelSize(imageCatalogUrl, imageCatalogName, imageId, stack);
         Map<String, String> freeDiskSpaceByNodes = getFreeDiskSpaceByNodes(stack);
         LOGGER.debug("Required free space for parcels {} KB. Free space by nodes in KB: {}", parcelSize, freeDiskSpaceByNodes);
-        Map<String, String> notEligibleNodes = getNotEligibleNodes(freeDiskSpaceByNodes, parcelSize, stack.getGatewayInstanceMetadata());
+        Map<String, String> notEligibleNodes = getNotEligibleNodes(freeDiskSpaceByNodes, parcelSize, stack.getNotTerminatedGatewayInstanceMetadata());
         if (!notEligibleNodes.isEmpty()) {
             throw new UpgradeValidationFailedException(String.format(
                     "There is not enough free space on the nodes to perform upgrade operation. The required free space by nodes: %s",

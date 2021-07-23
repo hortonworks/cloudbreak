@@ -23,6 +23,7 @@ import com.amazonaws.services.autoscaling.model.DetachInstancesResult;
 import com.amazonaws.services.autoscaling.model.Instance;
 import com.amazonaws.services.autoscaling.model.UpdateAutoScalingGroupRequest;
 import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
+import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
 import com.amazonaws.waiters.Waiter;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
@@ -153,18 +154,21 @@ public class AwsDownscaleService {
         return result;
     }
 
-    private List<String> terminateInstances(Long stackId, List<String> instanceIds, AmazonEc2Client amazonEC2Client) {
-        LOGGER.debug("Terminated instances. [stack: {}, instances: {}]", stackId, instanceIds);
+    private List<String> terminateInstances(Long stackId, List<String> instanceIdsToDelete, AmazonEc2Client amazonEC2Client) {
+        LOGGER.debug("Terminated instances. [stack: {}, instances: {}]", stackId, instanceIdsToDelete);
         try {
-            amazonEC2Client.terminateInstances(new TerminateInstancesRequest().withInstanceIds(instanceIds));
-            return instanceIds;
+            List<String> existingInstances = getExistingInstances(instanceIdsToDelete, amazonEC2Client);
+            if (!existingInstances.isEmpty()) {
+                amazonEC2Client.terminateInstances(new TerminateInstancesRequest().withInstanceIds(existingInstances));
+            }
+            return existingInstances;
         } catch (AmazonServiceException e) {
             LOGGER.info("Termination failed, lets check if it is because instance was not found", e);
             if (!INSTANCE_NOT_FOUND_ERROR_CODE.equals(e.getErrorCode())) {
                 throw e;
             } else {
                 LOGGER.info("Instance was not found, lets terminate others");
-                List<String> runningInstances = instanceIds.stream()
+                List<String> runningInstances = instanceIdsToDelete.stream()
                         .filter(instanceId -> !e.getMessage().contains(instanceId))
                         .collect(Collectors.toList());
                 LOGGER.info("Running instances on AWS to terminate: {}", runningInstances);
@@ -174,6 +178,18 @@ public class AwsDownscaleService {
                 return runningInstances;
             }
         }
+    }
+
+    private List<String> getExistingInstances(List<String> instanceIdsToDelete, AmazonEc2Client amazonEC2Client) {
+        DescribeInstancesResult instancesResult = amazonEC2Client.describeInstances(new DescribeInstancesRequest().withInstanceIds(instanceIdsToDelete));
+        List<String> existingInstances = instancesResult.getReservations().stream()
+                .flatMap(reservation -> reservation.getInstances().stream())
+                .map(com.amazonaws.services.ec2.model.Instance::getInstanceId)
+                .collect(Collectors.toList());
+        List<String> missingInstances = new ArrayList<>(instanceIdsToDelete);
+        missingInstances.removeAll(existingInstances);
+        LOGGER.debug("Known instances on AWS: {} Missing instances: {}", existingInstances, missingInstances);
+        return existingInstances;
     }
 
     private void waitForTerminateInstances(Long stackId, List<String> instanceIds, AmazonEc2Client amazonEC2Client) {

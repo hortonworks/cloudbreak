@@ -582,18 +582,22 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
         this.parameters = parameters;
     }
 
-    public List<InstanceMetaData> getGatewayInstanceMetadata() {
-        List<InstanceMetaData> metadataList = new ArrayList<>();
-        for (InstanceGroup instanceGroup : instanceGroups) {
-            if (InstanceGroupType.GATEWAY.equals(instanceGroup.getInstanceGroupType())) {
-                metadataList.addAll(instanceGroup.getNotTerminatedInstanceMetaDataSet());
-            }
-        }
-        return metadataList;
+    public List<InstanceMetaData> getNotTerminatedGatewayInstanceMetadata() {
+        return instanceGroups.stream()
+                .filter(ig -> InstanceGroupType.GATEWAY.equals(ig.getInstanceGroupType()))
+                .flatMap(ig -> ig.getNotTerminatedInstanceMetaDataSet().stream())
+                .collect(Collectors.toList());
+    }
+
+    public List<InstanceMetaData> getReachableGatewayInstanceMetadata() {
+        return instanceGroups.stream()
+                .filter(ig -> InstanceGroupType.GATEWAY.equals(ig.getInstanceGroupType()))
+                .flatMap(ig -> ig.getReachableInstanceMetaDataSet().stream())
+                .collect(Collectors.toList());
     }
 
     public InstanceMetaData getPrimaryGatewayInstance() {
-        Optional<InstanceMetaData> metaData = getGatewayInstanceMetadata().stream()
+        Optional<InstanceMetaData> metaData = getNotTerminatedGatewayInstanceMetadata().stream()
                 .filter(im -> InstanceMetadataType.GATEWAY_PRIMARY.equals(im.getInstanceMetadataType())).findFirst();
         return metaData.orElse(null);
     }

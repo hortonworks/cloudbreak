@@ -246,7 +246,7 @@ public class StackCreationService {
 
     public void setupTls(StackContext context) throws CloudbreakException {
         Stack stack = context.getStack();
-        for (InstanceMetaData gwInstance : stack.getGatewayInstanceMetadata()) {
+        for (InstanceMetaData gwInstance : stack.getNotTerminatedGatewayInstanceMetadata()) {
             tlsSetupService.setupTls(stack, gwInstance);
         }
     }

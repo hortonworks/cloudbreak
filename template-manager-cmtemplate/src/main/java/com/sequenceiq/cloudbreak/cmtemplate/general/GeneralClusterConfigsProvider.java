@@ -27,7 +27,7 @@ public class GeneralClusterConfigsProvider {
         boolean gatewayInstanceMetadataPresented = false;
         boolean instanceMetadataPresented = false;
         if (stack.getInstanceGroups() != null && !stack.getInstanceGroups().isEmpty()) {
-            List<InstanceMetaData> gatewayInstanceMetadata = stack.getGatewayInstanceMetadata();
+            List<InstanceMetaData> gatewayInstanceMetadata = stack.getNotTerminatedGatewayInstanceMetadata();
             gatewayInstanceMetadataPresented = !gatewayInstanceMetadata.isEmpty()
                     && stack.getCluster().getGateway() != null;
             instanceMetadataPresented = true;
