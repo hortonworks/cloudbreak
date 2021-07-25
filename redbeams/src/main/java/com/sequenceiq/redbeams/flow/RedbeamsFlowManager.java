@@ -15,6 +15,7 @@ import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.core.model.FlowAcceptResult;
 import com.sequenceiq.flow.core.model.ResultType;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
+import com.sequenceiq.flow.service.FlowNameFormatService;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
@@ -30,6 +31,9 @@ public class RedbeamsFlowManager {
     @Inject
     private ErrorHandlerAwareReactorEventFactory eventFactory;
 
+    @Inject
+    private FlowNameFormatService flowNameFormatService;
+
     public void notify(String selector, Acceptable acceptable) {
         Map<String, Object> headerWithUserCrn = getHeaderWithUserCrn(null);
         Event<Acceptable> event = eventFactory.createEventWithErrHandler(headerWithUserCrn, acceptable);
@@ -41,7 +45,9 @@ public class RedbeamsFlowManager {
         try {
             FlowAcceptResult accepted = (FlowAcceptResult) event.getData().accepted().await(WAIT_FOR_ACCEPT, TimeUnit.SECONDS);
             if (accepted == null || ResultType.ALREADY_EXISTING_FLOW.equals(accepted.getResultType())) {
-                throw new RuntimeException(String.format("Flows under operation, request not allowed."));
+                throw new RuntimeException(String.format("Request not allowed, external database already has a running operation. " +
+                                "Running operation(s): [%s]",
+                        flowNameFormatService.formatFlows(accepted.getAlreadyRunningFlows())));
             }
         } catch (InterruptedException e) {
             throw new RuntimeException(e.getMessage());

@@ -279,13 +279,16 @@ public abstract class AbstractResourceConnector implements ResourceConnector<Lis
     protected Collection<CloudResource> getDeletableResources(Iterable<CloudResource> resources, Iterable<CloudInstance> instances) {
         Collection<CloudResource> result = new ArrayList<>();
         for (CloudInstance instance : instances) {
-            String instanceId = instance.getInstanceId();
             for (CloudResource resource : resources) {
-                if (instanceId.equalsIgnoreCase(resource.getName())) {
+                if (isCloudResourceAndCloudInstanceEquals(instance, resource)) {
                     result.add(resource);
                 }
             }
         }
         return result;
+    }
+
+    protected boolean isCloudResourceAndCloudInstanceEquals(CloudInstance instance, CloudResource resource) {
+        return instance.getInstanceId().equalsIgnoreCase(resource.getName());
     }
 }

@@ -32,6 +32,10 @@ public class AwsResourceNameService extends CloudbreakResourceNameService {
 
     private static final int LOAD_BALANCER_TARGET_GROUP_PART_COUNT = 3;
 
+    private static final int CLOUD_WATCH_PART_COUNT = 4;
+
+    private static final int PART_3 = 3;
+
     @Value("${cb.max.aws.resource.name.length:}")
     private int maxResourceNameLength;
 
@@ -54,6 +58,8 @@ public class AwsResourceNameService extends CloudbreakResourceNameService {
             resourceName = loadBalancer(parts);
         } else if (resourceType == ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP) {
             resourceName = loadBalancerTargetGroup(parts);
+        } else if (resourceType == ResourceType.AWS_CLOUD_WATCH) {
+            resourceName = cloudWatch(parts);
         } else {
             throw new IllegalStateException("Unsupported resource type: " + resourceType);
         }
@@ -154,6 +160,25 @@ public class AwsResourceNameService extends CloudbreakResourceNameService {
         name = appendPart(name, resourceNameWithScheme);
         name = appendHash(name, new Date());
         name = adjustBaseLength(name, maxLoadBalancerResourceNameLength);
+
+        return name;
+    }
+
+    private String cloudWatch(Object[] parts) {
+        checkArgs(CLOUD_WATCH_PART_COUNT, parts);
+        String name;
+        String stackName = String.valueOf(parts[0]);
+        String stackId = String.valueOf(parts[1]);
+        String instanceGroupName = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, String.valueOf(parts[2]).toLowerCase());
+        String privateId = String.valueOf(parts[PART_3]);
+
+        name = normalize(stackName);
+        name = adjustPartLength(name);
+        name = appendPart(name, stackId);
+        name = appendPart(name, "CloudWatch");
+        name = appendPart(name, StringUtils.capitalize(normalize(instanceGroupName)));
+        name = appendPart(name, privateId);
+        name = adjustBaseLength(name, maxResourceNameLength);
 
         return name;
     }

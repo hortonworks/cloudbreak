@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.kafka;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_0;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_2_12;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 
@@ -25,6 +26,8 @@ public class KafkaDatahubConfigProvider implements CmTemplateComponentConfigProv
 
     static final String PRODUCER_METRICS_ENABLE = "producer.metrics.enable";
 
+    static final String KAFKA_DECOMMISSION_HOOK_ENABLED = "kafka.decommission.hook.enabled";
+
     @Override
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         ArrayList<ApiClusterTemplateConfig> configs = Lists.newArrayList();
@@ -35,6 +38,9 @@ public class KafkaDatahubConfigProvider implements CmTemplateComponentConfigProv
         }
         if (KafkaConfigProviderUtils.getCdhVersionForStreaming(source).supportsRangerServiceCreation()) {
             configs.add(config(RANGER_PLUGIN_KAFKA_SERVICE_NAME, GENERATED_RANGER_SERVICE_NAME));
+        }
+        if (isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERA_STACK_VERSION_7_2_12)) {
+            configs.add(config(KAFKA_DECOMMISSION_HOOK_ENABLED, "true"));
         }
         return configs;
     }

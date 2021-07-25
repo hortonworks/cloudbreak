@@ -30,6 +30,7 @@ import com.sequenceiq.flow.core.model.FlowAcceptResult;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.flow.reactor.api.event.BaseFlowEvent;
 import com.sequenceiq.flow.reactor.config.EventBusStatisticReporter;
+import com.sequenceiq.flow.service.FlowNameFormatService;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
@@ -64,6 +65,9 @@ public class ReactorNotifier {
 
     @Inject
     private ErrorHandlerAwareReactorEventFactory eventFactory;
+
+    @Inject
+    private FlowNameFormatService flowNameFormatService;
 
     public FlowIdentifier notify(Long stackId, String selector, Acceptable acceptable) {
         return notify(stackId, selector, acceptable, stackService::getByIdWithTransaction);
@@ -100,7 +104,10 @@ public class ReactorNotifier {
             switch (accepted.getResultType()) {
                 case ALREADY_EXISTING_FLOW:
                     reactorReporter.logErrorReport();
-                    throw new FlowsAlreadyRunningException(String.format("Stack %s has flows under operation, request not allowed.", identifier));
+                    throw new FlowsAlreadyRunningException(String.format("Request not allowed, cluster '%s' already has a running operation. " +
+                            "Running operation(s): [%s]",
+                            identifier,
+                            flowNameFormatService.formatFlows(accepted.getAlreadyRunningFlows())));
                 case RUNNING_IN_FLOW:
                     return new FlowIdentifier(FlowType.FLOW, accepted.getAsFlowId());
                 case RUNNING_IN_FLOW_CHAIN:

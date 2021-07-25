@@ -7,15 +7,16 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_H
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_HA_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AUTOMATIC_USERSYNC_POLLER;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_NATIVE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_IMAGE_MARKETPLACE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_SINGLE_RESOURCE_GROUP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_SINGLE_RESOURCE_GROUP_DEDICATED_STORAGE_ACCOUNT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_BASE_IMAGE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_DISK_ENCRYPTION_WITH_CMK;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_NATIVE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_DISK_SSE_WITH_CMK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_DATABASE_WIRE_ENCRYPTION;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_GCP_DISK_ENCRYPTION_WITH_CMEK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CCM_V2;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_IDENTITY_MAPPING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION;
@@ -27,6 +28,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CONCLUS
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_METRICS_DATABUS_PROCESSING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_NODESTATUS_CHECK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_BACKUP_ON_UPGRADE;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATA_LAKE_LIGHT_TO_MEDIUM_MIGRATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_METRICS_DATABUS_PROCESSING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_AWS_EFS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_LOAD_BALANCER;
@@ -185,10 +187,10 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.io.Resources;
 import com.google.protobuf.util.JsonFormat;
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.util.SanitizerUtil;
 import com.sequenceiq.thunderhead.grpc.GrpcActorContext;
 import com.sequenceiq.thunderhead.model.AltusToken;
@@ -352,6 +354,9 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.datalake.backup.on.upgrade.enable}")
     private boolean datalakeBackupOnUpgrade;
 
+    @Value("${auth.mock.datalake.light.to.medium.migration.enable}")
+    private boolean datalakeLightToMediumMigration;
+
     @Value("${auth.mock.cm.sync.command.poller.enable}")
     private boolean cmSyncCommandPollerEnabled;
 
@@ -403,6 +408,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.cm.ha.enable}")
     private boolean cmHAEnabled;
+
+    @Value("${auth.mock.gcp.disk.EncryptionWithCMEK.enable}")
+    private boolean enableGcpDiskEncryptionWithCMEK;
 
     @PostConstruct
     public void init() {
@@ -719,6 +727,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         if (datalakeBackupOnUpgrade) {
             builder.addEntitlements(createEntitlement(CDP_DATALAKE_BACKUP_ON_UPGRADE));
         }
+        if (datalakeLightToMediumMigration) {
+            builder.addEntitlements(createEntitlement(DATA_LAKE_LIGHT_TO_MEDIUM_MIGRATION));
+        }
         if (cmSyncCommandPollerEnabled) {
             builder.addEntitlements(createEntitlement(CDP_USE_CM_SYNC_COMMAND_POLLER));
         }
@@ -752,6 +763,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         if (metricsDatabusProcessing) {
             builder.addEntitlements(createEntitlement(CDP_DATALAKE_METRICS_DATABUS_PROCESSING));
             builder.addEntitlements(createEntitlement(CDP_DATAHUB_METRICS_DATABUS_PROCESSING));
+        }
+        if (enableGcpDiskEncryptionWithCMEK) {
+            builder.addEntitlements(createEntitlement(CDP_CB_GCP_DISK_ENCRYPTION_WITH_CMEK));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()

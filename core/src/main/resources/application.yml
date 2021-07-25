@@ -342,15 +342,6 @@ cb:
   blueprint:
     cm:
       defaults:
-        7.0.2: >
-          CDP 1.2 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie=cdp-data-engineering;
-          CDP 1.2 - Data Engineering: HA: Apache Spark, Apache Hive, Apache Oozie=cdp-data-engineering-ha;
-          CDP 1.2 - Data Mart: Apache Impala, Hue=cdp-data-mart;
-          CDP 1.2 - Real-time Data Mart: Apache Impala, Hue, Apache Kudu, Apache Spark=cdp-rt-data-mart;
-          CDP 1.2 - Operational Database: Apache HBase=cdp-opdb;
-          CDP 1.2 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx;
-          CDP 1.2 - Streams Messaging Heavy Duty: Apache Kafka, Schema Registry, Streams Messaging Manager=cdp-streaming;
-          CDP 1.2 - Streams Messaging Light Duty: Apache Kafka, Schema Registry, Streams Messaging Manager=cdp-streaming-small
         7.1.0: >
           7.1.0 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie=cdp-data-engineering;
           7.1.0 - Data Engineering: HA: Apache Spark, Apache Hive, Apache Oozie=cdp-data-engineering-ha;

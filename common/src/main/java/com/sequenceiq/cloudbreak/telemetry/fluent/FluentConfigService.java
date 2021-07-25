@@ -87,8 +87,7 @@ public class FluentConfigService {
                 builder.withAnonymizationRules(anonymizationRuleResolver.decodeRules(telemetry.getRules()));
             }
             if (enabled && meteringEnabled) {
-                builder
-                        .withMeteringConfiguration(meteringConfiguration);
+                builder.withMeteringConfiguration(meteringConfiguration);
             }
         }
         if (!enabled) {

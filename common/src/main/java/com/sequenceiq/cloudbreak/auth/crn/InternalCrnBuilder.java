@@ -40,6 +40,11 @@ public class InternalCrnBuilder {
         return INTERNAL_USER_CRN.equals(c.getResource());
     }
 
+    public static boolean isInternalCrnForService(String crn, Crn.Service serviceType) {
+        Crn c = Crn.fromString(crn);
+        return isInternalCrn(crn) && serviceType.equals(c.getService());
+    }
+
     public static boolean isInternalCrn(Crn crn) {
         return INTERNAL_USER_CRN.equals(crn.getResource());
     }

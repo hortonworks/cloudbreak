@@ -130,6 +130,9 @@ public class MountDisks {
                 .peek(volumeSet -> resourceAttributeUtil.getTypedAttributes(volumeSet, VolumeSetAttributes.class).ifPresent(volumeSetAttributes -> {
                     volumeSetAttributes.setUuids(uuids);
                     volumeSetAttributes.setFstab(fstab);
+                    if (!discoveryFQDN.equals(volumeSetAttributes.getDiscoveryFQDN())) {
+                        LOGGER.info("DiscoveryFQDN is updated for {} to {}", volumeSet.getResourceName(), discoveryFQDN);
+                    }
                     volumeSetAttributes.setDiscoveryFQDN(discoveryFQDN);
                     resourceAttributeUtil.setTypedAttributes(volumeSet, volumeSetAttributes);
                 }))

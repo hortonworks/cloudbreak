@@ -456,7 +456,7 @@
           "base": true
         }
       ],
-      "dependencies": ["ZOOKEEPER"]
+      "dependencies": ["HDFS", "RANGER"]
     },
     {
       "name": "STREAMS_MESSAGING_MANAGER",
@@ -474,7 +474,7 @@
           "base": true
         }
       ],
-      "dependencies": ["ZOOKEEPER"]
+      "dependencies": ["ZOOKEEPER","KAFKA", "RANGER", "SCHEMAREGISTRY", "STREAMS_REPLICATION_MANAGER"]
     },
     {
       "name": "DAS",
@@ -594,7 +594,20 @@
           "base" : true
         }
       ],
-      "dependencies": ["ZOOKEEPER", "HDFS", "HBASE"]
+      "dependencies": ["KAFKA"]
+    },
+    {
+      "name": "CRUISE_CONTROL",
+      "displayName": "Cruise Control",
+      "componentNameInParcel": "cruise_control",
+      "components": [
+        {
+          "name": "CRUISE_CONTROL_SERVER",
+          "groups": ["cruise_control"],
+          "base" : true
+        }
+      ],
+      "dependencies": ["KAFKA", "ZOOKEEPER"]
     }
   ]
 }

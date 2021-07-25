@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
@@ -44,14 +45,16 @@ public class ImageProvider {
     private Set<Image> getImagesFromInstanceMetadata(Long stackId) {
         return instanceMetaDataService.getNotDeletedInstanceMetadataByStackId(stackId)
                 .stream()
+                .map(InstanceMetaData::getImage)
+                .filter(json -> !json.getMap().isEmpty())
                 .map(convertJsonToImage())
                 .collect(Collectors.toSet());
     }
 
-    private Function<InstanceMetaData, Image> convertJsonToImage() {
-        return image -> {
+    private Function<Json, Image> convertJsonToImage() {
+        return imageJson -> {
             try {
-                return image.getImage().get(Image.class);
+                return imageJson.get(Image.class);
             } catch (IOException e) {
                 String message = "Failed to convert Json to Image";
                 LOGGER.error(message, e);

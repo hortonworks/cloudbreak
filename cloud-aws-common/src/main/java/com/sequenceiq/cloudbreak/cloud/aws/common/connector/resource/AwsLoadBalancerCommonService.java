@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsNetworkView;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.model.GroupSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 
@@ -65,7 +66,7 @@ public class AwsLoadBalancerCommonService {
         // Check and see if we already have a load balancer whose scheme matches this one.
         AwsLoadBalancer currentLoadBalancer = null;
         LoadBalancerType cloudLbType = cloudLoadBalancer.getType();
-        Set<String> subnetIds = selectLoadBalancerSubnetIds(cloudLbType, awsNetworkView);
+        Set<String> subnetIds = selectLoadBalancerSubnetIds(cloudLbType, awsNetworkView, cloudLoadBalancer);
         AwsLoadBalancerScheme scheme = loadBalancerTypeConverter.convert(cloudLbType);
 
         currentLoadBalancer = awsLoadBalancers.stream()
@@ -79,22 +80,29 @@ public class AwsLoadBalancerCommonService {
     }
 
     @VisibleForTesting
-    Set<String> selectLoadBalancerSubnetIds(LoadBalancerType type, AwsNetworkView awsNetworkView) {
-        List<String> subnetIds;
+    Set<String> selectLoadBalancerSubnetIds(LoadBalancerType type, AwsNetworkView awsNetworkView, CloudLoadBalancer cloudLoadBalancer) {
+        List<String> subnetIds = new ArrayList<>();
         if (type == LoadBalancerType.PRIVATE) {
             LOGGER.debug("Private load balancer detected. Using instance subnet for load balancer creation.");
-            subnetIds = awsNetworkView.getSubnetList();
+            subnetIds.addAll(awsNetworkView.getSubnetList());
         } else {
-            subnetIds = awsNetworkView.getEndpointGatewaySubnetList();
+            subnetIds.addAll(awsNetworkView.getEndpointGatewaySubnetList());
             LOGGER.debug("Public load balancer detected. Using endpoint gateway subnet for load balancer creation.");
             if (subnetIds.isEmpty()) {
                 LOGGER.debug("Endpoint gateway subnet is not set. Falling back to instance subnet for load balancer creation.");
-                subnetIds = awsNetworkView.getSubnetList();
+                subnetIds.addAll(awsNetworkView.getSubnetList());
             }
         }
         if (subnetIds.isEmpty()) {
             throw new CloudConnectorException("Unable to configure load balancer: Could not identify subnets.");
         }
+        Set<String> multiAzSubnets = cloudLoadBalancer.getPortToTargetGroupMapping()
+                .values()
+                .stream()
+                .flatMap(groups -> groups.stream().flatMap(group -> group.getNetwork().getSubnets().stream().map(GroupSubnet::getSubnetId)))
+                .collect(Collectors.toSet());
+        LOGGER.info("Adding subnets that have been configured via multi-AZ support: '{}'", String.join(",", multiAzSubnets));
+        subnetIds.addAll(multiAzSubnets);
         return new HashSet<>(subnetIds);
     }
 

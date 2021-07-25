@@ -4,6 +4,7 @@ import static com.sequenceiq.datalake.flow.create.SdxCreateEvent.STORAGE_VALIDAT
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_UPGRADE_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_UPGRADE_FLOW_CHAIN_EVENT;
 import static com.sequenceiq.datalake.flow.delete.SdxDeleteEvent.SDX_DELETE_EVENT;
+import static com.sequenceiq.datalake.flow.detach.SdxDetachEvent.SDX_RESIZE_FLOW_CHAIN_START_EVENT;
 import static com.sequenceiq.datalake.flow.diagnostics.SdxCmDiagnosticsEvent.SDX_CM_DIAGNOSTICS_COLLECTION_EVENT;
 import static com.sequenceiq.datalake.flow.diagnostics.SdxDiagnosticsEvent.SDX_DIAGNOSTICS_COLLECTION_EVENT;
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_DATABASE_BACKUP_EVENT;
@@ -38,6 +39,7 @@ import com.sequenceiq.datalake.flow.cert.rotation.event.SdxStartCertRotationEven
 import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradeFlowChainStartEvent;
 import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradeStartEvent;
 import com.sequenceiq.datalake.flow.delete.event.SdxDeleteStartEvent;
+import com.sequenceiq.datalake.flow.detach.event.DatalakeResizeFlowChainStartEvent;
 import com.sequenceiq.datalake.flow.diagnostics.event.SdxCmDiagnosticsCollectionEvent;
 import com.sequenceiq.datalake.flow.diagnostics.event.SdxDiagnosticsCollectionEvent;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeDatabaseBackupStartEvent;
@@ -48,6 +50,7 @@ import com.sequenceiq.datalake.flow.repair.event.SdxRepairStartEvent;
 import com.sequenceiq.datalake.flow.start.event.SdxStartStartEvent;
 import com.sequenceiq.datalake.flow.stop.event.SdxStartStopEvent;
 import com.sequenceiq.datalake.service.EnvironmentClientService;
+import com.sequenceiq.flow.service.FlowNameFormatService;
 import com.sequenceiq.datalake.settings.SdxRepairSettings;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
@@ -82,11 +85,21 @@ public class SdxReactorFlowManager {
     @Inject
     private DatalakeDrConfig datalakeDrConfig;
 
+    @Inject
+    private FlowNameFormatService flowNameFormatService;
+
     public FlowIdentifier triggerSdxCreation(SdxCluster cluster) {
         LOGGER.info("Trigger Datalake creation for: {}", cluster);
         String selector = STORAGE_VALIDATION_WAIT_EVENT.event();
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
         return notify(selector, new SdxEvent(selector, cluster.getId(), userId));
+    }
+
+    public FlowIdentifier triggerSdxResize(Long sdxClusterId, SdxCluster newSdxCluster) {
+        LOGGER.info("Trigger Datalake resizing for: {}", sdxClusterId);
+        String selector = SDX_RESIZE_FLOW_CHAIN_START_EVENT.event();
+        String userId = ThreadBasedUserCrnProvider.getUserCrn();
+        return notify(selector, new DatalakeResizeFlowChainStartEvent(sdxClusterId, newSdxCluster, userId));
     }
 
     public FlowIdentifier triggerSdxDeletion(SdxCluster cluster, boolean forced) {
@@ -216,8 +229,10 @@ public class SdxReactorFlowManager {
             } else {
                 switch (accepted.getResultType()) {
                     case ALREADY_EXISTING_FLOW:
-                        throw new FlowsAlreadyRunningException(String.format("Sdx cluster %s has flows under operation, request not allowed.",
-                                event.getData().getResourceId()));
+                        throw new FlowsAlreadyRunningException(String.format("Request not allowed, datalake cluster '%s' already has a running operation. " +
+                                        "Running operation(s): [%s]",
+                                event.getData().getResourceId(),
+                                flowNameFormatService.formatFlows(accepted.getAlreadyRunningFlows())));
                     case RUNNING_IN_FLOW:
                         return new FlowIdentifier(FlowType.FLOW, accepted.getAsFlowId());
                     case RUNNING_IN_FLOW_CHAIN:
@@ -229,6 +244,6 @@ public class SdxReactorFlowManager {
         } catch (InterruptedException e) {
             throw new CloudbreakApiException(e.getMessage());
         }
-
     }
+
 }

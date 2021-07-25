@@ -2,8 +2,8 @@ package com.sequenceiq.it.cloudbreak.cloud.v4.gcp;
 
 import static java.lang.String.format;
 
+import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -17,10 +17,13 @@ import org.springframework.util.StringUtils;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.GcpNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.GcpStackV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.network.InstanceGroupNetworkV4Request;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
+import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.InstanceTemplateV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.network.InstanceGroupNetworkV1Request;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.gcp.GcpCredentialParameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.gcp.JsonParameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.gcp.P12Parameters;
@@ -35,6 +38,7 @@ import com.sequenceiq.it.cloudbreak.dto.InstanceTemplateV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.NetworkV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.RootVolumeV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.StackAuthenticationTestDto;
+import com.sequenceiq.it.cloudbreak.dto.SubnetId;
 import com.sequenceiq.it.cloudbreak.dto.VolumeV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDtoBase;
@@ -141,6 +145,16 @@ public class GcpCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
+    public LoggingRequest loggingRequest(TelemetryTestDto dto) {
+        GcsCloudStorageV1Parameters gcsCloudStorageV1Parameters = new GcsCloudStorageV1Parameters();
+        gcsCloudStorageV1Parameters.setServiceAccountEmail(getServiceAccountEmail());
+        LoggingRequest loggingRequest = new LoggingRequest();
+        loggingRequest.setGcs(gcsCloudStorageV1Parameters);
+        loggingRequest.setStorageLocation(getBaseLocation());
+        return loggingRequest;
+    }
+
+    @Override
     public DistroXVolumeTestDto attachedVolume(DistroXVolumeTestDto volume) {
         int attachedVolumeSize = gcpProperties.getInstance().getVolumeSize();
         int attachedVolumeCount = gcpProperties.getInstance().getVolumeCount();
@@ -181,6 +195,30 @@ public class GcpCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
+    public InstanceGroupNetworkV4Request instanceGroupNetworkV4Request(SubnetId subnetId) {
+        if (gcpProperties.getMultiaz()) {
+            InstanceGroupNetworkV4Request result = new InstanceGroupNetworkV4Request();
+            result.createGcp();
+            result.getGcp().setSubnetIds(subnetId.collectSubnets(gcpProperties.getNetwork().getSubnetIds()));
+            return result;
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public InstanceGroupNetworkV1Request instanceGroupNetworkV1Request(SubnetId subnetId) {
+        if (gcpProperties.getMultiaz()) {
+            InstanceGroupNetworkV1Request result = new InstanceGroupNetworkV1Request();
+            result.createAws();
+            result.getGcp().setSubnetIds(subnetId.collectSubnets(gcpProperties.getNetwork().getSubnetIds()));
+            return result;
+        } else {
+            return null;
+        }
+    }
+
+    @Override
     public DistroXNetworkTestDto network(DistroXNetworkTestDto network) {
         return network;
     }
@@ -188,7 +226,7 @@ public class GcpCloudProvider extends AbstractCloudProvider {
     @Override
     public EnvironmentNetworkTestDto network(EnvironmentNetworkTestDto network) {
         return network
-                .withSubnetIDs(Set.of(gcpProperties.getNetwork().getSubnetId()))
+                .withSubnetIDs(new HashSet<>(gcpProperties.getNetwork().getSubnetIds()))
                 .withGcp(environmentNetworkParameters());
     }
 

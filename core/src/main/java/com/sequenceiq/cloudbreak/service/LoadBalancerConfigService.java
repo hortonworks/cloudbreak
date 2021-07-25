@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service;
 
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_2_11;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.oozie.OozieHAConfigProvider.OOZIE_HTTPS_PORT;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
@@ -109,18 +111,11 @@ public class LoadBalancerConfigService {
         return groupNames;
     }
 
-    public Set<String> getOozieGroups(Stack stack) {
+    public Set<String> getOozieGroups(CmTemplateProcessor cmTemplateProcessor) {
         LOGGER.debug("Fetching list of instance groups with Oozie installed");
-        Cluster cluster = stack.getCluster();
-        if (cluster != null) {
-            CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(cluster.getBlueprint().getBlueprintText());
-            Set<String> groupNames = cmTemplateProcessor.getHostGroupsWithComponent(OozieRoles.OOZIE_SERVER);
-            LOGGER.info("Oozie instance groups are {}", groupNames);
-            return groupNames;
-        } else {
-            LOGGER.info("No Oozie instance groups found");
-            return Set.of();
-        }
+        Set<String> groupNames = cmTemplateProcessor.getHostGroupsWithComponent(OozieRoles.OOZIE_SERVER);
+        LOGGER.info("Oozie instance groups are {}", groupNames);
+        return groupNames;
     }
 
     public String generateLoadBalancerEndpoint(Stack stack) {
@@ -434,7 +429,7 @@ public class LoadBalancerConfigService {
     }
 
     private Optional<TargetGroup> setupOozieHATargetGroup(Stack stack, boolean dryRun) {
-        Optional<InstanceGroup> oozieInstanceGroup = getOozieInstanceGroup(stack);
+        Optional<InstanceGroup> oozieInstanceGroup = getOozieHAInstanceGroup(stack);
 
         if (oozieInstanceGroup.isPresent()) {
             LOGGER.info("Oozie HA instance group found; enabling Oozie load balancer configuration.");
@@ -454,12 +449,20 @@ public class LoadBalancerConfigService {
         }
     }
 
-    private Optional<InstanceGroup> getOozieInstanceGroup(Stack stack) {
-        Set<String> oozieGroupNames = getOozieGroups(stack);
-        return stack.getInstanceGroups().stream()
-            .filter(ig -> oozieGroupNames.contains(ig.getGroupName()))
-            .filter(ig -> ig.getNodeCount() > 1)
-            .findFirst();
+    private Optional<InstanceGroup> getOozieHAInstanceGroup(Stack stack) {
+        if (stack.getStackVersion() != null &&
+            isVersionNewerOrEqualThanLimited(stack.getStackVersion(), CLOUDERA_STACK_VERSION_7_2_11)) {
+            Cluster cluster = stack.getCluster();
+            if (cluster != null) {
+                CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(cluster.getBlueprint().getBlueprintText());
+                Set<String> oozieGroupNames = getOozieGroups(cmTemplateProcessor);
+                return stack.getInstanceGroups().stream()
+                    .filter(ig -> oozieGroupNames.contains(ig.getGroupName()))
+                    .filter(ig -> ig.getNodeCount() > 1)
+                    .findFirst();
+            }
+        }
+        return Optional.empty();
     }
 
     private LoadBalancer createLoadBalancerIfNotExists(Set<LoadBalancer> loadBalancers, LoadBalancerType type, Stack stack) {

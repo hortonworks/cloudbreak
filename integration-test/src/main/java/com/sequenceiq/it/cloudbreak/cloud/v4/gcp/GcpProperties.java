@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.cloud.v4.gcp;
 
+import java.util.List;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
@@ -13,6 +15,8 @@ public class GcpProperties {
 
     private String location;
 
+    private Boolean multiaz;
+
     private final Credential credential = new Credential();
 
     private final Instance instance = new Instance();
@@ -24,6 +28,17 @@ public class GcpProperties {
     private final CloudStorage cloudStorage = new CloudStorage();
 
     private final Network network = new Network();
+
+    public Boolean getMultiaz() {
+        if (multiaz == null) {
+            return Boolean.FALSE;
+        }
+        return multiaz;
+    }
+
+    public void setMultiaz(Boolean multiaz) {
+        this.multiaz = multiaz;
+    }
 
     public Baseimage getBaseimage() {
         return baseimage;
@@ -121,6 +136,16 @@ public class GcpProperties {
         private String networkId;
 
         private String subnetId;
+
+        private List<String> subnetIds;
+
+        public List<String> getSubnetIds() {
+            return subnetIds;
+        }
+
+        public void setSubnetIds(List<String> subnetIds) {
+            this.subnetIds = subnetIds;
+        }
 
         public String getSharedProjectId() {
             return sharedProjectId;

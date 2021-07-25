@@ -10,10 +10,13 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.StackV4ParameterBase;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.network.InstanceGroupNetworkV4Request;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
 import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.InstanceTemplateV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.network.InstanceGroupNetworkV1Request;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
@@ -24,6 +27,7 @@ import com.sequenceiq.it.cloudbreak.dto.NetworkV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.PlacementSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.RootVolumeV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.StackAuthenticationTestDto;
+import com.sequenceiq.it.cloudbreak.dto.SubnetId;
 import com.sequenceiq.it.cloudbreak.dto.VolumeV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDtoBase;
@@ -353,7 +357,27 @@ public class CloudProviderProxy implements CloudProvider {
         return delegate.getFreeIpaImageCatalogUrl();
     }
 
-    private CloudProvider getDelegate(CloudPlatform cloudPlatform) {
+    @Override
+    public InstanceGroupNetworkV4Request instanceGroupNetworkV4Request(SubnetId subnetId) {
+        return delegate.instanceGroupNetworkV4Request(subnetId);
+    }
+
+    @Override
+    public InstanceGroupNetworkV1Request instanceGroupNetworkV1Request(SubnetId subnetId) {
+        return delegate.instanceGroupNetworkV1Request(subnetId);
+    }
+
+    @Override
+    public LoggingRequest loggingRequest(TelemetryTestDto dto) {
+        return getDelegate(dto).loggingRequest(dto);
+    }
+
+    @Override
+    public String getVariant() {
+        return delegate.getVariant();
+    }
+
+    public CloudProvider getDelegate(CloudPlatform cloudPlatform) {
         return cloudProviderMap.getOrDefault(cloudPlatform, delegate);
     }
 

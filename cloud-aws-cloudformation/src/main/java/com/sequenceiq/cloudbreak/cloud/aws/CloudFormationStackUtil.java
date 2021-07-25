@@ -1,8 +1,11 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
+import static com.sequenceiq.cloudbreak.cloud.model.CloudResource.PRIVATE_ID;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -51,6 +54,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.LoadBalancerTypeC
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
@@ -119,16 +123,27 @@ public class CloudFormationStackUtil {
         return idsByGroups.entrySet().stream()
                 .flatMap(entry -> {
                     Group group = entry.getKey();
-                    return entry.getValue().stream()
-                            .map(id -> CloudResource.builder()
-                                    .type(ResourceType.AWS_INSTANCE)
-                                    .instanceId(id)
-                                    .name(id)
-                                    .group(group.getName())
-                                    .status(CommonStatus.CREATED)
-                                    .availabilityZone(ac.getCloudContext().getLocation().getAvailabilityZone().value())
-                                    .persistent(false)
-                                    .build());
+                    List<CloudResource> cloudResources = new ArrayList<>();
+                    Iterator<CloudInstance> groupInstancesIterator = group.getInstances().stream()
+                            .filter(cloudInstance -> cloudInstance.getInstanceId() == null)
+                            .collect(Collectors.toList())
+                            .iterator();
+                    for (String instanceId : entry.getValue()) {
+                        CloudResource cloudResource = CloudResource.builder()
+                                .type(ResourceType.AWS_INSTANCE)
+                                .instanceId(instanceId)
+                                .name(instanceId)
+                                .group(group.getName())
+                                .status(CommonStatus.CREATED)
+                                .availabilityZone(ac.getCloudContext().getLocation().getAvailabilityZone().value())
+                                .persistent(false)
+                                .build();
+                        if (groupInstancesIterator.hasNext()) {
+                            cloudResource.putParameter(PRIVATE_ID, groupInstancesIterator.next().getTemplate().getPrivateId());
+                        }
+                        cloudResources.add(cloudResource);
+                    }
+                    return cloudResources.stream();
                 })
                 .collect(Collectors.toList());
     }

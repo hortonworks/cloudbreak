@@ -91,6 +91,11 @@ public class GcpClientActions extends GcpClient {
                 .collect(Collectors.toList());
     }
 
+    public Map<String, String> instanceSubnet(List<String> instanceIds) {
+        //TODO
+        return null;
+    }
+
     public void deleteHostGroupInstances(List<String> instanceIds) {
         LOGGER.info("Deleting instances: '{}'", String.join(", ", instanceIds));
         Compute compute = buildCompute();

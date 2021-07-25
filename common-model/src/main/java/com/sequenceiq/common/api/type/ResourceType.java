@@ -17,6 +17,7 @@ public enum ResourceType {
     AWS_VOLUMESET,
     AWS_EFS,
     AWS_INSTANCE,
+    AWS_CLOUD_WATCH,
     RDS_INSTANCE,
     RDS_HOSTNAME,
     RDS_PORT,
@@ -49,6 +50,7 @@ public enum ResourceType {
     GCP_FIREWALL_INTERNAL,
     GCP_INSTANCE,
     GCP_DATABASE,
+    GCP_INSTANCE_GROUP,
 
     //AZURE
     AZURE_INSTANCE,

@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.cloud.v4.aws;
 
 import static java.lang.String.format;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -17,8 +18,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.A
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AwsStackV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateV4SpotParameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.network.InstanceGroupNetworkV4Request;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
+import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
 import com.sequenceiq.common.api.type.EncryptionType;
 import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.common.model.FileSystemType;
@@ -27,6 +30,7 @@ import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.AwsEnc
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.AwsInstanceTemplateV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.AwsInstanceTemplateV1SpotParameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.InstanceTemplateV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.network.InstanceGroupNetworkV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.aws.AwsNetworkV1Parameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.AwsCredentialParameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.KeyBasedParameters;
@@ -46,6 +50,7 @@ import com.sequenceiq.it.cloudbreak.dto.InstanceTemplateV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.NetworkV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.RootVolumeV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.StackAuthenticationTestDto;
+import com.sequenceiq.it.cloudbreak.dto.SubnetId;
 import com.sequenceiq.it.cloudbreak.dto.VolumeV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDtoBase;
@@ -149,6 +154,16 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
+    public LoggingRequest loggingRequest(TelemetryTestDto dto) {
+        LoggingRequest loggingRequest = new LoggingRequest();
+        S3CloudStorageV1Parameters s3CloudStorageV1Parameters = new S3CloudStorageV1Parameters();
+        s3CloudStorageV1Parameters.setInstanceProfile(getInstanceProfile());
+        loggingRequest.setS3(s3CloudStorageV1Parameters);
+        loggingRequest.setStorageLocation(getBaseLocation());
+        return loggingRequest;
+    }
+
+    @Override
     public DistroXVolumeTestDto attachedVolume(DistroXVolumeTestDto volume) {
         int attachedVolumeSize = awsProperties.getInstance().getVolumeSize();
         int attachedVolumeCount = awsProperties.getInstance().getVolumeCount();
@@ -235,6 +250,30 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     public String getSubnetId() {
         Set<String> subnetIDs = awsProperties.getSubnetIds();
         return subnetIDs.iterator().next();
+    }
+
+    @Override
+    public InstanceGroupNetworkV4Request instanceGroupNetworkV4Request(SubnetId subnetId) {
+        if (awsProperties.getMultiaz()) {
+            InstanceGroupNetworkV4Request result = new InstanceGroupNetworkV4Request();
+            result.createAws();
+            result.getAws().setSubnetIds(subnetId.collectSubnets(new LinkedList<>(awsProperties.getSubnetIds())));
+            return result;
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public InstanceGroupNetworkV1Request instanceGroupNetworkV1Request(SubnetId subnetId) {
+        if (awsProperties.getMultiaz()) {
+            InstanceGroupNetworkV1Request result = new InstanceGroupNetworkV1Request();
+            result.createAws();
+            result.getAws().setSubnetIds(subnetId.collectSubnets(new LinkedList<>(awsProperties.getSubnetIds())));
+            return result;
+        } else {
+            return null;
+        }
     }
 
     @Override
@@ -418,6 +457,15 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     public EnvironmentTestDto environment(EnvironmentTestDto environment) {
         return super.environment(environment)
                 .withFreeIpa(getAttachedFreeIpaRequest());
+    }
+
+    @Override
+    public String getVariant() {
+        if (awsProperties.getMultiaz()) {
+            return "AWS_NATIVE";
+        } else {
+            return "AWS";
+        }
     }
 
     private AttachedFreeIpaRequest getAttachedFreeIpaRequest() {

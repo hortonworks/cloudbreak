@@ -304,10 +304,11 @@ public class DatabaseConfigService extends AbstractArchivistService<DatabaseConf
     }
 
     @Override
-    public Map<String, Optional<String>> getNamesByCrns(Collection<String> crns) {
+    public Map<String, Optional<String>> getNamesByCrns(Collection<String> crnStrings) {
         Map<String, Optional<String>> result = new HashMap<>();
-        repository.findResourceNamesByCrn(crns).stream()
-                .forEach(nameAndCrn -> result.put(nameAndCrn.getCrn(), Optional.ofNullable(nameAndCrn.getName())));
+        List<Crn> crns = crnStrings.stream().map(crnString -> Crn.safeFromString(crnString)).collect(Collectors.toList());
+        repository.findByResourceCrnIn(crns).stream()
+                .forEach(nameAndCrn -> result.put(nameAndCrn.getResourceCrn().toString(), Optional.ofNullable(nameAndCrn.getName())));
         return result;
     }
 

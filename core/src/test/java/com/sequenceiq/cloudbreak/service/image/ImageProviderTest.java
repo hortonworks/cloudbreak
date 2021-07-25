@@ -52,6 +52,44 @@ public class ImageProviderTest {
         verify(instanceMetaDataService).getNotDeletedInstanceMetadataByStackId(STACK_ID);
     }
 
+    @Test
+    public void testFilterCurrentImageShouldReturnFalseWhenOneOfTheImageJsonIsNull() {
+        InstanceMetaData nullImageInstanceMetadata = new InstanceMetaData();
+        nullImageInstanceMetadata.setImage(new Json(null));
+        Set<InstanceMetaData> instanceMetaData = Set.of(createInstanceMetaData(NEW_IMAGE), nullImageInstanceMetadata);
+        when(instanceMetaDataService.getNotDeletedInstanceMetadataByStackId(STACK_ID)).thenReturn(instanceMetaData);
+
+        assertFalse(underTest.filterCurrentImage(STACK_ID, NEW_IMAGE));
+
+        verify(instanceMetaDataService).getNotDeletedInstanceMetadataByStackId(STACK_ID);
+    }
+
+    @Test
+    public void testFilterCurrentImageShouldReturnTrueWhenOneOfTheImageJsonIsNullButTheOtherIsOnOldImage() {
+        InstanceMetaData nullImageInstanceMetadata = new InstanceMetaData();
+        nullImageInstanceMetadata.setImage(new Json(null));
+        Set<InstanceMetaData> instanceMetaData = Set.of(createInstanceMetaData(OLD_IMAGE), nullImageInstanceMetadata);
+        when(instanceMetaDataService.getNotDeletedInstanceMetadataByStackId(STACK_ID)).thenReturn(instanceMetaData);
+
+        assertTrue(underTest.filterCurrentImage(STACK_ID, NEW_IMAGE));
+
+        verify(instanceMetaDataService).getNotDeletedInstanceMetadataByStackId(STACK_ID);
+    }
+
+    @Test
+    public void testFilterCurrentImageShouldReturnFalseWhenBothOfTheImageJsonIsNull() {
+        InstanceMetaData nullImageInstanceMetadata = new InstanceMetaData();
+        nullImageInstanceMetadata.setImage(new Json(null));
+        InstanceMetaData nullImageInstanceMetadata2 = new InstanceMetaData();
+        nullImageInstanceMetadata2.setImage(new Json(null));
+        Set<InstanceMetaData> instanceMetaData = Set.of(nullImageInstanceMetadata, nullImageInstanceMetadata2);
+        when(instanceMetaDataService.getNotDeletedInstanceMetadataByStackId(STACK_ID)).thenReturn(instanceMetaData);
+
+        assertFalse(underTest.filterCurrentImage(STACK_ID, NEW_IMAGE));
+
+        verify(instanceMetaDataService).getNotDeletedInstanceMetadataByStackId(STACK_ID);
+    }
+
     private com.sequenceiq.cloudbreak.cloud.model.Image createImage(String imageId) {
         return new com.sequenceiq.cloudbreak.cloud.model.Image(null, null, null, null, null, null, imageId, null);
     }

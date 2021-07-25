@@ -157,7 +157,10 @@ class EntitlementServiceTest {
                 {"CDP_NODESTATUS_ENABLE_SALT_PING", (EntitlementCheckFunction) EntitlementService::nodestatusSaltPingEnabled, true},
 
                 {"EPHEMERAL_DISKS_FOR_TEMP_DATA", (EntitlementCheckFunction) EntitlementService::ephemeralDisksForTempDataEnabled, false},
-                {"EPHEMERAL_DISKS_FOR_TEMP_DATA", (EntitlementCheckFunction) EntitlementService::ephemeralDisksForTempDataEnabled, true}
+                {"EPHEMERAL_DISKS_FOR_TEMP_DATA", (EntitlementCheckFunction) EntitlementService::ephemeralDisksForTempDataEnabled, true},
+
+                {"CDP_CB_GCP_DISK_ENCRYPTION_WITH_CMEK", (EntitlementCheckFunction) EntitlementService::isGcpDiskEncryptionWithCMEKEnabled, false},
+                {"CDP_CB_GCP_DISK_ENCRYPTION_WITH_CMEK", (EntitlementCheckFunction) EntitlementService::isGcpDiskEncryptionWithCMEKEnabled, true}
         };
     }
 

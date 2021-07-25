@@ -245,20 +245,6 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
         return repository;
     }
 
-    private Set<DatabaseServerConfig> getByNames(Long workspaceId, String environmentCrn, Set<String> names) {
-        Set<DatabaseServerConfig> resources =
-                repository.findByNameInAndWorkspaceIdAndEnvironmentId(names, workspaceId, environmentCrn);
-        Set<String> notFound = Sets.difference(names,
-                resources.stream().map(DatabaseServerConfig::getName).collect(Collectors.toSet()));
-
-        if (!notFound.isEmpty()) {
-            throw new NotFoundException(String.format("No %s(s) found with name(s) %s in environment '%s'", DatabaseServerConfig.class.getSimpleName(),
-                    String.join(", ", notFound), environmentCrn));
-        }
-
-        return resources;
-    }
-
     public Set<DatabaseServerConfig> getByCrns(Set<String> crns) {
         Set<Crn> parsedCrns = crns.stream()
                 .map(Crn::safeFromString)
@@ -358,10 +344,11 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
     }
 
     @Override
-    public Map<String, Optional<String>> getNamesByCrns(Collection<String> crns) {
+    public Map<String, Optional<String>> getNamesByCrns(Collection<String> crnStrings) {
         Map<String, Optional<String>> result = new HashMap<>();
-        repository.findResourceNamesByCrn(crns).stream()
-                .forEach(nameAndCrn -> result.put(nameAndCrn.getCrn(), Optional.ofNullable(nameAndCrn.getName())));
+        List<Crn> crns = crnStrings.stream().map(crnString -> Crn.safeFromString(crnString)).collect(Collectors.toList());
+        repository.findByResourceCrnIn(crns).stream()
+                .forEach(nameAndCrn -> result.put(nameAndCrn.getResourceCrn().toString(), Optional.ofNullable(nameAndCrn.getName())));
         return result;
     }
 

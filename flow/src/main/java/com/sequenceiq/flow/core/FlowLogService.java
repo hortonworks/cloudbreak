@@ -10,6 +10,7 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 import com.sequenceiq.flow.domain.FlowChainLog;
 import com.sequenceiq.flow.domain.FlowLog;
+import com.sequenceiq.flow.domain.FlowLogIdWithTypeAndTimestamp;
 
 public interface FlowLogService {
     FlowLog save(FlowParameters flowParameters, String flowChanId, String key, Payload payload, Map<Object, Object> variables, Class<?> flowType,
@@ -26,6 +27,8 @@ public interface FlowLogService {
     void saveChain(String flowChainId, String parentFlowChainId, FlowTriggerEventQueue chain, String flowTriggerUserCrn);
 
     void updateLastFlowLogStatus(FlowLog lastFlowLog, boolean failureEvent);
+
+    Set<FlowLogIdWithTypeAndTimestamp> findAllRunningNonTerminationFlowsByResourceId(Long resourceId);
 
     boolean isOtherNonTerminationFlowRunning(Long stackId);
 

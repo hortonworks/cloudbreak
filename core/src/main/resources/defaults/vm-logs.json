@@ -47,7 +47,7 @@
     "label": "waagent"
   },
   {
-    "path": "${serverLogFolderPrefix}/cloudera-scm-server/cloudera-scm-server.log",
+    "path": "${serverLogFolderPrefix}/cloudera-scm-server/cloudera-scm-server.log*",
     "label": "cloudera_server_log"
   },
   {
