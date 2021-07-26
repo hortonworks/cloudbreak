@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.Compute.RegionBackendServices.Delete;
@@ -27,6 +28,12 @@ import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.api.type.ResourceType;
 
+/**
+ * Responsible for CRUD opertaions of a GCP Backend Service Resource
+ * A backend service could have multiple definitions, but currently the only one used is based on instance groups
+ * Set the health check mentod to be used for the related instance groups
+ */
+@Service
 public class GcpBackendServiceResourceBuilder extends AbstractGcpLoadBalancerBuilder {
 
     public static final String GCP_INSTANCEGROUP_REFERENCE_FORMAT = "https://www.googleapis.com/compute/v1/projects/%s/zones/%s/instanceGroups/%s";

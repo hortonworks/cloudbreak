@@ -1,13 +1,17 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.loadbalancer;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.Compute;
@@ -17,6 +21,7 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.network.GcpNetworkResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.gcp.network.GcpSubnetResourceBuilder;
+import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpLabelUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
@@ -24,15 +29,33 @@ import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.api.type.ResourceType;
 
+/**
+ * Responsible for the CRUD operations of a GCP Forwarding Rule.
+ * A Forwarding Rule maps an incoming request based on IP address, port, to a specific Backend Service
+ * Only one can exist for a given IP address and port combination in a subnet
+ *
+ */
+@Service
 public class GcpForwardingRuleResourceBuilder extends AbstractGcpLoadBalancerBuilder {
 
     public static final String GCP_BACKEND_SERVICE_REF_FORMAT = "https://www.googleapis.com/compute/v1/projects/%s/regions/%s/backendServices/%s";
 
     public static final String GCP_IP_REF_FORMAT = "https://www.googleapis.com/compute/v1/projects/%s/regions/%s/addresses/%s";
 
+    public static final String TCP = "TCP";
+
+    public static final String INTERNAL = "INTERNAL";
+
+    public static final String EXTERNAL = "EXTERNAL";
+
     private static final int ORDER = 4;
 
+    private static final int MAX_LABEL_LENGTH = 63;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpForwardingRuleResourceBuilder.class);
+
+    @Inject
+    private GcpLabelUtil gcpLabelUtil;
 
     @Override
     public List<CloudResource> create(GcpContext context, AuthenticatedContext auth, CloudLoadBalancer loadBalancer) {
@@ -63,15 +86,15 @@ public class GcpForwardingRuleResourceBuilder extends AbstractGcpLoadBalancerBui
 
         for (CloudResource buildableResource : buildableResources) {
             Integer trafficPort = buildableResource.getParameter(TRAFFICPORT, Integer.class);
-            ForwardingRule forwardingRule = new ForwardingRule().setIPProtocol("TCP")
+            ForwardingRule forwardingRule = new ForwardingRule().setIPProtocol(TCP)
                     .setName(buildableResource.getName())
                     .setPorts(List.of(String.valueOf(trafficPort)));
             if (loadBalancer.getType().equals(LoadBalancerType.PRIVATE)) {
-                forwardingRule.setLoadBalancingScheme("INTERNAL")
+                forwardingRule.setLoadBalancingScheme(INTERNAL)
                         .setNetwork(context.getParameter(GcpNetworkResourceBuilder.NETWORK_NAME, String.class))
                         .setSubnetwork(context.getParameter(GcpSubnetResourceBuilder.SUBNET_NAME, String.class));
             } else {
-                forwardingRule.setLoadBalancingScheme("EXTERNAL");
+                forwardingRule.setLoadBalancingScheme(EXTERNAL);
             }
 
             Optional<String> backendName = backendResources.stream()
@@ -80,18 +103,19 @@ public class GcpForwardingRuleResourceBuilder extends AbstractGcpLoadBalancerBui
                     .map(CloudResource::getName);
 
             if (!backendName.isPresent()) {
-                LOGGER.warn("backend not found for fowarding rule {}, port {}, project {}", buildableResource.getName(), trafficPort, projectId);
+                LOGGER.warn("backend not found for forwarding rule {}, port {}, project {}", buildableResource.getName(), trafficPort, projectId);
                 continue;
             } else {
                 forwardingRule.setBackendService(String.format(GCP_BACKEND_SERVICE_REF_FORMAT, projectId, regionName, backendName.get()));
             }
 
             if (ipResources.isEmpty()) {
-                LOGGER.warn("No reserved IP address for loadbalancer {}-{}, using empmeral", loadBalancer.getType(), projectId);
+                LOGGER.warn("No reserved IP address for loadbalancer {}-{}, using ephemeral", loadBalancer.getType(), projectId);
             } else {
                 forwardingRule.setIPAddress(String.format(GCP_IP_REF_FORMAT, projectId, regionName, ipResources.get(0).getName()));
 
             }
+            forwardingRule.setUnknownKeys(new HashMap<>(gcpLabelUtil.createLabelsFromTags(cloudStack)));
             Compute.ForwardingRules.Insert insert = context.getCompute().forwardingRules().insert(projectId, regionName, forwardingRule);
             results.add(doOperationalRequest(buildableResource, insert));
 

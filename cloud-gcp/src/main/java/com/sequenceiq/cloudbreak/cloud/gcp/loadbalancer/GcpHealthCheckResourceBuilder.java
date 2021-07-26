@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.springframework.stereotype.Service;
+
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.Compute.RegionHealthChecks.Delete;
 import com.google.api.services.compute.Compute.RegionHealthChecks.Insert;
@@ -20,6 +22,14 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
 import com.sequenceiq.common.api.type.ResourceType;
 
+/**
+ * Resposible for CRUD operations for a GCP health checker resource.
+ * Currently only regional health checks are supported.
+ * Generally only one exists for each port being used in a given stack, but not a hard rule
+ * Currently the health check is a graceful termination of TCP handshake, support exists for HTTP level health checks
+ *
+ */
+@Service
 public class GcpHealthCheckResourceBuilder extends AbstractGcpLoadBalancerBuilder {
 
     private static final int ORDER = 1;
