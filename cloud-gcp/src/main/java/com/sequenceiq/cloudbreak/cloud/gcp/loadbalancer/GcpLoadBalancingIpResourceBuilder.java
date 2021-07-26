@@ -2,8 +2,11 @@ package com.sequenceiq.cloudbreak.cloud.gcp.loadbalancer;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.compute.GcpReservedIpResourceBuilder;
@@ -14,11 +17,20 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.api.type.ResourceType;
 
+/**
+ * The loadbalancer version of creating a reserved IP address, where possible use {@link GcpReservedIpResourceBuilder}
+ * Used to reserve an IP address to act as the destination for the load balancer forwarding rule
+ *
+ */
+@Service
 public class GcpLoadBalancingIpResourceBuilder extends AbstractGcpLoadBalancerBuilder {
 
     private static final int ORDER = 3;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpLoadBalancingIpResourceBuilder.class);
+
+    @Inject
+    private GcpReservedIpResourceBuilder reservedIpResourceBuilder;
 
     @Override
     public List<CloudResource> create(GcpContext context, AuthenticatedContext auth, CloudLoadBalancer loadBalancer) {
@@ -31,13 +43,13 @@ public class GcpLoadBalancingIpResourceBuilder extends AbstractGcpLoadBalancerBu
     @Override
     public List<CloudResource> build(GcpContext context, AuthenticatedContext auth, List<CloudResource> buildableResources,
             CloudLoadBalancer loadBalancer, CloudStack cloudStack) throws Exception {
-        return GcpReservedIpResourceBuilder.buildReservedIp(context, buildableResources, cloudStack,
+        return reservedIpResourceBuilder.buildReservedIp(context, buildableResources, cloudStack,
                 loadBalancer.getType() == LoadBalancerType.PRIVATE ? GcpReservedIpResourceBuilder.INTERNAL : GcpReservedIpResourceBuilder.EXTERNAL);
     }
 
     @Override
     public CloudResource delete(GcpContext context, AuthenticatedContext auth, CloudResource resource) throws Exception {
-        return GcpReservedIpResourceBuilder.deleteReservedIP(context, resource);
+        return reservedIpResourceBuilder.deleteReservedIP(context, resource);
     }
 
     @Override

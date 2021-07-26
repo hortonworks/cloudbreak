@@ -17,13 +17,13 @@ import com.sequenceiq.common.api.type.ResourceType;
  * For example to create the necessary network infrastructure for GCP, it is required to have the following network builders:
  * GCP_HEALTHCHECK
  * GCP_BACKEND_SERVICE
- * GCP_FOWARDING_RULE
+ * GCP_FORWARDING_RULE
  * These resource builders are ordered {@link OrderedBuilder#order()} which means you can provide the
  * order of the resource creation. For instance creation it is most likely to need the resources created by an early builder so these resources should
  * be provided by the generic {@link ResourceBuilderContext} objects which will be passed along with the creation process.
  * <br>
  * To remove the corresponding network resources the builders will be called in <b>reverse</b> order. It the example above it will be called as:
- * GCP_FOWARDING_RULE
+ * GCP_FORWARDING_RULE
  * GCP_BACKEND_SERVICE
  * GCP_HEALTHCHECK
  * <br>

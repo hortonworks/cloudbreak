@@ -57,7 +57,7 @@ public class GcpReservedIpResourceBuilder extends AbstractGcpComputeBuilder {
         return buildReservedIp(context, buildableResource, cloudStack, EXTERNAL);
     }
 
-    public static List<CloudResource> buildReservedIp(GcpContext context, List<CloudResource> buildableResource,
+    public List<CloudResource> buildReservedIp(GcpContext context, List<CloudResource> buildableResource,
             CloudStack cloudStack, String type) throws Exception {
         List<CloudResource> result = new ArrayList<>();
         for (CloudResource resource : buildableResource) {
@@ -66,6 +66,7 @@ public class GcpReservedIpResourceBuilder extends AbstractGcpComputeBuilder {
 
             Address address = new Address();
             address.setName(resource.getName());
+            address.setDescription(description());
             address.setAddressType(type);
             if (INTERNAL.equals(type)) {
                 address.setPurpose(SHARED_LOADBALANCER_VIP)
@@ -80,11 +81,11 @@ public class GcpReservedIpResourceBuilder extends AbstractGcpComputeBuilder {
             try {
                 Operation operation = networkInsert.execute();
                 if (operation.getHttpErrorStatusCode() != null) {
-                    throw new GcpResourceException(operation.getHttpErrorMessage(), ResourceType.GCP_RESERVED_IP, resource.getName());
+                    throw new GcpResourceException(operation.getHttpErrorMessage(), resourceType(), resource.getName());
                 }
                 result.add(createOperationAwareCloudResource(resource, operation));
             } catch (GoogleJsonResponseException e) {
-                throw new GcpResourceException(e.getDetails().getMessage(), ResourceType.GCP_RESERVED_IP, resource.getName());
+                throw new GcpResourceException(checkException(e), resourceType(), resource.getName());
             }
         }
         return result;
@@ -96,7 +97,7 @@ public class GcpReservedIpResourceBuilder extends AbstractGcpComputeBuilder {
         return deleteReservedIP(context, resource);
     }
 
-    public static CloudResource deleteReservedIP(GcpContext context, CloudResource resource) throws Exception {
+    public CloudResource deleteReservedIP(GcpContext context, CloudResource resource) throws Exception {
         Compute compute = context.getCompute();
         String projectId = context.getProjectId();
         String region = context.getLocation().getRegion().value();
@@ -105,7 +106,8 @@ public class GcpReservedIpResourceBuilder extends AbstractGcpComputeBuilder {
             Operation operation = compute.addresses().delete(projectId, region, resource.getName()).execute();
             return createOperationAwareCloudResource(resource, operation);
         } catch (GoogleJsonResponseException e) {
-            throw exceptionHandlerWithThrow(e, resource.getName(), ResourceType.GCP_RESERVED_IP);
+            exceptionHandler(e, resource.getName(), resourceType());
+            return null;
         }
     }
 

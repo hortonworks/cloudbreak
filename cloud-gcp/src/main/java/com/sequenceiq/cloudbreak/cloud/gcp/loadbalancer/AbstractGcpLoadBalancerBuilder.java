@@ -14,8 +14,10 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.template.LoadBalancerResourceBuilder;
 
-/*
- * GCP:a fowarding rule is the tuple (type, external IP(assigneable), service port(s), backend service { health check port ,instancegroups{instances}}
+/**
+ * Abstract class for ResourceBuilders that operate based off of the configuration of the loadbalancers in a given stack
+ *
+ * GCP:a forwarding rule is the tuple (type, external IP(assigneable), service port(s), backend service { health check port ,instancegroups{instances}}
  * each entry value here needs to be it's own backend service and then have 1 forwarding rule for all entries that have the same service port
  * this covers a situation where instance A and B are both set to service port X, but have different health check ports
  * */
