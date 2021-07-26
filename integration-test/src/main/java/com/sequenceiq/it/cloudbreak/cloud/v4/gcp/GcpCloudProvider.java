@@ -4,6 +4,7 @@ import static java.lang.String.format;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -225,8 +226,10 @@ public class GcpCloudProvider extends AbstractCloudProvider {
 
     @Override
     public EnvironmentNetworkTestDto network(EnvironmentNetworkTestDto network) {
+        Set<String> subnets = gcpProperties.getNetwork().getSubnetIds() == null ? Set.of(gcpProperties.getNetwork().getSubnetId()) :
+                new HashSet<>(gcpProperties.getNetwork().getSubnetIds());
         return network
-                .withSubnetIDs(new HashSet<>(gcpProperties.getNetwork().getSubnetIds()))
+                .withSubnetIDs(subnets)
                 .withGcp(environmentNetworkParameters());
     }
 
