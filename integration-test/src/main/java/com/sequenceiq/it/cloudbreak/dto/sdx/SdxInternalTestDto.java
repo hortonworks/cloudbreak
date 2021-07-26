@@ -53,6 +53,7 @@ import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 import com.sequenceiq.it.cloudbreak.search.Searchable;
 import com.sequenceiq.it.cloudbreak.util.AuditUtil;
+import com.sequenceiq.it.cloudbreak.util.InstanceUtil;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
@@ -333,10 +334,7 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
 
     public SdxInternalTestDto awaitForHealthyInstances() {
         Map<List<String>, InstanceStatus> instanceStatusMap = getInstanceStatusMapIfAvailableInResponse(() ->
-                getResponse().getStackV4Response().getInstanceGroups().stream().collect(Collectors.toMap(
-                        instanceGroupV4Response -> instanceGroupV4Response.getMetadata().stream()
-                                .map(InstanceMetaDataV4Response::getInstanceId).collect(Collectors.toList()),
-                        instanceMetaDataV4Response -> InstanceStatus.SERVICES_HEALTHY)));
+                InstanceUtil.getInstanceStatusMap(getResponse().getStackV4Response()));
         return awaitForInstance(instanceStatusMap);
     }
 

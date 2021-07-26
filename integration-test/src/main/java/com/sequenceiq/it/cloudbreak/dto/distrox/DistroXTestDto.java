@@ -51,6 +51,7 @@ import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.search.Searchable;
 import com.sequenceiq.it.cloudbreak.util.AuditUtil;
+import com.sequenceiq.it.cloudbreak.util.InstanceUtil;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
 
 @Prototype
@@ -183,11 +184,7 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
 
     public DistroXTestDto awaitForHealthyInstances() {
         Map<List<String>, InstanceStatus> instanceStatusMap = getInstanceStatusMapIfAvailableInResponse(() ->
-            getResponse().getInstanceGroups().stream()
-                    .collect(Collectors.toMap(
-                            instanceGroupV4Response -> instanceGroupV4Response.getMetadata().stream()
-                                    .map(InstanceMetaDataV4Response::getInstanceId).collect(Collectors.toList()),
-                            instanceMetaDataV4Response -> InstanceStatus.SERVICES_HEALTHY)));
+                InstanceUtil.getInstanceStatusMap(getResponse()));
         return awaitForInstance(instanceStatusMap);
     }
 

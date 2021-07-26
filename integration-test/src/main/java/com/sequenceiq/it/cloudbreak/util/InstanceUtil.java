@@ -1,9 +1,12 @@
 package com.sequenceiq.it.cloudbreak.util;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 
@@ -16,5 +19,16 @@ public class InstanceUtil {
                 instanceGroup.getName().equals(hostGroupName)).findFirst().orElse(null);
         return Objects.requireNonNull(instanceGroupV4Response)
                 .getMetadata().stream().map(InstanceMetaDataV4Response::getInstanceId).collect(Collectors.toList());
+    }
+
+    public static Map<List<String>, InstanceStatus> getInstanceStatusMap(StackV4Response stackV4Response) {
+        return stackV4Response.getInstanceGroups().stream()
+                .filter(instanceGroupV4Response -> instanceGroupV4Response.getMetadata().stream()
+                        .anyMatch(instanceMetaDataV4Response -> Objects.nonNull(instanceMetaDataV4Response.getInstanceId())))
+                .collect(Collectors.toMap(
+                        instanceGroupV4Response -> instanceGroupV4Response.getMetadata().stream()
+                                .filter(instanceMetaDataV4Response -> Objects.nonNull(instanceMetaDataV4Response.getInstanceId()))
+                                .map(InstanceMetaDataV4Response::getInstanceId).collect(Collectors.toList()),
+                        instanceMetaDataV4Response -> InstanceStatus.SERVICES_HEALTHY));
     }
 }
