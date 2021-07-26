@@ -199,24 +199,34 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
     public DistroXTestDto awaitForHostGroup(String hostGroup, InstanceStatus instanceStatus) {
         Optional<InstanceGroupV4Response> instanceGroup = getResponse().getInstanceGroups().stream()
                 .filter(instanceGroupV4Response -> hostGroup.equals(instanceGroupV4Response.getName()))
+                .filter(instanceGroupV4Response -> instanceGroupV4Response.getMetadata().stream()
+                        .anyMatch(instanceMetaDataV4Response -> Objects.nonNull(instanceMetaDataV4Response.getInstanceId())))
                 .findAny();
         if (instanceGroup.isPresent()) {
-            List<String> instanceIds = instanceGroup.get().getMetadata().stream().map(InstanceMetaDataV4Response::getInstanceId).collect(Collectors.toList());
+            List<String> instanceIds = instanceGroup.get().getMetadata().stream()
+                    .filter(instanceMetaDataV4Response -> Objects.nonNull(instanceMetaDataV4Response.getInstanceId()))
+                    .map(InstanceMetaDataV4Response::getInstanceId)
+                    .collect(Collectors.toList());
             return awaitForInstance(Map.of(instanceIds, instanceStatus));
         } else {
-            throw new IllegalStateException("Can't find instance group with this name: " + hostGroup);
+            throw new IllegalStateException("Can't find valid instance group with this name: " + hostGroup);
         }
     }
 
-    public DistroXTestDto awaitForHostGroups(List<String> hostGroup, InstanceStatus instanceStatus) {
+    public DistroXTestDto awaitForHostGroups(List<String> hostGroups, InstanceStatus instanceStatus) {
         Optional<InstanceGroupV4Response> instanceGroup = getResponse().getInstanceGroups().stream()
-                .filter(instanceGroupV4Response -> hostGroup.contains(instanceGroupV4Response.getName()))
+                .filter(instanceGroupV4Response -> hostGroups.contains(instanceGroupV4Response.getName()))
+                .filter(instanceGroupV4Response -> instanceGroupV4Response.getMetadata().stream()
+                        .anyMatch(instanceMetaDataV4Response -> Objects.nonNull(instanceMetaDataV4Response.getInstanceId())))
                 .findAny();
         if (instanceGroup.isPresent()) {
-            List<String> instanceIds = instanceGroup.get().getMetadata().stream().map(InstanceMetaDataV4Response::getInstanceId).collect(Collectors.toList());
+            List<String> instanceIds = instanceGroup.get().getMetadata().stream()
+                    .filter(instanceMetaDataV4Response -> Objects.nonNull(instanceMetaDataV4Response.getInstanceId()))
+                    .map(InstanceMetaDataV4Response::getInstanceId)
+                    .collect(Collectors.toList());
             return awaitForInstance(Map.of(instanceIds, instanceStatus));
         } else {
-            throw new IllegalStateException("Can't find instance group with this name: " + hostGroup);
+            throw new IllegalStateException("Can't find valid instance group with this name: " + hostGroups);
         }
     }
 
