@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.LinkedHashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -109,7 +110,7 @@ class StackCommonServiceTest {
     public void testThrowsExceptionWhenDeleteInstanceFromDataLake() {
         Stack stack = new Stack();
         stack.setType(StackType.DATALAKE);
-        when(stackService.getByNameOrCrnInWorkspace(STACK_NAME, WORKSPACE_ID)).thenReturn(stack);
+        when(stackService.findStackByNameOrCrnAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.of(stack));
 
         BadRequestException exception = assertThrows(BadRequestException.class,
                 () -> underTest.deleteInstanceInWorkspace(STACK_NAME, WORKSPACE_ID, "node1", true));
@@ -124,7 +125,7 @@ class StackCommonServiceTest {
         stack.setType(StackType.WORKLOAD);
         User user = new User();
         when(userService.getOrCreate(any())).thenReturn(user);
-        when(stackService.getByNameOrCrnInWorkspace(STACK_NAME, WORKSPACE_ID)).thenReturn(stack);
+        when(stackService.findStackByNameOrCrnAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.of(stack));
 
         underTest.deleteInstanceInWorkspace(STACK_NAME, WORKSPACE_ID, "node1", true);
 
@@ -135,7 +136,7 @@ class StackCommonServiceTest {
     public void testThrowsExceptionWhenDeleteInstancesFromDataLake() {
         Stack stack = new Stack();
         stack.setType(StackType.DATALAKE);
-        when(stackService.getByNameOrCrnInWorkspace(STACK_NAME, WORKSPACE_ID)).thenReturn(stack);
+        when(stackService.findStackByNameOrCrnAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.of(stack));
 
         Set<String> nodes = new LinkedHashSet<>();
         nodes.add("node1");
@@ -154,7 +155,7 @@ class StackCommonServiceTest {
         stack.setType(StackType.WORKLOAD);
         User user = new User();
         when(userService.getOrCreate(any())).thenReturn(user);
-        when(stackService.getByNameOrCrnInWorkspace(STACK_NAME, WORKSPACE_ID)).thenReturn(stack);
+        when(stackService.findStackByNameOrCrnAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.of(stack));
 
         Set<String> nodes = new LinkedHashSet<>();
         nodes.add("node1");

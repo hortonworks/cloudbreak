@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil.anonymi
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -174,9 +175,12 @@ public class StackCommonService {
 
     public FlowIdentifier deleteMultipleInstancesInWorkspace(NameOrCrn nameOrCrn, Long workspaceId, Set<String> instanceIds, boolean forced) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
-        validateStackIsNotDataLake(stack, instanceIds);
-        return stackOperationService.removeInstances(stack, workspaceId, instanceIds, forced, user);
+        Optional<Stack> stack = stackService.findStackByNameOrCrnAndWorkspaceId(nameOrCrn, workspaceId);
+        if (stack.isEmpty()) {
+            throw new BadRequestException("The requested Data Hub does not exist.");
+        }
+        validateStackIsNotDataLake(stack.orElse(null), instanceIds);
+        return stackOperationService.removeInstances(stack.orElse(null), workspaceId, instanceIds, forced, user);
     }
 
     public FlowIdentifier putStartInWorkspace(NameOrCrn nameOrCrn, Long workspaceId) {
@@ -281,9 +285,12 @@ public class StackCommonService {
 
     public FlowIdentifier deleteInstanceInWorkspace(NameOrCrn nameOrCrn, Long workspaceId, String instanceId, boolean forced) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
-        validateStackIsNotDataLake(stack, Set.of(instanceId));
-        return stackOperationService.removeInstance(stack, workspaceId, instanceId, forced, user);
+        Optional<Stack> stack = stackService.findStackByNameOrCrnAndWorkspaceId(nameOrCrn, workspaceId);
+        if (stack.isEmpty()) {
+            throw new BadRequestException("The requested Data Hub does not exist.");
+        }
+        validateStackIsNotDataLake(stack.orElse(null), Set.of(instanceId));
+        return stackOperationService.removeInstance(stack.orElse(null), workspaceId, instanceId, forced, user);
     }
 
     private void validateStackIsNotDataLake(Stack stack, Set<String> instanceIds) {
