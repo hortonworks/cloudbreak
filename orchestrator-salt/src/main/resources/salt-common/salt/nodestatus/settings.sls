@@ -23,6 +23,14 @@
   {% set collect_available = False %}
 {% endif %}
 
+{% if telemetry.clusterType and telemetry.clusterType|upper != "DATAHUB" %}
+  {% set doctor_timeout_supported = True %}
+{% elif telemetry.cdpTelemetryPackageVersion and salt['pkg.version_cmp'](telemetry.cdpTelemetryPackageVersion,'0.4.10-1') >= 0 %}
+  {% set doctor_timeout_supported = True %}
+{% else %}
+  {% set doctor_timeout_supported = False %}
+{% endif %}
+
 {% if telemetry.cdpTelemetryVersion > 9 %}
   {% set salt_ping_available = True %}
 {% else %}
@@ -34,6 +42,7 @@
     "serverPassword": server_password,
     "collectParams": collect_params,
     "collectAvailable": collect_available,
+    "doctorTimeoutSupported": doctor_timeout_supported,
     "saltPingAvailable": salt_ping_available,
     "saltPingEnabled": salt_ping_enabled
 }) %}
