@@ -2,6 +2,9 @@ package com.sequenceiq.datalake.service.sdx.cert;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -17,14 +20,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.dyngr.core.AttemptResults;
-import com.dyngr.exception.PollerStoppedException;
 import com.dyngr.exception.UserBreakException;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.CertificatesRotationV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
@@ -60,7 +59,7 @@ class CertRotationServiceTest {
     private SdxStatusService sdxStatusService;
 
     @Mock
-    private ClusterStatusCheckerForCertRotation statusChecker;
+    private CloudbreakPoller statusChecker;
 
     @InjectMocks
     private CertRotationService underTest;
@@ -140,33 +139,23 @@ class CertRotationServiceTest {
     }
 
     @Test
-    public void testWaitForCloudbreakClusterCertRotation() throws JsonProcessingException {
+    public void testWaitForCloudbreakClusterCertRotation() {
         SdxCluster sdxCluster = new SdxCluster();
         when(sdxService.getById(1L)).thenReturn(sdxCluster);
-        when(statusChecker.checkClusterStatusDuringRotate(sdxCluster)).thenReturn(AttemptResults.finishWith(new StackV4Response()));
 
         underTest.waitForCloudbreakClusterCertRotation(1L, POLLING_CONFIG);
 
+        verify(statusChecker).pollUpdateUntilAvailable(eq("Certificate rotation"), eq(sdxCluster), any());
         verify(sdxStatusService).setStatusForDatalakeAndNotify(DatalakeStatusEnum.CERT_ROTATION_FINISHED, ResourceEvent.SDX_CERT_ROTATION_FINISHED,
                 "Datalake is running", sdxCluster);
     }
 
     @Test
-    public void testWaitForCloudbreakClusterCertRotationTimeout() throws JsonProcessingException {
+    public void testWaitForCloudbreakClusterCertRotationBreak() {
         SdxCluster sdxCluster = new SdxCluster();
         when(sdxService.getById(1L)).thenReturn(sdxCluster);
-        when(statusChecker.checkClusterStatusDuringRotate(sdxCluster)).thenReturn(AttemptResults.justContinue());
-
-        assertThrows(PollerStoppedException.class, () -> underTest.waitForCloudbreakClusterCertRotation(1L, POLLING_CONFIG));
-
-        verifyNoInteractions(sdxStatusService);
-    }
-
-    @Test
-    public void testWaitForCloudbreakClusterCertRotationBreak() throws JsonProcessingException {
-        SdxCluster sdxCluster = new SdxCluster();
-        when(sdxService.getById(1L)).thenReturn(sdxCluster);
-        when(statusChecker.checkClusterStatusDuringRotate(sdxCluster)).thenReturn(AttemptResults.breakFor("failure"));
+        doThrow(new UserBreakException("failure"))
+                .when(statusChecker).pollUpdateUntilAvailable(any(), eq(sdxCluster), any());
 
         assertThrows(UserBreakException.class, () -> underTest.waitForCloudbreakClusterCertRotation(1L, POLLING_CONFIG));
 

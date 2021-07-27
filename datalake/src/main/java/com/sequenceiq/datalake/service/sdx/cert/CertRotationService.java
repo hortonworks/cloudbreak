@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.dyngr.Polling;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.CertificatesRotationV4Response;
@@ -51,7 +50,7 @@ public class CertRotationService {
     private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
     @Inject
-    private ClusterStatusCheckerForCertRotation statusChecker;
+    private CloudbreakPoller statusChecker;
 
     public FlowIdentifier rotateAutoTlsCertificates(SdxCluster sdxCluster, CertificatesRotationV4Request rotateCertificateRequest) {
         MDCBuilder.buildMdcContext(sdxCluster);
@@ -87,10 +86,7 @@ public class CertRotationService {
 
     public void waitForCloudbreakClusterCertRotation(Long id, PollingConfig pollingConfig) {
         SdxCluster sdxCluster = sdxService.getById(id);
-        Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
-                .stopIfException(pollingConfig.getStopPollingIfExceptionOccured())
-                .stopAfterDelay(pollingConfig.getDuration(), pollingConfig.getDurationTimeUnit())
-                .run(() -> statusChecker.checkClusterStatusDuringRotate(sdxCluster));
+        statusChecker.pollUpdateUntilAvailable("Certificate rotation", sdxCluster, pollingConfig);
         sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.CERT_ROTATION_FINISHED, ResourceEvent.SDX_CERT_ROTATION_FINISHED,
                 "Datalake is running", sdxCluster);
     }

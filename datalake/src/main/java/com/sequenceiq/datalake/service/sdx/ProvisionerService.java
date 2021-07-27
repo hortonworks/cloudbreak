@@ -1,8 +1,5 @@
 package com.sequenceiq.datalake.service.sdx;
 
-import static com.sequenceiq.datalake.service.sdx.CloudbreakFlowService.FlowState.FINISHED;
-import static com.sequenceiq.datalake.service.sdx.CloudbreakFlowService.FlowState.RUNNING;
-
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Optional;
@@ -27,15 +24,12 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.api.model.StatusKind;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
-import com.sequenceiq.datalake.flow.statestore.DatalakeInMemoryStateStore;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
-import com.sequenceiq.datalake.service.sdx.CloudbreakFlowService.FlowState;
-import com.sequenceiq.datalake.service.sdx.status.AvailabilityChecker;
+import com.sequenceiq.datalake.service.sdx.cert.CloudbreakPoller;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
@@ -68,7 +62,7 @@ public class ProvisionerService {
     private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
     @Inject
-    private AvailabilityChecker availabilityChecker;
+    private CloudbreakPoller cloudbreakPoller;
 
     private AttemptResult<StackV4Response> sdxCreationFailed(String statusReason) {
         String errorMessage = "Data Lake creation failed: " + statusReason;
@@ -189,55 +183,10 @@ public class ProvisionerService {
     public StackV4Response waitCloudbreakClusterCreation(Long id, PollingConfig pollingConfig) {
         SdxCluster sdxCluster = sdxService.getById(id);
         sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.STACK_CREATION_IN_PROGRESS, "Datalake stack creation in progress", sdxCluster);
-        return Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
-                .stopIfException(pollingConfig.getStopPollingIfExceptionOccured())
-                .stopAfterDelay(pollingConfig.getDuration(), pollingConfig.getDurationTimeUnit())
-                .run(() -> {
-                    LOGGER.info("Polling cloudbreak for stack status: '{}' in '{}' env", sdxCluster.getClusterName(), sdxCluster.getEnvName());
-                    try {
-                        if (PollGroup.CANCELLED.equals(DatalakeInMemoryStateStore.get(sdxCluster.getId()))) {
-                            LOGGER.info("Cloudbreak stack polling cancelled in inmemory store, id: " + sdxCluster.getId());
-                            return AttemptResults.breakFor("Cloudbreak stack polling cancelled in inmemory store, id: " + sdxCluster.getId());
-                        }
-                        FlowState flowState = cloudbreakFlowService.getLastKnownFlowState(sdxCluster);
-                        if (RUNNING.equals(flowState)) {
-                            LOGGER.info("Cluster creation polling will continue, cluster has an active flow in Cloudbreak, id: {}", sdxCluster.getId());
-                            return AttemptResults.justContinue();
-                        }
-                        StackV4Response stackV4Response = ThreadBasedUserCrnProvider.doAsInternalActor(() -> stackV4Endpoint
-                                .get(0L, sdxCluster.getClusterName(), Collections.emptySet(), sdxCluster.getAccountId()));
-                        LOGGER.info("Stack status of SDX {} by response from cloudbreak: {}", sdxCluster.getClusterName(),
-                                stackV4Response.getStatus().name());
-                        LOGGER.debug("Response from cloudbreak: {}", JsonUtil.writeValueAsString(stackV4Response));
-                        ClusterV4Response cluster = stackV4Response.getCluster();
-                        if (availabilityChecker.stackAndClusterAvailable(stackV4Response, cluster)) {
-                            LOGGER.info("Stack and cluster is available.");
-                            sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.STACK_CREATION_FINISHED,
-                                    "Stack created for Datalake", sdxCluster);
-                            return AttemptResults.finishWith(stackV4Response);
-                        } else {
-                            if (Status.CREATE_FAILED.equals(stackV4Response.getStatus())) {
-                                LOGGER.error("Stack creation failed {}", stackV4Response.getName());
-                                return sdxCreationFailed(stackV4Response.getStatusReason());
-                            } else if (Status.CREATE_FAILED.equals(stackV4Response.getCluster().getStatus())) {
-                                LOGGER.error("Cluster creation failed {}", stackV4Response.getCluster().getName());
-                                return sdxCreationFailed(stackV4Response.getCluster().getStatusReason());
-                            } else {
-                                String message = sdxStatusService.getShortStatusMessage(stackV4Response);
-                                if (FINISHED.equals(flowState)) {
-                                    LOGGER.error("Cluster creation flow finished but stack or cluster is not available! {}", message);
-                                    return sdxCreationFailed(message);
-                                } else {
-                                    LOGGER.info("Cluster creation polling will continue, {}", message);
-                                    return AttemptResults.justContinue();
-                                }
-                            }
-                        }
-                    } catch (NotFoundException e) {
-                        LOGGER.debug("Stack not found on CB side " + sdxCluster.getClusterName(), e);
-                        return AttemptResults.breakFor("Stack not found on CB side " + sdxCluster.getClusterName());
-                    }
-                });
+        cloudbreakPoller.pollCreateUntilAvailable(sdxCluster, pollingConfig);
+        sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.STACK_CREATION_FINISHED, "Stack created for Datalake", sdxCluster);
+        return ThreadBasedUserCrnProvider.doAsInternalActor(
+                () -> stackV4Endpoint.get(0L, sdxCluster.getClusterName(), Collections.emptySet(), sdxCluster.getAccountId()));
     }
 
 }
