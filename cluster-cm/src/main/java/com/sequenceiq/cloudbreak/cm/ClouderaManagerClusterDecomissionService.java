@@ -75,10 +75,9 @@ public class ClouderaManagerClusterDecomissionService implements ClusterDecomiss
     }
 
     @Override
-    public Set<InstanceMetaData> collectDownscaleCandidates(@Nonnull HostGroup hostGroup, Integer scalingAdjustment, int defaultRootVolumeSize,
+    public Set<InstanceMetaData> collectDownscaleCandidates(@Nonnull HostGroup hostGroup, Integer scalingAdjustment,
             Set<InstanceMetaData> instanceMetaDatasInStack) {
-        return clouderaManagerDecomissioner.collectDownscaleCandidates(client, stack, hostGroup, scalingAdjustment, defaultRootVolumeSize,
-                instanceMetaDatasInStack);
+        return clouderaManagerDecomissioner.collectDownscaleCandidates(client, stack, hostGroup, scalingAdjustment, instanceMetaDatasInStack);
     }
 
     @Override

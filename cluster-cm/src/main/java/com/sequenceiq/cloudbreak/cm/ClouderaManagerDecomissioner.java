@@ -118,12 +118,11 @@ public class ClouderaManagerDecomissioner {
     }
 
     public Set<InstanceMetaData> collectDownscaleCandidates(ApiClient client, Stack stack, HostGroup hostGroup, Integer scalingAdjustment,
-            int defaultRootVolumeSize, Set<InstanceMetaData> instanceMetaDatasInStack) {
+            Set<InstanceMetaData> instanceMetaDatasInStack) {
         LOGGER.debug("Collecting downscale candidates");
         Set<InstanceMetaData> instancesForHostGroup = instanceMetaDatasInStack.stream()
                 .filter(instanceMetaData -> instanceMetaData.getInstanceGroup().getGroupName().equals(hostGroup.getName()))
                 .collect(Collectors.toSet());
-        ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(client);
         HostsResourceApi hostsResourceApi = clouderaManagerApiFactory.getHostsResourceApi(client);
         try {
             HostTemplatesResourceApi hostTemplatesResourceApi = clouderaManagerApiFactory.getHostTemplatesResourceApi(client);
@@ -131,16 +130,13 @@ public class ClouderaManagerDecomissioner {
             int replication = hostGroupNodesAreDataNodes(hostTemplates, hostGroup.getName()) ? getReplicationFactor(client, stack.getName()) : 0;
             verifyNodeCount(replication, scalingAdjustment, instancesForHostGroup.size(), 0, stack);
 
-            ApiHostList hostRefList = clustersResourceApi.listHosts(stack.getName(), null, null, null);
+            ApiHostList hostRefList = hostsResourceApi.readHosts(null, null, SUMMARY_REQUEST_VIEW);
             Set<InstanceMetaData> instancesToRemove = getUnusedInstances(scalingAdjustment, instancesForHostGroup, hostRefList);
 
             List<ApiHost> apiHosts = hostRefList.getItems().stream()
                     .filter(host -> instancesForHostGroup.stream()
                             .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null)
                             .anyMatch(instanceMetaData -> instanceMetaData.getDiscoveryFQDN().equals(host.getHostname())))
-                    .map(ApiHost::getHostId)
-                    .parallel()
-                    .map(readHostSummary(hostsResourceApi))
                     .collect(Collectors.toList());
 
             Set<String> hostsToRemove = apiHosts.stream()
@@ -311,17 +307,6 @@ public class ClouderaManagerDecomissioner {
             LOGGER.info("Cannot downscale: replication: {}, adjustment: {}, filtered host size: {}", replication, scalingAdjustment, hostSize);
             throw new NotEnoughNodeException("There is not enough node to downscale. Check the replication factor.");
         }
-    }
-
-    private Function<String, ApiHost> readHostSummary(HostsResourceApi hostsResourceApi) {
-        return hostId -> {
-            try {
-                return hostsResourceApi.readHost(hostId, SUMMARY_REQUEST_VIEW);
-            } catch (ApiException e) {
-                LOGGER.error("Failed to read host: {}", hostId, e);
-                throw new CloudbreakServiceException(e.getMessage(), e);
-            }
-        };
     }
 
     public void deleteHost(Stack stack, InstanceMetaData data, ApiClient client) {

@@ -141,11 +141,6 @@ class ClouderaManagerDecomissionerTest {
 
     @Test
     public void testDecommissionForNodesNowKnownByCM() throws ApiException {
-        ApiHostList apiHostRefList = new ApiHostList();
-        apiHostRefList.setItems(List.of(createApiHostRef("host1.example.com"), createApiHostRef("host2.example.com"),
-                createApiHostRef("host5.example.com")));
-        when(clustersResourceApi.listHosts(STACK_NAME, null, null, null)).thenReturn(apiHostRefList);
-        when(clouderaManagerApiFactory.getClustersResourceApi(client)).thenReturn(clustersResourceApi);
         HostTemplatesResourceApi hostTemplatesResourceApi = mock(HostTemplatesResourceApi.class);
         ApiHostTemplateList apiHostTemplateList = new ApiHostTemplateList();
         apiHostTemplateList.setItems(new ArrayList<>());
@@ -157,18 +152,11 @@ class ClouderaManagerDecomissionerTest {
 
         HostsResourceApi hostsResourceApi = mock(HostsResourceApi.class);
         when(clouderaManagerApiFactory.getHostsResourceApi(client)).thenReturn(hostsResourceApi);
-        ApiHost apiHost1 = new ApiHost();
-        apiHost1.setHealthSummary(ApiHealthSummary.GOOD);
-        apiHost1.setHostname("host1.example.com");
-        when(hostsResourceApi.readHost(eq("host1.example.com"), any())).thenReturn(apiHost1);
-        ApiHost apiHost2 = new ApiHost();
-        apiHost2.setHealthSummary(ApiHealthSummary.BAD);
-        apiHost2.setHostname("host2.example.com");
-        when(hostsResourceApi.readHost(eq("host2.example.com"), any())).thenReturn(apiHost2);
-        ApiHost apiHost3 = new ApiHost();
-        apiHost3.setHealthSummary(ApiHealthSummary.GOOD);
-        apiHost3.setHostname("host5.example.com");
-        when(hostsResourceApi.readHost(eq("host5.example.com"), any())).thenReturn(apiHost3);
+        ApiHostList apiHostList = new ApiHostList();
+        apiHostList.addItemsItem(createApiHostRef("host1.example.com"));
+        apiHostList.addItemsItem(createApiHostRef("host2.example.com", ApiHealthSummary.BAD));
+        apiHostList.addItemsItem(createApiHostRef("host5.example.com"));
+        when(hostsResourceApi.readHosts(any(), any(), any())).thenReturn(apiHostList);
 
         InstanceMetaData healthy1 = createInstanceMetadata(InstanceStatus.SERVICES_HEALTHY, "host1.example.com", "compute");
         InstanceMetaData bad1 = createInstanceMetadata(InstanceStatus.SERVICES_HEALTHY, "host2.example.com", "compute");
@@ -179,7 +167,7 @@ class ClouderaManagerDecomissionerTest {
         Set<InstanceMetaData> instanceMetaDataSet = Set.of(failed1, failed2, healthy1, healthy2, bad1);
         Stack stack = getStack();
         stack.setPlatformVariant("AWS");
-        Set<InstanceMetaData> removableInstances = underTest.collectDownscaleCandidates(client, stack, compute, 4, 0, instanceMetaDataSet);
+        Set<InstanceMetaData> removableInstances = underTest.collectDownscaleCandidates(client, stack, compute, 4, instanceMetaDataSet);
         assertEquals(4, removableInstances.size());
         assertTrue(removableInstances.contains(failed1));
         assertTrue(removableInstances.contains(failed2));
@@ -236,10 +224,15 @@ class ClouderaManagerDecomissionerTest {
     }
 
     private ApiHost createApiHostRef(String instanceFqd) {
-        ApiHost deletedInstanceHostRef = new ApiHost();
-        deletedInstanceHostRef.setHostname(instanceFqd);
-        deletedInstanceHostRef.setHostId(instanceFqd);
-        return deletedInstanceHostRef;
+        return createApiHostRef(instanceFqd, ApiHealthSummary.GOOD);
+    }
+
+    private ApiHost createApiHostRef(String instanceFqd, ApiHealthSummary healthSummary) {
+        ApiHost instanceHostRef = new ApiHost();
+        instanceHostRef.setHostname(instanceFqd);
+        instanceHostRef.setHostId(instanceFqd);
+        instanceHostRef.setHealthSummary(healthSummary);
+        return instanceHostRef;
     }
 
     private ApiCommand getApiCommand(BigDecimal commandId) {
