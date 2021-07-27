@@ -43,6 +43,8 @@ import com.sequenceiq.sdx.api.model.SetRangerCloudIdentityMappingRequest;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 
 @Validated
 @Path("/sdx")
@@ -134,7 +136,11 @@ public interface SdxEndpoint {
     @Path("/crn/{crn}/renew_certificate")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "renew certificate on SDX cluster by crn", nickname = "renewCertificateOnSdxByCrn")
-    void renewCertificate(@PathParam("crn") String crn);
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "successful operation", response = FlowIdentifier.class),
+            @ApiResponse(code = 0, message = "unsuccessful operation", response = Void.class)
+    })
+    FlowIdentifier renewCertificate(@PathParam("crn") String crn);
 
     @POST
     @Path("{name}/sync")

@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.exception.FlowNotAcceptedException;
 import com.sequenceiq.cloudbreak.exception.FlowsAlreadyRunningException;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.flow.cert.renew.event.SdxStartCertRenewalEvent;
 import com.sequenceiq.datalake.flow.cert.rotation.event.SdxStartCertRotationEvent;
 import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradeFlowChainStartEvent;
 import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradeStartEvent;
@@ -213,6 +214,10 @@ public class SdxReactorFlowManager {
     }
 
     public FlowIdentifier triggerCertRotation(SdxStartCertRotationEvent event) {
+        return notify(event.selector(), event);
+    }
+
+    public FlowIdentifier triggerCertRenewal(SdxStartCertRenewalEvent event) {
         return notify(event.selector(), event);
     }
 

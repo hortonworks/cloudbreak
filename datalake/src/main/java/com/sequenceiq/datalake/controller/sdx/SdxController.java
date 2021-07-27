@@ -45,6 +45,7 @@ import com.sequenceiq.datalake.service.sdx.SdxRepairService;
 import com.sequenceiq.datalake.service.sdx.SdxRetryService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.StorageValidationService;
+import com.sequenceiq.datalake.service.sdx.cert.CertRenewalService;
 import com.sequenceiq.datalake.service.sdx.cert.CertRotationService;
 import com.sequenceiq.datalake.service.sdx.start.SdxStartService;
 import com.sequenceiq.datalake.service.sdx.stop.SdxStopService;
@@ -93,6 +94,9 @@ public class SdxController implements SdxEndpoint {
 
     @Inject
     private CertRotationService certRotationService;
+
+    @Inject
+    private CertRenewalService certRenewalService;
 
     @Inject
     private DataLakeFiltering dataLakeFiltering;
@@ -195,7 +199,7 @@ public class SdxController implements SdxEndpoint {
     @Override
     @FilterListBasedOnPermissions
     public List<SdxClusterResponse> getByEnvCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @FilterParam(DataLakeFiltering.ENV_CRN)
-            @TenantAwareParam String envCrn) {
+    @TenantAwareParam String envCrn) {
         List<SdxCluster> sdxClusters = dataLakeFiltering.filterDataLakesByEnvCrn(AuthorizationResourceAction.DESCRIBE_DATALAKE, envCrn);
         return convertSdxClusters(sdxClusters);
     }
@@ -234,10 +238,10 @@ public class SdxController implements SdxEndpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.REPAIR_DATALAKE)
-    public void renewCertificate(@ResourceCrn @TenantAwareParam String crn) {
+    public FlowIdentifier renewCertificate(@ResourceCrn @TenantAwareParam String crn) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         SdxCluster sdxCluster = sdxService.getByCrn(userCrn, crn);
-        sdxService.renewCertificate(sdxCluster, userCrn);
+        return certRenewalService.triggerRenewCertificate(sdxCluster, userCrn);
     }
 
     @Override

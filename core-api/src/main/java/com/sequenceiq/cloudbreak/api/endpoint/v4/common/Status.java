@@ -72,7 +72,7 @@ public enum Status {
     }
 
     public boolean isAvailable() {
-        return Arrays.asList(AVAILABLE, MAINTENANCE_MODE_ENABLED).contains(valueOf(name()));
+        return getAvailableStatuses().contains(this);
     }
 
     public boolean isInProgress() {
@@ -183,6 +183,10 @@ public enum Status {
             default:
                 throw new IllegalArgumentException(format("State '%s' is declared to mappable to failed state but not handled.", this));
         }
+    }
+
+    public static Set<Status> getAvailableStatuses() {
+        return Sets.immutableEnumSet(AVAILABLE, MAINTENANCE_MODE_ENABLED);
     }
 
     public static Set<Status> getAllowedDataHubStatesForSdxUpgrade() {

@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
@@ -178,6 +179,15 @@ public class SdxStatusService {
         } else {
             clusterStatusReason = stack.getCluster().getStatusReason();
         }
+        return String.format("Stack status: %s, reason: %s, cluster status: %s, reason: %s",
+                stackStatus, stackStatusReason, clusterStatus, clusterStatusReason);
+    }
+
+    public String getShortStatusMessage(StackStatusV4Response statusResponse) {
+        String stackStatus = statusResponse.getStatus() == null ? "N/A" : statusResponse.getStatus().name();
+        String stackStatusReason = statusResponse.getStatusReason() == null ? "N/A" : statusResponse.getStatusReason();
+        String clusterStatus = statusResponse.getClusterStatus() == null ? "N/A" : statusResponse.getClusterStatus().name();
+        String clusterStatusReason = statusResponse.getClusterStatusReason() == null ? "N/A" : statusResponse.getClusterStatusReason();
         return String.format("Stack status: %s, reason: %s, cluster status: %s, reason: %s",
                 stackStatus, stackStatusReason, clusterStatus, clusterStatusReason);
     }
