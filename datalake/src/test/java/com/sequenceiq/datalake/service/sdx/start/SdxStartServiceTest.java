@@ -1,12 +1,7 @@
 package com.sequenceiq.datalake.service.sdx.start;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.START_FAILED;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.START_REQUESTED;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOP_FAILED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doThrow;
@@ -15,8 +10,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
-
-import java.util.Collections;
 
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ClientErrorException;
@@ -30,12 +23,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.dyngr.core.AttemptResult;
-import com.dyngr.core.AttemptState;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
@@ -174,123 +162,6 @@ public class SdxStartServiceTest {
 
         verifyNoInteractions(cloudbreakFlowService);
         assertEquals("Can not start stack, web application error happened on Cloudbreak side: Error message: \"error\"", exception.getMessage());
-    }
-
-    @Test
-    public void testCheckClusterStatusDuringStartWhenStackAndClusterAvailable() throws JsonProcessingException {
-        SdxCluster sdxCluster = sdxCluster();
-
-        StackV4Response stackV4Response = new StackV4Response();
-        stackV4Response.setStatus(AVAILABLE);
-        ClusterV4Response clusterV4Response = new ClusterV4Response();
-        clusterV4Response.setStatus(AVAILABLE);
-        stackV4Response.setCluster(clusterV4Response);
-
-        when(stackV4Endpoint.get(eq(0L), eq(sdxCluster.getClusterName()), eq(Collections.emptySet()), anyString()))
-                .thenReturn(stackV4Response);
-        when(availabilityChecker.stackAndClusterAvailable(stackV4Response, clusterV4Response)).thenReturn(Boolean.TRUE);
-
-        AttemptResult<StackV4Response> actual = underTest.checkClusterStatusDuringStart(sdxCluster);
-
-        assertEquals(stackV4Response, actual.getResult());
-    }
-
-    @Test
-    public void testCheckClusterStatusDuringStartWhenStackAvailableOnly() throws JsonProcessingException {
-        SdxCluster sdxCluster = sdxCluster();
-
-        StackV4Response stackV4Response = new StackV4Response();
-        stackV4Response.setStatus(AVAILABLE);
-        ClusterV4Response clusterV4Response = new ClusterV4Response();
-        clusterV4Response.setStatus(START_REQUESTED);
-        stackV4Response.setCluster(clusterV4Response);
-
-        when(stackV4Endpoint.get(eq(0L), eq(sdxCluster.getClusterName()), eq(Collections.emptySet()), anyString()))
-                .thenReturn(stackV4Response);
-
-        AttemptResult<StackV4Response> actual = underTest.checkClusterStatusDuringStart(sdxCluster);
-
-        assertEquals(AttemptState.CONTINUE, actual.getState());
-    }
-
-    @Test
-    public void testCheckClusterStatusDuringStartWhenStackFailed() throws JsonProcessingException {
-        SdxCluster sdxCluster = sdxCluster();
-
-        StackV4Response stackV4Response = new StackV4Response();
-        stackV4Response.setStatusReason("reason");
-        stackV4Response.setStatus(START_FAILED);
-
-        when(stackV4Endpoint.get(eq(0L), eq(sdxCluster.getClusterName()), eq(Collections.emptySet()), anyString()))
-                .thenReturn(stackV4Response);
-        when(availabilityChecker.stackAndClusterAvailable(eq(stackV4Response), any())).thenReturn(Boolean.FALSE);
-
-        AttemptResult<StackV4Response> actual = underTest.checkClusterStatusDuringStart(sdxCluster);
-
-        assertEquals(AttemptState.BREAK, actual.getState());
-        assertEquals("SDX start failed 'clusterName', reason", actual.getMessage());
-    }
-
-    @Test
-    public void testCheckClusterStatusDuringStartWhenClusterFailed() throws JsonProcessingException {
-        SdxCluster sdxCluster = sdxCluster();
-
-        StackV4Response stackV4Response = new StackV4Response();
-        stackV4Response.setStatusReason("reason");
-        stackV4Response.setStatus(AVAILABLE);
-        ClusterV4Response clusterV4Response = new ClusterV4Response();
-        clusterV4Response.setStatus(START_FAILED);
-        clusterV4Response.setStatusReason("cluster reason");
-        stackV4Response.setCluster(clusterV4Response);
-
-        when(stackV4Endpoint.get(eq(0L), eq(sdxCluster.getClusterName()), eq(Collections.emptySet()), anyString()))
-                .thenReturn(stackV4Response);
-        when(availabilityChecker.stackAndClusterAvailable(stackV4Response, clusterV4Response)).thenReturn(Boolean.FALSE);
-
-        AttemptResult<StackV4Response> actual = underTest.checkClusterStatusDuringStart(sdxCluster);
-
-        assertEquals(AttemptState.BREAK, actual.getState());
-        assertEquals("SDX start failed 'clusterName', cluster reason", actual.getMessage());
-    }
-
-    @Test
-    public void testCheckClusterStatusDuringStartWhenStackStopFailed() throws JsonProcessingException {
-        SdxCluster sdxCluster = sdxCluster();
-
-        StackV4Response stackV4Response = new StackV4Response();
-        stackV4Response.setStatusReason("reason");
-        stackV4Response.setStatus(STOP_FAILED);
-
-        when(stackV4Endpoint.get(eq(0L), eq(sdxCluster.getClusterName()), eq(Collections.emptySet()), anyString()))
-                .thenReturn(stackV4Response);
-        when(availabilityChecker.stackAndClusterAvailable(eq(stackV4Response), any())).thenReturn(Boolean.FALSE);
-
-        AttemptResult<StackV4Response> actual = underTest.checkClusterStatusDuringStart(sdxCluster);
-
-        assertEquals(AttemptState.BREAK, actual.getState());
-        assertEquals("SDX start failed 'clusterName', stack is in inconsistency state: STOP_FAILED", actual.getMessage());
-    }
-
-    @Test
-    public void testCheckClusterStatusDuringStartWhenClusterStopFailed() throws JsonProcessingException {
-        SdxCluster sdxCluster = sdxCluster();
-
-        StackV4Response stackV4Response = new StackV4Response();
-        stackV4Response.setStatusReason("reason");
-        stackV4Response.setStatus(AVAILABLE);
-        ClusterV4Response clusterV4Response = new ClusterV4Response();
-        clusterV4Response.setStatus(STOP_FAILED);
-        clusterV4Response.setStatusReason("cluster reason");
-        stackV4Response.setCluster(clusterV4Response);
-
-        when(stackV4Endpoint.get(eq(0L), eq(sdxCluster.getClusterName()), eq(Collections.emptySet()), anyString()))
-                .thenReturn(stackV4Response);
-        when(availabilityChecker.stackAndClusterAvailable(stackV4Response, clusterV4Response)).thenReturn(Boolean.FALSE);
-
-        AttemptResult<StackV4Response> actual = underTest.checkClusterStatusDuringStart(sdxCluster);
-
-        assertEquals(AttemptState.BREAK, actual.getState());
-        assertEquals("SDX start failed 'clusterName', cluster is in inconsistency state: STOP_FAILED", actual.getMessage());
     }
 
     private SdxCluster sdxCluster() {

@@ -1,5 +1,6 @@
 package com.sequenceiq.datalake.service.sdx;
 
+import static com.sequenceiq.datalake.flow.cert.renew.event.SdxCertRenewalEvent.CERT_RENEWAL_STARTED_EVENT;
 import static com.sequenceiq.datalake.flow.create.SdxCreateEvent.SDX_STACK_CREATION_IN_PROGRESS_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_UPGRADE_IN_PROGRESS_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_VM_REPLACE_IN_PROGRESS_EVENT;
@@ -90,7 +91,8 @@ public class SdxRetryService {
                 DATALAKE_VM_REPLACE_IN_PROGRESS_EVENT,
                 SDX_REPAIR_IN_PROGRESS_EVENT,
                 SDX_START_IN_PROGRESS_EVENT,
-                SDX_STOP_IN_PROGRESS_EVENT
+                SDX_STOP_IN_PROGRESS_EVENT,
+                CERT_RENEWAL_STARTED_EVENT
         );
     }
 

@@ -1017,12 +1017,6 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
         return sdxClusterRepository.save(sdxCluster);
     }
 
-    public void renewCertificate(SdxCluster sdxCluster, String userCrn) {
-        ThreadBasedUserCrnProvider.doAsInternalActor(() -> {
-            stackV4Endpoint.renewCertificate(WORKSPACE_ID_DEFAULT, sdxCluster.getClusterName(), userCrn);
-        });
-    }
-
     public void updateCertExpirationState(Long id, CertExpirationState state) {
         sdxClusterRepository.updateCertExpirationState(id, state);
     }

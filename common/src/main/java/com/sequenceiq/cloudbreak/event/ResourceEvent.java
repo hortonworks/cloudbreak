@@ -373,6 +373,9 @@ public enum ResourceEvent {
     DATALAKE_BACKUP_FAILED("datalake.backup.failed"),
     DATALAKE_RESTORE_FAILED("datalake.restore.failed"),
     DATALAKE_DETACHED("datalake.detached"),
+    DATALAKE_CERT_RENEWAL_STARTED("datalake.cert.renewal.started"),
+    DATALAKE_CERT_RENEWAL_FAILED("datalake.cert.renewal.failed"),
+    DATALAKE_CERT_RENEWAL_FINISHED("datalake.cert.renewal.finished"),
     SDX_CERT_ROTATION_STARTED("resource.sdx.cert.rotation.started"),
     SDX_CERT_ROTATION_FAILED("resource.sdx.cert.rotation.failed"),
     SDX_CERT_ROTATION_FINISHED("resource.sdx.cert.rotation.finished");

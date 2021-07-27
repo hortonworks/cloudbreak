@@ -39,16 +39,15 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
-import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
-import com.sequenceiq.datalake.service.sdx.CloudbreakFlowService.FlowState;
-import com.sequenceiq.datalake.service.sdx.status.AvailabilityChecker;
+import com.sequenceiq.datalake.service.sdx.cert.CloudbreakPoller;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAwsParams;
 import com.sequenceiq.environment.api.v1.environment.model.response.CompactRegionResponse;
@@ -88,7 +87,7 @@ class ProvisionerServiceTest {
     private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
     @Mock
-    private AvailabilityChecker availabilityChecker;
+    private CloudbreakPoller cloudbreakPoller;
 
     @InjectMocks
     private ProvisionerService underTest;
@@ -131,11 +130,11 @@ class ProvisionerServiceTest {
         sdxCluster.setInitiatorUserCrn(USER_CRN);
         sdxCluster.setAccountId("hortonworks");
         sdxCluster.setTags(Json.silent(new HashMap<>()));
-        StackV4Response stackV4Response = new StackV4Response();
-        stackV4Response.setStatus(Status.REQUESTED);
 
         when(sdxService.getById(clusterId)).thenReturn(sdxCluster);
         PollingConfig pollingConfig = new PollingConfig(10, TimeUnit.MILLISECONDS, 100, TimeUnit.MILLISECONDS);
+        doThrow(new PollerStoppedException("Stopped."))
+                .when(cloudbreakPoller).pollCreateUntilAvailable(sdxCluster, pollingConfig);
 
         Assertions.assertThrows(PollerStoppedException.class, () -> underTest.waitCloudbreakClusterCreation(clusterId, pollingConfig));
 
@@ -147,11 +146,10 @@ class ProvisionerServiceTest {
     void waitCloudbreakClusterCreationFailedByFailedStack() {
         long clusterId = CLUSTER_ID.incrementAndGet();
         SdxCluster sdxCluster = generateValidSdxCluster(clusterId);
-        StackV4Response stackV4Response = new StackV4Response();
-        stackV4Response.setStatus(Status.CREATE_FAILED);
-        when(stackV4Endpoint.get(anyLong(), eq(sdxCluster.getClusterName()), anySet(), anyString())).thenReturn(stackV4Response);
-        when(sdxService.getById(clusterId)).thenReturn(sdxCluster);
         PollingConfig pollingConfig = new PollingConfig(10, TimeUnit.MILLISECONDS, 500, TimeUnit.MILLISECONDS);
+        doThrow(new UserBreakException("Stack creation failedStack creation failed"))
+                .when(cloudbreakPoller).pollCreateUntilAvailable(sdxCluster, pollingConfig);
+        when(sdxService.getById(clusterId)).thenReturn(sdxCluster);
 
         Assertions.assertThrows(UserBreakException.class, () -> underTest
                 .waitCloudbreakClusterCreation(clusterId, pollingConfig), "Stack creation failed");
@@ -169,17 +167,12 @@ class ProvisionerServiceTest {
         ClusterV4Response cluster = new ClusterV4Response();
         cluster.setStatus(Status.AVAILABLE);
         stackV4Response.setCluster(cluster);
-        when(cloudbreakFlowService.getLastKnownFlowState(sdxCluster))
-                .thenReturn(FlowState.RUNNING)
-                .thenReturn(FlowState.FINISHED);
         when(stackV4Endpoint.get(anyLong(), eq(sdxCluster.getClusterName()), anySet(), anyString())).thenReturn(stackV4Response);
         when(sdxService.getById(clusterId)).thenReturn(sdxCluster);
-        when(availabilityChecker.stackAndClusterAvailable(stackV4Response, cluster)).thenReturn(Boolean.TRUE);
         PollingConfig pollingConfig = new PollingConfig(10, TimeUnit.MILLISECONDS, 1000, TimeUnit.MILLISECONDS);
 
         underTest.waitCloudbreakClusterCreation(clusterId, pollingConfig);
 
-        verify(cloudbreakFlowService, times(2)).getLastKnownFlowState(sdxCluster);
         verify(sdxStatusService, times(1))
                 .setStatusForDatalakeAndNotify(DatalakeStatusEnum.STACK_CREATION_IN_PROGRESS, "Datalake stack creation in progress", sdxCluster);
         verify(sdxStatusService, times(1))
