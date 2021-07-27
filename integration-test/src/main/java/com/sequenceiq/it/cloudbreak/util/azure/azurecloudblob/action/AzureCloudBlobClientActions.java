@@ -358,4 +358,28 @@ public class AzureCloudBlobClientActions extends AzureCloudBlobClient {
             throw new TestFailException("Azure Adls Gen 2 Blob couldn't process the call.", e);
         }
     }
+
+    public String getLoggingUrl(String baseLocation, String clusterLogPath) {
+        String containerName = getContainerName(baseLocation);
+        CloudBlobContainer cloudBlobContainer = getCloudBlobContainer(containerName);
+
+        Log.log(LOGGER, format(" Azure Blob Storage URI: %s", cloudBlobContainer.getStorageUri()));
+        Log.log(LOGGER, format(" Azure Blob Container: %s", cloudBlobContainer.getName()));
+        Log.log(LOGGER, format(" Azure Blob Cluster Logs: %s", clusterLogPath));
+
+        try {
+            CloudBlobDirectory logsDirectory = cloudBlobContainer.getDirectoryReference(clusterLogPath);
+            if (logsDirectory.listBlobs().iterator().hasNext()) {
+                return String.format("https://autotestingapi.blob.core.windows.net/%s%s",
+                        containerName, clusterLogPath);
+            } else {
+                LOGGER.error("Azure Adls Gen 2 Blob is NOT present with name: {}", containerName);
+                throw new TestFailException("Azure Adls Gen 2 Blob is NOT present with name: " + containerName);
+            }
+        } catch (StorageException | URISyntaxException e) {
+            LOGGER.error("Azure Adls Gen 2 Blob couldn't process the call. So it has been returned with error!", e);
+            throw new TestFailException("Azure Adls Gen 2 Blob couldn't process the call.", e);
+        }
+    }
+
 }

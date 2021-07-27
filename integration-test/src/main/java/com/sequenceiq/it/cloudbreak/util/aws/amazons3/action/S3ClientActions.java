@@ -72,7 +72,7 @@ public class S3ClientActions extends S3Client {
     public void listBucketSelectedObject(String baseLocation, String selectedObject, boolean zeroContent) {
         AmazonS3 s3Client = buildS3Client();
         String bucketName = getBucketName();
-        AmazonS3URI amazonS3URI = new AmazonS3URI(getEUWestS3Uri());
+        AmazonS3URI amazonS3URI = new AmazonS3URI(getBaseLocationUri());
         List<S3ObjectSummary> filteredObjectSummaries;
         String keyPrefix = StringUtils.substringAfterLast(baseLocation, "/");
 
@@ -126,6 +126,36 @@ public class S3ClientActions extends S3Client {
                         LOGGER.error("Unable to close Amazon S3 object {}. It has been returned with error!", object.getKey(), e);
                     }
                 }
+            } catch (AmazonServiceException e) {
+                LOGGER.error("Amazon S3 couldn't process the call. So it has been returned with error!", e);
+                throw new TestFailException("Amazon S3 couldn't process the call.", e);
+            } catch (SdkClientException e) {
+                LOGGER.error("Amazon S3 response could not been parsed, because of error!", e);
+                throw new TestFailException("Amazon S3 response could not been parsed", e);
+            } finally {
+                s3Client.shutdown();
+            }
+        } else {
+            LOGGER.error("Amazon S3 bucket is NOT present with name: {}", bucketName);
+            throw new TestFailException("Amazon S3 bucket is NOT present with name: " + bucketName);
+        }
+    }
+
+    public String getLoggingUrl(String baseLocation, String clusterLogPath) {
+        AmazonS3 s3Client = buildS3Client();
+        AmazonS3URI amazonS3URI = new AmazonS3URI(getBaseLocationUri());
+        String bucketName = amazonS3URI.getBucket();
+        String keyPrefix = StringUtils.substringAfterLast(baseLocation, "/");
+
+        Log.log(LOGGER, format(" Amazon S3 URI: %s", amazonS3URI));
+        Log.log(LOGGER, format(" Amazon S3 Bucket: %s", bucketName));
+        Log.log(LOGGER, format(" Amazon S3 Key Prefix: %s",  keyPrefix));
+        Log.log(LOGGER, format(" Amazon S3 Cluster Logs: %s", clusterLogPath));
+
+        if (s3Client.doesBucketExistV2(bucketName)) {
+            try {
+                return String.format("https://s3.console.aws.amazon.com/s3/buckets/%s?region=%s&prefix=%s%s/&showversions=false",
+                        bucketName, amazonS3URI.getRegion(), keyPrefix, clusterLogPath);
             } catch (AmazonServiceException e) {
                 LOGGER.error("Amazon S3 couldn't process the call. So it has been returned with error!", e);
                 throw new TestFailException("Amazon S3 couldn't process the call.", e);

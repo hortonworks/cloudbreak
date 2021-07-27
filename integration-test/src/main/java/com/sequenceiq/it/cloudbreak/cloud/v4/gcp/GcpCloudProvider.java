@@ -30,6 +30,8 @@ import com.sequenceiq.environment.api.v1.credential.model.parameters.gcp.JsonPar
 import com.sequenceiq.environment.api.v1.credential.model.parameters.gcp.P12Parameters;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkGcpParams;
 import com.sequenceiq.environment.api.v1.environment.model.request.SecurityAccessRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.GcpNetworkParameters;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.NetworkRequest;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.AbstractCloudProvider;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -51,6 +53,7 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXVolumeTestD
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentSecurityAccessTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCustomTestDto;
@@ -175,6 +178,39 @@ public class GcpCloudProvider extends AbstractCloudProvider {
     public DistroXRootVolumeTestDto distroXRootVolume(DistroXRootVolumeTestDto distroXRootVolume) {
         int rootVolumeSize = gcpProperties.getInstance().getRootVolumeSize();
         return distroXRootVolume.withSize(rootVolumeSize);
+    }
+
+    @Override
+    public NetworkRequest networkRequest(FreeIpaTestDto dto) {
+        NetworkRequest networkRequest = new NetworkRequest();
+        GcpNetworkParameters networkParameters = new GcpNetworkParameters();
+        networkParameters.setSubnetId(getSubnetId());
+        networkParameters.setNetworkId(getNetworkId());
+        networkParameters.setNoPublicIp(getNoPublicIp());
+        networkParameters.setNoFirewallRules(getNoFirewallRules());
+        networkParameters.setSharedProjectId(getSharedProjectId());
+        networkRequest.setGcp(networkParameters);
+        return networkRequest;
+    }
+
+    public String getNetworkId() {
+        return gcpProperties.getNetwork().getNetworkId();
+    }
+
+    public String getSubnetId() {
+        return gcpProperties.getNetwork().getSubnetId();
+    }
+
+    public Boolean getNoPublicIp() {
+        return gcpProperties.getNetwork().getNoPublicIp();
+    }
+
+    public Boolean getNoFirewallRules() {
+        return gcpProperties.getNetwork().getNoFirewallRules();
+    }
+
+    public String getSharedProjectId() {
+        return gcpProperties.getNetwork().getSharedProjectId();
     }
 
     @Override

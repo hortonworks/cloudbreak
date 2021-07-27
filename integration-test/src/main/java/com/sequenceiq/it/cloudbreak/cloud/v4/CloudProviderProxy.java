@@ -17,6 +17,7 @@ import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.InstanceTemplateV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.InstanceGroupNetworkV1Request;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.NetworkRequest;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
@@ -370,6 +371,11 @@ public class CloudProviderProxy implements CloudProvider {
     @Override
     public LoggingRequest loggingRequest(TelemetryTestDto dto) {
         return getDelegate(dto).loggingRequest(dto);
+    }
+
+    @Override
+    public NetworkRequest networkRequest(FreeIpaTestDto dto) {
+        return getDelegate(dto).networkRequest(dto);
     }
 
     @Override

@@ -78,4 +78,19 @@ public class AwsCloudFunctionality implements CloudFunctionality {
     public Map<String, String> getInstanceSubnetMap(List<String> instanceIds) {
         return amazonEC2Util.instanceSubnet(instanceIds);
     }
+
+    @Override
+    public String getFreeIpaLogsUrl(String clusterName, String crn, String baseLocation) {
+        return amazonS3Util.getFreeIpaLogsUrl(clusterName, crn, baseLocation);
+    }
+
+    @Override
+    public String getDataLakeLogsUrl(String clusterName, String crn, String baseLocation) {
+        return amazonS3Util.getDataLakeLogsUrl(clusterName, crn, baseLocation);
+    }
+
+    @Override
+    public String getDataHubLogsUrl(String clusterName, String crn, String baseLocation) {
+        return amazonS3Util.getDataHubLogsUrl(clusterName, crn, baseLocation);
+    }
 }

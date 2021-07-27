@@ -8,17 +8,45 @@
   <td class="method">
     #set ($testInstanceName = "")
     #if ($testResult.testName)
-      #set ($testInstanceName = " ($testResult.testName)")
+        #set ($testName = $testResult.testName)
+        #if ($testName.matches("^.*(_test).*"))
+            #set ($testName = $testResult.testName.split("_").get(1))
+        #end
+        #set ($testInstanceName = " ($testName)")
+    #end
+    #set ($name = $testResult.name)
+    #if ($name.matches("^.*(_test).*"))
+        #set ($name = $testResult.name.split("_").get(1))
     #end
     #if ($testResult.method.description && $testResult.method.description.length() > 0)
-      <span class="description" title="$testResult.method.description">$testResult.name$testInstanceName</span>
+      <span class="description" title="$testResult.method.description">$name$testInstanceName</span>
     #else
-      $testResult.name$testInstanceName
+      $name$testInstanceName
     #end
     #set ($searchUrlIndexPostFix = "searchUrl")
-    #set ($searchUrl = $testResult.testContext.getAttribute("$testResult.name$testInstanceName$searchUrlIndexPostFix"))
+    #set ($searchUrl = $testResult.testContext.getAttribute("$name$testInstanceName$searchUrlIndexPostFix"))
     #if ( $searchUrl )
-    &#183; <a href=$searchUrl target="_blank">Search in logs</a>
+        <br />
+        &#183; <a href=$searchUrl target="_blank">Search in logs</a>
+        <br />
+    #end
+    #set ($freeipaStorageUrlIndexPostFix = "freeipaStorageUrl")
+    #set ($freeipaStorageUrl = $testResult.testContext.getAttribute("$name$testInstanceName$freeipaStorageUrlIndexPostFix"))
+    #if ( $freeipaStorageUrl )
+        &#183; <a href=$freeipaStorageUrl target="_blank">FreeIpa Cluster Logs</a>
+        <br />
+    #end
+    #set ($datalakeStorageUrlIndexPostFix = "datalakeStorageUrl")
+    #set ($datalakeStorageUrl = $testResult.testContext.getAttribute("$name$testInstanceName$datalakeStorageUrlIndexPostFix"))
+    #if ( $datalakeStorageUrl )
+        &#183; <a href=$datalakeStorageUrl target="_blank">Datalake Cluster Logs</a>
+        <br />
+    #end
+    #set ($datahubStorageUrlIndexPostFix = "datahubStorageUrl")
+    #set ($datahubStorageUrl = $testResult.testContext.getAttribute("$name$testInstanceName$datahubStorageUrlIndexPostFix"))
+    #if ( $datahubStorageUrl )
+        &#183; <a href=$datahubStorageUrl target="_blank">Datahub Cluster Logs</a>
+        <br />
     #end
   </td>
   <td class="duration">
