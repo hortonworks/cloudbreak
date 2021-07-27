@@ -34,6 +34,8 @@ import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAzu
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.ResourceGroupUsage;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.AzureNetworkParameters;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.NetworkRequest;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.ResourceGroupTest;
 import com.sequenceiq.it.cloudbreak.cloud.v4.AbstractCloudProvider;
@@ -54,6 +56,7 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXRootVolumeT
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXVolumeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
@@ -204,6 +207,18 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
+    public NetworkRequest networkRequest(FreeIpaTestDto dto) {
+        NetworkRequest networkRequest = new NetworkRequest();
+        AzureNetworkParameters networkParameters = new AzureNetworkParameters();
+        networkParameters.setSubnetId(getSubnetId());
+        networkParameters.setNetworkId(getNetworkId());
+        networkParameters.setNoPublicIp(getNoPublicIp());
+        networkParameters.setResourceGroupName(getResourceGroupName());
+        networkRequest.setAzure(networkParameters);
+        return networkRequest;
+    }
+
+    @Override
     public NetworkV4TestDto network(NetworkV4TestDto network) {
         AzureNetworkV4Parameters parameters = new AzureNetworkV4Parameters();
         parameters.setNoPublicIp(false);
@@ -232,7 +247,7 @@ public class AzureCloudProvider extends AbstractCloudProvider {
 
     @Override
     public EnvironmentNetworkTestDto network(EnvironmentNetworkTestDto network) {
-        return network.withSubnetIDs(getSubnetIDs())
+        return network.withSubnetIDs(getSubnetIds())
                 .withAzure(environmentNetworkParameters());
     }
 
@@ -264,8 +279,13 @@ public class AzureCloudProvider extends AbstractCloudProvider {
         return azureProperties.getNetwork().getNetworkId();
     }
 
-    public Set<String> getSubnetIDs() {
+    public Set<String> getSubnetIds() {
         return azureProperties.getNetwork().getSubnetIds();
+    }
+
+    public String getSubnetId() {
+        Set<String> subnetIDs = getSubnetIds();
+        return subnetIDs.iterator().next();
     }
 
     public Boolean getNoPublicIp() {

@@ -86,4 +86,19 @@ public class GcpCloudFunctionality implements CloudFunctionality {
     public String transformTagKeyOrValue(String originalValue) {
         return gcpLabelUtil.transformLabelKeyOrValue(originalValue);
     }
+
+    @Override
+    public String getFreeIpaLogsUrl(String clusterName, String crn, String baseLocation) {
+        return gcpUtil.getFreeIpaLogsUrl(clusterName, crn, baseLocation);
+    }
+
+    @Override
+    public String getDataLakeLogsUrl(String clusterName, String crn, String baseLocation) {
+        return gcpUtil.getDataLakeLogsUrl(clusterName, crn, baseLocation);
+    }
+
+    @Override
+    public String getDataHubLogsUrl(String clusterName, String crn, String baseLocation) {
+        return gcpUtil.getDataHubLogsUrl(clusterName, crn, baseLocation);
+    }
 }

@@ -16,6 +16,7 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.sequenceiq.common.model.FileSystemType;
+import com.sequenceiq.it.cloudbreak.cloud.v4.aws.AwsCloudProvider;
 import com.sequenceiq.it.cloudbreak.cloud.v4.aws.AwsProperties;
 
 @Service
@@ -24,6 +25,9 @@ public class S3Client {
 
     @Inject
     private AwsProperties awsProperties;
+
+    @Inject
+    private AwsCloudProvider awsCloudProvider;
 
     public S3Client() {
     }
@@ -67,7 +71,7 @@ public class S3Client {
         }
     }
 
-    public String getEUWestS3Uri() {
+    public String getBaseLocationUri() {
         return String.join(".", "http://" + getBucketName(), "s3", awsProperties.getRegion(), "amazonaws.com");
     }
 

@@ -57,8 +57,13 @@ public class MeasuredTestContext extends MockedTestContext {
     }
 
     @Override
-    public Map<String, CloudbreakTestDto> getResources() {
-        return wrappedTestContext.getResources();
+    public Map<String, CloudbreakTestDto> getResourceNames() {
+        return wrappedTestContext.getResourceNames();
+    }
+
+    @Override
+    public Map<String, CloudbreakTestDto> getResourceCrns() {
+        return wrappedTestContext.getResourceCrns();
     }
 
     @Override

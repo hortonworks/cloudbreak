@@ -55,7 +55,7 @@ public class TestInvocationListener implements IInvokedMethodListener {
             return;
         }
 
-        List<CloudbreakTestDto> testDtos = new ArrayList<>(testContext.getResources().values());
+        List<CloudbreakTestDto> testDtos = new ArrayList<>(testContext.getResourceNames().values());
         List<CloudbreakTestDto> orderedTestDtos = testDtos.stream().sorted(new CompareByOrder()).collect(Collectors.toList());
         for (CloudbreakTestDto testDto : orderedTestDtos) {
             try {
