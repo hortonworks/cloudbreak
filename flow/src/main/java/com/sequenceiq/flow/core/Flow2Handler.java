@@ -314,7 +314,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
         LOGGER.debug("flow finalizing arrived: id: {}", flowId);
         flowLogService.close(stackId, flowId);
         Flow flow = runningFlows.remove(flowId);
-        flowStatCache.remove(flowId, true);
+        flowStatCache.remove(flowId, flowChainId == null && !flow.isFlowFailed());
         if (flowChainId != null) {
             if (flow.isFlowFailed()) {
                 flowChains.removeFullFlowChain(flowChainId, false);
