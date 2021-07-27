@@ -42,15 +42,12 @@ public class AwsCredentialVerifier {
     private static final int MAX_ELEMENT_SIZE = 200;
 
     @Inject
-    private AwsPlatformParameters awsPlatformParameters;
-
-    @Inject
     private CommonAwsClient awsClient;
 
     @Cacheable(value = AwsCredentialCachingConfig.TEMPORARY_AWS_CREDENTIAL_VERIFIER_CACHE,
             unless = "#awsCredential == null")
-    public void validateAws(AwsCredentialView awsCredential) throws AwsPermissionMissingException {
-        String policies = new String(Base64.getDecoder().decode(awsPlatformParameters.getEnvironmentMinimalPoliciesJson()));
+    public void validateAws(AwsCredentialView awsCredential, String policyJson) throws AwsPermissionMissingException {
+        String policies = new String(Base64.getDecoder().decode(policyJson));
         try {
             List<RequiredAction> resourcesWithActions = getRequiredActions(policies);
             AmazonIdentityManagementClient amazonIdentityManagement = awsClient.createAmazonIdentityManagement(awsCredential);

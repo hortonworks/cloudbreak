@@ -41,8 +41,9 @@ public class EphemeralClusterService {
     }
 
     public void updateClusterFailed(long stackId, Exception exception) {
+        String errorMessage = "Ephemeral cluster update failed " + exception.getMessage();
         clusterService.updateClusterStatusByStackId(stackId, AVAILABLE);
-        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.AVAILABLE, "Ephemeral cluster update failed " + exception.getMessage());
-        flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), STACK_DATALAKE_UPDATE_FAILED);
+        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.AVAILABLE, errorMessage);
+        flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), STACK_DATALAKE_UPDATE_FAILED, errorMessage);
     }
 }

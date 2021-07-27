@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Nonnull;
@@ -8,6 +9,7 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.credential.CredentialNotifier;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.CDPServicePolicyVerificationResponses;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.credential.CredentialVerificationContext;
@@ -23,9 +25,20 @@ public interface CredentialConnector {
      * Check whether the credential (e.g public key) associated with a stack (cluster) has present on Cloud provider.
      *
      * @param authenticatedContext the authenticated context which holds the client object
-     * @return the status respone of method call
+     * @return the status response of method call
      */
     CloudCredentialStatus verify(@Nonnull AuthenticatedContext authenticatedContext, CredentialVerificationContext credentialVerificationContext);
+
+    /**
+     * Check whether the credential (e.g public key) associated with a stack (cluster) has present on Cloud provider.
+     *
+     * @param authenticatedContext the authenticated context which holds the client object
+     * @return the status response of method call
+     */
+    default CDPServicePolicyVerificationResponses verifyByServices(@Nonnull AuthenticatedContext authenticatedContext,
+        List<String> services, Map<String, String> experiencePrerequisites) {
+        throw new UnsupportedOperationException("Verification for services which are not CB related not supported!");
+    }
 
     /**
      * Create the credential (e.g public key) associated with a stack (cluster) on Cloud provider.

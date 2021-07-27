@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.environment.experience.config.ExperiencePathConfig;
+import com.sequenceiq.environment.experience.config.ExperiencePathPlaceholders;
 
 @Component
 class CommonExperienceWebTargetProvider {
@@ -32,12 +33,12 @@ class CommonExperienceWebTargetProvider {
     WebTarget createWebTargetForClusterFetch(String experienceBasePath, String environmentCrn) {
         checkExperienceBasePath(experienceBasePath);
         LOGGER.debug("Creating WebTarget to connect experience for cluster fetch");
-        return client.target(experienceBasePath.replace(componentsToReplace.get("envCrn"), environmentCrn));
+        return client.target(experienceBasePath.replace(componentsToReplace.get(ExperiencePathPlaceholders.ENVIRONMENT_CRN.getPlaceholder()), environmentCrn));
     }
 
     WebTarget createWebTargetForPolicyFetch(String experienceBasePath, String cloudProvider) {
         checkExperienceBasePath(experienceBasePath);
-        String path = experienceBasePath.replace(componentsToReplace.get("cloudProvider"), cloudProvider);
+        String path = experienceBasePath.replace(componentsToReplace.get(ExperiencePathPlaceholders.CLOUD_PROVIDER.getPlaceholder()), cloudProvider);
         LOGGER.debug("Creating WebTarget to connect an experience on path [{}] fetch", path);
         return client.target(path);
     }

@@ -10,6 +10,12 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
+import java.net.URL;
+import java.util.Base64;
+import java.util.List;
+import java.util.Map;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -20,11 +26,14 @@ import org.mockito.MockitoAnnotations;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.SdkBaseException;
+import com.google.common.base.Charsets;
+import com.google.common.io.Resources;
 import com.sequenceiq.cloudbreak.cloud.aws.common.exception.AwsConfusedDeputyException;
 import com.sequenceiq.cloudbreak.cloud.aws.common.exception.AwsPermissionMissingException;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialViewProvider;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.model.CDPServicePolicyVerificationResponses;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
@@ -44,6 +53,9 @@ public class AwsCredentialConnectorTest {
 
     @Mock
     private AwsCredentialVerifier awsCredentialVerifier;
+
+    @Mock
+    private AwsPlatformParameters awsPlatformParameters;
 
     @Mock
     private CloudCredential credential;
@@ -75,7 +87,11 @@ public class AwsCredentialConnectorTest {
     }
 
     @Test
-    public void testVerifyIfRoleBasedCredentialVerificationThrowsSdkBaseExceptionThenFailedStatusShouldReturn() throws AwsPermissionMissingException {
+    public void testVerifyIfRoleBasedCredentialVerificationThrowsSdkBaseExceptionThenFailedStatusShouldReturn()
+        throws AwsPermissionMissingException, IOException {
+        URL url = Resources.getResource("definitions/aws-environment-minimal-policy.json");
+        String awsEnvPolicy = Resources.toString(url, Charsets.UTF_8);
+        String encodedAwsEnvPolicy = Base64.getEncoder().encodeToString(awsEnvPolicy.getBytes());
         String roleArn = "someRoleArn";
         when(credentialView.getRoleArn()).thenReturn(roleArn);
 
@@ -84,7 +100,8 @@ public class AwsCredentialConnectorTest {
                 "external ID. Cause: '%s'", roleArn, exceptionMessageComesFromSdk);
         Exception sdkException = new SdkBaseException(exceptionMessageComesFromSdk);
 
-        doThrow(sdkException).when(awsCredentialVerifier).validateAws(credentialView);
+        when(awsPlatformParameters.getEnvironmentMinimalPoliciesJson()).thenReturn(encodedAwsEnvPolicy);
+        doThrow(sdkException).when(awsCredentialVerifier).validateAws(credentialView, encodedAwsEnvPolicy);
         CloudCredentialStatus result = underTest.verify(authenticatedContext, CREDENTIAL_VERIFICATION_CONTEXT);
 
         assertNotNull(result);
@@ -92,8 +109,8 @@ public class AwsCredentialConnectorTest {
         assertEquals(expectedExceptionMessage, result.getStatusReason());
         assertEquals(sdkException, result.getException());
 
-        verify(awsCredentialVerifier, times(1)).validateAws(any());
-        verify(awsCredentialVerifier, times(1)).validateAws(credentialView);
+        verify(awsCredentialVerifier, times(1)).validateAws(any(), any());
+        verify(awsCredentialVerifier, times(1)).validateAws(credentialView, encodedAwsEnvPolicy);
     }
 
     @Test
@@ -107,14 +124,17 @@ public class AwsCredentialConnectorTest {
         assertEquals(CredentialStatus.VERIFIED, result.getStatus());
         assertNull(result.getException());
 
-        verify(awsCredentialVerifier, times(1)).validateAws(any());
-        verify(awsCredentialVerifier, times(1)).validateAws(credentialView);
+        verify(awsCredentialVerifier, times(1)).validateAws(any(), any());
     }
 
     @Test
     public void testVerifyIfRoleBasedCredentialVerificationShouldFailWhenItIsCredentialCreationAndRoleIsAssumableWithoutExternalId()
-            throws AwsPermissionMissingException {
+            throws AwsPermissionMissingException, IOException {
+        URL url = Resources.getResource("definitions/aws-environment-minimal-policy.json");
+        String awsEnvPolicy = Resources.toString(url, Charsets.UTF_8);
+        String encodedAwsEnvPolicy = Base64.getEncoder().encodeToString(awsEnvPolicy.getBytes());
         String roleArn = "someRoleArn";
+        when(awsPlatformParameters.getEnvironmentMinimalPoliciesJson()).thenReturn(encodedAwsEnvPolicy);
         when(credentialView.getRoleArn()).thenReturn(roleArn);
 
         CloudCredentialStatus result = underTest.verify(authenticatedContext, new CredentialVerificationContext(Boolean.TRUE));
@@ -123,14 +143,18 @@ public class AwsCredentialConnectorTest {
         assertEquals(CredentialStatus.FAILED, result.getStatus());
         assertEquals(AwsConfusedDeputyException.class, result.getException().getClass());
 
-        verify(awsCredentialVerifier, times(0)).validateAws(any());
-        verify(awsCredentialVerifier, times(0)).validateAws(credentialView);
+        verify(awsCredentialVerifier, times(0)).validateAws(any(), any());
+        verify(awsCredentialVerifier, times(0)).validateAws(credentialView, encodedAwsEnvPolicy);
     }
 
     @Test
     public void testVerifyIfRoleBasedCredentialVerificationShouldReturnVerifiedStatusWhenItIsCredentialCreationAndRoleIsNotAssumableWithoutExternalId()
-            throws AwsPermissionMissingException {
+            throws AwsPermissionMissingException, IOException {
+        URL url = Resources.getResource("definitions/aws-environment-minimal-policy.json");
+        String awsEnvPolicy = Resources.toString(url, Charsets.UTF_8);
+        String encodedAwsEnvPolicy = Base64.getEncoder().encodeToString(awsEnvPolicy.getBytes());
         String roleArn = "someRoleArn";
+        when(awsPlatformParameters.getEnvironmentMinimalPoliciesJson()).thenReturn(encodedAwsEnvPolicy);
         when(credentialView.getRoleArn()).thenReturn(roleArn);
         AmazonClientException amazonClientException = new AmazonClientException(ROLE_IS_NOT_ASSUMABLE_ERROR_MESSAGE_INDICATOR);
         when(credentialClient.retrieveSessionCredentialsWithoutExternalId(any())).thenThrow(amazonClientException);
@@ -141,13 +165,16 @@ public class AwsCredentialConnectorTest {
         assertEquals(CredentialStatus.VERIFIED, result.getStatus());
         assertNull(result.getException());
 
-        verify(awsCredentialVerifier, times(1)).validateAws(any());
-        verify(awsCredentialVerifier, times(1)).validateAws(credentialView);
+        verify(awsCredentialVerifier, times(1)).validateAws(any(), any());
+        verify(awsCredentialVerifier, times(1)).validateAws(credentialView, encodedAwsEnvPolicy);
     }
 
     @Test
     public void testVerifyIfRoleBasedCredentialVerificationShouldReturnFailedStatusWhenItIsCredentialCreationAndRoleAssumeFailsWithoutExternalId()
-            throws AwsPermissionMissingException {
+            throws AwsPermissionMissingException, IOException {
+        URL url = Resources.getResource("definitions/aws-environment-minimal-policy.json");
+        String awsEnvPolicy = Resources.toString(url, Charsets.UTF_8);
+        String encodedAwsEnvPolicy = Base64.getEncoder().encodeToString(awsEnvPolicy.getBytes());
         String roleArn = "someRoleArn";
         when(credentialView.getRoleArn()).thenReturn(roleArn);
         AmazonClientException amazonClientException = new AmazonClientException("Something unexpected happened");
@@ -159,7 +186,173 @@ public class AwsCredentialConnectorTest {
         assertEquals(CredentialStatus.FAILED, result.getStatus());
         assertEquals(amazonClientException, result.getException());
 
-        verify(awsCredentialVerifier, times(0)).validateAws(any());
-        verify(awsCredentialVerifier, times(0)).validateAws(credentialView);
+        verify(awsCredentialVerifier, times(0)).validateAws(any(), any());
+        verify(awsCredentialVerifier, times(0)).validateAws(credentialView, encodedAwsEnvPolicy);
+    }
+
+    @Test
+    public void testVerifyByServiceIfRoleBasedCredentialVerificationThrowsSdkBaseExceptionThenFailed503StatusShouldReturn()
+            throws IOException {
+
+        URL url = Resources.getResource("definitions/aws-environment-minimal-policy.json");
+        String awsEnvPolicy = Resources.toString(url, Charsets.UTF_8);
+        String encodedAwsEnvPolicy = Base64.getEncoder().encodeToString(awsEnvPolicy.getBytes());
+        List<String> services = List.of("ml");
+        Map<String, String> experiencePrerequisites = Map.of("ml", encodedAwsEnvPolicy);
+
+        String roleArn = "someRoleArn";
+        when(credentialView.getRoleArn()).thenReturn(roleArn);
+
+        String exceptionMessageComesFromSdk = "SomethingTerribleHappened!";
+        String expectedExceptionMessage = String.format("Unable to verify credential: check if the role '%s' exists and it's created with the correct " +
+                "external ID. Cause: '%s'", roleArn, exceptionMessageComesFromSdk);
+        Exception sdkException = new SdkBaseException(exceptionMessageComesFromSdk);
+
+        when(awsPlatformParameters.getEnvironmentMinimalPoliciesJson()).thenReturn(encodedAwsEnvPolicy);
+        when(credentialClient.retrieveSessionCredentials(any())).thenThrow(sdkException);
+        CDPServicePolicyVerificationResponses result = underTest.verifyByServices(authenticatedContext, services, experiencePrerequisites);
+
+        assertNotNull(result);
+        assertEquals(result.getResults().size(), 1);
+        assertEquals(result.getResults().stream().findFirst().get().getServiceName(), "ml");
+        assertEquals(result.getResults().stream().findFirst().get().getServiceStatus(), expectedExceptionMessage);
+        assertEquals(result.getResults().stream().findFirst().get().getStatusCode(), 503);
+    }
+
+    @Test
+    public void testVerifyByServiceIfRoleBasedCredentialVerificationThrowsAwsConfusedDeputyExceptionThenFailed503StatusShouldReturn()
+            throws IOException {
+
+        URL url = Resources.getResource("definitions/aws-environment-minimal-policy.json");
+        String awsEnvPolicy = Resources.toString(url, Charsets.UTF_8);
+        String encodedAwsEnvPolicy = Base64.getEncoder().encodeToString(awsEnvPolicy.getBytes());
+        List<String> services = List.of("ml");
+        Map<String, String> experiencePrerequisites = Map.of("ml", encodedAwsEnvPolicy);
+
+        String roleArn = "someRoleArn";
+        when(credentialView.getRoleArn()).thenReturn(roleArn);
+
+        String exceptionMessageComesFromSdk = "Unable to verify credential: check if the role 'someRoleArn' exists " +
+                "and it's created with the correct external ID. Cause: 'SomethingTerribleHappened!!";
+        Exception sdkException = new AwsConfusedDeputyException("SomethingTerribleHappened");
+
+        when(awsPlatformParameters.getEnvironmentMinimalPoliciesJson()).thenReturn(encodedAwsEnvPolicy);
+        when(credentialClient.retrieveSessionCredentials(any())).thenThrow(sdkException);
+        CDPServicePolicyVerificationResponses result = underTest.verifyByServices(authenticatedContext, services, experiencePrerequisites);
+
+        assertNotNull(result);
+        assertEquals(result.getResults().size(), 1);
+        assertEquals(result.getResults().stream().findFirst().get().getServiceName(), "ml");
+        assertEquals(result.getResults().stream().findFirst().get().getServiceStatus(), "SomethingTerribleHappened");
+        assertEquals(result.getResults().stream().findFirst().get().getStatusCode(), 503);
+    }
+
+    @Test
+    public void testVerifyByServiceIfRoleBasedCredentialVerificationThrowsSdkBaseExceptionThenFailedStatusShouldReturn()
+            throws IOException {
+
+        URL url = Resources.getResource("definitions/aws-environment-minimal-policy.json");
+        String awsEnvPolicy = Resources.toString(url, Charsets.UTF_8);
+        String encodedAwsEnvPolicy = Base64.getEncoder().encodeToString(awsEnvPolicy.getBytes());
+        List<String> services = List.of("ml");
+        Map<String, String> experiencePrerequisites = Map.of("ml", encodedAwsEnvPolicy);
+
+        String roleArn = "someRoleArn";
+        when(credentialView.getRoleArn()).thenReturn(roleArn);
+
+        String exceptionMessageComesFromSdk = "Unable to verify credential: check if the role 'someRoleArn' exists " +
+                "and it's created with the correct external ID. Cause: 'SomethingTerribleHappened!!";
+        Exception sdkException = new AwsConfusedDeputyException("SomethingTerribleHappened");
+
+        when(awsPlatformParameters.getEnvironmentMinimalPoliciesJson()).thenReturn(encodedAwsEnvPolicy);
+        when(credentialClient.retrieveSessionCredentials(any())).thenThrow(sdkException);
+        CDPServicePolicyVerificationResponses result = underTest.verifyByServices(authenticatedContext, services, experiencePrerequisites);
+
+        assertNotNull(result);
+        assertEquals(result.getResults().size(), 1);
+        assertEquals(result.getResults().stream().findFirst().get().getServiceName(), "ml");
+        assertEquals(result.getResults().stream().findFirst().get().getServiceStatus(), "SomethingTerribleHappened");
+        assertEquals(result.getResults().stream().findFirst().get().getStatusCode(), 503);
+    }
+
+    @Test
+    public void testVerifyByServiceIfRoleBasedCredentialVerificationThrowsAmazonClientExceptionThenFailed503StatusShouldReturn()
+            throws IOException {
+
+        URL url = Resources.getResource("definitions/aws-environment-minimal-policy.json");
+        String awsEnvPolicy = Resources.toString(url, Charsets.UTF_8);
+        String encodedAwsEnvPolicy = Base64.getEncoder().encodeToString(awsEnvPolicy.getBytes());
+        List<String> services = List.of("ml");
+        Map<String, String> experiencePrerequisites = Map.of("ml", encodedAwsEnvPolicy);
+
+        String roleArn = "someRoleArn";
+        when(credentialView.getRoleArn()).thenReturn(roleArn);
+
+        String exceptionMessageComesFromSdk = "Unable to verify AWS credential due to: 'SomethingTerribleHappened'";
+        Exception sdkException = new AmazonClientException("SomethingTerribleHappened");
+
+        when(awsPlatformParameters.getEnvironmentMinimalPoliciesJson()).thenReturn(encodedAwsEnvPolicy);
+        when(credentialClient.retrieveSessionCredentials(any())).thenThrow(sdkException);
+        CDPServicePolicyVerificationResponses result = underTest.verifyByServices(authenticatedContext, services, experiencePrerequisites);
+
+        assertNotNull(result);
+        assertEquals(result.getResults().size(), 1);
+        assertEquals(result.getResults().stream().findFirst().get().getServiceName(), "ml");
+        assertEquals(result.getResults().stream().findFirst().get().getServiceStatus(), exceptionMessageComesFromSdk);
+        assertEquals(result.getResults().stream().findFirst().get().getStatusCode(), 503);
+    }
+
+    @Test
+    public void testVerifyByServiceIfKeyBasedCredentialAndRoleBasedNOTDefinedShouldThrowException()
+            throws IOException {
+
+        URL url = Resources.getResource("definitions/aws-environment-minimal-policy.json");
+        String awsEnvPolicy = Resources.toString(url, Charsets.UTF_8);
+        String encodedAwsEnvPolicy = Base64.getEncoder().encodeToString(awsEnvPolicy.getBytes());
+        List<String> services = List.of("ml");
+        Map<String, String> experiencePrerequisites = Map.of("ml", encodedAwsEnvPolicy);
+
+        String roleArn = null;
+        when(credentialView.getAccessKey()).thenReturn(roleArn);
+        when(credentialView.getRoleArn()).thenReturn(roleArn);
+        when(credentialView.getSecretKey()).thenReturn(roleArn);
+
+        String exceptionMessageComesFromSdk = "Please provide both the 'access' and 'secret key'";
+
+        when(awsPlatformParameters.getEnvironmentMinimalPoliciesJson()).thenReturn(encodedAwsEnvPolicy);
+        CDPServicePolicyVerificationResponses result = underTest.verifyByServices(authenticatedContext, services, experiencePrerequisites);
+
+        assertNotNull(result);
+        assertEquals(result.getResults().size(), 1);
+        assertEquals(result.getResults().stream().findFirst().get().getServiceName(), "ml");
+        assertEquals(result.getResults().stream().findFirst().get().getServiceStatus(), exceptionMessageComesFromSdk);
+        assertEquals(result.getResults().stream().findFirst().get().getStatusCode(), 503);
+    }
+
+    @Test
+    public void testVerifyByServiceIfOnlyKeyBasedCredentialWithAccessKeyAndRoleBasedNOTDefinedShouldThrowException()
+        throws IOException {
+
+        URL url = Resources.getResource("definitions/aws-environment-minimal-policy.json");
+        String awsEnvPolicy = Resources.toString(url, Charsets.UTF_8);
+        String encodedAwsEnvPolicy = Base64.getEncoder().encodeToString(awsEnvPolicy.getBytes());
+        List<String> services = List.of("ml");
+        Map<String, String> experiencePrerequisites = Map.of("ml", encodedAwsEnvPolicy);
+
+        String roleArn = "someRoleArn";
+        when(credentialView.getAccessKey()).thenReturn(roleArn);
+        when(credentialView.getRoleArn()).thenReturn(null);
+        when(credentialView.getSecretKey()).thenReturn(null);
+
+        String exceptionMessageComesFromSdk = "Please provide both the 'access' and 'secret key'";
+
+        when(awsPlatformParameters.getEnvironmentMinimalPoliciesJson()).thenReturn(encodedAwsEnvPolicy);
+        CDPServicePolicyVerificationResponses result = underTest.verifyByServices(authenticatedContext, services, experiencePrerequisites);
+
+        assertNotNull(result);
+        assertEquals(result.getResults().size(), 1);
+        assertEquals(result.getResults().stream().findFirst().get().getServiceName(), "ml");
+        assertEquals(result.getResults().stream().findFirst().get().getServiceStatus(), exceptionMessageComesFromSdk);
+        assertEquals(result.getResults().stream().findFirst().get().getStatusCode(), 503);
     }
 }

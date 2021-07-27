@@ -44,6 +44,10 @@ public class EnvironmentModelDescription {
     public static final String YARN_QUEUE = "Queue for Yarn deployments";
     public static final String YARN_LIFETIME = "Lifetime for Yarn deployments in seconds";
 
+    public static final String POLICY_VALIDATION_ERROR_SERVICE = "The policy validation service name";
+    public static final String POLICY_VALIDATION_ERROR_MESSAGE = "The policy validation message of service";
+    public static final String POLICY_VALIDATION_ERROR_CODE = "The policy validation code";
+
     public static final String CREDENTIAL_NAME_REQUEST = "Name of the credential of the environment. If the name is given, "
             + "the detailed credential is ignored in the request.";
     public static final String CREDENTIAL_REQUEST = "If credentialName is not specified, the credential is used to create the new credential for "

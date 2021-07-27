@@ -51,6 +51,7 @@ import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.model.CredentialType;
 import com.sequenceiq.environment.api.v1.credential.model.request.CredentialRequest;
+import com.sequenceiq.environment.api.v1.environment.model.response.PolicyValidationErrorResponses;
 import com.sequenceiq.environment.credential.attributes.CredentialAttributes;
 import com.sequenceiq.environment.credential.attributes.azure.CodeGrantFlowAttributes;
 import com.sequenceiq.environment.credential.domain.Credential;
@@ -59,6 +60,8 @@ import com.sequenceiq.environment.credential.repository.CredentialRepository;
 import com.sequenceiq.environment.credential.v1.converter.CredentialRequestToCreateAWSCredentialRequestConverter;
 import com.sequenceiq.environment.credential.validation.CredentialValidator;
 import com.sequenceiq.environment.credential.verification.CredentialVerification;
+import com.sequenceiq.environment.environment.verification.CDPServicePolicyVerification;
+import com.sequenceiq.environment.environment.verification.PolicyValidationErrorResponseConverter;
 import com.sequenceiq.notification.NotificationSender;
 
 @Service
@@ -95,6 +98,9 @@ public class CredentialService extends AbstractCredentialService implements Reso
 
     @Inject
     private RegionAwareCrnGenerator regionAwareCrnGenerator;
+
+    @Inject
+    private PolicyValidationErrorResponseConverter policyValidationErrorResponseConverter;
 
     protected CredentialService(NotificationSender notificationSender, CloudbreakMessagesService messagesService,
             @Value("${environment.enabledplatforms}") Set<String> enabledPlatforms) {
@@ -405,5 +411,12 @@ public class CredentialService extends AbstractCredentialService implements Reso
     @Override
     public EnumSet<Crn.ResourceType> getSupportedCrnResourceTypes() {
         return EnumSet.of(Crn.ResourceType.CREDENTIAL);
+    }
+
+    public PolicyValidationErrorResponses validatePolicy(String accountId, String environmentCrn, List<String> services) {
+        Credential credential = getByEnvironmentCrnAndAccountId(environmentCrn, accountId, ENVIRONMENT);
+        Map<String, String> experiencePrerequisites = credentialPrerequisiteService.getExperiencePrerequisites(credential.getCloudPlatform());
+        CDPServicePolicyVerification cdpServicePolicyVerification = credentialAdapter.verifyByServices(credential, accountId, services, experiencePrerequisites);
+        return policyValidationErrorResponseConverter.convert(cdpServicePolicyVerification);
     }
 }

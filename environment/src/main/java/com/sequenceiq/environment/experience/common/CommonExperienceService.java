@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.experience.common;
 
 import static com.sequenceiq.cloudbreak.util.ConditionBasedEvaluatorUtil.throwIfTrue;
+import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNullOtherwise;
 import static java.util.stream.Collectors.toSet;
 
 import java.util.Collection;
@@ -94,7 +95,7 @@ public class CommonExperienceService implements Experience {
                         LOGGER.info("Requesting {} to fetch granular policy for experience '{}' for cloud platform '{}'",
                                 ExperienceConnectorService.class.getSimpleName(), configuredExperience.getBusinessName(), environment.getCloudPlatform());
                         ExperiencePolicyResponse res = experienceConnectorService.collectPolicy(xpPath, environment.getCloudPlatform());
-                        policies.put(configuredExperience.getBusinessName(), res.getAws().getPolicy());
+                        policies.put(configuredExperience.getBusinessName(), getIfNotNullOtherwise(res.getAws(), aws -> aws.getPolicy(), null));
                     } catch (ExperienceOperationFailedException eofe) {
                         LOGGER.warn("Unable to fetch policy from experience \"" + configuredExperience.getName() + "\" due to: " + eofe.getMessage(), eofe);
                         policies.put(configuredExperience.getBusinessName(), "");
