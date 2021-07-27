@@ -60,6 +60,7 @@ import com.sequenceiq.environment.credential.repository.CredentialRepository;
 import com.sequenceiq.environment.credential.v1.converter.CredentialRequestToCreateAWSCredentialRequestConverter;
 import com.sequenceiq.environment.credential.validation.CredentialValidator;
 import com.sequenceiq.environment.credential.verification.CredentialVerification;
+import com.sequenceiq.environment.environment.verification.PolicyValidationErrorResponseConverter;
 import com.sequenceiq.notification.NotificationSender;
 
 @SpringBootTest
@@ -134,6 +135,9 @@ class CredentialServiceTest {
 
     @MockBean
     private RegionAwareCrnGenerator regionAwareCrnGenerator;
+
+    @MockBean
+    private PolicyValidationErrorResponseConverter policyValidationErrorResponseConverter;
 
     @BeforeEach
     void setupTestCredential() throws TransactionService.TransactionExecutionException {

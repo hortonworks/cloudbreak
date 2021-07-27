@@ -62,6 +62,7 @@ import com.sequenceiq.environment.credential.validation.CredentialValidator;
 import com.sequenceiq.environment.environment.flow.EnvEventParameterFactory;
 import com.sequenceiq.environment.environment.flow.EnvironmentFlowInformation;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
+import com.sequenceiq.environment.environment.verification.PolicyValidationErrorResponseConverter;
 import com.sequenceiq.environment.experience.api.LiftieApi;
 import com.sequenceiq.environment.experience.common.CommonExperienceConnectorService;
 import com.sequenceiq.environment.experience.policy.response.ExperiencePolicyResponse;
@@ -122,6 +123,9 @@ public class CredentialExperienceTest {
 
     @MockBean
     private RegionAwareCrnGenerator regionAwareCrnGenerator;
+
+    @MockBean
+    private PolicyValidationErrorResponseConverter policyValidationErrorResponseConverter;
 
     @BeforeEach
     public void setup() {

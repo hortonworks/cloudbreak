@@ -1,8 +1,12 @@
 package com.sequenceiq.environment.credential.service;
 
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.event.credential.CDPServicePolicyVerificationRequest;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialVerificationRequest;
 import com.sequenceiq.cloudbreak.cloud.event.credential.InitCodeGrantFlowRequest;
 import com.sequenceiq.cloudbreak.cloud.event.credential.InteractiveLoginRequest;
@@ -29,6 +33,11 @@ public class RequestProvider {
     public CredentialVerificationRequest getCredentialVerificationRequest(CloudContext cloudContext, CloudCredential cloudCredential,
             boolean creationVerification) {
         return new CredentialVerificationRequest(cloudContext, cloudCredential, creationVerification);
+    }
+
+    public CDPServicePolicyVerificationRequest getCDPServicePolicyVerificationRequest(CloudContext cloudContext, CloudCredential cloudCredential,
+            List<String> services, Map<String, String> experiencePrerequisites) {
+        return new CDPServicePolicyVerificationRequest(cloudContext, cloudCredential, services, experiencePrerequisites);
     }
 
     public InteractiveLoginRequest getInteractiveLoginRequest(CloudContext cloudContext, ExtendedCloudCredential cloudCredential) {

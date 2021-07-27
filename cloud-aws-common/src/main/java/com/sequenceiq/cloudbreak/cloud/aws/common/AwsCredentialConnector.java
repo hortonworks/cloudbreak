@@ -5,7 +5,11 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -16,6 +20,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.amazonaws.AmazonClientException;
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.common.exception.AwsConfusedDeputyException;
 import com.sequenceiq.cloudbreak.cloud.aws.common.exception.AwsPermissionMissingException;
@@ -23,7 +28,9 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialViewProvider;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.model.CDPServicePolicyVerificationResponse;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.CDPServicePolicyVerificationResponses;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.credential.CredentialVerificationContext;
@@ -81,6 +88,32 @@ public class AwsCredentialConnector implements CredentialConnector {
     }
 
     @Override
+    public CDPServicePolicyVerificationResponses verifyByServices(AuthenticatedContext authenticatedContext,
+        List<String> services, Map<String, String> experiencePrerequisites) {
+        CloudCredential credential = authenticatedContext.getCloudCredential();
+        LOGGER.debug("Create credential: {}", credential);
+        AwsCredentialView awsCredential = credentialViewProvider.createAwsCredentialView(credential);
+        String roleArn = awsCredential.getRoleArn();
+        String accessKey = awsCredential.getAccessKey();
+        String secretKey = awsCredential.getSecretKey();
+
+        CDPServicePolicyVerificationResponses result;
+        if (isNoneEmpty(roleArn, accessKey, secretKey)) {
+            String message = "Please only provide the 'role arn' or the 'access' and 'secret key'";
+            result = new CDPServicePolicyVerificationResponses(getServiceStatus(services, message));
+        } else if (isNotEmpty(roleArn)) {
+            result = verifyIamRoleIsAssumable(credential, services, experiencePrerequisites);
+        } else if (isEmpty(accessKey) || isEmpty(secretKey)) {
+            String message = "Please provide both the 'access' and 'secret key'";
+            result = new CDPServicePolicyVerificationResponses(getServiceStatus(services, message));
+        } else {
+            String message = "We do not support to verify 'access' and 'secret key'";
+            result = new CDPServicePolicyVerificationResponses(getServiceStatus(services, message));
+        }
+        return result;
+    }
+
+    @Override
     public CloudCredentialStatus create(AuthenticatedContext auth) {
         return new CloudCredentialStatus(auth.getCloudCredential(), CredentialStatus.CREATED);
     }
@@ -120,6 +153,45 @@ public class AwsCredentialConnector implements CredentialConnector {
         );
     }
 
+    private CDPServicePolicyVerificationResponses verifyIamRoleIsAssumable(CloudCredential cloudCredential,
+        List<String> services, Map<String, String> experiencePrerequisites) {
+        AwsCredentialView awsCredential = credentialViewProvider.createAwsCredentialView(cloudCredential);
+        CDPServicePolicyVerificationResponses credentialStatus;
+        Map<String, String> servicesWithPolicies = new HashMap<>();
+        services.forEach(service -> {
+            String policy = experiencePrerequisites.get(service.toUpperCase());
+            servicesWithPolicies.put(service, policy);
+        });
+        try {
+            credentialClient.retrieveSessionCredentials(awsCredential);
+            credentialStatus = verifyCredentialsPermission(awsCredential, servicesWithPolicies);
+        } catch (AmazonClientException ae) {
+            String errorMessage = getErrorMessageForAwsClientException(awsCredential, ae);
+            LOGGER.warn(errorMessage, ae);
+            credentialStatus = new CDPServicePolicyVerificationResponses(getServiceStatus(services, errorMessage));
+        } catch (AwsConfusedDeputyException confusedDeputyEx) {
+            credentialStatus = new CDPServicePolicyVerificationResponses(getServiceStatus(services, confusedDeputyEx.getMessage()));
+        } catch (RuntimeException e) {
+            String errorMessage = String.format("Unable to verify credential: check if the role '%s' exists and it's created with the correct external ID. " +
+                            "Cause: '%s'", awsCredential.getRoleArn(), e.getMessage());
+            LOGGER.warn(errorMessage, e);
+            credentialStatus = new CDPServicePolicyVerificationResponses(getServiceStatus(services, errorMessage));
+        }
+        return credentialStatus;
+    }
+
+    private Set<CDPServicePolicyVerificationResponse> getServiceStatus(List<String> services, String errorMessage) {
+        Set<CDPServicePolicyVerificationResponse> cdpServicePolicyVerificationResponses = new HashSet<>();
+        for (String service : services) {
+            CDPServicePolicyVerificationResponse cdpServicePolicyVerificationResponse = new CDPServicePolicyVerificationResponse();
+            cdpServicePolicyVerificationResponse.setStatusCode(CDPServicePolicyVerificationResponse.SERVICE_UNAVAILABLE);
+            cdpServicePolicyVerificationResponse.setServiceStatus(errorMessage);
+            cdpServicePolicyVerificationResponse.setServiceName(service);
+            cdpServicePolicyVerificationResponses.add(cdpServicePolicyVerificationResponse);
+        }
+        return cdpServicePolicyVerificationResponses;
+    }
+
     private CloudCredentialStatus verifyIamRoleIsAssumable(CloudCredential cloudCredential, CredentialVerificationContext credentialVerificationContext) {
         AwsCredentialView awsCredential = credentialViewProvider.createAwsCredentialView(cloudCredential);
         CloudCredentialStatus credentialStatus = new CloudCredentialStatus(cloudCredential, CredentialStatus.VERIFIED);
@@ -136,7 +208,7 @@ public class AwsCredentialConnector implements CredentialConnector {
             credentialStatus = new CloudCredentialStatus(cloudCredential, CredentialStatus.FAILED, confusedDeputyEx, confusedDeputyEx.getMessage());
         } catch (RuntimeException e) {
             String errorMessage = String.format("Unable to verify credential: check if the role '%s' exists and it's created with the correct external ID. " +
-                            "Cause: '%s'", awsCredential.getRoleArn(), e.getMessage());
+                    "Cause: '%s'", awsCredential.getRoleArn(), e.getMessage());
             LOGGER.warn(errorMessage, e);
             credentialStatus = new CloudCredentialStatus(cloudCredential, CredentialStatus.FAILED, e, errorMessage);
         }
@@ -147,12 +219,45 @@ public class AwsCredentialConnector implements CredentialConnector {
             CloudCredentialStatus credentialStatus) {
         if (cloudCredential.isVerifyPermissions()) {
             try {
-                awsCredentialVerifier.validateAws(awsCredential);
+                String environmentMinimalPoliciesJson = awsPlatformParameters.getEnvironmentMinimalPoliciesJson();
+                verifyCredentialsPermission(awsCredential, environmentMinimalPoliciesJson);
             } catch (AwsPermissionMissingException e) {
                 credentialStatus = new CloudCredentialStatus(cloudCredential, PERMISSIONS_MISSING, new Exception(e.getMessage()), e.getMessage());
             }
         }
         return credentialStatus;
+    }
+
+    private CDPServicePolicyVerificationResponses verifyCredentialsPermission(AwsCredentialView awsCredential,
+        Map<String, String> servicesWithPolicies) {
+        Set<CDPServicePolicyVerificationResponse> cdpServicePolicyVerificationResponses = new HashSet<>();
+        for (Map.Entry<String, String> entry : servicesWithPolicies.entrySet()) {
+            String serviceName = entry.getKey();
+            String policy = entry.getValue();
+            try {
+                if (Strings.isNullOrEmpty(policy)) {
+                    CDPServicePolicyVerificationResponse cdpServicePolicyVerificationResponse = new CDPServicePolicyVerificationResponse();
+                    cdpServicePolicyVerificationResponse.setStatusCode(CDPServicePolicyVerificationResponse.NOT_IMPLEMENTED);
+                    cdpServicePolicyVerificationResponse.setServiceStatus("The policy query endpoint was not implement on experience side.");
+                    cdpServicePolicyVerificationResponse.setServiceName(serviceName);
+                    cdpServicePolicyVerificationResponses.add(cdpServicePolicyVerificationResponse);
+                } else {
+                    verifyCredentialsPermission(awsCredential, policy);
+                }
+            } catch (AwsPermissionMissingException e) {
+                CDPServicePolicyVerificationResponse cdpServicePolicyVerificationResponse = new CDPServicePolicyVerificationResponse();
+                cdpServicePolicyVerificationResponse.setStatusCode(CDPServicePolicyVerificationResponse.NOT_FOUND);
+                cdpServicePolicyVerificationResponse.setServiceName(serviceName);
+                cdpServicePolicyVerificationResponse.setServiceStatus(e.getMessage());
+                cdpServicePolicyVerificationResponses.add(cdpServicePolicyVerificationResponse);
+            }
+        }
+        return new CDPServicePolicyVerificationResponses(cdpServicePolicyVerificationResponses);
+    }
+
+    private void verifyCredentialsPermission(AwsCredentialView awsCredential, String policyJson)
+            throws AwsPermissionMissingException {
+        awsCredentialVerifier.validateAws(awsCredential, policyJson);
     }
 
     private CloudCredentialStatus determineDefaultRegion(CloudCredential cloudCredential, CloudCredentialStatus credentialStatus) {

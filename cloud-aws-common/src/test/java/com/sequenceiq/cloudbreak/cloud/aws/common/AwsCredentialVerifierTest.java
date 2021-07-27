@@ -55,7 +55,7 @@ public class AwsCredentialVerifierTest {
     public void verifyCredentialAndThrowFailExceptionTest() throws IOException {
         URL url = Resources.getResource("definitions/aws-environment-minimal-policy.json");
         String awsEnvPolicy = Resources.toString(url, Charsets.UTF_8);
-        when(awsPlatformParameters.getEnvironmentMinimalPoliciesJson()).thenReturn(Base64.getEncoder().encodeToString(awsEnvPolicy.getBytes()));
+        String encodedAwsEnvPolicy = Base64.getEncoder().encodeToString(awsEnvPolicy.getBytes());
         Map<String, Object> awsParameters = new HashMap<>();
         awsParameters.put("accessKey", "a");
         awsParameters.put("secretKey", "b");
@@ -93,7 +93,7 @@ public class AwsCredentialVerifierTest {
         });
 
         try {
-            awsCredentialVerifier.validateAws(new AwsCredentialView(cloudCredential));
+            awsCredentialVerifier.validateAws(new AwsCredentialView(cloudCredential), encodedAwsEnvPolicy);
             fail("It shoud throw verification exception");
         } catch (AwsPermissionMissingException e) {
             assertThat(e.getMessage(), CoreMatchers.containsString("denied_action1"));
@@ -114,7 +114,7 @@ public class AwsCredentialVerifierTest {
     public void verifyCredentialTest() throws IOException, AwsPermissionMissingException {
         URL url = Resources.getResource("definitions/aws-environment-minimal-policy.json");
         String awsEnvPolicy = Resources.toString(url, Charsets.UTF_8);
-        when(awsPlatformParameters.getEnvironmentMinimalPoliciesJson()).thenReturn(Base64.getEncoder().encodeToString(awsEnvPolicy.getBytes()));
+        String encodedAwsEnvPolicy = Base64.getEncoder().encodeToString(awsEnvPolicy.getBytes());
         Map<String, Object> awsParameters = new HashMap<>();
         awsParameters.put("accessKey", "a");
         awsParameters.put("secretKey", "b");
@@ -147,14 +147,14 @@ public class AwsCredentialVerifierTest {
             simulatePrincipalPolicyResult.setEvaluationResults(evaluationResults);
             when(amazonIdentityManagement.simulatePrincipalPolicy(requestArgumentCaptor.capture())).thenReturn(simulatePrincipalPolicyResult);
 
-        awsCredentialVerifier.validateAws(new AwsCredentialView(cloudCredential));
+        awsCredentialVerifier.validateAws(new AwsCredentialView(cloudCredential), encodedAwsEnvPolicy);
     }
 
     @Test
     public void verifyCredentialAndThrowFailExceptionBecauseOrganizatioRuleTest() throws IOException {
         URL url = Resources.getResource("definitions/aws-environment-minimal-policy.json");
         String awsEnvPolicy = Resources.toString(url, Charsets.UTF_8);
-        when(awsPlatformParameters.getEnvironmentMinimalPoliciesJson()).thenReturn(Base64.getEncoder().encodeToString(awsEnvPolicy.getBytes()));
+        String encodedAwsEnvPolicy = Base64.getEncoder().encodeToString(awsEnvPolicy.getBytes());
         Map<String, Object> awsParameters = new HashMap<>();
         awsParameters.put("accessKey", "a");
         awsParameters.put("secretKey", "b");
@@ -192,7 +192,7 @@ public class AwsCredentialVerifierTest {
         });
 
         try {
-            awsCredentialVerifier.validateAws(new AwsCredentialView(cloudCredential));
+            awsCredentialVerifier.validateAws(new AwsCredentialView(cloudCredential), encodedAwsEnvPolicy);
             fail("It shoud throw verification exception");
         } catch (AwsPermissionMissingException e) {
             assertThat(e.getMessage(), CoreMatchers.containsString("denied_action1_0 : aws:ec2,"));
@@ -213,7 +213,7 @@ public class AwsCredentialVerifierTest {
     public void verifyCredentialAndOrganizatioDecisionDetailIsNullTest() throws IOException {
         URL url = Resources.getResource("definitions/aws-environment-minimal-policy.json");
         String awsEnvPolicy = Resources.toString(url, Charsets.UTF_8);
-        when(awsPlatformParameters.getEnvironmentMinimalPoliciesJson()).thenReturn(Base64.getEncoder().encodeToString(awsEnvPolicy.getBytes()));
+        String encodedAwsEnvPolicy = Base64.getEncoder().encodeToString(awsEnvPolicy.getBytes());
         Map<String, Object> awsParameters = new HashMap<>();
         awsParameters.put("accessKey", "a");
         awsParameters.put("secretKey", "b");
@@ -251,7 +251,7 @@ public class AwsCredentialVerifierTest {
         });
 
         try {
-            awsCredentialVerifier.validateAws(new AwsCredentialView(cloudCredential));
+            awsCredentialVerifier.validateAws(new AwsCredentialView(cloudCredential), encodedAwsEnvPolicy);
             fail("It shoud throw verification exception");
         } catch (AwsPermissionMissingException e) {
             assertThat(e.getMessage(), CoreMatchers.containsString("denied_action1_0 : aws:ec2,"));
