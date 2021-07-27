@@ -99,7 +99,6 @@ public class ClouderaManagerClusterDecomissionServiceTest {
     public void testCollectDownscaleCandidates() {
         HostGroup hostGroup = new HostGroup();
         Integer scalingAdjustment = 1;
-        int defaultRootVolumeSize = 2;
         Set<InstanceMetaData> instanceMetadatas = new HashSet<>();
         InstanceMetaData instanceMetaData1 = new InstanceMetaData();
         instanceMetaData1.setDiscoveryFQDN("host1");
@@ -110,14 +109,13 @@ public class ClouderaManagerClusterDecomissionServiceTest {
         instanceMetaData2.setPrivateId(2L);
         instanceMetadatas.add(instanceMetaData2);
 
-        when(clouderaManagerDecomissioner.collectDownscaleCandidates(apiClient, stack, hostGroup, scalingAdjustment, defaultRootVolumeSize,
-                instanceMetadatas)).thenReturn(instanceMetadatas);
+        when(clouderaManagerDecomissioner.collectDownscaleCandidates(apiClient, stack, hostGroup, scalingAdjustment, instanceMetadatas))
+                .thenReturn(instanceMetadatas);
 
-        Set<InstanceMetaData> actual = underTest.collectDownscaleCandidates(hostGroup, scalingAdjustment, defaultRootVolumeSize, instanceMetadatas);
+        Set<InstanceMetaData> actual = underTest.collectDownscaleCandidates(hostGroup, scalingAdjustment, instanceMetadatas);
 
         assertEquals(instanceMetadatas, actual);
-        verify(clouderaManagerDecomissioner).collectDownscaleCandidates(apiClient, stack, hostGroup, scalingAdjustment, defaultRootVolumeSize,
-                instanceMetadatas);
+        verify(clouderaManagerDecomissioner).collectDownscaleCandidates(apiClient, stack, hostGroup, scalingAdjustment, instanceMetadatas);
     }
 
     @Test

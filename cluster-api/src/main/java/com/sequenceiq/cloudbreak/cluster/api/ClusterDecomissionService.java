@@ -14,7 +14,7 @@ import com.sequenceiq.cloudbreak.service.CloudbreakException;
 public interface ClusterDecomissionService {
     void verifyNodesAreRemovable(Stack stack, Collection<InstanceMetaData> removableInstances);
 
-    Set<InstanceMetaData> collectDownscaleCandidates(@Nonnull HostGroup hostGroup, Integer scalingAdjustment, int defaultRootVolumeSize,
+    Set<InstanceMetaData> collectDownscaleCandidates(@Nonnull HostGroup hostGroup, Integer scalingAdjustment,
             Set<InstanceMetaData> instanceMetaDatasInStack) throws CloudbreakException;
 
     Map<String, InstanceMetaData> collectHostsToRemove(@Nonnull HostGroup hostGroup, Set<String> hostNames);

@@ -4,7 +4,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -22,7 +21,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.cloudera.api.swagger.ClustersResourceApi;
 import com.cloudera.api.swagger.HostTemplatesResourceApi;
 import com.cloudera.api.swagger.HostsResourceApi;
 import com.cloudera.api.swagger.ServicesResourceApi;
@@ -208,16 +206,7 @@ public class ClouderaManagerDecommisionerTest {
         Set<HostGroup> hostGroups = createTestHostGroups(1, 6);
         cluster.setHostGroups(hostGroups);
         HostGroup downscaledHostGroup = hostGroups.iterator().next();
-        ClustersResourceApi clustersResourceApi = mock(ClustersResourceApi.class);
-        when(clouderaManagerApiFactory.getClustersResourceApi(any(ApiClient.class))).thenReturn(clustersResourceApi);
         HostsResourceApi hostsResourceApi = mock(HostsResourceApi.class);
-        when(hostsResourceApi.readHost(anyString(), anyString())).thenAnswer(invocation -> {
-            ApiHost apiHost = new ApiHost();
-            apiHost.setHealthSummary(ApiHealthSummary.GOOD);
-            apiHost.setHostname(invocation.getArgument(0));
-            apiHost.setHostId(invocation.getArgument(0));
-            return apiHost;
-        });
         when(clouderaManagerApiFactory.getHostsResourceApi(any(ApiClient.class))).thenReturn(hostsResourceApi);
         HostTemplatesResourceApi hostTemplatesResourceApi = mock(HostTemplatesResourceApi.class);
         when(clouderaManagerApiFactory.getHostTemplatesResourceApi(any(ApiClient.class))).thenReturn(hostTemplatesResourceApi);
@@ -232,11 +221,12 @@ public class ClouderaManagerDecommisionerTest {
                     ApiHost apiHostRef = new ApiHost();
                     apiHostRef.setHostname(hostName);
                     apiHostRef.setHostId(hostName);
+                    apiHostRef.setHealthSummary(ApiHealthSummary.GOOD);
                     apiHosts.add(apiHostRef);
                 });
         apiHostRefList.setItems(apiHosts);
-        when(clustersResourceApi.listHosts(stack.getName(), null, null, null)).thenReturn(apiHostRefList);
-        Set<InstanceMetaData> downscaleCandidates = underTest.collectDownscaleCandidates(mock(ApiClient.class), stack, downscaledHostGroup, -2, 0,
+        when(hostsResourceApi.readHosts(any(), any(), any())).thenReturn(apiHostRefList);
+        Set<InstanceMetaData> downscaleCandidates = underTest.collectDownscaleCandidates(mock(ApiClient.class), stack, downscaledHostGroup, -2,
                 downscaledHostGroup.getInstanceGroup().getAllInstanceMetaData());
         assertEquals(2, downscaleCandidates.size());
         assertTrue("Assert if downscaleCandidates contains hg0-instanceid-4",
@@ -255,15 +245,13 @@ public class ClouderaManagerDecommisionerTest {
         Set<HostGroup> hostGroups = createTestHostGroups(1, 6);
         cluster.setHostGroups(hostGroups);
         HostGroup downscaledHostGroup = hostGroups.iterator().next();
-        ClustersResourceApi clustersResourceApi = mock(ClustersResourceApi.class);
-        when(clouderaManagerApiFactory.getClustersResourceApi(any(ApiClient.class))).thenReturn(clustersResourceApi);
         HostsResourceApi hostsResourceApi = mock(HostsResourceApi.class);
         when(clouderaManagerApiFactory.getHostsResourceApi(any(ApiClient.class))).thenReturn(hostsResourceApi);
         HostTemplatesResourceApi hostTemplatesResourceApi = mock(HostTemplatesResourceApi.class);
         when(clouderaManagerApiFactory.getHostTemplatesResourceApi(any(ApiClient.class))).thenReturn(hostTemplatesResourceApi);
         ApiHostTemplateList hostTemplates = createEmptyHostTemplates();
         Mockito.when(hostTemplatesResourceApi.readHostTemplates(stack.getName())).thenReturn(hostTemplates);
-        assertThrows(NotEnoughNodeException.class, () -> underTest.collectDownscaleCandidates(mock(ApiClient.class), stack, downscaledHostGroup, -8, 0,
+        assertThrows(NotEnoughNodeException.class, () -> underTest.collectDownscaleCandidates(mock(ApiClient.class), stack, downscaledHostGroup, -8,
                 downscaledHostGroup.getInstanceGroup().getAllInstanceMetaData()));
     }
 
@@ -281,16 +269,7 @@ public class ClouderaManagerDecommisionerTest {
                 .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN().equals("hg0-host-2"))
                 .findFirst();
         hgHost2.ifPresent(instanceMetaData -> instanceMetaData.setDiscoveryFQDN(null));
-        ClustersResourceApi clustersResourceApi = mock(ClustersResourceApi.class);
-        when(clouderaManagerApiFactory.getClustersResourceApi(any(ApiClient.class))).thenReturn(clustersResourceApi);
         HostsResourceApi hostsResourceApi = mock(HostsResourceApi.class);
-        when(hostsResourceApi.readHost(anyString(), anyString())).thenAnswer(invocation -> {
-            ApiHost apiHost = new ApiHost();
-            apiHost.setHealthSummary(ApiHealthSummary.GOOD);
-            apiHost.setHostname(invocation.getArgument(0));
-            apiHost.setHostId(invocation.getArgument(0));
-            return apiHost;
-        });
         when(clouderaManagerApiFactory.getHostsResourceApi(any(ApiClient.class))).thenReturn(hostsResourceApi);
         HostTemplatesResourceApi hostTemplatesResourceApi = mock(HostTemplatesResourceApi.class);
         when(clouderaManagerApiFactory.getHostTemplatesResourceApi(any(ApiClient.class))).thenReturn(hostTemplatesResourceApi);
@@ -305,11 +284,12 @@ public class ClouderaManagerDecommisionerTest {
                     ApiHost apiHostRef = new ApiHost();
                     apiHostRef.setHostname(hostName);
                     apiHostRef.setHostId(hostName);
+                    apiHostRef.setHealthSummary(ApiHealthSummary.GOOD);
                     apiHosts.add(apiHostRef);
                 });
         apiHostRefList.setItems(apiHosts);
-        when(clustersResourceApi.listHosts(stack.getName(), null, null, null)).thenReturn(apiHostRefList);
-        Set<InstanceMetaData> downscaleCandidates = underTest.collectDownscaleCandidates(mock(ApiClient.class), stack, downscaledHostGroup, -2, 0,
+        when(hostsResourceApi.readHosts(any(), any(), any())).thenReturn(apiHostRefList);
+        Set<InstanceMetaData> downscaleCandidates = underTest.collectDownscaleCandidates(mock(ApiClient.class), stack, downscaledHostGroup, -2,
                 downscaledHostGroup.getInstanceGroup().getAllInstanceMetaData());
         assertEquals(2, downscaleCandidates.size());
         assertTrue("Assert if downscaleCandidates contains hg0-host-2, because FQDN is missing",

@@ -27,7 +27,6 @@ import com.sequenceiq.cloudbreak.reactor.api.event.resource.CollectDownscaleCand
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
-import com.sequenceiq.cloudbreak.service.stack.DefaultRootVolumeSizeProvider;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
@@ -54,9 +53,6 @@ public class CollectDownscaleCandidatesHandler implements EventHandler<CollectDo
     private HostGroupService hostGroupService;
 
     @Inject
-    private DefaultRootVolumeSizeProvider defaultRootVolumeSizeProvider;
-
-    @Inject
     private ClusterApiConnectors clusterApiConnectors;
 
     @Inject
@@ -78,11 +74,10 @@ public class CollectDownscaleCandidatesHandler implements EventHandler<CollectDo
             result = transactionService.required(() -> {
                 try {
                     Stack stack = stackService.getByIdWithListsInTransaction(request.getResourceId());
-                    int defaultRootVolumeSize = defaultRootVolumeSizeProvider.getForPlatform(stack.cloudPlatform());
                     Set<Long> privateIds = request.getPrivateIds();
                     if (noSelectedInstancesForDownscale(privateIds)) {
                         LOGGER.info("No private id(s) has been provided for downscale!");
-                        privateIds = collectCandidates(request, stack, defaultRootVolumeSize);
+                        privateIds = collectCandidates(request, stack);
                     } else {
                         List<InstanceMetaData> removableInstances =
                                 stackService.getInstanceMetaDataForPrivateIdsWithoutTerminatedInstances(stack.getInstanceMetaDataAsList(), privateIds);
@@ -118,17 +113,15 @@ public class CollectDownscaleCandidatesHandler implements EventHandler<CollectDo
         eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
     }
 
-    private Set<Long> collectCandidates(CollectDownscaleCandidatesRequest request, Stack stack, int defaultRootVolumeSize)
+    private Set<Long> collectCandidates(CollectDownscaleCandidatesRequest request, Stack stack)
             throws CloudbreakException {
-        LOGGER.debug("Collecting candidates for downscale based on " + CollectDownscaleCandidatesRequest.class.getSimpleName() + " [{}] and "
-                + Stack.class.getSimpleName() + " [{}] and default root volume size [{}]", request.toString(), "stackCrn: " + stack.getResourceCrn(),
-                defaultRootVolumeSize);
+        LOGGER.debug("Collecting candidates for downscale based on [{}] and stack CRN [{}].", request, stack.getResourceCrn());
         HostGroup hostGroup = hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), request.getHostGroupName())
                 .orElseThrow(NotFoundException.notFound("hostgroup", request.getHostGroupName()));
         LOGGER.debug("Host group has been found for cluster! It's name: {}", hostGroup.getName());
         List<InstanceMetaData> metaDataForInstanceGroup = instanceMetaDataService.findAliveInstancesInInstanceGroup(hostGroup.getInstanceGroup().getId());
         Set<InstanceMetaData> collectedCandidates = clusterApiConnectors.getConnector(stack).clusterDecomissionService()
-                .collectDownscaleCandidates(hostGroup, request.getScalingAdjustment(), defaultRootVolumeSize, new HashSet<>(metaDataForInstanceGroup));
+                .collectDownscaleCandidates(hostGroup, request.getScalingAdjustment(), new HashSet<>(metaDataForInstanceGroup));
         String collectedHostsAsString = collectedCandidates.stream().map(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null ?
                 "FQDN: " + instanceMetaData.getDiscoveryFQDN() : "Private id: " + instanceMetaData.getPrivateId())
                 .collect(Collectors.joining(", "));
