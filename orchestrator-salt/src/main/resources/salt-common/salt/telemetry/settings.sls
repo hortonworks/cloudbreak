@@ -78,6 +78,12 @@
   {% set test_cloud_storage_upload_params = "gcs upload -p /tmp/.test_cloud_storage_upload.txt --location " + gcs_location + " --bucket " + gcs_bucket %}
 {% endif %}
 
+{% if salt['pkg.version']('cdp-telemetry') %}
+  {% set cdp_telemetry_package_version = salt['pkg.version']('cdp-telemetry') %}
+{% else %}
+  {% set cdp_telemetry_package_version = None %}
+{% endif %}
+
 {% do telemetry.update({
     "platform": platform,
     "clusterCrn": cluster_crn,
@@ -89,6 +95,7 @@
     "databusEndpoint": databus_endpoint,
     "databusEndpointValidation": databus_endpoint_validation,
     "cdpTelemetryVersion": cdp_telemetry_version,
+    "cdpTelemetryPackageVersion": cdp_telemetry_package_version,
     "proxyUrl": proxy_full_url,
     "proxyProtocol": proxy_protocol,
     "noProxyHosts": no_proxy_hosts,
