@@ -27,5 +27,5 @@ public interface FlowChainLogRepository extends CrudRepository<FlowChainLog, Lon
     @Query("DELETE FROM FlowChainLog fch "
             + "WHERE fch.flowChainId NOT IN ( SELECT DISTINCT fl.flowChainId FROM FlowLog fl )"
             + " AND fch.flowChainId NOT IN (SELECT DISTINCT fc.parentFlowChainId FROM FlowChainLog fc)")
-    int purgeOrphanFLowChainLogs();
+    int purgeOrphanFlowChainLogs();
 }

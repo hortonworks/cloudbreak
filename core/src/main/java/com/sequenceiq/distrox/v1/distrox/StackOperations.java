@@ -278,7 +278,7 @@ public class StackOperations implements ResourcePropertyProvider {
 
     public FlowIdentifier recoverCluster(@NotNull NameOrCrn nameOrCrn, Long workspaceId) {
         LOGGER.debug("Starting to recover cluster ({}) from failed upgrade", nameOrCrn);
-        return recoveryService.recoverFailedUpgrade(workspaceId, nameOrCrn);
+        return recoveryService.recoverCluster(workspaceId, nameOrCrn);
     }
 
     public FlowIdentifier updateSalt(@NotNull NameOrCrn nameOrCrn, Long workspaceId) {

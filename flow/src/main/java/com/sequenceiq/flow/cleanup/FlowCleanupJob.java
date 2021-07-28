@@ -67,7 +67,7 @@ public class FlowCleanupJob extends TracedQuartzJob {
             int purgedFinalizedFlowLogs = flowLogService.purgeFinalizedFlowLogs();
             LOGGER.debug("Deleted flowlog count: {}", purgedFinalizedFlowLogs);
             LOGGER.debug("Cleaning orphan flowchainlogs");
-            int purgedOrphanFLowChainLogs = flowChainLogService.purgeOrphanFLowChainLogs();
+            int purgedOrphanFLowChainLogs = flowChainLogService.purgeOrphanFlowChainLogs();
             LOGGER.debug("Deleted flowchainlog count: {}", purgedOrphanFLowChainLogs);
             return null;
         });

@@ -4,11 +4,13 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.recovery.bri
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.recovery.bringup.DatalakeRecoveryBringupEvent.RECOVERY_BRINGUP_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.recovery.bringup.DatalakeRecoveryBringupEvent.RECOVERY_BRINGUP_FAIL_HANDLED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.recovery.bringup.DatalakeRecoveryBringupEvent.RECOVERY_BRINGUP_FINALIZED_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.recovery.bringup.DatalakeRecoveryBringupEvent.RECOVERY_BRINGUP_FINISHED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.recovery.bringup.DatalakeRecoveryBringupEvent.RECOVERY_BRINGUP_NEW_INSTANCES_FINISHED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.recovery.bringup.DatalakeRecoveryBringupEvent.RECOVERY_RESTORE_COMPONENTS_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.recovery.bringup.DatalakeRecoveryBringupState.FINAL_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.recovery.bringup.DatalakeRecoveryBringupState.INIT_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.recovery.bringup.DatalakeRecoveryBringupState.RECOVERY_BRINGUP_FAILED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.recovery.bringup.DatalakeRecoveryBringupState.RECOVERY_BRINGUP_FINISHED_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.recovery.bringup.DatalakeRecoveryBringupState.RECOVERY_RESTORE_COMPONENTS_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.recovery.bringup.DatalakeRecoveryBringupState.RECOVERY_SETUP_NEW_INSTANCES_STATE;
 
 import java.util.List;
@@ -24,21 +26,25 @@ public class DatalakeRecoveryBringupFlowConfig extends AbstractFlowConfiguration
 
     private static final List<Transition<DatalakeRecoveryBringupState, DatalakeRecoveryBringupEvent>> TRANSITIONS =
         new Transition.Builder<DatalakeRecoveryBringupState, DatalakeRecoveryBringupEvent>()
-            .defaultFailureEvent(RECOVERY_BRINGUP_FAILED_EVENT)
+                .defaultFailureEvent(RECOVERY_BRINGUP_FAILED_EVENT)
 
-            .from(INIT_STATE).to(RECOVERY_SETUP_NEW_INSTANCES_STATE)
-            .event(RECOVERY_BRINGUP_EVENT)
-            .defaultFailureEvent()
+                .from(INIT_STATE).to(RECOVERY_RESTORE_COMPONENTS_STATE)
+                .event(RECOVERY_BRINGUP_EVENT)
+                .defaultFailureEvent()
 
-            .from(RECOVERY_SETUP_NEW_INSTANCES_STATE).to(RECOVERY_BRINGUP_FINISHED_STATE)
-            .event(RECOVERY_BRINGUP_FINISHED_EVENT)
-            .defaultFailureEvent()
+                .from(RECOVERY_RESTORE_COMPONENTS_STATE).to(RECOVERY_SETUP_NEW_INSTANCES_STATE)
+                .event(RECOVERY_RESTORE_COMPONENTS_FINISHED_EVENT)
+                .defaultFailureEvent()
 
-            .from(RECOVERY_BRINGUP_FINISHED_STATE).to(FINAL_STATE)
-            .event(RECOVERY_BRINGUP_FINALIZED_EVENT)
-            .defaultFailureEvent()
+                .from(RECOVERY_SETUP_NEW_INSTANCES_STATE).to(RECOVERY_BRINGUP_FINISHED_STATE)
+                .event(RECOVERY_BRINGUP_NEW_INSTANCES_FINISHED_EVENT)
+                .defaultFailureEvent()
 
-            .build();
+                .from(RECOVERY_BRINGUP_FINISHED_STATE).to(FINAL_STATE)
+                .event(RECOVERY_BRINGUP_FINALIZED_EVENT)
+                .defaultFailureEvent()
+
+                .build();
 
     private static final FlowEdgeConfig<DatalakeRecoveryBringupState, DatalakeRecoveryBringupEvent> EDGE_CONFIG =
         new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, RECOVERY_BRINGUP_FAILED_STATE, RECOVERY_BRINGUP_FAIL_HANDLED_EVENT);
