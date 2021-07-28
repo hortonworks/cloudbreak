@@ -65,7 +65,9 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
             + "WHERE s.environmentCrn= :environmentCrn AND s.type = :type AND s.terminated=null")
     Long countByEnvironmentCrnAndStackType(@Param("environmentCrn") String environmentCrn, @Param("type") StackType type);
 
-    @Query("SELECT s FROM Stack s WHERE s.name= :name AND s.workspace.id= :workspaceId AND " + SHOW_TERMINATED_CLUSTERS_IF_REQUESTED)
+    @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData LEFT JOIN FETCH ig.template "
+            + "LEFT JOIN FETCH ig.securityGroup LEFT JOIN FETCH ig.instanceGroupNetwork WHERE s.name= :name " +
+            "AND s.workspace.id= :workspaceId AND " + SHOW_TERMINATED_CLUSTERS_IF_REQUESTED)
     Optional<Stack> findByNameAndWorkspaceIdWithLists(@Param("name") String name, @Param("workspaceId") Long workspaceId,
             @Param("showTerminated") Boolean showTerminated,
             @Param("terminatedAfter") Long terminatedAfter);
