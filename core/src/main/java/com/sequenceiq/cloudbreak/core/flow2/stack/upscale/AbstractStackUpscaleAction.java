@@ -80,7 +80,7 @@ abstract class AbstractStackUpscaleAction<P extends Payload> extends AbstractSta
         CloudCredential cloudCredential = stackUtil.getCloudCredential(stack);
         CloudStack cloudStack = cloudStackConverter.convert(stack);
         return new StackScalingFlowContext(flowParameters, stack, cloudContext, cloudCredential, cloudStack, getInstanceGroupName(variables),
-                Collections.emptySet(), getAdjustment(variables), getHostNames(variables));
+                Collections.emptySet(), getAdjustment(variables), getHostNames(variables), isRepair(variables));
     }
 
     @Override
@@ -94,6 +94,10 @@ abstract class AbstractStackUpscaleAction<P extends Payload> extends AbstractSta
 
     private Integer getAdjustment(Map<Object, Object> variables) {
         return (Integer) variables.get(ADJUSTMENT);
+    }
+
+    private boolean isRepair(Map<Object, Object> variables) {
+        return variables.get(REPAIR) != null && (Boolean) variables.get(REPAIR);
     }
 
     private Set<String> getHostNames(Map<Object, Object> variables) {
