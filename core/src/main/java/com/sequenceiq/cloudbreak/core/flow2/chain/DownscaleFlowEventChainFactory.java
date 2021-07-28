@@ -59,6 +59,9 @@ public class DownscaleFlowEventChainFactory implements FlowEventChainFactory<Clu
             sste = event.getPrivateIds() == null
                     ? new StackDownscaleTriggerEvent(STACK_DOWNSCALE_EVENT.event(), event.getResourceId(), instanceGroupName, event.getAdjustment())
                     : new StackDownscaleTriggerEvent(STACK_DOWNSCALE_EVENT.event(), event.getResourceId(), instanceGroupName, event.getPrivateIds());
+            if (event.getDetails() != null && event.getDetails().isRepair()) {
+                sste.setRepair();
+            }
             flowEventChain.add(sste);
         }
         return new FlowTriggerEventQueue(getName(), flowEventChain);

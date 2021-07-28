@@ -45,6 +45,8 @@ public abstract class AbstractStackDownscaleAction<P extends Payload>
 
     private static final String ADJUSTMENT = "ADJUSTMENT";
 
+    private static final String REPAIR = "REPAIR";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractStackDownscaleAction.class);
 
     @Inject
@@ -90,8 +92,20 @@ public abstract class AbstractStackDownscaleAction<P extends Payload>
         String instanceGroupName = extractInstanceGroupName(payload, variables);
         Set<String> instanceIds = extractInstanceIds(payload, variables, stack);
         Integer adjustment = extractAdjustment(payload, variables);
+        boolean repair = extractRepair(payload, variables);
         CloudStack cloudStack = cloudStackConverter.convertForDownscale(stack, instanceIds);
-        return new StackScalingFlowContext(flowParameters, stack, cloudContext, cloudCredential, cloudStack, instanceGroupName, instanceIds, adjustment);
+        return new StackScalingFlowContext(flowParameters, stack, cloudContext, cloudCredential, cloudStack, instanceGroupName, instanceIds, adjustment,
+                repair);
+    }
+
+    private boolean extractRepair(P payload, Map<Object, Object> variables) {
+        if (payload instanceof StackDownscaleTriggerEvent) {
+            StackDownscaleTriggerEvent ssc = (StackDownscaleTriggerEvent) payload;
+            boolean repair = ssc.isRepair();
+            variables.put(REPAIR, repair);
+            return repair;
+        }
+        return isRepair(variables);
     }
 
     private Integer extractAdjustment(P payload, Map<Object, Object> variables) {
@@ -150,5 +164,9 @@ public abstract class AbstractStackDownscaleAction<P extends Payload>
 
     protected Integer getAdjustment(Map<Object, Object> variables) {
         return (Integer) variables.get(ADJUSTMENT);
+    }
+
+    protected boolean isRepair(Map<Object, Object> variables) {
+        return variables.get(REPAIR) != null && (Boolean) variables.get(REPAIR);
     }
 }
