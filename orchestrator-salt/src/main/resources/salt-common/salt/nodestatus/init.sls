@@ -6,12 +6,15 @@
     - template: jinja
     - user: "root"
     - group: "root"
-    - mode: 600
-
+    - mode: 600{% if nodestatus.doctorTimeoutSupported %}
 start_nodestatus_monitor:
   service.running:
     - enable: True
     - name: cdp-nodestatus-monitor
     - watch:
-       - file: /opt/cdp-telemetry/conf/nodestatus-monitor.yaml
+       - file: /opt/cdp-telemetry/conf/nodestatus-monitor.yaml{% else %}
+stop_nodestatus_monitor:
+  service.dead:
+    - enable: False
+    - name: cdp-nodestatus-monitor{% endif %}
 {% endif %}
