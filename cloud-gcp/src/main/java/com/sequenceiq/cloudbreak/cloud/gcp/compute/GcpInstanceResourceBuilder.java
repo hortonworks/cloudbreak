@@ -469,12 +469,12 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
 
     private void prepareNetworkAndSubnet(String projectId, Region region, Network network, NetworkInterface networkInterface,
         CloudInstance instance) {
+        String subnetId = Strings.isNullOrEmpty(instance.getSubnetId()) ? gcpStackUtil.getSubnetId(network) : instance.getSubnetId();
         if (StringUtils.isNotEmpty(gcpStackUtil.getSharedProjectId(network))) {
             networkInterface.setNetwork(getNetworkUrl(gcpStackUtil.getSharedProjectId(network), gcpStackUtil.getCustomNetworkId(network)));
-            String subnetId = Strings.isNullOrEmpty(instance.getSubnetId()) ? gcpStackUtil.getSubnetId(network) : instance.getSubnetId();
             networkInterface.setSubnetwork(getSubnetUrl(gcpStackUtil.getSharedProjectId(network), region.value(), subnetId));
         } else {
-            networkInterface.setSubnetwork(getSubnetUrl(projectId, region.value(), instance.getSubnetId()));
+            networkInterface.setSubnetwork(getSubnetUrl(projectId, region.value(), subnetId));
         }
     }
 
