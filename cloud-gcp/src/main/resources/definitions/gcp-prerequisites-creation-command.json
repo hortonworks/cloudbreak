@@ -1,3 +1,5 @@
+gcloud init
+
 SERVICE_ACCOUNT_NAME=cdp-credential
 PROJECT_ID=$(gcloud config get-value project)
 
