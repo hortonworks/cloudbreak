@@ -20,18 +20,21 @@ public class StackScalingFlowContext extends StackContext {
 
     private final Set<String> hostNames;
 
+    private final boolean repair;
+
     public StackScalingFlowContext(FlowParameters flowParameters, Stack stack, CloudContext cloudContext, CloudCredential cloudCredential,
-            CloudStack cloudStack, String instanceGroupName, Set<String> instanceIds, Integer adjustment) {
-        this(flowParameters, stack, cloudContext, cloudCredential, cloudStack, instanceGroupName, instanceIds, adjustment, Collections.emptySet());
+            CloudStack cloudStack, String instanceGroupName, Set<String> instanceIds, Integer adjustment, boolean repair) {
+        this(flowParameters, stack, cloudContext, cloudCredential, cloudStack, instanceGroupName, instanceIds, adjustment, Collections.emptySet(), repair);
     }
 
     public StackScalingFlowContext(FlowParameters flowParameters, Stack stack, CloudContext cloudContext, CloudCredential cloudCredential,
-            CloudStack cloudStack, String instanceGroupName, Set<String> instanceIds, Integer adjustment, Set<String> hostNames) {
+            CloudStack cloudStack, String instanceGroupName, Set<String> instanceIds, Integer adjustment, Set<String> hostNames, boolean repair) {
         super(flowParameters, stack, cloudContext, cloudCredential, cloudStack);
         this.instanceGroupName = instanceGroupName;
         this.instanceIds = instanceIds;
         this.adjustment = adjustment;
         this.hostNames = hostNames;
+        this.repair = repair;
     }
 
     public Collection<String> getInstanceIds() {
@@ -49,4 +52,9 @@ public class StackScalingFlowContext extends StackContext {
     public Set<String> getHostNames() {
         return hostNames;
     }
+
+    public boolean isRepair() {
+        return repair;
+    }
+
 }
