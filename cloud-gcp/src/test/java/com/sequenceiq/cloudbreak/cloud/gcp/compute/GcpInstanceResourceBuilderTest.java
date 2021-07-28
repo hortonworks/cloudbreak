@@ -440,6 +440,33 @@ public class GcpInstanceResourceBuilderTest {
         verifyNoInteractions(addInstances);
     }
 
+    @Test
+    public void noSubnetInformationOnInstance() throws Exception {
+
+        // GIVEN
+        Group group = newGroupWithParams(ImmutableMap.of());
+        List<CloudResource> buildableResources = builder.create(context, group.getInstances().get(0), privateId, authenticatedContext, group, image);
+        context.addComputeResources(0L, buildableResources);
+        group.getInstances().get(0).setSubnetId(null);
+        when(gcpStackUtil.getSubnetId(any())).thenReturn("default");
+
+        // WHEN
+        when(compute.instances()).thenReturn(instances);
+        when(instances.insert(anyString(), anyString(), any(Instance.class))).thenReturn(insert);
+        when(insert.setPrettyPrint(anyBoolean())).thenReturn(insert);
+        when(insert.execute()).thenReturn(operation);
+        mockInstanceGroupAdd(group);
+
+        builder.build(context, group.getInstances().get(0), privateId, authenticatedContext, group, buildableResources, cloudStack);
+
+        // THEN
+        verify(compute).instances();
+        verify(instances).insert(anyString(), anyString(), instanceArg.capture());
+        assertEquals("https://www.googleapis.com/compute/v1/projects/projectId/regions/region/subnetworks/default",
+                instanceArg.getValue().getNetworkInterfaces().get(0).getSubnetwork());
+        assertNull(instanceArg.getValue().getHostname());
+    }
+
     public Group newGroupWithParams(Map<String, Object> params) {
         return newGroupWithParams(params, null);
     }

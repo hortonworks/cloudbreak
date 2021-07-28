@@ -16,8 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import reactor.bus.Event;
-
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -41,6 +39,8 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
+
+import reactor.bus.Event;
 
 @Component
 public class CreateLoadBalancerEntityHandler extends ExceptionCatcherEventHandler<CreateLoadBalancerEntityRequest> {
@@ -98,7 +98,7 @@ public class CreateLoadBalancerEntityHandler extends ExceptionCatcherEventHandle
             instanceGroups.forEach(ig -> ig.setTargetGroups(targetGroupPersistenceService.findByInstanceGroupId(ig.getId())));
             Set<LoadBalancer> existingLoadBalancers = loadBalancerPersistenceService.findByStackId(stack.getId());
             stack.setInstanceGroups(instanceGroups);
-            Set<LoadBalancer> newLoadBalancers = loadBalancerConfigService. createLoadBalancers(stack, environment, false);
+            Set<LoadBalancer> newLoadBalancers = loadBalancerConfigService.createLoadBalancers(stack, environment, false);
 
             Stack savedStack;
             if (doLoadBalancersAlreadyExist(existingLoadBalancers, newLoadBalancers)) {
