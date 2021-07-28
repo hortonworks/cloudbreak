@@ -108,8 +108,8 @@ public class FlowChainLogService {
         });
     }
 
-    public int purgeOrphanFLowChainLogs() {
-        return repository.purgeOrphanFLowChainLogs();
+    public int purgeOrphanFlowChainLogs() {
+        return repository.purgeOrphanFlowChainLogs();
     }
 
     public FlowChainLog save(FlowChainLog chainLog) {

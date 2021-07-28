@@ -44,12 +44,12 @@ public class ImageComponentUpdaterService {
     @Inject
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
-    public UpgradeImageInfo updateForUpgrade(String imageId, Long stackId) {
+    public UpgradeImageInfo updateForUpgrade(String targetImageId, Long stackId) {
         Stack stack = stackService.getById(stackId);
         try {
             restRequestThreadLocalService.setWorkspace(stack.getWorkspace());
 
-            UpgradeImageInfo upgradeImageInfo = upgradeImageInfoFactory.create(imageId, stackId);
+            UpgradeImageInfo upgradeImageInfo = upgradeImageInfoFactory.create(targetImageId, stackId);
             Set<Component> targetComponents = imageService.getComponents(
                     stack, upgradeImageInfo.getCurrentImage().getUserdata(), upgradeImageInfo.getTargetStatedImage(),
                     EnumSet.of(CDH_PRODUCT_DETAILS, CM_REPO_DETAILS)
@@ -59,7 +59,7 @@ public class ImageComponentUpdaterService {
             return upgradeImageInfo;
         } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {
             LOGGER.warn(String.format("Image was not found for stack %s", stack.getName()), e);
-            throw notFoundException("Image", imageId);
+            throw notFoundException("Image", targetImageId);
         }
     }
 }

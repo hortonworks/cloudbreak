@@ -6,6 +6,7 @@ import com.sequenceiq.flow.core.RestartAction;
 
 public enum DatalakeRecoveryBringupState implements FlowState {
     INIT_STATE,
+    RECOVERY_RESTORE_COMPONENTS_STATE,
     RECOVERY_SETUP_NEW_INSTANCES_STATE,
     RECOVERY_BRINGUP_FAILED_STATE,
     RECOVERY_BRINGUP_FINISHED_STATE,

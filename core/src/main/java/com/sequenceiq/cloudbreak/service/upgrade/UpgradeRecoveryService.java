@@ -24,10 +24,10 @@ public class UpgradeRecoveryService {
     @Inject
     private ReactorFlowManager flowManager;
 
-    public FlowIdentifier recoverFailedUpgrade(Long workspaceId, NameOrCrn stackNameOrCrn) {
+    public FlowIdentifier recoverCluster(Long workspaceId, NameOrCrn stackNameOrCrn) {
         Stack stack = stackService.getByNameOrCrnInWorkspace(stackNameOrCrn, workspaceId);
         MDCBuilder.buildMdcContext(stack);
-        LOGGER.debug("Upgrade recovery has been initiated for stack {}", stackNameOrCrn.getNameOrCrn());
+        LOGGER.debug("Recovery has been initiated for stack {}", stackNameOrCrn.getNameOrCrn());
         return flowManager.triggerDatalakeClusterRecovery(stack.getId());
     }
 }
