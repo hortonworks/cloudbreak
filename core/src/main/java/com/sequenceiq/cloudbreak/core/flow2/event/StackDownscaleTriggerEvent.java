@@ -25,6 +25,12 @@ public class StackDownscaleTriggerEvent extends StackScaleTriggerEvent {
         this.privateIds = privateIds;
     }
 
+    @Override
+    public StackDownscaleTriggerEvent setRepair() {
+        super.setRepair();
+        return this;
+    }
+
     public Set<Long> getPrivateIds() {
         return privateIds;
     }
