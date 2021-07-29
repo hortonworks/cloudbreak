@@ -144,7 +144,7 @@ public class EnvironmentTest extends AbstractMockTest {
                 .when(credentialTestClient.create())
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.create())
-                .when(environmentTestClient.getInternal())
+                .when(environmentTestClient.get())
                 .then(EnvironmentTest::checkEnvironmentCrnIsNotEmpty)
                 .validate();
     }
