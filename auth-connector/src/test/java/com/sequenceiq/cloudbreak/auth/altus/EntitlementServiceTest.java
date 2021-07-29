@@ -90,6 +90,9 @@ class EntitlementServiceTest {
                 {"CDP_CCM_V2", (EntitlementCheckFunction) EntitlementService::ccmV2Enabled, false},
                 {"CDP_CCM_V2", (EntitlementCheckFunction) EntitlementService::ccmV2Enabled, true},
 
+                {"CDP_CCM_V2_JUMPGATE", (EntitlementCheckFunction) EntitlementService::ccmV2JumpgateEnabled, false},
+                {"CDP_CCM_V2_JUMPGATE", (EntitlementCheckFunction) EntitlementService::ccmV2JumpgateEnabled, true},
+
                 {"CDP_AZURE_SINGLE_RESOURCE_GROUP", (EntitlementCheckFunction) EntitlementService::azureSingleResourceGroupDeploymentEnabled, false},
                 {"CDP_AZURE_SINGLE_RESOURCE_GROUP", (EntitlementCheckFunction) EntitlementService::azureSingleResourceGroupDeploymentEnabled, true},
 

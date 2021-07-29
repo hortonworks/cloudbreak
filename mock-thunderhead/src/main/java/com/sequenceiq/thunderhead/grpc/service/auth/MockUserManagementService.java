@@ -18,6 +18,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZUR
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_DATABASE_WIRE_ENCRYPTION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_GCP_DISK_ENCRYPTION_WITH_CMEK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CCM_V2;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CCM_V2_JUMPGATE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_IDENTITY_MAPPING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION_AWS;
@@ -302,6 +303,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.ccmv2.enable}")
     private boolean ccmV2Enabled;
+
+    @Value("${auth.mock.ccmv2jumpgate.enable}")
+    private boolean ccmV2JumpgateEnabled;
 
     @Value("${auth.mock.mediumdutysdx.enable}")
     private boolean mediumDutySdxEnabled;
@@ -678,6 +682,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (ccmV2Enabled) {
             builder.addEntitlements(createEntitlement(CDP_CCM_V2));
+        }
+        if (ccmV2JumpgateEnabled) {
+            builder.addEntitlements(createEntitlement(CDP_CCM_V2_JUMPGATE));
         }
         if (mediumDutySdxEnabled) {
             builder.addEntitlements(createEntitlement(CDP_MEDIUM_DUTY_SDX));

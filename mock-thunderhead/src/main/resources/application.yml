@@ -46,6 +46,7 @@ auth:
     database.wire.encryption.enable: true
     datahub.runtime.upgrade.enable: true
     ccmv2.enable: false
+    ccmv2jumpgate.enable: false
     environment.experience.deletion.enable: true
     endpointgateway.enable.azure: false
     endpointgateway.skip.validation: false
