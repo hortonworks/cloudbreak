@@ -7,15 +7,16 @@ set -o nounset
 set -o pipefail
 set -o xtrace
 
-if [[ $# -ne 5 && $# -ne 6 ]]; then
+if [[ $# -lt 5 || $# -gt 7 ]]; then
   echo "Invalid inputs provided"
-  echo "Script accepts 5 inputs:"
+  echo "Script accepts at least 5 and at most 7 inputs:"
   echo "  1. Object Storage Service url to retrieve backups."
   echo "  2. PostgreSQL host name."
   echo "  3. PostgreSQL port."
   echo "  4. PostgreSQL user name."
   echo "  5. Ranger admin group."
-  echo "  6. (optional) Log file location."
+  echo "  6. (optional) Name of the database to restore. If not given, will restore ranger and hive databases."
+  echo "  7. (optional) Log file location. Must be provided along with a database name."
   exit 1
 fi
 
@@ -24,7 +25,8 @@ HOST="$2"
 PORT="$3"
 USERNAME="$4"
 RANGERGROUP="$5"
-LOGFILE=${6:-/var/log/}/dl_postgres_restore.log
+DATABASENAME="${6-}"
+LOGFILE=${7:-/var/log}/dl_postgres_restore.log
 echo "Logs at ${LOGFILE}"
 
 BACKUPS_DIR="/var/tmp/postgres_restore_staging"
@@ -138,8 +140,14 @@ run_restore() {
 
   hdfs dfs -copyToLocal -f "$BACKUP_LOCATION" "$BACKUPS_DIR" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || errorExit "Could not copy backups from ${BACKUP_LOCATION}."
 
-  restore_db_from_local "hive"
-  restore_db_from_local "ranger"
+  if [[ -z "$DATABASENAME" ]]; then
+    echo "No database name provided. Will restore hive and ranger databases."
+    restore_db_from_local "hive"
+    restore_db_from_local "ranger"
+  else
+    echo "Restoring ${DATABASENAME}."
+    restore_db_from_local "${DATABASENAME}"
+  fi
 
   rm -rfv "$BACKUPS_DIR" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2)
 }
