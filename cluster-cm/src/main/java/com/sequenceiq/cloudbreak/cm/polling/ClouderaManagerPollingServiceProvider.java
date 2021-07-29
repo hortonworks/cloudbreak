@@ -251,7 +251,7 @@ public class ClouderaManagerPollingServiceProvider {
         ClouderaManagerSyncCommandPollerObject pollerObject = new ClouderaManagerSyncCommandPollerObject(stack, apiClient, recentCommandId, commandName);
         ClouderaManagerSyncApiCommandIdCheckerTask listenerTask =
                 new ClouderaManagerSyncApiCommandIdCheckerTask(clouderaManagerApiPojoFactory, syncApiCommandRetriever);
-        return clouderaManagerCommandPollerObjectPollingService.pollWithAbsoluteTimeoutSingleFailure(
+        return clouderaManagerCommandPollerObjectPollingService.pollWithAbsoluteTimeout(
                 listenerTask,
                 pollerObject,
                 POLL_INTERVAL,
@@ -261,7 +261,7 @@ public class ClouderaManagerPollingServiceProvider {
     private PollingResult pollCommandListWithTimeListener(Stack stack, ApiClient apiClient, List<BigDecimal> commandIds, long maximumWaitTimeInSeconds,
             AbstractClouderaManagerCommandListCheckerTask<ClouderaManagerCommandListPollerObject> listenerTask) {
         ClouderaManagerCommandListPollerObject clouderaManagerCommandPollerObject = new ClouderaManagerCommandListPollerObject(stack, apiClient, commandIds);
-        return clouderaManagerCommandListPollerObjectPollingService.pollWithAbsoluteTimeoutSingleFailure(
+        return clouderaManagerCommandListPollerObjectPollingService.pollWithAbsoluteTimeout(
                 listenerTask,
                 clouderaManagerCommandPollerObject,
                 POLL_INTERVAL,
@@ -271,7 +271,7 @@ public class ClouderaManagerPollingServiceProvider {
     private PollingResult pollCommandWithTimeListener(Stack stack, ApiClient apiClient, BigDecimal commandId, long maximumWaitTimeInSeconds,
             AbstractClouderaManagerCommandCheckerTask<ClouderaManagerCommandPollerObject> listenerTask) {
         ClouderaManagerCommandPollerObject clouderaManagerCommandPollerObject = new ClouderaManagerCommandPollerObject(stack, apiClient, commandId);
-        return clouderaManagerCommandPollerObjectPollingService.pollWithAbsoluteTimeoutSingleFailure(
+        return clouderaManagerCommandPollerObjectPollingService.pollWithAbsoluteTimeout(
                 listenerTask,
                 clouderaManagerCommandPollerObject,
                 POLL_INTERVAL,
@@ -281,7 +281,7 @@ public class ClouderaManagerPollingServiceProvider {
     private PollingResult pollCommandWithAttemptListener(Stack stack, ApiClient apiClient, BigDecimal commandId, int numAttempts,
             AbstractClouderaManagerCommandCheckerTask<ClouderaManagerCommandPollerObject> listenerTask) {
         ClouderaManagerCommandPollerObject clouderaManagerCommandPollerObject = new ClouderaManagerCommandPollerObject(stack, apiClient, commandId);
-        return clouderaManagerCommandPollerObjectPollingService.pollWithAttemptSingleFailure(
+        return clouderaManagerCommandPollerObjectPollingService.pollWithAttempt(
                 listenerTask,
                 clouderaManagerCommandPollerObject,
                 POLL_INTERVAL,
