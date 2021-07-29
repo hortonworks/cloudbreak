@@ -15,9 +15,12 @@ import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCA
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_VALIDATE_INSTANCES_FINISHED_EVENT;
 import static java.lang.String.format;
 
+import com.sequenceiq.freeipa.entity.FreeIpa;
+import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -130,6 +133,9 @@ public class FreeIpaUpscaleActions {
     @Inject
     private PrivateIdProvider privateIdProvider;
 
+    @Inject
+    private FreeIpaService freeIpaService;
+
     @Bean(name = "UPSCALE_STARTING_STATE")
     public Action<?, ?> startingAction() {
         return new AbstractUpscaleAction<>(UpscaleEvent.class) {
@@ -185,18 +191,27 @@ public class FreeIpaUpscaleActions {
             }
 
             private List<CloudInstance> buildNewInstances(Stack stack, int instanceCountByGroup) {
+                FreeIpa freeIpa = freeIpaService.findByStackId(stack.getId());
+                String hostname = freeIpa.getHostname();
+                String domain = freeIpa.getDomain();
                 long privateId = privateIdProvider.getFirstValidPrivateId(stack.getInstanceGroups());
                 List<CloudInstance> newInstances = new ArrayList<>();
                 for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
+                    Set<InstanceMetaData> instanceMetaDataSet = new LinkedHashSet<>();
                     int remainingInstances = instanceCountByGroup - instanceGroup.getNotDeletedInstanceMetaDataSet().size();
                     for (long i = 0; i < remainingInstances; ++i) {
-                        newInstances.add(cloudStackConverter.buildInstance(stack, null, instanceGroup,
-                                stack.getStackAuthentication(), privateId++, InstanceStatus.CREATE_REQUESTED));
+                        long nextId = privateId++;
+                        InstanceMetaData instanceMetaData = new InstanceMetaData();
+                        instanceMetaData.setInstanceGroup(instanceGroup);
+                        instanceMetaData.setDiscoveryFQDN(hostname + format("%d.", nextId) + domain);
+                        instanceMetaDataSet.add(instanceMetaData);
+                        newInstances.add(cloudStackConverter.buildInstance(stack, instanceMetaData, instanceGroup,
+                                stack.getStackAuthentication(), nextId, InstanceStatus.CREATE_REQUESTED));
                     }
+                    instanceGroup.setInstanceMetaData(instanceMetaDataSet);
                 }
                 return newInstances;
             }
-
         };
     }
 
