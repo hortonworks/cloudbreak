@@ -51,8 +51,6 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
-import com.sequenceiq.cloudbreak.common.type.ClusterManagerState;
-import com.sequenceiq.cloudbreak.common.type.ClusterManagerState.ClusterManagerStatus;
 import com.sequenceiq.cloudbreak.converter.scheduler.StatusToPollGroupConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -333,12 +331,11 @@ public class ClusterService {
             return stack.getCluster();
         } else {
             ExtendedHostStatuses extendedHostStatuses = connector.clusterStatusService().getExtendedHostStatuses();
-            updateClusterCertExpirationState(stack.getCluster(), extendedHostStatuses.isHostCertExpiring());
-            Map<HostName, ClusterManagerState> hostStatuses = extendedHostStatuses.getHostHealth();
+            updateClusterCertExpirationState(stack.getCluster(), extendedHostStatuses.isAnyCertExpiring());
             try {
                 return transactionService.required(() -> {
                     Set<InstanceMetaData> notTerminatedInstanceMetaDatas = instanceMetaDataService.findNotTerminatedForStack(stackId);
-                    List<InstanceMetaData> updatedInstanceMetaData = updateInstanceStatuses(notTerminatedInstanceMetaDatas, hostStatuses);
+                    List<InstanceMetaData> updatedInstanceMetaData = updateInstanceStatuses(notTerminatedInstanceMetaDatas, extendedHostStatuses);
                     instanceMetaDataService.saveAll(updatedInstanceMetaData);
                     fireHostStatusUpdateNotification(stack, updatedInstanceMetaData);
                     return stack.getCluster();
@@ -365,17 +362,16 @@ public class ClusterService {
         });
     }
 
-    private List<InstanceMetaData> updateInstanceStatuses(Set<InstanceMetaData> notTerminatedInstanceMetaDatas, Map<HostName,
-            ClusterManagerState> hostStatuses) {
+    private List<InstanceMetaData> updateInstanceStatuses(Set<InstanceMetaData> notTerminatedInstanceMetaDatas,
+            ExtendedHostStatuses extendedHostStatuses) {
         return notTerminatedInstanceMetaDatas.stream()
                 .filter(instanceMetaData -> SERVICES_RUNNING.equals(instanceMetaData.getInstanceStatus()))
                 .map(instanceMetaData -> {
-                    ClusterManagerState clusterManagerState = hostStatuses.get(hostName(instanceMetaData.getDiscoveryFQDN()));
-                    if (clusterManagerState != null) {
-                        InstanceStatus newState = ClusterManagerStatus.HEALTHY.equals(clusterManagerState.getClusterManagerStatus()) ?
-                                SERVICES_HEALTHY : SERVICES_UNHEALTHY;
+                    HostName hostName = hostName(instanceMetaData.getDiscoveryFQDN());
+                    if (extendedHostStatuses.getHostsHealth().containsKey(hostName)) {
+                        InstanceStatus newState = extendedHostStatuses.isHostHealthy(hostName) ? SERVICES_HEALTHY : SERVICES_UNHEALTHY;
                         instanceMetaData.setInstanceStatus(newState);
-                        instanceMetaData.setStatusReason(clusterManagerState.getStatusReason());
+                        instanceMetaData.setStatusReason(extendedHostStatuses.statusReasonForHost(hostName));
                     }
                     return instanceMetaData;
                 }).collect(Collectors.toList());

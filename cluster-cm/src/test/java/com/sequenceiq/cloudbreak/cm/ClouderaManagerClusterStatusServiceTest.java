@@ -6,20 +6,15 @@ import static com.sequenceiq.cloudbreak.cm.ClouderaManagerClusterStatusService.F
 import static com.sequenceiq.cloudbreak.cm.ClouderaManagerClusterStatusService.HOST_AGENT_CERTIFICATE_EXPIRY;
 import static com.sequenceiq.cloudbreak.cm.ClouderaManagerClusterStatusService.HOST_SCM_HEALTH;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -45,17 +40,13 @@ import com.cloudera.api.swagger.model.ApiService;
 import com.cloudera.api.swagger.model.ApiServiceList;
 import com.cloudera.api.swagger.model.ApiServiceState;
 import com.cloudera.api.swagger.model.ApiVersionInfo;
-import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
-import com.sequenceiq.cloudbreak.cloud.model.HostName;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatus;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatusResult;
 import com.sequenceiq.cloudbreak.cluster.status.ExtendedHostStatuses;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
-import com.sequenceiq.cloudbreak.common.type.ClusterManagerState;
-import com.sequenceiq.cloudbreak.common.type.ClusterManagerState.ClusterManagerStatus;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 
@@ -228,13 +219,10 @@ public class ClouderaManagerClusterStatusServiceTest {
                 new ApiHost().hostname("host6").addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.DISABLED))
         );
 
-        Map<HostName, ClusterManagerState.ClusterManagerStatus> expected = ImmutableMap.of(
-                hostName("host1"), ClusterManagerState.ClusterManagerStatus.HEALTHY,
-                hostName("host2"), ClusterManagerState.ClusterManagerStatus.HEALTHY,
-                hostName("host3"), ClusterManagerState.ClusterManagerStatus.UNHEALTHY
-        );
-        Map<HostName, ClusterManagerState.ClusterManagerStatus> actual = new TreeMap<>(subject.getHostStatuses());
-        assertEquals(expected, actual);
+        ExtendedHostStatuses extendedHostStatuses = subject.getExtendedHostStatuses();
+        assertFalse(extendedHostStatuses.isHostHealthy(hostName("host3")));
+        assertTrue(extendedHostStatuses.isHostHealthy(hostName("host1")));
+        assertTrue(extendedHostStatuses.isHostHealthy(hostName("host2")));
     }
 
     @Test
@@ -248,27 +236,19 @@ public class ClouderaManagerClusterStatusServiceTest {
                         .addHealthChecksItem(new ApiHealthCheck().name(HOST_AGENT_CERTIFICATE_EXPIRY).summary(ApiHealthSummary.CONCERNING)
                                 .explanation("in 30 days")),
                 new ApiHost().hostname("host3")
-                        .addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.BAD).explanation("explanation"))
+                        .addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.BAD).explanation("explanation."))
                         .addHealthChecksItem(new ApiHealthCheck().name(HOST_AGENT_CERTIFICATE_EXPIRY).summary(ApiHealthSummary.BAD).explanation("in 2 days")),
                 new ApiHost().hostname("host4").addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.NOT_AVAILABLE)),
                 new ApiHost().hostname("host5").addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.HISTORY_NOT_AVAILABLE)),
                 new ApiHost().hostname("host6").addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.DISABLED))
         );
 
-        Map<HostName, ClusterManagerState.ClusterManagerStatus> expected = ImmutableMap.of(
-                hostName("host1"), ClusterManagerState.ClusterManagerStatus.HEALTHY,
-                hostName("host2"), ClusterManagerState.ClusterManagerStatus.HEALTHY,
-                hostName("host3"), ClusterManagerState.ClusterManagerStatus.UNHEALTHY
-        );
-
         ExtendedHostStatuses extendedHostStatuses = subject.getExtendedHostStatuses();
-        Map<HostName, ClusterManagerState> extendedStateMap = extendedHostStatuses.getHostHealth();
-        Map<HostName, ClusterManagerState.ClusterManagerStatus> actual = new TreeMap<>(extendedStateMap.entrySet().stream()
-                .map(e -> Pair.of(e.getKey(), e.getValue().getClusterManagerStatus()))
-                .collect(Collectors.toMap(Pair::getLeft, Pair::getRight)));
-        assertEquals(expected, actual);
-        assertEquals("HOST_SCM_HEALTH: BAD. Reason: explanation. ", extendedStateMap.get(hostName("host3")).getStatusReason());
-        assertTrue(extendedHostStatuses.isHostCertExpiring());
+        assertEquals("explanation.", extendedHostStatuses.statusReasonForHost(hostName("host3")));
+        assertTrue(extendedHostStatuses.isAnyCertExpiring());
+        assertTrue(extendedHostStatuses.isHostHealthy(hostName("host1")));
+        assertTrue(extendedHostStatuses.isHostHealthy(hostName("host2")));
+        assertFalse(extendedHostStatuses.isHostHealthy(hostName("host3")));
     }
 
     @Test
@@ -284,14 +264,9 @@ public class ClouderaManagerClusterStatusServiceTest {
         );
 
         ExtendedHostStatuses extendedHostStatuses = subject.getExtendedHostStatuses();
-        Map<HostName, ClusterManagerState> extendedStateMap = extendedHostStatuses.getHostHealth();
-
-        Map<HostName, ClusterManagerState> expected = Map.of(hostName("host1"), new ClusterManagerState(ClusterManagerStatus.HEALTHY, null),
-                hostName("host2"), new ClusterManagerState(ClusterManagerStatus.HEALTHY, null));
-
-        assertEquals(expected.keySet(), extendedStateMap.keySet());
-        extendedStateMap.values().forEach(state -> assertEquals(ClusterManagerStatus.HEALTHY, state.getClusterManagerStatus()));
-        assertTrue(extendedHostStatuses.isHostCertExpiring());
+        assertTrue(extendedHostStatuses.isHostHealthy(hostName("host1")));
+        assertTrue(extendedHostStatuses.isHostHealthy(hostName("host2")));
+        assertTrue(extendedHostStatuses.isAnyCertExpiring());
     }
 
     @Test
@@ -311,17 +286,14 @@ public class ClouderaManagerClusterStatusServiceTest {
         );
 
         ExtendedHostStatuses extendedHostStatuses = subject.getExtendedHostStatuses();
-        Map<HostName, ClusterManagerState> extendedStateMap = extendedHostStatuses.getHostHealth();
 
-        Map<HostName, ClusterManagerState> expected = Map.of(
-                hostName("host1"), new ClusterManagerState(ClusterManagerStatus.UNHEALTHY,
-                        "HOST_SCM_HEALTH: BAD. Reason: explanation. The following service are in bad health: badservice"),
-                hostName("host2"), new ClusterManagerState(ClusterManagerStatus.UNHEALTHY,
-                        "The following service are in bad health: badservice2,badservice3"));
-
-        assertEquals(expected.keySet(), extendedStateMap.keySet());
-        extendedStateMap.values().forEach(state -> assertEquals(ClusterManagerStatus.UNHEALTHY, state.getClusterManagerStatus()));
-        assertFalse(extendedHostStatuses.isHostCertExpiring());
+        assertFalse(extendedHostStatuses.isAnyCertExpiring());
+        assertFalse(extendedHostStatuses.isHostHealthy(hostName("host1")));
+        assertFalse(extendedHostStatuses.isHostHealthy(hostName("host2")));
+        assertEquals("explanation. The following services are in bad health: badservice.",
+                extendedHostStatuses.statusReasonForHost(hostName("host1")));
+        assertEquals("The following services are in bad health: badservice2, badservice3.",
+                extendedHostStatuses.statusReasonForHost(hostName("host2")));
     }
 
     @Test
@@ -337,14 +309,10 @@ public class ClouderaManagerClusterStatusServiceTest {
         );
 
         ExtendedHostStatuses extendedHostStatuses = subject.getExtendedHostStatuses();
-        Map<HostName, ClusterManagerState> extendedStateMap = extendedHostStatuses.getHostHealth();
 
-        Map<HostName, ClusterManagerState> expected = Map.of(hostName("host1"), new ClusterManagerState(ClusterManagerStatus.HEALTHY, null),
-                hostName("host2"), new ClusterManagerState(ClusterManagerStatus.HEALTHY, null));
-
-        assertEquals(expected.keySet(), extendedStateMap.keySet());
-        extendedStateMap.values().forEach(state -> assertEquals(ClusterManagerStatus.HEALTHY, state.getClusterManagerStatus()));
-        assertFalse(extendedHostStatuses.isHostCertExpiring());
+        assertFalse(extendedHostStatuses.isAnyCertExpiring());
+        assertTrue(extendedHostStatuses.isHostHealthy(hostName("host1")));
+        assertTrue(extendedHostStatuses.isHostHealthy(hostName("host2")));
     }
 
     @Test
@@ -356,22 +324,21 @@ public class ClouderaManagerClusterStatusServiceTest {
                         .addHealthChecksItem(new ApiHealthCheck().name("another").summary(ApiHealthSummary.BAD))
         );
 
-        Map<HostName, ClusterManagerStatus> expected = Collections.singletonMap(hostName("host"), ClusterManagerStatus.HEALTHY);
-        assertEquals(expected, subject.getHostStatuses());
+        assertTrue(subject.getExtendedHostStatuses().isHostHealthy(hostName("host")));
     }
 
     @Test
-    public void ignoresHostsWithoutHealthChecks() throws ApiException {
+    public void hostWithoutHealthCheckIsIgnored() throws ApiException {
         hostsAre(new ApiHost().hostname("hostY"));
 
-        assertEquals(Collections.emptyMap(), subject.getHostStatuses());
+        assertFalse(subject.getExtendedHostStatuses().getHostsHealth().containsKey(hostName("hostY")));
     }
 
     @Test
-    public void ignoresHostsWithoutAppropriateHealthCheck() throws ApiException {
-        hostsAre(new ApiHost().hostname("hostY").addHealthChecksItem(new ApiHealthCheck().name("fake_check").summary(ApiHealthSummary.GOOD)));
+    public void hostWithoutAppropriateHealthCheckIsIgnored() throws ApiException {
+        hostsAre(new ApiHost().hostname("hostY").addHealthChecksItem(new ApiHealthCheck().name("fake_check").summary(ApiHealthSummary.BAD)));
 
-        assertEquals(Collections.emptyMap(), subject.getHostStatuses());
+        assertFalse(subject.getExtendedHostStatuses().getHostsHealth().containsKey(hostName("hostY")));
     }
 
     private ApiRoleRef roleRef(String serviceName, ApiHealthSummary apiHealthSummary) {

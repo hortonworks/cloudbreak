@@ -7,7 +7,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_FAI
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOPPED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.WAIT_FOR_SYNC;
 import static com.sequenceiq.cloudbreak.cloud.model.CloudInstance.INSTANCE_NAME;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_FAILED_NODES_REPORTED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_FAILED_NODES_REPORTED_CLUSTER_EVENT;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_SYNC_INSTANCE_DELETED_BY_PROVIDER_CBMETADATA;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_SYNC_INSTANCE_DELETED_CBMETADATA;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_SYNC_INSTANCE_STATE_SYNCED;
@@ -222,7 +222,7 @@ public class StackSyncService {
                 LOGGER.debug("Instance '{}' is reported as deleted on the cloud provider, setting its state to {}.",
                         instance.getInstanceId(), state.name());
                 eventService.fireCloudbreakEvent(stack.getId(), "RECOVERY",
-                        CLUSTER_FAILED_NODES_REPORTED,
+                        CLUSTER_FAILED_NODES_REPORTED_CLUSTER_EVENT,
                         Collections.singletonList(instance.getDiscoveryFQDN()));
                 if (InstanceSyncState.DELETED_BY_PROVIDER.equals(state)) {
                     updateMetaDataToDeletedByProvider(stack, instance);

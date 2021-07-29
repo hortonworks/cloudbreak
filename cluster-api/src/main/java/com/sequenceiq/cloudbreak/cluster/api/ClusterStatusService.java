@@ -5,7 +5,6 @@ import java.util.Map;
 import com.sequenceiq.cloudbreak.cloud.model.HostName;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatusResult;
 import com.sequenceiq.cloudbreak.cluster.status.ExtendedHostStatuses;
-import com.sequenceiq.cloudbreak.common.type.ClusterManagerState;
 
 public interface ClusterStatusService {
 
@@ -13,11 +12,6 @@ public interface ClusterStatusService {
      * Determine cluster-level status based on service/component states.
      */
     ClusterStatusResult getStatus(boolean blueprintPresent);
-
-    /**
-     * Determine state of all hosts known by the Cluster Manager.
-     */
-    Map<HostName, ClusterManagerState.ClusterManagerStatus> getHostStatuses();
 
     ExtendedHostStatuses getExtendedHostStatuses();
 

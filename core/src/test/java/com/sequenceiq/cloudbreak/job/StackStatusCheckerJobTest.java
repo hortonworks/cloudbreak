@@ -14,6 +14,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.EnumSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.After;
@@ -37,8 +38,9 @@ import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterStatusService;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatusResult;
 import com.sequenceiq.cloudbreak.cluster.status.ExtendedHostStatuses;
-import com.sequenceiq.cloudbreak.common.type.ClusterManagerState;
-import com.sequenceiq.cloudbreak.common.type.ClusterManagerState.ClusterManagerStatus;
+import com.sequenceiq.cloudbreak.common.type.HealthCheck;
+import com.sequenceiq.cloudbreak.common.type.HealthCheckResult;
+import com.sequenceiq.cloudbreak.common.type.HealthCheckType;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
@@ -171,7 +173,7 @@ public class StackStatusCheckerJobTest {
         setupForCM();
         underTest.executeTracedJob(jobExecutionContext);
 
-        verify(clusterOperationService, times(0)).reportHealthChange(anyString(), anySet(), anySet());
+        verify(clusterOperationService, times(0)).reportHealthChange(anyString(), any(), anySet());
         verify(stackInstanceStatusChecker).queryInstanceStatuses(eq(stack), any());
     }
 
@@ -182,7 +184,7 @@ public class StackStatusCheckerJobTest {
         when(clusterApi.clusterStatusService()).thenReturn(clusterStatusService);
         underTest.executeTracedJob(jobExecutionContext);
 
-        verify(clusterOperationService, times(1)).reportHealthChange(any(), anySet(), anySet());
+        verify(clusterOperationService, times(1)).reportHealthChange(any(), any(), anySet());
         verify(stackInstanceStatusChecker).queryInstanceStatuses(eq(stack), any());
         verify(clusterService, times(1)).updateClusterCertExpirationState(stack.getCluster(), true);
     }
@@ -208,8 +210,9 @@ public class StackStatusCheckerJobTest {
         setStackStatus(DetailedStackStatus.AVAILABLE);
         when(clusterApi.clusterStatusService()).thenReturn(clusterStatusService);
         when(clusterStatusService.isClusterManagerRunningQuickCheck()).thenReturn(true);
-        ClusterManagerState clusterManagerState = new ClusterManagerState(ClusterManagerStatus.HEALTHY, null);
-        ExtendedHostStatuses extendedHostStatuses = new ExtendedHostStatuses(Map.of(HostName.hostName("host1"), clusterManagerState), true);
+        Set<HealthCheck> healthChecks = Sets.newHashSet(new HealthCheck(HealthCheckType.HOST, HealthCheckResult.HEALTHY, Optional.empty()),
+                new HealthCheck(HealthCheckType.CERT, HealthCheckResult.UNHEALTHY, Optional.empty()));
+        ExtendedHostStatuses extendedHostStatuses = new ExtendedHostStatuses(Map.of(HostName.hostName("host1"), healthChecks));
         when(clusterStatusService.getExtendedHostStatuses()).thenReturn(extendedHostStatuses);
         when(instanceMetaDataService.findNotTerminatedForStack(anyLong())).thenReturn(Set.of(instanceMetaData));
         when(instanceMetaData.getInstanceStatus()).thenReturn(InstanceStatus.SERVICES_HEALTHY);
