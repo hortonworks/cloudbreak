@@ -57,6 +57,7 @@ public class InstanceMetaDataService {
     }
 
     public Stack saveInstanceAndGetUpdatedStack(Stack stack, List<CloudInstance> cloudInstances, boolean save, Set<String> hostNames) {
+        LOGGER.info("Get updated stack with instances: {} and hostnames: {} and save: ({})", cloudInstances, hostNames, save);
         Iterator<String> hostNameIterator = hostNames.iterator();
         for (CloudInstance cloudInstance : cloudInstances) {
             InstanceGroup instanceGroup = getInstanceGroup(stack.getInstanceGroups(), cloudInstance.getTemplate().getGroupName());

@@ -314,12 +314,14 @@ public class SaltOrchestrator implements HostOrchestrator {
     @Override
     public void bootstrapNewNodes(List<GatewayConfig> allGatewayConfigs, Set<Node> targets, Set<Node> allNodes, byte[] stateConfigZip, BootstrapParams params,
             ExitCriteriaModel exitModel) throws CloudbreakOrchestratorException {
+        LOGGER.info("Bootstrap new nodes: {}", targets);
         GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(allGatewayConfigs);
         Set<String> gatewayTargets = allGatewayConfigs.stream().filter(gc -> targets.stream().anyMatch(n -> gc.getPrivateAddress().equals(n.getPrivateIp())))
                 .map(GatewayConfig::getPrivateAddress).collect(Collectors.toSet());
         List<SaltConnector> saltConnectors = saltService.createSaltConnector(allGatewayConfigs);
         try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
             if (!gatewayTargets.isEmpty()) {
+                LOGGER.info("Gateway targets are not empty, upload salt config: {}", gatewayTargets);
                 uploadSaltConfig(sc, gatewayTargets, stateConfigZip, exitModel);
                 params.setRestartNeeded(true);
             }

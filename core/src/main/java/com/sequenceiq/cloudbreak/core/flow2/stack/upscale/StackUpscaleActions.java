@@ -189,13 +189,15 @@ public class StackUpscaleActions {
             protected Selectable createRequest(StackScalingFlowContext context) {
                 List<CloudResource> cloudResources = cloudResourceConverter.convert(context.getStack().getResources());
                 List<CloudInstance> allKnownInstances = cloudStackConverter.buildInstances(context.getStack());
-                Set<String> instanceMetaData = instanceMetaDataService.unusedInstancesInInstanceGroupByName(context.getStack().getId(),
+                LOGGER.info("All known instances: {}", allKnownInstances);
+                Set<String> unusedInstancesForGroup = instanceMetaDataService.unusedInstancesInInstanceGroupByName(context.getStack().getId(),
                         context.getInstanceGroupName()).stream()
                         .map(InstanceMetaData::getInstanceId)
                         .collect(Collectors.toSet());
+                LOGGER.info("Unused instances for group: {}", unusedInstancesForGroup);
                 List<CloudInstance> newCloudInstances = allKnownInstances.stream()
                         .filter(cloudInstance -> InstanceStatus.CREATE_REQUESTED.equals(cloudInstance.getTemplate().getStatus())
-                                || instanceMetaData.contains(cloudInstance.getInstanceId()))
+                                || unusedInstancesForGroup.contains(cloudInstance.getInstanceId()))
                         .collect(Collectors.toList());
                 return new CollectMetadataRequest(context.getCloudContext(), context.getCloudCredential(), cloudResources, newCloudInstances, allKnownInstances);
             }
@@ -213,12 +215,14 @@ public class StackUpscaleActions {
                 InstanceGroup ig = instanceGroupService.findOneWithInstanceMetadataByGroupNameInStack(payload.getResourceId(), context.getInstanceGroupName())
                         .orElseThrow(NotFoundException.notFound("instanceGroup", context.getInstanceGroupName()));
                 if (InstanceGroupType.GATEWAY == ig.getInstanceGroupType()) {
+                    LOGGER.info("Gateway type instance group");
                     Stack stack = stackService.getByIdWithListsInTransaction(context.getStack().getId());
                     InstanceMetaData gatewayMetaData = stack.getPrimaryGatewayInstance();
-                    if (null == gatewayMetaData && isRepair(variables)) {
+                    if (null == gatewayMetaData) {
                         throw new CloudbreakServiceException("Could not get gateway instance metadata from the cloud provider.");
                     }
                     CloudInstance gatewayInstance = metadataConverter.convert(gatewayMetaData, stack.getEnvironmentCrn(), stack.getStackAuthentication());
+                    LOGGER.info("Send GetSSHFingerprintsRequest because we need to collect SSH fingerprints");
                     Selectable sshFingerPrintReq = new GetSSHFingerprintsRequest<GetSSHFingerprintsResult>(context.getCloudContext(),
                             context.getCloudCredential(), gatewayInstance);
                     sendEvent(context, sshFingerPrintReq);

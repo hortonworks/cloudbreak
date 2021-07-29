@@ -77,6 +77,7 @@ public class HostMetadataSetup {
 
     private void updateWithHostData(Stack stack, Collection<InstanceMetaData> metadataToUpdate) {
         try {
+            LOGGER.info("Update metadatas: {}", metadataToUpdate);
             List<String> privateIps = metadataToUpdate.stream()
                     .filter(instanceMetaData -> InstanceStatus.CREATED.equals(instanceMetaData.getInstanceStatus()))
                     .map(InstanceMetaData::getPrivateIp)

@@ -126,6 +126,7 @@ public class MetadataSetupService {
             Optional<InstanceMetaData> terminatedPrimaryGwWhichShouldBeRestored = Optional.empty();
             if (!primaryIgSelected) {
                 terminatedPrimaryGwWhichShouldBeRestored = instanceMetaDataService.getLastTerminatedPrimaryGatewayInstanceMetadata(stack.getId());
+                LOGGER.info("Terminated primary GW which should be restored: {}", terminatedPrimaryGwWhichShouldBeRestored);
             }
 
             for (CloudVmMetaDataStatus cloudVmMetaDataStatus : cloudVmMetaDataStatusList) {
@@ -193,12 +194,14 @@ public class MetadataSetupService {
     }
 
     private void setupFromCloudInstance(CloudInstance cloudInstance, InstanceMetaData instanceMetaDataEntry) {
+        LOGGER.debug("Setup InstanceMetaData {}, from CloudInstance {}", instanceMetaDataEntry, cloudInstance);
         instanceMetaDataEntry.setSubnetId(cloudInstance.getSubnetId());
         instanceMetaDataEntry.setAvailabilityZone(cloudInstance.getAvailabilityZone());
         instanceMetaDataEntry.setInstanceName(cloudInstance.getStringParameter(CloudInstance.INSTANCE_NAME));
     }
 
     private void setupFromCloudInstanceMetadata(CloudInstanceMetaData md, InstanceMetaData instanceMetaDataEntry) {
+        LOGGER.debug("Setup InstanceMetaData {}, from CloudInstanceMetaData {}", instanceMetaDataEntry, md);
         instanceMetaDataEntry.setPrivateIp(md.getPrivateIp());
         instanceMetaDataEntry.setPublicIp(md.getPublicIp());
         instanceMetaDataEntry.setSshPort(md.getSshPort());
