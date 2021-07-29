@@ -20,7 +20,7 @@ public final class MonitorUpdateRate {
     /**
      * Time update rate in ms, aligned to the cron expression.
      */
-    public static final long CRON_UPDATE_RATE_IN_MILLIS = 10_000L;
+    public static final long CRON_UPDATE_RATE_IN_MILLIS = 30_000L;
 
     /**
      * Every 10 seconds.
