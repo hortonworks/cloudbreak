@@ -25,7 +25,9 @@ import org.springframework.stereotype.Service;
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Joiner;
 import com.sequenceiq.cloudbreak.altus.AltusDatabusConfiguration;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.client.RPCResponse;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
@@ -165,43 +167,59 @@ public class DiagnosticsFlowService {
         }
         try {
             Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-            String resourceCrn = stack.getResourceCrn();
-            String accountId = Crn.safeFromString(resourceCrn).getAccountId();
-            reportNetworkCheckUsage(resourceCrn, accountId, Value.CLOUDERA_ARCHIVE, networkDetailsList,
+            UsageProto.CDPEnvironmentsEnvironmentType.Value cloudPlatformEnum =
+                    UsageProto.CDPEnvironmentsEnvironmentType.Value.UNSET;
+            String cloudPlatform = stack.getCloudPlatform();
+            if (cloudPlatform != null) {
+                try {
+                    cloudPlatformEnum = UsageProto.CDPEnvironmentsEnvironmentType.Value.valueOf(cloudPlatform.toUpperCase());
+                } catch (IllegalArgumentException e) {
+                    // Do not set the cloud platform.
+                }
+            }
+            reportNetworkCheckUsage(stack, cloudPlatformEnum, Value.CLOUDERA_ARCHIVE, networkDetailsList,
                     NodeStatusProto.NetworkDetails::getArchiveClouderaComAccessible);
-            reportNetworkCheckUsage(resourceCrn, accountId, Value.DATABUS, networkDetailsList,
-                    NodeStatusProto.NetworkDetails::getDatabusAccessible);
-            reportNetworkCheckUsage(resourceCrn, accountId, Value.DATABUS_S3, networkDetailsList,
-                    NodeStatusProto.NetworkDetails::getDatabusS3Accessible);
-            reportNetworkCheckUsage(resourceCrn, accountId, Value.S3, networkDetailsList, NodeStatusProto.NetworkDetails::getS3Accessible);
-            reportNetworkCheckUsage(resourceCrn, accountId, Value.STS, networkDetailsList, NodeStatusProto.NetworkDetails::getStsAccessible);
-            reportNetworkCheckUsage(resourceCrn, accountId, Value.ADLSV2, networkDetailsList, NodeStatusProto.NetworkDetails::getAdlsV2Accessible);
-            reportNetworkCheckUsage(resourceCrn, accountId, Value.AZURE_MGMT, networkDetailsList,
+            reportNetworkCheckUsage(stack, cloudPlatformEnum, Value.DATABUS, networkDetailsList, NodeStatusProto.NetworkDetails::getDatabusAccessible);
+            reportNetworkCheckUsage(stack, cloudPlatformEnum, Value.DATABUS_S3, networkDetailsList, NodeStatusProto.NetworkDetails::getDatabusS3Accessible);
+            reportNetworkCheckUsage(stack, cloudPlatformEnum, Value.S3, networkDetailsList, NodeStatusProto.NetworkDetails::getS3Accessible);
+            reportNetworkCheckUsage(stack, cloudPlatformEnum, Value.STS, networkDetailsList, NodeStatusProto.NetworkDetails::getStsAccessible);
+            reportNetworkCheckUsage(stack, cloudPlatformEnum, Value.ADLSV2, networkDetailsList, NodeStatusProto.NetworkDetails::getAdlsV2Accessible);
+            reportNetworkCheckUsage(stack, cloudPlatformEnum, Value.AZURE_MGMT, networkDetailsList,
                     NodeStatusProto.NetworkDetails::getAzureManagementAccessible);
-            reportNetworkCheckUsage(resourceCrn, accountId, Value.GCS, networkDetailsList, NodeStatusProto.NetworkDetails::getGcsAccessible);
-            reportNetworkCheckUsage(resourceCrn, accountId, Value.SERVICE_DELIVERY_CACHE_S3, networkDetailsList,
+            reportNetworkCheckUsage(stack, cloudPlatformEnum, Value.GCS, networkDetailsList, NodeStatusProto.NetworkDetails::getGcsAccessible);
+            reportNetworkCheckUsage(stack, cloudPlatformEnum, Value.SERVICE_DELIVERY_CACHE_S3, networkDetailsList,
                     NodeStatusProto.NetworkDetails::getServiceDeliveryCacheS3Accessible);
         } catch (Exception e) {
             LOGGER.error("Unexpected error happened during preflight check reporting.", e);
         }
     }
 
-    private void reportNetworkCheckUsage(String resourceCrn, String accountId, Value type,
+    private void reportNetworkCheckUsage(Stack stack, UsageProto.CDPEnvironmentsEnvironmentType.Value envType, Value type,
             List<NodeStatusProto.NetworkDetails> networkNodes, Function<NodeStatusProto.NetworkDetails, NodeStatusProto.HealthStatus> healthEvaluator) {
         if (allNetworkNodesInUnknownStatus(networkNodes, healthEvaluator)) {
             LOGGER.debug("All network details are in UNKNOWN state, this could mean responses does not support this network check type yet. " +
                     "Skip usage reporting..");
         } else {
+            String resourceCrn = stack.getResourceCrn();
+            String accountId = Crn.safeFromString(resourceCrn).getAccountId();
+            String clusterType = StackType.DATALAKE == stack.getType() ? CloudbreakEventService.DATALAKE_RESOURCE_TYPE.toUpperCase()
+                    : CloudbreakEventService.DATAHUB_RESOURCE_TYPE.toUpperCase();
             List<String> unhealthyNodes = getUnhealthyHosts(networkNodes, healthEvaluator);
             UsageProto.CDPNetworkCheckResult.Value networkCheckResult = unhealthyNodes.isEmpty()
                     ? UsageProto.CDPNetworkCheckResult.Value.SUCCESSFUL : UsageProto.CDPNetworkCheckResult.Value.FAILED;
-            UsageProto.CDPNetworkCheck networkCheck = UsageProto.CDPNetworkCheck.newBuilder()
-                    .setAccountId(accountId)
+            UsageProto.CDPNetworkCheck.Builder newtorkCheckBuilder = UsageProto.CDPNetworkCheck.newBuilder();
+            newtorkCheckBuilder.setAccountId(accountId)
                     .setCrn(resourceCrn)
+                    .setClusterName(stack.getName())
+                    .setClusterType(clusterType)
+                    .setEnvironmentCrn(stack.getEnvironmentCrn())
+                    .setEnvironmentType(envType)
                     .setType(type)
-                    .setResult(networkCheckResult)
-                    .addAllFailedHosts(unhealthyNodes)
-                    .build();
+                    .setResult(networkCheckResult);
+            if (!unhealthyNodes.isEmpty()) {
+                newtorkCheckBuilder.setFailedHostsJoined(Joiner.on(",").join(unhealthyNodes));
+            }
+            UsageProto.CDPNetworkCheck networkCheck = newtorkCheckBuilder.build();
             LOGGER.debug("Preflight network check report:\n {}", networkCheck);
             usageReporter.cdpNetworkCheckEvent(networkCheck);
         }

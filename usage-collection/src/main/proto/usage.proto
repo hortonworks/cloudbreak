@@ -1681,4 +1681,14 @@ message CDPNetworkCheck {
   string crn = 4;
   // List of hosts where network check failed
   repeated string failedHosts = 5;
+  // Joined lists of hosts where network check failed. (above repeated objects are deprecated)
+  string failedHostsJoined = 6;
+  // Name of the cluster resource
+  string clusterName = 7;
+  // Type of the cluster
+  string clusterType = 8;
+  // Crn of the environment.
+  string environmentCrn = 9;
+  // The environment type. (cloud platform)
+  CDPEnvironmentsEnvironmentType.Value environmentType = 10;
 }
