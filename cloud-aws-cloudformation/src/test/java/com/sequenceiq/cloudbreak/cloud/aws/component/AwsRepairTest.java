@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -69,10 +70,10 @@ import com.amazonaws.services.elasticfilesystem.model.LifeCycleState;
 import com.amazonaws.services.elasticfilesystem.model.MountTargetDescription;
 import com.amazonaws.waiters.Waiter;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsMetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
-import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonCloudWatchClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
@@ -404,8 +405,13 @@ public class AwsRepairTest {
                 .thenReturn(new DescribeStackResourceResult()
                         .withStackResourceDetail(new StackResourceDetail().withPhysicalResourceId(AUTOSCALING_GROUP_NAME)));
 
-        when(amazonEC2Client.describeInstances(any()))
-                .thenReturn(new DescribeInstancesResult().withReservations(new Reservation().withInstances(List.of())));
+        when(amazonEC2Client.describeInstances(any(DescribeInstancesRequest.class))).thenAnswer(a -> {
+            DescribeInstancesRequest request = a.getArgument(0, DescribeInstancesRequest.class);
+            List<com.amazonaws.services.ec2.model.Instance> instances = request.getInstanceIds().stream()
+                    .map(i -> new com.amazonaws.services.ec2.model.Instance().withInstanceId(i))
+                    .collect(Collectors.toList());
+            return new DescribeInstancesResult().withReservations(new Reservation().withInstances(instances));
+        });
 
         AmazonEC2Waiters mockWaiter = mock(AmazonEC2Waiters.class);
         when(amazonEC2Client.waiters())

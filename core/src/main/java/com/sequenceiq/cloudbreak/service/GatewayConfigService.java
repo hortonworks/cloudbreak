@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -29,11 +29,15 @@ public class GatewayConfigService {
     private TlsSecurityService tlsSecurityService;
 
     public List<GatewayConfig> getAllGatewayConfigs(Stack stack) {
-        List<GatewayConfig> result = new ArrayList<>();
-        for (InstanceMetaData instanceMetaData : stack.getGatewayInstanceMetadata()) {
-            result.add(getGatewayConfig(stack, instanceMetaData, stack.getCluster().hasGateway()));
+        boolean knoxGatewayEnabled = stack.getCluster().hasGateway();
+        List<InstanceMetaData> reachableGatewayInstanceMetadata = stack.getReachableGatewayInstanceMetadata();
+        if (reachableGatewayInstanceMetadata.isEmpty()) {
+            throw new NotFoundException("No reachable gateway found");
+        } else {
+            return reachableGatewayInstanceMetadata.stream()
+                    .map(im -> getGatewayConfig(stack, im, knoxGatewayEnabled))
+                    .collect(Collectors.toList());
         }
-        return result;
     }
 
     public GatewayConfig getPrimaryGatewayConfigWithoutLists(Stack stack) {

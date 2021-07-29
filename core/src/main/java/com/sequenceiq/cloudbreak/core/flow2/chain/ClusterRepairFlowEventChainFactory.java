@@ -17,7 +17,6 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.type.ClusterManagerType;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
@@ -92,11 +91,9 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
                 Optional<String> primaryGatewayHostName = instanceMetaDataService.getPrimaryGatewayDiscoveryFQDNByInstanceGroup(event.getStackId(),
                         instanceGroup.getId());
                 boolean primaryGatewayRepairable = primaryGatewayHostName.isPresent() && hostNames.contains(primaryGatewayHostName.get());
-                boolean singlePrimaryGatewayRepairable = primaryGatewayRepairable && !isMultipleGateway(event.getStackId());
-                if (singlePrimaryGatewayRepairable || StackType.DATALAKE.equals(stack.getType())) {
+                if (primaryGatewayRepairable) {
                     repairConfig.setSinglePrimaryGateway(new Repair(instanceGroup.getGroupName(), hostGroup.getName(), hostNames));
-                } else if (primaryGatewayRepairable) {
-                    repairConfig.setChangePGW(true);
+                } else {
                     repairConfig.addRepairs(new Repair(instanceGroup.getGroupName(), hostGroup.getName(), hostNames));
                 }
             } else {
@@ -104,17 +101,6 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
             }
         }
         return repairConfig;
-    }
-
-    private boolean isMultipleGateway(Long stackId) {
-        Set<InstanceGroupView> instanceGroupViews = instanceGroupService.findViewByStackId(stackId);
-        int gatewayCount = 0;
-        for (InstanceGroupView ig : instanceGroupViews) {
-            if (ig.getInstanceGroupType() == InstanceGroupType.GATEWAY) {
-                gatewayCount += ig.getNodeCount();
-            }
-        }
-        return gatewayCount > 1;
     }
 
     private Queue<Selectable> createFlowTriggers(ClusterRepairTriggerEvent event, RepairConfig repairConfig) {
@@ -125,8 +111,6 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
             flowTriggers.add(stackDownscaleEvent(event, repair.getHostGroupName(), repair.getHostNames()));
             flowTriggers.add(fullUpscaleEvent(event, repair.getHostGroupName(), repair.getHostNames(), true,
                     event.isRestartServices(), isKerberosSecured(event.getStackId())));
-        } else if (repairConfig.isChangePGW()) {
-            flowTriggers.add(changePrimaryGatewayEvent(event));
         }
         for (Repair repair : repairConfig.getRepairs()) {
             flowTriggers.add(fullDownscaleEvent(event, repair.getHostGroupName(), repair.getHostNames()));
@@ -135,7 +119,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
                         event.isRestartServices(), false));
             }
         }
-        if (!event.isRemoveOnly() && (repairConfig.getSinglePrimaryGateway().isPresent() || repairConfig.isChangePGW())
+        if (!event.isRemoveOnly() && (repairConfig.getSinglePrimaryGateway().isPresent())
                 && !stackService.findClustersConnectedToDatalakeByDatalakeStackId(event.getResourceId()).isEmpty()) {
             flowTriggers.add(upgradeEphemeralClustersEvent(event));
         }
@@ -198,9 +182,6 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
     }
 
     private static class RepairConfig {
-
-        private boolean changePGW;
-
         private Optional<Repair> singlePrimaryGateway;
 
         private List<Repair> repairs;
@@ -208,14 +189,6 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
         RepairConfig() {
             singlePrimaryGateway = Optional.empty();
             repairs = new ArrayList<>();
-        }
-
-        public boolean isChangePGW() {
-            return changePGW;
-        }
-
-        public void setChangePGW(boolean changePGW) {
-            this.changePGW = changePGW;
         }
 
         public Optional<Repair> getSinglePrimaryGateway() {

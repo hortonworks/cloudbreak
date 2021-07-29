@@ -147,7 +147,7 @@ public class ClusterProxyService {
     }
 
     private List<ClusterServiceConfig> getClusterServiceConfigsForGWs(Stack stack) {
-        List<InstanceMetaData> gatewayInstanceMetadatas = stack.getGatewayInstanceMetadata();
+        List<InstanceMetaData> gatewayInstanceMetadatas = stack.getNotTerminatedGatewayInstanceMetadata();
         return gatewayInstanceMetadatas.stream()
                 .map(gatewayInstanceMetadata -> createClusterServiceConfigFromGWMetadata(stack, gatewayInstanceMetadata))
                 .collect(Collectors.toList());

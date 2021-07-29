@@ -279,7 +279,7 @@ public class ClusterBootstrapper {
     private List<GatewayConfig> collectAndCheckGateways(Stack stack) {
         LOGGER.info("Collect and check gateways for {}", stack.getName());
         List<GatewayConfig> allGatewayConfig = new ArrayList<>();
-        for (InstanceMetaData gateway : stack.getGatewayInstanceMetadata()) {
+        for (InstanceMetaData gateway : stack.getNotTerminatedGatewayInstanceMetadata()) {
             GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, gateway, isKnoxEnabled(stack));
             LOGGER.info("Add gateway config: {}", gatewayConfig);
             allGatewayConfig.add(gatewayConfig);
@@ -384,7 +384,7 @@ public class ClusterBootstrapper {
             throws CloudbreakOrchestratorException {
         Cluster cluster = stack.getCluster();
         Boolean enableKnox = cluster.getGateway() != null;
-        for (InstanceMetaData gateway : stack.getGatewayInstanceMetadata()) {
+        for (InstanceMetaData gateway : stack.getNotTerminatedGatewayInstanceMetadata()) {
             GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, gateway, enableKnox);
             PollingResult bootstrapApiPolling = hostBootstrapApiPollingService.pollWithAbsoluteTimeoutSingleFailure(
                     hostBootstrapApiCheckerTask, new HostBootstrapApiContext(stack, gatewayConfig, hostOrchestrator), POLL_INTERVAL, MAX_POLLING_ATTEMPTS);

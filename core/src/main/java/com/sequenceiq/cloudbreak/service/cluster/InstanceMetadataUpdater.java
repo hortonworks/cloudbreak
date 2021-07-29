@@ -101,7 +101,7 @@ public class InstanceMetadataUpdater {
 
     private GatewayConfig getGatewayConfig(Stack stack, Boolean enableKnox) {
         GatewayConfig gatewayConfig = null;
-        for (InstanceMetaData gateway : stack.getGatewayInstanceMetadata()) {
+        for (InstanceMetaData gateway : stack.getNotTerminatedGatewayInstanceMetadata()) {
             if (InstanceMetadataType.GATEWAY_PRIMARY.equals(gateway.getInstanceMetadataType())) {
                 gatewayConfig = gatewayConfigService.getGatewayConfig(stack, gateway, enableKnox);
             }

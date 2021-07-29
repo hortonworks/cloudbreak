@@ -18,6 +18,7 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,6 +37,8 @@ import com.amazonaws.services.autoscaling.model.DetachInstancesRequest;
 import com.amazonaws.services.autoscaling.model.DetachInstancesResult;
 import com.amazonaws.services.autoscaling.model.Instance;
 import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
+import com.amazonaws.services.ec2.model.DescribeInstancesResult;
+import com.amazonaws.services.ec2.model.Reservation;
 import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
 import com.amazonaws.services.ec2.model.TerminateInstancesResult;
 import com.amazonaws.services.ec2.waiters.AmazonEC2Waiters;
@@ -126,6 +129,7 @@ class AwsDownscaleServiceTest {
                 .thenReturn(describeAutoScalingGroupsResult);
         when(amazonAutoScalingClient.detachInstances(detachInstancesRequestArgumentCaptor.capture()))
                 .thenReturn(new DetachInstancesResult());
+        mockDescribeInstances(amazonEC2Client);
 
         underTest.downscale(authenticatedContext, stack, resources, cloudInstances);
 
@@ -135,6 +139,16 @@ class AwsDownscaleServiceTest {
         verify(cfStackUtil, times(0)).removeLoadBalancerTargets(any(), any(), any());
 
         assertEquals(describeAutoScalingGroupsRequest.getValue().getAutoScalingGroupNames(), List.of("autoscalegroup-1"));
+    }
+
+    private void mockDescribeInstances(AmazonEc2Client amazonEC2Client) {
+        when(amazonEC2Client.describeInstances(any(DescribeInstancesRequest.class))).thenAnswer(a -> {
+            DescribeInstancesRequest request = a.getArgument(0, DescribeInstancesRequest.class);
+            List<com.amazonaws.services.ec2.model.Instance> instances = request.getInstanceIds().stream()
+                    .map(i -> new com.amazonaws.services.ec2.model.Instance().withInstanceId(i))
+                    .collect(Collectors.toList());
+            return new DescribeInstancesResult().withReservations(new Reservation().withInstances(instances));
+        });
     }
 
     @Test
@@ -179,6 +193,7 @@ class AwsDownscaleServiceTest {
         ArgumentCaptor<DescribeAutoScalingGroupsRequest> describeAutoScalingGroupsRequest = ArgumentCaptor.forClass(DescribeAutoScalingGroupsRequest.class);
         when(amazonAutoScalingClient.describeAutoScalingGroups(describeAutoScalingGroupsRequest.capture()))
                 .thenReturn(describeAutoScalingGroupsResult);
+        mockDescribeInstances(amazonEC2Client);
 
         underTest.downscale(authenticatedContext, stack, resources, cloudInstances);
 
@@ -232,6 +247,7 @@ class AwsDownscaleServiceTest {
         when(amazonAutoScalingClient.detachInstances(any())).thenReturn(new DetachInstancesResult());
         when(amazonEC2Client.terminateInstances(any())).thenReturn(new TerminateInstancesResult());
         when(cfStackUtil.getAutoscalingGroupName(any(), (String) any(), any())).thenReturn("autoscalegroup-1");
+        mockDescribeInstances(amazonEC2Client);
 
         //create inOrder object passing any mocks that need to be verified in order
         InOrder inOrder = Mockito.inOrder(amazonAutoScalingClient, amazonEC2Client);
@@ -286,6 +302,7 @@ class AwsDownscaleServiceTest {
             .thenReturn(describeAutoScalingGroupsResult);
         when(amazonAutoScalingClient.detachInstances(detachInstancesRequestArgumentCaptor.capture()))
             .thenReturn(new DetachInstancesResult());
+        mockDescribeInstances(amazonEC2Client);
 
         underTest.downscale(authenticatedContext, stack, resources, cloudInstances);
 
@@ -348,6 +365,7 @@ class AwsDownscaleServiceTest {
         ArgumentCaptor<DescribeAutoScalingGroupsRequest> describeAutoScalingGroupsRequest = ArgumentCaptor.forClass(DescribeAutoScalingGroupsRequest.class);
         when(amazonAutoScalingClient.describeAutoScalingGroups(describeAutoScalingGroupsRequest.capture()))
                 .thenReturn(describeAutoScalingGroupsResult);
+        mockDescribeInstances(amazonEC2Client);
 
         underTest.downscale(authenticatedContext, stack, resources, cloudInstances);
 
@@ -436,6 +454,7 @@ class AwsDownscaleServiceTest {
         ArgumentCaptor<DescribeAutoScalingGroupsRequest> describeAutoScalingGroupsRequest = ArgumentCaptor.forClass(DescribeAutoScalingGroupsRequest.class);
         when(amazonAutoScalingClient.describeAutoScalingGroups(describeAutoScalingGroupsRequest.capture()))
                 .thenReturn(describeAutoScalingGroupsResult);
+        mockDescribeInstances(amazonEC2Client);
 
         underTest.downscale(authenticatedContext, stack, resources, cloudInstances);
 
