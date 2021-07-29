@@ -45,13 +45,13 @@ public class CronTest {
     @Parameters(name = "{index}: cronExpressionTest({0})={1}")
     public static Iterable<Object[]> data() {
         return Arrays.asList(new Object[][] {
-                { "* * * * *",              "* * * * * ?",              null },
+                { "* * * * * ?",              "* * * * * ?",            null },
                 { "00 59 23 31 DEC Fri",    "00 59 23 31 DEC Fri",      null },
                 { "00 45 17 7 6 *",         "00 45 17 7 6 *",           null },
                 { "* * * 1,3,5,7,9,11 * *", "* * * 1,3,5,7,9,11 * *",   null },
                 { "0 9 1-7 * 1 *",          "0 9 1-7 * 1 *",            null },
                 { "0 0 1 * * *",            "0 0 1 * * *",              null },
-                { "* 0-11 * * *",           "* 0-11 * * * ?",           null },
+                { "* 0-11 * * * ?",           "* 0-11 * * * ?",         null },
                 { "* * * 1,2,3 * *",        "* * * 1,2,3 * *",          null },
                 { "0 0 * * * *",            "0 0 * * * *",              null },
                 { "0 0 * * 3 *",            "0 0 * * 3 *",              null },
@@ -65,8 +65,8 @@ public class CronTest {
                 { "* * * 1,2,3 * *",        "* * * 1,2,3 * *",          null },
                 { "0 0 * * * *",            "0 0 * * * *",              null },
                 { "0 0 * * 3 *",            "0 0 * * 3 *",              null },
-                { "0 8 * * 5",              "0 8 * * 5 ?",              null },
-                { "0 8 * *",                "0 8 * * * ?",                null },
+                { "0 8 * * 5 ?",            "0 8 * * 5 ?",              null },
+                { "0 8 * * * ?",            "0 8 * * * ?",              null },
                 { "* * * Jan,Feb,Mar * *",                  null, ParseException.class },
                 { "0,15,30,45 0,6,12,18 1,15,31 * * *",     null, ParseException.class },
                 { "1,2,3,5,20-25,30-35,59 23 31 12 * *",    null, ParseException.class },
