@@ -51,6 +51,9 @@ public class StackViewV4Response implements JsonEntity {
     @ApiModelProperty(StackModelDescription.CLOUD_PLATFORM)
     private String cloudPlatform;
 
+    @ApiModelProperty(StackModelDescription.VARIANT)
+    private String variant;
+
     @ApiModelProperty(StackModelDescription.TUNNEL)
     private Tunnel tunnel = Tunnel.DIRECT;
 
@@ -175,5 +178,35 @@ public class StackViewV4Response implements JsonEntity {
 
     public void setStackVersion(String stackVersion) {
         this.stackVersion = stackVersion;
+    }
+
+    public String getVariant() {
+        return variant;
+    }
+
+    public void setVariant(String variant) {
+        this.variant = variant;
+    }
+
+    @Override
+    public String toString() {
+        return "StackViewV4Response{" +
+                "crn='" + crn + '\'' +
+                ", name='" + name + '\'' +
+                ", hdpVersion='" + hdpVersion + '\'' +
+                ", cluster=" + cluster +
+                ", status=" + status +
+                ", nodeCount=" + nodeCount +
+                ", created=" + created +
+                ", terminated=" + terminated +
+                ", user=" + user +
+                ", environmentCrn='" + environmentCrn + '\'' +
+                ", environmentName='" + environmentName + '\'' +
+                ", credentialName='" + credentialName + '\'' +
+                ", cloudPlatform='" + cloudPlatform + '\'' +
+                ", variant='" + variant + '\'' +
+                ", tunnel=" + tunnel +
+                ", stackVersion='" + stackVersion + '\'' +
+                '}';
     }
 }
