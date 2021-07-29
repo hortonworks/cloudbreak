@@ -309,6 +309,26 @@ message CDPEnvironmentsEnvironmentType {
   }
 }
 
+// The variant of a CDP Cluster.
+message CDPCloudProviderVariantType {
+  enum Value {
+    // A value indicating the enum is unset.
+    UNSET = 0;
+    // AWS
+    AWS = 1;
+    // AWS_NATIVE
+    AWS_NATIVE = 2;
+    // Azure
+    AZURE = 3;
+    // Google
+    GCP = 4;
+    // YCloud
+    YARN = 5;
+    // Mock
+    MOCK = 6;
+  }
+}
+
 // The status of a CDP Cloudbreak cluster.
 message CDPCloudbreakClusterStatus {
   enum Value {
@@ -1087,6 +1107,8 @@ message CDPClusterDetails {
   // added tags that are product-specific. The format of this is a map serialized
   // into a string as json. e.g.:   "tags": "{\"key1\":\"value1\",\"key2\":\"value2\"}"
   string userTags = 4;
+  // The cluster specific variant e.g.: in case of AWS it can be AWS or AWS_NATIVE
+  CDPCloudProviderVariantType.Value cloudProviderVariant = 5;
 }
 
 message CDPStatusDetails {
@@ -1611,52 +1633,52 @@ message CDPDatahubAutoscaleConfigChanged {
 
 // Holds network check result
 message CDPNetworkCheckResult {
-    enum Value {
-      // A value indicating the enum is unset.
-      UNSET = 0;
-      // Successful result for a network check
-      SUCCESSFUL = 1;
-      // Failed result for a network check
-      FAILED = 2;
-    }
+  enum Value {
+    // A value indicating the enum is unset.
+    UNSET = 0;
+    // Successful result for a network check
+    SUCCESSFUL = 1;
+    // Failed result for a network check
+    FAILED = 2;
   }
-  
-  // Holds network check type
-  message CDPNetworkCheckType {
-    enum Value {
-      // A value indicating the enum is unset.
-      UNSET = 0;
-      // AWS S3 endpoint.
-      S3 = 1;
-      // AWS Security Token Service endpoint.
-      STS = 2;
-      // ADLS v2 (ABFS) endpoint (<azure_storage_account>.dfs.core.windows.net).
-      ADLSV2 = 3;
-      // Azure management endpoint (management.azure.com).
-      AZURE_MGMT = 4;
-      // GCS endpoint (storage.googleapis.com).
-      GCS = 5;
-      // Cloudera archive endpoint (archive.cloudera.com).
-      CLOUDERA_ARCHIVE = 6;
-      // DataBus API endpoint.
-      DATABUS = 7;
-      // DataBus S3 endpoint.
-      DATABUS_S3 = 8;
-      // Cloudera service delivery cache S3 address (cloudera-service-delivery-cache.s3.amazonaws.com).
-      SERVICE_DELIVERY_CACHE_S3 = 9;
-    }
+}
+
+// Holds network check type
+message CDPNetworkCheckType {
+  enum Value {
+    // A value indicating the enum is unset.
+    UNSET = 0;
+    // AWS S3 endpoint.
+    S3 = 1;
+    // AWS Security Token Service endpoint.
+    STS = 2;
+    // ADLS v2 (ABFS) endpoint (<azure_storage_account>.dfs.core.windows.net).
+    ADLSV2 = 3;
+    // Azure management endpoint (management.azure.com).
+    AZURE_MGMT = 4;
+    // GCS endpoint (storage.googleapis.com).
+    GCS = 5;
+    // Cloudera archive endpoint (archive.cloudera.com).
+    CLOUDERA_ARCHIVE = 6;
+    // DataBus API endpoint.
+    DATABUS = 7;
+    // DataBus S3 endpoint.
+    DATABUS_S3 = 8;
+    // Cloudera service delivery cache S3 address (cloudera-service-delivery-cache.s3.amazonaws.com).
+    SERVICE_DELIVERY_CACHE_S3 = 9;
   }
-  
-  // Pre flight network check result for VM based clusters.
-  message CDPNetworkCheck {
-    // Type of the pre flight network check.
-    CDPNetworkCheckType.Value type = 1;
-    // Result of the pre flight network check.
-    CDPNetworkCheckResult.Value result = 2;
-    // CDP account id. This uniquely identifies the account within CDP
-    string accountId = 3;
-    // The crn of the cluster resource.
-    string crn = 4;
-    // List of hosts where network check failed
-    repeated string failedHosts = 5;
-  }
+}
+
+// Pre flight network check result for VM based clusters.
+message CDPNetworkCheck {
+  // Type of the pre flight network check.
+  CDPNetworkCheckType.Value type = 1;
+  // Result of the pre flight network check.
+  CDPNetworkCheckResult.Value result = 2;
+  // CDP account id. This uniquely identifies the account within CDP
+  string accountId = 3;
+  // The crn of the cluster resource.
+  string crn = 4;
+  // List of hosts where network check failed
+  repeated string failedHosts = 5;
+}

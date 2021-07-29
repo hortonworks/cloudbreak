@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.CloudbreakDetailsV4Response;
@@ -118,6 +119,7 @@ public class StackToStackV4ResponseConverter extends AbstractConversionServiceAw
         convertTelemetryComponent(response, source);
         response.setTags(getTags(source.getTags()));
         response.setTimeToLive(getStackTimeToLive(source));
+        response.setVariant(Strings.isNullOrEmpty(source.getPlatformVariant()) ? source.getCloudPlatform() : source.getPlatformVariant());
         response.setExternalDatabase(getIfNotNull(source.getExternalDatabaseCreationType(),
                 ed -> getConversionService().convert(ed, DatabaseResponse.class)));
         datalakeService.addSharedServiceResponse(source, response);

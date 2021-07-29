@@ -250,6 +250,7 @@ public class ModelDescriptions {
         public static final String GCP_PARAMETERS = "gcp specific parameters for stack";
         public static final String OPENSTACK_PARAMETERS = "openstack specific parameters for stack";
         public static final String CLOUD_PLATFORM = "Cloudplatform of the stack";
+        public static final String VARIANT = "Variant of the stack";
         public static final String TUNNEL = "Configuration that the connection going directly or with cluster proxy or with ccm and cluster proxy.";
         public static final String FLOW_ID = "Flow identifier for the current stack creation. Only returned during the stack create request/response.";
         public static final String EXTERNAL_DATABASE = "External database parameters for the stack.";

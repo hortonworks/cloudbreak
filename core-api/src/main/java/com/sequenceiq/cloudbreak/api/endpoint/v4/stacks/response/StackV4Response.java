@@ -123,6 +123,9 @@ public class StackV4Response extends StackV4Base implements TaggedResponse {
     @ApiModelProperty(StackModelDescription.CLOUD_PLATFORM)
     private CloudPlatform cloudPlatform;
 
+    @ApiModelProperty(StackModelDescription.VARIANT)
+    private String variant;
+
     @ApiModelProperty(StackModelDescription.TUNNEL)
     private Tunnel tunnel = Tunnel.DIRECT;
 
@@ -379,6 +382,14 @@ public class StackV4Response extends StackV4Base implements TaggedResponse {
         this.externalDatabase = externalDatabase;
     }
 
+    public String getVariant() {
+        return variant;
+    }
+
+    public void setVariant(String variant) {
+        this.variant = variant;
+    }
+
     @Override
     public String toString() {
         return "StackV4Response{ " +
@@ -410,6 +421,7 @@ public class StackV4Response extends StackV4Base implements TaggedResponse {
                 ", placement=" + placement +
                 ", sharedService=" + sharedService +
                 ", cloudPlatform=" + cloudPlatform +
+                ", variant=" + variant +
                 ", tunnel=" + tunnel +
                 ", flowIdentifier=" + flowIdentifier +
                 ", externalDatabase=" + externalDatabase +

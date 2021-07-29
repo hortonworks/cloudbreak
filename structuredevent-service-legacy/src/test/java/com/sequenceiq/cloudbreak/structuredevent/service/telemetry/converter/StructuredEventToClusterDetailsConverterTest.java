@@ -86,6 +86,42 @@ public class StructuredEventToClusterDetailsConverterTest {
     }
 
     @Test
+    public void testVariantConversionWithNullVariant() {
+        StackDetails stackDetails = new StackDetails();
+        stackDetails.setPlatformVariant(null);
+
+        StructuredFlowEvent structuredFlowEvent = new StructuredFlowEvent();
+        structuredFlowEvent.setStack(stackDetails);
+        UsageProto.CDPClusterDetails clusterDetails = underTest.convert(structuredFlowEvent);
+
+        Assertions.assertEquals(UsageProto.CDPCloudProviderVariantType.Value.UNSET, clusterDetails.getCloudProviderVariant());
+
+        StructuredSyncEvent structuredSyncEvent = new StructuredSyncEvent();
+        structuredSyncEvent.setStack(stackDetails);
+        clusterDetails = underTest.convert(structuredSyncEvent);
+
+        Assertions.assertEquals(0, clusterDetails.getCloudProviderVariantValue());
+    }
+
+    @Test
+    public void testVariantConversionWithNotNullVariant() {
+        StackDetails stackDetails = new StackDetails();
+        stackDetails.setPlatformVariant("AWS_NATIVE");
+
+        StructuredFlowEvent structuredFlowEvent = new StructuredFlowEvent();
+        structuredFlowEvent.setStack(stackDetails);
+        UsageProto.CDPClusterDetails clusterDetails = underTest.convert(structuredFlowEvent);
+
+        Assertions.assertEquals(UsageProto.CDPCloudProviderVariantType.Value.AWS_NATIVE, clusterDetails.getCloudProviderVariant());
+
+        StructuredSyncEvent structuredSyncEvent = new StructuredSyncEvent();
+        structuredSyncEvent.setStack(stackDetails);
+        clusterDetails = underTest.convert(structuredSyncEvent);
+
+        Assertions.assertEquals(2, clusterDetails.getCloudProviderVariantValue());
+    }
+
+    @Test
     public void testUserTagsConversionWithEmptyTags() {
         StackDetails stackDetails = new StackDetails();
         stackDetails.setTags(new Json(""));

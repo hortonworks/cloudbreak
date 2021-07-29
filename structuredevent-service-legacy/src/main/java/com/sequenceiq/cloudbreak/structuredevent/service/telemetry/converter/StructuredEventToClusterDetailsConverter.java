@@ -7,6 +7,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredFlowEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredSyncEvent;
@@ -35,6 +36,11 @@ public class StructuredEventToClusterDetailsConverter {
             if (userTags != null && !userTags.isEmpty()) {
                 cdpClusterDetails.setUserTags(JsonUtil.writeValueAsStringSilentSafe(userTags));
             }
+            String platformVariant = structuredFlowEvent.getStack().getPlatformVariant();
+            if (!Strings.isNullOrEmpty(platformVariant)) {
+                cdpClusterDetails.setCloudProviderVariant(UsageProto.CDPCloudProviderVariantType
+                        .Value.valueOf(platformVariant));
+            }
         }
 
         return cdpClusterDetails.build();
@@ -51,6 +57,11 @@ public class StructuredEventToClusterDetailsConverter {
             Map<String, String> userTags = structuredSyncEvent.getStack().getStackTags().getUserDefinedTags();
             if (userTags != null && !userTags.isEmpty()) {
                 cdpClusterDetails.setUserTags(JsonUtil.writeValueAsStringSilentSafe(userTags));
+            }
+            String platformVariant = structuredSyncEvent.getStack().getPlatformVariant();
+            if (!Strings.isNullOrEmpty(platformVariant)) {
+                cdpClusterDetails.setCloudProviderVariant(UsageProto.CDPCloudProviderVariantType
+                        .Value.valueOf(platformVariant));
             }
         }
 
