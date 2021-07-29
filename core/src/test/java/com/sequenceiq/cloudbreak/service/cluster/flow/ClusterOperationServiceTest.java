@@ -1,8 +1,11 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_AUTORECOVERY_REQUESTED;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_FAILED_NODES_REPORTED;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_RECOVERED_NODES_REPORTED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_AUTORECOVERY_REQUESTED_CLUSTER_EVENT;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_AUTORECOVERY_REQUESTED_HOST_EVENT;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_FAILED_NODES_REPORTED_CLUSTER_EVENT;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_FAILED_NODES_REPORTED_HOST_EVENT;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_RECOVERED_NODES_REPORTED_CLUSTER_EVENT;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_RECOVERED_NODES_REPORTED_HOST_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -24,6 +27,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -154,7 +158,7 @@ public class ClusterOperationServiceTest {
     @Test
     public void shouldThrowExceptionWhenNewHealthyAndFailedNodeAreTheSame() {
         BadRequestException exception = assertThrows(BadRequestException.class, () -> {
-            underTest.reportHealthChange(STACK_CRN, Set.of("host"), Set.of("host"));
+            underTest.reportHealthChange(STACK_CRN, Map.of("host", Optional.empty()), Set.of("host"));
         });
 
         assertEquals("Failed nodes [host] and healthy nodes [host] should not have common items.", exception.getMessage());
@@ -178,20 +182,24 @@ public class ClusterOperationServiceTest {
         when(instanceMetaDataService.findNotTerminatedForStack(eq(stack.getId()))).thenReturn(Set.of(host1, host2));
         when(hostGroupService.findHostGroupsInCluster(stack.getCluster().getId())).thenReturn(Set.of(hostGroup, getHostGroup(host2, RecoveryMode.MANUAL)));
 
-        underTest.reportHealthChange(STACK_CRN, Set.of("host1", "host2"), Set.of());
+        underTest.reportHealthChange(STACK_CRN, Map.of("host1", Optional.empty(), "host2", Optional.empty()), Set.of());
 
         Map<String, List<String>> autoRecoveredNodes = Map.of("master", List.of("host1"));
         verify(flowManager).triggerClusterRepairFlow(STACK_ID, autoRecoveredNodes, false, false);
 
-        verify(cloudbreakMessagesService, times(1)).getMessage(CLUSTER_AUTORECOVERY_REQUESTED.getMessage(),
-                Set.of("host1"));
+        verify(cloudbreakMessagesService, times(1)).getMessage(eq(CLUSTER_AUTORECOVERY_REQUESTED_HOST_EVENT.getMessage()),
+                any());
+        verify(cloudbreakMessagesService, times(1)).getMessage(eq(CLUSTER_AUTORECOVERY_REQUESTED_CLUSTER_EVENT.getMessage()),
+                any());
         verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(STACK_ID, "RECOVERY",
-                CLUSTER_AUTORECOVERY_REQUESTED, List.of("host1"));
+                CLUSTER_AUTORECOVERY_REQUESTED_CLUSTER_EVENT, List.of("host1"));
 
-        verify(cloudbreakMessagesService, times(1)).getMessage(CLUSTER_FAILED_NODES_REPORTED.getMessage(),
-                Set.of("host2"));
+        verify(cloudbreakMessagesService, times(1)).getMessage(eq(CLUSTER_FAILED_NODES_REPORTED_HOST_EVENT.getMessage()),
+                any());
+        verify(cloudbreakMessagesService, times(1)).getMessage(eq(CLUSTER_FAILED_NODES_REPORTED_CLUSTER_EVENT.getMessage()),
+                any());
         verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(STACK_ID, "RECOVERY",
-                CLUSTER_FAILED_NODES_REPORTED, List.of("host2"));
+                CLUSTER_FAILED_NODES_REPORTED_CLUSTER_EVENT, List.of("host2"));
         verify(updateHostsValidator, times(1)).validateComponentsCategory(stack, hostGroup.getName());
     }
 
@@ -203,9 +211,9 @@ public class ClusterOperationServiceTest {
         when(hostGroupService.findHostGroupsInCluster(stack.getCluster().getId())).thenReturn(Set.of(getHostGroup(instanceMd, RecoveryMode.MANUAL)));
 
         when(stackService.findByCrn(STACK_CRN)).thenReturn(stack);
-        when(cloudbreakMessagesService.getMessage(any(), anyCollection())).thenReturn("failed node");
+        lenient().when(cloudbreakMessagesService.getMessage(any(), anyCollection())).thenReturn("failed node");
 
-        underTest.reportHealthChange(STACK_CRN, Set.of(hostFQDN), Set.of());
+        underTest.reportHealthChange(STACK_CRN, Map.of(hostFQDN, Optional.empty()), Set.of());
 
         verify(flowManager, times(0)).triggerStackSync(eq(stack.getId()));
     }
@@ -225,7 +233,7 @@ public class ClusterOperationServiceTest {
         doThrow(new FlowsAlreadyRunningException("Flow in action")).when(flowManager).triggerClusterRepairFlow(anyLong(), anyMap(), anyBoolean(), anyBoolean());
 
         assertThrows(FlowsAlreadyRunningException.class, () -> {
-            underTest.reportHealthChange(STACK_CRN, Set.of("host1"), Set.of());
+            underTest.reportHealthChange(STACK_CRN, Map.of("host1", Optional.empty()), Set.of());
         });
 
         verifyNoMoreInteractions(cloudbreakMessagesService);
@@ -242,10 +250,11 @@ public class ClusterOperationServiceTest {
 
         when(cloudbreakMessagesService.getMessage(any(), anyCollection())).thenReturn("recovery detected");
 
-        underTest.reportHealthChange(STACK_CRN, Set.of(), Set.of("host1"));
+        underTest.reportHealthChange(STACK_CRN, Map.of(), Set.of("host1"));
 
-        verify(cloudbreakMessagesService).getMessage("cluster.recoverednodes.reported", Set.of("host1"));
-        verify(cloudbreakEventService).fireCloudbreakEvent(STACK_ID, "AVAILABLE", CLUSTER_RECOVERED_NODES_REPORTED, List.of("host1"));
+        verify(cloudbreakMessagesService, times(1)).getMessage(eq(CLUSTER_RECOVERED_NODES_REPORTED_CLUSTER_EVENT.getMessage()), any());
+        verify(cloudbreakMessagesService, times(1)).getMessage(eq(CLUSTER_RECOVERED_NODES_REPORTED_HOST_EVENT.getMessage()), any());
+        verify(cloudbreakEventService).fireCloudbreakEvent(STACK_ID, "AVAILABLE", CLUSTER_RECOVERED_NODES_REPORTED_CLUSTER_EVENT, List.of("host1"));
         assertEquals(InstanceStatus.SERVICES_HEALTHY, host1.getInstanceStatus());
     }
 

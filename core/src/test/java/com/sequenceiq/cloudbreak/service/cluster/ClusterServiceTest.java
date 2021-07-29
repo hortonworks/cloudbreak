@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
-import static com.sequenceiq.cloudbreak.common.type.ClusterManagerState.ClusterManagerStatus;
+import static com.sequenceiq.cloudbreak.common.type.HealthCheckResult.HEALTHY;
+import static com.sequenceiq.cloudbreak.common.type.HealthCheckResult.UNHEALTHY;
 import static com.sequenceiq.common.api.type.CertExpirationState.HOST_CERT_EXPIRING;
 import static com.sequenceiq.common.api.type.CertExpirationState.VALID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -14,6 +15,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -26,13 +28,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.HostName;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterStatusService;
 import com.sequenceiq.cloudbreak.cluster.status.ExtendedHostStatuses;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
-import com.sequenceiq.cloudbreak.common.type.ClusterManagerState;
+import com.sequenceiq.cloudbreak.common.type.HealthCheck;
+import com.sequenceiq.cloudbreak.common.type.HealthCheckResult;
+import com.sequenceiq.cloudbreak.common.type.HealthCheckType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -105,8 +110,8 @@ class ClusterServiceTest {
 
     static Object[][] updateClusterMetadataScenarios() {
         return new Object[][]{
-                {"CM returns HEALTHY", ClusterManagerStatus.HEALTHY, InstanceStatus.SERVICES_HEALTHY, STATUS_REASON_SERVER},
-                {"CM returns UNHEALTHY", ClusterManagerStatus.UNHEALTHY, InstanceStatus.SERVICES_UNHEALTHY, STATUS_REASON_SERVER},
+                {"CM returns HEALTHY", HEALTHY, InstanceStatus.SERVICES_HEALTHY, STATUS_REASON_SERVER},
+                {"CM returns UNHEALTHY", UNHEALTHY, InstanceStatus.SERVICES_UNHEALTHY, STATUS_REASON_SERVER},
                 {"CM returns no data for the host", null, InstanceStatus.SERVICES_RUNNING, STATUS_REASON_ORIGINAL},
         };
     }
@@ -114,11 +119,11 @@ class ClusterServiceTest {
     @ParameterizedTest(name = "{0}")
     @MethodSource("updateClusterMetadataScenarios")
     public void testUpdateClusterMetadataWhenCmReachable(
-            String name, ClusterManagerStatus clusterManagerStatus, InstanceStatus expectedInstanceStatus, String expectedStatusReason)
+            String name, HealthCheckResult healthCheckResult, InstanceStatus expectedInstanceStatus, String expectedStatusReason)
             throws TransactionService.TransactionExecutionException {
         when(transactionService.required(any(Supplier.class))).thenAnswer(ans -> ((Supplier) ans.getArgument(0)).get());
         Stack stack = setupStack(STACK_ID);
-        setupClusterApi(stack, clusterManagerStatus, expectedStatusReason);
+        setupClusterApi(stack, healthCheckResult, expectedStatusReason);
         setupInstanceMetadata(stack);
 
         underTest.updateClusterMetadata(STACK_ID);
@@ -148,17 +153,18 @@ class ClusterServiceTest {
         when(instanceMetaDataService.findNotTerminatedForStack(stack.getId())).thenReturn(Set.of(instanceMetadata));
     }
 
-    private void setupClusterApi(Stack stack, ClusterManagerStatus clusterManagerStatus, String statusReason) {
+    private void setupClusterApi(Stack stack, HealthCheckResult healthCheckResult, String statusReason) {
         ClusterApi connector = mock(ClusterApi.class);
         ClusterStatusService clusterStatusService = mock(ClusterStatusService.class);
         when(clusterStatusService.isClusterManagerRunning()).thenReturn(true);
         when(connector.clusterStatusService()).thenReturn(clusterStatusService);
 
-        Map<HostName, ClusterManagerState> clusterManagerStateMap = new HashMap<>();
-        if (clusterManagerStatus != null) {
-            clusterManagerStateMap.put(HostName.hostName(FQDN1), new ClusterManagerState(clusterManagerStatus, statusReason));
+        Map<HostName, Set<HealthCheck>> clusterManagerStateMap = new HashMap<>();
+        if (healthCheckResult != null) {
+            clusterManagerStateMap.put(HostName.hostName(FQDN1),
+                    Sets.newHashSet(new HealthCheck(HealthCheckType.HOST, healthCheckResult, Optional.ofNullable(statusReason))));
         }
-        ExtendedHostStatuses extendedHostStatuses = new ExtendedHostStatuses(clusterManagerStateMap, false);
+        ExtendedHostStatuses extendedHostStatuses = new ExtendedHostStatuses(clusterManagerStateMap);
         when(clusterStatusService.getExtendedHostStatuses()).thenReturn(extendedHostStatuses);
         when(clusterApiConnectors.getConnector(stack)).thenReturn(connector);
     }

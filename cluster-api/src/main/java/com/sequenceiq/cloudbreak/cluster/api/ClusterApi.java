@@ -7,10 +7,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import com.sequenceiq.cloudbreak.cloud.model.HostName;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatus;
-import com.sequenceiq.cloudbreak.common.type.ClusterManagerState;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
@@ -124,10 +122,6 @@ public interface ClusterApi {
 
     default ClusterStatus getStatus(boolean blueprintPresent) {
         return clusterStatusService().getStatus(blueprintPresent).getClusterStatus();
-    }
-
-    default Map<HostName, ClusterManagerState.ClusterManagerStatus> getHostStatuses() {
-        return clusterStatusService().getHostStatuses();
     }
 
     ClusterSetupService clusterSetupService();

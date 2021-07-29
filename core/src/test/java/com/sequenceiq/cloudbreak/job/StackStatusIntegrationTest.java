@@ -15,6 +15,7 @@ import static org.mockito.Mockito.when;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -35,6 +36,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -47,8 +49,9 @@ import com.sequenceiq.cloudbreak.cluster.status.ClusterStatusResult;
 import com.sequenceiq.cloudbreak.cluster.status.ExtendedHostStatuses;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
-import com.sequenceiq.cloudbreak.common.type.ClusterManagerState;
-import com.sequenceiq.cloudbreak.common.type.ClusterManagerState.ClusterManagerStatus;
+import com.sequenceiq.cloudbreak.common.type.HealthCheck;
+import com.sequenceiq.cloudbreak.common.type.HealthCheckResult;
+import com.sequenceiq.cloudbreak.common.type.HealthCheckType;
 import com.sequenceiq.cloudbreak.converter.scheduler.StatusToPollGroupConverter;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
@@ -137,7 +140,7 @@ class StackStatusIntegrationTest {
 
     private Set<InstanceMetaData> runningInstances;
 
-    private Map<HostName, ClusterManagerState> hostStatuses;
+    private Map<HostName, Set<HealthCheck>> hostStatuses;
 
     @BeforeEach
     void setUp() {
@@ -187,7 +190,7 @@ class StackStatusIntegrationTest {
         when(clusterApiConnectors.getConnector(stack)).thenReturn(clusterApi);
 
         hostStatuses = new HashMap<>();
-        when(clusterStatusService.getExtendedHostStatuses()).thenReturn(new ExtendedHostStatuses(hostStatuses, false));
+        when(clusterStatusService.getExtendedHostStatuses()).thenReturn(new ExtendedHostStatuses(hostStatuses));
     }
 
     @Test
@@ -199,8 +202,8 @@ class StackStatusIntegrationTest {
     void availableStackInstancesAreHealthy() throws JobExecutionException {
         setUpClusterStatus(ClusterStatus.STARTED);
         stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.AVAILABLE));
-        setUpClusterManagerStatus(INSTANCE_1, ClusterManagerStatus.HEALTHY);
-        setUpClusterManagerStatus(INSTANCE_2, ClusterManagerStatus.HEALTHY);
+        setUpHealthForInstance(INSTANCE_1, HealthCheckResult.HEALTHY);
+        setUpHealthForInstance(INSTANCE_2, HealthCheckResult.HEALTHY);
         setUpCloudVmInstanceStatuses(Map.of(
                 INSTANCE_1, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.STARTED,
                 INSTANCE_2, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.STARTED));
@@ -228,8 +231,8 @@ class StackStatusIntegrationTest {
     void availableStackOneInstanceGoesDown() throws JobExecutionException {
         setUpClusterStatus(ClusterStatus.STARTED);
         stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.AVAILABLE));
-        setUpClusterManagerStatus(INSTANCE_1, ClusterManagerStatus.HEALTHY);
-        setUpClusterManagerStatus(INSTANCE_2, ClusterManagerStatus.UNHEALTHY);
+        setUpHealthForInstance(INSTANCE_1, HealthCheckResult.HEALTHY);
+        setUpHealthForInstance(INSTANCE_2, HealthCheckResult.UNHEALTHY);
         setUpCloudVmInstanceStatuses(Map.of(
                 INSTANCE_1, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.STARTED,
                 INSTANCE_2, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.TERMINATED_BY_PROVIDER));
@@ -258,8 +261,8 @@ class StackStatusIntegrationTest {
     void availableStackAllInstancesGoesDown() throws JobExecutionException {
         setUpClusterStatus(ClusterStatus.STARTED);
         stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.AVAILABLE));
-        setUpClusterManagerStatus(INSTANCE_1, ClusterManagerStatus.HEALTHY);
-        setUpClusterManagerStatus(INSTANCE_2, ClusterManagerStatus.UNHEALTHY);
+        setUpHealthForInstance(INSTANCE_1, HealthCheckResult.HEALTHY);
+        setUpHealthForInstance(INSTANCE_2, HealthCheckResult.UNHEALTHY);
         setUpCloudVmInstanceStatuses(Map.of(
                 INSTANCE_1, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.TERMINATED_BY_PROVIDER,
                 INSTANCE_2, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.TERMINATED_BY_PROVIDER));
@@ -290,8 +293,8 @@ class StackStatusIntegrationTest {
     void availableStackWithOneInstanceDownAllInstancesGoesDown() throws JobExecutionException {
         setUpClusterStatus(ClusterStatus.STARTED);
         stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.AVAILABLE));
-        setUpClusterManagerStatus(INSTANCE_1, ClusterManagerStatus.HEALTHY);
-        setUpClusterManagerStatus(INSTANCE_2, ClusterManagerStatus.UNHEALTHY);
+        setUpHealthForInstance(INSTANCE_1, HealthCheckResult.HEALTHY);
+        setUpHealthForInstance(INSTANCE_2, HealthCheckResult.UNHEALTHY);
         setUpCloudVmInstanceStatuses(Map.of(
                 INSTANCE_1, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.TERMINATED_BY_PROVIDER,
                 INSTANCE_2, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.TERMINATED_BY_PROVIDER));
@@ -338,8 +341,9 @@ class StackStatusIntegrationTest {
         when(clusterStatusService.isClusterManagerRunningQuickCheck()).thenReturn(true);
     }
 
-    private void setUpClusterManagerStatus(String fqdn, ClusterManagerStatus clusterManagerStatus) {
-        hostStatuses.put(hostName(fqdn), new ClusterManagerState(clusterManagerStatus, ""));
+    private void setUpHealthForInstance(String fqdn, HealthCheckResult healthCheckResult) {
+        hostStatuses.put(hostName(fqdn), Sets.newHashSet(
+                new HealthCheck(HealthCheckType.HOST, healthCheckResult, Optional.empty())));
     }
 
     @Configuration

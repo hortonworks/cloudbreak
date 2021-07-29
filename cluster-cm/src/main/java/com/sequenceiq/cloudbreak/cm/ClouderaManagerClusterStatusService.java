@@ -1,18 +1,18 @@
 package com.sequenceiq.cloudbreak.cm;
 
 import static com.sequenceiq.cloudbreak.cloud.model.HostName.hostName;
-import static java.util.Collections.emptySet;
-import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
+import static org.apache.commons.collections4.CollectionUtils.emptyIfNull;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
@@ -39,6 +39,7 @@ import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiHealthCheck;
 import com.cloudera.api.swagger.model.ApiHealthSummary;
 import com.cloudera.api.swagger.model.ApiHost;
+import com.cloudera.api.swagger.model.ApiHostList;
 import com.cloudera.api.swagger.model.ApiRole;
 import com.cloudera.api.swagger.model.ApiRoleRef;
 import com.cloudera.api.swagger.model.ApiRoleState;
@@ -46,8 +47,6 @@ import com.cloudera.api.swagger.model.ApiService;
 import com.cloudera.api.swagger.model.ApiServiceState;
 import com.cloudera.api.swagger.model.ApiVersionInfo;
 import com.google.common.base.Joiner;
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimaps;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cloud.model.HostName;
@@ -59,8 +58,9 @@ import com.sequenceiq.cloudbreak.cluster.status.ExtendedHostStatuses;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
-import com.sequenceiq.cloudbreak.common.type.ClusterManagerState;
-import com.sequenceiq.cloudbreak.common.type.ClusterManagerState.ClusterManagerStatus;
+import com.sequenceiq.cloudbreak.common.type.HealthCheck;
+import com.sequenceiq.cloudbreak.common.type.HealthCheckResult;
+import com.sequenceiq.cloudbreak.common.type.HealthCheckType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 
@@ -76,7 +76,7 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
 
     static final String FULL_WITH_EXPLANATION_VIEW = "FULL_WITH_HEALTH_CHECK_EXPLANATION";
 
-    static final Set<String> CHECK_NAMES = Set.of(HOST_SCM_HEALTH, HOST_AGENT_CERTIFICATE_EXPIRY);
+    private static final String DEFAULT_STATUS_REASON = "Cloudera Manager reported bad health for this host.";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerClusterStatusService.class);
 
@@ -99,6 +99,12 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
             ApiHealthSummary.DISABLED,
             ApiHealthSummary.NOT_AVAILABLE,
             ApiHealthSummary.HISTORY_NOT_AVAILABLE
+    );
+
+    private static final Set<Function<ApiHost, Optional<HealthCheck>>> HEALTH_CHECK_FUNCTIONS = Sets.newHashSet(
+            ClouderaManagerClusterStatusService::getHostHealthCheck,
+            ClouderaManagerClusterStatusService::getServicesHealthCheck,
+            ClouderaManagerClusterStatusService::getCertCheck
     );
 
     private final Stack stack;
@@ -199,14 +205,13 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
         }
     }
 
-    private static ClusterManagerStatus healthSummaryToState(ApiHealthSummary healthSummary) {
+    private static HealthCheckResult healthSummaryToHealthCheckResult(ApiHealthSummary healthSummary) {
         switch (healthSummary) {
             case GOOD:
             case CONCERNING:
-                return ClusterManagerStatus.HEALTHY;
+                return HealthCheckResult.HEALTHY;
             default:
-                LOGGER.debug("Translated health summary {} to state {}", healthSummary, ClusterManagerStatus.UNHEALTHY);
-                return ClusterManagerStatus.UNHEALTHY;
+                return HealthCheckResult.UNHEALTHY;
         }
     }
 
@@ -246,74 +251,66 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
     @Override
     public ExtendedHostStatuses getExtendedHostStatuses() {
         List<ApiHost> apiHostList = getHostsFromCM();
-        Map<HostName, Collection<ApiHealthCheck>> hostHealth = getHostHealth(apiHostList);
-        Map<HostName, ClusterManagerState> clusterManagerStateByHost = hostHealth.entrySet().stream()
-                .flatMap(this::getScmHealthForHost)
-                .collect(toMap(Pair::getLeft, Pair::getRight));
-        boolean hostCertExpiring = isHostCertExpiring(hostHealth);
-        checkServicesHealth(apiHostList, clusterManagerStateByHost);
-        LOGGER.debug("Creating 'ExtendedHostStatuses' with {} and cert expiring [{}]", clusterManagerStateByHost, hostCertExpiring);
-        return new ExtendedHostStatuses(clusterManagerStateByHost, hostCertExpiring);
+        Map<HostName, Set<HealthCheck>> hostStates = apiHostList.stream().collect(
+                Collectors.toMap(apiHost -> hostName(apiHost.getHostname()), ClouderaManagerClusterStatusService::getHealthChecks));
+        hostStates.entrySet().removeIf(entry -> entry.getValue().isEmpty());
+        LOGGER.debug("Creating 'ExtendedHostStatuses' with {}", hostStates);
+        return new ExtendedHostStatuses(hostStates);
     }
 
-    private void checkServicesHealth(List<ApiHost> apiHostList, Map<HostName, ClusterManagerState> clusterManagerStateByHost) {
-        apiHostList.forEach(host -> changeStateForHostIfServiceInBadHealth(clusterManagerStateByHost, host));
+    private static Set<HealthCheck> getHealthChecks(ApiHost apiHost) {
+        return HEALTH_CHECK_FUNCTIONS.stream()
+                .map(healthCheck -> healthCheck.apply(apiHost))
+                .flatMap(Optional::stream)
+                .collect(Collectors.toSet());
     }
 
-    private void changeStateForHostIfServiceInBadHealth(Map<HostName, ClusterManagerState> clusterManagerStateByHost, ApiHost host) {
+    private static Optional<HealthCheck> getServicesHealthCheck(ApiHost host) {
         Set<String> servicesWithBadHealth = collectServicesWithBadHealthOnHost(host);
         if (!servicesWithBadHealth.isEmpty()) {
-            updateServicesHealthForHost(clusterManagerStateByHost, host, servicesWithBadHealth);
+            String statusReason = String.format("The following services are in bad health: %s.", Joiner.on(", ").join(servicesWithBadHealth));
+            return Optional.of(new HealthCheck(HealthCheckType.SERVICES, HealthCheckResult.UNHEALTHY, Optional.of(statusReason)));
         }
+        return Optional.empty();
     }
 
-    private Set<String> collectServicesWithBadHealthOnHost(ApiHost host) {
-        return host.getRoleRefs() == null ? emptySet() : host.getRoleRefs().stream()
+    private static Set<String> collectServicesWithBadHealthOnHost(ApiHost host) {
+        return emptyIfNull(host.getRoleRefs()).stream()
                 .filter(roleRef -> ApiHealthSummary.BAD.equals(roleRef.getHealthSummary()))
                 .map(ApiRoleRef::getServiceName)
                 .collect(Collectors.toSet());
     }
 
-    private void updateServicesHealthForHost(Map<HostName, ClusterManagerState> clusterManagerStateByHost, ApiHost host, Set<String> servicesWithBadHealth) {
-        ClusterManagerState clusterManagerState = clusterManagerStateByHost.get(hostName(host.getHostname()));
-        clusterManagerState.setClusterManagerStatus(ClusterManagerStatus.UNHEALTHY);
-        String statusReason = String.format("The following services are in bad health: %s", Joiner.on(",").join(servicesWithBadHealth));
-        if (StringUtils.isEmpty(clusterManagerState.getStatusReason())) {
-            clusterManagerState.setStatusReason(statusReason);
-        } else {
-            StringUtils.appendIfMissing(clusterManagerState.getStatusReason(), statusReason);
-        }
-    }
-
-    private boolean isHostCertExpiring(Map<HostName, Collection<ApiHealthCheck>> hostHealth) {
-        return hostHealth.values().stream()
-                .flatMap(Collection::stream)
+    private static Optional<HealthCheck> getCertCheck(ApiHost apiHost) {
+        Optional<ApiHealthCheck> healthCheck = emptyIfNull(apiHost.getHealthChecks()).stream()
                 .filter(health -> HOST_AGENT_CERTIFICATE_EXPIRY.equals(health.getName()))
-                .anyMatch(health -> ApiHealthSummary.GOOD != health.getSummary());
-    }
-
-    private Stream<Pair<HostName, ClusterManagerState>> getScmHealthForHost(Map.Entry<HostName, Collection<ApiHealthCheck>> healthChecksForHost) {
-        return healthChecksForHost.getValue().stream()
-                .filter(health -> HOST_SCM_HEALTH.equals(health.getName()))
-                .map(health -> Pair.of(healthChecksForHost.getKey(), createClusterManagerStateFromApiHealthCheck(health)));
-    }
-
-    private ClusterManagerState createClusterManagerStateFromApiHealthCheck(ApiHealthCheck health) {
-        ClusterManagerStatus clusterManagerStatus = healthSummaryToState(health.getSummary());
-        String hostHealthMessage = getHostHealthMessage(health.getSummary(), health.getExplanation());
-        return new ClusterManagerState(clusterManagerStatus, hostHealthMessage);
-    }
-
-    private String getHostHealthMessage(ApiHealthSummary healthSummary, String explanation) {
-        if (healthSummaryToState(healthSummary) == ClusterManagerStatus.UNHEALTHY) {
-            return String.format("%s: %s. Reason: %s. ", HOST_SCM_HEALTH, healthSummary.name(), ofNullable(explanation).orElse(""));
+                .findFirst();
+        if (healthCheck.isPresent()) {
+            HealthCheckResult result = !ApiHealthSummary.GOOD.equals(healthCheck.get().getSummary()) ?
+                    HealthCheckResult.UNHEALTHY : HealthCheckResult.HEALTHY;
+            return Optional.of(new HealthCheck(HealthCheckType.CERT, result, Optional.empty()));
         }
-        return null;
+        return Optional.empty();
     }
 
-    @Override
-    public Map<HostName, ClusterManagerState.ClusterManagerStatus> getHostStatuses() {
-        return convertHealthSummary(getHostHealthSummary(), ClouderaManagerClusterStatusService::healthSummaryToState);
+    private static Optional<HealthCheck> getHostHealthCheck(ApiHost apiHost) {
+        return emptyIfNull(apiHost.getHealthChecks()).stream()
+                .filter(health -> HOST_SCM_HEALTH.equals(health.getName()))
+                .filter(health -> !IGNORED_HEALTH_SUMMARIES.contains(health.getSummary()))
+                .findFirst()
+                .map(apiHealthCheck -> new HealthCheck(HealthCheckType.HOST, healthSummaryToHealthCheckResult(apiHealthCheck.getSummary()),
+                        getHostHealthMessage(apiHealthCheck.getSummary(), apiHealthCheck.getExplanation())));
+    }
+
+    private static Optional<String> getHostHealthMessage(ApiHealthSummary healthSummary, String explanation) {
+        if (healthSummaryToHealthCheckResult(healthSummary) == HealthCheckResult.UNHEALTHY) {
+            if (StringUtils.isNotBlank(explanation)) {
+                return Optional.of(explanation.endsWith(".") ? explanation : explanation + ".");
+            } else {
+                return Optional.of(DEFAULT_STATUS_REASON);
+            }
+        }
+        return Optional.empty();
     }
 
     @Override
@@ -435,27 +432,12 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
         }
     }
 
-    private Map<HostName, Collection<ApiHealthCheck>> getHostHealth(List<ApiHost> apiHostList) {
-        Map<HostName, Collection<ApiHealthCheck>> healthCheckByHost = apiHostList
-                .stream()
-                .filter(host -> host.getHealthChecks() != null)
-                .flatMap(host -> getHealthCheckPairStreamByHost(host))
-                .collect(Multimaps.toMultimap(Pair::getLeft, Pair::getRight, ArrayListMultimap::create)).asMap();
-        LOGGER.debug("Healthcheck result from CM: {}", healthCheckByHost);
-        return healthCheckByHost;
-    }
-
-    private Stream<Pair<HostName, ApiHealthCheck>> getHealthCheckPairStreamByHost(ApiHost host) {
-        return host.getHealthChecks().stream()
-                .filter(check -> CHECK_NAMES.contains(check.getName()))
-                .filter(check -> !IGNORED_HEALTH_SUMMARIES.contains(check.getSummary()))
-                .map(check -> Pair.of(hostName(host.getHostname()), check));
-    }
-
     private List<ApiHost> getHostsFromCM() {
         HostsResourceApi api = clouderaManagerApiFactory.getHostsResourceApi(client);
         try {
-            return api.readHosts(null, null, FULL_WITH_EXPLANATION_VIEW).getItems();
+            ApiHostList apiHostList = api.readHosts(null, null, FULL_WITH_EXPLANATION_VIEW);
+            LOGGER.trace("Response from CM for readHosts call: {}", apiHostList);
+            return apiHostList.getItems();
         } catch (ApiException e) {
             LOGGER.info("Failed to get hosts from CM", e);
             throw new RuntimeException("Failed to get hosts from CM due to: " + e.getMessage(), e);

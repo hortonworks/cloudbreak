@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -22,6 +23,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
@@ -29,8 +31,9 @@ import com.sequenceiq.cloudbreak.cloud.model.HostName;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterStatusService;
 import com.sequenceiq.cloudbreak.cluster.status.ExtendedHostStatuses;
-import com.sequenceiq.cloudbreak.common.type.ClusterManagerState;
-import com.sequenceiq.cloudbreak.common.type.ClusterManagerState.ClusterManagerStatus;
+import com.sequenceiq.cloudbreak.common.type.HealthCheck;
+import com.sequenceiq.cloudbreak.common.type.HealthCheckResult;
+import com.sequenceiq.cloudbreak.common.type.HealthCheckType;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -136,13 +139,13 @@ class VmStatusCheckerConclusionStepTest {
     }
 
     private ExtendedHostStatuses createExtendedHostStatuses(boolean healthy) {
-        Map<HostName, ClusterManagerState> hostStatuses = new HashMap<>();
-        ClusterManagerStatus status = healthy ? ClusterManagerStatus.HEALTHY : ClusterManagerStatus.UNHEALTHY;
+        Map<HostName, Set<HealthCheck>> hostStatuses = new HashMap<>();
+        HealthCheckResult status = healthy ? HealthCheckResult.HEALTHY : HealthCheckResult.UNHEALTHY;
         String reason = healthy ? null : "error";
-        ClusterManagerState clusterManagerState = new ClusterManagerState(status, reason);
-        hostStatuses.put(HostName.hostName("host1"), clusterManagerState);
-        hostStatuses.put(HostName.hostName("host2"), clusterManagerState);
-        return new ExtendedHostStatuses(hostStatuses, false);
+        Set<HealthCheck> healthChecks = Sets.newHashSet(new HealthCheck(HealthCheckType.HOST, status, Optional.ofNullable(reason)));
+        hostStatuses.put(HostName.hostName("host1"), healthChecks);
+        hostStatuses.put(HostName.hostName("host2"), healthChecks);
+        return new ExtendedHostStatuses(hostStatuses);
     }
 
     private InstanceMetaData createInstanceMetadata(String host) {

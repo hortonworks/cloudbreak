@@ -19,8 +19,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.HostName;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.status.ExtendedHostStatuses;
-import com.sequenceiq.cloudbreak.common.type.ClusterManagerState;
-import com.sequenceiq.cloudbreak.common.type.ClusterManagerState.ClusterManagerStatus;
+import com.sequenceiq.cloudbreak.common.type.HealthCheck;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -64,10 +63,10 @@ public class VmStatusCheckerConclusionStep extends ConclusionStep {
 
     private Conclusion checkCMForInstanceStatuses(ClusterApi connector, Set<InstanceMetaData> runningInstances) {
         ExtendedHostStatuses extendedHostStatuses = connector.clusterStatusService().getExtendedHostStatuses();
-        Map<HostName, ClusterManagerState> hostStatuses = extendedHostStatuses.getHostHealth();
-        Map<String, String> unhealthyHosts = hostStatuses.entrySet().stream()
-                .filter(hostStatus -> ClusterManagerStatus.UNHEALTHY.equals(hostStatus.getValue().getClusterManagerStatus()))
-                .collect(Collectors.toMap(hostStatus -> hostStatus.getKey().value(), hostStatus -> hostStatus.getValue().getStatusReason()));
+        Map<HostName, Set<HealthCheck>> hostStatuses = extendedHostStatuses.getHostsHealth();
+        Map<String, String> unhealthyHosts = hostStatuses.keySet().stream()
+                .filter(hostName -> !extendedHostStatuses.isHostHealthy(hostName))
+                .collect(Collectors.toMap(hostName -> hostName.value(), hostName -> extendedHostStatuses.statusReasonForHost(hostName)));
         Set<String> noReportHosts = runningInstances.stream()
                 .filter(i -> !hostStatuses.containsKey(hostName(i.getDiscoveryFQDN())))
                 .map(InstanceMetaData::getDiscoveryFQDN)

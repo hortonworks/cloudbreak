@@ -12,7 +12,9 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -34,8 +36,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.HostName;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.status.ExtendedHostStatuses;
-import com.sequenceiq.cloudbreak.common.type.ClusterManagerState;
-import com.sequenceiq.cloudbreak.common.type.ClusterManagerState.ClusterManagerStatus;
+import com.sequenceiq.cloudbreak.common.type.HealthCheck;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -198,11 +199,11 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
         try {
             if (isClusterManagerRunning(stack, connector)) {
                 ExtendedHostStatuses extendedHostStatuses = connector.clusterStatusService().getExtendedHostStatuses();
-                Map<HostName, ClusterManagerState> hostStatuses = extendedHostStatuses.getHostHealth();
+                Map<HostName, Set<HealthCheck>> hostStatuses = extendedHostStatuses.getHostsHealth();
                 LOGGER.debug("Cluster '{}' state check, host certicates expiring: [{}], cm running, hoststates: {}",
-                        stack.getId(), extendedHostStatuses.isHostCertExpiring(), hostStatuses);
-                reportHealthAndSyncInstances(stack, runningInstances, getFailedInstancesInstanceMetadata(hostStatuses, runningInstances),
-                        getNewHealthyHostNames(hostStatuses, runningInstances), extendedHostStatuses.isHostCertExpiring());
+                        stack.getId(), extendedHostStatuses.isAnyCertExpiring(), hostStatuses);
+                reportHealthAndSyncInstances(stack, runningInstances, getFailedInstancesInstanceMetadata(extendedHostStatuses, runningInstances),
+                        getNewHealthyHostNames(extendedHostStatuses, runningInstances), extendedHostStatuses.isAnyCertExpiring());
             } else {
                 syncInstances(stack, runningInstances, false);
             }
@@ -212,22 +213,21 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
         }
     }
 
-    private void reportHealthAndSyncInstances(Stack stack, Collection<InstanceMetaData> runningInstances, Collection<InstanceMetaData> failedInstances,
-            Set<String> newHealtyHostNames, boolean hostCertExpiring) {
-        Set<String> newFailedNodeNames = failedInstances.stream()
-                .filter(i -> !Set.of(SERVICES_UNHEALTHY, STOPPED).contains(i.getInstanceStatus()))
-                .map(InstanceMetaData::getDiscoveryFQDN)
-                .collect(toSet());
-        ifFlowNotRunning(() -> updateStates(stack, failedInstances, newFailedNodeNames, newHealtyHostNames, hostCertExpiring));
-        syncInstances(stack, runningInstances, failedInstances, InstanceSyncState.RUNNING, true);
+    private void reportHealthAndSyncInstances(Stack stack, Collection<InstanceMetaData> runningInstances,
+            Map<InstanceMetaData, Optional<String>> failedInstances, Set<String> newHealtyHostNames, boolean hostCertExpiring) {
+        Map<String, Optional<String>> newFailedNodeNamesWithReason = failedInstances.entrySet().stream()
+                .filter(e -> !Set.of(SERVICES_UNHEALTHY, STOPPED).contains(e.getKey().getInstanceStatus()))
+                .collect(Collectors.toMap(e -> e.getKey().getDiscoveryFQDN(), e -> e.getValue()));
+        ifFlowNotRunning(() -> updateStates(stack, failedInstances.keySet(), newFailedNodeNamesWithReason, newHealtyHostNames, hostCertExpiring));
+        syncInstances(stack, runningInstances, failedInstances.keySet(), InstanceSyncState.RUNNING, true);
     }
 
-    private void updateStates(Stack stack, Collection<InstanceMetaData> failedInstances, Set<String> newFailedNodeNames, Set<String> newHealtyHostNames,
-            boolean hostCertExpiring) {
+    private void updateStates(Stack stack, Collection<InstanceMetaData> failedInstances, Map<String, Optional<String>> newFailedNodeNamesWithReason,
+            Set<String> newHealtyHostNames, boolean hostCertExpiring) {
         LOGGER.info("Updating status: Failed instances: {} New failed node names: {} New healthy host name: {} Host cert expiring: {}",
-                failedInstances, newFailedNodeNames, newHealtyHostNames, hostCertExpiring);
+                failedInstances, newFailedNodeNamesWithReason.keySet(), newHealtyHostNames, hostCertExpiring);
         clusterService.updateClusterCertExpirationState(stack.getCluster(), hostCertExpiring);
-        clusterOperationService.reportHealthChange(stack.getResourceCrn(), newFailedNodeNames, newHealtyHostNames);
+        clusterOperationService.reportHealthChange(stack.getResourceCrn(), newFailedNodeNamesWithReason, newHealtyHostNames);
         if (!failedInstances.isEmpty()) {
             clusterService.updateClusterStatusByStackId(stack.getId(), Status.AMBIGUOUS);
         } else if (statesFromAvailableAllowed().contains(stack.getCluster().getStatus())) {
@@ -275,9 +275,9 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
         return connector.clusterStatusService().isClusterManagerRunningQuickCheck();
     }
 
-    private Set<String> getNewHealthyHostNames(Map<HostName, ClusterManagerState> hostStatuses, Set<InstanceMetaData> runningInstances) {
-        Set<String> healthyHosts = hostStatuses.entrySet().stream()
-                .filter(e -> e.getValue().getClusterManagerStatus() == ClusterManagerStatus.HEALTHY)
+    private Set<String> getNewHealthyHostNames(ExtendedHostStatuses hostStatuses, Set<InstanceMetaData> runningInstances) {
+        Set<String> healthyHosts = hostStatuses.getHostsHealth().entrySet().stream()
+                .filter(e -> hostStatuses.isHostHealthy(e.getKey()))
                 .map(Entry::getKey)
                 .map(HostName::value)
                 .collect(toSet());
@@ -288,20 +288,25 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
         return Sets.intersect(healthyHosts, unhealthyStoredHosts);
     }
 
-    private Set<InstanceMetaData> getFailedInstancesInstanceMetadata(Map<HostName, ClusterManagerState> hostStatuses,
+    private Map<InstanceMetaData, Optional<String>> getFailedInstancesInstanceMetadata(ExtendedHostStatuses hostStatuses,
             Set<InstanceMetaData> runningInstances) {
-        Set<String> failedHosts = hostStatuses.entrySet().stream()
-                .filter(e -> e.getValue().getClusterManagerStatus() == ClusterManagerStatus.UNHEALTHY)
-                .map(Entry::getKey)
-                .map(HostName::value)
-                .collect(toSet());
+        Map<String, Optional<String>> failedHosts = hostStatuses.getHostsHealth().entrySet().stream()
+                .filter(e -> !hostStatuses.isHostHealthy(e.getKey()))
+                .collect(Collectors.toMap(e -> e.getKey().value(), e -> Optional.ofNullable(hostStatuses.statusReasonForHost(e.getKey()))));
         Set<String> noReportHosts = runningInstances.stream()
-                .filter(i -> hostStatuses.get(hostName(i.getDiscoveryFQDN())) == null)
+                .filter(i -> hostStatuses.getHostsHealth().get(hostName(i.getDiscoveryFQDN())) == null)
                 .map(InstanceMetaData::getDiscoveryFQDN)
                 .collect(toSet());
         return runningInstances.stream()
-                .filter(i -> failedHosts.contains(i.getDiscoveryFQDN()) || noReportHosts.contains(i.getDiscoveryFQDN()))
-                .collect(toSet());
+                .filter(i -> failedHosts.containsKey(i.getDiscoveryFQDN()) || noReportHosts.contains(i.getDiscoveryFQDN()))
+                .collect(Collectors.toMap(imd -> imd, imd -> getReasonForFailedInstance(failedHosts, imd)));
+    }
+
+    private Optional<String> getReasonForFailedInstance(Map<String, Optional<String>> failedHosts, InstanceMetaData imd) {
+        if (failedHosts.containsKey(imd.getDiscoveryFQDN())) {
+            return failedHosts.get(imd.getDiscoveryFQDN());
+        }
+        return Optional.empty();
     }
 
     private Long getStackId() {
