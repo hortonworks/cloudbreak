@@ -346,13 +346,18 @@ public class ClusterBootstrapper {
                 .collect(Collectors.toSet());
         String clusterDomain = getClusterDomain(metaDataSet, stack.getCustomDomain());
 
+        LOGGER.info("Cluster domain: {}", clusterDomain);
+
         Map<String, AtomicLong> hostGroupNodeIndexes = new HashMap<>();
         Set<String> clusterNodeNames = stack.getNotTerminatedInstanceMetaDataList().stream()
                 .map(InstanceMetaData::getShortHostname).collect(Collectors.toSet());
 
+        LOGGER.info("Cluster node names: {}", clusterNodeNames);
+
         for (InstanceMetaData im : metaDataSet) {
             Node node = createNodeAndInitFqdnInInstanceMetadata(stack, im, clusterDomain, hostGroupNodeIndexes, clusterNodeNames);
             if (upscaleCandidateAddresses.contains(im.getPrivateIp())) {
+                LOGGER.info("Node is an upscale candidate: {}", node.getInstanceId());
                 nodes.add(node);
             }
             allNodes.add(node);
@@ -365,12 +370,14 @@ public class ClusterBootstrapper {
                 .filter(gc -> nodes.stream().noneMatch(n -> gc.getPrivateAddress().equals(n.getPrivateIp())))
                 .collect(Collectors.toList());
         for  (GatewayConfig masterToCorrect: saltMastersToCorrect) {
+            LOGGER.info("Remove dead salt minions on master: {}", masterToCorrect);
             hostOrchestrator.removeDeadSaltMinions(masterToCorrect);
         }
     }
 
     private String getClusterDomain(Set<InstanceMetaData> metaDataSet, String customDomain) {
         if (customDomain != null && !customDomain.isEmpty()) {
+            LOGGER.info("Custom domain for cluster: {}", customDomain);
             return customDomain;
         }
         Optional<InstanceMetaData> metadataWithFqdn = metaDataSet.stream().filter(im -> isNoneBlank(im.getDiscoveryFQDN())).findAny();
@@ -382,6 +389,7 @@ public class ClusterBootstrapper {
 
     private void bootstrapNewNodesOnHost(Stack stack, List<GatewayConfig> allGatewayConfigs, Set<Node> nodes, Set<Node> allNodes)
             throws CloudbreakOrchestratorException {
+        LOGGER.info("Bootstrap new nodes: {}", nodes);
         Cluster cluster = stack.getCluster();
         Boolean enableKnox = cluster.getGateway() != null;
         for (InstanceMetaData gateway : stack.getNotTerminatedGatewayInstanceMetadata()) {
@@ -424,10 +432,14 @@ public class ClusterBootstrapper {
         String discoveryFQDN = im.getDiscoveryFQDN();
         String instanceId = im.getInstanceId();
         String instanceType = im.getInstanceGroup().getTemplate().getInstanceType();
+        LOGGER.info("Create and init FQDN for instance if necessary: {}", im);
         if (isNoneBlank(discoveryFQDN)) {
+            LOGGER.info("FQDN in not null for instance with id: {}", instanceId);
             return new Node(im.getPrivateIp(), im.getPublicIpWrapper(), instanceId, instanceType, im.getShortHostname(), domain, im.getInstanceGroupName());
         } else {
+            LOGGER.info("FQDN is blank, generate FQDN for {}", instanceId);
             String hostname = clusterNodeNameGenerator.getNodeNameForInstanceMetadata(im, stack, hostGroupNodeIndexes, clusterNodeNames);
+            LOGGER.info("Generated hostname for {}: {}", instanceId, hostname);
             initializeDiscoveryFqdnOfInstanceMetadata(im, domain, hostname);
             return new Node(im.getPrivateIp(), im.getPublicIpWrapper(), instanceId, instanceType, hostname, domain, im.getInstanceGroupName());
         }
@@ -435,6 +447,7 @@ public class ClusterBootstrapper {
 
     private void initializeDiscoveryFqdnOfInstanceMetadata(InstanceMetaData im, String domain, String hostname) {
         String generatedFqdn = String.format("%s.%s", hostname, domain);
+        LOGGER.info("Set generated FQDN for {}: {}", im.getInstanceId(), generatedFqdn);
         im.setDiscoveryFQDN(generatedFqdn);
     }
 

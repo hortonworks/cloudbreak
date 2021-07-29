@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.reactor;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterBootstrapper;
@@ -15,6 +17,9 @@ import reactor.bus.EventBus;
 
 @Component
 public class BootstrapNewNodesHandler implements EventHandler<BootstrapNewNodesRequest> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(BootstrapNewNodesHandler.class);
+
     @Inject
     private EventBus eventBus;
 
@@ -31,6 +36,7 @@ public class BootstrapNewNodesHandler implements EventHandler<BootstrapNewNodesR
         BootstrapNewNodesRequest request = event.getData();
         BootstrapNewNodesResult result;
         try {
+            LOGGER.info("BootstrapNewNodesRequest arrived with upscale candidates: {}", request.getUpscaleCandidateAddresses());
             clusterBootstrapper.bootstrapNewNodes(request.getResourceId(), request.getUpscaleCandidateAddresses());
             result = new BootstrapNewNodesResult(request);
         } catch (Exception e) {

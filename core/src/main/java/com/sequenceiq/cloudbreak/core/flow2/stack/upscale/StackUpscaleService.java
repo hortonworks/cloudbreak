@@ -196,6 +196,7 @@ public class StackUpscaleService {
     }
 
     public List<CloudInstance> buildNewInstances(Stack stack, String extendedInstanceGroupName, int count) {
+        LOGGER.info("Build {} instances for group: {}", count, extendedInstanceGroupName);
         Optional<InstanceGroup> extendedInstanceGroup = stack.getInstanceGroups().stream()
                 .filter(instanceGroup -> extendedInstanceGroupName.equals(instanceGroup.getGroupName()))
                 .findAny();
@@ -212,6 +213,7 @@ public class StackUpscaleService {
                         stack.getEnvironmentCrn()));
             }
         }
+        LOGGER.info("Built instances: {}", newInstances);
         return newInstances;
     }
 

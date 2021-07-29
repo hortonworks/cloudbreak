@@ -26,6 +26,7 @@ public class ClusterNodeNameGenerator {
 
     public String getNodeNameForInstanceMetadata(InstanceMetaData im, Stack stack, Map<String, AtomicLong> hostGroupNodeIndexes, Set<String> clusterNodeNames) {
         if (isNotBlank(im.getShortHostname())) {
+            LOGGER.info("Short hostname is filled for {}: {}", im.getInstanceId(), im.getShortHostname());
             return im.getShortHostname();
         } else {
             String generatedHostName;
@@ -36,7 +37,7 @@ public class ClusterNodeNameGenerator {
                         im.getInstanceGroupName(), hostGroupNodeIndex.getAndIncrement(), stack.isHostgroupNameAsHostname());
             } while (clusterNodeNames.contains(generatedHostName));
 
-            LOGGER.debug("Generated hostname {} for address: {}", generatedHostName, im.getPrivateIp());
+            LOGGER.info("Generated hostname {} for address: {}", generatedHostName, im.getPrivateIp());
             clusterNodeNames.add(generatedHostName);
             return generatedHostName;
         }
