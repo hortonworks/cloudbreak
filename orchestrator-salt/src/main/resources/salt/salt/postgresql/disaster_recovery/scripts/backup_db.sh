@@ -8,15 +8,16 @@ set -o nounset
 set -o pipefail
 set -o xtrace
 
-if [[ $# -ne 5 && $# -ne 6 ]]; then
+if [[ $# -lt 5 || $# -gt 7 ]]; then
   echo "Invalid inputs provided"
-  echo "Script accepts 5 inputs:"
+  echo "Script accepts at least 5 and at most 7 inputs:"
   echo "  1. Object Storage Service url to place backups."
   echo "  2. PostgreSQL host name."
   echo "  3. PostgreSQL port."
   echo "  4. PostgreSQL user name."
   echo "  5. Ranger admin group."
-  echo "  6. (optional) Log file location."
+  echo "  6. (optional) Name of the database to backup. If not given, will backup ranger and hive databases."
+  echo "  7. (optional) Log file location. Must be provided along with a database name."
   exit 1
 fi
 
@@ -25,7 +26,8 @@ HOST="$2"
 PORT="$3"
 USERNAME="$4"
 RANGERGROUP="$5"
-LOGFILE=${6:-/var/log/}/dl_postgres_backup.log
+DATABASENAME="$6"
+LOGFILE=${7:-/var/log/}/dl_postgres_backup.log
 echo "Logs at ${LOGFILE}"
 
 {%- from 'postgresql/settings.sls' import postgresql with context %}
@@ -142,8 +144,14 @@ run_backup() {
   DATE_DIR=${BACKUPS_DIR}/$(date '+%Y-%m-%dT%H:%M:%SZ')
   mkdir -p "$DATE_DIR" || error_exit "Could not create local directory for backups."
 
-  backup_database_for_service "hive"
-  backup_database_for_service "ranger"
+  if [[ -z "$DATABASENAME" ]]; then
+    echo "No database name provided. Will backup hive and ranger databases."
+    backup_database_for_service "hive"
+    backup_database_for_service "ranger"
+  else
+    echo "Backing up ${DATABASENAME}."
+    backup_database_for_service "${DATABASENAME}"
+  fi
 
   rmdir -v "$DATE_DIR" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2)
 }
