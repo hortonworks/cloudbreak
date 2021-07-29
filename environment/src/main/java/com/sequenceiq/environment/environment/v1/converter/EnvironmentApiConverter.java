@@ -2,6 +2,7 @@ package com.sequenceiq.environment.environment.v1.converter;
 
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
 import static com.sequenceiq.common.model.CredentialType.ENVIRONMENT;
 import static com.sequenceiq.environment.environment.dto.EnvironmentChangeCredentialDto.EnvironmentChangeCredentialDtoBuilder.anEnvironmentChangeCredentialDto;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
@@ -39,6 +40,8 @@ import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEn
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.ResourceGroupUsage;
+import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpEnvironmentParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpResourceEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentCrnResponse;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.credential.v1.converter.TunnelConverter;
@@ -57,6 +60,8 @@ import com.sequenceiq.environment.parameter.dto.AwsParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureResourceEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureResourceGroupDto;
+import com.sequenceiq.environment.parameter.dto.GcpParametersDto;
+import com.sequenceiq.environment.parameter.dto.GcpResourceEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
 import com.sequenceiq.environment.parameter.dto.ResourceGroupCreation;
 import com.sequenceiq.environment.parameter.dto.ResourceGroupUsagePattern;
@@ -160,6 +165,8 @@ public class EnvironmentApiConverter {
             return awsParamsToParametersDto(request.getAws(), Optional.ofNullable(request.getFreeIpa()).map(AttachedFreeIpaRequest::getAws).orElse(null));
         } else if (AZURE.name().equals(cloudPlatform)) {
             return azureParamsToParametersDto(request.getAzure());
+        } else if (GCP.name().equals(cloudPlatform)) {
+            return gcpParamsToParametersDto(request.getGcp());
         }
         return null;
     }
@@ -183,6 +190,18 @@ public class EnvironmentApiConverter {
         }
         return ParametersDto.builder()
                 .withAzureParameters(azureParamsToAzureParametersDto(azureEnvironmentParameters))
+                .build();
+    }
+
+    private ParametersDto gcpParamsToParametersDto(GcpEnvironmentParameters gcpEnvironmentParameters) {
+        if (Objects.isNull(gcpEnvironmentParameters)) {
+            return ParametersDto.builder()
+                    .withGcpParameters(GcpParametersDto.builder()
+                            .build())
+                    .build();
+        }
+        return ParametersDto.builder()
+                .withGcpParameters(gcpParamsToGcpParametersDto(gcpEnvironmentParameters))
                 .build();
     }
 
@@ -222,12 +241,32 @@ public class EnvironmentApiConverter {
 
     }
 
+    private GcpParametersDto gcpParamsToGcpParametersDto(GcpEnvironmentParameters gcpEnvironmentParameters) {
+        return GcpParametersDto.builder()
+                .withEncryptionParameters(
+                        Optional.ofNullable(gcpEnvironmentParameters)
+                                .map(GcpEnvironmentParameters::getGcpResourceEncryptionParameters)
+                                .filter(gcpResourceEncryptionParameters -> Objects.nonNull(gcpResourceEncryptionParameters.getEncryptionKey()))
+                                .map(this::gcpResourceEncryptionParametersToGcpEncryptionParametersDto)
+                                .orElse(null)
+                )
+                .build();
+
+    }
+
     private AzureResourceEncryptionParametersDto azureResourceEncryptionParametersToAzureEncryptionParametersDto(
             AzureResourceEncryptionParameters azureResourceEncryptionParameters) {
         AzureResourceEncryptionParametersDto.Builder azureResourceEncryptionParametersDto = AzureResourceEncryptionParametersDto.builder()
                 .withEncryptionKeyUrl(azureResourceEncryptionParameters.getEncryptionKeyUrl())
                 .withEncryptionKeyResourceGroupName(azureResourceEncryptionParameters.getEncryptionKeyResourceGroupName());
         return azureResourceEncryptionParametersDto.build();
+    }
+
+    private GcpResourceEncryptionParametersDto gcpResourceEncryptionParametersToGcpEncryptionParametersDto(
+            GcpResourceEncryptionParameters gcpResourceEncryptionParameters) {
+        GcpResourceEncryptionParametersDto.Builder gcpResourceEncryptionParametersDto = GcpResourceEncryptionParametersDto.builder()
+                .withEncryptionKey(gcpResourceEncryptionParameters.getEncryptionKey());
+        return gcpResourceEncryptionParametersDto.build();
     }
 
     private AzureResourceGroupDto buildDefaultResourceGroupDto() {

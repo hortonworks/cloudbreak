@@ -42,6 +42,7 @@ import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.service.EnvironmentResourceService;
 import com.sequenceiq.environment.environment.validation.validators.EncryptionKeyUrlValidator;
+import com.sequenceiq.environment.environment.validation.validators.EncryptionKeyValidator;
 import com.sequenceiq.environment.environment.validation.validators.NetworkCreationValidator;
 import com.sequenceiq.environment.environment.validation.validators.PublicKeyValidator;
 import com.sequenceiq.environment.environment.validation.validators.TagValidator;
@@ -81,6 +82,9 @@ class EnvironmentValidatorServiceTest {
     @Mock
     private EncryptionKeyUrlValidator encryptionKeyUrlValidator;
 
+    @Mock
+    private EncryptionKeyValidator encryptionKeyValidator;
+
     private EnvironmentValidatorService underTest;
 
     @BeforeEach
@@ -95,7 +99,8 @@ class EnvironmentValidatorServiceTest {
                 singleton(CloudPlatform.YARN.name()),
                 tagValidator,
                 encryptionKeyUrlValidator,
-                entitlementService);
+                entitlementService,
+                encryptionKeyValidator);
     }
 
     @Test

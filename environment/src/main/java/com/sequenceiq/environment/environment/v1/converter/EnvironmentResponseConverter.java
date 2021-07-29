@@ -17,6 +17,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureRe
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.ResourceGroupUsage;
 import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpEnvironmentParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpResourceEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.yarn.YarnEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentAuthenticationResponse;
@@ -37,6 +38,8 @@ import com.sequenceiq.environment.parameter.dto.AwsParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureResourceEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureResourceGroupDto;
+import com.sequenceiq.environment.parameter.dto.GcpParametersDto;
+import com.sequenceiq.environment.parameter.dto.GcpResourceEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
 import com.sequenceiq.environment.parameter.dto.ResourceGroupUsagePattern;
 import com.sequenceiq.environment.proxy.v1.converter.ProxyConfigToProxyResponseConverter;
@@ -199,10 +202,21 @@ public class EnvironmentResponseConverter {
     }
 
     private GcpEnvironmentParameters gcpEnvParamsToGcpEnvironmentParams(ParametersDto parameters) {
-        return Optional.ofNullable(parameters.getGcpParametersDto())
-                .map(yarn -> GcpEnvironmentParameters.builder()
-                        .build())
+        GcpResourceEncryptionParametersDto gcpResourceEncryptionParametersDto = Optional.ofNullable(parameters.getGcpParametersDto())
+                .map(GcpParametersDto::getGcpResourceEncryptionParametersDto)
                 .orElse(null);
+        return GcpEnvironmentParameters.builder()
+                .withResourceEncryptionParameters(getIfNotNull(gcpResourceEncryptionParametersDto, this::gcpParametersToGcpResourceEncryptionParameters))
+                .build();
+/*        GcpResourceEncryptionParametersDto gcpResourceEncryptionParametersDto = Optional.ofNullable(parameters.getGcpParametersDto())
+                .map(GcpParametersDto::getGcpResourceEncryptionParametersDto)
+                .orElse(null);
+
+        return Optional.ofNullable(parameters.getGcpParametersDto())
+                .map(gcp -> GcpEnvironmentParameters.builder()
+                        .withResourceEncryptionParameters(getIfNotNull(gcpResourceEncryptionParametersDto, this::gcpParametersToGcpResourceEncryptionParameters))
+                        .build())
+                .orElse(null);*/
     }
 
     private S3GuardRequestParameters awsParametersToS3guardParam(AwsParametersDto awsParametersDto) {
@@ -224,6 +238,13 @@ public class EnvironmentResponseConverter {
                 .withEncryptionKeyUrl(azureResourceEncryptionParametersDto.getEncryptionKeyUrl())
                 .withDiskEncryptionSetId(azureResourceEncryptionParametersDto.getDiskEncryptionSetId())
                 .withEncryptionKeyResourceGroupName(azureResourceEncryptionParametersDto.getEncryptionKeyResourceGroupName())
+                .build();
+    }
+
+    private GcpResourceEncryptionParameters gcpParametersToGcpResourceEncryptionParameters(
+            GcpResourceEncryptionParametersDto gcpResourceEncryptionParametersDto) {
+        return GcpResourceEncryptionParameters.builder()
+                .withEncryptionKey(gcpResourceEncryptionParametersDto.getEncryptionKey())
                 .build();
     }
 

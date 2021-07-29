@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.api.v1.environment.model.request.gcp;
 
 import java.io.Serializable;
+
 import javax.validation.Valid;
 
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
@@ -15,11 +16,14 @@ public class GcpEnvironmentParameters implements Serializable {
     @ApiModelProperty(EnvironmentModelDescription.GCP_RESOURCE_ENCRYPTION_PARAMETERS)
     private GcpResourceEncryptionParameters gcpResourceEncryptionParameters;
 
-    private GcpEnvironmentParameters(Builder builder) {
+    public GcpEnvironmentParameters() {
+    }
+
+    private GcpEnvironmentParameters(GcpEnvironmentParameters.Builder builder) {
+        gcpResourceEncryptionParameters = builder.gcpResourceEncryptionParameters;
     }
 
     public GcpResourceEncryptionParameters getGcpResourceEncryptionParameters() {
-
         return gcpResourceEncryptionParameters;
     }
 
@@ -51,9 +55,7 @@ public class GcpEnvironmentParameters implements Serializable {
         }
 
         public GcpEnvironmentParameters build() {
-            GcpEnvironmentParameters gcpEnvironmentParameters = new GcpEnvironmentParameters(this);
-            gcpEnvironmentParameters.setGcpResourceEncryptionParameters(gcpResourceEncryptionParameters);
-            return gcpEnvironmentParameters;
+            return new GcpEnvironmentParameters(this);
         }
     }
 }
