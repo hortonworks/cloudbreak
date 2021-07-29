@@ -75,7 +75,7 @@ public class EnvironmentTestClient {
         return new EnvironmentChangeCredentialAction();
     }
 
-    public Action<EnvironmentTestDto, EnvironmentClient> getInternal() {
+    public Action<EnvironmentTestDto, EnvironmentClient> get() {
         return new EnvironmentInternalGetAction();
     }
 

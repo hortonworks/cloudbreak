@@ -10,6 +10,7 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseAvailabilityType;
 import com.sequenceiq.it.TestParameter;
+import com.sequenceiq.it.cloudbreak.assertion.distrox.AvailabilityZoneAssertion;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -65,6 +66,7 @@ public class DistroXEncryptedVolumeTest extends AbstractE2ETest {
                     sshEnaDriverCheckActions.checkEnaDriverOnAws(testDto.getResponse(), client);
                     return testDto;
                 })
+                .then(new AvailabilityZoneAssertion())
                 .then(validateTemplateContainsExternalDatabaseHostname())
                 .then((context, distrox, client) -> {
                     distrox.getResponse();
