@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.configuration;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
@@ -11,8 +12,9 @@ import javax.inject.Inject;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.core.task.AsyncTaskExecutor;
+import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -20,11 +22,14 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.logger.MDCUtils;
+import com.sequenceiq.freeipa.configuration.UsersyncConfigTest.UsersyncConfigTestConfig;
 
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import io.opentracing.Tracer;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = UsersyncConfig.class)
+@ContextConfiguration(classes = { UsersyncConfig.class, UsersyncConfigTestConfig.class })
 @TestPropertySource(properties = {
         "freeipa.usersync.threadpool.core.size=1",
         "freeipa.usersync.threadpool.capacity.size=10"
@@ -37,7 +42,7 @@ class UsersyncConfigTest {
 
     @Inject
     @Qualifier(UsersyncConfig.USERSYNC_TASK_EXECUTOR)
-    AsyncTaskExecutor usersyncTaskExecutor;
+    ExecutorService usersyncTaskExecutor;
 
     @MockBean
     Tracer tracer;
@@ -53,5 +58,14 @@ class UsersyncConfigTest {
                 assertEquals(USER_CRN, ThreadBasedUserCrnProvider.getUserCrn());
             });
         future.get(1L, TimeUnit.SECONDS);
+    }
+
+    @TestConfiguration
+    public static class UsersyncConfigTestConfig {
+
+        @Bean
+        public MeterRegistry meterRegistry() {
+            return new SimpleMeterRegistry();
+        }
     }
 }

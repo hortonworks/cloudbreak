@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
@@ -17,13 +18,10 @@ import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
-import com.sequenceiq.freeipa.client.operation.UserDisableOperation;
-import com.sequenceiq.freeipa.client.operation.UserEnableOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -59,6 +57,8 @@ import com.sequenceiq.freeipa.client.operation.GroupAddOperation;
 import com.sequenceiq.freeipa.client.operation.GroupRemoveMemberOperation;
 import com.sequenceiq.freeipa.client.operation.GroupRemoveOperation;
 import com.sequenceiq.freeipa.client.operation.UserAddOperation;
+import com.sequenceiq.freeipa.client.operation.UserDisableOperation;
+import com.sequenceiq.freeipa.client.operation.UserEnableOperation;
 import com.sequenceiq.freeipa.client.operation.UserRemoveOperation;
 import com.sequenceiq.freeipa.configuration.BatchPartitionSizeProperties;
 import com.sequenceiq.freeipa.configuration.UsersyncConfig;
@@ -67,7 +67,6 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.UserSyncStatus;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.WorkloadCredentialService;
-import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredentialUpdate;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsGroup;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsUser;
 import com.sequenceiq.freeipa.service.freeipa.user.model.SyncStatusDetail;
@@ -78,6 +77,7 @@ import com.sequenceiq.freeipa.service.freeipa.user.model.UserSyncOptions;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UsersState;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UsersStateDifference;
 import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredential;
+import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredentialUpdate;
 import com.sequenceiq.freeipa.service.freeipa.user.ums.UmsEventGenerationIdsProvider;
 import com.sequenceiq.freeipa.service.freeipa.user.ums.UmsUsersStateProviderDispatcher;
 import com.sequenceiq.freeipa.service.operation.OperationService;
@@ -128,7 +128,7 @@ public class UserSyncService {
 
     @Inject
     @Qualifier(UsersyncConfig.USERSYNC_TASK_EXECUTOR)
-    private AsyncTaskExecutor asyncTaskExecutor;
+    private ExecutorService asyncTaskExecutor;
 
     @Inject
     private OperationService operationService;
