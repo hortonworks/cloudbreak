@@ -173,6 +173,12 @@ public class StackCommonService {
         return put(stack, updateStackJson);
     }
 
+    public FlowIdentifier syncCmInWorkspace(NameOrCrn nameOrCrn, Long workspaceId, Set<String> candidateImageUuids) {
+        Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
+        MDCBuilder.buildMdcContext(stack);
+        return syncCm(stack, candidateImageUuids);
+    }
+
     public FlowIdentifier deleteMultipleInstancesInWorkspace(NameOrCrn nameOrCrn, Long workspaceId, Set<String> instanceIds, boolean forced) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Optional<Stack> stack = stackService.findStackByNameOrCrnAndWorkspaceId(nameOrCrn, workspaceId);
@@ -318,6 +324,10 @@ public class StackCommonService {
         } else {
             return new ImageChangeDto(stackId, stackImageChangeRequest.getImageId());
         }
+    }
+
+    private FlowIdentifier syncCm(Stack stack, Set<String> candidateImageUuids) {
+        return stackOperationService.syncCm(stack, candidateImageUuids);
     }
 
     private FlowIdentifier put(Stack stack, UpdateStackV4Request updateRequest) {

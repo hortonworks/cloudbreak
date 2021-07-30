@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.service.upgrade.sync;
 
-import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -15,6 +13,11 @@ import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterComponentUpdater;
 import com.sequenceiq.cloudbreak.service.upgrade.StackComponentUpdater;
+import com.sequenceiq.cloudbreak.service.upgrade.sync.operationresult.CmParcelSyncOperationResult;
+import com.sequenceiq.cloudbreak.service.upgrade.sync.operationresult.CmRepoSyncOperationResult;
+import com.sequenceiq.cloudbreak.service.upgrade.sync.operationresult.CmSyncOperationResult;
+import com.sequenceiq.cloudbreak.service.upgrade.sync.operationresult.CmSyncOperationSummary;
+import com.sequenceiq.cloudbreak.service.upgrade.sync.operationresult.CmSyncOperationSummaryService;
 
 @Service
 public class CmSyncerService {
@@ -33,42 +36,46 @@ public class CmSyncerService {
     @Inject
     private CmServerQueryService cmServerQueryService;
 
+    @Inject
+    private CmSyncOperationSummaryService cmSyncOperationSummaryService;
+
+    @Inject
+    private CmSyncResultMergerService cmSyncResultMergerService;
+
     /**
      * Will retrieve (if CM server is reachable):
      * - all the active parcels, CDH and prewarm parcels as well
      * - CM version
      * from the CM server and will try to find matching products in stated images.
      * The found products will then be used to update the Component and ClusterComponent table in DB
-     *
-     * @param stack           The stack that needs to be synced
+     *  @param stack           The stack that needs to be synced
      * @param candidateImages Set of candidate images whose products are used to match against the parcel version received from CM server.
      */
-    public void syncFromCmToDb(Stack stack, Set<Image> candidateImages) {
+    public CmSyncOperationSummary syncFromCmToDb(Stack stack, Set<Image> candidateImages) {
         if (!cmServerQueryService.isCmServerRunning(stack)) {
-            LOGGER.info("CM server is down, it is not possible to sync parcels and CM version to DB.");
-            return;
+            String message = "CM server is down, it is not possible to sync parcels and CM version from the server.";
+            LOGGER.info(message);
+            return CmSyncOperationSummary.builder().withError(message).build();
         }
         if (candidateImages.isEmpty()) {
-            LOGGER.info("No candidate images supplied, skipping syncing CM parcels and CM version to DB.");
-            return;
+            String message = "No candidate images supplied for CM sync, it is not possible to sync parcels and CM version from the server. " +
+                    "Please call Cloudera support";
+            LOGGER.info(message);
+            return CmSyncOperationSummary.builder().withError(message).build();
         }
-        syncInternal(stack, candidateImages);
+        return syncInternal(stack, candidateImages);
     }
 
-    private void syncInternal(Stack stack, Set<Image> candidateImages) {
-        Optional<Component> cmRepoComponents = cmInstalledComponentFinderService.findCmRepoComponent(stack, candidateImages);
-        Set<Component> parcelComponents = cmInstalledComponentFinderService.findParcelComponents(stack, candidateImages);
-        Set<Component> syncedFromServer = mergeFoundComponents(cmRepoComponents, parcelComponents);
+    private CmSyncOperationSummary syncInternal(Stack stack, Set<Image> candidateImages) {
+        CmRepoSyncOperationResult cmRepoSyncResult = cmInstalledComponentFinderService.findCmRepoComponent(stack, candidateImages);
+        CmParcelSyncOperationResult cmParcelSyncResult = cmInstalledComponentFinderService.findParcelComponents(stack, candidateImages);
+        Set<Component> syncedFromServer = cmSyncResultMergerService.merge(cmRepoSyncResult, cmParcelSyncResult, stack);
         LOGGER.debug("Active components read from CM server and persisting now to the DB: {}", syncedFromServer);
         stackComponentUpdater.updateComponentsByStackId(stack, syncedFromServer, false);
         clusterComponentUpdater.updateClusterComponentsByStackId(stack, syncedFromServer, false);
-    }
-
-    private Set<Component> mergeFoundComponents(Optional<Component> cmRepoComponents, Set<Component> parcelComponents) {
-        Set<Component> syncedFromServer = new HashSet<>();
-        cmRepoComponents.ifPresent(syncedFromServer::add);
-        syncedFromServer.addAll(parcelComponents);
-        return syncedFromServer;
+        CmSyncOperationSummary cmSyncOperationSummary = cmSyncOperationSummaryService.evaluate(new CmSyncOperationResult(cmRepoSyncResult, cmParcelSyncResult));
+        LOGGER.info("CM sync was executed, summary: {}", cmSyncOperationSummary);
+        return cmSyncOperationSummary;
     }
 
 }

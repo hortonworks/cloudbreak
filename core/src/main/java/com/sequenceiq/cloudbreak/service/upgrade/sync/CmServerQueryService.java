@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.upgrade.sync;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -43,10 +44,10 @@ public class CmServerQueryService {
      * @param stack The stack, to get the coordinates of the CM to query
      * @return The actual CM version
      */
-    String queryCmVersion(Stack stack) {
-        String cmVersion = apiConnectors.getConnector(stack).clusterStatusService().getClusterManagerVersion();
-        LOGGER.debug("Reading CM version info from CM server, found version: {}", cmVersion);
-        return cmVersion;
+    Optional<String> queryCmVersion(Stack stack) {
+        Optional<String> cmVersionOptional = apiConnectors.getConnector(stack).clusterStatusService().getClusterManagerVersion();
+        LOGGER.debug("Reading CM version info from CM server, found version: {}", cmVersionOptional);
+        return cmVersionOptional;
     }
 
     boolean isCmServerRunning(Stack stack) {

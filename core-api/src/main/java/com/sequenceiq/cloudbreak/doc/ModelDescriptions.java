@@ -790,4 +790,9 @@ public class ModelDescriptions {
         public static final String DRY_RUN = "Checks the eligibility of an image to upgrade";
         public static final String SHOW_AVAILABLE_IMAGES = "Returns the list of images that are eligible for the upgrade";
     }
+
+    public static class CmSyncRequest {
+        public static final String IMAGE_IDS = "List of image UUIDs to find CM and parcel information. " +
+                "If left empty, all images are used from the image catalog.";
+    }
 }

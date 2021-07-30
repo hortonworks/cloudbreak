@@ -91,6 +91,15 @@ public class ImageService {
         return componentConfigProviderService.getImage(stackId);
     }
 
+    public String getCurrentImageCatalogName(Long stackId) throws CloudbreakImageNotFoundException {
+        return getImage(stackId).getImageCatalogName();
+    }
+
+    public StatedImage getCurrentImage(Long stackId) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        Image image = getImage(stackId);
+        return imageCatalogService.getImage(image.getImageCatalogUrl(), image.getImageCatalogName(), image.getImageId());
+    }
+
     @Measure(ImageService.class)
     public Set<Component> create(Stack stack, String platformString, StatedImage imgFromCatalog)
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {

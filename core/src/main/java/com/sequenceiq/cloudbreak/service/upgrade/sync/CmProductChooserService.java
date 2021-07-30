@@ -36,13 +36,17 @@ public class CmProductChooserService {
 
     /**
      * Using the installedCMVersion, will look for a matching clouderaManagerRepo.
-     * @param installedCmVersion The version of the CM used for lookup
-     * @param candidateCmVersions The candidate cloudera manager repos
+     *
+     * @param installedCmVersionOptional The version of the CM used for lookup
+     * @param candidateCmVersions        The candidate cloudera manager repos
      * @return The found clouderaManagerRepo as an Optional, or empty
      */
-    Optional<ClouderaManagerRepo> chooseCmRepo(String installedCmVersion, Set<ClouderaManagerRepo> candidateCmVersions) {
+    Optional<ClouderaManagerRepo> chooseCmRepo(Optional<String> installedCmVersionOptional, Set<ClouderaManagerRepo> candidateCmVersions) {
+        if (installedCmVersionOptional.isEmpty()) {
+            return Optional.empty();
+        }
         Optional<ClouderaManagerRepo> foundClouderaManagerRepo = candidateCmVersions.stream()
-                .filter(candidateCmVersion -> installedCmVersion.equals(candidateCmVersion.getVersion()))
+                .filter(candidateCmVersion -> installedCmVersionOptional.get().equals(candidateCmVersion.getVersion()))
                 .findFirst();
         LOGGER.debug("ClouderaManagerRepo found based on the CM server version: {}", foundClouderaManagerRepo);
         return foundClouderaManagerRepo;

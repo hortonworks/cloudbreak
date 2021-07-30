@@ -215,6 +215,10 @@ public class StackOperations implements ResourcePropertyProvider {
         return stackCommonService.syncInWorkspace(nameOrCrn, workspaceId);
     }
 
+    public FlowIdentifier syncCm(NameOrCrn nameOrCrn, Long workspaceId, Set<String> candidateImageUuids) {
+        return stackCommonService.syncCmInWorkspace(nameOrCrn, workspaceId, candidateImageUuids);
+    }
+
     public FlowIdentifier retry(NameOrCrn nameOrCrn, Long workspaceId) {
         return stackCommonService.retryInWorkspace(nameOrCrn, workspaceId);
     }

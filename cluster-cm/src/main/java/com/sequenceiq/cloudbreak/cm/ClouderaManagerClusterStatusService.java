@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
@@ -403,13 +404,13 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
     }
 
     @Override
-    public String getClusterManagerVersion() {
+    public Optional<String> getClusterManagerVersion() {
         try {
             ApiVersionInfo apiVersionInfo = cmApiRetryTemplate.execute(context -> clouderaManagerApiFactory.getClouderaManagerResourceApi(client).getVersion());
-            return apiVersionInfo.getVersion();
+            return Optional.ofNullable(apiVersionInfo.getVersion());
         } catch (ApiException e) {
             LOGGER.info("Failed to get version from CM", e);
-            return "";
+            return Optional.empty();
         }
     }
 

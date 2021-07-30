@@ -103,7 +103,7 @@ public class CmProductChooserServiceTest {
 
     @Test
     void testChooseCmRepoWhenRepoWithMatchingVersionPresentThenRepoChosen() {
-        String installedCmVersion = "cmVersion1";
+        Optional<String> installedCmVersion = Optional.of("cmVersion1");
         Set<ClouderaManagerRepo> candidateCmRepos = Set.of(
                 new ClouderaManagerRepo().withVersion("cmVersion1"),
                 new ClouderaManagerRepo().withVersion("cmVersion2")
@@ -117,7 +117,20 @@ public class CmProductChooserServiceTest {
 
     @Test
     void testChooseCmRepoWhenRepoWithMatchingVersionMissingThenNoRepoChosen() {
-        String installedCmVersion = "cmVersion9";
+        Optional<String> installedCmVersion = Optional.of("cmVersion9");
+        Set<ClouderaManagerRepo> candidateCmRepos = Set.of(
+                new ClouderaManagerRepo().withVersion("cmVersion1"),
+                new ClouderaManagerRepo().withVersion("cmVersion2")
+        );
+
+        Optional<ClouderaManagerRepo> foundCmRepo = underTest.chooseCmRepo(installedCmVersion, candidateCmRepos);
+
+        assertTrue(foundCmRepo.isEmpty());
+    }
+
+    @Test
+    void testChooseCmRepoWhenInstalledCmVersionNotPresentThenNoRepoChosen() {
+        Optional<String> installedCmVersion = Optional.empty();
         Set<ClouderaManagerRepo> candidateCmRepos = Set.of(
                 new ClouderaManagerRepo().withVersion("cmVersion1"),
                 new ClouderaManagerRepo().withVersion("cmVersion2")
