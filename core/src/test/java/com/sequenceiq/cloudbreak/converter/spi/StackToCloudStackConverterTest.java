@@ -14,8 +14,10 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -36,6 +38,8 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -66,6 +70,7 @@ import com.sequenceiq.cloudbreak.converter.InstanceMetadataToImageIdConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
+import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
@@ -215,7 +220,7 @@ public class StackToCloudStackConverterTest {
         when(environmentClientService.getByCrn(anyString())).thenReturn(environmentResponse);
         when(loadBalancerPersistenceService.findByStackId(anyLong())).thenReturn(Collections.emptySet());
         when(targetGroupPersistenceService.findByLoadBalancerId(anyLong())).thenReturn(Collections.emptySet());
-        doNothing().when(multiAzCalculatorService).calculateByRoundRobin(anyMap(), any(InstanceGroup.class));
+        doNothing().when(multiAzCalculatorService).calculateByRoundRobin(anyMap(), any(InstanceGroup.class), any(CloudInstance.class));
         when(multiAzCalculatorService.prepareSubnetAzMap(any(DetailedEnvironmentResponse.class))).thenReturn(new HashMap<>());
     }
 
@@ -1134,6 +1139,167 @@ public class StackToCloudStackConverterTest {
             result.getGroups().get(0).getDeletedInstances().get(0).getParameters().get(NetworkConstants.SUBNET_ID));
         assertEquals(terminatedMetaData.getInstanceName(),
             result.getGroups().get(0).getDeletedInstances().get(0).getParameters().get(CloudInstance.INSTANCE_NAME));
+    }
+
+    static Object[][] buildInstanceTestWhenInstanceMetaDataPresentAndSubnetAndAvailabilityZoneDataProvider() {
+        return new Object[][]{
+                // testCaseName subnetId availabilityZone
+                {"subnetId=null, availabilityZone=null", null, null},
+                {"subnetId=\"subnet-1\", availabilityZone=null", "subnet-1", null},
+                {"subnetId=\"subnet-1\", availabilityZone=\"az-1\"", "subnet-1", "az-1"},
+        };
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("buildInstanceTestWhenInstanceMetaDataPresentAndSubnetAndAvailabilityZoneDataProvider")
+    void buildInstanceTestWhenInstanceMetaDataPresentAndSubnetAndAvailabilityZone(String testCaseName, String subnetId, String availabilityZone) {
+        InstanceMetaData instanceMetaData = new InstanceMetaData();
+        instanceMetaData.setInstanceId("i-1234");
+        instanceMetaData.setDiscoveryFQDN("vm.empire.com");
+        instanceMetaData.setInstanceName("worker3");
+        instanceMetaData.setSubnetId(subnetId);
+        instanceMetaData.setAvailabilityZone(availabilityZone);
+
+        InstanceGroup instanceGroup = new InstanceGroup();
+        Template template = new Template();
+        template.setVolumeTemplates(Set.of());
+        instanceGroup.setTemplate(template);
+        Stack stack = new Stack();
+        stack.setCloudPlatform("AWS");
+        instanceGroup.setStack(stack);
+        instanceGroup.setGroupName("worker");
+
+        when(instanceMetadataToImageIdConverter.convert(instanceMetaData)).thenReturn("image-12");
+
+        CloudInstance cloudInstance = underTest.buildInstance(instanceMetaData, instanceGroup, new StackAuthentication(), 12L, InstanceStatus.CREATED,
+                new DetailedEnvironmentResponse());
+
+        verifyCloudInstanceWhenInstanceMetaDataPresent(cloudInstance, subnetId, availabilityZone);
+    }
+
+    private void verifyCloudInstanceWhenInstanceMetaDataPresent(CloudInstance cloudInstance, String subnetIdExpected, String availabilityZoneExpected) {
+        assertThat(cloudInstance).isNotNull();
+        assertThat(cloudInstance.getInstanceId()).isEqualTo("i-1234");
+
+        InstanceTemplate instanceTemplate = cloudInstance.getTemplate();
+        assertThat(instanceTemplate).isNotNull();
+        assertThat(instanceTemplate.getPrivateId()).isEqualTo(12L);
+        assertThat(instanceTemplate.getGroupName()).isEqualTo("worker");
+        assertThat(instanceTemplate.getStatus()).isEqualTo(InstanceStatus.CREATED);
+        assertThat(instanceTemplate.getImageId()).isEqualTo("image-12");
+
+        assertThat(cloudInstance.getAuthentication()).isNotNull();
+
+        assertThat(cloudInstance.getSubnetId()).isEqualTo(subnetIdExpected);
+        assertThat(cloudInstance.getAvailabilityZone()).isEqualTo(availabilityZoneExpected);
+
+        Map<String, Object> parameters = cloudInstance.getParameters();
+        assertThat(parameters).isNotNull();
+        assertThat(parameters.get(CloudInstance.DISCOVERY_NAME)).isEqualTo("vm");
+        assertThat(parameters.get(SUBNET_ID)).isEqualTo(subnetIdExpected);
+        assertThat(parameters.get(CloudInstance.INSTANCE_NAME)).isEqualTo("worker3");
+        assertThat(parameters.get(CloudInstance.FQDN)).isEqualTo("vm.empire.com");
+    }
+
+    static Object[][] buildInstanceTestWhenInstanceMetaDataNullAndSubnetAndAvailabilityZoneAndRoundRobinDataProvider() {
+        return new Object[][]{
+                // testCaseName subnetId availabilityZone
+                {"subnetId=\"subnet-1\", availabilityZone=null", "subnet-1", null},
+                {"subnetId=\"subnet-1\", availabilityZone=\"az-1\"", "subnet-1", "az-1"},
+        };
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("buildInstanceTestWhenInstanceMetaDataNullAndSubnetAndAvailabilityZoneAndRoundRobinDataProvider")
+    void buildInstanceTestWhenInstanceMetaDataNullAndSubnetAndAvailabilityZoneAndRoundRobin(String testCaseName, String subnetId, String availabilityZone) {
+        InstanceGroup instanceGroup = new InstanceGroup();
+        Template template = new Template();
+        template.setVolumeTemplates(Set.of());
+        instanceGroup.setTemplate(template);
+        Stack stack = new Stack();
+        stack.setCloudPlatform("AWS");
+        instanceGroup.setStack(stack);
+        instanceGroup.setGroupName("worker");
+
+        DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
+        Map<String, String> subnetAzPairs = Map.of("subnet-1", "az-1");
+        when(multiAzCalculatorService.prepareSubnetAzMap(environment)).thenReturn(subnetAzPairs);
+        doAnswer(invocation -> {
+            CloudInstance cloudInstance = invocation.getArgument(2, CloudInstance.class);
+            cloudInstance.setSubnetId(subnetId);
+            cloudInstance.setAvailabilityZone(availabilityZone);
+            return null;
+        }).when(multiAzCalculatorService).calculateByRoundRobin(eq(subnetAzPairs), eq(instanceGroup), any(CloudInstance.class));
+
+        CloudInstance cloudInstance = underTest.buildInstance(null, instanceGroup, new StackAuthentication(), 12L, InstanceStatus.CREATED, environment);
+
+        verifyCloudInstanceWhenInstanceMetaDataNull(cloudInstance, subnetId, availabilityZone);
+
+        verify(instanceMetadataToImageIdConverter, never()).convert(any(InstanceMetaData.class));
+    }
+
+    private void verifyCloudInstanceWhenInstanceMetaDataNull(CloudInstance cloudInstance, String subnetIdExpected, String availabilityZoneExpected) {
+        assertThat(cloudInstance).isNotNull();
+        assertThat(cloudInstance.getInstanceId()).isNull();
+
+        InstanceTemplate instanceTemplate = cloudInstance.getTemplate();
+        assertThat(instanceTemplate).isNotNull();
+        assertThat(instanceTemplate.getPrivateId()).isEqualTo(12L);
+        assertThat(instanceTemplate.getGroupName()).isEqualTo("worker");
+        assertThat(instanceTemplate.getStatus()).isEqualTo(InstanceStatus.CREATED);
+        assertThat(instanceTemplate.getImageId()).isNull();
+
+        assertThat(cloudInstance.getAuthentication()).isNotNull();
+
+        assertThat(cloudInstance.getSubnetId()).isEqualTo(subnetIdExpected);
+        assertThat(cloudInstance.getAvailabilityZone()).isEqualTo(availabilityZoneExpected);
+
+        Map<String, Object> parameters = cloudInstance.getParameters();
+        assertThat(parameters).isNotNull();
+        assertThat(parameters).doesNotContainKey(CloudInstance.DISCOVERY_NAME);
+        assertThat(parameters).doesNotContainKey(SUBNET_ID);
+        assertThat(parameters).doesNotContainKey(CloudInstance.INSTANCE_NAME);
+        assertThat(parameters).doesNotContainKey(CloudInstance.FQDN);
+    }
+
+    static Object[][] buildInstanceTestWhenInstanceMetaDataNullAndSubnetAndAvailabilityZoneAndStackFallbackDataProvider() {
+        return new Object[][]{
+                // testCaseName withStackNetwork
+                {"withStackNetwork=false", false},
+                {"withStackNetwork=true", true},
+        };
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("buildInstanceTestWhenInstanceMetaDataNullAndSubnetAndAvailabilityZoneAndStackFallbackDataProvider")
+    void buildInstanceTestWhenInstanceMetaDataNullAndSubnetAndAvailabilityZoneAndStackFallback(String testCaseName, boolean withStackNetwork) {
+        InstanceGroup instanceGroup = new InstanceGroup();
+        Template template = new Template();
+        template.setVolumeTemplates(Set.of());
+        instanceGroup.setTemplate(template);
+        Stack stack = new Stack();
+        stack.setCloudPlatform("AWS");
+        String subnetId = null;
+        String availabilityZone = null;
+        if (withStackNetwork) {
+            Network network = new Network();
+            network.setAttributes(Json.silent(Map.of("subnetId", "subnet-1")));
+            stack.setNetwork(network);
+            subnetId = "subnet-1";
+            availabilityZone = "az-1";
+        }
+        instanceGroup.setStack(stack);
+        instanceGroup.setGroupName("worker");
+
+        DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
+        Map<String, String> subnetAzPairs = Map.of("subnet-1", "az-1");
+        when(multiAzCalculatorService.prepareSubnetAzMap(environment)).thenReturn(subnetAzPairs);
+
+        CloudInstance cloudInstance = underTest.buildInstance(null, instanceGroup, new StackAuthentication(), 12L, InstanceStatus.CREATED, environment);
+
+        verifyCloudInstanceWhenInstanceMetaDataNull(cloudInstance, subnetId, availabilityZone);
+
+        verify(instanceMetadataToImageIdConverter, never()).convert(any(InstanceMetaData.class));
     }
 
 }

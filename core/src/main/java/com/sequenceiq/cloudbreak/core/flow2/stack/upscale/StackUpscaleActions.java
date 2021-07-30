@@ -27,10 +27,10 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
-import com.sequenceiq.cloudbreak.cloud.transform.ResourceLists;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyEnablementService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
@@ -43,7 +43,6 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterProxyReRegistrationRequest;
@@ -114,10 +113,7 @@ public class StackUpscaleActions {
                     sendEvent(context);
                 } else {
                     List<CloudResourceStatus> list = resourceService.getAllAsCloudResourceStatus(payload.getResourceId());
-                    CloudStack stack = cloudStackConverter.convert(stackService.getByIdWithListsInTransaction(payload.getResourceId()));
-                    UpscaleStackRequest<UpscaleStackResult> request =
-                            new UpscaleStackRequest<>(context.getCloudContext(), context.getCloudCredential(), stack, ResourceLists.transform(list));
-                    UpscaleStackResult result = new UpscaleStackResult(request.getResourceId(), ResourceStatus.CREATED, list);
+                    UpscaleStackResult result = new UpscaleStackResult(payload.getResourceId(), ResourceStatus.CREATED, list);
                     sendEvent(context, result.selector(), result);
                 }
             }
@@ -254,7 +250,7 @@ public class StackUpscaleActions {
             private ClusterProxyEnablementService clusterProxyEnablementService;
 
             @Override
-            protected void doExecute(StackScalingFlowContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(StackScalingFlowContext context, StackEvent payload, Map<Object, Object> variables) {
                 if (clusterProxyEnablementService.isClusterProxyApplicable(context.getStack().cloudPlatform())) {
                     stackUpscaleService.reRegisterWithClusterProxy(context.getStack().getId());
                     sendEvent(context);
@@ -309,7 +305,7 @@ public class StackUpscaleActions {
             private InstanceMetaDataService instanceMetaDataService;
 
             @Override
-            protected void doExecute(StackScalingFlowContext context, ExtendHostMetadataResult payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(StackScalingFlowContext context, ExtendHostMetadataResult payload, Map<Object, Object> variables) {
                 Set<InstanceMetaData> instanceMetaData = instanceMetaDataService.findNotTerminatedForStack(context.getStack().getId());
                 Set<String> ips = payload.getRequest().getUpscaleCandidateAddresses();
                 Set<String> hostNames = instanceMetaData.stream()
@@ -345,7 +341,7 @@ public class StackUpscaleActions {
     }
 
     @Bean(name = "UPSCALE_FAILED_STATE")
-    public Action<?, ?> stackStartFailedAction() {
+    public Action<?, ?> stackUpscaleFailedAction() {
         return new AbstractStackFailureAction<StackUpscaleState, StackUpscaleEvent>() {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {

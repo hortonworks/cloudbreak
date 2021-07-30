@@ -338,7 +338,7 @@ class AllocateDatabaseServerV4RequestToDBStackConverterTest {
                 .withTag(new TagResponse())
                 .withLocation(LocationResponse.LocationResponseBuilder.aLocationResponse().withName(REGION).build())
                 .withSecurityAccess(SecurityAccessResponse.builder().withDefaultSecurityGroupId(DEFAULT_SECURITY_GROUP_ID).build())
-                .withNetwork(EnvironmentNetworkResponse.EnvironmentNetworkResponseBuilder.anEnvironmentNetworkResponse()
+                .withNetwork(EnvironmentNetworkResponse.builder()
                         .withSubnetMetas(
                                 Map.of(
                                         "subnet-1", cloudSubnets.get(0),

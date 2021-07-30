@@ -182,9 +182,8 @@ public class LoadBalancerConfigService {
             loadBalancerOptional = loadBalancers.stream()
                 .filter(lb -> lb.getType() != null && !preferredType.equals(lb.getType()))
                 .findFirst();
-            if (loadBalancerOptional.isPresent()) {
-                LOGGER.debug("Could not find load balancer of preferred type {}. Using type {}", preferredType, loadBalancerOptional.get().getType());
-            }
+            loadBalancerOptional.ifPresent(loadBalancer ->
+                    LOGGER.debug("Could not find load balancer of preferred type {}. Using type {}", preferredType, loadBalancer.getType()));
         }
 
         if (loadBalancerOptional.isEmpty()) {
@@ -282,12 +281,12 @@ public class LoadBalancerConfigService {
         boolean dryRun, Set<LoadBalancer> loadBalancers) {
         Optional<TargetGroup> knoxTargetGroup = setupKnoxTargetGroup(stack, dryRun);
         if (knoxTargetGroup.isPresent()) {
-            if (isNetworkUsingPrivateSubnet(stack.getNetwork(), environment.getNetwork())) {
+            if (environment != null && isNetworkUsingPrivateSubnet(stack.getNetwork(), environment.getNetwork())) {
                 setupLoadBalancer(dryRun, stack, loadBalancers, knoxTargetGroup.get(), LoadBalancerType.PRIVATE);
             } else {
                 LOGGER.debug("Private subnet is not available. The internal load balancer will not be created.");
             }
-            if (shouldCreateExternalKnoxLoadBalancer(stack.getNetwork(), environment.getNetwork(), stack.getCloudPlatform())) {
+            if (environment != null && shouldCreateExternalKnoxLoadBalancer(stack.getNetwork(), environment.getNetwork(), stack.getCloudPlatform())) {
                 setupLoadBalancer(dryRun, stack, loadBalancers, knoxTargetGroup.get(), LoadBalancerType.PUBLIC);
             } else {
                 LOGGER.debug("External load balancer creation is disabled.");
@@ -320,7 +319,7 @@ public class LoadBalancerConfigService {
     }
 
     private boolean isSelectedSubnetAvailableAndRequestedType(Network network, EnvironmentNetworkResponse envNetwork, boolean privateType) {
-        if (network != null) {
+        if (network != null && envNetwork != null) {
             String subnetId = getSubnetId(network);
             if (StringUtils.isNotEmpty(subnetId)) {
                 LOGGER.debug("Found selected stack subnet {}", subnetId);
@@ -389,7 +388,7 @@ public class LoadBalancerConfigService {
     }
 
     private boolean isEndpointGatewayEnabled(EnvironmentNetworkResponse network) {
-        boolean result =  network != null && network.getPublicEndpointAccessGateway() == PublicEndpointAccessGateway.ENABLED;
+        boolean result = network != null && network.getPublicEndpointAccessGateway() == PublicEndpointAccessGateway.ENABLED;
         if (result) {
             LOGGER.debug("Public endpoint access gateway is enabled. A public load balancer will be created.");
         } else {

@@ -24,7 +24,7 @@ import com.sequenceiq.common.model.PrivateEndpointType;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAwsParams.EnvironmentNetworkAwsParamsBuilder;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAzureParams;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
-import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse.EnvironmentNetworkResponseBuilder;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 
 public class NetworkParameterAdderTest {
@@ -66,7 +66,7 @@ public class NetworkParameterAdderTest {
         DBStack dbStack = new DBStack();
         DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.builder()
                 .withCloudPlatform(CloudPlatform.AWS.name())
-                .withNetwork(EnvironmentNetworkResponseBuilder.anEnvironmentNetworkResponse()
+                .withNetwork(EnvironmentNetworkResponse.builder()
                         .withAws(EnvironmentNetworkAwsParamsBuilder.anEnvironmentNetworkAwsParams().withVpcId(TEST_VPC_ID).build())
                         .withNetworkCidr(TEST_VPC_CIDR)
                         .build())
@@ -84,7 +84,7 @@ public class NetworkParameterAdderTest {
         DBStack dbStack = new DBStack();
         DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.builder()
                 .withCloudPlatform(CloudPlatform.AZURE.name())
-                .withNetwork(EnvironmentNetworkResponseBuilder.anEnvironmentNetworkResponse()
+                .withNetwork(EnvironmentNetworkResponse.builder()
                         .withSubnetMetas(Map.of())
                         .withAzure(
                                 EnvironmentNetworkAzureParams.EnvironmentNetworkAzureParamsBuilder.anEnvironmentNetworkAzureParams()

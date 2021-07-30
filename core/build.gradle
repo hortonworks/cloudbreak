@@ -150,7 +150,7 @@ dependencyManagement {
     dependency group: 'com.thoughtworks.xstream',           name: 'xstream',                     version: xStream
     dependency group: 'com.github.fommil',                  name: 'openssh',                     version: '1.0'
 
-    dependency (group: 'io.swagger',                         name: 'swagger-jersey2-jaxrs',       version: swaggerVersion) {
+    dependency (group: 'io.swagger',                        name: 'swagger-jersey2-jaxrs',       version: swaggerVersion) {
       exclude 'org.yaml:snakeyaml'
     }
     dependency group: 'javax.mail',                         name: 'mail',                        version: '1.5.0-b01'
@@ -176,7 +176,7 @@ dependencyManagement {
 dependencies {
   compile group: 'com.squareup.okhttp3',               name: 'okhttp',                     version: okhttpVersion
   compile group: 'com.google.code.gson',               name: 'gson'
-  compile group: 'com.fasterxml.jackson.core',    name: 'jackson-databind'
+  compile group: 'com.fasterxml.jackson.core',         name: 'jackson-databind'
 
   compile group: 'org.springframework.boot',           name: 'spring-boot-starter'
   compile group: 'org.springframework.boot',           name: 'spring-boot-starter-web'
@@ -273,16 +273,17 @@ dependencies {
   runtime project(':cluster-cm')
   runtime project(':auth-connector')
   runtime project(':audit-connector')
-  runtime group: 'activation',                    name: 'activation'
+  runtime group: 'activation',                   name: 'activation'
 
   testCompile project(path: ':core-model', configuration: 'tests')
   testCompile project(path: ':cloud-common', configuration: 'tests')
   testCompile project(path: ':common', configuration: 'tests')
   testCompile project(path: ':authorization-common', configuration: 'tests')
+  testCompile project(path: ':flow', configuration: 'tests')
 
   testCompile group: 'org.powermock',            name: 'powermock-module-junit4'
   testCompile group: 'org.powermock',            name: 'powermock-api-mockito2'
-  testCompile (group: 'org.mockito',              name: 'mockito-core') {
+  testCompile (group: 'org.mockito',             name: 'mockito-core') {
     exclude group: 'org.hamcrest'
   }
   testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test'

@@ -30,6 +30,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Strings;
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
@@ -46,6 +48,7 @@ import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hue.HueRoles;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
@@ -60,6 +63,7 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.IdBroker;
@@ -355,7 +359,7 @@ public class StackCreatorService {
     private void throwBadRequestIfHaveMissingRecipe(final Set<String> missingRecipes, final String instanceGroupName) {
         if (!missingRecipes.isEmpty()) {
             if (missingRecipes.size() > 1) {
-                throw new BadRequestException(String.format("The given recipes does not exists for the instance group \"%s\": %s",
+                throw new BadRequestException(String.format("The given recipes do not exist for the instance group \"%s\": %s",
                         instanceGroupName, String.join(", ", missingRecipes)));
             } else {
                 throw new BadRequestException(String.format("The given recipe does not exist for the instance group \"%s\": %s",
@@ -372,16 +376,38 @@ public class StackCreatorService {
         }
     }
 
+    @VisibleForTesting
     void fillInstanceMetadata(DetailedEnvironmentResponse environment, Stack stack) {
         long privateIdNumber = 0;
+        Map<String, String> subnetAzPairs = multiAzCalculatorService.prepareSubnetAzMap(environment);
+        String stackSubnetId = getStackSubnetIdIfExists(stack);
+        String stackAz = stackSubnetId == null ? null : subnetAzPairs.get(stackSubnetId);
         for (InstanceGroup instanceGroup : sortInstanceGroups(stack)) {
             for (InstanceMetaData instanceMetaData : instanceGroup.getAllInstanceMetaData()) {
                 instanceMetaData.setPrivateId(privateIdNumber++);
                 instanceMetaData.setInstanceStatus(InstanceStatus.REQUESTED);
             }
-            multiAzCalculatorService.calculateByRoundRobin(
-                    multiAzCalculatorService.prepareSubnetAzMap(environment),
-                    instanceGroup);
+            multiAzCalculatorService.calculateByRoundRobin(subnetAzPairs, instanceGroup);
+            prepareInstanceMetaDataSubnetAndAvailabilityZoneAndRackId(stackSubnetId, stackAz, instanceGroup);
+        }
+    }
+
+    private String getStackSubnetIdIfExists(Stack stack) {
+        return Optional.ofNullable(stack.getNetwork())
+                .map(Network::getAttributes)
+                .map(Json::getMap)
+                .map(attr -> attr.get("subnetId"))
+                .map(Object::toString)
+                .orElse(null);
+    }
+
+    private void prepareInstanceMetaDataSubnetAndAvailabilityZoneAndRackId(String stackSubnetId, String stackAz, InstanceGroup instanceGroup) {
+        for (InstanceMetaData instanceMetaData : instanceGroup.getAllInstanceMetaData()) {
+            if (Strings.isNullOrEmpty(instanceMetaData.getSubnetId()) && Strings.isNullOrEmpty(instanceMetaData.getAvailabilityZone())) {
+                instanceMetaData.setSubnetId(stackSubnetId);
+                instanceMetaData.setAvailabilityZone(stackAz);
+            }
+            instanceMetaData.setRackId(multiAzCalculatorService.determineRackId(instanceMetaData.getSubnetId(), instanceMetaData.getAvailabilityZone()));
         }
     }
 

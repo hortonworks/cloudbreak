@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.CREATED;
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.TERMINATED;
 
@@ -51,8 +50,6 @@ import com.sequenceiq.common.api.type.LoadBalancerType;
 
 @Service
 public class MetadataSetupService {
-
-    private static final String DEFAULT_RACK = "default-rack";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MetadataSetupService.class);
 
@@ -158,7 +155,6 @@ public class MetadataSetupService {
                 instanceMetaDataEntry.setInstanceId(instanceId);
                 instanceMetaDataEntry.setPrivateId(privateId);
                 instanceMetaDataEntry.setStartDate(clock.getCurrentTimeMillis());
-                instanceMetaDataEntry.setRackId(determineRackId(instanceMetaDataEntry.getSubnetId(), instanceMetaDataEntry.getAvailabilityZone()));
                 if (instanceMetaDataEntry.getClusterManagerServer() == null) {
                     instanceMetaDataEntry.setServer(Boolean.FALSE);
                 }
@@ -204,8 +200,6 @@ public class MetadataSetupService {
 
     private void setupFromCloudInstance(CloudInstance cloudInstance, InstanceMetaData instanceMetaDataEntry) {
         LOGGER.debug("Setup InstanceMetaData {}, from CloudInstance {}", instanceMetaDataEntry, cloudInstance);
-        instanceMetaDataEntry.setSubnetId(cloudInstance.getSubnetId());
-        instanceMetaDataEntry.setAvailabilityZone(cloudInstance.getAvailabilityZone());
         instanceMetaDataEntry.setInstanceName(cloudInstance.getStringParameter(CloudInstance.INSTANCE_NAME));
     }
 
@@ -262,9 +256,7 @@ public class MetadataSetupService {
     }
 
     private boolean selectPrimaryGWIfNotSelected(boolean primaryIgSelectedYet, InstanceMetaData instanceMetaDataEntry) {
-        boolean primaryIgSelected = primaryIgSelectedYet;
-        if (!primaryIgSelected) {
-            primaryIgSelected = true;
+        if (!primaryIgSelectedYet) {
             instanceMetaDataEntry.setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
             instanceMetaDataEntry.setServer(Boolean.TRUE);
             LOGGER.info("Primary gateway is not selected, let's select this instance: {}", instanceMetaDataEntry.getInstanceId());
@@ -272,7 +264,7 @@ public class MetadataSetupService {
             LOGGER.info("Primary gateway was selected. {} will be a normal gateway instance.", instanceMetaDataEntry.getInstanceId());
             instanceMetaDataEntry.setInstanceMetadataType(InstanceMetadataType.GATEWAY);
         }
-        return primaryIgSelected;
+        return true;
     }
 
     private boolean restorePrimaryGWIfFQDNMatch(InstanceMetaData terminatedPrimaryGwWhichShouldBeRestored, InstanceMetaData instanceMetaDataEntry) {
@@ -286,13 +278,6 @@ public class MetadataSetupService {
             instanceMetaDataEntry.setInstanceMetadataType(InstanceMetadataType.GATEWAY);
             return false;
         }
-    }
-
-    private String determineRackId(String subnetId, String availabilityZone) {
-        return "/" +
-                (isNullOrEmpty(availabilityZone) ?
-                        (isNullOrEmpty(subnetId) ? DEFAULT_RACK : subnetId)
-                        : availabilityZone);
     }
 
     private InstanceMetaData createInstanceMetadataIfAbsent(Iterable<InstanceMetaData> allInstanceMetadata, Long privateId, String instanceId) {
