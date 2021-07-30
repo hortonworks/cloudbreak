@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.upgrade.sync;
+package com.sequenceiq.cloudbreak.service.upgrade.sync.component;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
@@ -19,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
+import com.sequenceiq.cloudbreak.service.upgrade.sync.common.ParcelInfo;
 
 @ExtendWith(MockitoExtension.class)
 public class CmServerQueryServiceTest {

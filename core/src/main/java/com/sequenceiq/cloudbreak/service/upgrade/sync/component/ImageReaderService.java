@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.upgrade.sync;
+package com.sequenceiq.cloudbreak.service.upgrade.sync.component;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -35,7 +35,7 @@ public class ImageReaderService {
      * @param datalake true if the stack is a datalake
      * @return a set of ClouderaManagerProducts present on the image
      */
-    public Set<ClouderaManagerProduct> getParcels(Set<Image> statedImages, boolean datalake) {
+    Set<ClouderaManagerProduct> getParcels(Set<Image> statedImages, boolean datalake) {
         Set<ClouderaManagerProduct> foundParcelProducts = statedImages.stream()
                 .map(im -> clouderaManagerProductTransformer.transform(im, true, !datalake))
                 .flatMap(Collection::stream)

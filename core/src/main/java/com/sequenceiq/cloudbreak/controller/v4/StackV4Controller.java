@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Requ
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UserNamePasswordV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerSyncV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.CertificatesRotationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBlueprintV4Response;
@@ -117,6 +118,12 @@ public class StackV4Controller extends NotificationController implements StackV4
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public FlowIdentifier sync(Long workspaceId, String name, @AccountId String accountId) {
         return stackOperations.sync(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId());
+    }
+
+    @Override
+    @InternalOnly
+    public FlowIdentifier syncCm(Long workspaceId, String name, @InitiatorUserCrn String initiatorUserCrn, ClouderaManagerSyncV4Request syncRequest) {
+        return stackOperations.syncCm(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId(), syncRequest.getCandidateImageUuids());
     }
 
     @Override

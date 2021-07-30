@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.upgrade.sync;
+package com.sequenceiq.cloudbreak.service.upgrade.sync.component;
 
 
 import static org.hamcrest.MatcherAssert.assertThat;
