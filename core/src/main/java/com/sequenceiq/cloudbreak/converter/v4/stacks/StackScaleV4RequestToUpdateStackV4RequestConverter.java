@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 
 @Component
-public class UpdateStackRequestV2ToUpdateStackRequestConverter extends AbstractConversionServiceAwareConverter<StackScaleV4Request, UpdateStackV4Request> {
+public class StackScaleV4RequestToUpdateStackV4RequestConverter extends AbstractConversionServiceAwareConverter<StackScaleV4Request, UpdateStackV4Request> {
 
     @Inject
     private InstanceGroupService instanceGroupService;

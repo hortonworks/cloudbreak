@@ -1,18 +1,20 @@
 package com.sequenceiq.cloudbreak.controller;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -22,13 +24,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
@@ -41,12 +43,14 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.In
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.controller.validation.ParametersValidator;
 import com.sequenceiq.cloudbreak.controller.validation.filesystem.FileSystemValidator;
 import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidator;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
+import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -67,13 +71,12 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.StackViewService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
-import com.sequenceiq.cloudbreak.validation.Validator;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class StackCreatorServiceTest {
 
     private static final Long WORKSPACE_ID = 1L;
@@ -84,18 +87,9 @@ public class StackCreatorServiceTest {
 
     private static final String STACK_NAME = "STACK_NAME";
 
-    private static final String CLOUD_PLATFORM = "MOCK";
-
-    private static final String BLUEPRINT_NAME = "BLUEPRINT_NAME";
-
-    private static final String STACK_VERSION = "STACK_VERSION";
-
     private static final String AWS_PLATFORM = "AWS";
 
     private static final String YARN_PLATFORM = "YARN";
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
 
     @Mock
     private StackDecorator stackDecorator;
@@ -129,9 +123,6 @@ public class StackCreatorServiceTest {
 
     @Mock
     private SharedServiceConfigProvider sharedServiceConfigProvider;
-
-    @Mock
-    private Validator<StackV4Request> stackRequestValidator;
 
     @Mock
     private TransactionService transactionService;
@@ -195,13 +186,9 @@ public class StackCreatorServiceTest {
         doThrow(new NotFoundException("missing recipe"))
                 .when(recipeService).get(NameOrCrn.ofName(RECIPE_NAME), WORKSPACE_ID);
 
-        expectedException.expect(BadRequestException.class);
-        expectedException.expectMessage("The given recipe does not exist for the instance group \"INSTANCE_GROUP\": RECIPE_NAME");
+        BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> underTest.createStack(user, workspace, stackRequest, false));
 
-        underTest.createStack(user, workspace, stackRequest, false);
-
-        verify(blueprintService).updateDefaultBlueprintCollection(WORKSPACE_ID);
-        verify(stackRequestValidator).validate(stackRequest);
+        assertThat(badRequestException).hasMessage("The given recipe does not exist for the instance group \"INSTANCE_GROUP\": RECIPE_NAME");
     }
 
     @Test
@@ -218,15 +205,11 @@ public class StackCreatorServiceTest {
 
         when(stackViewService.findByName(anyString(), anyLong())).thenReturn(Optional.of(new StackView()));
 
-        expectedException.expect(BadRequestException.class);
-        expectedException.expectMessage("Cluster already exists: STACK_NAME");
+        BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> underTest.createStack(user, workspace, stackRequest, false));
 
-        underTest.createStack(user, workspace, stackRequest, false);
+        assertThat(badRequestException).hasMessage("Cluster already exists: STACK_NAME");
 
-        verify(blueprintService).updateDefaultBlueprintCollection(WORKSPACE_ID);
-        verify(stackRequestValidator).validate(stackRequest);
         verify(recipeService).get(NameOrCrn.ofName(RECIPE_NAME), WORKSPACE_ID);
-        verify(stackService).getIdByNameInWorkspace(STACK_NAME, WORKSPACE_ID);
         verify(stackViewService).findByName(STACK_NAME, WORKSPACE_ID);
     }
 
@@ -353,22 +336,24 @@ public class StackCreatorServiceTest {
         InstanceGroup workerGroup = getARequestGroup("worker", 2, InstanceGroupType.CORE);
         InstanceGroup computeGroup = getARequestGroup("compute", 4, InstanceGroupType.CORE);
         stack.setInstanceGroups(Set.of(masterGroup, workerGroup, computeGroup));
-        when(multiAzCalculatorService.prepareSubnetAzMap(any(DetailedEnvironmentResponse.class)))
-                .thenReturn(new HashMap<>());
+        when(multiAzCalculatorService.prepareSubnetAzMap(environmentResponse)).thenReturn(Map.of());
         doNothing().when(multiAzCalculatorService).calculateByRoundRobin(anyMap(), any(InstanceGroup.class));
 
         underTest.fillInstanceMetadata(environmentResponse, stack);
 
         Map<String, Set<InstanceMetaData>> hostGroupInstances = stack.getInstanceGroups().stream().collect(
-                Collectors.toMap(InstanceGroup::getGroupName, instanceGroup -> instanceGroup.getAllInstanceMetaData()));
-        Long privateIdStart = 0L;
+                Collectors.toMap(InstanceGroup::getGroupName, InstanceGroup::getAllInstanceMetaData));
+        long privateIdStart = 0L;
         validateInstanceMetadataPrivateId("master", 1, privateIdStart, hostGroupInstances.get("master"));
+        validateInstanceMetadataSubnetAndAvailabilityZoneAndRackId("master", 1, hostGroupInstances.get("master"), null, null, null);
 
         privateIdStart = 1L;
         validateInstanceMetadataPrivateId("compute", 4, privateIdStart, hostGroupInstances.get("compute"));
+        validateInstanceMetadataSubnetAndAvailabilityZoneAndRackId("compute", 4, hostGroupInstances.get("compute"), null, null, null);
 
         privateIdStart = 5L;
         validateInstanceMetadataPrivateId("worker", 2, privateIdStart, hostGroupInstances.get("worker"));
+        validateInstanceMetadataSubnetAndAvailabilityZoneAndRackId("worker", 2, hostGroupInstances.get("worker"), null, null, null);
     }
 
     @Test
@@ -380,29 +365,92 @@ public class StackCreatorServiceTest {
         InstanceGroup workerGroup = getARequestGroup("worker", 3, InstanceGroupType.CORE);
         InstanceGroup masterGroup = getARequestGroup("master", 2, InstanceGroupType.CORE);
         stack.setInstanceGroups(Set.of(masterGroup, workerGroup, computeGroup, managerGroup, gatewayGroup));
-        when(multiAzCalculatorService.prepareSubnetAzMap(any(DetailedEnvironmentResponse.class)))
-                .thenReturn(new HashMap<>());
+        when(multiAzCalculatorService.prepareSubnetAzMap(environmentResponse)).thenReturn(Map.of());
         doNothing().when(multiAzCalculatorService).calculateByRoundRobin(anyMap(), any(InstanceGroup.class));
 
         underTest.fillInstanceMetadata(environmentResponse, stack);
 
         Map<String, Set<InstanceMetaData>> hostGroupInstances = stack.getInstanceGroups().stream().collect(
-        Collectors.toMap(InstanceGroup::getGroupName, instanceGroup -> instanceGroup.getAllInstanceMetaData()));
+        Collectors.toMap(InstanceGroup::getGroupName, InstanceGroup::getAllInstanceMetaData));
 
-        Long privateIdStart = 0L;
+        long privateIdStart = 0L;
         validateInstanceMetadataPrivateId("manager", 1, privateIdStart, hostGroupInstances.get("manager"));
+        validateInstanceMetadataSubnetAndAvailabilityZoneAndRackId("manager", 1, hostGroupInstances.get("manager"), null, null, null);
 
         privateIdStart = 1L;
         validateInstanceMetadataPrivateId("compute", 0, privateIdStart, hostGroupInstances.get("compute"));
+        validateInstanceMetadataSubnetAndAvailabilityZoneAndRackId("compute", 0, hostGroupInstances.get("compute"), null, null, null);
 
         privateIdStart = 1L;
         validateInstanceMetadataPrivateId("gateway", 2, privateIdStart, hostGroupInstances.get("gateway"));
+        validateInstanceMetadataSubnetAndAvailabilityZoneAndRackId("gateway", 2, hostGroupInstances.get("gateway"), null, null, null);
 
         privateIdStart = 3L;
         validateInstanceMetadataPrivateId("master", 2, privateIdStart, hostGroupInstances.get("master"));
+        validateInstanceMetadataSubnetAndAvailabilityZoneAndRackId("master", 2, hostGroupInstances.get("master"), null, null, null);
 
         privateIdStart = 5L;
         validateInstanceMetadataPrivateId("worker", 3, privateIdStart, hostGroupInstances.get("worker"));
+        validateInstanceMetadataSubnetAndAvailabilityZoneAndRackId("worker", 3, hostGroupInstances.get("worker"), null, null, null);
+    }
+
+    static Object[][] fillInstanceMetadataTestWhenSubnetAndAvailabilityZoneAndRackIdAndRoundRobinDataProvider() {
+        return new Object[][]{
+                // testCaseName subnetId availabilityZone
+                {"subnetId=\"subnet-1\", availabilityZone=null", "subnet-1", null},
+                {"subnetId=\"subnet-1\", availabilityZone=\"az-1\"", "subnet-1", "az-1"},
+        };
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("fillInstanceMetadataTestWhenSubnetAndAvailabilityZoneAndRackIdAndRoundRobinDataProvider")
+    public void fillInstanceMetadataTestWhenSubnetAndAvailabilityZoneAndRackIdAndRoundRobin(String testCaseName, String subnetId, String availabilityZone) {
+        Stack stack = new Stack();
+        InstanceGroup workerGroup = getARequestGroup("worker", 3, InstanceGroupType.CORE);
+        stack.setInstanceGroups(Set.of(workerGroup));
+        Map<String, String> subnetAzPairs = Map.of();
+        when(multiAzCalculatorService.prepareSubnetAzMap(environmentResponse)).thenReturn(subnetAzPairs);
+        doAnswer(invocation -> {
+            InstanceGroup instanceGroup = invocation.getArgument(1, InstanceGroup.class);
+            instanceGroup.getAllInstanceMetaData().forEach(instanceMetaData -> {
+                instanceMetaData.setSubnetId(subnetId);
+                instanceMetaData.setAvailabilityZone(availabilityZone);
+            });
+            return null;
+        }).when(multiAzCalculatorService).calculateByRoundRobin(subnetAzPairs, workerGroup);
+        when(multiAzCalculatorService.determineRackId(subnetId, availabilityZone)).thenReturn("/fooRack");
+
+        underTest.fillInstanceMetadata(environmentResponse, stack);
+
+        Map<String, Set<InstanceMetaData>> hostGroupInstances = stack.getInstanceGroups().stream().collect(
+                Collectors.toMap(InstanceGroup::getGroupName, InstanceGroup::getAllInstanceMetaData));
+
+        long privateIdStart = 0L;
+        validateInstanceMetadataPrivateId("worker", 3, privateIdStart, hostGroupInstances.get("worker"));
+        validateInstanceMetadataSubnetAndAvailabilityZoneAndRackId("worker", 3, hostGroupInstances.get("worker"), subnetId, availabilityZone, "/fooRack");
+    }
+
+    @Test
+    public void fillInstanceMetadataTestWhenSubnetAndAvailabilityZoneAndRackIdAndStackFallback() {
+        Stack stack = new Stack();
+        InstanceGroup workerGroup = getARequestGroup("worker", 3, InstanceGroupType.CORE);
+        stack.setInstanceGroups(Set.of(workerGroup));
+        Network network = new Network();
+        network.setAttributes(Json.silent(Map.of("subnetId", "subnet-1")));
+        stack.setNetwork(network);
+        Map<String, String> subnetAzPairs = Map.of("subnet-1", "az-1");
+        when(multiAzCalculatorService.prepareSubnetAzMap(environmentResponse)).thenReturn(subnetAzPairs);
+        doNothing().when(multiAzCalculatorService).calculateByRoundRobin(subnetAzPairs, workerGroup);
+        when(multiAzCalculatorService.determineRackId("subnet-1", "az-1")).thenReturn("/fooRack");
+
+        underTest.fillInstanceMetadata(environmentResponse, stack);
+
+        Map<String, Set<InstanceMetaData>> hostGroupInstances = stack.getInstanceGroups().stream().collect(
+                Collectors.toMap(InstanceGroup::getGroupName, InstanceGroup::getAllInstanceMetaData));
+
+        long privateIdStart = 0L;
+        validateInstanceMetadataPrivateId("worker", 3, privateIdStart, hostGroupInstances.get("worker"));
+        validateInstanceMetadataSubnetAndAvailabilityZoneAndRackId("worker", 3, hostGroupInstances.get("worker"), "subnet-1", "az-1", "/fooRack");
     }
 
     @Test
@@ -456,10 +504,21 @@ public class StackCreatorServiceTest {
     }
 
     private void validateInstanceMetadataPrivateId(String hostGroup, int nodeCount,
-            Long privateIdStart, Set<InstanceMetaData> instanceMetaData) {
-        assertEquals("Instance Metadata size should match for hostgroup: " + hostGroup, nodeCount, instanceMetaData.size());
+            long privateIdStart, Set<InstanceMetaData> instanceMetaData) {
+        assertEquals(nodeCount, instanceMetaData.size(), "Instance Metadata size should match for hostgroup: " + hostGroup);
         for (InstanceMetaData im : instanceMetaData) {
-            assertEquals("Private Id should match for hostgroup: " + hostGroup, privateIdStart++, im.getPrivateId());
+            assertEquals(Long.valueOf(privateIdStart++), im.getPrivateId(), "Private Id should match for hostgroup: " + hostGroup);
+        }
+    }
+
+    private void validateInstanceMetadataSubnetAndAvailabilityZoneAndRackId(String hostGroup, int nodeCount, Set<InstanceMetaData> instanceMetaData,
+            String subnetIdExpected, String availabilityZoneExpected, String rackIdExpected) {
+        assertEquals(nodeCount, instanceMetaData.size(), "Instance Metadata size should match for hostgroup: " + hostGroup);
+        for (InstanceMetaData im : instanceMetaData) {
+            assertThat(im.getSubnetId()).overridingErrorMessage("Subnet Id should match for hostgroup: " + hostGroup).isEqualTo(subnetIdExpected);
+            assertThat(im.getAvailabilityZone()).overridingErrorMessage("Availability Zone should match for hostgroup: " + hostGroup)
+                    .isEqualTo(availabilityZoneExpected);
+            assertThat(im.getRackId()).overridingErrorMessage("Rack Id should match for hostgroup: " + hostGroup).isEqualTo(rackIdExpected);
         }
     }
 
@@ -469,10 +528,9 @@ public class StackCreatorServiceTest {
         requestHostGroup.setInstanceGroupType(hostGroupType);
 
         Set<InstanceMetaData> instanceMetadata = new HashSet<>();
-        IntStream.range(0, numOfNodes).forEach(count -> {
-            instanceMetadata.add(new InstanceMetaData());
-        });
+        IntStream.range(0, numOfNodes).forEach(count -> instanceMetadata.add(new InstanceMetaData()));
         requestHostGroup.setInstanceMetaData(instanceMetadata);
         return requestHostGroup;
     }
+
 }

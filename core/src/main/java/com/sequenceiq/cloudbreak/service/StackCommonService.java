@@ -14,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.AmbariAddressV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.UpdateStackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.CertificateV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
@@ -275,10 +274,6 @@ public class StackCommonService {
         return tlsSecurityService.getCertificates(stack.getId());
     }
 
-    public StackV4Response getStackForAmbari(AmbariAddressV4Request json) {
-        return stackService.getByAmbariAddress(json.getAmbariAddress());
-    }
-
     public Set<AutoscaleStackV4Response> getAllForAutoscale() {
         LOGGER.debug("Get all stack, autoscale authorized only.");
         return stackService.getAllForAutoscale();
@@ -313,15 +308,15 @@ public class StackCommonService {
         }
     }
 
-    public FlowIdentifier changeImageInWorkspace(NameOrCrn nameOrCrn, Long organziationId, StackImageChangeV4Request stackImageChangeRequest) {
-        ImageChangeDto imageChangeDto = createImageChangeDto(nameOrCrn, organziationId, stackImageChangeRequest);
+    public FlowIdentifier changeImageInWorkspace(NameOrCrn nameOrCrn, Long workspaceId, StackImageChangeV4Request stackImageChangeRequest) {
+        ImageChangeDto imageChangeDto = createImageChangeDto(nameOrCrn, workspaceId, stackImageChangeRequest);
         return stackOperationService.updateImage(imageChangeDto);
     }
 
-    public ImageChangeDto createImageChangeDto(NameOrCrn nameOrCrn, Long organziationId, StackImageChangeV4Request stackImageChangeRequest) {
-        Long stackId = stackService.getIdByNameOrCrnInWorkspace(nameOrCrn, organziationId);
+    public ImageChangeDto createImageChangeDto(NameOrCrn nameOrCrn, Long workspaceId, StackImageChangeV4Request stackImageChangeRequest) {
+        Long stackId = stackService.getIdByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
         if (StringUtils.isNotBlank(stackImageChangeRequest.getImageCatalogName())) {
-            ImageCatalog imageCatalog = imageCatalogService.get(organziationId, stackImageChangeRequest.getImageCatalogName());
+            ImageCatalog imageCatalog = imageCatalogService.get(workspaceId, stackImageChangeRequest.getImageCatalogName());
             return new ImageChangeDto(stackId, stackImageChangeRequest.getImageId(), imageCatalog.getName(), imageCatalog.getImageCatalogUrl());
         } else {
             return new ImageChangeDto(stackId, stackImageChangeRequest.getImageId());
@@ -345,13 +340,14 @@ public class StackCommonService {
     }
 
     private void validateHardLimits(Integer scalingAdjustment) {
-        boolean violatingMaxNodeCount =
-                InternalCrnBuilder.isInternalCrnForService(restRequestThreadLocalService.getCloudbreakUser().getUserCrn(), Crn.Service.AUTOSCALE) ?
+        boolean forAutoscale = InternalCrnBuilder.isInternalCrnForService(restRequestThreadLocalService.getCloudbreakUser().getUserCrn(),
+                Crn.Service.AUTOSCALE);
+        boolean violatingMaxNodeCount = forAutoscale ?
                         scalingHardLimitsService.isViolatingAutoscaleMaxStepInNodeCount(scalingAdjustment) :
                         scalingHardLimitsService.isViolatingMaxUpscaleStepInNodeCount(scalingAdjustment);
         if (violatingMaxNodeCount) {
             throw new BadRequestException(String.format("Upscaling by more than %d nodes is not supported",
-                    scalingHardLimitsService.getMaxUpscaleStepInNodeCount()));
+                    forAutoscale ? scalingHardLimitsService.getMaxAutoscaleStepInNodeCount() : scalingHardLimitsService.getMaxUpscaleStepInNodeCount()));
         }
     }
 }

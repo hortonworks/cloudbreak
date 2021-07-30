@@ -208,9 +208,10 @@ public class StackUpscaleService {
         Optional<InstanceGroup> extendedInstanceGroup = stack.getInstanceGroups().stream()
                 .filter(instanceGroup -> extendedInstanceGroupName.equals(instanceGroup.getGroupName()))
                 .findAny();
-        long privateId = getFirstValidPrivateId(stack.getInstanceGroupsAsList());
         List<CloudInstance> newInstances = new ArrayList<>();
         if (extendedInstanceGroup.isPresent()) {
+            long privateId = getFirstValidPrivateId(stack.getInstanceGroupsAsList());
+            DetailedEnvironmentResponse environment = getEnvironmentByEnvironmentCrn(stack.getEnvironmentCrn());
             for (long i = 0; i < count; i++) {
                 newInstances.add(cloudStackConverter.buildInstance(
                         null,
@@ -218,7 +219,7 @@ public class StackUpscaleService {
                         stack.getStackAuthentication(),
                         privateId++,
                         InstanceStatus.CREATE_REQUESTED,
-                        getEnvironmentByEnvironmentCrn(stack.getEnvironmentCrn())));
+                        environment));
             }
         }
         LOGGER.debug("New instances have been built: {}", newInstances.stream().map(CloudInstance::getInstanceId).collect(Collectors.toList()));
@@ -237,7 +238,7 @@ public class StackUpscaleService {
         return environment;
     }
 
-    private Long getFirstValidPrivateId(List<InstanceGroup> instanceGroups) {
+    private long getFirstValidPrivateId(List<InstanceGroup> instanceGroups) {
         LOGGER.debug("Get first valid PrivateId of instanceGroups");
         long id = instanceGroups.stream()
                 .flatMap(ig -> ig.getAllInstanceMetaData().stream())
@@ -249,4 +250,5 @@ public class StackUpscaleService {
         LOGGER.debug("First valid privateId: {}", id);
         return id;
     }
+
 }

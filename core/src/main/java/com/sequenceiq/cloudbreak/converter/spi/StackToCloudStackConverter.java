@@ -143,10 +143,6 @@ public class StackToCloudStackConverter {
         return convert(stack, deleteRequestedInstances);
     }
 
-    public CloudStack convertForTermination(Stack stack, String instanceId) {
-        return convert(stack, Collections.singleton(instanceId));
-    }
-
     public CloudStack convert(Stack stack, Collection<String> deleteRequestedInstances) {
         Image image = null;
         String environmentCrn = stack.getEnvironmentCrn();
@@ -223,21 +219,34 @@ public class StackToCloudStackConverter {
                 instanceMetaData == null ? null : instanceMetaData.getSubnetId(),
                 instanceMetaData == null ? null : instanceMetaData.getAvailabilityZone(),
                 parameters);
-        prepareCloudInstanceSubnetAndAvailabilityZone(environment, instanceGroup, cloudInstance);
+        if (instanceMetaData == null) {
+            prepareCloudInstanceSubnetAndAvailabilityZone(environment, instanceGroup, cloudInstance, stack);
+        }
         return cloudInstance;
     }
 
-    private void prepareCloudInstanceSubnetAndAvailabilityZone(DetailedEnvironmentResponse environment,
-        InstanceGroup instanceGroup, CloudInstance cloudInstance) {
+    private void prepareCloudInstanceSubnetAndAvailabilityZone(DetailedEnvironmentResponse environment, InstanceGroup instanceGroup,
+            CloudInstance cloudInstance, Stack stack) {
+        Map<String, String> subnetAzPairs = multiAzCalculatorService.prepareSubnetAzMap(environment);
+        multiAzCalculatorService.calculateByRoundRobin(
+                subnetAzPairs,
+                instanceGroup,
+                cloudInstance
+        );
         if (Strings.isNullOrEmpty(cloudInstance.getSubnetId()) && Strings.isNullOrEmpty(cloudInstance.getAvailabilityZone())) {
-            if (environment != null) {
-                multiAzCalculatorService.calculateByRoundRobin(
-                        multiAzCalculatorService.prepareSubnetAzMap(environment),
-                        instanceGroup,
-                        cloudInstance
-                );
-            }
+            String stackSubnetId = getStackSubnetIdIfExists(stack);
+            cloudInstance.setSubnetId(stackSubnetId);
+            cloudInstance.setAvailabilityZone(stackSubnetId == null ? null : subnetAzPairs.get(stackSubnetId));
         }
+    }
+
+    private String getStackSubnetIdIfExists(Stack stack) {
+        return Optional.ofNullable(stack.getNetwork())
+                .map(com.sequenceiq.cloudbreak.domain.Network::getAttributes)
+                .map(Json::getMap)
+                .map(attr -> attr.get("subnetId"))
+                .map(Object::toString)
+                .orElse(null);
     }
 
     InstanceTemplate buildInstanceTemplate(Template template, String name, Long privateId, InstanceStatus status, String instanceImageId) {
@@ -251,7 +260,7 @@ public class StackToCloudStackConverter {
         fields.putAll(secretAttributes);
 
         List<Volume> volumes = new ArrayList<>();
-        template.getVolumeTemplates().stream().forEach(volumeModel -> {
+        template.getVolumeTemplates().forEach(volumeModel -> {
             for (int i = 0; i < volumeModel.getVolumeCount(); i++) {
                 String mount = volumeModel.getUsageType() == VolumeUsageType.GENERAL ? VolumeUtils.VOLUME_PREFIX + (i + 1) : VolumeUtils.DATABASE_VOLUME;
                 Volume volume = new Volume(mount, volumeModel.getVolumeType(), volumeModel.getVolumeSize(), getVolumeUsageType(volumeModel.getUsageType()));
@@ -324,7 +333,7 @@ public class StackToCloudStackConverter {
                                         instanceAuthentication.getPublicKey(),
                                         getRootVolumeSize(instanceGroup),
                                         cloudFileSystemView,
-                                        buildDeletedCloudInstances(environment, stackAuthentication, deleteRequests, instanceGroup),
+                                        buildDeletedCloudInstances(environment, stackAuthentication, instanceGroup),
                                         buildGroupNetwork(stack.getNetwork(), instanceGroup))
                         );
                     }
@@ -379,12 +388,10 @@ public class StackToCloudStackConverter {
 
     private List<CloudInstance> buildDeletedCloudInstances(DetailedEnvironmentResponse environment,
             StackAuthentication stackAuthentication,
-            Collection<String> deleteRequests,
             InstanceGroup instanceGroup) {
         List<CloudInstance> instances = new ArrayList<>();
         for (InstanceMetaData metaData : instanceGroup.getDeletedInstanceMetaDataSet()) {
-            InstanceStatus status = TERMINATED;
-            instances.add(buildInstance(metaData, instanceGroup, stackAuthentication, metaData.getPrivateId(), status, environment));
+            instances.add(buildInstance(metaData, instanceGroup, stackAuthentication, metaData.getPrivateId(), TERMINATED, environment));
         }
         return instances;
     }
@@ -507,7 +514,7 @@ public class StackToCloudStackConverter {
     }
 
     public Map<String, Object> buildCloudInstanceParameters(DetailedEnvironmentResponse environment, InstanceMetaData instanceMetaData,
-        CloudPlatform platform) {
+            CloudPlatform platform) {
         Map<String, Object> params = new HashMap<>();
         putIfPresent(params, CloudInstance.DISCOVERY_NAME, getIfNotNull(instanceMetaData, InstanceMetaData::getShortHostname));
         putIfPresent(params, SUBNET_ID, getIfNotNull(instanceMetaData, InstanceMetaData::getSubnetId));
@@ -524,8 +531,7 @@ public class StackToCloudStackConverter {
         return params;
     }
 
-    public Map<String, Object> buildCloudInstanceParameters(String environmentCrn, InstanceMetaData instanceMetaData,
-        CloudPlatform platform) {
+    public Map<String, Object> buildCloudInstanceParameters(String environmentCrn, InstanceMetaData instanceMetaData, CloudPlatform platform) {
         return buildCloudInstanceParameters(getEnvironmentByEnvironmentCrn(environmentCrn),
                 instanceMetaData,
                 platform);

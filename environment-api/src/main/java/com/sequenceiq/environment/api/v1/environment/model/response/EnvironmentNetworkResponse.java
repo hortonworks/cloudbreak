@@ -162,7 +162,11 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
                 '}';
     }
 
-    public static final class EnvironmentNetworkResponseBuilder {
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static final class Builder {
         private String crn;
 
         private String name;
@@ -209,124 +213,120 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
 
         private Set<String> endpointGatewaySubnetIds;
 
-        private EnvironmentNetworkResponseBuilder() {
+        private Builder() {
         }
 
-        public static EnvironmentNetworkResponseBuilder anEnvironmentNetworkResponse() {
-            return new EnvironmentNetworkResponseBuilder();
-        }
-
-        public EnvironmentNetworkResponseBuilder withCrn(String id) {
+        public Builder withCrn(String id) {
             this.crn = id;
             return this;
         }
 
-        public EnvironmentNetworkResponseBuilder withName(String name) {
+        public Builder withName(String name) {
             this.name = name;
             return this;
         }
 
-        public EnvironmentNetworkResponseBuilder withSubnetIds(Set<String> subnetIds) {
+        public Builder withSubnetIds(Set<String> subnetIds) {
             this.subnetIds = subnetIds;
             return this;
         }
 
-        public EnvironmentNetworkResponseBuilder withSubnetMetas(Map<String, CloudSubnet> subnetMetas) {
+        public Builder withSubnetMetas(Map<String, CloudSubnet> subnetMetas) {
             this.subnetMetas = subnetMetas;
             return this;
         }
 
-        public EnvironmentNetworkResponseBuilder withCbSubnets(Map<String, CloudSubnet> cbSubnets) {
+        public Builder withCbSubnets(Map<String, CloudSubnet> cbSubnets) {
             this.cbSubnets = cbSubnets;
             return this;
         }
 
-        public EnvironmentNetworkResponseBuilder withDwxSubnets(Map<String, CloudSubnet> dwxSubnets) {
+        public Builder withDwxSubnets(Map<String, CloudSubnet> dwxSubnets) {
             this.dwxSubnets = dwxSubnets;
             return this;
         }
 
-        public EnvironmentNetworkResponseBuilder withMlxSubnets(Map<String, CloudSubnet> mlxSubnets) {
+        public Builder withMlxSubnets(Map<String, CloudSubnet> mlxSubnets) {
             this.mlxSubnets = mlxSubnets;
             return this;
         }
 
-        public EnvironmentNetworkResponseBuilder withLiftieSubnets(Map<String, CloudSubnet> liftieSubnets) {
+        public Builder withLiftieSubnets(Map<String, CloudSubnet> liftieSubnets) {
             this.liftieSubnets = liftieSubnets;
             return this;
         }
 
-        public EnvironmentNetworkResponseBuilder withExistingNetwork(boolean existingNetwork) {
+        public Builder withExistingNetwork(boolean existingNetwork) {
             this.existingNetwork = existingNetwork;
             return this;
         }
 
-        public EnvironmentNetworkResponseBuilder withPreferedSubnetId(String preferedSubnetId) {
+        public Builder withPreferedSubnetId(String preferedSubnetId) {
             this.preferedSubnetId = preferedSubnetId;
             return this;
         }
 
-        public EnvironmentNetworkResponseBuilder withPrivateSubnetCreation(PrivateSubnetCreation privateSubnetCreation) {
+        public Builder withPrivateSubnetCreation(PrivateSubnetCreation privateSubnetCreation) {
             this.privateSubnetCreation = privateSubnetCreation;
             return this;
         }
 
-        public EnvironmentNetworkResponseBuilder withServiceEndpointCreation(ServiceEndpointCreation serviceEndpointCreation) {
+        public Builder withServiceEndpointCreation(ServiceEndpointCreation serviceEndpointCreation) {
             this.serviceEndpointCreation = serviceEndpointCreation;
             return this;
         }
 
-        public EnvironmentNetworkResponseBuilder withOutboundInternetTraffic(OutboundInternetTraffic outboundInternetTraffic) {
+        public Builder withOutboundInternetTraffic(OutboundInternetTraffic outboundInternetTraffic) {
             this.outboundInternetTraffic = outboundInternetTraffic;
             return this;
         }
 
-        public EnvironmentNetworkResponseBuilder withAws(EnvironmentNetworkAwsParams aws) {
+        public Builder withAws(EnvironmentNetworkAwsParams aws) {
             this.aws = aws;
             return this;
         }
 
-        public EnvironmentNetworkResponseBuilder withAzure(EnvironmentNetworkAzureParams azure) {
+        public Builder withAzure(EnvironmentNetworkAzureParams azure) {
             this.azure = azure;
             return this;
         }
 
-        public EnvironmentNetworkResponseBuilder withYarn(EnvironmentNetworkYarnParams yarn) {
+        public Builder withYarn(EnvironmentNetworkYarnParams yarn) {
             this.yarn = yarn;
             return this;
         }
 
-        public EnvironmentNetworkResponseBuilder withGcp(EnvironmentNetworkGcpParams gcp) {
+        public Builder withGcp(EnvironmentNetworkGcpParams gcp) {
             this.gcp = gcp;
             return this;
         }
 
-        public EnvironmentNetworkResponseBuilder withNetworkCidr(String networkCidr) {
+        public Builder withNetworkCidr(String networkCidr) {
             this.networkCidr = networkCidr;
             return this;
         }
 
-        public EnvironmentNetworkResponseBuilder withNetworkCidrs(Set<String> networkCidrs) {
+        public Builder withNetworkCidrs(Set<String> networkCidrs) {
             this.networkCidrs = networkCidrs;
             return this;
         }
 
-        public EnvironmentNetworkResponseBuilder withMock(EnvironmentNetworkMockParams mock) {
+        public Builder withMock(EnvironmentNetworkMockParams mock) {
             this.mock = mock;
             return this;
         }
 
-        public EnvironmentNetworkResponseBuilder withUsePublicEndpointAccessGateway(PublicEndpointAccessGateway publicEndpointAccessGateway) {
+        public Builder withUsePublicEndpointAccessGateway(PublicEndpointAccessGateway publicEndpointAccessGateway) {
             this.publicEndpointAccessGateway = publicEndpointAccessGateway;
             return this;
         }
 
-        public EnvironmentNetworkResponseBuilder withEndpointGatewaySubnetMetas(Map<String, CloudSubnet> endpointGatewaySubnetMetas) {
+        public Builder withEndpointGatewaySubnetMetas(Map<String, CloudSubnet> endpointGatewaySubnetMetas) {
             this.endpointGatewaySubnetMetas = endpointGatewaySubnetMetas;
             return this;
         }
 
-        public EnvironmentNetworkResponseBuilder withEndpointGatewaySubnetIds(Set<String> endpointGatewaySubnetIds) {
+        public Builder withEndpointGatewaySubnetIds(Set<String> endpointGatewaySubnetIds) {
             this.endpointGatewaySubnetIds = endpointGatewaySubnetIds;
             return this;
         }
@@ -359,4 +359,5 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
             return environmentNetworkResponse;
         }
     }
+
 }

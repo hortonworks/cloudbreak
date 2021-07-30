@@ -155,7 +155,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
             convertAsStack(source, stack);
             updateCloudPlatformAndRelatedFields(source, stack, environment);
             setNetworkIfApplicable(source, stack, environment);
-            setInstanceGroupNetworkIfApplicable(source, stack, environment);
+            setInstanceGroupNetworkIfApplicable(source, stack);
             stack.getComponents().add(getTelemetryComponent(stack, source));
         }
         Map<String, Object> asMap = providerParameterCalculator.get(source).asMap();
@@ -172,7 +172,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.PROVISION_REQUESTED));
         stack.setCreated(clock.getCurrentTimeMillis());
         stack.setInstanceGroups(convertInstanceGroups(source, stack));
-        measure(() -> updateCluster(source, stack, workspace),
+        measure(() -> updateCluster(source, stack),
                 LOGGER, "Converted cluster and updated the stack in {} ms for stack {}", source.getName());
         stack.setGatewayPort(source.getGatewayPort());
         stack.setUuid(UUID.randomUUID().toString());
@@ -181,7 +181,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         if (source.getImage() != null) {
             stack.getComponents().add(getImageComponent(source, stack));
         }
-        if (!isTemplate(source)) {
+        if (!isTemplate(source) && environment != null) {
             gatewaySecurityGroupDecorator.extendGatewaySecurityGroupWithDefaultGatewayCidrs(stack, environment.getTunnel());
         }
         stack.setExternalDatabaseCreationType(getIfNotNull(source.getExternalDatabase(), DatabaseRequest::getAvailabilityType));
@@ -286,19 +286,21 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         if (source.getCloudPlatform() != null) {
             return source.getCloudPlatform().name();
         }
-        return environmentResponse.getCloudPlatform();
+        return environmentResponse == null ? "UNKNOWN" : environmentResponse.getCloudPlatform();
     }
 
     private Json getTags(StackV4Request source, DetailedEnvironmentResponse environment) {
         try {
             TagsV4Request tags = source.getTags();
             if (tags == null) {
-                Map<String, String> userDefined = environment == null ? new HashMap<>() : environment.getTags().getUserDefined();
+                Map<String, String> userDefined = environment == null || environment.getTags() == null ? new HashMap<>() :
+                        environment.getTags().getUserDefined();
                 return new Json(new StackTags(userDefined, new HashMap<>(), new HashMap<>()));
             }
 
             Map<String, String> userDefined = new HashMap<>();
-            if (environment.getTags() != null && environment.getTags().getUserDefined() != null && !environment.getTags().getUserDefined().isEmpty()) {
+            if (environment != null && environment.getTags() != null && environment.getTags().getUserDefined() != null &&
+                    !environment.getTags().getUserDefined().isEmpty()) {
                 userDefined = environment.getTags().getUserDefined();
             }
 
@@ -340,7 +342,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         return convertedSet;
     }
 
-    private void updateCluster(StackV4Request source, Stack stack, Workspace workspace) {
+    private void updateCluster(StackV4Request source, Stack stack) {
         if (source.getCluster() != null) {
             source.getCluster().setName(stack.getName());
             Cluster cluster = getConversionService().convert(source.getCluster(), Cluster.class);
@@ -394,13 +396,12 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         }
     }
 
-    private void setInstanceGroupNetworkIfApplicable(StackV4Request source, Stack stack, DetailedEnvironmentResponse environment) {
+    private void setInstanceGroupNetworkIfApplicable(StackV4Request source, Stack stack) {
+        String subnetId = getStackSubnetIdIfExists(stack);
         List<InstanceGroupV4Request> instanceGroups = source.getInstanceGroups();
         for (InstanceGroupV4Request instanceGroup : instanceGroups) {
-            Network network = stack.getNetwork();
             if (instanceGroup.getNetwork() == null) {
                 InstanceGroupNetworkV4Request instanceGroupNetworkV4Request = new InstanceGroupNetworkV4Request();
-                String subnetId = getSubnetIdIfExist(network);
                 setNetworkByProvider(source, instanceGroup, instanceGroupNetworkV4Request, subnetId);
             }
         }
@@ -483,22 +484,20 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         }
     }
 
-    private String getSubnetIdIfExist(Network network) {
-        String subnetId = null;
-        if (network != null) {
-            Object subnetIdObject = network.getAttributes().getMap().get("subnetId");
-            if (subnetIdObject != null) {
-                subnetId = subnetIdObject.toString();
-            }
-        }
-        return subnetId;
+    private String getStackSubnetIdIfExists(Stack stack) {
+        return Optional.ofNullable(stack.getNetwork())
+                .map(Network::getAttributes)
+                .map(Json::getMap)
+                .map(attr -> attr.get("subnetId"))
+                .map(Object::toString)
+                .orElse(null);
     }
 
     private void setNetworkIfApplicable(StackV4Request source, Stack stack, DetailedEnvironmentResponse environment) {
         if (source.getNetwork() != null) {
             source.getNetwork().setCloudPlatform(source.getCloudPlatform());
             Network network = getConversionService().convert(source.getNetwork(), Network.class);
-            EnvironmentNetworkResponse envNetwork = environment.getNetwork();
+            EnvironmentNetworkResponse envNetwork = environment == null ? null : environment.getNetwork();
             if (envNetwork != null) {
                 network.setNetworkCidrs(envNetwork.getNetworkCidrs());
                 network.setOutboundInternetTraffic(envNetwork.getOutboundInternetTraffic());
@@ -507,7 +506,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         } else {
             EnvironmentNetworkConverter environmentNetworkConverter = environmentNetworkConverterMap.get(source.getCloudPlatform());
             String availabilityZone = source.getPlacement() != null ? source.getPlacement().getAvailabilityZone() : null;
-            if (environmentNetworkConverter != null) {
+            if (environmentNetworkConverter != null && environment != null) {
                 Network network = environmentNetworkConverter.convertToLegacyNetwork(environment.getNetwork(), availabilityZone);
                 stack.setNetwork(network);
             }

@@ -129,14 +129,14 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
     }
 
     private StackDownscaleTriggerEvent stackDownscaleEvent(ClusterRepairTriggerEvent event, String groupName, List<String> hostNames) {
-        Set<InstanceMetaData> instanceMetaData = instanceMetaDataService.getAllInstanceMetadataWithoutInstaceGroupByStackId(event.getStackId());
+        Set<InstanceMetaData> instanceMetaData = instanceMetaDataService.getAllInstanceMetadataWithoutInstanceGroupByStackId(event.getStackId());
         Set<Long> privateIdsForHostNames = stackService.getPrivateIdsForHostNames(instanceMetaData, new HashSet<>(hostNames));
         return new StackDownscaleTriggerEvent(STACK_DOWNSCALE_EVENT.event(), event.getResourceId(), groupName, privateIdsForHostNames, event.accepted())
                 .setRepair();
     }
 
     private ClusterAndStackDownscaleTriggerEvent fullDownscaleEvent(ClusterRepairTriggerEvent event, String hostGroupName, List<String> hostNames) {
-        Set<InstanceMetaData> instanceMetaData = instanceMetaDataService.getAllInstanceMetadataWithoutInstaceGroupByStackId(event.getStackId());
+        Set<InstanceMetaData> instanceMetaData = instanceMetaDataService.getAllInstanceMetadataWithoutInstanceGroupByStackId(event.getStackId());
         Set<Long> privateIdsForHostNames = stackService.getPrivateIdsForHostNames(instanceMetaData, hostNames);
         return new ClusterAndStackDownscaleTriggerEvent(FlowChainTriggers.FULL_DOWNSCALE_TRIGGER_EVENT, event.getResourceId(),
                 hostGroupName, Sets.newHashSet(privateIdsForHostNames), ScalingType.DOWNSCALE_TOGETHER, event.accepted(),

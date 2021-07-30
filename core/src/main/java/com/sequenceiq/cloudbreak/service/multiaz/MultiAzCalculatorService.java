@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.multiaz;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_IDS;
 
 import java.util.ArrayList;
@@ -16,7 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -29,20 +29,29 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 @Service
 public class MultiAzCalculatorService {
 
+    private static final String DEFAULT_RACK = "default-rack";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(MultiAzCalculatorService.class);
 
     @Inject
     private MultiAzValidator multiAzValidator;
 
+    public String determineRackId(String subnetId, String availabilityZone) {
+        return "/" +
+                (isNullOrEmpty(availabilityZone) ?
+                        (isNullOrEmpty(subnetId) ? DEFAULT_RACK : subnetId)
+                        : availabilityZone);
+    }
+
     public Map<String, String> prepareSubnetAzMap(DetailedEnvironmentResponse environment) {
         Map<String, String> subnetAzPairs = new HashMap<>();
-        if (environment != null && environment.getNetwork() != null) {
+        if (environment != null && environment.getNetwork() != null && environment.getNetwork().getSubnetMetas() != null) {
             for (Map.Entry<String, CloudSubnet> entry : environment.getNetwork().getSubnetMetas().entrySet()) {
                 CloudSubnet value = entry.getValue();
-                if (!Strings.isNullOrEmpty(value.getName())) {
+                if (!isNullOrEmpty(value.getName())) {
                     subnetAzPairs.put(value.getName(), value.getAvailabilityZone());
                 }
-                if (!Strings.isNullOrEmpty(value.getId())) {
+                if (!isNullOrEmpty(value.getId())) {
                     subnetAzPairs.put(value.getId(), value.getAvailabilityZone());
                 }
             }
@@ -57,8 +66,8 @@ public class MultiAzCalculatorService {
         collectCurrentSubnetUsage(instanceGroup, subnetUsage);
 
         if (!subnetIds.isEmpty() && multiAzValidator.supportedForInstanceMetadataGeneration(instanceGroup)) {
-            for (InstanceMetaData instanceMetaData : instanceGroup.getAllInstanceMetaData()) {
-                if (Strings.isNullOrEmpty(instanceMetaData.getSubnetId())) {
+            for (InstanceMetaData instanceMetaData : instanceGroup.getNotDeletedInstanceMetaDataSet()) {
+                if (isNullOrEmpty(instanceMetaData.getSubnetId())) {
                     Integer numberOfInstanceInASubnet = searchTheSmallestInstanceCountForSubnets(subnetUsage);
                     String leastUsedSubnetId = searchTheSmallestUsedSubnetID(subnetUsage, numberOfInstanceInASubnet);
 
@@ -78,7 +87,7 @@ public class MultiAzCalculatorService {
         collectCurrentSubnetUsage(instanceGroup, subnetUsage);
 
         if (!subnetIds.isEmpty() && multiAzValidator.supportedForInstanceMetadataGeneration(instanceGroup)) {
-            if (Strings.isNullOrEmpty(cloudInstance.getSubnetId())) {
+            if (isNullOrEmpty(cloudInstance.getSubnetId())) {
                 Integer numberOfInstanceInASubnet = searchTheSmallestInstanceCountForSubnets(subnetUsage);
                 String leastUsedSubnetId = searchTheSmallestUsedSubnetID(subnetUsage, numberOfInstanceInASubnet);
 
@@ -112,12 +121,12 @@ public class MultiAzCalculatorService {
 
     private void collectCurrentSubnetUsage(InstanceGroup instanceGroup, Map<String, Integer> subnetUsage) {
 
-        for (InstanceMetaData instanceMetaData : instanceGroup.getAllInstanceMetaData()) {
+        for (InstanceMetaData instanceMetaData : instanceGroup.getNotDeletedInstanceMetaDataSet()) {
             String subnetId = instanceMetaData.getSubnetId();
-            if (!Strings.isNullOrEmpty(subnetId)) {
+            if (!isNullOrEmpty(subnetId)) {
                 Integer countOfInstances = subnetUsage.get(subnetId);
                 if (countOfInstances != null) {
-                    subnetUsage.put(subnetId, countOfInstances++);
+                    subnetUsage.put(subnetId, countOfInstances + 1);
                 } else {
                     LOGGER.warn("Subnet ID {} is not present in the environment networks. Current usage: {}",
                             subnetId, subnetUsage.keySet());

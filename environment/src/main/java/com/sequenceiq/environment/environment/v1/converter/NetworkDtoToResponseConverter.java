@@ -25,7 +25,7 @@ public class NetworkDtoToResponseConverter {
     }
 
     public EnvironmentNetworkResponse convert(NetworkDto network, Tunnel tunnel, boolean detailedResponse) {
-        return EnvironmentNetworkResponse.EnvironmentNetworkResponseBuilder.anEnvironmentNetworkResponse()
+        return EnvironmentNetworkResponse.builder()
                 .withCrn(network.getResourceCrn())
                 .withSubnetIds(network.getSubnetIds())
                 .withNetworkCidr(network.getNetworkCidr())
