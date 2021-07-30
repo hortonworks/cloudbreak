@@ -180,8 +180,8 @@ public class ClusterRepairService {
         } else if (isHAClusterAndRepairNotAllowed(removeOnly, stack)) {
             repairStartResult = Result.error(RepairValidation
                     .of("Repair is not supported when the cluster uses cluster proxy and has multiple gateway nodes. This will be fixed in future releases."));
-        } else if (isPrimaryGWUnhealthyAndItIsNotSelected(repairMode, selectedParts, stack)) {
-            repairStartResult = Result.error(RepairValidation.of("Primary gateway node is unhealthy, it must be repaired first."));
+        } else if (isAnyGWUnhealthyAndItIsNotSelected(repairMode, selectedParts, stack)) {
+            repairStartResult = Result.error(RepairValidation.of("Gateway node is unhealthy, it must be repaired first."));
         } else {
             Map<HostGroupName, Set<InstanceMetaData>> repairableNodes = selectRepairableNodes(getInstanceSelectors(repairMode, selectedParts), stack);
             RepairValidation validationBySelectedNodes = validateSelectedNodes(stack, repairableNodes, reattach);
@@ -195,19 +195,21 @@ public class ClusterRepairService {
         return repairStartResult;
     }
 
-    private boolean isPrimaryGWUnhealthyAndItIsNotSelected(ManualClusterRepairMode repairMode, Set<String> selectedParts, Stack stack) {
-        if (stack.getPrimaryGatewayInstance() == null) {
-            LOGGER.info("Stack has no primary GW");
+    private boolean isAnyGWUnhealthyAndItIsNotSelected(ManualClusterRepairMode repairMode, Set<String> selectedParts, Stack stack) {
+        List<InstanceMetaData> gatewayInstances = stack.getGatewayInstanceMetadata();
+        if (gatewayInstances.size() < 1) {
+            LOGGER.info("Stack has no GW");
             return false;
         }
+        List<InstanceMetaData> unhealthyGWs = gatewayInstances.stream().filter(gatewayInstance -> !gatewayInstance.isHealthy()).collect(toList());
         if (ManualClusterRepairMode.HOST_GROUP.equals(repairMode)) {
-            LOGGER.info("Host group based repair mode, so Primary GW hostgroup should be selected if it is not healthy");
-            return !stack.getPrimaryGatewayInstance().isHealthy() &&
-                    !selectedParts.contains(stack.getPrimaryGatewayInstance().getInstanceGroup().getGroupName());
+            LOGGER.info("Host group based repair mode, so GW hostgroup should be selected if any GW is not healthy. Unhealthy GWs: {}. Selected instances: {}",
+                    unhealthyGWs, selectedParts);
+            return unhealthyGWs.stream().anyMatch(unhealthyGW -> !selectedParts.contains(unhealthyGW.getInstanceGroupName()));
         } else if (ManualClusterRepairMode.NODE_ID.equals(repairMode)) {
-            LOGGER.info("Node id based repair mode, so Primary GW instance should be selected if it is not healthy");
-            return stack.getPrimaryGatewayInstance().isUnhealthy() &&
-                    !selectedParts.contains(stack.getPrimaryGatewayInstance().getInstanceId());
+            LOGGER.info("Node id based repair mode, so GW instance should be selected if it is not healthy. Unhealthy GWs: {}. Selected hostgroups: {}",
+                    unhealthyGWs, selectedParts);
+            return unhealthyGWs.stream().anyMatch(unhealthyGW -> !selectedParts.contains(unhealthyGW.getInstanceId()));
         } else {
             LOGGER.info("Repair mode is not host group or node id based: {}", repairMode);
             return false;

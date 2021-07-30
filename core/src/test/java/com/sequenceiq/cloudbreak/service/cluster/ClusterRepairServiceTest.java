@@ -17,6 +17,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -463,24 +464,96 @@ public class ClusterRepairServiceTest {
     }
 
     @Test
-    public void testValidateRepairWhenPGWUnhealthyAndNotSelected() {
+    public void testValidateRepairWhenOneGWUnhealthyAndNotSelected() {
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
         when(freeipaService.freeipaStatusInDesiredState(stack, Set.of(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE)))
                 .thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
+
         InstanceMetaData primaryGW = new InstanceMetaData();
         primaryGW.setInstanceStatus(InstanceStatus.DELETED_ON_PROVIDER_SIDE);
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setGroupName("gateway");
         primaryGW.setInstanceGroup(instanceGroup);
-        when(stack.getPrimaryGatewayInstance()).thenReturn(primaryGW);
+
+        InstanceMetaData secondaryGW = new InstanceMetaData();
+        secondaryGW.setInstanceStatus(InstanceStatus.SERVICES_HEALTHY);
+        secondaryGW.setInstanceGroup(instanceGroup);
+
+        ArrayList<InstanceMetaData> gatewayInstances = new ArrayList<>();
+        gatewayInstances.add(primaryGW);
+        gatewayInstances.add(secondaryGW);
+
+        when(stack.getGatewayInstanceMetadata()).thenReturn(gatewayInstances);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
             Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> actual =
                     underTest.validateRepair(ManualClusterRepairMode.HOST_GROUP, STACK_ID, Set.of("idbroker"), false, false);
             assertEquals(1, actual.getError().getValidationErrors().size());
-            assertEquals("Primary gateway node is unhealthy, it must be repaired first.",
+            assertEquals("Gateway node is unhealthy, it must be repaired first.",
                     actual.getError().getValidationErrors().get(0));
+        });
+    }
+
+    @Test
+    public void testValidateRepairWhenTwoGWUnhealthyAndNotSelected() {
+        when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
+        when(freeipaService.freeipaStatusInDesiredState(stack, Set.of(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE)))
+                .thenReturn(true);
+        when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
+
+        InstanceMetaData primaryGW = new InstanceMetaData();
+        primaryGW.setInstanceStatus(InstanceStatus.DELETED_ON_PROVIDER_SIDE);
+        InstanceGroup instanceGroup = new InstanceGroup();
+        instanceGroup.setGroupName("gateway");
+        primaryGW.setInstanceGroup(instanceGroup);
+
+        InstanceMetaData secondaryGW = new InstanceMetaData();
+        secondaryGW.setInstanceStatus(InstanceStatus.DELETED_ON_PROVIDER_SIDE);
+        secondaryGW.setInstanceGroup(instanceGroup);
+
+        ArrayList<InstanceMetaData> gatewayInstances = new ArrayList<>();
+        gatewayInstances.add(primaryGW);
+        gatewayInstances.add(secondaryGW);
+
+        when(stack.getGatewayInstanceMetadata()).thenReturn(gatewayInstances);
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> actual =
+                    underTest.validateRepair(ManualClusterRepairMode.HOST_GROUP, STACK_ID, Set.of("idbroker"), false, false);
+            assertEquals(1, actual.getError().getValidationErrors().size());
+            assertEquals("Gateway node is unhealthy, it must be repaired first.",
+                    actual.getError().getValidationErrors().get(0));
+        });
+    }
+
+    @Test
+    public void testValidateRepairWhenNoUnhealthyGWAndNotSelected() {
+        when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
+        when(freeipaService.freeipaStatusInDesiredState(stack, Set.of(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE)))
+                .thenReturn(true);
+        when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
+
+        InstanceMetaData primaryGW = new InstanceMetaData();
+        primaryGW.setInstanceStatus(InstanceStatus.SERVICES_HEALTHY);
+        InstanceGroup instanceGroup = new InstanceGroup();
+        instanceGroup.setGroupName("gateway");
+        primaryGW.setInstanceGroup(instanceGroup);
+
+        InstanceMetaData secondaryGW = new InstanceMetaData();
+        secondaryGW.setInstanceStatus(InstanceStatus.SERVICES_HEALTHY);
+        secondaryGW.setInstanceGroup(instanceGroup);
+
+        ArrayList<InstanceMetaData> gatewayInstances = new ArrayList<>();
+        gatewayInstances.add(primaryGW);
+        gatewayInstances.add(secondaryGW);
+
+        when(stack.getGatewayInstanceMetadata()).thenReturn(gatewayInstances);
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> actual =
+                    underTest.validateRepair(ManualClusterRepairMode.HOST_GROUP, STACK_ID, Set.of("idbroker"), false, false);
+            assertTrue(actual.isSuccess());
         });
     }
 
