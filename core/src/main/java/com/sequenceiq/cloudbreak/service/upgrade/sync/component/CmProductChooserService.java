@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.upgrade.sync;
+package com.sequenceiq.cloudbreak.service.upgrade.sync.component;
 
 import java.util.List;
 import java.util.Optional;
@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
+import com.sequenceiq.cloudbreak.service.upgrade.sync.common.ParcelInfo;
 
 @Service
 public class CmProductChooserService {
@@ -36,16 +37,22 @@ public class CmProductChooserService {
 
     /**
      * Using the installedCMVersion, will look for a matching clouderaManagerRepo.
-     * @param installedCmVersion The version of the CM used for lookup
-     * @param candidateCmVersions The candidate cloudera manager repos
+     *
+     * @param installedCmVersionOptional The version of the CM used for lookup
+     * @param candidateCmVersions        The candidate cloudera manager repos
      * @return The found clouderaManagerRepo as an Optional, or empty
      */
-    Optional<ClouderaManagerRepo> chooseCmRepo(String installedCmVersion, Set<ClouderaManagerRepo> candidateCmVersions) {
-        Optional<ClouderaManagerRepo> foundClouderaManagerRepo = candidateCmVersions.stream()
-                .filter(candidateCmVersion -> installedCmVersion.equals(candidateCmVersion.getVersion()))
-                .findFirst();
-        LOGGER.debug("ClouderaManagerRepo found based on the CM server version: {}", foundClouderaManagerRepo);
-        return foundClouderaManagerRepo;
+    Optional<ClouderaManagerRepo> chooseCmRepo(Optional<String> installedCmVersionOptional, Set<ClouderaManagerRepo> candidateCmVersions) {
+        if (installedCmVersionOptional.isEmpty()) {
+            LOGGER.debug("No ClouderaManagerRepo found because the CM version retrieved from the server is empty.");
+            return Optional.empty();
+        } else {
+            Optional<ClouderaManagerRepo> foundClouderaManagerRepo = candidateCmVersions.stream()
+                    .filter(candidateCmVersion -> installedCmVersionOptional.get().equals(candidateCmVersion.getVersion()))
+                    .findFirst();
+            LOGGER.debug("ClouderaManagerRepo found based on the CM server version: {}", foundClouderaManagerRepo);
+            return foundClouderaManagerRepo;
+        }
     }
 
     private Optional<ClouderaManagerProduct> findMatchingClouderaManagerProduct(Set<ClouderaManagerProduct> candidateProducts, ParcelInfo ip) {

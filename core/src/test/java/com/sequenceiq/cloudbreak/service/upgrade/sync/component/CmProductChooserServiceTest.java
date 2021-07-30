@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.upgrade.sync;
+package com.sequenceiq.cloudbreak.service.upgrade.sync.component;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
@@ -17,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
+import com.sequenceiq.cloudbreak.service.upgrade.sync.common.ParcelInfo;
 
 @ExtendWith(MockitoExtension.class)
 public class CmProductChooserServiceTest {
@@ -103,7 +104,7 @@ public class CmProductChooserServiceTest {
 
     @Test
     void testChooseCmRepoWhenRepoWithMatchingVersionPresentThenRepoChosen() {
-        String installedCmVersion = "cmVersion1";
+        Optional<String> installedCmVersion = Optional.of("cmVersion1");
         Set<ClouderaManagerRepo> candidateCmRepos = Set.of(
                 new ClouderaManagerRepo().withVersion("cmVersion1"),
                 new ClouderaManagerRepo().withVersion("cmVersion2")
@@ -117,7 +118,20 @@ public class CmProductChooserServiceTest {
 
     @Test
     void testChooseCmRepoWhenRepoWithMatchingVersionMissingThenNoRepoChosen() {
-        String installedCmVersion = "cmVersion9";
+        Optional<String> installedCmVersion = Optional.of("cmVersion9");
+        Set<ClouderaManagerRepo> candidateCmRepos = Set.of(
+                new ClouderaManagerRepo().withVersion("cmVersion1"),
+                new ClouderaManagerRepo().withVersion("cmVersion2")
+        );
+
+        Optional<ClouderaManagerRepo> foundCmRepo = underTest.chooseCmRepo(installedCmVersion, candidateCmRepos);
+
+        assertTrue(foundCmRepo.isEmpty());
+    }
+
+    @Test
+    void testChooseCmRepoWhenInstalledCmVersionNotPresentThenNoRepoChosen() {
+        Optional<String> installedCmVersion = Optional.empty();
         Set<ClouderaManagerRepo> candidateCmRepos = Set.of(
                 new ClouderaManagerRepo().withVersion("cmVersion1"),
                 new ClouderaManagerRepo().withVersion("cmVersion2")

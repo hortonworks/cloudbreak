@@ -22,6 +22,6 @@ public interface ClusterStatusService {
 
     boolean isClusterManagerRunningQuickCheck();
 
-    String getClusterManagerVersion();
+    Optional<String> getClusterManagerVersion();
 
 }

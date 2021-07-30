@@ -1,6 +1,7 @@
-package com.sequenceiq.cloudbreak.service.upgrade.sync;
+package com.sequenceiq.cloudbreak.service.upgrade.sync.component;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
+import com.sequenceiq.cloudbreak.service.upgrade.sync.common.ParcelInfo;
 
 @Service
 public class CmServerQueryService {
@@ -43,13 +45,13 @@ public class CmServerQueryService {
      * @param stack The stack, to get the coordinates of the CM to query
      * @return The actual CM version
      */
-    String queryCmVersion(Stack stack) {
-        String cmVersion = apiConnectors.getConnector(stack).clusterStatusService().getClusterManagerVersion();
-        LOGGER.debug("Reading CM version info from CM server, found version: {}", cmVersion);
-        return cmVersion;
+    Optional<String> queryCmVersion(Stack stack) {
+        Optional<String> cmVersionOptional = apiConnectors.getConnector(stack).clusterStatusService().getClusterManagerVersion();
+        LOGGER.debug("Reading CM version info from CM server, found version: {}", cmVersionOptional);
+        return cmVersionOptional;
     }
 
-    boolean isCmServerRunning(Stack stack) {
+    public boolean isCmServerRunning(Stack stack) {
         return apiConnectors.getConnector(stack).clusterStatusService().isClusterManagerRunning();
     }
 

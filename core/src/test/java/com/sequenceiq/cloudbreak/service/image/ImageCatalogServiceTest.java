@@ -843,7 +843,7 @@ public class ImageCatalogServiceTest {
         when(imageCatalogRepository.findByNameAndWorkspaceId(CUSTOM_CATALOG_NAME, WORKSPACE_ID)).thenReturn(Optional.of(imageCatalog));
         when(customImageProvider.mergeSourceImageAndCustomImageProperties(any(), any(), any(), any())).thenReturn(statedImage);
 
-        StatedImages actual = underTest.getImages(WORKSPACE_ID, CUSTOM_CATALOG_NAME, Set.of("AWS"));
+        StatedImages actual = underTest.getImages(USER_CRN, WORKSPACE_ID, CUSTOM_CATALOG_NAME, Set.of("AWS"));
         assertEquals(statedImage.getImage(), actual.getImages().getCdhImages().stream().findFirst().get());
 
     }
@@ -858,9 +858,9 @@ public class ImageCatalogServiceTest {
         when(imageCatalogRepository.findByNameAndWorkspaceId(CUSTOM_CATALOG_NAME, WORKSPACE_ID)).thenReturn(Optional.of(imageCatalog));
         when(customImageProvider.mergeSourceImageAndCustomImageProperties(any(), any(), any(), any())).thenReturn(statedImage);
 
-        StatedImages actual = underTest.getImages(WORKSPACE_ID, CUSTOM_CATALOG_NAME, Set.of("AWS"));
-        assertEquals(statedImage.getImage(), actual.getImages().getFreeIpaImages().stream().findFirst().get());
+        StatedImages actual = underTest.getImages(USER_CRN, WORKSPACE_ID, CUSTOM_CATALOG_NAME, Set.of("AWS"));
 
+        assertEquals(statedImage.getImage(), actual.getImages().getFreeIpaImages().stream().findFirst().get());
     }
 
     @Test

@@ -6,7 +6,6 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOP_REQUE
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_START_IGNORED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_STOP_IGNORED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_STOP_REQUESTED;
-
 import static java.lang.String.format;
 
 import java.util.Collection;
@@ -198,6 +197,10 @@ public class StackOperationService {
             LOGGER.debug("Stack could not be synchronized in {} state!", stack.getStatus());
             return FlowIdentifier.notTriggered();
         }
+    }
+
+    public FlowIdentifier syncCm(Stack stack, Set<String> candidateImageUuids) {
+        return flowManager.triggerCmSync(stack.getId(), candidateImageUuids);
     }
 
     private FlowIdentifier stop(Stack stack, Cluster cluster, boolean updateCluster, User user) {

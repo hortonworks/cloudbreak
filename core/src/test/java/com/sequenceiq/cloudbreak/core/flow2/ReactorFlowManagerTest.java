@@ -17,7 +17,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import com.sequenceiq.cloudbreak.core.flow2.event.DatabaseBackupTriggerEvent;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,6 +34,7 @@ import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers;
+import com.sequenceiq.cloudbreak.core.flow2.event.DatabaseBackupTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.MaintenanceModeValidationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackImageUpdateTriggerEvent;
@@ -135,6 +135,7 @@ public class ReactorFlowManagerTest {
         underTest.triggerDatalakeDatabaseRestore(STACK_ID, null, null);
         underTest.triggerAutoTlsCertificatesRotation(STACK_ID, new CertificatesRotationV4Request());
         underTest.triggerStackLoadBalancerUpdate(STACK_ID);
+        underTest.triggerCmSync(STACK_ID, Set.of());
 
         int count = 0;
         for (Method method : underTest.getClass().getDeclaredMethods()) {

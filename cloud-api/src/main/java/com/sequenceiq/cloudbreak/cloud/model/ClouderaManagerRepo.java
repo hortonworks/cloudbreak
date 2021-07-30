@@ -79,4 +79,14 @@ public class ClouderaManagerRepo {
         map.put("gpgKeyUrl", gpgKeyUrl);
         return map;
     }
+
+    @Override
+    public String toString() {
+        return "ClouderaManagerRepo{" +
+                "predefined=" + predefined +
+                ", version='" + version + '\'' +
+                ", baseUrl='" + baseUrl + '\'' +
+                ", gpgKeyUrl='" + gpgKeyUrl + '\'' +
+                '}';
+    }
 }
