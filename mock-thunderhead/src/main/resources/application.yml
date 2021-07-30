@@ -53,6 +53,7 @@ auth:
     nodestatus.salt.ping.enable: true
     metrics.databus.processing.enable: false
     user.sync.credentials.update.optimization.enable: true
+    freeipa.batch.call.enable: true
     azure:
       disk:
         SSEWithCMK.enable: true
