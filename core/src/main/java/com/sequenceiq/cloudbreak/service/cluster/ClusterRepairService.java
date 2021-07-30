@@ -196,7 +196,7 @@ public class ClusterRepairService {
     }
 
     private boolean isAnyGWUnhealthyAndItIsNotSelected(ManualClusterRepairMode repairMode, Set<String> selectedParts, Stack stack) {
-        List<InstanceMetaData> gatewayInstances = stack.getGatewayInstanceMetadata();
+        List<InstanceMetaData> gatewayInstances = stack.getNotTerminatedGatewayInstanceMetadata();
         if (gatewayInstances.size() < 1) {
             LOGGER.info("Stack has no GW");
             return false;

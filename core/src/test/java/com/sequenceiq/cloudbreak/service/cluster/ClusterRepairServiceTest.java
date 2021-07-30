@@ -484,7 +484,7 @@ public class ClusterRepairServiceTest {
         gatewayInstances.add(primaryGW);
         gatewayInstances.add(secondaryGW);
 
-        when(stack.getGatewayInstanceMetadata()).thenReturn(gatewayInstances);
+        when(stack.getNotTerminatedGatewayInstanceMetadata()).thenReturn(gatewayInstances);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
             Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> actual =
@@ -516,7 +516,7 @@ public class ClusterRepairServiceTest {
         gatewayInstances.add(primaryGW);
         gatewayInstances.add(secondaryGW);
 
-        when(stack.getGatewayInstanceMetadata()).thenReturn(gatewayInstances);
+        when(stack.getNotTerminatedGatewayInstanceMetadata()).thenReturn(gatewayInstances);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
             Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> actual =
@@ -548,7 +548,7 @@ public class ClusterRepairServiceTest {
         gatewayInstances.add(primaryGW);
         gatewayInstances.add(secondaryGW);
 
-        when(stack.getGatewayInstanceMetadata()).thenReturn(gatewayInstances);
+        when(stack.getNotTerminatedGatewayInstanceMetadata()).thenReturn(gatewayInstances);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
             Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> actual =
