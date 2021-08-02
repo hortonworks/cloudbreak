@@ -10,11 +10,13 @@ import org.springframework.stereotype.Component;
 import com.dyngr.Polling;
 import com.dyngr.core.AttemptResult;
 import com.dyngr.core.AttemptResults;
+import com.dyngr.exception.PollerStoppedException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.distrox.api.v1.distrox.model.cluster.DistroXMultiDeleteV1Request;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.service.datahub.DatahubService;
+import com.sequenceiq.environment.exception.DatahubOperationFailedException;
 import com.sequenceiq.environment.util.PollingConfig;
 
 @Component
@@ -47,10 +49,15 @@ public class DatahubDeletionService {
         datahubService.deleteMultiple(environment.getResourceCrn(), multiDeleteRequest, force);
 
         LOGGER.debug("Starting poller to check all Datahub stacks for environment {} are deleted", environment.getName());
-        Polling.stopAfterDelay(pollingConfig.getTimeout(), pollingConfig.getTimeoutTimeUnit())
-                .stopIfException(pollingConfig.getStopPollingIfExceptionOccured())
-                .waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
-                .run(() -> periodicCheckForDeletion(environment));
+        try {
+            Polling.stopAfterDelay(pollingConfig.getTimeout(), pollingConfig.getTimeoutTimeUnit())
+                    .stopIfException(pollingConfig.getStopPollingIfExceptionOccured())
+                    .waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
+                    .run(() -> periodicCheckForDeletion(environment));
+        } catch (PollerStoppedException e) {
+            LOGGER.info("Datahub cluster deletion timed out");
+            throw new DatahubOperationFailedException("Datahub cluster deletion timed out", e);
+        }
     }
 
     private AttemptResult<Object> periodicCheckForDeletion(Environment environment) {
