@@ -43,6 +43,7 @@ fi
 /opt/cloudera/cm-agent/bin/certmanager --location $CERTMANAGER_DIR setup --configure-services $CERTMANAGER_ARGS --override ca_dn="CN=${HOSTNAME}" --stop-at-csr ${ALTNAME} --trusted-ca-certs ${CACERTS_DIR}/cacerts.pem
 /opt/cloudera/cm/bin/generate_intermediate_ca_ipa.sh $CM_PRINCIPAL ${CERTMANAGER_DIR}/CMCA/private/ca_csr.pem $OUT_FILE
 /opt/cloudera/cm-agent/bin/certmanager --location $CERTMANAGER_DIR setup --configure-services $CERTMANAGER_ARGS --override ca_dn="CN=${HOSTNAME}" --signed-ca-cert=$OUT_FILE --skip-cm-init ${ALTNAME} --trusted-ca-certs ${CACERTS_DIR}/cacerts.pem > $CERTMANAGER_DIR/auto-tls.init.txt
+chmod 600 $CERTMANAGER_DIR/auto-tls.init.txt
 
 rm -rf $OUT_FILE
 
