@@ -1,8 +1,11 @@
 package com.sequenceiq.environment.environment.flow.deletion.handler.experience;
 
+import static com.sequenceiq.cloudbreak.polling.PollingResult.EXIT;
 import static com.sequenceiq.cloudbreak.polling.PollingResult.isSuccess;
 import static com.sequenceiq.environment.environment.flow.deletion.handler.experience.ExperienceDeletionRetrievalTask.EXPERIENCE_RETRYING_COUNT;
-import static com.sequenceiq.environment.environment.flow.deletion.handler.experience.ExperienceDeletionRetrievalTask.EXPERIENCE_RETRYING_INTERVAL;
+import static com.sequenceiq.environment.environment.flow.deletion.handler.experience.ExperienceDeletionRetrievalTask.EXPERIENCE_RETRYING_INTERVAL_IN_MILLISECOND;
+
+import java.util.function.Function;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -13,6 +16,7 @@ import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentExperienceDto;
+import com.sequenceiq.environment.environment.dto.EnvironmentExperienceDto.Builder;
 import com.sequenceiq.environment.exception.ExperienceOperationFailedException;
 import com.sequenceiq.environment.experience.ExperienceConnectorService;
 
@@ -80,16 +84,23 @@ public class EnvironmentExperienceDeletionAction {
         Pair<PollingResult, Exception> result = experiencePollingService.pollWithTimeout(
                 new ExperienceDeletionRetrievalTask(experienceConnectorService),
                 new ExperiencePollerObject(environment.getResourceCrn(), environment.getName(), environment.getCloudPlatform(), environment.getAccountId()),
-                EXPERIENCE_RETRYING_INTERVAL,
+                EXPERIENCE_RETRYING_INTERVAL_IN_MILLISECOND,
                 EXPERIENCE_RETRYING_COUNT,
                 SINGLE_FAILURE);
         if (!isSuccess(result.getLeft())) {
-            processFailureWithForceDelete(result, forceDelete);
+            if (result.getLeft().equals(EXIT)) {
+                reCheckDeletionOtherwise(
+                        env -> experienceConnectorService.getConnectedExperienceCount(EnvironmentExperienceDto.fromEnvironment(env)) == 0,
+                        environment,
+                        () -> processFailureWithForceDelete(result, forceDelete));
+            } else {
+                processFailureWithForceDelete(result, forceDelete);
+            }
         }
     }
 
     private EnvironmentExperienceDto createEnvironmentExperienceDto(Environment environment) {
-        EnvironmentExperienceDto environmentExperienceDto = new EnvironmentExperienceDto.Builder()
+        EnvironmentExperienceDto environmentExperienceDto = new Builder()
                 .withName(environment.getName())
                 .withCrn(environment.getResourceCrn())
                 .withAccountId(environment.getAccountId())
@@ -114,6 +125,12 @@ public class EnvironmentExperienceDeletionAction {
         }
         throw new ExperienceOperationFailedException(String.format("%s %s", rootMsg, experiencePollingFailureResolver.getMessageForFailure(result)),
                 result.getRight());
+    }
+
+    private void reCheckDeletionOtherwise(Function<Environment, Boolean> reCheck, Environment environment, Runnable processFailure) {
+        if (!reCheck.apply(environment)) {
+            processFailure.run();
+        }
     }
 
 }

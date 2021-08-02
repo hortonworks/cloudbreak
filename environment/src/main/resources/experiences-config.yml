@@ -2,8 +2,6 @@ environment:
   experience:
     liftie:
       workloads:
-        - name: mon-platform
-          description: Monitoring Clusters
       pathInfix: /liftie/api/v1
       address: https://${MOCK_INFRASTRUCTURE_HOST:localhost}:${MOCK_INFRASTRUCTURE_BIND_PORT:10090}
       policyPath: /prerequisites?cloudPlatform={cloudProvider}
@@ -13,12 +11,13 @@ environment:
         envCrn: "{environmentCrn}"
         cloudProvider: "{cloudProvider}"
     configs:
-      - name: DWX
+      - name: MLX
         description: Data Warehouse Clusters
         businessName: Data Warehouses
-        environmentEndpointPort: ${MOCK_INFRASTRUCTURE_BIND_PORT:10090}
-        baseAddress: https://${MOCK_INFRASTRUCTURE_HOST:localhost}
-        address: https://${MOCK_INFRASTRUCTURE_HOST:localhost}:${MOCK_INFRASTRUCTURE_BIND_PORT:10090}
-        internalEnvironmentEndpoint: /dwx/{environmentCrn}
-        policyPort: ${MOCK_INFRASTRUCTURE_BIND_PORT:10090}
+        environmentEndpointPort: ${MOCK_INFRASTRUCTURE_BIND_PORT:8080}
+        baseAddress: http://${MOCK_INFRASTRUCTURE_HOST:localhost}
+        address: http://${MOCK_INFRASTRUCTURE_HOST:localhost}:${MOCK_INFRASTRUCTURE_BIND_PORT:8080}
+        internalEnvironmentEndpoint: /ml/environment/{environmentCrn}
+        policyPort: ${MOCK_INFRASTRUCTURE_BIND_PORT:8080}
         policyEndpoint: /prerequisites?cloudPlatform={cloudProvider}
+        forceDeleteCapable: true

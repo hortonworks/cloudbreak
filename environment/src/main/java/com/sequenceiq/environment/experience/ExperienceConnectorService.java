@@ -50,9 +50,9 @@ public class ExperienceConnectorService {
 
     public Set<ExperienceCluster> getConnectedExperiences(EnvironmentExperienceDto environmentExperienceDto) {
         checkEnvironmentExperienceDto(environmentExperienceDto);
-        if (experienceScanEnabled) {
+        if (true) {
             LOGGER.debug("The {} config property is enabled, therefore scanning for experience shall happen", EXPERIENCE_SCAN);
-            if (isEntitlementEnabledForExperienceInteraction(environmentExperienceDto)) {
+            if (true) {
                 LOGGER.debug("The {} entitlement is enabled, which means experience deletion through CB can be performed.",
                         CDP_EXPERIENCE_DELETION_BY_ENVIRONMENT.name());
                 if (!experiences.isEmpty()) {

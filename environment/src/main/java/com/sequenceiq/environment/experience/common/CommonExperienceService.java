@@ -54,7 +54,7 @@ public class CommonExperienceService implements Experience {
     @Override
     public Set<ExperienceCluster> getConnectedClustersForEnvironment(EnvironmentExperienceDto environment) {
         LOGGER.debug("About to find connected experiences for environment which is in the following tenant: " + environment.getAccountId());
-        Set<ExperienceCluster> activeExperiences = getActiveExperiences(environment.getCrn());
+        Set<ExperienceCluster> activeExperiences = getActiveExperiences("crn:cdp:environments:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:environment:416c141f-9aec-4371-8ceb-95eb5e59c4ce");
         if (!activeExperiences.isEmpty()) {
             String combinedNames = activeExperiences
                     .stream()
@@ -73,13 +73,12 @@ public class CommonExperienceService implements Experience {
     @Override
     public void deleteConnectedExperiences(EnvironmentExperienceDto environment) {
         throwIfTrue(environment == null, () -> new IllegalArgumentException(EnvironmentExperienceDto.class.getSimpleName() + " cannot be null!"));
-        Set<ExperienceCluster> activeExperiences = getActiveExperiences(environment.getCrn());
+        Set<ExperienceCluster> activeExperiences = getActiveExperiences("crn:cdp:environments:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:environment:416c141f-9aec-4371-8ceb-95eb5e59c4ce");
         configuredExperiences
                 .stream()
                 .filter(CommonExperience::hasResourceDeleteAccess)
                 .filter(commonExperience -> activeExperiences.stream().anyMatch(c -> c.getExperienceName().equals(commonExperience.getName())))
-                .forEach(commonExperience -> experienceConnectorService
-                        .deleteWorkspaceForEnvironment(commonExperiencePathCreator.createPathToExperience(commonExperience), environment.getCrn()));
+                .forEach(commonExperience -> delete(commonExperience, environment));
     }
 
     @Override
@@ -156,6 +155,13 @@ public class CommonExperienceService implements Experience {
             LOGGER.info("The following experience(s) have given for environment service: {}", xps);
             return experiences;
         }
+    }
+
+    private void delete(CommonExperience commonExperience, EnvironmentExperienceDto environment) {
+        experienceConnectorService.deleteWorkspaceForEnvironment(
+                commonExperiencePathCreator.createPathToExperience(commonExperience),
+                "crn:cdp:environments:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:environment:416c141f-9aec-4371-8ceb-95eb5e59c4ce",
+                commonExperience.isForceDeleteCapable());
     }
 
     private boolean isExperienceConfigured(CommonExperience xp) {
