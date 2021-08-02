@@ -131,6 +131,7 @@ public class EnvironmentModelDescription {
 
     public static final String ENVIRONMENT_SERVICE_VERSION = "The version of the Cloudbreak build used to create the environment.";
 
+    public static final String AWS_DISK_ENCRYPTION_PARAMETERS = "AWS Disk encryption parameters";
     private EnvironmentModelDescription() {
     }
 }
