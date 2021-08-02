@@ -74,6 +74,10 @@ public class MDCBuilder {
         MDC.put(LoggerContextKey.ACCOUNT_ID.toString(), account);
     }
 
+    public static void addTenant(String tenant) {
+        MDC.put(LoggerContextKey.TENANT.toString(), tenant);
+    }
+
     public static void addTraceId(String traceId) {
         MDC.put(LoggerContextKey.TRACE_ID.toString(), traceId);
     }

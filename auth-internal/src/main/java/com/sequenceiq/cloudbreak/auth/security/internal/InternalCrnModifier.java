@@ -10,11 +10,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.auth.CrnUser;
 import com.sequenceiq.cloudbreak.auth.ReflectionUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.auth.CrnUser;
 import com.sequenceiq.cloudbreak.auth.crn.InternalCrnBuilder;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
 @Service
 public class InternalCrnModifier {
@@ -43,6 +44,7 @@ public class InternalCrnModifier {
             String userCrnString) {
         Optional<Object> accountId = reflectionUtil.getParameter(proceedingJoinPoint, methodSignature, AccountId.class);
         if (accountId.isPresent() && accountId.get() instanceof String) {
+            MDCBuilder.addTenant((String) accountId.get());
             String newUserCrn = getAccountIdModifiedCrn(userCrnString, (String) accountId.get());
             return Optional.of(newUserCrn);
         }
@@ -55,6 +57,7 @@ public class InternalCrnModifier {
         if (tenantAwareCrn.isPresent() && tenantAwareCrn.get() instanceof String
                 && Crn.isCrn((String) tenantAwareCrn.get())) {
             String accountId = Crn.fromString((String) tenantAwareCrn.get()).getAccountId();
+            MDCBuilder.addTenant(accountId);
             String newUserCrn = getAccountIdModifiedCrn(userCrnString, accountId);
             return Optional.of(newUserCrn);
         }

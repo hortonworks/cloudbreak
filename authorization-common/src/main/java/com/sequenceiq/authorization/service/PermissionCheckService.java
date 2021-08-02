@@ -74,6 +74,7 @@ public class PermissionCheckService {
         }
 
         if (internalUser && initiatorUserCrnParameter.isPresent()) {
+            MDCBuilder.addTenant(Crn.fromString(initiatorUserCrnParameter.get()).getAccountId());
             return ThreadBasedUserCrnProvider.doAs(initiatorUserCrnParameter.get(), () ->
                     commonPermissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature, startTime));
         } else {
