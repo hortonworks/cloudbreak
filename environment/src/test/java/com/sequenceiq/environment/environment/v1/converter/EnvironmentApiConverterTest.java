@@ -43,6 +43,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNe
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.LocationRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.SecurityAccessRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsDiskEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsFreeIpaParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsFreeIpaSpotParameters;
@@ -293,6 +294,35 @@ public class EnvironmentApiConverterTest {
     }
 
     @Test
+    void testAwsDiskEncryptionParametersAndAwsRequest() {
+        EnvironmentRequest request = createEnvironmentRequest(AWS);
+        request.setAws(AwsEnvironmentParameters.builder()
+                .withAwsDiskEncryptionParameters(
+                        AwsDiskEncryptionParameters.builder()
+                                .withEncryptionKeyArn("dummy-key-arn")
+                                .build())
+                .build());
+        FreeIpaCreationDto freeIpaCreationDto = mock(FreeIpaCreationDto.class);
+        EnvironmentTelemetry environmentTelemetry = mock(EnvironmentTelemetry.class);
+        EnvironmentBackup environmentBackup = mock(EnvironmentBackup.class);
+        AccountTelemetry accountTelemetry = mock(AccountTelemetry.class);
+        Features features = mock(Features.class);
+        NetworkDto networkDto = mock(NetworkDto.class);
+        when(credentialService.getCloudPlatformByCredential(anyString(), anyString(), any())).thenReturn(AWS.name());
+        when(freeIpaConverter.convert(request.getFreeIpa())).thenReturn(freeIpaCreationDto);
+        when(accountTelemetry.getFeatures()).thenReturn(features);
+        when(accountTelemetryService.getOrDefault(any())).thenReturn(accountTelemetry);
+        when(telemetryApiConverter.convert(eq(request.getTelemetry()), any())).thenReturn(environmentTelemetry);
+        when(backupConverter.convert(eq(request.getBackup()))).thenReturn(environmentBackup);
+        when(tunnelConverter.convert(request.getTunnel())).thenReturn(request.getTunnel());
+        when(networkRequestToDtoConverter.convert(request.getNetwork())).thenReturn(networkDto);
+
+        EnvironmentCreationDto actual = underTest.initCreationDto(request);
+        assertEquals("dummy-key-arn",
+                actual.getParameters().getAwsParametersDto().getAwsDiskEncryptionParametersDto().getEncryptionKeyArn());
+    }
+
+    @Test
     void testAzureResourceEncryptionParametersAndAzureRequest() {
         EnvironmentRequest request = createEnvironmentRequest(AZURE);
         request.setAzure(AzureEnvironmentParameters.builder()
@@ -365,6 +395,8 @@ public class EnvironmentApiConverterTest {
         assertEquals(request.getAws().getS3guard().getDynamoDbTableName(), actual.getAwsParametersDto().getS3GuardTableName());
         assertEquals(request.getFreeIpa().getAws().getSpot().getPercentage(), actual.getAwsParametersDto().getFreeIpaSpotPercentage());
         assertEquals(request.getFreeIpa().getAws().getSpot().getMaxPrice(), actual.getAwsParametersDto().getFreeIpaSpotMaxPrice());
+        assertEquals(request.getAws().getAwsDiskEncryptionParameters().getEncryptionKeyArn(),
+                actual.getAwsParametersDto().getAwsDiskEncryptionParametersDto().getEncryptionKeyArn());
     }
 
     private void assertSecurityAccess(SecurityAccessRequest request, SecurityAccessDto actual) {
@@ -426,6 +458,11 @@ public class EnvironmentApiConverterTest {
         s3GuardRequestParameters.setDynamoDbTableName("my-table");
         AwsEnvironmentParameters awsEnvironmentParameters = new AwsEnvironmentParameters();
         awsEnvironmentParameters.setS3guard(s3GuardRequestParameters);
+        awsEnvironmentParameters.setAwsDiskEncryptionParameters(
+                AwsDiskEncryptionParameters.builder()
+                        .withEncryptionKeyArn("dummy-key-arn")
+                        .build()
+        );
         return awsEnvironmentParameters;
     }
 

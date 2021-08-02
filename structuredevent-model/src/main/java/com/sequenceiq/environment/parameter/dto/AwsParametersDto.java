@@ -13,11 +13,14 @@ public class AwsParametersDto implements S3GuardParameters {
 
     private Double freeIpaSpotMaxPrice;
 
+    private AwsDiskEncryptionParametersDto awsDiskEncryptionParametersDto;
+
     private AwsParametersDto(Builder builder) {
         dynamoDbTableName = builder.dynamoDbTableName;
         dynamoDbTableCreation = builder.dynamoDbTableCreation;
         freeIpaSpotPercentage = builder.freeIpaSpotPercentage;
         freeIpaSpotMaxPrice = builder.freeIpaSpotMaxPrice;
+        awsDiskEncryptionParametersDto = builder.awsDiskEncryptionParametersDto;
     }
 
     @Override
@@ -50,6 +53,10 @@ public class AwsParametersDto implements S3GuardParameters {
         this.freeIpaSpotMaxPrice = freeIpaSpotMaxPrice;
     }
 
+    public AwsDiskEncryptionParametersDto getAwsDiskEncryptionParametersDto() {
+        return awsDiskEncryptionParametersDto;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -61,6 +68,7 @@ public class AwsParametersDto implements S3GuardParameters {
                 + ", dynamoDbTableCreation=" + dynamoDbTableCreation
                 + ", freeIpaSpotPercentage=" + freeIpaSpotPercentage
                 + ", freeIpaSpotMaxPrice=" + freeIpaSpotMaxPrice
+                + ", awsDiskEncryptionParametersDto" + awsDiskEncryptionParametersDto
                 + '}';
     }
 
@@ -73,6 +81,8 @@ public class AwsParametersDto implements S3GuardParameters {
         private int freeIpaSpotPercentage;
 
         private Double freeIpaSpotMaxPrice;
+
+        private AwsDiskEncryptionParametersDto awsDiskEncryptionParametersDto;
 
         private Builder() {
         }
@@ -94,6 +104,11 @@ public class AwsParametersDto implements S3GuardParameters {
 
         public Builder withFreeIpaSpotMaxPrice(Double freeIpaSpotMaxPrice) {
             this.freeIpaSpotMaxPrice = freeIpaSpotMaxPrice;
+            return this;
+        }
+
+        public Builder withAwsDiskEncryptionParameters(AwsDiskEncryptionParametersDto awsDiskEncryptionParametersDto) {
+            this.awsDiskEncryptionParametersDto = awsDiskEncryptionParametersDto;
             return this;
         }
 

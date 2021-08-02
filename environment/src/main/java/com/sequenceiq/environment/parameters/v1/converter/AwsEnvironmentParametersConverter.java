@@ -8,6 +8,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.parameters.dao.domain.AwsParameters;
 import com.sequenceiq.environment.parameters.dao.domain.BaseParameters;
+import com.sequenceiq.environment.parameter.dto.AwsDiskEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.AwsParametersDto;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
 import com.sequenceiq.environment.parameter.dto.ParametersDto.Builder;
@@ -43,6 +44,10 @@ public class AwsEnvironmentParametersConverter extends BaseEnvironmentParameters
         awsParameters.setFreeIpaSpotMaxPrice(awsParametersDto
                 .map(AwsParametersDto::getFreeIpaSpotMaxPrice)
                 .orElse(null));
+        awsParameters.setEncryptionKeyArn(awsParametersDto
+                .map(AwsParametersDto::getAwsDiskEncryptionParametersDto)
+                .map(AwsDiskEncryptionParametersDto::getEncryptionKeyArn)
+                .orElse(null));
     }
 
     @Override
@@ -54,6 +59,9 @@ public class AwsEnvironmentParametersConverter extends BaseEnvironmentParameters
                 .withDynamoDbTableCreation(awsParameters.getS3guardTableCreation())
                 .withFreeIpaSpotPercentage(awsParameters.getFreeIpaSpotPercentage())
                 .withFreeIpaSpotMaxPrice(awsParameters.getFreeIpaSpotMaxPrice())
+                .withAwsDiskEncryptionParameters(AwsDiskEncryptionParametersDto.builder()
+                        .withEncryptionKeyArn(awsParameters.getEncryptionKeyArn())
+                .build())
                 .build());
     }
 }
