@@ -2,7 +2,7 @@ package com.sequenceiq.environment.environment.flow.deletion.handler.experience;
 
 import static com.sequenceiq.cloudbreak.polling.PollingResult.isSuccess;
 import static com.sequenceiq.environment.environment.flow.deletion.handler.experience.ExperienceDeletionRetrievalTask.EXPERIENCE_RETRYING_COUNT;
-import static com.sequenceiq.environment.environment.flow.deletion.handler.experience.ExperienceDeletionRetrievalTask.EXPERIENCE_RETRYING_INTERVAL;
+import static com.sequenceiq.environment.environment.flow.deletion.handler.experience.ExperienceDeletionRetrievalTask.EXPERIENCE_RETRYING_INTERVAL_IN_MILLISECOND;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -80,7 +80,7 @@ public class EnvironmentExperienceDeletionAction {
         Pair<PollingResult, Exception> result = experiencePollingService.pollWithTimeout(
                 new ExperienceDeletionRetrievalTask(experienceConnectorService),
                 new ExperiencePollerObject(environment.getResourceCrn(), environment.getName(), environment.getCloudPlatform(), environment.getAccountId()),
-                EXPERIENCE_RETRYING_INTERVAL,
+                EXPERIENCE_RETRYING_INTERVAL_IN_MILLISECOND,
                 EXPERIENCE_RETRYING_COUNT,
                 SINGLE_FAILURE);
         if (!isSuccess(result.getLeft())) {

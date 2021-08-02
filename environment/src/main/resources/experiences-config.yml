@@ -2,8 +2,6 @@ environment:
   experience:
     liftie:
       workloads:
-        - name: mon-platform
-          description: Monitoring Clusters
       pathInfix: /liftie/api/v1
       address: https://${MOCK_INFRASTRUCTURE_HOST:localhost}:${MOCK_INFRASTRUCTURE_BIND_PORT:10090}
       policyPath: /prerequisites?cloudPlatform={cloudProvider}
@@ -21,4 +19,14 @@ environment:
         address: https://${MOCK_INFRASTRUCTURE_HOST:localhost}:${MOCK_INFRASTRUCTURE_BIND_PORT:10090}
         internalEnvironmentEndpoint: /dwx/{environmentCrn}
         policyPort: ${MOCK_INFRASTRUCTURE_BIND_PORT:10090}
+        policyEndpoint: /prerequisites?cloudPlatform={cloudProvider}
+      - name: MLX
+        description: Machine Learning Experience
+        businessName: Machine learning
+        environmentEndpointPort: ${MOCK_INFRASTRUCTURE_BIND_PORT:10090}
+        baseAddress: https://${MOCK_INFRASTRUCTURE_HOST:localhost}
+        address: https://${MOCK_INFRASTRUCTURE_HOST:localhost}:${MOCK_INFRASTRUCTURE_BIND_PORT:10090}
+        internalEnvironmentEndpoint: /ml/environment/{environmentCrn}
+        policyPort: ${MOCK_INFRASTRUCTURE_BIND_PORT:8080}
+        forceDeleteCapable: true
         policyEndpoint: /prerequisites?cloudPlatform={cloudProvider}

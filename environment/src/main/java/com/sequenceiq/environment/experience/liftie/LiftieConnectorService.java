@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.environment.exception.ExperienceOperationFailedException;
 import com.sequenceiq.environment.experience.InvocationBuilderProvider;
+import com.sequenceiq.environment.experience.QueryParamInjectorUtil;
 import com.sequenceiq.environment.experience.ResponseReader;
 import com.sequenceiq.environment.experience.RetryableWebTarget;
 import com.sequenceiq.environment.experience.api.LiftieApi;
@@ -66,7 +67,7 @@ public class LiftieConnectorService implements LiftieApi {
         putIfPresent(queryParams, "tenant", tenant);
         putIfPresent(queryParams, "workloads", workload);
         putIfPresent(queryParams, "page", page != null ? page.toString() : null);
-        webTarget = setQueryParams(webTarget, queryParams);
+        webTarget = QueryParamInjectorUtil.setQueryParams(webTarget, queryParams);
         LOGGER.info("WebTarget has created for getting Kubernetes clusters related to the given environment environment [name: {}]: {}",
                 env, webTarget.toString());
         Invocation.Builder call = invocationBuilderProvider.createInvocationBuilder(webTarget);
@@ -118,17 +119,6 @@ public class LiftieConnectorService implements LiftieApi {
             LOGGER.warn("Kubernetes Experience http call execution has failed due to:", re);
             throw new ExperienceOperationFailedException(re);
         }
-    }
-
-    private WebTarget setQueryParams(WebTarget webTarget, Map<String, String> nameValuePairs) {
-        WebTarget target = webTarget;
-        for (Map.Entry<String, String> entry : nameValuePairs.entrySet()) {
-            String value = entry.getValue();
-            if (value != null) {
-                target = target.queryParam(entry.getKey(), value);
-            }
-        }
-        return target;
     }
 
 }

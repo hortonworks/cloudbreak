@@ -12,7 +12,7 @@ public interface CommonExperienceApi {
 
     @NotNull Set<CpInternalCluster> getExperienceClustersConnectedToEnv(String experienceBasePath, String environmentCrn);
 
-    @NotNull DeleteCommonExperienceWorkspaceResponse deleteWorkspaceForEnvironment(String experienceBasePath, String environmentCrn);
+    @NotNull DeleteCommonExperienceWorkspaceResponse deleteWorkspaceForEnvironment(String experienceBasePath, String environmentCrn, boolean force);
 
     @NotNull ExperiencePolicyResponse collectPolicy(String experienceBasePath, String cloudPlatform);
 

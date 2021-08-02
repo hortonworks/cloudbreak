@@ -3,6 +3,7 @@ package com.sequenceiq.environment.experience.common;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 
 import java.net.URI;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.environment.exception.ExperienceOperationFailedException;
 import com.sequenceiq.environment.experience.InvocationBuilderProvider;
+import com.sequenceiq.environment.experience.QueryParamInjectorUtil;
 import com.sequenceiq.environment.experience.ResponseReader;
 import com.sequenceiq.environment.experience.RetryableWebTarget;
 import com.sequenceiq.environment.experience.api.CommonExperienceApi;
@@ -76,10 +78,13 @@ public class CommonExperienceConnectorService implements CommonExperienceApi {
 
     @NotNull
     @Override
-    public DeleteCommonExperienceWorkspaceResponse deleteWorkspaceForEnvironment(String experienceBasePath, String environmentCrn) {
+    public DeleteCommonExperienceWorkspaceResponse deleteWorkspaceForEnvironment(String experienceBasePath, String environmentCrn, boolean force) {
         WebTarget webTarget = commonExperienceWebTargetProvider.createWebTargetForClusterFetch(experienceBasePath, environmentCrn);
         LOGGER.info("WebTarget has created for deleting workspaces for environment [crn: {}]: {}",
                 environmentCrn, webTarget.toString());
+        if (force) {
+            webTarget = QueryParamInjectorUtil.setQueryParams(webTarget, Map.of("force", "true"));
+        }
         Invocation.Builder call = invocationBuilderProvider.createInvocationBuilder(webTarget);
         Optional<Response> response = executeCall(webTarget.getUri(), () -> retryableWebTarget.delete(call));
         if (response.isPresent()) {

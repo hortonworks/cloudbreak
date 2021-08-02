@@ -1,7 +1,7 @@
 package com.sequenceiq.environment.environment.flow.deletion.handler.experience;
 
 import static com.sequenceiq.environment.environment.flow.deletion.handler.experience.ExperienceDeletionRetrievalTask.EXPERIENCE_RETRYING_COUNT;
-import static com.sequenceiq.environment.environment.flow.deletion.handler.experience.ExperienceDeletionRetrievalTask.EXPERIENCE_RETRYING_INTERVAL;
+import static com.sequenceiq.environment.environment.flow.deletion.handler.experience.ExperienceDeletionRetrievalTask.EXPERIENCE_RETRYING_INTERVAL_IN_MILLISECOND;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -64,7 +64,7 @@ class EnvironmentExperienceDeletionActionTest {
         when(mockExperiencePollingService.pollWithTimeout(
                 any(ExperienceDeletionRetrievalTask.class),
                 any(ExperiencePollerObject.class),
-                eq(Long.valueOf(EXPERIENCE_RETRYING_INTERVAL)),
+                eq(Long.valueOf(EXPERIENCE_RETRYING_INTERVAL_IN_MILLISECOND)),
                 eq(EXPERIENCE_RETRYING_COUNT),
                 eq(1)))
                 .thenReturn(new ImmutablePair<>(PollingResult.SUCCESS, null));
@@ -80,7 +80,7 @@ class EnvironmentExperienceDeletionActionTest {
         when(mockExperiencePollingService.pollWithTimeout(
                 any(ExperienceDeletionRetrievalTask.class),
                 any(ExperiencePollerObject.class),
-                eq(Long.valueOf(EXPERIENCE_RETRYING_INTERVAL)),
+                eq(Long.valueOf(EXPERIENCE_RETRYING_INTERVAL_IN_MILLISECOND)),
                 eq(EXPERIENCE_RETRYING_COUNT),
                 eq(1)))
                 .thenReturn(pollingResult);
@@ -103,7 +103,7 @@ class EnvironmentExperienceDeletionActionTest {
         when(mockExperiencePollingService.pollWithTimeout(
                 any(ExperienceDeletionRetrievalTask.class),
                 any(ExperiencePollerObject.class),
-                eq(Long.valueOf(EXPERIENCE_RETRYING_INTERVAL)),
+                eq(Long.valueOf(EXPERIENCE_RETRYING_INTERVAL_IN_MILLISECOND)),
                 eq(EXPERIENCE_RETRYING_COUNT),
                 eq(1)))
                 .thenReturn(pollingResult);
@@ -123,7 +123,7 @@ class EnvironmentExperienceDeletionActionTest {
         when(mockExperiencePollingService.pollWithTimeout(
                 any(ExperienceDeletionRetrievalTask.class),
                 any(ExperiencePollerObject.class),
-                eq(Long.valueOf(EXPERIENCE_RETRYING_INTERVAL)),
+                eq(Long.valueOf(EXPERIENCE_RETRYING_INTERVAL_IN_MILLISECOND)),
                 eq(EXPERIENCE_RETRYING_COUNT),
                 eq(1)))
                 .thenReturn(pollingResult);

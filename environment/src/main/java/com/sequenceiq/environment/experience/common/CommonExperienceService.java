@@ -78,8 +78,7 @@ public class CommonExperienceService implements Experience {
                 .stream()
                 .filter(CommonExperience::hasResourceDeleteAccess)
                 .filter(commonExperience -> activeExperiences.stream().anyMatch(c -> c.getExperienceName().equals(commonExperience.getName())))
-                .forEach(commonExperience -> experienceConnectorService
-                        .deleteWorkspaceForEnvironment(commonExperiencePathCreator.createPathToExperience(commonExperience), environment.getCrn()));
+                .forEach(commonExperience -> delete(commonExperience, environment));
     }
 
     @Override
@@ -156,6 +155,13 @@ public class CommonExperienceService implements Experience {
             LOGGER.info("The following experience(s) have given for environment service: {}", xps);
             return experiences;
         }
+    }
+
+    private void delete(CommonExperience commonExperience, EnvironmentExperienceDto environment) {
+        experienceConnectorService.deleteWorkspaceForEnvironment(
+                commonExperiencePathCreator.createPathToExperience(commonExperience),
+                environment.getCrn(),
+                commonExperience.isForceDeleteCapable());
     }
 
     private boolean isExperienceConfigured(CommonExperience xp) {
