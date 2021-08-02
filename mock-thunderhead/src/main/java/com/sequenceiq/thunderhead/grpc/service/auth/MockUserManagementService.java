@@ -416,6 +416,9 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.gcp.disk.EncryptionWithCMEK.enable}")
     private boolean enableGcpDiskEncryptionWithCMEK;
 
+    @Value("${auth.mock.freeipa.batch.call.enable}")
+    private boolean enableFmsFreeipaBatchCall;
+
     @PostConstruct
     public void init() {
         cbLicense = getLicense();
@@ -774,6 +777,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         if (enableGcpDiskEncryptionWithCMEK) {
             builder.addEntitlements(createEntitlement(CDP_CB_GCP_DISK_ENCRYPTION_WITH_CMEK));
         }
+        if (enableFmsFreeipaBatchCall) {
+            builder.addEntitlements(createEntitlement(FMS_FREEIPA_BATCH_CALL));
+        }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()
                         .setAccount(builder
@@ -792,7 +798,6 @@ public class MockUserManagementService extends UserManagementImplBase {
                                 .addEntitlements(createEntitlement(CDP_SHOW_CLI))
                                 .addEntitlements(createEntitlement(DATAHUB_STREAMING_SCALING))
                                 .addEntitlements(createEntitlement(CDP_CP_CUSTOM_DL_TEMPLATE))
-                                .addEntitlements(createEntitlement(FMS_FREEIPA_BATCH_CALL))
                                 .addEntitlements(createEntitlement(OJDBC_TOKEN_DH))
                                 .addEntitlements(createEntitlement(CDP_FREEIPA_UPGRADE))
                                 .setGlobalPasswordPolicy(workloadPasswordPolicy)
