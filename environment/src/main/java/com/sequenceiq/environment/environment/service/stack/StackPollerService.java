@@ -5,18 +5,24 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.dyngr.Polling;
 import com.dyngr.core.AttemptMaker;
+import com.dyngr.exception.PollerStoppedException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.environment.environment.poller.StackPollerProvider;
+import com.sequenceiq.environment.exception.DatahubOperationFailedException;
 
 @Service
 public class StackPollerService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(StackPollerService.class);
 
     private static final List<Status> SKIPPED_STATES = List.of(
         Status.CREATE_FAILED,
@@ -65,10 +71,15 @@ public class StackPollerService {
 
     private void startStackConfigUpdatePolling(List<String> stackCrns, AttemptMaker<Void> attemptMaker) {
         if (CollectionUtils.isNotEmpty(stackCrns)) {
-            Polling.stopAfterDelay(maxTime, TimeUnit.SECONDS)
-                .stopIfException(true)
-                .waitPeriodly(sleepTime, TimeUnit.SECONDS)
-                .run(attemptMaker);
+            try {
+                Polling.stopAfterDelay(maxTime, TimeUnit.SECONDS)
+                        .stopIfException(true)
+                        .waitPeriodly(sleepTime, TimeUnit.SECONDS)
+                        .run(attemptMaker);
+            } catch (PollerStoppedException e) {
+                LOGGER.info("Datahub starting timed out");
+                throw new DatahubOperationFailedException("Datahub starting timed out", e);
+            }
         }
     }
 
