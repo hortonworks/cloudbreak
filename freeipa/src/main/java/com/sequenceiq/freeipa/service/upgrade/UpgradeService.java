@@ -4,6 +4,7 @@ import static com.sequenceiq.freeipa.api.v1.operation.model.OperationState.RUNNI
 import static java.util.function.Predicate.not;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -70,7 +71,7 @@ public class UpgradeService {
             Set<String> nonPgwInstanceIds, ImageSettingsRequest imageSettingsRequest, ImageInfoResponse selectedImage, ImageInfoResponse currentImage) {
         Operation operation = startUpgradeOperation(stack.getAccountId(), request);
         UpgradeEvent upgradeEvent = new UpgradeEvent(FlowChainTriggers.UPGRADE_TRIGGER_EVENT, stack.getId(), nonPgwInstanceIds, pgwInstanceId,
-                operation.getOperationId(), imageSettingsRequest);
+                operation.getOperationId(), imageSettingsRequest, Objects.nonNull(stack.getBackup()));
         LOGGER.info("Trigger upgrade flow with event: {}", upgradeEvent);
         FlowIdentifier flowIdentifier = flowManager.notify(FlowChainTriggers.UPGRADE_TRIGGER_EVENT, upgradeEvent);
         return new FreeIpaUpgradeResponse(flowIdentifier, selectedImage, currentImage, operation.getOperationId());

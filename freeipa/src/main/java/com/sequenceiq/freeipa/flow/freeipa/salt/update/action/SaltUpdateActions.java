@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.flow.freeipa.salt.update;
+package com.sequenceiq.freeipa.flow.freeipa.salt.update.action;
 
 import java.util.Map;
 
@@ -13,6 +13,7 @@ import com.sequenceiq.freeipa.flow.freeipa.provision.event.bootstrap.BootstrapMa
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.orchestrator.OrchestratorConfigRequest;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.orchestrator.OrchestratorConfigSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.services.InstallFreeIpaServicesRequest;
+import com.sequenceiq.freeipa.flow.freeipa.salt.update.SaltUpdateTriggerEvent;
 import com.sequenceiq.freeipa.flow.stack.StackContext;
 import com.sequenceiq.freeipa.flow.stack.provision.action.AbstractStackProvisionAction;
 
