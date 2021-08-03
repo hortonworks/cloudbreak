@@ -16,6 +16,8 @@
     "Microsoft.Network/networkInterfaces/*",
     "Microsoft.Network/networkSecurityGroups/*",
     "Microsoft.Network/*/read",
+    "Microsoft.Network/loadBalancers/write",
+    "Microsoft.Network/loadBalancers/backendAddressPools/join/action",
     "Microsoft.Compute/availabilitySets/*",
     "Microsoft.Compute/disks/*",
     "Microsoft.Compute/images/*",
