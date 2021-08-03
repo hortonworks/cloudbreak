@@ -35,7 +35,7 @@ do
   if [[ ! -e ${tokendir}/agent_token_copied_to_client ]]; then
     set +e
     # This can be fairly slow, for large clusters
-    COPY_RESULT=$(salt ${fqdn} cp.get_file salt://agent-tls-tokens/${AGENT_FQDN_TOKENDIR_MAP[${fqdn}]}/cmagent.token /etc/cloudera-scm-agent/cmagent.token)
+    COPY_RESULT=$(salt ${fqdn} cp.get_file salt://agent-tls-tokens/${AGENT_FQDN_TOKENDIR_MAP[${fqdn}]}/cmagent.token /etc/cloudera-scm-agent/cmagent.token makedirs=True)
     SALT_CP_RET=$?
     set -e
     if [[ "$COPY_RESULT" != *"False"* ]] && [[ "$SALT_CP_RET" -eq 0 ]] ; then
