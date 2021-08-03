@@ -76,14 +76,10 @@ public class GcpResourceConnector extends AbstractResourceConnector {
 
         CloudContext cloudContext = auth.getCloudContext();
         Platform platform = cloudContext.getPlatform();
-        Variant variant = cloudContext.getVariant();
-
 
         ResourceBuilderContext context = contextBuilders.get(platform).contextInit(cloudContext, auth, stack.getNetwork(), List.of(), true);
 
-        List<CloudResourceStatus> loadBalancerStatuses = loadBalancerResourceService.buildResources(context, auth, stack);
-
-        return loadBalancerStatuses;
+        return loadBalancerResourceService.buildResources(context, auth, stack);
     }
 
     @Override

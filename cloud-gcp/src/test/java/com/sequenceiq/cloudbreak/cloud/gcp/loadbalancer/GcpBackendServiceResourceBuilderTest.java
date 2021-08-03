@@ -106,7 +106,7 @@ public class GcpBackendServiceResourceBuilderTest {
 
         List<CloudResource> cloudResources = underTest.create(gcpContext, authenticatedContext, cloudLoadBalancer);
 
-        Assertions.assertTrue(cloudResources.get(0).getName().startsWith("name-PUBLIC-8080"));
+        Assertions.assertTrue(cloudResources.get(0).getName().startsWith("name-public-8080"));
         Assertions.assertEquals(1, cloudResources.size());
         Assertions.assertEquals(8080, cloudResources.get(0).getParameter("hcport", Integer.class));
         Assertions.assertEquals(80, cloudResources.get(0).getParameter("trafficport", Integer.class));
@@ -124,15 +124,6 @@ public class GcpBackendServiceResourceBuilderTest {
                 .group("master")
                 .name("hcsuper")
                 .params(parameters)
-                .persistent(true)
-                .build();
-
-        CloudResource igResource = new CloudResource.Builder()
-                .type(ResourceType.GCP_INSTANCE_GROUP)
-                .status(CommonStatus.CREATED)
-                .group("master")
-                .name("igsuper")
-                .params(new HashMap<>())
                 .persistent(true)
                 .build();
 
@@ -159,7 +150,6 @@ public class GcpBackendServiceResourceBuilderTest {
         when(gcpContext.getCompute()).thenReturn(compute);
         when(gcpContext.getProjectId()).thenReturn("id");
         when(gcpContext.getLoadBalancerResources(any())).thenReturn(List.of(hcResource));
-        when(gcpContext.getGroupResources("master")).thenReturn(List.of(igResource));
         when(gcpContext.getLocation()).thenReturn(location);
         when(location.getAvailabilityZone()).thenReturn(availabilityZone);
         when(availabilityZone.value()).thenReturn("us-west2");

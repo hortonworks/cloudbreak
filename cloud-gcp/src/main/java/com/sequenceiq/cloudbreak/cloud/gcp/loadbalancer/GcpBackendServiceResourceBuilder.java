@@ -38,7 +38,7 @@ public class GcpBackendServiceResourceBuilder extends AbstractGcpLoadBalancerBui
 
     public static final String GCP_INSTANCEGROUP_REFERENCE_FORMAT = "https://www.googleapis.com/compute/v1/projects/%s/zones/%s/instanceGroups/%s";
 
-    public static final String UTILIZATION = "UTILIZATION";
+    public static final String CONNECTION = "CONNECTION";
 
     public static final String GCP_HEALTH_CHECK_FORMAT = "https://www.googleapis.com/compute/v1/projects/%s/regions/%s/healthChecks/%s";
 
@@ -89,10 +89,10 @@ public class GcpBackendServiceResourceBuilder extends AbstractGcpLoadBalancerBui
             Set<Group> groups = loadBalancer.getPortToTargetGroupMapping().get(targetGroupPortPair);
             for (Group group : groups) {
                 Backend backend = new Backend();
-                CloudResource instanceGroupResource = filterResourcesByType(context.getGroupResources(group.getName()), ResourceType.GCP_INSTANCE_GROUP).get(0);
+                String groupname = getResourceNameService().resourceName(ResourceType.GCP_INSTANCE_GROUP, context.getName(), group.getName());
                 backend.setGroup(String.format(GCP_INSTANCEGROUP_REFERENCE_FORMAT,
-                        context.getProjectId(), zone, instanceGroupResource.getName()));
-                backend.setBalancingMode(UTILIZATION);
+                        context.getProjectId(), zone, groupname));
+                backend.setBalancingMode(CONNECTION);
                 backends.add(backend);
             }
 

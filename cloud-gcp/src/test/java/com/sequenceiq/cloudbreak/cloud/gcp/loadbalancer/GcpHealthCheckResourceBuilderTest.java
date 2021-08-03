@@ -99,7 +99,7 @@ public class GcpHealthCheckResourceBuilderTest {
 
         List<CloudResource> cloudResources = underTest.create(gcpContext, authenticatedContext, cloudLoadBalancer);
 
-        Assertions.assertTrue(cloudResources.get(0).getName().startsWith("name-PUBLIC-8080"));
+        Assertions.assertTrue(cloudResources.get(0).getName().startsWith("name-public-8080"));
         Assertions.assertEquals(1, cloudResources.size());
         Assertions.assertEquals(8080, cloudResources.get(0).getParameter("hcport", Integer.class));
     }

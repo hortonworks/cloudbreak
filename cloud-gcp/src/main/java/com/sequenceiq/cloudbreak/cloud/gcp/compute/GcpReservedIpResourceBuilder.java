@@ -18,8 +18,6 @@ import com.google.api.services.compute.model.Operation;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
-import com.sequenceiq.cloudbreak.cloud.gcp.network.GcpNetworkResourceBuilder;
-import com.sequenceiq.cloudbreak.cloud.gcp.network.GcpSubnetResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
@@ -34,8 +32,6 @@ public class GcpReservedIpResourceBuilder extends AbstractGcpComputeBuilder {
     public static final String INTERNAL = "INTERNAL";
 
     public static final String EXTERNAL = "EXTERNAL";
-
-    public static final String SHARED_LOADBALANCER_VIP = "SHARED_LOADBALANCER_VIP";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpReservedIpResourceBuilder.class);
 
@@ -68,11 +64,6 @@ public class GcpReservedIpResourceBuilder extends AbstractGcpComputeBuilder {
             address.setName(resource.getName());
             address.setDescription(description());
             address.setAddressType(type);
-            if (INTERNAL.equals(type)) {
-                address.setPurpose(SHARED_LOADBALANCER_VIP)
-                        .setNetwork(context.getParameter(GcpNetworkResourceBuilder.NETWORK_NAME, String.class))
-                        .setSubnetwork(context.getParameter(GcpSubnetResourceBuilder.SUBNET_NAME, String.class));
-            }
 
             Map<String, Object> customTags = new HashMap<>();
             customTags.putAll(cloudStack.getTags());

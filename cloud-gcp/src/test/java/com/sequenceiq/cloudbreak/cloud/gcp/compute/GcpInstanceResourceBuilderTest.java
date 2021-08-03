@@ -450,6 +450,10 @@ public class GcpInstanceResourceBuilderTest {
         group.getInstances().get(0).setSubnetId(null);
         when(gcpStackUtil.getSubnetId(any())).thenReturn("default");
 
+        ArgumentCaptor<String> subnetCaptor = ArgumentCaptor.forClass(String.class);
+        when(gcpStackUtil.getSubnetUrl(anyString(), anyString(), subnetCaptor.capture()))
+                .thenReturn("https://www.googleapis.com/compute/v1/projects/projectId/regions/region/subnetworks/default");
+
         // WHEN
         when(compute.instances()).thenReturn(instances);
         when(instances.insert(anyString(), anyString(), any(Instance.class))).thenReturn(insert);
@@ -465,6 +469,7 @@ public class GcpInstanceResourceBuilderTest {
         assertEquals("https://www.googleapis.com/compute/v1/projects/projectId/regions/region/subnetworks/default",
                 instanceArg.getValue().getNetworkInterfaces().get(0).getSubnetwork());
         assertNull(instanceArg.getValue().getHostname());
+        assertEquals(subnetCaptor.getValue(), "default");
     }
 
     public Group newGroupWithParams(Map<String, Object> params) {

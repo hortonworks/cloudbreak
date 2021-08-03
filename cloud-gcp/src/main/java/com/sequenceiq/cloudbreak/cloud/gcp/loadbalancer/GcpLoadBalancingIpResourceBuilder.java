@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.loadbalancer;
 
+import java.util.Collection;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -14,6 +15,7 @@ import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -34,10 +36,15 @@ public class GcpLoadBalancingIpResourceBuilder extends AbstractGcpLoadBalancerBu
 
     @Override
     public List<CloudResource> create(GcpContext context, AuthenticatedContext auth, CloudLoadBalancer loadBalancer) {
-            String resourceName = getResourceNameService().resourceName(resourceType(), auth.getCloudContext().getName(), loadBalancer.getType(), 1);
+        String groupName = loadBalancer.getPortToTargetGroupMapping().values().stream()
+                .flatMap(Collection::stream).map(Group::getName).findFirst().orElse("lb");
+        if (!context.getNoPublicIp()) {
+            String resourceName = getResourceNameService().resourceName(resourceType(), auth.getCloudContext().getName(), loadBalancer.getType(), groupName);
             return List.of(new CloudResource.Builder().type(resourceType())
-                    .name(resourceName)
-                    .build());
+                .name(resourceName)
+                .build());
+        }
+        return List.of();
     }
 
     @Override
