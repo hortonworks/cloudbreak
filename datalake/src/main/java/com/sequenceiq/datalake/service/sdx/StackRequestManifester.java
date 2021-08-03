@@ -39,6 +39,7 @@ import com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentConfigView;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.common.api.cloudstorage.AccountMappingBase;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
 import com.sequenceiq.common.api.cloudstorage.StorageIdentityBase;
@@ -50,7 +51,9 @@ import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.api.type.EncryptionType;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.model.CloudIdentityType;
+import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.service.validation.cloudstorage.CloudStorageLocationValidator;
 import com.sequenceiq.datalake.service.validation.cloudstorage.CloudStorageValidator;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkYarnParams;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
@@ -69,6 +72,9 @@ public class StackRequestManifester {
 
     @Inject
     private CloudStorageValidator cloudStorageValidator;
+
+    @Inject
+    private CloudStorageLocationValidator cloudStorageLocationValidator;
 
     @Inject
     private GrpcIdbmmsClient idbmmsClient;
@@ -131,13 +137,27 @@ public class StackRequestManifester {
             setupClusterRequest(stackRequest);
             prepareTelemetryForStack(stackRequest, environment, sdxCluster);
             setupCloudStorageAccountMapping(stackRequest, environment.getCrn(), environment.getIdBrokerMappingSource(), environment.getCloudPlatform());
-            cloudStorageValidator.validate(stackRequest.getCluster().getCloudStorage(), environment, new ValidationResult.ValidationResultBuilder());
+            validateCloudStorage(sdxCluster, environment, stackRequest);
             setupInstanceVolumeEncryption(stackRequest, environment);
             return stackRequest;
         } catch (IOException e) {
             LOGGER.error("Can not parse JSON to stack request");
             throw new IllegalStateException("Can not parse JSON to stack request", e);
         }
+    }
+
+    private void validateCloudStorage(SdxCluster sdxCluster, DetailedEnvironmentResponse environment, StackV4Request stackRequest) {
+        if (FileSystemType.S3.equals(sdxCluster.getCloudStorageFileSystemType())
+                && !Strings.isNullOrEmpty(sdxCluster.getCloudStorageBaseLocation())) {
+            ValidationResultBuilder validationBuilder = new ValidationResultBuilder();
+            cloudStorageLocationValidator.validate(sdxCluster.getCloudStorageBaseLocation(), FileSystemType.S3, environment,
+                    validationBuilder);
+            ValidationResult validationResult = validationBuilder.build();
+            if (validationResult.hasError()) {
+                throw new BadRequestException(validationResult.getFormattedErrors());
+            }
+        }
+        cloudStorageValidator.validate(stackRequest.getCluster().getCloudStorage(), environment, new ValidationResultBuilder());
     }
 
     private void setupYarnDetails(DetailedEnvironmentResponse environment, StackV4Request stackRequest) {
