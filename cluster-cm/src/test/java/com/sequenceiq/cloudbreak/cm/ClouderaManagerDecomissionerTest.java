@@ -73,6 +73,9 @@ class ClouderaManagerDecomissionerTest {
     private ClustersResourceApi clustersResourceApi;
 
     @Mock
+    private HostsResourceApi hostsResourceApi;
+
+    @Mock
     private ClouderaManagerResourceApi clouderaManagerResourceApi;
 
     @Mock
@@ -86,7 +89,7 @@ class ClouderaManagerDecomissionerTest {
 
     @Test
     public void testDecommissionForLostNodesIfFirstDecommissionSucceeded() throws ApiException {
-        mockListHosts();
+        mockListClusterHosts();
         mockDecommission(Pair.of(BigDecimal.ONE, PollingResult.SUCCESS));
         mockAbortCommand(BigDecimal.ONE);
         InstanceMetaData deletedInstanceMetadata = createDeletedInstanceMetadata();
@@ -99,7 +102,7 @@ class ClouderaManagerDecomissionerTest {
 
     @Test
     public void testDecommissionForLostNodesIfSecondDecommissionSucceeded() throws ApiException {
-        mockListHosts();
+        mockListClusterHosts();
         mockDecommission(Pair.of(BigDecimal.ONE, PollingResult.TIMEOUT),
                 Pair.of(BigDecimal.TEN, PollingResult.SUCCESS));
         mockAbortCommand(BigDecimal.ONE);
@@ -113,7 +116,7 @@ class ClouderaManagerDecomissionerTest {
 
     @Test
     public void testDecommissionForLostNodesIfBothDecommissionFails() throws ApiException {
-        mockListHosts();
+        mockListClusterHosts();
         mockDecommission(Pair.of(BigDecimal.ONE, PollingResult.TIMEOUT),
                 Pair.of(BigDecimal.TEN, PollingResult.TIMEOUT));
         mockAbortCommand(BigDecimal.ONE, BigDecimal.TEN);
@@ -129,7 +132,7 @@ class ClouderaManagerDecomissionerTest {
 
     @Test
     public void collectHostsToRemoveShouldCollectDeletedOnProviderSideNodes() throws Exception {
-        mockListHosts();
+        mockListClusterHosts();
         Set<String> hostNames = Set.of(DELETED_INSTANCE_FQDN, RUNNING_INSTANCE_FQDN);
 
         Map<String, InstanceMetaData> result = underTest.collectHostsToRemove(getStack(), createHostGroup(), hostNames, client);
@@ -198,11 +201,11 @@ class ClouderaManagerDecomissionerTest {
                 Arrays.stream(commandIds).map(commandIdItem -> getApiCommand(commandIdItem)).toArray(ApiCommand[]::new));
     }
 
-    private void mockListHosts() throws ApiException {
+    private void mockListClusterHosts() throws ApiException {
         ApiHostList apiHostRefList = new ApiHostList();
         apiHostRefList.setItems(List.of(createApiHostRef(DELETED_INSTANCE_FQDN), createApiHostRef(RUNNING_INSTANCE_FQDN)));
-        when(clustersResourceApi.listHosts(STACK_NAME, null, null, null)).thenReturn(apiHostRefList);
-        when(clouderaManagerApiFactory.getClustersResourceApi(client)).thenReturn(clustersResourceApi);
+        when(hostsResourceApi.readHosts(null, null, "SUMMARY")).thenReturn(apiHostRefList);
+        when(clouderaManagerApiFactory.getHostsResourceApi(client)).thenReturn(hostsResourceApi);
     }
 
     private InstanceMetaData createRunningInstanceMetadata() {
