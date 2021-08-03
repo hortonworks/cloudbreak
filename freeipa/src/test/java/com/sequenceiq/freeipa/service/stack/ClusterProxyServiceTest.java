@@ -50,6 +50,8 @@ public class ClusterProxyServiceTest {
 
     private static final String TEST_ACCOUNT_ID = "9d74eee4-1cad-45d7-b645-7ccf9edbb73d";
 
+    private static final String FREEIPA_SERVICE = "freeipa";
+
     @InjectMocks
     private ClusterProxyService underTest;
 
@@ -116,8 +118,9 @@ public class ClusterProxyServiceTest {
 
         assertEquals(false, proxyRegisterationReq.isUseTunnel(), "CCMV1 tunnel should not be enabled");
         assertEquals(true, proxyRegisterationReq.isUseCcmV2(), ccmv2Mode.toString() + " should be enabled.");
-        assertEquals(List.of(new CcmV2Config("testAgentCrn", "testAgentCrn-testInstanceId", "privateIpAddress",
-                ServiceFamilies.GATEWAY.getDefaultPort())), proxyRegisterationReq.getCcmV2Configs(), ccmv2Mode.toString() + " config should match");
+        assertEquals(List.of(new CcmV2Config("privateIpAddress", ServiceFamilies.GATEWAY.getDefaultPort(),
+                        "testAgentCrn-testInstanceId", FREEIPA_SERVICE)),
+                proxyRegisterationReq.getCcmV2Configs(), ccmv2Mode.toString() + " config should match");
     }
 
     @ParameterizedTest
@@ -163,10 +166,10 @@ public class ClusterProxyServiceTest {
         assertEquals(false, proxyRegisterationReq.isUseTunnel(), "CCMV1 tunnel should not be enabled");
         assertEquals(true, proxyRegisterationReq.isUseCcmV2(), ccmv2Mode.toString() + " should be enabled.");
         assertEquals(List.of(
-                new CcmV2Config("testAgentCrn", "testAgentCrn-testInstanceId1", "privateIpAddress1",
-                        ServiceFamilies.GATEWAY.getDefaultPort()),
-                new CcmV2Config("testAgentCrn", "testAgentCrn-testInstanceId2", "privateIpAddress2",
-                        ServiceFamilies.GATEWAY.getDefaultPort())), proxyRegisterationReq.getCcmV2Configs(), ccmv2Mode.toString() + " config should match");
+                new CcmV2Config("privateIpAddress1", ServiceFamilies.GATEWAY.getDefaultPort(), "testAgentCrn-testInstanceId1", FREEIPA_SERVICE
+                ),
+                new CcmV2Config("privateIpAddress2", ServiceFamilies.GATEWAY.getDefaultPort(), "testAgentCrn-testInstanceId2", FREEIPA_SERVICE
+                )), proxyRegisterationReq.getCcmV2Configs(), ccmv2Mode.toString() + " config should match");
     }
 
     @Test

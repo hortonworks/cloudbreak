@@ -6,11 +6,12 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class ConfigUpdateRequest {
-    @JsonProperty
-    private String clusterCrn;
 
     @JsonProperty
-    private String uriOfKnox;
+    private final String clusterCrn;
+
+    @JsonProperty
+    private final String uriOfKnox;
 
     @JsonCreator
     public ConfigUpdateRequest(String clusterCrn, String uriOfKnox) {

@@ -6,11 +6,12 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class ClientCertificate {
-    @JsonProperty
-    private String keyRef;
 
     @JsonProperty
-    private String certificateRef;
+    private final String keyRef;
+
+    @JsonProperty
+    private final String certificateRef;
 
     @JsonCreator
     public ClientCertificate(String keyRef, String certificateRef) {

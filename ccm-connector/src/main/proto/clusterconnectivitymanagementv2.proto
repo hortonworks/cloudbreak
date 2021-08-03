@@ -152,7 +152,7 @@ message ListAgentsRequest {
     // If an accountId is passed-in, all agents belonging to this accountId would be returned.
     string accountId = 3;
     // If an environmentCrn is passed-in, all agents belonging to this environmnent would be returned.
-    string envirinmentCrn = 4;
+    string environmentCrn = 4;
   }
 }
 

@@ -3,9 +3,12 @@ package com.sequenceiq.cloudbreak.clusterproxy;
 import java.util.List;
 
 public class ConfigRegistrationRequestBuilder {
+
     private String accountId;
 
-    private String clusterCrn;
+    private final String clusterCrn;
+
+    private String environmentCrn;
 
     private String uriOfKnox;
 
@@ -23,8 +26,17 @@ public class ConfigRegistrationRequestBuilder {
 
     private List<CcmV2Config> ccmV2Configs;
 
+    // TODO: cluster-proxy documentation suggests this should be set to "true" in production services. We have not set it ever and the default at
+    // cluster-proxy level is "false"
+    private boolean tlsStrictCheck;
+
     public ConfigRegistrationRequestBuilder(String clusterCrn) {
         this.clusterCrn = clusterCrn;
+    }
+
+    public ConfigRegistrationRequestBuilder withEnvironmentCrn(String environmentCrn) {
+        this.environmentCrn = environmentCrn;
+        return this;
     }
 
     public ConfigRegistrationRequestBuilder withAliases(List<String> aliases) {
@@ -44,6 +56,11 @@ public class ConfigRegistrationRequestBuilder {
 
     public ConfigRegistrationRequestBuilder withAccountId(String accountId) {
         this.accountId = accountId;
+        return this;
+    }
+
+    public ConfigRegistrationRequestBuilder withUseCcmV2(boolean useCcmV2) {
+        this.useCcmV2 = useCcmV2;
         return this;
     }
 
@@ -68,7 +85,13 @@ public class ConfigRegistrationRequestBuilder {
         return this;
     }
 
+    public ConfigRegistrationRequestBuilder withTlsStrictCheck(boolean tlsStrictCheck) {
+        this.tlsStrictCheck = tlsStrictCheck;
+        return this;
+    }
+
     public ConfigRegistrationRequest build() {
-        return new ConfigRegistrationRequest(clusterCrn, uriOfKnox, accountId, useTunnel, tunnels, aliases, services, certificates, useCcmV2, ccmV2Configs);
+        return new ConfigRegistrationRequest(clusterCrn, environmentCrn, uriOfKnox, accountId,
+                useTunnel, tunnels, aliases, services, certificates, useCcmV2, ccmV2Configs, tlsStrictCheck);
     }
 }

@@ -6,17 +6,18 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class ClusterServiceHealthCheck {
-    @JsonProperty
-    private int intervalInSec;
 
     @JsonProperty
-    private String endpointSuffix;
+    private final int intervalInSec;
 
     @JsonProperty
-    private int timeoutInSec;
+    private final String endpointSuffix;
 
     @JsonProperty
-    private int healthyStatusCode;
+    private final int timeoutInSec;
+
+    @JsonProperty
+    private final int healthyStatusCode;
 
     @JsonCreator
     public ClusterServiceHealthCheck(int intervalInSec, String endpointSuffix, int timeoutInSec, int healthyStatusCode) {
