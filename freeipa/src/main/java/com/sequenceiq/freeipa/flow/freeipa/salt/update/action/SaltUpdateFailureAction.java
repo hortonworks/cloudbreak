@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.flow.freeipa.salt.update;
+package com.sequenceiq.freeipa.flow.freeipa.salt.update.action;
 
 import java.util.Map;
 
@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.flow.OperationAwareAction;
+import com.sequenceiq.freeipa.flow.freeipa.salt.update.SaltUpdateEvent;
+import com.sequenceiq.freeipa.flow.freeipa.salt.update.SaltUpdateState;
 import com.sequenceiq.freeipa.flow.stack.AbstractStackFailureAction;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.flow.stack.StackFailureContext;

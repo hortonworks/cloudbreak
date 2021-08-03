@@ -10,7 +10,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 
-public class OrchestratorStateParams {
+public class OrchestratorStateParams implements Cloneable {
     private String state;
 
     private GatewayConfig primaryGatewayConfig;
@@ -103,5 +103,25 @@ public class OrchestratorStateParams {
 
     public void setErrorMessage(String errorMessage) {
         this.errorMessage = errorMessage;
+    }
+
+    @Override
+    public OrchestratorStateParams clone() throws CloneNotSupportedException {
+        return (OrchestratorStateParams) super.clone();
+    }
+
+    @Override
+    public String toString() {
+        return "OrchestratorStateParams{" +
+                "state='" + state + '\'' +
+                ", primaryGatewayConfig=" + primaryGatewayConfig +
+                ", targetHostNames=" + targetHostNames +
+                ", allNodes=" + allNodes +
+                ", exitCriteriaModel=" + exitCriteriaModel +
+                ", stateRetryParams=" + stateRetryParams +
+                ", stateParams=" + stateParams +
+                ", concurrent=" + concurrent +
+                ", errorMessage='" + errorMessage + '\'' +
+                '}';
     }
 }

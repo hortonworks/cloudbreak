@@ -2,11 +2,8 @@ package com.sequenceiq.freeipa.flow.freeipa.upgrade;
 
 import java.util.Set;
 
-import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
-
-import reactor.rx.Promise;
 
 public class UpgradeEvent extends StackEvent {
 
@@ -18,30 +15,16 @@ public class UpgradeEvent extends StackEvent {
 
     private final ImageSettingsRequest imageSettingsRequest;
 
-    public UpgradeEvent(Long stackId, Set<String> instanceIds, String primareGwInstanceId, String operationId, ImageSettingsRequest imageSettingsRequest) {
-        super(stackId);
-        this.instanceIds = instanceIds;
-        this.primareGwInstanceId = primareGwInstanceId;
-        this.operationId = operationId;
-        this.imageSettingsRequest = imageSettingsRequest;
-    }
+    private final boolean backupSet;
 
     public UpgradeEvent(String selector, Long stackId, Set<String> instanceIds, String primareGwInstanceId, String operationId,
-            ImageSettingsRequest imageSettingsRequest) {
+            ImageSettingsRequest imageSettingsRequest, boolean backupSet) {
         super(selector, stackId);
         this.instanceIds = instanceIds;
         this.primareGwInstanceId = primareGwInstanceId;
         this.operationId = operationId;
         this.imageSettingsRequest = imageSettingsRequest;
-    }
-
-    public UpgradeEvent(String selector, Long stackId, Promise<AcceptResult> accepted, Set<String> instanceIds, String primareGwInstanceId, String operationId,
-            ImageSettingsRequest imageSettingsRequest) {
-        super(selector, stackId, accepted);
-        this.instanceIds = instanceIds;
-        this.primareGwInstanceId = primareGwInstanceId;
-        this.operationId = operationId;
-        this.imageSettingsRequest = imageSettingsRequest;
+        this.backupSet = backupSet;
     }
 
     public Set<String> getInstanceIds() {
@@ -58,5 +41,9 @@ public class UpgradeEvent extends StackEvent {
 
     public ImageSettingsRequest getImageSettingsRequest() {
         return imageSettingsRequest;
+    }
+
+    public boolean isBackupSet() {
+        return backupSet;
     }
 }

@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.service.upgrade;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -23,6 +24,7 @@ import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
+import com.sequenceiq.freeipa.api.model.Backup;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
 import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.model.FreeIpaUpgradeRequest;
@@ -73,14 +75,9 @@ class UpgradeServiceTest {
         when(stackService.getByEnvironmentCrnAndAccountIdWithLists(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(stack);
         Set<InstanceMetaData> allInstances = createValidImSet();
         when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(allInstances);
-        ImageInfoResponse selectedImage = new ImageInfoResponse();
-        when(imageService.selectImage(stack, request.getImage())).thenReturn(selectedImage);
-        ImageInfoResponse currentImage = new ImageInfoResponse();
-        when(imageService.currentImage(stack)).thenReturn(currentImage);
-        Operation operation = new Operation();
-        operation.setStatus(OperationState.RUNNING);
-        operation.setOperationId("opId");
-        when(operationService.startOperation(any(), any(), any(), any())).thenReturn(operation);
+        ImageInfoResponse selectedImage = mockSelectedImage(request, stack);
+        ImageInfoResponse currentImage = mockCurrentImage(stack);
+        Operation operation = mockOperation(OperationState.RUNNING);
         ArgumentCaptor<Acceptable> eventCaptor = ArgumentCaptor.forClass(Acceptable.class);
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, "flowId");
         when(flowManager.notify(eq(FlowChainTriggers.UPGRADE_TRIGGER_EVENT), eventCaptor.capture())).thenReturn(flowIdentifier);
@@ -98,9 +95,67 @@ class UpgradeServiceTest {
         assertEquals("pgw", upgradeEvent.getPrimareGwInstanceId());
         assertEquals(2, upgradeEvent.getInstanceIds().size());
         assertTrue(Set.of("im2", "im3").containsAll(upgradeEvent.getInstanceIds()));
+        assertFalse(upgradeEvent.isBackupSet());
 
         verify(validationService).validateEntitlement(ACCOUNT_ID);
         verify(validationService).validateStackForUpgrade(allInstances, stack);
+    }
+
+    @Test
+    public void testUpgradeTriggeredWithBackup() {
+        FreeIpaUpgradeRequest request = new FreeIpaUpgradeRequest();
+        request.setImage(new ImageSettingsRequest());
+        request.setEnvironmentCrn(ENVIRONMENT_CRN);
+
+        Stack stack = mock(Stack.class);
+        when(stack.getBackup()).thenReturn(new Backup());
+        when(stackService.getByEnvironmentCrnAndAccountIdWithLists(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(stack);
+        Set<InstanceMetaData> allInstances = createValidImSet();
+        when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(allInstances);
+        ImageInfoResponse selectedImage = mockSelectedImage(request, stack);
+        ImageInfoResponse currentImage = mockCurrentImage(stack);
+        Operation operation = mockOperation(OperationState.RUNNING);
+        ArgumentCaptor<Acceptable> eventCaptor = ArgumentCaptor.forClass(Acceptable.class);
+        FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, "flowId");
+        when(flowManager.notify(eq(FlowChainTriggers.UPGRADE_TRIGGER_EVENT), eventCaptor.capture())).thenReturn(flowIdentifier);
+
+        FreeIpaUpgradeResponse response = underTest.upgradeFreeIpa(ACCOUNT_ID, request);
+
+        assertEquals(flowIdentifier, response.getFlowIdentifier());
+        assertEquals(operation.getOperationId(), response.getOperationId());
+        assertEquals(currentImage, response.getOriginalImage());
+        assertEquals(selectedImage, response.getTargetImage());
+
+        UpgradeEvent upgradeEvent = (UpgradeEvent) eventCaptor.getValue();
+        assertEquals(request.getImage(), upgradeEvent.getImageSettingsRequest());
+        assertEquals(operation.getOperationId(), upgradeEvent.getOperationId());
+        assertEquals("pgw", upgradeEvent.getPrimareGwInstanceId());
+        assertEquals(2, upgradeEvent.getInstanceIds().size());
+        assertTrue(Set.of("im2", "im3").containsAll(upgradeEvent.getInstanceIds()));
+        assertTrue(upgradeEvent.isBackupSet());
+
+        verify(validationService).validateEntitlement(ACCOUNT_ID);
+        verify(validationService).validateStackForUpgrade(allInstances, stack);
+    }
+
+    private Operation mockOperation(OperationState operationState) {
+        Operation operation = new Operation();
+        operation.setStatus(operationState);
+        operation.setOperationId("opId");
+        when(operationService.startOperation(any(), any(), any(), any())).thenReturn(operation);
+        return operation;
+    }
+
+    private ImageInfoResponse mockCurrentImage(Stack stack) {
+        ImageInfoResponse currentImage = new ImageInfoResponse();
+        when(imageService.currentImage(stack)).thenReturn(currentImage);
+        return currentImage;
+    }
+
+    private ImageInfoResponse mockSelectedImage(FreeIpaUpgradeRequest request, Stack stack) {
+        ImageInfoResponse selectedImage = new ImageInfoResponse();
+        when(imageService.selectImage(stack, request.getImage())).thenReturn(selectedImage);
+        return selectedImage;
     }
 
     @Test
@@ -114,12 +169,8 @@ class UpgradeServiceTest {
         when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(allInstances);
         ImageInfoResponse selectedImage = new ImageInfoResponse();
         when(imageService.selectImage(eq(stack), any(ImageSettingsRequest.class))).thenReturn(selectedImage);
-        ImageInfoResponse currentImage = new ImageInfoResponse();
-        when(imageService.currentImage(stack)).thenReturn(currentImage);
-        Operation operation = new Operation();
-        operation.setStatus(OperationState.RUNNING);
-        operation.setOperationId("opId");
-        when(operationService.startOperation(any(), any(), any(), any())).thenReturn(operation);
+        ImageInfoResponse currentImage = mockCurrentImage(stack);
+        Operation operation = mockOperation(OperationState.RUNNING);
         ArgumentCaptor<Acceptable> eventCaptor = ArgumentCaptor.forClass(Acceptable.class);
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, "flowId");
         when(flowManager.notify(eq(FlowChainTriggers.UPGRADE_TRIGGER_EVENT), eventCaptor.capture())).thenReturn(flowIdentifier);
@@ -169,14 +220,9 @@ class UpgradeServiceTest {
         when(stackService.getByEnvironmentCrnAndAccountIdWithLists(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(stack);
         Set<InstanceMetaData> allInstances = createValidImSet();
         when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(allInstances);
-        ImageInfoResponse selectedImage = new ImageInfoResponse();
-        when(imageService.selectImage(stack, request.getImage())).thenReturn(selectedImage);
-        ImageInfoResponse currentImage = new ImageInfoResponse();
-        when(imageService.currentImage(stack)).thenReturn(currentImage);
-        Operation operation = new Operation();
-        operation.setStatus(OperationState.REJECTED);
-        operation.setOperationId("opId");
-        when(operationService.startOperation(any(), any(), any(), any())).thenReturn(operation);
+        mockSelectedImage(request, stack);
+        mockCurrentImage(stack);
+        mockOperation(OperationState.REJECTED);
 
         assertThrows(BadRequestException.class, () -> underTest.upgradeFreeIpa(ACCOUNT_ID, request));
 
