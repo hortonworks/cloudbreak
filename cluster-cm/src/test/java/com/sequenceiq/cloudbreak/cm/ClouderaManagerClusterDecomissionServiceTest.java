@@ -166,11 +166,11 @@ public class ClouderaManagerClusterDecomissionServiceTest {
         when(applicationContext.getBean(ClouderaManagerModificationService.class, stack, clientConfig)).thenReturn(modificationService);
         when(clouderaManagerApiFactory.getClustersResourceApi(apiClient)).thenReturn(clustersResourceApi);
 
-        underTest.restartStaleServices();
+        underTest.restartStaleServices(false);
 
         verify(applicationContext).getBean(ClouderaManagerModificationService.class, stack, clientConfig);
         verify(clouderaManagerApiFactory).getClustersResourceApi(apiClient);
-        verify(modificationService).restartStaleServices(clustersResourceApi);
+        verify(modificationService).restartStaleServices(clustersResourceApi, false);
     }
 
     private Stack createStack() {

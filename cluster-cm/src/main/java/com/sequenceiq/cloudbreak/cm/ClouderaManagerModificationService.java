@@ -218,7 +218,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
                 ClouderaManagerProduct cdhProduct = getCdhProducts(products);
                 upgradeNonCdhProducts(products, cdhProduct.getName(), parcelResourceApi, true);
                 upgradeCdh(clustersResourceApi, parcelResourceApi, cdhProduct);
-                restartStaleServices(clustersResourceApi);
+                restartStaleServices(clustersResourceApi, false);
             }
             removeUnusedParcelVersions(parcelResourceApi, products);
             configService.enableKnoxAutorestartIfCmVersionAtLeast(CLOUDERAMANAGER_VERSION_7_1_0, apiClient, stack.getName());
@@ -399,21 +399,21 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         LOGGER.debug("Refreshed parcel repos");
     }
 
-    public void restartStaleServices(ClustersResourceApi clustersResourceApi) throws ApiException, CloudbreakException {
+    public void restartStaleServices(ClustersResourceApi clustersResourceApi, boolean forced) throws ApiException, CloudbreakException {
         MgmtServiceResourceApi mgmtServiceResourceApi = clouderaManagerApiFactory.getMgmtServiceResourceApi(apiClient);
         restartClouderaManagementServices(mgmtServiceResourceApi);
-        deployConfigAndRefreshCMStaleServices(clustersResourceApi);
+        deployConfigAndRefreshCMStaleServices(clustersResourceApi, forced);
     }
 
     @VisibleForTesting
-    void deployConfigAndRefreshCMStaleServices(ClustersResourceApi clustersResourceApi) throws ApiException, CloudbreakException {
+    void deployConfigAndRefreshCMStaleServices(ClustersResourceApi clustersResourceApi, boolean forced) throws ApiException, CloudbreakException {
         LOGGER.debug("Redeploying client configurations and refreshing stale services in Cloudera Manager.");
         ServicesResourceApi servicesResourceApi = clouderaManagerApiFactory.getServicesResourceApi(apiClient);
         List<ApiService> services = servicesResourceApi.readServices(stack.getName(), SUMMARY).getItems();
         List<ApiService> notFreshServices = getNotFreshServices(services, ApiService::getConfigStalenessStatus);
         List<ApiService> notFreshClientServices = getNotFreshServices(services, ApiService::getClientConfigStalenessStatus);
         if (!notFreshServices.isEmpty() || !notFreshClientServices.isEmpty()) {
-            deployConfigAndRefreshStaleServices(clustersResourceApi, notFreshServices, notFreshClientServices);
+            deployConfigAndRefreshStaleServices(clustersResourceApi, notFreshServices, notFreshClientServices, forced);
         } else {
             LOGGER.debug("No stale services found in Cloudera Manager.");
         }
@@ -426,7 +426,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     private void deployConfigAndRefreshStaleServices(ClustersResourceApi clustersResourceApi, List<ApiService> notFreshServices,
-            List<ApiService> notFreshClientServices) throws ApiException, CloudbreakException {
+            List<ApiService> notFreshClientServices, boolean forced) throws ApiException, CloudbreakException {
         LOGGER.debug("Services with config staleness status: {}", notFreshServices.stream()
                 .map(it -> it.getName() + ": " + it.getConfigStalenessStatus())
                 .collect(Collectors.joining(", ")));
@@ -436,10 +436,21 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         List<ApiCommand> commands = clustersResourceApi.listActiveCommands(stack.getName(), SUMMARY).getItems();
         BigDecimal deployCommandId = clouderaManagerCommonCommandService.getDeployClientConfigCommandId(stack, clustersResourceApi, commands);
         pollDeployConfig(deployCommandId);
-        ApiCommand refreshServicesCmd = clouderaManagerCommonCommandService.getApiCommand(
-                commands, "RefreshCluster", stack.getName(), clustersResourceApi::refresh);
-        pollRefresh(refreshServicesCmd);
+        refreshServices(clustersResourceApi, forced, commands);
         LOGGER.debug("Config deployed and stale services are refreshed in Cloudera Manager.");
+    }
+
+    private void refreshServices(ClustersResourceApi clustersResourceApi, boolean forced, List<ApiCommand> commands) throws ApiException, CloudbreakException {
+        try {
+            ApiCommand refreshServicesCmd = clouderaManagerCommonCommandService.getApiCommand(
+                    commands, "RefreshCluster", stack.getName(), clustersResourceApi::refresh);
+            pollRefresh(refreshServicesCmd);
+        } catch (Exception e) {
+            LOGGER.error("Error occured during refreshing stale services, forced: {}", forced, e);
+            if (!forced) {
+                throw e;
+            }
+        }
     }
 
     private void restartServices(ClustersResourceApi clustersResourceApi) throws ApiException, CloudbreakException {
@@ -734,7 +745,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     public void updateServiceConfigAndRestartService(String serviceType, String configName, String newConfigValue) throws Exception {
         configService.modifyServiceConfigValue(apiClient, stack.getName(), serviceType, configName, newConfigValue);
         ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(apiClient);
-        restartStaleServices(clustersResourceApi);
+        restartStaleServices(clustersResourceApi, false);
     }
 
 }
