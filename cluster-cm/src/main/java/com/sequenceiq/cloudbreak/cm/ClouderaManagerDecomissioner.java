@@ -196,9 +196,9 @@ public class ClouderaManagerDecomissioner {
         if (hostsToRemove.size() != hostNames.size()) {
             LOGGER.debug("Not all hosts found in the given host group. [{}, {}]", hostGroup.getName(), hostNames);
         }
-        ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(client);
+        HostsResourceApi hostsResourceApi = clouderaManagerApiFactory.getHostsResourceApi(client);
         try {
-            ApiHostList hostRefList = clustersResourceApi.listHosts(stack.getName(), null, null, null);
+            ApiHostList hostRefList = hostsResourceApi.readHosts(null, null, SUMMARY_REQUEST_VIEW);
             List<String> runningHosts = hostRefList.getItems().stream()
                     .map(ApiHost::getHostname)
                     .collect(Collectors.toList());
@@ -215,9 +215,9 @@ public class ClouderaManagerDecomissioner {
     }
 
     public Set<String> decommissionNodes(Stack stack, Map<String, InstanceMetaData> hostsToRemove, ApiClient client) {
-        ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(client);
+        HostsResourceApi hostsResourceApi = clouderaManagerApiFactory.getHostsResourceApi(client);
         try {
-            ApiHostList hostRefList = clustersResourceApi.listHosts(stack.getName(), null, null, null);
+            ApiHostList hostRefList = hostsResourceApi.readHosts(null, null, SUMMARY_REQUEST_VIEW);
             List<String> stillAvailableRemovableHosts = hostRefList.getItems().stream()
                     .filter(apiHostRef -> hostsToRemove.containsKey(apiHostRef.getHostname()))
                     .parallel()
@@ -328,15 +328,15 @@ public class ClouderaManagerDecomissioner {
     }
 
     private void deleteHostFromClouderaManager(Stack stack, InstanceMetaData data, ApiClient client) {
-        ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(client);
+        HostsResourceApi hostsResourceApi = clouderaManagerApiFactory.getHostsResourceApi(client);
         try {
-            ApiHostList hostRefList = clustersResourceApi.listHosts(stack.getName(), null, null, null);
+            ApiHostList hostRefList = hostsResourceApi.readHosts(null, null, SUMMARY_REQUEST_VIEW);
             Optional<ApiHost> hostRefOptional = hostRefList.getItems().stream()
                     .filter(host -> data.getDiscoveryFQDN().equals(host.getHostname()))
                     .findFirst();
             if (hostRefOptional.isPresent()) {
                 ApiHost hostRef = hostRefOptional.get();
-                HostsResourceApi hostsResourceApi = clouderaManagerApiFactory.getHostsResourceApi(client);
+                ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(client);
                 clustersResourceApi.removeHost(stack.getName(), hostRef.getHostId());
                 hostsResourceApi.deleteHost(hostRef.getHostId());
                 LOGGER.debug("Host remove request sent. Host id: [{}]", hostRef.getHostId());
