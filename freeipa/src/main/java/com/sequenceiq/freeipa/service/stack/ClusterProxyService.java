@@ -255,10 +255,10 @@ public class ClusterProxyService {
                 .collect(Collectors.toList());
         serviceConfigs.add(new ClusterServiceConfig(generateFreeIpaFqdn(stack),
                 endpoints,
+                null,
+                false,
                 List.of(),
-                clientCertificate,
-                getHealthCheck(stack)
-        ));
+                clientCertificate, getHealthCheck(stack)));
         return serviceConfigs;
     }
 
@@ -288,10 +288,11 @@ public class ClusterProxyService {
     private List<CcmV2Config> createCcmV2Configs(Stack stack, List<GatewayConfig> gatewayConfigs) {
         return gatewayConfigs.stream()
                 .map(gatewayConfig -> new CcmV2Config(
-                        stack.getCcmV2AgentCrn(),
-                        String.format(CCMV2_BACKEND_ID_FORMAT, stack.getCcmV2AgentCrn(), gatewayConfig.getInstanceId()),
                         gatewayConfig.getPrivateAddress(),
-                        getNginxPort(stack)))
+                        getNginxPort(stack),
+                        String.format(CCMV2_BACKEND_ID_FORMAT, stack.getCcmV2AgentCrn(), gatewayConfig.getInstanceId()),
+                        FREEIPA_SERVICE_NAME
+                ))
                 .collect(Collectors.toList());
     }
 

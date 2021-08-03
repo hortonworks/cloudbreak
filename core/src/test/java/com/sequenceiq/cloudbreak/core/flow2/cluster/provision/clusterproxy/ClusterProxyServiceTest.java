@@ -78,6 +78,10 @@ class ClusterProxyServiceTest {
 
     private static final String MINA_ID = "mina-id";
 
+    private static final String ENVIRONMENT_CRN = "environment-crn";
+
+    private static final String CLOUDERA_MANAGER_SERVICE = "cloudera-manager";
+
     @Mock
     private StackService stackService;
 
@@ -116,11 +120,10 @@ class ClusterProxyServiceTest {
         assertTrue(requestSent.getServices().contains(cmInternalServiceConfig()));
     }
 
-    @ParameterizedTest
-    @EnumSource(value = Tunnel.class, names = {"CCMV2", "CCMV2_JUMPGATE"}, mode = EnumSource.Mode.INCLUDE)
-    void testRegisterClusterWhenCCMV2OrJumpgate(Tunnel tunnel) throws ClusterProxyException {
-        Stack stack = testStackUsingCCM();
-        stack.setTunnel(tunnel);
+    @Test
+    void testRegisterClusterWhenCCMV2() throws ClusterProxyException {
+        Stack stack = testStack();
+        stack.setTunnel(Tunnel.CCMV2);
         stack.setCcmV2AgentCrn("testAgentCrn");
         when(securityConfigService.findOneByStackId(STACK_ID)).thenReturn(Optional.of(gatewaySecurityConfig()));
 
@@ -130,8 +133,29 @@ class ClusterProxyServiceTest {
         verify(clusterProxyRegistrationClient).registerConfig(captor.capture());
         ConfigRegistrationRequest proxyRegisterationReq = captor.getValue();
         assertEquals(true, proxyRegisterationReq.isUseCcmV2(), "CCMV2 should be enabled");
-        assertEquals(List.of(new CcmV2Config("testAgentCrn", "testAgentCrn-i-abc123", "10.10.10.10",
-                        ServiceFamilies.GATEWAY.getDefaultPort())), proxyRegisterationReq.getCcmV2Configs(), "CCMV2 config should match");
+        assertEquals(List.of(new CcmV2Config("10.10.10.10", ServiceFamilies.GATEWAY.getDefaultPort(), "testAgentCrn-i-abc123", CLOUDERA_MANAGER_SERVICE
+        )), proxyRegisterationReq.getCcmV2Configs(), "CCMV2 config should match");
+        assertEquals(List.of(cmServiceConfigForCcmV2(), cmInternalServiceConfig()), proxyRegisterationReq.getServices(),
+                "CCMV2 service configs should match.");
+
+        assertEquals(false, proxyRegisterationReq.isUseTunnel(), "CCMV1 tunnel should be disabled.");
+        assertNull(proxyRegisterationReq.getTunnels(), "CCMV1 tunnel should not be configured.");
+    }
+
+    @Test
+    void testRegisterClusterWhenCCMV2Jumpgate() throws ClusterProxyException {
+        Stack stack = testStack();
+        stack.setTunnel(Tunnel.CCMV2_JUMPGATE);
+        stack.setCcmV2AgentCrn("testAgentCrn");
+        when(securityConfigService.findOneByStackId(STACK_ID)).thenReturn(Optional.of(gatewaySecurityConfig()));
+
+        ArgumentCaptor<ConfigRegistrationRequest> captor = ArgumentCaptor.forClass(ConfigRegistrationRequest.class);
+        service.registerCluster(stack);
+
+        verify(clusterProxyRegistrationClient).registerConfig(captor.capture());
+        ConfigRegistrationRequest proxyRegisterationReq = captor.getValue();
+        assertEquals(true, proxyRegisterationReq.isUseCcmV2(), "CCMV2 should be enabled");
+        assertNull(proxyRegisterationReq.getCcmV2Configs(), "CCMV2 config should be empty for Jumpgate");
         assertEquals(List.of(cmServiceConfigForCcmV2(), cmInternalServiceConfig()), proxyRegisterationReq.getServices(),
                 "CCMV2 service configs should match.");
 
@@ -161,11 +185,10 @@ class ClusterProxyServiceTest {
         assertTrue(proxyRegisterationReq.getServices().contains(cmInternalServiceConfig()));
     }
 
-    @ParameterizedTest
-    @EnumSource(value = Tunnel.class, names = {"CCMV2", "CCMV2_JUMPGATE"}, mode = EnumSource.Mode.INCLUDE)
-    void testReRegisterClusterWhenCCMV2(Tunnel tunnel) throws ClusterProxyException {
-        Stack stack = testStackUsingCCM();
-        stack.setTunnel(tunnel);
+    @Test
+    void testReRegisterClusterWhenCCMV2() throws ClusterProxyException {
+        Stack stack = testStack();
+        stack.setTunnel(Tunnel.CCMV2);
         stack.setCcmV2AgentCrn("testAgentCrn");
         Gateway gateway = new Gateway();
         gateway.setPath("test-cluster");
@@ -179,8 +202,33 @@ class ClusterProxyServiceTest {
         ConfigRegistrationRequest proxyRegisterationReq = captor.getValue();
         assertEquals(true, proxyRegisterationReq.isUseCcmV2(), "CCMV2 should be enabled");
         assertEquals(List.of(
-                new CcmV2Config("testAgentCrn", "testAgentCrn-i-abc123", "10.10.10.10",
-                        ServiceFamilies.GATEWAY.getDefaultPort())), proxyRegisterationReq.getCcmV2Configs(), "CCMV2 config should match");
+                new CcmV2Config("10.10.10.10", ServiceFamilies.GATEWAY.getDefaultPort(), "testAgentCrn-i-abc123", CLOUDERA_MANAGER_SERVICE
+                )), proxyRegisterationReq.getCcmV2Configs(), "CCMV2 config should match");
+
+        assertEquals("https://10.10.10.10:9443/knox/test-cluster", proxyRegisterationReq.getUriOfKnox(), "CCMV2 Knox URI should match");
+        assertEquals(List.of(cmServiceConfigForCcmV2(), cmInternalServiceConfig()), proxyRegisterationReq.getServices(), "CCMV2 service configs should match.");
+
+        assertEquals(false, proxyRegisterationReq.isUseTunnel(), "CCMV1 tunnel should be disabled.");
+        assertNull(proxyRegisterationReq.getTunnels(), "CCMV1 tunnel should not be configured.");
+    }
+
+    @Test
+    void testReRegisterClusterWhenCCMV2Jumpgate() throws ClusterProxyException {
+        Stack stack = testStack();
+        stack.setTunnel(Tunnel.CCMV2_JUMPGATE);
+        stack.setCcmV2AgentCrn("testAgentCrn");
+        Gateway gateway = new Gateway();
+        gateway.setPath("test-cluster");
+        stack.getCluster().setGateway(gateway);
+
+        when(securityConfigService.findOneByStackId(STACK_ID)).thenReturn(Optional.of(gatewaySecurityConfig()));
+        ArgumentCaptor<ConfigRegistrationRequest> captor = ArgumentCaptor.forClass(ConfigRegistrationRequest.class);
+        service.reRegisterCluster(stack);
+
+        verify(clusterProxyRegistrationClient).registerConfig(captor.capture());
+        ConfigRegistrationRequest proxyRegisterationReq = captor.getValue();
+        assertEquals(true, proxyRegisterationReq.isUseCcmV2(), "CCMV2 should be enabled");
+        assertNull(proxyRegisterationReq.getCcmV2Configs(), "CCMV2 config should be empty for Jumpgate");
 
         assertEquals("https://10.10.10.10:9443/knox/test-cluster", proxyRegisterationReq.getUriOfKnox(), "CCMV2 Knox URI should match");
         assertEquals(List.of(cmServiceConfigForCcmV2(), cmInternalServiceConfig()), proxyRegisterationReq.getServices(), "CCMV2 service configs should match.");
@@ -307,6 +355,7 @@ class ClusterProxyServiceTest {
 
     private ConfigRegistrationRequest configRegistrationRequest() {
         return new ConfigRegistrationRequestBuilder(STACK_CRN)
+                .withEnvironmentCrn(ENVIRONMENT_CRN)
                 .withAliases(List.of(String.valueOf(CLUSTER_ID))).withServices(List.of(cmServiceConfigWithInstanceId(PRIMARY_PUBLIC_IP, PRIMARY_INSTANCE_ID),
                         cmServiceConfigWithInstanceId(OTHER_PUBLIC_IP, OTHER_INSTANCE_ID), cmServiceConfig(), cmInternalServiceConfig())).build();
     }
@@ -330,14 +379,14 @@ class ClusterProxyServiceTest {
         ClientCertificate clientCertificate = new ClientCertificate("/cb/test-data/secret/clientKey:secret:base64",
                 "/cb/test-data/secret/clientCert:secret:base64");
         return new ClusterServiceConfig("cb-internal-" + instanceId,
-                List.of("https://" + ipAddress + ":9443"), asList(cloudbreakUser, dpUser), clientCertificate, null);
+                List.of("https://" + ipAddress + ":9443"), null, false, asList(cloudbreakUser, dpUser), clientCertificate, null);
     }
 
     private ClusterServiceConfig cmServiceConfig() {
         ClusterServiceCredential cloudbreakUser = new ClusterServiceCredential("cloudbreak", "/cb/test-data/secret/cbpassword:secret");
         ClusterServiceCredential dpUser = new ClusterServiceCredential("cmmgmt", "/cb/test-data/secret/dppassword:secret", true);
-        return new ClusterServiceConfig("cloudera-manager",
-                List.of("https://10.10.10.10/clouderamanager"), asList(cloudbreakUser, dpUser), null, null);
+        return new ClusterServiceConfig(CLOUDERA_MANAGER_SERVICE,
+                List.of("https://10.10.10.10/clouderamanager"), null, false, asList(cloudbreakUser, dpUser), null, null);
     }
 
     private ClusterServiceConfig cmServiceConfigForCcmV2() {
@@ -345,8 +394,8 @@ class ClusterProxyServiceTest {
         ClusterServiceCredential dpUser = new ClusterServiceCredential("cmmgmt", "/cb/test-data/secret/dppassword:secret", true);
         ClientCertificate clientCertificate = new ClientCertificate("/cb/test-data/secret/clientKey:secret:base64",
                 "/cb/test-data/secret/clientCert:secret:base64");
-        return new ClusterServiceConfig("cloudera-manager",
-                List.of("https://10.10.10.10:9443"), asList(cloudbreakUser, dpUser), clientCertificate, null);
+        return new ClusterServiceConfig(CLOUDERA_MANAGER_SERVICE,
+                List.of("https://10.10.10.10:9443"), null, false, asList(cloudbreakUser, dpUser), clientCertificate, null);
     }
 
     private ClusterServiceConfig cmInternalServiceConfig() {
@@ -355,7 +404,7 @@ class ClusterProxyServiceTest {
         ClientCertificate clientCertificate = new ClientCertificate("/cb/test-data/secret/clientKey:secret:base64",
                 "/cb/test-data/secret/clientCert:secret:base64");
         return new ClusterServiceConfig("cb-internal",
-                List.of("https://10.10.10.10:9443"), asList(cloudbreakUser, dpUser), clientCertificate, null);
+                List.of("https://10.10.10.10:9443"), null, false, asList(cloudbreakUser, dpUser), clientCertificate, null);
     }
 
     private ConfigUpdateRequest configUpdateRequest(String clusterIdentifier) {

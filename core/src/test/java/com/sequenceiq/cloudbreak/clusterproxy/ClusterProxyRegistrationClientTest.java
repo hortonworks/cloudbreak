@@ -32,6 +32,8 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 public class ClusterProxyRegistrationClientTest {
     private static final String STACK_CRN = "stack-crn";
 
+    private static final String ENVIORONMENT_CRN = "environment-crn";
+
     private static final String CLUSTER_ID = "cluster-id";
 
     private static final String KNOX_URI = "https://10.10.10.10:8443/test-cluster";
@@ -68,7 +70,7 @@ public class ClusterProxyRegistrationClientTest {
     @Test
     public void shouldRegisterProxyConfigurationWithClusterProxy() throws URISyntaxException, JsonProcessingException {
         ClusterServiceConfig clusterServiceConfig = clusterServiceConfig();
-        ConfigRegistrationRequest request = configRegistrationRequest(STACK_CRN, CLUSTER_ID, clusterServiceConfig, CERTIFICATES);
+        ConfigRegistrationRequest request = configRegistrationRequest(STACK_CRN, ENVIORONMENT_CRN, CLUSTER_ID, clusterServiceConfig, CERTIFICATES);
 
         ConfigRegistrationResponse response = new ConfigRegistrationResponse();
         response.setX509Unwrapped("X509PublicKey");
@@ -109,12 +111,13 @@ public class ClusterProxyRegistrationClientTest {
         ClusterServiceCredential cloudbreakUser = new ClusterServiceCredential("cloudbreak", "/cb/test-data/secret/cbpassword:secret");
         ClusterServiceCredential dpUser = new ClusterServiceCredential("cmmgmt", "/cb/test-data/secret/dppassword:secret", true);
         return new ClusterServiceConfig("cloudera-manager",
-                List.of("https://10.10.10.10/clouderamanager"), asList(cloudbreakUser, dpUser), null, null);
+                List.of("https://10.10.10.10/clouderamanager"), null, false, asList(cloudbreakUser, dpUser), null, null);
     }
 
-    private ConfigRegistrationRequest configRegistrationRequest(String stackCrn, String clusterId,
+    private ConfigRegistrationRequest configRegistrationRequest(String stackCrn, String environmentCrn, String clusterId,
                                                                 ClusterServiceConfig serviceConfig, List<String> certificates) {
-        return new ConfigRegistrationRequestBuilder(stackCrn).withAliases(List.of(clusterId)).withServices(List.of(serviceConfig))
+        return new ConfigRegistrationRequestBuilder(stackCrn).withEnvironmentCrn(environmentCrn)
+                .withAliases(List.of(clusterId)).withServices(List.of(serviceConfig))
                 .withCertificates(certificates).build();
     }
 

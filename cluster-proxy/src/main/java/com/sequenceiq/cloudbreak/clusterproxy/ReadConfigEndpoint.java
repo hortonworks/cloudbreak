@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.clusterproxy;
 import java.util.Objects;
 
 public class ReadConfigEndpoint {
+
     private String endpointId;
 
     private String status;
@@ -75,6 +76,6 @@ public class ReadConfigEndpoint {
     }
 
     public String toHumanReadableString() {
-        return "[endpointId = [" + endpointId + "], endpoint: [" + endpoint + "], status: [" + status + "]]";
+        return "[endpointId = [" + endpointId + "], endpoint: [" + endpoint + "], status: [" + status + "], updatedTime: [" + updatedTime + " ]]";
     }
 }

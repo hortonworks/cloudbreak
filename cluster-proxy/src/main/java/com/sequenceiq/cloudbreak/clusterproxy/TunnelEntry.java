@@ -5,20 +5,21 @@ import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class TunnelEntry {
-    @JsonProperty
-    private String key;
 
     @JsonProperty
-    private String serviceType;
+    private final String key;
 
     @JsonProperty
-    private String host;
+    private final String serviceType;
 
     @JsonProperty
-    private int port;
+    private final String host;
 
     @JsonProperty
-    private String minaSshdServiceId;
+    private final int port;
+
+    @JsonProperty
+    private final String minaSshdServiceId;
 
     public TunnelEntry(String key, String serviceType, String host, int port, String minaSshdServiceId) {
         this.key = key;

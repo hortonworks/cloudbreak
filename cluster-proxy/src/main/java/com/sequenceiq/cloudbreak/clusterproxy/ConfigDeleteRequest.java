@@ -6,8 +6,9 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class ConfigDeleteRequest {
+
     @JsonProperty
-    private String clusterCrn;
+    private final String clusterCrn;
 
     @JsonCreator
     public ConfigDeleteRequest(String clusterCrn) {

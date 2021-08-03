@@ -1,23 +1,23 @@
 package com.sequenceiq.cloudbreak.clusterproxy;
 
+import java.util.Objects;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import java.util.Objects;
 
 public class Tunnel {
 
     @JsonProperty
-    private String key;
+    private final String key;
 
     @JsonProperty
-    private String serviceType;
+    private final String serviceType;
 
     @JsonProperty
-    private String host;
+    private final String host;
 
     @JsonProperty
-    private int port;
+    private final int port;
 
     @JsonCreator
     public Tunnel(String key, String serviceType, String host, int port) {

@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.clusterproxy;
 import java.util.Objects;
 
 public class ConfigRegistrationResponse {
+
     private String result;
 
     private String x509Unwrapped;

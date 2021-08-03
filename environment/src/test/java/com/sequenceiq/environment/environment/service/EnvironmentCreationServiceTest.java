@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.util.TestConstants.CRN;
 import static com.sequenceiq.cloudbreak.util.TestConstants.USER;
 import static com.sequenceiq.environment.environment.service.EnvironmentTestData.ENVIRONMENT_NAME;
 import static com.sequenceiq.environment.environment.service.EnvironmentTestData.getCloudRegions;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -24,6 +25,8 @@ import javax.ws.rs.BadRequestException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -124,39 +127,64 @@ class EnvironmentCreationServiceTest {
         verify(reactorFlowManager, never()).triggerCreationFlow(anyLong(), eq(ENVIRONMENT_NAME), eq(USER), anyString());
     }
 
-    @Test
-    void testCreateForCcmV2TunnelInitialization() {
-        EnvironmentCreationDto environmentCreationDto = EnvironmentCreationDto.builder()
-                .withName(ENVIRONMENT_NAME).withAccountId(ACCOUNT_ID).withAuthentication(AuthenticationDto.builder().build())
-                .build();
+    // @formatter:off
+    // CHECKSTYLE:OFF
+    static Object[][] tunnelingScenarios() {
+        return new Object[][] {
+                // tunnel                 override  CCMv2Enabled CCMv2JumpgateEnabled  valid  expectedTunnel  expectedThrowable  errorMessage
+                { Tunnel.DIRECT,          false,    false,       false,                true,  Tunnel.DIRECT,          null,              null },
+                { Tunnel.DIRECT,          false,    false,       true,                 true,  Tunnel.DIRECT,          null,              null },
+                { Tunnel.DIRECT,          false,    true,        false,                true,  Tunnel.DIRECT,          null,              null },
+                { Tunnel.DIRECT,          false,    true,        true,                 true,  Tunnel.DIRECT,          null,              null },
+                { Tunnel.DIRECT,          true,     false,       false,                true,  Tunnel.DIRECT,          null,              null },
+                { Tunnel.DIRECT,          true,     false,       true,                 true,  Tunnel.DIRECT,          null,              null },
+                { Tunnel.DIRECT,          true,     true,        false,                true,  Tunnel.DIRECT,          null,              null },
+                { Tunnel.DIRECT,          true,     true,        true,                 true,  Tunnel.DIRECT,          null,              null },
 
-        Environment environment = new Environment();
-        environment.setName(ENVIRONMENT_NAME);
-        environment.setId(1L);
-        environment.setAccountId(ACCOUNT_ID);
-        environment.setExperimentalFeaturesJson(ExperimentalFeatures.builder().withTunnel(Tunnel.CCM).build());
+                { Tunnel.CLUSTER_PROXY,   false,    false,       false,                true,  Tunnel.CLUSTER_PROXY,   null,              null },
+                { Tunnel.CLUSTER_PROXY,   false,    false,       true,                 true,  Tunnel.CLUSTER_PROXY,   null,              null },
+                { Tunnel.CLUSTER_PROXY,   false,    true,        false,                true,  Tunnel.CLUSTER_PROXY,   null,              null },
+                { Tunnel.CLUSTER_PROXY,   false,    true,        true,                 true,  Tunnel.CLUSTER_PROXY,   null,              null },
+                { Tunnel.CLUSTER_PROXY,   true,     false,       false,                true,  Tunnel.CLUSTER_PROXY,   null,              null },
+                { Tunnel.CLUSTER_PROXY,   true,     false,       true,                 true,  Tunnel.CLUSTER_PROXY,   null,              null },
+                { Tunnel.CLUSTER_PROXY,   true,     true,        false,                true,  Tunnel.CLUSTER_PROXY,   null,              null },
+                { Tunnel.CLUSTER_PROXY,   true,     true,        true,                 true,  Tunnel.CLUSTER_PROXY,   null,              null },
 
-        when(environmentService.isNameOccupied(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(false);
-        when(environmentResourceService.getCredentialFromRequest(any(), any())).thenReturn(new Credential());
-        when(environmentDtoConverter.creationDtoToEnvironment(eq(environmentCreationDto))).thenReturn(environment);
-        when(validatorService.validateParentChildRelation(any(), any())).thenReturn(ValidationResult.builder().build());
-        when(validatorService.validateNetworkCreation(any(), any())).thenReturn(ValidationResult.builder());
-        when(validatorService.validateFreeIpaCreation(any())).thenReturn(ValidationResult.builder().build());
-        when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
-        when(environmentService.getRegionsByEnvironment(any())).thenReturn(getCloudRegions());
-        when(environmentService.save(any(Environment.class))).thenReturn(environment);
-        when(entitlementService.ccmV2Enabled(ACCOUNT_ID)).thenReturn(true);
+                { Tunnel.CCM,             false,    false,       false,                true,  Tunnel.CCM,             null,              null },
+                { Tunnel.CCM,             false,    false,       true,                 true,  Tunnel.CCMV2_JUMPGATE,  null,              null },
+                { Tunnel.CCM,             false,    true,        false,                true,  Tunnel.CCMV2,           null,              null },
+                { Tunnel.CCM,             false,    true,        true,                 true,  Tunnel.CCMV2_JUMPGATE,  null,              null },
+                { Tunnel.CCM,             true,     false,       false,                true,  Tunnel.CCM,             null,              null },
+                { Tunnel.CCM,             true,     false,       true,                 true,  Tunnel.CCM,             null,              null },
+                { Tunnel.CCM,             true,     true,        false,                true,  Tunnel.CCM,             null,              null },
+                { Tunnel.CCM,             true,     true,        true,                 true,  Tunnel.CCM,             null,              null },
 
-        environmentCreationServiceUnderTest.create(environmentCreationDto);
+                { Tunnel.CCMV2,           false,    false,       false,                false, null,                   BadRequestException.class, "CCMV2 not enabled for account." },
+                { Tunnel.CCMV2,           false,    false,       true,                 false, null,                   BadRequestException.class, "CCMV2 not enabled for account." },
+                { Tunnel.CCMV2,           false,    true,        false,                true,  Tunnel.CCMV2,           null,              null },
+                { Tunnel.CCMV2,           false,    true,        true,                 true,  Tunnel.CCMV2,           null,              null },
+                { Tunnel.CCMV2,           true,     false,       false,                false, null,                   BadRequestException.class, "CCMV2 not enabled for account." },
+                { Tunnel.CCMV2,           true,     false,       true,                 false, null,                   BadRequestException.class, "CCMV2 not enabled for account." },
+                { Tunnel.CCMV2,           true,     true,        false,                true,  Tunnel.CCMV2,           null,              null },
+                { Tunnel.CCMV2,           true,     true,        true,                 true,  Tunnel.CCMV2,           null,              null },
 
-        ArgumentCaptor<Environment> captor = ArgumentCaptor.forClass(Environment.class);
-        verify(environmentService).save(captor.capture());
-        Environment capturedEnvironment = captor.getValue();
-        assertEquals(Tunnel.CCMV2, capturedEnvironment.getExperimentalFeaturesJson().getTunnel(), "Tunnel should be CCMV2");
+                { Tunnel.CCMV2_JUMPGATE,  false,    false,       false,                false, null,                   BadRequestException.class, "CCMV2 Jumpgate not enabled for account." },
+                { Tunnel.CCMV2_JUMPGATE,  false,    false,       true,                 true , Tunnel.CCMV2_JUMPGATE,  null,              null },
+                { Tunnel.CCMV2_JUMPGATE,  false,    true,        false,                false, null,                   BadRequestException.class, "CCMV2 Jumpgate not enabled for account." },
+                { Tunnel.CCMV2_JUMPGATE,  false,    true,        true,                 true,  Tunnel.CCMV2_JUMPGATE,  null,              null },
+                { Tunnel.CCMV2_JUMPGATE,  true,     false,       false,                false, null,                   BadRequestException.class, "CCMV2 Jumpgate not enabled for account." },
+                { Tunnel.CCMV2_JUMPGATE,  true,     false,       true,                 true,  Tunnel.CCMV2_JUMPGATE,  null,              null },
+                { Tunnel.CCMV2_JUMPGATE,  true,     true,        false,                false, null,                   BadRequestException.class, "CCMV2 Jumpgate not enabled for account." },
+                { Tunnel.CCMV2_JUMPGATE,  true,     true,        true,                 true,  Tunnel.CCMV2_JUMPGATE,  null,              null },
+        };
     }
+    // CHECKSTYLE:ON
+    // @formatter:on
 
-    @Test
-    void testCreateForCcmV2TunnelInitializationWhenNotEntitled() {
+    @ParameterizedTest(name = "Tunnel = {0}, Override = {1}, CCMv2Entitled = {2}, CMv2JumpgateEntitled = {3}, Valid = {4}")
+    @MethodSource("tunnelingScenarios")
+    void testCreateForCcmV2TunnelInitialization(Tunnel tunnel, boolean override, boolean ccmV2Entitled, boolean ccmv2JumpgateEntitled,
+            boolean valid, Tunnel expectedTunnel, Class<? extends Throwable> expectedThrowable, String errorMessage) {
         EnvironmentCreationDto environmentCreationDto = EnvironmentCreationDto.builder()
                 .withName(ENVIRONMENT_NAME).withAccountId(ACCOUNT_ID).withAuthentication(AuthenticationDto.builder().build())
                 .build();
@@ -165,7 +193,7 @@ class EnvironmentCreationServiceTest {
         environment.setName(ENVIRONMENT_NAME);
         environment.setId(1L);
         environment.setAccountId(ACCOUNT_ID);
-        environment.setExperimentalFeaturesJson(ExperimentalFeatures.builder().withTunnel(Tunnel.CCMV2).build());
+        environment.setExperimentalFeaturesJson(ExperimentalFeatures.builder().withTunnel(tunnel).withOverrideTunnel(override).build());
 
         when(environmentService.isNameOccupied(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(false);
         when(environmentResourceService.getCredentialFromRequest(any(), any())).thenReturn(new Credential());
@@ -176,75 +204,25 @@ class EnvironmentCreationServiceTest {
         when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
         when(environmentService.getRegionsByEnvironment(any())).thenReturn(getCloudRegions());
         when(environmentService.save(any(Environment.class))).thenReturn(environment);
-        when(entitlementService.ccmV2Enabled(ACCOUNT_ID)).thenReturn(false);
+        when(entitlementService.ccmV2Enabled(ACCOUNT_ID)).thenReturn(ccmV2Entitled);
+        when(entitlementService.ccmV2JumpgateEnabled(ACCOUNT_ID)).thenReturn(ccmv2JumpgateEntitled);
 
-        assertThrows(BadRequestException.class, () -> environmentCreationServiceUnderTest.create(environmentCreationDto));
+        if (valid) {
+            environmentCreationServiceUnderTest.create(environmentCreationDto);
 
-        verify(environmentService, never()).save(any());
-        verify(environmentResourceService, never()).createAndSetNetwork(any(), any(), any(), any(), any());
-        verify(reactorFlowManager, never()).triggerCreationFlow(anyLong(), eq(ENVIRONMENT_NAME), eq(USER), anyString());
-    }
+            ArgumentCaptor<Environment> captor = ArgumentCaptor.forClass(Environment.class);
+            verify(environmentService).save(captor.capture());
+            Environment capturedEnvironment = captor.getValue();
+            assertEquals(expectedTunnel, capturedEnvironment.getExperimentalFeaturesJson().getTunnel(), "Tunnel should be " + expectedTunnel);
+        } else {
+            assertThatThrownBy(() -> environmentCreationServiceUnderTest.create(environmentCreationDto))
+                    .isInstanceOf(expectedThrowable)
+                    .hasMessage(errorMessage);
 
-    @Test
-    void testCreateForCcmV1TunnelInitialization() {
-        EnvironmentCreationDto environmentCreationDto = EnvironmentCreationDto.builder()
-                .withName(ENVIRONMENT_NAME).withAccountId(ACCOUNT_ID).withAuthentication(AuthenticationDto.builder().build())
-                .build();
-
-        Environment environment = new Environment();
-        environment.setName(ENVIRONMENT_NAME);
-        environment.setId(1L);
-        environment.setAccountId(ACCOUNT_ID);
-        environment.setExperimentalFeaturesJson(ExperimentalFeatures.builder().withTunnel(Tunnel.CCM).build());
-
-        when(environmentService.isNameOccupied(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(false);
-        when(environmentResourceService.getCredentialFromRequest(any(), any())).thenReturn(new Credential());
-        when(environmentDtoConverter.creationDtoToEnvironment(eq(environmentCreationDto))).thenReturn(environment);
-        when(validatorService.validateParentChildRelation(any(), any())).thenReturn(ValidationResult.builder().build());
-        when(validatorService.validateNetworkCreation(any(), any())).thenReturn(ValidationResult.builder());
-        when(validatorService.validateFreeIpaCreation(any())).thenReturn(ValidationResult.builder().build());
-        when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
-        when(environmentService.getRegionsByEnvironment(any())).thenReturn(getCloudRegions());
-        when(environmentService.save(any(Environment.class))).thenReturn(environment);
-        when(entitlementService.ccmV2Enabled(ACCOUNT_ID)).thenReturn(false);
-
-        environmentCreationServiceUnderTest.create(environmentCreationDto);
-
-        ArgumentCaptor<Environment> captor = ArgumentCaptor.forClass(Environment.class);
-        verify(environmentService).save(captor.capture());
-        Environment capturedEnvironment = captor.getValue();
-        assertEquals(Tunnel.CCM, capturedEnvironment.getExperimentalFeaturesJson().getTunnel(), "Tunnel should be CCM");
-    }
-
-    @Test
-    void testCreateForDirectTunnelInitialization() {
-        EnvironmentCreationDto environmentCreationDto = EnvironmentCreationDto.builder()
-                .withName(ENVIRONMENT_NAME).withAccountId(ACCOUNT_ID).withAuthentication(AuthenticationDto.builder().build())
-                .build();
-
-        Environment environment = new Environment();
-        environment.setName(ENVIRONMENT_NAME);
-        environment.setId(1L);
-        environment.setAccountId(ACCOUNT_ID);
-        environment.setExperimentalFeaturesJson(ExperimentalFeatures.builder().withTunnel(Tunnel.DIRECT).build());
-
-        when(environmentService.isNameOccupied(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(false);
-        when(environmentResourceService.getCredentialFromRequest(any(), any())).thenReturn(new Credential());
-        when(environmentDtoConverter.creationDtoToEnvironment(eq(environmentCreationDto))).thenReturn(environment);
-        when(validatorService.validateParentChildRelation(any(), any())).thenReturn(ValidationResult.builder().build());
-        when(validatorService.validateNetworkCreation(any(), any())).thenReturn(ValidationResult.builder());
-        when(validatorService.validateFreeIpaCreation(any())).thenReturn(ValidationResult.builder().build());
-        when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
-        when(environmentService.getRegionsByEnvironment(any())).thenReturn(getCloudRegions());
-        when(environmentService.save(any(Environment.class))).thenReturn(environment);
-        when(entitlementService.ccmV2Enabled(ACCOUNT_ID)).thenReturn(true);
-
-        environmentCreationServiceUnderTest.create(environmentCreationDto);
-
-        ArgumentCaptor<Environment> captor = ArgumentCaptor.forClass(Environment.class);
-        verify(environmentService).save(captor.capture());
-        Environment capturedEnvironment = captor.getValue();
-        assertEquals(Tunnel.DIRECT, capturedEnvironment.getExperimentalFeaturesJson().getTunnel(), "Tunnel should be DIRECT");
+            verify(environmentService, never()).save(any());
+            verify(environmentResourceService, never()).createAndSetNetwork(any(), any(), any(), any(), any());
+            verify(reactorFlowManager, never()).triggerCreationFlow(anyLong(), eq(ENVIRONMENT_NAME), eq(USER), anyString());
+        }
     }
 
     @Test

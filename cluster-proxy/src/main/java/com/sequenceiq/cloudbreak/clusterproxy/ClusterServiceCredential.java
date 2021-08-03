@@ -6,14 +6,15 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class ClusterServiceCredential {
-    @JsonProperty
-    private String username;
 
     @JsonProperty
-    private String credentialRef;
+    private final String username;
 
     @JsonProperty
-    private boolean isDefault;
+    private final String credentialRef;
+
+    @JsonProperty
+    private final boolean isDefault;
 
     @JsonCreator
     public ClusterServiceCredential(String username, String credentialRef) {

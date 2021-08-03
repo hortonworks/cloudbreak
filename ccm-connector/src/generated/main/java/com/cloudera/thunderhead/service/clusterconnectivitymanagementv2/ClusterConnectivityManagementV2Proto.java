@@ -9201,18 +9201,18 @@ public final class ClusterConnectivityManagementV2Proto {
      * If an environmentCrn is passed-in, all agents belonging to this environmnent would be returned.
      * </pre>
      *
-     * <code>string envirinmentCrn = 4;</code>
+     * <code>string environmentCrn = 4;</code>
      */
-    java.lang.String getEnvirinmentCrn();
+    java.lang.String getEnvironmentCrn();
     /**
      * <pre>
      * If an environmentCrn is passed-in, all agents belonging to this environmnent would be returned.
      * </pre>
      *
-     * <code>string envirinmentCrn = 4;</code>
+     * <code>string environmentCrn = 4;</code>
      */
     com.google.protobuf.ByteString
-        getEnvirinmentCrnBytes();
+        getEnvironmentCrnBytes();
 
     public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.ListAgentsRequest.FilterOneofCase getFilterOneofCase();
   }
@@ -9323,7 +9323,7 @@ public final class ClusterConnectivityManagementV2Proto {
     public enum FilterOneofCase
         implements com.google.protobuf.Internal.EnumLite {
       ACCOUNTID(3),
-      ENVIRINMENTCRN(4),
+      ENVIRONMENTCRN(4),
       FILTERONEOF_NOT_SET(0);
       private final int value;
       private FilterOneofCase(int value) {
@@ -9340,7 +9340,7 @@ public final class ClusterConnectivityManagementV2Proto {
       public static FilterOneofCase forNumber(int value) {
         switch (value) {
           case 3: return ACCOUNTID;
-          case 4: return ENVIRINMENTCRN;
+          case 4: return ENVIRONMENTCRN;
           case 0: return FILTERONEOF_NOT_SET;
           default: return null;
         }
@@ -9437,15 +9437,15 @@ public final class ClusterConnectivityManagementV2Proto {
       }
     }
 
-    public static final int ENVIRINMENTCRN_FIELD_NUMBER = 4;
+    public static final int ENVIRONMENTCRN_FIELD_NUMBER = 4;
     /**
      * <pre>
      * If an environmentCrn is passed-in, all agents belonging to this environmnent would be returned.
      * </pre>
      *
-     * <code>string envirinmentCrn = 4;</code>
+     * <code>string environmentCrn = 4;</code>
      */
-    public java.lang.String getEnvirinmentCrn() {
+    public java.lang.String getEnvironmentCrn() {
       java.lang.Object ref = "";
       if (filterOneofCase_ == 4) {
         ref = filterOneof_;
@@ -9467,10 +9467,10 @@ public final class ClusterConnectivityManagementV2Proto {
      * If an environmentCrn is passed-in, all agents belonging to this environmnent would be returned.
      * </pre>
      *
-     * <code>string envirinmentCrn = 4;</code>
+     * <code>string environmentCrn = 4;</code>
      */
     public com.google.protobuf.ByteString
-        getEnvirinmentCrnBytes() {
+        getEnvironmentCrnBytes() {
       java.lang.Object ref = "";
       if (filterOneofCase_ == 4) {
         ref = filterOneof_;
@@ -9569,8 +9569,8 @@ public final class ClusterConnectivityManagementV2Proto {
               .equals(other.getAccountId());
           break;
         case 4:
-          result = result && getEnvirinmentCrn()
-              .equals(other.getEnvirinmentCrn());
+          result = result && getEnvironmentCrn()
+              .equals(other.getEnvironmentCrn());
           break;
         case 0:
         default:
@@ -9598,8 +9598,8 @@ public final class ClusterConnectivityManagementV2Proto {
           hash = (53 * hash) + getAccountId().hashCode();
           break;
         case 4:
-          hash = (37 * hash) + ENVIRINMENTCRN_FIELD_NUMBER;
-          hash = (53 * hash) + getEnvirinmentCrn().hashCode();
+          hash = (37 * hash) + ENVIRONMENTCRN_FIELD_NUMBER;
+          hash = (53 * hash) + getEnvironmentCrn().hashCode();
           break;
         case 0:
         default:
@@ -9847,7 +9847,7 @@ public final class ClusterConnectivityManagementV2Proto {
             onChanged();
             break;
           }
-          case ENVIRINMENTCRN: {
+          case ENVIRONMENTCRN: {
             filterOneofCase_ = 4;
             filterOneof_ = other.filterOneof_;
             onChanged();
@@ -10149,9 +10149,9 @@ public final class ClusterConnectivityManagementV2Proto {
        * If an environmentCrn is passed-in, all agents belonging to this environmnent would be returned.
        * </pre>
        *
-       * <code>string envirinmentCrn = 4;</code>
+       * <code>string environmentCrn = 4;</code>
        */
-      public java.lang.String getEnvirinmentCrn() {
+      public java.lang.String getEnvironmentCrn() {
         java.lang.Object ref = "";
         if (filterOneofCase_ == 4) {
           ref = filterOneof_;
@@ -10173,10 +10173,10 @@ public final class ClusterConnectivityManagementV2Proto {
        * If an environmentCrn is passed-in, all agents belonging to this environmnent would be returned.
        * </pre>
        *
-       * <code>string envirinmentCrn = 4;</code>
+       * <code>string environmentCrn = 4;</code>
        */
       public com.google.protobuf.ByteString
-          getEnvirinmentCrnBytes() {
+          getEnvironmentCrnBytes() {
         java.lang.Object ref = "";
         if (filterOneofCase_ == 4) {
           ref = filterOneof_;
@@ -10198,9 +10198,9 @@ public final class ClusterConnectivityManagementV2Proto {
        * If an environmentCrn is passed-in, all agents belonging to this environmnent would be returned.
        * </pre>
        *
-       * <code>string envirinmentCrn = 4;</code>
+       * <code>string environmentCrn = 4;</code>
        */
-      public Builder setEnvirinmentCrn(
+      public Builder setEnvironmentCrn(
           java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
@@ -10215,9 +10215,9 @@ public final class ClusterConnectivityManagementV2Proto {
        * If an environmentCrn is passed-in, all agents belonging to this environmnent would be returned.
        * </pre>
        *
-       * <code>string envirinmentCrn = 4;</code>
+       * <code>string environmentCrn = 4;</code>
        */
-      public Builder clearEnvirinmentCrn() {
+      public Builder clearEnvironmentCrn() {
         if (filterOneofCase_ == 4) {
           filterOneofCase_ = 0;
           filterOneof_ = null;
@@ -10230,9 +10230,9 @@ public final class ClusterConnectivityManagementV2Proto {
        * If an environmentCrn is passed-in, all agents belonging to this environmnent would be returned.
        * </pre>
        *
-       * <code>string envirinmentCrn = 4;</code>
+       * <code>string environmentCrn = 4;</code>
        */
-      public Builder setEnvirinmentCrnBytes(
+      public Builder setEnvironmentCrnBytes(
           com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
@@ -11497,7 +11497,7 @@ public final class ClusterConnectivityManagementV2Proto {
       "onmentCrn\030\004 \001(\t\022\032\n\014certificates\030\005 \003(\tB\004\210" +
       "\265\030\001\"\212\001\n\021ListAgentsRequest\022\020\n\010pageSize\030\001 " +
       "\001(\005\022$\n\tpageToken\030\002 \001(\0132\021.paging.PageToke" +
-      "n\022\023\n\taccountId\030\003 \001(\tH\000\022\030\n\016envirinmentCrn" +
+      "n\022\023\n\taccountId\030\003 \001(\tH\000\022\030\n\016environmentCrn" +
       "\030\004 \001(\tH\000B\016\n\014filter_oneof\"\204\001\n\022ListAgentsR" +
       "esponse\022(\n\rnextPageToken\030\001 \001(\0132\021.paging." +
       "PageToken\022D\n\006agents\030\002 \003(\01324.clusterconne" +
@@ -11623,7 +11623,7 @@ public final class ClusterConnectivityManagementV2Proto {
     internal_static_clusterconnectivitymanagementv2_ListAgentsRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_clusterconnectivitymanagementv2_ListAgentsRequest_descriptor,
-        new java.lang.String[] { "PageSize", "PageToken", "AccountId", "EnvirinmentCrn", "FilterOneof", });
+        new java.lang.String[] { "PageSize", "PageToken", "AccountId", "EnvironmentCrn", "FilterOneof", });
     internal_static_clusterconnectivitymanagementv2_ListAgentsResponse_descriptor =
       getDescriptor().getMessageTypes().get(13);
     internal_static_clusterconnectivitymanagementv2_ListAgentsResponse_fieldAccessorTable = new

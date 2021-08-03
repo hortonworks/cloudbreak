@@ -6,8 +6,9 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class ReadConfigRequest {
+
     @JsonProperty
-    private String clusterCrn;
+    private final String clusterCrn;
 
     @JsonCreator
     public ReadConfigRequest(String clusterCrn) {
