@@ -36,8 +36,8 @@ public class KibanaSearchUrl implements SearchUrl {
         }
 
         this.searchables = searchables;
-        this.testStartDate = DateUtils.addHours(testStartDate, -2);
-        this.testStopDate = DateUtils.addHours(testStopDate, -2);
+        this.testStartDate = DateUtils.addHours(testStartDate, -1);
+        this.testStopDate = DateUtils.addHours(testStopDate, -1);
     }
 
     @Override
