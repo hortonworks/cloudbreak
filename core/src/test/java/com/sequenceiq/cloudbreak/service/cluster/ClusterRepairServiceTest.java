@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_MANUALRECOVERY_COULD_NOT_START;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_MANUALRECOVERY_NO_NODES_TO_RECOVER;
 import static com.sequenceiq.redbeams.api.model.common.Status.AVAILABLE;
 import static com.sequenceiq.redbeams.api.model.common.Status.STOPPED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -77,8 +76,8 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
-import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.common.api.type.Tunnel;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.StateStatus;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
@@ -375,8 +374,8 @@ public class ClusterRepairServiceTest {
             ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.repairHostGroups(1L, Set.of("hostGroup1"), false, false));
         });
 
-        assertEquals("Could not trigger cluster repair for stack 1 because node list is incorrect", exception.getMessage());
-        verifyEventArguments(CLUSTER_MANUALRECOVERY_NO_NODES_TO_RECOVER, "hostGroup1");
+        assertEquals("Repairable node list is empty. Please check node statuses and try again.", exception.getMessage());
+        verifyEventArguments(CLUSTER_MANUALRECOVERY_COULD_NOT_START, "Repairable node list is empty. Please check node statuses and try again.");
         verifyNoInteractions(stackUpdater);
     }
 
@@ -533,6 +532,12 @@ public class ClusterRepairServiceTest {
         when(freeipaService.freeipaStatusInDesiredState(stack, Set.of(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE)))
                 .thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
+        HostGroup hostGroup1 = new HostGroup();
+        hostGroup1.setName("idbroker");
+        hostGroup1.setRecoveryMode(RecoveryMode.MANUAL);
+        InstanceMetaData host1 = getHost("idbroker1", hostGroup1.getName(), InstanceStatus.SERVICES_UNHEALTHY, InstanceGroupType.CORE);
+        hostGroup1.setInstanceGroup(host1.getInstanceGroup());
+        when(hostGroupService.getByCluster(eq(1L))).thenReturn(Set.of(hostGroup1));
 
         InstanceMetaData primaryGW = new InstanceMetaData();
         primaryGW.setInstanceStatus(InstanceStatus.SERVICES_HEALTHY);
