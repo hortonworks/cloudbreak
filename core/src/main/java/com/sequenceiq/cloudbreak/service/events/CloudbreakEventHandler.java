@@ -32,10 +32,10 @@ public class CloudbreakEventHandler implements Consumer<Event<CloudbreakComposit
         CloudbreakCompositeEvent cloudbreakCompositeEvent = cloudbreakEvent.getData();
         StructuredNotificationEvent structuredNotificationEvent = cloudbreakCompositeEvent.getStructuredNotificationEvent();
         legacyStructuredEventAsyncNotifier.sendStructuredEvent(structuredNotificationEvent);
-        sendDistroxNotificaiton(cloudbreakCompositeEvent);
+        sendNotification(cloudbreakCompositeEvent);
     }
 
-    private void sendDistroxNotificaiton(CloudbreakCompositeEvent cloudbreakCompositeEvent) {
+    private void sendNotification(CloudbreakCompositeEvent cloudbreakCompositeEvent) {
         String owner = cloudbreakCompositeEvent.getOwner();
         StackV4Response stackResponse = cloudbreakCompositeEvent.getStackResponse();
         if (stackResponse != null) {
