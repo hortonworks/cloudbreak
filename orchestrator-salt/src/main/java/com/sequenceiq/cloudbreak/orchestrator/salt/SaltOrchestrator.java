@@ -1201,7 +1201,7 @@ public class SaltOrchestrator implements HostOrchestrator {
                 runNewService(sc, new HighStateAllRunner(allHostnames, allNodes), exitCriteriaModel, maxRetryRecipe, true);
             } else {
                 // Skip highstate and just execute other recipes for performace.
-                StateAllRunner stateAllRunner = new StateAllRunner(targetHostnames, allNodes, "recipes." + phase.value());
+                StateRunner stateAllRunner = new StateRunner(targetHostnames, allNodes, "recipes." + phase.value());
                 OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(sc, stateAllRunner);
                 Callable<Boolean> saltJobRunBootstrapRunner = saltRunner.runner(saltJobIdTracker, exitCriteria, exitCriteriaModel, maxRetry, false);
                 saltJobRunBootstrapRunner.call();
