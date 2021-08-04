@@ -184,12 +184,16 @@ public class ClusterRepairService {
             repairStartResult = Result.error(RepairValidation.of("Gateway node is unhealthy, it must be repaired first."));
         } else {
             Map<HostGroupName, Set<InstanceMetaData>> repairableNodes = selectRepairableNodes(getInstanceSelectors(repairMode, selectedParts), stack);
-            RepairValidation validationBySelectedNodes = validateSelectedNodes(stack, repairableNodes, reattach);
-            if (validationBySelectedNodes.getValidationErrors().isEmpty()) {
-                setStackStatusAndMarkDeletableVolumes(repairMode, deleteVolumes, stack, repairableNodes);
-                repairStartResult = Result.success(repairableNodes);
+            if (repairableNodes.isEmpty()) {
+                repairStartResult = Result.error(RepairValidation.of("Repairable node list is empty. Please check node statuses and try again."));
             } else {
-                repairStartResult = Result.error(validationBySelectedNodes);
+                RepairValidation validationBySelectedNodes = validateSelectedNodes(stack, repairableNodes, reattach);
+                if (!validationBySelectedNodes.getValidationErrors().isEmpty()) {
+                    repairStartResult = Result.error(validationBySelectedNodes);
+                } else {
+                    setStackStatusAndMarkDeletableVolumes(repairMode, deleteVolumes, stack, repairableNodes);
+                    repairStartResult = Result.success(repairableNodes);
+                }
             }
         }
         return repairStartResult;
