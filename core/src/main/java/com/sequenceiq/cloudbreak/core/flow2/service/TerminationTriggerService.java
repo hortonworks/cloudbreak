@@ -109,7 +109,9 @@ public class TerminationTriggerService {
     private void fireTerminationEvent(Stack stack, boolean forced) {
         Long stackId = stack.getId();
         boolean secure = isKerberosConfigAvailableForCluster(stack);
-        String selector = secure ? FlowChainTriggers.PROPER_TERMINATION_TRIGGER_EVENT : FlowChainTriggers.TERMINATION_TRIGGER_EVENT;
+        String selector = secure && !stack.getStackStatus().getStatus().isStopState()
+                ? FlowChainTriggers.PROPER_TERMINATION_TRIGGER_EVENT
+                : FlowChainTriggers.TERMINATION_TRIGGER_EVENT;
         reactorNotifier.notify(stackId, selector, new TerminationEvent(selector, stackId, forced));
         flowCancelService.cancelRunningFlows(stackId);
     }

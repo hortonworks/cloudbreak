@@ -93,10 +93,8 @@ public enum Status {
 
     public boolean isStopState() {
         return Status.STOPPED.equals(this)
-                || UPDATE_IN_PROGRESS.equals(this)
                 || Status.STOP_IN_PROGRESS.equals(this)
-                || Status.STOP_REQUESTED.equals(this)
-                || Status.STOP_FAILED.equals(this);
+                || Status.STOP_REQUESTED.equals(this);
     }
 
     @VisibleForTesting

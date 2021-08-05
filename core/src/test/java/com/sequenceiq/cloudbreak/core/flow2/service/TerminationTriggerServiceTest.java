@@ -77,7 +77,7 @@ public class TerminationTriggerServiceTest {
 
         underTest.triggerTermination(getAvailableStack(), false);
 
-        verifyTerminationEventFired(true, false);
+        verifyTerminationEventFired(true, false, false);
     }
 
     @Test
@@ -87,7 +87,7 @@ public class TerminationTriggerServiceTest {
 
         underTest.triggerTermination(getAvailableStack(), false);
 
-        verifyTerminationEventFired(false, false);
+        verifyTerminationEventFired(false, false, false);
     }
 
     @Test
@@ -97,7 +97,7 @@ public class TerminationTriggerServiceTest {
 
         underTest.triggerTermination(getAvailableStack(), true);
 
-        verifyTerminationEventFired(true, true);
+        verifyTerminationEventFired(true, true, false);
     }
 
     @Test
@@ -107,7 +107,7 @@ public class TerminationTriggerServiceTest {
 
         underTest.triggerTermination(getAvailableStack(), true);
 
-        verifyTerminationEventFired(false, true);
+        verifyTerminationEventFired(false, true, false);
     }
 
     @Test
@@ -119,7 +119,7 @@ public class TerminationTriggerServiceTest {
 
         underTest.triggerTermination(getAvailableStack(), false);
 
-        verifyTerminationEventFired(true, false);
+        verifyTerminationEventFired(true, false, false);
     }
 
     @Test
@@ -131,7 +131,7 @@ public class TerminationTriggerServiceTest {
 
         underTest.triggerTermination(getAvailableStack(), true);
 
-        verifyTerminationEventFired(true, true);
+        verifyTerminationEventFired(true, true, false);
     }
 
     @Test
@@ -143,7 +143,7 @@ public class TerminationTriggerServiceTest {
 
         underTest.triggerTermination(getAvailableStack(), false);
 
-        verifyTerminationEventFired(false, false);
+        verifyTerminationEventFired(false, false, false);
     }
 
     @Test
@@ -155,7 +155,7 @@ public class TerminationTriggerServiceTest {
 
         underTest.triggerTermination(getAvailableStack(), true);
 
-        verifyTerminationEventFired(false, true);
+        verifyTerminationEventFired(false, true, false);
     }
 
     @Test
@@ -193,7 +193,7 @@ public class TerminationTriggerServiceTest {
 
         underTest.triggerTermination(getAvailableStack(), true);
 
-        verifyTerminationEventFired(true, true);
+        verifyTerminationEventFired(true, true, false);
         verify(flowCancelService).cancelFlowSilently(flowLog);
     }
 
@@ -213,7 +213,25 @@ public class TerminationTriggerServiceTest {
 
         underTest.triggerTermination(stack, true);
 
-        verifyTerminationEventFired(false, true);
+        verifyTerminationEventFired(false, true, false);
+    }
+
+    @Test
+    public void whenStackStoppedAndSecureThenItShouldTerminate() {
+        Stack stack = stackWithStatus(Status.STOP_REQUESTED);
+
+        underTest.triggerTermination(stack, false);
+
+        verifyTerminationEventFired(true, false, true);
+    }
+
+    @Test
+    public void whenStackStoppedAndNotSecureThenItShouldTerminate() {
+        Stack stack = stackWithStatus(Status.STOP_REQUESTED);
+
+        underTest.triggerTermination(stack, false);
+
+        verifyTerminationEventFired(false, false, true);
     }
 
     private Stack stackWithStatus(Status status) {
@@ -231,7 +249,7 @@ public class TerminationTriggerServiceTest {
         return stackWithStatus(Status.AVAILABLE);
     }
 
-    private void verifyTerminationEventFired(boolean kerberized, boolean forced) {
+    private void verifyTerminationEventFired(boolean kerberized, boolean forced, boolean stopped) {
         ArgumentCaptor<String> selectorCaptor = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<TerminationEvent> eventCaptor = ArgumentCaptor.forClass(TerminationEvent.class);
         verify(reactorNotifier).notify(anyLong(), selectorCaptor.capture(), eventCaptor.capture());
@@ -239,7 +257,7 @@ public class TerminationTriggerServiceTest {
 
         String selector = selectorCaptor.getValue();
         TerminationEvent event = eventCaptor.getValue();
-        if (kerberized) {
+        if (kerberized && !stopped) {
             assertEquals(FlowChainTriggers.PROPER_TERMINATION_TRIGGER_EVENT, selector);
             assertEquals(FlowChainTriggers.PROPER_TERMINATION_TRIGGER_EVENT, event.selector());
         } else {
