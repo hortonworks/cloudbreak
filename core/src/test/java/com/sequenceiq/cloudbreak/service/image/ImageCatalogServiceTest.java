@@ -121,11 +121,15 @@ public class ImageCatalogServiceTest {
 
     private static final String CDP_DEFAULT_CATALOG_NAME = "cdp-default";
 
+    private static final String CATALOG_NAME = "test-catalog";
+
     private static final String CUSTOM_CATALOG_NAME = "custom-catalog";
 
     private static final String CUSTOM_BASE_PARCEL_URL = "https://myarchive.test.com";
 
     private static final String CUSTOM_IMAGE_ID = "customImageId";
+
+    private static final String USER_CRN = "crn:altus:iam:us-west-1:1111:user:1111";
 
     @Rule
     public final ExpectedException thrown = ExpectedException.none();
@@ -877,6 +881,51 @@ public class ImageCatalogServiceTest {
         assertEquals(statedImage.getImage(), actual.getImage());
     }
 
+    @Test
+    public void testFindAllByIdsWithDefaultsInCaseOfCustomCatalogsOnly() {
+
+        Set<ImageCatalog> imageCatalogs = getImageCatalogs();
+        when(imageCatalogRepository.findAllByIdNotArchived(any())).thenReturn(imageCatalogs);
+
+        Set<ImageCatalog> actual = underTest.findAllByIdsWithDefaults(null, true);
+
+        assertEquals(1, actual.size());
+        assertTrue(actual.contains(imageCatalogs.stream().filter(catalog -> catalog.getName().equals(CUSTOM_CATALOG_NAME)).findFirst().get()));
+    }
+
+    @Test
+    public void testFindAllByIdsWithDefaultsInCaseOfAllCatalogsWithoutLegacyCatalog() {
+
+        Set<ImageCatalog> imageCatalogs = getImageCatalogs();
+        when(imageCatalogRepository.findAllByIdNotArchived(any())).thenReturn(imageCatalogs);
+        if (ThreadBasedUserCrnProvider.getUserCrn() == null) {
+            ThreadBasedUserCrnProvider.setUserCrn(USER_CRN);
+        }
+
+        Set<ImageCatalog> actual = underTest.findAllByIdsWithDefaults(null, false);
+
+        assertEquals(3, actual.size());
+        assertTrue(actual.contains(imageCatalogs.stream().filter(catalog -> catalog.getName().equals("default")).findFirst().get()));
+        assertTrue(actual.contains(imageCatalogs.stream().filter(catalog -> catalog.getName().equals(CUSTOM_CATALOG_NAME)).findFirst().get()));
+    }
+
+    @Test
+    public void testFindAllByIdsWithDefaultsInCaseOfAllCatalogsWithLegacyCatalog() {
+
+        Set<ImageCatalog> imageCatalogs = getImageCatalogs();
+        when(imageCatalogRepository.findAllByIdNotArchived(any())).thenReturn(imageCatalogs);
+        setMockedLegacyCatalogEnabled(true);
+        if (ThreadBasedUserCrnProvider.getUserCrn() == null) {
+            ThreadBasedUserCrnProvider.setUserCrn(USER_CRN);
+        }
+
+        Set<ImageCatalog> actual = underTest.findAllByIdsWithDefaults(null, false);
+
+        assertEquals(4, actual.size());
+        assertTrue(actual.contains(imageCatalogs.stream().filter(catalog -> catalog.getName().equals("default")).findFirst().get()));
+        assertTrue(actual.contains(imageCatalogs.stream().filter(catalog -> catalog.getName().equals(CUSTOM_CATALOG_NAME)).findFirst().get()));
+    }
+
     private void setupImageCatalogProvider(String catalogUrl, String catalogFile) throws IOException, CloudbreakImageCatalogException {
         String catalogJson = FileReaderUtils.readFileFromClasspath(catalogFile);
         CloudbreakImageCatalogV3 catalog = JsonUtil.readValue(catalogJson, CloudbreakImageCatalogV3.class);
@@ -946,6 +995,16 @@ public class ImageCatalogServiceTest {
         customImage.setCustomizedImageId(customizedImageId);
         customImage.setBaseParcelUrl(baseParcelUrl);
         return customImage;
+    }
+
+    private Set<ImageCatalog> getImageCatalogs() {
+        ImageCatalog customImageCatalog = new ImageCatalog();
+        customImageCatalog.setName(CUSTOM_CATALOG_NAME);
+        return Set.of(getImageCatalog(), customImageCatalog);
+    }
+
+    private void setMockedLegacyCatalogEnabled(boolean value) {
+        ReflectionTestUtils.setField(underTest, ImageCatalogService.class, "legacyCatalogEnabled", value, boolean.class);
     }
 
     private static class AwsCloudConstant implements CloudConstant {
