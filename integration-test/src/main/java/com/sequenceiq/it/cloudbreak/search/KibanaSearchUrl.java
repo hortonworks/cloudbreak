@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Component;
 
@@ -36,8 +35,8 @@ public class KibanaSearchUrl implements SearchUrl {
         }
 
         this.searchables = searchables;
-        this.testStartDate = DateUtils.addHours(testStartDate, -1);
-        this.testStopDate = DateUtils.addHours(testStopDate, -1);
+        this.testStartDate = testStartDate;
+        this.testStopDate = testStopDate;
     }
 
     @Override
