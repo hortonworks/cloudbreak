@@ -31,6 +31,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -118,7 +119,13 @@ public class FreeIpaCreationHandlerTest {
     private CloudPlatformConnectors connectors;
 
     @Mock
+    private MultiAzValidator multiAzValidator;
+
+    @Mock
     private EventBus eventBus;
+
+    @Mock
+    private EntitlementService entitlementService;
 
     private FreeIpaCreationHandler victim;
 
@@ -136,7 +143,10 @@ public class FreeIpaCreationHandlerTest {
                 telemetryApiConverter,
                 backupConverter,
                 connectors,
-                eventBus, Collections.singleton(CloudPlatform.YARN.name()));
+                eventBus,
+                entitlementService,
+                multiAzValidator,
+                Collections.singleton(CloudPlatform.YARN.name()));
     }
 
     @Test
@@ -371,6 +381,7 @@ public class FreeIpaCreationHandlerTest {
         environmentDto.setCloudPlatform(CloudPlatform.YARN.name());
         environmentDto.setNetwork(NetworkDto.builder()
                 .withNetworkCidr(YARN_NETWORK_CIDR)
+                .withNetworkCidrs(Set.of(YARN_NETWORK_CIDR))
                 .build());
 
         return environmentDto;

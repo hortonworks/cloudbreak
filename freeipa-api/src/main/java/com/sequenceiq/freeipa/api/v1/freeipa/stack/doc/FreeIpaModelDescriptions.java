@@ -18,6 +18,7 @@ public class FreeIpaModelDescriptions {
     public static final String CLOUD_PLATFORM = "Cloud Platform for FreeIPA";
     public static final String USE_CCM = "whether to use CCM for communicating with the freeipa instance";
     public static final String TUNNEL = "Configuration that the connection going directly or with cluster proxy or with ccm and cluster proxy.";
+    public static final String VARIANT = "Configuration of cloud platform variant.";
     public static final String TAGS = "Tags for freeipa server.";
     public static final String USERSYNC_STATUS_DETAILS = "user sync status details for the environment";
     public static final String AWS_PARAMETERS = "Aws specific FreeIpa parameters";
@@ -34,6 +35,10 @@ public class FreeIpaModelDescriptions {
         public static final String NODE_COUNT = "number of nodes";
         public static final String TEMPLATE = "instancegroup related template";
         public static final String SECURITYGROUP = "instancegroup related securitygroup";
+        public static final String NETWORK = "referenced network";
+        public static final String AVAILABILITY_ZONE = "availability zone of instance";
+        public static final String SUBNET_ID = "subnet ID of instance";
+        public static final String AWS_PARAMETERS = "provider specific parameters of the specified network";
         public static final String STATUS = "status of the instance";
         public static final String INSTANCE_TYPE = "type of the instance";
     }

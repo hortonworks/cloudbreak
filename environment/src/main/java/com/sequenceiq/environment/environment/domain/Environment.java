@@ -80,6 +80,9 @@ public class Environment implements AuthResource, AccountAwareResource {
     private String freeIpaImageId;
 
     @Column(nullable = false)
+    private boolean freeIpaEnableMultiAz;
+
+    @Column(nullable = false)
     private String locationDisplayName;
 
     @Column(nullable = false)
@@ -498,6 +501,14 @@ public class Environment implements AuthResource, AccountAwareResource {
         this.environmentServiceVersion = environmentServiceVersion;
     }
 
+    public boolean isFreeIpaEnableMultiAz() {
+        return freeIpaEnableMultiAz;
+    }
+
+    public void setFreeIpaEnableMultiAz(boolean freeIpaEnableMultiAz) {
+        this.freeIpaEnableMultiAz = freeIpaEnableMultiAz;
+    }
+
     @Override
     public String toString() {
         return "Environment{" +
@@ -507,6 +518,7 @@ public class Environment implements AuthResource, AccountAwareResource {
                 ", resourceCrn='" + resourceCrn + '\'' +
                 ", status=" + status +
                 ", statusReason='" + statusReason + '\'' +
+                ", freeIpaEnableMultiAz='" + freeIpaEnableMultiAz + '\'' +
                 '}';
     }
 }

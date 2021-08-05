@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.controller.validation.stack;
 
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants.AwsVariant.AWS_NATIVE_VARIANT;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants.AwsVariant.AWS_VARIANT;
 import static com.sequenceiq.cloudbreak.validation.ValidationResult.State.ERROR;
 import static com.sequenceiq.cloudbreak.validation.ValidationResult.State.VALID;
 import static org.junit.Assert.assertEquals;
@@ -18,9 +20,11 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Sets;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
+import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.controller.validation.template.InstanceTemplateValidator;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Template;
@@ -82,7 +86,7 @@ public class StackValidatorTest extends StackRequestValidatorTestBase {
     @Test
     public void testWithZeroRootVolumeSize() {
         assertNotNull(templateValidator);
-        Stack stackRequest = stackWithRootVolumeSize(0);
+        Stack stackRequest = stackWithRootVolumeSize(0, StackType.WORKLOAD, AWS_VARIANT.variant());
         ValidationResult.ValidationResultBuilder builder = new ValidationResult.ValidationResultBuilder();
 
         entitlementMock(stackRequest, false);
@@ -93,7 +97,7 @@ public class StackValidatorTest extends StackRequestValidatorTestBase {
 
     @Test
     public void testWithNegativeRootVolumeSize() {
-        Stack stack = stackWithRootVolumeSize(-1);
+        Stack stack = stackWithRootVolumeSize(-1, StackType.WORKLOAD, AWS_VARIANT.variant());
         ValidationResult.ValidationResultBuilder builder = new ValidationResult.ValidationResultBuilder();
 
         entitlementMock(stack, false);
@@ -104,7 +108,7 @@ public class StackValidatorTest extends StackRequestValidatorTestBase {
 
     @Test
     public void testNullValueIsAllowedForRootVolumeSize() {
-        Stack stack = stackWithRootVolumeSize(null);
+        Stack stack = stackWithRootVolumeSize(null, StackType.WORKLOAD, AWS_VARIANT.variant());
         ValidationResult.ValidationResultBuilder builder = new ValidationResult.ValidationResultBuilder();
 
         entitlementMock(stack, false);
@@ -115,7 +119,7 @@ public class StackValidatorTest extends StackRequestValidatorTestBase {
 
     @Test
     public void testWithPositiveRootVolumeSize() {
-        Stack stack = stackWithRootVolumeSize(1);
+        Stack stack = stackWithRootVolumeSize(1, StackType.WORKLOAD, AWS_VARIANT.variant());
         ValidationResult.ValidationResultBuilder builder = new ValidationResult.ValidationResultBuilder();
 
         entitlementMock(stack, false);
@@ -125,8 +129,56 @@ public class StackValidatorTest extends StackRequestValidatorTestBase {
     }
 
     @Test
+    public void testWithPositiveRootVolumeSizeWithDataLakeAndDatalakeEntitlementEnabledAndCFTemplate() {
+        Stack stack = stackWithRootVolumeSize(1, StackType.DATALAKE, AWS_VARIANT.variant());
+        ValidationResult.ValidationResultBuilder builder = new ValidationResult.ValidationResultBuilder();
+
+        entitlementMock(stack, true);
+        when(entitlementService.awsNativeDataLakeEnabled(anyString())).thenReturn(true);
+
+        underTest.validate(stack, builder);
+        assertEquals(VALID, builder.build().getState());
+    }
+
+    @Test
+    public void testWithPositiveRootVolumeSizeWithDataLakeAndDatalakeEntitlementDisabledAndCFTemplate() {
+        Stack stack = stackWithRootVolumeSize(1, StackType.DATALAKE, AWS_VARIANT.variant());
+        ValidationResult.ValidationResultBuilder builder = new ValidationResult.ValidationResultBuilder();
+
+        entitlementMock(stack, true);
+        when(entitlementService.awsNativeDataLakeEnabled(anyString())).thenReturn(false);
+
+        underTest.validate(stack, builder);
+        assertEquals(VALID, builder.build().getState());
+    }
+
+    @Test
+    public void testWithPositiveRootVolumeSizeWithDataLakeAndDatalakeEntitlementEnabledAndNative() {
+        Stack stack = stackWithRootVolumeSize(1, StackType.DATALAKE, AWS_NATIVE_VARIANT.variant());
+        ValidationResult.ValidationResultBuilder builder = new ValidationResult.ValidationResultBuilder();
+
+        entitlementMock(stack, true);
+        when(entitlementService.awsNativeDataLakeEnabled(anyString())).thenReturn(true);
+
+        underTest.validate(stack, builder);
+        assertEquals(VALID, builder.build().getState());
+    }
+
+    @Test
+    public void testWithPositiveRootVolumeSizeWithDataLakeAndDatalakeEntitlementDisabledAndNative() {
+        Stack stack = stackWithRootVolumeSize(1, StackType.DATALAKE, AWS_NATIVE_VARIANT.variant());
+        ValidationResult.ValidationResultBuilder builder = new ValidationResult.ValidationResultBuilder();
+
+        entitlementMock(stack, true);
+        when(entitlementService.awsNativeDataLakeEnabled(anyString())).thenReturn(false);
+
+        underTest.validate(stack, builder);
+        assertEquals(ERROR, builder.build().getState());
+    }
+
+    @Test
     public void testWithNativeVariantWhenEntitlementEnabledShouldBeValid() {
-        Stack stack = stackWithRootVolumeSize(1);
+        Stack stack = stackWithRootVolumeSize(1, StackType.WORKLOAD, AWS_VARIANT.variant());
         stack.setPlatformVariant(AwsConstants.AwsVariant.AWS_NATIVE_VARIANT.variant().value());
         ValidationResult.ValidationResultBuilder builder = new ValidationResult.ValidationResultBuilder();
 
@@ -138,7 +190,7 @@ public class StackValidatorTest extends StackRequestValidatorTestBase {
 
     @Test
     public void testWithNativeVariantWhenEntitlementNOTEnabledShouldNOTBeValid() {
-        Stack stack = stackWithRootVolumeSize(1);
+        Stack stack = stackWithRootVolumeSize(1, StackType.WORKLOAD, AWS_VARIANT.variant());
         stack.setPlatformVariant(AwsConstants.AwsVariant.AWS_NATIVE_VARIANT.variant().value());
         ValidationResult.ValidationResultBuilder builder = new ValidationResult.ValidationResultBuilder();
 
@@ -160,18 +212,18 @@ public class StackValidatorTest extends StackRequestValidatorTestBase {
         when(entitlementService.awsNativeEnabled(anyString())).thenReturn(enabled);
     }
 
-    private Stack stackWithRootVolumeSize(Integer rootVolumeSize) {
-        Template templateRequest = new Template();
-        templateRequest.setRootVolumeSize(rootVolumeSize);
-        InstanceGroup instanceGroup = getInstanceGroup(templateRequest);
-        Cluster clusterRequest = getCluster();
-        return getStack(Sets.newHashSet(instanceGroup), clusterRequest);
+    private Stack stackWithRootVolumeSize(Integer rootVolumeSize, StackType stackType, Variant variant) {
+        Template template = new Template();
+        template.setRootVolumeSize(rootVolumeSize);
+        InstanceGroup instanceGroup = getInstanceGroup(template);
+        Cluster cluster = getCluster();
+        return getStack(Sets.newHashSet(instanceGroup), cluster, stackType, variant.value());
     }
 
-    private InstanceGroup getInstanceGroup(Template templateRequest) {
+    private InstanceGroup getInstanceGroup(Template template) {
         InstanceGroup instanceGroupRequest = new InstanceGroup();
         instanceGroupRequest.setGroupName("master");
-        instanceGroupRequest.setTemplate(templateRequest);
+        instanceGroupRequest.setTemplate(template);
         return instanceGroupRequest;
     }
 
@@ -183,14 +235,16 @@ public class StackValidatorTest extends StackRequestValidatorTestBase {
         return cluster;
     }
 
-    private Stack getStack(Set<InstanceGroup> instanceGroupRequests, Cluster clusterRequest) {
-        Stack stackRequest = new Stack();
-        stackRequest.setCluster(clusterRequest);
-        stackRequest.setInstanceGroups(instanceGroupRequests);
-        stackRequest.setEnvironmentCrn("envCrn");
-        stackRequest.setRegion("region");
-        stackRequest.setResourceCrn("crn:cdp:datahub:us-west-1:account:cluster:cluster");
-        return stackRequest;
+    private Stack getStack(Set<InstanceGroup> instanceGroupRequests, Cluster cluster, StackType stackType, String variant) {
+        Stack stack = new Stack();
+        stack.setCluster(cluster);
+        stack.setInstanceGroups(instanceGroupRequests);
+        stack.setEnvironmentCrn("envCrn");
+        stack.setRegion("region");
+        stack.setResourceCrn("crn:cdp:datahub:us-west-1:account:cluster:cluster");
+        stack.setType(stackType);
+        stack.setPlatformVariant(variant);
+        return stack;
     }
 
 }

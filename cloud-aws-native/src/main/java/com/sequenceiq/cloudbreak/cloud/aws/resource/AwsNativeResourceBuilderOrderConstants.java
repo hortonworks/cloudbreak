@@ -18,6 +18,8 @@ public class AwsNativeResourceBuilderOrderConstants {
 
     public static final int NATIVE_CLOUD_WATCH_RESOURCE_BUILDER_ORDER = 7;
 
+    public static final int NATIVE_ROOT_DISK_TAGGING_RESOURCE_BUILDER_ORDER = 8;
+
     private AwsNativeResourceBuilderOrderConstants() {
     }
 

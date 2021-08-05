@@ -79,6 +79,8 @@ class StackToDescribeFreeIpaResponseConverterTest {
 
     private static final String SERVER_IP = "1.1.1.1";
 
+    private static final String VARIANT = "NATIVE";
+
     @InjectMocks
     private StackToDescribeFreeIpaResponseConverter underTest;
 
@@ -149,6 +151,7 @@ class StackToDescribeFreeIpaResponseConverterTest {
                 .returns(STATUS_STRING, DescribeFreeIpaResponse::getStatusString)
                 // TODO decorateFreeIpaServerResponseWithIps
                 .returns(APP_VERSION, DescribeFreeIpaResponse::getAppVersion)
+                .returns(VARIANT, DescribeFreeIpaResponse::getVariant)
                 // TODO decorateWithCloudStorgeAndTelemetry
                 .returns(USERSYNC_STATUS_RESPONSE, DescribeFreeIpaResponse::getUserSyncStatus);
 
@@ -167,6 +170,7 @@ class StackToDescribeFreeIpaResponseConverterTest {
         stack.setCloudPlatform(CLOUD_PLATFORM);
         stack.setStackAuthentication(new StackAuthentication());
         stack.setAppVersion(APP_VERSION);
+        stack.setPlatformvariant(VARIANT);
         stack.setGatewayport(GATEWAY_PORT);
         return stack;
     }

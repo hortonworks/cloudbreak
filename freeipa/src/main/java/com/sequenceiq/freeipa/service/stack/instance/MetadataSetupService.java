@@ -1,7 +1,5 @@
 package com.sequenceiq.freeipa.service.stack.instance;
 
-import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_ID;
-
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -60,7 +58,8 @@ public class MetadataSetupService {
             instanceMetaDataEntry.setInstanceId(instanceId);
             instanceMetaDataEntry.setPrivateId(privateId);
             instanceMetaDataEntry.setStartDate(clock.getCurrentTimeMillis());
-            instanceMetaDataEntry.setSubnetId(cloudInstance.getStringParameter(SUBNET_ID));
+            instanceMetaDataEntry.setSubnetId(cloudInstance.getSubnetId());
+            instanceMetaDataEntry.setAvailabilityZone(cloudInstance.getAvailabilityZone());
             instanceMetaDataEntry.setInstanceName(cloudInstance.getStringParameter(CloudInstance.INSTANCE_NAME));
             instanceMetaDataEntry.setLifeCycle(convertLifeCycle(md));
             if (instanceMetaDataEntry.getInstanceMetadataType() == null) {

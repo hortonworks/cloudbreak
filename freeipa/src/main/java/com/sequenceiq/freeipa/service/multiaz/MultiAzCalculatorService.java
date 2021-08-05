@@ -1,5 +1,15 @@
 package com.sequenceiq.freeipa.service.multiaz;
 
+import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_IDS;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -7,10 +17,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Strings;
+import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
+import com.sequenceiq.freeipa.entity.InstanceGroupNetwork;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
-import com.sequenceiq.freeipa.entity.Network;
 
 @Service
 public class MultiAzCalculatorService {
@@ -20,24 +32,92 @@ public class MultiAzCalculatorService {
     @Inject
     private MultiAzValidator multiAzValidator;
 
-    public void calculateByRoundRobin(Network network, InstanceGroup instanceGroup) {
-        String subnetId = getSubnetId(network);
-        if (!Strings.isNullOrEmpty(subnetId) && multiAzValidator.supportedForInstanceMetadataGeneration(network.cloudPlatform())) {
-            for (InstanceMetaData instanceMetaData : instanceGroup.getAllInstanceMetaData()) {
+    public Map<String, String> prepareSubnetAzMap(DetailedEnvironmentResponse environment) {
+        Map<String, String> subnetAzPairs = new HashMap<>();
+        if (environment != null && environment.getNetwork() != null && environment.getNetwork().getSubnetMetas() != null) {
+            for (Map.Entry<String, CloudSubnet> entry : environment.getNetwork().getSubnetMetas().entrySet()) {
+                CloudSubnet value = entry.getValue();
+                if (!Strings.isNullOrEmpty(value.getName())) {
+                    subnetAzPairs.put(value.getName(), value.getAvailabilityZone());
+                }
+                if (!Strings.isNullOrEmpty(value.getId())) {
+                    subnetAzPairs.put(value.getId(), value.getAvailabilityZone());
+                }
+            }
+        }
+        return subnetAzPairs;
+    }
+
+    public void calculateByRoundRobin(Map<String, String> subnetAzPairs, InstanceGroup instanceGroup, String variant) {
+        Map<String, Integer> subnetUsage = new HashMap<>();
+        Set<String> subnetIds = collectSubnetIds(instanceGroup);
+        initializeSubnetUsage(subnetAzPairs, subnetIds, subnetUsage);
+        collectCurrentSubnetUsage(instanceGroup, subnetUsage);
+        if (!subnetIds.isEmpty() && multiAzValidator.supportedForInstanceMetadataGeneration(instanceGroup)) {
+            for (InstanceMetaData instanceMetaData : instanceGroup.getNotDeletedInstanceMetaDataSet()) {
                 if (Strings.isNullOrEmpty(instanceMetaData.getSubnetId())) {
-                    instanceMetaData.setSubnetId(subnetId);
-                    //instanceMetaData.setAvailabilityZone(subnetAzPairs.get(leastUsedSubnetId));
+                    Integer numberOfInstanceInASubnet = searchTheSmallestInstanceCountForSubnets(subnetUsage);
+                    String leastUsedSubnetId = searchTheSmallestUsedSubnetID(subnetUsage, numberOfInstanceInASubnet);
+
+                    instanceMetaData.setSubnetId(leastUsedSubnetId);
+                    instanceMetaData.setAvailabilityZone(subnetAzPairs.get(leastUsedSubnetId));
+
+                    subnetUsage.put(leastUsedSubnetId, numberOfInstanceInASubnet + 1);
                 }
             }
         }
     }
 
-    private String getSubnetId(Network network) {
-        String subnetId = null;
-        Json attributes = network.getAttributes();
-        if (attributes != null && attributes.getMap() != null) {
-            subnetId = (String) attributes.getMap().get("subnetId");
+    private Integer searchTheSmallestInstanceCountForSubnets(Map<String, Integer> subnetUsage) {
+        return Collections.min(subnetUsage.values());
+    }
+
+    private String searchTheSmallestUsedSubnetID(Map<String, Integer> subnetUsage, Integer currentNumber) {
+        return subnetUsage.entrySet()
+                .stream()
+                .filter(e -> e.getValue().equals(currentNumber))
+                .findFirst()
+                .get()
+                .getKey();
+    }
+
+    private void initializeSubnetUsage(Map<String, String> subnetAzPairs, Set<String> subnetIds, Map<String, Integer> subnetUsage) {
+        for (String subnetId : subnetAzPairs.keySet()) {
+            if (subnetIds.contains(subnetId)) {
+                subnetUsage.put(subnetId, 0);
+            }
         }
-        return subnetId;
+    }
+
+    private void collectCurrentSubnetUsage(InstanceGroup instanceGroup, Map<String, Integer> subnetUsage) {
+
+        for (InstanceMetaData instanceMetaData : instanceGroup.getAllInstanceMetaData()) {
+            String subnetId = instanceMetaData.getSubnetId();
+            if (!Strings.isNullOrEmpty(subnetId)) {
+                Integer countOfInstances = subnetUsage.get(subnetId);
+                if (countOfInstances != null) {
+                    subnetUsage.put(subnetId, ++countOfInstances);
+                } else {
+                    LOGGER.warn("Subnet ID {} is not present in the environment networks. Current usage: {}",
+                            subnetId, subnetUsage.keySet());
+                }
+            }
+        }
+    }
+
+    private Set<String> collectSubnetIds(InstanceGroup instanceGroup) {
+        Set<String> allSubnetIds = new HashSet<>();
+        InstanceGroupNetwork instanceGroupNetwork = instanceGroup.getInstanceGroupNetwork();
+        if (instanceGroupNetwork != null) {
+            Json attributes = instanceGroupNetwork.getAttributes();
+            if (attributes != null) {
+                List<String> subnetIds = (List<String>) attributes
+                        .getMap()
+                        .getOrDefault(SUBNET_IDS, new ArrayList<>());
+                allSubnetIds.addAll(subnetIds);
+            }
+
+        }
+        return allSubnetIds;
     }
 }

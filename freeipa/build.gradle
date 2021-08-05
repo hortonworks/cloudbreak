@@ -136,11 +136,12 @@ dependencies {
   testCompile project(path: ':common', configuration: 'tests')
   runtime project(':orchestrator-salt')
   runtime project(':cloud-openstack')
-  runtime project(':cloud-aws-cloudformation')
   runtime project(':cloud-mock')
   runtime project(':cloud-azure')
   runtime project(':cloud-gcp')
-  implementation     project(":structuredevent-service-cdp")
+  implementation project(":structuredevent-service-cdp")
+  implementation project(':cloud-aws-cloudformation')
+  implementation project(':cloud-aws-native')
 
   testCompile group: 'com.hubspot.jinjava', name: 'jinjava', version: jinjavaVersion
   testImplementation project(path: ':authorization-common', configuration: 'tests')

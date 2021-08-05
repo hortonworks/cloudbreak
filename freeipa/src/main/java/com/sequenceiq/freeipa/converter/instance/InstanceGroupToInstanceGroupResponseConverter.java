@@ -23,6 +23,9 @@ public class InstanceGroupToInstanceGroupResponseConverter implements Converter<
     private SecurityGroupToSecurityGroupResponseConverter securityGroupConverter;
 
     @Inject
+    private InstanceGroupNetworkToInstanceGroupNetworkResponseConverter instanceGroupNetworkConverter;
+
+    @Inject
     private InstanceMetaDataToInstanceMetaDataResponseConverter metaDataConverter;
 
     @Override
@@ -35,6 +38,9 @@ public class InstanceGroupToInstanceGroupResponseConverter implements Converter<
         instanceGroupResponse.setMetaData(metaDataConverter.convert(source.getNotTerminatedInstanceMetaDataSet()));
         if (source.getSecurityGroup() != null) {
             instanceGroupResponse.setSecurityGroup(securityGroupConverter.convert(source.getSecurityGroup()));
+        }
+        if (source.getInstanceGroupNetwork() != null) {
+            instanceGroupResponse.setNetwork(instanceGroupNetworkConverter.convert(source.getInstanceGroupNetwork()));
         }
         instanceGroupResponse.setNodeCount(source.getNodeCount());
         instanceGroupResponse.setName(source.getGroupName());

@@ -67,4 +67,9 @@ public class ResourceService {
         return repository.findByResourceReferenceAndType(resourceReference, resourceType);
     }
 
+    public Optional<Resource> findByResourceReferenceAndStatusAndTypeAndStack(String resourceReference, CommonStatus status,
+            ResourceType resourceType, Long stackId) {
+        return repository.findByResourceReferenceAndStatusAndTypeAndStack(resourceReference, status, resourceType, stackId);
+    }
+
 }

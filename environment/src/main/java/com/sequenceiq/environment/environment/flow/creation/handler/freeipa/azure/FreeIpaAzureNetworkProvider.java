@@ -13,6 +13,7 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.creation.handler.freeipa.FreeIpaNetworkProvider;
+import com.sequenceiq.environment.network.service.domain.ProvidedSubnetIds;
 import com.sequenceiq.environment.network.dto.AzureParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.network.service.SubnetIdProvider;
@@ -26,7 +27,7 @@ public class FreeIpaAzureNetworkProvider implements FreeIpaNetworkProvider {
     private SubnetIdProvider subnetIdProvider;
 
     @Override
-    public NetworkRequest provider(EnvironmentDto environment) {
+    public NetworkRequest network(EnvironmentDto environment, boolean multiAzRequired) {
         NetworkRequest networkRequest = new NetworkRequest();
         NetworkDto network = environment.getNetwork();
         AzureParams azureParams = network.getAzure();
@@ -34,8 +35,12 @@ public class FreeIpaAzureNetworkProvider implements FreeIpaNetworkProvider {
         azureNetworkParameters.setNetworkId(azureParams.getNetworkId());
         azureNetworkParameters.setNoPublicIp(azureParams.isNoPublicIp());
         azureNetworkParameters.setResourceGroupName(azureParams.getResourceGroupName());
-        azureNetworkParameters.setSubnetId(
-                subnetIdProvider.provide(network, environment.getExperimentalFeatures().getTunnel(), CloudPlatform.AZURE));
+        ProvidedSubnetIds providedSubnetIds = subnetIdProvider.subnets(
+                network,
+                environment.getExperimentalFeatures().getTunnel(),
+                CloudPlatform.AZURE,
+                multiAzRequired);
+        azureNetworkParameters.setSubnetId(providedSubnetIds.getSubnetId());
         networkRequest.setAzure(azureNetworkParameters);
         networkRequest.setNetworkCidrs(collectNetworkCidrs(network));
         return networkRequest;
@@ -47,7 +52,7 @@ public class FreeIpaAzureNetworkProvider implements FreeIpaNetworkProvider {
     }
 
     @Override
-    public Set<String> getSubnets(NetworkRequest networkRequest) {
+    public Set<String> subnets(NetworkRequest networkRequest) {
         return Sets.newHashSet(networkRequest.getAzure().getSubnetId());
     }
 

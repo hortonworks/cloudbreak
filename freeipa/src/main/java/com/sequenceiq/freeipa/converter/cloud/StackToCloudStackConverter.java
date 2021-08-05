@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -54,6 +55,7 @@ import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudGcsView;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudS3View;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.model.Logging;
@@ -68,6 +70,7 @@ import com.sequenceiq.freeipa.api.model.Backup;
 import com.sequenceiq.freeipa.converter.image.ImageConverter;
 import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
+import com.sequenceiq.freeipa.entity.InstanceGroupNetwork;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackAuthentication;
@@ -155,7 +158,7 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
                 instanceTemplate,
                 instanceAuthentication,
                 instanceMetaData != null ? instanceMetaData.getSubnetId() : null,
-                stack.getAvailabilityZone(),
+                instanceMetaData != null ? instanceMetaData.getAvailabilityZone() : null,
                 parameters);
     }
 
@@ -246,7 +249,7 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
                     rootVolumeSize = defaultRootVolumeSizeProvider.getForPlatform(cloudPlatform);
                 }
 
-                GroupNetwork groupNetwork = buildGroupNetwork(stack.getNetwork());
+                GroupNetwork groupNetwork = buildGroupNetwork(stack.getNetwork(), instanceGroup);
 
                 groups.add(
                         new Group(instanceGroup.getGroupName(),
@@ -274,18 +277,23 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
                 stackAuthentication.getLoginUserName());
     }
 
-    private GroupNetwork buildGroupNetwork(com.sequenceiq.freeipa.entity.Network network) {
-        Map<String, Object> params = new HashMap<>();
-        String subnetId = null;
-        if (network != null) {
-            Json attributes = network.getAttributes();
-            params = attributes == null ? Collections.emptyMap() : attributes.getMap();
+    private GroupNetwork buildGroupNetwork(com.sequenceiq.freeipa.entity.Network network, InstanceGroup instanceGroup) {
+        GroupNetwork groupNetwork = null;
+        InstanceGroupNetwork instanceGroupNetwork = instanceGroup.getInstanceGroupNetwork();
+        if (instanceGroupNetwork != null) {
+            Json attributes = instanceGroupNetwork.getAttributes();
+            Map<String, Object> params = attributes == null ? Collections.emptyMap() : attributes.getMap();
+            Set<GroupSubnet> subnets = new HashSet<>();
             if (params != null) {
-                subnetId = (String) params.get(SUBNET_ID);
+                List<String> subnetIds = (List<String>) params.getOrDefault(NetworkConstants.SUBNET_IDS, new ArrayList<>());
+                for (String subnetId : subnetIds) {
+                    GroupSubnet groupSubnet = new GroupSubnet(subnetId);
+                    subnets.add(groupSubnet);
+                }
             }
+            groupNetwork = new GroupNetwork(network.getOutboundInternetTraffic(), subnets, params);
         }
-        GroupSubnet subnet = new GroupSubnet(subnetId);
-        return new GroupNetwork(network.getOutboundInternetTraffic(), Set.of(subnet), params);
+        return groupNetwork;
     }
 
     private Security buildSecurity(InstanceGroup ig) {

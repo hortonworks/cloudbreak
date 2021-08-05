@@ -77,6 +77,9 @@ public class DescribeFreeIpaResponse {
     @ApiModelProperty(value = FreeIpaModelDescriptions.CLOUD_PLATFORM)
     private String cloudPlatform;
 
+    @ApiModelProperty(value = FreeIpaModelDescriptions.VARIANT)
+    private String variant;
+
     @ApiModelProperty(value = FreeIpaModelDescriptions.TELEMETRY)
     private TelemetryResponse telemetry;
 
@@ -228,5 +231,38 @@ public class DescribeFreeIpaResponse {
 
     public void setUserSyncStatus(UserSyncStatusResponse userSyncStatus) {
         this.userSyncStatus = userSyncStatus;
+    }
+
+    public String getVariant() {
+        return variant;
+    }
+
+    public void setVariant(String variant) {
+        this.variant = variant;
+    }
+
+    @Override
+    public String toString() {
+        return "DescribeFreeIpaResponse{" +
+                "environmentCrn='" + environmentCrn + '\'' +
+                ", name='" + name + '\'' +
+                ", crn='" + crn + '\'' +
+                ", placement=" + placement +
+                ", instanceGroups=" + instanceGroups +
+                ", authentication=" + authentication +
+                ", network=" + network +
+                ", image=" + image +
+                ", freeIpa=" + freeIpa +
+                ", availabilityStatus=" + availabilityStatus +
+                ", status=" + status +
+                ", statusString='" + statusString + '\'' +
+                ", statusReason='" + statusReason + '\'' +
+                ", appVersion='" + appVersion + '\'' +
+                ", cloudPlatform='" + cloudPlatform + '\'' +
+                ", variant='" + variant + '\'' +
+                ", telemetry=" + telemetry +
+                ", cloudStorage=" + cloudStorage +
+                ", userSyncStatus=" + userSyncStatus +
+                '}';
     }
 }

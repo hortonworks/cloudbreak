@@ -23,6 +23,9 @@ public class InstanceGroupRequest extends InstanceGroupBase {
     @ApiModelProperty(InstanceGroupModelDescription.SECURITYGROUP)
     private SecurityGroupRequest securityGroup;
 
+    @ApiModelProperty(InstanceGroupModelDescription.NETWORK)
+    private InstanceGroupNetworkRequest network;
+
     public InstanceTemplateRequest getInstanceTemplate() {
         return instanceTemplate;
     }
@@ -39,6 +42,14 @@ public class InstanceGroupRequest extends InstanceGroupBase {
         this.securityGroup = securityGroup;
     }
 
+    public InstanceGroupNetworkRequest getNetwork() {
+        return network;
+    }
+
+    public void setNetwork(InstanceGroupNetworkRequest network) {
+        this.network = network;
+    }
+
     @Override
     public String toString() {
         return super.toString() + "InstanceGroupRequest{"
@@ -47,6 +58,7 @@ public class InstanceGroupRequest extends InstanceGroupBase {
                 + ", type=" + getType()
                 + ", instanceTemplate=" + instanceTemplate
                 + ", securityGroup=" + securityGroup
+                + ", network=" + network
                 + '}';
     }
 }

@@ -31,6 +31,8 @@ public class InstanceMetaDataToInstanceMetaDataResponseConverter implements Conv
         metaDataJson.setInstanceStatus(source.getInstanceStatus());
         metaDataJson.setInstanceType(source.getInstanceMetadataType());
         metaDataJson.setLifeCycle(source.getLifeCycle());
+        metaDataJson.setAvailabilityZone(source.getAvailabilityZone());
+        metaDataJson.setSubnetId(source.getSubnetId());
         return metaDataJson;
     }
 

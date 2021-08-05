@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup;
 
 import org.springframework.stereotype.Component;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -11,8 +10,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 public class InstanceMetaDataToInstanceMetaDataV4ResponseConverter
         extends AbstractConversionServiceAwareConverter<InstanceMetaData, InstanceMetaDataV4Response> {
 
-    @VisibleForTesting
-    static final String NOT_AVAILABLE = "N/A";
+    private static final String NOT_AVAILABLE = "N/A";
 
     @Override
     public InstanceMetaDataV4Response convert(InstanceMetaData source) {

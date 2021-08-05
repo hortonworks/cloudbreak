@@ -8,7 +8,6 @@ import static com.sequenceiq.environment.environment.flow.creation.event.EnvCrea
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.CREATE_IN_PROGRESS;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -17,6 +16,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -26,6 +26,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -58,6 +60,7 @@ import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneNetwork;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.attachchildenv.AttachChildEnvironmentRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupNetworkRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceTemplateRequest;
@@ -106,6 +109,10 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
 
     private final EventBus eventBus;
 
+    private final EntitlementService entitlementService;
+
+    private final MultiAzValidator multiAzValidator;
+
     private Set<String> enabledChildPlatforms;
 
     public FreeIpaCreationHandler(
@@ -120,7 +127,10 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
             TelemetryApiConverter telemetryApiConverter,
             BackupConverter backupConverter,
             CloudPlatformConnectors connectors,
-            EventBus eventBus, @Value("${environment.enabledChildPlatforms}") Set<String> enabledChildPlatforms) {
+            EventBus eventBus,
+            EntitlementService entitlementService,
+            MultiAzValidator multiAzValidator,
+            @Value("${environment.enabledChildPlatforms}") Set<String> enabledChildPlatforms) {
         super(eventSender);
         this.environmentService = environmentService;
         this.freeIpaService = freeIpaService;
@@ -134,6 +144,8 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
         this.connectors = connectors;
         this.eventBus = eventBus;
         this.enabledChildPlatforms = enabledChildPlatforms;
+        this.entitlementService = entitlementService;
+        this.multiAzValidator = multiAzValidator;
     }
 
     @Override
@@ -192,7 +204,11 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
 
                 AddDnsZoneForSubnetsRequest addDnsZoneForSubnetsRequest = new AddDnsZoneForSubnetsRequest();
                 addDnsZoneForSubnetsRequest.setEnvironmentCrn(parentEnvironmentCrn);
-                addDnsZoneForSubnetsRequest.setSubnets(Collections.singletonList(environmentDto.getNetwork().getNetworkCidr()));
+                addDnsZoneForSubnetsRequest.setSubnets(
+                        environmentDto.getNetwork()
+                                .getNetworkCidrs()
+                                .stream()
+                                .collect(Collectors.toList()));
 
                 dnsV1Endpoint.addDnsZoneForSubnets(addDnsZoneForSubnetsRequest);
             }
@@ -215,6 +231,8 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
     }
 
     private CreateFreeIpaRequest createFreeIpaRequest(EnvironmentDto environment) {
+        boolean multiAzRequired = environment.getFreeIpaCreation().isEnableMultiAz();
+
         CreateFreeIpaRequest createFreeIpaRequest = new CreateFreeIpaRequest();
         createFreeIpaRequest.setEnvironmentCrn(environment.getResourceCrn());
         createFreeIpaRequest.setName(environment.getName() + "-freeipa");
@@ -222,7 +240,7 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
         FreeIpaServerRequest freeIpaServerRequest = freeIpaServerRequestProvider.create(environment);
         createFreeIpaRequest.setFreeIpa(freeIpaServerRequest);
 
-        setPlacementAndNetwork(environment, createFreeIpaRequest);
+        setPlacementAndNetwork(environment, createFreeIpaRequest, multiAzRequired);
         setAuthentication(environment.getAuthentication(), createFreeIpaRequest);
         setTelemetry(environment, createFreeIpaRequest);
         setBackup(environment, createFreeIpaRequest);
@@ -233,10 +251,16 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
         if (environment.getSecurityAccess() != null) {
             securityGroupRequest = createSecurityGroupRequest(environment.getSecurityAccess());
         }
-        createFreeIpaRequest.setInstanceGroups(createInstanceGroupRequests(securityGroupRequest, environment.getFreeIpaCreation()));
-
+        createFreeIpaRequest.setInstanceGroups(createInstanceGroupRequests(createFreeIpaRequest, securityGroupRequest, environment, multiAzRequired));
+        setVariant(environment, createFreeIpaRequest, multiAzRequired);
         setUseCcm(environment.getExperimentalFeatures().getTunnel(), createFreeIpaRequest);
         return createFreeIpaRequest;
+    }
+
+    private void setVariant(EnvironmentDto environment, CreateFreeIpaRequest createFreeIpaRequest, boolean multiAzRequired) {
+        if (multiAzRequired && CloudPlatform.AWS.name().equals(environment.getCloudPlatform())) {
+            createFreeIpaRequest.setVariant(AwsConstants.AwsVariant.AWS_NATIVE_VARIANT.variant().value());
+        }
     }
 
     private void setTags(EnvironmentDto environment, CreateFreeIpaRequest createFreeIpaRequest) {
@@ -257,7 +281,7 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
         createFreeIpaRequest.setBackup(backup);
     }
 
-    private void setPlacementAndNetwork(EnvironmentDto environment, CreateFreeIpaRequest createFreeIpaRequest) {
+    private void setPlacementAndNetwork(EnvironmentDto environment, CreateFreeIpaRequest createFreeIpaRequest, boolean multiAzRequired) {
         PlacementRequest placementRequest = new PlacementRequest();
         String region = environment.getRegions().iterator().next().getName();
         Platform platform = platform(environment.getCloudPlatform().toUpperCase());
@@ -269,9 +293,11 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
 
         if (freeIpaNetworkProvider != null) {
             createFreeIpaRequest.setNetwork(
-                    freeIpaNetworkProvider.provider(environment));
-            placementRequest.setAvailabilityZone(
-                    freeIpaNetworkProvider.availabilityZone(createFreeIpaRequest.getNetwork(), environment));
+                    freeIpaNetworkProvider.network(environment, multiAzRequired));
+            if (!multiAzRequired) {
+                placementRequest.setAvailabilityZone(
+                        freeIpaNetworkProvider.availabilityZone(createFreeIpaRequest.getNetwork(), environment));
+            }
         }
     }
 
@@ -307,14 +333,28 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
         createFreeIpaRequest.setTunnel(tunnel);
     }
 
-    private List<InstanceGroupRequest> createInstanceGroupRequests(SecurityGroupRequest securityGroupRequest, FreeIpaCreationDto freeIpaCreation) {
+    private List<InstanceGroupRequest> createInstanceGroupRequests(CreateFreeIpaRequest createFreeIpaRequest,
+            SecurityGroupRequest securityGroupRequest,
+            EnvironmentDto environment,
+            boolean multiAzRequired) {
         List<InstanceGroupRequest> instanceGroupRequests = new LinkedList<>();
+        FreeIpaCreationDto freeIpaCreation = environment.getFreeIpaCreation();
         InstanceGroupRequest instanceGroupRequest = new InstanceGroupRequest();
         instanceGroupRequest.setName(MASTER_GROUP_NAME);
         instanceGroupRequest.setNodeCount(freeIpaCreation.getInstanceCountByGroup());
         instanceGroupRequest.setType(InstanceGroupType.MASTER);
         instanceGroupRequest.setSecurityGroup(securityGroupRequest);
         instanceGroupRequest.setInstanceTemplateRequest(createInstanceTemplate(freeIpaCreation));
+        if (multiAzRequired && multiAzValidator.suportedMultiAzForEnvironment(environment.getCloudPlatform())) {
+            FreeIpaNetworkProvider freeIpaNetworkProvider = freeIpaNetworkProviderMapByCloudPlatform
+                    .get(CloudPlatform.valueOf(environment.getCloudPlatform()));
+            if (freeIpaNetworkProvider != null) {
+                InstanceGroupNetworkRequest instanceGroupNetworkRequest = freeIpaNetworkProvider.networkByGroup(environment);
+                instanceGroupRequest.setNetwork(instanceGroupNetworkRequest);
+                createFreeIpaRequest.getPlacement().setAvailabilityZone(
+                        freeIpaNetworkProvider.availabilityZone(instanceGroupNetworkRequest, environment));
+            }
+        }
         instanceGroupRequests.add(instanceGroupRequest);
         return instanceGroupRequests;
     }

@@ -20,7 +20,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.NetworkR
 public class FreeIpaGcpNetworkProvider implements FreeIpaNetworkProvider {
 
     @Override
-    public NetworkRequest provider(EnvironmentDto environment) {
+    public NetworkRequest network(EnvironmentDto environment, boolean multiAzRequired) {
         NetworkRequest networkRequest = new NetworkRequest();
         NetworkDto network = environment.getNetwork();
         GcpParams gcpParams = network.getGcp();
@@ -42,7 +42,7 @@ public class FreeIpaGcpNetworkProvider implements FreeIpaNetworkProvider {
     }
 
     @Override
-    public Set<String> getSubnets(NetworkRequest networkRequest) {
+    public Set<String> subnets(NetworkRequest networkRequest) {
         return Sets.newHashSet(networkRequest.getGcp().getSubnetId());
     }
 

@@ -135,7 +135,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
     }
 
     protected Optional<String> getAvailabilityZone(AwsContext context, CloudInstance cloudInstance) {
-        return Optional.empty();
+        return Optional.ofNullable(cloudInstance.getAvailabilityZone());
     }
 
     private Supplier<CloudResource> createVolumeSet(long privateId, AuthenticatedContext auth, Group group,

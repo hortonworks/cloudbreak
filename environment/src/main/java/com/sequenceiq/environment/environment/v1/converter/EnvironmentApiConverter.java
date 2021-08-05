@@ -115,7 +115,7 @@ public class EnvironmentApiConverter {
                 .withCloudPlatform(cloudPlatform)
                 .withCredential(request)
                 .withCreated(System.currentTimeMillis())
-                .withFreeIpaCreation(freeIpaConverter.convert(request.getFreeIpa()))
+                .withFreeIpaCreation(freeIpaConverter.convert(request.getFreeIpa(), accountId))
                 .withLocation(locationRequestToDto(request.getLocation()))
                 .withTelemetry(telemetryApiConverter.convert(request.getTelemetry(),
                         accountTelemetryService.getOrDefault(accountId).getFeatures()))

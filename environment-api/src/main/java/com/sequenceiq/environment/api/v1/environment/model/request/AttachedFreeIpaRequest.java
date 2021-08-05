@@ -23,6 +23,9 @@ public class AttachedFreeIpaRequest implements Serializable {
     @ApiModelProperty(value = EnvironmentModelDescription.FREEIPA_INSTANCE_COUNT_BY_GROUP)
     private Integer instanceCountByGroup;
 
+    @ApiModelProperty(value = EnvironmentModelDescription.MULTIAZ_FREEIPA)
+    private boolean enableMultiAz;
+
     @Valid
     @ApiModelProperty(EnvironmentModelDescription.FREEIPA_AWS_PARAMETERS)
     private AwsFreeIpaParameters aws;
@@ -68,6 +71,7 @@ public class AttachedFreeIpaRequest implements Serializable {
         return "AttachedFreeIpaRequest{" +
                 "create=" + create +
                 ", instanceCountByGroup=" + instanceCountByGroup +
+                ", enableMultiAz=" + enableMultiAz +
                 ", aws=" + aws +
                 ", azure=" + azure +
                 ", gcp=" + gcp +
@@ -97,5 +101,13 @@ public class AttachedFreeIpaRequest implements Serializable {
 
     public void setImage(FreeIpaImageRequest image) {
         this.image = image;
+    }
+
+    public boolean isEnableMultiAz() {
+        return enableMultiAz;
+    }
+
+    public void setEnableMultiAz(boolean enableMultiAz) {
+        this.enableMultiAz = enableMultiAz;
     }
 }

@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.cloud.model.SubnetSelectionParameters;
 import com.sequenceiq.cloudbreak.cloud.model.SubnetSelectionResult;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.type.Tunnel;
+import com.sequenceiq.environment.network.service.domain.ProvidedSubnetIds;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 
 @ExtendWith(MockitoExtension.class)
@@ -53,9 +54,9 @@ class SubnetIdProviderTest {
         NetworkConnector networkConnector = setupConnectorWithSelectionResult(List.of(new CloudSubnet("id", "name")));
         Tunnel tunnel = Tunnel.DIRECT;
 
-        String provide = underTest.provide(networkDto, tunnel, CloudPlatform.AWS);
+        ProvidedSubnetIds providedSubnetIds = underTest.subnets(networkDto, tunnel, CloudPlatform.AWS, false);
 
-        assertEquals("id", provide);
+        assertEquals("id", providedSubnetIds.getSubnetId());
         ArgumentCaptor<SubnetSelectionParameters> subnetSelectionParametersCaptor = ArgumentCaptor.forClass(SubnetSelectionParameters.class);
 
         verify(networkConnector).chooseSubnets(any(), subnetSelectionParametersCaptor.capture());
@@ -66,7 +67,7 @@ class SubnetIdProviderTest {
 
     @Test
     void testProvideShouldReturnNullWhenNetworkNull() {
-        String actual = underTest.provide(null, Tunnel.DIRECT, CloudPlatform.AWS);
+        ProvidedSubnetIds actual = underTest.subnets(null, Tunnel.DIRECT, CloudPlatform.AWS, false);
 
         Assertions.assertNull(actual);
     }
@@ -77,9 +78,9 @@ class SubnetIdProviderTest {
                 .withCbSubnets(Map.of())
                 .build();
 
-        String actual = underTest.provide(networkDto, Tunnel.DIRECT, CloudPlatform.AWS);
+        ProvidedSubnetIds providedSubnetIds = underTest.subnets(networkDto, Tunnel.DIRECT, CloudPlatform.AWS, false);
 
-        Assertions.assertNull(actual);
+        Assertions.assertNull(providedSubnetIds);
     }
 
     @Test
@@ -95,9 +96,9 @@ class SubnetIdProviderTest {
                 ))
                 .build();
 
-        String actual = underTest.provide(networkDto, Tunnel.DIRECT, CloudPlatform.AWS);
+        ProvidedSubnetIds providedSubnetIds = underTest.subnets(networkDto, Tunnel.DIRECT, CloudPlatform.AWS, false);
 
-        Assertions.assertNotNull(actual);
+        Assertions.assertNotNull(providedSubnetIds);
     }
 
     @Test
@@ -113,9 +114,9 @@ class SubnetIdProviderTest {
                 ))
                 .build();
 
-        String actual = underTest.provide(networkDto, Tunnel.DIRECT, CloudPlatform.AWS);
+        ProvidedSubnetIds providedSubnetIds = underTest.subnets(networkDto, Tunnel.DIRECT, CloudPlatform.AWS, false);
 
-        Assertions.assertNotNull(actual);
+        Assertions.assertNotNull(providedSubnetIds);
     }
 
     @Test
@@ -137,9 +138,9 @@ class SubnetIdProviderTest {
                 ))
                 .build();
 
-        String actual = underTest.provide(networkDto, Tunnel.DIRECT, CloudPlatform.AWS);
+        ProvidedSubnetIds providedSubnetIds = underTest.subnets(networkDto, Tunnel.DIRECT, CloudPlatform.AWS, false);
 
-        Assertions.assertNotNull(actual);
+        Assertions.assertNotNull(providedSubnetIds);
     }
 
     @Test
@@ -156,9 +157,9 @@ class SubnetIdProviderTest {
                 ))
                 .build();
 
-        String actual = underTest.provide(networkDto, Tunnel.DIRECT, CloudPlatform.AWS);
+        ProvidedSubnetIds providedSubnetIds = underTest.subnets(networkDto, Tunnel.DIRECT, CloudPlatform.AWS, false);
 
-        Assertions.assertNull(actual);
+        Assertions.assertNull(providedSubnetIds);
     }
 
     private NetworkConnector setupConnectorWithSelectionResult(List<CloudSubnet> selectedSubnets) {

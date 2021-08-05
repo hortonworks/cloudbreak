@@ -37,4 +37,14 @@ public class CloudResourceRetrieverService implements ResourceRetriever {
         return optionalResource
                 .map(resource -> conversionService.convert(resource, CloudResource.class));
     }
+
+    @Override
+    public Optional<CloudResource> findByResourceReferenceAndStatusAndTypeAndStack(String resourceReference,
+        CommonStatus status, ResourceType resourceType, Long stackId) {
+        Optional<Resource> optionalResource = resourceService.findByResourceReferenceAndStatusAndTypeAndStack(resourceReference, status, resourceType, stackId);
+        LOGGER.debug("Resource retrieved by optionalResource reference: {}, status: {}, type: {}, stackId: {}. Is present: {}", resourceReference, status,
+                resourceType, stackId, optionalResource.isPresent());
+        return optionalResource
+                .map(resource -> conversionService.convert(resource, CloudResource.class));
+    }
 }
