@@ -76,4 +76,19 @@ public class AzureCloudFunctionality implements CloudFunctionality {
         //TODO
         return null;
     }
+
+    @Override
+    public String getFreeIpaLogsUrl(String clusterName, String crn, String baseLocation) {
+        return azureCloudBlobUtil.getFreeIpaLogsUrl(clusterName, crn, baseLocation);
+    }
+
+    @Override
+    public String getDataLakeLogsUrl(String clusterName, String crn, String baseLocation) {
+        return azureCloudBlobUtil.getDataLakeLogsUrl(clusterName, crn, baseLocation);
+    }
+
+    @Override
+    public String getDataHubLogsUrl(String clusterName, String crn, String baseLocation) {
+        return azureCloudBlobUtil.getDataHubLogsUrl(clusterName, crn, baseLocation);
+    }
 }

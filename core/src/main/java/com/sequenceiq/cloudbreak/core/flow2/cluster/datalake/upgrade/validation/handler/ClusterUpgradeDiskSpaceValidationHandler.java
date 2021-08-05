@@ -10,9 +10,9 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedException;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeDiskSpaceValidationFinishedEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationFailureEvent;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationFinishedEvent;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
@@ -42,18 +42,16 @@ public class ClusterUpgradeDiskSpaceValidationHandler extends ExceptionCatcherEv
         LOGGER.debug("Accepting Cluster upgrade validation event.");
         ClusterUpgradeValidationEvent request = event.getData();
         Long stackId = request.getResourceId();
-        Selectable result;
+        Selectable result = new ClusterUpgradeDiskSpaceValidationFinishedEvent(request.getResourceId());
         try {
             StatedImage image = imageCatalogService.getImage(request.getImageId());
             diskSpaceValidationService.validateFreeSpaceForUpgrade(getStack(stackId), image.getImageCatalogUrl(), image.getImageCatalogName(),
                     request.getImageId());
-            result = new ClusterUpgradeValidationFinishedEvent(stackId);
         } catch (UpgradeValidationFailedException e) {
             LOGGER.warn("Cluster upgrade validation failed", e);
             result = new ClusterUpgradeValidationFailureEvent(stackId, e);
         } catch (Exception e) {
             LOGGER.warn("Cluster upgrade validation was unsuccessful due to an internal error", e);
-            result = new ClusterUpgradeValidationFinishedEvent(stackId, e);
         }
         return result;
     }
@@ -69,6 +67,6 @@ public class ClusterUpgradeDiskSpaceValidationHandler extends ExceptionCatcherEv
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<ClusterUpgradeValidationEvent> event) {
-        return new ClusterUpgradeValidationFinishedEvent(resourceId, e);
+        return new ClusterUpgradeDiskSpaceValidationFinishedEvent(resourceId);
     }
 }

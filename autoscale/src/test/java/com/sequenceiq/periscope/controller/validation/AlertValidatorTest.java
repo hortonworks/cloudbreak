@@ -136,7 +136,7 @@ public class AlertValidatorTest {
         request.setCron("2 22 22243 333");
 
         expectedException.expect(BadRequestException.class);
-        expectedException.expectMessage("Range exceeds maximum");
+        expectedException.expectMessage("Cron expression must consist of 6 fields (found 4 in \"2 22 22243 333\")");
 
         underTest.validateSchedule(request);
     }

@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationHandlerSelectors.VALIDATE_DISK_SPACE_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.FINALIZE_CLUSTER_UPGRADE_VALIDATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.HANDLED_FAILED_CLUSTER_UPGRADE_VALIDATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_IMAGE_VALIDATION_EVENT;
 
@@ -26,10 +25,14 @@ import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeContext;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeDiskSpaceValidationFinishedEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeServiceValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationFailureEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationFinalizeEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationFinishedEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateService;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
@@ -48,6 +51,8 @@ public class ClusterUpgradeValidationActions {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterUpgradeValidationActions.class);
 
+    private static final String LOCK_COMPONENTS = "lockComponents";
+
     @Inject
     private StackService stackService;
 
@@ -62,20 +67,21 @@ public class ClusterUpgradeValidationActions {
 
     @Bean(name = "CLUSTER_UPGRADE_VALIDATION_INIT_STATE")
     public Action<?, ?> initClusterUpgradeValidation() {
-        return new AbstractClusterUpgradeValidationAction<>(ClusterUpgradeValidationEvent.class) {
+        return new AbstractClusterUpgradeValidationAction<>(ClusterUpgradeValidationTriggerEvent.class) {
 
             @Override
-            protected void doExecute(StackContext context, ClusterUpgradeValidationEvent payload, Map<Object, Object> variables) {
+            protected void doExecute(StackContext context, ClusterUpgradeValidationTriggerEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Starting cluster upgrade validation flow. Target image: {}", payload.getImageId());
                 cloudbreakEventService.fireCloudbreakEvent(payload.getResourceId(), UPDATE_IN_PROGRESS.name(),
                         ResourceEvent.CLUSTER_UPGRADE_VALIDATION_STARTED);
+                variables.put(LOCK_COMPONENTS, payload.isLockComponents());
                 ClusterUpgradeValidationEvent event = new ClusterUpgradeValidationEvent(START_CLUSTER_UPGRADE_IMAGE_VALIDATION_EVENT.name(),
                         payload.getResourceId(), payload.getImageId());
                 sendEvent(context, event.selector(), event);
             }
 
             @Override
-            protected Object getFailurePayload(ClusterUpgradeValidationEvent payload, Optional<StackContext> flowContext, Exception ex) {
+            protected Object getFailurePayload(ClusterUpgradeValidationTriggerEvent payload, Optional<StackContext> flowContext, Exception ex) {
                 return new ClusterUpgradeValidationFinishedEvent(payload.getResourceId(), ex);
             }
         };
@@ -93,8 +99,8 @@ public class ClusterUpgradeValidationActions {
                 Image targetImage = stackImageUpdateService
                         .getImageModelFromStatedImage(context.getStack(), upgradeImageInfo.getCurrentImage(), upgradeImageInfo.getTargetStatedImage());
                 CloudStack cloudStack = context.getCloudStack().replaceImage(targetImage);
-                ClusterUpgradeImageValidationEvent event = new ClusterUpgradeImageValidationEvent(
-                        payload.getResourceId(), payload.getImageId(), cloudStack, context.getCloudCredential(), context.getCloudContext());
+                ClusterUpgradeImageValidationEvent event = new ClusterUpgradeImageValidationEvent(payload.getResourceId(), payload.getImageId(), cloudStack,
+                        context.getCloudCredential(), context.getCloudContext());
                 sendEvent(context, event.selector(), event);
             }
 
@@ -120,6 +126,26 @@ public class ClusterUpgradeValidationActions {
 
             @Override
             protected Object getFailurePayload(ClusterUpgradeValidationEvent payload, Optional<StackContext> flowContext, Exception ex) {
+                return new ClusterUpgradeDiskSpaceValidationFinishedEvent(payload.getResourceId());
+            }
+
+        };
+    }
+
+    @Bean(name = "CLUSTER_UPGRADE_SERVICE_VALIDATION_STATE")
+    public Action<?, ?> clusterUpgradeServiceValidation() {
+        return new AbstractClusterUpgradeValidationAction<>(ClusterUpgradeDiskSpaceValidationFinishedEvent.class) {
+
+            @Override
+            protected void doExecute(StackContext context, ClusterUpgradeDiskSpaceValidationFinishedEvent payload, Map<Object, Object> variables) {
+                LOGGER.info("Starting to validate services.");
+                boolean lockComponents = (Boolean) variables.get(LOCK_COMPONENTS);
+                ClusterUpgradeServiceValidationEvent event = new ClusterUpgradeServiceValidationEvent(payload.getResourceId(), lockComponents);
+                sendEvent(context, event.selector(), event);
+            }
+
+            @Override
+            protected Object getFailurePayload(ClusterUpgradeDiskSpaceValidationFinishedEvent payload, Optional<StackContext> flowContext, Exception ex) {
                 return new ClusterUpgradeValidationFinishedEvent(payload.getResourceId(), ex);
             }
 
@@ -142,14 +168,13 @@ public class ClusterUpgradeValidationActions {
                     cloudbreakEventService.fireCloudbreakEvent(resourceId, AVAILABLE.name(), ResourceEvent.CLUSTER_UPGRADE_VALIDATION_SKIPPED,
                             Collections.singletonList(exception.getMessage()));
                 }
-                ClusterUpgradeValidationEvent event = new ClusterUpgradeValidationEvent(FINALIZE_CLUSTER_UPGRADE_VALIDATION_EVENT.name(),
-                        payload.getResourceId(), payload.getImageId());
+                ClusterUpgradeValidationFinalizeEvent event = new ClusterUpgradeValidationFinalizeEvent(payload.getResourceId());
                 sendEvent(context, event);
             }
 
             @Override
             protected Object getFailurePayload(ClusterUpgradeValidationFinishedEvent payload, Optional<StackContext> flowContext, Exception ex) {
-                return null;
+                return new ClusterUpgradeValidationFinishedEvent(payload.getResourceId(), ex);
             }
 
         };
@@ -161,8 +186,9 @@ public class ClusterUpgradeValidationActions {
                 ClusterUpgradeValidationFailureEvent>(ClusterUpgradeValidationFailureEvent.class) {
 
             @Override
-            protected ClusterUpgradeContext createFlowContext(FlowParameters flowParameters, StateContext<ClusterUpgradeValidationState,
-                    ClusterUpgradeValidationStateSelectors> stateContext, ClusterUpgradeValidationFailureEvent payload) {
+            protected ClusterUpgradeContext createFlowContext(FlowParameters flowParameters,
+                    StateContext<ClusterUpgradeValidationState, ClusterUpgradeValidationStateSelectors> stateContext,
+                    ClusterUpgradeValidationFailureEvent payload) {
                 Flow flow = getFlow(flowParameters.getFlowId());
                 StackView stackView = stackService.getViewByIdWithoutAuth(payload.getResourceId());
                 MDCBuilder.buildMdcContext(stackView);

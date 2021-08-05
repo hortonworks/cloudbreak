@@ -1,7 +1,5 @@
 package com.sequenceiq.it.cloudbreak.util.gcp;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 
@@ -11,8 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
-import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.util.gcp.action.GcpClientActions;
 
 @Component
@@ -67,12 +65,18 @@ public class GcpUtil {
     }
 
     private void listSelectedObject(String baseLocation, boolean zeroContent) {
-        try {
-            URI baseLocationUri = new URI(baseLocation);
-            gcpClientActions.listBucketSelectedObject(baseLocationUri, zeroContent);
-        } catch (URISyntaxException e) {
-            LOGGER.error("Google GCS base location path: '{}' is not a valid URI!", baseLocation);
-            throw new TestFailException(String.format(" Google GCS base location path: '%s' is not a valid URI! ", baseLocation));
-        }
+        gcpClientActions.listBucketSelectedObject(baseLocation, zeroContent);
+    }
+
+    public String getFreeIpaLogsUrl(String clusterName, String crn, String baseLocation) {
+        return gcpClientActions.getLoggingUrl(baseLocation, "/cluster-logs/freeipa/" + clusterName + "_" + Crn.fromString(crn).getResource());
+    }
+
+    public String getDataLakeLogsUrl(String clusterName, String crn, String baseLocation) {
+        return gcpClientActions.getLoggingUrl(baseLocation, "/cluster-logs/datalake/" + clusterName + "_" + Crn.fromString(crn).getResource());
+    }
+
+    public String getDataHubLogsUrl(String clusterName, String crn, String baseLocation) {
+        return gcpClientActions.getLoggingUrl(baseLocation, "/cluster-logs/datahub/" + clusterName + "_" + Crn.fromString(crn).getResource());
     }
 }

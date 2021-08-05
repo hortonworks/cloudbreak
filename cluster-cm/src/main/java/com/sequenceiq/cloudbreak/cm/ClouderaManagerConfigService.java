@@ -13,15 +13,19 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.api.swagger.ClouderaManagerResourceApi;
+import com.cloudera.api.swagger.RoleConfigGroupsResourceApi;
 import com.cloudera.api.swagger.ServicesResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiConfig;
+import com.cloudera.api.swagger.model.ApiConfigList;
+import com.cloudera.api.swagger.model.ApiRoleConfigGroupList;
 import com.cloudera.api.swagger.model.ApiService;
 import com.cloudera.api.swagger.model.ApiServiceConfig;
 import com.cloudera.api.swagger.model.ApiServiceList;
 import com.cloudera.api.swagger.model.ApiVersionInfo;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
 
 @Service
@@ -107,9 +111,9 @@ public class ClouderaManagerConfigService {
         ServicesResourceApi servicesResourceApi = clouderaManagerApiFactory.getServicesResourceApi(client);
         LOGGER.info("Trying to modify {} {} to {}", serviceType, configName, newConfigValue);
         getServiceName(clusterName, serviceType, servicesResourceApi)
-            .ifPresentOrElse(
-                modifyServiceConfigValue(clusterName, servicesResourceApi, configName, newConfigValue),
-                () -> LOGGER.info("{} service name is missing, skip modifying the {} property.", serviceType, configName));
+                .ifPresentOrElse(
+                        modifyServiceConfigValue(clusterName, servicesResourceApi, configName, newConfigValue),
+                        () -> LOGGER.info("{} service name is missing, skip modifying the {} property.", serviceType, configName));
     }
 
     private Consumer<String> modifyServiceConfigValue(String clusterName, ServicesResourceApi servicesResourceApi, String configName,
@@ -131,12 +135,46 @@ public class ClouderaManagerConfigService {
             LOGGER.debug("Looking for service of name {} in cluster {}", serviceType, clusterName);
             ApiServiceList serviceList = servicesResourceApi.readServices(clusterName, DataView.SUMMARY.name());
             return serviceList.getItems().stream()
-                .filter(service -> serviceType.equals(service.getType()))
-                .map(ApiService::getName)
-                .findFirst();
+                    .filter(service -> serviceType.equals(service.getType()))
+                    .map(ApiService::getName)
+                    .findFirst();
         } catch (ApiException e) {
             LOGGER.debug(String.format("Failed to get %s service name from Cloudera Manager.", serviceType), e);
             return Optional.empty();
         }
+    }
+
+    public Optional<String> getRoleConfigValueByServiceType(ApiClient apiClient, String clusterName, String roleType, String serviceType, String configName) {
+        LOGGER.debug("Looking for configuration: {} for cluster {}, roleType {}, and serviceType {}", configName, clusterName, roleType, serviceType);
+        RoleConfigGroupsResourceApi roleConfigGroupsResourceApi = clouderaManagerApiFactory.getRoleConfigGroupsResourceApi(apiClient);
+        ServicesResourceApi servicesResourceApi = clouderaManagerApiFactory.getServicesResourceApi(apiClient);
+        try {
+            String serviceName = getServiceNameValue(clusterName, serviceType, servicesResourceApi);
+            String roleConfigGroupName = getRoleConfigGroupNameByTypeAndServiceName(roleType, clusterName, serviceName, roleConfigGroupsResourceApi);
+            ApiConfigList roleConfig = roleConfigGroupsResourceApi.readConfig(clusterName, roleConfigGroupName, serviceName, "full");
+            return roleConfig.getItems().stream()
+                    .filter(apiConfig -> configName.equals(apiConfig.getName()))
+                    .map(apiConfig -> Optional.ofNullable(apiConfig.getValue()).orElse(apiConfig.getDefault()))
+                    .findFirst();
+        } catch (ApiException | NotFoundException e) {
+            LOGGER.debug("Failed to get configuration: {} for cluster {}, roleType {}, and serviceType {}", configName, clusterName, roleType, serviceType, e);
+            return Optional.empty();
+        }
+    }
+
+    private String getServiceNameValue(String clusterName, String serviceType, ServicesResourceApi servicesResourceApi) {
+        return getServiceName(clusterName, serviceType, servicesResourceApi).orElseThrow(
+                () -> new NotFoundException(String.format("No service found with %s service type", serviceType)));
+    }
+
+    private String getRoleConfigGroupNameByTypeAndServiceName(String roleType, String clusterName, String serviceName,
+            RoleConfigGroupsResourceApi roleConfigGroupsResourceApi) throws ApiException {
+        ApiRoleConfigGroupList roleConfigGroupList = roleConfigGroupsResourceApi.readRoleConfigGroups(clusterName, serviceName);
+        return roleConfigGroupList.getItems()
+                .stream()
+                .filter(roleConfigGroup -> roleType.equals(roleConfigGroup.getRoleType()))
+                .findFirst()
+                .orElseThrow(() -> new NotFoundException(String.format("No role found with %s role type", roleType)))
+                .getName();
     }
 }

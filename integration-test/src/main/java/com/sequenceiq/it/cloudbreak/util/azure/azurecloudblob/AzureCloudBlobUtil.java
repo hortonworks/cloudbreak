@@ -54,4 +54,17 @@ public class AzureCloudBlobUtil {
         azureCloudBlobClientActions.listSelectedDirectory(baseLocation,
                 "cluster-logs/freeipa/" + clusterName + "_" + Crn.fromString(crn).getResource(), false);
     }
+
+    public String getFreeIpaLogsUrl(String clusterName, String crn, String baseLocation) {
+        return azureCloudBlobClientActions.getLoggingUrl(baseLocation, "/cluster-logs/freeipa/" + clusterName + "_" + Crn.fromString(crn).getResource());
+    }
+
+    public String getDataLakeLogsUrl(String clusterName, String crn, String baseLocation) {
+        return azureCloudBlobClientActions.getLoggingUrl(baseLocation, "/cluster-logs/datalake/" + clusterName + "_" + Crn.fromString(crn).getResource());
+    }
+
+    public String getDataHubLogsUrl(String clusterName, String crn, String baseLocation) {
+        return azureCloudBlobClientActions.getLoggingUrl(baseLocation, "/cluster-logs/datahub/" + clusterName + "_" + Crn.fromString(crn).getResource());
+    }
+
 }

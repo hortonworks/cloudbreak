@@ -11,6 +11,8 @@ public class PollingService<T> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PollingService.class);
 
+    private static final int DEFAULT_MAX_CONSECUTIVE_FAILURES = 5;
+
     /**
      * Executes a {@link StatusCheckerTask} until it signals success, or the
      * maximum attempts are reached. A {@link StatusCheckerTask} has no
@@ -77,12 +79,12 @@ public class PollingService<T> {
         return new ImmutablePair<>(PollingResult.EXIT, actual);
     }
 
-    public PollingResult pollWithAbsoluteTimeoutSingleFailure(StatusCheckerTask<T> statusCheckerTask, T t, int interval, long maximumWaitTimeInSeconds) {
-        return pollWithAbsoluteTimeout(statusCheckerTask, t, interval, maximumWaitTimeInSeconds, 1).getLeft();
+    public PollingResult pollWithAbsoluteTimeout(StatusCheckerTask<T> statusCheckerTask, T t, int interval, long maximumWaitTimeInSeconds) {
+        return pollWithAbsoluteTimeout(statusCheckerTask, t, interval, maximumWaitTimeInSeconds, DEFAULT_MAX_CONSECUTIVE_FAILURES).getLeft();
     }
 
-    public PollingResult pollWithAttemptSingleFailure(StatusCheckerTask<T> statusCheckerTask, T t, int interval, int maxAttempts) {
-        return pollWithTimeout(statusCheckerTask, t, interval, maxAttempts, 1).getLeft();
+    public PollingResult pollWithAttempt(StatusCheckerTask<T> statusCheckerTask, T t, int interval, int maxAttempts) {
+        return pollWithTimeout(statusCheckerTask, t, interval, maxAttempts, DEFAULT_MAX_CONSECUTIVE_FAILURES).getLeft();
     }
 
     private void sleep(long duration) {

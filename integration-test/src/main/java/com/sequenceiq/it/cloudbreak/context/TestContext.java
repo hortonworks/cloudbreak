@@ -74,7 +74,9 @@ public abstract class TestContext implements ApplicationContextAware {
 
     private ApplicationContext applicationContext;
 
-    private final Map<String, CloudbreakTestDto> resources = new LinkedHashMap<>();
+    private final Map<String, CloudbreakTestDto> resourceNames = new LinkedHashMap<>();
+
+    private final Map<String, CloudbreakTestDto> resourceCrns = new LinkedHashMap<>();
 
     private final Map<String, Map<Class<? extends MicroserviceClient>, MicroserviceClient>> clients = new HashMap<>();
 
@@ -149,8 +151,12 @@ public abstract class TestContext implements ApplicationContextAware {
         return Duration.of(pollingInterval, ChronoUnit.MILLIS);
     }
 
-    public Map<String, CloudbreakTestDto> getResources() {
-        return resources;
+    public Map<String, CloudbreakTestDto> getResourceNames() {
+        return resourceNames;
+    }
+
+    public Map<String, CloudbreakTestDto> getResourceCrns() {
+        return resourceCrns;
     }
 
     public Map<String, Map<Class<? extends MicroserviceClient>, MicroserviceClient>> getClients() {
@@ -370,7 +376,7 @@ public abstract class TestContext implements ApplicationContextAware {
 
         Log.then(LOGGER, assertion.getClass().getSimpleName() + " assertion on " + entity + " by " + who);
         try {
-            CloudbreakTestDto cloudbreakTestDto = resources.get(key);
+            CloudbreakTestDto cloudbreakTestDto = resourceNames.get(key);
             if (cloudbreakTestDto != null) {
                 return assertion.doAssertion(this, (T) cloudbreakTestDto, getMicroserviceClient(entity.getClass(), who.getAccessKey()));
             } else {
@@ -702,10 +708,10 @@ public abstract class TestContext implements ApplicationContextAware {
 
     public <O extends CloudbreakTestDto> O given(String key, Class<O> clss, CloudPlatform cloudPlatform) {
         checkShutdown();
-        O cloudbreakEntity = (O) resources.get(key);
+        O cloudbreakEntity = (O) resourceNames.get(key);
         if (cloudbreakEntity == null) {
             cloudbreakEntity = init(clss, cloudPlatform);
-            resources.put(key, cloudbreakEntity);
+            resourceNames.put(key, cloudbreakEntity);
             Log.given(LOGGER, cloudbreakEntity + " created");
         } else {
             Log.given(LOGGER, cloudbreakEntity + " retrieved");
@@ -726,10 +732,10 @@ public abstract class TestContext implements ApplicationContextAware {
     }
 
     public <T extends CloudbreakTestDto> T get(String key) {
-        if (!resources.containsKey(key) || resources.get(key) == null) {
+        if (!resourceNames.containsKey(key) || resourceNames.get(key) == null) {
             LOGGER.warn("Key: '{}' has been provided but it has no result in the Test Context's Resources map.", key);
         }
-        return (T) resources.get(key);
+        return (T) resourceNames.get(key);
     }
 
     public <T extends CloudbreakTestDto> T get(Class<T> clss) {
@@ -949,6 +955,14 @@ public abstract class TestContext implements ApplicationContextAware {
         if (runningParameter.isWaitForFlow()) {
             awaitForFlow(awaitEntity, emptyRunningParameter());
         }
+
+        try {
+            resourceCrns.put(awaitEntity.getCrn(), awaitEntity);
+            LOGGER.info("Resource Crn: '{}' by '{}' has been put to resource Crns map.", awaitEntity.getCrn(), awaitEntity.getName());
+        } catch (IllegalStateException | NullPointerException e) {
+            LOGGER.info("Resource Crn is not available for: {}", awaitEntity.getName());
+        }
+
         resourceAwait.await(awaitEntity, desiredStatuses, getTestContext(), runningParameter, pollingInterval, maxRetry);
         return entity;
     }
@@ -1068,7 +1082,7 @@ public abstract class TestContext implements ApplicationContextAware {
         validated = true;
         checkShutdown();
         if (!exceptionMap.isEmpty()) {
-            List<Clue> clues = resources.values().stream()
+            List<Clue> clues = resourceNames.values().stream()
                     .filter(Investigable.class::isInstance)
                     .peek(cloudbreakTestDto -> {
                         try {
@@ -1113,7 +1127,7 @@ public abstract class TestContext implements ApplicationContextAware {
 
     protected <T extends CloudbreakTestDto> T getEntityFromEntityClass(Class<T> entityClass, RunningParameter runningParameter) {
         String key = getKey(entityClass, runningParameter);
-        T entity = (T) resources.get(key);
+        T entity = (T) resourceNames.get(key);
         if (entity == null) {
             LOGGER.warn("Cannot found in the resources [{}], run with the default", entityClass.getSimpleName());
             entity = init(entityClass);
@@ -1122,7 +1136,7 @@ public abstract class TestContext implements ApplicationContextAware {
     }
 
     private <T> String getKeyForAwait(T entity, Class<? extends T> entityClass, RunningParameter runningParameter) {
-        Optional<Map.Entry<String, CloudbreakTestDto>> foundEntry = resources.entrySet().stream()
+        Optional<Map.Entry<String, CloudbreakTestDto>> foundEntry = resourceNames.entrySet().stream()
                 .filter(entry -> entry.getValue() == entity)
                 .findFirst();
         if (foundEntry.isPresent()) {
@@ -1163,7 +1177,7 @@ public abstract class TestContext implements ApplicationContextAware {
             LOGGER.info("Cleanup skipped beacuse cleanupOnFail is false");
             return;
         }
-        List<CloudbreakTestDto> testDtos = new ArrayList<>(getResources().values());
+        List<CloudbreakTestDto> testDtos = new ArrayList<>(getResourceNames().values());
         List<CloudbreakTestDto> orderedTestDtos = testDtos.stream().sorted(new CompareByOrder()).collect(Collectors.toList());
         for (CloudbreakTestDto testDto : orderedTestDtos) {
             try {
@@ -1186,6 +1200,6 @@ public abstract class TestContext implements ApplicationContextAware {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "{clients: " + clients + ", entities: " + resources + "}";
+        return getClass().getSimpleName() + "{clients: " + clients + ", entities: " + resourceNames + "}";
     }
 }

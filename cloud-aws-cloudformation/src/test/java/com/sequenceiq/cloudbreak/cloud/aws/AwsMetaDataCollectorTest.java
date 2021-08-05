@@ -117,6 +117,9 @@ public class AwsMetaDataCollectorTest {
     @Mock
     private LoadBalancerTypeConverter loadBalancerTypeConverter;
 
+    @Mock
+    private AwsLoadBalancerMetadataCollector awsLoadBalancerMetadataCollector;
+
     @InjectMocks
     private AwsMetadataCollector awsMetadataCollector;
 
@@ -427,7 +430,6 @@ public class AwsMetaDataCollectorTest {
     @Test
     public void testCollectLoadBalancers() {
         setupMethodsForLoadBalancer(true);
-
         AuthenticatedContext ac = authenticatedContext();
         List<CloudLoadBalancerMetadata> metadata = awsMetadataCollector.collectLoadBalancer(ac,
                 List.of(LoadBalancerType.PRIVATE, LoadBalancerType.PUBLIC), null);
@@ -451,7 +453,7 @@ public class AwsMetaDataCollectorTest {
     @Test
     public void testCollectLoadBalancerOnlyDefaultGateway() {
         setupMethodsForLoadBalancer(true);
-
+        when(awsLoadBalancerMetadataCollector.getParameters(any(), any(), any())).thenReturn(Map.of());
         AuthenticatedContext ac = authenticatedContext();
         List<CloudLoadBalancerMetadata> metadata = awsMetadataCollector.collectLoadBalancer(ac,
                 List.of(LoadBalancerType.PRIVATE), null);
@@ -469,7 +471,7 @@ public class AwsMetaDataCollectorTest {
     @Test
     public void testCollectLoadBalancerOnlyEndpointAccessGateway() {
         setupMethodsForLoadBalancer(true);
-
+        when(awsLoadBalancerMetadataCollector.getParameters(any(), any(), any())).thenReturn(Map.of());
         AuthenticatedContext ac = authenticatedContext();
         List<CloudLoadBalancerMetadata> metadata = awsMetadataCollector.collectLoadBalancer(ac,
                 List.of(LoadBalancerType.PUBLIC), null);
@@ -486,7 +488,7 @@ public class AwsMetaDataCollectorTest {
     @Test
     public void testCollectLoadBalancerMissingMetadata() {
         setupMethodsForLoadBalancer(false);
-
+        when(awsLoadBalancerMetadataCollector.getParameters(any(), any(), any())).thenReturn(Map.of());
         AuthenticatedContext ac = authenticatedContext();
         List<CloudLoadBalancerMetadata> metadata = awsMetadataCollector.collectLoadBalancer(ac,
                 List.of(LoadBalancerType.PRIVATE, LoadBalancerType.PUBLIC), null);
@@ -564,5 +566,4 @@ public class AwsMetaDataCollectorTest {
         assertThat(result).hasMessage("Serious problem");
         assertThat(result).hasCause(exception);
     }
-
 }

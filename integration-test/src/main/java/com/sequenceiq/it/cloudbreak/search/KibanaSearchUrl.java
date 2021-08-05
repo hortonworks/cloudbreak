@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Component;
 
@@ -33,9 +34,10 @@ public class KibanaSearchUrl implements SearchUrl {
         if (testStartDate == null || testStopDate == null) {
             throw new IllegalArgumentException("Dates must be filled");
         }
+
         this.searchables = searchables;
-        this.testStartDate = testStartDate;
-        this.testStopDate = testStopDate;
+        this.testStartDate = DateUtils.addHours(testStartDate, -1);
+        this.testStopDate = DateUtils.addHours(testStopDate, -1);
     }
 
     @Override
@@ -54,15 +56,15 @@ public class KibanaSearchUrl implements SearchUrl {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.S'Z'");
         String end = formatter.format(testStopDate);
         String start = formatter.format(testStartDate);
-        return String.format("(refreshInterval:(display:Off,pause:!f,value:0),time:(from:'%s',mode:absolute,to:'%s'))", start, end);
+        return String.format("(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'%s',to:'%s'))", start, end);
     }
 
     private String getAppState() {
-        return String.format("(columns:!('@message','@app'," + KEY + "),filters:!(%s('$state':(store:appState),"
-                        + "meta:(alias:!n,disabled:!f,index:'logstash-*',key:" + KEY + ",negate:!f,params:!(%s),"
+        return String.format("(columns:!('@message','@app'," + KEY + "),filters:!(('$state':(store:appState),"
+                        + "meta:(alias:!n,disabled:!f,index:'0ec45520-98e6-11eb-85ad-c5cb99d34f92',key:" + KEY + ",negate:!f,params:!(%s),"
                         + "type:phrases,value:'%s'),query:(bool:(minimum_should_match:1,should:!(%s"
-                        + "))))),index:'logstash-*',interval:auto,query:(match_all:()),sort:!('@timestamp',desc))",
-                getEnvironmentQuery(), getResourceList(), getResourceList(), getResourceQueries());
+                        + "))))),index:'0ec45520-98e6-11eb-85ad-c5cb99d34f92',interval:auto,query:(language:kuery,query:''),sort:!('@timestamp',desc))",
+                getResourceList(), getResourceList(), getResourceQueries());
 
     }
 
@@ -70,19 +72,6 @@ public class KibanaSearchUrl implements SearchUrl {
         List<String> list = searchables.stream().map(Searchable::getSearchId).collect(Collectors.toList());
 
         return String.join(",", list);
-    }
-
-    private String getEnvironmentQuery() {
-        String envQuery = "";
-        String env = kibanaProps.getApp();
-
-        if (env == null || !"".equals(env)) {
-            envQuery = String.format("('$state':(store:appState),meta:"
-                    + "(alias:!n,disabled:!f,index:'logstash-*',key:'@app',negate:!f,type:phrase,value:%s),"
-                    + "query:(match:('@app':(query:%s,type:phrase)))),", env, env);
-        }
-
-        return envQuery;
     }
 
     private String getResourceQueries() {

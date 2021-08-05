@@ -737,4 +737,8 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         restartStaleServices(clustersResourceApi);
     }
 
+    @Override
+    public Optional<String> getRoleConfigValueByServiceType(String clusterName,  String roleConfigGroup, String serviceType, String configName) {
+        return configService.getRoleConfigValueByServiceType(apiClient, clusterName, roleConfigGroup, serviceType, configName);
+    }
 }

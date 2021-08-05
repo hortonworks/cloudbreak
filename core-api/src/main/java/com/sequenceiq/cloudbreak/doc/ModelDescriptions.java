@@ -256,6 +256,19 @@ public class ModelDescriptions {
         public static final String EXTERNAL_DATABASE = "External database parameters for the stack.";
         public static final String ENDPOINT_GATEWAY_FLOWS = "A list of stack and the flow id for the add endpoint gateway flow";
         public static final String ENABLE_LOAD_BALANCER = "Enable load balancer.";
+        public static final String LOAD_BALANCER = "Any load balancers routing traffic both to and inside of the cluster.";
+        public static final String LOAD_BALANCER_FQDN = "The registered FQDN of the load balancer.";
+        public static final String LOAD_BALANCER_CLOUD_DNS = "The AWS generated DNS name for the load balancer.";
+        public static final String LOAD_BALANCER_IP = "The frontend ip address for the load balancer.";
+        public static final String LOAD_BALANCER_TARGETS = "The list of target instances the load balancer routes traffic to.";
+        public static final String LOAD_BALANCER_TYPE = "Whether the load balancer is internet-facing (public), or only accessible over private endpoints.";
+        public static final String LOAD_BALANCER_AWS = "The AWS resource id for the load balancer.";
+        public static final String TARGET_GROUP_PORT = "The port where the load balancer receives traffic and forward it to the associated targets.";
+        public static final String TARGET_GROUP_INSTANCES = "Ids for the target instances receiving traffic from the load balancer on the defined port.";
+        public static final String TARGET_GROUP_AWS = "The AWS listener and target group resource ids.";
+        public static final String AWS_LB_ARN = "The ARN of the AWS load balancer.";
+        public static final String AWS_LISTENER_ARN = "The ARN of the AWS listener for the specified port.";
+        public static final String AWS_TARGETGROUP_ARN = "The ARN of the AWS target group for the specified port.";
     }
 
     public static class ClusterModelDescription {

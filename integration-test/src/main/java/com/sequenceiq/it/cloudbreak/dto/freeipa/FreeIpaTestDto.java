@@ -15,6 +15,8 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.testng.util.Strings;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateV4SpotParameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.StackAuthenticationV4Request;
@@ -227,6 +229,11 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
         return template;
     }
 
+    public FreeIpaTestDto withNetwork() {
+        getRequest().setNetwork(getCloudProvider().networkRequest(this));
+        return this;
+    }
+
     private FreeIpaTestDto withNetwork(NetworkV4TestDto network) {
         NetworkV4Request request = network.getRequest();
         NetworkRequest networkRequest = new NetworkRequest();
@@ -275,6 +282,17 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
         ImageSettingsRequest imageSettingsRequest = new ImageSettingsRequest();
         imageSettingsRequest.setCatalog(catalog);
         getRequest().setImage(imageSettingsRequest);
+        return this;
+    }
+
+    public FreeIpaTestDto withCatalog(String imageCatalog, String imageUuid) {
+        if (!Strings.isNullOrEmpty(imageCatalog) && !Strings.isNullOrEmpty(imageUuid)) {
+            ImageSettingsRequest imageSettingsRequest = new ImageSettingsRequest();
+            imageSettingsRequest.setCatalog(imageCatalog);
+            imageSettingsRequest.setId(imageUuid);
+
+            getRequest().setImage(imageSettingsRequest);
+        }
         return this;
     }
 

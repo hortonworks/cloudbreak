@@ -35,7 +35,6 @@ public class TelemetryTestDto extends AbstractCloudbreakTestDto<TelemetryRequest
 
     public TelemetryTestDto withLogging() {
         getRequest().setLogging(getCloudProvider().loggingRequest(this));
-
         return this;
     }
 

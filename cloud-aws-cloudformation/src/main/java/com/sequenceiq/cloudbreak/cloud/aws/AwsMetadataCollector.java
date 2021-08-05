@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPlatformResources;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.AwsLoadBalancer;
+import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.AwsLoadBalancerScheme;
 import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.LoadBalancerTypeConverter;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsLifeCycleMapper;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AuthenticatedContextView;
@@ -69,6 +70,9 @@ public class AwsMetadataCollector implements MetadataCollector {
 
     @Inject
     private AwsPlatformResources awsPlatformResources;
+
+    @Inject
+    private AwsLoadBalancerMetadataCollector awsLoadBalancerMetadataCollector;
 
     @Override
     public List<CloudVmMetaDataStatus> collect(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms,
@@ -309,15 +313,20 @@ public class AwsMetadataCollector implements MetadataCollector {
 
         List<CloudLoadBalancerMetadata> cloudLoadBalancerMetadata = new ArrayList<>();
         for (LoadBalancerType type : loadBalancerTypes) {
-            String loadBalancerName = AwsLoadBalancer.getLoadBalancerName(loadBalancerTypeConverter.convert(type));
+            AwsLoadBalancerScheme scheme = loadBalancerTypeConverter.convert(type);
+            String loadBalancerName = AwsLoadBalancer.getLoadBalancerName(scheme);
             LOGGER.debug("Attempting to collect metadata for load balancer {}, type {}", loadBalancerName, type);
             try {
                 LoadBalancer loadBalancer = cloudFormationStackUtil.getLoadBalancerByLogicalId(ac, loadBalancerName);
+                LOGGER.debug("Parsing all listener and target group information for load balancer {}", loadBalancerName);
+                Map<String, Object> parameters = awsLoadBalancerMetadataCollector.getParameters(ac, loadBalancer, scheme);
+
                 CloudLoadBalancerMetadata loadBalancerMetadata = new CloudLoadBalancerMetadata.Builder()
                     .withType(type)
                     .withCloudDns(loadBalancer.getDNSName())
                     .withHostedZoneId(loadBalancer.getCanonicalHostedZoneId())
                     .withName(loadBalancerName)
+                    .withParameters(parameters)
                     .build();
                 cloudLoadBalancerMetadata.add(loadBalancerMetadata);
                 LOGGER.debug("Saved metadata for load balancer {}: DNS {}, zone id {}", loadBalancerName, loadBalancer.getDNSName(),

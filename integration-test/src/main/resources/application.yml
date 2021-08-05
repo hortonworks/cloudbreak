@@ -280,7 +280,7 @@ integrationtest:
   defaultBlueprintName:
 
   kibana:
-    url: https://logs-dev.sre.cloudera.com/app/kibana#/discover
+    url: https://logs-dev-7x.sre.cloudera.com/_plugin/kibana/app/discover#/
     cluster:
     app:
 

@@ -2,14 +2,14 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.FAILED_CLUSTER_UPGRADE_VALIDATION_EVENT;
 
-import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 
-public class ClusterUpgradeValidationFailureEvent extends ClusterUpgradeValidationEvent implements Selectable {
+public class ClusterUpgradeValidationFailureEvent extends StackEvent {
 
     private final Exception exception;
 
     public ClusterUpgradeValidationFailureEvent(Long resourceId, Exception exception) {
-        super(FAILED_CLUSTER_UPGRADE_VALIDATION_EVENT.event(), resourceId, null);
+        super(FAILED_CLUSTER_UPGRADE_VALIDATION_EVENT.event(), resourceId);
         this.exception = exception;
     }
 

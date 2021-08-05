@@ -4,6 +4,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.it.cloudbreak.util.aws.amazons3.action.S3ClientActions;
 
 @Component
@@ -28,6 +29,19 @@ public class AmazonS3Util {
     }
 
     public void listDataLakeObject(String baseLocation) {
-        s3ClientActions.listBucketSelectedObject(baseLocation, "cluster-logs/datalake", false);
+        s3ClientActions.listBucketSelectedObject(baseLocation, "cluster-logs/datalake",
+                false);
+    }
+
+    public String getFreeIpaLogsUrl(String clusterName, String crn, String baseLocation) {
+        return s3ClientActions.getLoggingUrl(baseLocation, "/cluster-logs/freeipa/" + clusterName + "_" + Crn.fromString(crn).getResource());
+    }
+
+    public String getDataLakeLogsUrl(String clusterName, String crn, String baseLocation) {
+        return s3ClientActions.getLoggingUrl(baseLocation, "/cluster-logs/datalake/" + clusterName + "_" + Crn.fromString(crn).getResource());
+    }
+
+    public String getDataHubLogsUrl(String clusterName, String crn, String baseLocation) {
+        return s3ClientActions.getLoggingUrl(baseLocation, "/cluster-logs/datahub/" + clusterName + "_" + Crn.fromString(crn).getResource());
     }
 }

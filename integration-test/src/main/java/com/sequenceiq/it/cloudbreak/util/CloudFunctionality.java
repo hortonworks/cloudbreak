@@ -6,6 +6,8 @@ import java.util.Map;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
+
 public interface CloudFunctionality {
 
     int MAX_DELAY = 5000;
@@ -84,5 +86,29 @@ public interface CloudFunctionality {
 
     default String transformTagKeyOrValue(String originalValue) {
         return originalValue;
+    }
+
+    @Retryable(
+            maxAttempts = ATTEMPTS,
+            backoff = @Backoff(delay = DELAY, multiplier = MULTIPLIER, maxDelay = MAX_DELAY)
+    )
+    default String getFreeIpaLogsUrl(String clusterName, String crn, String baseLocation) {
+        return "/cluster-logs/freeipa/" + clusterName + "_" + Crn.fromString(crn).getResource();
+    }
+
+    @Retryable(
+            maxAttempts = ATTEMPTS,
+            backoff = @Backoff(delay = DELAY, multiplier = MULTIPLIER, maxDelay = MAX_DELAY)
+    )
+    default String getDataLakeLogsUrl(String clusterName, String crn, String baseLocation) {
+        return "/cluster-logs/datalake/" + clusterName + "_" + Crn.fromString(crn).getResource();
+    }
+
+    @Retryable(
+            maxAttempts = ATTEMPTS,
+            backoff = @Backoff(delay = DELAY, multiplier = MULTIPLIER, maxDelay = MAX_DELAY)
+    )
+    default String getDataHubLogsUrl(String clusterName, String crn, String baseLocation) {
+        return "/cluster-logs/datahub/" + clusterName + "_" + Crn.fromString(crn).getResource();
     }
 }

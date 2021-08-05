@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.chain;
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeEvent.CLUSTER_UPGRADE_INIT_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_VALIDATION_INIT_EVENT;
+
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
@@ -19,7 +19,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update.SaltUpdateEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterUpgradeTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DistroXUpgradeTriggerEvent;
@@ -69,8 +69,9 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
 
     private void addUpgradeValidationToChain(DistroXUpgradeTriggerEvent event, Queue<Selectable> flowEventChain) {
         if (upgradeValidationEnabled) {
-            flowEventChain.add(new ClusterUpgradeValidationEvent(START_CLUSTER_UPGRADE_VALIDATION_INIT_EVENT.event(), event.getResourceId(), event.accepted(),
-                    event.getImageChangeDto().getImageId()));
+            flowEventChain
+                    .add(new ClusterUpgradeValidationTriggerEvent(event.getResourceId(), event.accepted(), event.getImageChangeDto().getImageId(),
+                            event.isLockComponents()));
         }
     }
 

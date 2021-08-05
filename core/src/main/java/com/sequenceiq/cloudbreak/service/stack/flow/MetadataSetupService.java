@@ -38,11 +38,14 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
+import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.TargetGroup;
+import com.sequenceiq.cloudbreak.service.LoadBalancerConfigConverter;
 import com.sequenceiq.cloudbreak.service.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
+import com.sequenceiq.cloudbreak.service.stack.TargetGroupPersistenceService;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 
@@ -66,6 +69,9 @@ public class MetadataSetupService {
     private LoadBalancerPersistenceService loadBalancerPersistenceService;
 
     @Inject
+    private TargetGroupPersistenceService targetGroupPersistenceService;
+
+    @Inject
     private LoadBalancerConfigService loadBalancerConfigService;
 
     @Inject
@@ -73,6 +79,9 @@ public class MetadataSetupService {
 
     @Inject
     private TransactionService transactionService;
+
+    @Inject
+    private LoadBalancerConfigConverter loadBalancerConfigConverter;
 
     public void cleanupRequestedInstances(Long stackId) {
         try {
@@ -320,8 +329,17 @@ public class MetadataSetupService {
                 String endpoint = loadBalancerConfigService.generateLoadBalancerEndpoint(stack);
                 LOGGER.info("Saving load balancer endpoint as: {}", endpoint);
                 loadBalancerEntry.setEndpoint(endpoint);
+                loadBalancerEntry.setProviderConfig(loadBalancerConfigConverter.convertLoadBalancer(stack.getCloudPlatform(),
+                    cloudLoadBalancerMetadata));
 
                 loadBalancerPersistenceService.save(loadBalancerEntry);
+
+                Set<TargetGroup> targetGroups = targetGroupPersistenceService.findByLoadBalancerId(loadBalancerEntry.getId());
+                for (TargetGroup targetGroup : targetGroups) {
+                    targetGroup.setProviderConfig(loadBalancerConfigConverter.convertTargetGroup(stack.getCloudPlatform(),
+                        cloudLoadBalancerMetadata, targetGroup));
+                    targetGroupPersistenceService.save(targetGroup);
+                }
             }
         } catch (Exception ex) {
             throw new CloudbreakServiceException("Load balancer metadata collection failed", ex);

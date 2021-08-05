@@ -24,6 +24,8 @@ import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.Instan
 import com.sequenceiq.distrox.api.v1.distrox.model.network.mock.MockNetworkV1Parameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.mock.MockParameters;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkMockParams;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.MockNetworkParameters;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.NetworkRequest;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.ResourcePropertyProvider;
 import com.sequenceiq.it.cloudbreak.cloud.v4.AbstractCloudProvider;
@@ -46,6 +48,7 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXNetworkTest
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXRootVolumeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXVolumeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
@@ -305,6 +308,17 @@ public class MockCloudProvider extends AbstractCloudProvider {
     @Override
     public DistroXRootVolumeTestDto distroXRootVolume(DistroXRootVolumeTestDto distroXRootVolume) {
         return distroXRootVolume.withSize(100);
+    }
+
+    @Override
+    public NetworkRequest networkRequest(FreeIpaTestDto dto) {
+        NetworkRequest networkRequest = new NetworkRequest();
+        MockNetworkParameters networkParameters = new MockNetworkParameters();
+        networkParameters.setSubnetId(getSubnetId());
+        networkParameters.setVpcId(getVpcId());
+        networkParameters.setInternetGatewayId(getInternetGatewayId());
+        networkRequest.setMock(networkParameters);
+        return networkRequest;
     }
 
     @Override

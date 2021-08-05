@@ -14,9 +14,11 @@ import org.springframework.stereotype.Service;
 
 import com.dyngr.Polling;
 import com.dyngr.core.AttemptMaker;
+import com.dyngr.exception.PollerStoppedException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.environment.environment.poller.DatahubPollerProvider;
+import com.sequenceiq.environment.exception.DatahubOperationFailedException;
 
 @Service
 public class DatahubPollerService {
@@ -59,10 +61,15 @@ public class DatahubPollerService {
             BiConsumer<String, List<String>> datahubOperation, AttemptMaker<Void> attemptMaker) {
         if (CollectionUtils.isNotEmpty(datahubCrns)) {
             datahubOperation.accept(envCrn, datahubCrns);
-            Polling.stopAfterAttempt(attemptCount)
-                    .stopIfException(true)
-                    .waitPeriodly(sleepTime, TimeUnit.SECONDS)
-                    .run(attemptMaker);
+            try {
+                Polling.stopAfterAttempt(attemptCount)
+                        .stopIfException(true)
+                        .waitPeriodly(sleepTime, TimeUnit.SECONDS)
+                        .run(attemptMaker);
+            } catch (PollerStoppedException e) {
+                LOGGER.info("Datahub operation timed out");
+                throw new DatahubOperationFailedException("Datahub operation timed out");
+            }
         }
     }
 

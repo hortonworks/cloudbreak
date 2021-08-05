@@ -191,7 +191,7 @@ public class ClusterBootstrapper {
 
     private void checkIfAllNodesAvailable(Stack stack, Set<Node> nodes, InstanceMetaData primaryGateway) throws CloudbreakOrchestratorFailedException {
         GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, primaryGateway, isKnoxEnabled(stack));
-        PollingResult allNodesAvailabilityPolling = hostClusterAvailabilityPollingService.pollWithAbsoluteTimeoutSingleFailure(
+        PollingResult allNodesAvailabilityPolling = hostClusterAvailabilityPollingService.pollWithAbsoluteTimeout(
                 hostClusterAvailabilityCheckerTask, new HostOrchestratorClusterContext(stack, hostOrchestrator, gatewayConfig, nodes),
                 POLL_INTERVAL, MAX_POLLING_ATTEMPTS);
         validatePollingResultForCancellation(allNodesAvailabilityPolling, "Polling of all nodes availability was cancelled.");
@@ -283,7 +283,7 @@ public class ClusterBootstrapper {
             GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, gateway, isKnoxEnabled(stack));
             LOGGER.info("Add gateway config: {}", gatewayConfig);
             allGatewayConfig.add(gatewayConfig);
-            PollingResult bootstrapApiPolling = hostBootstrapApiPollingService.pollWithAbsoluteTimeoutSingleFailure(
+            PollingResult bootstrapApiPolling = hostBootstrapApiPollingService.pollWithAbsoluteTimeout(
                     hostBootstrapApiCheckerTask, new HostBootstrapApiContext(stack, gatewayConfig, hostOrchestrator), POLL_INTERVAL, MAX_POLLING_ATTEMPTS);
             validatePollingResultForCancellation(bootstrapApiPolling, "Polling of bootstrap API was cancelled.");
         }
@@ -394,7 +394,7 @@ public class ClusterBootstrapper {
         Boolean enableKnox = cluster.getGateway() != null;
         for (InstanceMetaData gateway : stack.getNotTerminatedGatewayInstanceMetadata()) {
             GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, gateway, enableKnox);
-            PollingResult bootstrapApiPolling = hostBootstrapApiPollingService.pollWithAbsoluteTimeoutSingleFailure(
+            PollingResult bootstrapApiPolling = hostBootstrapApiPollingService.pollWithAbsoluteTimeout(
                     hostBootstrapApiCheckerTask, new HostBootstrapApiContext(stack, gatewayConfig, hostOrchestrator), POLL_INTERVAL, MAX_POLLING_ATTEMPTS);
             validatePollingResultForCancellation(bootstrapApiPolling, "Polling of bootstrap API was cancelled.");
         }
@@ -414,7 +414,7 @@ public class ClusterBootstrapper {
         InstanceMetaData primaryGateway = stack.getPrimaryGatewayInstance();
         GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, primaryGateway, enableKnox);
         PollingResult allNodesAvailabilityPolling = hostClusterAvailabilityPollingService
-                .pollWithAbsoluteTimeoutSingleFailure(hostClusterAvailabilityCheckerTask,
+                .pollWithAbsoluteTimeout(hostClusterAvailabilityCheckerTask,
                         new HostOrchestratorClusterContext(stack, hostOrchestrator, gatewayConfig, nodes), POLL_INTERVAL, MAX_POLLING_ATTEMPTS);
         validatePollingResultForCancellation(allNodesAvailabilityPolling, "Polling of new nodes availability was cancelled.");
         if (TIMEOUT.equals(allNodesAvailabilityPolling)) {
