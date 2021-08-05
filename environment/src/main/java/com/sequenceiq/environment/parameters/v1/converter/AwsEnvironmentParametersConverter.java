@@ -61,7 +61,7 @@ public class AwsEnvironmentParametersConverter extends BaseEnvironmentParameters
                 .withFreeIpaSpotMaxPrice(awsParameters.getFreeIpaSpotMaxPrice())
                 .withAwsDiskEncryptionParameters(AwsDiskEncryptionParametersDto.builder()
                         .withEncryptionKeyArn(awsParameters.getEncryptionKeyArn())
-                .build())
+                        .build())
                 .build());
     }
 }

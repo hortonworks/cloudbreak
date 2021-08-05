@@ -9,7 +9,7 @@ public class AwsParametersDtoTest {
         AwsParametersDto dummyAwsParametersDto = AwsParametersDto.builder()
                 .withAwsDiskEncryptionParameters(AwsDiskEncryptionParametersDto.builder()
                         .withEncryptionKeyArn("dummy-key-arn")
-                .build())
+                        .build())
                 .build();
         Assertions.assertNotNull(dummyAwsParametersDto.getAwsDiskEncryptionParametersDto());
     }
