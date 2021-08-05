@@ -82,6 +82,7 @@ import com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleEvent;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleFailureEvent;
+import com.sequenceiq.freeipa.flow.freeipa.upscale.event.ValidateInstancesHealthEvent;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.failure.BootstrapMachinesFailedToUpscaleFailureEventConverter;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.failure.ClusterProxyUpdateRegistrationFailedToUpscaleFailureEventConverter;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.failure.CollectMetadataResultToUpscaleFailureEventConverter;
@@ -494,6 +495,16 @@ public class FreeIpaUpscaleActions {
                     }
                 }
                 sendEvent(context, UPSCALE_UPDATE_METADATA_FINISHED_EVENT.selector(), new StackEvent(stack.getId()));
+            }
+        };
+    }
+
+    @Bean(name = "UPSCALE_VALIDATE_NEW_INSTANCES_HEALTH_STATE")
+    public Action<?, ?> validateNewInstanceAction() {
+        return new AbstractUpscaleAction<>(StackEvent.class) {
+            @Override
+            protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
+                sendEvent(context, new ValidateInstancesHealthEvent(payload.getResourceId(), getInstanceIds(variables)));
             }
         };
     }

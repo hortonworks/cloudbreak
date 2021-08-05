@@ -17,7 +17,7 @@ public class UpscaleFailureEvent extends StackEvent {
 
     public UpscaleFailureEvent(Long stackId, String failedPhase, Set<String> success, Map<String, String> failureDetails,
             Exception exception) {
-        super(null, stackId);
+        super(stackId);
         this.exception = exception;
         this.failedPhase = failedPhase;
         this.success = success;
@@ -40,4 +40,13 @@ public class UpscaleFailureEvent extends StackEvent {
         return failureDetails;
     }
 
+    @Override
+    public String toString() {
+        return "UpscaleFailureEvent{" +
+                "exception=" + exception +
+                ", failedPhase='" + failedPhase + '\'' +
+                ", success=" + success +
+                ", failureDetails=" + failureDetails +
+                "} " + super.toString();
+    }
 }

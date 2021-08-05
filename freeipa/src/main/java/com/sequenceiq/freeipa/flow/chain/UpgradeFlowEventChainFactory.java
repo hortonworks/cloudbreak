@@ -3,12 +3,12 @@ package com.sequenceiq.freeipa.flow.chain;
 import static com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEvents.IMAGE_CHANGE_EVENT;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
@@ -50,12 +50,12 @@ public class UpgradeFlowEventChainFactory implements FlowEventChainFactory<Upgra
     private void addScaleEventsAndChangePgw(UpgradeEvent event, Queue<Selectable> flowEventChain, int instanceCountForUpscale, int instanceCountForDownscale) {
         flowEventChain.add(new UpscaleEvent(UpscaleFlowEvent.UPSCALE_EVENT.event(),
                 event.getResourceId(), instanceCountForUpscale, Boolean.FALSE, true, false, event.getOperationId()));
-        List<String> oldInstances = new ArrayList<>(event.getInstanceIds());
+        ArrayList<String> oldInstances = new ArrayList<>(event.getInstanceIds());
         oldInstances.add(event.getPrimareGwInstanceId());
         flowEventChain.add(new ChangePrimaryGatewayEvent(ChangePrimaryGatewayFlowEvent.CHANGE_PRIMARY_GATEWAY_EVENT.event(), event.getResourceId(),
                 oldInstances, Boolean.FALSE, event.getOperationId()));
-        flowEventChain.add(new DownscaleEvent(DownscaleFlowEvent.DOWNSCALE_EVENT.event(),
-                event.getResourceId(), List.of(event.getPrimareGwInstanceId()), instanceCountForDownscale, false, true, false, event.getOperationId()));
+        flowEventChain.add(new DownscaleEvent(DownscaleFlowEvent.DOWNSCALE_EVENT.event(), event.getResourceId(),
+                Lists.newArrayList(event.getPrimareGwInstanceId()), instanceCountForDownscale, false, true, false, event.getOperationId()));
     }
 
     private void addScaleEventsForNonPgwInstances(UpgradeEvent event, Queue<Selectable> flowEventChain, int instanceCountForUpscale,
@@ -64,7 +64,7 @@ public class UpgradeFlowEventChainFactory implements FlowEventChainFactory<Upgra
             flowEventChain.add(new UpscaleEvent(UpscaleFlowEvent.UPSCALE_EVENT.event(),
                     event.getResourceId(), instanceCountForUpscale, Boolean.FALSE, true, false, event.getOperationId()));
             flowEventChain.add(new DownscaleEvent(DownscaleFlowEvent.DOWNSCALE_EVENT.event(),
-                    event.getResourceId(), List.of(instanceId), instanceCountForDownscale, false, true, false, event.getOperationId()));
+                    event.getResourceId(), Lists.newArrayList(instanceId), instanceCountForDownscale, false, true, false, event.getOperationId()));
         }
     }
 

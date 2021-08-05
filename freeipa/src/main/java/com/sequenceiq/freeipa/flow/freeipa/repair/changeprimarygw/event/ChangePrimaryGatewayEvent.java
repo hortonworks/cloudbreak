@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.event;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
@@ -12,16 +13,16 @@ public class ChangePrimaryGatewayEvent extends StackEvent {
 
     private final Boolean finalChain;
 
-    private final List<String> repairInstanceIds;
+    private final ArrayList<String> repairInstanceIds;
 
-    public ChangePrimaryGatewayEvent(String selector, Long stackId, List<String> repairInstanceIds, Boolean finalChain, String operationId) {
+    public ChangePrimaryGatewayEvent(String selector, Long stackId, ArrayList<String> repairInstanceIds, Boolean finalChain, String operationId) {
         super(selector, stackId);
         this.repairInstanceIds = repairInstanceIds;
         this.finalChain = finalChain;
         this.operationId = operationId;
     }
 
-    public ChangePrimaryGatewayEvent(String selector, Long stackId, List<String> repairInstanceIds, Boolean finalChain, String operationId,
+    public ChangePrimaryGatewayEvent(String selector, Long stackId, ArrayList<String> repairInstanceIds, Boolean finalChain, String operationId,
             Promise<AcceptResult> accepted) {
         super(selector, stackId, accepted);
         this.repairInstanceIds = repairInstanceIds;

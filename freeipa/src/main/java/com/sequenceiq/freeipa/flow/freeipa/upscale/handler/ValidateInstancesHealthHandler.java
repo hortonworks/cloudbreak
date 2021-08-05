@@ -1,0 +1,127 @@
+package com.sequenceiq.freeipa.flow.freeipa.upscale.handler;
+
+import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_VALIDATE_NEW_INSTANCES_HEALTH_FINISHED_EVENT;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import com.google.common.base.Joiner;
+import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.flow.event.EventSelectorUtil;
+import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
+import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.NodeHealthDetails;
+import com.sequenceiq.freeipa.client.FreeIpaClientException;
+import com.sequenceiq.freeipa.entity.InstanceMetaData;
+import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleFailureEvent;
+import com.sequenceiq.freeipa.flow.freeipa.upscale.event.ValidateInstancesHealthEvent;
+import com.sequenceiq.freeipa.flow.stack.StackEvent;
+import com.sequenceiq.freeipa.service.stack.FreeIpaInstanceHealthDetailsService;
+import com.sequenceiq.freeipa.service.stack.StackService;
+import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
+
+import reactor.bus.Event;
+
+@Component
+public class ValidateInstancesHealthHandler extends ExceptionCatcherEventHandler<ValidateInstancesHealthEvent> {
+
+    public static final String PHASE = "Instance health validation";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ValidateInstancesHealthHandler.class);
+
+    @Inject
+    private InstanceMetaDataService instanceMetaDataService;
+
+    @Inject
+    private FreeIpaInstanceHealthDetailsService healthService;
+
+    @Inject
+    private StackService stackService;
+
+    @Override
+    public String selector() {
+        return EventSelectorUtil.selector(ValidateInstancesHealthEvent.class);
+    }
+
+    @Override
+    protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<ValidateInstancesHealthEvent> event) {
+        LOGGER.error("Unexpected exception during the validation of FreeIPA instances' health", e);
+        return new UpscaleFailureEvent(resourceId, PHASE, Set.of(), Map.of(), e);
+    }
+
+    @Override
+    protected Selectable doAccept(HandlerEvent<ValidateInstancesHealthEvent> event) {
+        List<NodeHealthDetails> healthDetails = fetchInstancesHealth(event.getData());
+        List<NodeHealthDetails> notHealthyNodes = filterNotHealthyNodes(healthDetails);
+        if (notHealthyNodes.isEmpty()) {
+            LOGGER.info("Every checked instance seems to be healthy");
+            return new StackEvent(UPSCALE_VALIDATE_NEW_INSTANCES_HEALTH_FINISHED_EVENT.event(), event.getData().getResourceId());
+        } else {
+            return handleUnhealthyInstancesPresent(event, healthDetails, notHealthyNodes);
+        }
+    }
+
+    private UpscaleFailureEvent handleUnhealthyInstancesPresent(HandlerEvent<ValidateInstancesHealthEvent> event, List<NodeHealthDetails> healthDetails,
+            List<NodeHealthDetails> notHealthyNodes) {
+        LOGGER.warn("Non healthy instances found: {}", notHealthyNodes);
+        Set<String> healthyInstances = collectHealthyInstanceIds(healthDetails);
+        Map<String, String> failureDetails = constructFailureDetails(notHealthyNodes);
+        Exception exceptionForFailureEvent = new Exception("Unhealthy instances found: " + failureDetails.keySet());
+        return new UpscaleFailureEvent(event.getData().getResourceId(), PHASE, healthyInstances, failureDetails, exceptionForFailureEvent);
+    }
+
+    private Map<String, String> constructFailureDetails(List<NodeHealthDetails> notHealthyNodes) {
+        return notHealthyNodes.stream()
+                .collect(Collectors.toMap(NodeHealthDetails::getInstanceId, hd -> Joiner.on("; ").join(hd.getIssues())));
+    }
+
+    private Set<String> collectHealthyInstanceIds(List<NodeHealthDetails> healthDetails) {
+        return healthDetails.stream()
+                .filter(healthDetail -> FreeIpaInstanceHealthDetailsService.HEALTHY_INSTANCE_STATUS == healthDetail.getStatus())
+                .map(NodeHealthDetails::getInstanceId).collect(Collectors.toSet());
+    }
+
+    private List<NodeHealthDetails> filterNotHealthyNodes(List<NodeHealthDetails> healthDetails) {
+        return healthDetails.stream()
+                .filter(healthDetail -> FreeIpaInstanceHealthDetailsService.HEALTHY_INSTANCE_STATUS != healthDetail.getStatus())
+                .collect(Collectors.toList());
+    }
+
+    private List<NodeHealthDetails> fetchInstancesHealth(ValidateInstancesHealthEvent event) {
+        Stack stack = stackService.getStackById(event.getResourceId());
+        MDCBuilder.buildMdcContext(stack);
+        Set<InstanceMetaData> instanceMetaDatas = instanceMetaDataService.getByInstanceIds(event.getInstanceIds());
+        List<NodeHealthDetails> healthDetails = instanceMetaDatas.stream().map(im -> getInstanceHealthDetails(stack, im)).collect(Collectors.toList());
+        LOGGER.info("Fetched healthdetails for instances {} - {}", event.getInstanceIds(), healthDetails);
+        return healthDetails;
+    }
+
+    private NodeHealthDetails getInstanceHealthDetails(Stack stack, InstanceMetaData im) {
+        try {
+            return healthService.getInstanceHealthDetails(stack, im);
+        } catch (FreeIpaClientException e) {
+            return handleExceptionWhileFetchingHealth(im, e);
+        }
+    }
+
+    private NodeHealthDetails handleExceptionWhileFetchingHealth(InstanceMetaData im, FreeIpaClientException e) {
+        LOGGER.error("Couldn't get health information for {}", im, e);
+        NodeHealthDetails nodeHealthDetails = new NodeHealthDetails();
+        nodeHealthDetails.setName(im.getDiscoveryFQDN());
+        nodeHealthDetails.setInstanceId(im.getInstanceId());
+        nodeHealthDetails.setStatus(InstanceStatus.UNREACHABLE);
+        nodeHealthDetails.setIssues(List.of(e.getMessage()));
+        return nodeHealthDetails;
+    }
+}
