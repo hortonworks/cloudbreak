@@ -46,7 +46,8 @@ public class FreeIpaClientExceptionUtil {
             FreeIpaErrorCodes.SIZE_LIMIT_EXCEEDED,
             FreeIpaErrorCodes.ADMIN_LIMIT_EXCEEDED,
             FreeIpaErrorCodes.NON_FATAL_ERROR,
-            FreeIpaErrorCodes.GENERIC_ERROR
+            FreeIpaErrorCodes.GENERIC_ERROR,
+            FreeIpaErrorCodes.ACI_ERROR
     );
 
     private static final Set<FreeIpaErrorCodes> CLIENT_UNUSABLE_ERROR_CODES = Set.of(
