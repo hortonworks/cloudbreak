@@ -69,4 +69,14 @@ public class NodeHealthDetails {
     public void setInstanceId(String instanceId) {
         this.instanceId = instanceId;
     }
+
+    @Override
+    public String toString() {
+        return "NodeHealthDetails{" +
+                "issues=" + issues +
+                ", status=" + status +
+                ", name='" + name + '\'' +
+                ", instanceId='" + instanceId + '\'' +
+                '}';
+    }
 }

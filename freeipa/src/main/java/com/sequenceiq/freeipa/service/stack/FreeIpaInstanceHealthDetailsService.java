@@ -33,6 +33,8 @@ public class FreeIpaInstanceHealthDetailsService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaInstanceHealthDetailsService.class);
 
+    private static final InstanceStatus HEALTHY_INSTANCE_STATUS = InstanceStatus.CREATED;
+
     private static final String EXTERNAL_COMMAND_OUTPUT = "ExternalCommandOutput";
 
     private static final String STATUS_OK = "OK";
@@ -121,7 +123,7 @@ public class FreeIpaInstanceHealthDetailsService {
         nodeResponse.setName(instanceMetaData.getDiscoveryFQDN());
         nodeResponse.setInstanceId(instanceMetaData.getInstanceId());
         if (isHealthCheckPassing(rpcResponse)) {
-            nodeResponse.setStatus(InstanceStatus.CREATED);
+            nodeResponse.setStatus(HEALTHY_INSTANCE_STATUS);
         } else {
             nodeResponse.setStatus(InstanceStatus.UNHEALTHY);
             nodeResponse.setIssues(rpcResponse.getMessages().stream().map(RPCMessage::getMessage).collect(Collectors.toList()));

@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.service.upgrade;
 import static com.sequenceiq.freeipa.api.v1.operation.model.OperationState.RUNNING;
 import static java.util.function.Predicate.not;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -53,6 +54,7 @@ public class UpgradeService {
     @Inject
     private UpgradeValidationService validationService;
 
+    @SuppressWarnings("IllegalType")
     public FreeIpaUpgradeResponse upgradeFreeIpa(String accountId, FreeIpaUpgradeRequest request) {
         validationService.validateEntitlement(accountId);
         Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithLists(request.getEnvironmentCrn(), accountId);
@@ -60,15 +62,16 @@ public class UpgradeService {
         Set<InstanceMetaData> allInstances = stack.getNotDeletedInstanceMetaDataSet();
         validationService.validateStackForUpgrade(allInstances, stack);
         String pgwInstanceId = selectPrimaryGwInstanceId(allInstances);
-        Set<String> nonPgwInstanceIds = collectNonPrimaryGwInstanceIds(allInstances, pgwInstanceId);
+        HashSet<String> nonPgwInstanceIds = collectNonPrimaryGwInstanceIds(allInstances, pgwInstanceId);
         ImageSettingsRequest imageSettingsRequest = Optional.ofNullable(request.getImage()).orElseGet(ImageSettingsRequest::new);
         ImageInfoResponse selectedImage = imageService.selectImage(stack, imageSettingsRequest);
         ImageInfoResponse currentImage = imageService.currentImage(stack);
         return triggerUpgrade(request, stack, pgwInstanceId, nonPgwInstanceIds, imageSettingsRequest, selectedImage, currentImage);
     }
 
+    @SuppressWarnings("IllegalType")
     private FreeIpaUpgradeResponse triggerUpgrade(FreeIpaUpgradeRequest request, Stack stack, String pgwInstanceId,
-            Set<String> nonPgwInstanceIds, ImageSettingsRequest imageSettingsRequest, ImageInfoResponse selectedImage, ImageInfoResponse currentImage) {
+            HashSet<String> nonPgwInstanceIds, ImageSettingsRequest imageSettingsRequest, ImageInfoResponse selectedImage, ImageInfoResponse currentImage) {
         Operation operation = startUpgradeOperation(stack.getAccountId(), request);
         UpgradeEvent upgradeEvent = new UpgradeEvent(FlowChainTriggers.UPGRADE_TRIGGER_EVENT, stack.getId(), nonPgwInstanceIds, pgwInstanceId,
                 operation.getOperationId(), imageSettingsRequest, Objects.nonNull(stack.getBackup()));
@@ -86,11 +89,12 @@ public class UpgradeService {
         return operation;
     }
 
-    private Set<String> collectNonPrimaryGwInstanceIds(Set<InstanceMetaData> allInstances, String pgwInstanceId) {
-        Set<String> nonPgwInstanceIds = allInstances.stream()
+    @SuppressWarnings("IllegalType")
+    private HashSet<String> collectNonPrimaryGwInstanceIds(Set<InstanceMetaData> allInstances, String pgwInstanceId) {
+        HashSet<String> nonPgwInstanceIds = allInstances.stream()
                 .map(InstanceMetaData::getInstanceId)
                 .filter(not(pgwInstanceId::equals))
-                .collect(Collectors.toSet());
+                .collect(Collectors.toCollection(HashSet::new));
         LOGGER.debug("Non primary gateway instance IDs: {}", nonPgwInstanceIds);
         return nonPgwInstanceIds;
     }
