@@ -19,14 +19,13 @@ import com.google.api.services.compute.model.ForwardingRule;
 import com.google.api.services.compute.model.Operation;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
-import com.sequenceiq.cloudbreak.cloud.gcp.network.GcpNetworkResourceBuilder;
-import com.sequenceiq.cloudbreak.cloud.gcp.network.GcpSubnetResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpLabelUtil;
+import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
-import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.api.type.ResourceType;
 
 /**
@@ -44,10 +43,6 @@ public class GcpForwardingRuleResourceBuilder extends AbstractGcpLoadBalancerBui
 
     public static final String TCP = "TCP";
 
-    public static final String INTERNAL = "INTERNAL";
-
-    public static final String EXTERNAL = "EXTERNAL";
-
     private static final int ORDER = 4;
 
     private static final int MAX_LABEL_LENGTH = 63;
@@ -56,6 +51,9 @@ public class GcpForwardingRuleResourceBuilder extends AbstractGcpLoadBalancerBui
 
     @Inject
     private GcpLabelUtil gcpLabelUtil;
+
+    @Inject
+    private GcpStackUtil gcpStackUtil;
 
     @Override
     public List<CloudResource> create(GcpContext context, AuthenticatedContext auth, CloudLoadBalancer loadBalancer) {
@@ -78,8 +76,9 @@ public class GcpForwardingRuleResourceBuilder extends AbstractGcpLoadBalancerBui
             CloudLoadBalancer loadBalancer, CloudStack cloudStack) throws Exception {
         String projectId = context.getProjectId();
         String regionName = context.getLocation().getRegion().getRegionName();
+        Network network = cloudStack.getNetwork();
         List<CloudResource> results = new ArrayList<>();
-
+        GcpLoadBalancerScheme scheme = GcpLoadBalancerScheme.getScheme(loadBalancer);
 
         List<CloudResource> backendResources = filterResourcesByType(context.getLoadBalancerResources(loadBalancer.getType()), ResourceType.GCP_BACKEND_SERVICE);
         List<CloudResource> ipResources = filterResourcesByType(context.getLoadBalancerResources(loadBalancer.getType()), ResourceType.GCP_RESERVED_IP);
@@ -89,12 +88,10 @@ public class GcpForwardingRuleResourceBuilder extends AbstractGcpLoadBalancerBui
             ForwardingRule forwardingRule = new ForwardingRule().setIPProtocol(TCP)
                     .setName(buildableResource.getName())
                     .setPorts(List.of(String.valueOf(trafficPort)));
-            if (loadBalancer.getType().equals(LoadBalancerType.PRIVATE)) {
-                forwardingRule.setLoadBalancingScheme(INTERNAL)
-                        .setNetwork(context.getParameter(GcpNetworkResourceBuilder.NETWORK_NAME, String.class))
-                        .setSubnetwork(context.getParameter(GcpSubnetResourceBuilder.SUBNET_NAME, String.class));
-            } else {
-                forwardingRule.setLoadBalancingScheme(EXTERNAL);
+            forwardingRule.setLoadBalancingScheme(scheme.getGcpType());
+            if (scheme.equals(GcpLoadBalancerScheme.INTERNAL)) {
+                forwardingRule.setSubnetwork(gcpStackUtil.getNetworkUrl(projectId, gcpStackUtil.getCustomNetworkId(network)));
+                forwardingRule.setSubnetwork(gcpStackUtil.getSubnetUrl(projectId, regionName, gcpStackUtil.getSubnetId(network)));
             }
 
             Optional<String> backendName = backendResources.stream()

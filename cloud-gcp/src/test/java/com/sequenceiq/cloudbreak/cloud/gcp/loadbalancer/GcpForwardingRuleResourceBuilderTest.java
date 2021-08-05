@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpResourceNameService;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpLabelUtil;
+import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -82,6 +83,9 @@ public class GcpForwardingRuleResourceBuilderTest {
     @Mock
     private GcpLabelUtil gcpLabelUtil;
 
+    @Mock
+    private GcpStackUtil gcpStackUtil;
+
     private Image image;
 
     private CloudStack cloudStack;
@@ -108,7 +112,7 @@ public class GcpForwardingRuleResourceBuilderTest {
 
         List<CloudResource> cloudResources = underTest.create(gcpContext, authenticatedContext, cloudLoadBalancer);
 
-        Assertions.assertTrue(cloudResources.get(0).getName().startsWith("name-PUBLIC-80"));
+        Assertions.assertTrue(cloudResources.get(0).getName().startsWith("name-public-80"));
         Assertions.assertEquals(1, cloudResources.size());
         Assertions.assertEquals(8080, cloudResources.get(0).getParameter("hcport", Integer.class));
         Assertions.assertEquals(80, cloudResources.get(0).getParameter("trafficport", Integer.class));
@@ -159,6 +163,8 @@ public class GcpForwardingRuleResourceBuilderTest {
         when(operation.getName()).thenReturn("name");
         when(operation.getHttpErrorStatusCode()).thenReturn(null);
         when(cloudLoadBalancer.getType()).thenReturn(LoadBalancerType.PRIVATE);
+        when(gcpStackUtil.getCustomNetworkId(any())).thenReturn("default-network");
+        when(gcpStackUtil.getSubnetId(any())).thenReturn("default-subnet");
 
 
         List<CloudResource> cloudResources = underTest.build(gcpContext, authenticatedContext,

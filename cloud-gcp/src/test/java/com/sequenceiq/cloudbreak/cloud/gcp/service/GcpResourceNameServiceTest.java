@@ -104,7 +104,7 @@ public class GcpResourceNameServiceTest {
 
 
         Assert.assertNotNull("The generated name must not be null!", resourceName);
-        Assert.assertTrue("The resource name is not the expected one!", resourceName.startsWith("stack-PUBLIC-8080"));
+        Assert.assertTrue("The resource name is not the expected one!", resourceName.startsWith("stack-public-8080"));
         Assert.assertEquals("The timestamp must be appended", 4L, resourceName.split("-").length);
 
     }
@@ -156,7 +156,7 @@ public class GcpResourceNameServiceTest {
 
         // THEN
         Assert.assertNotNull("The generated name must not be null!", resourceName);
-        Assert.assertEquals("The timestamp must be appended", 3L, resourceName.split("-").length);
+        Assert.assertEquals("Should have both parts", 2L, resourceName.split("-").length);
         Assert.assertTrue("The resource name is not the expected one!", resourceName.startsWith("stack-group"));
     }
 }

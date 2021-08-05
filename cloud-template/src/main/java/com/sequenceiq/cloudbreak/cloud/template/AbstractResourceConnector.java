@@ -100,9 +100,6 @@ public abstract class AbstractResourceConnector implements ResourceConnector<Lis
         List<CloudResourceStatus> computeStatuses = computeResourceService.buildResourcesForLaunch(context, auth, stack, adjustmentType, threshold);
         cloudResourceStatuses.addAll(computeStatuses);
 
-        //loadBalancer
-        List<CloudResourceStatus> loadBalancerStatuses = loadBalancerResourceService.buildResources(context, auth, stack);
-        cloudResourceStatuses.addAll(loadBalancerStatuses);
         return cloudResourceStatuses;
     }
 

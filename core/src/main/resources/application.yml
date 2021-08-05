@@ -713,7 +713,7 @@ cb:
     readTimeoutMs: 30000
 
   loadBalancer:
-    supportedPlatforms: AWS,YARN,AZURE
+    supportedPlatforms: AWS,YARN,AZURE,GCP
 
   upgrade:
     failure.sync:

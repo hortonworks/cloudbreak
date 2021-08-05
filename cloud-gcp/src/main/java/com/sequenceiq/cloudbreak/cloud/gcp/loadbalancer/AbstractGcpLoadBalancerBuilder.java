@@ -3,6 +3,9 @@ package com.sequenceiq.cloudbreak.cloud.gcp.loadbalancer;
 import java.io.IOException;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.ComputeRequest;
 import com.google.api.services.compute.model.Operation;
@@ -27,6 +30,8 @@ public abstract class AbstractGcpLoadBalancerBuilder extends AbstractGcpResource
 
     static final String HCPORT = "hcport";
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractGcpLoadBalancerBuilder.class);
+
     @Override
     public List<CloudResourceStatus> checkResources(GcpContext context, AuthenticatedContext auth, List<CloudResource> resources) {
         return checkResources(resourceType(), context, auth, resources);
@@ -36,10 +41,13 @@ public abstract class AbstractGcpLoadBalancerBuilder extends AbstractGcpResource
         try {
             Operation operation = request.execute();
             if (operation.getHttpErrorStatusCode() != null) {
+                LOGGER.error("Bad status code {} from resource {}-{}, {}", operation.getHttpErrorStatusCode(),
+                        resourceType(), resource.getName(), operation.getHttpErrorMessage());
                 throw new GcpResourceException(operation.getHttpErrorMessage(), resourceType(), resource.getName());
             }
             return createOperationAwareCloudResource(resource, operation);
         } catch (GoogleJsonResponseException e) {
+            LOGGER.error("Bad Response from GCP for resource {}", resource.getName(), e);
             throw exceptionHandlerWithThrow(e, resource.getName(), resourceType());
         }
     }

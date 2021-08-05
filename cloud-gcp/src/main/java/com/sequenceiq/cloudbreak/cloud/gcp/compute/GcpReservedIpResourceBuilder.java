@@ -18,8 +18,7 @@ import com.google.api.services.compute.model.Operation;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
-import com.sequenceiq.cloudbreak.cloud.gcp.network.GcpNetworkResourceBuilder;
-import com.sequenceiq.cloudbreak.cloud.gcp.network.GcpSubnetResourceBuilder;
+import com.sequenceiq.cloudbreak.cloud.gcp.loadbalancer.GcpLoadBalancerScheme;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
@@ -30,12 +29,6 @@ import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
 public class GcpReservedIpResourceBuilder extends AbstractGcpComputeBuilder {
-
-    public static final String INTERNAL = "INTERNAL";
-
-    public static final String EXTERNAL = "EXTERNAL";
-
-    public static final String SHARED_LOADBALANCER_VIP = "SHARED_LOADBALANCER_VIP";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpReservedIpResourceBuilder.class);
 
@@ -54,25 +47,21 @@ public class GcpReservedIpResourceBuilder extends AbstractGcpComputeBuilder {
     @Override
     public List<CloudResource> build(GcpContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group,
             List<CloudResource> buildableResource, CloudStack cloudStack) throws Exception {
-        return buildReservedIp(context, buildableResource, cloudStack, EXTERNAL);
+        return buildReservedIp(context, buildableResource, cloudStack, GcpLoadBalancerScheme.EXTERNAL);
     }
 
     public List<CloudResource> buildReservedIp(GcpContext context, List<CloudResource> buildableResource,
-            CloudStack cloudStack, String type) throws Exception {
+            CloudStack cloudStack, GcpLoadBalancerScheme type) throws Exception {
         List<CloudResource> result = new ArrayList<>();
         for (CloudResource resource : buildableResource) {
             String projectId = context.getProjectId();
             String region = context.getLocation().getRegion().value();
+            LOGGER.info("reserving IP [project:{}, resource: {}]", projectId, resource.getName());
 
             Address address = new Address();
             address.setName(resource.getName());
             address.setDescription(description());
-            address.setAddressType(type);
-            if (INTERNAL.equals(type)) {
-                address.setPurpose(SHARED_LOADBALANCER_VIP)
-                        .setNetwork(context.getParameter(GcpNetworkResourceBuilder.NETWORK_NAME, String.class))
-                        .setSubnetwork(context.getParameter(GcpSubnetResourceBuilder.SUBNET_NAME, String.class));
-            }
+            address.setAddressType(type.getGcpType());
 
             Map<String, Object> customTags = new HashMap<>();
             customTags.putAll(cloudStack.getTags());
@@ -85,6 +74,7 @@ public class GcpReservedIpResourceBuilder extends AbstractGcpComputeBuilder {
                 }
                 result.add(createOperationAwareCloudResource(resource, operation));
             } catch (GoogleJsonResponseException e) {
+                LOGGER.error("failed to reserve IP [project: {}, resource: {}]", projectId, resource.getName(), e);
                 throw new GcpResourceException(checkException(e), resourceType(), resource.getName());
             }
         }

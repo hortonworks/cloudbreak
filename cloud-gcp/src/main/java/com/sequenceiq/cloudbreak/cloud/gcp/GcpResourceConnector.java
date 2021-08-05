@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.cloud.template.compute.ComputeResourceService;
 import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 import com.sequenceiq.cloudbreak.cloud.template.group.GroupResourceService;
 import com.sequenceiq.cloudbreak.cloud.template.init.ContextBuilders;
+import com.sequenceiq.cloudbreak.cloud.template.loadbalancer.LoadBalancerResourceService;
 import com.sequenceiq.cloudbreak.cloud.template.network.NetworkResourceService;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -47,6 +48,9 @@ public class GcpResourceConnector extends AbstractResourceConnector {
 
     @Inject
     private ComputeResourceService computeResourceService;
+
+    @Inject
+    private LoadBalancerResourceService loadBalancerResourceService;
 
     @Inject
     private ContextBuilders contextBuilders;
@@ -67,9 +71,15 @@ public class GcpResourceConnector extends AbstractResourceConnector {
     }
 
     @Override
-    public List<CloudResourceStatus> launchLoadBalancers(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier persistenceNotifier)
+    public List<CloudResourceStatus> launchLoadBalancers(AuthenticatedContext auth, CloudStack stack, PersistenceNotifier persistenceNotifier)
             throws Exception {
-        throw new UnsupportedOperationException("Load balancers are not supported for GCP.");
+
+        CloudContext cloudContext = auth.getCloudContext();
+        Platform platform = cloudContext.getPlatform();
+
+        ResourceBuilderContext context = contextBuilders.get(platform).contextInit(cloudContext, auth, stack.getNetwork(), List.of(), true);
+
+        return loadBalancerResourceService.buildResources(context, auth, stack);
     }
 
     @Override

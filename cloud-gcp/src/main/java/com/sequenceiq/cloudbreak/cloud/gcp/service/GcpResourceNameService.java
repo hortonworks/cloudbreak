@@ -157,7 +157,6 @@ public class GcpResourceNameService extends CloudbreakResourceNameService {
         name = normalize(stackName);
         name = adjustPartLength(name);
         name = appendPart(name, normalize(groupName));
-        name = appendHash(name, new Date());
         name = adjustBaseLength(name, maxResourceNameLength);
         return name;
     }
@@ -171,7 +170,7 @@ public class GcpResourceNameService extends CloudbreakResourceNameService {
 
         name = normalize(stackName);
         name = adjustPartLength(name);
-        name = appendPart(name, lbType);
+        name = appendPart(name, normalize(lbType));
         name = appendPart(name, port);
         name = appendHash(name, new Date());
         name = adjustBaseLength(name, maxResourceNameLength);
