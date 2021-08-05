@@ -42,11 +42,11 @@ import com.sequenceiq.it.cloudbreak.dto.ClouderaManagerProductTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ClouderaManagerTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.InstanceGroupTestDto;
+import com.sequenceiq.it.cloudbreak.dto.SecurityGroupTestDto;
 import com.sequenceiq.it.cloudbreak.dto.StackAuthenticationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.blueprint.BlueprintTestDto;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
-import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentSecurityAccessTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
@@ -125,11 +125,8 @@ public class AwsYcloudHybridCloudTest extends AbstractE2ETest {
         createDefaultCredential(testContext);
         //Use a pre-prepared security group what allows inbound connections from ycloud
         testContext
-                .given(EnvironmentSecurityAccessTestDto.class)
-                .withDefaultSecurityGroupId(hybridCloudSecurityGroupID)
-                .withSecurityGroupIdForKnox(hybridCloudSecurityGroupID)
-                .given(EnvironmentTestDto.class)
-                .withSecurityAccess();
+                .given(SecurityGroupTestDto.class)
+                .withSecurityGroupIds(hybridCloudSecurityGroupID);
         createEnvironmentWithNetworkAndFreeIpa(testContext);
 
         testContext
