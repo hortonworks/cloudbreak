@@ -149,6 +149,12 @@
       "displayName": "Las Vegas, Nevada",
       "latitude": "36.11",
       "longitude": "-115.17"
+    },
+    {
+      "name": "asia-southeast2",
+      "displayName": "Jakarta, Indonesia",
+      "latitude": "-6.12",
+      "longitude": "106.77"
     }
   ]
 }
