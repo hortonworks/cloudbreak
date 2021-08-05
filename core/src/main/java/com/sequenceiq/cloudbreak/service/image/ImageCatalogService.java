@@ -177,9 +177,9 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
             imageCatalogs.removeIf(imageCatalog -> !StringUtils.isEmpty(imageCatalog.getImageCatalogUrl()));
         } else {
             imageCatalogs.add(getCloudbreakDefaultImageCatalog());
-        }
-        if (legacyCatalogEnabled) {
-            imageCatalogs.add(getCloudbreakLegacyDefaultImageCatalog());
+            if (legacyCatalogEnabled) {
+                imageCatalogs.add(getCloudbreakLegacyDefaultImageCatalog());
+            }
         }
         return imageCatalogs;
     }
