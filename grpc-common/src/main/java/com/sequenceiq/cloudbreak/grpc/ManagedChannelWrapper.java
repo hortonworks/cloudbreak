@@ -24,7 +24,7 @@ public class ManagedChannelWrapper implements AutoCloseable {
      * @param channel the channel
      */
     public ManagedChannelWrapper(ManagedChannel channel) {
-        this.channel = checkNotNull(channel);
+        this.channel = checkNotNull(channel, "channel should not be null.");
     }
 
     /**

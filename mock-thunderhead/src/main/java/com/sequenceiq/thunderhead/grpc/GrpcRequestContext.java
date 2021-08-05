@@ -22,7 +22,7 @@ public class GrpcRequestContext {
 
     @JsonCreator
     public GrpcRequestContext(@JsonProperty("requestId") String requestId) {
-        this.requestId = checkNotNull(requestId);
+        this.requestId = checkNotNull(requestId, "requestId should not be null.");
     }
 
     @JsonProperty("requestId")

@@ -61,8 +61,8 @@ public class MinaSshdManagementClient {
      * @throws CcmException if an exception occurs
      */
     public MinaSshdService acquireMinaSshdService(String requestId, String accountId) throws CcmException {
-        checkNotNull(requestId);
-        checkNotNull(accountId);
+        checkNotNull(requestId, "requestId should not be null.");
+        checkNotNull(accountId, "accountId should not be null.");
 
         MinaSshdManagementBlockingStub blockingStub = newStub(requestId);
         AcquireMinaSshdServiceRequest.Builder requestBuilder = AcquireMinaSshdServiceRequest.newBuilder()
@@ -101,8 +101,8 @@ public class MinaSshdManagementClient {
      * @return the list of minasshd services
      */
     public List<MinaSshdService> listMinaSshdServices(String requestId, String accountId, List<String> serviceIds) throws CcmException {
-        checkNotNull(requestId);
-        checkNotNull(accountId);
+        checkNotNull(requestId, "requestId should not be null.");
+        checkNotNull(accountId, "accountId should not be null.");
 
         List<MinaSshdService> groups = new ArrayList<>();
 
@@ -158,8 +158,8 @@ public class MinaSshdManagementClient {
      */
     public GenerateAndRegisterSshTunnelingKeyPairResponse generateAndRegisterSshTunnelingKeyPair(
             String requestId, String accountId, String minaSshdServiceId, String keyId) throws CcmException {
-        checkNotNull(requestId);
-        checkNotNull(accountId);
+        checkNotNull(requestId, "requestId should not be null.");
+        checkNotNull(accountId, "accountId should not be null.");
         checkNotNull(minaSshdServiceId);
         checkNotNull(keyId);
 
@@ -199,7 +199,7 @@ public class MinaSshdManagementClient {
      */
     public UnregisterSshTunnelingKeyResponse unregisterSshTunnelingKey(
             String requestId, String minaSshdServiceId, String keyId) throws CcmException {
-        checkNotNull(requestId);
+        checkNotNull(requestId, "requestId should not be null.");
         checkNotNull(minaSshdServiceId);
         checkNotNull(keyId);
 
@@ -234,7 +234,7 @@ public class MinaSshdManagementClient {
      * @return the stub
      */
     private MinaSshdManagementBlockingStub newStub(String requestId) {
-        checkNotNull(requestId);
+        checkNotNull(requestId, "requestId should not be null.");
         return MinaSshdManagementGrpc.newBlockingStub(channel)
                 .withInterceptors(GrpcUtil.getTracingInterceptor(tracer),
                         new AltusMetadataInterceptor(requestId, actorCrn));

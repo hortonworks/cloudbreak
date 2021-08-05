@@ -72,7 +72,7 @@ public class Crn {
         private final String legacyName;
 
         Partition(String name, String legacyName) {
-            this.name = checkNotNull(name);
+            this.name = checkNotNull(name, "name should not be null.");
             this.legacyName = legacyName;
         }
 
@@ -98,7 +98,7 @@ public class Crn {
          * @throws NullPointerException if 'input' is null
          */
         public static Partition fromString(String input) {
-            checkNotNull(input);
+            checkNotNull(input, "input should not be null.");
             return FROM_STRING.get(input);
         }
 
@@ -111,7 +111,7 @@ public class Crn {
          * @throws CrnParseException    if 'input' is not a valid partition name
          */
         public static Partition safeFromString(String input) {
-            checkNotNull(input);
+            checkNotNull(input, "input should not be null.");
             Partition partition = fromString(input);
             if (partition == null) {
                 throw new CrnParseException(String.format(
@@ -198,7 +198,7 @@ public class Crn {
         }
 
         Service(String name, String legacyName, boolean adminService) {
-            this.name = checkNotNull(name);
+            this.name = checkNotNull(name, "name should not be null.");
             this.legacyName = legacyName;
             this.adminService = adminService;
         }
@@ -225,7 +225,7 @@ public class Crn {
          * @throws NullPointerException if 'input' is null
          */
         public static Service fromString(String input) {
-            checkNotNull(input);
+            checkNotNull(input, "input should not be null.");
             return FROM_STRING.get(input);
         }
 
@@ -238,7 +238,7 @@ public class Crn {
          * @throws CrnParseException    if 'input' is not a valid service name
          */
         public static Service safeFromString(String input) {
-            checkNotNull(input);
+            checkNotNull(input, "input should not be null.");
             Service service = fromString(input);
             if (service == null) {
                 throw new CrnParseException(String.format(
@@ -277,7 +277,7 @@ public class Crn {
         private final String name;
 
         Region(String name) {
-            this.name = checkNotNull(name);
+            this.name = checkNotNull(name, "name should not be null.");
         }
 
         public String getName() {
@@ -296,7 +296,7 @@ public class Crn {
          * @return the region
          */
         public static Region fromString(String input) {
-            checkNotNull(input);
+            checkNotNull(input, "input should not be null.");
             return FROM_STRING.get(input);
         }
 
@@ -306,7 +306,7 @@ public class Crn {
          * @return the region
          */
         public static Region safeFromString(String input) {
-            checkNotNull(input);
+            checkNotNull(input, "input should not be null.");
             Region region = fromString(input);
             if (region == null) {
                 throw new CrnParseException(String.format(
@@ -384,7 +384,7 @@ public class Crn {
         private final String name;
 
         ResourceType(String name) {
-            this.name = checkNotNull(name);
+            this.name = checkNotNull(name, "name should not be null.");
         }
 
         public String getName() {
@@ -404,7 +404,7 @@ public class Crn {
          * @throws CrnParseException if 'input' is not a valid resource type
          */
         public static ResourceType fromString(String input) {
-            checkNotNull(input);
+            checkNotNull(input, "input should not be null.");
             ResourceType resourceType = FROM_STRING.get(input);
             if (resourceType == null) {
                 throw new CrnParseException(String.format(
@@ -442,12 +442,12 @@ public class Crn {
             String accountId,
             ResourceType resourceType,
             String resource) {
-        this.partition = checkNotNull(partition);
-        this.service = checkNotNull(service);
-        this.region = checkNotNull(region);
-        this.accountId = checkNotNull(accountId);
-        this.resourceType = checkNotNull(resourceType);
-        this.resource = checkNotNull(resource);
+        this.partition = checkNotNull(partition, "partition should not be null.");
+        this.service = checkNotNull(service, "service should not be null.");
+        this.region = checkNotNull(region, "region should not be null.");
+        this.accountId = checkNotNull(accountId, "accountId should not be null.");
+        this.resourceType = checkNotNull(resourceType, "resourceType should not be null.");
+        this.resource = checkNotNull(resource, "resource should not be null.");
     }
 
     /**
@@ -538,7 +538,7 @@ public class Crn {
     //CHECKSTYLE:OFF: checkstyle:magicnumber
     @Nullable
     public static Crn fromString(String input) {
-        checkNotNull(input);
+        checkNotNull(input, "input should not be null.");
         Matcher matcher = CRN_PATTERN.matcher(input);
         if (!matcher.matches()) {
             return null;
@@ -652,12 +652,12 @@ public class Crn {
         }
 
         public Builder setAccountId(String accountId) {
-            this.accountId = checkNotNull(accountId);
+            this.accountId = checkNotNull(accountId, "accountId should not be null.");
             return this;
         }
 
         public Builder setResource(String resource) {
-            this.resource = checkNotNull(resource);
+            this.resource = checkNotNull(resource, "resource should not be null.");
             return this;
         }
 
@@ -681,12 +681,12 @@ public class Crn {
         }
 
         Builder setService(Service service) {
-            this.service = checkNotNull(service);
+            this.service = checkNotNull(service, "service should not be null.");
             return this;
         }
 
         Builder setResourceType(ResourceType resourceType) {
-            this.resourceType = checkNotNull(resourceType);
+            this.resourceType = checkNotNull(resourceType, "resourceType should not be null.");
             return this;
         }
 

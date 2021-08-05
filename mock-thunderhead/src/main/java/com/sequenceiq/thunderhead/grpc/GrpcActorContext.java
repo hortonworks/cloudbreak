@@ -30,7 +30,7 @@ public class GrpcActorContext {
     @JsonCreator
     public GrpcActorContext(
             @JsonProperty("actorCrn") String actorCrn) {
-        this.actorCrn = checkNotNull(actorCrn);
+        this.actorCrn = checkNotNull(actorCrn, "actorCrn should not be null.");
     }
 
     @JsonProperty("actorCrn")

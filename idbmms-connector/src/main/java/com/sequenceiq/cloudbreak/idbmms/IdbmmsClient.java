@@ -32,8 +32,8 @@ class IdbmmsClient {
     private final Tracer tracer;
 
     IdbmmsClient(ManagedChannel channel, String actorCrn, Tracer tracer) {
-        this.channel = checkNotNull(channel);
-        this.actorCrn = checkNotNull(actorCrn);
+        this.channel = checkNotNull(channel, "channel should not be null.");
+        this.actorCrn = checkNotNull(actorCrn, "actorCrn should not be null.");
         this.tracer = tracer;
     }
 
@@ -46,7 +46,7 @@ class IdbmmsClient {
      * @throws NullPointerException if either argument is {@code null}
      */
     MappingsConfig getMappingsConfig(String requestId, String environmentCrn) {
-        checkNotNull(requestId);
+        checkNotNull(requestId, "requestId should not be null.");
         checkNotNull(environmentCrn);
         IdBrokerMappingManagementProto.GetMappingsConfigResponse mappingsConfig = newStub(requestId).getMappingsConfig(
                 IdBrokerMappingManagementProto.GetMappingsConfigRequest.newBuilder()
@@ -67,7 +67,7 @@ class IdbmmsClient {
      * @throws NullPointerException if either argument is {@code null}
      */
     void deleteMappings(String requestId, String environmentCrn) {
-        checkNotNull(requestId);
+        checkNotNull(requestId, "requestId should not be null.");
         checkNotNull(environmentCrn);
         newStub(requestId).deleteMappings(
                 IdBrokerMappingManagementProto.DeleteMappingsRequest.newBuilder()
@@ -83,7 +83,7 @@ class IdbmmsClient {
      * @return the stub
      */
     private IdBrokerMappingManagementGrpc.IdBrokerMappingManagementBlockingStub newStub(String requestId) {
-        checkNotNull(requestId);
+        checkNotNull(requestId, "requestId should not be null.");
         return IdBrokerMappingManagementGrpc.newBlockingStub(channel)
                 .withInterceptors(GrpcUtil.getTracingInterceptor(tracer),
                         new AltusMetadataInterceptor(requestId, actorCrn));
