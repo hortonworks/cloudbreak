@@ -12,6 +12,10 @@ public class PlatformNoSqlTableResponse implements Serializable {
 
     private String name;
 
+    public PlatformNoSqlTableResponse() {
+
+    }
+
     public PlatformNoSqlTableResponse(String name) {
         this.name = name;
     }

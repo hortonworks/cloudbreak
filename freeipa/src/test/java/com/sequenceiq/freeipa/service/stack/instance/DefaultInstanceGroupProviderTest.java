@@ -2,6 +2,9 @@ package com.sequenceiq.freeipa.service.stack.instance;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Map;
+import java.util.Set;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -15,7 +18,11 @@ import com.sequenceiq.cloudbreak.cloud.model.instance.AzureInstanceTemplate;
 import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.common.api.type.EncryptionType;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.AwsNetworkParameters;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.NetworkRequest;
+import com.sequenceiq.freeipa.entity.InstanceGroupNetwork;
 import com.sequenceiq.freeipa.entity.Template;
 import com.sequenceiq.freeipa.service.DefaultRootVolumeSizeProvider;
 
@@ -92,6 +99,18 @@ class DefaultInstanceGroupProviderTest {
         Json attributes = underTest.createAttributes(CloudPlatform.AWS, STACK_NM, IG_NAME);
 
         assertThat(attributes).isNull();
+    }
+
+    @Test
+    void createDefaultNetworkWithAwsAttributesShouldReturnWithNetworkAttributes() {
+        Json json = new Json(Map.of(NetworkConstants.SUBNET_IDS, Set.of("id")));
+        NetworkRequest network = new NetworkRequest();
+        AwsNetworkParameters awsNetworkParameters = new AwsNetworkParameters();
+        awsNetworkParameters.setSubnetId("id");
+        network.setAws(awsNetworkParameters);
+        InstanceGroupNetwork defaultNetwork = underTest.createDefaultNetwork(CloudPlatform.AWS, network);
+
+        assertThat(defaultNetwork.getAttributes()).isEqualTo(json);
     }
 
 }

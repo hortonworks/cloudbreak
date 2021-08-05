@@ -41,6 +41,7 @@ public class EnvironmentModelDescription {
     public static final String CREATE_FREEIPA = "Create freeipa in environment";
     public static final String FREEIPA = "The FreeIPA paramaters";
     public static final String FREEIPA_INSTANCE_COUNT_BY_GROUP = "The number of FreeIPA instances to create per group when creating FreeIPA in environment";
+    public static final String MULTIAZ_FREEIPA = "The FreeIPA multi-AZ enabled or not";
     public static final String YARN_QUEUE = "Queue for Yarn deployments";
     public static final String YARN_LIFETIME = "Lifetime for Yarn deployments in seconds";
 

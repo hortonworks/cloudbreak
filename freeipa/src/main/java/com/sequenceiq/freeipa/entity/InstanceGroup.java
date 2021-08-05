@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Convert;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -41,6 +42,13 @@ public class InstanceGroup implements Comparable<InstanceGroup> {
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private SecurityGroup securityGroup;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @Column(name = "availabilityzone")
+    private Set<String> availabilityZones = new HashSet<>();
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    private InstanceGroupNetwork instanceGroupNetwork;
 
     private String groupName;
 
@@ -89,6 +97,22 @@ public class InstanceGroup implements Comparable<InstanceGroup> {
 
     public void setStack(Stack stack) {
         this.stack = stack;
+    }
+
+    public InstanceGroupNetwork getInstanceGroupNetwork() {
+        return instanceGroupNetwork;
+    }
+
+    public void setInstanceGroupNetwork(InstanceGroupNetwork instanceGroupNetwork) {
+        this.instanceGroupNetwork = instanceGroupNetwork;
+    }
+
+    public Set<String> getAvailabilityZones() {
+        return availabilityZones;
+    }
+
+    public void setAvailabilityZones(Set<String> availabilityZones) {
+        this.availabilityZones = availabilityZones;
     }
 
     public Set<InstanceMetaData> getNotTerminatedInstanceMetaDataSet() {

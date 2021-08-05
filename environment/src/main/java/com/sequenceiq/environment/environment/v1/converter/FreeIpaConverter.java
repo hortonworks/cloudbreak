@@ -2,7 +2,10 @@ package com.sequenceiq.environment.environment.v1.converter;
 
 import java.util.Optional;
 
+import javax.inject.Inject;
+
 import com.google.common.base.Strings;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.environment.api.v1.environment.model.request.FreeIpaImageRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.FreeIpaImageResponse;
 import org.springframework.stereotype.Component;
@@ -17,6 +20,9 @@ import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
 
 @Component
 public class FreeIpaConverter {
+
+    @Inject
+    private EntitlementService entitlementService;
 
     public FreeIpaResponse convert(FreeIpaCreationDto freeIpaCreation) {
         if (freeIpaCreation == null) {
@@ -55,10 +61,14 @@ public class FreeIpaConverter {
         return result;
     }
 
-    public FreeIpaCreationDto convert(AttachedFreeIpaRequest request) {
+    public FreeIpaCreationDto convert(AttachedFreeIpaRequest request, String accountId) {
         FreeIpaCreationDto.Builder builder = FreeIpaCreationDto.builder();
         if (request != null) {
             builder.withCreate(request.getCreate());
+            builder.withEnableMultiAz(request.isEnableMultiAz());
+            if (entitlementService.awsNativeFreeIpaEnabled(accountId)) {
+                builder.withEnableMultiAz(true);
+            }
             Optional.ofNullable(request.getInstanceCountByGroup())
                     .ifPresent(builder::withInstanceCountByGroup);
             Optional.ofNullable(request.getAws())

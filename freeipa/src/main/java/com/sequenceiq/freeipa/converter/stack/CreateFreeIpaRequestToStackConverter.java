@@ -2,7 +2,6 @@ package com.sequenceiq.freeipa.converter.stack;
 
 import static com.gs.collections.impl.utility.StringIterate.isEmpty;
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
-import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.util.HashMap;
@@ -26,9 +25,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
-import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
@@ -58,7 +58,6 @@ import com.sequenceiq.freeipa.entity.SecurityGroup;
 import com.sequenceiq.freeipa.entity.SecurityRule;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackStatus;
-import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
 import com.sequenceiq.freeipa.service.tag.AccountTagService;
 import com.sequenceiq.freeipa.util.CrnService;
 
@@ -96,9 +95,6 @@ public class CreateFreeIpaRequestToStackConverter {
     @Inject
     private AccountTagService accountTagService;
 
-    @Inject
-    private CachedEnvironmentClientService cachedEnvironmentClientService;
-
     @Value("${cb.platform.default.regions:}")
     private String defaultRegions;
 
@@ -111,7 +107,8 @@ public class CreateFreeIpaRequestToStackConverter {
     @Value("#{'${freeipa.default.gateway.cidr}'.split(',')}")
     private Set<String> defaultGatewayCidr;
 
-    public Stack convert(CreateFreeIpaRequest source, String accountId, Future<String> ownerFuture, String userCrn, String cloudPlatform) {
+    public Stack convert(CreateFreeIpaRequest source, DetailedEnvironmentResponse environment, String accountId,
+        Future<String> ownerFuture, String userCrn, String cloudPlatform) {
         Stack stack = new Stack();
         stack.setEnvironmentCrn(source.getEnvironmentCrn());
         stack.setAccountId(accountId);
@@ -124,11 +121,11 @@ public class CreateFreeIpaRequestToStackConverter {
         stack.setAvailabilityZone(Optional.ofNullable(source.getPlacement()).map(PlacementBase::getAvailabilityZone).orElse(null));
         updateCloudPlatformAndRelatedFields(source, stack, cloudPlatform);
         stack.setStackAuthentication(stackAuthenticationConverter.convert(source.getAuthentication()));
-        stack.setInstanceGroups(convertInstanceGroups(source, stack, accountId));
         if (source.getNetwork() != null) {
             source.getNetwork().setCloudPlatform(CloudPlatform.valueOf(cloudPlatform));
             stack.setNetwork(networkConverter.convert(source.getNetwork()));
         }
+        stack.setInstanceGroups(convertInstanceGroups(source, stack, environment, accountId));
         stack.setTelemetry(telemetryConverter.convert(source.getTelemetry()));
         if (source.getBackup() != null && isNotEmpty(source.getBackup().getStorageLocation())) {
             stack.setBackup(backupConverter.convert(source.getBackup()));
@@ -162,7 +159,7 @@ public class CreateFreeIpaRequestToStackConverter {
         Set<String> defaultGatewayCidrs = defaultGatewayCidr.stream().filter(StringUtils::isNotBlank).collect(Collectors.toSet());
         if (!defaultGatewayCidrs.isEmpty() && !stack.getTunnel().useCcm()) {
             for (InstanceGroup gateway : gateways) {
-                if (CollectionUtils.isEmpty(gateway.getSecurityGroup().getSecurityGroupIds())) {
+                if (gateway.getSecurityGroup() != null && CollectionUtils.isEmpty(gateway.getSecurityGroup().getSecurityGroupIds())) {
                     Set<SecurityRule> rules = gateway.getSecurityGroup().getSecurityRules();
                     defaultGatewayCidrs.forEach(cloudbreakCidr -> rules.add(createSecurityRule(gateway.getSecurityGroup(), cloudbreakCidr,
                             stack.getGatewayport().toString())));
@@ -199,7 +196,7 @@ public class CreateFreeIpaRequestToStackConverter {
     private void updateCloudPlatformAndRelatedFields(CreateFreeIpaRequest source, Stack stack, String cloudPlatform) {
         stack.setRegion(getRegion(source, cloudPlatform));
         stack.setCloudPlatform(cloudPlatform);
-        stack.setPlatformvariant(cloudPlatform);
+        stack.setPlatformvariant(Strings.isNullOrEmpty(source.getVariant()) ? cloudPlatform : source.getVariant());
     }
 
     private String getRegion(CreateFreeIpaRequest source, String cloudPlatform) {
@@ -261,12 +258,12 @@ public class CreateFreeIpaRequestToStackConverter {
         return result;
     }
 
-    private Set<InstanceGroup> convertInstanceGroups(CreateFreeIpaRequest source, Stack stack, String accountId) {
+    private Set<InstanceGroup> convertInstanceGroups(CreateFreeIpaRequest source, Stack stack,
+        DetailedEnvironmentResponse environment, String accountId) {
         if (CollectionUtils.isEmpty(source.getInstanceGroups())) {
             throw new BadRequestException(String.format("No instancegroups are specified. Instancegroups field cannot be empty."));
         }
-        DetailedEnvironmentResponse environment = measure(() -> cachedEnvironmentClientService.getByCrn(source.getEnvironmentCrn()),
-                LOGGER, "Environment properties were queried under {} ms for environment {}", source.getEnvironmentCrn());
+
         String diskEncryptionSetId = Optional.of(environment)
                 .map(DetailedEnvironmentResponse::getAzure)
                 .map(AzureEnvironmentParameters::getResourceEncryptionParameters)
@@ -276,8 +273,13 @@ public class CreateFreeIpaRequestToStackConverter {
         source.getInstanceGroups().stream()
                 .map(ig -> {
                     FreeIpaServerRequest ipaServerRequest = source.getFreeIpa();
-                    return instanceGroupConverter.convert(ig, accountId, stack.getCloudPlatform(), stack.getName(),
-                            ipaServerRequest.getHostname(), ipaServerRequest.getDomain(), diskEncryptionSetId);
+                    return instanceGroupConverter.convert(ig,
+                            source.getNetwork(),
+                            accountId,
+                            stack,
+                            ipaServerRequest,
+                            environment,
+                            diskEncryptionSetId);
                 })
                 .forEach(ig -> {
                     ig.setStack(stack);

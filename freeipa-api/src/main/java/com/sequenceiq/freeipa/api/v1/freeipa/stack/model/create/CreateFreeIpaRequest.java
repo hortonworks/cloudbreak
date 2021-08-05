@@ -93,6 +93,9 @@ public class CreateFreeIpaRequest implements TaggableRequest {
     @ApiModelProperty(value = FreeIpaModelDescriptions.TUNNEL)
     private Tunnel tunnel;
 
+    @ApiModelProperty(value = FreeIpaModelDescriptions.VARIANT)
+    private String variant;
+
     public String getEnvironmentCrn() {
         return environmentCrn;
     }
@@ -197,6 +200,14 @@ public class CreateFreeIpaRequest implements TaggableRequest {
         this.tunnel = tunnel;
     }
 
+    public String getVariant() {
+        return variant;
+    }
+
+    public void setVariant(String variant) {
+        this.variant = variant;
+    }
+
     public Map<String, String> getTags() {
         return tags;
     }
@@ -223,6 +234,7 @@ public class CreateFreeIpaRequest implements TaggableRequest {
                 + ", freeIpa=" + freeIpa
                 + ", gatewayPort=" + gatewayPort
                 + ", telemetry=" + telemetry
+                + ", variant=" + variant
                 + ", tags=" + tags
                 + ", tunnel=" + tunnel
                 + '}';

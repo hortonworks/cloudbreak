@@ -1,7 +1,10 @@
 package com.sequenceiq.freeipa.service.stack;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -21,8 +24,11 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.freeipa.converter.cloud.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.freeipa.dto.Credential;
+import com.sequenceiq.freeipa.entity.InstanceGroup;
+import com.sequenceiq.freeipa.entity.InstanceGroupNetwork;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.CredentialService;
 import com.sequenceiq.freeipa.service.filter.NetworkFilterProvider;
@@ -47,10 +53,8 @@ public class NetworkService {
     public Multimap<String, String> getFilteredSubnetWithCidr(Stack stack) {
         Map<String, Object> attributes = stack.getNetwork().getAttributes().getMap();
         String networkId = (String) attributes.getOrDefault("networkId", attributes.get("vpcId"));
-        String subnetId = (String) attributes.get("subnetId");
         Objects.requireNonNull(networkId, "Network id is null");
-        Objects.requireNonNull(subnetId, "Subnet id is null");
-        return getFilteredSubnetWithCidr(stack.getEnvironmentCrn(), stack, networkId, Set.of(subnetId));
+        return getFilteredSubnetWithCidr(stack.getEnvironmentCrn(), stack, networkId, collectSubnetIdsFromStack(stack));
     }
 
     public Multimap<String, String> getFilteredSubnetWithCidr(String environmentCrn, Stack stack, String networkId, Collection<String> subnetIds) {
@@ -102,5 +106,17 @@ public class NetworkService {
             LOGGER.debug("NetworkFilter: {}", networkFilter);
             return networkFilter;
         }
+    }
+
+    private Set<String> collectSubnetIdsFromStack(Stack stack) {
+        Set<String> subnetIds = new HashSet<>();
+        for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
+            InstanceGroupNetwork instanceGroupNetwork = instanceGroup.getInstanceGroupNetwork();
+            if (instanceGroupNetwork != null && instanceGroupNetwork.getAttributes() != null) {
+                Map<String, Object> map = instanceGroupNetwork.getAttributes().getMap();
+                subnetIds.addAll((List<String>) map.getOrDefault(NetworkConstants.SUBNET_IDS, new ArrayList<>()));
+            }
+        }
+        return subnetIds;
     }
 }

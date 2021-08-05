@@ -56,7 +56,7 @@ public abstract class AbstractStackStartAction<P extends Payload> extends Abstra
                 .withName(stack.getName())
                 .withCrn(stack.getResourceCrn())
                 .withPlatform(stack.getCloudPlatform())
-                .withVariant(stack.getCloudPlatform())
+                .withVariant(stack.getPlatformvariant())
                 .withLocation(location)
                 .withUserName(stack.getOwner())
                 .withAccountId(stack.getAccountId())

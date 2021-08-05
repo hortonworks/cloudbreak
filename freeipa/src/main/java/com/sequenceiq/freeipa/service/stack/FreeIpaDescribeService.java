@@ -41,7 +41,7 @@ public class FreeIpaDescribeService {
         Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithLists(environmentCrn, accountId);
         MDCBuilder.buildMdcContext(stack);
         ImageEntity image = imageService.getByStack(stack);
-        FreeIpa freeIpa = freeIpaService.findByStack(stack);
+        FreeIpa freeIpa = freeIpaService.findByStackId(stack.getId());
         UserSyncStatus userSyncStatus = userSyncStatusService.findByStack(stack);
         DescribeFreeIpaResponse response = stackToDescribeFreeIpaResponseConverter.convert(stack, image, freeIpa, userSyncStatus);
         LOGGER.trace("FreeIPA describe response: {}", response);

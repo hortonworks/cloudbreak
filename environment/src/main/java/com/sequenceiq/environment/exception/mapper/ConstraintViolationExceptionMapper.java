@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.exception.mapper;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -15,6 +16,10 @@ import org.springframework.stereotype.Component;
 public class ConstraintViolationExceptionMapper implements ExceptionMapper<ConstraintViolationException> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConstraintViolationExceptionMapper.class);
+
+    public ConstraintViolationExceptionMapper() {
+
+    }
 
     @Override
     public Response toResponse(ConstraintViolationException exception) {
@@ -34,6 +39,10 @@ public class ConstraintViolationExceptionMapper implements ExceptionMapper<Const
     private static class ConstraintViolationResponse {
 
         private final List<String> constraintViolations;
+
+        ConstraintViolationResponse() {
+            constraintViolations = new ArrayList<>();
+        }
 
         ConstraintViolationResponse(List<String> constraintViolations) {
             this.constraintViolations = constraintViolations;

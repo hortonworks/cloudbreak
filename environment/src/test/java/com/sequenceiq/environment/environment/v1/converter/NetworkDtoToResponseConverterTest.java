@@ -7,6 +7,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,6 +20,7 @@ import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.model.base.PrivateSubnetCreation;
 import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
+import com.sequenceiq.environment.network.service.domain.ProvidedSubnetIds;
 import com.sequenceiq.environment.network.dao.domain.RegistrationType;
 import com.sequenceiq.environment.network.dto.AwsParams;
 import com.sequenceiq.environment.network.dto.AzureParams;
@@ -43,7 +45,8 @@ public class NetworkDtoToResponseConverterTest {
     @Test
     void testConvertWithAwsParams() {
         NetworkDto network = createNetworkDto().withAws(createAwsParams()).build();
-        when(subnetIdProvider.provide(network, TUNNEL, network.getCloudPlatform())).thenReturn(PREFERRED_SUBNET_ID);
+        ProvidedSubnetIds providedSubnetIds = new ProvidedSubnetIds(PREFERRED_SUBNET_ID, Set.of(PREFERRED_SUBNET_ID));
+        when(subnetIdProvider.subnets(network, TUNNEL, network.getCloudPlatform(), false)).thenReturn(providedSubnetIds);
 
         EnvironmentNetworkResponse actual = underTest.convert(network, TUNNEL, true);
 
@@ -57,7 +60,8 @@ public class NetworkDtoToResponseConverterTest {
     @Test
     void testConvertWithAzureParams() {
         NetworkDto network = createNetworkDto().withAzure(createAzureParams()).build();
-        when(subnetIdProvider.provide(network, TUNNEL, network.getCloudPlatform())).thenReturn(PREFERRED_SUBNET_ID);
+        ProvidedSubnetIds providedSubnetIds = new ProvidedSubnetIds(PREFERRED_SUBNET_ID, Set.of(PREFERRED_SUBNET_ID));
+        when(subnetIdProvider.subnets(network, TUNNEL, network.getCloudPlatform(), false)).thenReturn(providedSubnetIds);
 
         EnvironmentNetworkResponse actual = underTest.convert(network, TUNNEL, true);
 
@@ -73,7 +77,8 @@ public class NetworkDtoToResponseConverterTest {
     @Test
     void testConvertWithMockParams() {
         NetworkDto network = createNetworkDto().withMock(createMockParams()).build();
-        when(subnetIdProvider.provide(network, TUNNEL, network.getCloudPlatform())).thenReturn(PREFERRED_SUBNET_ID);
+        ProvidedSubnetIds providedSubnetIds = new ProvidedSubnetIds(PREFERRED_SUBNET_ID, Set.of(PREFERRED_SUBNET_ID));
+        when(subnetIdProvider.subnets(network, TUNNEL, network.getCloudPlatform(), false)).thenReturn(providedSubnetIds);
 
         EnvironmentNetworkResponse actual = underTest.convert(network, TUNNEL, true);
 
@@ -89,7 +94,8 @@ public class NetworkDtoToResponseConverterTest {
     void testConvertWithYarnParams() {
         NetworkDto network = createNetworkDto().withYarn(createYarnParams()).build();
 
-        when(subnetIdProvider.provide(network, TUNNEL, network.getCloudPlatform())).thenReturn(PREFERRED_SUBNET_ID);
+        ProvidedSubnetIds providedSubnetIds = new ProvidedSubnetIds(PREFERRED_SUBNET_ID, Set.of(PREFERRED_SUBNET_ID));
+        when(subnetIdProvider.subnets(network, TUNNEL, network.getCloudPlatform(), false)).thenReturn(providedSubnetIds);
 
         EnvironmentNetworkResponse actual = underTest.convert(network, TUNNEL, true);
 
@@ -102,7 +108,7 @@ public class NetworkDtoToResponseConverterTest {
     }
 
     private void assertCommonFields(NetworkDto network, EnvironmentNetworkResponse actual) {
-        verify(subnetIdProvider).provide(network, TUNNEL, network.getCloudPlatform());
+        verify(subnetIdProvider).subnets(network, TUNNEL, network.getCloudPlatform(), false);
         assertEquals(network.getResourceCrn(), actual.getCrn());
         assertEquals(network.getSubnetIds(), actual.getSubnetIds());
         assertEquals(network.getNetworkCidr(), actual.getNetworkCidr());

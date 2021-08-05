@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.service.stack;
 
+import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
+
 import java.util.Objects;
 import java.util.concurrent.Future;
 
@@ -12,8 +14,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformTemplateRequest;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
@@ -23,6 +26,7 @@ import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.CloudStorageFolderResolverService;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.freeipa.api.model.Backup;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
@@ -39,16 +43,18 @@ import com.sequenceiq.freeipa.entity.SecurityConfig;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.chain.FlowChainTriggers;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
-import com.sequenceiq.freeipa.service.multiaz.MultiAzCalculatorService;
-import com.sequenceiq.freeipa.service.telemetry.AccountTelemetryService;
 import com.sequenceiq.freeipa.service.CredentialService;
 import com.sequenceiq.freeipa.service.SecurityConfigService;
 import com.sequenceiq.freeipa.service.TlsSecurityService;
+import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 import com.sequenceiq.freeipa.service.freeipa.backup.BackupClusterType;
 import com.sequenceiq.freeipa.service.freeipa.backup.cloud.CloudBackupFolderResolverService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.image.ImageService;
+import com.sequenceiq.freeipa.service.multiaz.MultiAzCalculatorService;
+import com.sequenceiq.freeipa.service.multiaz.MultiAzValidator;
+import com.sequenceiq.freeipa.service.telemetry.AccountTelemetryService;
 import com.sequenceiq.freeipa.util.CrnService;
 
 @Service
@@ -110,6 +116,15 @@ public class FreeIpaCreationService {
     @Inject
     private MultiAzCalculatorService multiAzCalculatorService;
 
+    @Inject
+    private CachedEnvironmentClientService cachedEnvironmentClientService;
+
+    @Inject
+    private EntitlementService entitlementService;
+
+    @Inject
+    private MultiAzValidator multiAzValidator;
+
     @Value("${info.app.version:}")
     private String appVersion;
 
@@ -117,7 +132,10 @@ public class FreeIpaCreationService {
         String userCrn = crnService.getUserCrn();
         Future<String> ownerFuture = initiateOwnerFetching(userCrn);
         Credential credential = credentialService.getCredentialByEnvCrn(request.getEnvironmentCrn());
-        Stack stack = stackConverter.convert(request, accountId, ownerFuture, userCrn, credential.getCloudPlatform());
+        DetailedEnvironmentResponse environment = measure(() -> cachedEnvironmentClientService.getByCrn(request.getEnvironmentCrn()),
+                LOGGER, "Environment properties were queried under {} ms for environment {}", request.getEnvironmentCrn());
+
+        Stack stack = stackConverter.convert(request, environment, accountId, ownerFuture, userCrn, credential.getCloudPlatform());
         stack.setAppVersion(appVersion);
         GetPlatformTemplateRequest getPlatformTemplateRequest = templateService.triggerGetTemplate(stack, credential);
         Telemetry telemetry = stack.getTelemetry();
@@ -134,11 +152,12 @@ public class FreeIpaCreationService {
                 BackupClusterType.FREEIPA.value(), stack.getName(), stack.getResourceCrn());
         stack.setBackup(backup);
 
-        fillInstanceMetadata(stack);
+        fillInstanceMetadata(stack, environment);
 
         String template = templateService.waitGetTemplate(stack, getPlatformTemplateRequest);
         stack.setTemplate(template);
         SecurityConfig securityConfig = tlsSecurityService.generateSecurityKeys(accountId);
+        multiAzValidator.validateMultiAzForStack(stack.getPlatformvariant(), stack.getInstanceGroups());
         try {
             Triple<Stack, ImageEntity, FreeIpa> stackImageFreeIpaTuple = transactionService.required(() -> {
                 SecurityConfig savedSecurityConfig = securityConfigService.save(securityConfig);
@@ -171,14 +190,15 @@ public class FreeIpaCreationService {
         return ownerFuture;
     }
 
-    private void fillInstanceMetadata(Stack stack) {
+    private void fillInstanceMetadata(Stack stack, DetailedEnvironmentResponse environment) {
         long privateIdNumber = 0;
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
             for (InstanceMetaData instanceMetaData : instanceGroup.getAllInstanceMetaData()) {
                 instanceMetaData.setPrivateId(privateIdNumber++);
                 instanceMetaData.setInstanceStatus(InstanceStatus.REQUESTED);
             }
-            multiAzCalculatorService.calculateByRoundRobin(stack.getNetwork(), instanceGroup);
+            multiAzCalculatorService.calculateByRoundRobin(multiAzCalculatorService.prepareSubnetAzMap(environment),
+                    instanceGroup, stack.getPlatformvariant());
         }
     }
 }

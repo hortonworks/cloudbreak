@@ -43,6 +43,12 @@ public class InstanceMetaDataResponse {
     @ApiModelProperty
     private InstanceLifeCycle lifeCycle;
 
+    @ApiModelProperty(InstanceGroupModelDescription.SUBNET_ID)
+    private String subnetId;
+
+    @ApiModelProperty(InstanceGroupModelDescription.AVAILABILITY_ZONE)
+    private String availabilityZone;
+
     public String getInstanceGroup() {
         return instanceGroup;
     }
@@ -121,5 +127,21 @@ public class InstanceMetaDataResponse {
 
     public void setLifeCycle(InstanceLifeCycle lifeCycle) {
         this.lifeCycle = lifeCycle;
+    }
+
+    public String getSubnetId() {
+        return subnetId;
+    }
+
+    public void setSubnetId(String subnetId) {
+        this.subnetId = subnetId;
+    }
+
+    public String getAvailabilityZone() {
+        return availabilityZone;
+    }
+
+    public void setAvailabilityZone(String availabilityZone) {
+        this.availabilityZone = availabilityZone;
     }
 }

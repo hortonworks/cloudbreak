@@ -17,6 +17,9 @@ public class PlatformSecurityGroupResponse implements Serializable {
 
     private Map<String, Object> properties;
 
+    public PlatformSecurityGroupResponse() {
+    }
+
     public PlatformSecurityGroupResponse(String groupName, String groupId, Map<String, Object> properties) {
         this.groupName = groupName;
         this.groupId = groupId;

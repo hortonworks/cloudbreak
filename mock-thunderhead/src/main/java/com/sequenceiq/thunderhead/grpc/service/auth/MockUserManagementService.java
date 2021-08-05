@@ -15,6 +15,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_BASE_IM
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_DISK_ENCRYPTION_WITH_CMK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_NATIVE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_NATIVE_DATALAKE;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_NATIVE_FREEIPA;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_DISK_SSE_WITH_CMK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_DATABASE_WIRE_ENCRYPTION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_GCP_DISK_ENCRYPTION_WITH_CMEK;
@@ -381,7 +382,10 @@ public class MockUserManagementService extends UserManagementImplBase {
     private boolean ephemeralDisksForTempDataEnabled;
 
     @Value("${auth.mock.datalake.multiaz.enable}")
-    private boolean multiAzDataLakeEnabled;
+    private boolean enableMultiAzDataLake;
+
+    @Value("${auth.mock.freeipa.multiaz.enable}")
+    private boolean enableMultiAzFreeIpa;
 
     private String cbLicense;
 
@@ -784,10 +788,12 @@ public class MockUserManagementService extends UserManagementImplBase {
         if (enableFmsFreeipaBatchCall) {
             builder.addEntitlements(createEntitlement(FMS_FREEIPA_BATCH_CALL));
         }
-        if (multiAzDataLakeEnabled) {
+        if (enableMultiAzDataLake) {
             builder.addEntitlements(createEntitlement(CDP_CB_AWS_NATIVE_DATALAKE));
         }
-
+        if (enableMultiAzFreeIpa) {
+            builder.addEntitlements(createEntitlement(CDP_CB_AWS_NATIVE_FREEIPA));
+        }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()
                         .setAccount(builder

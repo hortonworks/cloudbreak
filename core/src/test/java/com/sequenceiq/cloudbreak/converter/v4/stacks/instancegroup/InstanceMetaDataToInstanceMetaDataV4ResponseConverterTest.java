@@ -53,7 +53,7 @@ class InstanceMetaDataToInstanceMetaDataV4ResponseConverterTest {
                 // testCaseName publicIp privateIp publicIpExpected
                 {"publicIp=null, privateIp=null", null, null, null},
                 {"publicIp=PUBLIC_IP, privateIp=null", PUBLIC_IP, null, PUBLIC_IP},
-                {"publicIp=null, privateIp=PRIVATE_IP", null, PRIVATE_IP, InstanceMetaDataToInstanceMetaDataV4ResponseConverter.NOT_AVAILABLE},
+                {"publicIp=null, privateIp=PRIVATE_IP", null, PRIVATE_IP, "N/A"},
                 {"publicIp=PUBLIC_IP, privateIp=PRIVATE_IP", PUBLIC_IP, PRIVATE_IP, PUBLIC_IP},
         };
     }

@@ -1,6 +1,10 @@
 package com.sequenceiq.cloudbreak.controller.validation.stack;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType.DATALAKE;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType.LEGACY;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType.WORKLOAD;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_NATIVE;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_NATIVE_DATALAKE;
 import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants.AwsVariant.AWS_NATIVE_VARIANT;
 
 import java.util.Optional;
@@ -56,10 +60,17 @@ public class StackValidator {
     private void validateVariant(Stack source, ValidationResultBuilder validationBuilder) {
         String variant = source.getPlatformVariant();
         boolean awsNativeEnabled = entitlementService.awsNativeEnabled(Crn.safeFromString(source.getResourceCrn()).getAccountId());
-        if (AWS_NATIVE_VARIANT.variant().value().equals(variant) && !awsNativeEnabled) {
+        boolean awsNativeDatalakeEnabled = entitlementService.awsNativeDataLakeEnabled(Crn.safeFromString(source.getResourceCrn()).getAccountId());
+        if ((WORKLOAD.equals(source.getType()) || LEGACY.equals(source.getType()))
+                && AWS_NATIVE_VARIANT.variant().value().equals(variant) && !awsNativeEnabled) {
             validationBuilder.error(String.format("%s entitlement was not granted to your tenant. "
                     + "Please get in contact with Cloudera support to request it.",
                     CDP_CB_AWS_NATIVE.name()));
+        }
+        if (DATALAKE.equals(source.getType()) && AWS_NATIVE_VARIANT.variant().value().equals(variant) && !awsNativeDatalakeEnabled) {
+            validationBuilder.error(String.format("%s entitlement was not granted to your tenant. "
+                            + "Please get in contact with Cloudera support to request it.",
+                    CDP_CB_AWS_NATIVE_DATALAKE.name()));
         }
     }
 

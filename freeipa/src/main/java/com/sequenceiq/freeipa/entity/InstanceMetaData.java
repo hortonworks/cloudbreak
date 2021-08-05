@@ -54,6 +54,8 @@ public class InstanceMetaData {
 
     private String subnetId;
 
+    private String availabilityZone;
+
     private String instanceName;
 
     @ManyToOne
@@ -231,6 +233,14 @@ public class InstanceMetaData {
         this.lifeCycle = lifeCycle;
     }
 
+    public String getAvailabilityZone() {
+        return availabilityZone;
+    }
+
+    public void setAvailabilityZone(String availabilityZone) {
+        this.availabilityZone = availabilityZone;
+    }
+
     @Override
     public String toString() {
         return new StringJoiner(", ", InstanceMetaData.class.getSimpleName() + "[", "]")
@@ -242,6 +252,8 @@ public class InstanceMetaData {
                 .add("discoveryFQDN='" + discoveryFQDN + "'")
                 .add("instanceName='" + instanceName + "'")
                 .add("instanceStatus='" + instanceStatus + "'")
+                .add("availabilityZone='" + availabilityZone + "'")
+                .add("subnetId='" + subnetId + "'")
                 .toString();
     }
 }

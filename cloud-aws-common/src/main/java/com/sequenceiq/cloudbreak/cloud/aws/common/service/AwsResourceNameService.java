@@ -25,6 +25,8 @@ public class AwsResourceNameService extends CloudbreakResourceNameService {
 
     private static final int ATTACHED_DISKS_PART_COUNT = 3;
 
+    private static final int ROOT_DISKS_PART_COUNT = 3;
+
     private static final int INSTANCE_NAME_PART_COUNT = 3;
 
     private static final int SECURITY_GROUP_PART_COUNT = 3;
@@ -63,6 +65,8 @@ public class AwsResourceNameService extends CloudbreakResourceNameService {
             resourceName = loadBalancerTargetGroup(parts);
         } else if (resourceType == ResourceType.AWS_CLOUD_WATCH) {
             resourceName = cloudWatch(parts);
+        } else if (resourceType == ResourceType.AWS_ROOT_DISK_TAGGING) {
+            resourceName = rootDiskResourceName(parts);
         } else {
             throw new IllegalStateException("Unsupported resource type: " + resourceType);
         }
@@ -82,6 +86,22 @@ public class AwsResourceNameService extends CloudbreakResourceNameService {
 
     private String instanceName(Object[] parts) {
         checkArgs(INSTANCE_NAME_PART_COUNT, parts);
+        String name;
+        String stackName = String.valueOf(parts[0]);
+        String instanceGroupName = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, String.valueOf(parts[1]).toLowerCase());
+        String privateId = String.valueOf(parts[2]);
+
+        name = normalize(stackName);
+        name = adjustPartLength(name);
+        name = appendPart(name, normalize(instanceGroupName));
+        name = appendPart(name, privateId);
+        name = adjustBaseLength(name, maxResourceNameLength);
+
+        return name;
+    }
+
+    private String rootDiskResourceName(Object[] parts) {
+        checkArgs(ROOT_DISKS_PART_COUNT, parts);
         String name;
         String stackName = String.valueOf(parts[0]);
         String instanceGroupName = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, String.valueOf(parts[1]).toLowerCase());

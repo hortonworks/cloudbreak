@@ -27,7 +27,7 @@ public class MultiAzValidator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MultiAzValidator.class);
 
-    @Value("${cb.multiaz.supported.variant:AWS_NATIVE}")
+    @Value("${cb.multiaz.supported.variants:AWS_NATIVE}")
     private Set<String> supportedMultiAzVariants;
 
     @Value("${cb.multiaz.supported.instancemetadata.platforms:AWS,GCP,AZURE,YARN}")

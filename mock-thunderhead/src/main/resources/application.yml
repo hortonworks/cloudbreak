@@ -14,6 +14,7 @@ auth:
     event-generation:
       expiration-minutes: 10
     freeipa:
+      multiaz.enable: false
       ha:
         repair.enable: true
     cloudstoragevalidation.enable:

@@ -18,6 +18,7 @@ import reactor.bus.Event.Headers;
  */
 @Service
 public class ErrorHandlerAwareReactorEventFactory {
+
     @Inject
     private LoggingErrorHandler errorHandler;
 

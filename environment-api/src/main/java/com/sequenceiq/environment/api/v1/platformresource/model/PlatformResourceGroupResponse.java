@@ -10,6 +10,9 @@ public class PlatformResourceGroupResponse {
 
     private String name;
 
+    public PlatformResourceGroupResponse() {
+    }
+
     public PlatformResourceGroupResponse(String name) {
         this.name = name;
     }

@@ -8,6 +8,8 @@ public class FreeIpaCreationDto {
 
     private FreeIpaCreationAwsParametersDto aws;
 
+    private boolean enableMultiAz;
+
     private String imageCatalog;
 
     private String imageId;
@@ -17,6 +19,7 @@ public class FreeIpaCreationDto {
         instanceCountByGroup = builder.instanceCountByGroup;
         aws = builder.aws;
         imageCatalog = builder.imageCatalog;
+        enableMultiAz = builder.enableMultiAz;
         imageId = builder.imageId;
     }
 
@@ -60,6 +63,14 @@ public class FreeIpaCreationDto {
         this.imageId = imageId;
     }
 
+    public boolean isEnableMultiAz() {
+        return enableMultiAz;
+    }
+
+    public void setEnableMultiAz(boolean enableMultiAz) {
+        this.enableMultiAz = enableMultiAz;
+    }
+
     @Override
     public String toString() {
         return "FreeIpaCreationDto{" +
@@ -68,6 +79,7 @@ public class FreeIpaCreationDto {
             "aws='" + aws + '\'' +
             "imageCatalog='" + imageCatalog + '\'' +
             "imageId='" + imageId + '\'' +
+            "enableMultiAz='" + enableMultiAz + '\'' +
             '}';
     }
 
@@ -86,6 +98,8 @@ public class FreeIpaCreationDto {
         private String imageCatalog;
 
         private String imageId;
+
+        private boolean enableMultiAz;
 
         private Builder() {
         }
@@ -112,6 +126,11 @@ public class FreeIpaCreationDto {
 
         public Builder withImageId(String imageId) {
             this.imageId = imageId;
+            return this;
+        }
+
+        public Builder withEnableMultiAz(boolean enableMultiAz) {
+            this.enableMultiAz = enableMultiAz;
             return this;
         }
 

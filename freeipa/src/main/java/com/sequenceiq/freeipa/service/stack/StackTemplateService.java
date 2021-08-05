@@ -40,7 +40,7 @@ public class StackTemplateService {
                 .withName(stack.getName())
                 .withCrn(stack.getResourceCrn())
                 .withPlatform(stack.getCloudPlatform())
-                .withVariant(stack.getCloudPlatform())
+                .withVariant(stack.getPlatformvariant())
                 .withLocation(location)
                 .withUserName(stack.getOwner())
                 .withAccountId(stack.getAccountId())

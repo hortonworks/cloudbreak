@@ -26,6 +26,10 @@ public class InstanceGroupResponse extends InstanceGroupBase {
     @ApiModelProperty(InstanceGroupModelDescription.SECURITYGROUP)
     private SecurityGroupResponse securityGroup;
 
+    @NotNull
+    @ApiModelProperty(InstanceGroupModelDescription.NETWORK)
+    private InstanceGroupNetworkResponse network;
+
     private Set<InstanceMetaDataResponse> metaData = new HashSet<>();
 
     public InstanceTemplateResponse getInstanceTemplate() {
@@ -52,12 +56,21 @@ public class InstanceGroupResponse extends InstanceGroupBase {
         this.metaData = metaData;
     }
 
+    public InstanceGroupNetworkResponse getNetwork() {
+        return network;
+    }
+
+    public void setNetwork(InstanceGroupNetworkResponse network) {
+        this.network = network;
+    }
+
     @Override
     public String toString() {
         return "InstanceGroupResponse{" +
                 "InstanceGroupBase=" + super.toString() +
                 ", instanceTemplate=" + instanceTemplate +
                 ", securityGroup=" + securityGroup +
+                ", network=" + network +
                 ", metaData=" + metaData +
                 '}';
     }

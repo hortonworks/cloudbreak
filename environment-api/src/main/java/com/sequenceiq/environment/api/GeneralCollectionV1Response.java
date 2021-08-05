@@ -6,6 +6,9 @@ public class GeneralCollectionV1Response<T> {
 
     private Collection<T> responses;
 
+    public GeneralCollectionV1Response() {
+    }
+
     public GeneralCollectionV1Response(Collection<T> responses) {
         this.responses = responses;
     }
