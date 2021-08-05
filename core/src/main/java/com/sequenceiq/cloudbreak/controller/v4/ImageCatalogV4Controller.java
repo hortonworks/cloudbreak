@@ -22,7 +22,6 @@ import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceNameList;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.FilterListBasedOnPermissions;
-import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.annotation.RequestObject;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceName;
@@ -193,7 +192,7 @@ public class ImageCatalogV4Controller extends NotificationController implements 
 
     @Override
     @AccountIdNotNeeded
-    @InternalOnly
+    @DisableCheckPermissions
     public ImageV4Response getImageFromDefaultById(Long workspaceId, @ResourceName String imageId) throws Exception {
         StatedImage statedImage = defaultImageCatalogService.getImageFromDefaultCatalog(imageId);
         return converterUtil.convert(statedImage.getImage(), ImageV4Response.class);
@@ -201,7 +200,7 @@ public class ImageCatalogV4Controller extends NotificationController implements 
 
     @Override
     @AccountIdNotNeeded
-    @InternalOnly
+    @DisableCheckPermissions
     public ImageV4Response getImageFromDefault(Long workspaceId, String type, String provider, String runtime) throws Exception {
         StatedImage statedImage = defaultImageCatalogService.getImageFromDefaultCatalog(type, provider, runtime);
         return converterUtil.convert(statedImage.getImage(), ImageV4Response.class);
