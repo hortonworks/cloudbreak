@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.util.DocumentationLinkProvider;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
@@ -15,6 +16,7 @@ import com.sequenceiq.environment.environment.domain.LocationAwareCredential;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentValidationDto;
 import com.sequenceiq.environment.environment.service.NoSqlTableCreationModeDeterminerService;
+import com.sequenceiq.environment.parameter.dto.AwsDiskEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.AwsParametersDto;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
 import com.sequenceiq.environment.parameter.dto.s3guard.S3GuardTableCreation;
@@ -33,10 +35,13 @@ public class AwsParameterValidator implements ParameterValidator {
 
     private final ParametersService parametersService;
 
+    private EntitlementService entitlementService;
+
     public AwsParameterValidator(NoSqlTableCreationModeDeterminerService noSqlTableCreationModeDeterminerService,
-            ParametersService parametersService) {
+            ParametersService parametersService, EntitlementService entitlementService) {
         this.noSqlTableCreationModeDeterminerService = noSqlTableCreationModeDeterminerService;
         this.parametersService = parametersService;
+        this.entitlementService = entitlementService;
     }
 
     @Override
@@ -62,6 +67,17 @@ public class AwsParameterValidator implements ParameterValidator {
                 determineAwsParameters(environmentDto, parametersDto);
             }
         }
+        ValidationResult validationResult;
+        AwsDiskEncryptionParametersDto awsDiskEncryptionParametersDto = awsParametersDto.getAwsDiskEncryptionParametersDto();
+
+        if (awsDiskEncryptionParametersDto != null) {
+            validationResult = validateEntitlement(validationResultBuilder,
+                    awsDiskEncryptionParametersDto, environmentDto.getAccountId());
+            if (validationResult.hasError()) {
+                return validationResult;
+            }
+        }
+
         if (awsParametersDto.getFreeIpaSpotPercentage() < PERCENTAGE_MIN || awsParametersDto.getFreeIpaSpotPercentage() > PERCENTAGE_MAX) {
             validationResultBuilder.error(String.format("FreeIpa spot percentage must be between %d and %d.", PERCENTAGE_MIN, PERCENTAGE_MAX));
         }
@@ -93,4 +109,23 @@ public class AwsParameterValidator implements ParameterValidator {
                 .withLocation(environment.getLocation().getName())
                 .build();
     }
+
+    //CHECKSTYLE:OFF:FallThroughCheck
+    private ValidationResult validateEntitlement(ValidationResultBuilder validationResultBuilder,
+            AwsDiskEncryptionParametersDto awsDiskEncryptionParametersDto
+             , String accountId) {
+
+        String encryptionKeyArn = awsDiskEncryptionParametersDto.getEncryptionKeyArn();
+        if (Objects.nonNull(encryptionKeyArn)) {
+            if (!entitlementService.isAWSDiskEncryptionWithCMKEnabled(accountId)) {
+                LOGGER.info("Invalid request, CDP_CB_AWS_DISK_ENCRYPTION_WITH_CMK entitlement turned off for account {}", accountId);
+                return validationResultBuilder.error(
+                        "You specified encryptionKeyArn to use Server Side Encryption for AWS Managed disks with CMK, "
+                                + "but that feature is currently disabled. Get 'CDP_CB_AWS_DISK_ENCRYPTION_WITH_CMK' enabled for your account to use SSE with CMK.").
+                        build();
+            }
+        }
+        return validationResultBuilder.build();
+    }
+
 }

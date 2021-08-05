@@ -41,6 +41,7 @@ import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsSpotParamete
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.service.EnvironmentResourceService;
+import com.sequenceiq.environment.environment.validation.validators.EncryptionKeyArnValidator;
 import com.sequenceiq.environment.environment.validation.validators.EncryptionKeyUrlValidator;
 import com.sequenceiq.environment.environment.validation.validators.NetworkCreationValidator;
 import com.sequenceiq.environment.environment.validation.validators.PublicKeyValidator;
@@ -79,6 +80,9 @@ class EnvironmentValidatorServiceTest {
     private EntitlementService entitlementService;
 
     @Mock
+    private EncryptionKeyArnValidator encryptionKeyArnValidator;
+
+    @Mock
     private EncryptionKeyUrlValidator encryptionKeyUrlValidator;
 
     private EnvironmentValidatorService underTest;
@@ -94,6 +98,7 @@ class EnvironmentValidatorServiceTest {
                 singleton(CloudPlatform.AWS.name()),
                 singleton(CloudPlatform.YARN.name()),
                 tagValidator,
+                encryptionKeyArnValidator,
                 encryptionKeyUrlValidator,
                 entitlementService);
     }

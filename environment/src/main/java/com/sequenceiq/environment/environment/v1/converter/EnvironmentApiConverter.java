@@ -32,6 +32,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNe
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.LocationRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.SecurityAccessRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsDiskEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsFreeIpaParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.S3GuardRequestParameters;
@@ -53,6 +54,7 @@ import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentFeatures;
 import com.sequenceiq.environment.network.dto.NetworkDto;
+import com.sequenceiq.environment.parameter.dto.AwsDiskEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.AwsParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureResourceEncryptionParametersDto;
@@ -191,6 +193,11 @@ public class EnvironmentApiConverter {
                 .withDynamoDbTableName(Optional.ofNullable(aws)
                         .map(AwsEnvironmentParameters::getS3guard)
                         .map(S3GuardRequestParameters::getDynamoDbTableName)
+                        .orElse(null))
+                .withAwsDiskEncryptionParameters(Optional.ofNullable(aws)
+                        .map(AwsEnvironmentParameters::getAwsDiskEncryptionParameters)
+                        .filter(awsDiskEncryptionParameters ->  Objects.nonNull(awsDiskEncryptionParameters.getEncryptionKeyArn()))
+                        .map(this::awsDiskEncryptionParametersToAwsDiskEncryptionParametersDto)
                         .orElse(null));
         Optional.ofNullable(awsFreeIpa)
                 .map(AwsFreeIpaParameters::getSpot)
@@ -198,7 +205,15 @@ public class EnvironmentApiConverter {
                     builder.withFreeIpaSpotPercentage(awsFreeIpaSpotParameters.getPercentage())
                             .withFreeIpaSpotMaxPrice(awsFreeIpaSpotParameters.getMaxPrice());
                 });
+
         return builder.build();
+    }
+
+    private AwsDiskEncryptionParametersDto awsDiskEncryptionParametersToAwsDiskEncryptionParametersDto(
+            AwsDiskEncryptionParameters awsDiskEncryptionParameters) {
+        AwsDiskEncryptionParametersDto.Builder awsDiskEncryptionParametersDto = AwsDiskEncryptionParametersDto.builder()
+                .withEncryptionKeyArn(awsDiskEncryptionParameters.getEncryptionKeyArn());
+        return awsDiskEncryptionParametersDto.build();
     }
 
     private AzureParametersDto azureParamsToAzureParametersDto(AzureEnvironmentParameters azureEnvironmentParameters) {

@@ -17,6 +17,7 @@ import com.sequenceiq.environment.environment.domain.EnvironmentViewConverter;
 import com.sequenceiq.environment.parameters.dao.domain.AwsParameters;
 import com.sequenceiq.environment.parameters.dao.domain.BaseParameters;
 import com.sequenceiq.environment.parameter.dto.s3guard.S3GuardTableCreation;
+import com.sequenceiq.environment.parameter.dto.AwsDiskEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.AwsParametersDto;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
 
@@ -32,6 +33,8 @@ class AwsEnvironmentParametersConverterTest {
     private static final EnvironmentView ENVIRONMENT_VIEW = new EnvironmentView();
 
     private static final long ID = 10L;
+
+    private static final String ENCRYPTION_KEY_ARN = "dummy-key-arn";
 
     @Mock
     private EnvironmentViewConverter environmentViewConverter;
@@ -52,18 +55,24 @@ class AwsEnvironmentParametersConverterTest {
     @Test
     void convertTest() {
         when(environmentViewConverter.convert(any(Environment.class))).thenReturn(ENVIRONMENT_VIEW);
-        ParametersDto parameters = ParametersDto.builder()
-                .withId(ID)
-                .withAwsParameters(AwsParametersDto.builder()
-                        .withDynamoDbTableName(TABLE_NAME)
-                        .withDynamoDbTableCreation(S3GuardTableCreation.CREATE_NEW)
-                        .build())
-                .build();
+        ParametersDto builder = ParametersDto.builder()
+                                .withId(ID)
+                                .withAwsParameters(AwsParametersDto.builder()
+                                    .withDynamoDbTableName(TABLE_NAME)
+                                    .withDynamoDbTableCreation(S3GuardTableCreation.CREATE_NEW)
+                                    .withAwsDiskEncryptionParameters(AwsDiskEncryptionParametersDto.builder()
+                                    .withEncryptionKeyArn("dummy-key-arn")
+                                    .build())
+                                .build())
+                            .build();
+
+
+
         Environment environment = new Environment();
         environment.setName(ENV_NAME);
         environment.setAccountId(ACCOUNT_ID);
 
-        BaseParameters result = underTest.convert(environment, parameters);
+        BaseParameters result = underTest.convert(environment, builder);
 
         assertEquals(AwsParameters.class, result.getClass());
         AwsParameters awsResult = (AwsParameters) result;
@@ -87,6 +96,7 @@ class AwsEnvironmentParametersConverterTest {
         parameters.setS3guardTableCreation(S3GuardTableCreation.CREATE_NEW);
         parameters.setFreeIpaSpotPercentage(null);
         parameters.setFreeIpaSpotMaxPrice(0.9);
+        parameters.setEncryptionKeyArn(ENCRYPTION_KEY_ARN);
 
         ParametersDto result = underTest.convertToDto(parameters);
 
@@ -97,5 +107,6 @@ class AwsEnvironmentParametersConverterTest {
         assertEquals(S3GuardTableCreation.CREATE_NEW, result.getAwsParametersDto().getDynamoDbTableCreation());
         assertEquals(0, result.getAwsParametersDto().getFreeIpaSpotPercentage());
         assertEquals(0.9, result.getAwsParametersDto().getFreeIpaSpotMaxPrice());
+        assertEquals(ENCRYPTION_KEY_ARN, result.getAwsParametersDto().getAwsDiskEncryptionParametersDto().getEncryptionKeyArn());
     }
 }

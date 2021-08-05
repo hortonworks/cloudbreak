@@ -53,6 +53,7 @@ import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.network.dto.NetworkDto;
+import com.sequenceiq.environment.parameter.dto.AwsDiskEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.AwsParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureResourceEncryptionParametersDto;
@@ -210,6 +211,8 @@ public class EnvironmentResponseConverterTest {
     private void assertParameters(EnvironmentDto environment, EnvironmentBaseResponse actual, CloudPlatform cloudPlatform) {
         if (AWS.equals(cloudPlatform)) {
             assertEquals(environment.getParameters().getAwsParametersDto().getS3GuardTableName(), actual.getAws().getS3guard().getDynamoDbTableName());
+            assertEquals(environment.getParameters().getAwsParametersDto().getAwsDiskEncryptionParametersDto().getEncryptionKeyArn(),
+                    actual.getAws().getAwsDiskEncryptionParameters().getEncryptionKeyArn());
         } else {
             assertAzureParameters(environment.getParameters().getAzureParametersDto(), actual.getAzure());
         }
@@ -316,6 +319,11 @@ public class EnvironmentResponseConverterTest {
         return ParametersDto.builder()
                 .withAwsParameters(AwsParametersDto.builder()
                         .withDynamoDbTableName("my-table")
+                        .build())
+                .withAwsParameters(AwsParametersDto.builder()
+                        .withAwsDiskEncryptionParameters(AwsDiskEncryptionParametersDto.builder()
+                        .withEncryptionKeyArn("dummy-key-arn")
+                        .build())
                         .build())
                 .build();
     }
