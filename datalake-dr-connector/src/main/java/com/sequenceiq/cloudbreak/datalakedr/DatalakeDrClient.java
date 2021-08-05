@@ -56,7 +56,7 @@ public class DatalakeDrClient {
         }
 
         checkNotNull(datalakeName);
-        checkNotNull(actorCrn);
+        checkNotNull(actorCrn, "actorCrn should not be null.");
         checkNotNull(backupLocation);
 
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
@@ -79,7 +79,7 @@ public class DatalakeDrClient {
         }
 
         checkNotNull(datalakeName);
-        checkNotNull(actorCrn);
+        checkNotNull(actorCrn, "actorCrn should not be null.");
 
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
             RestoreDatalakeRequest.Builder builder = RestoreDatalakeRequest.newBuilder()
@@ -111,7 +111,7 @@ public class DatalakeDrClient {
         }
 
         checkNotNull(datalakeName);
-        checkNotNull(actorCrn);
+        checkNotNull(actorCrn, "actorCrn should not be null.");
 
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
             BackupDatalakeStatusRequest.Builder builder = BackupDatalakeStatusRequest.newBuilder()
@@ -135,7 +135,7 @@ public class DatalakeDrClient {
         }
 
         checkNotNull(datalakeName);
-        checkNotNull(actorCrn);
+        checkNotNull(actorCrn, "actorCrn should not be null.");
 
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
             BackupDatalakeStatusRequest.Builder builder = BackupDatalakeStatusRequest.newBuilder()
@@ -158,7 +158,7 @@ public class DatalakeDrClient {
         }
 
         checkNotNull(datalakeName);
-        checkNotNull(actorCrn);
+        checkNotNull(actorCrn, "actorCrn should not be null.");
         checkNotNull(backupId);
 
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
@@ -181,7 +181,7 @@ public class DatalakeDrClient {
         }
 
         checkNotNull(datalakeName);
-        checkNotNull(actorCrn);
+        checkNotNull(actorCrn, "actorCrn should not be null.");
         checkNotNull(restoreId);
 
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
@@ -210,7 +210,7 @@ public class DatalakeDrClient {
         }
 
         checkNotNull(datalakeName);
-        checkNotNull(actorCrn);
+        checkNotNull(actorCrn, "actorCrn should not be null.");
 
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
             RestoreDatalakeStatusRequest.Builder builder = RestoreDatalakeStatusRequest.newBuilder()
@@ -234,7 +234,7 @@ public class DatalakeDrClient {
         }
 
         checkNotNull(datalakeName);
-        checkNotNull(actorCrn);
+        checkNotNull(actorCrn, "actorCrn should not be null.");
 
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
             RestoreDatalakeStatusRequest.Builder builder = RestoreDatalakeStatusRequest.newBuilder()
@@ -253,7 +253,7 @@ public class DatalakeDrClient {
         }
 
         checkNotNull(datalakeName);
-        checkNotNull(actorCrn);
+        checkNotNull(actorCrn, "actorCrn should not be null.");
 
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
             ListDatalakeBackupRequest.Builder builder = ListDatalakeBackupRequest.newBuilder()
@@ -278,7 +278,7 @@ public class DatalakeDrClient {
 
         checkNotNull(datalakeName);
         checkNotNull(backupId);
-        checkNotNull(actorCrn);
+        checkNotNull(actorCrn, "actorCrn should not be null.");
 
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
             ListDatalakeBackupRequest.Builder builder = ListDatalakeBackupRequest.newBuilder()
@@ -317,7 +317,7 @@ public class DatalakeDrClient {
      * @return the stub
      */
     private datalakeDRBlockingStub newStub(ManagedChannel channel, String requestId, String actorCrn) {
-        checkNotNull(requestId);
+        checkNotNull(requestId, "requestId should not be null.");
         return datalakeDRGrpc.newBlockingStub(channel)
             .withInterceptors(GrpcUtil.getTracingInterceptor(tracer), new AltusMetadataInterceptor(requestId, actorCrn));
     }

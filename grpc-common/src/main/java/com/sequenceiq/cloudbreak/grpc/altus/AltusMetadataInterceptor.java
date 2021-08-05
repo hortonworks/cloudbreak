@@ -59,8 +59,8 @@ public class AltusMetadataInterceptor implements ClientInterceptor {
      * @param actorCrn  the actor CRN
      */
     public AltusMetadataInterceptor(String requestId, String actorCrn) {
-        this.requestId = checkNotNull(requestId);
-        this.actorCrn = checkNotNull(actorCrn);
+        this.requestId = checkNotNull(requestId, "requestId should not be null.");
+        this.actorCrn = checkNotNull(actorCrn, "actorCrn should not be null.");
     }
 
     @Override

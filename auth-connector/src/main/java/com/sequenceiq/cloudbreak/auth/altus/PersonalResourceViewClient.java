@@ -32,15 +32,15 @@ public class PersonalResourceViewClient {
      * @param tracer   tracer
      */
     PersonalResourceViewClient(ManagedChannel channel, String actorCrn, Tracer tracer) {
-        this.channel = checkNotNull(channel);
-        this.actorCrn = checkNotNull(actorCrn);
+        this.channel = checkNotNull(channel, "channel should not be null.");
+        this.actorCrn = checkNotNull(actorCrn, "actorCrn should not be null.");
         this.tracer = tracer;
     }
 
     public List<Boolean> hasRightOnResources(String requestId, String actorCrn, String right, Iterable<String> resources) {
-        checkNotNull(requestId);
-        checkNotNull(actorCrn);
-        checkNotNull(resources);
+        checkNotNull(requestId, "requestId should not be null.");
+        checkNotNull(actorCrn, "actorCrn should not be null.");
+        checkNotNull(resources, "resources should not be null.");
         return newStub(requestId)
                 .hasResourcesByRight(
                         PersonalResourceViewProto.HasResourcesByRightRequest
@@ -59,7 +59,7 @@ public class PersonalResourceViewClient {
      * @return the stub
      */
     private PersonalResourceViewGrpc.PersonalResourceViewBlockingStub newStub(String requestId) {
-        checkNotNull(requestId);
+        checkNotNull(requestId, "requestId should not be null.");
         return PersonalResourceViewGrpc.newBlockingStub(channel).withInterceptors(
                 GrpcUtil.getTracingInterceptor(tracer),
                 new AltusMetadataInterceptor(requestId, actorCrn)

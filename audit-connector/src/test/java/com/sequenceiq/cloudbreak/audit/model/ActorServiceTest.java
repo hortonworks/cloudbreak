@@ -14,7 +14,7 @@ class ActorServiceTest {
     static Object[][] scenarios() {
         return new Object[][] {
             // testName        serviceName   valid  expectedThrowable,              errorMessage
-            { "Null Service Name",    null,  false, NullPointerException.class,     null                                                                      },
+            { "Null Service Name",    null,  false, NullPointerException.class,     "input should not be null."                                                                      },
             { "Empty Service Name",   "",    false, IllegalArgumentException.class, "Actor service name must be a valid service name as represented in a CRN" },
             { "Invalid Service Name", "aim", false, IllegalArgumentException.class, "Actor service name must be a valid service name as represented in a CRN" },
             { "Valid Service Name",   "iam", true,  null,                           null                                                                      },
@@ -40,6 +40,6 @@ class ActorServiceTest {
 
         ThrowingCallable constructor = () -> ActorService.builder().build();
 
-        assertConstruction(constructor, false, NullPointerException.class, null);
+        assertConstruction(constructor, false, NullPointerException.class, "input should not be null.");
     }
 }

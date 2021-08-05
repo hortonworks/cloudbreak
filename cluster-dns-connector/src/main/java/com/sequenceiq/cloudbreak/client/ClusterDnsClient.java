@@ -38,8 +38,8 @@ public class ClusterDnsClient {
     }
 
     public String signCertificate(String requestId, String accountId, String environment, byte[] csr) {
-        checkNotNull(requestId);
-        checkNotNull(accountId);
+        checkNotNull(requestId, "requestId should not be null.");
+        checkNotNull(accountId, "accountId should not be null.");
         CertificateSigningRequest.Builder requestBuilder = CertificateSigningRequest.newBuilder()
                 .setAccountId(accountId)
                 .setEnvironmentName(environment)
@@ -49,7 +49,7 @@ public class ClusterDnsClient {
     }
 
     public PollCertificateSigningResponse pollCertificateSigning(String requestId, String workflowId) {
-        checkNotNull(requestId);
+        checkNotNull(requestId, "requestId should not be null.");
         final PollCertificateSigningRequest.Builder builder = PollCertificateSigningRequest
                 .newBuilder()
                 .setWorkflowId(workflowId);
@@ -59,7 +59,7 @@ public class ClusterDnsClient {
 
     public CreateDnsEntryResponse createDnsEntryWithIp(String requestId, String accountId, String endpoint, String environment, boolean wildcard,
             List<String> ips) {
-        checkNotNull(requestId);
+        checkNotNull(requestId, "requestId should not be null.");
 
         DnsTarget dnsTarget = DnsTarget.newBuilder()
                 .setTargetIPs(IPs.newBuilder().addAllIP(ips).build())
@@ -77,7 +77,7 @@ public class ClusterDnsClient {
 
     public DeleteDnsEntryResponse deleteDnsEntryWithIp(String requestId, String accountId, String endpoint, String environment, boolean wildcard,
             List<String> ips) {
-        checkNotNull(requestId);
+        checkNotNull(requestId, "requestId should not be null.");
         DnsTarget dnsTarget = DnsTarget.newBuilder()
                 .setTargetIPs(IPs.newBuilder().addAllIP(ips).build())
                 .build();
@@ -92,7 +92,7 @@ public class ClusterDnsClient {
 
     public CreateDnsEntryResponse createDnsEntryWithCloudDns(String requestId, String accountId, String endpoint,
             String environment, String cloudDns, String hostedZoneId) {
-        checkNotNull(requestId);
+        checkNotNull(requestId, "requestId should not be null.");
 
         AWSElbDnsTarget awsElbDnsTarget = AWSElbDnsTarget.newBuilder()
             .setDnsName(cloudDns)
@@ -114,7 +114,7 @@ public class ClusterDnsClient {
 
     public DeleteDnsEntryResponse deleteDnsEntryWithCloudDns(String requestId, String accountId, String endpoint,
             String environment, String cloudDns, String hostedZoneId) {
-        checkNotNull(requestId);
+        checkNotNull(requestId, "requestId should not be null.");
 
         AWSElbDnsTarget awsElbDnsTarget = AWSElbDnsTarget.newBuilder()
             .setDnsName(cloudDns)
@@ -141,7 +141,7 @@ public class ClusterDnsClient {
      * @return the stub
      */
     private PublicEndpointManagementBlockingStub newStub(String requestId) {
-        checkNotNull(requestId);
+        checkNotNull(requestId, "requestId should not be null.");
         return PublicEndpointManagementGrpc.newBlockingStub(channel)
                 .withInterceptors(GrpcUtil.getTracingInterceptor(tracer),
                         new AltusMetadataInterceptor(requestId, actorCrn));

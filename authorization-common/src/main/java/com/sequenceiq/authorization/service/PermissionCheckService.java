@@ -65,7 +65,7 @@ public class PermissionCheckService {
 
         if (!internalUser && !hasAnnotationOnClass(proceedingJoinPoint, DisableCheckPermissions.class)
                 && !hasAnyAnnotationOnMethod(methodSignature, DisableCheckPermissions.class, CustomPermissionCheck.class)) {
-            checkNotNull(userCrn);
+            checkNotNull(userCrn, "userCrn should not be null.");
             validateNotInternalOnly(proceedingJoinPoint, methodSignature);
             if (hasAnnotationOnMethod(methodSignature, CheckPermissionByAccount.class)) {
                 accountAuthorizationService.authorize(methodSignature.getMethod().getAnnotation(CheckPermissionByAccount.class), userCrn);

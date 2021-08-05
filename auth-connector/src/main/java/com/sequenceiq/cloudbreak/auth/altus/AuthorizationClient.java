@@ -32,14 +32,14 @@ public class AuthorizationClient {
      * @param tracer   tracer
      */
     AuthorizationClient(ManagedChannel channel, Tracer tracer) {
-        this.channel = checkNotNull(channel);
+        this.channel = checkNotNull(channel, "channel should not be null.");
         this.tracer = tracer;
     }
 
     public void checkRight(String requestId, String userCrn, String right, String resource) {
-        checkNotNull(requestId);
-        checkNotNull(userCrn);
-        checkNotNull(right);
+        checkNotNull(requestId, "requestId should not be null.");
+        checkNotNull(userCrn, "userCrn should not be null.");
+        checkNotNull(right, "right should not be null.");
         AuthorizationProto.RightCheck.Builder rightCheckBuilder = AuthorizationProto.RightCheck.newBuilder().setRight(right);
         if (!StringUtils.isEmpty(resource)) {
             rightCheckBuilder.setResource(resource);
@@ -53,9 +53,9 @@ public class AuthorizationClient {
     }
 
     public List<Boolean> hasRights(String requestId, String actorCrn, Iterable<AuthorizationProto.RightCheck> rightChecks) {
-        checkNotNull(requestId);
-        checkNotNull(actorCrn);
-        checkNotNull(rightChecks);
+        checkNotNull(requestId, "requestId should not be null.");
+        checkNotNull(actorCrn, "actorCrn should not be null.");
+        checkNotNull(rightChecks, "rightChecks should not be null.");
         AuthorizationProto.HasRightsResponse response = newStub(requestId).hasRights(
                 AuthorizationProto.HasRightsRequest.newBuilder()
                         .setActorCrn(actorCrn)
@@ -72,7 +72,7 @@ public class AuthorizationClient {
      * @return the stub
      */
     private AuthorizationGrpc.AuthorizationBlockingStub newStub(String requestId) {
-        checkNotNull(requestId);
+        checkNotNull(requestId, "requestId should not be null.");
         return AuthorizationGrpc.newBlockingStub(channel).withInterceptors(
                 GrpcUtil.getTracingInterceptor(tracer),
                 new AltusMetadataInterceptor(requestId, INTERNAL_ACTOR_CRN)

@@ -31,7 +31,7 @@ public class InternalCrnBuilder {
      * @throws NullPointerException if {@code serviceType == null}
      */
     public InternalCrnBuilder(Service serviceType) {
-        checkNotNull(serviceType);
+        checkNotNull(serviceType, "serviceType should not be null.");
         this.serviceType = serviceType;
     }
 

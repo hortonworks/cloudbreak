@@ -80,9 +80,9 @@ public class GrpcUmsClient {
 
     public static GrpcUmsClient createClient(ManagedChannelWrapper channelWrapper, UmsClientConfig clientConfig, Tracer tracer) {
         GrpcUmsClient client = new GrpcUmsClient();
-        client.channelWrapper = Preconditions.checkNotNull(channelWrapper);
-        client.umsClientConfig = Preconditions.checkNotNull(clientConfig);
-        client.tracer = Preconditions.checkNotNull(tracer);
+        client.channelWrapper = Preconditions.checkNotNull(channelWrapper, "channelWrapper should not be null.");
+        client.umsClientConfig = Preconditions.checkNotNull(clientConfig, "clientConfig should not be null.");
+        client.tracer = Preconditions.checkNotNull(tracer, "tracer should not be null.");
         return client;
     }
 

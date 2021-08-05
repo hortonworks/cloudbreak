@@ -117,7 +117,7 @@ public class AuditClient {
      * @return the stub
      */
     private AuditBlockingStub newStub(ManagedChannel channel, String requestId, String actorCrn) {
-        checkNotNull(requestId);
+        checkNotNull(requestId, "requestId should not be null.");
         return AuditGrpc.newBlockingStub(channel)
                 .withInterceptors(GrpcUtil.getTracingInterceptor(tracer),
                         new AltusMetadataInterceptor(requestId, actorCrn));

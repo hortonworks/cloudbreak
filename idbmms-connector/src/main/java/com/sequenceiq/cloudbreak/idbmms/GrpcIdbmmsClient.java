@@ -46,9 +46,9 @@ public class GrpcIdbmmsClient {
      * @throws IdbmmsOperationException if any problem is encountered during the IDBMMS call processing
      */
     public MappingsConfig getMappingsConfig(String actorCrn, String environmentCrn, Optional<String> requestId) {
-        checkNotNull(actorCrn);
+        checkNotNull(actorCrn, "actorCrn should not be null.");
         checkNotNull(environmentCrn);
-        checkNotNull(requestId);
+        checkNotNull(requestId, "requestId should not be null.");
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
             IdbmmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
             String effectiveRequestId = requestId.orElse(UUID.randomUUID().toString());
@@ -71,9 +71,9 @@ public class GrpcIdbmmsClient {
      * @throws IdbmmsOperationException if any problem is encountered during the IDBMMS call processing
      */
     public void deleteMappings(String actorCrn, String environmentCrn, Optional<String> requestId) {
-        checkNotNull(actorCrn);
+        checkNotNull(actorCrn, "actorCrn should not be null.");
         checkNotNull(environmentCrn);
-        checkNotNull(requestId);
+        checkNotNull(requestId, "requestId should not be null.");
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
             IdbmmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
             String effectiveRequestId = requestId.orElse(UUID.randomUUID().toString());

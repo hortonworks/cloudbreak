@@ -26,9 +26,9 @@ public class RequestContextServerInterceptor implements ServerInterceptor {
         if (!"usermanagement.UserManagement/VerifyInteractiveUserSessionToken".equals(serverCall.getMethodDescriptor().getFullMethodName())
                 && !"usermanagement.UserManagement/Authenticate".equals(serverCall.getMethodDescriptor().getFullMethodName())) {
             String requestId = metadata.get(REQUEST_ID_METADATA_KEY);
-            checkNotNull(requestId);
+            checkNotNull(requestId, "requestId should not be null.");
             String actorCrn = metadata.get(ACTOR_CRN_METADATA_KEY);
-            checkNotNull(actorCrn);
+            checkNotNull(actorCrn, "actorCrn should not be null.");
 
             GrpcRequestContext requestContext = new GrpcRequestContext(requestId);
             GrpcActorContext actorContext = new GrpcActorContext(actorCrn);
@@ -45,7 +45,7 @@ public class RequestContextServerInterceptor implements ServerInterceptor {
             }
         } else {
             String requestId = metadata.get(REQUEST_ID_METADATA_KEY);
-            checkNotNull(requestId);
+            checkNotNull(requestId, "requestId should not be null.");
             GrpcRequestContext requestContext =
                     new GrpcRequestContext(requestId);
             Context context = Context.current().withValue(GrpcRequestContext.REQUEST_CONTEXT, requestContext);
