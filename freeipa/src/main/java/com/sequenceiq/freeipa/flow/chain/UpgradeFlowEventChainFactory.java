@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
@@ -67,12 +68,12 @@ public class UpgradeFlowEventChainFactory implements FlowEventChainFactory<Upgra
         List<Selectable> events = new ArrayList<>(PRIMARY_GW_EVENT_COUNT);
         events.add(new UpscaleEvent(UpscaleFlowEvent.UPSCALE_EVENT.event(),
                 event.getResourceId(), instanceCountForUpscale, Boolean.FALSE, true, false, event.getOperationId()));
-        List<String> oldInstances = new ArrayList<>(event.getInstanceIds());
+        ArrayList<String> oldInstances = new ArrayList<>(event.getInstanceIds());
         oldInstances.add(event.getPrimareGwInstanceId());
         events.add(new ChangePrimaryGatewayEvent(ChangePrimaryGatewayFlowEvent.CHANGE_PRIMARY_GATEWAY_EVENT.event(), event.getResourceId(),
                 oldInstances, Boolean.FALSE, event.getOperationId()));
-        events.add(new DownscaleEvent(DownscaleFlowEvent.DOWNSCALE_EVENT.event(),
-                event.getResourceId(), List.of(event.getPrimareGwInstanceId()), instanceCountForDownscale, false, true, false, event.getOperationId()));
+        events.add(new DownscaleEvent(DownscaleFlowEvent.DOWNSCALE_EVENT.event(), event.getResourceId(), Lists.newArrayList(event.getPrimareGwInstanceId()),
+                instanceCountForDownscale, false, true, false, event.getOperationId()));
         return events;
     }
 
@@ -85,7 +86,7 @@ public class UpgradeFlowEventChainFactory implements FlowEventChainFactory<Upgra
             events.add(new UpscaleEvent(UpscaleFlowEvent.UPSCALE_EVENT.event(),
                     event.getResourceId(), instanceCountForUpscale, Boolean.FALSE, true, false, event.getOperationId()));
             events.add(new DownscaleEvent(DownscaleFlowEvent.DOWNSCALE_EVENT.event(),
-                    event.getResourceId(), List.of(instanceId), instanceCountForDownscale, false, true, false, event.getOperationId()));
+                    event.getResourceId(), Lists.newArrayList(instanceId), instanceCountForDownscale, false, true, false, event.getOperationId()));
         }
         return events;
     }

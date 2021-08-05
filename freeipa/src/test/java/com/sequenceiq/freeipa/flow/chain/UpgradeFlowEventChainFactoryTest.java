@@ -8,10 +8,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 import java.util.Queue;
-import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
+import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
@@ -39,7 +39,7 @@ class UpgradeFlowEventChainFactoryTest {
     @Test
     public void testFlowChainCreation() {
         ImageSettingsRequest imageSettingsRequest = new ImageSettingsRequest();
-        UpgradeEvent event = new UpgradeEvent("selector", STACK_ID, Set.of("repl1", "repl2"), "pgw", OPERATION_ID, imageSettingsRequest, false);
+        UpgradeEvent event = new UpgradeEvent("selector", STACK_ID, Sets.newHashSet("repl1", "repl2"), "pgw", OPERATION_ID, imageSettingsRequest, false);
 
         FlowTriggerEventQueue eventQueue = underTest.createFlowTriggerEventQueue(event);
 
@@ -142,7 +142,7 @@ class UpgradeFlowEventChainFactoryTest {
     @Test
     public void testFlowChainCreationWithBackup() {
         ImageSettingsRequest imageSettingsRequest = new ImageSettingsRequest();
-        UpgradeEvent event = new UpgradeEvent("selector", STACK_ID, Set.of("repl1", "repl2"), "pgw", OPERATION_ID, imageSettingsRequest, true);
+        UpgradeEvent event = new UpgradeEvent("selector", STACK_ID, Sets.newHashSet("repl1", "repl2"), "pgw", OPERATION_ID, imageSettingsRequest, true);
 
         FlowTriggerEventQueue eventQueue = underTest.createFlowTriggerEventQueue(event);
 

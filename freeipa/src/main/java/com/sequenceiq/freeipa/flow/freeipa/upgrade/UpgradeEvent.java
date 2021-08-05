@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.flow.freeipa.upgrade;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
@@ -7,7 +8,8 @@ import com.sequenceiq.freeipa.flow.stack.StackEvent;
 
 public class UpgradeEvent extends StackEvent {
 
-    private final Set<String> instanceIds;
+    @SuppressWarnings("IllegalType")
+    private final HashSet<String> instanceIds;
 
     private final String primareGwInstanceId;
 
@@ -17,7 +19,7 @@ public class UpgradeEvent extends StackEvent {
 
     private final boolean backupSet;
 
-    public UpgradeEvent(String selector, Long stackId, Set<String> instanceIds, String primareGwInstanceId, String operationId,
+    public UpgradeEvent(String selector, Long stackId, HashSet<String> instanceIds, String primareGwInstanceId, String operationId,
             ImageSettingsRequest imageSettingsRequest, boolean backupSet) {
         super(selector, stackId);
         this.instanceIds = instanceIds;
