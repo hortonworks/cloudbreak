@@ -81,4 +81,8 @@ public class ResourceService {
             Long stackId) {
         return repository.findByResourceReferenceAndStatusAndTypeAndStack(resourceReference, status, resourceType, stackId);
     }
+
+    public Optional<Resource> findFirstByStatusAndTypeAndStack(CommonStatus status, ResourceType resourceType, Long stackId) {
+        return repository.findFirstByResourceStatusAndResourceTypeAndStackId(status, resourceType, stackId);
+    }
 }

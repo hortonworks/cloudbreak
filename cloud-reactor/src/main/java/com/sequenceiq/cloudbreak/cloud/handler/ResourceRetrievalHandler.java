@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -32,12 +33,16 @@ public class ResourceRetrievalHandler implements Consumer<Event<ResourceRetrieva
     }
 
     private Optional<CloudResource> retrieveResource(ResourceRetrievalNotification data) {
-        if (data.getStackId() != null) {
-            return cloudResourceRetrieverService.findByResourceReferenceAndStatusAndTypeAndStack(data.getResourceReference(),
+        Optional<CloudResource> result;
+        if (data.getStackId() != null && StringUtils.isNotEmpty(data.getResourceReference())) {
+            result = cloudResourceRetrieverService.findByResourceReferenceAndStatusAndTypeAndStack(data.getResourceReference(),
                     data.getStatus(), data.getResourceType(), data.getStackId());
+        } else if (data.getStackId() != null && StringUtils.isEmpty(data.getResourceReference())) {
+            result = cloudResourceRetrieverService.findFirstByStatusAndTypeAndStack(data.getStatus(), data.getResourceType(), data.getStackId());
         } else {
-            return cloudResourceRetrieverService.findByResourceReferenceAndStatusAndType(data.getResourceReference(), data.getStatus(),
+            result = cloudResourceRetrieverService.findByResourceReferenceAndStatusAndType(data.getResourceReference(), data.getStatus(),
                     data.getResourceType());
         }
+        return result;
     }
 }

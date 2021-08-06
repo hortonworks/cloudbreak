@@ -14,4 +14,8 @@ public interface ResourceRetriever {
             Long stackId) {
         throw new UnsupportedOperationException("Interface not implemented.");
     }
+
+    default Optional<CloudResource> findFirstByStatusAndTypeAndStack(CommonStatus status, ResourceType resourceType, Long stackId) {
+        throw new UnsupportedOperationException("Interface not implemented.");
+    }
 }

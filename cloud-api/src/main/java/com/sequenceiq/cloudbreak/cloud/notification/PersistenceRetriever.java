@@ -33,4 +33,8 @@ public interface PersistenceRetriever {
     default Optional<CloudResource> notifyRetrieve(Long stackId, String resourceReference, CommonStatus status, ResourceType resourceType) {
         throw new UnsupportedOperationException("Interface not implemented.");
     }
+
+    default Optional<CloudResource> retrieveFirstByTypeAndStatusForStack(ResourceType resourceType, CommonStatus status, Long stackId) {
+        throw new UnsupportedOperationException("Interface not implemented.");
+    }
 }
