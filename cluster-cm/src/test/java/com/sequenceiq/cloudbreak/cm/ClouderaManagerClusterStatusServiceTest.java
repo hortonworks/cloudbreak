@@ -16,6 +16,7 @@ import static org.mockito.Mockito.when;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
@@ -261,7 +262,7 @@ public class ClouderaManagerClusterStatusServiceTest {
                 hostName("host3"), ClusterManagerState.ClusterManagerStatus.UNHEALTHY
         );
 
-        ExtendedHostStatuses extendedHostStatuses = subject.getExtendedHostStatuses();
+        ExtendedHostStatuses extendedHostStatuses = subject.getExtendedHostStatuses(Optional.of("7.2.11"));
         Map<HostName, ClusterManagerState> extendedStateMap = extendedHostStatuses.getHostHealth();
         Map<HostName, ClusterManagerState.ClusterManagerStatus> actual = new TreeMap<>(extendedStateMap.entrySet().stream()
                 .map(e -> Pair.of(e.getKey(), e.getValue().getClusterManagerStatus()))
@@ -283,7 +284,7 @@ public class ClouderaManagerClusterStatusServiceTest {
                                 .explanation("in 30 days"))
         );
 
-        ExtendedHostStatuses extendedHostStatuses = subject.getExtendedHostStatuses();
+        ExtendedHostStatuses extendedHostStatuses = subject.getExtendedHostStatuses(Optional.of("7.2.11"));
         Map<HostName, ClusterManagerState> extendedStateMap = extendedHostStatuses.getHostHealth();
 
         Map<HostName, ClusterManagerState> expected = Map.of(hostName("host1"), new ClusterManagerState(ClusterManagerStatus.HEALTHY, null),
@@ -310,7 +311,7 @@ public class ClouderaManagerClusterStatusServiceTest {
                         .addRoleRefsItem(roleRef("badservice3", ApiHealthSummary.BAD))
         );
 
-        ExtendedHostStatuses extendedHostStatuses = subject.getExtendedHostStatuses();
+        ExtendedHostStatuses extendedHostStatuses = subject.getExtendedHostStatuses(Optional.of("7.2.12"));
         Map<HostName, ClusterManagerState> extendedStateMap = extendedHostStatuses.getHostHealth();
 
         Map<HostName, ClusterManagerState> expected = Map.of(
@@ -321,6 +322,18 @@ public class ClouderaManagerClusterStatusServiceTest {
 
         assertEquals(expected.keySet(), extendedStateMap.keySet());
         extendedStateMap.values().forEach(state -> assertEquals(ClusterManagerStatus.UNHEALTHY, state.getClusterManagerStatus()));
+        assertFalse(extendedHostStatuses.isHostCertExpiring());
+
+        extendedHostStatuses = subject.getExtendedHostStatuses(Optional.of("7.2.11"));
+        extendedStateMap = extendedHostStatuses.getHostHealth();
+
+        expected = Map.of(
+                hostName("host1"), new ClusterManagerState(ClusterManagerStatus.UNHEALTHY,
+                        "HOST_SCM_HEALTH: BAD. Reason: explanation"),
+                hostName("host2"), new ClusterManagerState(ClusterManagerStatus.HEALTHY, null));
+        assertEquals(expected.keySet(), extendedStateMap.keySet());
+        assertEquals(ClusterManagerStatus.UNHEALTHY, expected.get(hostName("host1")).getClusterManagerStatus());
+        assertEquals(ClusterManagerStatus.HEALTHY, expected.get(hostName("host2")).getClusterManagerStatus());
         assertFalse(extendedHostStatuses.isHostCertExpiring());
     }
 
@@ -336,7 +349,7 @@ public class ClouderaManagerClusterStatusServiceTest {
                                 .explanation("in 30 days"))
         );
 
-        ExtendedHostStatuses extendedHostStatuses = subject.getExtendedHostStatuses();
+        ExtendedHostStatuses extendedHostStatuses = subject.getExtendedHostStatuses(Optional.of("7.2.11"));
         Map<HostName, ClusterManagerState> extendedStateMap = extendedHostStatuses.getHostHealth();
 
         Map<HostName, ClusterManagerState> expected = Map.of(hostName("host1"), new ClusterManagerState(ClusterManagerStatus.HEALTHY, null),

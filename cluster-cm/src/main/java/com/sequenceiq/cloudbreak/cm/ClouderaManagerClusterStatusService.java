@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
@@ -58,6 +59,7 @@ import com.sequenceiq.cloudbreak.cluster.status.ExtendedHostStatuses;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
+import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.common.type.ClusterManagerState;
 import com.sequenceiq.cloudbreak.common.type.ClusterManagerState.ClusterManagerStatus;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -243,19 +245,22 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
     }
 
     @Override
-    public ExtendedHostStatuses getExtendedHostStatuses() {
+    public ExtendedHostStatuses getExtendedHostStatuses(Optional<String> runtimeVersion) {
         List<ApiHost> apiHostList = getHostsFromCM();
         Map<HostName, Collection<ApiHealthCheck>> hostHealth = getHostHealth(apiHostList);
         Map<HostName, ClusterManagerState> clusterManagerStateByHost = hostHealth.entrySet().stream()
                 .flatMap(this::getScmHealthForHost)
                 .collect(toMap(Pair::getLeft, Pair::getRight));
         boolean hostCertExpiring = isHostCertExpiring(hostHealth);
-        checkServicesHealth(apiHostList, clusterManagerStateByHost);
+        if (CMRepositoryVersionUtil.isCmServicesHealthCheckAllowed(runtimeVersion)) {
+            checkServicesHealth(apiHostList, clusterManagerStateByHost);
+        }
         LOGGER.debug("Creating 'ExtendedHostStatuses' with {} and cert expiring [{}]", clusterManagerStateByHost, hostCertExpiring);
         return new ExtendedHostStatuses(clusterManagerStateByHost, hostCertExpiring);
     }
 
     private void checkServicesHealth(List<ApiHost> apiHostList, Map<HostName, ClusterManagerState> clusterManagerStateByHost) {
+        LOGGER.debug("Check services of CM based on CM response.");
         apiHostList.forEach(host -> changeStateForHostIfServiceInBadHealth(clusterManagerStateByHost, host));
     }
 

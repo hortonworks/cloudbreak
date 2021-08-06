@@ -7,11 +7,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -33,9 +35,11 @@ import com.sequenceiq.cloudbreak.common.type.ClusterManagerState;
 import com.sequenceiq.cloudbreak.common.type.ClusterManagerState.ClusterManagerStatus;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.cloudbreak.service.stack.RuntimeVersionService;
 import com.sequenceiq.cloudbreak.service.stack.StackInstanceStatusChecker;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
@@ -57,6 +61,9 @@ class VmStatusCheckerConclusionStepTest {
     @Mock
     private StackInstanceStatusChecker stackInstanceStatusChecker;
 
+    @Mock
+    private RuntimeVersionService runtimeVersionService;
+
     @InjectMocks
     private VmStatusCheckerConclusionStep underTest;
 
@@ -68,9 +75,13 @@ class VmStatusCheckerConclusionStepTest {
     public void setUp() {
         Stack stack = new Stack();
         stack.setId(1L);
+        Cluster cluster = new Cluster();
+        cluster.setId(2L);
+        stack.setCluster(cluster);
         when(stackService.getById(anyLong())).thenReturn(stack);
         when(clusterApiConnectors.getConnector(any(Stack.class))).thenReturn(connector);
         when(connector.clusterStatusService()).thenReturn(clusterStatusService);
+        lenient().when(runtimeVersionService.getRuntimeVersion(anyLong())).thenReturn(Optional.of("7.2.11"));
     }
 
     @Test
@@ -78,7 +89,7 @@ class VmStatusCheckerConclusionStepTest {
         when(clusterStatusService.isClusterManagerRunningQuickCheck()).thenReturn(Boolean.TRUE);
         when(instanceMetaDataService.findNotTerminatedForStack(anyLong()))
                 .thenReturn(Set.of(createInstanceMetadata("host1"), createInstanceMetadata("host2")));
-        when(clusterStatusService.getExtendedHostStatuses()).thenReturn(createExtendedHostStatuses(true));
+        when(clusterStatusService.getExtendedHostStatuses(any())).thenReturn(createExtendedHostStatuses(true));
 
         Conclusion conclusion = underTest.check(1L);
         assertFalse(conclusion.isFailureFound());
@@ -92,7 +103,7 @@ class VmStatusCheckerConclusionStepTest {
         when(clusterStatusService.isClusterManagerRunningQuickCheck()).thenReturn(Boolean.TRUE);
         when(instanceMetaDataService.findNotTerminatedForStack(anyLong()))
                 .thenReturn(Set.of(createInstanceMetadata("host1"), createInstanceMetadata("host2"), createInstanceMetadata("host3")));
-        when(clusterStatusService.getExtendedHostStatuses()).thenReturn(createExtendedHostStatuses(false));
+        when(clusterStatusService.getExtendedHostStatuses(any())).thenReturn(createExtendedHostStatuses(false));
 
         Conclusion conclusion = underTest.check(1L);
         assertTrue(conclusion.isFailureFound());

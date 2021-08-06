@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -28,15 +29,13 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.Upg
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageComponentVersions;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
-import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.controller.validation.stack.StackRuntimeVersionValidator;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.ClusterView;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
+import com.sequenceiq.cloudbreak.service.stack.RuntimeVersionService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.StackViewService;
 import com.sequenceiq.common.model.UpgradeShowAvailableImages;
@@ -68,10 +67,7 @@ public class DistroXUpgradeAvailabilityServiceTest {
     private StackViewService stackViewService;
 
     @Mock
-    private ClusterComponentConfigProvider clusterComponentConfigProvider;
-
-    @Mock
-    private StackRuntimeVersionValidator stackRuntimeVersionValidator;
+    private RuntimeVersionService runtimeVersionService;
 
     @InjectMocks
     private DistroXUpgradeAvailabilityService underTest;
@@ -189,15 +185,10 @@ public class DistroXUpgradeAvailabilityServiceTest {
         ClusterView clusterView = new ClusterView();
         clusterView.setId(1L);
         ReflectionTestUtils.setField(stackView, "cluster", clusterView);
-        ClouderaManagerProduct product = new ClouderaManagerProduct();
-        product.setVersion("C");
-        product.setName("CDH");
-        List<ClouderaManagerProduct> products = List.of(product);
         when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WORKSPACE_ID)).thenReturn(stackWithEnv);
         when(stackOperations.checkForClusterUpgrade(ACCOUNT_ID, stackWithEnv, WORKSPACE_ID, request)).thenReturn(response);
         when(stackViewService.findDatalakeViewByEnvironmentCrn(stackWithEnv.getEnvironmentCrn())).thenReturn(Optional.of(stackView));
-        when(clusterComponentConfigProvider.getClouderaManagerProductDetails(1L)).thenReturn(products);
-        when(stackRuntimeVersionValidator.getCdhVersionFromClouderaManagerProducts(products)).thenReturn(Optional.of("C"));
+        when(runtimeVersionService.getRuntimeVersion(eq(clusterView.getId()))).thenReturn(Optional.of("C"));
 
         UpgradeV4Response result = underTest.checkForUpgrade(CLUSTER, WORKSPACE_ID, request, USER_CRN);
 
@@ -240,15 +231,10 @@ public class DistroXUpgradeAvailabilityServiceTest {
         ClusterView clusterView = new ClusterView();
         clusterView.setId(1L);
         ReflectionTestUtils.setField(stackView, "cluster", clusterView);
-        ClouderaManagerProduct product = new ClouderaManagerProduct();
-        product.setVersion("7.1.0");
-        product.setName("CDH");
-        List<ClouderaManagerProduct> products = List.of(product);
         when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WORKSPACE_ID)).thenReturn(stackWithEnv);
         when(stackOperations.checkForClusterUpgrade(ACCOUNT_ID, stackWithEnv, WORKSPACE_ID, request)).thenReturn(response);
         when(stackViewService.findDatalakeViewByEnvironmentCrn(stackWithEnv.getEnvironmentCrn())).thenReturn(Optional.of(stackView));
-        when(clusterComponentConfigProvider.getClouderaManagerProductDetails(1L)).thenReturn(products);
-        when(stackRuntimeVersionValidator.getCdhVersionFromClouderaManagerProducts(products)).thenReturn(Optional.of("7.1.0"));
+        when(runtimeVersionService.getRuntimeVersion(eq(clusterView.getId()))).thenReturn(Optional.of("7.1.0"));
         when(entitlementService.isDifferentDataHubAndDataLakeVersionAllowed(anyString())).thenReturn(false);
 
         UpgradeV4Response result = underTest.checkForUpgrade(CLUSTER, WORKSPACE_ID, request, USER_CRN);
