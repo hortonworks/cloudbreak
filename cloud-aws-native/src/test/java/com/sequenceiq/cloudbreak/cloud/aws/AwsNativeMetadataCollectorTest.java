@@ -46,6 +46,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonElasticLoadBalancingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.LoadBalancerTypeConverter;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsLifeCycleMapper;
+import com.sequenceiq.cloudbreak.cloud.aws.metadata.AwsNativeLbMetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.aws.metadata.AwsNativeMetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -83,6 +84,9 @@ class AwsNativeMetadataCollectorTest {
 
     @Mock
     private AuthenticatedContext authenticatedContext;
+
+    @Mock
+    private AwsNativeLbMetadataCollector awsNativeLbMetadataCollector;
 
     @InjectMocks
     private AwsNativeMetadataCollector underTest;
