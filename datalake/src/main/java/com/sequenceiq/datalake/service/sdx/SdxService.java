@@ -108,6 +108,8 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
 
     public static final String MEDIUM_DUTY_REQUIRED_VERSION = "7.2.7";
 
+    public static final String CCMV2_REQUIRED_VERSION = "7.2.6";
+
     public static final String SDX_RESIZE_NAME_SUFFIX = "-md";
 
     public static final long WORKSPACE_ID_DEFAULT = 0L;
@@ -326,6 +328,7 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
         validateRuntimeAndImage(sdxClusterRequest, environment, imageSettingsV4Request, imageV4Response);
         validateRazEnablement(sdxClusterRequest, environment);
         String runtimeVersion = getRuntime(sdxClusterRequest, internalStackV4Request, imageV4Response);
+        validateCcmV2Requirement(environment, runtimeVersion);
 
         SdxCluster sdxCluster = validateAndCreateNewSdxCluster(userCrn, name, runtimeVersion,
                 sdxClusterRequest.getClusterShape(), sdxClusterRequest.isEnableRangerRaz(), environment);
@@ -799,6 +802,23 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
         }
     }
 
+    private void validateCcmV2Requirement(DetailedEnvironmentResponse environment, String runtimeVersion) {
+        if (environment.getTunnel() != null) {
+            switch (environment.getTunnel()) {
+                case CCMV2:
+                case CCMV2_JUMPGATE:
+                    Comparator<Versioned> versionComparator = new VersionComparator();
+                    if (versionComparator.compare(() -> CCMV2_REQUIRED_VERSION, () -> runtimeVersion) > 0) {
+                        throw new BadRequestException(String.format("Runtime version %s does not support Cluster Connectivity Manager. " +
+                                "Please try creating a datalake with runtime version at least %s.", runtimeVersion, CCMV2_REQUIRED_VERSION));
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
     private void setTagsSafe(SdxClusterRequest sdxClusterRequest, SdxCluster sdxCluster) {
         try {
             if (sdxClusterRequest.getTags() == null) {
@@ -952,7 +972,7 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
     private DetailedEnvironmentResponse validateAndGetEnvironment(String environmentName) {
         DetailedEnvironmentResponse environmentResponse = environmentClientService.getByName(environmentName);
         validateEnv(environmentResponse);
-        return  environmentResponse;
+        return environmentResponse;
     }
 
     @Override
