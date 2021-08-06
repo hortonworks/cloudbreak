@@ -14,6 +14,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -219,7 +220,7 @@ public class ClouderaManagerClusterStatusServiceTest {
                 new ApiHost().hostname("host6").addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.DISABLED))
         );
 
-        ExtendedHostStatuses extendedHostStatuses = subject.getExtendedHostStatuses();
+        ExtendedHostStatuses extendedHostStatuses = subject.getExtendedHostStatuses(Optional.of("7.2.12"));
         assertFalse(extendedHostStatuses.isHostHealthy(hostName("host3")));
         assertTrue(extendedHostStatuses.isHostHealthy(hostName("host1")));
         assertTrue(extendedHostStatuses.isHostHealthy(hostName("host2")));
@@ -243,7 +244,7 @@ public class ClouderaManagerClusterStatusServiceTest {
                 new ApiHost().hostname("host6").addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.DISABLED))
         );
 
-        ExtendedHostStatuses extendedHostStatuses = subject.getExtendedHostStatuses();
+        ExtendedHostStatuses extendedHostStatuses = subject.getExtendedHostStatuses(Optional.of("7.2.12"));
         assertEquals("explanation.", extendedHostStatuses.statusReasonForHost(hostName("host3")));
         assertTrue(extendedHostStatuses.isAnyCertExpiring());
         assertTrue(extendedHostStatuses.isHostHealthy(hostName("host1")));
@@ -263,7 +264,7 @@ public class ClouderaManagerClusterStatusServiceTest {
                                 .explanation("in 30 days"))
         );
 
-        ExtendedHostStatuses extendedHostStatuses = subject.getExtendedHostStatuses();
+        ExtendedHostStatuses extendedHostStatuses = subject.getExtendedHostStatuses(Optional.of("7.2.12"));
         assertTrue(extendedHostStatuses.isHostHealthy(hostName("host1")));
         assertTrue(extendedHostStatuses.isHostHealthy(hostName("host2")));
         assertTrue(extendedHostStatuses.isAnyCertExpiring());
@@ -285,7 +286,7 @@ public class ClouderaManagerClusterStatusServiceTest {
                         .addRoleRefsItem(roleRef("badservice3", ApiHealthSummary.BAD))
         );
 
-        ExtendedHostStatuses extendedHostStatuses = subject.getExtendedHostStatuses();
+        ExtendedHostStatuses extendedHostStatuses = subject.getExtendedHostStatuses(Optional.of("7.2.12"));
 
         assertFalse(extendedHostStatuses.isAnyCertExpiring());
         assertFalse(extendedHostStatuses.isHostHealthy(hostName("host1")));
@@ -294,6 +295,14 @@ public class ClouderaManagerClusterStatusServiceTest {
                 extendedHostStatuses.statusReasonForHost(hostName("host1")));
         assertEquals("The following services are in bad health: badservice2, badservice3.",
                 extendedHostStatuses.statusReasonForHost(hostName("host2")));
+
+        extendedHostStatuses = subject.getExtendedHostStatuses(Optional.of("7.2.11"));
+
+        assertFalse(extendedHostStatuses.isAnyCertExpiring());
+        assertFalse(extendedHostStatuses.isHostHealthy(hostName("host1")));
+        assertTrue(extendedHostStatuses.isHostHealthy(hostName("host2")));
+        assertEquals("explanation.",
+                extendedHostStatuses.statusReasonForHost(hostName("host1")));
     }
 
     @Test
@@ -308,7 +317,7 @@ public class ClouderaManagerClusterStatusServiceTest {
                                 .explanation("in 30 days"))
         );
 
-        ExtendedHostStatuses extendedHostStatuses = subject.getExtendedHostStatuses();
+        ExtendedHostStatuses extendedHostStatuses = subject.getExtendedHostStatuses(Optional.of("7.2.12"));
 
         assertFalse(extendedHostStatuses.isAnyCertExpiring());
         assertTrue(extendedHostStatuses.isHostHealthy(hostName("host1")));
@@ -324,21 +333,21 @@ public class ClouderaManagerClusterStatusServiceTest {
                         .addHealthChecksItem(new ApiHealthCheck().name("another").summary(ApiHealthSummary.BAD))
         );
 
-        assertTrue(subject.getExtendedHostStatuses().isHostHealthy(hostName("host")));
+        assertTrue(subject.getExtendedHostStatuses(Optional.of("7.2.12")).isHostHealthy(hostName("host")));
     }
 
     @Test
     public void hostWithoutHealthCheckIsIgnored() throws ApiException {
         hostsAre(new ApiHost().hostname("hostY"));
 
-        assertFalse(subject.getExtendedHostStatuses().getHostsHealth().containsKey(hostName("hostY")));
+        assertFalse(subject.getExtendedHostStatuses(Optional.of("7.2.12")).getHostsHealth().containsKey(hostName("hostY")));
     }
 
     @Test
     public void hostWithoutAppropriateHealthCheckIsIgnored() throws ApiException {
         hostsAre(new ApiHost().hostname("hostY").addHealthChecksItem(new ApiHealthCheck().name("fake_check").summary(ApiHealthSummary.BAD)));
 
-        assertFalse(subject.getExtendedHostStatuses().getHostsHealth().containsKey(hostName("hostY")));
+        assertFalse(subject.getExtendedHostStatuses(Optional.of("7.2.12")).getHostsHealth().containsKey(hostName("hostY")));
     }
 
     private ApiRoleRef roleRef(String serviceName, ApiHealthSummary apiHealthSummary) {

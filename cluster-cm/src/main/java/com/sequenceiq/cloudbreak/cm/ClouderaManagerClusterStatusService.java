@@ -16,6 +16,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -58,6 +59,7 @@ import com.sequenceiq.cloudbreak.cluster.status.ExtendedHostStatuses;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
+import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.common.type.HealthCheck;
 import com.sequenceiq.cloudbreak.common.type.HealthCheckResult;
 import com.sequenceiq.cloudbreak.common.type.HealthCheckType;
@@ -249,20 +251,23 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
     }
 
     @Override
-    public ExtendedHostStatuses getExtendedHostStatuses() {
+    public ExtendedHostStatuses getExtendedHostStatuses(Optional<String> runtimeVersion) {
         List<ApiHost> apiHostList = getHostsFromCM();
-        Map<HostName, Set<HealthCheck>> hostStates = apiHostList.stream().collect(
-                Collectors.toMap(apiHost -> hostName(apiHost.getHostname()), ClouderaManagerClusterStatusService::getHealthChecks));
+        boolean isCmServicesHealthCheckAllowed = CMRepositoryVersionUtil.isCmServicesHealthCheckAllowed(runtimeVersion);
+        Map<HostName, Set<HealthCheck>> hostStates = apiHostList.stream().collect(Collectors.toMap(
+                apiHost -> hostName(apiHost.getHostname()), apiHost -> getHealthChecks(apiHost, isCmServicesHealthCheckAllowed)));
         hostStates.entrySet().removeIf(entry -> entry.getValue().isEmpty());
         LOGGER.debug("Creating 'ExtendedHostStatuses' with {}", hostStates);
         return new ExtendedHostStatuses(hostStates);
     }
 
-    private static Set<HealthCheck> getHealthChecks(ApiHost apiHost) {
-        return HEALTH_CHECK_FUNCTIONS.stream()
+    private static Set<HealthCheck> getHealthChecks(ApiHost apiHost, boolean isCmServicesHealthCheckAllowed) {
+        Set<HealthCheck> healthChecks = HEALTH_CHECK_FUNCTIONS.stream()
                 .map(healthCheck -> healthCheck.apply(apiHost))
                 .flatMap(Optional::stream)
                 .collect(Collectors.toSet());
+        healthChecks.removeIf(healthCheck -> HealthCheckType.SERVICES.equals(healthCheck.getType()) && !isCmServicesHealthCheckAllowed);
+        return healthChecks;
     }
 
     private static Optional<HealthCheck> getServicesHealthCheck(ApiHost host) {
