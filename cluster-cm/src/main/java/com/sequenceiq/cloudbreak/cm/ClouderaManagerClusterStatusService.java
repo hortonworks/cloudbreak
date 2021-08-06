@@ -16,7 +16,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -253,20 +252,20 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
     @Override
     public ExtendedHostStatuses getExtendedHostStatuses(Optional<String> runtimeVersion) {
         List<ApiHost> apiHostList = getHostsFromCM();
-        boolean isCmServicesHealthCheckAllowed = CMRepositoryVersionUtil.isCmServicesHealthCheckAllowed(runtimeVersion);
+        boolean cmServicesHealthCheckAllowed = CMRepositoryVersionUtil.isCmServicesHealthCheckAllowed(runtimeVersion);
         Map<HostName, Set<HealthCheck>> hostStates = apiHostList.stream().collect(Collectors.toMap(
-                apiHost -> hostName(apiHost.getHostname()), apiHost -> getHealthChecks(apiHost, isCmServicesHealthCheckAllowed)));
+                apiHost -> hostName(apiHost.getHostname()), apiHost -> getHealthChecks(apiHost, cmServicesHealthCheckAllowed)));
         hostStates.entrySet().removeIf(entry -> entry.getValue().isEmpty());
         LOGGER.debug("Creating 'ExtendedHostStatuses' with {}", hostStates);
         return new ExtendedHostStatuses(hostStates);
     }
 
-    private static Set<HealthCheck> getHealthChecks(ApiHost apiHost, boolean isCmServicesHealthCheckAllowed) {
+    private static Set<HealthCheck> getHealthChecks(ApiHost apiHost, boolean cmServicesHealthCheckAllowed) {
         Set<HealthCheck> healthChecks = HEALTH_CHECK_FUNCTIONS.stream()
                 .map(healthCheck -> healthCheck.apply(apiHost))
                 .flatMap(Optional::stream)
                 .collect(Collectors.toSet());
-        healthChecks.removeIf(healthCheck -> HealthCheckType.SERVICES.equals(healthCheck.getType()) && !isCmServicesHealthCheckAllowed);
+        healthChecks.removeIf(healthCheck -> HealthCheckType.SERVICES.equals(healthCheck.getType()) && !cmServicesHealthCheckAllowed);
         return healthChecks;
     }
 
