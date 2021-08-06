@@ -794,7 +794,7 @@ class ClouderaManagerModificationServiceTest {
         when(clouderaManagerApiFactory.getServicesResourceApi(apiClientMock)).thenReturn(servicesResourceApi);
         when(servicesResourceApi.readServices("stack_name", "SUMMARY")).thenReturn(apiServiceList);
 
-        underTest.deployConfigAndRefreshCMStaleServices(clustersResourceApi);
+        underTest.deployConfigAndRefreshCMStaleServices(clustersResourceApi, false);
 
         verify(clouderaManagerPollingServiceProvider, times(0)).startPollingCmClientConfigDeployment(eq(stack), eq(apiClientMock), any());
     }
@@ -819,10 +819,62 @@ class ClouderaManagerModificationServiceTest {
         when(servicesResourceApi.readServices("stack_name", "SUMMARY")).thenReturn(apiServiceList);
         when(clustersResourceApi.listActiveCommands(stack.getName(), "SUMMARY")).thenReturn(apiCommandList);
 
-        underTest.deployConfigAndRefreshCMStaleServices(clustersResourceApi);
+        underTest.deployConfigAndRefreshCMStaleServices(clustersResourceApi, false);
 
         verify(clouderaManagerPollingServiceProvider, times(1)).startPollingCmClientConfigDeployment(eq(stack), eq(apiClientMock), any());
         verify(clouderaManagerPollingServiceProvider, times(1)).startPollingCmConfigurationRefresh(eq(stack), eq(apiClientMock), any());
+    }
+
+    @Test
+    void testDeployConfigAndRefreshCMStaleServicesWhenRefreshFailAndForcedIsTrueSwallowError() throws CloudbreakException, ApiException {
+        ApiService apiService = new ApiService().configStalenessStatus(ApiConfigStalenessStatus.STALE)
+                .clientConfigStalenessStatus(ApiConfigStalenessStatus.FRESH);
+        List<ApiService> apiServices = List.of(apiService);
+        ApiServiceList apiServiceList = new ApiServiceList();
+        apiServiceList.setItems(apiServices);
+
+        List<ApiCommand> apiCommands = List.of(
+                new ApiCommand().name("DeployClusterClientConfig").id(BigDecimal.ONE),
+                new ApiCommand().name("RefreshCluster").id(BigDecimal.ONE));
+        ApiCommandList apiCommandList = new ApiCommandList();
+        apiCommandList.setItems(apiCommands);
+
+        when(clouderaManagerApiFactory.getServicesResourceApi(apiClientMock)).thenReturn(servicesResourceApi);
+        when(clouderaManagerCommonCommandService.getApiCommand(any(), any(), any(), any()))
+                .thenThrow(new ClouderaManagerOperationFailedException("RefreshCommand failed"));
+        when(servicesResourceApi.readServices("stack_name", "SUMMARY")).thenReturn(apiServiceList);
+        when(clustersResourceApi.listActiveCommands(stack.getName(), "SUMMARY")).thenReturn(apiCommandList);
+
+        underTest.deployConfigAndRefreshCMStaleServices(clustersResourceApi, true);
+
+        verify(clouderaManagerPollingServiceProvider, times(1)).startPollingCmClientConfigDeployment(eq(stack), eq(apiClientMock), any());
+    }
+
+    @Test
+    void testDeployConfigAndRefreshCMStaleServicesWhenRefreshFailAndForcedIsFalseFail() throws CloudbreakException, ApiException {
+        ApiService apiService = new ApiService().configStalenessStatus(ApiConfigStalenessStatus.STALE)
+                .clientConfigStalenessStatus(ApiConfigStalenessStatus.FRESH);
+        List<ApiService> apiServices = List.of(apiService);
+        ApiServiceList apiServiceList = new ApiServiceList();
+        apiServiceList.setItems(apiServices);
+
+        List<ApiCommand> apiCommands = List.of(
+                new ApiCommand().name("DeployClusterClientConfig").id(BigDecimal.ONE),
+                new ApiCommand().name("RefreshCluster").id(BigDecimal.ONE));
+        ApiCommandList apiCommandList = new ApiCommandList();
+        apiCommandList.setItems(apiCommands);
+
+        when(clouderaManagerApiFactory.getServicesResourceApi(apiClientMock)).thenReturn(servicesResourceApi);
+        when(clouderaManagerCommonCommandService.getApiCommand(any(), any(), any(), any()))
+                .thenThrow(new ClouderaManagerOperationFailedException("RefreshCommand failed"));
+        when(servicesResourceApi.readServices("stack_name", "SUMMARY")).thenReturn(apiServiceList);
+        when(clustersResourceApi.listActiveCommands(stack.getName(), "SUMMARY")).thenReturn(apiCommandList);
+
+        ClouderaManagerOperationFailedException exception = assertThrows(ClouderaManagerOperationFailedException.class,
+                () -> underTest.deployConfigAndRefreshCMStaleServices(clustersResourceApi, false));
+
+        assertEquals("RefreshCommand failed", exception.getMessage());
+        verify(clouderaManagerPollingServiceProvider, times(1)).startPollingCmClientConfigDeployment(eq(stack), eq(apiClientMock), any());
     }
 
     @Test
