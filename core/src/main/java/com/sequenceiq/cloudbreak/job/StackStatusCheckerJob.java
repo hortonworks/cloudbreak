@@ -46,6 +46,7 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.cloudbreak.service.stack.RuntimeVersionService;
 import com.sequenceiq.cloudbreak.service.stack.StackInstanceStatusChecker;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.StackViewService;
@@ -96,6 +97,9 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
 
     @Inject
     private InstanceMetaDataToCloudInstanceConverter cloudInstanceConverter;
+
+    @Inject
+    private RuntimeVersionService runtimeVersionService;
 
     public StackStatusCheckerJob(Tracer tracer) {
         super(tracer, "Stack Status Checker Job");
@@ -197,7 +201,8 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
         Set<InstanceMetaData> runningInstances = instanceMetaDataService.findNotTerminatedForStack(stack.getId());
         try {
             if (isClusterManagerRunning(stack, connector)) {
-                ExtendedHostStatuses extendedHostStatuses = connector.clusterStatusService().getExtendedHostStatuses();
+                ExtendedHostStatuses extendedHostStatuses = connector.clusterStatusService().getExtendedHostStatuses(
+                        runtimeVersionService.getRuntimeVersion(stack.getCluster().getId()));
                 Map<HostName, ClusterManagerState> hostStatuses = extendedHostStatuses.getHostHealth();
                 LOGGER.debug("Cluster '{}' state check, host certicates expiring: [{}], cm running, hoststates: {}",
                         stack.getId(), extendedHostStatuses.isHostCertExpiring(), hostStatuses);

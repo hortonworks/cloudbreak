@@ -16,14 +16,12 @@ import java.util.Optional;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.jupiter.api.Assertions;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
@@ -36,12 +34,12 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.StackDetails;
-import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.view.ClusterView;
 import com.sequenceiq.cloudbreak.domain.view.StackStatusView;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
+import com.sequenceiq.cloudbreak.service.stack.RuntimeVersionService;
 import com.sequenceiq.cloudbreak.service.stack.StackViewService;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
@@ -75,7 +73,7 @@ public class StackRuntimeVersionValidatorTest {
     private StackViewService stackViewService;
 
     @Mock
-    private ClusterComponentConfigProvider clusterComponentConfigProvider;
+    private RuntimeVersionService runtimeVersionService;
 
     @Test
     public void testValidationWhenEntitlementOn() {
@@ -178,14 +176,14 @@ public class StackRuntimeVersionValidatorTest {
     @Test
     public void testValidationWhenCbHasDlStackButCdhProductMissing() throws IllegalAccessException {
         when(stackViewService.findDatalakeViewByEnvironmentCrn(anyString())).thenReturn(Optional.of(createDatalakeStack(Status.AVAILABLE)));
-        when(clusterComponentConfigProvider.getClouderaManagerProductDetails(anyLong())).thenReturn(Lists.newArrayList());
+        when(runtimeVersionService.getRuntimeVersion(anyLong())).thenReturn(Optional.empty());
         when(entitlementService.isDifferentDataHubAndDataLakeVersionAllowed(any())).thenReturn(false);
         when(sdxClientService.getByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(createSdxClusterResponse(null, SdxClusterStatusResponse.RUNNING));
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validate(createStackRequest(DATA_HUB_VERSION), mock(Image.class), StackType.WORKLOAD));
 
         verify(stackViewService).findDatalakeViewByEnvironmentCrn(anyString());
-        verify(clusterComponentConfigProvider).getClouderaManagerProductDetails(anyLong());
+        verify(runtimeVersionService).getRuntimeVersion(anyLong());
         verify(entitlementService).isDifferentDataHubAndDataLakeVersionAllowed(any());
         verify(sdxClientService).getByEnvironmentCrn(ENVIRONMENT_CRN);
     }
@@ -193,13 +191,13 @@ public class StackRuntimeVersionValidatorTest {
     @Test
     public void testValidationWhenCbHasDlStack() throws IllegalAccessException {
         when(stackViewService.findDatalakeViewByEnvironmentCrn(anyString())).thenReturn(Optional.of(createDatalakeStack(Status.AVAILABLE)));
-        when(clusterComponentConfigProvider.getClouderaManagerProductDetails(anyLong())).thenReturn(Lists.newArrayList(getCdhProduct(DATA_HUB_VERSION)));
+        when(runtimeVersionService.getRuntimeVersion(anyLong())).thenReturn(Optional.of(DATA_HUB_VERSION));
         when(entitlementService.isDifferentDataHubAndDataLakeVersionAllowed(any())).thenReturn(false);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validate(createStackRequest(DATA_HUB_VERSION), mock(Image.class), StackType.WORKLOAD));
 
         verify(stackViewService).findDatalakeViewByEnvironmentCrn(anyString());
-        verify(clusterComponentConfigProvider).getClouderaManagerProductDetails(anyLong());
+        verify(runtimeVersionService).getRuntimeVersion(anyLong());
         verify(entitlementService).isDifferentDataHubAndDataLakeVersionAllowed(any());
         verify(sdxClientService, never()).getByEnvironmentCrn(ENVIRONMENT_CRN);
     }
@@ -213,27 +211,9 @@ public class StackRuntimeVersionValidatorTest {
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validate(createStackRequest(DATA_HUB_VERSION), mock(Image.class), StackType.WORKLOAD));
 
         verify(stackViewService).findDatalakeViewByEnvironmentCrn(anyString());
-        verify(clusterComponentConfigProvider, never()).getClouderaManagerProductDetails(anyLong());
+        verify(runtimeVersionService, never()).getRuntimeVersion(anyLong());
         verify(entitlementService).isDifferentDataHubAndDataLakeVersionAllowed(any());
         verify(sdxClientService).getByEnvironmentCrn(ENVIRONMENT_CRN);
-    }
-
-    @Test
-    public void testGetCdhVersionFromClouderaManagerProductsIfNameAddedButVersionMissing() {
-
-        ClouderaManagerProduct cdhProduct = getCdhProduct();
-        Optional<String> actual = underTest.getCdhVersionFromClouderaManagerProducts(List.of(cdhProduct));
-
-        Assertions.assertTrue(actual.isEmpty());
-    }
-
-    @Test
-    public void testGetCdhVersionFromClouderaManagerProductsIfNameAndVersionAdded() {
-
-        ClouderaManagerProduct cdhProduct = getCdhProduct("version");
-        Optional<String> actual = underTest.getCdhVersionFromClouderaManagerProducts(List.of(cdhProduct));
-
-        Assertions.assertFalse(actual.isEmpty());
     }
 
     private StackView createDatalakeStack(Status status) throws IllegalAccessException {
@@ -254,20 +234,6 @@ public class StackRuntimeVersionValidatorTest {
         ClouderaManagerProduct product = new ClouderaManagerProduct();
         product.setName("CDH");
         product.setVersion(version + "-something");
-        return product;
-    }
-
-    private ClouderaManagerProduct getCdhProduct() {
-        ClouderaManagerProduct product = new ClouderaManagerProduct();
-        product.setName("CDH");
-        product.setVersion(null);
-        return product;
-    }
-
-    private ClouderaManagerProduct getProduct(String name, String version) {
-        ClouderaManagerProduct product = new ClouderaManagerProduct();
-        product.setName(name);
-        product.setVersion(version);
         return product;
     }
 

@@ -14,6 +14,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.EnumSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.After;
@@ -49,6 +50,7 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.cloudbreak.service.stack.RuntimeVersionService;
 import com.sequenceiq.cloudbreak.service.stack.StackInstanceStatusChecker;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackSyncService;
@@ -114,6 +116,9 @@ public class StackStatusCheckerJobTest {
 
     @Mock
     private InstanceMetaDataToCloudInstanceConverter cloudInstanceConverter;
+
+    @Mock
+    private RuntimeVersionService runtimeVersionService;
 
     @Before
     public void init() {
@@ -210,7 +215,7 @@ public class StackStatusCheckerJobTest {
         when(clusterStatusService.isClusterManagerRunningQuickCheck()).thenReturn(true);
         ClusterManagerState clusterManagerState = new ClusterManagerState(ClusterManagerStatus.HEALTHY, null);
         ExtendedHostStatuses extendedHostStatuses = new ExtendedHostStatuses(Map.of(HostName.hostName("host1"), clusterManagerState), true);
-        when(clusterStatusService.getExtendedHostStatuses()).thenReturn(extendedHostStatuses);
+        when(clusterStatusService.getExtendedHostStatuses(Optional.empty())).thenReturn(extendedHostStatuses);
         when(instanceMetaDataService.findNotTerminatedForStack(anyLong())).thenReturn(Set.of(instanceMetaData));
         when(instanceMetaData.getInstanceStatus()).thenReturn(InstanceStatus.SERVICES_HEALTHY);
     }

@@ -15,6 +15,7 @@ import static org.mockito.Mockito.when;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -69,6 +70,7 @@ import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.cloudbreak.service.stack.RuntimeVersionService;
 import com.sequenceiq.cloudbreak.service.stack.StackInstanceStatusChecker;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.StackStopRestrictionService;
@@ -133,6 +135,9 @@ class StackStatusIntegrationTest {
     @MockBean
     private StackInstanceStatusChecker stackStatusChecker;
 
+    @MockBean
+    private RuntimeVersionService runtimeVersionService;
+
     private Stack stack;
 
     private Set<InstanceMetaData> runningInstances;
@@ -166,6 +171,7 @@ class StackStatusIntegrationTest {
         Cluster cluster = new Cluster();
         cluster.setVariant("AWS");
         cluster.setClusterManagerIp("192.168.0.1");
+        cluster.setId(2L);
         stack.setCluster(cluster);
         stack.setResourceCrn("crn:stack");
         User creator = new User();
@@ -187,7 +193,7 @@ class StackStatusIntegrationTest {
         when(clusterApiConnectors.getConnector(stack)).thenReturn(clusterApi);
 
         hostStatuses = new HashMap<>();
-        when(clusterStatusService.getExtendedHostStatuses()).thenReturn(new ExtendedHostStatuses(hostStatuses, false));
+        when(clusterStatusService.getExtendedHostStatuses(Optional.empty())).thenReturn(new ExtendedHostStatuses(hostStatuses, false));
     }
 
     @Test
