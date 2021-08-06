@@ -8,11 +8,13 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_ADDING_INSTANC
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_INFRASTRUCTURE_UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_METADATA_EXTEND_WITH_COUNT;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_REPAIR_FAILED;
+import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static java.lang.String.format;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -24,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -46,9 +49,11 @@ import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TlsSetupService;
 import com.sequenceiq.common.api.type.CommonResourceType;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Service
 public class StackUpscaleService {
@@ -75,6 +80,9 @@ public class StackUpscaleService {
 
     @Inject
     private TransactionService transactionService;
+
+    @Inject
+    private EnvironmentClientService environmentClientService;
 
     public void startAddInstances(Stack stack, Integer scalingAdjustment, String hostGroupName) {
         String statusReason = format("Adding %s new instance(s) to instance group %s", scalingAdjustment, hostGroupName);
@@ -210,11 +218,23 @@ public class StackUpscaleService {
                         stack.getStackAuthentication(),
                         privateId++,
                         InstanceStatus.CREATE_REQUESTED,
-                        stack.getEnvironmentCrn()));
+                        getEnvironmentByEnvironmentCrn(stack.getEnvironmentCrn())));
             }
         }
         LOGGER.info("Built instances: {}", newInstances);
         return newInstances;
+    }
+
+    private DetailedEnvironmentResponse getEnvironmentByEnvironmentCrn(String environmentCrn) {
+        DetailedEnvironmentResponse environment = null;
+        if (Objects.nonNull(environmentCrn)) {
+            environment = measure(() ->
+                            ThreadBasedUserCrnProvider.doAsInternalActor(() ->
+                                    environmentClientService.getByCrn(environmentCrn)),
+                    LOGGER,
+                    "Get Environment from Environment service took {} ms");
+        }
+        return environment;
     }
 
     private Long getFirstValidPrivateId(List<InstanceGroup> instanceGroups) {

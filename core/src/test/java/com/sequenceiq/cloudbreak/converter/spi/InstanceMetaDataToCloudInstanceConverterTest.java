@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.converter.spi;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
@@ -75,7 +76,7 @@ public class InstanceMetaDataToCloudInstanceConverterTest extends AbstractEntity
             params.put(NetworkConstants.SUBNET_ID, SUBNET_ID);
             params.put(CloudInstance.INSTANCE_NAME, INSTANCE_NAME);
         }
-        when(stackToCloudStackConverter.buildCloudInstanceParameters(any(), any(), any())).thenReturn(params);
+        when(stackToCloudStackConverter.buildCloudInstanceParameters(anyString(), any(), any())).thenReturn(params);
     }
 
     @Test
