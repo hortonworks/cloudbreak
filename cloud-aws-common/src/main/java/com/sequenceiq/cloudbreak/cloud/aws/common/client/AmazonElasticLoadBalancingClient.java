@@ -15,8 +15,12 @@ import com.amazonaws.services.elasticloadbalancingv2.model.DeleteTargetGroupRequ
 import com.amazonaws.services.elasticloadbalancingv2.model.DeleteTargetGroupResult;
 import com.amazonaws.services.elasticloadbalancingv2.model.DeregisterTargetsRequest;
 import com.amazonaws.services.elasticloadbalancingv2.model.DeregisterTargetsResult;
+import com.amazonaws.services.elasticloadbalancingv2.model.DescribeListenersRequest;
+import com.amazonaws.services.elasticloadbalancingv2.model.DescribeListenersResult;
 import com.amazonaws.services.elasticloadbalancingv2.model.DescribeLoadBalancersRequest;
 import com.amazonaws.services.elasticloadbalancingv2.model.DescribeLoadBalancersResult;
+import com.amazonaws.services.elasticloadbalancingv2.model.DescribeTargetGroupsRequest;
+import com.amazonaws.services.elasticloadbalancingv2.model.DescribeTargetGroupsResult;
 import com.amazonaws.services.elasticloadbalancingv2.model.DescribeTargetHealthRequest;
 import com.amazonaws.services.elasticloadbalancingv2.model.DescribeTargetHealthResult;
 import com.amazonaws.services.elasticloadbalancingv2.model.RegisterTargetsRequest;
@@ -62,8 +66,8 @@ public class AmazonElasticLoadBalancingClient extends AmazonClient {
         return client.createListener(request);
     }
 
-    public DescribeLoadBalancersResult describeListeners(DescribeLoadBalancersRequest describeLoadBalancersRequest) {
-        return client.describeLoadBalancers(describeLoadBalancersRequest);
+    public DescribeListenersResult describeListeners(DescribeListenersRequest request) {
+        return client.describeListeners(request);
     }
 
     public DeleteListenerResult deleteListener(DeleteListenerRequest deleteListenerRequest) {
@@ -72,5 +76,9 @@ public class AmazonElasticLoadBalancingClient extends AmazonClient {
 
     public DeleteLoadBalancerResult deleteLoadBalancer(DeleteLoadBalancerRequest deleteListenerRequest) {
         return client.deleteLoadBalancer(deleteListenerRequest);
+    }
+
+    public DescribeTargetGroupsResult describeTargetGroup(DescribeTargetGroupsRequest describeTargetGroupsRequest) {
+        return client.describeTargetGroups(describeTargetGroupsRequest);
     }
 }
