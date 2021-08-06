@@ -68,6 +68,9 @@ public class AwsNativeMetadataCollector implements MetadataCollector {
     @Inject
     private AwsPlatformResources awsPlatformResources;
 
+    @Inject
+    private AwsNativeLbMetadataCollector awsNativeLbMetadataCollector;
+
     @Value("${cb.aws.native.instance.fetch.max.item:100}")
     private int instanceFetchMaxBatchSize;
 
@@ -101,8 +104,9 @@ public class AwsNativeMetadataCollector implements MetadataCollector {
                 .collect(Collectors.toSet());
         AmazonElasticLoadBalancingClient loadBalancingClient = awsClient.createElasticLoadBalancingClient(awsCredential, region);
         LOGGER.info("Collect AWS load balancer metadata, in region '{}' with ARNs: '{}'", region, String.join(", ", loadBalancerArns));
+
         for (String loadBalancerArn : loadBalancerArns) {
-            Optional<CloudLoadBalancerMetadata> collectedLoadBalancer = collectLoadBalancerMetadata(loadBalancingClient, loadBalancerArn);
+            Optional<CloudLoadBalancerMetadata> collectedLoadBalancer = collectLoadBalancerMetadata(loadBalancingClient, loadBalancerArn, resources);
             collectedLoadBalancer.ifPresent(result::add);
         }
         return result;
@@ -214,10 +218,11 @@ public class AwsNativeMetadataCollector implements MetadataCollector {
         return result;
     }
 
-    private Optional<CloudLoadBalancerMetadata> collectLoadBalancerMetadata(AmazonElasticLoadBalancingClient loadBalancingClient, String loadBalancerArn) {
+    private Optional<CloudLoadBalancerMetadata> collectLoadBalancerMetadata(AmazonElasticLoadBalancingClient loadBalancingClient,
+            String loadBalancerArn, List<CloudResource> resources) {
         Optional<CloudLoadBalancerMetadata> result = Optional.empty();
         try {
-            result = describeLoadBalancer(loadBalancerArn, loadBalancingClient);
+            result = describeLoadBalancer(loadBalancerArn, loadBalancingClient, resources);
         } catch (AmazonServiceException awsException) {
             if (StringUtils.isNotEmpty(awsException.getErrorCode()) && LOAD_BALANCER_NOT_FOUND_ERROR_CODE.equals(awsException.getErrorCode())) {
                 LOGGER.info("Load balancers with ARN '{}' could not be found due to:", loadBalancerArn, awsException);
@@ -232,7 +237,8 @@ public class AwsNativeMetadataCollector implements MetadataCollector {
         return result;
     }
 
-    private Optional<CloudLoadBalancerMetadata> describeLoadBalancer(String loadBalancerArn, AmazonElasticLoadBalancingClient loadBalancingClient) {
+    private Optional<CloudLoadBalancerMetadata> describeLoadBalancer(String loadBalancerArn, AmazonElasticLoadBalancingClient loadBalancingClient,
+            List<CloudResource> resources) {
         DescribeLoadBalancersRequest describeLoadBalancersRequest = new DescribeLoadBalancersRequest()
                 .withLoadBalancerArns(loadBalancerArn);
         DescribeLoadBalancersResult describeLoadBalancersResult = loadBalancingClient.describeLoadBalancers(describeLoadBalancersRequest);
@@ -241,11 +247,13 @@ public class AwsNativeMetadataCollector implements MetadataCollector {
                 .findFirst()
                 .map(loadBalancer -> {
                     LoadBalancerType type = loadBalancerTypeConverter.convert(loadBalancer.getScheme());
+                    Map<String, Object> parameters = awsNativeLbMetadataCollector.getParameters(loadBalancerArn, resources);
                     CloudLoadBalancerMetadata loadBalancerMetadata = new CloudLoadBalancerMetadata.Builder()
                             .withType(type)
                             .withCloudDns(loadBalancer.getDNSName())
                             .withHostedZoneId(loadBalancer.getCanonicalHostedZoneId())
                             .withName(loadBalancer.getLoadBalancerName())
+                            .withParameters(parameters)
                             .build();
                     LOGGER.info("Saved metadata for load balancer {}: DNS {}, zone ID {}", loadBalancer.getLoadBalancerName(), loadBalancer.getDNSName(),
                             loadBalancer.getCanonicalHostedZoneId());

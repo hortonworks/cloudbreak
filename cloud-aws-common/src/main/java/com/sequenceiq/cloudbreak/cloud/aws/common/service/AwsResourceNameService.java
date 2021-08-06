@@ -14,6 +14,9 @@ import com.sequenceiq.common.api.type.ResourceType;
 
 @Service("AwsResourceNameServiceV2")
 public class AwsResourceNameService extends CloudbreakResourceNameService {
+
+    public static final String TG_PART_NAME = "TG";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsResourceNameService.class);
 
     private static final String FIREWALL_INTERNAL_NAME_SUFFIX = "internal";
@@ -151,7 +154,7 @@ public class AwsResourceNameService extends CloudbreakResourceNameService {
         String stackName = String.valueOf(parts[0]);
         String scheme = String.valueOf(parts[1]);
         String port = String.valueOf(parts[2]);
-        String resourceNameWithScheme = "TG" + port + scheme;
+        String resourceNameWithScheme = TG_PART_NAME + port + scheme;
         int numberOfAppends = 2;
         int maxLengthOfStackName = maxLoadBalancerResourceNameLength - getDefaultHashLength() - resourceNameWithScheme.length() - numberOfAppends;
         String reducedStackName = stackName.substring(0, maxLengthOfStackName);
