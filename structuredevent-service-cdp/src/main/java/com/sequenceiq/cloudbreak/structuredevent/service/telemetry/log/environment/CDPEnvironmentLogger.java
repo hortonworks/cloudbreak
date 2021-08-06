@@ -42,6 +42,7 @@ public class CDPEnvironmentLogger implements CDPTelemetryEventLogger {
 
         if (cdpStructuredFlowEvent instanceof CDPEnvironmentStructuredFlowEvent &&
                 useCase != UsageProto.CDPEnvironmentStatus.Value.UNSET) {
+            LOGGER.debug("Sending usage report for {}", cdpStructuredFlowEvent.getOperation().getResourceType());
             usageReporter.cdpEnvironmentRequested(
                     environmentRequestedConverter.convert((CDPEnvironmentStructuredFlowEvent) cdpStructuredFlowEvent));
             usageReporter.cdpEnvironmentStatusChanged(
