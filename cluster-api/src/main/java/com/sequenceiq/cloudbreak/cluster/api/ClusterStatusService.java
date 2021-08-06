@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cluster.api;
 
 import java.util.Map;
+import java.util.Optional;
 
 import com.sequenceiq.cloudbreak.cloud.model.HostName;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatusResult;
@@ -13,7 +14,7 @@ public interface ClusterStatusService {
      */
     ClusterStatusResult getStatus(boolean blueprintPresent);
 
-    ExtendedHostStatuses getExtendedHostStatuses();
+    ExtendedHostStatuses getExtendedHostStatuses(Optional<String> runtimeVersion);
 
     Map<HostName, String> getHostStatusesRaw();
 

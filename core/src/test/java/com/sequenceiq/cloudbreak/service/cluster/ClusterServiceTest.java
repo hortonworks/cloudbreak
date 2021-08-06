@@ -43,6 +43,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.repository.cluster.ClusterRepository;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.cloudbreak.service.stack.RuntimeVersionService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.common.api.type.CertExpirationState;
@@ -75,6 +76,9 @@ class ClusterServiceTest {
 
     @Mock
     private TransactionService transactionService;
+
+    @Mock
+    private RuntimeVersionService runtimeVersionService;
 
     @Captor
     private ArgumentCaptor<Iterable<InstanceMetaData>> payloadArgumentCaptor;
@@ -122,6 +126,7 @@ class ClusterServiceTest {
             String name, HealthCheckResult healthCheckResult, InstanceStatus expectedInstanceStatus, String expectedStatusReason)
             throws TransactionService.TransactionExecutionException {
         when(transactionService.required(any(Supplier.class))).thenAnswer(ans -> ((Supplier) ans.getArgument(0)).get());
+        when(runtimeVersionService.getRuntimeVersion(anyLong())).thenReturn(Optional.of("7.2.11"));
         Stack stack = setupStack(STACK_ID);
         setupClusterApi(stack, healthCheckResult, expectedStatusReason);
         setupInstanceMetadata(stack);
@@ -140,7 +145,9 @@ class ClusterServiceTest {
     private Stack setupStack(long stackId) {
         Stack stack = new Stack();
         stack.setId(stackId);
-        stack.setCluster(new Cluster());
+        Cluster cluster = new Cluster();
+        cluster.setId(2L);
+        stack.setCluster(cluster);
         when(stackService.getById(anyLong())).thenReturn(stack);
         return stack;
     }
@@ -165,7 +172,7 @@ class ClusterServiceTest {
                     Sets.newHashSet(new HealthCheck(HealthCheckType.HOST, healthCheckResult, Optional.ofNullable(statusReason))));
         }
         ExtendedHostStatuses extendedHostStatuses = new ExtendedHostStatuses(clusterManagerStateMap);
-        when(clusterStatusService.getExtendedHostStatuses()).thenReturn(extendedHostStatuses);
+        when(clusterStatusService.getExtendedHostStatuses(any())).thenReturn(extendedHostStatuses);
         when(clusterApiConnectors.getConnector(stack)).thenReturn(connector);
     }
 }

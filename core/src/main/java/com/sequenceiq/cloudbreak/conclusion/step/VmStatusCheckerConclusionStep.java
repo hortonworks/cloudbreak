@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.cloudbreak.service.stack.RuntimeVersionService;
 import com.sequenceiq.cloudbreak.service.stack.StackInstanceStatusChecker;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.InstanceSyncState;
@@ -49,20 +50,24 @@ public class VmStatusCheckerConclusionStep extends ConclusionStep {
     @Inject
     private StackInstanceStatusChecker stackInstanceStatusChecker;
 
+    @Inject
+    private RuntimeVersionService runtimeVersionService;
+
     @Override
     public Conclusion check(Long resourceId) {
         Stack stack = stackService.getById(resourceId);
         ClusterApi connector = clusterApiConnectors.getConnector(stack);
         Set<InstanceMetaData> runningInstances = instanceMetaDataService.findNotTerminatedForStack(stack.getId());
         if (isClusterManagerRunning(stack, connector)) {
-            return checkCMForInstanceStatuses(connector, runningInstances);
+            return checkCMForInstanceStatuses(connector, runningInstances, stack.getCluster().getId());
         } else {
             return checkProviderForInstanceStatuses(stack, runningInstances);
         }
     }
 
-    private Conclusion checkCMForInstanceStatuses(ClusterApi connector, Set<InstanceMetaData> runningInstances) {
-        ExtendedHostStatuses extendedHostStatuses = connector.clusterStatusService().getExtendedHostStatuses();
+    private Conclusion checkCMForInstanceStatuses(ClusterApi connector, Set<InstanceMetaData> runningInstances, Long clusterId) {
+        ExtendedHostStatuses extendedHostStatuses = connector.clusterStatusService().getExtendedHostStatuses(
+                runtimeVersionService.getRuntimeVersion(clusterId));
         Map<HostName, Set<HealthCheck>> hostStatuses = extendedHostStatuses.getHostsHealth();
         Map<String, String> unhealthyHosts = hostStatuses.keySet().stream()
                 .filter(hostName -> !extendedHostStatuses.isHostHealthy(hostName))

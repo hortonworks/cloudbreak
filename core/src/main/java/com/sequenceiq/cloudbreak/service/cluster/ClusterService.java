@@ -71,6 +71,7 @@ import com.sequenceiq.cloudbreak.service.gateway.GatewayService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.cloudbreak.service.stack.RuntimeVersionService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.util.UsageLoggingUtil;
@@ -126,6 +127,9 @@ public class ClusterService {
 
     @Inject
     private UsageLoggingUtil usageLoggingUtil;
+
+    @Inject
+    private RuntimeVersionService runtimeVersionService;
 
     public Cluster saveClusterAndComponent(Cluster cluster, List<ClusterComponent> components, String stackName) {
         Cluster savedCluster;
@@ -330,7 +334,8 @@ public class ClusterService {
                     Arrays.asList(cmInstance.getDiscoveryFQDN(), cmInstance.getInstanceStatus().name()));
             return stack.getCluster();
         } else {
-            ExtendedHostStatuses extendedHostStatuses = connector.clusterStatusService().getExtendedHostStatuses();
+            ExtendedHostStatuses extendedHostStatuses = connector.clusterStatusService().getExtendedHostStatuses(
+                    runtimeVersionService.getRuntimeVersion(stack.getCluster().getId()));
             updateClusterCertExpirationState(stack.getCluster(), extendedHostStatuses.isAnyCertExpiring());
             try {
                 return transactionService.required(() -> {

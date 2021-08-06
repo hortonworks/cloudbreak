@@ -51,6 +51,7 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.cloudbreak.service.stack.RuntimeVersionService;
 import com.sequenceiq.cloudbreak.service.stack.StackInstanceStatusChecker;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackSyncService;
@@ -116,6 +117,9 @@ public class StackStatusCheckerJobTest {
 
     @Mock
     private InstanceMetaDataToCloudInstanceConverter cloudInstanceConverter;
+
+    @Mock
+    private RuntimeVersionService runtimeVersionService;
 
     @Before
     public void init() {
@@ -213,7 +217,7 @@ public class StackStatusCheckerJobTest {
         Set<HealthCheck> healthChecks = Sets.newHashSet(new HealthCheck(HealthCheckType.HOST, HealthCheckResult.HEALTHY, Optional.empty()),
                 new HealthCheck(HealthCheckType.CERT, HealthCheckResult.UNHEALTHY, Optional.empty()));
         ExtendedHostStatuses extendedHostStatuses = new ExtendedHostStatuses(Map.of(HostName.hostName("host1"), healthChecks));
-        when(clusterStatusService.getExtendedHostStatuses()).thenReturn(extendedHostStatuses);
+        when(clusterStatusService.getExtendedHostStatuses(any())).thenReturn(extendedHostStatuses);
         when(instanceMetaDataService.findNotTerminatedForStack(anyLong())).thenReturn(Set.of(instanceMetaData));
         when(instanceMetaData.getInstanceStatus()).thenReturn(InstanceStatus.SERVICES_HEALTHY);
     }

@@ -5,7 +5,6 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -16,14 +15,12 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
-import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProductBase;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.StackDetails;
-import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
+import com.sequenceiq.cloudbreak.service.stack.RuntimeVersionService;
 import com.sequenceiq.cloudbreak.service.stack.StackViewService;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
@@ -40,7 +37,7 @@ public class StackRuntimeVersionValidator {
     private StackViewService stackViewService;
 
     @Inject
-    private ClusterComponentConfigProvider clusterComponentConfigProvider;
+    private RuntimeVersionService runtimeVersionService;
 
     @Inject
     private EntitlementService entitlementService;
@@ -70,9 +67,7 @@ public class StackRuntimeVersionValidator {
         try {
             Optional<StackView> relatedDatalakeStack = stackViewService.findDatalakeViewByEnvironmentCrn(environmentCrn);
             if (relatedDatalakeStack.isPresent() && relatedDatalakeStack.get().isAvailable()) {
-                List<ClouderaManagerProduct> clouderaManagerProductDetails =
-                        clusterComponentConfigProvider.getClouderaManagerProductDetails(relatedDatalakeStack.get().getClusterView().getId());
-                Optional<String> cdhVersion = getCdhVersionFromClouderaManagerProducts(clouderaManagerProductDetails);
+                Optional<String> cdhVersion = runtimeVersionService.getRuntimeVersion(relatedDatalakeStack.get().getClusterView().getId());
                 if (cdhVersion.isEmpty()) {
                     return Optional.of(String.format("Cannot found CDH details about related datalake stack in CB, name: %s",
                             relatedDatalakeStack.get().getName()));
@@ -115,20 +110,7 @@ public class StackRuntimeVersionValidator {
                 .map(StackV4Request::getCluster)
                 .map(ClusterV4Request::getCm)
                 .map(ClouderaManagerV4Request::getProducts)
-                .flatMap(this::getCdhVersionFromClouderaManagerProducts);
-    }
-
-    public Optional<String> getCdhVersionFromClouderaManagerProducts(List<? extends ClouderaManagerProductBase> products) {
-        return products.stream()
-                .filter(product -> "CDH".equals(product.getName()))
-                .filter(product -> {
-                    if (product.getVersion() == null) {
-                        LOGGER.info("Cannot find the CDH's version in the request. We fallback to the default CDH version");
-                    }
-                    return product.getVersion() != null;
-                })
-                .map(product -> StringUtils.substringBefore(product.getVersion(), "-"))
-                .findFirst();
+                .flatMap(RuntimeVersionService::getRuntimeVersionFromClouderaManagerProducts);
     }
 
     private void compareRuntimeVersions(String requestedRuntimeVersion, String sdxRuntimeVersion) {

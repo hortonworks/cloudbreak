@@ -19,14 +19,13 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnParseException;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.controller.validation.stack.StackRuntimeVersionValidator;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
+import com.sequenceiq.cloudbreak.service.stack.RuntimeVersionService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.StackViewService;
 import com.sequenceiq.distrox.v1.distrox.StackOperations;
@@ -49,10 +48,7 @@ public class DistroXUpgradeAvailabilityService {
     private StackViewService stackViewService;
 
     @Inject
-    private ClusterComponentConfigProvider clusterComponentConfigProvider;
-
-    @Inject
-    private StackRuntimeVersionValidator stackRuntimeVersionValidator;
+    private RuntimeVersionService runtimeVersionService;
 
     public boolean isRuntimeUpgradeEnabled(String userCrn) {
         try {
@@ -119,8 +115,7 @@ public class DistroXUpgradeAvailabilityService {
         if (CollectionUtils.isNotEmpty(candidates)) {
             Optional<StackView> datalakeViewOpt = stackViewService.findDatalakeViewByEnvironmentCrn(stack.getEnvironmentCrn());
             if (datalakeViewOpt.isPresent()) {
-                Optional<String> datalakeVersionOpt = stackRuntimeVersionValidator.getCdhVersionFromClouderaManagerProducts(
-                        clusterComponentConfigProvider.getClouderaManagerProductDetails(datalakeViewOpt.get().getClusterView().getId()));
+                Optional<String> datalakeVersionOpt = runtimeVersionService.getRuntimeVersion(datalakeViewOpt.get().getClusterView().getId());
                 if (datalakeVersionOpt.isPresent()) {
                     String dlVersion = datalakeVersionOpt.get();
                     result = filterForDatalakeVersion(dlVersion, candidates);
