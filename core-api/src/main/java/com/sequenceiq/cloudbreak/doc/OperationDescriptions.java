@@ -44,6 +44,7 @@ public class OperationDescriptions {
         public static final String REPAIR_CLUSTER_IN_WORKSPACE_INTERNAL = "repairs the stack by name in workspace, internal only";
         public static final String UPGRADE_CLUSTER_IN_WORKSPACE = "upgrades the stack by name in workspace";
         public static final String UPGRADE_CLUSTER_IN_WORKSPACE_INTERNAL = "upgrades the stack by name in workspace, internal only";
+        public static final String RECOVER_CLUSTER_IN_WORKSPACE_INTERNAL = "recovers the stack by name in workspace, internal only";
         public static final String CHECK_FOR_UPGRADE_CLUSTER_IN_WORKSPACE = "check for upgrades for the stack by name in workspace";
         public static final String DELETE_WITH_KERBEROS_IN_WORKSPACE = "deletes the stack (with kerberos cluster) by name in workspace";
         public static final String GET_STACK_REQUEST_IN_WORKSPACE = "gets StackRequest by name in workspace";

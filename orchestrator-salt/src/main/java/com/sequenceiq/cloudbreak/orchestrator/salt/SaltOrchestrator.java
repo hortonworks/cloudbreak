@@ -46,7 +46,9 @@ import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorTimeoutException;
+import com.sequenceiq.cloudbreak.orchestrator.host.GrainOperation;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
+import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorGrainRunnerParams;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateRetryParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.BootstrapParams;
@@ -77,6 +79,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.GrainRemoveRun
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.HighStateAllRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.HighStateRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.MineUpdateRunner;
+import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.ModifyGrainBase;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.ParameterizedStateRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.StateAllRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.StateRunner;
@@ -356,11 +359,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             Callable<Boolean> saltPillarRunner = saltRunner.runner(hostSave, exitCriteria, exitModel);
             saltPillarRunner.call();
 
-            for (Entry<String, SaltPillarProperties> propertiesEntry : saltConfig.getServicePillarConfig().entrySet()) {
-                OrchestratorBootstrap pillarSave = new PillarSave(sc, gatewayTargetIpAddresses, propertiesEntry.getValue());
-                saltPillarRunner = saltRunner.runner(pillarSave, exitCriteria, exitModel);
-                saltPillarRunner.call();
-            }
+            savePillars(saltConfig, exitModel, gatewayTargetIpAddresses, sc);
 
             setAdMemberRoleIfNeeded(allNodes, saltConfig, exitModel, sc, reachableHostnames);
             setIpaMemberRoleIfNeeded(allNodes, saltConfig, exitModel, sc, reachableHostnames);
@@ -395,6 +394,14 @@ public class SaltOrchestrator implements HostOrchestrator {
         }
     }
 
+    private void savePillars(SaltConfig saltConfig, ExitCriteriaModel exitModel, Set<String> gatewayTargetIpAddresses, SaltConnector sc) throws Exception {
+        for (Entry<String, SaltPillarProperties> propertiesEntry : saltConfig.getServicePillarConfig().entrySet()) {
+            OrchestratorBootstrap pillarSave = new PillarSave(sc, gatewayTargetIpAddresses, propertiesEntry.getValue());
+            Callable<Boolean> saltPillarRunner = saltRunner.runner(pillarSave, exitCriteria, exitModel);
+            saltPillarRunner.call();
+        }
+    }
+
     @Override
     public void initSaltConfig(List<GatewayConfig> allGateway, Set<Node> allNodes, SaltConfig saltConfig, ExitCriteriaModel exitModel)
             throws CloudbreakOrchestratorFailedException {
@@ -405,11 +412,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             Callable<Boolean> saltPillarRunner = saltRunner.runner(hostSave, exitCriteria, exitModel);
             saltPillarRunner.call();
 
-            for (Entry<String, SaltPillarProperties> propertiesEntry : saltConfig.getServicePillarConfig().entrySet()) {
-                OrchestratorBootstrap pillarSave = new PillarSave(sc, gatewayTargets, propertiesEntry.getValue());
-                saltPillarRunner = saltRunner.runner(pillarSave, exitCriteria, exitModel);
-                saltPillarRunner.call();
-            }
+            savePillars(saltConfig, exitModel, gatewayTargets, sc);
         } catch (ExecutionException e) {
             LOGGER.warn("Error occurred during bootstrap", e);
             if (e.getCause() instanceof CloudbreakOrchestratorFailedException) {
@@ -1128,6 +1131,34 @@ public class SaltOrchestrator implements HostOrchestrator {
             saltJobRunBootstrapRunner.call();
         } catch (Exception e) {
             LOGGER.error(stateParams.getErrorMessage(), e);
+            throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void runOrchestratorGrainRunner(OrchestratorGrainRunnerParams grainRunnerParams) throws CloudbreakOrchestratorFailedException {
+        try (SaltConnector sc = saltService.createSaltConnector(grainRunnerParams.getPrimaryGatewayConfig())) {
+            Set<String> targetHostNames = grainRunnerParams.getTargetHostNames();
+            GrainOperation grainOperation = grainRunnerParams.getGrainOperation();
+            Set<Node> allNodes = grainRunnerParams.getAllNodes();
+            String key = grainRunnerParams.getKey();
+            String value = grainRunnerParams.getValue();
+
+            ModifyGrainBase runner;
+            switch (grainOperation) {
+                case ADD:
+                    runner = new GrainAddRunner(targetHostNames, allNodes, key, value);
+                    break;
+                case REMOVE:
+                    runner = new GrainRemoveRunner(targetHostNames, allNodes, key, value);
+                    break;
+                default:
+                    throw new IllegalStateException("Unexpected value: " + grainOperation);
+            }
+            saltCommandRunner.runModifyGrainCommand(sc, runner, grainRunnerParams.getExitCriteriaModel(), exitCriteria);
+
+        } catch (Exception e) {
+            LOGGER.error("Exception during grain runner", e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
         }
     }

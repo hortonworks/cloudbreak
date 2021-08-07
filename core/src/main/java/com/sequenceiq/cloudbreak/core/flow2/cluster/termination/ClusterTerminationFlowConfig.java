@@ -43,12 +43,14 @@ public class ClusterTerminationFlowConfig extends AbstractFlowConfiguration<Clus
                         .failureEvent(DEREGISTER_SERVICES_FAILED_EVENT)
                     .from(DISABLE_KERBEROS_STATE).to(CLUSTER_TERMINATING_STATE).event(DISABLE_KERBEROS_FINISHED_EVENT)
                         .failureEvent(DISABLE_KERBEROS_FAILED_EVENT)
+
                     .from(INIT_STATE).to(CLUSTER_TERMINATING_STATE).event(TERMINATION_EVENT)
                         .noFailureEvent()
                     .from(CLUSTER_TERMINATING_STATE).to(CLUSTER_TERMINATION_FINISH_STATE).event(TERMINATION_FINISHED_EVENT)
                         .failureEvent(TERMINATION_FAILED_EVENT)
                     .from(CLUSTER_TERMINATION_FINISH_STATE).to(FINAL_STATE).event(FINALIZED_EVENT)
                         .defaultFailureEvent()
+
                     .build();
 
     private static final FlowEdgeConfig<ClusterTerminationState, ClusterTerminationEvent> EDGE_CONFIG =

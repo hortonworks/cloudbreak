@@ -10,6 +10,9 @@
 
 {% if 'None' != configure_remote_db %}
 
+include:
+  - postgresql.disaster_recovery.recover
+
 /opt/salt/scripts/init_db_remote.sh:
   file.managed:
     - makedirs: True

@@ -30,9 +30,9 @@ import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidato
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.StackUpdaterService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
-import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.action.AbstractStackCreationAction;
+import com.sequenceiq.cloudbreak.core.flow2.stack.start.StackCreationContext;
 import com.sequenceiq.cloudbreak.core.flow2.validate.cloud.config.CloudConfigValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.validate.cloud.config.CloudConfigValidationState;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -93,7 +93,7 @@ public class CloudConfigValidationActions {
     public Action<?, ?> cloudConfigValidationAction() {
         return new AbstractStackCreationAction<>(StackEvent.class) {
             @Override
-            protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(StackCreationContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
                 Stack stack = context.getStack();
                 String name = stack.getName();
 
@@ -156,7 +156,7 @@ public class CloudConfigValidationActions {
             }
 
             @Override
-            protected Object getFailurePayload(StackEvent payload, Optional<StackContext> flowContext, Exception ex) {
+            protected Object getFailurePayload(StackEvent payload, Optional<StackCreationContext> flowContext, Exception ex) {
                 return new StackFailureEvent(CloudConfigValidationEvent.VALIDATE_CLOUD_CONFIG_FAILED_EVENT.selector(), payload.getResourceId(), ex);
             }
         };

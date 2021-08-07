@@ -115,6 +115,8 @@ public interface HostOrchestrator extends HostRecipeExecutor {
 
     void runOrchestratorState(OrchestratorStateParams stateParameters) throws CloudbreakOrchestratorFailedException;
 
+    void runOrchestratorGrainRunner(OrchestratorGrainRunnerParams grainRunnerParams) throws CloudbreakOrchestratorFailedException;
+
     Map<String, String> getFreeDiskSpaceByNodes(Set<Node> nodes, List<GatewayConfig> gatewayConfigs);
 
     void removeDeadSaltMinions(GatewayConfig gatewayConfig) throws CloudbreakOrchestratorFailedException;

@@ -57,6 +57,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.google.common.collect.Sets;
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.ImageCatalogV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.BaseStackDetailsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
@@ -218,12 +219,33 @@ class SdxServiceTest {
     }
 
     @Test
+    void testGetSdxClusterByNameOrCrnWhenClusterNameProvidedShouldReturnSdxClusterWithTheSameNameAsTheRequest() {
+        SdxCluster sdxCluser = new SdxCluster();
+        sdxCluser.setEnvName("env");
+        sdxCluser.setClusterName(CLUSTER_NAME);
+        when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(eq("hortonworks"), eq(CLUSTER_NAME)))
+                .thenReturn(Optional.of(sdxCluser));
+        SdxCluster returnedSdxCluster = underTest.getByNameOrCrn(USER_CRN, NameOrCrn.ofName(CLUSTER_NAME));
+        assertEquals(sdxCluser, returnedSdxCluster);
+    }
+
+    @Test
     void testGetSdxClusterWhenClusterCrnProvidedShouldReturnSdxClusterWithTheSameCrnAsTheRequest() {
         SdxCluster sdxCluser = new SdxCluster();
         sdxCluser.setEnvName("env");
         sdxCluser.setClusterName(CLUSTER_NAME);
         when(sdxClusterRepository.findByAccountIdAndCrnAndDeletedIsNull(eq("hortonworks"), eq(ENVIRONMENT_CRN))).thenReturn(Optional.of(sdxCluser));
         SdxCluster returnedSdxCluster = underTest.getByCrn(USER_CRN, ENVIRONMENT_CRN);
+        assertEquals(sdxCluser, returnedSdxCluster);
+    }
+
+    @Test
+    void testGetSdxClusterByNameOrCrnWhenClusterCrnProvidedShouldReturnSdxClusterWithTheSameCrnAsTheRequest() {
+        SdxCluster sdxCluser = new SdxCluster();
+        sdxCluser.setEnvName("env");
+        sdxCluser.setClusterName(CLUSTER_NAME);
+        when(sdxClusterRepository.findByAccountIdAndCrnAndDeletedIsNull(eq("hortonworks"), eq(ENVIRONMENT_CRN))).thenReturn(Optional.of(sdxCluser));
+        SdxCluster returnedSdxCluster = underTest.getByNameOrCrn(USER_CRN, NameOrCrn.ofCrn(ENVIRONMENT_CRN));
         assertEquals(sdxCluser, returnedSdxCluster);
     }
 

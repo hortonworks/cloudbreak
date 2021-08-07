@@ -39,7 +39,7 @@ public class AwsStackValidator implements Validator {
         try {
             LOGGER.debug("Checking stack name availability. [{}]", cFStackName);
             cfClient.describeStacks(new DescribeStacksRequest().withStackName(cFStackName));
-            throw new CloudConnectorException(String.format("Stack is already exists with the given name: %s", cFStackName));
+            throw new CloudConnectorException(String.format("Stack already exists with the given name: %s", cFStackName));
         } catch (AmazonServiceException e) {
             if (e.getErrorMessage().contains(cFStackName + " does not exist")) {
                 LOGGER.info("Stack name is available, CF stack not found by name {}", cFStackName);

@@ -186,7 +186,7 @@ public class ClusterV4RequestToClusterConverterTest {
         source.setDatabases(rdsConfigNames);
 
         Exception exception = assertThrows(NotFoundException.class, () -> underTest.convert(source));
-        assertEquals("RDS config names dont exists", exception.getMessage());
+        assertEquals("RDS config names do not exist", exception.getMessage());
 
         verify(rdsConfigService, times(1)).findByNamesInWorkspace(rdsConfigNames, workspace.getId());
     }
@@ -203,7 +203,7 @@ public class ClusterV4RequestToClusterConverterTest {
         when(blueprintService.getByNameForWorkspaceAndLoadDefaultsIfNecessary(blueprintName, workspace)).thenReturn(null);
 
         Exception exception = assertThrows(NotFoundException.class, () -> underTest.convert(source));
-        assertEquals("Cluster definition does not exists by name: bp-name", exception.getMessage());
+        assertEquals("Cluster definition does not exist by name: bp-name", exception.getMessage());
     }
 
     @Test

@@ -120,15 +120,16 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
         try {
             measure(() -> {
                 Stack stack = stackService.get(getStackId());
-                if (unshedulableStates().contains(stack.getStatus())) {
-                    LOGGER.debug("Stack sync will be unscheduled, stack state is {}", stack.getStatus());
+                Status stackStatus = stack.getStatus();
+                if (unschedulableStates().contains(stackStatus)) {
+                    LOGGER.debug("Stack sync will be unscheduled, stack state is {}", stackStatus);
                     jobService.unschedule(getLocalId());
-                } else if (null == stack.getStatus() || ignoredStates().contains(stack.getStatus())) {
-                    LOGGER.debug("Stack sync is skipped, stack state is {}", stack.getStatus());
-                } else if (syncableStates().contains(stack.getStatus())) {
+                } else if (null == stackStatus || ignoredStates().contains(stackStatus)) {
+                    LOGGER.debug("Stack sync is skipped, stack state is {}", stackStatus);
+                } else if (syncableStates().contains(stackStatus)) {
                     ThreadBasedUserCrnProvider.doAs(DATAHUB_INTERNAL_ACTOR_CRN, () -> doSync(stack));
                 } else {
-                    LOGGER.warn("Unhandled stack status, {}", stack.getStatus());
+                    LOGGER.warn("Unhandled stack status, {}", stackStatus);
                 }
             }, LOGGER, "Check status took {} ms for stack {}.", getStackId());
         } catch (Exception e) {
@@ -137,7 +138,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     }
 
     @VisibleForTesting
-    Set<Status> unshedulableStates() {
+    Set<Status> unschedulableStates() {
         return EnumSet.of(
                 Status.CREATE_FAILED,
                 Status.PRE_DELETE_IN_PROGRESS,
@@ -170,7 +171,9 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                 Status.EXTERNAL_DATABASE_CREATION_IN_PROGRESS,
                 Status.BACKUP_IN_PROGRESS,
                 Status.RESTORE_IN_PROGRESS,
-                Status.LOAD_BALANCER_UPDATE_IN_PROGRESS
+                Status.LOAD_BALANCER_UPDATE_IN_PROGRESS,
+                Status.RECOVERY_IN_PROGRESS,
+                Status.RECOVERY_REQUESTED
         );
     }
 
@@ -193,7 +196,8 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                 Status.EXTERNAL_DATABASE_START_FINISHED,
                 Status.EXTERNAL_DATABASE_STOP_FAILED,
                 Status.EXTERNAL_DATABASE_STOP_IN_PROGRESS,
-                Status.EXTERNAL_DATABASE_STOP_FINISHED
+                Status.EXTERNAL_DATABASE_STOP_FINISHED,
+                Status.RECOVERY_FAILED
         );
     }
 

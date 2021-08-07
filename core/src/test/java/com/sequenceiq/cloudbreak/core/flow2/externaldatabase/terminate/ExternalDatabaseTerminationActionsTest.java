@@ -42,6 +42,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.externaldatabase.TerminateExt
 import com.sequenceiq.cloudbreak.reactor.api.event.externaldatabase.TerminateExternalDatabaseRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.externaldatabase.TerminateExternalDatabaseResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.TerminationEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.TerminationType;
 import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -180,7 +181,8 @@ class ExternalDatabaseTerminationActionsTest {
     @ParameterizedTest
     @ValueSource(booleans = { false, true })
     void externalDatabaseTermination(boolean forced) {
-        TerminationEvent terminationEventPayload = new TerminationEvent(ACTION_PAYLOAD_SELECTOR, STACK_ID, forced);
+        TerminationEvent terminationEventPayload = new TerminationEvent(ACTION_PAYLOAD_SELECTOR, STACK_ID, forced ?
+                TerminationType.FORCED : TerminationType.REGULAR);
         when(stateContext.getMessageHeader(MessageFactory.HEADERS.DATA.name())).thenReturn(terminationEventPayload);
         Action<?, ?> action = configureAction(underTest::externalDatabaseTermination);
         action.execute(stateContext);

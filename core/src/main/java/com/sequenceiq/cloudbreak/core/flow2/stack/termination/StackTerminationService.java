@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.cloud.event.resource.TerminateStackResult;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -45,16 +46,17 @@ public class StackTerminationService {
     @Inject
     private ClusterPublicEndpointManagementService clusterPublicEndpointManagementService;
 
-    public void finishStackTermination(StackTerminationContext context, TerminateStackResult payload, Boolean forcedTermination) {
+    public void finishStackTermination(StackTerminationContext context, TerminateStackResult payload) {
         LOGGER.debug("Terminate stack result: {}", payload);
         Stack stack = context.getStack();
-        terminationService.finalizeTermination(stack.getId(), forcedTermination);
+        terminationService.finalizeTermination(stack.getId(), context.getTerminationType().isForced());
         flowMessageService.fireEventAndLog(stack.getId(), DELETE_COMPLETED.name(), STACK_DELETE_COMPLETED);
         clusterService.updateClusterStatusByStackId(stack.getId(), DELETE_COMPLETED);
         metricService.incrementMetricCounter(MetricType.STACK_TERMINATION_SUCCESSFUL, stack);
     }
 
-    public void handleStackTerminationError(Long stackId, Exception errorDetails, boolean forced) {
+    public void handleStackTerminationError(StackView stackView, Exception errorDetails, boolean forced) {
+        Long stackId = stackView.getId();
         String stackUpdateMessage;
         ResourceEvent resourceEvent;
         DetailedStackStatus status;
@@ -72,6 +74,8 @@ public class StackTerminationService {
             resourceEvent = STACK_FORCED_DELETE_COMPLETED;
         }
         flowMessageService.fireEventAndLog(stackId, status.name(), resourceEvent, stackUpdateMessage);
+        metricService.incrementMetricCounter(MetricType.STACK_TERMINATION_FAILED, stackView, errorDetails);
+
     }
 
     public void deleteDnsEntry(Stack stack) {

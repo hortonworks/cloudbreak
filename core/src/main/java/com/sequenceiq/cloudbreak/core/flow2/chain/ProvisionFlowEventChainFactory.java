@@ -13,6 +13,8 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.ProvisionEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.ProvisionType;
 import com.sequenceiq.flow.api.model.operation.OperationType;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
@@ -31,8 +33,8 @@ public class ProvisionFlowEventChainFactory implements FlowEventChainFactory<Sta
         flowEventChain.add(new StackEvent(VALIDATE_CLOUD_CONFIG_EVENT.event(), event.getResourceId(), event.accepted()));
         flowEventChain.add(new StackEvent(VALIDATE_KERBEROS_CONFIG_EVENT.event(), event.getResourceId(), event.accepted()));
         flowEventChain.add(new StackEvent(START_EXTERNAL_DATABASE_CREATION_EVENT.event(), event.getResourceId(), event.accepted()));
-        flowEventChain.add(new StackEvent(START_CREATION_EVENT.event(), event.getResourceId(), event.accepted()));
-        flowEventChain.add(new StackEvent(CLUSTER_CREATION_EVENT.event(), event.getResourceId()));
+        flowEventChain.add(new ProvisionEvent(START_CREATION_EVENT.event(), event.getResourceId(), ProvisionType.REGULAR, event.accepted()));
+        flowEventChain.add(new ProvisionEvent(CLUSTER_CREATION_EVENT.event(), event.getResourceId(), ProvisionType.REGULAR));
         return new FlowTriggerEventQueue(getName(), flowEventChain);
     }
 

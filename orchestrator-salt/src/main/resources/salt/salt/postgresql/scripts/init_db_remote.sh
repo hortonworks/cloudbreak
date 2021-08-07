@@ -6,7 +6,7 @@ export PGSSLROOTCERT="{{ postgresql.root_certs_file }}"
 export PGSSLMODE=verify-full
 {%- endif %}
 
-{% for service, values in pillar.get('postgres', {}).items()  %}
+{% for service, values in pillar.get('postgres', {}).items() %}
 
 {% if values['user'] is defined %}
 

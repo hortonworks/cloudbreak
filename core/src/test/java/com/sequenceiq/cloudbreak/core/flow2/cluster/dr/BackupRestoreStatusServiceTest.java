@@ -6,11 +6,17 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_DATABASE_BA
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_DATABASE_RESTORE;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_DATABASE_RESTORE_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_DATABASE_RESTORE_FINISHED;
-
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
@@ -19,13 +25,6 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 public class BackupRestoreStatusServiceTest {
 
@@ -98,7 +97,7 @@ public class BackupRestoreStatusServiceTest {
     }
 
     @Test
-    public void testRestorepFailure() {
+    public void testRestoreFailure() {
         ArgumentCaptor<ResourceEvent> captor = ArgumentCaptor.forClass(ResourceEvent.class);
         service.handleDatabaseRestoreFailure(STACK_ID, ERROR_MESSAGE, DetailedStackStatus.DATABASE_RESTORE_FAILED);
         verify(clusterService, times(1)).updateClusterStatusByStackId(STACK_ID, Status.AVAILABLE, ERROR_MESSAGE);

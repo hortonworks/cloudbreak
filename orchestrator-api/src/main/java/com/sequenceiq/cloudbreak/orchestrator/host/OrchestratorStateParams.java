@@ -11,6 +11,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 
 public class OrchestratorStateParams implements Cloneable {
+
     private String state;
 
     private GatewayConfig primaryGatewayConfig;

@@ -372,7 +372,7 @@ public enum ResourceEvent {
     DATALAKE_BACKUP_IN_PROGRESS("datalake.backup.in.progress"),
     DATALAKE_RESTORE_IN_PROGRESS("datalake.restore.in.progress"),
     DATALAKE_BACKUP_FINISHED("datalake.backup.finished"),
-    DATALAKE_RESTORE_FINISHED("datalake.restore.finised"),
+    DATALAKE_RESTORE_FINISHED("datalake.restore.finished"),
     DATALAKE_BACKUP_FAILED("datalake.backup.failed"),
     DATALAKE_RESTORE_FAILED("datalake.restore.failed"),
     DATALAKE_DETACHED("datalake.detached"),
@@ -381,7 +381,15 @@ public enum ResourceEvent {
     DATALAKE_CERT_RENEWAL_FINISHED("datalake.cert.renewal.finished"),
     SDX_CERT_ROTATION_STARTED("resource.sdx.cert.rotation.started"),
     SDX_CERT_ROTATION_FAILED("resource.sdx.cert.rotation.failed"),
-    SDX_CERT_ROTATION_FINISHED("resource.sdx.cert.rotation.finished");
+    SDX_CERT_ROTATION_FINISHED("resource.sdx.cert.rotation.finished"),
+
+    DATALAKE_RECOVERY_REQUESTED("datalake.recovery.requested"),
+    DATALAKE_RECOVERY_IN_PROGRESS("datalake.recovery.in.progress"),
+    DATALAKE_RECOVERY_BRINGUP_FINISHED("datalake.recovery.bringup.finished"),
+    DATALAKE_RECOVERY_BRINGUP_FAILED("datalake.recovery.bringup.failed"),
+    DATALAKE_RECOVERY_TEARDOWN_FINISHED("datalake.recovery.teardown.finished"),
+    DATALAKE_RECOVERY_FAILED("datalake.recovery.failed"),
+    DATALAKE_RECOVERY_FINISHED("datalake.recovery.finished");
 
     private final String message;
 

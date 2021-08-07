@@ -22,7 +22,7 @@ public class ClusterProxyDeregisterAction extends AbstractStackTerminationAction
 
     @Override
     protected void doExecute(StackTerminationContext context, StackPreTerminationSuccess payload, Map<Object, Object> variables) {
-        if (clusterProxyEnablementService.isClusterProxyApplicable(context.getStack().getCloudPlatform())) {
+        if (!context.getTerminationType().isRecovery() && clusterProxyEnablementService.isClusterProxyApplicable(context.getStack().getCloudPlatform())) {
             ClusterProxyDeregisterRequest deregisterRequest = createRequest(context);
             sendEvent(context, deregisterRequest.selector(), deregisterRequest);
         } else {

@@ -103,7 +103,7 @@ public class ReactorFlowManagerTest {
         underTest.triggerStackStart(STACK_ID);
         underTest.triggerClusterStop(STACK_ID);
         underTest.triggerClusterStart(STACK_ID);
-        underTest.triggerTermination(STACK_ID, false);
+        underTest.triggerTermination(STACK_ID);
         underTest.triggerStackUpscale(STACK_ID, instanceGroupAdjustment, true);
         underTest.triggerStackDownscale(STACK_ID, instanceGroupAdjustment);
         underTest.triggerStackRemoveInstance(STACK_ID, "hostgroup", 5L);
@@ -136,6 +136,7 @@ public class ReactorFlowManagerTest {
         underTest.triggerAutoTlsCertificatesRotation(STACK_ID, new CertificatesRotationV4Request());
         underTest.triggerStackLoadBalancerUpdate(STACK_ID);
         underTest.triggerCmSync(STACK_ID, Set.of());
+        underTest.triggerDatalakeClusterRecovery(STACK_ID);
 
         int count = 0;
         for (Method method : underTest.getClass().getDeclaredMethods()) {

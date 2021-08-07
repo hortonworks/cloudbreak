@@ -31,6 +31,7 @@ import reactor.bus.EventBus;
 
 @Component
 public class TerminateStackHandler implements CloudPlatformEventHandler<TerminateStackRequest> {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(TerminateStackHandler.class);
 
     @Inject

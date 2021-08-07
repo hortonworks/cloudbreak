@@ -13,13 +13,11 @@ import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyEnablementService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.AbstractClusterAction;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterViewContext;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.service.ClusterCreationService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
-import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.action.AbstractStackCreationAction;
+import com.sequenceiq.cloudbreak.core.flow2.stack.start.StackCreationContext;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.job.StackJobAdapter;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
@@ -79,6 +77,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.HostMetadataSet
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.HostMetadataSetupSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.PreFlightCheckRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.PreFlightCheckSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.SetupRecoveryRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.SetupRecoverySuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StartAmbariServicesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StartClusterManagerServicesSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ValidateCloudStorageRequest;
@@ -86,6 +86,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ValidateCloudSt
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UploadRecipesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UploadRecipesSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.CleanupFreeIpaEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.ProvisionEvent;
 import com.sequenceiq.cloudbreak.service.freeipa.InstanceMetadataProcessor;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
@@ -111,12 +112,19 @@ public class ClusterCreationActions {
 
     @Bean(name = "CLUSTER_PROXY_REGISTRATION_STATE")
     public Action<?, ?> clusterProxyRegistrationAction() {
-        return new AbstractStackCreationAction<>(StackEvent.class) {
+        return new AbstractStackCreationAction<>(ProvisionEvent.class) {
+
             @Inject
             private ClusterProxyEnablementService clusterProxyEnablementService;
 
             @Override
-            protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
+            protected void prepareExecution(ProvisionEvent payload, Map<Object, Object> variables) {
+                super.prepareExecution(payload, variables);
+                variables.put(PROVISION_TYPE, payload.getProvisionType());
+            }
+
+            @Override
+            protected void doExecute(StackCreationContext context, ProvisionEvent payload, Map<Object, Object> variables) {
                 if (clusterProxyEnablementService.isClusterProxyApplicable(context.getStack().cloudPlatform())) {
                     clusterCreationService.registeringToClusterProxy(context.getStack());
                     sendEvent(context);
@@ -127,7 +135,7 @@ public class ClusterCreationActions {
             }
 
             @Override
-            protected Selectable createRequest(StackContext context) {
+            protected Selectable createRequest(StackCreationContext context) {
                 return new ClusterProxyRegistrationRequest(context.getStack().getId(), context.getStack().cloudPlatform());
             }
         };
@@ -137,13 +145,13 @@ public class ClusterCreationActions {
     public Action<?, ?> bootstrappingMachinesAction() {
         return new AbstractStackCreationAction<>(ClusterProxyRegistrationSuccess.class) {
             @Override
-            protected void doExecute(StackContext context, ClusterProxyRegistrationSuccess payload, Map<Object, Object> variables) {
+            protected void doExecute(StackCreationContext context, ClusterProxyRegistrationSuccess payload, Map<Object, Object> variables) {
                 clusterCreationService.bootstrappingMachines(context.getStack());
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(StackContext context) {
+            protected Selectable createRequest(StackCreationContext context) {
                 return new BootstrapMachinesRequest(context.getStack().getId());
             }
         };
@@ -153,13 +161,13 @@ public class ClusterCreationActions {
     public Action<?, ?> collectingHostMetadataAction() {
         return new AbstractStackCreationAction<>(BootstrapMachinesSuccess.class) {
             @Override
-            protected void doExecute(StackContext context, BootstrapMachinesSuccess payload, Map<Object, Object> variables) {
+            protected void doExecute(StackCreationContext context, BootstrapMachinesSuccess payload, Map<Object, Object> variables) {
                 clusterCreationService.collectingHostMetadata(context.getStack());
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(StackContext context) {
+            protected Selectable createRequest(StackCreationContext context) {
                 return new HostMetadataSetupRequest(context.getStack().getId());
             }
         };
@@ -169,32 +177,47 @@ public class ClusterCreationActions {
     public Action<?, ?> validateCloudStorageAction() {
         return new AbstractStackCreationAction<>(HostMetadataSetupSuccess.class) {
             @Override
-            protected void doExecute(StackContext context, HostMetadataSetupSuccess payload, Map<Object, Object> variables) {
+            protected void doExecute(StackCreationContext context, HostMetadataSetupSuccess payload, Map<Object, Object> variables) {
                 clusterCreationService.validatingCloudStorageOnVm(context.getStack());
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(StackContext context) {
+            protected Selectable createRequest(StackCreationContext context) {
                 return new ValidateCloudStorageRequest(context.getStack().getId());
+            }
+        };
+    }
+
+    @Bean(name = "SETUP_RECOVERY_STATE")
+    public Action<?, ?> setupRecoveryAction() {
+        return new AbstractStackCreationAction<>(ValidateCloudStorageSuccess.class) {
+            @Override
+            protected void doExecute(StackCreationContext context, ValidateCloudStorageSuccess payload, Map<Object, Object> variables) {
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(StackCreationContext context) {
+                return new SetupRecoveryRequest(context.getStack().getId(), context.getProvisionType());
             }
         };
     }
 
     @Bean(name = "CLEANUP_FREEIPA_STATE")
     public Action<?, ?> cleanupFreeIpaAction() {
-        return new AbstractStackCreationAction<>(ValidateCloudStorageSuccess.class) {
+        return new AbstractStackCreationAction<>(SetupRecoverySuccess.class) {
 
             @Inject
             private InstanceMetaDataService instanceMetaDataService;
 
             @Override
-            protected void doExecute(StackContext context, ValidateCloudStorageSuccess payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(StackCreationContext context, SetupRecoverySuccess payload, Map<Object, Object> variables) throws Exception {
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(StackContext context) {
+            protected Selectable createRequest(StackCreationContext context) {
                 Set<InstanceMetaData> instanceMetaData = instanceMetaDataService.findNotTerminatedForStack(context.getStack().getId());
                 Set<String> hostNames = instanceMetadataProcessor.extractFqdn(instanceMetaData);
                 Set<String> ips = instanceMetadataProcessor.extractIps(instanceMetaData);
@@ -207,13 +230,13 @@ public class ClusterCreationActions {
     public Action<?, ?> bootStrappingPublicEndpointAction() {
         return new AbstractStackCreationAction<>(StackEvent.class) {
             @Override
-            protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
+            protected void doExecute(StackCreationContext context, StackEvent payload, Map<Object, Object> variables) {
                 clusterCreationService.bootstrapPublicEndpoints(context.getStack());
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(StackContext context) {
+            protected Selectable createRequest(StackCreationContext context) {
                 return new BootstrapPublicEndpointSuccess(context.getStack().getId());
             }
         };
@@ -223,13 +246,13 @@ public class ClusterCreationActions {
     public Action<?, ?> bootStrappingPrivateEndpointAction() {
         return new AbstractStackCreationAction<>(BootstrapPublicEndpointSuccess.class) {
             @Override
-            protected void doExecute(StackContext context, BootstrapPublicEndpointSuccess payload, Map<Object, Object> variables) {
+            protected void doExecute(StackCreationContext context, BootstrapPublicEndpointSuccess payload, Map<Object, Object> variables) {
                 clusterCreationService.bootstrapPrivateEndpoints(context.getStack());
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(StackContext context) {
+            protected Selectable createRequest(StackCreationContext context) {
                 return new BootstrapFreeIPAEndpointSuccess(context.getStack().getId());
             }
         };
@@ -237,14 +260,14 @@ public class ClusterCreationActions {
 
     @Bean(name = "UPLOAD_RECIPES_STATE")
     public Action<?, ?> uploadRecipesAction() {
-        return new AbstractClusterAction<>(BootstrapFreeIPAEndpointSuccess.class) {
+        return new AbstractClusterCreationAction<>(BootstrapFreeIPAEndpointSuccess.class) {
             @Override
-            protected void doExecute(ClusterViewContext context, BootstrapFreeIPAEndpointSuccess payload, Map<Object, Object> variables) {
+            protected void doExecute(ClusterCreationViewContext context, BootstrapFreeIPAEndpointSuccess payload, Map<Object, Object> variables) {
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(ClusterViewContext context) {
+            protected Selectable createRequest(ClusterCreationViewContext context) {
                 return new UploadRecipesRequest(context.getStackId());
             }
         };
@@ -252,14 +275,14 @@ public class ClusterCreationActions {
 
     @Bean(name = "CONFIGURE_KEYTABS_STATE")
     public Action<?, ?> configureKeytabsAction() {
-        return new AbstractClusterAction<>(UploadRecipesSuccess.class) {
+        return new AbstractClusterCreationAction<>(UploadRecipesSuccess.class) {
             @Override
-            protected void doExecute(ClusterViewContext context, UploadRecipesSuccess payload, Map<Object, Object> variables) {
+            protected void doExecute(ClusterCreationViewContext context, UploadRecipesSuccess payload, Map<Object, Object> variables) {
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(ClusterViewContext context) {
+            protected Selectable createRequest(ClusterCreationViewContext context) {
                 return new KeytabConfigurationRequest(context.getStackId());
             }
         };
@@ -267,15 +290,15 @@ public class ClusterCreationActions {
 
     @Bean(name = "STARTING_CLUSTER_MANAGER_SERVICES_STATE")
     public Action<?, ?> startingAmbariServicesAction() {
-        return new AbstractClusterAction<>(KeytabConfigurationSuccess.class) {
+        return new AbstractClusterCreationAction<>(KeytabConfigurationSuccess.class) {
             @Override
-            protected void doExecute(ClusterViewContext context, KeytabConfigurationSuccess payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterCreationViewContext context, KeytabConfigurationSuccess payload, Map<Object, Object> variables) throws Exception {
                 clusterCreationService.startingClusterServices(context.getStack());
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(ClusterViewContext context) {
+            protected Selectable createRequest(ClusterCreationViewContext context) {
                 return new StartAmbariServicesRequest(context.getStackId());
             }
         };
@@ -283,15 +306,15 @@ public class ClusterCreationActions {
 
     @Bean(name = "PREFLIGHT_CHECK_STATE")
     public Action<?, ?> preFlightCheckAction() {
-        return new AbstractClusterAction<>(StartClusterManagerServicesSuccess.class) {
+        return new AbstractClusterCreationAction<>(StartClusterManagerServicesSuccess.class) {
             @Override
-            protected void doExecute(ClusterViewContext context, StartClusterManagerServicesSuccess payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterCreationViewContext context, StartClusterManagerServicesSuccess payload, Map<Object, Object> variables) {
                 LOGGER.debug("Starting pre-flight checks for stack with id: {}", context.getStackId());
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(ClusterViewContext context) {
+            protected Selectable createRequest(ClusterCreationViewContext context) {
                 return new PreFlightCheckRequest(context.getStackId());
             }
         };
@@ -299,15 +322,15 @@ public class ClusterCreationActions {
 
     @Bean(name = "STARTING_CLUSTER_MANAGER_STATE")
     public Action<?, ?> startingAmbariAction() {
-        return new AbstractClusterAction<>(PreFlightCheckSuccess.class) {
+        return new AbstractClusterCreationAction<>(PreFlightCheckSuccess.class) {
             @Override
-            protected void doExecute(ClusterViewContext context, PreFlightCheckSuccess payload, Map<Object, Object> variables) {
+            protected void doExecute(ClusterCreationViewContext context, PreFlightCheckSuccess payload, Map<Object, Object> variables) {
                 clusterCreationService.startingClusterManager(context.getStackId());
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(ClusterViewContext context) {
+            protected Selectable createRequest(ClusterCreationViewContext context) {
                 return new StartClusterRequest(context.getStackId());
             }
         };
@@ -315,14 +338,14 @@ public class ClusterCreationActions {
 
     @Bean(name = "CONFIGURE_LDAP_SSO_STATE")
     public Action<?, ?> configureLdapSSOAction() {
-        return new AbstractClusterAction<>(StartClusterSuccess.class) {
+        return new AbstractClusterCreationAction<>(StartClusterSuccess.class) {
             @Override
-            protected void doExecute(ClusterViewContext context, StartClusterSuccess payload, Map<Object, Object> variables) {
+            protected void doExecute(ClusterCreationViewContext context, StartClusterSuccess payload, Map<Object, Object> variables) {
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(ClusterViewContext context) {
+            protected Selectable createRequest(ClusterCreationViewContext context) {
                 return new LdapSSOConfigurationRequest(context.getStackId());
             }
         };
@@ -330,14 +353,14 @@ public class ClusterCreationActions {
 
     @Bean(name = "WAIT_FOR_CLUSTER_MANAGER_STATE")
     public Action<?, ?> waitForClusterManagerAction() {
-        return new AbstractClusterAction<>(LdapSSOConfigurationSuccess.class) {
+        return new AbstractClusterCreationAction<>(LdapSSOConfigurationSuccess.class) {
             @Override
-            protected void doExecute(ClusterViewContext context, LdapSSOConfigurationSuccess payload, Map<Object, Object> variables) {
+            protected void doExecute(ClusterCreationViewContext context, LdapSSOConfigurationSuccess payload, Map<Object, Object> variables) {
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(ClusterViewContext context) {
+            protected Selectable createRequest(ClusterCreationViewContext context) {
                 return new WaitForClusterManagerRequest(context.getStackId());
             }
         };
@@ -345,14 +368,14 @@ public class ClusterCreationActions {
 
     @Bean(name = "EXECUTE_POST_CLUSTER_MANAGER_START_RECIPES_STATE")
     public Action<?, ?> executePostClusterManagerStartRecipesAction() {
-        return new AbstractClusterAction<>(WaitForClusterManagerSuccess.class) {
+        return new AbstractClusterCreationAction<>(WaitForClusterManagerSuccess.class) {
             @Override
-            protected void doExecute(ClusterViewContext context, WaitForClusterManagerSuccess payload, Map<Object, Object> variables) {
+            protected void doExecute(ClusterCreationViewContext context, WaitForClusterManagerSuccess payload, Map<Object, Object> variables) {
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(ClusterViewContext context) {
+            protected Selectable createRequest(ClusterCreationViewContext context) {
                 return new ExecutePostClusterManagerStartRecipesRequest(context.getStackId());
             }
         };
@@ -360,14 +383,14 @@ public class ClusterCreationActions {
 
     @Bean(name = "PREPARE_PROXY_CONFIG_STATE")
     public Action<?, ?> prepareProxyConfigAction() {
-        return new AbstractClusterAction<>(ExecutePostClusterManagerStartRecipesSuccess.class) {
+        return new AbstractClusterCreationAction<>(ExecutePostClusterManagerStartRecipesSuccess.class) {
             @Override
-            protected void doExecute(ClusterViewContext context, ExecutePostClusterManagerStartRecipesSuccess payload, Map<Object, Object> variables) {
+            protected void doExecute(ClusterCreationViewContext context, ExecutePostClusterManagerStartRecipesSuccess payload, Map<Object, Object> variables) {
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(ClusterViewContext context) {
+            protected Selectable createRequest(ClusterCreationViewContext context) {
                 return new ClusterManagerPrepareProxyConfigRequest(context.getStackId());
             }
         };
@@ -375,14 +398,14 @@ public class ClusterCreationActions {
 
     @Bean(name = "SETUP_MONITORING_STATE")
     public Action<?, ?> setupMonitoringAction() {
-        return new AbstractClusterAction<>(ClusterManagerPrepareProxyConfigSuccess.class) {
+        return new AbstractClusterCreationAction<>(ClusterManagerPrepareProxyConfigSuccess.class) {
             @Override
-            protected void doExecute(ClusterViewContext context, ClusterManagerPrepareProxyConfigSuccess payload, Map<Object, Object> variables) {
+            protected void doExecute(ClusterCreationViewContext context, ClusterManagerPrepareProxyConfigSuccess payload, Map<Object, Object> variables) {
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(ClusterViewContext context) {
+            protected Selectable createRequest(ClusterCreationViewContext context) {
                 return new ClusterManagerSetupMonitoringRequest(context.getStackId());
             }
         };
@@ -390,14 +413,14 @@ public class ClusterCreationActions {
 
     @Bean(name = "PREPARE_EXTENDED_TEMPLATE_STATE")
     public Action<?, ?> prepareExtendedTemplateAction() {
-        return new AbstractClusterAction<>(ClusterManagerSetupMonitoringSuccess.class) {
+        return new AbstractClusterCreationAction<>(ClusterManagerSetupMonitoringSuccess.class) {
             @Override
-            protected void doExecute(ClusterViewContext context, ClusterManagerSetupMonitoringSuccess payload, Map<Object, Object> variables) {
+            protected void doExecute(ClusterCreationViewContext context, ClusterManagerSetupMonitoringSuccess payload, Map<Object, Object> variables) {
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(ClusterViewContext context) {
+            protected Selectable createRequest(ClusterCreationViewContext context) {
                 return new PrepareExtendedTemplateRequest(context.getStackId());
             }
         };
@@ -405,14 +428,14 @@ public class ClusterCreationActions {
 
     @Bean(name = "VALIDATE_LICENCE_STATE")
     public Action<?, ?> validateLicenceAction() {
-        return new AbstractClusterAction<>(PrepareExtendedTemplateSuccess.class) {
+        return new AbstractClusterCreationAction<>(PrepareExtendedTemplateSuccess.class) {
             @Override
-            protected void doExecute(ClusterViewContext context, PrepareExtendedTemplateSuccess payload, Map<Object, Object> variables) {
+            protected void doExecute(ClusterCreationViewContext context, PrepareExtendedTemplateSuccess payload, Map<Object, Object> variables) {
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(ClusterViewContext context) {
+            protected Selectable createRequest(ClusterCreationViewContext context) {
                 return new ValidateClusterLicenceRequest(context.getStackId());
             }
         };
@@ -420,14 +443,14 @@ public class ClusterCreationActions {
 
     @Bean(name = "CONFIGURE_MANAGEMENT_SERVICES_STATE")
     public Action<?, ?> configureManagementServicesAction() {
-        return new AbstractClusterAction<>(ValidateClusterLicenceSuccess.class) {
+        return new AbstractClusterCreationAction<>(ValidateClusterLicenceSuccess.class) {
             @Override
-            protected void doExecute(ClusterViewContext context, ValidateClusterLicenceSuccess payload, Map<Object, Object> variables) {
+            protected void doExecute(ClusterCreationViewContext context, ValidateClusterLicenceSuccess payload, Map<Object, Object> variables) {
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(ClusterViewContext context) {
+            protected Selectable createRequest(ClusterCreationViewContext context) {
                 return new ConfigureClusterManagerManagementServicesRequest(context.getStackId());
             }
         };
@@ -435,14 +458,15 @@ public class ClusterCreationActions {
 
     @Bean(name = "CONFIGURE_SUPPORT_TAGS_STATE")
     public Action<?, ?> configureSupportTagsAction() {
-        return new AbstractClusterAction<>(ConfigureClusterManagerManagementServicesSuccess.class) {
+        return new AbstractClusterCreationAction<>(ConfigureClusterManagerManagementServicesSuccess.class) {
             @Override
-            protected void doExecute(ClusterViewContext context, ConfigureClusterManagerManagementServicesSuccess payload, Map<Object, Object> variables) {
+            protected void doExecute(ClusterCreationViewContext context,
+                    ConfigureClusterManagerManagementServicesSuccess payload, Map<Object, Object> variables) {
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(ClusterViewContext context) {
+            protected Selectable createRequest(ClusterCreationViewContext context) {
                 return new ConfigureClusterManagerSupportTagsRequest(context.getStackId());
             }
         };
@@ -450,14 +474,14 @@ public class ClusterCreationActions {
 
     @Bean(name = "UPDATE_CONFIG_STATE")
     public Action<?, ?> updateConfigAction() {
-        return new AbstractClusterAction<>(ConfigureClusterManagerSupportTagsSuccess.class) {
+        return new AbstractClusterCreationAction<>(ConfigureClusterManagerSupportTagsSuccess.class) {
             @Override
-            protected void doExecute(ClusterViewContext context, ConfigureClusterManagerSupportTagsSuccess payload, Map<Object, Object> variables) {
+            protected void doExecute(ClusterCreationViewContext context, ConfigureClusterManagerSupportTagsSuccess payload, Map<Object, Object> variables) {
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(ClusterViewContext context) {
+            protected Selectable createRequest(ClusterCreationViewContext context) {
                 return new UpdateClusterConfigRequest(context.getStackId());
             }
         };
@@ -465,14 +489,14 @@ public class ClusterCreationActions {
 
     @Bean(name = "REFRESH_PARCEL_REPOS_STATE")
     public Action<?, ?> refreshParcelReposAction() {
-        return new AbstractClusterAction<>(UpdateClusterConfigSuccess.class) {
+        return new AbstractClusterCreationAction<>(UpdateClusterConfigSuccess.class) {
             @Override
-            protected void doExecute(ClusterViewContext context, UpdateClusterConfigSuccess payload, Map<Object, Object> variables) {
+            protected void doExecute(ClusterCreationViewContext context, UpdateClusterConfigSuccess payload, Map<Object, Object> variables) {
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(ClusterViewContext context) {
+            protected Selectable createRequest(ClusterCreationViewContext context) {
                 return new ClusterManagerRefreshParcelRequest(context.getStackId());
             }
         };
@@ -480,15 +504,15 @@ public class ClusterCreationActions {
 
     @Bean(name = "INSTALLING_CLUSTER_STATE")
     public Action<?, ?> installingClusterAction() {
-        return new AbstractClusterAction<>(ClusterManagerRefreshParcelSuccess.class) {
+        return new AbstractClusterCreationAction<>(ClusterManagerRefreshParcelSuccess.class) {
             @Override
-            protected void doExecute(ClusterViewContext context, ClusterManagerRefreshParcelSuccess payload, Map<Object, Object> variables) {
+            protected void doExecute(ClusterCreationViewContext context, ClusterManagerRefreshParcelSuccess payload, Map<Object, Object> variables) {
                 clusterCreationService.installingCluster(context.getStack());
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(ClusterViewContext context) {
+            protected Selectable createRequest(ClusterCreationViewContext context) {
                 return new InstallClusterRequest(context.getStackId());
             }
         };
@@ -496,14 +520,14 @@ public class ClusterCreationActions {
 
     @Bean(name = "AUTOCONFIGURE_CLUSTER_MANAGER_STATE")
     public Action<?, ?> autoConfiguerClusterManagerAction() {
-        return new AbstractClusterAction<>(InstallClusterSuccess.class) {
+        return new AbstractClusterCreationAction<>(InstallClusterSuccess.class) {
             @Override
-            protected void doExecute(ClusterViewContext context, InstallClusterSuccess payload, Map<Object, Object> variables) {
+            protected void doExecute(ClusterCreationViewContext context, InstallClusterSuccess payload, Map<Object, Object> variables) {
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(ClusterViewContext context) {
+            protected Selectable createRequest(ClusterCreationViewContext context) {
                 return new AutoConfigureClusterManagerRequest(context.getStackId());
             }
         };
@@ -511,14 +535,14 @@ public class ClusterCreationActions {
 
     @Bean(name = "START_MANAGEMENT_SERVICES_STATE")
     public Action<?, ?> startManagementServicesAction() {
-        return new AbstractClusterAction<>(AutoConfigureClusterManagerSuccess.class) {
+        return new AbstractClusterCreationAction<>(AutoConfigureClusterManagerSuccess.class) {
             @Override
-            protected void doExecute(ClusterViewContext context, AutoConfigureClusterManagerSuccess payload, Map<Object, Object> variables) {
+            protected void doExecute(ClusterCreationViewContext context, AutoConfigureClusterManagerSuccess payload, Map<Object, Object> variables) {
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(ClusterViewContext context) {
+            protected Selectable createRequest(ClusterCreationViewContext context) {
                 return new StartClusterManagerManagementServicesRequest(context.getStackId());
             }
         };
@@ -526,14 +550,14 @@ public class ClusterCreationActions {
 
     @Bean(name = "SUPPRESS_WARNINGS_STATE")
     public Action<?, ?> suppressWarningsAction() {
-        return new AbstractClusterAction<>(StartClusterManagerManagementServicesSuccess.class) {
+        return new AbstractClusterCreationAction<>(StartClusterManagerManagementServicesSuccess.class) {
             @Override
-            protected void doExecute(ClusterViewContext context, StartClusterManagerManagementServicesSuccess payload, Map<Object, Object> variables) {
+            protected void doExecute(ClusterCreationViewContext context, StartClusterManagerManagementServicesSuccess payload, Map<Object, Object> variables) {
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(ClusterViewContext context) {
+            protected Selectable createRequest(ClusterCreationViewContext context) {
                 return new SuppressClusterWarningsRequest(context.getStackId());
             }
         };
@@ -541,14 +565,14 @@ public class ClusterCreationActions {
 
     @Bean(name = "CONFIGURE_KERBEROS_STATE")
     public Action<?, ?> configureKerberosAction() {
-        return new AbstractClusterAction<>(SuppressClusterWarningsSuccess.class) {
+        return new AbstractClusterCreationAction<>(SuppressClusterWarningsSuccess.class) {
             @Override
-            protected void doExecute(ClusterViewContext context, SuppressClusterWarningsSuccess payload, Map<Object, Object> variables) {
+            protected void doExecute(ClusterCreationViewContext context, SuppressClusterWarningsSuccess payload, Map<Object, Object> variables) {
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(ClusterViewContext context) {
+            protected Selectable createRequest(ClusterCreationViewContext context) {
                 return new ClusterManagerConfigureKerberosRequest(context.getStackId());
             }
         };
@@ -556,14 +580,14 @@ public class ClusterCreationActions {
 
     @Bean(name = "EXECUTE_POST_INSTALL_RECIPES_STATE")
     public Action<?, ?> executePostInstallRecipesAction() {
-        return new AbstractClusterAction<>(ClusterManagerConfigureKerberosSuccess.class) {
+        return new AbstractClusterCreationAction<>(ClusterManagerConfigureKerberosSuccess.class) {
             @Override
-            protected void doExecute(ClusterViewContext context, ClusterManagerConfigureKerberosSuccess payload, Map<Object, Object> variables) {
+            protected void doExecute(ClusterCreationViewContext context, ClusterManagerConfigureKerberosSuccess payload, Map<Object, Object> variables) {
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(ClusterViewContext context) {
+            protected Selectable createRequest(ClusterCreationViewContext context) {
                 return new ExecutePostInstallRecipesRequest(context.getStackId());
             }
         };
@@ -571,14 +595,14 @@ public class ClusterCreationActions {
 
     @Bean(name = "PREPARE_DATALAKE_RESOURCE_STATE")
     public Action<?, ?> prepareDatalakeResourceAction() {
-        return new AbstractClusterAction<>(ExecutePostInstallRecipesSuccess.class) {
+        return new AbstractClusterCreationAction<>(ExecutePostInstallRecipesSuccess.class) {
             @Override
-            protected void doExecute(ClusterViewContext context, ExecutePostInstallRecipesSuccess payload, Map<Object, Object> variables) {
+            protected void doExecute(ClusterCreationViewContext context, ExecutePostInstallRecipesSuccess payload, Map<Object, Object> variables) {
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(ClusterViewContext context) {
+            protected Selectable createRequest(ClusterCreationViewContext context) {
                 return new PrepareDatalakeResourceRequest(context.getStackId());
             }
         };
@@ -586,15 +610,15 @@ public class ClusterCreationActions {
 
     @Bean(name = "FINALIZE_CLUSTER_INSTALL_STATE")
     public Action<?, ?> finalizeClusterInstallAction() {
-        return new AbstractClusterAction<>(PrepareDatalakeResourceSuccess.class) {
+        return new AbstractClusterCreationAction<>(PrepareDatalakeResourceSuccess.class) {
             @Override
-            protected void doExecute(ClusterViewContext context, PrepareDatalakeResourceSuccess payload, Map<Object, Object> variables) {
+            protected void doExecute(ClusterCreationViewContext context, PrepareDatalakeResourceSuccess payload, Map<Object, Object> variables) {
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(ClusterViewContext context) {
-                return new FinalizeClusterInstallRequest(context.getStackId());
+            protected Selectable createRequest(ClusterCreationViewContext context) {
+                return new FinalizeClusterInstallRequest(context.getStackId(), context.getProvisionType());
             }
         };
     }
@@ -603,12 +627,12 @@ public class ClusterCreationActions {
     public Action<?, ?> clusterProxyGatewayRegistrationAction() {
         return new AbstractStackCreationAction<>(FinalizeClusterInstallSuccess.class) {
             @Override
-            protected void doExecute(StackContext context, FinalizeClusterInstallSuccess payload, Map<Object, Object> variables) {
+            protected void doExecute(StackCreationContext context, FinalizeClusterInstallSuccess payload, Map<Object, Object> variables) {
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(StackContext context) {
+            protected Selectable createRequest(StackCreationContext context) {
                 return new ClusterProxyGatewayRegistrationRequest(context.getStack().getId(), context.getStack().cloudPlatform());
             }
         };
@@ -616,9 +640,9 @@ public class ClusterCreationActions {
 
     @Bean(name = "CLUSTER_CREATION_FINISHED_STATE")
     public Action<?, ?> clusterCreationFinishedAction() {
-        return new AbstractClusterAction<>(ClusterProxyGatewayRegistrationSuccess.class) {
+        return new AbstractClusterCreationAction<>(ClusterProxyGatewayRegistrationSuccess.class) {
             @Override
-            protected void doExecute(ClusterViewContext context, ClusterProxyGatewayRegistrationSuccess payload, Map<Object, Object> variables) {
+            protected void doExecute(ClusterCreationViewContext context, ClusterProxyGatewayRegistrationSuccess payload, Map<Object, Object> variables) {
                 clusterCreationService.clusterInstallationFinished(context.getStack());
                 jobService.schedule(context.getStackId(), StackJobAdapter.class);
                 syncJobService.schedule(context.getStackId(), StructuredSynchronizerJobAdapter.class);
@@ -627,7 +651,7 @@ public class ClusterCreationActions {
             }
 
             @Override
-            protected Selectable createRequest(ClusterViewContext context) {
+            protected Selectable createRequest(ClusterCreationViewContext context) {
                 return new StackEvent(ClusterCreationEvent.CLUSTER_CREATION_FINISHED_EVENT.event(), context.getStackId());
             }
         };

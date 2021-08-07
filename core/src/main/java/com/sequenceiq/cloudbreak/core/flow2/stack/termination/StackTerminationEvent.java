@@ -10,6 +10,7 @@ import com.sequenceiq.flow.event.EventSelectorUtil;
 
 public enum StackTerminationEvent implements FlowEvent {
     TERMINATION_EVENT("STACK_TERMINATE_TRIGGER_EVENT"),
+    RECOVERY_TERMINATION_EVENT("STACK_RECOVERY_TERMINATION_EVENT"),
     PRE_TERMINATION_FAILED_EVENT(EventSelectorUtil.selector(StackPreTerminationFailed.class)),
     PRE_TERMINATION_FINISHED_EVENT(EventSelectorUtil.selector(StackPreTerminationSuccess.class)),
     CLUSTER_PROXY_DEREGISTER_SUCCEEDED_EVENT(EventSelectorUtil.selector(ClusterProxyDeregisterSuccess.class)),

@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationSt
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.TerminationEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.TerminationType;
 import com.sequenceiq.flow.core.ApplicationFlowInformation;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.domain.FlowLog;
@@ -88,7 +89,7 @@ public class TerminationTriggerService {
         Class<?> payloadType = fl.getPayloadType();
         if (TerminationEvent.class.equals(payloadType)) {
             TerminationEvent payload = (TerminationEvent) JsonReader.jsonToJava(fl.getPayload());
-            return Boolean.TRUE.equals(payload.getForced());
+            return payload.getTerminationType().isForced();
         } else {
             LOGGER.warn("Payloadtype [{}] is not 'TerminationEvent' for flow [{}]", fl.getPayloadType(), fl.getFlowId());
             return false;
@@ -109,10 +110,11 @@ public class TerminationTriggerService {
     private void fireTerminationEvent(Stack stack, boolean forced) {
         Long stackId = stack.getId();
         boolean secure = isKerberosConfigAvailableForCluster(stack);
-        String selector = secure && !stack.getStackStatus().getStatus().isStopState()
+        String selector = (secure && !stack.getStackStatus().getStatus().isStopState())
                 ? FlowChainTriggers.PROPER_TERMINATION_TRIGGER_EVENT
                 : FlowChainTriggers.TERMINATION_TRIGGER_EVENT;
-        reactorNotifier.notify(stackId, selector, new TerminationEvent(selector, stackId, forced));
+        reactorNotifier.notify(stackId, selector, new TerminationEvent(selector, stackId, forced ? TerminationType.FORCED : TerminationType.REGULAR));
+
         flowCancelService.cancelRunningFlows(stackId);
     }
 

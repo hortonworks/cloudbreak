@@ -221,7 +221,7 @@ public class StackUpscaleService {
                         getEnvironmentByEnvironmentCrn(stack.getEnvironmentCrn())));
             }
         }
-        LOGGER.info("Built instances: {}", newInstances);
+        LOGGER.debug("New instances have been built: {}", newInstances.stream().map(CloudInstance::getInstanceId).collect(Collectors.toList()));
         return newInstances;
     }
 

@@ -39,6 +39,7 @@ import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.authorization.service.ResourcePropertyProvider;
 import com.sequenceiq.authorization.service.list.ResourceWithId;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.ImageCatalogV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
@@ -198,6 +199,12 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
         } else {
             throw notFound("SDX cluster", id).get();
         }
+    }
+
+    public SdxCluster getByNameOrCrn(String userCrn, NameOrCrn clusterNameOrCrn) {
+        return clusterNameOrCrn.hasName()
+                ? getByNameInAccount(userCrn, clusterNameOrCrn.getName())
+                :  getByCrn(userCrn, clusterNameOrCrn.getCrn());
     }
 
     public Iterable<SdxCluster> findAllById(List<Long> ids) {
