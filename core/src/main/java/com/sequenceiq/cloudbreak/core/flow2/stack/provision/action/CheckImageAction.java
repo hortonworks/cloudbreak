@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.PrepareImageResultToStackEventConverter;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.service.StackCreationService;
+import com.sequenceiq.cloudbreak.core.flow2.stack.start.StackCreationContext;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.PayloadConverter;
@@ -44,7 +45,7 @@ public class CheckImageAction extends AbstractStackCreationAction<StackEvent> {
     }
 
     @Override
-    protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
+    protected void doExecute(StackCreationContext context, StackEvent payload, Map<Object, Object> variables) {
         CheckImageResult checkImageResult = stackCreationService.checkImage(context);
         switch (checkImageResult.getImageStatus()) {
             case IN_PROGRESS:
@@ -72,7 +73,7 @@ public class CheckImageAction extends AbstractStackCreationAction<StackEvent> {
     }
 
     @Override
-    protected Selectable createRequest(StackContext context) {
+    protected Selectable createRequest(StackCreationContext context) {
         return new StackEvent(getFinishedEvent().event(), context.getStack().getId());
     }
 

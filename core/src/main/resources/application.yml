@@ -662,6 +662,9 @@ cb:
     db: profiler_metric
     port: 5432
 
+  recovery:
+    database.reuse: hive
+
   cm:
     admin.role: "ROLE_ADMIN"
     limited.admin.role: "ROLE_LIMITED_CLUSTER_ADMIN"

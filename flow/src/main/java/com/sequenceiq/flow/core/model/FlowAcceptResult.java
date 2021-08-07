@@ -2,6 +2,7 @@ package com.sequenceiq.flow.core.model;
 
 import java.util.Collections;
 import java.util.Set;
+import java.util.StringJoiner;
 
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.flow.domain.FlowLogIdWithTypeAndTimestamp;
@@ -58,5 +59,13 @@ public class FlowAcceptResult implements AcceptResult {
             throw new IllegalStateException("Can't handle " + resultType + " as flow chain.");
         }
         return pollableId;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", FlowAcceptResult.class.getSimpleName() + "[", "]")
+                .add("resultType=" + resultType)
+                .add("pollableId='" + pollableId + "'")
+                .toString();
     }
 }

@@ -195,7 +195,7 @@ public class StackStatusCheckerJobTest {
 
     @Test
     public void testHandledAllStatesSeparately() {
-        Set<Status> unshedulableStates = underTest.unshedulableStates();
+        Set<Status> unshedulableStates = underTest.unschedulableStates();
         Set<Status> ignoredStates = underTest.ignoredStates();
         Set<Status> syncableStates = underTest.syncableStates();
 

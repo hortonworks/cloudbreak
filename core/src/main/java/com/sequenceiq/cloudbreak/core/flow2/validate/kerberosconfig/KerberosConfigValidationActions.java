@@ -21,9 +21,9 @@ import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.controller.validation.environment.ClusterCreationEnvironmentValidator;
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.StackUpdaterService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
-import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.action.AbstractStackCreationAction;
+import com.sequenceiq.cloudbreak.core.flow2.stack.start.StackCreationContext;
 import com.sequenceiq.cloudbreak.core.flow2.validate.kerberosconfig.config.KerberosConfigValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.validate.kerberosconfig.config.KerberosConfigValidationState;
 import com.sequenceiq.cloudbreak.core.flow2.validate.kerberosconfig.event.CheckFreeIpaExistsEvent;
@@ -65,13 +65,13 @@ public class KerberosConfigValidationActions {
         return new AbstractStackCreationAction<>(StackEvent.class) {
 
             @Override
-            protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
+            protected void doExecute(StackCreationContext context, StackEvent payload, Map<Object, Object> variables) {
                 CheckFreeIpaExistsEvent event = new CheckFreeIpaExistsEvent(payload.getResourceId());
                 sendEvent(context, event);
             }
 
             @Override
-            protected Object getFailurePayload(StackEvent payload, Optional<StackContext> flowContext, Exception ex) {
+            protected Object getFailurePayload(StackEvent payload, Optional<StackCreationContext> flowContext, Exception ex) {
                 return new StackFailureEvent(KerberosConfigValidationEvent.VALIDATE_KERBEROS_CONFIG_FAILED_EVENT.selector(), payload.getResourceId(), ex);
             }
         };
@@ -82,13 +82,13 @@ public class KerberosConfigValidationActions {
         return new AbstractStackCreationAction<>(StackEvent.class) {
 
             @Override
-            protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
+            protected void doExecute(StackCreationContext context, StackEvent payload, Map<Object, Object> variables) {
                 StartBindUserCreationEvent event = new StartBindUserCreationEvent(payload.getResourceId());
                 sendEvent(context, event);
             }
 
             @Override
-            protected Object getFailurePayload(StackEvent payload, Optional<StackContext> flowContext, Exception ex) {
+            protected Object getFailurePayload(StackEvent payload, Optional<StackCreationContext> flowContext, Exception ex) {
                 return new StackFailureEvent(KerberosConfigValidationEvent.VALIDATE_KERBEROS_CONFIG_FAILED_EVENT.selector(), payload.getResourceId(), ex);
             }
         };
@@ -99,14 +99,14 @@ public class KerberosConfigValidationActions {
         return new AbstractStackCreationAction<>(PollBindUserCreationEvent.class) {
 
             @Override
-            protected void doExecute(StackContext context, PollBindUserCreationEvent payload, Map<Object, Object> variables) {
+            protected void doExecute(StackCreationContext context, PollBindUserCreationEvent payload, Map<Object, Object> variables) {
                 PollBindUserCreationEvent event = new PollBindUserCreationEvent(payload.getResourceId(), payload.getOperationId(),
                         Crn.safeFromString(context.getStack().getResourceCrn()).getAccountId());
                 sendEvent(context, event);
             }
 
             @Override
-            protected Object getFailurePayload(PollBindUserCreationEvent payload, Optional<StackContext> flowContext, Exception ex) {
+            protected Object getFailurePayload(PollBindUserCreationEvent payload, Optional<StackCreationContext> flowContext, Exception ex) {
                 return new StackFailureEvent(KerberosConfigValidationEvent.VALIDATE_KERBEROS_CONFIG_FAILED_EVENT.selector(), payload.getResourceId(), ex);
             }
         };
@@ -116,7 +116,7 @@ public class KerberosConfigValidationActions {
     public Action<?, ?> kerberosConfigValidationAction() {
         return new AbstractStackCreationAction<>(ValidateKerberosConfigEvent.class) {
             @Override
-            protected void doExecute(StackContext context, ValidateKerberosConfigEvent payload, Map<Object, Object> variables) {
+            protected void doExecute(StackCreationContext context, ValidateKerberosConfigEvent payload, Map<Object, Object> variables) {
                 decorateStackWithCustomDomainIfAdOrIpaJoinable(context.getStack());
                 Cluster cluster = context.getStack().getCluster();
                 if ((cluster != null && Boolean.TRUE.equals(cluster.getAutoTlsEnabled())) || payload.doesFreeipaExistsForEnv()) {
@@ -129,7 +129,7 @@ public class KerberosConfigValidationActions {
             }
 
             @Override
-            protected Object getFailurePayload(ValidateKerberosConfigEvent payload, Optional<StackContext> flowContext, Exception ex) {
+            protected Object getFailurePayload(ValidateKerberosConfigEvent payload, Optional<StackCreationContext> flowContext, Exception ex) {
                 return new StackFailureEvent(KerberosConfigValidationEvent.VALIDATE_KERBEROS_CONFIG_FAILED_EVENT.selector(), payload.getResourceId(), ex);
             }
 

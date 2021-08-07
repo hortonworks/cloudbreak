@@ -551,7 +551,7 @@ public class ClusterOperationService {
             Blueprint blueprint = blueprintService.getByNameForWorkspace(blueprintName, stack.getWorkspace());
             if (!clusterService.withEmbeddedClusterManagerDB(cluster)) {
                 throw new BadRequestException("Cluster Manager doesn't support resetting external DB automatically. To reset Cluster Manager schema you "
-                        + "must first drop and then create it using DDL scripts from /var/lib/ambari-server/resources or /opt/cloudera/cm/schema/postgresql/");
+                        + "must first drop and then create it using DDL scripts from /opt/cloudera/cm/schema/postgresql/");
             }
             BlueprintValidator blueprintValidator = blueprintValidatorFactory.createBlueprintValidator(blueprint);
             blueprintValidator.validate(blueprint, hostGroups, stackWithLists.getInstanceGroups(), validateBlueprint);

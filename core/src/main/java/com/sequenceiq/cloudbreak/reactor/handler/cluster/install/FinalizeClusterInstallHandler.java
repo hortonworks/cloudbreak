@@ -8,10 +8,12 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.cluster.ClusterBuilderService;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.FinalizeClusterInstallFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.FinalizeClusterInstallRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.FinalizeClusterInstallSuccess;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import com.sequenceiq.cloudbreak.service.recovery.RdsRecoverySetupService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -25,6 +27,9 @@ public class FinalizeClusterInstallHandler extends ExceptionCatcherEventHandler<
 
     @Inject
     private ClusterBuilderService clusterBuilderService;
+
+    @Inject
+    private RdsRecoverySetupService rdsRecoverySetupService;
 
     @Override
     public String selector() {
@@ -43,11 +48,11 @@ public class FinalizeClusterInstallHandler extends ExceptionCatcherEventHandler<
         Selectable response;
         try {
             clusterBuilderService.finalizeClusterInstall(stackId);
+            if (event.getData().getProvisionType().isRecovery()) {
+                rdsRecoverySetupService.removeRecoverRole(stackId);
+            }
             response = new FinalizeClusterInstallSuccess(stackId);
-        } catch (RuntimeException e) {
-            LOGGER.error("ClusterInstallSuccessHandler step failed with the following message: {}", e.getMessage());
-            response = new FinalizeClusterInstallFailed(stackId, e);
-        } catch (CloudbreakException e) {
+        } catch (RuntimeException | CloudbreakException | CloudbreakOrchestratorFailedException e) {
             LOGGER.error("ClusterInstallSuccessHandler step failed with the following message: {}", e.getMessage());
             response = new FinalizeClusterInstallFailed(stackId, e);
         }

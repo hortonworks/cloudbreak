@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -18,18 +19,23 @@ import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractStackAction;
-import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationState;
+import com.sequenceiq.cloudbreak.core.flow2.stack.start.StackCreationContext;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.ProvisionType;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.flow.core.FlowParameters;
 
-public abstract class AbstractStackCreationAction<P extends Payload> extends AbstractStackAction<StackCreationState, StackCreationEvent, StackContext, P> {
+public abstract class AbstractStackCreationAction<P extends Payload> extends
+        AbstractStackAction<StackCreationState, StackCreationEvent, StackCreationContext, P> {
+
+    public static final String PROVISION_TYPE = "PROVISION_TYPE";
+
     @Inject
     private StackService stackService;
 
@@ -47,9 +53,12 @@ public abstract class AbstractStackCreationAction<P extends Payload> extends Abs
     }
 
     @Override
-    protected StackContext createFlowContext(FlowParameters flowParameters, StateContext<StackCreationState, StackCreationEvent> stateContext, P payload) {
+    protected StackCreationContext createFlowContext(FlowParameters flowParameters,
+            StateContext<StackCreationState, StackCreationEvent> stateContext, P payload) {
         Stack stack = stackService.getByIdWithListsInTransaction(payload.getResourceId());
         stack.setResources(new HashSet<>(resourceService.getAllByStackId(payload.getResourceId())));
+        Map<Object, Object> variables = stateContext.getExtendedState().getVariables();
+        ProvisionType provisionType = (ProvisionType) variables.getOrDefault(PROVISION_TYPE, ProvisionType.REGULAR);
         MDCBuilder.buildMdcContext(stack);
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = CloudContext.Builder.builder()
@@ -65,11 +74,11 @@ public abstract class AbstractStackCreationAction<P extends Payload> extends Abs
                 .build();
         CloudCredential cloudCredential = stackUtil.getCloudCredential(stack);
         CloudStack cloudStack = cloudStackConverter.convert(stack);
-        return new StackContext(flowParameters, stack, cloudContext, cloudCredential, cloudStack);
+        return new StackCreationContext(flowParameters, stack, cloudContext, cloudCredential, cloudStack, provisionType);
     }
 
     @Override
-    protected Object getFailurePayload(P payload, Optional<StackContext> flowContext, Exception ex) {
+    protected Object getFailurePayload(P payload, Optional<StackCreationContext> flowContext, Exception ex) {
         return new StackFailureEvent(payload.getResourceId(), ex);
     }
 }

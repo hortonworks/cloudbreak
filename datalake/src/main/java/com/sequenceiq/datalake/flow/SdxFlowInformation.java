@@ -17,6 +17,7 @@ import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxStatusEntity;
 import com.sequenceiq.datalake.flow.create.SdxCreateFlowConfig;
+import com.sequenceiq.datalake.flow.datalake.recovery.DatalakeUpgradeRecoveryFlowConfig;
 import com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeFlowConfig;
 import com.sequenceiq.datalake.flow.delete.SdxDeleteFlowConfig;
 import com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupFlowConfig;
@@ -43,7 +44,8 @@ public class SdxFlowInformation implements ApplicationFlowInformation {
             SdxRepairFlowConfig.class,
             DatalakeUpgradeFlowConfig.class,
             DatalakeBackupFlowConfig.class,
-            DatalakeRestoreFlowConfig.class);
+            DatalakeRestoreFlowConfig.class,
+            DatalakeUpgradeRecoveryFlowConfig.class);
 
     private static final List<String> ALLOWED_PARALLEL_FLOWS = Collections.singletonList(SDX_DELETE_EVENT.event());
 

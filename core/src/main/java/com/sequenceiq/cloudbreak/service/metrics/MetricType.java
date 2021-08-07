@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.metrics;
 import com.sequenceiq.cloudbreak.common.metrics.type.Metric;
 
 public enum MetricType implements Metric {
+
     STACK_CREATION_SUCCESSFUL("stack.creation.successful"),
     STACK_CREATION_FAILED("stack.creation.failed"),
     STACK_UPSCALE_SUCCESSFUL("stack.upscale.successful"),
@@ -13,6 +14,8 @@ public enum MetricType implements Metric {
     STACK_START_FAILED("stack.start.failed"),
     STACK_TERMINATION_SUCCESSFUL("stack.termination.successful"),
     STACK_TERMINATION_FAILED("stack.termination.failed"),
+    STACK_RECOVERY_TEARDOWN_SUCCESSFUL("stack.recovery.teardown.successful"),
+    STACK_RECOVERY_TEARDOWN_FAILED("stack.recovery.teardown.failed"),
 
     STACK_IMAGE_COPY("stack.image.copy"),
 

@@ -43,6 +43,7 @@ public class ClusterTerminationActions {
     @Bean(name = "PREPARE_CLUSTER_STATE")
     public Action<?, ?> prepareCluster() {
         return new AbstractClusterAction<>(StackEvent.class) {
+
             @Override
             protected void doExecute(ClusterViewContext context, StackEvent payload, Map<Object, Object> variables) {
                 jobService.unschedule(String.valueOf(context.getStackId()));

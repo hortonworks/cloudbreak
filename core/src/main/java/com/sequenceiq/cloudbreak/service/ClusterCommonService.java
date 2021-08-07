@@ -150,7 +150,7 @@ public class ClusterCommonService {
         Set<HostGroup> hostGroups = new HashSet<>();
         for (HostGroupV4Request json : updateCluster.getHostgroups()) {
             HostGroup hostGroup = converterUtil.convert(json, HostGroup.class);
-            hostGroup = hostGroupDecorator.decorate(hostGroup, json, stack, false);
+            hostGroup = hostGroupDecorator.decorate(hostGroup, json, stack);
             hostGroups.add(hostGroup);
         }
         return clusterOperationService.recreate(stack, updateCluster.getBlueprintName(), hostGroups, updateCluster.getValidateBlueprint());

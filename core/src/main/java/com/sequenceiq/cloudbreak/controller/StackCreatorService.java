@@ -256,7 +256,7 @@ public class StackCreatorService {
                 try {
                     LOGGER.info("Create cluster entity in the database with name {}.", stackName);
                     long clusterSaveStart = System.currentTimeMillis();
-                    createClusterIfNeed(user, stackRequest, newStack, stackName, blueprint, environment.getParentEnvironmentCloudPlatform());
+                    createClusterIfNeeded(user, stackRequest, newStack, stackName, blueprint, environment.getParentEnvironmentCloudPlatform());
                     LOGGER.info("Cluster save took {} ms", System.currentTimeMillis() - clusterSaveStart);
                 } catch (CloudbreakImageCatalogException | IOException | TransactionExecutionException e) {
                     throw new RuntimeException(e.getMessage(), e);
@@ -369,11 +369,7 @@ public class StackCreatorService {
 
     void fillInstanceMetadata(DetailedEnvironmentResponse environment, Stack stack) {
         long privateIdNumber = 0;
-        //Gateway HostGroups are sorted first to start with privateIdNumber 0.
-        List<InstanceGroup> sortedInstanceGroups = stack.getInstanceGroups().stream()
-                .sorted(Comparator.comparing(InstanceGroup::getInstanceGroupType)
-                        .thenComparing(InstanceGroup::getGroupName)).collect(Collectors.toList());
-        for (InstanceGroup instanceGroup : sortedInstanceGroups) {
+        for (InstanceGroup instanceGroup : sortInstanceGroups(stack)) {
             for (InstanceMetaData instanceMetaData : instanceGroup.getAllInstanceMetaData()) {
                 instanceMetaData.setPrivateId(privateIdNumber++);
                 instanceMetaData.setInstanceStatus(InstanceStatus.REQUESTED);
@@ -384,7 +380,17 @@ public class StackCreatorService {
         }
     }
 
-    private void createClusterIfNeed(User user, StackV4Request stackRequest, Stack stack, String stackName,
+    public List<InstanceGroup> sortInstanceGroups(Stack stack) {
+        return stack.getInstanceGroups().stream()
+                .sorted(createGatewayFirstComparator()).collect(Collectors.toList());
+    }
+
+    private Comparator<InstanceGroup> createGatewayFirstComparator() {
+        return Comparator.comparing(InstanceGroup::getInstanceGroupType)
+                .thenComparing(InstanceGroup::getGroupName);
+    }
+
+    private void createClusterIfNeeded(User user, StackV4Request stackRequest, Stack stack, String stackName,
             Blueprint blueprint, String parentEnvironmentCloudPlatform) throws CloudbreakImageCatalogException, IOException, TransactionExecutionException {
         if (stackRequest.getCluster() != null) {
             long start = System.currentTimeMillis();

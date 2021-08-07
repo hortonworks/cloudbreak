@@ -4,12 +4,14 @@ import static java.util.Collections.singletonMap;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -22,6 +24,13 @@ import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbServerConfigurer;
 
 @Service
 public class PostgresConfigService {
+
+    public static final String POSTGRES_COMMON = "postgres-common";
+
+    public static final String POSTGRESQL_SERVER = "postgresql-server";
+
+    @Value("${cb.recovery.database.reuse}")
+    private List<String> databasesReusedDuringRecovery;
 
     @Inject
     private RdsConfigProviderFactory rdsConfigProviderFactory;
@@ -42,12 +51,12 @@ public class PostgresConfigService {
         if (CollectionUtils.isNotEmpty(rootCerts)) {
             Map<String, String> rootSslCertsMap = Map.of("ssl_certs", String.join("\n", rootCerts),
                     "ssl_certs_file_path", dbCertificateProvider.getSslCertsFilePath());
-            servicePillar.put("postgres-common", new SaltPillarProperties("/postgresql/root-certs.sls",
+            servicePillar.put(POSTGRES_COMMON, new SaltPillarProperties("/postgresql/root-certs.sls",
                     singletonMap("postgres_root_certs", rootSslCertsMap)));
         }
 
         if (!postgresConfig.isEmpty()) {
-            servicePillar.put("postgresql-server", new SaltPillarProperties("/postgresql/postgre.sls", singletonMap("postgres", postgresConfig)));
+            servicePillar.put(POSTGRESQL_SERVER, new SaltPillarProperties("/postgresql/postgre.sls", singletonMap("postgres", postgresConfig)));
         }
     }
 
@@ -62,6 +71,9 @@ public class PostgresConfigService {
             postgresConfig.put("configure_remote_db", "true");
         } else {
             postgresConfig.putAll(embeddedDatabaseConfigProvider.collectEmbeddedDatabaseConfigs(stack));
+        }
+        if (CollectionUtils.isNotEmpty(databasesReusedDuringRecovery)) {
+            postgresConfig.put("recovery_reused_databases", databasesReusedDuringRecovery);
         }
         rdsConfigProviderFactory.getAllSupportedRdsConfigProviders().forEach(provider ->
                 postgresConfig.putAll(provider.createServicePillarConfigMapIfNeeded(stack, cluster)));

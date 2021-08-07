@@ -23,6 +23,9 @@ public enum Status {
     RESTORE_IN_PROGRESS(StatusKind.PROGRESS),
     RESTORE_FAILED(StatusKind.FINAL),
     RESTORE_FINISHED(StatusKind.FINAL),
+    RECOVERY_IN_PROGRESS(StatusKind.PROGRESS),
+    RECOVERY_REQUESTED(StatusKind.PROGRESS),
+    RECOVERY_FAILED(StatusKind.FINAL),
     CREATE_FAILED(StatusKind.FINAL),
     ENABLE_SECURITY_FAILED(StatusKind.FINAL),
     PRE_DELETE_IN_PROGRESS(StatusKind.PROGRESS),
@@ -55,8 +58,7 @@ public enum Status {
     LOAD_BALANCER_UPDATE_FINISHED(StatusKind.FINAL),
     LOAD_BALANCER_UPDATE_FAILED(StatusKind.FINAL);
 
-
-    private StatusKind statusKind;
+    private final StatusKind statusKind;
 
     Status(StatusKind statusKind) {
         this.statusKind = statusKind;
@@ -67,7 +69,7 @@ public enum Status {
     }
 
     public boolean isRemovableStatus() {
-        return Arrays.asList(AVAILABLE, UPDATE_FAILED, CREATE_FAILED, ENABLE_SECURITY_FAILED, DELETE_FAILED,
+        return Arrays.asList(AVAILABLE, UPDATE_FAILED, RECOVERY_FAILED, CREATE_FAILED, ENABLE_SECURITY_FAILED, DELETE_FAILED,
                 DELETE_COMPLETED, DELETED_ON_PROVIDER_SIDE, STOPPED, START_FAILED, STOP_FAILED).contains(valueOf(name()));
     }
 
@@ -103,6 +105,7 @@ public enum Status {
                 REQUESTED,
                 CREATE_IN_PROGRESS,
                 UPDATE_IN_PROGRESS,
+                RECOVERY_IN_PROGRESS,
                 DELETE_IN_PROGRESS,
                 PRE_DELETE_IN_PROGRESS,
                 START_IN_PROGRESS,
@@ -118,6 +121,8 @@ public enum Status {
                 AVAILABLE,
                 UPDATE_REQUESTED,
                 UPDATE_FAILED,
+                RECOVERY_REQUESTED,
+                RECOVERY_FAILED,
                 BACKUP_FAILED,
                 RESTORE_FAILED,
                 CREATE_FAILED,
@@ -160,6 +165,7 @@ public enum Status {
         return this;
     }
 
+    @SuppressWarnings("checkstyle:CyclomaticComplexity")
     private Status convertStatus() {
         switch (this) {
             case REQUESTED:
@@ -167,6 +173,8 @@ public enum Status {
                 return CREATE_FAILED;
             case UPDATE_IN_PROGRESS:
                 return UPDATE_FAILED;
+            case RECOVERY_IN_PROGRESS:
+                return RECOVERY_FAILED;
             case DELETE_IN_PROGRESS:
             case PRE_DELETE_IN_PROGRESS:
                 return DELETE_FAILED;

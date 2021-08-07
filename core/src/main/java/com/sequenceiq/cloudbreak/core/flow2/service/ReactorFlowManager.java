@@ -41,10 +41,11 @@ import com.sequenceiq.cloudbreak.core.flow2.event.ClusterCertificatesRotationTri
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterCredentialChangeTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterCredentialChangeTriggerEvent.Type;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterDownscaleDetails;
+import com.sequenceiq.cloudbreak.core.flow2.event.ClusterRecoveryTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterScaleTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.ClusterUpgradeTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DatabaseBackupTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DatabaseRestoreTriggerEvent;
-import com.sequenceiq.cloudbreak.core.flow2.event.ClusterUpgradeTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DistroXUpgradeTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.MaintenanceModeValidationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.MultiHostgroupClusterAndStackDownscaleTriggerEvent;
@@ -62,6 +63,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.CmSyncTriggerEv
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.EphemeralClusterUpdateTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StackRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.TerminationEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.TerminationType;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.stack.repair.UnhealthyInstances;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -145,9 +147,9 @@ public class ReactorFlowManager {
         return reactorNotifier.notify(stackId, selector, event);
     }
 
-    public void triggerTermination(Long stackId, Boolean forced) {
+    public void triggerTermination(Long stackId) {
         String selector = StackTerminationEvent.TERMINATION_EVENT.event();
-        reactorNotifier.notify(stackId, selector, new TerminationEvent(selector, stackId, forced));
+        reactorNotifier.notify(stackId, selector, new TerminationEvent(selector, stackId, TerminationType.REGULAR));
         flowCancelService.cancelRunningFlows(stackId);
     }
 
@@ -174,6 +176,11 @@ public class ReactorFlowManager {
     public FlowIdentifier triggerDistroXUpgrade(Long stackId, ImageChangeDto imageChangeDto, boolean replaceVms, boolean lockComponents) {
         String selector = FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT;
         return reactorNotifier.notify(stackId, selector, new DistroXUpgradeTriggerEvent(selector, stackId, imageChangeDto, replaceVms, lockComponents));
+    }
+
+    public FlowIdentifier triggerDatalakeClusterRecovery(Long stackId) {
+        String selector = FlowChainTriggers.CLUSTER_RECOVERY_CHAIN_TRIGGER_EVENT;
+        return reactorNotifier.notify(stackId, selector, new ClusterRecoveryTriggerEvent(selector, stackId));
     }
 
     public FlowIdentifier triggerClusterCredentialReplace(Long stackId, String userName, String password) {
