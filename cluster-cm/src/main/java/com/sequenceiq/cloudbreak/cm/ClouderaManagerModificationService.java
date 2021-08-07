@@ -211,6 +211,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             Set<ClouderaManagerProduct> products = getProducts(components);
             setParcelRepo(products, clouderaManagerResourceApi);
             refreshParcelRepos(clouderaManagerResourceApi);
+            restartMgmtServices();
             if (patchUpgrade) {
                 downloadAndActivateParcels(products, parcelResourceApi, true);
                 restartServices(clustersResourceApi);
@@ -218,7 +219,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
                 ClouderaManagerProduct cdhProduct = getCdhProducts(products);
                 upgradeNonCdhProducts(products, cdhProduct.getName(), parcelResourceApi, true);
                 upgradeCdh(clustersResourceApi, parcelResourceApi, cdhProduct);
-                restartStaleServices(clustersResourceApi, false);
+                deployConfigAndRefreshCMStaleServices(clustersResourceApi, false);
             }
             removeUnusedParcelVersions(parcelResourceApi, products);
             configService.enableKnoxAutorestartIfCmVersionAtLeast(CLOUDERAMANAGER_VERSION_7_1_0, apiClient, stack.getName());
@@ -400,9 +401,13 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     public void restartStaleServices(ClustersResourceApi clustersResourceApi, boolean forced) throws ApiException, CloudbreakException {
+        restartMgmtServices();
+        deployConfigAndRefreshCMStaleServices(clustersResourceApi, forced);
+    }
+
+    private void restartMgmtServices() throws ApiException, CloudbreakException {
         MgmtServiceResourceApi mgmtServiceResourceApi = clouderaManagerApiFactory.getMgmtServiceResourceApi(apiClient);
         restartClouderaManagementServices(mgmtServiceResourceApi);
-        deployConfigAndRefreshCMStaleServices(clustersResourceApi, forced);
     }
 
     @VisibleForTesting
