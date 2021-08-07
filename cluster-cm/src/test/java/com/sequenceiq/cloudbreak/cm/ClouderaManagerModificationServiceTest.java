@@ -626,7 +626,16 @@ class ClouderaManagerModificationServiceTest {
     }
 
     @Test
-    void testUpgradeClusterComponentIsNotPresent() {
+    void testUpgradeClusterComponentIsNotPresent() throws ApiException {
+        BigDecimal apiCommandId = new BigDecimal(200);
+        PollingResult successPollingResult = PollingResult.SUCCESS;
+        ApiCommandList apiCommandList = new ApiCommandList();
+        apiCommandList.setItems(new ArrayList<>());
+        when(clouderaManagerApiFactory.getMgmtServiceResourceApi(any())).thenReturn(mgmtServiceResourceApi);
+        when(mgmtServiceResourceApi.listActiveCommands("SUMMARY")).thenReturn(apiCommandList);
+        when(mgmtServiceResourceApi.restartCommand()).thenReturn(new ApiCommand().id(apiCommandId));
+        when(clouderaManagerPollingServiceProvider.startPollingCmServicesRestart(stack, apiClientMock, apiCommandId)).thenReturn(successPollingResult);
+
         Set<ClusterComponent> clusterComponents = TestUtil.clusterComponentSet(cluster);
         Set<ClusterComponent> clusterComponentsNoCDH = clusterComponents.stream().filter(clusterComponent -> !clusterComponent.getName().equals("CDH"))
                 .collect(Collectors.toSet());
@@ -643,8 +652,16 @@ class ClouderaManagerModificationServiceTest {
         when(clouderaManagerApiFactory.getParcelResourceApi(any())).thenReturn(parcelResourceApi);
         when(clouderaManagerApiFactory.getClustersResourceApi(any())).thenReturn(clustersResourceApi);
         when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any())).thenReturn(clouderaManagerResourceApi);
+        when(clouderaManagerApiFactory.getMgmtServiceResourceApi(any())).thenReturn(mgmtServiceResourceApi);
         BigDecimal apiCommandId = new BigDecimal(200);
         PollingResult successPollingResult = PollingResult.SUCCESS;
+
+        // Mgmt Service restart
+        ApiCommandList apiCommandList = new ApiCommandList();
+        apiCommandList.setItems(new ArrayList<>());
+        when(mgmtServiceResourceApi.listActiveCommands("SUMMARY")).thenReturn(apiCommandList);
+        when(mgmtServiceResourceApi.restartCommand()).thenReturn(new ApiCommand().id(apiCommandId));
+        when(clouderaManagerPollingServiceProvider.startPollingCmServicesRestart(stack, apiClientMock, apiCommandId)).thenReturn(successPollingResult);
 
         // Restart services
         when(clustersResourceApi.listActiveCommands(stack.getName(), "SUMMARY")).thenReturn(new ApiCommandList().items(List.of()));
@@ -657,6 +674,9 @@ class ClouderaManagerModificationServiceTest {
         verify(clouderaManagerParcelManagementService, times(1)).checkParcelApiAvailability(stack, apiClientMock);
         verify(clouderaManagerParcelManagementService, times(1)).setParcelRepos(any(), eq(clouderaManagerResourceApi));
         verify(clouderaManagerParcelManagementService, times(1)).refreshParcelRepos(clouderaManagerResourceApi, stack, apiClientMock);
+        verify(mgmtServiceResourceApi, times(1)).listActiveCommands("SUMMARY");
+        verify(mgmtServiceResourceApi, times(1)).restartCommand();
+        verify(clouderaManagerPollingServiceProvider, times(2)).startPollingCmServicesRestart(stack, apiClientMock, apiCommandId);
         verify(clouderaManagerParcelManagementService, times(1)).downloadParcels(any(), eq(parcelResourceApi), eq(stack), eq(apiClientMock));
         verify(clouderaManagerParcelManagementService, times(1)).distributeParcels(any(), eq(parcelResourceApi), eq(stack), eq(apiClientMock));
         verify(clouderaManagerParcelManagementService, times(1)).activateParcels(any(), eq(parcelResourceApi), eq(stack), eq(apiClientMock));
