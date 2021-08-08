@@ -53,6 +53,8 @@ import com.sequenceiq.environment.network.CloudNetworkService;
 import com.sequenceiq.environment.network.NetworkService;
 import com.sequenceiq.environment.network.service.LoadBalancerEntitlementService;
 import com.sequenceiq.environment.parameter.dto.AwsParametersDto;
+import com.sequenceiq.environment.parameter.dto.AzureParametersDto;
+import com.sequenceiq.environment.parameter.dto.AzureResourceEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
 import com.sequenceiq.environment.parameters.service.ParametersService;
 
@@ -492,6 +494,13 @@ class EnvironmentCreationServiceTest {
                 .withCreator(CRN)
                 .withAccountId(ACCOUNT_ID)
                 .withAuthentication(AuthenticationDto.builder().build())
+                .withParameters(ParametersDto.builder()
+                        .withAzureParameters(AzureParametersDto.builder()
+                                .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder()
+                                        .withEncryptionKeyUrl("dummy-key-url")
+                                        .build())
+                                .build())
+                        .build())
                 .build();
         final Environment environment = new Environment();
         environment.setName(ENVIRONMENT_NAME);
@@ -502,7 +511,7 @@ class EnvironmentCreationServiceTest {
 
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
         validationResultBuilder.error("error");
-        when(validatorService.validateEncryptionKeyUrl(any())).thenReturn(validationResultBuilder.build());
+        when(validatorService.validateEncryptionKeyUrl(any(), any())).thenReturn(validationResultBuilder.build());
 
         when(environmentService.isNameOccupied(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(false);
         when(environmentDtoConverter.creationDtoToEnvironment(eq(environmentCreationDto))).thenReturn(environment);

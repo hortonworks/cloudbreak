@@ -165,7 +165,16 @@ public class EnvironmentCreationService {
         ValidationResultBuilder validationBuilder = validatorService.validateNetworkCreation(environment, creationDto.getNetwork());
         validationBuilder.merge(validatorService.validatePublicKey(creationDto.getAuthentication().getPublicKey()));
         validationBuilder.merge(validatorService.validateTags(creationDto));
-        validationBuilder.merge(validatorService.validateEncryptionKeyUrl(creationDto));
+
+        if (AZURE.name().equalsIgnoreCase(creationDto.getCloudPlatform())) {
+            String encryptionKeyUrl = Optional.ofNullable(creationDto.getParameters())
+                    .map(paramsDto -> paramsDto.getAzureParametersDto())
+                    .map(azureParamsDto -> azureParamsDto.getAzureResourceEncryptionParametersDto())
+                    .map(azureREParamsDto -> azureREParamsDto.getEncryptionKeyUrl()).orElse(null);
+            if (encryptionKeyUrl != null) {
+                validationBuilder.merge(validatorService.validateEncryptionKeyUrl(encryptionKeyUrl, creationDto.getAccountId()));
+            }
+        }
         ValidationResult parentChildValidation = validatorService.validateParentChildRelation(environment, creationDto.getParentEnvironmentName());
         validationBuilder.merge(parentChildValidation);
         EnvironmentTelemetry environmentTelemetry = creationDto.getTelemetry();

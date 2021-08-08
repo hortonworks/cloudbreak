@@ -33,6 +33,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentCl
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentEditRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentLoadBalancerUpdateRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.azure.UpdateAzureResourceEncryptionParametersRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentCrnResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
@@ -114,6 +115,14 @@ public interface EnvironmentEndpoint {
     DetailedEnvironmentResponse changeCredentialByEnvironmentName(@PathParam("name") String environmentName, @Valid EnvironmentChangeCredentialRequest request);
 
     @PUT
+    @Path("/name/{name}/update_azure_encryption_resources")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = EnvironmentOpDescription.UPDATE_AZURE_ENCRYPTION_RESOURCES_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
+            nickname = "UpdateAzureResourceEncryptionParametersV1")
+    DetailedEnvironmentResponse updateAzureResourceEncryptionParametersByEnvironmentName(@PathParam("name") String environmentName,
+            @Valid UpdateAzureResourceEncryptionParametersRequest request);
+
+    @PUT
     @Path("/name/{name}/change_telemetry_features")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.CHANGE_TELEMETRY_FEATURES_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
@@ -167,6 +176,14 @@ public interface EnvironmentEndpoint {
             nickname = "changeCredentialInEnvironmentV1ByCrn")
     DetailedEnvironmentResponse changeCredentialByEnvironmentCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn,
             @Valid EnvironmentChangeCredentialRequest request);
+
+    @PUT
+    @Path("/crn/{crn}/update_azure_encryption_resources")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = EnvironmentOpDescription.UPDATE_AZURE_ENCRYPTION_RESOURCES_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
+            nickname = "UpdateAzureResourceEncryptionParametersV1ByCrn")
+    DetailedEnvironmentResponse updateAzureResourceEncryptionParametersByEnvironmentCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT)
+    @PathParam("crn") String crn, @Valid UpdateAzureResourceEncryptionParametersRequest request);
 
     @PUT
     @Path("/crn/{crn}/change_telemetry_features")

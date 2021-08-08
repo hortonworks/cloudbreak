@@ -1,7 +1,6 @@
 package com.sequenceiq.environment.environment.validation;
 
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
-import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static com.sequenceiq.cloudbreak.util.SecurityGroupSeparator.getSecurityGroupIds;
 import static com.sequenceiq.common.model.CredentialType.ENVIRONMENT;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
@@ -267,23 +266,15 @@ public class EnvironmentValidatorService {
         return resultBuilder.build();
     }
 
-    public ValidationResult validateEncryptionKeyUrl(EnvironmentCreationDto creationDto) {
+    public ValidationResult validateEncryptionKeyUrl(String encryptionKeyUrl, String accountId) {
         ValidationResultBuilder resultBuilder = ValidationResult.builder();
-        if (AZURE.name().equalsIgnoreCase(creationDto.getCloudPlatform())) {
-            String encryptionKeyUrl = Optional.ofNullable(creationDto.getParameters())
-                    .map(paramsDto -> paramsDto.getAzureParametersDto())
-                    .map(azureParamsDto -> azureParamsDto.getAzureResourceEncryptionParametersDto())
-                    .map(azureREParamsDto -> azureREParamsDto.getEncryptionKeyUrl()).orElse(null);
-            if (StringUtils.isNotEmpty(encryptionKeyUrl)) {
-                if (!entitlementService.isAzureDiskSSEWithCMKEnabled(creationDto.getAccountId())) {
-                    resultBuilder.error(String.format("You have specified encryption-key-url to enable Server Side Encryption for Azure Managed disks with CMK"
-                            + "but that feature is currently not enabled for this account."
-                            + " Please get 'CDP_CB_AZURE_DISK_SSE_WITH_CMK' enabled for this account to use SSE with CMK."));
-                } else {
-                    ValidationResult validationResult = encryptionKeyUrlValidator.validateEncryptionKeyUrl(encryptionKeyUrl);
-                    resultBuilder.merge(validationResult);
-                }
-            }
+        if (!entitlementService.isAzureDiskSSEWithCMKEnabled(accountId)) {
+            resultBuilder.error(String.format("You have specified encryption-key-url to enable Server Side Encryption for Azure Managed disks with CMK"
+                    + "but that feature is currently not enabled for this account."
+                    + " Please get 'CDP_CB_AZURE_DISK_SSE_WITH_CMK' enabled for this account to use SSE with CMK."));
+        } else {
+            ValidationResult validationResult = encryptionKeyUrlValidator.validateEncryptionKeyUrl(encryptionKeyUrl);
+            resultBuilder.merge(validationResult);
         }
         return resultBuilder.build();
     }

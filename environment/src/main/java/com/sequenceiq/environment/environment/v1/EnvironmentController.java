@@ -34,8 +34,8 @@ import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.annotation.ResourceNameList;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateResponse;
@@ -50,9 +50,9 @@ import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentCl
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentEditRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentLoadBalancerUpdateRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.azure.UpdateAzureResourceEncryptionParametersRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentCrnResponse;
-import com.sequenceiq.environment.environment.service.EnvironmentProgressService;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponses;
 import com.sequenceiq.environment.authorization.EnvironmentFiltering;
@@ -65,11 +65,13 @@ import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentLoadBalancerDto;
+import com.sequenceiq.environment.environment.dto.UpdateAzureResourceEncryptionDto;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentFeatures;
 import com.sequenceiq.environment.environment.service.EnvironmentCreationService;
 import com.sequenceiq.environment.environment.service.EnvironmentDeletionService;
 import com.sequenceiq.environment.environment.service.EnvironmentLoadBalancerService;
 import com.sequenceiq.environment.environment.service.EnvironmentModificationService;
+import com.sequenceiq.environment.environment.service.EnvironmentProgressService;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.EnvironmentStackConfigUpdateService;
 import com.sequenceiq.environment.environment.service.EnvironmentStartService;
@@ -301,6 +303,26 @@ public class EnvironmentController implements EnvironmentEndpoint {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         EnvironmentDto result = environmentModificationService.changeCredentialByEnvironmentCrn(accountId, crn,
                 environmentApiConverter.convertEnvironmentChangeCredentialDto(request));
+        return environmentResponseConverter.dtoToDetailedResponse(result);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.UPDATE_AZURE_ENCRYPTION_RESOURCES)
+    public DetailedEnvironmentResponse updateAzureResourceEncryptionParametersByEnvironmentCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT)
+    @ResourceCrn String crn, @RequestObject @Valid UpdateAzureResourceEncryptionParametersRequest request) {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        EnvironmentDto result = environmentModificationService.updateAzureResourceEncryptionParametersByEnvironmentCrn(accountId, crn,
+                environmentApiConverter.convertUpdateAzureResourceEncryptionDto(request));
+        return environmentResponseConverter.dtoToDetailedResponse(result);
+    }
+
+    @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.UPDATE_AZURE_ENCRYPTION_RESOURCES)
+    public DetailedEnvironmentResponse updateAzureResourceEncryptionParametersByEnvironmentName(@ResourceName String environmentName,
+            @RequestObject @Valid UpdateAzureResourceEncryptionParametersRequest request) {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        UpdateAzureResourceEncryptionDto dto = environmentApiConverter.convertUpdateAzureResourceEncryptionDto(request);
+        EnvironmentDto result = environmentModificationService.updateAzureResourceEncryptionParametersByEnvironmentName(accountId, environmentName, dto);
         return environmentResponseConverter.dtoToDetailedResponse(result);
     }
 
