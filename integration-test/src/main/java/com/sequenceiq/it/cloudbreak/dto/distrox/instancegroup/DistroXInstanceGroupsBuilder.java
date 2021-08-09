@@ -9,6 +9,7 @@ import static com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXInst
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.InstanceTemplateV1Request;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CloudProvider;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -31,6 +32,16 @@ public class DistroXInstanceGroupsBuilder {
     public DistroXInstanceGroupsBuilder withDiskEncryption() {
         CloudProvider cloudProvider = testContext.getCloudProvider();
         getInstanceTemplates().forEach(cloudProvider::setInstanceTemplateV1Parameters);
+        return this;
+    }
+
+    public DistroXInstanceGroupsBuilder withEphemeralTemporaryStorage() {
+        getInstanceTemplates().forEach(template -> template.setTemporaryStorage(TemporaryStorage.EPHEMERAL_VOLUMES));
+        return this;
+    }
+
+    public DistroXInstanceGroupsBuilder withInstanceType(String instanceType) {
+        getInstanceTemplates().forEach(template -> template.setInstanceType(instanceType));
         return this;
     }
 
