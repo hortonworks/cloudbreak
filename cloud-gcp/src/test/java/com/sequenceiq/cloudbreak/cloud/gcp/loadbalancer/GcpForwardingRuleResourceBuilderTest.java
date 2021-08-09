@@ -94,6 +94,9 @@ public class GcpForwardingRuleResourceBuilderTest {
     @Captor
     private ArgumentCaptor<ForwardingRule> forwardingRuleArg;
 
+    @Mock
+    private GcpLoadBalancerTypeConverter gcpLoadBalancerTypeConverter;
+
     private Image image;
 
     private CloudStack cloudStack;
@@ -247,5 +250,7 @@ public class GcpForwardingRuleResourceBuilderTest {
         lenient().when(gcpStackUtil.getSubnetId(any())).thenReturn("default-subnet");
         lenient().when(gcpStackUtil.getNetworkUrl(anyString(), anyString())).thenCallRealMethod();
         lenient().when(gcpStackUtil.getSubnetUrl(anyString(), anyString(), anyString())).thenCallRealMethod();
+        lenient().when(gcpLoadBalancerTypeConverter.getScheme(any(CloudLoadBalancer.class))).thenCallRealMethod();
+
     }
 }
