@@ -259,7 +259,13 @@
           {
             "refName": "hms-HIVEMETASTORE-BASE",
             "roleType": "HIVEMETASTORE",
-            "base": true
+            "base": true,
+            "configs": [
+              {
+                "name": "hive_metastore_config_safety_valve",
+                "value": "<property><name>hive.metastore.try.direct.sql.ddl</name><value>true</value></property>"
+              }
+            ]
           }
         ]
       },
