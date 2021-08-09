@@ -6,12 +6,16 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.KeyEncryptionMethod;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AwsInstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AzureInstanceGroupParameters;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AzureInstanceTemplate;
+import com.sequenceiq.cloudbreak.cloud.model.instance.GcpInstanceTemplate;
 import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -23,6 +27,7 @@ import com.sequenceiq.freeipa.service.DefaultRootVolumeSizeProvider;
 
 @Service
 public class DefaultInstanceGroupProvider {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultInstanceGroupProvider.class);
 
     private static final int DEFAULT_FAULT_DOMAIN_COUNTER = 2;
 
@@ -37,7 +42,7 @@ public class DefaultInstanceGroupProvider {
     @Inject
     private DefaultInstanceTypeProvider defaultInstanceTypeProvider;
 
-    public Template createDefaultTemplate(CloudPlatform cloudPlatform, String accountId, String diskEncryptionSetId) {
+    public Template createDefaultTemplate(CloudPlatform cloudPlatform, String accountId, String diskEncryptionSetId, String gcpKmsEncryptionKey) {
         Template template = new Template();
         template.setName(missingResourceNameGenerator.generateName(APIResourceType.TEMPLATE));
         template.setStatus(ResourceStatus.DEFAULT);
@@ -56,6 +61,12 @@ public class DefaultInstanceGroupProvider {
             template.setAttributes(new Json(Map.<String, Object>ofEntries(
                     entry(AzureInstanceTemplate.DISK_ENCRYPTION_SET_ID, diskEncryptionSetId),
                     entry(AzureInstanceTemplate.MANAGED_DISK_ENCRYPTION_WITH_CUSTOM_KEY_ENABLED, Boolean.TRUE))));
+        }
+        if (cloudPlatform == CloudPlatform.GCP && gcpKmsEncryptionKey != null) {
+            template.setAttributes(new Json(Map.<String, Object>ofEntries(
+                    entry(GcpInstanceTemplate.VOLUME_ENCRYPTION_KEY_ID, gcpKmsEncryptionKey),
+                    entry(GcpInstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.CUSTOM),
+                    entry(GcpInstanceTemplate.KEY_ENCRYPTION_METHOD, KeyEncryptionMethod.KMS))));
         }
         return template;
     }
