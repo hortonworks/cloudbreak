@@ -6,6 +6,18 @@ import static com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreEvent.DATAL
 import static com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreEvent.DATALAKE_RESTORE_FAILED_EVENT;
 import static com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreEvent.DATALAKE_RESTORE_FAILURE_HANDLED_EVENT;
 
+import java.util.Map;
+import java.util.Optional;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.statemachine.StateContext;
+import org.springframework.statemachine.action.Action;
+
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeDrStatusResponse;
@@ -13,15 +25,16 @@ import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.operation.SdxOperationStatus;
+import com.sequenceiq.datalake.events.EventSenderService;
 import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.SdxEvent;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeDatabaseRestoreCouldNotStartEvent;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeDatabaseRestoreFailedEvent;
-import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeRestoreFailedEvent;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeDatabaseRestoreStartEvent;
-import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeRestoreSuccessEvent;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeDatabaseRestoreWaitRequest;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeFullRestoreWaitRequest;
+import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeRestoreFailedEvent;
+import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeRestoreSuccessEvent;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeTriggerRestoreEvent;
 import com.sequenceiq.datalake.metric.MetricType;
 import com.sequenceiq.datalake.metric.SdxMetricService;
@@ -34,18 +47,6 @@ import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.sdx.api.model.DatalakeDatabaseDrStatus;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRestoreStatusResponse;
-
-import java.util.Map;
-import java.util.Optional;
-
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.statemachine.StateContext;
-import org.springframework.statemachine.action.Action;
 
 @Configuration
 public class DatalakeRestoreActions {
@@ -69,6 +70,9 @@ public class DatalakeRestoreActions {
     @Inject
     private SdxService sdxService;
 
+    @Inject
+    private EventSenderService eventSenderService;
+
     @Bean(name = "DATALAKE_TRIGGERING_RESTORE_STATE")
     public Action<?, ?> triggerDatalakeRestore() {
         return new AbstractSdxAction<>(DatalakeTriggerRestoreEvent.class) {
@@ -86,6 +90,7 @@ public class DatalakeRestoreActions {
             @Override
             protected void doExecute(SdxContext context, DatalakeTriggerRestoreEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Triggering datalake restore for {}", payload.getResourceId());
+
                 DatalakeDrStatusResponse restoreStatusResponse =
                         sdxBackupRestoreService.triggerDatalakeRestore(payload.getResourceId(),
                                 payload.getBackupId(),
@@ -171,6 +176,9 @@ public class DatalakeRestoreActions {
                 SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_RESTORE_INPROGRESS,
                         ResourceEvent.DATALAKE_RESTORE_IN_PROGRESS,
                         "Datalake restore in progress", payload.getResourceId());
+
+                eventSenderService.sendEventAndNotification(sdxCluster, context.getFlowTriggerUserCrn(), ResourceEvent.DATALAKE_RESTORE_IN_PROGRESS);
+
                 metricService.incrementMetricCounter(MetricType.SDX_RESTORE_REQUESTED, sdxCluster);
                 sendEvent(context, DatalakeDatabaseRestoreWaitRequest.from(context, operationId));
             }
@@ -253,6 +261,9 @@ public class DatalakeRestoreActions {
                 SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING,
                         ResourceEvent.DATALAKE_RESTORE_FINISHED,
                         "Datalake restore finished, Datalake is running", payload.getResourceId());
+
+                eventSenderService.sendEventAndNotification(sdxCluster, context.getFlowTriggerUserCrn(), ResourceEvent.DATALAKE_RESTORE_FINISHED);
+
                 metricService.incrementMetricCounter(MetricType.SDX_RESTORE_FINISHED, sdxCluster);
                 sendEvent(context, DATALAKE_DATABASE_RESTORE_FINALIZED_EVENT.event(), payload);
             }
@@ -305,6 +316,9 @@ public class DatalakeRestoreActions {
                 SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_RESTORE_FAILED,
                         ResourceEvent.DATALAKE_RESTORE_FAILED,
                         "Datalake restore failed", payload.getResourceId());
+
+                eventSenderService.sendEventAndNotification(sdxCluster, context.getFlowTriggerUserCrn(), ResourceEvent.DATALAKE_RESTORE_FAILED);
+
                 metricService.incrementMetricCounter(MetricType.SDX_RESTORE_FAILED, sdxCluster);
                 sendEvent(context, DATALAKE_RESTORE_FAILURE_HANDLED_EVENT.event(), payload);
             }

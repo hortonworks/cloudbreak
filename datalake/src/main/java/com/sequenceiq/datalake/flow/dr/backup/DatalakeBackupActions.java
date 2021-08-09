@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.operation.SdxOperationStatus;
+import com.sequenceiq.datalake.events.EventSenderService;
 import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.SdxEvent;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeBackupFailedEvent;
@@ -69,12 +70,15 @@ public class DatalakeBackupActions {
     @Inject
     private SdxService sdxService;
 
+    @Inject
+    private EventSenderService eventSenderService;
+
     @Bean(name = "DATALAKE_TRIGGERING_BACKUP_STATE")
     public Action<?, ?> triggerDatalakeBackup() {
         return new AbstractSdxAction<>(DatalakeTriggerBackupEvent.class) {
             @Override
             protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
-                DatalakeTriggerBackupEvent payload) {
+                    DatalakeTriggerBackupEvent payload) {
                 return SdxContext.from(flowParameters, payload);
             }
 
@@ -88,6 +92,10 @@ public class DatalakeBackupActions {
             @Override
             protected void doExecute(SdxContext context, DatalakeTriggerBackupEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Triggering datalake backup for {}", payload.getResourceId());
+
+                SdxCluster sdxCluster = sdxService.getById(payload.getResourceId());
+                eventSenderService.sendEventAndNotification(sdxCluster, context.getFlowTriggerUserCrn(), ResourceEvent.DATALAKE_BACKUP_IN_PROGRESS);
+
                 DatalakeDrStatusResponse backupStatusResponse =
                         sdxBackupRestoreService.triggerDatalakeBackup(payload.getResourceId(), payload.getBackupLocation(),
                                 payload.getBackupName(), payload.getUserId());
@@ -131,6 +139,10 @@ public class DatalakeBackupActions {
             @Override
             protected void doExecute(SdxContext context, DatalakeDatabaseBackupStartEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Datalake database backup has been started for {}", payload.getResourceId());
+
+                SdxCluster sdxCluster = sdxService.getById(payload.getResourceId());
+                eventSenderService.sendEventAndNotification(sdxCluster, context.getFlowTriggerUserCrn(), ResourceEvent.DATALAKE_DATABASE_BACKUP);
+
                 sdxBackupRestoreService.databaseBackup(payload.getDrStatus(),
                         payload.getResourceId(),
                         payload.getBackupRequest());
@@ -188,6 +200,10 @@ public class DatalakeBackupActions {
                 LOGGER.error("Datalake database backup could not be started for datalake with id: {}", payload.getResourceId(), exception);
                 String operationId = (String) variables.get(OPERATION_ID);
                 sdxBackupRestoreService.updateDatabaseStatusEntry(operationId, SdxOperationStatus.FAILED, payload.getException().getMessage());
+
+                SdxCluster sdxCluster = sdxService.getById(payload.getResourceId());
+                eventSenderService.sendEventAndNotification(sdxCluster, context.getFlowTriggerUserCrn(), ResourceEvent.DATALAKE_DATABASE_BACKUP_FAILED);
+
                 sendEvent(context, DATALAKE_DATABASE_BACKUP_FAILURE_HANDLED_EVENT.event(), payload);
             }
 
@@ -245,6 +261,9 @@ public class DatalakeBackupActions {
                 SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING,
                         ResourceEvent.DATALAKE_BACKUP_FINISHED,
                         "Datalake backup finished, Datalake is running", payload.getResourceId());
+
+                eventSenderService.sendEventAndNotification(sdxCluster, context.getFlowTriggerUserCrn(), ResourceEvent.DATALAKE_BACKUP_FINISHED);
+
                 metricService.incrementMetricCounter(MetricType.SDX_BACKUP_FINISHED, sdxCluster);
             }
 
@@ -270,6 +289,10 @@ public class DatalakeBackupActions {
                 LOGGER.error("Datalake database backup failed for datalake with id: {}", payload.getResourceId(), exception);
                 String operationId = (String) variables.get(OPERATION_ID);
                 sdxBackupRestoreService.updateDatabaseStatusEntry(operationId, SdxOperationStatus.FAILED, exception.getLocalizedMessage());
+
+                SdxCluster sdxCluster = sdxService.getById(payload.getResourceId());
+                eventSenderService.sendEventAndNotification(sdxCluster, context.getFlowTriggerUserCrn(), ResourceEvent.DATALAKE_DATABASE_BACKUP_FAILED);
+
                 sendEvent(context, DATALAKE_DATABASE_BACKUP_FAILURE_HANDLED_EVENT.event(), payload);
             }
 
@@ -296,9 +319,13 @@ public class DatalakeBackupActions {
                 SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING,
                         ResourceEvent.DATALAKE_BACKUP_FAILED,
                         getFailureReason(variables), payload.getResourceId());
+
                 metricService.incrementMetricCounter(MetricType.SDX_BACKUP_FAILED, sdxCluster);
                 Flow flow = getFlow(context.getFlowParameters().getFlowId());
                 flow.setFlowFailed(payload.getException());
+
+                eventSenderService.sendEventAndNotification(sdxCluster, context.getFlowTriggerUserCrn(), ResourceEvent.DATALAKE_BACKUP_FAILED);
+
                 sendEvent(context, DATALAKE_BACKUP_FAILURE_HANDLED_EVENT.event(), payload);
             }
 
@@ -314,9 +341,9 @@ public class DatalakeBackupActions {
             return "Datalake backup failed, Datalake is running.";
         }
         if (variables.get(REASON).equals(DatalakeBackupFailureReason.BACKUP_ON_UPGRADE.name())) {
-            return  "Upgrade not stared, Datalake backup failed.";
+            return "Upgrade not stared, Datalake backup failed.";
         } else {
-            return  "Datalake backup failed, Datalake is running.";
+            return "Datalake backup failed, Datalake is running.";
         }
     }
 }

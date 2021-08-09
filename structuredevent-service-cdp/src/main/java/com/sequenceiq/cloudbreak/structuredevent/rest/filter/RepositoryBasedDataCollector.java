@@ -33,12 +33,24 @@ public class RepositoryBasedDataCollector {
     @Inject
     private CDPAccountAwareRepositoryLookupService repositoryLookupService;
 
+    /**
+     * Associates Spring repositories with URL path values.
+     * <p>
+     * Associations are determined by looking for @{code @AccountTypeEntity} and checking the superclass for an {@code @Path} annotation.
+     * <p>
+     * The repository type is determined from the value of the {@code @AccountTypeEntity}.
+     */
     @PostConstruct
     public void initializePathRepositoryMap() {
         Map<String, Object> accountEntityTypes = listableBeanFactory.getBeansWithAnnotation(AccountEntityType.class);
-        for (Object accountEntityType : accountEntityTypes.values()) {
-            Path pathAnnotation = AnnotationUtils.findAnnotation(accountEntityType.getClass().getSuperclass(), Path.class);
-            AccountEntityType entityTypeAnnotation = AnnotationUtils.findAnnotation(accountEntityType.getClass(), AccountEntityType.class);
+        for (Object bean : accountEntityTypes.values()) {
+            // find a @Path annotation attached to a class that's also annotated with @AccountEntityType
+            // Normally these are "controller" classes, which implement an interface that has the @Path annotation
+            Path pathAnnotation = AnnotationUtils.findAnnotation(bean.getClass().getSuperclass(), Path.class);
+
+            // Retrieve the @AccountEntityType associated with the bean we're iterating over
+            AccountEntityType entityTypeAnnotation = AnnotationUtils.findAnnotation(bean.getClass(), AccountEntityType.class);
+
             if (pathAnnotation != null) {
                 String pathValue = pathAnnotation.value();
                 Class<?> entityClass = entityTypeAnnotation.value();
@@ -48,9 +60,15 @@ public class RepositoryBasedDataCollector {
         }
     }
 
+    /**
+     * Attaches {@code RESOURCE_ID}, {@code RESOURCE_CRN}, or {@code RESOURCE_NAME} to the provided {@code params} if they're missing.
+     *
+     * @param params should include exactly one of {@code RESOURCE_CRN} or {@code RESOURCE_NAME}
+     */
     public void fetchDataFromDbIfNeed(Map<String, String> params) {
         String resourceCrn = params.get(RESOURCE_CRN);
         String resourceName = params.get(RESOURCE_NAME);
+        // check each repository for a matching CRN or Name.
         for (Map.Entry<String, AccountAwareResourceRepository<?, ?>> pathRepositoryEntry : pathRepositoryMap.entrySet()) {
             AccountAwareResourceRepository<?, ?> resourceRepository = pathRepositoryEntry.getValue();
             if (resourceCrn == null && resourceName != null) {
