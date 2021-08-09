@@ -52,6 +52,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureRe
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.ResourceGroupUsage;
 import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpEnvironmentParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpResourceEncryptionParameters;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.credential.v1.converter.TunnelConverter;
 import com.sequenceiq.environment.environment.domain.ExperimentalFeatures;
@@ -325,6 +326,36 @@ public class EnvironmentApiConverterTest {
                 actual.getParameters().getAzureParametersDto().getAzureResourceEncryptionParametersDto().getEncryptionKeyResourceGroupName());
     }
 
+    @Test
+    void testGcpResourceEncryptionParametersAndGcpRequest() {
+        EnvironmentRequest request = createEnvironmentRequest(GCP);
+        request.setGcp(GcpEnvironmentParameters.builder()
+                .withResourceEncryptionParameters(
+                        GcpResourceEncryptionParameters.builder()
+                                .withEncryptionKey("dummy-encryption-key")
+                                .build())
+                .build());
+        FreeIpaCreationDto freeIpaCreationDto = mock(FreeIpaCreationDto.class);
+        EnvironmentTelemetry environmentTelemetry = mock(EnvironmentTelemetry.class);
+        EnvironmentBackup environmentBackup = mock(EnvironmentBackup.class);
+        AccountTelemetry accountTelemetry = mock(AccountTelemetry.class);
+        Features features = mock(Features.class);
+        NetworkDto networkDto = mock(NetworkDto.class);
+        when(credentialService.getCloudPlatformByCredential(anyString(), anyString(), any())).thenReturn(GCP.name());
+        when(freeIpaConverter.convert(request.getFreeIpa())).thenReturn(freeIpaCreationDto);
+        when(accountTelemetry.getFeatures()).thenReturn(features);
+        when(accountTelemetryService.getOrDefault(any())).thenReturn(accountTelemetry);
+        when(telemetryApiConverter.convert(eq(request.getTelemetry()), any())).thenReturn(environmentTelemetry);
+        when(backupConverter.convert(eq(request.getBackup()))).thenReturn(environmentBackup);
+        when(tunnelConverter.convert(request.getTunnel())).thenReturn(request.getTunnel());
+        when(networkRequestToDtoConverter.convert(request.getNetwork())).thenReturn(networkDto);
+
+        EnvironmentCreationDto actual = underTest.initCreationDto(request);
+
+        assertEquals("dummy-encryption-key",
+                actual.getParameters().getGcpParametersDto().getGcpResourceEncryptionParametersDto().getEncryptionKey());
+    }
+
     private void assertLocation(LocationRequest request, LocationDto actual) {
         assertEquals(request.getName(), actual.getName());
         assertEquals(request.getLatitude(), actual.getLatitude());
@@ -349,6 +380,8 @@ public class EnvironmentApiConverterTest {
             assertAwsParameters(request, actual);
         } else if (AZURE.equals(cloudPlatform)) {
             assertAzureParameters(request, actual);
+        } else if (GCP.equals(cloudPlatform)) {
+            assertGcpParameters(request, actual);
         }
     }
 
@@ -365,6 +398,11 @@ public class EnvironmentApiConverterTest {
         assertEquals(request.getAws().getS3guard().getDynamoDbTableName(), actual.getAwsParametersDto().getS3GuardTableName());
         assertEquals(request.getFreeIpa().getAws().getSpot().getPercentage(), actual.getAwsParametersDto().getFreeIpaSpotPercentage());
         assertEquals(request.getFreeIpa().getAws().getSpot().getMaxPrice(), actual.getAwsParametersDto().getFreeIpaSpotMaxPrice());
+    }
+
+    private void assertGcpParameters(EnvironmentRequest request, ParametersDto actual) {
+        assertEquals(request.getGcp().getGcpResourceEncryptionParameters().getEncryptionKey(),
+                actual.getGcpParametersDto().getGcpResourceEncryptionParametersDto().getEncryptionKey());
     }
 
     private void assertSecurityAccess(SecurityAccessRequest request, SecurityAccessDto actual) {
@@ -447,7 +485,14 @@ public class EnvironmentApiConverterTest {
     }
 
     private GcpEnvironmentParameters createGcpRequest() {
-        return GcpEnvironmentParameters.builder().build();
+        GcpEnvironmentParameters gcpEnvironmentParameters = new GcpEnvironmentParameters();
+
+        gcpEnvironmentParameters.setGcpResourceEncryptionParameters(
+                GcpResourceEncryptionParameters.builder()
+                    .withEncryptionKey("dummy-encryption-key")
+                    .build()
+        );
+        return gcpEnvironmentParameters;
     }
 
     private AttachedFreeIpaRequest createFreeIpaRequest() {

@@ -23,7 +23,7 @@ public class EnvironmentParameterValidator {
     public EnvironmentParameterValidator(List<ParameterValidator> parameterValidators) {
         parameterValidatorsByCloudPlatform = parameterValidators
                 .stream()
-                .collect(Collectors.toMap(pv -> pv.getcloudPlatform().name(), Function.identity()));
+                .collect(Collectors.toMap(pv -> pv.getCloudPlatform().name(), Function.identity()));
     }
 
     public ValidationResult validate(EnvironmentValidationDto environmentValidationDto, ParametersDto parametersDto) {

@@ -166,6 +166,7 @@ public class EnvironmentCreationService {
         validationBuilder.merge(validatorService.validatePublicKey(creationDto.getAuthentication().getPublicKey()));
         validationBuilder.merge(validatorService.validateTags(creationDto));
         validationBuilder.merge(validatorService.validateEncryptionKeyUrl(creationDto));
+        validationBuilder.merge(validatorService.validateEncryptionKey(creationDto));
         ValidationResult parentChildValidation = validatorService.validateParentChildRelation(environment, creationDto.getParentEnvironmentName());
         validationBuilder.merge(parentChildValidation);
         EnvironmentTelemetry environmentTelemetry = creationDto.getTelemetry();
