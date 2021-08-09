@@ -19,20 +19,13 @@ import com.sequenceiq.cloudbreak.auth.JsonCMLicense;
 import com.sequenceiq.cloudbreak.auth.PaywallAccessChecker;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.cloud.model.Image;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
-import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
-import com.sequenceiq.cloudbreak.service.image.ImageCatalogProvider;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
-import com.sequenceiq.cloudbreak.service.image.ImageProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.service.upgrade.ImageFilterParamsFactory;
-import com.sequenceiq.cloudbreak.service.upgrade.image.locked.LockedComponentChecker;
+import com.sequenceiq.cloudbreak.service.upgrade.image.locked.LockedComponentService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 @Service
@@ -65,22 +58,10 @@ public class DistroXUpgradeService {
     private StackService stackService;
 
     @Inject
-    private ComponentConfigProviderService componentConfigProviderService;
-
-    @Inject
     private ClouderaManagerLicenseProvider clouderaManagerLicenseProvider;
 
     @Inject
-    private ImageCatalogProvider imageCatalogProvider;
-
-    @Inject
-    private ImageProvider imageProvider;
-
-    @Inject
-    private LockedComponentChecker lockedComponentChecker;
-
-    @Inject
-    private ImageFilterParamsFactory imageFilterParamsFactory;
+    private LockedComponentService lockedComponentService;
 
     public UpgradeV4Response triggerUpgrade(NameOrCrn cluster, Long workspaceId, String userCrn, UpgradeV4Request request) {
         UpgradeV4Response upgradeV4Response = upgradeAvailabilityService.checkForUpgrade(cluster, workspaceId, request, userCrn);
@@ -139,20 +120,7 @@ public class DistroXUpgradeService {
     }
 
     private boolean isComponentsLocked(Stack stack, ImageInfoV4Response targetImage) {
-        try {
-            Image currentImage = componentConfigProviderService.getImage(stack.getId());
-            CloudbreakImageCatalogV3 imageCatalog = imageCatalogProvider.getImageCatalogV3(currentImage.getImageCatalogUrl());
-            com.sequenceiq.cloudbreak.cloud.model.catalog.Image currentCatalogImage = imageProvider.getCurrentImageFromCatalog(currentImage.getImageId(),
-                    imageCatalog);
-            com.sequenceiq.cloudbreak.cloud.model.catalog.Image targetCatalogImage = imageProvider.getCurrentImageFromCatalog(targetImage.getImageId(),
-                    imageCatalog);
-            LOGGER.info("Determining that the stack {} component versions are the same on the current image {} and the target image {}", stack.getName(),
-                    currentCatalogImage.getUuid(), targetCatalogImage.getUuid());
-            return lockedComponentChecker.isUpgradePermitted(currentCatalogImage, targetCatalogImage, imageFilterParamsFactory.getStackRelatedParcels(stack));
-        } catch (Exception ex) {
-            LOGGER.warn("Exception during determining the lockComponents parameter.", ex);
-            throw new CloudbreakRuntimeException("");
-        }
+        return lockedComponentService.isComponentsLocked(stack, targetImage.getImageId());
     }
 
     private boolean determineReplaceVmsParam(UpgradeV4Response upgradeV4Response, boolean lockComponents, Stack stack) {
