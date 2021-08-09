@@ -50,7 +50,6 @@ public class GcpParameterValidator implements ParameterValidator {
                 return validationResult;
             }
         }
-        //TODO:: do we need to validate entitlement
         return validationResultBuilder.build();
     }
 
@@ -60,13 +59,15 @@ public class GcpParameterValidator implements ParameterValidator {
         GcpResourceEncryptionParametersDto gcpResourceEncryptionParametersDto = gcpParametersDto.getGcpResourceEncryptionParametersDto();
         String encryptionKey = gcpResourceEncryptionParametersDto.getEncryptionKey();
 
-        if (encryptionKey != null && !entitlementService.isGcpDiskEncryptionWithCMEKEnabled(accountId)) {
-            LOGGER.info("Invalid request, CDP_CB_GCP_DISK_ENCRYPTION_WITH_CMEK entitlement turned off for account {}", accountId);
-            return validationResultBuilder.error(
-                    "You specified encryptionKey to encrypt resources with CMEK, "
-                            + "but that feature is currently disabled."
-                            + "Get 'CDP_CB_GCP_DISK_ENCRYPTION_WITH_CMEK' enabled for your account to use resource encryption with CMEK.").
-                    build();
+        if (encryptionKey != null) {
+            if (!entitlementService.isGcpDiskEncryptionWithCMEKEnabled(accountId)) {
+                LOGGER.info("Invalid request, CDP_CB_GCP_DISK_ENCRYPTION_WITH_CMEK entitlement turned off for account {}", accountId);
+                return validationResultBuilder.error(
+                        "You specified encryptionKey to encrypt resources with CMEK, "
+                                + "but that feature is currently disabled."
+                                + "Get 'CDP_CB_GCP_DISK_ENCRYPTION_WITH_CMEK' enabled for your account to use resource encryption with CMEK.").
+                        build();
+            }
         }
 
         LOGGER.debug("Validation of encryption parameters is successful.");

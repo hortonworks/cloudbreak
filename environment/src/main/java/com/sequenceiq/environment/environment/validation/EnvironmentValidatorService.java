@@ -293,7 +293,7 @@ public class EnvironmentValidatorService {
                     .map(gcpParametersDto -> gcpParametersDto.getGcpResourceEncryptionParametersDto())
                     .map(gcpREParamsDto -> gcpREParamsDto.getEncryptionKey()).orElse(null);
             if (StringUtils.isNotEmpty(encryptionKey)) {
-                if (!entitlementService.isAzureDiskSSEWithCMKEnabled(creationDto.getAccountId())) {
+                if (!entitlementService.isGcpDiskEncryptionWithCMEKEnabled(creationDto.getAccountId())) {
                     resultBuilder.error(String.format("You have specified encryption-key to enable encryption for GCP resources with CMEK"
                             + "but that feature is currently not enabled for this account."
                             + " Please get 'CDP_CB_GCP_DISK_ENCRYPTION_WITH_CMEK' enabled for this account."));

@@ -205,18 +205,12 @@ public class EnvironmentResponseConverter {
         GcpResourceEncryptionParametersDto gcpResourceEncryptionParametersDto = Optional.ofNullable(parameters.getGcpParametersDto())
                 .map(GcpParametersDto::getGcpResourceEncryptionParametersDto)
                 .orElse(null);
-        return GcpEnvironmentParameters.builder()
-                .withResourceEncryptionParameters(getIfNotNull(gcpResourceEncryptionParametersDto, this::gcpParametersToGcpResourceEncryptionParameters))
-                .build();
-/*        GcpResourceEncryptionParametersDto gcpResourceEncryptionParametersDto = Optional.ofNullable(parameters.getGcpParametersDto())
-                .map(GcpParametersDto::getGcpResourceEncryptionParametersDto)
-                .orElse(null);
 
         return Optional.ofNullable(parameters.getGcpParametersDto())
                 .map(gcp -> GcpEnvironmentParameters.builder()
                         .withResourceEncryptionParameters(getIfNotNull(gcpResourceEncryptionParametersDto, this::gcpParametersToGcpResourceEncryptionParameters))
                         .build())
-                .orElse(null);*/
+                .orElse(null);
     }
 
     private S3GuardRequestParameters awsParametersToS3guardParam(AwsParametersDto awsParametersDto) {

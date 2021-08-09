@@ -43,7 +43,6 @@ public class GcpEnvironmentParameters implements Serializable {
     }
 
     public static final class Builder {
-
         private GcpResourceEncryptionParameters gcpResourceEncryptionParameters;
 
         private Builder() {

@@ -6,7 +6,6 @@ import javax.validation.constraints.Pattern;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
-import com.sequenceiq.environment.api.v1.environment.model.request.aws.S3GuardRequestParameters;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -16,16 +15,17 @@ public class GcpResourceEncryptionParameters implements Serializable {
 
     @VisibleForTesting
     static final String ENCRYPTION_KEY_INVALID_MSG =
-            "Expected Format: '/projects/<projectName>/locations/<location>/keyRings/<KeyRing>/cryptoKeys/<Key name>/cryptoKeyVersions/<version>'. " +
+            "Expected Format: '/projects/<projectName>/locations/<location>/keyRings/<KeyRing>/cryptoKeys/<KeyName>'. " +
             "Key location should be same as resource location " +
             "<keyName> may only contain alphanumeric characters and dashes.";
 
     @ApiModelProperty(EnvironmentModelDescription.ENCRYPTION_KEY)
-    @Pattern(regexp = ".*",
+    @Pattern(regexp = "projects\\/[a-zA-Z0-9_-]{1,63}\\/" +
+            "locations\\/[a-zA-Z0-9_-]{1,63}\\/keyRings\\/[a-zA-Z0-9_-]{1,63}\\/cryptoKeys\\/[a-zA-Z0-9_-]{1,63}",
             message = ENCRYPTION_KEY_INVALID_MSG)
     private String encryptionKey;
 
-    public GcpResourceEncryptionParameters(){
+    public GcpResourceEncryptionParameters() {
     }
 
     private GcpResourceEncryptionParameters(GcpResourceEncryptionParameters.Builder builder) {
@@ -63,9 +63,6 @@ public class GcpResourceEncryptionParameters implements Serializable {
         }
 
         public GcpResourceEncryptionParameters build() {
-/*            GcpResourceEncryptionParameters resourceEncryptionParameters = new GcpResourceEncryptionParameters();
-            resourceEncryptionParameters.setEncryptionKey(encryptionKey);
-            return resourceEncryptionParameters;*/
             return new GcpResourceEncryptionParameters(this);
         }
     }
