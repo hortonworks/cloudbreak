@@ -118,6 +118,10 @@ secret:
   application: sdx/shared
   engine: "com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV2Engine"
 
+cdp.structuredevent:
+  rest:
+    contentlogging: true
+
 vault:
   addr: localhost
   port: 8200

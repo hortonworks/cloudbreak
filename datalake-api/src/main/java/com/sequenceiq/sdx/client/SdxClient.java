@@ -1,6 +1,7 @@
 package com.sequenceiq.sdx.client;
 
 import com.sequenceiq.authorization.info.AuthorizationUtilEndpoint;
+import com.sequenceiq.cloudbreak.structuredevent.rest.endpoint.CDPStructuredEventV1Endpoint;
 import com.sequenceiq.flow.api.FlowEndpoint;
 import com.sequenceiq.flow.api.FlowPublicEndpoint;
 import com.sequenceiq.sdx.api.endpoint.DatabaseServerEndpoint;
@@ -38,4 +39,6 @@ public interface SdxClient {
     SdxBackupEndpoint sdxBackupEndpoint();
 
     SdxRestoreEndpoint sdxRestoreEndpoint();
+
+    CDPStructuredEventV1Endpoint structuredEventsV1Endpoint();
 }

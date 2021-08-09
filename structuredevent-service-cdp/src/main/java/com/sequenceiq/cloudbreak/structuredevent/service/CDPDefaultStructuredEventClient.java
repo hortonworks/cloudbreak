@@ -19,6 +19,11 @@ public class CDPDefaultStructuredEventClient {
     @Inject
     private List<CDPStructuredEventSenderService> structuredEventServices;
 
+    /**
+     * Sends the provided Structured Event to all registered {@code CDPStructuredEventSenderService}.
+     *
+     * Diverse implementations of {@code CDPStructuredEventSenderService} are used to send events to backing services, like DB or Kafka.
+     */
     public void sendStructuredEvent(CDPStructuredEvent structuredEvent) {
         for (CDPStructuredEventSenderService structuredEventSenderService : structuredEventServices) {
             LOGGER.trace("Send event {} with eventsender {}", structuredEvent, structuredEventSenderService.getClass());

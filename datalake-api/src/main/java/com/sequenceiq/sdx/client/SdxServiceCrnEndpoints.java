@@ -4,6 +4,7 @@ import javax.ws.rs.client.WebTarget;
 
 import com.sequenceiq.authorization.info.AuthorizationUtilEndpoint;
 import com.sequenceiq.cloudbreak.client.AbstractUserCrnServiceEndpoint;
+import com.sequenceiq.cloudbreak.structuredevent.rest.endpoint.CDPStructuredEventV1Endpoint;
 import com.sequenceiq.flow.api.FlowEndpoint;
 import com.sequenceiq.flow.api.FlowPublicEndpoint;
 import com.sequenceiq.sdx.api.endpoint.DatabaseServerEndpoint;
@@ -80,5 +81,10 @@ public class SdxServiceCrnEndpoints extends AbstractUserCrnServiceEndpoint imple
     @Override
     public SdxRestoreEndpoint sdxRestoreEndpoint() {
         return getEndpoint(SdxRestoreEndpoint.class);
+    }
+
+    @Override
+    public CDPStructuredEventV1Endpoint structuredEventsV1Endpoint() {
+        return getEndpoint(CDPStructuredEventV1Endpoint.class);
     }
 }

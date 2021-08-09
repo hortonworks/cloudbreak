@@ -25,6 +25,15 @@ import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestRequestDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestResponseDetails;
 import com.sequenceiq.cloudbreak.structuredevent.rest.urlparser.CDPRestUrlParser;
 
+/**
+ * Inspects all requests to a service and determines if it should mark the request or response up with additional Structured Event metadata.
+ *
+ * Uses implementations of {@code CDPRestUrlParser} to determine if additional actions should be taken on a request.
+ *
+ * Activation of this filter is controlled by the {@code contentLogging} configuration value.
+ *
+ * To use this class, it should be registered in an {@code EndpointConfig}.
+ */
 @Component
 public class CDPStructuredEventFilter implements WriterInterceptor, ContainerRequestFilter, ContainerResponseFilter {
 
@@ -91,19 +100,31 @@ public class CDPStructuredEventFilter implements WriterInterceptor, ContainerReq
     public void aroundWriteTo(WriterInterceptorContext context) throws IOException, WebApplicationException {
         context.proceed();
         if (BooleanUtils.isTrue((Boolean) context.getProperty(LOGGING_ENABLED_PROPERTY))) {
-            Long requestTime = (Long) context.getProperty(REQUEST_TIME);
-            RestRequestDetails restRequest = (RestRequestDetails) context.getProperty(REQUEST_DETAILS);
-            RestResponseDetails restResponse = (RestResponseDetails) context.getProperty(RESPONSE_DETAILS);
-            String responseBody = ((LoggingStream) context.getProperty(LOGGINGSTREAM_PROPERTY)).getStringBuilder(
-                    MessageUtils.getCharset(context.getMediaType())).toString();
-            Map<String, String> restParams = (Map<String, String>) context.getProperty(REST_PARAMS);
-            if (restParams == null) {
-                restParams = new HashMap<>();
-            }
-            structuredEventFilterUtil.sendStructuredEvent(restRequest, restResponse, restParams, requestTime, responseBody);
+            sendStructuredEvent(context);
         }
     }
 
+    private void sendStructuredEvent(WriterInterceptorContext context) {
+        Long requestTime = (Long) context.getProperty(REQUEST_TIME);
+        RestRequestDetails restRequest = (RestRequestDetails) context.getProperty(REQUEST_DETAILS);
+        RestResponseDetails restResponse = (RestResponseDetails) context.getProperty(RESPONSE_DETAILS);
+        String responseBody = ((LoggingStream) context.getProperty(LOGGINGSTREAM_PROPERTY)).getStringBuilder(
+                MessageUtils.getCharset(context.getMediaType())).toString();
+        Map<String, String> restParams = (Map<String, String>) context.getProperty(REST_PARAMS);
+        if (restParams == null) {
+            restParams = new HashMap<>();
+        }
+        structuredEventFilterUtil.sendStructuredEvent(restRequest, restResponse, restParams, requestTime, responseBody);
+    }
+
+    /**
+     * Iterates through implementations of {@code CDPRestUrlParser} to extract URL parameters if possible.
+     *
+     * The list of URL parsers is autowired by Spring.
+     *
+     * @param requestContext the source of URL parameters, parseable by one of the REST URL parsers
+     * @return a Map of constant names from {@code CDPRestUrlParser} to their values in the URL
+     */
     private Map<String, String> getRequestUrlParameters(ContainerRequestContext requestContext) {
         Map<String, String> params = Maps.newHashMap();
         for (CDPRestUrlParser cdpRestUrlParser : cdpRestUrlParsers) {

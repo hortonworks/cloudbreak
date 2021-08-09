@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateResponse;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.structuredevent.rest.annotation.AccountEntityType;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.cloudbreak.validation.ValidStackNameFormat;
 import com.sequenceiq.cloudbreak.validation.ValidStackNameLength;
@@ -63,6 +64,7 @@ import com.sequenceiq.sdx.api.model.SdxValidateCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SetRangerCloudIdentityMappingRequest;
 
 @Controller
+@AccountEntityType(SdxCluster.class)
 public class SdxController implements SdxEndpoint {
 
     @Inject

@@ -1,4 +1,4 @@
-apply plugin: 'java'
+apply plugin: 'java-library'
 
 repositories {
     mavenCentral()
@@ -13,9 +13,8 @@ jar {
 }
 
 dependencies {
-    implementation project(':cloud-reactor')
-    implementation project(':structuredevent-model')
-    implementation project(':structuredevent-api-cdp')
+    api project(':structuredevent-model')
+    api project(':structuredevent-api-cdp')
     implementation project(':environment-api')
     implementation project(':auth-connector')
     implementation project(':audit-connector')

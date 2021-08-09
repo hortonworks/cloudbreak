@@ -78,31 +78,58 @@ public class CDPFlowStructuredEventHandler<S, E> extends StateMachineListenerAda
 
     }
 
+    /**
+     * Send a new structured event.
+     * @param transition provides information to build the new Structured Event.
+     */
     @Override
     public void transition(Transition<S, E> transition) {
         try {
-            State<S, E> from = transition.getSource();
-            State<S, E> to = transition.getTarget();
-            Trigger<S, E> trigger = transition.getTrigger();
-            Long currentTime = System.currentTimeMillis();
-            String fromId = from != null ? from.getId().toString() : "unknown";
-            String toId = to != null ? to.getId().toString() : "unknown";
-            String eventId = trigger != null ? trigger.getEvent().toString() : "unknown";
+            String fromId = getFromId(transition);
+            String toId = getToId(transition);
+            String eventId = getEventId(transition);
             Boolean detailed = toId.equals(initState.toString()) || toId.equals(finalState.toString());
+
+            Long currentTime = System.currentTimeMillis();
             long duration = lastStateChange == null ? 0L : currentTime - lastStateChange;
-            FlowDetails flowDetails = new FlowDetails(flowChainType, flowType, flowChainId, flowId, fromId, toId, eventId, duration);
-            CDPStructuredEvent structuredEvent;
-            if (exception == null) {
-                structuredEvent = cdpStructuredFlowEventFactory.createStructuredFlowEvent(resourceId, flowDetails, detailed);
-            } else {
-                structuredEvent = cdpStructuredFlowEventFactory.createStructuredFlowEvent(resourceId, flowDetails, true, exception);
-                exception = null;
-            }
+
+            CDPStructuredEvent structuredEvent = buildCdpStructuredEvent(fromId, toId, eventId, detailed, duration);
             cdpDefaultStructuredEventClient.sendStructuredEvent(structuredEvent);
+
             lastStateChange = currentTime;
         } catch (RuntimeException ex) {
             LOGGER.error("Error happened during structured flow event generation! The event won't be stored!", ex);
         }
+    }
+
+    private CDPStructuredEvent buildCdpStructuredEvent(String fromId, String toId, String eventId, Boolean detailed, long duration) {
+        FlowDetails flowDetails = new FlowDetails(flowChainType, flowType, flowChainId, flowId, fromId, toId, eventId, duration);
+        CDPStructuredEvent structuredEvent;
+        if (exception == null) {
+            structuredEvent = cdpStructuredFlowEventFactory.createStructuredFlowEvent(resourceId, flowDetails, detailed);
+        } else {
+            structuredEvent = cdpStructuredFlowEventFactory.createStructuredFlowEvent(resourceId, flowDetails, true, exception);
+            exception = null;
+        }
+        return structuredEvent;
+    }
+
+    // provide protection against null values
+    private String getEventId(Transition<S, E> transition) {
+        Trigger<S, E> trigger = transition.getTrigger();
+        return trigger != null ? trigger.getEvent().toString() : "unknown";
+    }
+
+    // provide protection against null values
+    private String getToId(Transition<S, E> transition) {
+        State<S, E> to = transition.getTarget();
+        return to != null ? to.getId().toString() : "unknown";
+    }
+
+    // provide protection against null values
+    private String getFromId(Transition<S, E> transition) {
+        State<S, E> from = transition.getSource();
+        return from != null ? from.getId().toString() : "unknown";
     }
 
     @Override
