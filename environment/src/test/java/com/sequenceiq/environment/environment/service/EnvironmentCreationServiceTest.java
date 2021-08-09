@@ -463,6 +463,39 @@ class EnvironmentCreationServiceTest {
     }
 
     @Test
+    void testEncryptionKeyValidationError() {
+        final EnvironmentCreationDto environmentCreationDto = EnvironmentCreationDto.builder()
+                .withName(ENVIRONMENT_NAME)
+                .withCloudPlatform("GCP")
+                .withCreator(CRN)
+                .withAccountId(ACCOUNT_ID)
+                .withAuthentication(AuthenticationDto.builder().build())
+                .build();
+        final Environment environment = new Environment();
+        environment.setName(ENVIRONMENT_NAME);
+        environment.setId(1L);
+        environment.setAccountId(ACCOUNT_ID);
+        Credential credential = new Credential();
+        credential.setCloudPlatform("GCP");
+
+        ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
+        validationResultBuilder.error("error");
+        when(validatorService.validateEncryptionKeyUrl(any())).thenReturn(validationResultBuilder.build());
+
+        when(environmentService.isNameOccupied(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(false);
+        when(environmentDtoConverter.creationDtoToEnvironment(eq(environmentCreationDto))).thenReturn(environment);
+        when(environmentResourceService.getCredentialFromRequest(any(), any())).thenReturn(credential);
+        when(validatorService.validateParentChildRelation(any(), any())).thenReturn(ValidationResult.builder().build());
+        when(validatorService.validateNetworkCreation(any(), any())).thenReturn(ValidationResult.builder());
+        when(validatorService.validateFreeIpaCreation(any())).thenReturn(ValidationResult.builder().build());
+        when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
+        when(entitlementService.azureEnabled(eq(ACCOUNT_ID))).thenReturn(true);
+        when(environmentService.save(any())).thenReturn(environment);
+
+        assertThrows(BadRequestException.class, () -> environmentCreationServiceUnderTest.create(environmentCreationDto));
+    }
+
+    @Test
     void testEncryptionKeyUrlValidationError() {
         final EnvironmentCreationDto environmentCreationDto = EnvironmentCreationDto.builder()
                 .withName(ENVIRONMENT_NAME)

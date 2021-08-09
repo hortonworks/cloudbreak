@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.converter.stack;
 
+import static com.sequenceiq.freeipa.util.CloudArgsForIgConverter.DISK_ENCRYPTION_SET_ID;
+import static com.sequenceiq.freeipa.util.CloudArgsForIgConverter.GCP_KMS_ENCRYPTION_KEY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
@@ -7,6 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.security.SecureRandom;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
@@ -32,6 +35,8 @@ import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceEncryptionParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpEnvironmentParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpResourceEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.freeipa.api.model.Backup;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerRequest;
@@ -47,6 +52,7 @@ import com.sequenceiq.freeipa.entity.StackAuthentication;
 import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
 import com.sequenceiq.freeipa.service.tag.AccountTagService;
 import com.sequenceiq.freeipa.util.CrnService;
+import com.sequenceiq.freeipa.util.CloudArgsForIgConverter;
 
 @ExtendWith(MockitoExtension.class)
 public class CreateFreeIpaRequestToStackConverterTest {
@@ -86,20 +92,14 @@ public class CreateFreeIpaRequestToStackConverterTest {
     private CrnService crnService;
 
     @Captor
-    private ArgumentCaptor<String> diskEncryptionSetIdCaptor;
+    private ArgumentCaptor<EnumMap> mapCaptorForDiskEncryptionSetId;
+
+    @Captor
+    private ArgumentCaptor<EnumMap> mapCaptorForEncryptionKey;
 
     @Test
     void testConvertForInstanceGroupsWhendiskEncryptionSetIdIsPresent() throws InterruptedException, ExecutionException, TimeoutException {
-        CreateFreeIpaRequest source = new CreateFreeIpaRequest();
-        source.setEnvironmentCrn("envCrn");
-        source.setName("dummyName");
-        source.setAuthentication(new StackAuthenticationRequest());
-        source.setTelemetry(new TelemetryRequest());
-        source.setInstanceGroups(List.of(new InstanceGroupRequest()));
-        FreeIpaServerRequest freeIpaServerRequest = new FreeIpaServerRequest();
-        freeIpaServerRequest.setDomain("dummyDomain");
-        freeIpaServerRequest.setHostname("dummyHostName");
-        source.setFreeIpa(freeIpaServerRequest);
+        CreateFreeIpaRequest source = createCreateFreeIpaRequest();
 
         DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
         environmentResponse.setAzure(AzureEnvironmentParameters.builder()
@@ -110,7 +110,8 @@ public class CreateFreeIpaRequestToStackConverterTest {
         when(crnService.createCrn(ACCOUNT_ID, CrnResourceDescriptor.FREEIPA)).thenReturn("resourceCrn");
         when(stackAuthenticationConverter.convert(source.getAuthentication())).thenReturn(new StackAuthentication());
         when(cachedEnvironmentClientService.getByCrn(source.getEnvironmentCrn())).thenReturn(environmentResponse);
-        when(instanceGroupConverter.convert(any(InstanceGroupRequest.class), anyString(), anyString(), anyString(), anyString(), anyString(), anyString()))
+        when(instanceGroupConverter.convert(any(InstanceGroupRequest.class), anyString(), anyString(),
+                anyString(), anyString(), anyString(), any(EnumMap.class)))
                 .thenReturn(new InstanceGroup());
         when(telemetryConverter.convert(source.getTelemetry())).thenReturn(new Telemetry());
         when(backupConverter.convert(source.getTelemetry())).thenReturn(new Backup());
@@ -122,7 +123,63 @@ public class CreateFreeIpaRequestToStackConverterTest {
 
         underTest.convert(source, ACCOUNT_ID, owner, "crn1", CloudPlatform.AZURE.name());
         verify(instanceGroupConverter).convert(any(InstanceGroupRequest.class), anyString(), anyString(), anyString(), anyString(), anyString(),
-                diskEncryptionSetIdCaptor.capture());
-        assertEquals(diskEncryptionSetIdCaptor.getValue(), "dummyDiskEncryptionSetId");
+                mapCaptorForDiskEncryptionSetId.capture());
+        assertEquals(mapCaptorForDiskEncryptionSetId.getValue().get(DISK_ENCRYPTION_SET_ID), "dummyDiskEncryptionSetId");
+    }
+
+    @Test
+    void testConvertForInstanceGroupsWhenEncryptionKeyIsPresentForGcp() throws InterruptedException, ExecutionException, TimeoutException {
+        CreateFreeIpaRequest source = createCreateFreeIpaRequest();
+
+        DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
+
+        environmentResponse.setGcp(GcpEnvironmentParameters.builder()
+                .withResourceEncryptionParameters(GcpResourceEncryptionParameters.builder()
+                        .withEncryptionKey("dummyEncryptionKey")
+                        .build())
+                .build());
+
+        when(crnService.createCrn(ACCOUNT_ID, CrnResourceDescriptor.FREEIPA)).thenReturn("resourceCrn");
+        when(stackAuthenticationConverter.convert(source.getAuthentication())).thenReturn(new StackAuthentication());
+        when(cachedEnvironmentClientService.getByCrn(source.getEnvironmentCrn())).thenReturn(environmentResponse);
+        when(instanceGroupConverter.convert(any(InstanceGroupRequest.class), anyString(), anyString(), anyString(),
+                anyString(), anyString(), any(EnumMap.class))).thenReturn(new InstanceGroup());
+        when(telemetryConverter.convert(source.getTelemetry())).thenReturn(new Telemetry());
+        when(backupConverter.convert(source.getTelemetry())).thenReturn(new Backup());
+        when(entitlementService.internalTenant(ACCOUNT_ID)).thenReturn(Boolean.FALSE);
+        when(costTagging.prepareDefaultTags(any())).thenReturn(new HashMap<>());
+        ReflectionTestUtils.setField(underTest, "userGetTimeout", 10L);
+        ReflectionTestUtils.setField(underTest, "defaultGatewayCidr", Set.of());
+        Future<String> owner = CompletableFuture.completedFuture("dummyUser");
+
+        underTest.convert(source, ACCOUNT_ID, owner, "crn1", CloudPlatform.GCP.name());
+        verify(instanceGroupConverter).convert(any(InstanceGroupRequest.class), anyString(), anyString(), anyString(), anyString(), anyString(),
+                mapCaptorForEncryptionKey.capture());
+        assertEquals(mapCaptorForEncryptionKey.getValue().get(GCP_KMS_ENCRYPTION_KEY), "dummyEncryptionKey");
+    }
+
+    private CreateFreeIpaRequest createCreateFreeIpaRequest() {
+        CreateFreeIpaRequest source = new CreateFreeIpaRequest();
+        source.setEnvironmentCrn("envCrn");
+        source.setName("dummyName");
+        source.setAuthentication(new StackAuthenticationRequest());
+        source.setTelemetry(new TelemetryRequest());
+        source.setInstanceGroups(List.of(new InstanceGroupRequest()));
+        FreeIpaServerRequest freeIpaServerRequest = new FreeIpaServerRequest();
+        freeIpaServerRequest.setDomain("dummyDomain");
+        freeIpaServerRequest.setHostname("dummyHostName");
+        source.setFreeIpa(freeIpaServerRequest);
+
+        return source;
+    }
+
+    EnumMap<CloudArgsForIgConverter, String> createAndGetCloudArgsForIgMap(String diskEncryptionSetId, String encryptionKey) {
+        EnumMap<CloudArgsForIgConverter, String> cloudArgsForIgConverterMap =
+                new EnumMap<>(CloudArgsForIgConverter.class);
+
+        cloudArgsForIgConverterMap.put(DISK_ENCRYPTION_SET_ID, diskEncryptionSetId);
+        cloudArgsForIgConverterMap.put(GCP_KMS_ENCRYPTION_KEY, encryptionKey);
+
+        return cloudArgsForIgConverterMap;
     }
 }
