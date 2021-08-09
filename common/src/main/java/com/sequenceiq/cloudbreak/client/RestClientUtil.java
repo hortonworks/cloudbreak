@@ -12,9 +12,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.http.ssl.SSLContexts;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.ClientProperties;
+import org.glassfish.jersey.client.filter.EncodingFilter;
 import org.glassfish.jersey.logging.LoggingFeature;
 import org.glassfish.jersey.logging.LoggingFeature.Verbosity;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
+import org.glassfish.jersey.message.GZipEncoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,6 +75,8 @@ public class RestClientUtil {
         readTimeout.ifPresent(rt -> config.property(ClientProperties.READ_TIMEOUT, rt));
         config.register(MultiPartFeature.class);
         config.register(RequestIdProviderFeature.class);
+        config.register(EncodingFilter.class);
+        config.register(GZipEncoder.class);
 
         ClientBuilder builder = ClientBuilder.newBuilder().withConfig(config);
         builder.sslContext(sslContext);
