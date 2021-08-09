@@ -31,9 +31,11 @@ public class ClusterSyncLogger {
         if (resourceType != null) {
             switch (resourceType) {
                 case CloudbreakEventService.DATALAKE_RESOURCE_TYPE:
+                    LOGGER.debug("Sending usage report for {}", resourceType);
                     usageReporter.cdpDatalakeSync(datalakeConverter.convert(structuredSyncEvent));
                     break;
                 case CloudbreakEventService.DATAHUB_RESOURCE_TYPE:
+                    LOGGER.debug("Sending usage report for {}", resourceType);
                     usageReporter.cdpDatahubSync(datahubConverter.convert(structuredSyncEvent));
                     break;
                 default:
