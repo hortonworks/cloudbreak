@@ -3,8 +3,10 @@ package com.sequenceiq.it.cloudbreak.util.ssh.action;
 import static java.lang.String.format;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetaDataResponse;
 import com.sequenceiq.it.cloudbreak.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
@@ -66,6 +69,27 @@ public class SshJClientActions extends SshJClient {
         return instanceIPs;
     }
 
+    private List<String> getDistroXInstanceGroupIps(List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames, boolean publicIp) {
+        List<String> instanceIPs = new ArrayList<>();
+
+        hostGroupNames.forEach(hostGroupName -> {
+            List<String> instanceGroupIpList = instanceGroups.stream()
+                    .filter(instanceGroup -> instanceGroup.getName().equals(hostGroupName))
+                    .map(InstanceGroupV4Response::getMetadata)
+                    .filter(Objects::nonNull)
+                    .flatMap(Collection::stream)
+                    .map(x -> publicIp ? x.getPublicIp() : x.getPrivateIp())
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+            assert !instanceGroupIpList.isEmpty();
+            LOGGER.info("The selected Instance Group [{}] and the available {} IPs [{}].",
+                    hostGroupName, publicIp ? "Public" : "Private", instanceGroupIpList);
+            instanceIPs.addAll(instanceGroupIpList);
+        });
+
+        return instanceIPs;
+    }
+
     public SdxInternalTestDto checkFilesByNameAndPath(SdxInternalTestDto testDto, List<InstanceGroupV4Response> instanceGroups,
             List<String> hostGroupNames, String filePath, String fileName, long requiredNumberOfFiles, String user, String password) {
         String fileListCommand = String.format("find %s -type f -name %s", filePath, fileName);
@@ -104,6 +128,86 @@ public class SshJClientActions extends SshJClient {
             throw new TestFailException(String.format("File '%s' is NOT available at [%s] host group(s)!", filePath, hostGroupNames.toString()));
         }
         return testDto;
+    }
+
+    public void checkEphemeralDisksMounted(List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames) {
+        Map<String, Pair<Integer, String>> deviceMountPointMappingsByIp = getDeviceMountPointMappingsByIp(instanceGroups, hostGroupNames);
+        Map<String, Pair<Integer, String>> deviceDiskTypeMappingsByIp = getDeviceDiskTypeMappingsByIp(instanceGroups, hostGroupNames);
+
+        for (Entry<String, Pair<Integer, String>> node: deviceDiskTypeMappingsByIp.entrySet()) {
+            Map<String, String> ephemeralDisks = new Json(node.getValue().getValue()).getMap().entrySet().stream()
+                    .filter(e -> String.valueOf(e.getValue()).contains("Amazon EC2 NVMe Instance Storage"))
+                    .collect(Collectors.toMap(Entry::getKey, x -> String.valueOf(x.getValue())));
+
+            if (ephemeralDisks.isEmpty()) {
+                LOGGER.error("Instance store volume missing from node with IP {}!", node.getKey());
+                throw new TestFailException(String.format("Instance store volume missing from node with IP %s!", node.getKey()));
+            }
+
+            if (deviceMountPointMappingsByIp.get(node.getKey()) == null) {
+                LOGGER.error("No device mount point mappings found for node with IP {}!", node.getKey());
+                throw new TestFailException(String.format("No device mount point mappings found for node with IP %s!", node.getKey()));
+            }
+            Map<String, String> mounPoints = new Json(deviceMountPointMappingsByIp.get(node.getKey()).getValue()).getMap().entrySet().stream()
+                    .collect(Collectors.toMap(Entry::getKey, x -> String.valueOf(x.getValue())));
+
+            for (String device: ephemeralDisks.keySet()) {
+                String mountPoint = mounPoints.get(device);
+                if (mountPoint == null) {
+                    LOGGER.error("No mount point found for ephemeral device {} on node with IP {}!", device, node.getKey());
+                    throw new TestFailException(String.format("No mount point found for device %s on node with IP %s!", device, node.getKey()));
+                } else if (!mountPoint.contains("ephfs")) {
+                    LOGGER.error("Ephemeral device {} incorrectly mounted to {} on node with IP {}!", device, mountPoint, node.getKey());
+                    throw new TestFailException(String.format("Ephemeral device %s incorrectly mounted to %s on node with IP %s!",
+                            device, mountPoint, node.getKey()));
+                }
+            }
+        }
+    }
+
+    public void checkNoEphemeralDisksMounted(List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames) {
+        Map<String, Pair<Integer, String>> deviceMountPointMappingsByIp = getDeviceMountPointMappingsByIp(instanceGroups, hostGroupNames);
+        Map<String, Pair<Integer, String>> deviceDiskTypeMappingsByIp = getDeviceDiskTypeMappingsByIp(instanceGroups, hostGroupNames);
+
+        for (Entry<String, Pair<Integer, String>> node: deviceDiskTypeMappingsByIp.entrySet()) {
+            Map<String, String> ephemeralDisks = new Json(node.getValue().getValue()).getMap().entrySet().stream()
+                    .filter(e -> String.valueOf(e.getValue()).contains("Amazon EC2 NVMe Instance Storage"))
+                    .collect(Collectors.toMap(Entry::getKey, x -> String.valueOf(x.getValue())));
+
+            if (!ephemeralDisks.isEmpty()) {
+                LOGGER.error("Instance store volume unintentionally present on node with IP {}!", node.getKey());
+                throw new TestFailException(String.format("Instance store volume unintentionally present on node with IP %s!", node.getKey()));
+            }
+        }
+
+        for (Entry<String, Pair<Integer, String>> node: deviceMountPointMappingsByIp.entrySet()) {
+            Map<String, String> ephemeralMounts = new Json(node.getValue().getValue()).getMap().entrySet().stream()
+                    .filter(e -> String.valueOf(e.getValue()).contains("ephfs"))
+                    .collect(Collectors.toMap(Entry::getKey, x -> String.valueOf(x.getValue())));
+
+            if (!ephemeralMounts.isEmpty()) {
+                LOGGER.error("Device incorrectly mounted to /hadoopfs/ephfsN on node with IP {}!", node.getKey());
+                throw new TestFailException(String.format("Device incorrectly mounted to /hadoopfs/ephfsN on node with IP %s!", node.getKey()));
+            }
+        }
+    }
+
+    private Map<String, Pair<Integer, String>> getDeviceMountPointMappingsByIp(List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames) {
+        String diskMountPointListCmd =
+                "df | grep hadoopfs | awk '{print $1,$6}' | " +
+                        "sed -e \"s/\\(.*\\) \\(.*\\)/\\\"\\1\\\":\\\"\\2\\\"/\" | paste -s -d ',' | sed 's/.*/{\\0}/'";
+
+        return getDistroXInstanceGroupIps(instanceGroups, hostGroupNames, false).stream()
+                .collect(Collectors.toMap(ip -> ip, ip -> executeSshCommand(ip, diskMountPointListCmd)));
+    }
+
+    private Map<String, Pair<Integer, String>> getDeviceDiskTypeMappingsByIp(List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames) {
+        String diskTypeListCmd =
+                "sudo nvme list | grep dev | awk '{print $1,$3,$4,$5,$6,$7}' | " +
+                        "sed -e \"s/\\([^ ]*\\) \\(.*\\)/\\\"\\1\\\":\\\"\\2\\\"/\" | paste -s -d ',' | sed 's/.*/{\\0}/'";
+
+        return getDistroXInstanceGroupIps(instanceGroups, hostGroupNames, false).stream()
+                .collect(Collectors.toMap(ip -> ip, ip -> executeSshCommand(ip, diskTypeListCmd)));
     }
 
     public Map<String, Pair<Integer, String>> executeSshCommand(List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames, String sshCommand,

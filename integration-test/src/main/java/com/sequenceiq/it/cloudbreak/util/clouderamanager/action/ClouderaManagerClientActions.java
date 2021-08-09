@@ -11,6 +11,7 @@ import com.cloudera.api.swagger.RoleConfigGroupsResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiConfigList;
+import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
@@ -60,6 +61,42 @@ public class ClouderaManagerClientActions extends ClouderaManagerClient {
             if (knoxConfigs.getItems().isEmpty()) {
                 LOGGER.error("IDBroker mappings are NOT exist!");
                 throw new TestFailException("IDBroker mappings are NOT exist!");
+            }
+        } catch (ApiException e) {
+            LOGGER.error("Exception when calling UsersResourceApi#readUsers2", e);
+            throw new TestFailException("Exception when calling UsersResourceApi#readUsers2 at " + apiClient.getBasePath(), e);
+        } catch (Exception e) {
+            LOGGER.error("Can't get users' list at: '{}'!", apiClient.getBasePath());
+            throw new TestFailException("Can't get users' list at: " + apiClient.getBasePath(), e);
+        }
+        return testDto;
+    }
+
+    public DistroXTestDto checkCmYarnNodemanagerRoleConfigGroups(DistroXTestDto testDto, String user, String password) {
+        String serverIp = testDto.getResponse().getCluster().getServerIp();
+        ApiClient apiClient = getCmApiClient(serverIp, API_V_43, user, password);
+        // CHECKSTYLE:OFF
+        RoleConfigGroupsResourceApi roleConfigGroupsResourceApi = new RoleConfigGroupsResourceApi(apiClient);
+        // CHECKSTYLE:ON
+        try {
+            ApiConfigList knoxConfigs = roleConfigGroupsResourceApi.readConfig(testDto.getName(), "yarn-NODEMANAGER-BASE",
+                    "yarn", "summary");
+            knoxConfigs.getItems().stream()
+                    .forEach(knoxConfig -> {
+                        String knoxConfigName = knoxConfig.getName();
+                        String mappingsFromKnoxConfig = knoxConfig.getValue();
+                        if ("yarn_nodemanager_local_dirs".equalsIgnoreCase(knoxConfigName)) {
+                            if (!mappingsFromKnoxConfig.startsWith("/hadoopfs/ephfs")) {
+                                LOGGER.error("{} does not contains the expected '/hadoopfs/ephfs...' mapping!", knoxConfigName);
+                                throw new TestFailException(String.format("%s does not contains the expected '/hadoopfs/ephfs...' mapping!", knoxConfigName));
+                            } else {
+                                Log.log(LOGGER, format(" '%s' contains the expected '%s' mapping. ", knoxConfigName, mappingsFromKnoxConfig));
+                            }
+                        }
+                    });
+            if (knoxConfigs.getItems().isEmpty()) {
+                LOGGER.error("Nodemanager mappings are NOT exist!");
+                throw new TestFailException("Nodemanager mappings are NOT exist!");
             }
         } catch (ApiException e) {
             LOGGER.error("Exception when calling UsersResourceApi#readUsers2", e);
