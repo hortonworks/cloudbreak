@@ -75,6 +75,10 @@
     {
       "name": "eu-south-1",
       "displayName": "EU (Milan)"
+    },
+    {
+      "name": "me-south-1",
+      "displayName": "Middle East (Bahrain)"
     }
   ]
 }

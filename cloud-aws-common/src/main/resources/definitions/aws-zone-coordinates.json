@@ -132,6 +132,13 @@
       "latitude": "45.464664",
       "longitude": "9.188540",
       "k8sSupported": true
+    },
+    {
+      "name": "me-south-1",
+      "displayName": "Middle East (Bahrain)",
+      "latitude": "25.563633",
+      "longitude": "50.36539",
+      "k8sSupported": true
     }
   ]
 }
