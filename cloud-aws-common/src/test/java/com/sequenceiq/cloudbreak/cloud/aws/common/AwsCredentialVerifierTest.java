@@ -102,7 +102,7 @@ public class AwsCredentialVerifierTest {
             assertThat(e.getMessage(), not(CoreMatchers.containsString("accepted_action")));
         }
         List<SimulatePrincipalPolicyRequest> allSimulatePrincipalPolicyRequest = requestArgumentCaptor.getAllValues();
-        int simulateRequestNumber = 2;
+        int simulateRequestNumber = 5;
         assertEquals("expect if " + simulateRequestNumber + " simulate request has been sent",
                 simulateRequestNumber, allSimulatePrincipalPolicyRequest.size());
         allSimulatePrincipalPolicyRequest.forEach(simulatePrincipalPolicyRequest ->
@@ -201,7 +201,7 @@ public class AwsCredentialVerifierTest {
             assertThat(e.getMessage(), not(CoreMatchers.containsString("accepted_action")));
         }
         List<SimulatePrincipalPolicyRequest> allSimulatePrincipalPolicyRequest = requestArgumentCaptor.getAllValues();
-        int simulateRequestNumber = 2;
+        int simulateRequestNumber = 5;
         assertEquals("expect if " + simulateRequestNumber + " simulate request has been sent",
                 simulateRequestNumber, allSimulatePrincipalPolicyRequest.size());
         allSimulatePrincipalPolicyRequest.forEach(simulatePrincipalPolicyRequest ->
@@ -260,7 +260,7 @@ public class AwsCredentialVerifierTest {
             assertThat(e.getMessage(), not(CoreMatchers.containsString("accepted_action")));
         }
         List<SimulatePrincipalPolicyRequest> allSimulatePrincipalPolicyRequest = requestArgumentCaptor.getAllValues();
-        int simulateRequestNumber = 2;
+        int simulateRequestNumber = 5;
         assertEquals("expect if " + simulateRequestNumber + " simulate request has been sent",
                 simulateRequestNumber, allSimulatePrincipalPolicyRequest.size());
         allSimulatePrincipalPolicyRequest.forEach(simulatePrincipalPolicyRequest ->
