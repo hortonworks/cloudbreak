@@ -803,7 +803,7 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
     }
 
     private void validateCcmV2Requirement(DetailedEnvironmentResponse environment, String runtimeVersion) {
-        if (environment.getTunnel() != null) {
+        if (environment.getTunnel() != null && runtimeVersion != null) {
             switch (environment.getTunnel()) {
                 case CCMV2:
                 case CCMV2_JUMPGATE:

@@ -1384,6 +1384,7 @@ class SdxServiceTest {
     static Object[][] ccmScenarios() {
         return new Object[][]{
                 // runtime  compatible
+                {null,      true  },
                 {"7.2.5",   false },
                 {"7.2.6",   true  },
                 {"7.2.7",   true  },
