@@ -5,7 +5,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.Rule;
@@ -40,7 +39,7 @@ public class ClouderaManagerLicenseServiceTest {
     @Test
     public void validWhenLicenseIsNotEmpty() {
         UserManagementProto.Account account = UserManagementProto.Account.newBuilder().setClouderaManagerLicenseKey(LICENSE).build();
-        when(umsClient.getAccountDetails(ACCOUNT_ID, Optional.empty())).thenReturn(account);
+        when(umsClient.getAccountDetails(eq(ACCOUNT_ID), any())).thenReturn(account);
 
         underTest.validateClouderaManagerLicense(ACCOUNT_ID);
 
@@ -50,7 +49,7 @@ public class ClouderaManagerLicenseServiceTest {
     @Test
     public void invalidWhenLicenseIsEmpty() {
         UserManagementProto.Account account = UserManagementProto.Account.newBuilder().setClouderaManagerLicenseKey("").build();
-        when(umsClient.getAccountDetails(ACCOUNT_ID, Optional.empty())).thenReturn(account);
+        when(umsClient.getAccountDetails(eq(ACCOUNT_ID), any())).thenReturn(account);
 
         expectedException.expect(RuntimeException.class);
         expectedException.expectMessage("For this tenant there is no valid cloudera manager license.");

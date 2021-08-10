@@ -1,7 +1,6 @@
 package com.sequenceiq.authorization.service;
 
 import java.util.Optional;
-import java.util.UUID;
 
 import javax.inject.Inject;
 
@@ -12,10 +11,9 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
-import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
 @Service
@@ -69,10 +67,6 @@ public class UmsAccountAuthorizationService {
     }
 
     protected Optional<String> getRequestId() {
-        String requestId = MDCBuilder.getMdcContextMap().get(LoggerContextKey.REQUEST_ID.toString());
-        if (requestId == null) {
-            requestId = UUID.randomUUID().toString();
-        }
-        return Optional.of(requestId);
+        return Optional.of(MDCBuilder.getOrGenerateRequestId());
     }
 }

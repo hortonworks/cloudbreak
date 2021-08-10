@@ -4,7 +4,6 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
@@ -29,7 +28,6 @@ import com.sequenceiq.cloudbreak.ccm.endpoint.BaseServiceEndpoint;
 import com.sequenceiq.cloudbreak.ccm.endpoint.HostEndpoint;
 import com.sequenceiq.cloudbreak.ccm.endpoint.KnownServiceIdentifier;
 import com.sequenceiq.cloudbreak.ccmimpl.altus.GrpcMinaSshdManagementClient;
-import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
 /**
@@ -55,13 +53,7 @@ public class DefaultCcmParameterSupplier implements CcmParameterSupplier {
         if (grpcMinaSshdManagementClient == null) {
             return Optional.empty();
         }
-        String requestId = Optional.ofNullable(MDCBuilder.getMdcContextMap().get(LoggerContextKey.REQUEST_ID.toString()))
-                .orElseGet(() -> {
-                    String s = UUID.randomUUID().toString();
-                    LOGGER.debug("No requestId found. Setting request id to new UUID [{}]", s);
-                    MDCBuilder.addRequestId(s);
-                    return s;
-                });
+        String requestId = MDCBuilder.getOrGenerateRequestId();
         try {
             MinaSshdService minaSshdService = grpcMinaSshdManagementClient.acquireMinaSshdServiceAndWaitUntilReady(
                     requestId,

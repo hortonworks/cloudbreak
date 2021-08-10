@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.quartz;
 
-import java.util.UUID;
-
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.scheduling.quartz.QuartzJobBean;
@@ -39,7 +37,7 @@ public abstract class TracedQuartzJob extends QuartzJobBean {
 
     protected void fillMdcContext() {
         MDCBuilder.buildMdcContext(getMdcContextObject());
-        MDCBuilder.addRequestId(UUID.randomUUID().toString());
+        MDCBuilder.getOrGenerateRequestId();
     }
 
     protected abstract Object getMdcContextObject();

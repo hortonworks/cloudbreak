@@ -154,6 +154,7 @@ public class FreeIpaClientBuilder {
                     .setConnectionManagerShared(true)
                     .setDefaultRequestConfig(RequestConfig.custom().setConnectTimeout(TEST_CONNECTION_READ_TIMEOUT_MILLIS).build())
                     .setDefaultHeaders(defaultHeaders)
+                    .addInterceptorFirst(new RequestIdProviderInterceptor())
                     .setDefaultSocketConfig(
                             SocketConfig.custom()
                                     .setSoTimeout(SO_TIMEOUT)

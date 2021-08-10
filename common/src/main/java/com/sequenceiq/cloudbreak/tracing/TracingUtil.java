@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.slf4j.MDC;
 
 import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
 import io.opentracing.References;
 import io.opentracing.Span;
@@ -53,6 +54,6 @@ public class TracingUtil {
         environmentCrn = environmentCrn == null ? MDC.get(LoggerContextKey.ENV_CRN.toString()) : environmentCrn;
         span.setTag(LoggerContextKey.ENVIRONMENT_CRN.name(), environmentCrn);
         span.setTag(LoggerContextKey.RESOURCE_CRN.name(), MDC.get(LoggerContextKey.RESOURCE_CRN.toString()));
-        span.setTag(LoggerContextKey.REQUEST_ID.name(), MDC.get(LoggerContextKey.REQUEST_ID.toString()));
+        span.setTag(LoggerContextKey.REQUEST_ID.name(), MDCBuilder.getOrGenerateRequestId());
     }
 }

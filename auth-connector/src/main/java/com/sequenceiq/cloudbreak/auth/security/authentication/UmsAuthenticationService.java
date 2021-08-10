@@ -7,13 +7,12 @@ import org.springframework.security.core.Authentication;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.MachineUser;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
 import com.sequenceiq.cloudbreak.auth.CrnUser;
-import com.sequenceiq.cloudbreak.auth.crn.InternalCrnBuilder;
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.auth.crn.CrnParseException;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.exception.UmsAuthenticationException;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.CrnParseException;
+import com.sequenceiq.cloudbreak.auth.crn.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
-import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
 public class UmsAuthenticationService implements AuthenticationService {
@@ -34,7 +33,7 @@ public class UmsAuthenticationService implements AuthenticationService {
     }
 
     public CloudbreakUser getCloudbreakUser(String userCrn, String principal) {
-        String requestId = MDCBuilder.getMdcContextMap().get(LoggerContextKey.REQUEST_ID.toString());
+        String requestId = MDCBuilder.getOrGenerateRequestId();
         Crn crn;
         try {
             crn = Crn.safeFromString(userCrn);

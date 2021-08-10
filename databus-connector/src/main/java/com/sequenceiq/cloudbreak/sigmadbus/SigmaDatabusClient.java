@@ -20,7 +20,6 @@ import org.slf4j.LoggerFactory;
 import com.cloudera.sigma.service.dbus.DbusProto;
 import com.cloudera.sigma.service.dbus.SigmaDbusGrpc;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.RequestIdUtil;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
 import com.sequenceiq.cloudbreak.grpc.altus.AltusMetadataInterceptor;
 import com.sequenceiq.cloudbreak.grpc.util.GrpcUtil;
@@ -64,7 +63,7 @@ public class SigmaDatabusClient<D extends AbstractDatabusStreamConfiguration> im
     public void putRecord(DatabusRequest request) throws DatabusRecordProcessingException {
         ManagedChannelWrapper channelWrapper = getMessageWrapper();
         DbusProto.PutRecordRequest recordRequest = convert(request, databusStreamConfiguration);
-        String requestId =  RequestIdUtil.newRequestId();
+        String requestId = MDCBuilder.getOrGenerateRequestId();
         LOGGER.debug("Creating databus request with request id: {}", requestId);
         buildMdcContext(request, requestId);
         DbusProto.PutRecordResponse recordResponse = newStub(channelWrapper.getChannel(),
@@ -151,12 +150,13 @@ public class SigmaDatabusClient<D extends AbstractDatabusStreamConfiguration> im
     private void buildMdcContext(DatabusRequest request, String requestId) {
         if (request.getContext().isPresent()) {
             DatabusRequestContext context = request.getContext().get();
-            MDCBuilder.buildMdc(MdcContext.builder()
+            MdcContext.builder()
                     .requestId(requestId)
                     .tenant(context.getAccountId())
                     .environmentCrn(context.getEnvironmentCrn())
                     .resourceCrn(context.getResourceCrn())
-                    .resourceName(context.getResourceName()).buildMdc());
+                    .resourceName(context.getResourceName())
+                    .buildMdc();
         }
     }
 }

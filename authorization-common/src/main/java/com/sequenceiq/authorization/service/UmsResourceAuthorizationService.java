@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 
 import javax.inject.Inject;
 
@@ -20,9 +19,8 @@ import com.sequenceiq.authorization.utils.AuthorizationMessageUtilsService;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
-import com.sequenceiq.cloudbreak.auth.crn.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.auth.altus.model.Entitlement;
-import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
+import com.sequenceiq.cloudbreak.auth.crn.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.logger.MDCUtils;
 
@@ -83,11 +81,7 @@ public class UmsResourceAuthorizationService {
     }
 
     protected Optional<String> getRequestId() {
-        String requestId = MDCBuilder.getMdcContextMap().get(LoggerContextKey.REQUEST_ID.toString());
-        if (requestId == null) {
-            requestId = UUID.randomUUID().toString();
-        }
-        return Optional.of(requestId);
+        return Optional.of(MDCBuilder.getOrGenerateRequestId());
     }
 
     public boolean isEntitled(String accountId, Entitlement entitlement) {

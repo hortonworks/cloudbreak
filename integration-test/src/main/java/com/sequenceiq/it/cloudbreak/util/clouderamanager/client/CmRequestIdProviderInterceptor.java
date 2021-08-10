@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cm.client.tracing;
+package com.sequenceiq.it.cloudbreak.util.clouderamanager.client;
 
 import static com.sequenceiq.cloudbreak.logger.MDCContextFilter.REQUEST_ID_HEADER;
 

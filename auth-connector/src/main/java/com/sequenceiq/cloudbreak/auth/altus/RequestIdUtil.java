@@ -1,18 +1,21 @@
 package com.sequenceiq.cloudbreak.auth.altus;
 
 import java.util.Optional;
-import java.util.UUID;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
 public class RequestIdUtil {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RequestIdUtil.class);
 
     private RequestIdUtil() {
     }
 
     public static String getOrGenerate(Optional<String> requestId) {
-        return requestId.orElseGet(RequestIdUtil::newRequestId);
+        return requestId.orElse(MDCBuilder.getOrGenerateRequestId());
     }
 
-    public static String newRequestId() {
-        return UUID.randomUUID().toString();
-    }
 }

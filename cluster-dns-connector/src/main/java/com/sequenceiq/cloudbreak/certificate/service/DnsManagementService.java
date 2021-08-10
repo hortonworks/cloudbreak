@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.client.GrpcClusterDnsClient;
-import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
 @Service
@@ -25,7 +24,7 @@ public class DnsManagementService {
         String ipsAsString = String.join(",", ips);
         try {
             LOGGER.info("Creating DNS entry with endpoint name: '{}', environment name: '{}' and IPs: '{}'", endpoint, environment, ipsAsString);
-            Optional<String> requestIdOptional = Optional.ofNullable(MDCBuilder.getMdcContextMap().get(LoggerContextKey.REQUEST_ID.toString()));
+            Optional<String> requestIdOptional = Optional.ofNullable(MDCBuilder.getOrGenerateRequestId());
             grpcClusterDnsClient.createOrUpdateDnsEntryWithIp(accountId, endpoint, environment, wildcard, ips, requestIdOptional);
             LOGGER.info("DNS entry has been created with endpoint name: '{}', environment name: '{}' and IPs: '{}'", endpoint, environment, ipsAsString);
             return true;
@@ -39,7 +38,7 @@ public class DnsManagementService {
         String ipsAsString = String.join(",", ips);
         try {
             LOGGER.info("Deleting DNS entry with endpoint name: '{}', environment name: '{}' and IPs: '{}'", endpoint, environment, ipsAsString);
-            Optional<String> requestIdOptional = Optional.ofNullable(MDCBuilder.getMdcContextMap().get(LoggerContextKey.REQUEST_ID.toString()));
+            Optional<String> requestIdOptional = Optional.ofNullable(MDCBuilder.getOrGenerateRequestId());
             grpcClusterDnsClient.deleteDnsEntryWithIp(accountId, endpoint, environment, wildcard, ips, requestIdOptional);
             LOGGER.info("DNS entry has been deleted with endpoint name: '{}', environment name: '{}' and IPs: '{}'", endpoint, environment, ipsAsString);
             return true;
@@ -53,7 +52,7 @@ public class DnsManagementService {
             String hostedZoneId) {
         try {
             LOGGER.info("Creating DNS entry with endpoint name: '{}', environment name: '{}' and cloud DNS: '{}'", endpoint, environment, cloudDns);
-            Optional<String> requestIdOptional = Optional.ofNullable(MDCBuilder.getMdcContextMap().get(LoggerContextKey.REQUEST_ID.toString()));
+            Optional<String> requestIdOptional = Optional.ofNullable(MDCBuilder.getOrGenerateRequestId());
             grpcClusterDnsClient.createOrUpdateDnsEntryWithCloudDns(accountId, endpoint, environment, cloudDns, hostedZoneId, requestIdOptional);
             LOGGER.info("DNS entry has been created with endpoint name: '{}', environment name: '{}' and cloud DNS: '{}'", endpoint, environment, cloudDns);
             return true;
@@ -66,7 +65,7 @@ public class DnsManagementService {
     public boolean deleteDnsEntryWithCloudDns(String accountId, String endpoint, String environment, String cloudDns, String hostedZoneId) {
         try {
             LOGGER.info("Deleting DNS entry with endpoint name: '{}', environment name: '{}' and cloud DNS: '{}'", endpoint, environment, cloudDns);
-            Optional<String> requestIdOptional = Optional.ofNullable(MDCBuilder.getMdcContextMap().get(LoggerContextKey.REQUEST_ID.toString()));
+            Optional<String> requestIdOptional = Optional.ofNullable(MDCBuilder.getOrGenerateRequestId());
             grpcClusterDnsClient.deleteDnsEntryWithCloudDns(accountId, endpoint, environment, cloudDns, hostedZoneId, requestIdOptional);
             LOGGER.info("DNS entry has been deleted with endpoint name: '{}', environment name: '{}' and cloud DNS: '{}'", endpoint, environment, cloudDns);
             return true;
