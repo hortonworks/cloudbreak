@@ -74,6 +74,9 @@
   "EU (Milan)": {
     "zoneid": "eu-south-1",
     "defaultvm": "i2.4xlarge"
+  },
+  "Middle East (Bahrain)": {
+    "zoneid": "me-south-1",
+    "defaultvm": "i2.4xlarge"
   }
-
 }
