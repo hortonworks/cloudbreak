@@ -42,18 +42,18 @@ public class ClusterUpgradeDiskSpaceValidationHandler extends ExceptionCatcherEv
         LOGGER.debug("Accepting Cluster upgrade validation event.");
         ClusterUpgradeValidationEvent request = event.getData();
         Long stackId = request.getResourceId();
-        Selectable result = new ClusterUpgradeDiskSpaceValidationFinishedEvent(request.getResourceId());
         try {
             StatedImage image = imageCatalogService.getImage(request.getImageId());
             diskSpaceValidationService.validateFreeSpaceForUpgrade(getStack(stackId), image.getImageCatalogUrl(), image.getImageCatalogName(),
                     request.getImageId());
+            return new ClusterUpgradeDiskSpaceValidationFinishedEvent(request.getResourceId());
         } catch (UpgradeValidationFailedException e) {
             LOGGER.warn("Cluster upgrade validation failed", e);
-            result = new ClusterUpgradeValidationFailureEvent(stackId, e);
+            return new ClusterUpgradeValidationFailureEvent(stackId, e);
         } catch (Exception e) {
-            LOGGER.warn("Cluster upgrade validation was unsuccessful due to an internal error", e);
+            LOGGER.error("Cluster upgrade validation was unsuccessful due to an internal error", e);
+            return new ClusterUpgradeDiskSpaceValidationFinishedEvent(request.getResourceId());
         }
-        return result;
     }
 
     private Stack getStack(Long stackId) {
@@ -67,6 +67,7 @@ public class ClusterUpgradeDiskSpaceValidationHandler extends ExceptionCatcherEv
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<ClusterUpgradeValidationEvent> event) {
+        LOGGER.error("Cluster upgrade validation was unsuccessful due to an unexpected error", e);
         return new ClusterUpgradeDiskSpaceValidationFinishedEvent(resourceId);
     }
 }

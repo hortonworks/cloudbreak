@@ -37,21 +37,19 @@ public class ClusterUpgradeImageValidationHandler extends ExceptionCatcherEventH
         LOGGER.debug("Accepting cluster upgrade image validation event.");
         ClusterUpgradeImageValidationEvent request = event.getData();
         CloudContext cloudContext = request.getCloudContext();
-        Selectable result;
         try {
             CloudConnector<Object> connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
             AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
-            for (Validator v : connector.validators(ValidatorType.IMAGE)) {
-                v.validate(ac, request.getCloudStack());
+            for (Validator validator : connector.validators(ValidatorType.IMAGE)) {
+                validator.validate(ac, request.getCloudStack());
             }
             LOGGER.debug("Cluster upgrade image validation succeeded.");
-            result = new ClusterUpgradeValidationEvent(ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_DISK_SPACE_VALIDATION_EVENT.selector(),
-                    request.getResourceId(), request.getImageId());
+            return new ClusterUpgradeValidationEvent(ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_DISK_SPACE_VALIDATION_EVENT.selector(),
+                        request.getResourceId(), request.getImageId());
         } catch (RuntimeException e) {
             LOGGER.warn("Cluster upgrade image validation failed: ", e);
-            result = new ClusterUpgradeValidationFailureEvent(request.getResourceId(), e);
+            return new ClusterUpgradeValidationFailureEvent(request.getResourceId(), e);
         }
-        return result;
     }
 
     @Override
@@ -61,6 +59,7 @@ public class ClusterUpgradeImageValidationHandler extends ExceptionCatcherEventH
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<ClusterUpgradeImageValidationEvent> event) {
+        LOGGER.error("Cluster upgrade image validation failed: ", e);
         return new ClusterUpgradeValidationFailureEvent(resourceId, e);
     }
 

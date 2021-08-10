@@ -13,11 +13,6 @@ public class ClusterUpgradeContext extends CommonContext {
         stackId = event.getResourceId();
     }
 
-    public ClusterUpgradeContext(FlowParameters flowParameters, Long stackId) {
-        super(flowParameters);
-        this.stackId = stackId;
-    }
-
     public static ClusterUpgradeContext from(FlowParameters flowParameters, StackEvent event) {
         return new ClusterUpgradeContext(flowParameters, event);
     }

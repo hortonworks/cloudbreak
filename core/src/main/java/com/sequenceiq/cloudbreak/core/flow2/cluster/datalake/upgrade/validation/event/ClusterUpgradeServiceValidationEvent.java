@@ -14,4 +14,11 @@ public class ClusterUpgradeServiceValidationEvent extends StackEvent {
     public boolean isLockComponents() {
         return lockComponents;
     }
+
+    @Override
+    public String toString() {
+        return "ClusterUpgradeServiceValidationEvent{" +
+                "lockComponents=" + lockComponents +
+                "} " + super.toString();
+    }
 }
