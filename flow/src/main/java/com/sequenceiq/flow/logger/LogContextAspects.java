@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
 import reactor.bus.Event;
@@ -47,8 +46,6 @@ public class LogContextAspects {
         Map<String, String> mdcContextMap = event.getHeaders().get(MDCBuilder.MDC_CONTEXT_ID);
         if (mdcContextMap != null) {
             MDCBuilder.buildMdcContextFromMap(mdcContextMap);
-            String requestId = mdcContextMap.get(LoggerContextKey.REQUEST_ID.toString());
-            MDCBuilder.addRequestId(requestId);
         }
     }
 }

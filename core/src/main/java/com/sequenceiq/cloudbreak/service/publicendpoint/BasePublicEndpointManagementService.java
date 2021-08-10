@@ -11,7 +11,6 @@ import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.certificate.service.CertificateCreationService;
 import com.sequenceiq.cloudbreak.certificate.service.DnsManagementService;
 import com.sequenceiq.cloudbreak.dns.EnvironmentBasedDomainNameProvider;
-import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
 public abstract class BasePublicEndpointManagementService {
@@ -48,7 +47,7 @@ public abstract class BasePublicEndpointManagementService {
     }
 
     String getWorkloadSubdomain(String accountId) {
-        Optional<String> requestIdOptional = Optional.ofNullable(MDCBuilder.getMdcContextMap().get(LoggerContextKey.REQUEST_ID.toString()));
+        Optional<String> requestIdOptional = Optional.ofNullable(MDCBuilder.getOrGenerateRequestId());
         UserManagementProto.Account account = grpcUmsClient.getAccountDetails(accountId, requestIdOptional);
         return account.getWorkloadSubdomain();
     }

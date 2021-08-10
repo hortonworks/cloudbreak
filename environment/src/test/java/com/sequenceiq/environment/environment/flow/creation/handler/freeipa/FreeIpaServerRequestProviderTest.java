@@ -2,9 +2,10 @@ package com.sequenceiq.environment.environment.flow.creation.handler.freeipa;
 
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
-import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
@@ -42,7 +43,7 @@ class FreeIpaServerRequestProviderTest {
     @Test
     void testCreateWithLegacyDomain() {
         UserManagementProto.Account account = UserManagementProto.Account.newBuilder().build();
-        when(grpcUmsClient.getAccountDetails(ACCOUNT_ID, Optional.empty())).thenReturn(account);
+        when(grpcUmsClient.getAccountDetails(eq(ACCOUNT_ID), any())).thenReturn(account);
         when(environmentBasedDomainNameProvider.getDomainName(ENV_NAME, "internal")).thenReturn("mydomain");
 
         EnvironmentDto environmentDto = new EnvironmentDto();
@@ -55,7 +56,7 @@ class FreeIpaServerRequestProviderTest {
     @Test
     void testCreateWithDomainReturnedFromUms() {
         UserManagementProto.Account account = UserManagementProto.Account.newBuilder().setWorkloadSubdomain("checkme").build();
-        when(grpcUmsClient.getAccountDetails(ACCOUNT_ID, Optional.empty())).thenReturn(account);
+        when(grpcUmsClient.getAccountDetails(eq(ACCOUNT_ID), any())).thenReturn(account);
         when(environmentBasedDomainNameProvider.getDomainName(ENV_NAME, "checkme")).thenReturn("checkme.mydomain");
 
         EnvironmentDto environmentDto = new EnvironmentDto();

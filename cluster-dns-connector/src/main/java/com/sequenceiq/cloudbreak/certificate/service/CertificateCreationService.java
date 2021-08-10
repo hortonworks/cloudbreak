@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 import com.dyngr.Polling;
 import com.sequenceiq.cloudbreak.certificate.poller.CreateCertificationPoller;
 import com.sequenceiq.cloudbreak.client.GrpcClusterDnsClient;
-import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
 @Service
@@ -36,13 +35,13 @@ public class CertificateCreationService {
     public List<String> create(String accountId, String endpoint, String environment, PKCS10CertificationRequest csr)
             throws IOException {
         LOGGER.info("Starting certificate creation for endpoint: {} in environment: {}", endpoint, environment);
-        Optional<String> requestIdOptional = Optional.ofNullable(MDCBuilder.getMdcContextMap().get(LoggerContextKey.REQUEST_ID.toString()));
+        Optional<String> requestIdOptional = Optional.ofNullable(MDCBuilder.getOrGenerateRequestId());
         String pollingRequestId = grpcClusterDnsClient.signCertificate(accountId, environment, csr.getEncoded(), requestIdOptional);
         return polling(pollingRequestId);
     }
 
     public List<String> polling(String pollingRequestId) {
-        Optional<String> requestIdOptional = Optional.ofNullable(MDCBuilder.getMdcContextMap().get(LoggerContextKey.REQUEST_ID.toString()));
+        Optional<String> requestIdOptional = Optional.ofNullable(MDCBuilder.getOrGenerateRequestId());
         return Polling.waitPeriodly(pollingIntervall, TimeUnit.SECONDS)
                 .stopAfterAttempt(pollingAttempt)
                 .stopIfException(true)

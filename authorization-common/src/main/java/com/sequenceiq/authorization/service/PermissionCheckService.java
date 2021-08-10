@@ -5,7 +5,6 @@ import static com.sequenceiq.cloudbreak.auth.crn.InternalCrnBuilder.INTERNAL_ACC
 
 import java.lang.annotation.Annotation;
 import java.util.Optional;
-import java.util.UUID;
 
 import javax.inject.Inject;
 
@@ -28,7 +27,6 @@ import com.sequenceiq.cloudbreak.auth.crn.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.auth.security.CrnUserDetailsService;
 import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
 import com.sequenceiq.cloudbreak.auth.security.internal.InternalUserModifier;
-import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
 @Service
@@ -133,10 +131,6 @@ public class PermissionCheckService {
     }
 
     protected Optional<String> getRequestId() {
-        String requestId = MDCBuilder.getMdcContextMap().get(LoggerContextKey.REQUEST_ID.toString());
-        if (requestId == null) {
-            requestId = UUID.randomUUID().toString();
-        }
-        return Optional.of(requestId);
+        return Optional.of(MDCBuilder.getOrGenerateRequestId());
     }
 }

@@ -7,7 +7,6 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -83,8 +82,7 @@ public class UserSyncPoller {
     @VisibleForTesting
     void syncAllFreeIpaStacks() {
         try {
-            Optional<String> requestId = Optional.of(UUID.randomUUID().toString());
-            MDCBuilder.addRequestId(requestId.get());
+            Optional<String> requestId = Optional.of(MDCBuilder.getOrGenerateRequestId());
             LOGGER.debug("Setting request id = {} for this poll", requestId);
 
             ThreadBasedUserCrnProvider.doAs(INTERNAL_ACTOR_CRN, () -> {

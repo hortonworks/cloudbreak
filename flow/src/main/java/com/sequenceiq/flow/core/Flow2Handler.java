@@ -22,16 +22,15 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
-import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.flow.cleanup.InMemoryCleanup;
+import com.sequenceiq.flow.core.cache.FlowStatCache;
 import com.sequenceiq.flow.core.chain.FlowChainHandler;
 import com.sequenceiq.flow.core.chain.FlowChains;
 import com.sequenceiq.flow.core.config.FlowConfiguration;
 import com.sequenceiq.flow.core.exception.FlowNotFoundException;
 import com.sequenceiq.flow.core.exception.FlowNotTriggerableException;
 import com.sequenceiq.flow.core.model.FlowAcceptResult;
-import com.sequenceiq.flow.core.cache.FlowStatCache;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.FlowLogIdWithTypeAndTimestamp;
 import com.sequenceiq.flow.ha.NodeConfig;
@@ -395,7 +394,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
     }
 
     private void logFlowId(String flowId) {
-        String requestId = MDCBuilder.getMdcContextMap().get(LoggerContextKey.REQUEST_ID.toString());
+        String requestId = MDCBuilder.getOrGenerateRequestId();
         LOGGER.debug("Flow has been created with id: '{}' and the related request id: '{}'.", flowId, requestId);
     }
 }

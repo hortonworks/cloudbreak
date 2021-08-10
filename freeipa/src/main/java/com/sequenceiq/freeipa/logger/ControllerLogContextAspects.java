@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil;
 import com.sequenceiq.cloudbreak.logger.LogContextService;
-import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
 @Component
@@ -37,7 +36,7 @@ public class ControllerLogContextAspects {
             CodeSignature sig = (CodeSignature) joinPoint.getSignature();
             String[] paramNames = sig.getParameterNames();
             logContextService.buildMDCParams(joinPoint.getTarget(), paramNames, args);
-            MDCBuilder.addRequestId(MDCBuilder.getMdcContextMap().get(LoggerContextKey.REQUEST_ID.toString()));
+            MDCBuilder.getOrGenerateRequestId();
             LOGGER.debug("A controller method has been intercepted: {} with params {}, {}, MDC logger context is built.", joinPoint.toShortString(),
                     sig.getParameterNames(), AnonymizerUtil.anonymize(Arrays.toString(args)));
         } catch (Exception any) {

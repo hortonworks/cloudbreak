@@ -12,13 +12,18 @@ import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 
 public class MDCBuilder {
+
     public static final String MDC_CONTEXT_ID = "MDC_CONTEXT_ID";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MDCBuilder.class);
 
     private MDCBuilder() {
     }
@@ -52,10 +57,15 @@ public class MDCBuilder {
     public static String getOrGenerateRequestId() {
         String requestId = MDC.get(LoggerContextKey.REQUEST_ID.toString());
         if (null == requestId) {
-            requestId = UUID.randomUUID().toString();
+            requestId = generateRequestId();
+            LOGGER.debug("No requestId found. Setting request id to new UUID [{}]", requestId);
             MDC.put(LoggerContextKey.REQUEST_ID.toString(), requestId);
         }
         return requestId;
+    }
+
+    private static String generateRequestId() {
+        return UUID.randomUUID().toString();
     }
 
     public static void addEnvCrn(String env) {
@@ -111,6 +121,7 @@ public class MDCBuilder {
                     .tenant(getFieldValue(object, LoggerContextKey.ACCOUNT_ID.toString()))
                     .buildMdc();
         }
+        getOrGenerateRequestId();
     }
 
     public static void buildMdc(MdcContext mdcContext) {
@@ -124,6 +135,7 @@ public class MDCBuilder {
         doIfNotNull(mdcContext.getResourceType(), v -> MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), v));
         doIfNotNull(mdcContext.getTraceId(), v -> MDC.put(LoggerContextKey.TRACE_ID.toString(), v));
         doIfNotNull(mdcContext.getSpanId(), v -> MDC.put(LoggerContextKey.SPAN_ID.toString(), v));
+        getOrGenerateRequestId();
     }
 
     public static void buildMdcContextFromCrn(Crn crn) {
@@ -140,6 +152,7 @@ public class MDCBuilder {
         if (map != null) {
             map.forEach(MDC::put);
         }
+        getOrGenerateRequestId();
     }
 
     public static void buildMdcContextFromMapForControllerCalls(Map<String, String> map) {

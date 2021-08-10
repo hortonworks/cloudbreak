@@ -18,7 +18,6 @@ import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.service.GetCloudParameterException;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
-import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
 import com.sequenceiq.freeipa.dto.Credential;
 import com.sequenceiq.freeipa.entity.SaltSecurityConfig;
@@ -61,9 +60,8 @@ public class UserDataService {
     public void createUserData(Long stackId) {
         Stack stack = stackService.getStackById(stackId);
         Credential credential = credentialService.getCredentialByEnvCrn(stack.getEnvironmentCrn());
-        Optional<String> requestId = MDCUtils.getRequestId();
         Future<PlatformParameters> platformParametersFuture =
-                intermediateBuilderExecutor.submit(() -> platformParameterService.getPlatformParameters(requestId, stack, credential));
+                intermediateBuilderExecutor.submit(() -> platformParameterService.getPlatformParameters(stack, credential));
         SecurityConfig securityConfig = stack.getSecurityConfig();
         SaltSecurityConfig saltSecurityConfig = securityConfig.getSaltSecurityConfig();
         String cbPrivKey = saltSecurityConfig.getSaltBootSignPrivateKey();

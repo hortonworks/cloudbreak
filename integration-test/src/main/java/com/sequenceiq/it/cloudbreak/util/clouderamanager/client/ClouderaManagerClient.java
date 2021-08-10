@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.util.clouderamanager.client;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -11,6 +13,9 @@ public class ClouderaManagerClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerClient.class);
 
+    @Inject
+    private CmRequestIdProviderInterceptor cmRequestIdProviderInterceptor;
+
     public ClouderaManagerClient() {
     }
 
@@ -21,6 +26,7 @@ public class ClouderaManagerClient {
         cmClient.setUsername(cmUser);
         cmClient.setPassword(cmPassword);
         cmClient.setVerifyingSsl(false);
+        cmClient.getHttpClient().interceptors().add(cmRequestIdProviderInterceptor);
         LOGGER.info(String.format("Cloudera Manager Base Path: %s", cmClient.getBasePath()));
         return cmClient;
     }

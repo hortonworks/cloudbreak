@@ -10,10 +10,9 @@ import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.dns.EnvironmentBasedDomainNameProvider;
-import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.util.FreeIpaPasswordUtil;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
@@ -52,7 +51,7 @@ class FreeIpaServerRequestProvider {
 
     private String getAccountSubdomain() {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        Optional<String> requestIdOptional = Optional.ofNullable(MDCBuilder.getMdcContextMap().get(LoggerContextKey.REQUEST_ID.toString()));
+        Optional<String> requestIdOptional = Optional.ofNullable(MDCBuilder.getOrGenerateRequestId());
         // I think this should be better/safer if we could use the account id of environment,
         UserManagementProto.Account account = grpcUmsClient.getAccountDetails(Crn.safeFromString(userCrn).getAccountId(), requestIdOptional);
         String accountSubdomain = account.getWorkloadSubdomain();

@@ -4,9 +4,6 @@ import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilit
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 
-import java.util.Optional;
-import java.util.UUID;
-
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -42,8 +39,8 @@ public class PlatformParameterService {
     @Inject
     private FreeIpaFlowManager freeIpaFlowManager;
 
-    public PlatformParameters getPlatformParameters(Optional<String> requestId, Stack stack, Credential credential) {
-        MDCBuilder.addRequestId(requestId.orElse(UUID.randomUUID().toString()));
+    public PlatformParameters getPlatformParameters(Stack stack, Credential credential) {
+        MDCBuilder.getOrGenerateRequestId();
         LOGGER.debug("Get platform parameters for: {}", stack);
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = CloudContext.Builder.builder()

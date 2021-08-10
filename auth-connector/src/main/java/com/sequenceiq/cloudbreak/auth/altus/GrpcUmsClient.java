@@ -51,6 +51,7 @@ import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.common.api.telemetry.model.AnonymizationRule;
 
@@ -721,7 +722,7 @@ public class GrpcUmsClient {
         LOGGER.info("Getting access keys for {}", machineUserCrn);
         List<String> accessKeys = client.listMachineUserAccessKeys(RequestIdUtil.getOrGenerate(requestId), actorCrn, accountId, machineUserCrn);
         LOGGER.info("Deleting access keys for {}", machineUserCrn);
-        client.deleteAccessKeys(RequestIdUtil.newRequestId(), accessKeys, accountId);
+        client.deleteAccessKeys(MDCBuilder.getOrGenerateRequestId(), accessKeys, accountId);
     }
 
     /**
@@ -736,7 +737,7 @@ public class GrpcUmsClient {
     public boolean doesMachineUserHasAccessKey(String actorCrn, String accountId,
             String machineUserCrn, String accessKeyId) {
         UmsClient client = makeClient(channelWrapper.getChannel());
-        List<String> accessKeys = client.listMachineUserAccessKeys(RequestIdUtil.newRequestId(), actorCrn, accountId, machineUserCrn, true);
+        List<String> accessKeys = client.listMachineUserAccessKeys(MDCBuilder.getOrGenerateRequestId(), actorCrn, accountId, machineUserCrn, true);
         return accessKeys.contains(accessKeyId);
     }
 
@@ -771,7 +772,7 @@ public class GrpcUmsClient {
      */
     public String getIdentityProviderMetadataXml(String accountId) {
         UmsClient client = makeClient(channelWrapper.getChannel());
-        String requestId = RequestIdUtil.newRequestId();
+        String requestId = MDCBuilder.getOrGenerateRequestId();
         LOGGER.debug("Getting IdP metadata through account ID: {}, request id: {}", accountId, requestId);
         return client.getIdentityProviderMetadataXml(requestId, accountId);
     }

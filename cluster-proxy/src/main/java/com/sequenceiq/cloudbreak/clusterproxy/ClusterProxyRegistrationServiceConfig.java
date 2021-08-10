@@ -21,7 +21,7 @@ public class ClusterProxyRegistrationServiceConfig {
     public RestTemplate restTemplate() {
         TracingRestTemplateInterceptor tracingInterceptor = new TracingRestTemplateInterceptor(tracer);
         RestTemplate restTemplate = new RestTemplate();
-        restTemplate.setInterceptors(List.of(tracingInterceptor));
+        restTemplate.setInterceptors(List.of(new RequestIdProviderRequestInterceptor(), tracingInterceptor));
         return restTemplate;
     }
 
