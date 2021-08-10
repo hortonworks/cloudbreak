@@ -3,14 +3,12 @@ package com.sequenceiq.cloudbreak.cloud.aws.common;
 import static java.util.stream.Collectors.joining;
 
 import java.io.IOException;
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import javax.inject.Inject;
 
@@ -19,22 +17,29 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import com.amazonaws.auth.policy.Action;
+import com.amazonaws.auth.policy.Condition;
+import com.amazonaws.auth.policy.Policy;
+import com.amazonaws.auth.policy.Statement;
+import com.amazonaws.auth.policy.internal.JsonPolicyReader;
+import com.amazonaws.services.identitymanagement.model.ContextEntry;
+import com.amazonaws.services.identitymanagement.model.ContextKeyTypeEnum;
 import com.amazonaws.services.identitymanagement.model.SimulatePrincipalPolicyRequest;
 import com.amazonaws.services.identitymanagement.model.SimulatePrincipalPolicyResult;
 import com.amazonaws.services.securitytoken.model.GetCallerIdentityRequest;
 import com.amazonaws.services.securitytoken.model.GetCallerIdentityResult;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.cloud.aws.common.cache.AwsCredentialCachingConfig;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonIdentityManagementClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonSecurityTokenServiceClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.exception.AwsPermissionMissingException;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
-import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 
 @Service
 public class AwsCredentialVerifier {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsCredentialVerifier.class);
+
+    private static final int MAX_ELEMENT_SIZE = 200;
 
     @Inject
     private AwsPlatformParameters awsPlatformParameters;
@@ -47,7 +52,7 @@ public class AwsCredentialVerifier {
     public void validateAws(AwsCredentialView awsCredential) throws AwsPermissionMissingException {
         String policies = new String(Base64.getDecoder().decode(awsPlatformParameters.getEnvironmentMinimalPoliciesJson()));
         try {
-            Map<String, List<String>> resourcesWithActions = getRequiredActions(policies);
+            List<RequiredAction> resourcesWithActions = getRequiredActions(policies);
             AmazonIdentityManagementClient amazonIdentityManagement = awsClient.createAmazonIdentityManagement(awsCredential);
             AmazonSecurityTokenServiceClient awsSecurityTokenService = awsClient.createSecurityTokenService(awsCredential);
             String arn;
@@ -59,11 +64,13 @@ public class AwsCredentialVerifier {
             }
 
             List<String> failedActionList = new ArrayList<>();
-            for (Map.Entry<String, List<String>> resourceAndAction : resourcesWithActions.entrySet()) {
+            for (RequiredAction resourceAndAction : resourcesWithActions) {
                 SimulatePrincipalPolicyRequest simulatePrincipalPolicyRequest = new SimulatePrincipalPolicyRequest();
+                simulatePrincipalPolicyRequest.setMaxItems(MAX_ELEMENT_SIZE);
                 simulatePrincipalPolicyRequest.setPolicySourceArn(arn);
-                simulatePrincipalPolicyRequest.setActionNames(resourceAndAction.getValue());
-                simulatePrincipalPolicyRequest.setResourceArns(Collections.singleton(resourceAndAction.getKey()));
+                simulatePrincipalPolicyRequest.setActionNames(resourceAndAction.getActionNames());
+                simulatePrincipalPolicyRequest.setResourceArns(Collections.singleton(resourceAndAction.getResourceArn()));
+                simulatePrincipalPolicyRequest.setContextEntries(resourceAndAction.getConditions());
                 LOGGER.debug("Simulate policy request: {}", simulatePrincipalPolicyRequest);
                 SimulatePrincipalPolicyResult simulatePrincipalPolicyResult = amazonIdentityManagement.simulatePrincipalPolicy(simulatePrincipalPolicyRequest);
                 LOGGER.debug("Simulate policy result: {}", simulatePrincipalPolicyResult);
@@ -88,19 +95,48 @@ public class AwsCredentialVerifier {
         }
     }
 
-    private Map<String, List<String>> getRequiredActions(String policies) throws IOException {
-        JsonNode jsonNode = JsonUtil.readTree(policies);
-        JsonNode statements = jsonNode.get("Statement");
-        return StreamSupport.stream(statements.spliterator(), false)
-                .map(statement -> new AbstractMap.SimpleEntry<>(statement.get("Resource"),
-                        StreamSupport.stream(statement.get("Action").spliterator(), false)
-                                .map(JsonNode::asText)
-                                .collect(Collectors.toList())))
-                .flatMap(entry -> StreamSupport.stream(entry.getKey().spliterator(), false)
-                        .map(node -> new AbstractMap.SimpleEntry<>(node.asText(), entry.getValue())))
-                .collect(Collectors.toMap(AbstractMap.SimpleEntry::getKey, AbstractMap.SimpleEntry::getValue, (value1, value2) -> {
-                    value1.addAll(value2);
-                    return value1;
-                }));
+    private List<RequiredAction> getRequiredActions(String policies) throws IOException {
+        List<RequiredAction> requiredActions = new ArrayList<>();
+        Policy policy = new JsonPolicyReader().createPolicyFromJsonString(policies);
+        for (Statement statement : policy.getStatements()) {
+            RequiredAction requiredAction = new RequiredAction();
+            List<Action> actions = statement.getActions();
+            if (actions != null) {
+                List<String> actionNames = actions.stream()
+                        .map(e -> e.getActionName())
+                        .collect(Collectors.toList());
+                requiredAction.setActionNames(actionNames);
+            }
+            List<Condition> conditions = statement.getConditions();
+            if (conditions != null) {
+                for (Condition condition : conditions) {
+                    ContextEntry contextEntry = new ContextEntry();
+                    contextEntry.setContextKeyName(condition.getConditionKey());
+                    contextEntry.setContextKeyType(ContextKeyTypeEnum.String);
+                    contextEntry.setContextKeyValues(condition.getValues());
+                    requiredAction.getConditions().add(contextEntry);
+                }
+            }
+            String resourceString = statement.getResources().stream()
+                    .findFirst()
+                    .get()
+                    .getId();
+            requiredAction.setResourceArn(resourceString);
+
+            Optional<RequiredAction> first = requiredActions.stream()
+                    .filter(e -> e.getConditions().equals(requiredAction.getConditions())
+                            && e.getResourceArn().equals(requiredAction.getResourceArn()))
+                    .findFirst();
+
+            if (first.isPresent()) {
+                requiredActions.remove(first.get());
+                requiredAction.getActionNames().addAll(first.get().getActionNames());
+                requiredAction.getConditions().addAll(first.get().getConditions());
+                requiredActions.add(requiredAction);
+            } else {
+                requiredActions.add(requiredAction);
+            }
+        }
+        return requiredActions;
     }
 }
