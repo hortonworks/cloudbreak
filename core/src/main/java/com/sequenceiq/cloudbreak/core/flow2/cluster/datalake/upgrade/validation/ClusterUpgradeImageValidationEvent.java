@@ -35,4 +35,12 @@ public class ClusterUpgradeImageValidationEvent extends ClusterUpgradeValidation
         return cloudContext;
     }
 
+    @Override
+    public String toString() {
+        return "ClusterUpgradeImageValidationEvent{" +
+                "cloudCredential=" + cloudCredential +
+                ", cloudStack=" + cloudStack +
+                ", cloudContext=" + cloudContext +
+                "} " + super.toString();
+    }
 }

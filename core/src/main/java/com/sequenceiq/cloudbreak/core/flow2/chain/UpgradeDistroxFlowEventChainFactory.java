@@ -7,6 +7,7 @@ import static java.util.stream.Collectors.toMap;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -55,7 +56,7 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
     public FlowTriggerEventQueue createFlowTriggerEventQueue(DistroXUpgradeTriggerEvent event) {
         LOGGER.debug("Creating flow trigger event queue for distrox upgrade with event {}", event);
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
-        addUpgradeValidationToChain(event, flowEventChain);
+        createUpgradeValidationEvent(event).ifPresent(flowEventChain::add);
         flowEventChain.add(new StackEvent(SaltUpdateEvent.SALT_UPDATE_EVENT.event(), event.getResourceId(), event.accepted()));
         flowEventChain.add(new ClusterUpgradeTriggerEvent(CLUSTER_UPGRADE_INIT_EVENT.event(), event.getResourceId(), event.accepted(),
                 event.getImageChangeDto().getImageId()));
@@ -67,11 +68,14 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
         return new FlowTriggerEventQueue(getName(), flowEventChain);
     }
 
-    private void addUpgradeValidationToChain(DistroXUpgradeTriggerEvent event, Queue<Selectable> flowEventChain) {
+    private Optional<ClusterUpgradeValidationTriggerEvent> createUpgradeValidationEvent(DistroXUpgradeTriggerEvent event) {
         if (upgradeValidationEnabled) {
-            flowEventChain
-                    .add(new ClusterUpgradeValidationTriggerEvent(event.getResourceId(), event.accepted(), event.getImageChangeDto().getImageId(),
+            LOGGER.info("Upgrade validation enabled, adding to flowchain");
+            return Optional.of(new ClusterUpgradeValidationTriggerEvent(event.getResourceId(), event.accepted(), event.getImageChangeDto().getImageId(),
                             event.isLockComponents()));
+        } else {
+            LOGGER.info("Upgrade validation disabled");
+            return Optional.empty();
         }
     }
 

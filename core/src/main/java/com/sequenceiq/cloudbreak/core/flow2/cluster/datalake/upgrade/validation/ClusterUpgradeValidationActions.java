@@ -8,6 +8,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.vali
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_IMAGE_VALIDATION_EVENT;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -20,6 +21,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
@@ -38,6 +40,9 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateS
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
+import com.sequenceiq.cloudbreak.service.StackUpdater;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradeImageInfo;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradeImageInfoFactory;
@@ -185,13 +190,22 @@ public class ClusterUpgradeValidationActions {
         return new AbstractAction<ClusterUpgradeValidationState, ClusterUpgradeValidationStateSelectors, ClusterUpgradeContext,
                 ClusterUpgradeValidationFailureEvent>(ClusterUpgradeValidationFailureEvent.class) {
 
+            @Inject
+            private ClusterService clusterService;
+
+            @Inject
+            private CloudbreakMessagesService messagesService;
+
+            @Inject
+            private StackUpdater stackUpdater;
+
             @Override
             protected ClusterUpgradeContext createFlowContext(FlowParameters flowParameters,
                     StateContext<ClusterUpgradeValidationState, ClusterUpgradeValidationStateSelectors> stateContext,
                     ClusterUpgradeValidationFailureEvent payload) {
-                Flow flow = getFlow(flowParameters.getFlowId());
                 StackView stackView = stackService.getViewByIdWithoutAuth(payload.getResourceId());
                 MDCBuilder.buildMdcContext(stackView);
+                Flow flow = getFlow(flowParameters.getFlowId());
                 flow.setFlowFailed(payload.getException());
                 return ClusterUpgradeContext.from(flowParameters, payload);
             }
@@ -201,13 +215,17 @@ public class ClusterUpgradeValidationActions {
                 String errorMessage = payload.getException().getMessage();
                 Long resourceId = payload.getResourceId();
                 LOGGER.debug("Cluster upgrade validation failed with validation error: {}", errorMessage);
-                cloudbreakEventService.fireCloudbreakEvent(resourceId, UPDATE_FAILED.name(), ResourceEvent.CLUSTER_UPGRADE_VALIDATION_FAILED,
-                        Collections.singletonList(errorMessage));
+                ResourceEvent validationFailedResourceEvent = ResourceEvent.CLUSTER_UPGRADE_VALIDATION_FAILED;
+                cloudbreakEventService.fireCloudbreakEvent(resourceId, UPDATE_FAILED.name(), validationFailedResourceEvent, List.of(errorMessage));
+                String reason = messagesService.getMessage(validationFailedResourceEvent.getMessage(), List.of(errorMessage));
+                clusterService.updateClusterStatusByStackId(resourceId, AVAILABLE, reason);
+                stackUpdater.updateStackStatus(resourceId, DetailedStackStatus.AVAILABLE, reason);
                 sendEvent(context, HANDLED_FAILED_CLUSTER_UPGRADE_VALIDATION_EVENT.event(), payload);
             }
 
             @Override
             protected Object getFailurePayload(ClusterUpgradeValidationFailureEvent payload, Optional<ClusterUpgradeContext> flowContext, Exception ex) {
+                LOGGER.warn("No failure payload in case of CLUSTER_UPGRADE_VALIDATION_FAILED_STATE. This should not happen.", ex);
                 return null;
             }
 
