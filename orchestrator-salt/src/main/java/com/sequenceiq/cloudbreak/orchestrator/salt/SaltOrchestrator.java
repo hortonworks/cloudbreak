@@ -285,7 +285,7 @@ public class SaltOrchestrator implements HostOrchestrator {
                 + "' ATTACHED_VOLUME_SERIAL_LIST='" + serialIds + "' ";
         String command = "(cd " + SRV_SALT_DISK + ';' + formatCommandParams + "./" + DISK_FORMAT + ')';
         Map<String, String> formatResponse = SaltStates.runCommandOnHosts(retry, sc, hostname, command);
-        return formatResponse.get(node.getHostname());
+        return formatResponse.getOrDefault(node.getHostname(), "");
     }
 
     private void uploadMountScriptsAndMakeThemExecutable(Set<Node> nodes, ExitCriteriaModel exitModel, Set<String> allTargets, Target<String> allHosts,
