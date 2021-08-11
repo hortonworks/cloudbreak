@@ -100,7 +100,6 @@ public class CruiseControlRoleConfigProviderTest {
                         "com.linkedin.kafka.cruisecontrol.analyzer.goals.NetworkOutboundCapacityGoal," +
                         "com.linkedin.kafka.cruisecontrol.analyzer.goals.CpuCapacityGoal"),
                 config("auth_method", "Trusted Proxy"),
-                config("auth_admins", "kafka"),
                 config("trusted.proxy.spnego.fallback.enabled", "true")
         );
     }

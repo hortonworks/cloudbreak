@@ -86,6 +86,7 @@
           ]
         },
         "nodeCount": 3,
+        "minimumNodeCount": 3,
         "type": "CORE",
         "recoveryMode": "MANUAL",
         "recipeNames": []

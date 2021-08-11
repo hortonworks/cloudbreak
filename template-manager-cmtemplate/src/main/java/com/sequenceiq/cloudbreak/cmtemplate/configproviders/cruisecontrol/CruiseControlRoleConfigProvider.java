@@ -52,8 +52,6 @@ public class CruiseControlRoleConfigProvider implements CmHostGroupRoleConfigPro
 
     private static final String AUTHENTICATION_METHOD = "auth_method";
 
-    private static final String ADMIN_LEVEL_USERS = "auth_admins";
-
     private static final String TRUSTED_PROXY_SPNEGO_FALLBACK_ENABLED = "trusted.proxy.spnego.fallback.enabled";
 
     @Override
@@ -111,7 +109,6 @@ public class CruiseControlRoleConfigProvider implements CmHostGroupRoleConfigPro
                             "com.linkedin.kafka.cruisecontrol.analyzer.goals.NetworkOutboundCapacityGoal," +
                             "com.linkedin.kafka.cruisecontrol.analyzer.goals.CpuCapacityGoal"),
                     config(AUTHENTICATION_METHOD, "Trusted Proxy"),
-                    config(ADMIN_LEVEL_USERS, "kafka"),
                     config(TRUSTED_PROXY_SPNEGO_FALLBACK_ENABLED, "true")
             );
         }
