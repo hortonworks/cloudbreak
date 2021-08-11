@@ -53,12 +53,14 @@ public class CloudStorageValidator {
             addLogIdentity(cloudStorageRequest, telemetryRequest);
         }
 
-        ObjectStorageValidateRequest objectStorageValidateRequest = ObjectStorageValidateRequest.builder()
+        ObjectStorageValidateRequest.Builder objectStorageValidateBuilder = ObjectStorageValidateRequest.builder()
                 .withCloudPlatform(credential.getCloudPlatform())
                 .withCredential(cloudCredential)
-                .withCloudStorageRequest(cloudStorageRequest)
-                .withLogsLocationBase(telemetryRequest.getLogging().getStorageLocation())
-                .build();
+                .withCloudStorageRequest(cloudStorageRequest);
+        if (loggingConfigured) {
+            objectStorageValidateBuilder.withLogsLocationBase(telemetryRequest.getLogging().getStorageLocation());
+        }
+        ObjectStorageValidateRequest objectStorageValidateRequest = objectStorageValidateBuilder.build();
         return ThreadBasedUserCrnProvider.doAsInternalActor(() ->
                 cloudProviderServicesV4Endpoint.validateObjectStorage(objectStorageValidateRequest));
     }
