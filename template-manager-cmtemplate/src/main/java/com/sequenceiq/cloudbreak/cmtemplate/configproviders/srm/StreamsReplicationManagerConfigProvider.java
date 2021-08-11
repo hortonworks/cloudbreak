@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.srm;
 
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_2_12;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -11,6 +13,7 @@ import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigPr
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.kafka.KafkaRoles;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 
 @Component
 public class StreamsReplicationManagerConfigProvider extends AbstractRoleConfigProvider {
@@ -29,10 +32,21 @@ public class StreamsReplicationManagerConfigProvider extends AbstractRoleConfigP
 
     @Override
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
-        int kafkaBrokerPort = source.getGeneralClusterConfigs().getAutoTlsEnabled() ? KAFKA_SECURE_PORT : KAFKA_PLAIN_PORT;
+        String cdpVersion = source.getBlueprintView().getProcessor().getStackVersion() == null ?
+                "" : source.getBlueprintView().getProcessor().getStackVersion();
 
-        List<String> brokerHosts = source.getHostGroupsWithComponent(KafkaRoles.KAFKA_BROKER)
-                .flatMap(h -> h.getHosts().stream()).collect(Collectors.toList());
+        int kafkaBrokerPort = source.getGeneralClusterConfigs().getAutoTlsEnabled() ? KAFKA_SECURE_PORT : KAFKA_PLAIN_PORT;
+        List<HostgroupView> hostGroups = source.getHostGroupsWithComponent(KafkaRoles.KAFKA_BROKER).collect(Collectors.toList());
+        List<HostgroupView> coreBrokerHostGroup = hostGroups.stream().filter(g -> g.getName().equals("core_broker")).collect(Collectors.toList());
+        List<String> brokerHosts;
+
+        if (!coreBrokerHostGroup.isEmpty() && isVersionNewerOrEqualThanLimited(cdpVersion, CLOUDERA_STACK_VERSION_7_2_12)) {
+            brokerHosts = coreBrokerHostGroup.get(0).getHosts().stream().collect(Collectors.toList());
+        } else {
+            brokerHosts = hostGroups.stream()
+                    .flatMap(h -> h.getHosts().stream()).collect(Collectors.toList());
+        }
+
         String boostrapServers = brokerHosts.stream().map(h -> h + ":" + kafkaBrokerPort)
                 .collect(Collectors.joining(","));
 
