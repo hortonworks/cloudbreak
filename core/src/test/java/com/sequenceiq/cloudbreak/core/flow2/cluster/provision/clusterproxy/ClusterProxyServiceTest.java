@@ -158,6 +158,7 @@ class ClusterProxyServiceTest {
         verify(clusterProxyRegistrationClient).registerConfig(captor.capture());
         ConfigRegistrationRequest proxyRegisterationReq = captor.getValue();
         assertEquals(true, proxyRegisterationReq.isUseCcmV2(), "CCMV2 should be enabled");
+        assertNull(proxyRegisterationReq.getCcmV2Configs(), "CCMV2 config should be empty for Jumpgate");
         assertTrue(proxyRegisterationReq.getServices().contains(cmServiceConfigWithInstanceId(PRIMARY_PUBLIC_IP, PRIMARY_INSTANCE_ID)));
         assertTrue(proxyRegisterationReq.getServices().contains(cmServiceConfigWithInstanceId(OTHER_PUBLIC_IP, OTHER_INSTANCE_ID)));
         assertTrue(proxyRegisterationReq.getServices().contains(cmServiceConfig()));
