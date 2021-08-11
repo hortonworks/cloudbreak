@@ -119,19 +119,13 @@ public class ClusterProxyService {
     private ConfigRegistrationRequest createProxyConfigRequest(Stack stack) {
         ConfigRegistrationRequestBuilder requestBuilder = new ConfigRegistrationRequestBuilder(stack.getResourceCrn())
                 .withAliases(singletonList(clusterId(stack.getCluster())))
-                .withServices(serviceConfigs(stack));
+                .withServices(serviceConfigs(stack)).withAccountId(getAccountId(stack));
         if (stack.getTunnel().useCcmV1()) {
-            requestBuilder.withAccountId(getAccountId(stack))
-                    .withTunnelEntries(tunnelEntries(stack));
+            requestBuilder.withTunnelEntries(tunnelEntries(stack));
         } else if (stack.getTunnel().useCcmV2()) {
-            requestBuilder.withAccountId(getAccountId(stack))
-                    .withServices(serviceConfigsForCcmV2(stack))
-                    .withCcmV2Entries(ccmV2Configs(stack));
+            requestBuilder.withCcmV2Entries(ccmV2Configs(stack));
         } else if (stack.getTunnel().useCcmV2Jumpgate()) {
-            requestBuilder.withEnvironmentCrn(stack.getEnvironmentCrn())
-                    .withAccountId(getAccountId(stack))
-                    .withServices(serviceConfigsForCcmV2(stack))
-                    .withUseCcmV2(true);
+            requestBuilder.withEnvironmentCrn(stack.getEnvironmentCrn()).withUseCcmV2(true);
         }
         return requestBuilder.build();
     }
@@ -139,21 +133,13 @@ public class ClusterProxyService {
     private ConfigRegistrationRequest createProxyConfigReRegisterRequest(Stack stack) {
         ConfigRegistrationRequestBuilder requestBuilder = new ConfigRegistrationRequestBuilder(stack.getResourceCrn())
                 .withAliases(singletonList(clusterId(stack.getCluster())))
-                .withServices(serviceConfigs(stack)).withKnoxUrl(knoxUrl(stack));
+                .withServices(serviceConfigs(stack)).withKnoxUrl(knoxUrl(stack)).withAccountId(getAccountId(stack));
         if (stack.getTunnel().useCcmV1()) {
-            requestBuilder.withAccountId(getAccountId(stack))
-                    .withTunnelEntries(tunnelEntries(stack));
+            requestBuilder.withTunnelEntries(tunnelEntries(stack));
         } else if (stack.getTunnel().useCcmV2()) {
-            requestBuilder.withAccountId(getAccountId(stack))
-                    .withServices(serviceConfigsForCcmV2(stack))
-                    .withCcmV2Entries(ccmV2Configs(stack))
-                    .withKnoxUrl(knoxUrlForCcmV2(stack));
+            requestBuilder.withCcmV2Entries(ccmV2Configs(stack)).withKnoxUrl(knoxUrlForCcmV2(stack));
         } else if (stack.getTunnel().useCcmV2Jumpgate()) {
-            requestBuilder.withAccountId(getAccountId(stack))
-                    .withServices(serviceConfigsForCcmV2(stack))
-                    .withKnoxUrl(knoxUrlForCcmV2(stack))
-                    .withEnvironmentCrn(stack.getEnvironmentCrn())
-                    .withUseCcmV2(true);
+            requestBuilder.withKnoxUrl(knoxUrlForCcmV2(stack)).withEnvironmentCrn(stack.getEnvironmentCrn()).withUseCcmV2(true);
         }
         return requestBuilder.build();
     }
@@ -182,13 +168,6 @@ public class ClusterProxyService {
                 CB_INTERNAL + "-" + gatewayInstanceMetadata.getInstanceId(), internalAdminUrl);
     }
 
-    private List<ClusterServiceConfig> serviceConfigsForCcmV2(Stack stack) {
-        String internalAdminUrl = internalAdminUrl(stack, ServiceFamilies.GATEWAY.getDefaultPort());
-        return asList(
-                cmServiceConfig(stack, clientCertificates(stack), CLOUDERA_MANAGER_SERVICE_NAME, internalAdminUrl),
-                cmServiceConfig(stack, clientCertificates(stack), CB_INTERNAL, internalAdminUrl));
-    }
-
     private String getAccountId(Stack stack) {
         return Crn.safeFromString(stack.getResourceCrn()).getAccountId();
     }
@@ -204,13 +183,11 @@ public class ClusterProxyService {
     }
 
     private List<CcmV2Config> ccmV2Configs(Stack stack) {
-        InstanceMetaData primaryGateway = stack.getPrimaryGatewayInstance();
-        return List.of(new CcmV2Config(
-                primaryGateway.getPublicIpWrapper(),
+        return stack.getNotTerminatedGatewayInstanceMetadata().stream().map(instanceMetaData -> new CcmV2Config(
+                instanceMetaData.getPublicIpWrapper(),
                 ServiceFamilies.GATEWAY.getDefaultPort(),
-                String.format(CCMV2_BACKEND_ID_FORMAT, stack.getCcmV2AgentCrn(), primaryGateway.getInstanceId()),
-                CLOUDERA_MANAGER_SERVICE_NAME
-        ));
+                String.format(CCMV2_BACKEND_ID_FORMAT, stack.getCcmV2AgentCrn(), instanceMetaData.getInstanceId()),
+                CLOUDERA_MANAGER_SERVICE_NAME)).collect(Collectors.toList());
     }
 
     private ClusterServiceConfig cmServiceConfig(Stack stack, ClientCertificate clientCertificate, String serviceName, String clusterManagerUrl) {
