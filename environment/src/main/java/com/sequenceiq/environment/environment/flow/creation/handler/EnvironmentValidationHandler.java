@@ -10,9 +10,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
+import com.sequenceiq.cloudbreak.cloud.model.base.ResponseStatus;
+import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateResponse;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentCloudStorageValidationRequest;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.RegionWrapper;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
@@ -20,7 +24,10 @@ import com.sequenceiq.environment.environment.dto.EnvironmentValidationDto;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEvent;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationFailureEvent;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
+import com.sequenceiq.environment.environment.service.cloudstorage.CloudStorageValidator;
+import com.sequenceiq.environment.environment.v1.converter.TelemetryApiConverter;
 import com.sequenceiq.environment.environment.validation.EnvironmentFlowValidatorService;
+import com.sequenceiq.environment.exception.EnvironmentServiceException;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
 
@@ -40,16 +47,25 @@ public class EnvironmentValidationHandler extends EventSenderAwareHandler<Enviro
 
     private final EventBus eventBus;
 
+    private CloudStorageValidator cloudStorageValidator;
+
+    private TelemetryApiConverter telemetryApiConverter;
+
     protected EnvironmentValidationHandler(
             EventSender eventSender,
             EnvironmentService environmentService,
             EnvironmentFlowValidatorService validatorService,
-            WebApplicationExceptionMessageExtractor messageExtractor, EventBus eventBus) {
+            WebApplicationExceptionMessageExtractor messageExtractor,
+            EventBus eventBus,
+            CloudStorageValidator cloudStorageValidator,
+            TelemetryApiConverter telemetryApiConverter) {
         super(eventSender);
         this.validatorService = validatorService;
         this.environmentService = environmentService;
         webApplicationExceptionMessageExtractor = messageExtractor;
         this.eventBus = eventBus;
+        this.cloudStorageValidator = cloudStorageValidator;
+        this.telemetryApiConverter = telemetryApiConverter;
     }
 
     @Override
@@ -61,6 +77,8 @@ public class EnvironmentValidationHandler extends EventSenderAwareHandler<Enviro
                             LOGGER.debug("Environment validation flow step started.");
                             try {
                                 validateEnvironment(environmentDtoEvent, environmentValidationDto, environment);
+                                validateCloudStorage(environmentDtoEvent, environmentDto);
+                                goToNetworkCreationState(environmentDtoEvent, environmentDto);
                             } catch (WebApplicationException e) {
                                 String responseMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
                                 goToFailedState(environmentDtoEvent, e.getMessage() + ". " + responseMessage);
@@ -69,6 +87,17 @@ public class EnvironmentValidationHandler extends EventSenderAwareHandler<Enviro
                             }
                         }, () -> goToFailedState(environmentDtoEvent, String.format("Environment was not found with id '%s'.", environmentDto.getId()))
                 );
+    }
+
+    private void validateCloudStorage(Event<EnvironmentValidationDto> environmentDtoEvent, EnvironmentDto environmentDto) {
+        EnvironmentCloudStorageValidationRequest cloudStorageValidationRequest = new EnvironmentCloudStorageValidationRequest();
+        cloudStorageValidationRequest.setCredentialCrn(environmentDto.getCredential().getResourceCrn());
+        TelemetryRequest telemetryRequest = telemetryApiConverter.convertToRequest(environmentDto.getTelemetry());
+        cloudStorageValidationRequest.setTelemetry(telemetryRequest);
+        ObjectStorageValidateResponse response = cloudStorageValidator.validateCloudStorage(environmentDto.getAccountId(), cloudStorageValidationRequest);
+        if (!ResponseStatus.OK.equals(response.getStatus())) {
+            throw new EnvironmentServiceException(response.getError());
+        }
     }
 
     private void validateEnvironment(Event<EnvironmentValidationDto> environmentDtoEvent, EnvironmentValidationDto environmentValidationDto,
@@ -87,13 +116,12 @@ public class EnvironmentValidationHandler extends EventSenderAwareHandler<Enviro
         validationBuilder.merge(validatorService.validateAuthentication(environmentValidationDto));
         ValidationResult validationResult = validationBuilder.build();
         if (validationResult.hasError()) {
-            goToFailedState(environmentDtoEvent, validationResult.getFormattedErrors());
-        } else {
-            goToNetworkCreationState(environmentDtoEvent, environmentDto);
+            throw new EnvironmentServiceException(validationResult.getFormattedErrors());
         }
     }
 
     private void goToFailedState(Event<EnvironmentValidationDto> environmentDtoEvent, String message) {
+        LOGGER.warn("Environment validation failed: {}", message);
         EnvironmentDto environmentDto = environmentDtoEvent.getData().getEnvironmentDto();
         EnvCreationFailureEvent failureEvent = new EnvCreationFailureEvent(
                 environmentDto.getId(),
