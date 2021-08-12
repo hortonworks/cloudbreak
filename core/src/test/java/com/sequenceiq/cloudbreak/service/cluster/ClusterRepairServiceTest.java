@@ -425,7 +425,9 @@ public class ClusterRepairServiceTest {
         });
 
         String expectedErrorMessage =
-                "Action cannot be performed because there are stopped nodes in the cluster. Please select them for repair or start the stopped nodes.";
+                "Action cannot be performed because there are stopped nodes in the cluster. " +
+                        "Stopped nodes: [host2]. " +
+                        "Please select them for repair or start the stopped nodes.";
         assertEquals(expectedErrorMessage,
                 exception.getMessage());
         verifyEventArguments(CLUSTER_MANUALRECOVERY_COULD_NOT_START,
