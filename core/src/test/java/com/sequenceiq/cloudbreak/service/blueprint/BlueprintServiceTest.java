@@ -27,6 +27,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -46,10 +47,11 @@ import org.springframework.validation.Errors;
 
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -61,11 +63,13 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.view.BlueprintView;
+import com.sequenceiq.cloudbreak.domain.view.ClusterTemplateView;
 import com.sequenceiq.cloudbreak.init.blueprint.BlueprintLoaderService;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 import com.sequenceiq.cloudbreak.repository.BlueprintViewRepository;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.runtimes.SupportedRuntimes;
+import com.sequenceiq.cloudbreak.service.template.ClusterTemplateViewService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.LegacyRestRequestThreadLocalService;
@@ -123,6 +127,9 @@ public class BlueprintServiceTest {
 
     @Mock
     private RegionAwareCrnGenerator regionAwareCrnGenerator;
+
+    @Mock
+    private ClusterTemplateViewService clusterTemplateViewService;
 
     @InjectMocks
     private BlueprintService underTest;
@@ -232,10 +239,15 @@ public class BlueprintServiceTest {
     public void testDeletionWithNonTerminatedClusterAndStack() {
         Blueprint blueprint = getBlueprint("name", USER_MANAGED);
         Cluster cluster = getCluster("c1", 1L, blueprint, AVAILABLE, AVAILABLE);
+        ClusterTemplateView clusterTemplateView = new ClusterTemplateView();
+        clusterTemplateView.setName("ClusterDefinition");
+
+        when(clusterTemplateViewService.findAllByStackIds(any())).thenReturn(Set.of(clusterTemplateView));
         when(clusterService.findByBlueprint(any())).thenReturn(Set.of(cluster));
 
         BadRequestException exception = Assertions.assertThrows(BadRequestException.class, () -> underTest.delete(blueprint));
-        assertEquals("There is a cluster ['c1'] which uses cluster template 'name'. Please remove this cluster before deleting the custer template.",
+        assertEquals("There is a cluster ['ClusterDefinition'] which uses cluster template 'name'. "
+                + "Please remove this cluster before deleting the cluster template.",
                 exception.getMessage());
     }
 
@@ -246,11 +258,15 @@ public class BlueprintServiceTest {
         clusters.add(getCluster("c1", 1L, blueprint, PRE_DELETE_IN_PROGRESS, AVAILABLE));
         clusters.add(getCluster("c2", 1L, blueprint, DELETE_COMPLETED, DELETE_IN_PROGRESS));
         clusters.add(getCluster("c3", 1L, blueprint, DELETE_COMPLETED, DELETE_COMPLETED));
+        ClusterTemplateView clusterTemplateView = new ClusterTemplateView();
+        clusterTemplateView.setName("ClusterDefinition");
 
+        when(clusterTemplateViewService.findAllByStackIds(any())).thenReturn(Set.of(clusterTemplateView));
         when(clusterService.findByBlueprint(any())).thenReturn(clusters);
 
         BadRequestException exception = Assertions.assertThrows(BadRequestException.class, () -> underTest.delete(blueprint));
-        assertEquals("There is a cluster ['c1'] which uses cluster template 'name'. Please remove this cluster before deleting the custer template.",
+        assertEquals("There is a cluster ['ClusterDefinition'] which uses cluster template 'name'. "
+                + "Please remove this cluster before deleting the cluster template.",
                 exception.getMessage());
     }
 
@@ -260,13 +276,18 @@ public class BlueprintServiceTest {
         Set<Cluster> clusters = new HashSet<>();
         clusters.add(getCluster("c1", 1L, blueprint, PRE_DELETE_IN_PROGRESS, AVAILABLE));
         clusters.add(getCluster("c2", 1L, blueprint, DELETE_COMPLETED, DELETE_COMPLETED));
+        ClusterTemplateView clusterTemplateView = new ClusterTemplateView();
+        clusterTemplateView.setName("ClusterDefinition1");
+        ClusterTemplateView clusterTemplateView2 = new ClusterTemplateView();
+        clusterTemplateView2.setName("ClusterDefinition2");
+        when(clusterTemplateViewService.findAllByStackIds(any())).thenReturn(Set.of(clusterTemplateView, clusterTemplateView2));
         when(clusterService.findByBlueprint(any())).thenReturn(clusters);
 
         try {
             underTest.delete(blueprint);
         } catch (BadRequestException e) {
-            assertTrue(e.getMessage().contains("c1"));
-            assertFalse(e.getMessage().contains("c2"));
+            assertTrue(e.getMessage().contains("ClusterDefinition1"));
+            assertFalse(e.getMessage().contains("ClusterDefinition2"));
         }
         verify(clusterService, times(1)).saveAll(anyCollection());
     }
@@ -484,6 +505,54 @@ public class BlueprintServiceTest {
         assertEquals(ResourceStatus.SERVICE_MANAGED, savedBlueprint.getStatus());
     }
 
+    @Test
+    public void testPrepareDeletionWhenHasOneClusterDefinitionAndOneCluster() {
+        Blueprint blueprint = new Blueprint();
+        blueprint.setName("TemplateName");
+        Cluster templateCluster = getCluster("Stack Template Name", 0L, blueprint, AVAILABLE, AVAILABLE);
+        templateCluster.getStack().setType(StackType.TEMPLATE);
+        ClusterTemplateView clusterTemplateView = new ClusterTemplateView();
+        clusterTemplateView.setName("ClusterDefinition");
+
+        Cluster workloadCluster = getCluster("Workload Name", 1L, blueprint, AVAILABLE, AVAILABLE);
+
+        when(clusterTemplateViewService.findAllByStackIds(List.of(0L))).thenReturn(Set.of(clusterTemplateView));
+        when(clusterService.findByBlueprint(blueprint)).thenReturn(Set.of(workloadCluster, templateCluster));
+        BadRequestException actual = Assertions.assertThrows(BadRequestException.class, () -> underTest.prepareDeletion(blueprint));
+        Assertions.assertEquals("There are clusters or cluster definitions associated with cluster template 'TemplateName'. "
+                + "The cluster template used by 1 cluster(s) (Workload Name) and 1 cluster definitions (ClusterDefinition). "
+                + "Please remove these before deleting the cluster template.", actual.getMessage());
+    }
+
+    @Test
+    public void testPrepareDeletionWhenHasOneClusterDefinition() {
+        Blueprint blueprint = new Blueprint();
+        blueprint.setName("TemplateName");
+        Cluster templateCluster = getCluster("Cluster Name", 0L, blueprint, AVAILABLE, AVAILABLE);
+        templateCluster.getStack().setType(StackType.TEMPLATE);
+        ClusterTemplateView clusterTemplateView = new ClusterTemplateView();
+        clusterTemplateView.setName("ClusterDefinition");
+        when(clusterService.findByBlueprint(blueprint)).thenReturn(Set.of(templateCluster));
+        when(clusterTemplateViewService.findAllByStackIds(any())).thenReturn(Set.of(clusterTemplateView));
+        BadRequestException actual = Assertions.assertThrows(BadRequestException.class, () -> underTest.prepareDeletion(blueprint));
+        Assertions.assertEquals("There is a cluster definition ['ClusterDefinition'] which uses cluster template 'TemplateName'. "
+                + "Please remove this cluster before deleting the cluster template.", actual.getMessage());
+    }
+
+    @Test
+    public void testPrepareDeletionWhenHasOneCluster() {
+        Blueprint blueprint = new Blueprint();
+        blueprint.setName("TemplateName");
+        Cluster templateCluster = getCluster("Cluster Name", 0L, blueprint, AVAILABLE, AVAILABLE);
+        ClusterTemplateView clusterTemplateView = new ClusterTemplateView();
+        clusterTemplateView.setName("ClusterDefinition");
+        when(clusterService.findByBlueprint(blueprint)).thenReturn(Set.of(templateCluster));
+        when(clusterTemplateViewService.findAllByStackIds(any())).thenReturn(Set.of(clusterTemplateView));
+        BadRequestException actual = Assertions.assertThrows(BadRequestException.class, () -> underTest.prepareDeletion(blueprint));
+        Assertions.assertEquals("There is a cluster ['ClusterDefinition'] which uses cluster template 'TemplateName'. "
+                + "Please remove this cluster before deleting the cluster template.", actual.getMessage());
+    }
+
     private Cluster getCluster(String name, Long id, Blueprint blueprint, Status clusterStatus, Status stackStatus) {
         Cluster cluster1 = new Cluster();
         cluster1.setName(name);
@@ -499,6 +568,9 @@ public class BlueprintServiceTest {
         StackStatus ss = new StackStatus();
         ss.setStatus(status);
         stack.setStackStatus(ss);
+        stack.setType(StackType.WORKLOAD);
+        stack.setName(cluster1.getName());
+        stack.setId(cluster1.getId());
         cluster1.setStack(stack);
     }
 
