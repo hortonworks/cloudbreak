@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.repository.cluster;
 
+import java.util.List;
 import java.util.Set;
 
 import javax.transaction.Transactional;
@@ -20,6 +21,11 @@ public interface ClusterTemplateViewRepository extends WorkspaceResourceReposito
             "LEFT JOIN FETCH b.stackTemplate " +
             "WHERE b.workspace.id= :workspaceId AND b.status <> 'DEFAULT_DELETED'")
     Set<ClusterTemplateView> findAllActive(@Param("workspaceId") Long workspaceId);
+
+    @Query("SELECT b FROM ClusterTemplateView b " +
+            "LEFT JOIN FETCH b.stackTemplate " +
+            "WHERE b.stackTemplate.id in :stackIds AND b.status <> 'DEFAULT_DELETED'")
+    Set<ClusterTemplateView> findAllByStackIds(@Param("stackIds") List<Long> stackIds);
 
     // Need to fetch template which are defaults and which are env related. If the Env has no DL added then we will
     // show all the template in the actual provider context

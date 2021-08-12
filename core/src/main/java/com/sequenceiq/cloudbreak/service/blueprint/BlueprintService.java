@@ -34,11 +34,12 @@ import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.authorization.service.ResourcePropertyProvider;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.cloud.model.AutoscaleRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.ScaleRecommendation;
@@ -55,6 +56,7 @@ import com.sequenceiq.cloudbreak.domain.projection.BlueprintStatusView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.view.BlueprintView;
+import com.sequenceiq.cloudbreak.domain.view.CompactView;
 import com.sequenceiq.cloudbreak.init.blueprint.BlueprintLoaderService;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.logger.MDCUtils;
@@ -63,6 +65,7 @@ import com.sequenceiq.cloudbreak.repository.BlueprintViewRepository;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.CloudResourceAdvisor;
+import com.sequenceiq.cloudbreak.service.template.ClusterTemplateViewService;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigQueryObject;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigQueryObject.Builder;
 import com.sequenceiq.cloudbreak.validation.HueWorkaroundValidatorService;
@@ -121,6 +124,9 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
 
     @Inject
     private RegionAwareCrnGenerator regionAwareCrnGenerator;
+
+    @Inject
+    private ClusterTemplateViewService clusterTemplateViewService;
 
     public Blueprint get(Long id) {
         return blueprintRepository.findById(id).orElseThrow(notFound("Cluster definition", id));
@@ -346,17 +352,41 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
         Set<Cluster> notDeletedClustersWithThisCd = getNotDeletedClustersWithBlueprint(blueprint);
         if (!notDeletedClustersWithThisCd.isEmpty()) {
             if (notDeletedClustersWithThisCd.size() > 1) {
-                String clusters = notDeletedClustersWithThisCd
+                List<String> clusters = notDeletedClustersWithThisCd
                         .stream()
-                        .map(Cluster::getName)
-                        .collect(Collectors.joining(", "));
+                        .filter(it -> !it.getStack().getType().equals(StackType.TEMPLATE))
+                        .map(it -> it.getStack().getName())
+                        .collect(Collectors.toList());
+                List<Long> stackTemplateIds = notDeletedClustersWithThisCd
+                        .stream()
+                        .filter(it -> it.getStack().getType().equals(StackType.TEMPLATE))
+                        .map(it -> it.getStack().getId())
+                        .collect(Collectors.toList());
+                Set<String> clusterDefinitions = getClusterDefinitionNameByStackTemplateIds(stackTemplateIds);
                 throw new BadRequestException(String.format(
-                        "There are clusters associated with cluster template '%s'. Please remove these before deleting the cluster template. "
-                                + "The following clusters are using this blueprint: [%s]", blueprint.getName(), clusters));
+                        "There are clusters or cluster definitions associated with cluster template '%s'. "
+                                + "The cluster template used by %s cluster(s) (%s) and %s cluster definitions (%s). "
+                                + "Please remove these before deleting the cluster template.", blueprint.getName(),
+                        clusters.size(), String.join(", ", clusters), clusterDefinitions.size(),
+                        String.join(", ", clusterDefinitions)));
             }
-            throw new BadRequestException(String.format("There is a cluster ['%s'] which uses cluster template '%s'. Please remove this "
-                    + "cluster before deleting the custer template.", notDeletedClustersWithThisCd.iterator().next().getName(), blueprint.getName()));
+            Cluster cluster = notDeletedClustersWithThisCd.iterator().next();
+            String clusterType = getClusterType(cluster);
+            String clusterDefinitionName = getClusterDefinitionNameByStackTemplateIds(List.of(cluster.getStack().getId()))
+                    .stream().findFirst().orElseThrow(() -> new NotFoundException("Cannot find the cluster definition for the stack template"));
+            throw new BadRequestException(String.format("There is a %s ['%s'] which uses cluster template '%s'. Please remove this "
+                    + "cluster before deleting the cluster template.", clusterType, clusterDefinitionName, blueprint.getName()));
         }
+    }
+
+    private Set<String> getClusterDefinitionNameByStackTemplateIds(List<Long> stackTemplateIds) {
+        return clusterTemplateViewService.findAllByStackIds(stackTemplateIds)
+                .stream().map(CompactView::getName)
+                .collect(Collectors.toSet());
+    }
+
+    private String getClusterType(Cluster cluster) {
+        return cluster.getStack().getType().equals(StackType.TEMPLATE) ? "cluster definition" : "cluster";
     }
 
     private Set<Cluster> getNotDeletedClustersWithBlueprint(Blueprint blueprint) {
@@ -367,6 +397,8 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
                     return DELETE_COMPLETED.equals(stack.getStatus());
                 })
                 .collect(Collectors.toSet());
+        LOGGER.info("Cluster template will be detached from {} cluster definition(s): {}", deletedClustersWithThisBp.size(),
+                deletedClustersWithThisBp.stream().map(cluster -> cluster.getStack().getName()).collect(Collectors.toList()));
         deletedClustersWithThisBp.forEach(cluster -> cluster.setBlueprint(null));
         clusterService.saveAll(deletedClustersWithThisBp);
         Set<Cluster> notDeletedClustersWithThisBp = new HashSet<>(clustersWithThisBlueprint);

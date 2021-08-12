@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.template;
 
+import java.util.List;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -35,6 +36,10 @@ public class ClusterTemplateViewService extends AbstractWorkspaceAwareResourceSe
 
     public Set<ClusterTemplateView> findAllActive(Long workspaceId) {
         return repository.findAllActive(workspaceId);
+    }
+
+    public Set<ClusterTemplateView> findAllByStackIds(List<Long> stackIds) {
+        return repository.findAllByStackIds(stackIds);
     }
 
     public Set<ClusterTemplateView> findAllUserManagedAndDefaultByEnvironmentCrn(Long workspaceId, String environmentCrn,
