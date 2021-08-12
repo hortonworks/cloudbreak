@@ -10,6 +10,7 @@ import static java.util.stream.Collectors.toSet;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -161,15 +162,17 @@ public class ClusterRepairService {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         boolean reattach = !deleteVolumes;
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStartResult;
+        List<String> stoppedInstanceIds = getStoppedNotSelectedInstanceIds(stack, repairMode, selectedParts);
         if (!freeipaService.freeipaStatusInDesiredState(stack, Set.of(Status.AVAILABLE))) {
             repairStartResult = Result.error(RepairValidation
                     .of("Action cannot be performed because the FreeIPA isn't available. Please check the FreeIPA state."));
         } else if (!environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))) {
             repairStartResult = Result.error(RepairValidation
                     .of("Action cannot be performed because the Environment isn't available. Please check the Environment state."));
-        } else if (hasStoppedNotSelectedInstance(stack, repairMode, selectedParts)) {
+        } else if (!stoppedInstanceIds.isEmpty()) {
             repairStartResult = Result.error(RepairValidation
                     .of("Action cannot be performed because there are stopped nodes in the cluster. " +
+                            "Stopped nodes: [" + String.join(", ", stoppedInstanceIds) + "]. " +
                             "Please select them for repair or start the stopped nodes."));
         } else if (!isReattachSupportedOnProvider(stack, reattach)) {
             repairStartResult = Result.error(RepairValidation
@@ -250,19 +253,23 @@ public class ClusterRepairService {
         return false;
     }
 
-    private boolean hasStoppedNotSelectedInstance(Stack stack, ManualClusterRepairMode repairMode, Set<String> selectedParts) {
+    private List<String> getStoppedNotSelectedInstanceIds(Stack stack, ManualClusterRepairMode repairMode, Set<String> selectedParts) {
         if (ManualClusterRepairMode.HOST_GROUP.equals(repairMode)) {
             return stack.getInstanceMetaDataAsList()
                     .stream()
-                    .filter(im -> !selectedParts.contains(im.getInstanceGroup().getGroupName()))
-                    .anyMatch(im -> InstanceStatus.STOPPED.equals(im.getInstanceStatus()));
+                    .filter(im -> !selectedParts.contains(im.getInstanceGroup().getGroupName()) &&
+                            InstanceStatus.STOPPED.equals(im.getInstanceStatus()))
+                    .map(InstanceMetaData::getInstanceId)
+                    .collect(Collectors.toList());
         } else if (ManualClusterRepairMode.NODE_ID.equals(repairMode)) {
             return stack.getInstanceMetaDataAsList()
                     .stream()
-                    .filter(im -> !selectedParts.contains(im.getInstanceId()))
-                    .anyMatch(im -> InstanceStatus.STOPPED.equals(im.getInstanceStatus()));
+                    .filter(im -> !selectedParts.contains(im.getInstanceId()) &&
+                            InstanceStatus.STOPPED.equals(im.getInstanceStatus()))
+                    .map(InstanceMetaData::getInstanceId)
+                    .collect(Collectors.toList());
         }
-        return false;
+        return Collections.emptyList();
     }
 
     private boolean isReattachSupportedOnProvider(Stack stack, boolean repairWithReattach) {
