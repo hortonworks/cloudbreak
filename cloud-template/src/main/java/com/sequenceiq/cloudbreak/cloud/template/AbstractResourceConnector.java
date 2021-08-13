@@ -4,9 +4,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+
+import org.springframework.util.StringUtils;
 
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
@@ -37,6 +40,8 @@ import com.sequenceiq.cloudbreak.cloud.template.init.ContextBuilders;
 import com.sequenceiq.cloudbreak.cloud.template.loadbalancer.LoadBalancerResourceService;
 import com.sequenceiq.cloudbreak.cloud.template.network.NetworkResourceService;
 import com.sequenceiq.common.api.type.AdjustmentType;
+import com.sequenceiq.common.api.type.CommonStatus;
+import com.sequenceiq.common.api.type.ResourceType;
 
 /**
  * Abstract base implementation of {@link ResourceConnector} for cloud provider which do not have template based deployments. It provides the
@@ -180,7 +185,27 @@ public abstract class AbstractResourceConnector implements ResourceConnector<Lis
         context.addGroupResources(scalingGroup.getName(), groupResourceService.getGroupResources(variant, resources));
 
         //compute
+        diskReattachment(resources, scalingGroup, context);
         return computeResourceService.buildResourcesForUpscale(context, auth, stack, Collections.singletonList(scalingGroup));
+    }
+
+    protected void diskReattachment(List<CloudResource> resources, Group scalingGroup, ResourceBuilderContext context) {
+        List<CloudResource> diskSets = resources.stream()
+                .filter(cloudResource -> scalingGroup.getName().equalsIgnoreCase(cloudResource.getGroup()))
+                .filter(cloudResource -> getDiskResourceType().equals(cloudResource.getType()))
+                .filter(cloudResource -> StringUtils.isEmpty(cloudResource.getInstanceId()) || CommonStatus.DETACHED.equals(cloudResource.getStatus()))
+                .collect(Collectors.toList());
+        for (int i = 0; i < diskSets.size(); i++) {
+            CloudResource cloudResource = diskSets.get(i);
+            Optional.ofNullable(scalingGroup.getInstances().get(i))
+                    .map(CloudInstance::getTemplate)
+                    .map(InstanceTemplate::getPrivateId)
+                    .ifPresent(privateId -> context.addComputeResources(privateId, List.of(cloudResource)));
+        }
+    }
+
+    protected ResourceType getDiskResourceType() {
+        throw new IllegalArgumentException("Please override the disk resource type or implement the provider specified disk reattachment");
     }
 
     @Override

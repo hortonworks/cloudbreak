@@ -77,6 +77,22 @@ public class MultiAzCalculatorServiceTest {
         Assertions.assertEquals(result.get(cloudSubnetName(2)), cloudSubnetAz(2));
     }
 
+    @Test
+    public void testPrepareMultiAzMapWhenAvailabilityZoneNotNull() {
+        DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
+        EnvironmentNetworkResponse environmentNetworkResponse = new EnvironmentNetworkResponse();
+        environmentNetworkResponse.setSubnetMetas(Map.of(
+                cloudSubnetName(1), cloudSubnet(1),
+                cloudSubnetName(2), cloudSubnet(2)
+        ));
+        detailedEnvironmentResponse.setNetwork(environmentNetworkResponse);
+
+        Map<String, String> actual = underTest.prepareSubnetAzMap(detailedEnvironmentResponse, "az-1");
+        Assertions.assertEquals(2, actual.size());
+        Assertions.assertEquals("az-1", actual.get("name-1"));
+        Assertions.assertEquals("az-1", actual.get("1"));
+    }
+
     static Object[][] prepareSubnetAzMapTestWhenEmptyResultDataProvider() {
         return new Object[][]{
                 // testCaseName environment

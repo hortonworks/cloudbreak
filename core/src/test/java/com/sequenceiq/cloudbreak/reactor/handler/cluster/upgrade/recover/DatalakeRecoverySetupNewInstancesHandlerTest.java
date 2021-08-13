@@ -83,7 +83,7 @@ class DatalakeRecoverySetupNewInstancesHandlerTest {
         verify(clusterService).updateClusterStatusByStackId(STACK_ID, Status.REQUESTED);
         verify(stackCreatorService).sortInstanceGroups(stack);
         verify(stackUpscaleService, times(2)).buildNewInstances(eq(stack), any(), eq(0));
-        verify(instanceMetaDataService, times(2)).saveInstanceAndGetUpdatedStack(eq(stack), any(), eq(true), eq(Collections.emptySet()));
+        verify(instanceMetaDataService, times(2)).saveInstanceAndGetUpdatedStack(eq(stack), any(), eq(true), eq(Collections.emptySet()), eq(false));
     }
 
     @Test

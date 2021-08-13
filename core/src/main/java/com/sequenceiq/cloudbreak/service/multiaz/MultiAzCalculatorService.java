@@ -44,19 +44,34 @@ public class MultiAzCalculatorService {
     }
 
     public Map<String, String> prepareSubnetAzMap(DetailedEnvironmentResponse environment) {
+        return prepareSubnetAzMap(environment, null);
+    }
+
+    public Map<String, String> prepareSubnetAzMap(DetailedEnvironmentResponse environment, String availabilityZone) {
+        if (availabilityZone == null) {
+            LOGGER.debug("Collect all AZ in environment");
+        } else {
+            LOGGER.debug("Filter the AZs by {}", availabilityZone);
+        }
         Map<String, String> subnetAzPairs = new HashMap<>();
         if (environment != null && environment.getNetwork() != null && environment.getNetwork().getSubnetMetas() != null) {
             for (Map.Entry<String, CloudSubnet> entry : environment.getNetwork().getSubnetMetas().entrySet()) {
                 CloudSubnet value = entry.getValue();
-                if (!isNullOrEmpty(value.getName())) {
-                    subnetAzPairs.put(value.getName(), value.getAvailabilityZone());
-                }
-                if (!isNullOrEmpty(value.getId())) {
-                    subnetAzPairs.put(value.getId(), value.getAvailabilityZone());
+                if (needToAddAZ(value, availabilityZone)) {
+                    if (!isNullOrEmpty(value.getName())) {
+                        subnetAzPairs.put(value.getName(), value.getAvailabilityZone());
+                    }
+                    if (!isNullOrEmpty(value.getId())) {
+                        subnetAzPairs.put(value.getId(), value.getAvailabilityZone());
+                    }
                 }
             }
         }
         return subnetAzPairs;
+    }
+
+    private boolean needToAddAZ(CloudSubnet value, String availabilityZone) {
+        return availabilityZone == null || availabilityZone.equals(value.getAvailabilityZone());
     }
 
     public void calculateByRoundRobin(Map<String, String> subnetAzPairs, InstanceGroup instanceGroup) {

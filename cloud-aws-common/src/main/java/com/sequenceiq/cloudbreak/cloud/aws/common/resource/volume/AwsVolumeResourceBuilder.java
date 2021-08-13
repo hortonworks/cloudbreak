@@ -195,7 +195,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
     @Override
     public List<CloudResource> build(AwsContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group,
             List<CloudResource> buildableResource, CloudStack cloudStack) throws Exception {
-        LOGGER.debug("Create volumes on provider" + buildableResource.stream().map(CloudResource::getName).collect(Collectors.toList()));
+        LOGGER.debug("Create volumes on provider: {}", buildableResource.stream().map(CloudResource::getName).collect(Collectors.toList()));
         AmazonEc2Client client = getAmazonEC2Client(auth);
 
         String availabilityZone = auth.getCloudContext().getLocation().getAvailabilityZone().value();
@@ -238,7 +238,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
         }
         LOGGER.debug("Volume creation requests sent");
 
-        return buildableResource.stream()
+        return requestedResources.stream()
                 .peek(resource -> {
                     List<Volume> volumes = volumeSetMap.get(resource.getName());
                     if (!CollectionUtils.isEmpty(volumes)) {

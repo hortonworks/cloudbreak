@@ -145,7 +145,7 @@ class StackUpscaleActionsTest {
         when(stackUpscaleService.buildNewInstances(stack, INSTANCE_GROUP_NAME, ADJUSTMENT)).thenReturn(newInstances);
 
         Stack updatedStack = mock(Stack.class);
-        when(instanceMetaDataService.saveInstanceAndGetUpdatedStack(stack, newInstances, false, context.getHostNames())).thenReturn(updatedStack);
+        when(instanceMetaDataService.saveInstanceAndGetUpdatedStack(stack, newInstances, false, context.getHostNames(), false)).thenReturn(updatedStack);
 
         CloudStack convertedCloudStack = mock(CloudStack.class);
         when(cloudStackConverter.convert(updatedStack)).thenReturn(convertedCloudStack);
