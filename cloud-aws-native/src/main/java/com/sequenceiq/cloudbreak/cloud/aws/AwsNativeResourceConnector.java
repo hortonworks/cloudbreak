@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.template.AbstractResourceConnector;
+import com.sequenceiq.common.api.type.ResourceType;
 
 @Component
 public class AwsNativeResourceConnector extends AbstractResourceConnector {
@@ -79,5 +80,10 @@ public class AwsNativeResourceConnector extends AbstractResourceConnector {
     @Override
     protected boolean isCloudResourceAndCloudInstanceEquals(CloudInstance instance, CloudResource resource) {
         return instance.getInstanceId().equals(resource.getReference()) || instance.getInstanceId().equals(resource.getInstanceId());
+    }
+
+    @Override
+    protected ResourceType getDiskResourceType() {
+        return ResourceType.AWS_VOLUMESET;
     }
 }

@@ -79,9 +79,9 @@ public class DatalakeRecoverySetupNewInstancesHandler extends ExceptionCatcherEv
     private void setupNewInstances(Stack stack) {
         List<InstanceGroup> instanceGroups = stackCreatorService.sortInstanceGroups(stack);
         for (InstanceGroup instanceGroup : instanceGroups) {
-            List<CloudInstance> newInstance =
+            List<CloudInstance> newInstances =
                     stackUpscaleService.buildNewInstances(stack, instanceGroup.getGroupName(), instanceGroup.getInitialNodeCount());
-            instanceMetaDataService.saveInstanceAndGetUpdatedStack(stack, newInstance, true, Collections.emptySet());
+            instanceMetaDataService.saveInstanceAndGetUpdatedStack(stack, newInstances, true, Collections.emptySet(), false);
         }
     }
 }

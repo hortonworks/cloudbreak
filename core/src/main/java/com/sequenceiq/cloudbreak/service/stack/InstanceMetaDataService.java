@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
+import static com.sequenceiq.cloudbreak.cloud.model.CloudResource.ATTRIBUTES;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 
 import java.util.Iterator;
@@ -17,13 +18,18 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
+import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.projection.StackInstanceCount;
@@ -33,6 +39,8 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.multiaz.MultiAzCalculatorService;
+import com.sequenceiq.common.api.type.CommonStatus;
+import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Service
@@ -51,6 +59,9 @@ public class InstanceMetaDataService {
 
     @Inject
     private MultiAzCalculatorService multiAzCalculatorService;
+
+    @Inject
+    private ResourceRetriever resourceRetriever;
 
     public void updateInstanceStatus(final InstanceMetaData instanceMetaData, com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus newStatus) {
         updateInstanceStatus(instanceMetaData, newStatus, null);
@@ -71,9 +82,9 @@ public class InstanceMetaDataService {
         }
     }
 
-    public Stack saveInstanceAndGetUpdatedStack(Stack stack, List<CloudInstance> cloudInstances, boolean save, Set<String> hostNames) {
+    public Stack saveInstanceAndGetUpdatedStack(Stack stack, List<CloudInstance> cloudInstances, boolean save, Set<String> hostNames, boolean repair) {
         LOGGER.info("Get updated stack with instances: {} and hostnames: {} and save: ({})", cloudInstances, hostNames, save);
-        Map<String, String> subnetAzPairs = getSubnetAzPairs(stack.getEnvironmentCrn());
+        Map<String, String> subnetAzPairs = getSubnetAzPairs(stack.getEnvironmentCrn(), stack, repair);
         String stackSubnetId = getStackSubnetIdIfExists(stack);
         String stackAz = stackSubnetId == null ? null : subnetAzPairs.get(stackSubnetId);
         Iterator<String> hostNameIterator = hostNames.iterator();
@@ -100,13 +111,40 @@ public class InstanceMetaDataService {
         return stack;
     }
 
-    private Map<String, String> getSubnetAzPairs(String environmentCrn) {
+    @VisibleForTesting
+    String getAzFromDiskOrNullIfRepair(Stack stack, boolean repair) {
+        String availabilityZone = null;
+        if (repair) {
+            ResourceType resourceType = getSupportedReattachableDiskType(stack);
+            if (resourceType != null) {
+                Optional<CloudResource> reattachableDiskResource = resourceRetriever.findFirstByStatusAndTypeAndStack(CommonStatus.DETACHED,
+                        resourceType, stack.getId());
+                if (reattachableDiskResource.isPresent()) {
+                    VolumeSetAttributes volumeSetAttributes = reattachableDiskResource.get().getParameter(ATTRIBUTES, VolumeSetAttributes.class);
+                    availabilityZone = volumeSetAttributes.getAvailabilityZone();
+                    LOGGER.debug("Found AZ for the {}: {}", resourceType, availabilityZone);
+                }
+            }
+        }
+        return availabilityZone;
+    }
+
+    private ResourceType getSupportedReattachableDiskType(Stack stack) {
+        if (stack.getCloudPlatform().equalsIgnoreCase(CloudPlatform.AWS.name())) {
+            return ResourceType.AWS_VOLUMESET;
+        }
+        LOGGER.debug("Cloudbreak does not support the disk reattachment for {}", stack.getCloudPlatform());
+        return null;
+    }
+
+    private Map<String, String> getSubnetAzPairs(String environmentCrn, Stack stack, boolean repair) {
         DetailedEnvironmentResponse environment = measure(() ->
                         ThreadBasedUserCrnProvider.doAsInternalActor(() ->
                                 environmentClientService.getByCrn(environmentCrn)),
                 LOGGER,
                 "Get Environment from Environment service took {} ms");
-        return multiAzCalculatorService.prepareSubnetAzMap(environment);
+        String az = getAzFromDiskOrNullIfRepair(stack, repair);
+        return multiAzCalculatorService.prepareSubnetAzMap(environment, az);
     }
 
     private String getStackSubnetIdIfExists(Stack stack) {

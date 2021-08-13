@@ -366,7 +366,7 @@ public class AwsRepairTest {
                         && SUSPENDED_PROCESSES.equals(argument.getScalingProcesses())));
 
         ArgumentCaptor<CloudResource> updatedCloudResourceArgumentCaptor = ArgumentCaptor.forClass(CloudResource.class);
-        verify(resourceNotifier, times(4)).notifyUpdate(updatedCloudResourceArgumentCaptor.capture(), any());
+        verify(resourceNotifier, times(2)).notifyUpdate(updatedCloudResourceArgumentCaptor.capture(), any());
 
         assertVolumeResource(updatedCloudResourceArgumentCaptor.getAllValues(), INSTANCE_ID_1, SIZE_DISK_1, FSTAB_1);
         assertVolumeResource(updatedCloudResourceArgumentCaptor.getAllValues(), INSTANCE_ID_2, SIZE_DISK_2, FSTAB_2);

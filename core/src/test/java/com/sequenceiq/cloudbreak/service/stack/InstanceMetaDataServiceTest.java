@@ -17,6 +17,7 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -33,9 +34,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
+import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
@@ -43,6 +48,8 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.multiaz.MultiAzCalculatorService;
+import com.sequenceiq.common.api.type.CommonStatus;
+import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @ExtendWith(MockitoExtension.class)
@@ -72,6 +79,9 @@ class InstanceMetaDataServiceTest {
 
     @Mock
     private MultiAzCalculatorService multiAzCalculatorService;
+
+    @Mock
+    private ResourceRetriever resourceRetriever;
 
     @InjectMocks
     private InstanceMetaDataService underTest;
@@ -108,7 +118,7 @@ class InstanceMetaDataServiceTest {
 
         when(environmentClientService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environment);
         Map<String, String> subnetAzPairs = Map.of();
-        when(multiAzCalculatorService.prepareSubnetAzMap(environment)).thenReturn(subnetAzPairs);
+        when(multiAzCalculatorService.prepareSubnetAzMap(environment, null)).thenReturn(subnetAzPairs);
         doAnswer(invocation -> {
             CloudInstance cloudInstance = invocation.getArgument(2, CloudInstance.class);
             cloudInstance.setSubnetId(subnetId);
@@ -117,7 +127,7 @@ class InstanceMetaDataServiceTest {
         }).when(multiAzCalculatorService).calculateByRoundRobin(eq(subnetAzPairs), any(InstanceGroup.class), any(CloudInstance.class));
         when(multiAzCalculatorService.determineRackId(subnetId, availabilityZone)).thenReturn(rackId);
 
-        Stack result = underTest.saveInstanceAndGetUpdatedStack(stack, cloudInstances(INSTANCE_GROUP_COUNT), save, new LinkedHashSet<>(hostnames));
+        Stack result = underTest.saveInstanceAndGetUpdatedStack(stack, cloudInstances(INSTANCE_GROUP_COUNT), save, new LinkedHashSet<>(hostnames), false);
 
         assertThat(result).isSameAs(stack);
 
@@ -196,7 +206,7 @@ class InstanceMetaDataServiceTest {
 
         when(environmentClientService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environment);
         Map<String, String> subnetAzPairs = Map.of();
-        when(multiAzCalculatorService.prepareSubnetAzMap(environment)).thenReturn(subnetAzPairs);
+        when(multiAzCalculatorService.prepareSubnetAzMap(environment, null)).thenReturn(subnetAzPairs);
         doAnswer(invocation -> {
             CloudInstance cloudInstance = invocation.getArgument(2, CloudInstance.class);
             cloudInstance.setSubnetId(subnetId);
@@ -205,7 +215,7 @@ class InstanceMetaDataServiceTest {
         }).when(multiAzCalculatorService).calculateByRoundRobin(eq(subnetAzPairs), any(InstanceGroup.class), any(CloudInstance.class));
         when(multiAzCalculatorService.determineRackId(subnetId, availabilityZone)).thenReturn(rackId);
 
-        Stack result = underTest.saveInstanceAndGetUpdatedStack(stack, cloudInstances(INSTANCE_GROUP_COUNT), save, new LinkedHashSet<>(hostnames));
+        Stack result = underTest.saveInstanceAndGetUpdatedStack(stack, cloudInstances(INSTANCE_GROUP_COUNT), save, new LinkedHashSet<>(hostnames), false);
 
         assertThat(result).isSameAs(stack);
 
@@ -235,7 +245,7 @@ class InstanceMetaDataServiceTest {
 
         when(environmentClientService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environment);
         Map<String, String> subnetAzPairs = Map.of();
-        when(multiAzCalculatorService.prepareSubnetAzMap(environment)).thenReturn(subnetAzPairs);
+        when(multiAzCalculatorService.prepareSubnetAzMap(environment, null)).thenReturn(subnetAzPairs);
         doAnswer(invocation -> {
             CloudInstance cloudInstance = invocation.getArgument(2, CloudInstance.class);
             cloudInstance.setSubnetId(subnetId);
@@ -246,7 +256,7 @@ class InstanceMetaDataServiceTest {
 
         List<CloudInstance> cloudInstances = new ArrayList<>(cloudInstances(INSTANCE_GROUP_COUNT));
         cloudInstances.add(cloudInstance(INSTANCE_GROUP_COUNT + 1));
-        Stack result = underTest.saveInstanceAndGetUpdatedStack(stack, cloudInstances, save, new LinkedHashSet<>(hostnames));
+        Stack result = underTest.saveInstanceAndGetUpdatedStack(stack, cloudInstances, save, new LinkedHashSet<>(hostnames), false);
 
         assertThat(result).isSameAs(stack);
 
@@ -268,11 +278,11 @@ class InstanceMetaDataServiceTest {
 
         when(environmentClientService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environment);
         Map<String, String> subnetAzPairs = subnetId == null || availabilityZone == null ? Map.of() : Map.of(subnetId, availabilityZone);
-        when(multiAzCalculatorService.prepareSubnetAzMap(environment)).thenReturn(subnetAzPairs);
+        when(multiAzCalculatorService.prepareSubnetAzMap(environment, null)).thenReturn(subnetAzPairs);
         doNothing().when(multiAzCalculatorService).calculateByRoundRobin(eq(subnetAzPairs), any(InstanceGroup.class), any(CloudInstance.class));
         when(multiAzCalculatorService.determineRackId(subnetId, availabilityZone)).thenReturn(rackId);
 
-        Stack result = underTest.saveInstanceAndGetUpdatedStack(stack, cloudInstances(INSTANCE_GROUP_COUNT), save, new LinkedHashSet<>(hostnames));
+        Stack result = underTest.saveInstanceAndGetUpdatedStack(stack, cloudInstances(INSTANCE_GROUP_COUNT), save, new LinkedHashSet<>(hostnames), false);
 
         assertThat(result).isSameAs(stack);
 
@@ -288,9 +298,9 @@ class InstanceMetaDataServiceTest {
         Stack stack = stack(1);
 
         when(environmentClientService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environment);
-        when(multiAzCalculatorService.prepareSubnetAzMap(environment)).thenReturn(Map.of());
+        when(multiAzCalculatorService.prepareSubnetAzMap(environment, null)).thenReturn(Map.of());
 
-        Stack result = underTest.saveInstanceAndGetUpdatedStack(stack, List.of(), true, Set.of());
+        Stack result = underTest.saveInstanceAndGetUpdatedStack(stack, List.of(), true, Set.of(), false);
 
         assertThat(result).isSameAs(stack);
 
@@ -302,6 +312,34 @@ class InstanceMetaDataServiceTest {
 
         verify(multiAzCalculatorService, never()).calculateByRoundRobin(anyMap(), any(InstanceGroup.class), any(CloudInstance.class));
         verify(multiAzCalculatorService, never()).determineRackId(anyString(), anyString());
+    }
+
+    @Test
+    public void testGetAzFromDiskOrNullIfRepairWhenRepairAndCloudPlatformSupported() {
+        Stack stack = new Stack();
+        stack.setId(1L);
+        stack.setCloudPlatform(CloudPlatform.AWS.name());
+        CloudResource cloudResource = CloudResource.builder()
+                .type(ResourceType.AWS_VOLUMESET)
+                .status(CommonStatus.DETACHED)
+                .name("name")
+                .params(Map.of(CloudResource.ATTRIBUTES, new VolumeSetAttributes("az", false, "fstab", List.of(), 10, "type")))
+                .build();
+        when(resourceRetriever.findFirstByStatusAndTypeAndStack(CommonStatus.DETACHED, ResourceType.AWS_VOLUMESET, 1L))
+                .thenReturn(Optional.of(cloudResource));
+        String actual = underTest.getAzFromDiskOrNullIfRepair(stack, true);
+        assertThat(actual).isEqualTo("az");
+        verify(resourceRetriever).findFirstByStatusAndTypeAndStack(CommonStatus.DETACHED, ResourceType.AWS_VOLUMESET, 1L);
+    }
+
+    @Test
+    public void testGetAzFromDiskOrNullIfRepairWhenRepairwhenCloudPlatformNotSupported() {
+        Stack stack = new Stack();
+        stack.setId(1L);
+        stack.setCloudPlatform(CloudPlatform.GCP.name());
+        String actual = underTest.getAzFromDiskOrNullIfRepair(stack, true);
+        assertThat(actual).isNull();
+        verify(resourceRetriever, never()).findFirstByStatusAndTypeAndStack(CommonStatus.DETACHED, ResourceType.AWS_VOLUMESET, 1L);
     }
 
     private Stack stack(int instanceGroupCount) {

@@ -21,8 +21,10 @@ public class AwsNativeAttachmentResourceBuilder extends AwsAttachmentResourceBui
 
     @Override
     public CloudResource delete(AwsContext context, AuthenticatedContext auth, CloudResource resource) throws PreserveResourceException {
-        LOGGER.debug("No need to delete volumes here as AwsNativeVolumeResourceBuilder will take care of it, for volume: '{}'", resource.getName());
-        return null;
+        String message = String.format("No need to delete volumes here as AwsNativeVolumeResourceBuilder will take care of it, for volume: '%s'",
+                resource.getName());
+        LOGGER.debug(message);
+        throw new PreserveResourceException(message);
     }
 
     @Override

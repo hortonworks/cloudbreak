@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.template.AbstractResourceConnector;
+import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
 public class OpenStackNativeResourceConnector extends AbstractResourceConnector {
@@ -36,6 +37,11 @@ public class OpenStackNativeResourceConnector extends AbstractResourceConnector 
     @Override
     protected List<CloudResource> collectProviderSpecificResources(List<CloudResource> resources, List<CloudInstance> vms) {
         return Collections.emptyList();
+    }
+
+    @Override
+    protected ResourceType getDiskResourceType() {
+        return ResourceType.OPENSTACK_ATTACHED_DISK;
     }
 
     @Override
