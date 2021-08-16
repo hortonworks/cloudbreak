@@ -120,6 +120,12 @@ public interface InstanceMetaDataRepository extends CrudRepository<InstanceMetaD
             @Param("stackTypes") List<StackType> stackTypes);
 
     @Query("SELECT s.id as stackId, COUNT(i) as instanceCount "
+            + "FROM InstanceMetaData i JOIN i.instanceGroup ig JOIN ig.stack s "
+            + "WHERE i.instanceStatus <> 'TERMINATED' AND s.id = :stackId "
+            + "GROUP BY s.id")
+    StackInstanceCount countByStackId(@Param("stackId") Long stackId);
+
+    @Query("SELECT s.id as stackId, COUNT(i) as instanceCount "
             + "FROM InstanceMetaData i JOIN i.instanceGroup ig JOIN ig.stack s WHERE s.workspace.id= :id AND i.instanceStatus = 'SERVICES_UNHEALTHY' "
             + "GROUP BY s.id")
     Set<StackInstanceCount> countUnhealthyByWorkspaceId(@Param("id") Long workspaceId);

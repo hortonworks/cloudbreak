@@ -52,6 +52,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.service.ClusterCreationSetupService;
+import com.sequenceiq.cloudbreak.service.NodeCountLimitValidator;
 import com.sequenceiq.cloudbreak.service.StackUnderOperationService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.decorator.StackDecorator;
@@ -181,6 +182,9 @@ public class StackCreatorServiceTest {
     @Mock
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
+    @Mock
+    private NodeCountLimitValidator nodeCountLimitValidator;
+
     @Test
     public void shouldThrowBadRequestWhenRecipeIsMissing() {
         User user = new User();
@@ -192,6 +196,7 @@ public class StackCreatorServiceTest {
         instanceGroupV4Request.setRecipeNames(Set.of(RECIPE_NAME));
         stackRequest.setInstanceGroups(List.of(instanceGroupV4Request));
 
+        doNothing().when(nodeCountLimitValidator).validateProvision(any());
         doThrow(new NotFoundException("missing recipe"))
                 .when(recipeService).get(NameOrCrn.ofName(RECIPE_NAME), WORKSPACE_ID);
 
@@ -216,6 +221,7 @@ public class StackCreatorServiceTest {
         instanceGroupV4Request.setRecipeNames(Set.of(RECIPE_NAME));
         stackRequest.setInstanceGroups(List.of(instanceGroupV4Request));
 
+        doNothing().when(nodeCountLimitValidator).validateProvision(any());
         when(stackViewService.findByName(anyString(), anyLong())).thenReturn(Optional.of(new StackView()));
 
         expectedException.expect(BadRequestException.class);
