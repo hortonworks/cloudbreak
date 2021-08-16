@@ -42,7 +42,7 @@ public class TelemetryCommonConfigService {
     // TODO: refactor parameters to 1 object
     public TelemetryCommonConfigView createTelemetryCommonConfigs(Telemetry telemetry, List<VmLog> logs,
             String clusterType, String clusterCrn, String clusterName, String clusterOwner, String platform,
-            String databusEndpoint) {
+            String databusEndpoint, String databusS3Endpoint) {
         final TelemetryClusterDetails clusterDetails = TelemetryClusterDetails.Builder.builder()
                 .withOwner(clusterOwner)
                 .withName(clusterName)
@@ -51,6 +51,7 @@ public class TelemetryCommonConfigService {
                 .withPlatform(platform)
                 .withVersion(version)
                 .withDatabusEndpoint(databusEndpoint)
+                .withDatabusS3Endpoint(databusS3Endpoint)
                 .withDatabusEndpointValidation(databusEndpointValidation)
                 .build();
         resolveLogPathReferences(telemetry, logs);

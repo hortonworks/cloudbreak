@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryConfiguration;
@@ -31,8 +32,10 @@ public class FluentConfigServiceTest {
 
     private static final String REGION_SAMPLE = "eu-central-1";
 
+    private static final String DATAHUB_CRN = "crn:cdp:datahub:eu-1:1234:user:91011";
+
     private static final TelemetryClusterDetails DEFAULT_FLUENT_CLUSTER_DETAILS =
-            TelemetryClusterDetails.Builder.builder().withType(CLUSTER_TYPE_DEFAULT).withPlatform(PLATFORM_DEFAULT).build();
+            TelemetryClusterDetails.Builder.builder().withType(CLUSTER_TYPE_DEFAULT).withPlatform(PLATFORM_DEFAULT).withCrn(DATAHUB_CRN).build();
 
     private FluentConfigService underTest;
 
@@ -64,6 +67,7 @@ public class FluentConfigServiceTest {
         assertTrue(result.isCloudStorageLoggingEnabled());
         assertEquals("cluster-logs/datahub/cl1", result.getLogFolderName());
         assertEquals("mybucket", result.getS3LogArchiveBucketName());
+        assertEquals(Crn.Region.EU_1.getName(), result.toMap().get("environmentRegion"));
     }
 
     @Test

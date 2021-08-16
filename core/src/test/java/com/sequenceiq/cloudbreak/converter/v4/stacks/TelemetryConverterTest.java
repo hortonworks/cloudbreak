@@ -40,11 +40,13 @@ public class TelemetryConverterTest {
 
     private static final String DATABUS_ENDPOINT = "myCustomEndpoint";
 
+    private static final String DATABUS_S3_BUCKET = "myCustomS3Bucket";
+
     private TelemetryConverter underTest;
 
     @Before
     public void setUp() {
-        AltusDatabusConfiguration altusDatabusConfiguration = new AltusDatabusConfiguration(DATABUS_ENDPOINT, true, "****", "****");
+        AltusDatabusConfiguration altusDatabusConfiguration = new AltusDatabusConfiguration(DATABUS_ENDPOINT, DATABUS_S3_BUCKET, true, "****", "****");
         MeteringConfiguration meteringConfiguration = new MeteringConfiguration(true, "app", "stream");
         ClusterLogsCollectionConfiguration logCollectionConfig = new ClusterLogsCollectionConfiguration(true, "app", "stream");
         MonitoringConfiguration monitoringConfig = new MonitoringConfiguration(true, null, null);
@@ -222,7 +224,7 @@ public class TelemetryConverterTest {
     public void testConvertFromEnvAndSdxResponseWithDefaultDisabled() {
         // GIVEN
         SdxClusterResponse sdxClusterResponse = null;
-        AltusDatabusConfiguration altusDatabusConfiguration = new AltusDatabusConfiguration(DATABUS_ENDPOINT, false, "", null);
+        AltusDatabusConfiguration altusDatabusConfiguration = new AltusDatabusConfiguration(DATABUS_ENDPOINT, DATABUS_S3_BUCKET, false, "", null);
         MeteringConfiguration meteringConfiguration = new MeteringConfiguration(true, null, null);
         ClusterLogsCollectionConfiguration logCollectionConfig = new ClusterLogsCollectionConfiguration(true, null, null);
         MonitoringConfiguration monitoringConfig = new MonitoringConfiguration(false, null, null);
@@ -298,7 +300,7 @@ public class TelemetryConverterTest {
         SdxClusterResponse sdxClusterResponse = new SdxClusterResponse();
         sdxClusterResponse.setCrn("crn:cdp:cloudbreak:us-west-1:someone:sdxcluster:sdxId");
         sdxClusterResponse.setName("sdxName");
-        AltusDatabusConfiguration altusDatabusConfiguration = new AltusDatabusConfiguration(DATABUS_ENDPOINT, false, "", null);
+        AltusDatabusConfiguration altusDatabusConfiguration = new AltusDatabusConfiguration(DATABUS_ENDPOINT, DATABUS_S3_BUCKET, false, "", null);
         MeteringConfiguration meteringConfiguration = new MeteringConfiguration(true, null, null);
         ClusterLogsCollectionConfiguration logCollectionConfig = new ClusterLogsCollectionConfiguration(true, null, null);
         MonitoringConfiguration monitoringConfig = new MonitoringConfiguration(false, null, null);

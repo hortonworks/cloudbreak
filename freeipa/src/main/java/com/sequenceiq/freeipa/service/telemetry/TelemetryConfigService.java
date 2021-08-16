@@ -109,7 +109,7 @@ public class TelemetryConfigService {
     private Map<String, SaltPillarProperties> getTelemetryCommonPillarConfig(Stack stack, Telemetry telemetry, String databusEndpoint) {
         TelemetryCommonConfigView telemetryCommonConfigs = telemetryCommonConfigService.createTelemetryCommonConfigs(
                 telemetry, vmLogsService.getVmLogs(), FluentClusterType.FREEIPA.value(), stack.getResourceCrn(),
-                stack.getName(), stack.getOwner(), stack.getCloudPlatform(), databusEndpoint);
+                stack.getName(), stack.getOwner(), stack.getCloudPlatform(), databusEndpoint, dataBusEndpointProvider.getDatabusS3Endpoint(databusEndpoint));
         return Map.of("telemetry",
                 new SaltPillarProperties("/telemetry/init.sls", Collections.singletonMap("telemetry", telemetryCommonConfigs.toMap())));
     }

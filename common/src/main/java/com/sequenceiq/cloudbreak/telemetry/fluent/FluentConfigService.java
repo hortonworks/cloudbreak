@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.common.AnonymizationRuleResolver;
@@ -93,11 +94,11 @@ public class FluentConfigService {
         if (!enabled) {
             LOGGER.debug("Fluent based logging is disabled");
         }
-
         return builder
                 .withEnabled(enabled)
                 .withRegion(region)
                 .withClusterDetails(clusterDetails)
+                .withEnvironmentRegion(getEnvironmentRegion(clusterDetails))
                 .build();
     }
 
@@ -203,5 +204,19 @@ public class FluentConfigService {
                 .withRegion(cloudwatchParams.getRegion())
                 .withCloudwatchStreamKey(cloudwatchStreamKey.orElse(CloudwatchStreamKey.HOSTNAME).value())
                 .withLogFolderName(storageLocation);
+    }
+
+    private String getEnvironmentRegion(TelemetryClusterDetails clusterDetails) {
+        String environmentRegion = null;
+        if (clusterDetails != null && StringUtils.isNotBlank(clusterDetails.getCrn())) {
+            Crn crn = Crn.fromString(clusterDetails.getCrn());
+            if (crn != null && crn.getRegion() != null) {
+                environmentRegion = crn.getRegion().getName();
+                LOGGER.debug("Found environment region for telemetry: {}", environmentRegion);
+            } else {
+                LOGGER.debug("CRN is not filled correctly for telemetry cluster details");
+            }
+        }
+        return environmentRegion;
     }
 }

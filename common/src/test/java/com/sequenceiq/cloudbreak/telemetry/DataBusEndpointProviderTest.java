@@ -2,25 +2,36 @@ package com.sequenceiq.cloudbreak.telemetry;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.BDDMockito.given;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.altus.AltusDatabusConfiguration;
 import com.sequenceiq.cloudbreak.config.DataBusS3EndpointPattern;
 import com.sequenceiq.cloudbreak.config.DataBusS3EndpointPatternsConfig;
 
+@ExtendWith(MockitoExtension.class)
 public class DataBusEndpointProviderTest {
 
     private static final String DATABUS_ENDPOINT_CNAME = "https://dbusapi.us-west-1.altus.cloudera.com";
 
+    @InjectMocks
     private DataBusEndpointProvider underTest;
+
+    @Mock
+    private AltusDatabusConfiguration altusDatabusConfiguration;
 
     @BeforeEach
     public void setUp() {
-        underTest = new DataBusEndpointProvider(createDatabusS3EndpointPatterns(), DATABUS_ENDPOINT_CNAME);
+        underTest = new DataBusEndpointProvider(altusDatabusConfiguration, createDatabusS3EndpointPatterns(), DATABUS_ENDPOINT_CNAME);
     }
 
     @Test
@@ -30,6 +41,16 @@ public class DataBusEndpointProviderTest {
         String result = underTest.getDatabusS3Endpoint("https://dbusapi.us-west-1.sigma.altus.cloudera.com");
         // THEN
         assertEquals("https://cloudera-dbus-prod.s3.amazonaws.com", result);
+    }
+
+    @Test
+    public void testGetDatabusS3EndpointWithProvidedS3Bucket() {
+        // GIVEN
+        given(altusDatabusConfiguration.getAltusDatabusS3BucketName()).willReturn("mybucket");
+        // WHEN
+        String result = underTest.getDatabusS3Endpoint("https://dbusapi.us-west-1.sigma.altus.cloudera.com");
+        // THEN
+        assertEquals("https://mybucket.s3.amazonaws.com", result);
     }
 
     @Test
