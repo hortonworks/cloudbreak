@@ -7,6 +7,7 @@ import java.util.Map;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryConfigView;
 import com.sequenceiq.cloudbreak.telemetry.logcollection.ClusterLogsCollectionConfiguration;
@@ -68,6 +69,8 @@ public class FluentConfigView implements TelemetryConfigView {
 
     private final String providerPrefix;
 
+    private final String environmentRegion;
+
     private final Integer partitionIntervalMin;
 
     private final String azureStorageAccount;
@@ -112,6 +115,7 @@ public class FluentConfigView implements TelemetryConfigView {
         this.serviceLogFolderPrefix = builder.serviceLogFolderPrefix;
         this.region = builder.region;
         this.providerPrefix = builder.providerPrefix;
+        this.environmentRegion = builder.environmentRegion;
         this.partitionIntervalMin = builder.partitionIntervalMin;
         this.logFolderName = builder.logFolderName;
         this.s3LogArchiveBucketName = builder.s3LogArchiveBucketName;
@@ -157,6 +161,10 @@ public class FluentConfigView implements TelemetryConfigView {
 
     public String getProviderPrefix() {
         return providerPrefix;
+    }
+
+    public String getEnvironmentRegion() {
+        return environmentRegion;
     }
 
     public Integer getPartitionIntervalMin() {
@@ -244,6 +252,7 @@ public class FluentConfigView implements TelemetryConfigView {
         map.put("dbusIncludeSaltLogs", DBUS_INCLUDE_SALT_LOGS_DEFAULT);
         map.put("user", ObjectUtils.defaultIfNull(this.user, TD_AGENT_USER_DEFAULT));
         map.put("group", ObjectUtils.defaultIfNull(this.group, TD_AGENT_GROUP_DEFAULT));
+        map.put("environmentRegion", ObjectUtils.defaultIfNull(this.environmentRegion, Crn.Region.US_WEST_1.getName()));
         map.put("providerPrefix", ObjectUtils.defaultIfNull(this.providerPrefix, PROVIDER_PREFIX_DEFAULT));
         map.put("region", ObjectUtils.defaultIfNull(this.region, EMPTY_CONFIG_DEFAULT));
         map.put("serverLogFolderPrefix", ObjectUtils.defaultIfNull(this.serverLogFolderPrefix, LOG_FOLDER_DEFAULT));
@@ -327,6 +336,8 @@ public class FluentConfigView implements TelemetryConfigView {
 
         private String providerPrefix;
 
+        private String environmentRegion;
+
         private Integer partitionIntervalMin;
 
         private String logFolderName;
@@ -394,6 +405,11 @@ public class FluentConfigView implements TelemetryConfigView {
 
         public Builder withProviderPrefix(String providerPrefix) {
             this.providerPrefix = providerPrefix;
+            return this;
+        }
+
+        public Builder withEnvironmentRegion(String environmentRegion) {
+            this.environmentRegion = environmentRegion;
             return this;
         }
 

@@ -148,7 +148,7 @@ public class TestApplicationContext {
 
     @Bean
     public AltusDatabusConfiguration altusDatabusConfiguration() {
-        return new AltusDatabusConfiguration("", false, "", "");
+        return new AltusDatabusConfiguration("", "", false, "", "");
     }
 
     @Bean

@@ -8,6 +8,7 @@
 {% set cluster_type = salt['pillar.get']('telemetry:clusterType') %}
 {% set cluster_owner = salt['pillar.get']('telemetry:clusterOwner') %}
 {% set databus_endpoint = salt['pillar.get']('telemetry:databusEndpoint') %}
+{% set databus_s3_endpoint = salt['pillar.get']('telemetry:databusS3Endpoint') %}
 
 {% if salt['pillar.get']('telemetry:databusEndpointValidation') %}
     {% set databus_endpoint_validation = True %}
@@ -94,6 +95,7 @@
     "anonymizationRules": anonymization_rules,
     "databusEndpoint": databus_endpoint,
     "databusEndpointValidation": databus_endpoint_validation,
+    "databusS3Endpoint": databus_s3_endpoint,
     "cdpTelemetryVersion": cdp_telemetry_version,
     "cdpTelemetryPackageVersion": cdp_telemetry_package_version,
     "proxyUrl": proxy_full_url,

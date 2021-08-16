@@ -307,7 +307,7 @@ public class TelemetryDecoratorTest {
                 .willReturn(monitoringConfigView);
         given(nodeStatusConfigService.createNodeStatusConfig(isNull(), isNull(), anyBoolean())).willReturn(nodeStatusConfigView);
         given(telemetryCommonConfigService.createTelemetryCommonConfigs(any(), anyList(), anyString(), anyString(),
-                anyString(), anyString(), anyString(), anyString()))
+                anyString(), anyString(), anyString(), anyString(), isNull()))
                 .willReturn(telemetryCommonConfigView);
         given(entitlementService.useDataBusCNameEndpointEnabled(anyString())).willReturn(false);
     }

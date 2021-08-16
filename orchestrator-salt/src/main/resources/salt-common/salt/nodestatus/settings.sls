@@ -15,7 +15,13 @@
     {% set additional_collect_params = "" %}
 {% endif %}
 
-{% set collect_params = databus_params + " " + additional_collect_params %}
+{% if telemetry.cdpTelemetryPackageVersion and salt['pkg.version_cmp'](telemetry.cdpTelemetryPackageVersion,'0.4.12-1') >= 0 and telemetry.databusS3Endpoint %}
+  {% set databus_s3_endpoint_params = "--databus-s3-url " + telemetry.databusS3Endpoint + " " %}
+{% else %}
+  {% set databus_s3_endpoint_params = "" %}
+{% endif %}
+
+{% set collect_params = databus_s3_endpoint_params + databus_params + " " + additional_collect_params %}
 
 {% if telemetry.cdpTelemetryVersion > 2 %}
   {% set collect_available = True %}

@@ -28,13 +28,15 @@ public class TelemetryConverterTest {
 
     private static final String DATABUS_ENDPOINT = "myCustomEndpoint";
 
+    private static final String DATABUS_S3_BUCKET = "myCustomS3Bucket";
+
     private static final String EMAIL = "blah@blah.blah";
 
     private TelemetryConverter underTest;
 
     @BeforeEach
     public void setUp() {
-        AltusDatabusConfiguration altusDatabusConfiguration = new AltusDatabusConfiguration(DATABUS_ENDPOINT, false, "", null);
+        AltusDatabusConfiguration altusDatabusConfiguration = new AltusDatabusConfiguration(DATABUS_ENDPOINT, DATABUS_S3_BUCKET, false, "", null);
         MeteringConfiguration meteringConfiguration = new MeteringConfiguration(false, null, null);
         ClusterLogsCollectionConfiguration logCollectionConfig = new ClusterLogsCollectionConfiguration(true, null, null);
         MonitoringConfiguration monitoringConfig = new MonitoringConfiguration(true, null, null);

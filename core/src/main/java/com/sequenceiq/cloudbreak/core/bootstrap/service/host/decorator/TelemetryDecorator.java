@@ -143,6 +143,7 @@ public class TelemetryDecorator {
         String accountId = Crn.safeFromString(stack.getResourceCrn()).getAccountId();
         boolean useDbusCnameEndpoint = entitlementService.useDataBusCNameEndpointEnabled(accountId);
         String databusEndpoint = dataBusEndpointProvider.getDataBusEndpoint(telemetry.getDatabusEndpoint(), useDbusCnameEndpoint);
+        String databusS3Endpoint = dataBusEndpointProvider.getDatabusS3Endpoint(databusEndpoint);
 
         DatabusConfigView databusConfigView = databusConfigService.createDatabusConfigs(
                 dbusCredential.getAccessKey(), dbusCredential.getPrivateKey(), null, databusEndpoint);
@@ -167,7 +168,7 @@ public class TelemetryDecorator {
                 .build();
         final TelemetryCommonConfigView telemetryCommonConfigs = telemetryCommonConfigService.createTelemetryCommonConfigs(
                 telemetry, vmLogsService.getVmLogs(), clusterType, clusterCrn, stack.getName(), stack.getCreator().getUserCrn(), stack.getCloudPlatform(),
-                databusEndpoint);
+                databusEndpoint, databusS3Endpoint);
         servicePillar.put("telemetry",
                 new SaltPillarProperties("/telemetry/init.sls", Collections.singletonMap("telemetry", telemetryCommonConfigs.toMap())));
 

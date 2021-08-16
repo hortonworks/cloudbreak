@@ -89,6 +89,7 @@
 {% set cluster_crn = salt['pillar.get']('fluent:clusterCrn')%}
 {% set cluster_owner = salt['pillar.get']('fluent:clusterOwner')%}
 {% set cluster_version = salt['pillar.get']('fluent:clusterVersion')%}
+{% set environment_region = salt['pillar.get']('fluent:environmentRegion')%}
 
 {% set partition_interval = salt['pillar.get']('fluent:partitionIntervalMin') %}
 {% set cloudera_public_gem_repo = 'https://repository.cloudera.com/cloudera/api/gems/cloudera-gems/' %}
@@ -282,6 +283,7 @@
     "dbusIncludeSaltLogs": dbus_include_salt_logs,
     "forwardPort" : 24224,
     "region": region,
+    "environmentRegion" : environment_region,
     "platform": platform,
     "proxyUrl": proxy_url,
     "proxyAuth": proxy_auth,

@@ -29,6 +29,8 @@ public class TelemetryClusterDetails {
 
     private final boolean databusEndpointValidation;
 
+    private final String databusS3Endpoint;
+
     private TelemetryClusterDetails(Builder builder) {
         this.name = builder.name;
         this.type = builder.type;
@@ -38,6 +40,7 @@ public class TelemetryClusterDetails {
         this.version = builder.version;
         this.databusEndpoint = builder.databusEndpoint;
         this.databusEndpointValidation = builder.databusEndpointValidation;
+        this.databusS3Endpoint = builder.databusS3Endpoint;
     }
 
     public String getName() {
@@ -82,6 +85,7 @@ public class TelemetryClusterDetails {
         map.put("clusterVersion", this.version);
         map.put("databusEndpoint", this.databusEndpoint);
         map.put("databusEndpointValidation", this.databusEndpointValidation);
+        map.put("databusS3Endpoint", this.databusS3Endpoint);
         return map;
     }
 
@@ -102,6 +106,8 @@ public class TelemetryClusterDetails {
         private String databusEndpoint;
 
         private boolean databusEndpointValidation;
+
+        private String databusS3Endpoint;
 
         private Builder() {
         }
@@ -151,6 +157,11 @@ public class TelemetryClusterDetails {
 
         public Builder withDatabusEndpointValidation(boolean databusEndpointValidation) {
             this.databusEndpointValidation = databusEndpointValidation;
+            return this;
+        }
+
+        public Builder withDatabusS3Endpoint(String databusS3Endpoint) {
+            this.databusS3Endpoint = databusS3Endpoint;
             return this;
         }
 
