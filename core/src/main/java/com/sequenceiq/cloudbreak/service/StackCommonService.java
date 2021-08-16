@@ -118,6 +118,9 @@ public class StackCommonService {
     @Inject
     private BlueprintUpdaterConnectors blueprintUpdaterConnectors;
 
+    @Inject
+    private NodeCountLimitValidator nodeCountLimitValidator;
+
     public StackV4Response createInWorkspace(StackV4Request stackRequest, User user, Workspace workspace, boolean distroxRequest) {
         return stackCreatorService.createStack(user, workspace, stackRequest, distroxRequest);
     }
@@ -214,12 +217,7 @@ public class StackCommonService {
         updateRequest.setStackId(stack.getId());
         UpdateStackV4Request updateStackJson = converterUtil.convert(updateRequest, UpdateStackV4Request.class);
         Integer scalingAdjustment = updateStackJson.getInstanceGroupAdjustment().getScalingAdjustment();
-        if (scalingAdjustment > 0 && !cloudParameterCache.isUpScalingSupported(stack.cloudPlatform())) {
-            throw new BadRequestException(String.format("Upscaling is not supported on %s cloudplatform", stack.cloudPlatform()));
-        }
-        if (scalingAdjustment < 0 && !cloudParameterCache.isDownScalingSupported(stack.cloudPlatform())) {
-            throw new BadRequestException(String.format("Downscaling is not supported on %s cloudplatform", stack.cloudPlatform()));
-        }
+        validateScalingRequest(stack, scalingAdjustment);
 
         FlowIdentifier flowIdentifier;
         if (scalingAdjustment > 0) {
@@ -230,6 +228,16 @@ public class StackCommonService {
             flowIdentifier = clusterCommonService.put(stack.getResourceCrn(), updateClusterJson);
         }
         return flowIdentifier;
+    }
+
+    private void validateScalingRequest(Stack stack, Integer scalingAdjustment) {
+        if (scalingAdjustment > 0 && !cloudParameterCache.isUpScalingSupported(stack.cloudPlatform())) {
+            throw new BadRequestException(String.format("Upscaling is not supported on %s cloudplatform", stack.cloudPlatform()));
+        }
+        if (scalingAdjustment < 0 && !cloudParameterCache.isDownScalingSupported(stack.cloudPlatform())) {
+            throw new BadRequestException(String.format("Downscaling is not supported on %s cloudplatform", stack.cloudPlatform()));
+        }
+        nodeCountLimitValidator.validateScale(stack.getId(), scalingAdjustment);
     }
 
     public void deleteWithKerberosInWorkspace(NameOrCrn nameOrCrn, Long workspaceId, boolean forced) {

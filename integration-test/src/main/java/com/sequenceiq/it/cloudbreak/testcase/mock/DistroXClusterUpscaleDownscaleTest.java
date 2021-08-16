@@ -6,6 +6,7 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 
 import javax.inject.Inject;
+import javax.ws.rs.BadRequestException;
 
 import org.testng.ITestContext;
 import org.testng.annotations.Test;
@@ -17,6 +18,7 @@ import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDtoBase;
 import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.DistroXClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.clouderamanager.DistroXClouderaManagerTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.image.DistroXImageTestDto;
@@ -100,33 +102,7 @@ public class DistroXClusterUpscaleDownscaleTest extends AbstractClouderaManagerT
     public void testScaleDownAndUpWithLargeNodes(MockedTestContext testContext, ITestContext testNgContext) {
         String stack = resourcePropertyProvider().getName();
         createDatalake(testContext);
-        DistroXTestDto currentContext = testContext
-                .given(DIX_NET_KEY, DistroXNetworkTestDto.class)
-                .given(DIX_IMG_KEY, DistroXImageTestDto.class)
-                .withImageCatalog()
-                .withImageId(IMAGE_CATALOG_ID)
-                .given(CM_FOR_DISTRO_X, DistroXClouderaManagerTestDto.class)
-                .given(CLUSTER_KEY, DistroXClusterTestDto.class)
-                .withValidateBlueprint(false)
-                .withClouderaManager(CM_FOR_DISTRO_X)
-                .given("dx-5-volume-ig-template", DistroXInstanceTemplateTestDto.class)
-                .withAttachedVolumes(5)
-                .given("dx-1000-ig-worker", DistroXInstanceGroupTestDto.class)
-                .withHostGroup(HostGroupType.WORKER)
-                .withTemplate("dx-5-volume-ig-template")
-                .withNodeCount(300)
-                .given("dx-ig-master", DistroXInstanceGroupTestDto.class)
-                .withHostGroup(HostGroupType.MASTER)
-                .given("dx-ig-gw", DistroXInstanceGroupTestDto.class)
-                .withHostGroup(HostGroupType.GATEWAY)
-                .given("dx-ig-compute", DistroXInstanceGroupTestDto.class)
-                .withHostGroup(HostGroupType.COMPUTE)
-                .given(stack, DistroXTestDto.class)
-                .withInstanceGroups("dx-1000-ig-worker", "dx-ig-master", "dx-ig-gw", "dx-ig-compute")
-                .withCluster(CLUSTER_KEY)
-                .withName(stack)
-                .withImageSettings(DIX_IMG_KEY)
-                .withNetwork(DIX_NET_KEY)
+        DistroXTestDto currentContext = createDistroxDto(testContext, stack, 300)
                 .when(distroXClient.create(), key(stack))
                 .await(STACK_AVAILABLE, key(stack));
 
@@ -142,6 +118,57 @@ public class DistroXClusterUpscaleDownscaleTest extends AbstractClouderaManagerT
 
         currentContext
                 .validate();
+    }
+
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "there is a running DistroX cluster with 1000 instances in worker group with 5 volumes per instance",
+            when = "a scale, start stop called many times",
+            then = "the scale should fail")
+    public void testNodeCountLimit(MockedTestContext testContext, ITestContext testNgContext) {
+        String stack = resourcePropertyProvider().getName();
+        createDatalake(testContext);
+        createDistroxDto(testContext, stack, 401)
+                .whenException(distroXClient.create(), BadRequestException.class, key(stack)
+                        .expectedMessage("The maximum count of nodes for this cluster cannot be higher than 400"))
+                .given("dx-1000-ig-worker", DistroXInstanceGroupTestDto.class)
+                .withNodeCount(350)
+                .given(stack, DistroXTestDto.class)
+                .when(distroXClient.create(), key(stack))
+                .await(STACK_AVAILABLE, key(stack))
+                .whenException(distroXClient.scale(HostGroupType.WORKER.getName(), 401), BadRequestException.class, key(stack)
+                        .expectedMessage("The maximum count of nodes for this cluster cannot be higher than 400"))
+                .validate();
+    }
+
+    private DistroXTestDtoBase<DistroXTestDto> createDistroxDto(MockedTestContext testContext, String stack, int nodeCount) {
+        return testContext
+                .given(DIX_NET_KEY, DistroXNetworkTestDto.class)
+                .given(DIX_IMG_KEY, DistroXImageTestDto.class)
+                .withImageCatalog()
+                .withImageId(IMAGE_CATALOG_ID)
+                .given(CM_FOR_DISTRO_X, DistroXClouderaManagerTestDto.class)
+                .given(CLUSTER_KEY, DistroXClusterTestDto.class)
+                .withValidateBlueprint(false)
+                .withClouderaManager(CM_FOR_DISTRO_X)
+                .given("dx-5-volume-ig-template", DistroXInstanceTemplateTestDto.class)
+                .withAttachedVolumes(5)
+                .given("dx-1000-ig-worker", DistroXInstanceGroupTestDto.class)
+                .withHostGroup(HostGroupType.WORKER)
+                .withTemplate("dx-5-volume-ig-template")
+                .withNodeCount(nodeCount)
+                .given("dx-ig-master", DistroXInstanceGroupTestDto.class)
+                .withHostGroup(HostGroupType.MASTER)
+                .given("dx-ig-gw", DistroXInstanceGroupTestDto.class)
+                .withHostGroup(HostGroupType.GATEWAY)
+                .given("dx-ig-compute", DistroXInstanceGroupTestDto.class)
+                .withHostGroup(HostGroupType.COMPUTE)
+                .given(stack, DistroXTestDto.class)
+                .withInstanceGroups("dx-1000-ig-worker", "dx-ig-master", "dx-ig-gw", "dx-ig-compute")
+                .withCluster(CLUSTER_KEY)
+                .withName(stack)
+                .withImageSettings(DIX_IMG_KEY)
+                .withNetwork(DIX_NET_KEY);
     }
 
     @Override

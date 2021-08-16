@@ -232,6 +232,10 @@ public class InstanceMetaDataService {
         return repository.countByWorkspaceId(workspaceId, environmentCrn, stackTypes);
     }
 
+    public StackInstanceCount countByStackId(Long stackId) {
+        return repository.countByStackId(stackId);
+    }
+
     public List<InstanceMetaData> findAllByInstanceGroupAndInstanceStatus(InstanceGroup instanceGroup,
             com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus status) {
         return repository.findAllByInstanceGroupAndInstanceStatus(instanceGroup, status);

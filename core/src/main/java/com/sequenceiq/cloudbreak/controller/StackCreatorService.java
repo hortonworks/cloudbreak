@@ -69,6 +69,7 @@ import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.ClusterCreationSetupService;
+import com.sequenceiq.cloudbreak.service.NodeCountLimitValidator;
 import com.sequenceiq.cloudbreak.service.StackUnderOperationService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.decorator.StackDecorator;
@@ -168,10 +169,14 @@ public class StackCreatorService {
     @Inject
     private IdBrokerService idBrokerService;
 
+    @Inject
+    private NodeCountLimitValidator nodeCountLimitValidator;
+
     public StackV4Response createStack(User user, Workspace workspace, StackV4Request stackRequest, boolean distroxRequest) {
         long start = System.currentTimeMillis();
         String stackName = stackRequest.getName();
 
+        nodeCountLimitValidator.validateProvision(stackRequest);
         measure(() ->
                 validateRecipeExistenceOnInstanceGroups(stackRequest.getInstanceGroups(), workspace.getId()),
                 LOGGER,

@@ -167,6 +167,11 @@ cb:
 
   externaldatabase.ssl.rootcerts.path: /hadoopfs/fs1/database-cacerts/certs.pem
 
+  limit:
+    nodeCountLimits:
+      cm: 400
+      infrastructure: 500
+
   aws:
     spotinstances.enabled: true
     disabled.instance.types:
