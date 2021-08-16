@@ -33,7 +33,6 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 
 @Service
@@ -58,6 +57,7 @@ public class ParcelService {
 
     public Set<ClusterComponent> getParcelComponentsByBlueprint(Stack stack) {
         Set<ClusterComponent> components = getComponents(stack);
+        LOGGER.debug("The following components are available in the cluster {}", components);
         if (stack.isDatalake()) {
             return getDataLakeClusterComponents(components);
         } else {
@@ -69,8 +69,9 @@ public class ParcelService {
                 cmProducts.add(product);
             }
             cmProducts = filterParcelsByBlueprint(cmProducts, stack.getCluster().getBlueprint(), false);
-            LOGGER.debug("The following parcels are used in CM based on blueprint: {}", cmProducts);
-            return getComponentsByRequiredProducts(cmProductMap, cmProducts);
+            Set<ClusterComponent> componentsByRequiredProducts = getComponentsByRequiredProducts(cmProductMap, cmProducts);
+            LOGGER.debug("The following components are required for cluster {}", componentsByRequiredProducts);
+            return componentsByRequiredProducts;
         }
     }
 
@@ -93,11 +94,7 @@ public class ParcelService {
     }
 
     private Set<ClusterComponent> getComponents(Stack stack) {
-        return getParcelComponents(stack.getCluster());
-    }
-
-    private Set<ClusterComponent> getParcelComponents(Cluster cluster) {
-        return clusterComponentConfigProvider.getComponentsByClusterId(cluster.getId()).stream()
+        return clusterComponentConfigProvider.getComponentsByClusterId(stack.getCluster().getId()).stream()
                 .filter(clusterComponent -> ComponentType.CDH_PRODUCT_DETAILS == clusterComponent.getComponentType())
                 .collect(Collectors.toSet());
     }
@@ -117,26 +114,29 @@ public class ParcelService {
 
     public Set<ClouderaManagerProduct> filterParcelsByBlueprint(Set<ClouderaManagerProduct> parcels, Blueprint blueprint, boolean baseImage) {
         Set<String> serviceNamesInBlueprint = getAllServiceNameInBlueprint(blueprint);
+        LOGGER.debug("The following services are found in the blueprint: {}", serviceNamesInBlueprint);
         Set<ClouderaManagerProduct> ret = new HashSet<>();
         if (serviceNamesInBlueprint.contains(null)) {
-            // We can not identify one of the service from the blueprint so to stay on the safe side we will add every parcel
+            LOGGER.debug("We can not identify one of the service from the blueprint so to stay on the safe side we will add every parcel");
             return parcels;
         }
         parcels.forEach(parcel -> {
             ImmutablePair<ManifestStatus, Manifest> manifest = readRepoManifest(parcel.getParcel());
             if (manifest.right != null && ManifestStatus.SUCCESS.equals(manifest.left)) {
                 Set<String> componentNamesInParcel = getAllComponentNameInParcel(manifest.right);
+                LOGGER.debug("The following components are available in parcel: {}", componentNamesInParcel);
                 if (componentNamesInParcel.stream().anyMatch(serviceNamesInBlueprint::contains)) {
-                    LOGGER.info("Add parcel '{}' as there is at least one service both in the manifest and in the blueprint.", parcel.getDisplayName());
+                    LOGGER.info("Add parcel '{}' as there is at least one service both in the manifest and in the blueprint.", parcel);
                     ret.add(parcel);
                 } else {
-                    LOGGER.info("Skip parcel '{}' as there isn't any service both in the manifest and in the blueprint.", parcel.getDisplayName());
+                    LOGGER.info("Skip parcel '{}' as there isn't any service both in the manifest and in the blueprint.", parcel);
                 }
             } else {
-                LOGGER.info("Add parcel '{}' as we were unable to check parcel's manifest.", parcel.getDisplayName());
+                LOGGER.info("Add parcel '{}' as we were unable to check parcel's manifest.", parcel);
                 ret.add(parcel);
             }
         });
+        LOGGER.debug("The following parcels are used in CM based on blueprint: {}", ret);
         return ret;
     }
 
