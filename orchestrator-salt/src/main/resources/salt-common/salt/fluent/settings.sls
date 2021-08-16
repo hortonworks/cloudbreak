@@ -151,8 +151,20 @@
 {% endif %}
 {% set no_proxy_hosts = salt['pillar.get']('proxy:noProxyHosts') %}
 
+{% set metering_version_data = namespace(entities=[]) %}
+{% for role in grains.get('roles', []) %}
+{% if role.startswith("metering_prewarmed") %}
+  {% set metering_version_data.entities = metering_version_data.entities + [role.split("metering_prewarmed_v")[1]]%}
+{% endif %}
+{% endfor %}
+{% if metering_version_data.entities|length > 0 %}
+{% set metering_version = metering_version_data.entities[0] | int %}
+{% else %}
+{% set metering_version = 0 %}
+{% endif %}
+
 {% if dbus_metering_enabled %}
-  {% if "metering_prewarmed_v2" in grains.get('roles', []) and salt['pillar.get']('fluent:dbusMeteringAppName') and salt['pillar.get']('fluent:dbusMeteringStreamName') %}
+  {% if metering_version > 1 and salt['pillar.get']('fluent:dbusMeteringAppName') and salt['pillar.get']('fluent:dbusMeteringStreamName') %}
     {% set dbus_metering_app_headers = 'app:' + cluster_type + ',@metering-app:' + salt['pillar.get']('fluent:dbusMeteringAppName') %}
     {% set dbus_metering_stream_name = salt['pillar.get']('fluent:dbusMeteringStreamName') %}
   {% else %}
