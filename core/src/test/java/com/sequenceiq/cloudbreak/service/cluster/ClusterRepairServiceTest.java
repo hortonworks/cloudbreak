@@ -2,10 +2,12 @@ package com.sequenceiq.cloudbreak.service.cluster;
 
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_MANUALRECOVERY_COULD_NOT_START;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_MANUALRECOVERY_NO_NODES_TO_RECOVER;
+import static com.sequenceiq.cloudbreak.service.cluster.model.HostGroupName.hostGroupName;
 import static com.sequenceiq.redbeams.api.model.common.Status.AVAILABLE;
 import static com.sequenceiq.redbeams.api.model.common.Status.STOPPED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -51,6 +53,8 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.Resource;
+import com.sequenceiq.cloudbreak.domain.Template;
+import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
 import com.sequenceiq.cloudbreak.domain.stack.ManualClusterRepairMode;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
@@ -76,6 +80,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
+import com.sequenceiq.common.model.AwsDiskType;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.flow.domain.FlowLog;
@@ -161,6 +166,7 @@ public class ClusterRepairServiceTest {
         StackStatus stackStatus = new StackStatus();
         stackStatus.setStatus(Status.AVAILABLE);
         stack.setStackStatus(stackStatus);
+        stack.setInstanceGroups(Set.of());
         cluster.setStack(stack);
 
         lenient().doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(transactionService).required(any(Supplier.class));
@@ -482,6 +488,86 @@ public class ClusterRepairServiceTest {
             assertEquals("Primary gateway node is unhealthy, it must be repaired first.",
                     actual.getError().getValidationErrors().get(0));
         });
+    }
+
+    @Test
+    public void testValidateRepairWhenReattachSupported() {
+        when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
+        when(freeipaService.freeipaStatusInDesiredState(stack, Set.of(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE)))
+                .thenReturn(true);
+        when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
+        InstanceMetaData primaryGW = createInstanceMetaData("instanceId", InstanceStatus.SERVICES_HEALTHY);
+        when(stack.getPrimaryGatewayInstance()).thenReturn(primaryGW);
+
+        String idbrokerGroupName = "idbroker";
+        HostGroup idbrokerHg = new HostGroup();
+        idbrokerHg.setName(idbrokerGroupName);
+        idbrokerHg.setRecoveryMode(RecoveryMode.MANUAL);
+        Set<VolumeTemplate> volumeTemplateSet = Set.of(createVolumeTemplate(AwsDiskType.Standard), createVolumeTemplate(AwsDiskType.Ephemeral));
+        InstanceGroup idbrokerIg = createUnhealthyInstanceGroup(idbrokerGroupName, volumeTemplateSet);
+        idbrokerHg.setInstanceGroup(idbrokerIg);
+        when(hostGroupService.getByCluster(CLUSTER_ID)).thenReturn(Set.of(idbrokerHg));
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> actual =
+                    underTest.validateRepair(ManualClusterRepairMode.HOST_GROUP, STACK_ID, Set.of(idbrokerGroupName), false, false);
+            assertEquals(1, actual.getSuccess().size());
+            assertNotNull(actual.getSuccess().get(hostGroupName(idbrokerGroupName)));
+        });
+    }
+
+    @Test
+    public void testValidateRepairWhenReattachNotSupported() {
+        when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
+        when(freeipaService.freeipaStatusInDesiredState(stack, Set.of(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE)))
+                .thenReturn(true);
+        when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
+        InstanceMetaData primaryGW = createInstanceMetaData("instanceId", InstanceStatus.SERVICES_HEALTHY);
+        when(stack.getPrimaryGatewayInstance()).thenReturn(primaryGW);
+
+        String idbrokerGroupName = "idbroker";
+        HostGroup idbrokerHg = new HostGroup();
+        idbrokerHg.setName(idbrokerGroupName);
+        idbrokerHg.setRecoveryMode(RecoveryMode.MANUAL);
+        InstanceGroup idbrokerIg = createUnhealthyInstanceGroup(idbrokerGroupName, Set.of(createVolumeTemplate(AwsDiskType.Ephemeral)));
+        idbrokerHg.setInstanceGroup(idbrokerIg);
+        stack.setInstanceGroups(Set.of(idbrokerIg));
+        when(hostGroupService.getByCluster(CLUSTER_ID)).thenReturn(Set.of(idbrokerHg));
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> actual =
+                    underTest.validateRepair(ManualClusterRepairMode.HOST_GROUP, STACK_ID, Set.of(idbrokerGroupName), false, false);
+            assertEquals("Reattach not supported for this disk type.", actual.getError().getValidationErrors().get(0));
+        });
+    }
+
+    private InstanceGroup createUnhealthyInstanceGroup(String groupName, Set<VolumeTemplate> volumeTemplates) {
+        InstanceGroup instanceGroup = new InstanceGroup();
+        instanceGroup.setGroupName(groupName);
+        instanceGroup.setTemplate(createTemplate(volumeTemplates));
+        InstanceMetaData instanceMetaData = createInstanceMetaData("instanceId", InstanceStatus.SERVICES_UNHEALTHY);
+        instanceMetaData.setInstanceGroup(instanceGroup);
+        instanceGroup.setInstanceMetaData(Set.of(instanceMetaData));
+        return instanceGroup;
+    }
+
+    private Template createTemplate(Set<VolumeTemplate> volumeTemplates) {
+        Template idbrokerTemplate = new Template();
+        idbrokerTemplate.setVolumeTemplates(volumeTemplates);
+        return idbrokerTemplate;
+    }
+
+    private InstanceMetaData createInstanceMetaData(String instanceId, InstanceStatus instanceStatus) {
+        InstanceMetaData instanceMetaData = new InstanceMetaData();
+        instanceMetaData.setInstanceId(instanceId);
+        instanceMetaData.setInstanceStatus(instanceStatus);
+        return instanceMetaData;
+    }
+
+    private VolumeTemplate createVolumeTemplate(AwsDiskType diskType) {
+        VolumeTemplate volumeTemplate = new VolumeTemplate();
+        volumeTemplate.setVolumeType(diskType.value());
+        return volumeTemplate;
     }
 
     private void verifyEventArguments(ResourceEvent resourceEvent, String messageAssert) {

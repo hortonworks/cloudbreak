@@ -6,7 +6,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -43,6 +42,7 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.common.api.type.CdpResourceType;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.common.model.AwsDiskType;
 
 @ExtendWith(MockitoExtension.class)
 public class TemplateValidatorTest {
@@ -95,8 +95,9 @@ public class TemplateValidatorTest {
                 .withSsdConfig(1, 17592,
                         1, 24);
         VmType c3VmType = VmType.vmTypeWithMeta("c3.2xlarge", vmMetaBuilder.create(), false);
+        VmType i3VmType = VmType.vmTypeWithMeta("i3.2xlarge", vmMetaBuilder.withEphemeralConfig(1, 17592, 1, 24).create(), false);
         Map<String, Set<VmType>> machines = new HashMap<>();
-        machines.put(location, Collections.singleton(c3VmType));
+        machines.put(location, Set.of(c3VmType, i3VmType));
         cloudVmTypes = new CloudVmTypes(machines, new HashMap<>());
         when(cloudParameterService.getVmTypesV2(
                 isNull(), anyString(), isNull(), any(CdpResourceType.class), any(HashMap.class))).thenReturn(cloudVmTypes);
@@ -105,6 +106,7 @@ public class TemplateValidatorTest {
         Map<Platform, Map<String, VolumeParameterType>> diskMappings = new HashMap<>();
         Map<String, VolumeParameterType> diskTypeMap = new HashMap<>();
         diskTypeMap.put("standard", VolumeParameterType.SSD);
+        diskTypeMap.put(AwsDiskType.Ephemeral.value(), VolumeParameterType.EPHEMERAL);
         diskMappings.put(platform, diskTypeMap);
 
         platformDisks = new PlatformDisks(new HashMap<>(), new HashMap<>(), diskMappings, new HashMap<>());
@@ -115,7 +117,7 @@ public class TemplateValidatorTest {
 
     @Test
     public void validateIDBrokerDataVolumeZeroCountZeroSize() {
-        instanceGroup = createInstanceGroup(0, 0, true);
+        instanceGroup = createInstanceGroup(0, 0, true, false, "c3.2xlarge");
         underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, optionalUser, builder);
         Mockito.verify(builder, Mockito.times(0)).error(anyString());
         verifyIDBrokerVolume(instanceGroup);
@@ -123,7 +125,7 @@ public class TemplateValidatorTest {
 
     @Test
     public void validateIDBrokerDataVolumeCountOne() {
-        instanceGroup = createInstanceGroup(1, 0, true);
+        instanceGroup = createInstanceGroup(1, 0, true, false, "c3.2xlarge");
         underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, optionalUser, builder);
         Mockito.verify(builder, Mockito.times(0)).error(anyString());
     }
@@ -131,35 +133,64 @@ public class TemplateValidatorTest {
     @Test
     public void validateIDBrokerDataVolumeInvalidCount() {
         // volume count is larger than the max value of 24
-        instanceGroup = createInstanceGroup(25, 1, true);
+        instanceGroup = createInstanceGroup(25, 1, true, false, "c3.2xlarge");
         underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, optionalUser, builder);
         Mockito.verify(builder, Mockito.times(1)).error(anyString());
     }
 
     @Test
     public void validateIDBrokerDataVolumeDefaultSize() {
-        instanceGroup = createInstanceGroup(1, 100, true);
+        instanceGroup = createInstanceGroup(1, 100, true, false, "c3.2xlarge");
         underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, optionalUser, builder);
         Mockito.verify(builder, Mockito.times(0)).error(anyString());
     }
 
     @Test
     public void validateIDBrokerDataVolumeInvalidSize() {
-        instanceGroup = createInstanceGroup(1, 18000, true);
+        instanceGroup = createInstanceGroup(1, 18000, true, false, "c3.2xlarge");
         underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, optionalUser, builder);
         Mockito.verify(builder, Mockito.times(1)).error(anyString());
     }
 
     @Test
+    public void validateIDBrokerMixedVolumeCountOne() {
+        instanceGroup = createInstanceGroup(1, 0, true, true, "i3.2xlarge");
+        underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, optionalUser, builder);
+        Mockito.verify(builder, Mockito.times(0)).error(anyString());
+    }
+
+    @Test
+    public void validateIDBrokerMixedVolumeInvalidCount() {
+        // volume count is larger than the max value of 24
+        instanceGroup = createInstanceGroup(25, 1, true, true, "i3.2xlarge");
+        underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, optionalUser, builder);
+        Mockito.verify(builder, Mockito.times(2)).error(anyString());
+    }
+
+    @Test
+    public void validateIDBrokerMixedVolumeDefaultSize() {
+        instanceGroup = createInstanceGroup(1, 100, true, true, "i3.2xlarge");
+        underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, optionalUser, builder);
+        Mockito.verify(builder, Mockito.times(0)).error(anyString());
+    }
+
+    @Test
+    public void validateIDBrokerMixedVolumeInvalidSize() {
+        instanceGroup = createInstanceGroup(1, 18000, true, true, "i3.2xlarge");
+        underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, optionalUser, builder);
+        Mockito.verify(builder, Mockito.times(2)).error(anyString());
+    }
+
+    @Test
     public void validateMasterDataVolumeZeroCountZeroSize() {
-        instanceGroup = createInstanceGroup(0, 0, false);
+        instanceGroup = createInstanceGroup(0, 0, false, false, "c3.2xlarge");
         underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, optionalUser, builder);
         Mockito.verify(builder, Mockito.times(2)).error(anyString());
     }
 
     @Test
     public void validateMasterDataVolumeCountOne() {
-        instanceGroup = createInstanceGroup(1, 1, false);
+        instanceGroup = createInstanceGroup(1, 1, false, false, "c3.2xlarge");
         underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, optionalUser, builder);
         Mockito.verify(builder, Mockito.times(0)).error(anyString());
     }
@@ -167,31 +198,36 @@ public class TemplateValidatorTest {
     @Test
     public void validateMasterDataVolumeInvalidCount() {
         // volume count is larger than the max value of 24
-        instanceGroup = createInstanceGroup(25, 1, false);
+        instanceGroup = createInstanceGroup(25, 1, false, false, "c3.2xlarge");
         underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, optionalUser, builder);
         Mockito.verify(builder, Mockito.times(1)).error(anyString());
     }
 
     @Test
     public void validateMasterDataVolumeDefaultSize() {
-        instanceGroup = createInstanceGroup(1, 100, false);
+        instanceGroup = createInstanceGroup(1, 100, false, false, "c3.2xlarge");
         underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, optionalUser, builder);
         Mockito.verify(builder, Mockito.times(0)).error(anyString());
     }
 
     @Test
     public void validateMasterDataVolumeInvalidSize() {
-        instanceGroup = createInstanceGroup(1, 18000, false);
+        instanceGroup = createInstanceGroup(1, 18000, false, false, "c3.2xlarge");
         underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, optionalUser, builder);
         Mockito.verify(builder, Mockito.times(1)).error(anyString());
     }
 
-    private InstanceGroup createInstanceGroup(int dataVolumeCount, int dataVolumeSize, boolean createIDBroker) {
-        Template awsTemplate = TestUtil.awsTemplate(1L);
+    private InstanceGroup createInstanceGroup(int dataVolumeCount, int dataVolumeSize, boolean createIDBroker, boolean addEphemeralVolume, String instanceType) {
+        Template awsTemplate = TestUtil.awsTemplate(1L, instanceType);
         int volumeCount = dataVolumeCount;
         int volumeSize = dataVolumeSize;
-        VolumeTemplate volumeTemplate = TestUtil.volumeTemplate(volumeCount, volumeSize, "standard");
-        awsTemplate.setVolumeTemplates(Sets.newHashSet(volumeTemplate));
+        VolumeTemplate standardVolumeTemplate = TestUtil.volumeTemplate(volumeCount, volumeSize, "standard");
+        Set<VolumeTemplate> volumeTemplateSet = Sets.newHashSet(standardVolumeTemplate);
+        if (addEphemeralVolume) {
+            VolumeTemplate ephemeralVolumeTemplate = TestUtil.volumeTemplate(volumeCount, volumeSize, AwsDiskType.Ephemeral.value());
+            volumeTemplateSet.add(ephemeralVolumeTemplate);
+        }
+        awsTemplate.setVolumeTemplates(volumeTemplateSet);
 
         if (createIDBroker) {
             instanceGroup = TestUtil.instanceGroup(1L, InstanceGroupType.CORE, awsTemplate);
