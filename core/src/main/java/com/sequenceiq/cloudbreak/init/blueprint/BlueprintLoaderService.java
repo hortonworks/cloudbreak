@@ -15,7 +15,6 @@ import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -43,14 +42,8 @@ public class BlueprintLoaderService {
     @Inject
     private ClusterTemplateService clusterTemplateService;
 
-    private Map<String, Blueprint> defaultBlueprints;
-
-    @PostConstruct
-    public void getBlueprintsFromCache() {
-        defaultBlueprints = Map.copyOf(defaultBlueprintCache.defaultBlueprints());
-    }
-
     public boolean isAddingDefaultBlueprintsNecessaryForTheUser(Collection<Blueprint> blueprints) {
+        Map<String, Blueprint> defaultBlueprints = defaultBlueprintCache.defaultBlueprints();
         for (Blueprint blueprintFromDatabase : blueprints) {
             Blueprint defaultBlueprint = defaultBlueprints.get(blueprintFromDatabase.getName());
             if (mustUpdateTheExistingBlueprint(blueprintFromDatabase, defaultBlueprint)) {
@@ -83,7 +76,7 @@ public class BlueprintLoaderService {
     public void deleteOldDefaults(Set<Blueprint> blueprintsInDatabase) {
         List<Blueprint> deletableDefaults = blueprintsInDatabase.stream()
                 .filter(blueprint -> blueprint.getStatus().equals(DEFAULT))
-                .filter(blueprint -> !defaultBlueprints.containsKey(blueprint.getName()))
+                .filter(blueprint -> !defaultBlueprintCache.defaultBlueprints().containsKey(blueprint.getName()))
                 .filter(blueprint -> clusterTemplateService.getTemplatesByBlueprint(blueprint).isEmpty())
                 .collect(Collectors.toList());
 
@@ -139,6 +132,7 @@ public class BlueprintLoaderService {
     private Set<Blueprint> updateDefaultBlueprints(Iterable<Blueprint> blueprintsInDatabase, Workspace workspace) {
         Set<Blueprint> resultList = new HashSet<>();
         LOGGER.debug("Updating default blueprints which are contains text modifications.");
+        Map<String, Blueprint> defaultBlueprints = defaultBlueprintCache.defaultBlueprints();
         for (Blueprint blueprintInDatabase : blueprintsInDatabase) {
             Blueprint defaultBlueprint = defaultBlueprints.get(blueprintInDatabase.getName());
             if (isActiveBlueprintMustBeUpdatedAndNotUserManaged(blueprintInDatabase, defaultBlueprint)
@@ -196,7 +190,7 @@ public class BlueprintLoaderService {
     private Map<String, Blueprint> collectDeviationOfExistingAndDefaultBlueprints(Collection<Blueprint> blueprintsInDatabase) {
         LOGGER.debug("Collecting blueprints which are missing from the defaults.");
         Map<String, Blueprint> diff = new HashMap<>();
-        for (Entry<String, Blueprint> stringBlueprintEntry : defaultBlueprints.entrySet()) {
+        for (Entry<String, Blueprint> stringBlueprintEntry : defaultBlueprintCache.defaultBlueprints().entrySet()) {
             if (blueprintsInDatabase
                     .stream()
                     .noneMatch(bp -> bp.getName().equals(stringBlueprintEntry.getKey()))) {
@@ -211,7 +205,7 @@ public class BlueprintLoaderService {
         LOGGER.debug("Collecting blueprints which are missing from the cache.");
         Set<Blueprint> diff = new HashSet<>();
         for (Blueprint blueprint : blueprintsInDatabase) {
-            if (blueprint.getStatus().equals(DEFAULT) && defaultBlueprints.entrySet()
+            if (blueprint.getStatus().equals(DEFAULT) && defaultBlueprintCache.defaultBlueprints().entrySet()
                     .stream()
                     .noneMatch(bp -> bp.getKey().equals(blueprint.getName()))) {
                 diff.add(blueprint);
