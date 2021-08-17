@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.stack;
 import static org.junit.Assert.assertEquals;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.junit.Test;
@@ -22,12 +23,23 @@ public class StackStopRestrictionServiceTest {
     @Test
     public void infrastructureShouldNotBeStoppableForEphemeralStorage() {
         Set<InstanceGroup> groups = new HashSet<>();
-        groups.add(createGroup("ebs"));
-        groups.add(createGroup(AwsDiskType.Ephemeral.value()));
+        groups.add(createGroup(List.of("ebs")));
+        groups.add(createGroup(List.of(AwsDiskType.Ephemeral.value())));
 
         StopRestrictionReason actual = underTest.isInfrastructureStoppable("AWS", groups);
 
         assertEquals(StopRestrictionReason.EPHEMERAL_VOLUMES, actual);
+    }
+
+    @Test
+    public void infrastructureShouldBeStoppableForMixedStorage() {
+        Set<InstanceGroup> groups = new HashSet<>();
+        groups.add(createGroup(List.of("ebs")));
+        groups.add(createGroup(List.of(AwsDiskType.Ephemeral.value(), AwsDiskType.Gp2.value())));
+
+        StopRestrictionReason actual = underTest.isInfrastructureStoppable("AWS", groups);
+
+        assertEquals(StopRestrictionReason.NONE, actual);
     }
 
     @Test
@@ -39,8 +51,8 @@ public class StackStopRestrictionServiceTest {
     @Test
     public void infrastructureShouldBeStoppableForValidInstanceGroups() {
         Set<InstanceGroup> groups = new HashSet<>();
-        groups.add(createGroup("ebs"));
-        InstanceGroup master = createGroup("ebs");
+        groups.add(createGroup(List.of("ebs")));
+        InstanceGroup master = createGroup(List.of("ebs"));
         master.getTemplate().setAttributes(
                 new JsonToString().convertToEntityAttribute(
                         "{\"sshLocation\":\"0.0.0.0/0\",\"encrypted\":false}"));
@@ -51,14 +63,16 @@ public class StackStopRestrictionServiceTest {
         assertEquals(StopRestrictionReason.NONE, actual);
     }
 
-    private InstanceGroup createGroup(String volumeType) {
+    private InstanceGroup createGroup(List<String> volumeTypes) {
         InstanceGroup group = new InstanceGroup();
         Template ephemeralTemplate = new Template();
         group.setTemplate(ephemeralTemplate);
         ephemeralTemplate.setVolumeTemplates(Sets.newHashSet());
-        VolumeTemplate volumeTemplate = new VolumeTemplate();
-        volumeTemplate.setVolumeType(volumeType);
-        ephemeralTemplate.getVolumeTemplates().add(volumeTemplate);
+        for (String volumeType: volumeTypes) {
+            VolumeTemplate volumeTemplate = new VolumeTemplate();
+            volumeTemplate.setVolumeType(volumeType);
+            ephemeralTemplate.getVolumeTemplates().add(volumeTemplate);
+        }
         return group;
     }
 

@@ -39,6 +39,7 @@ import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.common.api.type.CdpResourceType;
+import com.sequenceiq.common.model.AwsDiskType;
 
 @Component
 public class TemplateValidator {
@@ -154,7 +155,9 @@ public class TemplateValidator {
         if (vmType != null) {
             Object maxSize = vmType.getMetaDataValue(VmTypeMeta.MAXIMUM_PERSISTENT_DISKS_SIZE_GB);
             if (maxSize != null) {
-                int fullSize = value.getVolumeTemplates().stream().mapToInt(volume -> volume.getVolumeSize() * volume.getVolumeCount()).sum();
+                int fullSize = value.getVolumeTemplates().stream()
+                        .filter(volumeTemplate -> !AwsDiskType.Ephemeral.value().equals(volumeTemplate.getVolumeType()))
+                        .mapToInt(volume -> volume.getVolumeSize() * volume.getVolumeCount()).sum();
                 if (Integer.parseInt(maxSize.toString()) < fullSize) {
                     validationBuilder.error(
                             String.format("The %s platform does not support %s Gb full volume size. The maximum size of disks could be %s Gb.",

@@ -244,9 +244,9 @@ public class TestUtil {
 
     public static Set<InstanceGroup> generateAwsInstanceGroups(int count) {
         Set<InstanceGroup> instanceGroups = new HashSet<>();
-        instanceGroups.add(instanceGroup(1L, InstanceGroupType.GATEWAY, awsTemplate(1L)));
+        instanceGroups.add(instanceGroup(1L, InstanceGroupType.GATEWAY, awsTemplate(1L, "c3.2xlarge")));
         for (int i = 0; i < count - 1; i++) {
-            instanceGroups.add(instanceGroup(1L, InstanceGroupType.CORE, awsTemplate(1L)));
+            instanceGroups.add(instanceGroup(1L, InstanceGroupType.CORE, awsTemplate(1L, "c3.2xlarge")));
         }
         return instanceGroups;
     }
@@ -344,9 +344,9 @@ public class TestUtil {
         return instanceMetaDatas;
     }
 
-    public static Template awsTemplate(Long id) {
+    public static Template awsTemplate(Long id, String instanceType) {
         Template awsTemplate = new Template();
-        awsTemplate.setInstanceType("c3.2xlarge");
+        awsTemplate.setInstanceType(instanceType);
         awsTemplate.setId(id);
         awsTemplate.setCloudPlatform(AWS);
         awsTemplate.setId(1L);
