@@ -45,15 +45,15 @@ public class CsdParcelDecorator {
         }
     }
 
-    private void addCsdParcelsToServicePillar(Collection<ClouderaManagerProduct> product, Map<String, SaltPillarProperties> servicePillar) {
-        List<String> csdUrls = getCsdUrlList(product);
+    private void addCsdParcelsToServicePillar(Collection<ClouderaManagerProduct> products, Map<String, SaltPillarProperties> servicePillar) {
+        List<String> csdUrls = getCsdUrlList(products);
         if (!csdUrls.isEmpty()) {
             LOGGER.debug("Decorating pillar with the following CSD parcels: {}", csdUrls);
             servicePillar.put("csd-downloader", new SaltPillarProperties("/cloudera-manager/csd.sls",
                     singletonMap("cloudera-manager",
                             singletonMap("csd-urls", csdUrls))));
         } else {
-            LOGGER.debug("There are no CSD to add to the pillar.");
+            LOGGER.debug("There are no CSD to add to the pillar. Related products: {}", products);
         }
     }
 
