@@ -9,9 +9,11 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,6 +32,7 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
@@ -103,6 +106,9 @@ public class AzureResourceConnectorTest {
 
     @Mock
     private AzureImageFormatValidator azureImageFormatValidator;
+
+    @Mock
+    private AzureTerminationHelperService azureTerminationHelperService;
 
     private List<CloudResource> instances;
 
@@ -202,4 +208,20 @@ public class AzureResourceConnectorTest {
         verify(azureMarketplaceImageProviderService, times(1)).get(imageModel);
     }
 
+    @Test
+    public void testLaunchLoadBalancerHandlesGracefully() throws Exception {
+        List<CloudResourceStatus> cloudResourceStatuses = underTest.launchLoadBalancers(ac, stack, notifier);
+        Assert.assertEquals(0, cloudResourceStatuses.size());
+    }
+
+    @Test
+    public void testTermiate() {
+        when(azureTerminationHelperService.handleTransientDeployment(any(), any(), any())).thenReturn(List.of());
+        when(azureTerminationHelperService.terminate(any(), any(), any()))
+                .thenReturn(List.of(new CloudResourceStatus(instances.get(0), ResourceStatus.DELETED)));
+        List<CloudResourceStatus> statuses = underTest.terminate(ac, stack, new ArrayList<>(instances));
+        for (CloudResourceStatus status : statuses) {
+            Assert.assertEquals(ResourceStatus.DELETED, status.getStatus());
+        }
+    }
 }

@@ -471,19 +471,11 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         CloudInstance instance) {
         String subnetId = Strings.isNullOrEmpty(instance.getSubnetId()) ? gcpStackUtil.getSubnetId(network) : instance.getSubnetId();
         if (StringUtils.isNotEmpty(gcpStackUtil.getSharedProjectId(network))) {
-            networkInterface.setNetwork(getNetworkUrl(gcpStackUtil.getSharedProjectId(network), gcpStackUtil.getCustomNetworkId(network)));
-            networkInterface.setSubnetwork(getSubnetUrl(gcpStackUtil.getSharedProjectId(network), region.value(), subnetId));
+            networkInterface.setNetwork(gcpStackUtil.getNetworkUrl(gcpStackUtil.getSharedProjectId(network), gcpStackUtil.getCustomNetworkId(network)));
+            networkInterface.setSubnetwork(gcpStackUtil.getSubnetUrl(gcpStackUtil.getSharedProjectId(network), region.value(), subnetId));
         } else {
-            networkInterface.setSubnetwork(getSubnetUrl(projectId, region.value(), subnetId));
+            networkInterface.setSubnetwork(gcpStackUtil.getSubnetUrl(projectId, region.value(), subnetId));
         }
-    }
-
-    private String getSubnetUrl(String sharedProjectId, String value, String customSubnetworkId) {
-        return String.format("https://www.googleapis.com/compute/v1/projects/%s/regions/%s/subnetworks/%s", sharedProjectId, value, customSubnetworkId);
-    }
-
-    private String getNetworkUrl(String sharedProjectId, String customNetworkId) {
-        return String.format("https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s", sharedProjectId, customNetworkId);
     }
 
     private List<CloudResource> filterResourcesByType(List<CloudResource> resources, ResourceType resourceType) {

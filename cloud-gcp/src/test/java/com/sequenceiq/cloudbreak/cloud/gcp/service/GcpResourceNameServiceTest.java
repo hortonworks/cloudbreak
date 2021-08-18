@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.cloud.service.ResourceNameService;
+import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.api.type.ResourceType;
 
 public class GcpResourceNameServiceTest {
@@ -96,6 +97,19 @@ public class GcpResourceNameServiceTest {
     }
 
     @Test
+    public void shouldHandleHealthCheckTypeFieldWithPort() {
+
+        Object[] parts = {"stack", LoadBalancerType.PUBLIC, 8080};
+        String resourceName = subject.resourceName(ResourceType.GCP_HEALTH_CHECK, parts);
+
+
+        Assert.assertNotNull("The generated name must not be null!", resourceName);
+        Assert.assertTrue("The resource name is not the expected one!", resourceName.startsWith("stack-public-8080"));
+        Assert.assertEquals("The timestamp must be appended", 4L, resourceName.split("-").length);
+
+    }
+
+    @Test
     public void shouldShortenGcpInstanceNameWhenLongResourceNameProvided() {
         //GIVEN
         Object[] parts = {"thisisaverylongtextwhichneedstobeshortenedbythespecificmethod",
@@ -142,7 +156,7 @@ public class GcpResourceNameServiceTest {
 
         // THEN
         Assert.assertNotNull("The generated name must not be null!", resourceName);
-        Assert.assertEquals("The timestamp must be appended", 3L, resourceName.split("-").length);
+        Assert.assertEquals("Should have both parts", 2L, resourceName.split("-").length);
         Assert.assertTrue("The resource name is not the expected one!", resourceName.startsWith("stack-group"));
     }
 }
