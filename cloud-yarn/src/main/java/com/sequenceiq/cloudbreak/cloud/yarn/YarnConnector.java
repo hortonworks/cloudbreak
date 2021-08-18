@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.cloud.EncryptionResources;
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.NetworkConnector;
+import com.sequenceiq.cloudbreak.cloud.ObjectStorageConnector;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
@@ -51,6 +52,9 @@ public class YarnConnector implements CloudConnector<Object> {
 
     @Inject
     private YarnPlatformResources platformResources;
+
+    @Inject
+    private YarnObjectStorageConnector objectStorage;
 
     @Override
     public Authenticator authentication() {
@@ -120,5 +124,10 @@ public class YarnConnector implements CloudConnector<Object> {
     @Override
     public EncryptionResources encryptionResources() {
         return null;
+    }
+
+    @Override
+    public ObjectStorageConnector objectStorage() {
+        return objectStorage;
     }
 }
