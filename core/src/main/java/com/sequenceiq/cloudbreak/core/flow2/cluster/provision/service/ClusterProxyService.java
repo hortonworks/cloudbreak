@@ -5,6 +5,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -165,13 +166,18 @@ public class ClusterProxyService {
     }
 
     private List<TunnelEntry> tunnelEntries(Stack stack) {
-        InstanceMetaData primaryGatewayInstance = stack.getPrimaryGatewayInstance();
-        String gatewayIp = stack.getPrimaryGatewayInstance().getPublicIpWrapper();
-        TunnelEntry gatewayTunnel = new TunnelEntry(primaryGatewayInstance.getInstanceId(), KnownServiceIdentifier.GATEWAY.name(),
-                gatewayIp, ServiceFamilies.GATEWAY.getDefaultPort(), stack.getMinaSshdServiceId());
-        TunnelEntry knoxTunnel = new TunnelEntry(primaryGatewayInstance.getInstanceId(), KnownServiceIdentifier.KNOX.name(),
-                gatewayIp, ServiceFamilies.KNOX.getDefaultPort(), stack.getMinaSshdServiceId());
-        return asList(gatewayTunnel, knoxTunnel);
+        List<TunnelEntry> entries = new ArrayList<>();
+        stack.getGatewayInstanceMetadata().forEach(md -> {
+            String gatewayIp = md.getPublicIpWrapper();
+            TunnelEntry gatewayTunnel = new TunnelEntry(md.getInstanceId(), KnownServiceIdentifier.GATEWAY.name(),
+                    gatewayIp, ServiceFamilies.GATEWAY.getDefaultPort(), stack.getMinaSshdServiceId());
+            TunnelEntry knoxTunnel = new TunnelEntry(md.getInstanceId(), KnownServiceIdentifier.KNOX.name(),
+                    gatewayIp, ServiceFamilies.KNOX.getDefaultPort(), stack.getMinaSshdServiceId());
+
+            entries.add(gatewayTunnel);
+            entries.add(knoxTunnel);
+        });
+        return entries;
     }
 
     private List<CcmV2Config> ccmV2Configs(Stack stack) {
