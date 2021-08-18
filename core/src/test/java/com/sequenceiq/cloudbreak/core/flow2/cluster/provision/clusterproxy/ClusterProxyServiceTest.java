@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.provision.clusterproxy;
 
 import static java.util.Arrays.asList;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -182,7 +183,7 @@ class ClusterProxyServiceTest {
         assertNull(proxyRegisterationReq.getCcmV2Configs(), "CCMV2 config should not be initialized.");
 
         assertEquals(true, proxyRegisterationReq.isUseTunnel(), "CCMV1 tunnel should be enabled");
-        assertEquals(tunnelEntries(), proxyRegisterationReq.getTunnels(), "CCMV1 tunnel should be configured.");
+        assertThat(proxyRegisterationReq.getTunnels()).withFailMessage("CCMV1 tunnel should be configured.").hasSameElementsAs(tunnelEntries());
         assertEquals(4, proxyRegisterationReq.getServices().size());
         assertTrue(proxyRegisterationReq.getServices().contains(cmServiceConfigWithInstanceId(PRIMARY_PUBLIC_IP, PRIMARY_INSTANCE_ID)));
         assertTrue(proxyRegisterationReq.getServices().contains(cmServiceConfigWithInstanceId(OTHER_PUBLIC_IP, OTHER_INSTANCE_ID)));
@@ -272,7 +273,7 @@ class ClusterProxyServiceTest {
         assertEquals("https://10.10.10.10/test-cluster", proxyRegisterationReq.getUriOfKnox(), "CCMV1 Knox URI should match");
 
         assertEquals(true, proxyRegisterationReq.isUseTunnel(), "CCMV1 tunnel should be enabled");
-        assertEquals(tunnelEntries(), proxyRegisterationReq.getTunnels(), "CCMV1 tunnel should be configured.");
+        assertThat(proxyRegisterationReq.getTunnels()).withFailMessage("CCMV1 tunnel should be configured.").hasSameElementsAs(tunnelEntries());
         assertEquals(4, proxyRegisterationReq.getServices().size());
         assertTrue(proxyRegisterationReq.getServices().contains(cmServiceConfigWithInstanceId(PRIMARY_PUBLIC_IP, PRIMARY_INSTANCE_ID)));
         assertTrue(proxyRegisterationReq.getServices().contains(cmServiceConfigWithInstanceId(OTHER_PUBLIC_IP, OTHER_INSTANCE_ID)));
@@ -370,8 +371,10 @@ class ClusterProxyServiceTest {
     }
 
     private List<TunnelEntry> tunnelEntries() {
-        return List.of(new TunnelEntry("i-abc123", "GATEWAY", "10.10.10.10", 9443, MINA_ID),
-                new TunnelEntry("i-abc123", "KNOX", "10.10.10.10", 443, MINA_ID));
+        return List.of(new TunnelEntry(PRIMARY_INSTANCE_ID, "GATEWAY", PRIMARY_PUBLIC_IP, 9443, MINA_ID),
+                new TunnelEntry(PRIMARY_INSTANCE_ID, "KNOX", PRIMARY_PUBLIC_IP, 443, MINA_ID),
+                new TunnelEntry(OTHER_INSTANCE_ID, "GATEWAY", OTHER_PUBLIC_IP, 9443, MINA_ID),
+                new TunnelEntry(OTHER_INSTANCE_ID, "KNOX", OTHER_PUBLIC_IP, 443, MINA_ID));
     }
 
     private ClusterServiceConfig cmServiceConfigWithInstanceId(String ipAddress, String instanceId) {
