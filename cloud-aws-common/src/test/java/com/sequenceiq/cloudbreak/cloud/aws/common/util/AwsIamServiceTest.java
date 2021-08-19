@@ -1,8 +1,11 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -10,31 +13,40 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.amazonaws.auth.policy.Action;
 import com.amazonaws.auth.policy.Policy;
 import com.amazonaws.auth.policy.Principal;
 import com.amazonaws.auth.policy.Resource;
 import com.amazonaws.auth.policy.Statement;
 import com.amazonaws.auth.policy.Statement.Effect;
+import com.amazonaws.auth.policy.actions.AutoScalingActions;
 import com.amazonaws.auth.policy.actions.S3Actions;
 import com.amazonaws.auth.policy.actions.SecurityTokenServiceActions;
+import com.amazonaws.services.identitymanagement.model.EvaluationResult;
 import com.amazonaws.services.identitymanagement.model.GetInstanceProfileRequest;
 import com.amazonaws.services.identitymanagement.model.GetInstanceProfileResult;
 import com.amazonaws.services.identitymanagement.model.GetRoleRequest;
 import com.amazonaws.services.identitymanagement.model.GetRoleResult;
 import com.amazonaws.services.identitymanagement.model.InstanceProfile;
 import com.amazonaws.services.identitymanagement.model.NoSuchEntityException;
+import com.amazonaws.services.identitymanagement.model.PolicyEvaluationDecisionType;
 import com.amazonaws.services.identitymanagement.model.Role;
 import com.amazonaws.services.identitymanagement.model.ServiceFailureException;
+import com.amazonaws.services.identitymanagement.model.SimulatePrincipalPolicyRequest;
+import com.amazonaws.services.identitymanagement.model.SimulatePrincipalPolicyResult;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonIdentityManagementClient;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
@@ -283,5 +295,80 @@ public class AwsIamServiceTest {
                         new Resource("resource2"));
         assertThat(awsIamService.getStatementResources(statementMultipleResources))
                 .isEqualTo(expectedMultipleResources);
+    }
+
+    @Test
+    public void testValidateRolePolicies() {
+        ArgumentCaptor<SimulatePrincipalPolicyRequest> simulatePolicyRequestCaptor = ArgumentCaptor.forClass(SimulatePrincipalPolicyRequest.class);
+        when(iam.simulatePrincipalPolicy(simulatePolicyRequestCaptor.capture()))
+                .thenReturn(new SimulatePrincipalPolicyResult().withEvaluationResults(new EvaluationResult()
+                        .withEvalDecision(PolicyEvaluationDecisionType.Allowed)));
+        Policy policy1 = new Policy();
+        Set<Statement> statements1 = Set.of(
+                createStatement(Set.of(AutoScalingActions.CreateAutoScalingGroup, AutoScalingActions.DeleteAutoScalingGroup),
+                        Set.of(new Resource("resource1"), new Resource("resource2"))),
+                createStatement(Set.of(S3Actions.GetObject, S3Actions.PutObject),
+                        Set.of(new Resource("resource1"), new Resource("resource2"), new Resource("resource3"), new Resource("resource4")))
+        );
+        policy1.getStatements().addAll(statements1);
+        Policy policy2 = new Policy();
+        Set<Statement> statements2 = Set.of(
+                createStatement(Set.of(AutoScalingActions.AttachLoadBalancers, AutoScalingActions.AttachLoadBalancerTargetGroups),
+                        Set.of(new Resource("resource1"), new Resource("resource2"))),
+                createStatement(Set.of(S3Actions.GetObject, S3Actions.PutObject),
+                        Set.of(new Resource("resource5"))),
+                createStatement(Set.of(S3Actions.GetObject, S3Actions.PutObject),
+                        Set.of(new Resource("resource6")))
+        );
+        policy2.setStatements(statements2);
+        Set<Policy> policies = Set.of(policy1, policy2);
+
+        List<EvaluationResult> evaluationResults = awsIamService.validateRolePolicies(iam, createRole(), policies);
+
+        assertEquals(2, evaluationResults.size());
+        verify(iam, times(2)).simulatePrincipalPolicy(any());
+        List<SimulatePrincipalPolicyRequest> requests = simulatePolicyRequestCaptor.getAllValues();
+
+        SimulatePrincipalPolicyRequest request1;
+        SimulatePrincipalPolicyRequest request2;
+        if (requests.get(0).getResourceArns().size() == 6) {
+            request1 = requests.get(0);
+            request2 = requests.get(1);
+        } else {
+            request1 = requests.get(1);
+            request2 = requests.get(0);
+        }
+        assertEquals("roleArn", request1.getPolicySourceArn());
+        assertEquals("roleArn", request2.getPolicySourceArn());
+        assertThat(request1.getResourceArns()).containsExactlyInAnyOrder("resource1", "resource2", "resource3", "resource4", "resource5", "resource6");
+        assertThat(request2.getResourceArns()).containsExactlyInAnyOrder("resource1", "resource2");
+        assertThat(request1.getActionNames()).containsExactlyInAnyOrder("s3:GetObject", "s3:PutObject");
+        assertThat(request2.getActionNames()).containsExactlyInAnyOrder("autoscaling:CreateAutoScalingGroup", "autoscaling:DeleteAutoScalingGroup",
+                "autoscaling:AttachLoadBalancers", "autoscaling:AttachLoadBalancerTargetGroups");
+    }
+
+    @Test
+    public void testInvalidValidateRolePolicies() {
+        when(iam.simulatePrincipalPolicy(any()))
+                .thenReturn(new SimulatePrincipalPolicyResult().withEvaluationResults(new EvaluationResult()
+                        .withEvalDecision(PolicyEvaluationDecisionType.ExplicitDeny)));
+
+        Policy policy = new Policy().withStatements(createStatement(Set.of(S3Actions.GetObject), Set.of(new Resource("resource1"))));
+        List<EvaluationResult> evaluationResults = awsIamService.validateRolePolicies(iam, createRole(), Set.of(policy));
+        assertThat(evaluationResults).hasSize(1);
+        EvaluationResult evaluationResult = evaluationResults.get(0);
+        assertEquals("explicitDeny", evaluationResult.getEvalDecision());
+        verify(iam, times(1)).simulatePrincipalPolicy(any());
+    }
+
+    private Statement createStatement(Set<Action> actions, Set<Resource> resources) {
+        Statement statement = new Statement(Effect.Allow);
+        statement.getActions().addAll(actions);
+        statement.setResources(resources);
+        return statement;
+    }
+
+    private Role createRole() {
+        return new Role().withArn("roleArn");
     }
 }

@@ -12,39 +12,28 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
 import com.amazonaws.services.identitymanagement.model.EvaluationResult;
 import com.amazonaws.services.identitymanagement.model.PolicyEvaluationDecisionType;
 import com.amazonaws.services.identitymanagement.model.Role;
 
-@ExtendWith(MockitoExtension.class)
 public abstract class AwsIDBrokerMappedRolePermissionValidatorTest {
-    @Mock
-    protected AmazonIdentityManagement iam;
 
     public abstract AwsIDBrokerMappedRolePermissionValidator getValidator();
 
-    @Test
     public abstract void testGetUsers();
 
-    @Test
     public abstract void testGetPolicyFileNames();
 
-    @Test
     public abstract void testGetStorageLocationBase();
 
-    @Test
     public abstract void testCheckLocation();
 
-    @Test
     public abstract void testGetPolicyJsonReplacements();
 
-    @Test
     public abstract void testGetPolicyJsonReplacementsNoDynamodb();
+
+    public abstract void testCollectPolicies();
 
     @Test
     public void testGetRoleArnsForUsers() {

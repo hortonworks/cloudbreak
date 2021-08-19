@@ -83,22 +83,15 @@ public abstract class AwsIDBrokerMappedRolePermissionValidator {
             List<String> policyFileNames = getPolicyFileNames(s3guardEnabled);
 
             SortedSet<String> failedActions = new TreeSet<>();
-            for (StorageLocationBase location : cloudFileSystem.getLocations()) {
-                if (checkLocation(location)) {
-                    Map<String, String> replacements = getPolicyJsonReplacements(location, cloudFileSystem);
-                    List<Policy> policies = getPolicies(policyFileNames, replacements);
-                    for (Role role : roles) {
-                        try {
-                            List<EvaluationResult> evaluationResults = awsIamService.validateRolePolicies(iam,
-                                    role, policies);
-                            failedActions.addAll(getFailedActions(role, evaluationResults));
-                        } catch (AmazonIdentityManagementException e) {
-                            // Only log the error and keep processing. Failed actions won't be added, but
-                            // processing doesn't get stopped either. This can happen due to rate limiting.
-                            LOGGER.error("Unable to validate role policies for role {} due to {}", role.getArn(),
-                                    e.getMessage(), e);
-                        }
-                    }
+            List<Policy> policies = collectPolicies(cloudFileSystem, policyFileNames);
+            for (Role role : roles) {
+                try {
+                    List<EvaluationResult> evaluationResults = awsIamService.validateRolePolicies(iam, role, policies);
+                    failedActions.addAll(getFailedActions(role, evaluationResults));
+                } catch (AmazonIdentityManagementException e) {
+                    // Only log the error and keep processing. Failed actions won't be added, but
+                    // processing doesn't get stopped either. This can happen due to rate limiting.
+                    LOGGER.error("Unable to validate role policies for role {} due to {}", role.getArn(), e.getMessage(), e);
                 }
             }
             if (!failedActions.isEmpty()) {
@@ -116,6 +109,18 @@ public abstract class AwsIDBrokerMappedRolePermissionValidator {
                 validationResultBuilder.error(validationErrorMessage);
             }
         }
+    }
+
+    List<Policy> collectPolicies(CloudS3View cloudFileSystem, List<String> policyFileNames) {
+        List<Policy> policies = new ArrayList<>();
+        for (StorageLocationBase location : cloudFileSystem.getLocations()) {
+            if (checkLocation(location)) {
+                Map<String, String> replacements = getPolicyJsonReplacements(location, cloudFileSystem);
+                List<Policy> policiesWithReplacements = getPolicies(policyFileNames, replacements);
+                policies.addAll(policiesWithReplacements);
+            }
+        }
+        return policies;
     }
 
     /**

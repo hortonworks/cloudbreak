@@ -9,6 +9,8 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -243,15 +245,47 @@ public class AwsIamService {
     public List<EvaluationResult> validateRolePolicies(AmazonIdentityManagementClient iam, Role role,
             Collection<Policy> policies) throws AmazonIdentityManagementException {
         List<EvaluationResult> evaluationResults = new ArrayList<>();
+        Set<PolicySimulation> policySimulations = collectPolicySimulations(policies);
+        for (PolicySimulation policySimulation : policySimulations) {
+            List<EvaluationResult> results = simulatePrincipalPolicy(iam, role.getArn(), policySimulation.getActions(), policySimulation.getResources());
+            evaluationResults.addAll(results);
+        }
+        return evaluationResults;
+    }
+
+    private Set<PolicySimulation> collectPolicySimulations(Collection<Policy> policies) {
+        Map<Set<String>, PolicySimulation> policySimulationsByResources = mergePolicySimulationsByResources(policies);
+        Map<Set<String>, PolicySimulation> policySimulationsByActions = mergePolicySimulationsByActions(policySimulationsByResources);
+        return new HashSet<>(policySimulationsByActions.values());
+    }
+
+    private Map<Set<String>, PolicySimulation> mergePolicySimulationsByResources(Collection<Policy> policies) {
+        Map<Set<String>, PolicySimulation> policySimulationsByResources = new HashMap<>();
         for (Policy policy : policies) {
             for (Statement statement : policy.getStatements()) {
                 SortedSet<String> actions = getStatementActions(statement);
                 SortedSet<String> resources = getStatementResources(statement);
-                List<EvaluationResult> results = simulatePrincipalPolicy(iam, role.getArn(), actions, resources);
-                evaluationResults.addAll(results);
+                if (policySimulationsByResources.containsKey(resources)) {
+                    policySimulationsByResources.get(resources).getActions().addAll(actions);
+                } else {
+                    policySimulationsByResources.put(resources, new PolicySimulation(resources, actions));
+                }
             }
         }
-        return evaluationResults;
+        return policySimulationsByResources;
+    }
+
+    private Map<Set<String>, PolicySimulation> mergePolicySimulationsByActions(Map<Set<String>, PolicySimulation> policySimulationsByResources) {
+        Map<Set<String>, PolicySimulation> policySimulationsByActions = new HashMap<>();
+        for (PolicySimulation policySimulation : policySimulationsByResources.values()) {
+            Set<String> actions = policySimulation.getActions();
+            if (policySimulationsByActions.containsKey(actions)) {
+                policySimulationsByActions.get(actions).getResources().addAll(policySimulation.getResources());
+            } else {
+                policySimulationsByActions.put(actions, policySimulation);
+            }
+        }
+        return policySimulationsByActions;
     }
 
     /**
