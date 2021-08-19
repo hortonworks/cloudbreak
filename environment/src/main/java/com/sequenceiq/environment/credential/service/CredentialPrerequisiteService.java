@@ -29,7 +29,6 @@ import com.sequenceiq.common.model.CredentialType;
 import com.sequenceiq.environment.credential.attributes.CredentialAttributes;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.exception.CredentialOperationException;
-import com.sequenceiq.environment.experience.ExperienceConnectorService;
 import com.sequenceiq.environment.user.UserPreferencesService;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
@@ -48,11 +47,8 @@ public class CredentialPrerequisiteService {
 
     private final EntitlementService entitlementService;
 
-    private ExperienceConnectorService experienceConnectorService;
-
     public CredentialPrerequisiteService(EventBus eventBus, UserPreferencesService userPreferencesService, ErrorHandlerAwareReactorEventFactory eventFactory,
-            ExperienceConnectorService experienceConnectorService, EntitlementService entitlementService) {
-        this.experienceConnectorService = experienceConnectorService;
+            EntitlementService entitlementService) {
         this.userPreferencesService = userPreferencesService;
         this.entitlementService = entitlementService;
         this.eventFactory = eventFactory;
