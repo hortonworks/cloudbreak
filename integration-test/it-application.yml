@@ -2,7 +2,7 @@ mock:
   server:
     address: test
   imagecatalog:
-    server: thunderhead-mock:8080
+    server: mock-infrastructure:10090
 
 integrationtest:
   outputdir: /it

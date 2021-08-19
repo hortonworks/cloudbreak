@@ -1,4 +1,4 @@
-package com.sequenceiq.thunderhead.controller;
+package com.sequenceiq.mock.controller;
 
 import javax.inject.Inject;
 
@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.sequenceiq.thunderhead.service.ImageCatalogMockService;
+import com.sequenceiq.mock.service.ImageCatalogMockService;
 
 @RestController
 public class MockImageCatalogController {
@@ -15,7 +15,7 @@ public class MockImageCatalogController {
     @Inject
     private ImageCatalogMockService imageCatalogMockService;
 
-    @GetMapping("/thunderhead/mock-image-catalog")
+    @GetMapping("/mock-image-catalog")
     @ResponseBody
     public String auth(@RequestParam("catalog-name") String name,
             @RequestParam("cb-version") String cbVersion,

@@ -50,7 +50,7 @@ public class CloudbreakServer {
     @Value("${integrationtest.dp.profile:}")
     private String profile;
 
-    @Value("${mock.imagecatalog.server:localhost:10080}")
+    @Value("${mock.imagecatalog.server:localhost:10090}")
     private String mockImageCatalogAddr;
 
     @Inject
