@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.cloud.gcp.network.GcpNetworkResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.gcp.network.GcpSubnetResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpSubnetSelectorService;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
+import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
@@ -264,6 +265,8 @@ public class GcpNetworkConnector extends AbstractGcpResourceBuilder implements D
                     auth, Collections.singletonList(cloudResource), context, true);
             subnet.setSubnetId(cloudResource.getName());
             syncPollingScheduler.schedule(task);
+        } catch (GcpResourceException e) {
+            throw e;
         } catch (Exception e) {
             LOGGER.debug("Skipping resource creation: {}", e.getMessage());
         }
@@ -277,6 +280,8 @@ public class GcpNetworkConnector extends AbstractGcpResourceBuilder implements D
             PollTask<List<CloudResourceStatus>> task = statusCheckFactory.newPollResourceTask(gcpNetworkResourceBuilder,
                     auth, Collections.singletonList(cloudResource), context, true);
             syncPollingScheduler.schedule(task);
+        } catch (GcpResourceException e) {
+            throw e;
         } catch (Exception e) {
             LOGGER.debug("Skipping resource creation: {}", e.getMessage());
         }
@@ -285,7 +290,9 @@ public class GcpNetworkConnector extends AbstractGcpResourceBuilder implements D
 
     private void deleteNetwork(GcpContext context, AuthenticatedContext auth, Network network, String networkId) throws IOException {
         if (StringUtils.isNotEmpty(networkId)) {
-            CloudResource networkResource = createNamedResource(GCP_NETWORK, networkId, context.getLocation().getAvailabilityZone().value());
+            AvailabilityZone az = context.getLocation().getAvailabilityZone();
+            String availabilityZone = az != null ? az.value() : null;
+            CloudResource networkResource = createNamedResource(GCP_NETWORK, networkId, availabilityZone);
             try {
                 CloudResource deletedResource = gcpNetworkResourceBuilder.delete(context, auth, networkResource, network);
                 if (deletedResource != null) {
@@ -293,6 +300,8 @@ public class GcpNetworkConnector extends AbstractGcpResourceBuilder implements D
                             gcpSubnetResourceBuilder, auth, Collections.singletonList(deletedResource), context, true);
                     syncPollingScheduler.schedule(task);
                 }
+            } catch (GcpResourceException e) {
+                throw e;
             } catch (Exception e) {
                 LOGGER.debug("Skipping resource deletion: {}", e.getMessage());
             }
@@ -310,6 +319,8 @@ public class GcpNetworkConnector extends AbstractGcpResourceBuilder implements D
                         gcpSubnetResourceBuilder, auth, Collections.singletonList(deletedResource), context, true);
                 syncPollingScheduler.schedule(task);
             }
+        } catch (GcpResourceException e) {
+            throw e;
         } catch (Exception e) {
             LOGGER.debug("Skipping resource deletion: {}", e.getMessage());
         }
