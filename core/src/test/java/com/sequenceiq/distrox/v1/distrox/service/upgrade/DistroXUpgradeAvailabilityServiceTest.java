@@ -274,7 +274,7 @@ public class DistroXUpgradeAvailabilityServiceTest {
     private ImageInfoV4Response createImageResponse(long creation, String cdp) {
         ImageInfoV4Response image = new ImageInfoV4Response();
         image.setCreated(creation);
-        image.setComponentVersions(new ImageComponentVersions("dontcare", "dontcare", cdp, "dontcare", "dontcare", "dontcare"));
+        image.setComponentVersions(new ImageComponentVersions("dontcare", "dontcare", cdp, "dontcare", "dontcare", "dontcare", List.of()));
         return image;
     }
 }

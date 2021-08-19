@@ -104,6 +104,9 @@ public class ModelDescriptions {
         public static final String SOURCE_IMAGE_ID = "id of the source image serving as the base of the customized image";
         public static final String PARCEL_BASE_URL = "custom base url for parcels in case of a customized image";
         public static final String VMS_TO_REGIONS = "VM image references mapped to cloud regions";
+        public static final String PARCEL_NAME = "display name of the parcel";
+        public static final String PARCEL_VERSION = "version of the parcel";
+        public static final String PARCEL_BUILD_NUMBER = "build number of the parcel";
     }
 
     public static class CustomImageDescription {

@@ -116,7 +116,7 @@ class DistroXUpgradeImageSelectorTest {
         ImageInfoV4Response image = new ImageInfoV4Response();
         image.setImageId(id);
         image.setCreated(creation);
-        image.setComponentVersions(new ImageComponentVersions("a", "b", cdp, "d", "g", "a"));
+        image.setComponentVersions(new ImageComponentVersions("a", "b", cdp, "d", "g", "a", List.of()));
         return image;
     }
 }
