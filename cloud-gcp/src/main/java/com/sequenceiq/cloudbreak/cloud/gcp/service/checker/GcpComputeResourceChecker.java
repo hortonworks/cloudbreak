@@ -71,14 +71,14 @@ public class GcpComputeResourceChecker {
             Location location = context.getLocation();
             Region region = location.getRegion();
             CloudResource cloudResource = resources.iterator().next();
-            String availabilityZone = Strings.isNullOrEmpty(cloudResource.getAvailabilityZone())
-                    ? location.getAvailabilityZone().value() : cloudResource.getAvailabilityZone();
             try {
                 Operation execute = gcpStackUtil.regionOperations(context.getCompute(), context.getProjectId(), operationId, region).execute();
                 checkComputeOperationError(execute);
                 return execute;
             } catch (GoogleJsonResponseException e1) {
                 if (e1.getDetails().get("code").equals(HttpStatus.SC_NOT_FOUND) || e1.getDetails().get("code").equals(HttpStatus.SC_FORBIDDEN)) {
+                    String availabilityZone = Strings.isNullOrEmpty(cloudResource.getAvailabilityZone())
+                            ? location.getAvailabilityZone().value() : cloudResource.getAvailabilityZone();
                     Operation execute = gcpStackUtil.zoneOperations(context.getCompute(), context.getProjectId(), operationId,
                             availabilityZone).execute();
                     checkComputeOperationError(execute);
