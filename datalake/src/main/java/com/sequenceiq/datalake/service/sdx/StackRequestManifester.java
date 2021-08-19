@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -32,6 +33,7 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.idbmms.GrpcIdbmmsClient;
 import com.sequenceiq.cloudbreak.idbmms.exception.IdbmmsOperationException;
 import com.sequenceiq.cloudbreak.idbmms.model.MappingsConfig;
@@ -84,6 +86,9 @@ public class StackRequestManifester {
 
     @Inject
     private EntitlementService entitlementService;
+
+    @Inject
+    private SdxNotificationService sdxNotificationService;
 
     public void configureStackForSdxCluster(SdxCluster sdxCluster, DetailedEnvironmentResponse environment) {
         StackV4Request generatedStackV4Request = setupStackRequestForCloudbreak(sdxCluster, environment);
@@ -147,6 +152,26 @@ public class StackRequestManifester {
     }
 
     private void validateCloudStorage(SdxCluster sdxCluster, DetailedEnvironmentResponse environment, StackV4Request stackRequest) {
+        validateCloudStorageLocation(sdxCluster, environment);
+        validateCloudStorageAndHandleTimeout(sdxCluster, environment, stackRequest);
+    }
+
+    private void validateCloudStorageAndHandleTimeout(SdxCluster sdxCluster, DetailedEnvironmentResponse environment, StackV4Request stackRequest) {
+        ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
+        try {
+            cloudStorageValidator.validate(stackRequest.getCluster().getCloudStorage(), environment, validationResultBuilder);
+        } catch (Exception e) {
+            String message = String.format("Error occured during object storage validation, validation skipped. Error: %s", e.getMessage());
+            LOGGER.warn(message);
+            sdxNotificationService.send(ResourceEvent.ENVIRONMENT_VALIDATION_FAILED_AND_SKIPPED, Set.of(e.getMessage()), sdxCluster);
+        }
+        ValidationResult validationResult = validationResultBuilder.build();
+        if (validationResult.hasError()) {
+            throw new BadRequestException(validationResult.getFormattedErrors());
+        }
+    }
+
+    private void validateCloudStorageLocation(SdxCluster sdxCluster, DetailedEnvironmentResponse environment) {
         if (FileSystemType.S3.equals(sdxCluster.getCloudStorageFileSystemType())
                 && !Strings.isNullOrEmpty(sdxCluster.getCloudStorageBaseLocation())) {
             ValidationResultBuilder validationBuilder = new ValidationResultBuilder();
@@ -157,7 +182,6 @@ public class StackRequestManifester {
                 throw new BadRequestException(validationResult.getFormattedErrors());
             }
         }
-        cloudStorageValidator.validate(stackRequest.getCluster().getCloudStorage(), environment, new ValidationResultBuilder());
     }
 
     private void setupYarnDetails(DetailedEnvironmentResponse environment, StackV4Request stackRequest) {

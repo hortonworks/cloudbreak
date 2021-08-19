@@ -3,17 +3,21 @@ package com.sequenceiq.environment.environment.flow.creation.handler;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.VALIDATE_ENVIRONMENT_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_NETWORK_CREATION_EVENT;
 
+import java.util.Set;
+
 import javax.ws.rs.WebApplicationException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.base.ResponseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateResponse;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentCloudStorageValidationRequest;
@@ -27,6 +31,7 @@ import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.cloudstorage.CloudStorageValidator;
 import com.sequenceiq.environment.environment.v1.converter.TelemetryApiConverter;
 import com.sequenceiq.environment.environment.validation.EnvironmentFlowValidatorService;
+import com.sequenceiq.environment.events.EventSenderService;
 import com.sequenceiq.environment.exception.EnvironmentServiceException;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
@@ -47,6 +52,8 @@ public class EnvironmentValidationHandler extends EventSenderAwareHandler<Enviro
 
     private final EventBus eventBus;
 
+    private final EventSenderService eventSenderService;
+
     private CloudStorageValidator cloudStorageValidator;
 
     private TelemetryApiConverter telemetryApiConverter;
@@ -57,6 +64,7 @@ public class EnvironmentValidationHandler extends EventSenderAwareHandler<Enviro
             EnvironmentFlowValidatorService validatorService,
             WebApplicationExceptionMessageExtractor messageExtractor,
             EventBus eventBus,
+            EventSenderService eventSenderService,
             CloudStorageValidator cloudStorageValidator,
             TelemetryApiConverter telemetryApiConverter) {
         super(eventSender);
@@ -64,6 +72,7 @@ public class EnvironmentValidationHandler extends EventSenderAwareHandler<Enviro
         this.environmentService = environmentService;
         webApplicationExceptionMessageExtractor = messageExtractor;
         this.eventBus = eventBus;
+        this.eventSenderService = eventSenderService;
         this.cloudStorageValidator = cloudStorageValidator;
         this.telemetryApiConverter = telemetryApiConverter;
     }
@@ -94,8 +103,16 @@ public class EnvironmentValidationHandler extends EventSenderAwareHandler<Enviro
         cloudStorageValidationRequest.setCredentialCrn(environmentDto.getCredential().getResourceCrn());
         TelemetryRequest telemetryRequest = telemetryApiConverter.convertToRequest(environmentDto.getTelemetry());
         cloudStorageValidationRequest.setTelemetry(telemetryRequest);
-        ObjectStorageValidateResponse response = cloudStorageValidator.validateCloudStorage(environmentDto.getAccountId(), cloudStorageValidationRequest);
-        if (!ResponseStatus.OK.equals(response.getStatus())) {
+        ObjectStorageValidateResponse response = null;
+        try {
+            response = cloudStorageValidator.validateCloudStorage(environmentDto.getAccountId(), cloudStorageValidationRequest);
+        } catch (Exception e) {
+            String message = String.format("Error occured during object storage validation, validation skipped. Error: %s", e.getMessage());
+            LOGGER.warn(message);
+            eventSenderService.sendEventAndNotification(environmentDto, ThreadBasedUserCrnProvider.getUserCrn(),
+                    ResourceEvent.ENVIRONMENT_VALIDATION_FAILED_AND_SKIPPED, Set.of(e.getMessage()));
+        }
+        if (response != null && ResponseStatus.ERROR.equals(response.getStatus())) {
             throw new EnvironmentServiceException(response.getError());
         }
     }
