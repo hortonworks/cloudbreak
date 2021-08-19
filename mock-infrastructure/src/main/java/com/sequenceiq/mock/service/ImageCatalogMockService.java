@@ -1,13 +1,13 @@
-package com.sequenceiq.thunderhead.service;
+package com.sequenceiq.mock.service;
 
 
 import java.util.Objects;
 
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
-@Component
+@Service
 public class ImageCatalogMockService {
 
     private static final String DEFAULT_IMAGE_UUID = "f6e778fc-7f17-4535-9021-515351df3691";

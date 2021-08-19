@@ -71,7 +71,7 @@ public class ImageCatalogMockServerSetup {
 
     // DYNAMIC address http://localhost:10080/thunderhead/mock-image-catalog?catalog-name=cb-catalog&cb-version=CB-2.29.0&runtime=7.2.2
     public String getFreeIpaImageCatalogUrl() {
-        return String.format("http://%s/thunderhead/mock-image-catalog?catalog-name=%s&cb-version=%s&runtime=%s",
+        return String.format("https://%s/mock-image-catalog?catalog-name=%s&cb-version=%s&runtime=%s",
                 mockImageCatalogServer,
                 "freeipa-catalog",
                 cbVersion,
@@ -79,7 +79,7 @@ public class ImageCatalogMockServerSetup {
     }
 
     public String getFreeIpaImageCatalogUrlWitdDefaultImageUuid(String defaultImageUuid) {
-        return String.format("http://%s/thunderhead/mock-image-catalog?catalog-name=%s&cb-version=%s&runtime=%s&default-image-uuid=%s",
+        return String.format("https://%s/mock-image-catalog?catalog-name=%s&cb-version=%s&runtime=%s&default-image-uuid=%s",
                 mockImageCatalogServer,
                 "freeipa-catalog",
                 cbVersion,
@@ -88,7 +88,7 @@ public class ImageCatalogMockServerSetup {
     }
 
     public String getImageCatalogUrl() {
-        return String.format("http://%s/thunderhead/mock-image-catalog?catalog-name=%s&cb-version=%s&runtime=%s",
+        return String.format("https://%s/mock-image-catalog?catalog-name=%s&cb-version=%s&runtime=%s",
                 mockImageCatalogServer,
                 "cb-catalog",
                 cbVersion,
@@ -96,7 +96,7 @@ public class ImageCatalogMockServerSetup {
     }
 
     public String getPreWarmedImageCatalogUrl() {
-        return String.format("http://%s/thunderhead/mock-image-catalog?catalog-name=%s&cb-version=%s&runtime=%s",
+        return String.format("https://%s/mock-image-catalog?catalog-name=%s&cb-version=%s&runtime=%s",
                 mockImageCatalogServer,
                 "catalog-with-prewarmed",
                 cbVersion,
@@ -104,7 +104,7 @@ public class ImageCatalogMockServerSetup {
     }
 
     public String getPreWarmedImageCatalogUrlWithDefaultImageUuid(String defaultImageUuid) {
-        return String.format("http://%s/thunderhead/mock-image-catalog?catalog-name=%s&cb-version=%s&runtime=%s&default-image-uuid=%s",
+        return String.format("https://%s/mock-image-catalog?catalog-name=%s&cb-version=%s&runtime=%s&default-image-uuid=%s",
                 mockImageCatalogServer,
                 "catalog-with-prewarmed",
                 cbVersion,
@@ -113,7 +113,7 @@ public class ImageCatalogMockServerSetup {
     }
 
     public String getPreWarmedImageCatalogUrlWithCmAndCdhVersions(String cmVersion, String cdhVersion) {
-        return String.format("http://%s/thunderhead/mock-image-catalog?catalog-name=%s&cb-version=%s&runtime=%s&cm=%s",
+        return String.format("https://%s/mock-image-catalog?catalog-name=%s&cb-version=%s&runtime=%s&cm=%s",
                 mockImageCatalogServer,
                 "catalog-with-prewarmed",
                 cbVersion,
@@ -122,7 +122,7 @@ public class ImageCatalogMockServerSetup {
     }
 
     public String getUpgradeImageCatalogUrl() {
-        return String.format("http://%s/thunderhead/mock-image-catalog?catalog-name=%s&cb-version=%s&runtime=%s",
+        return String.format("https://%s/mock-image-catalog?catalog-name=%s&cb-version=%s&runtime=%s",
                 mockImageCatalogServer,
                 "catalog-with-for-upgrade",
                 cbVersion,
