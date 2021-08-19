@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image;
 
+import java.util.List;
 import java.util.Objects;
 
 public class ImageComponentVersions implements Comparable<ImageComponentVersions> {
@@ -16,16 +17,20 @@ public class ImageComponentVersions implements Comparable<ImageComponentVersions
 
     private String osPatchLevel;
 
+    private List<ParcelInfoResponse> parcelInfoResponseList;
+
     public ImageComponentVersions() {
     }
 
-    public ImageComponentVersions(String cm, String cmGBN, String cdp, String cdpGBN, String os, String osPatchLevel) {
+    public ImageComponentVersions(String cm, String cmGBN, String cdp, String cdpGBN, String os,
+            String osPatchLevel, List<ParcelInfoResponse> parcelInfoResponseList) {
         this.cm = cm;
         this.cmGBN = cmGBN;
         this.cdp = cdp;
         this.cdpGBN = cdpGBN;
         this.os = os;
         this.osPatchLevel = osPatchLevel;
+        this.parcelInfoResponseList = parcelInfoResponseList;
     }
 
     public String getCm() {
@@ -76,6 +81,14 @@ public class ImageComponentVersions implements Comparable<ImageComponentVersions
         this.osPatchLevel = osPatchLevel;
     }
 
+    public List<ParcelInfoResponse> getParcelInfoResponseList() {
+        return parcelInfoResponseList;
+    }
+
+    public void setParcelInfoResponseList(List<ParcelInfoResponse> parcelInfoResponseList) {
+        this.parcelInfoResponseList = parcelInfoResponseList;
+    }
+
     @Override
     public String toString() {
         return "ImageComponentVersions{" +
@@ -85,6 +98,7 @@ public class ImageComponentVersions implements Comparable<ImageComponentVersions
                 ", cdpGBN='" + cdpGBN + '\'' +
                 ", os='" + os + '\'' +
                 ", osPatchLevel='" + osPatchLevel + '\'' +
+                ", parcelInfoResponseList=" + parcelInfoResponseList +
                 '}';
     }
 
