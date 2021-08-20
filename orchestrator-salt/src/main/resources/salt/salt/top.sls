@@ -10,6 +10,7 @@ base:
     - telemetry
     - fluent
     - metering
+    - logrotate
     - ntp
     - postgresql.root-certs
 
