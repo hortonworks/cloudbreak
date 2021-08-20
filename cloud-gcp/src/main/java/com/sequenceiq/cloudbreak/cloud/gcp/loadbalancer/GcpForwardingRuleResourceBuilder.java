@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -91,8 +92,14 @@ public class GcpForwardingRuleResourceBuilder extends AbstractGcpLoadBalancerBui
                     .setPorts(List.of(String.valueOf(trafficPort)));
             forwardingRule.setLoadBalancingScheme(scheme.getGcpType());
             if (scheme.equals(GcpLoadBalancerScheme.INTERNAL)) {
-                forwardingRule.setSubnetwork(gcpStackUtil.getNetworkUrl(projectId, gcpStackUtil.getCustomNetworkId(network)));
-                forwardingRule.setSubnetwork(gcpStackUtil.getSubnetUrl(projectId, regionName, gcpStackUtil.getSubnetId(network)));
+                String sharedProjectId = gcpStackUtil.getSharedProjectId(network);
+                if (StringUtils.isEmpty(sharedProjectId)) {
+                    forwardingRule.setNetwork(gcpStackUtil.getNetworkUrl(projectId, gcpStackUtil.getCustomNetworkId(network)));
+                    forwardingRule.setSubnetwork(gcpStackUtil.getSubnetUrl(projectId, regionName, gcpStackUtil.getSubnetId(network)));
+                } else {
+                    forwardingRule.setNetwork(gcpStackUtil.getNetworkUrl(sharedProjectId, gcpStackUtil.getCustomNetworkId(network)));
+                    forwardingRule.setSubnetwork(gcpStackUtil.getSubnetUrl(sharedProjectId, regionName, gcpStackUtil.getSubnetId(network)));
+                }
             }
 
             Optional<String> backendName = backendResources.stream()
