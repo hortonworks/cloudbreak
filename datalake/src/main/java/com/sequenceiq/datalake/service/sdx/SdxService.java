@@ -362,6 +362,7 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
         prepareDefaultSecurityConfigs(internalStackV4Request, stackRequest, cloudPlatform);
         prepareProviderSpecificParameters(stackRequest, sdxClusterRequest, cloudPlatform);
         stackRequest.setResourceCrn(sdxCluster.getCrn());
+        stackRequest.setDisplayName(sdxCluster.getClusterName());
         sdxCluster.setStackRequest(stackRequest);
 
         MDCBuilder.buildMdcContext(sdxCluster);
@@ -402,6 +403,7 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
                 clusterName + SDX_RESIZE_NAME_SUFFIX, sdxCluster.getRuntime(), shape,
                 sdxCluster.isRangerRazEnabled(), environment);
         newSdxCluster.setTags(sdxCluster.getTags());
+        newSdxCluster.setClusterDisplayName(sdxCluster.getClusterName());
 
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
         if (!Strings.isBlank(sdxCluster.getCloudStorageBaseLocation())) {
@@ -418,6 +420,7 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
         prepareCloudStorageForStack(stackRequest, stackV4Response, newSdxCluster, environment);
         prepareDefaultSecurityConfigs(null, stackRequest, cloudPlatform);
         stackRequest.setResourceCrn(newSdxCluster.getCrn());
+        stackRequest.setDisplayName(sdxCluster.getClusterName());
         newSdxCluster.setStackRequest(stackRequest);
         FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerSdxResize(sdxCluster.getId(), newSdxCluster);
         return Pair.of(sdxCluster, flowIdentifier);
@@ -434,6 +437,7 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
         newSdxCluster.setInitiatorUserCrn(userCrn);
         newSdxCluster.setCrn(createCrn(getAccountIdFromCrn(userCrn)));
         newSdxCluster.setClusterName(clusterName);
+        newSdxCluster.setClusterDisplayName(clusterName);
         newSdxCluster.setAccountId(getAccountIdFromCrn(userCrn));
         newSdxCluster.setClusterShape(shape);
         newSdxCluster.setCreated(clock.getCurrentTimeMillis());

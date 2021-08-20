@@ -383,6 +383,16 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
         assertTrue(stack.getLoadBalancers().isEmpty());
     }
 
+    @Test
+    public void testConvertAsStack() {
+        StackV4Request request = setupForEndpointGateway(false);
+        Stack stack = underTest.convert(request);
+        assertEquals(request.getName(), stack.getName());
+        request.setDisplayName("display");
+        stack = underTest.convert(request);
+        assertEquals("display", stack.getDisplayName());
+    }
+
     @Override
     public Class<StackV4Request> getRequestClass() {
         return StackV4Request.class;

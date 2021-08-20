@@ -166,7 +166,6 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         }
         setTimeToLive(source, stack);
         stack.setWorkspace(workspace);
-        stack.setDisplayName(source.getName());
         stack.setDatalakeCrn(datalakeService.getDatalakeCrn(source, workspace));
         stack.setStackAuthentication(getConversionService().convert(source.getAuthentication(), StackAuthentication.class));
         stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.PROVISION_REQUESTED));
@@ -206,6 +205,11 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
     private void convertAsStack(StackV4Request source, Stack stack) {
         validateStackAuthentication(source);
         stack.setName(source.getName());
+        if (!Strings.isNullOrEmpty(source.getDisplayName())) {
+            stack.setDisplayName(source.getDisplayName());
+        } else {
+            stack.setDisplayName(source.getName());
+        }
         stack.setAvailabilityZone(getAvailabilityZone(Optional.ofNullable(source.getPlacement())));
         stack.setOrchestrator(getOrchestrator());
         updateCustomDomainOrKerberos(source, stack);
@@ -250,6 +254,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         }
         stack.setType(StackType.TEMPLATE);
         stack.setName(UUID.randomUUID().toString());
+        stack.setDisplayName(source.getName());
     }
 
     private Orchestrator getOrchestrator() {

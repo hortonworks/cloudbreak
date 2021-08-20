@@ -87,6 +87,36 @@ class SdxControllerTest {
         assertEquals("crn:sdxcluster", sdxClusterResponse.getCrn());
         assertEquals(SdxClusterStatusResponse.REQUESTED, sdxClusterResponse.getStatus());
         assertEquals("statusreason", sdxClusterResponse.getStatusReason());
+
+    }
+
+    @Test
+    void createTestWithDisplayName() {
+        SdxCluster sdxCluster = getValidSdxCluster();
+        when(sdxService.createSdx(anyString(), anyString(), any(SdxClusterRequest.class), nullable(StackV4Request.class)))
+                .thenReturn(Pair.of(sdxCluster, new FlowIdentifier(FlowType.FLOW, "FLOW_ID")));
+
+        SdxClusterRequest createSdxClusterRequest = new SdxClusterRequest();
+        createSdxClusterRequest.setClusterShape(SdxClusterShape.MEDIUM_DUTY_HA);
+        createSdxClusterRequest.setEnvironment("test-env");
+        Map<String, String> tags = new HashMap<>();
+        tags.put("tag1", "value1");
+        createSdxClusterRequest.addTags(tags);
+        SdxStatusEntity sdxStatusEntity = new SdxStatusEntity();
+        sdxStatusEntity.setStatus(DatalakeStatusEnum.REQUESTED);
+        sdxStatusEntity.setStatusReason("statusreason");
+        sdxStatusEntity.setCreated(1L);
+        when(sdxStatusService.getActualStatusForSdx(sdxCluster)).thenReturn(sdxStatusEntity);
+        ReflectionTestUtils.setField(sdxClusterConverter, "sdxStatusService", sdxStatusService);
+        SdxClusterResponse sdxClusterResponse = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> sdxController.create("test-sdx-cluster", createSdxClusterRequest));
+        verify(sdxService).createSdx(eq(USER_CRN), eq("test-sdx-cluster"), eq(createSdxClusterRequest), nullable(StackV4Request.class));
+        verify(sdxStatusService, times(1)).getActualStatusForSdx(sdxCluster);
+        assertEquals("test-sdx-cluster", sdxClusterResponse.getName());
+        assertEquals("test-env", sdxClusterResponse.getEnvironmentName());
+        assertEquals("crn:sdxcluster", sdxClusterResponse.getCrn());
+        assertEquals(SdxClusterStatusResponse.REQUESTED, sdxClusterResponse.getStatus());
+        assertEquals("statusreason", sdxClusterResponse.getStatusReason());
     }
 
     @Test

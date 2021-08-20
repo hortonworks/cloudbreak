@@ -103,6 +103,7 @@ public class StackToStackV4ResponseConverter extends AbstractConversionServiceAw
         }
 
         response.setName(source.getName());
+        response.setDisplayName(source.getDisplayName());
         response.setAuthentication(getConversionService().convert(source.getStackAuthentication(), StackAuthenticationV4Response.class));
         response.setCrn(source.getResourceCrn());
         response.setId(source.getId());

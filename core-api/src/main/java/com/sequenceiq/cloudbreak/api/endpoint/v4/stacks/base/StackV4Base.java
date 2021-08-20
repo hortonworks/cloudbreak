@@ -24,6 +24,9 @@ public abstract class StackV4Base extends ProviderParametersBase implements Json
     @ApiModelProperty(value = StackModelDescription.STACK_NAME, required = true)
     private String name;
 
+    @ApiModelProperty(value = StackModelDescription.STACK_DISPLAYNAME)
+    private String displayName;
+
     @ApiModelProperty(StackModelDescription.AWS_PARAMETERS)
     private AwsStackV4Parameters aws;
 
@@ -51,6 +54,14 @@ public abstract class StackV4Base extends ProviderParametersBase implements Json
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
     public AwsStackV4Parameters createAws() {
@@ -157,6 +168,7 @@ public abstract class StackV4Base extends ProviderParametersBase implements Json
     public String toString() {
         return "StackV4Base{" +
                 "name='" + name + '\'' +
+                "display name ='" + displayName + '\'' +
                 ", aws=" + aws +
                 ", gcp=" + gcp +
                 ", azure=" + azure +

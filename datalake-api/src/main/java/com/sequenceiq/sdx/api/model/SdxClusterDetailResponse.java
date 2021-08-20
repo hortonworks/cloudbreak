@@ -13,7 +13,7 @@ public class SdxClusterDetailResponse extends SdxClusterResponse implements Tagg
     }
 
     public SdxClusterDetailResponse(SdxClusterResponse sdxClusterResponse, StackV4Response stackV4Response) {
-        super(sdxClusterResponse.getCrn(), sdxClusterResponse.getName(), sdxClusterResponse.getStatus(),
+        super(sdxClusterResponse.getCrn(), sdxClusterResponse.getName(), sdxClusterResponse.getDisplayName(), sdxClusterResponse.getStatus(),
                 sdxClusterResponse.getStatusReason(), sdxClusterResponse.getEnvironmentName(),
                 sdxClusterResponse.getEnvironmentCrn(), sdxClusterResponse.getStackCrn(),
                 sdxClusterResponse.getClusterShape(), sdxClusterResponse.getCloudStorageBaseLocation(),

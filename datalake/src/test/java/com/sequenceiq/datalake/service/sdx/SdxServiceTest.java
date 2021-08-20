@@ -230,6 +230,18 @@ class SdxServiceTest {
     }
 
     @Test
+    void testGetSdxClusterWhenClusterDisplayNameProvidedShouldReturnSdxClusterWithTheSameNameAsTheRequest() {
+        SdxCluster sdxCluser = new SdxCluster();
+        sdxCluser.setEnvName("env");
+        sdxCluser.setClusterName(CLUSTER_NAME);
+        sdxCluser.setClusterDisplayName(CLUSTER_NAME);
+        when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(eq("hortonworks"), eq(CLUSTER_NAME)))
+                .thenReturn(Optional.of(sdxCluser));
+        SdxCluster returnedSdxCluster = underTest.getByNameInAccount(USER_CRN, CLUSTER_NAME);
+        assertEquals(CLUSTER_NAME, returnedSdxCluster.getClusterDisplayName());
+    }
+
+    @Test
     void testGetSdxClusterWhenClusterCrnProvidedShouldReturnSdxClusterWithTheSameCrnAsTheRequest() {
         SdxCluster sdxCluser = new SdxCluster();
         sdxCluser.setEnvName("env");

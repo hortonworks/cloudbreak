@@ -54,6 +54,8 @@ public class SdxCluster implements AccountIdAwareResource {
     @NotNull
     private String clusterName;
 
+    private String clusterDisplayName;
+
     @NotNull
     private String initiatorUserCrn;
 
@@ -156,6 +158,14 @@ public class SdxCluster implements AccountIdAwareResource {
 
     public void setClusterName(String clusterName) {
         this.clusterName = clusterName;
+    }
+
+    public String getClusterDisplayName() {
+        return clusterDisplayName;
+    }
+
+    public void setClusterDisplayName(String clusterDisplayName) {
+        this.clusterDisplayName = clusterDisplayName;
     }
 
     public Long getStackId() {
@@ -379,6 +389,7 @@ public class SdxCluster implements AccountIdAwareResource {
                 Objects.equals(accountId, that.accountId) &&
                 Objects.equals(crn, that.crn) &&
                 Objects.equals(clusterName, that.clusterName) &&
+                Objects.equals(clusterDisplayName, that.clusterDisplayName) &&
                 Objects.equals(initiatorUserCrn, that.initiatorUserCrn) &&
                 Objects.equals(envName, that.envName) &&
                 Objects.equals(envCrn, that.envCrn) &&
@@ -402,7 +413,7 @@ public class SdxCluster implements AccountIdAwareResource {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, accountId, crn, clusterName, initiatorUserCrn, envName, envCrn, stackCrn, clusterShape, tags, stackId, stackRequest,
+        return Objects.hash(id, accountId, crn, clusterName, clusterDisplayName, initiatorUserCrn, envName, envCrn, stackCrn, clusterShape, tags, stackId, stackRequest,
                 stackRequestToCloudbreak, deleted, created, createDatabase, databaseCrn, cloudStorageBaseLocation, cloudStorageFileSystemType,
                 databaseAvailabilityType, rangerRazEnabled, certExpirationState, sdxClusterServiceVersion);
     }
@@ -412,6 +423,7 @@ public class SdxCluster implements AccountIdAwareResource {
         return "SdxCluster{" +
                 "crn='" + crn + '\'' +
                 ", clusterName='" + clusterName + '\'' +
+                ", clusterDisplayName='" + clusterDisplayName + '\'' +
                 ", envName='" + envName + '\'' +
                 ", envCrn='" + envCrn + '\'' +
                 ", runtime='" + runtime + '\'' +

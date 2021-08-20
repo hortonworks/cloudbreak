@@ -159,6 +159,7 @@ public class ModelDescriptions {
         public static final String ENTRIES = "Entries parameters as a json";
         public static final String IMAGE = "image of the stack";
         public static final String STACK_NAME = "name of the stack";
+        public static final String STACK_DISPLAYNAME = "Display name of the stack";
         public static final String REGION = "region of the stack";
         public static final String AVAILABILITY_ZONE = "availability zone of the stack";
         public static final String CREDENTIAL_ID = "credential resource id for the stack";

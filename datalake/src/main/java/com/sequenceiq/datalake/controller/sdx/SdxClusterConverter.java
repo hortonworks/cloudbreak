@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.google.common.base.Strings;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxStatusEntity;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
@@ -33,6 +34,11 @@ public class SdxClusterConverter {
         }
         sdxClusterResponse.setRuntime(sdxCluster.getRuntime());
         sdxClusterResponse.setName(sdxCluster.getClusterName());
+        if (Strings.isNullOrEmpty(sdxCluster.getClusterDisplayName())) {
+            sdxClusterResponse.setDisplayName(sdxCluster.getClusterName());
+        } else {
+            sdxClusterResponse.setDisplayName(sdxCluster.getClusterDisplayName());
+        }
         sdxClusterResponse.setCrn(sdxCluster.getCrn());
         sdxClusterResponse.setClusterShape(sdxCluster.getClusterShape());
         sdxClusterResponse.setEnvironmentName(sdxCluster.getEnvName());

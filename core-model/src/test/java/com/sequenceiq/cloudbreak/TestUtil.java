@@ -175,6 +175,7 @@ public class TestUtil {
         stack.setWorkspace(workspace);
         stack.setStackStatus(new StackStatus(stack, stackStatus, "statusReason", DetailedStackStatus.UNKNOWN));
         stack.setName("simplestack");
+        stack.setDisplayName("simplestack");
         stack.setId(1L);
         stack.setInstanceGroups(generateGcpInstanceGroups(3));
         stack.setRegion("region");

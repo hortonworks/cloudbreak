@@ -15,6 +15,8 @@ public class SdxClusterResponse {
 
     private String name;
 
+    private String displayName;
+
     private SdxClusterShape clusterShape;
 
     private SdxClusterStatusResponse status;
@@ -53,7 +55,7 @@ public class SdxClusterResponse {
     public SdxClusterResponse() {
     }
 
-    public SdxClusterResponse(String crn, String name, SdxClusterStatusResponse status,
+    public SdxClusterResponse(String crn, String name, String displayName, SdxClusterStatusResponse status,
             String statusReason, String environmentName, String environmentCrn, String stackCrn,
             SdxClusterShape clusterShape, String cloudStorageBaseLocation,
             FileSystemType cloudStorageFileSystemType, String runtime,
@@ -61,6 +63,7 @@ public class SdxClusterResponse {
             String sdxClusterServiceVersion, boolean detached) {
         this.crn = crn;
         this.name = name;
+        this.displayName = displayName;
         this.status = status;
         this.statusReason = statusReason;
         this.environmentName = environmentName;
@@ -99,6 +102,14 @@ public class SdxClusterResponse {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
     public SdxClusterShape getClusterShape() {
@@ -234,6 +245,7 @@ public class SdxClusterResponse {
         return "SdxClusterResponse{" +
                 "crn='" + crn + '\'' +
                 ", name='" + name + '\'' +
+                ", displayName ='" + displayName + '\'' +
                 ", clusterShape=" + clusterShape +
                 ", status=" + status +
                 ", statusReason='" + statusReason + '\'' +

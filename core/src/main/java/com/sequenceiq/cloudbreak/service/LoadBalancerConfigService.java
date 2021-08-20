@@ -120,7 +120,7 @@ public class LoadBalancerConfigService {
 
     public String generateLoadBalancerEndpoint(Stack stack) {
         StringBuilder name = new StringBuilder()
-            .append(stack.getName())
+            .append(stack.getDisplayName())
             .append('-')
             .append(ENDPOINT_SUFFIX);
         return name.toString();

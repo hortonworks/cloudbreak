@@ -17,6 +17,7 @@ import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 import org.springframework.util.StringUtils;
 
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
@@ -30,6 +31,7 @@ import com.sequenceiq.datalake.flow.delete.event.StackDeletionSuccessEvent;
 import com.sequenceiq.datalake.flow.delete.event.StackDeletionWaitRequest;
 import com.sequenceiq.datalake.metric.MetricType;
 import com.sequenceiq.datalake.metric.SdxMetricService;
+import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.AbstractSdxAction;
 import com.sequenceiq.datalake.service.sdx.ProvisionerService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
@@ -61,6 +63,9 @@ public class SdxDeleteActions {
 
     @Inject
     private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
+
+    @Inject
+    private SdxClusterRepository sdxClusterRepository;
 
     @Bean(name = "SDX_DELETION_START_STATE")
     public Action<?, ?> sdxDeletion() {
@@ -147,6 +152,13 @@ public class SdxDeleteActions {
                 if (sdxCluster != null) {
                     metricService.incrementMetricCounter(MetricType.SDX_DELETION_FINISHED, sdxCluster);
                 }
+                // If the sdx that is deleted is detached, we need to replace CRN with the CRN of the original SDX
+                if (sdxCluster.isDetached()) {
+                    LOGGER.info("Overriding the CRN of the resized data lake.");
+                    SdxCluster newSdxCluster = sdxService.getByNameInAccount(payload.getUserId(), sdxCluster.getClusterName() + "-md");
+                    // Update the Crn with the Crn of the detached data lake.
+                    updateDatalakeCrn(newSdxCluster, sdxCluster.getCrn());
+                }
                 sendEvent(context, SDX_DELETE_FINALIZED_EVENT.event(), payload);
             }
 
@@ -181,6 +193,14 @@ public class SdxDeleteActions {
                     SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DELETE_FAILED, statusReason,
                             payload.getResourceId());
                     metricService.incrementMetricCounter(MetricType.SDX_DELETION_FAILED, sdxCluster);
+                    // If the sdx that is deleted is detached, we need to replace CRN with the CRN of the original SDX
+                    if (sdxCluster.isDetached()) {
+                        LOGGER.info("Overriding the CRN of the resized data lake.");
+                        String currentClusterName = sdxCluster.getClusterName();
+                        SdxCluster newSdxCluster = sdxService.getByNameInAccount(payload.getUserId(), currentClusterName + "-md");
+                        // Update the Crn with the Crn of the detached data lake.
+                        updateDatalakeCrn(newSdxCluster, sdxCluster.getCrn());
+                    }
                 } catch (NotFoundException notFoundException) {
                     LOGGER.info("Can not set status to SDX_DELETION_FAILED because data lake was not found");
                 }
@@ -192,5 +212,12 @@ public class SdxDeleteActions {
                 return null;
             }
         };
+    }
+
+    private void updateDatalakeCrn(SdxCluster sdxCluster, String newCrn) {
+        if (!Strings.isNullOrEmpty(newCrn)) {
+            sdxCluster.setCrn(newCrn);
+            sdxClusterRepository.save(sdxCluster);
+        }
     }
 }
