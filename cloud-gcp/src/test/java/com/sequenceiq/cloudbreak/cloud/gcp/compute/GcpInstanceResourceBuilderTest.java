@@ -416,6 +416,62 @@ public class GcpInstanceResourceBuilderTest {
     }
 
     @Test
+    public void addInstanceGroupFromUpscale() throws Exception {
+        // GIVEN
+        Group group = newGroupWithParams(ImmutableMap.of());
+        List<CloudResource> buildableResources = builder.create(context, group.getInstances().get(0), privateId, authenticatedContext, group, image);
+        context.addComputeResources(0L, buildableResources);
+
+        // WHEN
+        when(compute.instances()).thenReturn(instances);
+        when(instances.insert(anyString(), anyString(), any(Instance.class))).thenReturn(insert);
+        when(insert.setPrettyPrint(anyBoolean())).thenReturn(insert);
+        when(insert.execute()).thenReturn(operation);
+
+        Operation addOperation = new Operation();
+        addOperation.setName("operation");
+        CloudResource instanceGroup = CloudResource.builder()
+                .type(ResourceType.GCP_INSTANCE_GROUP)
+                .status(CommonStatus.CREATED)
+                .name(group.getName())
+                .build();
+        CloudResource instanceGroup2 = CloudResource.builder()
+                .type(ResourceType.GCP_INSTANCE_GROUP)
+                .status(CommonStatus.CREATED)
+                .name("gateway")
+                .build();
+        CloudResource instanceGroup3 = CloudResource.builder()
+                .type(ResourceType.GCP_INSTANCE_GROUP)
+                .status(CommonStatus.CREATED)
+                .name("idbroker")
+                .build();
+        CloudResource instanceGroup4 = CloudResource.builder()
+                .type(ResourceType.GCP_INSTANCE_GROUP)
+                .status(CommonStatus.CREATED)
+                .name("free-master0")
+                .build();
+        context.addGroupResources(group.getName(), List.of(instanceGroup4, instanceGroup2, instanceGroup, instanceGroup3));
+        when(compute.instanceGroups()).thenReturn(instanceGroups);
+        ArgumentCaptor<String> groupName = ArgumentCaptor.forClass(String.class);
+        when(instanceGroups.addInstances(anyString(), anyString(), groupName.capture(), any())).thenReturn(addInstances);
+        InstanceGroups.List list = mock(InstanceGroups.List.class);
+        when(instanceGroups.list(anyString(), anyString())).thenReturn(list);
+        InstanceGroupList instanceGroupList = new InstanceGroupList();
+        instanceGroupList.setItems(singletonList(new InstanceGroup().setName(group.getName())));
+        when(list.execute()).thenReturn(instanceGroupList);
+        when(addInstances.execute()).thenReturn(addOperation);
+
+
+        builder.build(context, group.getInstances().get(0), privateId, authenticatedContext, group, buildableResources, cloudStack);
+
+        // THEN
+        verify(compute).instances();
+        assertEquals("master", groupName.getValue());
+        verify(instances).insert(anyString(), anyString(), instanceArg.capture());
+        assertNull(instanceArg.getValue().getHostname());
+    }
+
+    @Test
     public void noInstanceGroupsExist() throws Exception {
         // GIVEN
         Group group = newGroupWithParams(ImmutableMap.of());
