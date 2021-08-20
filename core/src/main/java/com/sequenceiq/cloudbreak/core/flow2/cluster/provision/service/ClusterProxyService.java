@@ -190,6 +190,7 @@ public class ClusterProxyService {
 
     private List<CcmV2Config> ccmV2Configs(Stack stack) {
         return stack.getNotTerminatedGatewayInstanceMetadata().stream().map(instanceMetaData -> new CcmV2Config(
+                stack.getCcmV2AgentCrn(),
                 instanceMetaData.getPublicIpWrapper(),
                 ServiceFamilies.GATEWAY.getDefaultPort(),
                 String.format(CCMV2_BACKEND_ID_FORMAT, stack.getCcmV2AgentCrn(), instanceMetaData.getInstanceId()),
