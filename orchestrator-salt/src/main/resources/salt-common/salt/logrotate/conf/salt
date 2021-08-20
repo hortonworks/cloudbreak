@@ -1,0 +1,15 @@
+/var/log/salt/master
+/var/log/salt/api
+/var/log/salt/key
+/var/log/salt/minion
+{
+    missingok
+    notifempty
+    copytruncate
+    daily
+    size 50M
+    rotate 14
+    dateext
+    dateformat -%Y%m%d-%s.log
+    nocompress
+}
