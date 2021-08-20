@@ -7,6 +7,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class CcmV2Config {
 
+    @JsonProperty("agentCrn")
+    private final String agentCrn;
+
     @JsonProperty("backendId")
     private final String backendId;
 
@@ -19,7 +22,8 @@ public class CcmV2Config {
     @JsonProperty("serviceName")
     private final String serviceName;
 
-    public CcmV2Config(String gatewayHost, int gatewayPort, String backendId, String serviceName) {
+    public CcmV2Config(String agentCrn, String gatewayHost, int gatewayPort, String backendId, String serviceName) {
+        this.agentCrn = agentCrn;
         this.gatewayHost = gatewayHost;
         this.gatewayPort = gatewayPort;
         this.backendId = backendId;
@@ -29,6 +33,7 @@ public class CcmV2Config {
     @Override
     public String toString() {
         return new StringJoiner(", ", CcmV2Config.class.getSimpleName() + "[", "]")
+                .add("agentCrn='" + agentCrn + "'")
                 .add("backendId='" + backendId + "'")
                 .add("gatewayHost='" + gatewayHost + "'")
                 .add("gatewayPort=" + gatewayPort)
@@ -46,6 +51,7 @@ public class CcmV2Config {
         }
         CcmV2Config that = (CcmV2Config) o;
         return gatewayPort == that.gatewayPort &&
+                Objects.equals(agentCrn, that.agentCrn) &&
                 Objects.equals(backendId, that.backendId) &&
                 Objects.equals(gatewayHost, that.gatewayHost) &&
                 Objects.equals(serviceName, that.serviceName);
@@ -53,6 +59,6 @@ public class CcmV2Config {
 
     @Override
     public int hashCode() {
-        return Objects.hash(backendId, gatewayHost, gatewayPort, serviceName);
+        return Objects.hash(agentCrn, backendId, gatewayHost, gatewayPort, serviceName);
     }
 }

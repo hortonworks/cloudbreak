@@ -190,10 +190,18 @@ public class ClusterProxyService {
 
     private List<CcmV2Config> ccmV2Configs(Stack stack) {
         return stack.getNotTerminatedGatewayInstanceMetadata().stream().map(instanceMetaData -> {
-            CcmV2Config gatewayConfig = new CcmV2Config(instanceMetaData.getPublicIpWrapper(), ServiceFamilies.GATEWAY.getDefaultPort(),
-                    String.format(CCMV2_BACKEND_ID_FORMAT, stack.getCcmV2AgentCrn(), instanceMetaData.getInstanceId()), CLOUDERA_MANAGER_SERVICE_NAME);
-            CcmV2Config knoxConfig = new CcmV2Config(instanceMetaData.getPublicIpWrapper(), ServiceFamilies.KNOX.getDefaultPort(),
-                    String.format(CCMV2_BACKEND_ID_FORMAT, stack.getCcmV2AgentCrn(), instanceMetaData.getInstanceId()), CLOUDERA_MANAGER_SERVICE_NAME);
+            CcmV2Config gatewayConfig = new CcmV2Config(
+                    stack.getCcmV2AgentCrn(),
+                    instanceMetaData.getPublicIpWrapper(),
+                    ServiceFamilies.GATEWAY.getDefaultPort(),
+                    String.format(CCMV2_BACKEND_ID_FORMAT, stack.getCcmV2AgentCrn(), instanceMetaData.getInstanceId()),
+                    CLOUDERA_MANAGER_SERVICE_NAME);
+            CcmV2Config knoxConfig = new CcmV2Config(
+                    stack.getCcmV2AgentCrn(),
+                    instanceMetaData.getPublicIpWrapper(),
+                    ServiceFamilies.KNOX.getDefaultPort(),
+                    String.format(CCMV2_BACKEND_ID_FORMAT, stack.getCcmV2AgentCrn(), instanceMetaData.getInstanceId()),
+                    CLOUDERA_MANAGER_SERVICE_NAME);
             return List.of(gatewayConfig, knoxConfig);
         }).flatMap(List::stream).collect(Collectors.toList());
     }
