@@ -1,7 +1,11 @@
 package com.sequenceiq.cloudbreak.controller.validation.diagnostics;
 
+import javax.ws.rs.ServiceUnavailableException;
+
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.telemetry.support.SupportBundleConfiguration;
 import com.sequenceiq.cloudbreak.validation.AbstractCMDiagnosticsCollectionValidator;
@@ -14,8 +18,11 @@ import com.sequenceiq.common.api.telemetry.model.Telemetry;
 @Component
 public class DiagnosticsCollectionValidator extends AbstractCMDiagnosticsCollectionValidator<Telemetry> {
 
-    public DiagnosticsCollectionValidator(SupportBundleConfiguration supportBundleConfiguration) {
+    private final EntitlementService entitlementService;
+
+    public DiagnosticsCollectionValidator(SupportBundleConfiguration supportBundleConfiguration, EntitlementService entitlementService) {
         super(supportBundleConfiguration);
+        this.entitlementService = entitlementService;
     }
 
     public void validate(BaseDiagnosticsCollectionRequest request, Stack stack, Telemetry telemetry) {
@@ -27,6 +34,7 @@ public class DiagnosticsCollectionValidator extends AbstractCMDiagnosticsCollect
     }
 
     public void validate(DiagnosticsDestination destination, Stack stack, Telemetry telemetry, Boolean cmBundle) {
+        checkMaintenance(stack.getResourceCrn());
         validate(telemetry, destination, stack.getStatus(), stack.getName(), null, cmBundle);
     }
 
@@ -56,5 +64,12 @@ public class DiagnosticsCollectionValidator extends AbstractCMDiagnosticsCollect
     @Override
     public String getStackType() {
         return "Data Hub";
+    }
+
+    private void checkMaintenance(String resourceCrn) {
+        Crn crn = Crn.fromString(resourceCrn);
+        if (crn != null && !entitlementService.isDiagnosticsEnabled(crn.getAccountId())) {
+            throw new ServiceUnavailableException("DataHub diagnostics service is currently unavailable.");
+        }
     }
 }

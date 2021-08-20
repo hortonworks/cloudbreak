@@ -2,10 +2,17 @@ package com.sequenceiq.datalake.service.validation.diagnostics;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.BDDMockito.given;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.telemetry.support.SupportBundleConfiguration;
 import com.sequenceiq.common.api.diagnostics.BaseDiagnosticsCollectionRequest;
@@ -15,16 +22,29 @@ import com.sequenceiq.common.api.telemetry.response.LoggingResponse;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.api.type.FeatureSetting;
 
+@ExtendWith(MockitoExtension.class)
 class DiagnosticsCollectionValidatorTest {
 
-    private final DiagnosticsCollectionValidator underTest =
-            new DiagnosticsCollectionValidator(
-                    new SupportBundleConfiguration(false, null, null));
+    private static final String DATALAKE_CRN = "crn:cdp:datalake:us-west-1:acc1:datalake:cluster1";
+
+    @InjectMocks
+    private DiagnosticsCollectionValidator underTest;
+
+    @Mock
+    private EntitlementService entitlementService;
+
+    @BeforeEach
+    public void setUp() {
+        underTest = new DiagnosticsCollectionValidator(
+                        new SupportBundleConfiguration(false, null, null), entitlementService);
+        given(entitlementService.isDiagnosticsEnabled("acc1")).willReturn(true);
+    }
 
     @Test
     void testWithoutTelemetry() {
         BaseDiagnosticsCollectionRequest request = new BaseDiagnosticsCollectionRequest();
         StackV4Response stackV4Response = new StackV4Response();
+        stackV4Response.setCrn(DATALAKE_CRN);
 
         BadRequestException thrown = assertThrows(BadRequestException.class, () -> underTest.validate(request, stackV4Response));
 
@@ -36,6 +56,7 @@ class DiagnosticsCollectionValidatorTest {
         BaseDiagnosticsCollectionRequest request = new BaseDiagnosticsCollectionRequest();
         request.setDestination(DiagnosticsDestination.CLOUD_STORAGE);
         StackV4Response stackV4Response = new StackV4Response();
+        stackV4Response.setCrn(DATALAKE_CRN);
         TelemetryResponse telemetry = new TelemetryResponse();
         stackV4Response.setTelemetry(telemetry);
 
@@ -49,6 +70,7 @@ class DiagnosticsCollectionValidatorTest {
         BaseDiagnosticsCollectionRequest request = new BaseDiagnosticsCollectionRequest();
         request.setDestination(DiagnosticsDestination.CLOUD_STORAGE);
         StackV4Response stackV4Response = new StackV4Response();
+        stackV4Response.setCrn(DATALAKE_CRN);
         TelemetryResponse telemetry = new TelemetryResponse();
         LoggingResponse logging = new LoggingResponse();
         telemetry.setLogging(logging);
@@ -64,6 +86,7 @@ class DiagnosticsCollectionValidatorTest {
         BaseDiagnosticsCollectionRequest request = new BaseDiagnosticsCollectionRequest();
         request.setDestination(DiagnosticsDestination.ENG);
         StackV4Response stackV4Response = new StackV4Response();
+        stackV4Response.setCrn(DATALAKE_CRN);
         TelemetryResponse telemetry = new TelemetryResponse();
         stackV4Response.setTelemetry(telemetry);
 
@@ -77,6 +100,7 @@ class DiagnosticsCollectionValidatorTest {
         BaseDiagnosticsCollectionRequest request = new BaseDiagnosticsCollectionRequest();
         request.setDestination(DiagnosticsDestination.ENG);
         StackV4Response stackV4Response = new StackV4Response();
+        stackV4Response.setCrn(DATALAKE_CRN);
         TelemetryResponse telemetry = new TelemetryResponse();
         FeaturesResponse features = new FeaturesResponse();
         FeatureSetting featureSetting = new FeatureSetting();
@@ -93,6 +117,7 @@ class DiagnosticsCollectionValidatorTest {
         BaseDiagnosticsCollectionRequest request = new BaseDiagnosticsCollectionRequest();
         request.setDestination(DiagnosticsDestination.SUPPORT);
         StackV4Response stackV4Response = new StackV4Response();
+        stackV4Response.setCrn(DATALAKE_CRN);
         TelemetryResponse telemetry = new TelemetryResponse();
         stackV4Response.setTelemetry(telemetry);
 
