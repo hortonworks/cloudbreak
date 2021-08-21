@@ -398,8 +398,8 @@ public interface StackV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DATABASE_BACKUP_INTERNAL, nickname = "databaseBackupInternal")
     BackupV4Response backupDatabaseByNameInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @QueryParam("backupLocation") String backupLocation, @QueryParam("backupId") String backupId,
-            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @QueryParam("backupId") String backupId, @QueryParam("backupLocation") String backupLocation,
+            @QueryParam("closeConnections") boolean closeConnections, @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 
     @POST
     @Path("{name}/database_restore")

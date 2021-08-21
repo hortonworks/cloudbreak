@@ -11,20 +11,42 @@ public class BackupRestoreEvent extends StackEvent {
 
     private final String backupId;
 
+    private final boolean closeConnections;
+
     public BackupRestoreEvent(Long stackId, String backupLocation, String backupId) {
         this (null, stackId, backupLocation, backupId);
+    }
+
+    public BackupRestoreEvent(Long stackId, String backupLocation, String backupId, boolean closeConnections) {
+        this(null, stackId, backupLocation, backupId, closeConnections);
     }
 
     public BackupRestoreEvent(String selector, Long stackId, String backupLocation, String backupId) {
         super(selector, stackId);
         this.backupLocation = backupLocation;
         this.backupId = backupId;
+        this.closeConnections = true;
+    }
+
+    public BackupRestoreEvent(String selector, Long stackId, String backupLocation, String backupId, boolean closeConnections) {
+        super(selector, stackId);
+        this.backupLocation = backupLocation;
+        this.backupId = backupId;
+        this.closeConnections = closeConnections;
     }
 
     public BackupRestoreEvent(String selector, Long stackId, Promise<AcceptResult> accepted, String backupLocation, String backupId) {
         super(selector, stackId, accepted);
         this.backupLocation = backupLocation;
         this.backupId = backupId;
+        this.closeConnections = true;
+    }
+
+    public BackupRestoreEvent(String selector, Long stackId, Promise<AcceptResult> accepted, String backupLocation, String backupId, boolean closeConnections) {
+        super(selector, stackId, accepted);
+        this.backupLocation = backupLocation;
+        this.backupId = backupId;
+        this.closeConnections = closeConnections;
     }
 
     public String getBackupLocation() {
@@ -33,5 +55,9 @@ public class BackupRestoreEvent extends StackEvent {
 
     public String getBackupId() {
         return backupId;
+    }
+
+    public boolean getCloseConnections() {
+        return closeConnections;
     }
 }

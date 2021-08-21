@@ -1,10 +1,22 @@
 package com.sequenceiq.datalake.flow.dr.backup;
 
-import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_DATABASE_BACKUP_FAILURE_HANDLED_EVENT;
+import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_BACKUP_FAILED_EVENT;
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_BACKUP_FAILURE_HANDLED_EVENT;
+import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_DATABASE_BACKUP_FAILURE_HANDLED_EVENT;
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_DATABASE_BACKUP_FINALIZED_EVENT;
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_DATABASE_BACKUP_IN_PROGRESS_EVENT;
-import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_BACKUP_FAILED_EVENT;
+
+import java.util.Map;
+import java.util.Optional;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.statemachine.StateContext;
+import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeDrStatusResponse;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
@@ -13,11 +25,11 @@ import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.operation.SdxOperationStatus;
 import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.SdxEvent;
+import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeBackupFailedEvent;
+import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeBackupSuccessEvent;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeDatabaseBackupCouldNotStartEvent;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeDatabaseBackupFailedEvent;
-import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeBackupFailedEvent;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeDatabaseBackupStartEvent;
-import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeBackupSuccessEvent;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeDatabaseBackupWaitRequest;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeFullBackupWaitRequest;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeTriggerBackupEvent;
@@ -31,21 +43,8 @@ import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowState;
-
-import java.util.Map;
-import java.util.Optional;
-
-import javax.inject.Inject;
-
 import com.sequenceiq.sdx.api.model.DatalakeDatabaseDrStatus;
 import com.sequenceiq.sdx.api.model.SdxDatabaseBackupStatusResponse;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.statemachine.StateContext;
-import org.springframework.statemachine.action.Action;
 
 @Configuration
 public class DatalakeBackupActions {
@@ -91,8 +90,7 @@ public class DatalakeBackupActions {
                 LOGGER.info("Triggering datalake backup for {}", payload.getResourceId());
                 DatalakeDrStatusResponse backupStatusResponse =
                         sdxBackupRestoreService.triggerDatalakeBackup(payload.getResourceId(), payload.getBackupLocation(),
-                                payload.getBackupName(),
-                                payload.getUserId());
+                                payload.getBackupName(), payload.getUserId());
                 variables.put(BACKUP_ID, backupStatusResponse.getDrOperationId());
                 variables.put(OPERATION_ID, backupStatusResponse.getDrOperationId());
                 payload.getDrStatus().setOperationId(backupStatusResponse.getDrOperationId());
@@ -126,7 +124,7 @@ public class DatalakeBackupActions {
                     variables.put(OPERATION_ID, payload.getDrStatus().getOperationId());
                 }
                 if (!variables.containsKey(BACKUP_ID)) {
-                    variables.put(BACKUP_ID, payload.getBackupId());
+                    variables.put(BACKUP_ID, payload.getBackupRequest().getBackupId());
                 }
             }
 
@@ -135,8 +133,7 @@ public class DatalakeBackupActions {
                 LOGGER.info("Datalake database backup has been started for {}", payload.getResourceId());
                 sdxBackupRestoreService.databaseBackup(payload.getDrStatus(),
                         payload.getResourceId(),
-                        payload.getBackupId(),
-                        payload.getBackupLocation());
+                        payload.getBackupRequest());
                 sendEvent(context, DATALAKE_DATABASE_BACKUP_IN_PROGRESS_EVENT.event(), payload);
             }
 

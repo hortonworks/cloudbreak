@@ -23,7 +23,7 @@ add_root_role_to_database:
 
 restore_postgresql_db:
   cmd.run:
-    - name: /opt/salt/scripts/restore_db.sh {{salt['pillar.get']('disaster_recovery:object_storage_url')}} "" "" "" {{salt['pillar.get']('disaster_recovery:ranger_admin_group')}} {{salt['pillar.get']('disaster_recovery:database_name') or ''}} "/var/lib/pgsql"
+    - name: /opt/salt/scripts/restore_db.sh {{salt['pillar.get']('disaster_recovery:object_storage_url')}} "" "" "" {{salt['pillar.get']('disaster_recovery:ranger_admin_group')}} {{salt['pillar.get']('disaster_recovery:database_name') or ''}}
     - require:
         - cmd: add_root_role_to_database
 {% endif %}

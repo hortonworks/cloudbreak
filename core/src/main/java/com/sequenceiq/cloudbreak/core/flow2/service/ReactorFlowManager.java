@@ -277,9 +277,9 @@ public class ReactorFlowManager {
         return reactorNotifier.notify(stackId, selector, new StackEvent(selector, stackId));
     }
 
-    public FlowIdentifier triggerDatalakeDatabaseBackup(Long stackId, String location, String backupId) {
+    public FlowIdentifier triggerDatalakeDatabaseBackup(Long stackId, String location, String backupId, boolean closeConnections) {
         String selector = FlowChainTriggers.DATALAKE_DATABASE_BACKUP_CHAIN_TRIGGER_EVENT;
-        return reactorNotifier.notify(stackId, selector, new DatabaseBackupTriggerEvent(selector, stackId, location, backupId));
+        return reactorNotifier.notify(stackId, selector, new DatabaseBackupTriggerEvent(selector, stackId, location, backupId, closeConnections));
     }
 
     public FlowIdentifier triggerDatalakeDatabaseRestore(Long stackId, String location, String backupId) {
