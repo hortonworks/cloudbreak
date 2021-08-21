@@ -81,7 +81,7 @@ public class DatabaseRestoreActions {
                     DatabaseRestoreFailedEvent payload) {
                 Flow flow = getFlow(flowParameters.getFlowId());
                 flow.setFlowFailed(payload.getException());
-                return BackupRestoreContext.from(flowParameters, payload, null, null);
+                return BackupRestoreContext.from(flowParameters, payload, null, null, true);
             }
 
             @Override

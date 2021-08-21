@@ -43,13 +43,13 @@ class SdxBackupControllerTest {
 
         when(sdxBackupRestoreService.getDatabaseBackupStatus(sdxCluster, backupId)).thenThrow(new NotFoundException("Status entry not found"));
         sdxBackupController.backupDatabaseByName(sdxCluster.getClusterName(), backupId, "");
-        verify(sdxBackupRestoreService, times(1)).triggerDatabaseBackup(any(), anyString(), anyString());
+        verify(sdxBackupRestoreService, times(1)).triggerDatabaseBackup(any(), any());
 
         reset(sdxBackupRestoreService);
         when(sdxBackupRestoreService.getDatabaseBackupStatus(sdxCluster, backupId))
                 .thenReturn(new SdxDatabaseBackupStatusResponse(DatalakeDatabaseDrStatus.SUCCEEDED, null));
         sdxBackupController.backupDatabaseByName(sdxCluster.getClusterName(), backupId, "");
-        verify(sdxBackupRestoreService, times(0)).triggerDatabaseBackup(any(), anyString(), anyString());
+        verify(sdxBackupRestoreService, times(0)).triggerDatabaseBackup(any(), any());
     }
 
     private SdxCluster getValidSdxCluster() {

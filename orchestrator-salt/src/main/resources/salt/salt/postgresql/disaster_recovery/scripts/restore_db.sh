@@ -7,7 +7,7 @@ set -o nounset
 set -o pipefail
 set -o xtrace
 
-if [[ $# -lt 5 || $# -gt 7 ]]; then
+if [[ $# -lt 5 || $# -gt 6 || "$1" == "None" ]]; then
   echo "Invalid inputs provided"
   echo "Script accepts at least 5 and at most 7 inputs:"
   echo "  1. Object Storage Service url to retrieve backups."
@@ -16,7 +16,6 @@ if [[ $# -lt 5 || $# -gt 7 ]]; then
   echo "  4. PostgreSQL user name."
   echo "  5. Ranger admin group."
   echo "  6. (optional) Name of the database to restore. If not given, will restore ranger and hive databases."
-  echo "  7. (optional) Log file location. Must be provided along with a database name."
   exit 1
 fi
 
@@ -26,7 +25,7 @@ PORT="$3"
 USERNAME="$4"
 RANGERGROUP="$5"
 DATABASENAME="${6-}"
-LOGFILE=${7:-/var/log}/dl_postgres_restore.log
+LOGFILE=/var/log/dl_postgres_restore.log
 echo "Logs at ${LOGFILE}"
 
 BACKUPS_DIR="/var/tmp/postgres_restore_staging"

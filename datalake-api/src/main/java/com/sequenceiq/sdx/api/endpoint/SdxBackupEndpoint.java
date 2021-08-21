@@ -1,5 +1,7 @@
 package com.sequenceiq.sdx.api.endpoint;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -14,6 +16,7 @@ import org.springframework.validation.annotation.Validated;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.sdx.api.model.SdxBackupResponse;
 import com.sequenceiq.sdx.api.model.SdxBackupStatusResponse;
+import com.sequenceiq.sdx.api.model.SdxDatabaseBackupRequest;
 import com.sequenceiq.sdx.api.model.SdxDatabaseBackupResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseBackupStatusResponse;
 
@@ -66,6 +69,14 @@ public interface SdxBackupEndpoint {
     @ApiOperation(value = "backup the database backing datalake ", produces = MediaType.APPLICATION_JSON, nickname = "backupDatabase")
     SdxDatabaseBackupResponse backupDatabaseByName(@PathParam("name") String name,
             @QueryParam("backupId") String backupId, @QueryParam("backupLocation") String backupLocation);
+
+    @POST
+    @Path("{name}/backupDatabaseInternal")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "backup the database with the option of closing or not closing connections to the database ", produces = MediaType.APPLICATION_JSON,
+        nickname = "backupDatabaseInternal")
+    SdxDatabaseBackupResponse backupDatabaseByNameInternal(@PathParam("name") String name,
+            @Valid @NotNull SdxDatabaseBackupRequest backupRequest);
 
     @GET
     @Path("{name}/backupDatabaseStatus")

@@ -26,7 +26,7 @@ public class BackupDatalakeDatabaseFlowEventChainFactory implements FlowEventCha
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
         flowEventChain.add(new StackEvent(SaltUpdateEvent.SALT_UPDATE_EVENT.event(), event.getResourceId(), event.accepted()));
         flowEventChain.add(new DatabaseBackupTriggerEvent(DATABASE_BACKUP_EVENT.event(), event.getResourceId(),
-                event.getBackupLocation(), event.getBackupId()));
+            event.getBackupLocation(), event.getBackupId(), event.getCloseConnections()));
         return new FlowTriggerEventQueue(getName(), event, flowEventChain);
     }
 }

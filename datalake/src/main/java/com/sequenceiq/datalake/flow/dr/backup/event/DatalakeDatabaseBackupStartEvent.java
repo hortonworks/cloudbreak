@@ -1,29 +1,28 @@
 package com.sequenceiq.datalake.flow.dr.backup.event;
 
+import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_DATABASE_BACKUP_EVENT;
+
 import com.sequenceiq.datalake.entity.operation.SdxOperation;
 import com.sequenceiq.datalake.entity.operation.SdxOperationType;
 import com.sequenceiq.datalake.flow.dr.event.DatalakeDatabaseDrStartBaseEvent;
-
-import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_DATABASE_BACKUP_EVENT;
+import com.sequenceiq.sdx.api.model.SdxDatabaseBackupRequest;
 
 public class DatalakeDatabaseBackupStartEvent extends DatalakeDatabaseDrStartBaseEvent {
 
-    private final String backupId;
+    private final SdxDatabaseBackupRequest backupRequest;
 
-    private final String backupLocation;
-
-    public DatalakeDatabaseBackupStartEvent(String selector, Long sdxId, String userId,
-            String backupId, String backupLocation) {
+    public DatalakeDatabaseBackupStartEvent(String selector, Long sdxId, String userId, SdxDatabaseBackupRequest backupRequest) {
         super(selector, sdxId, userId, SdxOperationType.BACKUP);
-        this.backupId = backupId;
-        this.backupLocation = backupLocation;
+        this.backupRequest = backupRequest;
     }
 
     public DatalakeDatabaseBackupStartEvent(String selector, SdxOperation drStatus, String userId,
                                             String backupId, String backupLocation) {
         super(selector, userId, drStatus);
-        this.backupId = backupId;
-        this.backupLocation = backupLocation;
+        this.backupRequest = new SdxDatabaseBackupRequest();
+        backupRequest.setBackupId(backupId);
+        backupRequest.setBackupLocation(backupLocation);
+        backupRequest.setCloseConnections(true);
     }
 
     public static DatalakeDatabaseBackupStartEvent from(DatalakeTriggerBackupEvent trigggerBackupEvent,
@@ -35,11 +34,7 @@ public class DatalakeDatabaseBackupStartEvent extends DatalakeDatabaseDrStartBas
                 trigggerBackupEvent.getBackupLocation());
     }
 
-    public String getBackupId() {
-        return backupId;
-    }
-
-    public String getBackupLocation() {
-        return backupLocation;
+    public SdxDatabaseBackupRequest getBackupRequest() {
+        return backupRequest;
     }
 }

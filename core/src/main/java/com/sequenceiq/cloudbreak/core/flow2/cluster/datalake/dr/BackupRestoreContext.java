@@ -12,11 +12,14 @@ public class BackupRestoreContext extends CommonContext {
 
     private final String backupId;
 
-    public BackupRestoreContext(FlowParameters flowParameters, StackEvent event, String backupLocation, String backupId) {
+    private final boolean closeConnections;
+
+    public BackupRestoreContext(FlowParameters flowParameters, StackEvent event, String backupLocation, String backupId, boolean closeConnections) {
         super(flowParameters);
         this.stackId = event.getResourceId();
         this.backupLocation = backupLocation;
         this.backupId = backupId;
+        this.closeConnections = closeConnections;
     }
 
     public BackupRestoreContext(FlowParameters flowParameters, Long stackId, String backupLocation, String backupId) {
@@ -24,10 +27,11 @@ public class BackupRestoreContext extends CommonContext {
         this.stackId = stackId;
         this.backupLocation = backupLocation;
         this.backupId = backupId;
+        this.closeConnections = true;
     }
 
-    public static BackupRestoreContext from(FlowParameters flowParameters, StackEvent event, String backupLocation, String backupId) {
-        return new BackupRestoreContext(flowParameters, event, backupLocation, backupId);
+    public static BackupRestoreContext from(FlowParameters flowParameters, StackEvent event, String backupLocation, String backupId, boolean closeConnections) {
+        return new BackupRestoreContext(flowParameters, event, backupLocation, backupId, closeConnections);
     }
 
     public Long getStackId() {
@@ -40,5 +44,9 @@ public class BackupRestoreContext extends CommonContext {
 
     public String getBackupId() {
         return backupId;
+    }
+
+    public boolean getCloseConnections() {
+        return closeConnections;
     }
 }
