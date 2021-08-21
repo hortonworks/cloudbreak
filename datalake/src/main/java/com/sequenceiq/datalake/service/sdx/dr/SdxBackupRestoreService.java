@@ -58,6 +58,7 @@ import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.sdx.api.model.DatalakeDatabaseDrStatus;
 import com.sequenceiq.sdx.api.model.SdxBackupResponse;
 import com.sequenceiq.sdx.api.model.SdxBackupStatusResponse;
+import com.sequenceiq.sdx.api.model.SdxDatabaseBackupRequest;
 import com.sequenceiq.sdx.api.model.SdxDatabaseBackupResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseBackupStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRestoreResponse;
@@ -96,14 +97,22 @@ public class SdxBackupRestoreService {
     @Inject
     private DatalakeDrClient datalakeDrClient;
 
-    public SdxDatabaseBackupResponse triggerDatabaseBackup(SdxCluster sdxCluster, String backupId, String backupLocation) {
+    public SdxDatabaseBackupResponse triggerDatabaseBackup(SdxCluster sdxCluster, SdxDatabaseBackupRequest backupRequest) {
         MDCBuilder.buildMdcContext(sdxCluster);
-        return triggerDatalakeDatabaseBackupFlow(sdxCluster.getId(), backupId, backupLocation);
+        return triggerDatalakeDatabaseBackupFlow(sdxCluster.getId(), backupRequest);
     }
 
     public SdxBackupResponse triggerDatalakeBackup(SdxCluster sdxCluster, String backupLocation, String backupName) {
         MDCBuilder.buildMdcContext(sdxCluster);
         return triggerDatalakeBackupFlow(sdxCluster.getId(), backupLocation, backupName);
+    }
+
+    public DatalakeDrStatusResponse triggerDatalakeBackup(Long id, String backupLocation, String backupName, String userCrn) {
+        SdxCluster sdxCluster = sdxClusterRepository.findById(id).orElseThrow(notFound("SDX cluster", id));
+        LOGGER.info("Triggering datalake backup for datalake: '{}' in '{}' env",
+                sdxCluster.getClusterName(), sdxCluster.getEnvName());
+        return datalakeDrClient.triggerBackup(
+                sdxCluster.getClusterName(), backupName, backupLocation, userCrn);
     }
 
     public SdxDatabaseRestoreResponse triggerDatabaseRestore(SdxCluster sdxCluster, String backupId, String restoreId, String backupLocation) {
@@ -134,10 +143,10 @@ public class SdxBackupRestoreService {
         return triggerDatalakeRestoreFlow(sdxCluster.getId(), backupId, backupLocation, backupLocationOverride);
     }
 
-    private SdxDatabaseBackupResponse triggerDatalakeDatabaseBackupFlow(Long clusterId, String backupId, String backupLocation) {
+    private SdxDatabaseBackupResponse triggerDatalakeDatabaseBackupFlow(Long clusterId, SdxDatabaseBackupRequest backupRequest) {
         String selector = DATALAKE_DATABASE_BACKUP_EVENT.event();
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
-        DatalakeDatabaseBackupStartEvent startEvent = new DatalakeDatabaseBackupStartEvent(selector, clusterId, userId, backupId, backupLocation);
+        DatalakeDatabaseBackupStartEvent startEvent = new DatalakeDatabaseBackupStartEvent(selector, clusterId, userId, backupRequest);
         FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerDatalakeDatabaseBackupFlow(startEvent);
         return new SdxDatabaseBackupResponse(startEvent.getDrStatus().getOperationId(), flowIdentifier);
     }
@@ -169,14 +178,14 @@ public class SdxBackupRestoreService {
         return new SdxRestoreResponse(startEvent.getDrStatus().getOperationId(), flowIdentifier);
     }
 
-    public void databaseBackup(SdxOperation drStatus, Long clusterId, String backupId, String backupLocation) {
+    public void databaseBackup(SdxOperation drStatus, Long clusterId, SdxDatabaseBackupRequest backupRequest) {
         try {
             sdxOperationRepository.save(drStatus);
             sdxClusterRepository.findById(clusterId).ifPresentOrElse(sdxCluster -> {
                 String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
                 BackupV4Response backupV4Response = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
                         stackV4Endpoint.backupDatabaseByNameInternal(0L, sdxCluster.getClusterName(),
-                        backupLocation, backupId, initiatorUserCrn));
+                        backupRequest.getBackupId(), backupRequest.getBackupLocation(), backupRequest.getCloseConnections(), initiatorUserCrn));
                 updateSuccessStatus(drStatus.getOperationId(), sdxCluster, backupV4Response.getFlowIdentifier(),
                         SdxOperationStatus.TRIGGERRED);
             }, () -> {
@@ -391,14 +400,6 @@ public class SdxBackupRestoreService {
         } catch (Exception e) {
             return AttemptResults.breakFor(e);
         }
-    }
-
-    public DatalakeDrStatusResponse triggerDatalakeBackup(Long id, String backupLocation, String backupName, String userCrn) {
-        SdxCluster sdxCluster = sdxClusterRepository.findById(id).orElseThrow(notFound("SDX cluster", id));
-        LOGGER.info("Triggering datalake backup for datalake: '{}' in '{}' env",
-                sdxCluster.getClusterName(), sdxCluster.getEnvName());
-        return datalakeDrClient.triggerBackup(
-                sdxCluster.getClusterName(), backupLocation, backupName, userCrn);
     }
 
     public SdxBackupStatusResponse getDatalakeBackupStatus(String datalakeName, String backupId, String backupName, String userCrn) {

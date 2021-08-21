@@ -130,7 +130,7 @@ public class ReactorFlowManagerTest {
         underTest.triggerDistroXUpgrade(STACK_ID, imageChangeDto, false, false);
         underTest.triggerSaltUpdate(STACK_ID);
         underTest.triggerPillarConfigurationUpdate(STACK_ID);
-        underTest.triggerDatalakeDatabaseBackup(STACK_ID, null, null);
+        underTest.triggerDatalakeDatabaseBackup(STACK_ID, null, null, true);
         underTest.triggerDatalakeDatabaseRestore(STACK_ID, null, null);
         underTest.triggerAutoTlsCertificatesRotation(STACK_ID, new CertificatesRotationV4Request());
         underTest.triggerStackLoadBalancerUpdate(STACK_ID);
@@ -230,7 +230,7 @@ public class ReactorFlowManagerTest {
     public void testTriggerDatabaseBackupFlowchain() {
         long stackId = 1L;
         String backupId = UUID.randomUUID().toString();
-        underTest.triggerDatalakeDatabaseBackup(stackId, BACKUP_LOCATION, backupId);
+        underTest.triggerDatalakeDatabaseBackup(stackId, BACKUP_LOCATION, backupId, true);
         ArgumentCaptor<Acceptable> captor = ArgumentCaptor.forClass(Acceptable.class);
         verify(reactorNotifier).notify(eq(stackId), eq(FlowChainTriggers.DATALAKE_DATABASE_BACKUP_CHAIN_TRIGGER_EVENT), captor.capture());
         DatabaseBackupTriggerEvent event = (DatabaseBackupTriggerEvent) captor.getValue();

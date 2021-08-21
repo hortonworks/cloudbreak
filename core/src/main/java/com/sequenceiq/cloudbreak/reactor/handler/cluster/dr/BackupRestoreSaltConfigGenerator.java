@@ -9,9 +9,9 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.google.common.base.Strings;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
@@ -29,7 +29,10 @@ public class BackupRestoreSaltConfigGenerator {
 
     public static final String RANGER_ADMIN_GROUP_KEY = "ranger_admin_group";
 
-    public SaltConfig createSaltConfig(String location, String backupId, String rangerAdminGroup, Stack stack) throws URISyntaxException {
+    public static final String CLOSE_CONNECTIONS = "close_connections";
+
+    public SaltConfig createSaltConfig(String location, String backupId, String rangerAdminGroup, boolean closeConnections, Stack stack)
+            throws URISyntaxException {
         String fullLocation = buildFullLocation(location, backupId, stack.getCloudPlatform());
 
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
@@ -37,9 +40,10 @@ public class BackupRestoreSaltConfigGenerator {
         Map<String, String> disasterRecoveryValues = new HashMap<>();
         disasterRecoveryValues.put(OBJECT_STORAGE_URL_KEY, fullLocation);
         disasterRecoveryValues.put(RANGER_ADMIN_GROUP_KEY, rangerAdminGroup);
+        disasterRecoveryValues.put(CLOSE_CONNECTIONS, String.valueOf(closeConnections));
 
         servicePillar.put("disaster-recovery", new SaltPillarProperties(POSTGRESQL_DISASTER_RECOVERY_PILLAR_PATH,
-            singletonMap(DISASTER_RECOVERY_KEY, disasterRecoveryValues)));
+                singletonMap(DISASTER_RECOVERY_KEY, disasterRecoveryValues)));
 
         return new SaltConfig(servicePillar);
     }

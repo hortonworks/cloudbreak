@@ -8,7 +8,7 @@ set -o nounset
 set -o pipefail
 set -o xtrace
 
-if [[ $# -lt 5 || $# -gt 7 ]]; then
+if [[ $# -lt 6 || $# -gt 7 || "$1" == "None" ]]; then
   echo "Invalid inputs provided"
   echo "Script accepts at least 5 and at most 7 inputs:"
   echo "  1. Object Storage Service url to place backups."
@@ -16,8 +16,8 @@ if [[ $# -lt 5 || $# -gt 7 ]]; then
   echo "  3. PostgreSQL port."
   echo "  4. PostgreSQL user name."
   echo "  5. Ranger admin group."
-  echo "  6. (optional) Name of the database to backup. If not given, will backup ranger and hive databases."
-  echo "  7. (optional) Log file location. Must be provided along with a database name."
+  echo "  6. Whether or not to close connections for the database while it is being backed up."
+  echo "  7. (optional) Name of the database to backup. If not given, will backup ranger and hive databases."
   exit 1
 fi
 
@@ -26,8 +26,9 @@ HOST="$2"
 PORT="$3"
 USERNAME="$4"
 RANGERGROUP="$5"
-DATABASENAME="${6-}"
-LOGFILE=${7:-/var/log}/dl_postgres_backup.log
+CLOSECONNECTIONS="$6"
+DATABASENAME="${7-}"
+LOGFILE=/var/log/dl_postgres_backup.log
 echo "Logs at ${LOGFILE}"
 
 {%- from 'postgresql/settings.sls' import postgresql with context %}
@@ -123,7 +124,11 @@ limit_incomming_connection() {
 backup_database_for_service() {
   SERVICE="$1"
   limit_incomming_connection $SERVICE 0
-  close_existing_connections $SERVICE
+
+  if [[ "$CLOSECONNECTIONS" == "true" ]]; then
+    close_existing_connections $SERVICE
+  fi
+
   doLog "INFO Dumping ${SERVICE}"
   LOCAL_BACKUP=${DATE_DIR}/${SERVICE}_backup
   pg_dump --host="$HOST" --port="$PORT" --username="$USERNAME" --dbname="$SERVICE" --format=plain --file="$LOCAL_BACKUP" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || errorExit "Unable to dump ${SERVICE}"
@@ -144,12 +149,14 @@ run_backup() {
   DATE_DIR=${BACKUPS_DIR}/$(date '+%Y-%m-%dT%H:%M:%SZ')
   mkdir -p "$DATE_DIR" || error_exit "Could not create local directory for backups."
 
+  doLog "INFO Conditional variable for closing connections to database during backup is set to ${CLOSECONNECTIONS}"
+
   if [[ -z "$DATABASENAME" ]]; then
-    echo "No database name provided. Will backup hive and ranger databases."
+    doLog "INFO No database name provided. Will backup hive and ranger databases."
     backup_database_for_service "hive"
     backup_database_for_service "ranger"
   else
-    echo "Backing up ${DATABASENAME}."
+    doLog "INFO Backing up ${DATABASENAME}."
     backup_database_for_service "${DATABASENAME}"
   fi
 

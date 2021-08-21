@@ -1,22 +1,9 @@
 package com.sequenceiq.cloudbreak.service;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
-
-import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
-import com.sequenceiq.cloudbreak.common.service.TransactionService;
-import com.sequenceiq.cloudbreak.controller.validation.dr.BackupRestoreV4RequestValidator;
-import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
-import com.sequenceiq.cloudbreak.validation.ValidationResult;
-import com.sequenceiq.flow.api.model.FlowIdentifier;
-import com.sequenceiq.flow.core.FlowLogService;
 
 import java.util.Collections;
 import java.util.Optional;
@@ -30,6 +17,20 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.controller.validation.dr.BackupRestoreV4RequestValidator;
+import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.core.FlowLogService;
 
 @ExtendWith(MockitoExtension.class)
 public class DatabaseBackupRestoreServiceTest {
@@ -88,9 +89,9 @@ public class DatabaseBackupRestoreServiceTest {
         when(stackService.findStackByNameAndWorkspaceId(any(), anyLong())).thenReturn(Optional.of(stack));
         when(stackService.getByNameOrCrnInWorkspace(any(), anyLong())).thenReturn(stack);
         when(flowLogService.findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(1L)).thenReturn(Collections.EMPTY_LIST);
-        when(flowManager.triggerDatalakeDatabaseBackup(anyLong(), any(), any())).thenReturn(FlowIdentifier.notTriggered());
+        when(flowManager.triggerDatalakeDatabaseBackup(anyLong(), any(), any(), anyBoolean())).thenReturn(FlowIdentifier.notTriggered());
 
-        service.backupDatabase(WORKSPACE_ID, ofName, null, null);
+        service.backupDatabase(WORKSPACE_ID, ofName, null, null, true);
     }
 
     @Test

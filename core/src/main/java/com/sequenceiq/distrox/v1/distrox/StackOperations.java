@@ -371,10 +371,10 @@ public class StackOperations implements ResourcePropertyProvider {
         return stackCommonService.getRetryableFlows(name, workspaceId);
     }
 
-    public FlowIdentifier backupClusterDatabase(@NotNull NameOrCrn nameOrCrn, Long workspaceId, String location, String backupId) {
+    public FlowIdentifier backupClusterDatabase(@NotNull NameOrCrn nameOrCrn, Long workspaceId, String location, String backupId, boolean closeConnections) {
         databaseBackupRestoreService.validate(workspaceId, nameOrCrn, location, backupId);
         LOGGER.debug("Starting cluster database backup: " + nameOrCrn);
-        return databaseBackupRestoreService.backupDatabase(workspaceId, nameOrCrn, location, backupId);
+        return databaseBackupRestoreService.backupDatabase(workspaceId, nameOrCrn, location, backupId, closeConnections);
     }
 
     public FlowIdentifier restoreClusterDatabase(@NotNull NameOrCrn nameOrCrn, Long workspaceId, String location, String backupId) {
