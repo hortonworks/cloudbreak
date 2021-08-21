@@ -54,6 +54,7 @@ auth:
     datahub.nodestatus.check.enable: true
     nodestatus.salt.ping.enable: true
     metrics.databus.processing.enable: false
+    diagnostics.vm.enable: true
     user.sync.credentials.update.optimization.enable: true
     freeipa.batch.call.enable: true
     azure:

@@ -3,8 +3,14 @@ package com.sequenceiq.freeipa.service.diagnostics;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.telemetry.support.SupportBundleConfiguration;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
@@ -18,10 +24,20 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackStatus;
 
+@ExtendWith(MockitoExtension.class)
 public class DiiagnosticsCollectionValidatorTest {
 
-    private final DiagnosticsCollectionValidator underTest = new DiagnosticsCollectionValidator(
-            new SupportBundleConfiguration(false, null, null));
+    @InjectMocks
+    private DiagnosticsCollectionValidator underTest;
+
+    @Mock
+    private EntitlementService entitlementService;
+
+    @BeforeEach
+    public void setUp() {
+        underTest = new DiagnosticsCollectionValidator(
+                new SupportBundleConfiguration(false, null, null), entitlementService);
+    }
 
     @Test
     void testValidateWithCloudStorageWithEmptyTelemetry() {
