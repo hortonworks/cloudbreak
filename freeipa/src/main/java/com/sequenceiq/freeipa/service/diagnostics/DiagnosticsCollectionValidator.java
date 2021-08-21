@@ -1,7 +1,11 @@
 package com.sequenceiq.freeipa.service.diagnostics;
 
+import javax.ws.rs.ServiceUnavailableException;
+
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.telemetry.support.SupportBundleConfiguration;
 import com.sequenceiq.cloudbreak.validation.AbstractDiagnosticsCollectionValidator;
@@ -19,11 +23,15 @@ public class DiagnosticsCollectionValidator extends AbstractDiagnosticsCollectio
 
     private static final int MIN_MINOR_VERSION = 33;
 
-    public DiagnosticsCollectionValidator(SupportBundleConfiguration supportBundleConfiguration) {
+    private final EntitlementService entitlementService;
+
+    public DiagnosticsCollectionValidator(SupportBundleConfiguration supportBundleConfiguration, EntitlementService entitlementService) {
         super(supportBundleConfiguration);
+        this.entitlementService = entitlementService;
     }
 
     public void validate(BaseDiagnosticsCollectionRequest request, Stack stack) {
+        checkMaintenance(stack.getResourceCrn());
         validate(stack.getTelemetry(), request.getDestination(), stack.getStackStatus().getStatus(), stack.getName(), stack.getAppVersion());
     }
 
@@ -66,5 +74,12 @@ public class DiagnosticsCollectionValidator extends AbstractDiagnosticsCollectio
     @Override
     public boolean isSupportBundleEnabled(boolean cmBundle) {
         return getSupportBundleConfiguration().isEnabled();
+    }
+
+    private void checkMaintenance(String resourceCrn) {
+        Crn crn = Crn.fromString(resourceCrn);
+        if (crn != null && !entitlementService.isDiagnosticsEnabled(crn.getAccountId())) {
+            throw new ServiceUnavailableException("FreeIPA diagnostics service is currently unavailable.");
+        }
     }
 }

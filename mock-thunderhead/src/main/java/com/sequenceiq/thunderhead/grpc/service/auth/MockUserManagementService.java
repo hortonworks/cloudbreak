@@ -50,6 +50,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SDX_HBA
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SHOW_CLI;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_USER_SYNC_CREDENTIALS_UPDATE_OPTIMIZATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_USE_CM_SYNC_COMMAND_POLLER;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_VM_DIAGNOSTICS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CLOUDERA_INTERNAL_ACCOUNT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_AWS_AUTOSCALING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_AZURE_AUTOSCALING;
@@ -369,6 +370,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.datahub.nodestatus.check.enable}")
     private boolean datahubNodestatusCheck;
+
+    @Value("${auth.mock.diagnostics.vm.enable}")
+    private boolean diagnosticsEnabled;
 
     @Value("${auth.mock.metrics.databus.processing.enable}")
     private boolean metricsDatabusProcessing;
@@ -776,6 +780,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (enableGcpDiskEncryptionWithCMEK) {
             builder.addEntitlements(createEntitlement(CDP_CB_GCP_DISK_ENCRYPTION_WITH_CMEK));
+        }
+        if (diagnosticsEnabled) {
+            builder.addEntitlements(createEntitlement(CDP_VM_DIAGNOSTICS));
         }
         if (enableFmsFreeipaBatchCall) {
             builder.addEntitlements(createEntitlement(FMS_FREEIPA_BATCH_CALL));
