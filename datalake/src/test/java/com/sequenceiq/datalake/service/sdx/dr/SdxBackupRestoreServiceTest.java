@@ -1,17 +1,12 @@
 package com.sequenceiq.datalake.service.sdx.dr;
 
-import java.util.UUID;
-
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.reset;
 
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
-import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
-import com.sequenceiq.datalake.entity.operation.SdxOperation;
-import com.sequenceiq.datalake.entity.operation.SdxOperationType;
-import com.sequenceiq.datalake.repository.SdxOperationRepository;
+import java.util.UUID;
+
 import org.assertj.core.util.Strings;
 import org.junit.Assert;
 import org.junit.Before;
@@ -27,13 +22,19 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.entity.operation.SdxOperation;
+import com.sequenceiq.datalake.entity.operation.SdxOperationType;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeDatabaseBackupStartEvent;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeDatabaseRestoreStartEvent;
+import com.sequenceiq.datalake.repository.SdxOperationRepository;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
+import com.sequenceiq.sdx.api.model.SdxDatabaseBackupRequest;
 import com.sequenceiq.sdx.api.model.SdxDatabaseBackupResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRestoreResponse;
 
@@ -88,12 +89,16 @@ public class SdxBackupRestoreServiceTest {
     @Test
     public void triggerDatabaseBackupSuccess() {
         when(sdxReactorFlowManager.triggerDatalakeDatabaseBackupFlow(Mockito.any(DatalakeDatabaseBackupStartEvent.class))).thenReturn(flowIdentifier);
-        SdxDatabaseBackupResponse backupResponse = sdxBackupRestoreService.triggerDatabaseBackup(sdxCluster, BACKUPID, BACKUPLOCATION);
+        SdxDatabaseBackupRequest backupRequest = new SdxDatabaseBackupRequest();
+        backupRequest.setBackupId(BACKUPID);
+        backupRequest.setBackupLocation(BACKUPLOCATION);
+        backupRequest.setCloseConnections(true);
+        SdxDatabaseBackupResponse backupResponse = sdxBackupRestoreService.triggerDatabaseBackup(sdxCluster, backupRequest);
         Assert.assertEquals(flowIdentifier, backupResponse.getFlowIdentifier());
         ArgumentCaptor<DatalakeDatabaseBackupStartEvent> eventArgumentCaptor = ArgumentCaptor.forClass(DatalakeDatabaseBackupStartEvent.class);
         verify(sdxReactorFlowManager, times(1)).triggerDatalakeDatabaseBackupFlow(eventArgumentCaptor.capture());
-        Assert.assertEquals(BACKUPID, eventArgumentCaptor.getValue().getBackupId());
-        Assert.assertEquals(BACKUPLOCATION, eventArgumentCaptor.getValue().getBackupLocation());
+        Assert.assertEquals(BACKUPID, eventArgumentCaptor.getValue().getBackupRequest().getBackupId());
+        Assert.assertEquals(BACKUPLOCATION, eventArgumentCaptor.getValue().getBackupRequest().getBackupLocation());
         Assert.assertEquals(userCrn, eventArgumentCaptor.getValue().getUserId());
         Assert.assertEquals(sdxCluster.getId(), eventArgumentCaptor.getValue().getResourceId());
         Assert.assertTrue(isUUID(eventArgumentCaptor.getValue().getDrStatus().getOperationId()));

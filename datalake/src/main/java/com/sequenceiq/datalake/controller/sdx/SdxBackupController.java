@@ -16,6 +16,7 @@ import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
 import com.sequenceiq.sdx.api.endpoint.SdxBackupEndpoint;
 import com.sequenceiq.sdx.api.model.SdxBackupResponse;
 import com.sequenceiq.sdx.api.model.SdxBackupStatusResponse;
+import com.sequenceiq.sdx.api.model.SdxDatabaseBackupRequest;
 import com.sequenceiq.sdx.api.model.SdxDatabaseBackupResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseBackupStatusResponse;
 
@@ -38,7 +39,26 @@ public class SdxBackupController implements SdxBackupEndpoint {
             sdxDatabaseBackupResponse.setOperationId(backupId);
             return sdxDatabaseBackupResponse;
         } catch (NotFoundException notFoundException) {
-            return sdxBackupRestoreService.triggerDatabaseBackup(sdxCluster, backupId, backupLocation);
+            SdxDatabaseBackupRequest backupRequest = new SdxDatabaseBackupRequest();
+            backupRequest.setBackupId(backupId);
+            backupRequest.setBackupLocation(backupLocation);
+            backupRequest.setCloseConnections(true);
+            return sdxBackupRestoreService.triggerDatabaseBackup(sdxCluster, backupRequest);
+        }
+    }
+
+    @Override
+    @CheckPermissionByResourceName(action  = AuthorizationResourceAction.BACKUP_DATALAKE)
+    public SdxDatabaseBackupResponse backupDatabaseByNameInternal(@ResourceName String name, SdxDatabaseBackupRequest backupRequest) {
+        SdxCluster sdxCluster = getSdxClusterByName(name);
+        String backupId = backupRequest.getBackupId();
+        try {
+            SdxDatabaseBackupStatusResponse response = sdxBackupRestoreService.getDatabaseBackupStatus(sdxCluster, backupId);
+            SdxDatabaseBackupResponse sdxDatabaseBackupResponse = new SdxDatabaseBackupResponse();
+            sdxDatabaseBackupResponse.setOperationId(backupId);
+            return sdxDatabaseBackupResponse;
+        } catch (NotFoundException notFoundException) {
+            return sdxBackupRestoreService.triggerDatabaseBackup(sdxCluster, backupRequest);
         }
     }
 
