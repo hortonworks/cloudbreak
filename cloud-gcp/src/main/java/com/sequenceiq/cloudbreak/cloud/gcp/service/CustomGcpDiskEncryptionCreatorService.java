@@ -39,7 +39,6 @@ import org.springframework.stereotype.Service;
 import com.google.api.services.compute.model.CustomerEncryptionKey;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
-import com.sequenceiq.cloudbreak.cloud.model.instance.GcpInstanceTemplate;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 
 @Service
@@ -58,7 +57,7 @@ public class CustomGcpDiskEncryptionCreatorService {
 
     public CustomerEncryptionKey createCustomerEncryptionKey(InstanceTemplate template) {
         String key = Optional.ofNullable(template.getStringParameter(InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID)).orElse("");
-        String method = Optional.ofNullable(template.getStringParameter(GcpInstanceTemplate.KEY_ENCRYPTION_METHOD)).orElse("RSA");
+        String method = Optional.ofNullable(template.getStringParameter("keyEncryptionMethod")).orElse("RSA");
 
         switch (method) {
             case "RAW":

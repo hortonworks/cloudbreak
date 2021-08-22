@@ -46,7 +46,7 @@ class DefaultInstanceGroupProviderTest {
 
     @Test
     void createDefaultTemplateTestNoVolumeEncryptionWhenAzure() {
-        Template result = underTest.createDefaultTemplate(CloudPlatform.AZURE, ACCOUNT_ID, null, null);
+        Template result = underTest.createDefaultTemplate(CloudPlatform.AZURE, ACCOUNT_ID, null);
 
         assertThat(result).isNotNull();
         assertThat(result.getAttributes()).isNull();
@@ -54,7 +54,7 @@ class DefaultInstanceGroupProviderTest {
 
     @Test
     void createDefaultTemplateTestVolumeEncryptionAddedWhenAzure() {
-        Template result = underTest.createDefaultTemplate(CloudPlatform.AZURE, ACCOUNT_ID, "dummyDiskEncryptionSet", null);
+        Template result = underTest.createDefaultTemplate(CloudPlatform.AZURE, ACCOUNT_ID, "dummyDiskEncryptionSet");
 
         assertThat(result).isNotNull();
         Json attributes = result.getAttributes();
@@ -66,24 +66,13 @@ class DefaultInstanceGroupProviderTest {
     @Test
     void createDefaultTemplateTestVolumeEncryptionAddedWhenAws() {
 
-        Template result = underTest.createDefaultTemplate(CloudPlatform.AWS, ACCOUNT_ID, null, null);
+        Template result = underTest.createDefaultTemplate(CloudPlatform.AWS, ACCOUNT_ID, null);
 
         assertThat(result).isNotNull();
         Json attributes = result.getAttributes();
         assertThat(attributes).isNotNull();
         assertThat(attributes.<Object>getValue(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED)).isEqualTo(Boolean.TRUE);
         assertThat(attributes.<Object>getValue(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE)).isEqualTo(EncryptionType.DEFAULT.name());
-    }
-
-    @Test
-    void createDefaultTemplateTestVolumeEncryptionAddedWhenGcp() {
-        Template result = underTest.createDefaultTemplate(CloudPlatform.GCP, ACCOUNT_ID, null, "dummyEncryptionKey");
-
-        assertThat(result).isNotNull();
-        Json attributes = result.getAttributes();
-        assertThat(attributes).isNotNull();
-        assertThat(attributes.<Object>getValue(AzureInstanceTemplate.VOLUME_ENCRYPTION_KEY_ID)).isEqualTo("dummyEncryptionKey");
-        assertThat(attributes.<Object>getValue("keyEncryptionMethod")).isEqualTo("KMS");
     }
 
     @Test

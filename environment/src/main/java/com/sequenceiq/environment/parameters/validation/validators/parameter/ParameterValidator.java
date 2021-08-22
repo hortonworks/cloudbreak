@@ -10,5 +10,5 @@ public interface ParameterValidator {
 
     ValidationResult validate(EnvironmentValidationDto environmentValidationDto, ParametersDto parametersDto, ValidationResultBuilder validationResultBuilder);
 
-    CloudPlatform getCloudPlatform();
+    CloudPlatform getcloudPlatform();
 }
