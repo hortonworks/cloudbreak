@@ -1,5 +1,16 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt;
 
+import static com.sequenceiq.common.model.diagnostics.DiagnosticParameters.EXCLUDE_HOSTS_FILTER;
+import static com.sequenceiq.common.model.diagnostics.DiagnosticParameters.HOSTS_FILTER;
+import static com.sequenceiq.common.model.diagnostics.DiagnosticParameters.HOST_GROUPS_FILTER;
+
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -8,10 +19,18 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
+import org.springframework.util.FileCopyUtils;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
@@ -21,8 +40,11 @@ import com.sequenceiq.cloudbreak.orchestrator.host.TelemetryOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
+import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.HostList;
+import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Target;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.BaseSaltJobRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltJobIdTracker;
+import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltUploadWithPermission;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.ConcurrentParameterizedStateRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.ParameterizedStateRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.StateAllRunner;
@@ -31,6 +53,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.runner.SaltRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
+import com.sequenceiq.cloudbreak.service.Retry;
 
 @Component
 public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
@@ -49,9 +72,25 @@ public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SaltTelemetryOrchestrator.class);
 
+    private static final String FILECOLLECTOR_CONFIG_NAME = "filecollector";
+
     private static final String FLUENT_AGENT_STOP = "fluent.agent-stop";
 
     private static final String TELEMETRY_CLOUD_STORAGE_TEST = "telemetry.test-cloud-storage";
+
+    private static final String PERMISSION = "0700";
+
+    private static final String PREFLIGHT_ERROR_START = "PreFlight diagnostics check FAILED";
+
+    private static final String RAM_WARNING = "-- RAM ISSUES ---";
+
+    private static final String ZERO_EXIT_CODE = "Exit code: 0";
+
+    private static final String LOCAL_PREFLIGHT_SCRIPTS_LOCATION = "salt-common/salt/filecollector/scripts/";
+
+    private static final String REMOTE_PREFLIGHT_SCRIPTS_LOCATION = "/srv/salt/scripts";
+
+    private static final String[] SCRIPTS_TO_UPLOAD = new String[]{"preflight-check.sh", "filecollector_minion_check.py"};
 
     private final ExitCriteria exitCriteria;
 
@@ -67,6 +106,9 @@ public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
 
     @Value("${cb.max.salt.cloudstorage.validation.retry:3}")
     private int maxCloudStorageValidationRetry;
+
+    @Inject
+    private Retry retry;
 
     public SaltTelemetryOrchestrator(ExitCriteria exitCriteria, SaltService saltService, SaltRunner saltRunner,
             @Value("${cb.max.salt.new.service.telemetry.stop.retry:5}") int maxTelemetryStopRetry,
@@ -137,6 +179,40 @@ public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
             throws CloudbreakOrchestratorFailedException {
         runSaltState(allGateways, nodes, parameters, exitModel, FILECOLLECTOR_INIT,
                 "Error occurred during diagnostics filecollector init.", maxDiagnosticsCollectionRetry, false);
+    }
+
+    @Override
+    public void preFlightDiagnosticsCheck(List<GatewayConfig> allGateways, Set<Node> nodes, Map<String, Object> parameters, ExitCriteriaModel exitModel)
+            throws CloudbreakOrchestratorFailedException {
+        GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(allGateways);
+        Set<String> gatewayTargets = getGatewayPrivateIps(allGateways);
+        Set<String> gatewayHostnames = getGatewayHostnames(allGateways);
+        try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
+            uploadScripts(sc, gatewayTargets, exitModel, SCRIPTS_TO_UPLOAD);
+            String command = String.format("/srv/salt/scripts/%s master-check", SCRIPTS_TO_UPLOAD[0]);
+            boolean anyHostsFilter = doesFilecollectorConfigHasHostsFilter(parameters);
+            if (anyHostsFilter && CollectionUtils.isNotEmpty(nodes)) {
+                command += " -h " + nodes.stream().map(Node::getHostname).collect(Collectors.joining(","));
+            }
+            Target<String> targets = new HostList(gatewayHostnames);
+            Map<String, String> preFlightResponses = SaltStates.runCommandOnHosts(retry, sc, targets, command);
+            logMemoryWarnings(preFlightResponses);
+            boolean successful = isSuccessful(preFlightResponses);
+            if (successful) {
+                LOGGER.debug("Diagnostics VM preflight check was successful");
+            } else {
+                String errorMessage = getErrorMessageForPreFlightCheck(preFlightResponses);
+                if (StringUtils.isNotBlank(errorMessage)) {
+                    throw new CloudbreakOrchestratorFailedException(errorMessage);
+                } else {
+                    throw new CloudbreakOrchestratorFailedException(String.format(
+                            "Running of preflight-check.sh script got unexpected result: %s", getAnyPreflightOutput(preFlightResponses)));
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.info("Error occurred during preflight-check script upload/execution", e);
+            throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
+        }
     }
 
     @Override
@@ -217,5 +293,107 @@ public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
             LOGGER.debug(errorMessage, e);
             throw new CloudbreakOrchestratorFailedException(e);
         }
+    }
+
+    private Set<String> getGatewayPrivateIps(Collection<GatewayConfig> allGatewayConfigs) {
+        return allGatewayConfigs.stream().map(GatewayConfig::getPrivateAddress).collect(Collectors.toSet());
+    }
+
+    private Set<String> getGatewayHostnames(Collection<GatewayConfig> allGatewayConfigs) {
+        return allGatewayConfigs.stream().map(GatewayConfig::getHostname).collect(Collectors.toSet());
+    }
+
+    private void uploadScripts(SaltConnector saltConnector, Set<String> targets, ExitCriteriaModel exitCriteriaModel, String... fileNames)
+            throws CloudbreakOrchestratorFailedException {
+        for (String fileName : fileNames) {
+            uploadFileToTargetsWithPermission(saltConnector, targets, exitCriteriaModel, fileName);
+        }
+    }
+
+    private void uploadFileToTargetsWithPermission(SaltConnector saltConnector, Set<String> targets, ExitCriteriaModel exitCriteriaModel,
+            String fileName) throws CloudbreakOrchestratorFailedException {
+        ClassPathResource preFlightScriptResource = new ClassPathResource(
+                LOCAL_PREFLIGHT_SCRIPTS_LOCATION + fileName, getClass().getClassLoader());
+        byte[] content = asString(preFlightScriptResource).getBytes(StandardCharsets.UTF_8);
+        try {
+            OrchestratorBootstrap saltUpload = new SaltUploadWithPermission(saltConnector, targets, REMOTE_PREFLIGHT_SCRIPTS_LOCATION,
+                    fileName, PERMISSION, content);
+            Callable<Boolean> saltUploadRunner = saltRunner.runner(saltUpload, exitCriteria, exitCriteriaModel);
+            saltUploadRunner.call();
+        } catch (Exception e) {
+            LOGGER.info("Error occurred during file distribute to gateway nodes", e);
+            throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
+        }
+    }
+
+    private String asString(Resource resource) {
+        try (Reader reader = new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8)) {
+            return FileCopyUtils.copyToString(reader);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    private String getAnyPreflightOutput(Map<String, String> responses) {
+        String output = null;
+        if (MapUtils.isNotEmpty(responses)) {
+            output = responses.entrySet().stream().findAny().map(Map.Entry::getValue).orElse(null);
+        }
+        return output;
+    }
+
+    private boolean isSuccessful(Map<String, String> responses) {
+        boolean result = true;
+        if (MapUtils.isNotEmpty(responses)) {
+            result = responses.entrySet().stream()
+                    .anyMatch(entry -> entry.getValue().contains(ZERO_EXIT_CODE));
+        }
+        return result;
+    }
+
+    private String getErrorMessageForPreFlightCheck(Map<String, String> responses) {
+        String errorMsg = null;
+        if (MapUtils.isNotEmpty(responses)) {
+            errorMsg = responses.values().stream()
+                    .filter(msg -> msg.contains(PREFLIGHT_ERROR_START))
+                    .findFirst()
+                    .map(msg -> msg.split(PREFLIGHT_ERROR_START)[1])
+                    .orElse(null);
+        }
+        return errorMsg;
+    }
+
+    private void logMemoryWarnings(Map<String, String> responses) {
+        if (MapUtils.isNotEmpty(responses)) {
+            String fullLogMessage = responses.values().stream()
+                    .filter(msg -> msg.contains(RAM_WARNING))
+                    .findFirst().orElse(null);
+            if (StringUtils.isNotBlank(fullLogMessage)) {
+                String[] splitted = fullLogMessage.split(RAM_WARNING);
+                if (splitted.length >= 2) {
+                    LOGGER.debug("RAM WARNINGS before diagnostics collection: {}", splitted[1]);
+                }
+            }
+        }
+    }
+
+    private boolean doesFilecollectorConfigHasHostsFilter(Map<String, Object> parameters) {
+        boolean result = false;
+        if (MapUtils.isNotEmpty(parameters) && parameters.containsKey(FILECOLLECTOR_CONFIG_NAME)) {
+            Map<String, Object> filecollectorMap = (Map<String, Object>) parameters.get(FILECOLLECTOR_CONFIG_NAME);
+            if (isAnyFilecollectorConfigKeyNotEmpty(filecollectorMap, HOSTS_FILTER, EXCLUDE_HOSTS_FILTER, HOST_GROUPS_FILTER)) {
+                result = true;
+            }
+        }
+        return result;
+    }
+
+    private boolean isAnyFilecollectorConfigKeyNotEmpty(Map<String, Object> filecollectorConfig, String... keys) {
+        return Arrays.stream(keys)
+                .filter(key -> filecollectorConfig.containsKey(key))
+                .anyMatch(key -> {
+                    Set<String> hostSet = (Set<String>) filecollectorConfig.get(key);
+                    return CollectionUtils.isNotEmpty(hostSet);
+                });
     }
 }

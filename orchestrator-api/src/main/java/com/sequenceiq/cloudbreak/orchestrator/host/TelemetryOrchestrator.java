@@ -21,6 +21,9 @@ public interface TelemetryOrchestrator {
     void initDiagnosticCollection(List<GatewayConfig> allGateways, Set<Node> nodes, Map<String, Object> parameters,
             ExitCriteriaModel exitModel) throws CloudbreakOrchestratorFailedException;
 
+    void preFlightDiagnosticsCheck(List<GatewayConfig> allGateways, Set<Node> nodes, Map<String, Object> parameters,
+            ExitCriteriaModel exitModel) throws CloudbreakOrchestratorFailedException;
+
     void executeDiagnosticCollection(List<GatewayConfig> allGateways, Set<Node> nodes, Map<String, Object> parameters,
             ExitCriteriaModel exitModel) throws CloudbreakOrchestratorFailedException;
 

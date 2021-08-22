@@ -173,6 +173,21 @@ public class DiagnosticsFlowService {
         }
     }
 
+    public void vmPreFlightCheck(Long stackId, Map<String, Object> parameters, Set<String> hosts, Set<String> hostGroups, Set<String> excludeHosts)
+            throws CloudbreakOrchestratorFailedException {
+        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        Set<InstanceMetaData> instanceMetaDataSet = instanceMetaDataService.findNotTerminatedForStack(stackId);
+        List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
+        Set<Node> allNodes = getNodes(instanceMetaDataSet, hosts, hostGroups, excludeHosts);
+        LOGGER.debug("Starting diagnostics VM preflight check. resourceCrn: '{}'", stack.getResourceCrn());
+        ClusterDeletionBasedExitCriteriaModel exitModel = new ClusterDeletionBasedExitCriteriaModel(stackId, stack.getCluster().getId());
+        if (allNodes.isEmpty()) {
+            LOGGER.debug("Diagnostics VM preflight check has been skipped. (no target minions)");
+        } else {
+            telemetryOrchestrator.preFlightDiagnosticsCheck(gatewayConfigs, allNodes, parameters, exitModel);
+        }
+    }
+
     public void collect(Long stackId, Map<String, Object> parameters, Set<String> hosts, Set<String> hostGroups, Set<String> excludeHosts)
             throws CloudbreakOrchestratorFailedException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);

@@ -9,6 +9,7 @@ import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.DiagnosticsCollect
 import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.DiagnosticsCollectionsState.DIAGNOSTICS_PREFLIGHT_CHECK_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.DiagnosticsCollectionsState.DIAGNOSTICS_UPLOAD_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.DiagnosticsCollectionsState.DIAGNOSTICS_SALT_VALIDATION_STATE;
+import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.DiagnosticsCollectionsState.DIAGNOSTICS_VM_PREFLIGHT_CHECK_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.DiagnosticsCollectionsState.FINAL_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.DiagnosticsCollectionsState.INIT_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsCollectionStateSelectors.FAILED_DIAGNOSTICS_COLLECTION_EVENT;
@@ -22,6 +23,7 @@ import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsC
 import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsCollectionStateSelectors.START_DIAGNOSTICS_PREFLIGHT_CHECK_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsCollectionStateSelectors.START_DIAGNOSTICS_UPLOAD_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsCollectionStateSelectors.START_DIAGNOSTICS_SALT_VALIDATION_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsCollectionStateSelectors.START_DIAGNOSTICS_VM_PREFLIGHT_CHECK_EVENT;
 
 import java.util.List;
 
@@ -56,7 +58,12 @@ public class DiagnosticsCollectionFlowConfig extends AbstractFlowConfiguration<D
             .failureState(DIAGNOSTICS_COLLECTION_FAILED_STATE)
             .defaultFailureEvent()
 
-            .from(DIAGNOSTICS_INIT_STATE).to(DIAGNOSTICS_ENSURE_MACHINE_USER_STATE)
+            .from(DIAGNOSTICS_INIT_STATE).to(DIAGNOSTICS_VM_PREFLIGHT_CHECK_STATE)
+            .event(START_DIAGNOSTICS_VM_PREFLIGHT_CHECK_EVENT)
+            .failureState(DIAGNOSTICS_COLLECTION_FAILED_STATE)
+            .defaultFailureEvent()
+
+            .from(DIAGNOSTICS_VM_PREFLIGHT_CHECK_STATE).to(DIAGNOSTICS_ENSURE_MACHINE_USER_STATE)
             .event(START_DIAGNOSTICS_ENSURE_MACHINE_USER_EVENT)
             .failureState(DIAGNOSTICS_COLLECTION_FAILED_STATE)
             .defaultFailureEvent()
