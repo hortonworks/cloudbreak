@@ -3,9 +3,15 @@ package com.sequenceiq.cloudbreak.controller.validation.diagnostics;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
@@ -18,10 +24,20 @@ import com.sequenceiq.common.api.telemetry.model.Logging;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.type.FeatureSetting;
 
+@ExtendWith(MockitoExtension.class)
 class DiagnosticsCollectionValidatorTest {
 
-    private final DiagnosticsCollectionValidator underTest = new DiagnosticsCollectionValidator(
-            new SupportBundleConfiguration(false, null, null));
+    @InjectMocks
+    private DiagnosticsCollectionValidator underTest;
+
+    @Mock
+    private EntitlementService entitlementService;
+
+    @BeforeEach
+    public void setUp() {
+        underTest = new DiagnosticsCollectionValidator(
+                new SupportBundleConfiguration(false, null, null), entitlementService);
+    }
 
     @Test
     void testValidateWithCloudStorageWithEmptyTelemetry() {

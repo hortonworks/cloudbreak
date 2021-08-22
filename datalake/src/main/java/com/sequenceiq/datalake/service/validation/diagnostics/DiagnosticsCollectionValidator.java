@@ -1,8 +1,12 @@
 package com.sequenceiq.datalake.service.validation.diagnostics;
 
+import javax.ws.rs.ServiceUnavailableException;
+
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.telemetry.support.SupportBundleConfiguration;
 import com.sequenceiq.cloudbreak.validation.AbstractCMDiagnosticsCollectionValidator;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
@@ -14,8 +18,11 @@ import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 @Component
 public class DiagnosticsCollectionValidator extends AbstractCMDiagnosticsCollectionValidator<TelemetryResponse> {
 
-    public DiagnosticsCollectionValidator(SupportBundleConfiguration supportBundleConfiguration) {
+    private final EntitlementService entitlementService;
+
+    public DiagnosticsCollectionValidator(SupportBundleConfiguration supportBundleConfiguration, EntitlementService entitlementService) {
         super(supportBundleConfiguration);
+        this.entitlementService = entitlementService;
     }
 
     public void validate(BaseCmDiagnosticsCollectionRequest request, StackV4Response stackV4Response) {
@@ -27,6 +34,7 @@ public class DiagnosticsCollectionValidator extends AbstractCMDiagnosticsCollect
     }
 
     public void validate(DiagnosticsDestination destination, StackV4Response stackV4Response, boolean cmBundle) {
+        checkMaintenance(stackV4Response.getCrn());
         validate(stackV4Response.getTelemetry(), destination, stackV4Response.getStatus(), stackV4Response.getName(), null, cmBundle);
     }
 
@@ -57,5 +65,12 @@ public class DiagnosticsCollectionValidator extends AbstractCMDiagnosticsCollect
     @Override
     public String getStackType() {
         return "Data Lake";
+    }
+
+    private void checkMaintenance(String resourceCrn) {
+        Crn crn = Crn.fromString(resourceCrn);
+        if (crn != null && !entitlementService.isDiagnosticsEnabled(crn.getAccountId())) {
+            throw new ServiceUnavailableException("DataLake diagnostics service is currently unavailable.");
+        }
     }
 }
