@@ -69,7 +69,7 @@ public class AwsParameterValidator implements ParameterValidator {
     }
 
     @Override
-    public CloudPlatform getCloudPlatform() {
+    public CloudPlatform getcloudPlatform() {
         return CloudPlatform.AWS;
     }
 

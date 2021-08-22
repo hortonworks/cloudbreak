@@ -8,14 +8,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.KeyEncryptionMethod;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsEncryptionV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateV4SpotParameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsPlacementGroupV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AzureEncryptionV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AzureInstanceTemplateV4Parameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.GcpEncryptionV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.GcpInstanceTemplateV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.YarnInstanceTemplateV4Parameters;
 import com.sequenceiq.common.api.type.EncryptionType;
@@ -28,8 +26,6 @@ import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.GcpIns
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.YarnInstanceTemplateV1Parameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceEncryptionParameters;
-import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpEnvironmentParameters;
-import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpResourceEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Component
@@ -64,10 +60,8 @@ public class InstanceTemplateParameterConverter {
         return response;
     }
 
-    public GcpInstanceTemplateV4Parameters convert(GcpInstanceTemplateV1Parameters source, DetailedEnvironmentResponse environment) {
-        GcpInstanceTemplateV4Parameters response = new GcpInstanceTemplateV4Parameters();
-        initGcpEncryptionFromEnvironment(response, environment);
-        return response;
+    public GcpInstanceTemplateV4Parameters convert(GcpInstanceTemplateV1Parameters source) {
+        return new GcpInstanceTemplateV4Parameters();
     }
 
     public GcpInstanceTemplateV1Parameters convert(GcpInstanceTemplateV4Parameters source) {
@@ -97,24 +91,6 @@ public class InstanceTemplateParameterConverter {
             response.setEncryption(encryption);
         } else {
             LOGGER.info("Environment has not requested for SSE with CMK for Azure managed disks.");
-        }
-    }
-
-    private void initGcpEncryptionFromEnvironment(GcpInstanceTemplateV4Parameters response, DetailedEnvironmentResponse environment) {
-        String encryptionKey = Optional.of(environment)
-                .map(DetailedEnvironmentResponse::getGcp)
-                .map(GcpEnvironmentParameters::getGcpResourceEncryptionParameters)
-                .map(GcpResourceEncryptionParameters::getEncryptionKey)
-                .orElse(null);
-        if (encryptionKey != null) {
-            LOGGER.info("Applying Encryption with CMEK for GCP disks as per environment.");
-            GcpEncryptionV4Parameters encryption = new GcpEncryptionV4Parameters();
-            encryption.setType(EncryptionType.CUSTOM);
-            encryption.setKeyEncryptionMethod(KeyEncryptionMethod.KMS);
-            encryption.setKey(encryptionKey);
-            response.setEncryption(encryption);
-        } else {
-            LOGGER.info("Environment has not requested for Customer-Managed Encryption with CMEK for GCP disks.");
         }
     }
 

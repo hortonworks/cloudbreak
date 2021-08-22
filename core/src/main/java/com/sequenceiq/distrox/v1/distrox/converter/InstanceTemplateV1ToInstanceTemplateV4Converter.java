@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.AzureInstanceTemplateV1Parameters;
-import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.GcpInstanceTemplateV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.InstanceTemplateV1Request;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
@@ -32,9 +31,7 @@ public class InstanceTemplateV1ToInstanceTemplateV4Converter {
         AzureInstanceTemplateV1Parameters azureParametersEffective = Objects.requireNonNullElse(source.getAzure(),
                 new AzureInstanceTemplateV1Parameters());
         response.setAzure(instanceTemplateParameterConverter.convert(azureParametersEffective, environment));
-        GcpInstanceTemplateV1Parameters gcpParametersEffective = Objects.requireNonNullElse(source.getGcp(),
-                new GcpInstanceTemplateV1Parameters());
-        response.setGcp(instanceTemplateParameterConverter.convert(gcpParametersEffective, environment));
+        response.setGcp(getIfNotNull(source.getGcp(), instanceTemplateParameterConverter::convert));
         response.setYarn(getIfNotNull(source.getYarn(), instanceTemplateParameterConverter::convert));
         response.setCloudPlatform(source.getCloudPlatform());
         response.setInstanceType(source.getInstanceType());

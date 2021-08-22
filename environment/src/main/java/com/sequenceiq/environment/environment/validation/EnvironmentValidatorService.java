@@ -3,9 +3,7 @@ package com.sequenceiq.environment.environment.validation;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static com.sequenceiq.cloudbreak.util.SecurityGroupSeparator.getSecurityGroupIds;
-import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
 import static com.sequenceiq.common.model.CredentialType.ENVIRONMENT;
-
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.apache.logging.log4j.util.Strings.isEmpty;
 
@@ -46,7 +44,6 @@ import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.service.EnvironmentResourceService;
 import com.sequenceiq.environment.environment.validation.validators.EncryptionKeyUrlValidator;
-import com.sequenceiq.environment.environment.validation.validators.EncryptionKeyValidator;
 import com.sequenceiq.environment.environment.validation.validators.NetworkCreationValidator;
 import com.sequenceiq.environment.environment.validation.validators.PublicKeyValidator;
 import com.sequenceiq.environment.environment.validation.validators.TagValidator;
@@ -83,8 +80,6 @@ public class EnvironmentValidatorService {
 
     private final EntitlementService entitlementService;
 
-    private final EncryptionKeyValidator encryptionKeyValidator;
-
     public EnvironmentValidatorService(NetworkCreationValidator networkCreationValidator,
             PlatformParameterService platformParameterService,
             EnvironmentResourceService environmentResourceService,
@@ -94,8 +89,7 @@ public class EnvironmentValidatorService {
             @Value("${environment.enabledChildPlatforms}") Set<String> enabledChildPlatforms,
             TagValidator tagValidator,
             EncryptionKeyUrlValidator encryptionKeyUrlValidator,
-            EntitlementService entitlementService,
-            EncryptionKeyValidator encryptionKeyValidator) {
+            EntitlementService entitlementService) {
         this.networkCreationValidator = networkCreationValidator;
         this.platformParameterService = platformParameterService;
         this.environmentResourceService = environmentResourceService;
@@ -106,7 +100,6 @@ public class EnvironmentValidatorService {
         this.tagValidator = tagValidator;
         this.encryptionKeyUrlValidator = encryptionKeyUrlValidator;
         this.entitlementService = entitlementService;
-        this.encryptionKeyValidator = encryptionKeyValidator;
     }
 
     public ValidationResultBuilder validateNetworkCreation(Environment environment, NetworkDto network) {
@@ -288,27 +281,6 @@ public class EnvironmentValidatorService {
                             + " Please get 'CDP_CB_AZURE_DISK_SSE_WITH_CMK' enabled for this account to use SSE with CMK."));
                 } else {
                     ValidationResult validationResult = encryptionKeyUrlValidator.validateEncryptionKeyUrl(encryptionKeyUrl);
-                    resultBuilder.merge(validationResult);
-                }
-            }
-        }
-        return resultBuilder.build();
-    }
-
-    public ValidationResult validateEncryptionKey(EnvironmentCreationDto creationDto) {
-        ValidationResultBuilder resultBuilder = ValidationResult.builder();
-        if (GCP.name().equalsIgnoreCase(creationDto.getCloudPlatform())) {
-            String encryptionKey = Optional.ofNullable(creationDto.getParameters())
-                    .map(parametersDto -> parametersDto.getGcpParametersDto())
-                    .map(gcpParametersDto -> gcpParametersDto.getGcpResourceEncryptionParametersDto())
-                    .map(gcpREParamsDto -> gcpREParamsDto.getEncryptionKey()).orElse(null);
-            if (StringUtils.isNotEmpty(encryptionKey)) {
-                if (!entitlementService.isGcpDiskEncryptionWithCMEKEnabled(creationDto.getAccountId())) {
-                    resultBuilder.error(String.format("You have specified encryption-key to enable encryption for GCP resources with CMEK "
-                            + "but that feature is currently not enabled for this account."
-                            + " Please get 'CDP_CB_GCP_DISK_ENCRYPTION_WITH_CMEK' enabled for this account."));
-                } else {
-                    ValidationResult validationResult = encryptionKeyValidator.validateEncryptionKey(encryptionKey);
                     resultBuilder.merge(validationResult);
                 }
             }

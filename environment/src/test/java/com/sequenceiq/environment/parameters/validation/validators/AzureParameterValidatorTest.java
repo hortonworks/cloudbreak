@@ -439,7 +439,7 @@ public class AzureParameterValidatorTest {
 
     @Test
     public void testCloudPlatform() {
-        assertEquals(CloudPlatform.AZURE, underTest.getCloudPlatform());
+        assertEquals(CloudPlatform.AZURE, underTest.getcloudPlatform());
     }
 
     @Test

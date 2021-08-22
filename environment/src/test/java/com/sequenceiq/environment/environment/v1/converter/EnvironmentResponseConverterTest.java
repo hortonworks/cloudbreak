@@ -2,7 +2,6 @@ package com.sequenceiq.environment.environment.v1.converter;
 
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
-import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -29,7 +28,6 @@ import com.sequenceiq.environment.api.v1.credential.model.response.CredentialVie
 import com.sequenceiq.environment.api.v1.environment.model.base.CloudStorageValidation;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
-import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.response.CompactRegionResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentAuthenticationResponse;
@@ -59,8 +57,6 @@ import com.sequenceiq.environment.parameter.dto.AwsParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureResourceEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureResourceGroupDto;
-import com.sequenceiq.environment.parameter.dto.GcpParametersDto;
-import com.sequenceiq.environment.parameter.dto.GcpResourceEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
 import com.sequenceiq.environment.parameter.dto.ResourceGroupCreation;
 import com.sequenceiq.environment.parameter.dto.ResourceGroupUsagePattern;
@@ -100,7 +96,7 @@ public class EnvironmentResponseConverterTest {
     private NetworkDtoToResponseConverter networkDtoToResponseConverter;
 
     @ParameterizedTest
-    @EnumSource(value = CloudPlatform.class, names = {"AWS", "AZURE", "GCP"})
+    @EnumSource(value = CloudPlatform.class, names = {"AWS", "AZURE"})
     void testDtoToDetailedResponse(CloudPlatform cloudPlatform) {
         EnvironmentDto environment = createEnvironmentDto(cloudPlatform);
         CredentialResponse credentialResponse = mock(CredentialResponse.class);
@@ -214,10 +210,8 @@ public class EnvironmentResponseConverterTest {
     private void assertParameters(EnvironmentDto environment, EnvironmentBaseResponse actual, CloudPlatform cloudPlatform) {
         if (AWS.equals(cloudPlatform)) {
             assertEquals(environment.getParameters().getAwsParametersDto().getS3GuardTableName(), actual.getAws().getS3guard().getDynamoDbTableName());
-        } else if (AZURE.equals(cloudPlatform))  {
+        } else {
             assertAzureParameters(environment.getParameters().getAzureParametersDto(), actual.getAzure());
-        } else if (GCP.equals(cloudPlatform)) {
-            assertGcpParameters(environment.getParameters().getGcpParametersDto(), actual.getGcp());
         }
     }
 
@@ -247,12 +241,6 @@ public class EnvironmentResponseConverterTest {
                 azureEnvironmentParameters.getResourceEncryptionParameters().getEncryptionKeyUrl());
         assertEquals("dummy-des-id", azureEnvironmentParameters.getResourceEncryptionParameters().getDiskEncryptionSetId());
         assertEquals("dummyResourceGroupName", azureEnvironmentParameters.getResourceEncryptionParameters().getEncryptionKeyResourceGroupName());
-    }
-
-    private void assertGcpParameters(GcpParametersDto gcpParametersDto, GcpEnvironmentParameters gcpEnvironmentParameters) {
-        assertNotNull(gcpEnvironmentParameters);
-        assertEquals(gcpParametersDto.getGcpResourceEncryptionParametersDto().getEncryptionKey(),
-                gcpEnvironmentParameters.getGcpResourceEncryptionParameters().getEncryptionKey());
     }
 
     private EnvironmentDto createEnvironmentDto(CloudPlatform cloudPlatform) {
@@ -297,8 +285,6 @@ public class EnvironmentResponseConverterTest {
             return createAwsParameters();
         } else if (AZURE.equals(cloudPlatform)) {
             return createAzureParameters();
-        } else if (GCP.equals(cloudPlatform)) {
-            return createGcpParameters();
         } else {
             throw new RuntimeException("CloudPlatform " + cloudPlatform + " is not supported.");
         }
@@ -321,17 +307,6 @@ public class EnvironmentResponseConverterTest {
                                         .withEncryptionKeyUrl("dummy-key-url")
                                         .withDiskEncryptionSetId("dummy-des-id")
                                         .withEncryptionKeyResourceGroupName("dummyResourceGroupName")
-                                        .build())
-                        .build())
-                .build();
-    }
-
-    private ParametersDto createGcpParameters() {
-        return ParametersDto.builder()
-                .withGcpParameters(GcpParametersDto.builder()
-                        .withEncryptionParameters(
-                                GcpResourceEncryptionParametersDto.builder()
-                                        .withEncryptionKey("dummy-encryption-key")
                                         .build())
                         .build())
                 .build();

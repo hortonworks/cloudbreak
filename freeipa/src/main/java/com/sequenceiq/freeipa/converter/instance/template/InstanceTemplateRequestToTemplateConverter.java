@@ -8,17 +8,13 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.KeyEncryptionMethod;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AwsInstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AzureInstanceTemplate;
-import com.sequenceiq.cloudbreak.cloud.model.instance.GcpInstanceTemplate;
 import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -35,7 +31,6 @@ import com.sequenceiq.freeipa.service.stack.instance.DefaultInstanceTypeProvider
 
 @Component
 public class InstanceTemplateRequestToTemplateConverter {
-    private static final Logger LOGGER = LoggerFactory.getLogger(InstanceTemplateRequestToTemplateConverter.class);
 
     @Inject
     private MissingResourceNameGenerator missingResourceNameGenerator;
@@ -52,8 +47,7 @@ public class InstanceTemplateRequestToTemplateConverter {
     @Inject
     private EntitlementService entitlementService;
 
-    public Template convert(InstanceTemplateRequest source, CloudPlatform cloudPlatform, String accountId,
-            String diskEncryptionSetId, String gcpKmsEncryptionKey) {
+    public Template convert(InstanceTemplateRequest source, CloudPlatform cloudPlatform, String accountId, String diskEncryptionSetId) {
         Template template = new Template();
         template.setName(missingResourceNameGenerator.generateName(APIResourceType.TEMPLATE));
         template.setStatus(ResourceStatus.USER_MANAGED);
@@ -78,13 +72,6 @@ public class InstanceTemplateRequestToTemplateConverter {
             attributes.put(AzureInstanceTemplate.DISK_ENCRYPTION_SET_ID, diskEncryptionSetId);
             attributes.put(AzureInstanceTemplate.MANAGED_DISK_ENCRYPTION_WITH_CUSTOM_KEY_ENABLED, true);
         }
-
-        if (gcpKmsEncryptionKey != null && cloudPlatform == CloudPlatform.GCP) {
-            attributes.put(GcpInstanceTemplate.VOLUME_ENCRYPTION_KEY_ID, gcpKmsEncryptionKey);
-            attributes.put(GcpInstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.CUSTOM);
-            attributes.put(GcpInstanceTemplate.KEY_ENCRYPTION_METHOD, KeyEncryptionMethod.KMS);
-        }
-
         template.setAttributes(new Json(attributes));
         return template;
     }

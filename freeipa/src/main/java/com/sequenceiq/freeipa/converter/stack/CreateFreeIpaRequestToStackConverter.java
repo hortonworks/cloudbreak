@@ -3,11 +3,8 @@ package com.sequenceiq.freeipa.converter.stack;
 import static com.gs.collections.impl.utility.StringIterate.isEmpty;
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
-import static com.sequenceiq.freeipa.util.CloudArgsForIgConverter.DISK_ENCRYPTION_SET_ID;
-import static com.sequenceiq.freeipa.util.CloudArgsForIgConverter.GCP_KMS_ENCRYPTION_KEY;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -45,8 +42,6 @@ import com.sequenceiq.cloudbreak.util.PasswordUtil;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceEncryptionParameters;
-import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpEnvironmentParameters;
-import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpResourceEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
@@ -66,7 +61,6 @@ import com.sequenceiq.freeipa.entity.StackStatus;
 import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
 import com.sequenceiq.freeipa.service.tag.AccountTagService;
 import com.sequenceiq.freeipa.util.CrnService;
-import com.sequenceiq.freeipa.util.CloudArgsForIgConverter;
 
 @Component
 public class CreateFreeIpaRequestToStackConverter {
@@ -278,25 +272,12 @@ public class CreateFreeIpaRequestToStackConverter {
                 .map(AzureEnvironmentParameters::getResourceEncryptionParameters)
                 .map(AzureResourceEncryptionParameters::getDiskEncryptionSetId)
                 .orElse(null);
-
-        String gcpKmsEncryptionKey = Optional.of(environment)
-                .map(DetailedEnvironmentResponse::getGcp)
-                .map(GcpEnvironmentParameters::getGcpResourceEncryptionParameters)
-                .map(GcpResourceEncryptionParameters::getEncryptionKey)
-                .orElse(null);
-
         Set<InstanceGroup> convertedSet = new HashSet<>();
-
-        EnumMap<CloudArgsForIgConverter, String> cloudArgsForIgConverterMap = new EnumMap<>(CloudArgsForIgConverter.class);
-
-        cloudArgsForIgConverterMap.put(DISK_ENCRYPTION_SET_ID, diskEncryptionSetId);
-        cloudArgsForIgConverterMap.put(GCP_KMS_ENCRYPTION_KEY, gcpKmsEncryptionKey);
-
         source.getInstanceGroups().stream()
                 .map(ig -> {
                     FreeIpaServerRequest ipaServerRequest = source.getFreeIpa();
                     return instanceGroupConverter.convert(ig, accountId, stack.getCloudPlatform(), stack.getName(),
-                            ipaServerRequest.getHostname(), ipaServerRequest.getDomain(), cloudArgsForIgConverterMap);
+                            ipaServerRequest.getHostname(), ipaServerRequest.getDomain(), diskEncryptionSetId);
                 })
                 .forEach(ig -> {
                     ig.setStack(stack);

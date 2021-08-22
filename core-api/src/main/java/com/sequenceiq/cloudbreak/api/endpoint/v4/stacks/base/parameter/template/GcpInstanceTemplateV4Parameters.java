@@ -9,7 +9,6 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceTemplateV4ParameterBase;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.KeyEncryptionMethod;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
-import com.sequenceiq.cloudbreak.cloud.model.instance.GcpInstanceTemplate;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.TemplateModelDescription;
 import com.sequenceiq.common.api.type.EncryptionType;
@@ -48,7 +47,7 @@ public class GcpInstanceTemplateV4Parameters extends InstanceTemplateV4Parameter
     public Map<String, Object> asMap() {
         Map<String, Object> map = super.asMap();
         if (encryption != null) {
-            putIfValueNotNull(map, GcpInstanceTemplate.KEY_ENCRYPTION_METHOD, encryption.getKeyEncryptionMethod());
+            putIfValueNotNull(map, "keyEncryptionMethod", encryption.getKeyEncryptionMethod());
             putIfValueNotNull(map, InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, encryption.getType());
         }
         putIfValueNotNull(map, "preemptible", preemptible);
@@ -75,7 +74,7 @@ public class GcpInstanceTemplateV4Parameters extends InstanceTemplateV4Parameter
     public void parse(Map<String, Object> parameters) {
         GcpEncryptionV4Parameters encryption = new GcpEncryptionV4Parameters();
         encryption.setKey(getParameterOrNull(parameters, InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID));
-        String keyEncryptionMethod = getParameterOrNull(parameters, GcpInstanceTemplate.KEY_ENCRYPTION_METHOD);
+        String keyEncryptionMethod = getParameterOrNull(parameters, "keyEncryptionMethod");
         if (keyEncryptionMethod != null) {
             encryption.setKeyEncryptionMethod(KeyEncryptionMethod.valueOf(keyEncryptionMethod));
         }
