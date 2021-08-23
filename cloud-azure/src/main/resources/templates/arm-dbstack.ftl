@@ -155,6 +155,36 @@
             "defaultValue": "${privateEndpointName}",
             "type": "String"
         }
+        <#if dataEncryption == true>
+        , "keyVaultName": {
+              "type": "string",
+              "defaultValue" : "${keyVaultName}",
+              "metadata": {
+                "description": "Key vault name where the key to use is stored"
+              }
+        },
+        "keyVaultResourceGroupName": {
+              "type": "string",
+              "defaultValue" : "${keyVaultResourceGroupName}",
+              "metadata": {
+                "description": "Key vault resource group name where it is stored"
+              }
+        },
+        "keyName": {
+              "type": "string",
+              "defaultValue" : "${keyName}",
+              "metadata": {
+                "description": "Key name in the key vault to use as encryption protector"
+              }
+        },
+        "keyVersion": {
+              "type": "string",
+              "defaultValue" : "${keyVersion}",
+              "metadata": {
+                "description": "Version of the key in the key vault to use as encryption protector"
+              }
+        }
+        </#if>
     },
     "variables": {
         "apiVersion":"2017-12-01",
@@ -163,12 +193,18 @@
         "geoRedundantBackupString":"[if(parameters('geoRedundantBackup'), 'Enabled', 'Disabled')]",
         "storageAutoGrowString":"[if(parameters('storageAutoGrow'), 'Enabled', 'Disabled')]",
         "subnetList": "[split(parameters('subnets'),',')]"
+        <#if dataEncryption == true>
+        , "serverKeyName": "[concat(parameters('keyVaultName'), '_', parameters('keyName'), '_', parameters('keyVersion'))]"
+        </#if>
     },
     "resources": [
             {
                 "name": "[parameters('dbServerName')]",
                 "type": "Microsoft.DBforPostgreSQL/servers",
                 "apiVersion": "[variables('apiVersion')]",
+                "identity": {
+                    "type": "SystemAssigned"
+                },
                 "sku": {
                     "name": "[parameters('skuName')]",
                     "tier": "[parameters('skuTier')]",
@@ -270,7 +306,60 @@
                 "batchSize": "[parameters('batchSize')]"
             }
         }
-        </#if>
+    </#if>
+    <#if dataEncryption == true> ,
+        {
+          "type": "Microsoft.Resources/deployments",
+          "apiVersion": "2019-05-01",
+          "name": "addAccessPolicy",
+          "resourceGroup": "[parameters('keyVaultResourceGroupName')]",
+          "dependsOn": [
+            "[resourceId('Microsoft.DBforPostgreSQL/servers', parameters('dbServerName'))]"
+          ],
+          "properties": {
+            "mode": "Incremental",
+            "template": {
+              "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+              "contentVersion": "1.0.0.0",
+              "resources": [
+                {
+                  "type": "Microsoft.KeyVault/vaults/accessPolicies",
+                  "name": "[concat(parameters('keyVaultName'), '/add')]",
+                  "apiVersion": "2018-02-14-preview",
+                  "properties": {
+                    "accessPolicies": [
+                      {
+                        "tenantId": "[subscription().tenantId]",
+                        "objectId": "[reference(resourceId('Microsoft.DBforPostgreSQL/servers/', parameters('dbServerName')), '2017-12-01', 'Full').identity.principalId]",
+                        "permissions": {
+                          "keys": [
+                            "get",
+                            "wrapKey",
+                            "unwrapKey"
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "[concat(parameters('dbServerName'), '/', variables('serverKeyName'))]",
+          "type": "Microsoft.DBforPostgreSQL/servers/keys",
+          "apiVersion": "2020-01-01-preview",
+          "dependsOn": [
+            "addAccessPolicy",
+            "[resourceId('Microsoft.DBforPostgreSQL/servers', parameters('dbServerName'))]"
+          ],
+          "properties": {
+            "serverKeyType": "AzureKeyVault",
+            "uri": "[concat(reference(resourceId(parameters('keyVaultResourceGroupName'), 'Microsoft.KeyVault/vaults/', parameters('keyVaultName')), '2018-02-14-preview', 'Full').properties.vaultUri, 'keys/', parameters('keyName'), '/', parameters('keyVersion'))]"
+          }
+        }
+    </#if>
     ],
     "outputs": {
      "databaseServerFQDN": {

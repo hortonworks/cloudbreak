@@ -1,5 +1,7 @@
 package com.sequenceiq.redbeams.converter.spi;
 
+import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.ENCRYPTION_KEY_RESOURCE_GROUP_NAME;
+import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.ENCRYPTION_KEY_URL;
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_GROUP_NAME_PARAMETER;
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_GROUP_USAGE_PARAMETER;
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.CREATE_REQUESTED;
@@ -25,6 +27,7 @@ import com.sequenceiq.cloudbreak.cloud.model.DatabaseEngine;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.ResourceGroupUsage;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -49,6 +52,8 @@ public class DBStackToDatabaseStackConverterTest {
     private static final String CLOUD_PLATFORM = "AZURE";
 
     private static final String RESOURCE_GROUP = "resource-group";
+
+    private static final String KEY_URL = "resource-group";
 
     private DBStack dbStack;
 
@@ -193,6 +198,74 @@ public class DBStackToDatabaseStackConverterTest {
         assertThat(parameters.get(RESOURCE_GROUP_NAME_PARAMETER).toString()).isEqualTo(RESOURCE_GROUP);
         assertThat(parameters.get(RESOURCE_GROUP_USAGE_PARAMETER).toString()).isEqualTo(ResourceGroupUsage.SINGLE.name());
         assertThat(parameters.size()).isEqualTo(4);
+    }
+
+    @Test
+    public void testConversionAzureWithAzureEncryptionResourcesPresent() {
+        Network network = new Network();
+        network.setAttributes(new Json(NETWORK_ATTRIBUTES));
+        dbStack.setNetwork(network);
+        dbStack.setCloudPlatform(CLOUD_PLATFORM);
+        dbStack.setParameters(new HashMap<>());
+        DatabaseServer server = new DatabaseServer();
+        server.setDatabaseVendor(DatabaseVendor.POSTGRES);
+        server.setAttributes(new Json(DATABASE_SERVER_ATTRIBUTES));
+        dbStack.setDatabaseServer(server);
+        dbStack.setTags(new Json(STACK_TAGS));
+        dbStack.setTemplate("template");
+        DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
+        environmentResponse.setCloudPlatform(CLOUD_PLATFORM);
+        environmentResponse.setAzure(AzureEnvironmentParameters.builder()
+                .withResourceEncryptionParameters(AzureResourceEncryptionParameters.builder()
+                        .withEncryptionKeyUrl(KEY_URL)
+                        .withEncryptionKeyResourceGroupName(RESOURCE_GROUP)
+                        .build())
+                .build());
+        when(environmentService.getByCrn(anyString())).thenReturn(environmentResponse);
+
+        DatabaseStack convertedStack = underTest.convert(dbStack);
+
+        Map<String, Object> parameters = convertedStack.getDatabaseServer().getParameters();
+        assertThat(parameters.get(ENCRYPTION_KEY_URL).toString()).isEqualTo(KEY_URL);
+        assertThat(parameters.get(ENCRYPTION_KEY_RESOURCE_GROUP_NAME).toString()).isEqualTo(RESOURCE_GROUP);
+        assertThat(parameters.size()).isEqualTo(4);
+    }
+
+    @Test
+    public void testConversionAzureWithAzureEncryptionResourcesPresentAndSingleResourceGroup() {
+        Network network = new Network();
+        network.setAttributes(new Json(NETWORK_ATTRIBUTES));
+        dbStack.setNetwork(network);
+        dbStack.setCloudPlatform(CLOUD_PLATFORM);
+        dbStack.setParameters(new HashMap<>());
+        DatabaseServer server = new DatabaseServer();
+        server.setDatabaseVendor(DatabaseVendor.POSTGRES);
+        server.setAttributes(new Json(DATABASE_SERVER_ATTRIBUTES));
+        dbStack.setDatabaseServer(server);
+        dbStack.setTags(new Json(STACK_TAGS));
+        dbStack.setTemplate("template");
+        DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
+        environmentResponse.setCloudPlatform(CLOUD_PLATFORM);
+        environmentResponse.setAzure(AzureEnvironmentParameters.builder()
+                .withAzureResourceGroup(AzureResourceGroup.builder()
+                        .withResourceGroupUsage(ResourceGroupUsage.SINGLE)
+                        .withName(RESOURCE_GROUP)
+                        .build())
+                .withResourceEncryptionParameters(AzureResourceEncryptionParameters.builder()
+                        .withEncryptionKeyUrl(KEY_URL)
+                        .withEncryptionKeyResourceGroupName(RESOURCE_GROUP)
+                        .build())
+                .build());
+        when(environmentService.getByCrn(anyString())).thenReturn(environmentResponse);
+
+        DatabaseStack convertedStack = underTest.convert(dbStack);
+
+        Map<String, Object> parameters = convertedStack.getDatabaseServer().getParameters();
+        assertThat(parameters.get(RESOURCE_GROUP_NAME_PARAMETER).toString()).isEqualTo(RESOURCE_GROUP);
+        assertThat(parameters.get(RESOURCE_GROUP_USAGE_PARAMETER).toString()).isEqualTo(ResourceGroupUsage.SINGLE.name());
+        assertThat(parameters.get(ENCRYPTION_KEY_URL).toString()).isEqualTo(KEY_URL);
+        assertThat(parameters.get(ENCRYPTION_KEY_RESOURCE_GROUP_NAME).toString()).isEqualTo(RESOURCE_GROUP);
+        assertThat(parameters.size()).isEqualTo(6);
     }
 
     @Test

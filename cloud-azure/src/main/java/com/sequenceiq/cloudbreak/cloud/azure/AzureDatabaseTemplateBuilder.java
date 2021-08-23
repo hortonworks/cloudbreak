@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 
@@ -39,6 +41,12 @@ public class AzureDatabaseTemplateBuilder {
 
     private static final Set<String> MEMORY_OPTIMIZED_INSTANCE_TYPES = Set.of("MO_Gen5_2", "MO_Gen5_4", "MO_Gen5_8", "MO_Gen5_16", "MO_Gen5_32");
 
+    private static final Pattern ENCRYPTION_KEY_URL_VAULT_NAME = Pattern.compile("https://([^.]+)\\.vault.*");
+
+    private static final Pattern ENCRYPTION_KEY_NAME = Pattern.compile(".*\\/keys\\/([^.]+)\\/.*");
+
+    private static final Pattern ENCRYPTION_KEY_VERSION = Pattern.compile(".*\\/keys\\/.*\\/([^.]+)");
+
     @Value("${cb.azure.database.template.batchSize}")
     private int defaultBatchSize;
 
@@ -68,6 +76,37 @@ public class AzureDatabaseTemplateBuilder {
             model.put("location", location);
             if (azureDatabaseServerView.getPort() != null) {
                 LOGGER.warn("Found port {} in database stack, but Azure ignores it", azureDatabaseServerView.getPort());
+            }
+            model.put("dataEncryption", false);
+            String keyVaultUrl = azureDatabaseServerView.getKeyVaultUrl();
+            if (keyVaultUrl != null) {
+                String keyVaultName;
+                String keyName;
+                String keyVersion;
+                Matcher matcher = ENCRYPTION_KEY_URL_VAULT_NAME.matcher(keyVaultUrl);
+                if (matcher.matches()) {
+                    keyVaultName = matcher.group(1);
+                } else {
+                    throw new IllegalArgumentException(String.format("keyVaultName cannot be fetched from encryptionKeyUrl %s.", keyVaultUrl));
+                }
+                matcher = ENCRYPTION_KEY_NAME.matcher(keyVaultUrl);
+                if (matcher.matches()) {
+                    keyName = matcher.group(1);
+                } else {
+                    throw new IllegalArgumentException(String.format("keyName cannot be fetched from encryptionKeyUrl %s.", keyVaultUrl));
+                }
+                matcher = ENCRYPTION_KEY_VERSION.matcher(keyVaultUrl);
+                if (matcher.matches()) {
+                    keyVersion = matcher.group(1);
+                } else {
+                    throw new IllegalArgumentException(String.format("keyVersion cannot be fetched from encryptionKeyUrl %s.", keyVaultUrl));
+                }
+
+                model.put("dataEncryption", true);
+                model.put("keyVaultName", keyVaultName);
+                model.put("keyVaultResourceGroupName", azureDatabaseServerView.getKeyVaultResourceGroupName());
+                model.put("keyName", keyName);
+                model.put("keyVersion", keyVersion);
             }
             model.put("serverTags", databaseStack.getTags());
             model.put("skuCapacity", azureDatabaseServerView.getSkuCapacity());

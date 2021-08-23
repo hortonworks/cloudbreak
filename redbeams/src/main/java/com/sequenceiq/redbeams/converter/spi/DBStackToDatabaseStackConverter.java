@@ -1,5 +1,7 @@
 package com.sequenceiq.redbeams.converter.spi;
 
+import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.ENCRYPTION_KEY_RESOURCE_GROUP_NAME;
+import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.ENCRYPTION_KEY_URL;
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_GROUP_NAME_PARAMETER;
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_GROUP_USAGE_PARAMETER;
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.CREATE_REQUESTED;
@@ -30,6 +32,7 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.ResourceGroupUsage;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -138,37 +141,64 @@ public class DBStackToDatabaseStackConverter {
         Json attributes = stack.getDatabaseServer().getAttributes();
         Map<String, Object> params = attributes == null ? Collections.emptyMap() : attributes.getMap();
 
-        if (CloudPlatform.AZURE.name().equals(stack.getCloudPlatform()) && !stack.getParameters().containsKey(RESOURCE_GROUP_NAME_PARAMETER)) {
+        if (CloudPlatform.AZURE.name().equals(stack.getCloudPlatform())) {
             DetailedEnvironmentResponse environment = measure(() -> environmentService.getByCrn(stack.getEnvironmentId()),
                     LOGGER, "Environment properties were queried under {} ms for environment {}", stack.getEnvironmentId());
+            if (!stack.getParameters().containsKey(RESOURCE_GROUP_NAME_PARAMETER)) {
+                Optional<AzureResourceGroup> resourceGroupOptional = getResourceGroupFromEnv(environment);
 
-            Optional<AzureResourceGroup> resourceGroupOptional = getResourceGroupFromEnv(environment);
-
-            if (resourceGroupOptional.isPresent() && !ResourceGroupUsage.MULTIPLE.equals(resourceGroupOptional.get().getResourceGroupUsage())) {
-                AzureResourceGroup resourceGroup = resourceGroupOptional.get();
-                String resourceGroupName = resourceGroup.getName();
-                ResourceGroupUsage resourceGroupUsage = resourceGroup.getResourceGroupUsage();
-                Map<String, Object> resourceGroupParameters = Map.of(
-                        RESOURCE_GROUP_NAME_PARAMETER, resourceGroupName,
-                        RESOURCE_GROUP_USAGE_PARAMETER, resourceGroupUsage.name());
-                return Stream.of(params, resourceGroupParameters)
+                if (resourceGroupOptional.isPresent() && !ResourceGroupUsage.MULTIPLE.equals(resourceGroupOptional.get().getResourceGroupUsage())) {
+                    AzureResourceGroup resourceGroup = resourceGroupOptional.get();
+                    String resourceGroupName = resourceGroup.getName();
+                    ResourceGroupUsage resourceGroupUsage = resourceGroup.getResourceGroupUsage();
+                    Map<String, Object> resourceGroupParameters = Map.of(
+                            RESOURCE_GROUP_NAME_PARAMETER, resourceGroupName,
+                            RESOURCE_GROUP_USAGE_PARAMETER, resourceGroupUsage.name());
+                    params = Stream.of(params, resourceGroupParameters)
+                            .flatMap(map -> map.entrySet().stream())
+                            .collect(Collectors.toMap(
+                                    Map.Entry::getKey,
+                                    Map.Entry::getValue,
+                                    (existingOne, newOne) -> existingOne));
+                }
+            }
+            if (azureEncryptionParametersPresent(environment)) {
+                Map<String, Object> encryptionParameters = Map.of(
+                        ENCRYPTION_KEY_URL, getEncryptionKeyUrlFromEnv(environment),
+                        ENCRYPTION_KEY_RESOURCE_GROUP_NAME, getEncryptionKeyResourceGroupNameFromEnv(environment));
+                params = Stream.of(params, encryptionParameters)
                         .flatMap(map -> map.entrySet().stream())
                         .collect(Collectors.toMap(
                                 Map.Entry::getKey,
                                 Map.Entry::getValue,
                                 (existingOne, newOne) -> existingOne));
-            } else {
-                return params;
             }
-        } else {
-            return params;
         }
+        return params;
     }
 
     private Optional<AzureResourceGroup> getResourceGroupFromEnv(DetailedEnvironmentResponse environment) {
         return Optional.ofNullable(environment)
                 .map(DetailedEnvironmentResponse::getAzure)
                 .map(AzureEnvironmentParameters::getResourceGroup);
+    }
+
+    private boolean azureEncryptionParametersPresent(DetailedEnvironmentResponse environment) {
+        return getEncryptionKeyUrlFromEnv(environment) != null && getEncryptionKeyResourceGroupNameFromEnv(environment) != null;
+    }
+
+    private String getEncryptionKeyUrlFromEnv(DetailedEnvironmentResponse environment) {
+        return Optional.ofNullable(environment)
+                .map(DetailedEnvironmentResponse::getAzure)
+                .map(AzureEnvironmentParameters::getResourceEncryptionParameters)
+                .map(AzureResourceEncryptionParameters::getEncryptionKeyUrl).orElse(null);
+    }
+
+    private String getEncryptionKeyResourceGroupNameFromEnv(DetailedEnvironmentResponse environment) {
+        return Optional.ofNullable(environment)
+                .map(DetailedEnvironmentResponse::getAzure)
+                .map(AzureEnvironmentParameters::getResourceEncryptionParameters)
+                .map(AzureResourceEncryptionParameters::getEncryptionKeyResourceGroupName).orElse(null);
     }
 
 }

@@ -32,6 +32,10 @@ public class PlatformParametersConsts {
 
     public static final String RESOURCE_CRN_PARAMETER = "resourceCrn";
 
+    public static final String ENCRYPTION_KEY_URL = "keyVaultUrl";
+
+    public static final String ENCRYPTION_KEY_RESOURCE_GROUP_NAME = "keyVaultResourceGroupName";
+
     private PlatformParametersConsts() {
 
     }
