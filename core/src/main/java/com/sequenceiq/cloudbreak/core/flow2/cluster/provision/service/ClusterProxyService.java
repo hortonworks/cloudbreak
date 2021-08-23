@@ -140,7 +140,8 @@ public class ClusterProxyService {
         } else if (stack.getTunnel().useCcmV2()) {
             requestBuilder.withServices(serviceConfigsForCcmV2(stack)).withCcmV2Entries(ccmV2Configs(stack)).withKnoxUrl(knoxUrlForCcmV2(stack));
         } else if (stack.getTunnel().useCcmV2Jumpgate()) {
-            requestBuilder.withServices(serviceConfigsForCcmV2(stack)).withKnoxUrl(knoxUrlForCcmV2(stack)).withEnvironmentCrn(stack.getEnvironmentCrn()).withUseCcmV2(true);
+            requestBuilder.withServices(serviceConfigsForCcmV2(stack)).withKnoxUrl(knoxUrlForCcmV2(stack))
+                    .withEnvironmentCrn(stack.getEnvironmentCrn()).withUseCcmV2(true);
         }
         return requestBuilder.build();
     }
