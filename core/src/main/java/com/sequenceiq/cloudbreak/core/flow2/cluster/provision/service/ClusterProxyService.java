@@ -120,7 +120,7 @@ public class ClusterProxyService {
         if (stack.getTunnel().useCcmV1()) {
             requestBuilder.withTunnelEntries(tunnelEntries(stack));
         } else if (stack.getTunnel().useCcmV2OrJumpgate()) {
-            requestBuilder.withCcmV2Entries(ccmV2Configs(stack));
+            requestBuilder.withServices(serviceConfigsForCcmV2(stack)).withCcmV2Entries(ccmV2Configs(stack));
         }
         return requestBuilder.build();
     }
@@ -132,7 +132,7 @@ public class ClusterProxyService {
         if (stack.getTunnel().useCcmV1()) {
             requestBuilder.withTunnelEntries(tunnelEntries(stack));
         } else if (stack.getTunnel().useCcmV2OrJumpgate()) {
-            requestBuilder.withCcmV2Entries(ccmV2Configs(stack)).withKnoxUrl(knoxUrlForCcmV2(stack));
+            requestBuilder.withServices(serviceConfigsForCcmV2(stack)).withCcmV2Entries(ccmV2Configs(stack)).withKnoxUrl(knoxUrlForCcmV2(stack));
         }
         return requestBuilder.build();
     }
@@ -143,6 +143,16 @@ public class ClusterProxyService {
         List<ClusterServiceConfig> clusterServiceConfigs = getClusterServiceConfigsForGWs(stack);
         clusterServiceConfigs.add(cmServiceConfig(stack, null, "cloudera-manager", clusterManagerUrl(stack)));
         clusterServiceConfigs.add(cmServiceConfig(stack, clientCertificates(stack), CB_INTERNAL, primaryGWInternalAdminUrl));
+        LOGGER.info("Service configs: {}", clusterServiceConfigs);
+        return clusterServiceConfigs;
+    }
+
+    private List<ClusterServiceConfig> serviceConfigsForCcmV2(Stack stack) {
+        String internalAdminUrl = internalAdminUrl(stack, ServiceFamilies.GATEWAY.getDefaultPort());
+        LOGGER.info("Primary GW internal admin URL is: {}", internalAdminUrl);
+        List<ClusterServiceConfig> clusterServiceConfigs = getClusterServiceConfigsForGWs(stack);
+        clusterServiceConfigs.add(cmServiceConfig(stack, clientCertificates(stack), "cloudera-manager", internalAdminUrl));
+        clusterServiceConfigs.add(cmServiceConfig(stack, clientCertificates(stack), CB_INTERNAL, internalAdminUrl));
         LOGGER.info("Service configs: {}", clusterServiceConfigs);
         return clusterServiceConfigs;
     }
