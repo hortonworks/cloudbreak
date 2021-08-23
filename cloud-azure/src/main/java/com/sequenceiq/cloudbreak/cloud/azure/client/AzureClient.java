@@ -62,6 +62,7 @@ import com.microsoft.azure.management.marketplaceordering.v2015_06_01.implementa
 import com.microsoft.azure.management.msi.Identity;
 import com.microsoft.azure.management.network.LoadBalancer;
 import com.microsoft.azure.management.network.LoadBalancerFrontend;
+import com.microsoft.azure.management.network.LoadBalancingRule;
 import com.microsoft.azure.management.network.Network;
 import com.microsoft.azure.management.network.NetworkInterface;
 import com.microsoft.azure.management.network.NetworkInterfaces;
@@ -777,6 +778,10 @@ public class AzureClient {
 
         LOGGER.info("Private IPs for load balancer {} retrieved: {}", loadBalancerName, loadbalancerPrivateIps);
         return loadbalancerPrivateIps;
+    }
+
+    public Map<String, LoadBalancingRule> getLoadBalancerRules(String resourceGroupName, String loadBalancerName) {
+        return getLoadBalancer(resourceGroupName, loadBalancerName).loadBalancingRules();
     }
 
     public PagedList<Identity> listIdentities() {

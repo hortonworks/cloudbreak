@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AWS;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AZURE;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.GCP;
 
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -13,11 +14,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsLoadBalancerMetadataView;
+import com.sequenceiq.cloudbreak.cloud.azure.view.AzureLoadBalancerMetadataView;
 import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancerMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.aws.AwsLoadBalancerConfigDb;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.aws.AwsTargetGroupArnsDb;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.aws.AwsTargetGroupConfigDb;
+import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.azure.AzureLoadBalancerConfigDb;
+import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.azure.AzureTargetGroupConfigDb;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancerConfigDbWrapper;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.TargetGroupConfigDbWrapper;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.TargetGroup;
@@ -34,7 +38,9 @@ public class LoadBalancerConfigConverter {
         switch (cloudPlatform) {
             case AWS:
                 return buildAwsConfig(new AwsLoadBalancerMetadataView(cloudLoadBalancerMetadata));
-            // TODO: AZURE, GCP
+            case AZURE:
+                return buildAzureConfig(new AzureLoadBalancerMetadataView(cloudLoadBalancerMetadata));
+            case GCP:
             default:
                 return new LoadBalancerConfigDbWrapper();
         }
@@ -48,11 +54,20 @@ public class LoadBalancerConfigConverter {
         return cloudLoadBalancerConfigDbWrapper;
     }
 
+    private LoadBalancerConfigDbWrapper buildAzureConfig(AzureLoadBalancerMetadataView azureMetadata) {
+        LoadBalancerConfigDbWrapper cloudLoadBalancerConfigDbWrapper = new LoadBalancerConfigDbWrapper();
+        AzureLoadBalancerConfigDb azureLoadBalancerConfigDb = new AzureLoadBalancerConfigDb();
+        azureLoadBalancerConfigDb.setName(azureMetadata.getLoadbalancerName());
+        cloudLoadBalancerConfigDbWrapper.setAzureConfig(azureLoadBalancerConfigDb);
+        return cloudLoadBalancerConfigDbWrapper;
+    }
+
     public TargetGroupConfigDbWrapper convertTargetGroup(String cloudPlatform, CloudLoadBalancerMetadata cloudLoadBalancerMetadata, TargetGroup targetGroup) {
         switch (cloudPlatform) {
             case AWS:
                 return buildAwsConfig(new AwsLoadBalancerMetadataView(cloudLoadBalancerMetadata), targetGroup);
             case AZURE:
+                return buildAzureConfig(new AzureLoadBalancerMetadataView(cloudLoadBalancerMetadata), targetGroup);
             case GCP:
             default:
                 return new TargetGroupConfigDbWrapper();
@@ -60,9 +75,7 @@ public class LoadBalancerConfigConverter {
     }
 
     private TargetGroupConfigDbWrapper buildAwsConfig(AwsLoadBalancerMetadataView awsMetadata, TargetGroup targetGroup) {
-        Set<Integer> trafficPorts = loadBalancerConfigService.getTargetGroupPortPairs(targetGroup).stream()
-            .map(TargetGroupPortPair::getTrafficPort)
-            .collect(Collectors.toSet());
+        Set<Integer> trafficPorts = getTrafficPorts(targetGroup);
 
         TargetGroupConfigDbWrapper targetGroupConfigDbWrapper = new TargetGroupConfigDbWrapper();
         AwsTargetGroupConfigDb awsTargetGroupConfigDb = new AwsTargetGroupConfigDb();
@@ -76,5 +89,24 @@ public class LoadBalancerConfigConverter {
         }
         targetGroupConfigDbWrapper.setAwsConfig(awsTargetGroupConfigDb);
         return targetGroupConfigDbWrapper;
+    }
+
+    private TargetGroupConfigDbWrapper buildAzureConfig(AzureLoadBalancerMetadataView azureMetadata, TargetGroup targetGroup) {
+        Set<Integer> trafficPorts = getTrafficPorts(targetGroup);
+
+        TargetGroupConfigDbWrapper targetGroupConfigDbWrapper = new TargetGroupConfigDbWrapper();
+        AzureTargetGroupConfigDb azureTargetGroupConfigDb = new AzureTargetGroupConfigDb();
+        for (Integer port : trafficPorts) {
+            String availabilitySetName = azureMetadata.getAvailabilitySetByPort(port);
+            azureTargetGroupConfigDb.addPortAvailabilitySetMapping(port, List.of(availabilitySetName));
+        }
+        targetGroupConfigDbWrapper.setAzureConfig(azureTargetGroupConfigDb);
+        return targetGroupConfigDbWrapper;
+    }
+
+    private Set<Integer> getTrafficPorts(TargetGroup targetGroup) {
+        return loadBalancerConfigService.getTargetGroupPortPairs(targetGroup).stream()
+                .map(TargetGroupPortPair::getTrafficPort)
+                .collect(Collectors.toSet());
     }
 }

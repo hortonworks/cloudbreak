@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.azure;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
@@ -100,6 +101,9 @@ public class AzureMetadataCollectorTest {
 
     @Mock
     private CloudContext mockCloudContext;
+
+    @Mock
+    private AzureLoadBalancerMetadataCollector azureLbMetadataCollector;
 
     @Test
     public void testCollectShouldReturnsTheAllVmMetadata() {
@@ -201,6 +205,7 @@ public class AzureMetadataCollectorTest {
             .thenReturn(List.of(PUBLIC_IP));
 
         when(authenticatedContext.getParameter(AzureClient.class)).thenReturn(azureClient);
+        when(azureLbMetadataCollector.getParameters(any(), anyString(), anyString())).thenReturn(Map.of());
 
         List<CloudLoadBalancerMetadata> result = underTest.collectLoadBalancer(authenticatedContext, List.of(LoadBalancerType.PUBLIC), resources);
 
@@ -225,6 +230,7 @@ public class AzureMetadataCollectorTest {
                 .thenReturn(List.of(PUBLIC_IP, SECOND_PUBLIC_IP));
 
         when(authenticatedContext.getParameter(AzureClient.class)).thenReturn(azureClient);
+        when(azureLbMetadataCollector.getParameters(any(), anyString(), anyString())).thenReturn(Map.of());
 
         List<CloudLoadBalancerMetadata> result = underTest.collectLoadBalancer(authenticatedContext, List.of(LoadBalancerType.PUBLIC), resources);
 
@@ -256,6 +262,7 @@ public class AzureMetadataCollectorTest {
                 .thenReturn(List.of(PRIVATE_IP));
 
         when(authenticatedContext.getParameter(AzureClient.class)).thenReturn(azureClient);
+        when(azureLbMetadataCollector.getParameters(any(), anyString(), anyString())).thenReturn(Map.of());
 
         List<CloudLoadBalancerMetadata> result = underTest.collectLoadBalancer(authenticatedContext,
                 List.of(LoadBalancerType.PUBLIC, LoadBalancerType.PRIVATE), resources);
@@ -290,6 +297,7 @@ public class AzureMetadataCollectorTest {
                 .thenReturn(List.of(PRIVATE_IP));
 
         when(authenticatedContext.getParameter(AzureClient.class)).thenReturn(azureClient);
+        when(azureLbMetadataCollector.getParameters(any(), anyString(), anyString())).thenReturn(Map.of());
 
         List<CloudLoadBalancerMetadata> result = underTest.collectLoadBalancer(authenticatedContext, List.of(LoadBalancerType.PRIVATE), resources);
 
@@ -314,6 +322,7 @@ public class AzureMetadataCollectorTest {
                 .thenReturn(List.of(PRIVATE_IP, "10.23.12.1"));
 
         when(authenticatedContext.getParameter(AzureClient.class)).thenReturn(azureClient);
+        when(azureLbMetadataCollector.getParameters(any(), anyString(), anyString())).thenReturn(Map.of());
 
         List<CloudLoadBalancerMetadata> result = underTest.collectLoadBalancer(authenticatedContext, List.of(LoadBalancerType.PRIVATE), resources);
 

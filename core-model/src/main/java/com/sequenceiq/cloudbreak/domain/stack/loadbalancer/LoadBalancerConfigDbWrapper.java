@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.domain.stack.loadbalancer;
 
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.aws.AwsLoadBalancerConfigDb;
+import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.azure.AzureLoadBalancerConfigDb;
 
 /**
  * A wrapper for the cloud provider specific load balancer metadata stored in the database. Only one
@@ -12,6 +13,8 @@ public class LoadBalancerConfigDbWrapper {
 
     private AwsLoadBalancerConfigDb awsConfig;
 
+    private AzureLoadBalancerConfigDb azureConfig;
+
     public AwsLoadBalancerConfigDb getAwsConfig() {
         return awsConfig;
     }
@@ -20,10 +23,19 @@ public class LoadBalancerConfigDbWrapper {
         this.awsConfig = awsConfig;
     }
 
+    public AzureLoadBalancerConfigDb getAzureConfig() {
+        return azureConfig;
+    }
+
+    public void setAzureConfig(AzureLoadBalancerConfigDb azureConfig) {
+        this.azureConfig = azureConfig;
+    }
+
     @Override
     public String toString() {
         return "CloudLoadBalancerConfig{" +
             "awsConfig=" + awsConfig +
+            "azureConfig=" + azureConfig +
             '}';
     }
 }

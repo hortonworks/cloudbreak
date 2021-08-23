@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.domain.stack.loadbalancer;
 
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.aws.AwsTargetGroupConfigDb;
+import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.azure.AzureTargetGroupConfigDb;
 
 /**
  * A wrapper for the cloud provider specific target group metadata stored in the database. Only one
@@ -12,6 +13,8 @@ public class TargetGroupConfigDbWrapper {
 
     private AwsTargetGroupConfigDb awsConfig;
 
+    private AzureTargetGroupConfigDb azureConfig;
+
     public AwsTargetGroupConfigDb getAwsConfig() {
         return awsConfig;
     }
@@ -20,10 +23,19 @@ public class TargetGroupConfigDbWrapper {
         this.awsConfig = awsConfig;
     }
 
+    public AzureTargetGroupConfigDb getAzureConfig() {
+        return azureConfig;
+    }
+
+    public void setAzureConfig(AzureTargetGroupConfigDb azureConfig) {
+        this.azureConfig = azureConfig;
+    }
+
     @Override
     public String toString() {
         return "TargetGroupConfigDbWrapper{" +
             "awsConfig=" + awsConfig +
+            "azureConfig=" + azureConfig +
             '}';
     }
 }
