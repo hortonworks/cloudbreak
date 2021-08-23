@@ -137,10 +137,6 @@ class ClusterProxyServiceTest {
                 "10.10.10.10", ServiceFamilies.GATEWAY.getDefaultPort(), "testAgentCrn-i-abc123", "cloudera-manager")));
         assertTrue(proxyRegisterationReq.getCcmV2Configs().contains(new CcmV2Config(
                 "10.10.10.11", ServiceFamilies.GATEWAY.getDefaultPort(), "testAgentCrn-i-def456", "cloudera-manager")));
-        assertTrue(proxyRegisterationReq.getCcmV2Configs().contains(new CcmV2Config(
-                "10.10.10.10", ServiceFamilies.KNOX.getDefaultPort(), "testAgentCrn-i-abc123", "cloudera-manager")));
-        assertTrue(proxyRegisterationReq.getCcmV2Configs().contains(new CcmV2Config(
-                "10.10.10.11", ServiceFamilies.KNOX.getDefaultPort(), "testAgentCrn-i-def456", "cloudera-manager")));
         assertTrue(proxyRegisterationReq.getServices().contains(cmServiceConfigWithInstanceId(PRIMARY_PUBLIC_IP, PRIMARY_INSTANCE_ID)));
         assertTrue(proxyRegisterationReq.getServices().contains(cmServiceConfigWithInstanceId(OTHER_PUBLIC_IP, OTHER_INSTANCE_ID)));
         assertTrue(proxyRegisterationReq.getServices().contains(cmServiceConfig()));
@@ -217,10 +213,6 @@ class ClusterProxyServiceTest {
                 "10.10.10.10", ServiceFamilies.GATEWAY.getDefaultPort(), "testAgentCrn-i-abc123", "cloudera-manager")));
         assertTrue(proxyRegisterationReq.getCcmV2Configs().contains(new CcmV2Config(
                 "10.10.10.11", ServiceFamilies.GATEWAY.getDefaultPort(), "testAgentCrn-i-def456", "cloudera-manager")));
-        assertTrue(proxyRegisterationReq.getCcmV2Configs().contains(new CcmV2Config(
-                "10.10.10.10", ServiceFamilies.KNOX.getDefaultPort(), "testAgentCrn-i-abc123", "cloudera-manager")));
-        assertTrue(proxyRegisterationReq.getCcmV2Configs().contains(new CcmV2Config(
-                "10.10.10.11", ServiceFamilies.KNOX.getDefaultPort(), "testAgentCrn-i-def456", "cloudera-manager")));
         assertTrue(proxyRegisterationReq.getServices().contains(cmServiceConfigWithInstanceId(PRIMARY_PUBLIC_IP, PRIMARY_INSTANCE_ID)));
         assertTrue(proxyRegisterationReq.getServices().contains(cmServiceConfigWithInstanceId(OTHER_PUBLIC_IP, OTHER_INSTANCE_ID)));
         assertTrue(proxyRegisterationReq.getServices().contains(cmServiceConfig()));
