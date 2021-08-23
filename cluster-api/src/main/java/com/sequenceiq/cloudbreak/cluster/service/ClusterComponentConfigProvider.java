@@ -26,7 +26,9 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
+import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
 import com.sequenceiq.cloudbreak.repository.ClusterComponentRepository;
+import com.sequenceiq.cloudbreak.repository.ClusterComponentViewRepository;
 
 @Service
 public class ClusterComponentConfigProvider {
@@ -35,6 +37,9 @@ public class ClusterComponentConfigProvider {
 
     @Inject
     private ClusterComponentRepository componentRepository;
+
+    @Inject
+    private ClusterComponentViewRepository componentViewRepository;
 
     @Inject
     private AuditReader auditReader;
@@ -47,8 +52,8 @@ public class ClusterComponentConfigProvider {
         return componentRepository.findComponentByClusterIdComponentTypeName(clusterId, componentType, name);
     }
 
-    public Set<ClusterComponent> getComponentListByType(Long clusterId, ComponentType componentType) {
-        return componentRepository.findComponentsByClusterIdAndComponentType(clusterId, componentType);
+    public Set<ClusterComponentView> getComponentListByType(Long clusterId, ComponentType componentType) {
+        return componentViewRepository.findComponentViewsByClusterIdAndComponentType(clusterId, componentType);
     }
 
     public Set<ClusterComponent> getComponentsByClusterId(Long clusterId) {
@@ -67,7 +72,7 @@ public class ClusterComponentConfigProvider {
     }
 
     public List<ClouderaManagerProduct> getClouderaManagerProductDetails(Long clusterId) {
-        Set<ClusterComponent> components = getComponentListByType(clusterId, ComponentType.CDH_PRODUCT_DETAILS);
+        Set<ClusterComponentView> components = getComponentListByType(clusterId, ComponentType.CDH_PRODUCT_DETAILS);
         return components.stream().map(component ->
                 retrieveFromAttribute(component, ClouderaManagerProduct.class))
                 .collect(Collectors.toList());
@@ -137,6 +142,13 @@ public class ClusterComponentConfigProvider {
             return null;
         }
         return retrieveFromAttributeJson(component.getAttributes(), clazz);
+    }
+
+    private <T> T retrieveFromAttribute(ClusterComponentView componentView, Class<T> clazz) {
+        if (componentView == null) {
+            return null;
+        }
+        return retrieveFromAttributeJson(componentView.getAttributes(), clazz);
     }
 
     private <T> T retrieveFromAttributeJson(Json attributes, Class<T> clazz) {
