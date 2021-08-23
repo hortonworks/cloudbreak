@@ -55,14 +55,15 @@ public class DefaultBlueprintCache {
                         blueprintJson.setName(split[0].trim());
                         JsonNode jsonNode = blueprintUtils.convertStringToJsonNode(
                                 blueprintUtils.readDefaultBlueprintFromFile(blueprintEntry.getKey(), split));
-                        blueprintJson.setBlueprint(jsonNode.get("blueprint").toString());
+                        JsonNode blueprintNode = jsonNode.get("blueprint");
+                        blueprintJson.setBlueprint(blueprintNode.toString());
                         Blueprint bp = converter.convert(blueprintJson);
                         JsonNode tags = jsonNode.get("tags");
                         Map<String, Object> tagParameters = blueprintUtils.prepareTags(tags);
                         bp.setTags(new Json(tagParameters));
                         JsonNode description = jsonNode.get("description");
                         bp.setDescription(description == null ? split[0] : description.asText(split[0]));
-                        JsonNode blueprintUpgradeOption = jsonNode.get("blueprintUpgradeOption");
+                        JsonNode blueprintUpgradeOption = blueprintNode.isMissingNode() ? null : blueprintNode.get("blueprintUpgradeOption");
                         bp.setBlueprintUpgradeOption(getBlueprintUpgradeOption(blueprintUpgradeOption));
                         defaultBlueprints.put(bp.getName(), bp);
                     }

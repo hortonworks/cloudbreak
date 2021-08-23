@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.cmtemplate.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.converter.v4.blueprint.BlueprintV4RequestToBlueprintConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.BlueprintUpgradeOption;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DefaulBlueprintCacheTest {
@@ -87,6 +88,31 @@ public class DefaulBlueprintCacheTest {
         assertEquals(2L, defaultBlueprints.size());
         assertEquals("Description1", defaultBlueprints.get("bp1").getDescription());
         assertEquals("Description2", defaultBlueprints.get("bp2").getDescription());
+    }
+
+    @Test
+    public void testLoadBlueprintsFromFileWithUpgradeOptions() throws IOException {
+        // GIVEN
+        Blueprint bp1 = new Blueprint();
+        bp1.setName("bp1");
+        String bp1JsonString = "{\"description\":\"7.2.10 - Data Engineering\",\"blueprint\":{\"cdhVersion\":\"7.2.10\",\"displayName\":\"dataengineering\","
+                + "\"blueprintUpgradeOption\":\"DISABLED\"}}";
+        JsonNode bpText1 = JsonUtil.readTree(bp1JsonString);
+        when(blueprintUtils.convertStringToJsonNode(any())).thenReturn(bpText1);
+        when(blueprintEntities.getDefaults()).thenReturn(Map.of("7.2.10", "Description1=bp1"));
+        when(blueprintUtils.isBlueprintNamePreConfigured(anyString(), any())).thenReturn(true);
+
+        when(converter.convert(any(BlueprintV4Request.class))).thenAnswer(invocation -> {
+            BlueprintV4Request request = invocation.getArgument(0);
+            return bp1;
+        });
+
+        underTest.loadBlueprintsFromFile();
+
+        Map<String, Blueprint> defaultBlueprints = underTest.defaultBlueprints();
+        assertEquals(1L, defaultBlueprints.size());
+        assertEquals("7.2.10 - Data Engineering", defaultBlueprints.get("bp1").getDescription());
+        assertEquals(BlueprintUpgradeOption.DISABLED, defaultBlueprints.get("bp1").getBlueprintUpgradeOption());
     }
 
 }
