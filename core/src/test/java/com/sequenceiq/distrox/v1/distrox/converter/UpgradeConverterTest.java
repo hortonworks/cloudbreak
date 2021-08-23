@@ -49,7 +49,7 @@ class UpgradeConverterTest {
         source.setReplaceVms(DistroXUpgradeReplaceVms.DISABLED);
         source.setRuntime("runtime");
 
-        UpgradeV4Request result = underTest.convert(source, new InternalUpgradeSettings());
+        UpgradeV4Request result = underTest.convert(source, new InternalUpgradeSettings(false, true));
 
         assertEquals(source.getDryRun(), result.getDryRun());
         assertEquals(source.getImageId(), result.getImageId());
@@ -65,7 +65,7 @@ class UpgradeConverterTest {
         // GIVEN
         DistroXUpgradeV1Request source = new DistroXUpgradeV1Request();
         // WHEN
-        UpgradeV4Request result = underTest.convert(source, new InternalUpgradeSettings(true));
+        UpgradeV4Request result = underTest.convert(source, new InternalUpgradeSettings(true, true));
         // THEN
         assertTrue(result.getInternalUpgradeSettings().isSkipValidations());
     }
@@ -75,7 +75,7 @@ class UpgradeConverterTest {
         // GIVEN
         DistroXUpgradeV1Request source = new DistroXUpgradeV1Request();
         // WHEN
-        UpgradeV4Request result = underTest.convert(source, new InternalUpgradeSettings());
+        UpgradeV4Request result = underTest.convert(source, new InternalUpgradeSettings(false, true));
         // THEN
         assertNull(result.getReplaceVms());
     }

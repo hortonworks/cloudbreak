@@ -161,7 +161,7 @@ public class ClusterUpgradeImageFilter {
             return new BlueprintValidationResult(!mediumDuty || canUpgradeMediumDuty, "The upgrade is not allowed for this template.");
         } else {
             return blueprintUpgradeOptionValidator.isValidBlueprint(imageFilterParams.getBlueprint(), imageFilterParams.isLockComponents(),
-                    imageFilterParams.isSkipValidations());
+                    imageFilterParams.isSkipValidations(), imageFilterParams.isDataHubUpgradeEntitled());
         }
     }
 

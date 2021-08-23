@@ -25,11 +25,6 @@ public class ImageFilterParams {
     private final InternalUpgradeSettings internalUpgradeSettings;
 
     public ImageFilterParams(Image currentImage, boolean lockComponents, Map<String, String> stackRelatedParcels, StackType stackType, Blueprint blueprint,
-            Long stackId) {
-        this(currentImage, lockComponents, stackRelatedParcels, stackType, blueprint, stackId, new InternalUpgradeSettings());
-    }
-
-    public ImageFilterParams(Image currentImage, boolean lockComponents, Map<String, String> stackRelatedParcels, StackType stackType, Blueprint blueprint,
             Long stackId, InternalUpgradeSettings internalUpgradeSettings) {
         this.currentImage = currentImage;
         this.lockComponents = lockComponents;
@@ -66,6 +61,10 @@ public class ImageFilterParams {
 
     public boolean isSkipValidations() {
         return internalUpgradeSettings != null && internalUpgradeSettings.isSkipValidations();
+    }
+
+    public boolean isDataHubUpgradeEntitled() {
+        return internalUpgradeSettings != null && internalUpgradeSettings.isDataHubUpgradeEntitled();
     }
 
     @Override

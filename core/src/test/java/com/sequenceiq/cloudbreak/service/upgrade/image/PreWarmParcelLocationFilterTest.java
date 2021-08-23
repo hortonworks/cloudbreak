@@ -11,6 +11,7 @@ import java.util.Map;
 import org.junit.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.InternalUpgradeSettings;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 
 public class PreWarmParcelLocationFilterTest {
@@ -25,7 +26,8 @@ public class PreWarmParcelLocationFilterTest {
 
     @Test
     public void testFilterImageShouldReturnTrueWhenTheStackTypeIsNotWorkload() {
-        assertTrue(underTest.filterImage(null, null, new ImageFilterParams(null, false, null, StackType.DATALAKE, null, STACK_ID)));
+        assertTrue(underTest.filterImage(null, null, new ImageFilterParams(null, false, null, StackType.DATALAKE, null, STACK_ID,
+                new InternalUpgradeSettings(false, true))));
     }
 
     @Test
@@ -127,7 +129,7 @@ public class PreWarmParcelLocationFilterTest {
     }
 
     private ImageFilterParams createImageFilterParams(Map<String, String> stackRelatedParcels) {
-        return new ImageFilterParams(null, false, stackRelatedParcels, StackType.WORKLOAD, null, STACK_ID);
+        return new ImageFilterParams(null, false, stackRelatedParcels, StackType.WORKLOAD, null, STACK_ID, new InternalUpgradeSettings(false, true));
     }
 
 }

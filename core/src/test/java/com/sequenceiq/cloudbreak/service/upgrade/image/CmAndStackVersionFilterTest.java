@@ -21,6 +21,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.InternalUpgradeSettings;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradePermissionProvider;
 import com.sequenceiq.cloudbreak.service.upgrade.image.locked.LockedComponentChecker;
@@ -137,7 +138,7 @@ class CmAndStackVersionFilterTest {
     }
 
     private ImageFilterParams createImageFilterParams(boolean lockComponents) {
-        return new ImageFilterParams(currentImage, lockComponents, activatedParcels, StackType.DATALAKE, null, 1L);
+        return new ImageFilterParams(currentImage, lockComponents, activatedParcels, StackType.DATALAKE, null, 1L, new InternalUpgradeSettings(false, true));
     }
 
     private void assertLockedCommon() {

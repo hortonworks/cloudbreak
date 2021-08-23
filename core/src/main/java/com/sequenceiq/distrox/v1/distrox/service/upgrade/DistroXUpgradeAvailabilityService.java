@@ -50,7 +50,7 @@ public class DistroXUpgradeAvailabilityService {
     @Inject
     private RuntimeVersionService runtimeVersionService;
 
-    public boolean isRuntimeUpgradeEnabled(String userCrn) {
+    public boolean isRuntimeUpgradeEnabledByUserCrn(String userCrn) {
         try {
             String accountId = Crn.safeFromString(userCrn).getAccountId();
             return entitlementService.datahubRuntimeUpgradeEnabled(accountId);
@@ -60,8 +60,11 @@ public class DistroXUpgradeAvailabilityService {
         }
     }
 
+    public boolean isRuntimeUpgradeEnabledByAccountId(String accountId) {
+        return entitlementService.datahubRuntimeUpgradeEnabled(accountId);
+    }
+
     public UpgradeV4Response checkForUpgrade(NameOrCrn nameOrCrn, Long workspaceId, UpgradeV4Request request, String userCrn) {
-        verifyRuntimeUpgradeEntitlement(userCrn, request);
         Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
         String accountId = Crn.safeFromString(userCrn).getAccountId();
         UpgradeV4Response response = stackOperations.checkForClusterUpgrade(accountId, stack, workspaceId, request);
@@ -71,6 +74,7 @@ public class DistroXUpgradeAvailabilityService {
     }
 
     private List<ImageInfoV4Response> filterCandidates(String accountId, Stack stack, UpgradeV4Request request, UpgradeV4Response upgradeV4Response) {
+        filterOnlyPatchUpgradesIfRuntimeUpgradeDisabled(accountId, stack.getName(), upgradeV4Response);
         List<ImageInfoV4Response> filteredCandidates;
         String stackName = stack.getName();
         boolean differentDataHubAndDataLakeVersionAllowed = entitlementService.isDifferentDataHubAndDataLakeVersionAllowed(accountId);
@@ -89,6 +93,33 @@ public class DistroXUpgradeAvailabilityService {
             }
         }
         return filteredCandidates;
+    }
+
+    private void filterOnlyPatchUpgradesIfRuntimeUpgradeDisabled(String accountId, String clusterName, UpgradeV4Response upgradeV4Response) {
+        if (!isRuntimeUpgradeEnabledByAccountId(accountId)) {
+            if (upgradeV4Response.getCurrent() != null) {
+                List<ImageInfoV4Response> upgradeCandidates = upgradeV4Response.getUpgradeCandidates();
+                String currentCdpVersion = upgradeV4Response.getCurrent().getComponentVersions().getCdp();
+                LOGGER.debug("Only patch upgrade is possible on [{}] cluster for [{}] runtime as CDP_RUNTIME_UPGRADE is disabled in [{}] account.",
+                        clusterName, currentCdpVersion, accountId);
+                upgradeCandidates = upgradeCandidates.stream()
+                        .filter(upgradeCandidate -> upgradeCandidate.getComponentVersions().getCdp().equals(currentCdpVersion))
+                        .collect(Collectors.toList());
+                upgradeV4Response.setUpgradeCandidates(upgradeCandidates);
+                if (upgradeCandidates.isEmpty()) {
+                    upgradeV4Response.setReason("No image is available for maintenance upgrade, CDP version: " + currentCdpVersion);
+                }
+                LOGGER.debug("Patch upgrade candidates for [{}] cluster: [{}]", clusterName, upgradeCandidates);
+            } else {
+                String message = String.format("No information about current image, cannot filter patch upgrade candidates based on it on [%s] cluster.",
+                        clusterName);
+                LOGGER.debug(message);
+                upgradeV4Response.appendReason(message);
+                upgradeV4Response.setUpgradeCandidates(List.of());
+            }
+        } else {
+            LOGGER.debug("Data Hub Runtime upgrade is enabled, not filtering for patch upgrade.");
+        }
     }
 
     private List<ImageInfoV4Response> filterForLatestImage(List<ImageInfoV4Response> candidates) {
@@ -133,9 +164,4 @@ public class DistroXUpgradeAvailabilityService {
         return candidates.stream().filter(imageInfo -> imageInfo.getComponentVersions().getCdp().equals(datalakeVersion)).collect(Collectors.toList());
     }
 
-    private void verifyRuntimeUpgradeEntitlement(String userCrn, UpgradeV4Request request) {
-        if (request != null && !Boolean.TRUE.equals(request.getLockComponents()) && !isRuntimeUpgradeEnabled(userCrn)) {
-            throw new BadRequestException("Runtime upgrade feature is not enabled");
-        }
-    }
 }
