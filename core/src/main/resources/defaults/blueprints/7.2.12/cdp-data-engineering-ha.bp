@@ -153,7 +153,7 @@
             "name": "hive_service_config_safety_valve",
             "value": "<property><name>fs.s3a.ssl.channel.mode</name><value>openssl</value></property><property><name>hive.txn.acid.dir.cache.duration</name><value>0</value></property><property><name>hive.server2.tez.session.lifetime</name><value>30m</value></property>
                         <property><name>hive.blobstore.supported.schemes</name><value>s3,s3a,s3n,abfs,gs</value></property><property><name>hive.orc.splits.include.fileid</name><value>false</value></property><property><name>hive.hook.proto.events.clean.freq</name><value>1h</value></property>
-                        <property><name>hive.metastore.try.direct.sql.ddl</name><value>true</value></property><property><name>parquet.compression</name><value>SNAPPY</value></property>"
+                        <property><name>hive.metastore.try.direct.sql.ddl</name><value>true</value></property><property><name>parquet.compression</name><value>SNAPPY</value></property><property><name>hive.privilege.synchronizer</name><value>false</value></property>"
           }
         ],
         "roleConfigGroups": [
