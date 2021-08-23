@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.cloud.azure.view;
 import static com.sequenceiq.cloudbreak.cloud.azure.view.AzureDatabaseServerView.BACKUP_RETENTION_DAYS;
 import static com.sequenceiq.cloudbreak.cloud.azure.view.AzureDatabaseServerView.DB_VERSION;
 import static com.sequenceiq.cloudbreak.cloud.azure.view.AzureDatabaseServerView.GEO_REDUNDANT_BACKUP;
+import static com.sequenceiq.cloudbreak.cloud.azure.view.AzureDatabaseServerView.KEY_VAULT_RESOURCE_GROUP_NAME;
+import static com.sequenceiq.cloudbreak.cloud.azure.view.AzureDatabaseServerView.KEY_VAULT_URL;
 import static com.sequenceiq.cloudbreak.cloud.azure.view.AzureDatabaseServerView.SKU_CAPACITY;
 import static com.sequenceiq.cloudbreak.cloud.azure.view.AzureDatabaseServerView.SKU_FAMILY;
 import static com.sequenceiq.cloudbreak.cloud.azure.view.AzureDatabaseServerView.SKU_TIER;
@@ -144,6 +146,20 @@ public class AzureDatabaseServerViewTest {
         when(server.getLocation()).thenReturn("some-location");
 
         assertThat(underTest.getLocation()).isEqualTo("some-location");
+    }
+
+    @Test
+    public void testKeyVaultUrl() {
+        when(server.getStringParameter(KEY_VAULT_URL)).thenReturn("dummyUrl");
+
+        assertThat(underTest.getKeyVaultUrl()).isEqualTo("dummyUrl");
+    }
+
+    @Test
+    public void testKeyVaultResourceGroupName() {
+        when(server.getStringParameter(KEY_VAULT_RESOURCE_GROUP_NAME)).thenReturn("dummyResourceGroupName");
+
+        assertThat(underTest.getKeyVaultResourceGroupName()).isEqualTo("dummyResourceGroupName");
     }
 
 }

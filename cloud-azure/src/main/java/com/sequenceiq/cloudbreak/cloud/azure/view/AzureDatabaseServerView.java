@@ -26,6 +26,12 @@ public class AzureDatabaseServerView {
     @VisibleForTesting
     static final String STORAGE_AUTO_GROW = "storageAutoGrow";
 
+    @VisibleForTesting
+    static final String KEY_VAULT_URL = "keyVaultUrl";
+
+    @VisibleForTesting
+    static final String KEY_VAULT_RESOURCE_GROUP_NAME = "keyVaultResourceGroupName";
+
     private static final int NUM_MB_IN_GB = 1024;
 
     private final DatabaseServer databaseServer;
@@ -104,6 +110,14 @@ public class AzureDatabaseServerView {
 
     public String getLocation() {
         return databaseServer.getLocation();
+    }
+
+    public String getKeyVaultUrl() {
+        return databaseServer.getStringParameter(KEY_VAULT_URL);
+    }
+
+    public String getKeyVaultResourceGroupName() {
+        return databaseServer.getStringParameter(KEY_VAULT_RESOURCE_GROUP_NAME);
     }
 
 }

@@ -1,15 +1,18 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -68,6 +71,10 @@ public class AzureTemplateBuilderDbTest {
 
     private static final String ROOT_PASSWORD = "godmode";
 
+    private static final String KEY_URL = "keyVaultUrl";
+
+    private static final String KEY_VAULT_RESOURCE_GROUP_NAME = "keyVaultResourceGroupName";
+
     @Spy
     private FreeMarkerTemplateUtils freeMarkerTemplateUtils;
 
@@ -116,6 +123,98 @@ public class AzureTemplateBuilderDbTest {
     @MethodSource("templatesPathDataProvider")
     void buildTestWhenUseSslEnforcementTrue(String templatePath) {
         buildTestWhenUseSslEnforcementInternal(templatePath, true);
+    }
+
+    @Test
+    void buildTestWhenDataEncryptionParametersPresent() {
+        Template template = Optional.ofNullable(factoryBean.getObject())
+                .map(config -> {
+                    try {
+                        return config.getTemplate("templates/arm-dbstack.ftl", "UTF-8");
+                    } catch (IOException e) {
+                        throw new IllegalStateException(e);
+                    }
+                }).orElseThrow();
+        Subnet subnet = new Subnet(SUBNET_CIDR);
+        Network network = new Network(subnet, List.of(NETWORK_CIDR), OutboundInternetTraffic.ENABLED);
+        network.putParameter("subnets", FULL_SUBNET_ID);
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("dbVersion", "10");
+        params.put(KEY_URL, "https://dummyVault.vault.azure.net/keys/dummyKey/dummyVersion");
+        params.put(KEY_VAULT_RESOURCE_GROUP_NAME, "dummyResourceGroup");
+        DatabaseServer databaseServer = DatabaseServer.builder()
+                .serverId(SERVER_ID)
+                .rootUserName(ROOT_USER_NAME)
+                .rootPassword(ROOT_PASSWORD)
+                .location(REGION)
+                .params(params)
+                .build();
+
+        DatabaseStack databaseStack = new DatabaseStack(network, databaseServer, Collections.emptyMap(), template.toString());
+        Mockito.when(azureDatabaseTemplateProvider.getTemplate(databaseStack)).thenReturn(template);
+        Mockito.when(azureUtils.encodeString(SUBNET_ID)).thenReturn("hash");
+
+        String result = underTest.build(cloudContext, databaseStack);
+
+        assertThat(JsonUtil.isValid(result)).overridingErrorMessage("Invalid JSON: " + result).isTrue();
+        assertThat(result).contains("\"keyVaultName\": {\n" +
+                "              \"type\": \"string\",\n" +
+                "              \"defaultValue\" : \"dummyVault\",\n" +
+                "              \"metadata\": {\n" +
+                "                \"description\": \"Key vault name where the key to use is stored\"\n" +
+                "              }\n" +
+                "        },\n" +
+                "        \"keyVaultResourceGroupName\": {\n" +
+                "              \"type\": \"string\",\n" +
+                "              \"defaultValue\" : \"dummyResourceGroup\",\n" +
+                "              \"metadata\": {\n" +
+                "                \"description\": \"Key vault resource group name where it is stored\"\n" +
+                "              }\n" +
+                "        },\n" +
+                "        \"keyName\": {\n" +
+                "              \"type\": \"string\",\n" +
+                "              \"defaultValue\" : \"dummyKey\",\n" +
+                "              \"metadata\": {\n" +
+                "                \"description\": \"Key name in the key vault to use as encryption protector\"\n" +
+                "              }\n" +
+                "        },\n" +
+                "        \"keyVersion\": {\n" +
+                "              \"type\": \"string\",\n" +
+                "              \"defaultValue\" : \"dummyVersion\",\n" +
+                "              \"metadata\": {\n" +
+                "                \"description\": \"Version of the key in the key vault to use as encryption protector\"\n" +
+                "              }\n" +
+                "        }");
+
+    }
+
+    @Test
+    void buildTestWhenDataEncryptionParametersPresentAndKeyVersionError() {
+        Template template = Optional.ofNullable(factoryBean.getObject())
+                .map(config -> {
+                    try {
+                        return config.getTemplate("templates/arm-dbstack.ftl", "UTF-8");
+                    } catch (IOException e) {
+                        throw new IllegalStateException(e);
+                    }
+                }).orElseThrow();
+        Subnet subnet = new Subnet(SUBNET_CIDR);
+        Network network = new Network(subnet, List.of(NETWORK_CIDR), OutboundInternetTraffic.ENABLED);
+        network.putParameter("subnets", FULL_SUBNET_ID);
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("dbVersion", "10");
+        params.put(KEY_URL, "https://dummyVault.vault.azure.net/keys/dummyKey");
+        params.put(KEY_VAULT_RESOURCE_GROUP_NAME, "dummyResourceGroup");
+        DatabaseServer databaseServer = DatabaseServer.builder()
+                .serverId(SERVER_ID)
+                .rootUserName(ROOT_USER_NAME)
+                .rootPassword(ROOT_PASSWORD)
+                .location(REGION)
+                .params(params)
+                .build();
+
+        DatabaseStack databaseStack = new DatabaseStack(network, databaseServer, Collections.emptyMap(), template.toString());
+        assertThrows(IllegalArgumentException.class, () -> underTest.build(cloudContext, databaseStack));
     }
 
     private void buildTestWhenUseSslEnforcementInternal(String templatePath, boolean useSslEnforcement) {
