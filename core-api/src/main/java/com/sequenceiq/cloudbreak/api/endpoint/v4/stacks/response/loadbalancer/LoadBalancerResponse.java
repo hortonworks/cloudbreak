@@ -35,6 +35,9 @@ public class LoadBalancerResponse implements Serializable {
     @ApiModelProperty(StackModelDescription.LOAD_BALANCER_AWS)
     private AwsLoadBalancerResponse awsResourceId;
 
+    @ApiModelProperty(StackModelDescription.LOAD_BALANCER_AZURE)
+    private AzureLoadBalancerResponse azureResourceId;
+
     public String getFqdn() {
         return fqdn;
     }
@@ -81,5 +84,13 @@ public class LoadBalancerResponse implements Serializable {
 
     public void setAwsResourceId(AwsLoadBalancerResponse awsResourceId) {
         this.awsResourceId = awsResourceId;
+    }
+
+    public AzureLoadBalancerResponse getAzureResourceId() {
+        return azureResourceId;
+    }
+
+    public void setAzureResourceId(AzureLoadBalancerResponse azureResourceId) {
+        this.azureResourceId = azureResourceId;
     }
 }

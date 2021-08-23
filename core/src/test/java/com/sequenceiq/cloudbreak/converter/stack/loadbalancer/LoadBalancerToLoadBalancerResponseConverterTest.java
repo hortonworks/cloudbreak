@@ -18,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.loadbalancer.AwsTargetGroupResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.loadbalancer.AzureTargetGroupResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.loadbalancer.LoadBalancerResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.loadbalancer.TargetGroupResponse;
 import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
@@ -32,6 +33,8 @@ import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.TargetGroup;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.aws.AwsLoadBalancerConfigDb;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.aws.AwsTargetGroupArnsDb;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.aws.AwsTargetGroupConfigDb;
+import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.azure.AzureLoadBalancerConfigDb;
+import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.azure.AzureTargetGroupConfigDb;
 import com.sequenceiq.cloudbreak.service.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
@@ -55,6 +58,10 @@ public class LoadBalancerToLoadBalancerResponseConverterTest extends AbstractEnt
     private static final String TG_ARN = "arn:targetGroup";
 
     private static final String LISTENER_ARN = "arn:listener";
+
+    private static final String AZURE_LB_NAME = "load-balancer-name";
+
+    private static final String AZURE_AS_NAME = "availability-set-name";
 
     @Mock
     private TargetGroupPersistenceService targetGroupService;
@@ -87,8 +94,9 @@ public class LoadBalancerToLoadBalancerResponseConverterTest extends AbstractEnt
         // WHEN
         LoadBalancerResponse response = underTest.convert(source);
         // THEN
-        assertAllFieldsNotNull(response, List.of("awsResourceId"));
+        assertAllFieldsNotNull(response, List.of("awsResourceId", "azureResourceId"));
         assertNull(response.getAwsResourceId());
+        assertNull(response.getAzureResourceId());
     }
 
     @Test
@@ -100,7 +108,7 @@ public class LoadBalancerToLoadBalancerResponseConverterTest extends AbstractEnt
         // WHEN
         LoadBalancerResponse response = underTest.convert(source);
         // THEN
-        assertAllFieldsNotNull(response, List.of());
+        assertAllFieldsNotNull(response, List.of("azureResourceId"));
         assertEquals(LB_ARN, response.getAwsResourceId().getArn());
         assertEquals(1, response.getTargets().size());
         TargetGroupResponse targetGroupResponse = response.getTargets().get(0);
@@ -110,6 +118,26 @@ public class LoadBalancerToLoadBalancerResponseConverterTest extends AbstractEnt
         assertNotNull(awsTargetGroupResponse);
         assertEquals(LISTENER_ARN, awsTargetGroupResponse.getListenerArn());
         assertEquals(TG_ARN, awsTargetGroupResponse.getTargetGroupArn());
+    }
+
+    @Test
+    public void testConvertAzure() {
+        LoadBalancer source = getSource();
+        // GIVEN
+        getSource().setProviderConfig(createAzureLoadBalancerConfig());
+        given(targetGroupService.findByLoadBalancerId(any())).willReturn(createAzureTargetGroups());
+        // WHEN
+        LoadBalancerResponse response = underTest.convert(source);
+        // THEN
+        assertAllFieldsNotNull(response, List.of("awsResourceId"));
+        assertEquals(AZURE_LB_NAME, response.getAzureResourceId().getName());
+        assertEquals(1, response.getTargets().size());
+        TargetGroupResponse targetGroupResponse = response.getTargets().get(0);
+        assertEquals(PORT, targetGroupResponse.getPort());
+        assertEquals(Set.of(INSTANCE_ID), targetGroupResponse.getTargetInstances());
+        AzureTargetGroupResponse azureTargetGroupResponse = targetGroupResponse.getAzureResourceId();
+        assertNotNull(azureTargetGroupResponse);
+        assertEquals(List.of(AZURE_AS_NAME), azureTargetGroupResponse.getAvailabilitySet());
     }
 
     @Override
@@ -147,5 +175,23 @@ public class LoadBalancerToLoadBalancerResponseConverterTest extends AbstractEnt
         InstanceMetaData instanceMetaData = new InstanceMetaData();
         instanceMetaData.setInstanceId(INSTANCE_ID);
         return List.of(instanceMetaData);
+    }
+
+    private LoadBalancerConfigDbWrapper createAzureLoadBalancerConfig() {
+        AzureLoadBalancerConfigDb azureLoadBalancerConfigDb = new AzureLoadBalancerConfigDb();
+        azureLoadBalancerConfigDb.setName(AZURE_LB_NAME);
+        LoadBalancerConfigDbWrapper cloudLoadBalancerConfigDbWrapper = new LoadBalancerConfigDbWrapper();
+        cloudLoadBalancerConfigDbWrapper.setAzureConfig(azureLoadBalancerConfigDb);
+        return cloudLoadBalancerConfigDbWrapper;
+    }
+
+    private Set<TargetGroup> createAzureTargetGroups() {
+        AzureTargetGroupConfigDb azureTargetGroupConfigDb = new AzureTargetGroupConfigDb();
+        azureTargetGroupConfigDb.setPortAvailabilitySetMapping(Map.of(PORT, List.of(AZURE_AS_NAME)));
+        TargetGroupConfigDbWrapper targetGroupConfigDbWrapper = new TargetGroupConfigDbWrapper();
+        targetGroupConfigDbWrapper.setAzureConfig(azureTargetGroupConfigDb);
+        TargetGroup targetGroup = new TargetGroup();
+        targetGroup.setProviderConfig(targetGroupConfigDbWrapper);
+        return Set.of(targetGroup);
     }
 }

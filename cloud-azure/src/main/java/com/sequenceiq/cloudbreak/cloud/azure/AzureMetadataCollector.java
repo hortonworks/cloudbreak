@@ -53,6 +53,9 @@ public class AzureMetadataCollector implements MetadataCollector {
     @Inject
     private AzureVmPublicIpProvider azureVmPublicIpProvider;
 
+    @Inject
+    private AzureLoadBalancerMetadataCollector azureLbMetadataCollector;
+
     @Override
     @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
     public List<CloudVmMetaDataStatus> collect(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<CloudInstance> vms,
@@ -155,10 +158,12 @@ public class AzureMetadataCollector implements MetadataCollector {
                 }
 
                 if (ip.isPresent()) {
+                    Map<String, Object> parameters = azureLbMetadataCollector.getParameters(ac, resourceGroup, loadBalancerName);
                     CloudLoadBalancerMetadata loadBalancerMetadata = new CloudLoadBalancerMetadata.Builder()
                         .withType(type)
                         .withIp(ip.get())
                         .withName(loadBalancerName)
+                        .withParameters(parameters)
                         .build();
                     cloudLoadBalancerMetadata.add(loadBalancerMetadata);
                     LOGGER.debug("Saved metadata for load balancer: {}", loadBalancerMetadata);

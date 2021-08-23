@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
+import com.sequenceiq.cloudbreak.cloud.model.instance.AvailabilitySetNameService;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AzureInstanceGroupParameters;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -83,6 +84,9 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
 
     @Mock
     private LoadBalancerPersistenceService loadBalancerPersistenceService;
+
+    @Mock
+    private AvailabilitySetNameService availabilitySetNameService;
 
     // allows @InjectMocks to provide this component to the LoadBalancerConfigService
     @Spy
@@ -641,6 +645,7 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
         when(entitlementService.datalakeLoadBalancerEnabled(anyString())).thenReturn(true);
         when(blueprint.getBlueprintText()).thenReturn(getBlueprintText("input/clouderamanager-knox.bp"));
         when(subnetSelector.findSubnetById(any(), anyString())).thenReturn(Optional.of(subnet));
+        when(availabilitySetNameService.generateName(any(), any())).thenReturn("");
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
             Set<LoadBalancer> loadBalancers = underTest.createLoadBalancers(stack, environment, false);
@@ -664,6 +669,7 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
         when(entitlementService.datalakeLoadBalancerEnabled(anyString())).thenReturn(true);
         when(blueprint.getBlueprintText()).thenReturn(getBlueprintText("input/clouderamanager-knox.bp"));
         when(subnetSelector.findSubnetById(any(), anyString())).thenReturn(Optional.of(subnet));
+        when(availabilitySetNameService.generateName(any(), any())).thenReturn("");
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
             Set<LoadBalancer> loadBalancers = underTest.createLoadBalancers(stack, environment, false);
@@ -687,6 +693,7 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
         when(entitlementService.datalakeLoadBalancerEnabled(anyString())).thenReturn(true);
         when(blueprint.getBlueprintText()).thenReturn(getBlueprintText("input/de-ha.bp"));
         when(subnetSelector.findSubnetById(any(), anyString())).thenReturn(Optional.of(subnet));
+        when(availabilitySetNameService.generateName(any(), any())).thenReturn("");
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
             Set<LoadBalancer> loadBalancers = underTest.createLoadBalancers(stack, environment, false);
@@ -709,6 +716,7 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
 
         when(blueprint.getBlueprintText()).thenReturn(getBlueprintText("input/clouderamanager-knox.bp"));
         when(subnetSelector.findSubnetById(any(), anyString())).thenReturn(Optional.of(subnet));
+        when(availabilitySetNameService.generateName(any(), any())).thenReturn("");
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
             Set<LoadBalancer> loadBalancers = underTest.createLoadBalancers(stack, environment, false);

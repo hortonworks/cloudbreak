@@ -25,6 +25,9 @@ public class TargetGroupResponse implements Serializable {
     @ApiModelProperty(StackModelDescription.TARGET_GROUP_AWS)
     private AwsTargetGroupResponse awsResourceIds;
 
+    @ApiModelProperty(StackModelDescription.TARGET_GROUP_AZURE)
+    private AzureTargetGroupResponse azureResourceId;
+
     public long getPort() {
         return port;
     }
@@ -47,5 +50,13 @@ public class TargetGroupResponse implements Serializable {
 
     public void setAwsResourceIds(AwsTargetGroupResponse awsResourceIds) {
         this.awsResourceIds = awsResourceIds;
+    }
+
+    public AzureTargetGroupResponse getAzureResourceId() {
+        return azureResourceId;
+    }
+
+    public void setAzureResourceId(AzureTargetGroupResponse azureResourceId) {
+        this.azureResourceId = azureResourceId;
     }
 }

@@ -13,18 +13,22 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.loadbalancer.AwsLoadBalancerResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.loadbalancer.AwsTargetGroupResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.loadbalancer.AzureLoadBalancerResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.loadbalancer.AzureTargetGroupResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.loadbalancer.LoadBalancerResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.loadbalancer.TargetGroupResponse;
 import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.aws.AwsLoadBalancerConfigDb;
-import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.aws.AwsTargetGroupArnsDb;
-import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.aws.AwsTargetGroupConfigDb;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.TargetGroupConfigDbWrapper;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.TargetGroup;
+import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.aws.AwsLoadBalancerConfigDb;
+import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.aws.AwsTargetGroupArnsDb;
+import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.aws.AwsTargetGroupConfigDb;
+import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.azure.AzureLoadBalancerConfigDb;
+import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.azure.AzureTargetGroupConfigDb;
 import com.sequenceiq.cloudbreak.service.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
@@ -55,6 +59,7 @@ public class LoadBalancerToLoadBalancerResponseConverter extends AbstractConvers
         response.setTargets(convertTargetGroups(targetGroupService.findByLoadBalancerId(source.getId())));
         if (source.getProviderConfig() != null) {
             response.setAwsResourceId(convertAwsLoadBalancer(source.getProviderConfig().getAwsConfig()));
+            response.setAzureResourceId(convertAzureLoadBalancer(source.getProviderConfig().getAzureConfig()));
         }
 
         return response;
@@ -65,6 +70,15 @@ public class LoadBalancerToLoadBalancerResponseConverter extends AbstractConvers
             AwsLoadBalancerResponse awsSettings = new AwsLoadBalancerResponse();
             awsSettings.setArn(awsMetadata.getArn());
             return awsSettings;
+        }
+        return null;
+    }
+
+    private AzureLoadBalancerResponse convertAzureLoadBalancer(AzureLoadBalancerConfigDb azureMetadata) {
+        if (azureMetadata != null) {
+            AzureLoadBalancerResponse azureSettings = new AzureLoadBalancerResponse();
+            azureSettings.setName(azureMetadata.getName());
+            return azureSettings;
         }
         return null;
     }
@@ -96,6 +110,7 @@ public class LoadBalancerToLoadBalancerResponseConverter extends AbstractConvers
         response.setTargetInstances(instanceIds);
         if (targetGroupConfig != null) {
             response.setAwsResourceIds(convertAwsTargetGroup(targetGroupConfig.getAwsConfig(), portPair.getTrafficPort()));
+            response.setAzureResourceId(convertAzureTargetGroup(targetGroupConfig.getAzureConfig(), portPair.getTrafficPort()));
         }
         return response;
     }
@@ -112,6 +127,16 @@ public class LoadBalancerToLoadBalancerResponseConverter extends AbstractConvers
                 awsSettings.setTargetGroupArn(arns.get().getTargetGroupArn());
                 return awsSettings;
             }
+        }
+        return null;
+    }
+
+    private AzureTargetGroupResponse convertAzureTargetGroup(AzureTargetGroupConfigDb azureConfig, Integer port) {
+        if (azureConfig != null) {
+            List<String> availabilitySets = azureConfig.getPortAvailabilitySetMapping().get(port);
+            AzureTargetGroupResponse azureSettings = new AzureTargetGroupResponse();
+            azureSettings.setAvailabilitySet(availabilitySets);
+            return azureSettings;
         }
         return null;
     }

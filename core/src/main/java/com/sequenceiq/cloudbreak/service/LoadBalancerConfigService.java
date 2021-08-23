@@ -41,6 +41,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.cloudbreak.converter.v4.environment.network.SubnetSelector;
+import com.sequenceiq.cloudbreak.cloud.model.instance.AvailabilitySetNameService;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -86,6 +87,9 @@ public class LoadBalancerConfigService {
 
     @Inject
     private ProviderParameterCalculator providerParameterCalculator;
+
+    @Inject
+    private AvailabilitySetNameService availabilitySetNameService;
 
     public Set<String> getKnoxGatewayGroups(Stack stack) {
         LOGGER.debug("Fetching list of instance groups with Knox gateway installed");
@@ -222,7 +226,7 @@ public class LoadBalancerConfigService {
     private void attachAvailabilitySetParameters(String availabilitySetPrefix, InstanceGroup ig) {
         Map<String, Object> parameters = ig.getAttributes().getMap();
         parameters.put("availabilitySet", Map.ofEntries(
-                entry(AzureInstanceGroupParameters.NAME, String.format("%s-%s-as", availabilitySetPrefix, ig.getGroupName())),
+                entry(AzureInstanceGroupParameters.NAME, availabilitySetNameService.generateName(availabilitySetPrefix, ig.getGroupName())),
                 entry(AzureInstanceGroupParameters.FAULT_DOMAIN_COUNT, DEFAULT_FAULT_DOMAIN_COUNT),
                 entry(AzureInstanceGroupParameters.UPDATE_DOMAIN_COUNT, DEFAULT_UPDATE_DOMAIN_COUNT)));
         ig.setAttributes(new Json(parameters));
