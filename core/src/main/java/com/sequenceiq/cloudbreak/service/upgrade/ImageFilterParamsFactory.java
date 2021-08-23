@@ -32,10 +32,6 @@ public class ImageFilterParamsFactory {
     @Inject
     private ClouderaManagerProductsProvider clouderaManagerProductsProvider;
 
-    public ImageFilterParams create(Image image, boolean lockComponents, Stack stack) {
-        return create(image, lockComponents, stack, new InternalUpgradeSettings());
-    }
-
     public ImageFilterParams create(Image image, boolean lockComponents, Stack stack, InternalUpgradeSettings internalUpgradeSettings) {
         return new ImageFilterParams(image, lockComponents, getStackRelatedParcels(stack), stack.getType(),
                 getBlueprint(stack), stack.getId(), internalUpgradeSettings);

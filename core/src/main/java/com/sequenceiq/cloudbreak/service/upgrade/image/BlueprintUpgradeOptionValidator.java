@@ -1,8 +1,6 @@
 package com.sequenceiq.cloudbreak.service.upgrade.image;
 
-import static com.sequenceiq.cloudbreak.domain.BlueprintUpgradeOption.DISABLED;
 import static com.sequenceiq.cloudbreak.domain.BlueprintUpgradeOption.ENABLED;
-import static com.sequenceiq.cloudbreak.domain.BlueprintUpgradeOption.OS_UPGRADE_ENABLED;
 
 import java.util.Optional;
 
@@ -23,10 +21,10 @@ class BlueprintUpgradeOptionValidator {
     @Inject
     private CustomTemplateUpgradeValidator customTemplateUpgradeValidator;
 
-    BlueprintValidationResult isValidBlueprint(Blueprint blueprint, boolean lockComponents, boolean skipValidations) {
+    BlueprintValidationResult isValidBlueprint(Blueprint blueprint, boolean lockComponents, boolean skipValidations, boolean dataHubUpgradeEntitled) {
         LOGGER.debug("Validating blueprint upgrade option. Name: {}, type: {}, upgradeOption: {}, lockComponents: {}", blueprint.getName(),
                 blueprint.getStatus(), blueprint.getBlueprintUpgradeOption(), lockComponents);
-        return isDefaultBlueprint(blueprint) ? isEnabledForDefaultBlueprint(lockComponents, blueprint, skipValidations)
+        return isDefaultBlueprint(blueprint) ? isEnabledForDefaultBlueprint(lockComponents, blueprint, skipValidations, dataHubUpgradeEntitled)
                 : isEnabledForCustomBlueprint(blueprint, skipValidations);
     }
 
@@ -34,24 +32,29 @@ class BlueprintUpgradeOptionValidator {
         return blueprint.getStatus().isDefault();
     }
 
-    private BlueprintValidationResult isEnabledForDefaultBlueprint(boolean lockComponents, Blueprint blueprint, boolean skipValidations) {
+    private BlueprintValidationResult isEnabledForDefaultBlueprint(boolean lockComponents, Blueprint blueprint, boolean skipValidations,
+            boolean dataHubUpgradeEntitled) {
         BlueprintUpgradeOption upgradeOption = getBlueprintUpgradeOption(blueprint);
         BlueprintValidationResult result;
         if (skipValidations) {
             LOGGER.debug("Blueprint options are not validated if the request is internal");
-            result = createResult(true, upgradeOption);
+            result = createResult(true);
         } else {
-            result = createResult(lockComponents ? isOsUpgradeEnabled(upgradeOption) : isRuntimeUpgradeEnabled(upgradeOption), upgradeOption);
+            result = createResult(lockComponents ? upgradeOption.isOsUpgradeEnabled() : isRuntimeUpgradeEnabled(upgradeOption, dataHubUpgradeEntitled));
         }
         return result;
     }
 
-    private boolean isOsUpgradeEnabled(BlueprintUpgradeOption upgradeOption) {
-        return OS_UPGRADE_ENABLED.equals(upgradeOption) || ENABLED.equals(upgradeOption);
-    }
-
-    private boolean isRuntimeUpgradeEnabled(BlueprintUpgradeOption upgradeOption) {
-        return !DISABLED.equals(upgradeOption);
+    private boolean isRuntimeUpgradeEnabled(BlueprintUpgradeOption upgradeOption, boolean dataHubUpgradeEntitled) {
+        boolean runtimeUpgradeEnabled = upgradeOption.isRuntimeUpgradeEnabled(dataHubUpgradeEntitled);
+        if (dataHubUpgradeEntitled) {
+            LOGGER.info("Data Hub upgrade entitlement is enabled, check the upgrade option to see if the template"
+                    + " is eligible for upgrade or not, upgrade option: {}, eligible: {}", upgradeOption, runtimeUpgradeEnabled);
+        } else {
+            LOGGER.info("Data Hub upgrade entitlement is disabled, check the upgrade option to see if the template"
+                    + " is eligible for maintenance upgrade or not, upgrade option: {}, eligible: {}", upgradeOption, runtimeUpgradeEnabled);
+        }
+        return runtimeUpgradeEnabled;
     }
 
     private BlueprintUpgradeOption getBlueprintUpgradeOption(Blueprint blueprint) {
@@ -62,15 +65,15 @@ class BlueprintUpgradeOptionValidator {
         BlueprintValidationResult result;
         if (skipValidations) {
             LOGGER.debug("Custom blueprint options are not validated if the request is internal");
-            result = createResult(true, null);
+            result = createResult(true);
         } else {
             result = customTemplateUpgradeValidator.isValid(blueprint);
         }
         return result;
     }
 
-    private BlueprintValidationResult createResult(boolean result, BlueprintUpgradeOption upgradeOption) {
+    private BlueprintValidationResult createResult(boolean result) {
         return new BlueprintValidationResult(result,
-                result ? null : String.format("The cluster template is not eligible for upgrade because the upgrade option is: %s", upgradeOption));
+                result ? null : "The cluster template is not eligible for upgrade");
     }
 }

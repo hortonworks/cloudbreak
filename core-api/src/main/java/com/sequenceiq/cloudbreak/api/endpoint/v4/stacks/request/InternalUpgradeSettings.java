@@ -8,21 +8,21 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class InternalUpgradeSettings {
 
-    private boolean skipValidations;
+    private final boolean skipValidations;
 
-    public InternalUpgradeSettings() {
-    }
+    private final boolean dataHubUpgradeEntitled;
 
-    public InternalUpgradeSettings(boolean skipValidations) {
+    public InternalUpgradeSettings(boolean skipValidations, boolean dataHubUpgradeEntitled) {
         this.skipValidations = skipValidations;
+        this.dataHubUpgradeEntitled = dataHubUpgradeEntitled;
     }
 
     public boolean isSkipValidations() {
         return skipValidations;
     }
 
-    public void setSkipValidations(boolean skipValidations) {
-        this.skipValidations = skipValidations;
+    public boolean isDataHubUpgradeEntitled() {
+        return dataHubUpgradeEntitled;
     }
 
     @Override
@@ -34,18 +34,19 @@ public class InternalUpgradeSettings {
             return false;
         }
         InternalUpgradeSettings that = (InternalUpgradeSettings) o;
-        return skipValidations == that.skipValidations;
+        return skipValidations == that.skipValidations && dataHubUpgradeEntitled == that.dataHubUpgradeEntitled;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(skipValidations);
+        return Objects.hash(skipValidations, dataHubUpgradeEntitled);
     }
 
     @Override
     public String toString() {
         return new StringJoiner(", ", InternalUpgradeSettings.class.getSimpleName() + "[", "]")
                 .add("skipValidations=" + skipValidations)
+                .add("datahubUpgradeEntitled=" + dataHubUpgradeEntitled)
                 .toString();
     }
 }

@@ -57,7 +57,7 @@ public class ImageFilterParamsFactoryTest {
         when(parcelService.getParcelComponentsByBlueprint(stack)).thenReturn(clusterComponents);
         when(clouderaManagerProductsProvider.findCdhProduct(clusterComponents)).thenReturn(Optional.of(createCMProduct(cdhName, cdhVersion)));
 
-        ImageFilterParams actual = underTest.create(image, true, stack);
+        ImageFilterParams actual = underTest.create(image, true, stack, new InternalUpgradeSettings(false, true));
 
         assertEquals(image, actual.getCurrentImage());
         assertTrue(actual.isLockComponents());
@@ -84,7 +84,7 @@ public class ImageFilterParamsFactoryTest {
         when(parcelService.getParcelComponentsByBlueprint(stack)).thenReturn(cdhClusterComponent);
         when(clouderaManagerProductsProvider.getProducts(cdhClusterComponent)).thenReturn(Set.of(spark, nifi));
 
-        ImageFilterParams actual = underTest.create(image, true, stack, new InternalUpgradeSettings(true));
+        ImageFilterParams actual = underTest.create(image, true, stack, new InternalUpgradeSettings(true, true));
 
         assertEquals(image, actual.getCurrentImage());
         assertTrue(actual.isLockComponents());
@@ -107,7 +107,7 @@ public class ImageFilterParamsFactoryTest {
 
         when(parcelService.getParcelComponentsByBlueprint(stack)).thenReturn(Collections.singleton(clusterComponent));
 
-        underTest.create(image, true, stack);
+        underTest.create(image, true, stack, new InternalUpgradeSettings(false, true));
 
         verify(parcelService).getParcelComponentsByBlueprint(stack);
     }

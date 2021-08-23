@@ -24,7 +24,6 @@ import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXUpgradeV1Endpoint;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Response;
 import com.sequenceiq.distrox.v1.distrox.converter.UpgradeConverter;
-import com.sequenceiq.distrox.v1.distrox.service.upgrade.ComponentLocker;
 import com.sequenceiq.distrox.v1.distrox.service.upgrade.DistroXUpgradeAvailabilityService;
 import com.sequenceiq.distrox.v1.distrox.service.upgrade.DistroXUpgradeService;
 
@@ -45,9 +44,6 @@ public class DistroXUpgradeV1Controller implements DistroXUpgradeV1Endpoint {
     @Inject
     private DistroXUpgradeService upgradeService;
 
-    @Inject
-    private ComponentLocker componentLocker;
-
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.UPGRADE_DATAHUB)
     public DistroXUpgradeV1Response upgradeClusterByName(@ResourceName String clusterName, @Valid DistroXUpgradeV1Request distroxUpgradeRequest) {
@@ -67,7 +63,8 @@ public class DistroXUpgradeV1Controller implements DistroXUpgradeV1Endpoint {
     public DistroXUpgradeV1Response upgradeClusterByNameInternal(@ResourceName String clusterName, @Valid DistroXUpgradeV1Request distroxUpgradeRequest,
             @InitiatorUserCrn String initiatorUserCrn) {
         NameOrCrn nameOrCrn = NameOrCrn.ofName(clusterName);
-        return upgradeCluster(clusterName, distroxUpgradeRequest, nameOrCrn, new InternalUpgradeSettings(true));
+        boolean dataHubRuntimeUpgradeEnabled = upgradeAvailabilityService.isRuntimeUpgradeEnabledByUserCrn(initiatorUserCrn);
+        return upgradeCluster(clusterName, distroxUpgradeRequest, nameOrCrn, new InternalUpgradeSettings(true, dataHubRuntimeUpgradeEnabled));
     }
 
     @Override
@@ -75,18 +72,20 @@ public class DistroXUpgradeV1Controller implements DistroXUpgradeV1Endpoint {
     public DistroXUpgradeV1Response upgradeClusterByCrnInternal(@ResourceCrn String clusterCrn, @Valid DistroXUpgradeV1Request distroxUpgradeRequest,
             @InitiatorUserCrn String initiatorUserCrn) {
         NameOrCrn nameOrCrn = NameOrCrn.ofCrn(clusterCrn);
-        return upgradeCluster(clusterCrn, distroxUpgradeRequest, nameOrCrn, new InternalUpgradeSettings(true));
+        boolean dataHubRuntimeUpgradeEnabled = upgradeAvailabilityService.isRuntimeUpgradeEnabledByUserCrn(initiatorUserCrn);
+        return upgradeCluster(clusterCrn, distroxUpgradeRequest, nameOrCrn, new InternalUpgradeSettings(true, dataHubRuntimeUpgradeEnabled));
     }
 
     private DistroXUpgradeV1Response upgradeCluster(String clusterNameOrCrn, DistroXUpgradeV1Request distroxUpgradeRequest, NameOrCrn nameOrCrn) {
-        return upgradeCluster(clusterNameOrCrn, distroxUpgradeRequest, nameOrCrn, new InternalUpgradeSettings());
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        boolean dataHubRuntimeUpgradeEnabled = upgradeAvailabilityService.isRuntimeUpgradeEnabledByAccountId(accountId);
+        return upgradeCluster(clusterNameOrCrn, distroxUpgradeRequest, nameOrCrn, new InternalUpgradeSettings(false, dataHubRuntimeUpgradeEnabled));
     }
 
     private DistroXUpgradeV1Response upgradeCluster(String clusterNameOrCrn, DistroXUpgradeV1Request distroxUpgradeRequest, NameOrCrn nameOrCrn,
             InternalUpgradeSettings internalUpgradeSettings) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        DistroXUpgradeV1Request modifiedRequest = componentLocker.lockComponentsIfRuntimeUpgradeIsDisabled(distroxUpgradeRequest, userCrn, clusterNameOrCrn);
-        UpgradeV4Request request = upgradeConverter.convert(modifiedRequest, internalUpgradeSettings);
+        UpgradeV4Request request = upgradeConverter.convert(distroxUpgradeRequest, internalUpgradeSettings);
         Long workspaceId = restRequestThreadLocalService.getRequestedWorkspaceId();
         if (request.isDryRun() || request.isShowAvailableImagesSet()) {
             LOGGER.info("Checking for upgrade for cluster [{}] with request: {}", clusterNameOrCrn, request);
