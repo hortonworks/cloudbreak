@@ -233,8 +233,11 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         String projectId = context.getProjectId();
         String zone = context.getLocation().getAvailabilityZone().value();
 
-        List<CloudResource> instanceGroupResources = filterResourcesByType(context.getGroupResources(group.getName()), ResourceType.GCP_INSTANCE_GROUP);
-        if (!instanceGroupResources.isEmpty()  && doesGcpInstanceGroupExist(compute, projectId, zone, instanceGroupResources.get(0))) {
+        //upscale will give us all groups here
+        List<CloudResource> instanceGroupResources = filterGroupFromName(filterResourcesByType(context.getGroupResources(group.getName()),
+                ResourceType.GCP_INSTANCE_GROUP), group.getName());
+
+        if (!instanceGroupResources.isEmpty() && doesGcpInstanceGroupExist(compute, projectId, zone, instanceGroupResources.get(0))) {
             LOGGER.info("adding instance {} to group {} in project {}", instance.getName(), group.getName(), projectId);
             InstanceGroupsAddInstancesRequest request = createAddInstancesRequest(instance, projectId, zone);
             AddInstances addInstances = compute.instanceGroups().addInstances(projectId,
@@ -468,7 +471,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
     }
 
     private void prepareNetworkAndSubnet(String projectId, Region region, Network network, NetworkInterface networkInterface,
-        CloudInstance instance) {
+            CloudInstance instance) {
         String subnetId = Strings.isNullOrEmpty(instance.getSubnetId()) ? gcpStackUtil.getSubnetId(network) : instance.getSubnetId();
         if (StringUtils.isNotEmpty(gcpStackUtil.getSharedProjectId(network))) {
             networkInterface.setNetwork(gcpStackUtil.getNetworkUrl(gcpStackUtil.getSharedProjectId(network), gcpStackUtil.getCustomNetworkId(network)));
@@ -481,6 +484,12 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
     private List<CloudResource> filterResourcesByType(List<CloudResource> resources, ResourceType resourceType) {
         return Optional.ofNullable(resources).orElseGet(List::of).stream()
                 .filter(resource -> resourceType.equals(resource.getType()))
+                .collect(Collectors.toList());
+    }
+
+    private List<CloudResource> filterGroupFromName(List<CloudResource> resources, String filterString) {
+        return Optional.ofNullable(resources).orElseGet(List::of).stream()
+                .filter(resource -> resource.getName().endsWith(filterString))
                 .collect(Collectors.toList());
     }
 
