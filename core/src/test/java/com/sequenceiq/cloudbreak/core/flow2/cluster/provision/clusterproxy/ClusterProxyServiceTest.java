@@ -137,13 +137,8 @@ class ClusterProxyServiceTest {
                 "testAgentCrn", "10.10.10.10", ServiceFamilies.GATEWAY.getDefaultPort(), "testAgentCrn-i-abc123", "cloudera-manager")));
         assertTrue(proxyRegisterationReq.getCcmV2Configs().contains(new CcmV2Config(
                 "testAgentCrn", "10.10.10.11", ServiceFamilies.GATEWAY.getDefaultPort(), "testAgentCrn-i-def456", "cloudera-manager")));
-        assertTrue(proxyRegisterationReq.getCcmV2Configs().contains(new CcmV2Config(
-                "testAgentCrn", "10.10.10.10", ServiceFamilies.KNOX.getDefaultPort(), "testAgentCrn-i-abc123", "cloudera-manager")));
-        assertTrue(proxyRegisterationReq.getCcmV2Configs().contains(new CcmV2Config(
-                "testAgentCrn", "10.10.10.11", ServiceFamilies.KNOX.getDefaultPort(), "testAgentCrn-i-def456", "cloudera-manager")));
         assertTrue(proxyRegisterationReq.getServices().contains(cmServiceConfigWithInstanceId(PRIMARY_PUBLIC_IP, PRIMARY_INSTANCE_ID)));
         assertTrue(proxyRegisterationReq.getServices().contains(cmServiceConfigWithInstanceId(OTHER_PUBLIC_IP, OTHER_INSTANCE_ID)));
-        assertTrue(proxyRegisterationReq.getServices().contains(cmServiceConfig()));
         assertTrue(proxyRegisterationReq.getServices().contains(cmInternalServiceConfig()));
 
         assertEquals(false, proxyRegisterationReq.isUseTunnel(), "CCMV1 tunnel should be disabled.");
@@ -166,7 +161,6 @@ class ClusterProxyServiceTest {
         assertNull(proxyRegisterationReq.getCcmV2Configs(), "CCMV2 config should be empty for Jumpgate");
         assertTrue(proxyRegisterationReq.getServices().contains(cmServiceConfigWithInstanceId(PRIMARY_PUBLIC_IP, PRIMARY_INSTANCE_ID)));
         assertTrue(proxyRegisterationReq.getServices().contains(cmServiceConfigWithInstanceId(OTHER_PUBLIC_IP, OTHER_INSTANCE_ID)));
-        assertTrue(proxyRegisterationReq.getServices().contains(cmServiceConfig()));
         assertTrue(proxyRegisterationReq.getServices().contains(cmInternalServiceConfig()));
 
         assertEquals(false, proxyRegisterationReq.isUseTunnel(), "CCMV1 tunnel should be disabled.");
@@ -217,13 +211,8 @@ class ClusterProxyServiceTest {
                 "testAgentCrn", "10.10.10.10", ServiceFamilies.GATEWAY.getDefaultPort(), "testAgentCrn-i-abc123", "cloudera-manager")));
         assertTrue(proxyRegisterationReq.getCcmV2Configs().contains(new CcmV2Config(
                 "testAgentCrn", "10.10.10.11", ServiceFamilies.GATEWAY.getDefaultPort(), "testAgentCrn-i-def456", "cloudera-manager")));
-        assertTrue(proxyRegisterationReq.getCcmV2Configs().contains(new CcmV2Config(
-                "testAgentCrn", "10.10.10.10", ServiceFamilies.KNOX.getDefaultPort(), "testAgentCrn-i-abc123", "cloudera-manager")));
-        assertTrue(proxyRegisterationReq.getCcmV2Configs().contains(new CcmV2Config(
-                "testAgentCrn", "10.10.10.11", ServiceFamilies.KNOX.getDefaultPort(), "testAgentCrn-i-def456", "cloudera-manager")));
         assertTrue(proxyRegisterationReq.getServices().contains(cmServiceConfigWithInstanceId(PRIMARY_PUBLIC_IP, PRIMARY_INSTANCE_ID)));
         assertTrue(proxyRegisterationReq.getServices().contains(cmServiceConfigWithInstanceId(OTHER_PUBLIC_IP, OTHER_INSTANCE_ID)));
-        assertTrue(proxyRegisterationReq.getServices().contains(cmServiceConfig()));
         assertTrue(proxyRegisterationReq.getServices().contains(cmInternalServiceConfig()));
 
         assertEquals(false, proxyRegisterationReq.isUseTunnel(), "CCMV1 tunnel should be disabled.");
@@ -249,13 +238,11 @@ class ClusterProxyServiceTest {
         assertNull(proxyRegisterationReq.getCcmV2Configs(), "CCMV2 config should be empty for Jumpgate");
         assertTrue(proxyRegisterationReq.getServices().contains(cmServiceConfigWithInstanceId(PRIMARY_PUBLIC_IP, PRIMARY_INSTANCE_ID)));
         assertTrue(proxyRegisterationReq.getServices().contains(cmServiceConfigWithInstanceId(OTHER_PUBLIC_IP, OTHER_INSTANCE_ID)));
-        assertTrue(proxyRegisterationReq.getServices().contains(cmServiceConfig()));
         assertTrue(proxyRegisterationReq.getServices().contains(cmInternalServiceConfig()));
 
         assertEquals("https://10.10.10.10:9443/knox/test-cluster", proxyRegisterationReq.getUriOfKnox(), "CCMV2 Knox URI should match");
         assertTrue(proxyRegisterationReq.getServices().contains(cmServiceConfigWithInstanceId(PRIMARY_PUBLIC_IP, PRIMARY_INSTANCE_ID)));
         assertTrue(proxyRegisterationReq.getServices().contains(cmServiceConfigWithInstanceId(OTHER_PUBLIC_IP, OTHER_INSTANCE_ID)));
-        assertTrue(proxyRegisterationReq.getServices().contains(cmServiceConfig()));
         assertTrue(proxyRegisterationReq.getServices().contains(cmInternalServiceConfig()));
 
         assertEquals(false, proxyRegisterationReq.isUseTunnel(), "CCMV1 tunnel should be disabled.");
@@ -344,7 +331,6 @@ class ClusterProxyServiceTest {
         assertEquals(4, requestSent.getServices().size());
         assertTrue(requestSent.getServices().contains(cmServiceConfigWithInstanceId(PRIMARY_PUBLIC_IP, PRIMARY_INSTANCE_ID)));
         assertTrue(requestSent.getServices().contains(cmServiceConfigWithInstanceId(OTHER_PUBLIC_IP, OTHER_INSTANCE_ID)));
-        assertTrue(requestSent.getServices().contains(cmServiceConfig()));
         assertTrue(requestSent.getServices().contains(cmInternalServiceConfig()));
     }
 
