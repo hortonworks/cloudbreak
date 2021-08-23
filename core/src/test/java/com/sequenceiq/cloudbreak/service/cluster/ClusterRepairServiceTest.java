@@ -574,7 +574,6 @@ public class ClusterRepairServiceTest {
         when(freeipaService.freeipaStatusInDesiredState(stack, Set.of(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE)))
                 .thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
-        InstanceMetaData primaryGW = createInstanceMetaData("instanceId", InstanceStatus.SERVICES_HEALTHY);
 
         String idbrokerGroupName = "idbroker";
         HostGroup idbrokerHg = new HostGroup();
@@ -599,7 +598,6 @@ public class ClusterRepairServiceTest {
         when(freeipaService.freeipaStatusInDesiredState(stack, Set.of(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE)))
                 .thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
-        InstanceMetaData primaryGW = createInstanceMetaData("instanceId", InstanceStatus.SERVICES_HEALTHY);
 
         String idbrokerGroupName = "idbroker";
         HostGroup idbrokerHg = new HostGroup();
