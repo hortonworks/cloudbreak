@@ -288,6 +288,7 @@ public class ClusterProxyService {
     private List<CcmV2Config> createCcmV2Configs(Stack stack, List<GatewayConfig> gatewayConfigs) {
         return gatewayConfigs.stream()
                 .map(gatewayConfig -> new CcmV2Config(
+                        stack.getCcmV2AgentCrn(),
                         gatewayConfig.getPrivateAddress(),
                         getNginxPort(stack),
                         String.format(CCMV2_BACKEND_ID_FORMAT, stack.getCcmV2AgentCrn(), gatewayConfig.getInstanceId()),

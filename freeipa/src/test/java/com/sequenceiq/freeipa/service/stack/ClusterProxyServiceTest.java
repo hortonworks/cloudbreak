@@ -118,7 +118,7 @@ public class ClusterProxyServiceTest {
 
         assertEquals(false, proxyRegisterationReq.isUseTunnel(), "CCMV1 tunnel should not be enabled");
         assertEquals(true, proxyRegisterationReq.isUseCcmV2(), ccmv2Mode.toString() + " should be enabled.");
-        assertEquals(List.of(new CcmV2Config("privateIpAddress", ServiceFamilies.GATEWAY.getDefaultPort(),
+        assertEquals(List.of(new CcmV2Config("testAgentCrn", "privateIpAddress", ServiceFamilies.GATEWAY.getDefaultPort(),
                         "testAgentCrn-testInstanceId", FREEIPA_SERVICE)),
                 proxyRegisterationReq.getCcmV2Configs(), ccmv2Mode.toString() + " config should match");
     }
@@ -166,9 +166,9 @@ public class ClusterProxyServiceTest {
         assertEquals(false, proxyRegisterationReq.isUseTunnel(), "CCMV1 tunnel should not be enabled");
         assertEquals(true, proxyRegisterationReq.isUseCcmV2(), ccmv2Mode.toString() + " should be enabled.");
         assertEquals(List.of(
-                new CcmV2Config("privateIpAddress1", ServiceFamilies.GATEWAY.getDefaultPort(), "testAgentCrn-testInstanceId1", FREEIPA_SERVICE
+                new CcmV2Config("testAgentCrn", "privateIpAddress1", ServiceFamilies.GATEWAY.getDefaultPort(), "testAgentCrn-testInstanceId1", FREEIPA_SERVICE
                 ),
-                new CcmV2Config("privateIpAddress2", ServiceFamilies.GATEWAY.getDefaultPort(), "testAgentCrn-testInstanceId2", FREEIPA_SERVICE
+                new CcmV2Config("testAgentCrn", "privateIpAddress2", ServiceFamilies.GATEWAY.getDefaultPort(), "testAgentCrn-testInstanceId2", FREEIPA_SERVICE
                 )), proxyRegisterationReq.getCcmV2Configs(), ccmv2Mode.toString() + " config should match");
     }
 
