@@ -79,11 +79,6 @@ class EntitlementServiceTest {
                 {"CDP_RUNTIME_UPGRADE", (EntitlementCheckFunction) EntitlementService::runtimeUpgradeEnabled, false},
                 {"CDP_RUNTIME_UPGRADE", (EntitlementCheckFunction) EntitlementService::runtimeUpgradeEnabled, true},
 
-                {"CDP_RUNTIME_UPGRADE_DATAHUB_CUSTOM_TEMPLATE",
-                        (EntitlementCheckFunction) EntitlementService::datahubRuntimeUpgradeEnabledForCustomTemplate, true},
-                {"CDP_RUNTIME_UPGRADE_DATAHUB_CUSTOM_TEMPLATE",
-                        (EntitlementCheckFunction) EntitlementService::datahubRuntimeUpgradeEnabledForCustomTemplate, true},
-
                 {"LOCAL_DEV", (EntitlementCheckFunction) EntitlementService::localDevelopment, false},
                 {"LOCAL_DEV", (EntitlementCheckFunction) EntitlementService::localDevelopment, true},
 
