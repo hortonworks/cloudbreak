@@ -80,6 +80,9 @@ public class GcpBackendServiceResourceBuilderTest {
     @Mock
     private Operation operation;
 
+    @Mock
+    private GcpLoadBalancerTypeConverter gcpLoadBalancerTypeConverter;
+
     private Image image;
 
     private CloudStack cloudStack;
@@ -161,6 +164,7 @@ public class GcpBackendServiceResourceBuilderTest {
         when(insert.execute()).thenReturn(operation);
         when(operation.getName()).thenReturn("name");
         when(operation.getHttpErrorStatusCode()).thenReturn(null);
+        when(gcpLoadBalancerTypeConverter.getScheme(any(CloudLoadBalancer.class))).thenCallRealMethod();
 
         List<CloudResource> cloudResources = underTest.build(gcpContext, authenticatedContext,
                 Collections.singletonList(resource), cloudLoadBalancer, cloudStack);

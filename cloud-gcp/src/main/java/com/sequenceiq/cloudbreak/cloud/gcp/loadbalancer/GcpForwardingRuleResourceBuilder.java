@@ -56,6 +56,9 @@ public class GcpForwardingRuleResourceBuilder extends AbstractGcpLoadBalancerBui
     @Inject
     private GcpStackUtil gcpStackUtil;
 
+    @Inject
+    private GcpLoadBalancerTypeConverter gcpLoadBalancerTypeConverter;
+
     @Override
     public List<CloudResource> create(GcpContext context, AuthenticatedContext auth, CloudLoadBalancer loadBalancer) {
         List<CloudResource> resources = new ArrayList<>();
@@ -79,7 +82,7 @@ public class GcpForwardingRuleResourceBuilder extends AbstractGcpLoadBalancerBui
         String regionName = context.getLocation().getRegion().getRegionName();
         Network network = cloudStack.getNetwork();
         List<CloudResource> results = new ArrayList<>();
-        GcpLoadBalancerScheme scheme = GcpLoadBalancerScheme.getScheme(loadBalancer);
+        GcpLoadBalancerScheme scheme = gcpLoadBalancerTypeConverter.getScheme(loadBalancer);
 
         List<CloudResource> backendResources = filterResourcesByType(context.getLoadBalancerResources(loadBalancer.getType()), ResourceType.GCP_BACKEND_SERVICE);
         List<CloudResource> ipResources = filterResourcesByType(context.getLoadBalancerResources(loadBalancer.getType()), ResourceType.GCP_RESERVED_IP);

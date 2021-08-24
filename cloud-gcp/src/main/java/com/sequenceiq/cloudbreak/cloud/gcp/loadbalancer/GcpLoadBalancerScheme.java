@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.loadbalancer;
 
-import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 
 public enum GcpLoadBalancerScheme {
@@ -23,13 +22,4 @@ public enum GcpLoadBalancerScheme {
         return cbType;
     }
 
-    public static GcpLoadBalancerScheme getScheme(CloudLoadBalancer cloudLoadBalancer) {
-        switch (cloudLoadBalancer.getType()) {
-            case PUBLIC:
-                return EXTERNAL;
-            case PRIVATE:
-            default:
-                return INTERNAL;
-        }
-    }
 }

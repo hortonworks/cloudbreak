@@ -8,6 +8,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -44,6 +46,9 @@ public class GcpBackendServiceResourceBuilder extends AbstractGcpLoadBalancerBui
     private static final int ORDER = 2;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpBackendServiceResourceBuilder.class);
+
+    @Inject
+    private GcpLoadBalancerTypeConverter gcpLoadBalancerTypeConverter;
 
     @Override
     public List<CloudResource> create(GcpContext context, AuthenticatedContext auth, CloudLoadBalancer loadBalancer) {
@@ -98,7 +103,7 @@ public class GcpBackendServiceResourceBuilder extends AbstractGcpLoadBalancerBui
 
             backendService.setBackends(backends);
             backendService.setName(buildableResource.getName());
-            backendService.setLoadBalancingScheme(GcpLoadBalancerScheme.getScheme(loadBalancer).getGcpType());
+            backendService.setLoadBalancingScheme(gcpLoadBalancerTypeConverter.getScheme(loadBalancer).getGcpType());
             backendService.setProtocol("TCP");
             String regionName = context.getLocation().getRegion().getRegionName();
             Insert insert = context.getCompute().regionBackendServices().insert(projectId, regionName, backendService);

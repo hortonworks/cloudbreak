@@ -2,11 +2,12 @@ package com.sequenceiq.cloudbreak.cloud.gcp;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -14,11 +15,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.model.AccessConfig;
+import com.google.api.services.compute.model.ForwardingRule;
+import com.google.api.services.compute.model.ForwardingRuleList;
 import com.google.api.services.compute.model.NetworkInterface;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpComputeFactory;
+import com.sequenceiq.cloudbreak.cloud.gcp.loadbalancer.GcpLoadBalancerTypeConverter;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstanceMetaData;
 import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancerMetadata;
@@ -40,6 +47,12 @@ public class GcpMetadataCollector implements MetadataCollector {
 
     @Inject
     private GcpStackUtil gcpStackUtil;
+
+    @Inject
+    private GcpComputeFactory gcpComputeFactory;
+
+    @Inject
+    private GcpLoadBalancerTypeConverter gcpLoadBalancerTypeConverter;
 
     @Override
     public List<CloudVmMetaDataStatus> collect(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<CloudInstance> vms,
@@ -129,8 +142,37 @@ public class GcpMetadataCollector implements MetadataCollector {
     @Override
     public List<CloudLoadBalancerMetadata> collectLoadBalancer(AuthenticatedContext ac, List<LoadBalancerType> loadBalancerTypes,
             List<CloudResource> resources) {
+        CloudCredential credential = ac.getCloudCredential();
+        Compute compute = gcpComputeFactory.buildCompute(credential);
+        String projectId = gcpStackUtil.getProjectId(credential);
+        String region = ac.getCloudContext().getLocation().getRegion().getRegionName();
+        List<CloudLoadBalancerMetadata> results = new ArrayList<>();
+        Set<String> names = resources.stream()
+                .filter(resource -> resource.getType().equals(ResourceType.GCP_FORWARDING_RULE))
+                .map(CloudResource::getName)
+                .collect(Collectors.toSet());
+        try {
+            ForwardingRuleList forwardingRuleList = compute.forwardingRules().list(projectId, region).execute();
+            if (forwardingRuleList.getWarning() != null) {
+                LOGGER.warn("Warning fetching GCP loadbalancer metadata, {}", forwardingRuleList.getWarning().getMessage());
+            }
+            for (ForwardingRule item : forwardingRuleList.getItems()) {
+                LoadBalancerType itemType = gcpLoadBalancerTypeConverter.getScheme(item.getLoadBalancingScheme()).getCbType();
+                if (names.contains(item.getName()) && loadBalancerTypes.contains(itemType)) {
+                    CloudLoadBalancerMetadata loadBalancerMetadata = new CloudLoadBalancerMetadata.Builder()
+                            .withType(itemType)
+                            .withIp(item.getIPAddress())
+                            .withName(item.getName())
+                            .build();
+                    results.add(loadBalancerMetadata);
+                }
+            }
+        } catch (RuntimeException | IOException e) {
+            LOGGER.error("Couldn't collect GCP LB metadata for {} ", projectId, e);
+        }
+
         // no-op
-        return Collections.emptyList();
+        return results;
     }
 
     @Override

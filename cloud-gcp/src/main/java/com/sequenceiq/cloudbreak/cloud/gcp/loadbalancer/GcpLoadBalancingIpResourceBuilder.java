@@ -33,6 +33,9 @@ public class GcpLoadBalancingIpResourceBuilder extends AbstractGcpLoadBalancerBu
     @Inject
     private GcpReservedIpResourceBuilder reservedIpResourceBuilder;
 
+    @Inject
+    private GcpLoadBalancerTypeConverter gcpLoadBalancerTypeConverter;
+
     @Override
     public List<CloudResource> create(GcpContext context, AuthenticatedContext auth, CloudLoadBalancer loadBalancer) {
         String groupName = loadBalancer.getPortToTargetGroupMapping().values().stream()
@@ -50,7 +53,7 @@ public class GcpLoadBalancingIpResourceBuilder extends AbstractGcpLoadBalancerBu
     public List<CloudResource> build(GcpContext context, AuthenticatedContext auth, List<CloudResource> buildableResources,
             CloudLoadBalancer loadBalancer, CloudStack cloudStack) throws Exception {
         return reservedIpResourceBuilder.buildReservedIp(context, buildableResources, cloudStack,
-                GcpLoadBalancerScheme.getScheme(loadBalancer));
+                gcpLoadBalancerTypeConverter.getScheme(loadBalancer));
     }
 
     @Override
