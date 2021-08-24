@@ -53,4 +53,12 @@ public interface CloudbreakTestDto extends Orderable, Assignable {
         throw new IllegalStateException(String.format("Error happened, getCrn() is not implemented for TestDto: %s", this));
     }
 
+    default <E extends Enum<E>> String getAwaitExceptionKey(E desiredStatus) {
+        return getAwaitExceptionKey(Map.of("status", desiredStatus));
+    }
+
+    default <E extends Enum<E>> String getAwaitExceptionKey(Map<String, E> desiredStatuses) {
+        return String.format("await %s for desired statuses %s", this, desiredStatuses);
+    }
+
 }

@@ -97,7 +97,7 @@ public class CloudbreakWaitObject implements WaitObject {
 
     @Override
     public boolean isFailedCheck() {
-        return desiredStatuses.equals(STACK_FAILED);
+        return desiredStatuses.equals(STACK_FAILED) || desiredStatuses.get(STATUS).equals(Status.CREATE_FAILED);
     }
 
     public String getAccountId() {

@@ -49,6 +49,7 @@ import com.sequenceiq.it.cloudbreak.mock.ImageCatalogMockServerSetup;
 import com.sequenceiq.it.cloudbreak.util.azure.azurecloudblob.AzureCloudBlobUtil;
 import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
+import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
 public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
 
@@ -168,6 +169,21 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
     protected void createDatalake(TestContext testContext) {
         testContext
                 .given(SdxInternalTestDto.class)
+                    .withCloudStorage(getCloudStorageRequest(testContext))
+                .when(sdxTestClient.createInternal())
+                .await(SdxClusterStatusResponse.RUNNING)
+                .awaitForHealthyInstances()
+                .when(sdxTestClient.describeInternal())
+                .validate();
+    }
+
+    protected void createDatalakeWithoutDatabase(TestContext testContext) {
+        SdxDatabaseRequest database = new SdxDatabaseRequest();
+        database.setCreate(false);
+
+        testContext
+                .given(SdxInternalTestDto.class)
+                    .withDatabase(database)
                     .withCloudStorage(getCloudStorageRequest(testContext))
                 .when(sdxTestClient.createInternal())
                 .await(SdxClusterStatusResponse.RUNNING)
