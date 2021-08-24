@@ -4,9 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -21,7 +19,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -43,9 +40,6 @@ public class CustomTemplateUpgradeValidatorTest {
     @Mock
     private CmTemplateProcessor cmTemplateProcessor;
 
-    @Mock
-    private EntitlementService entitlementService;
-
     private Blueprint blueprint;
 
     @Before
@@ -55,21 +49,8 @@ public class CustomTemplateUpgradeValidatorTest {
     }
 
     @Test
-    public void testIsValidShouldReturnTrueWhenTheEntitlementIsTurnedOn() {
-        when(entitlementService.datahubRuntimeUpgradeEnabledForCustomTemplate(anyString())).thenReturn(true);
-
-        BlueprintValidationResult actual = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.isValid(blueprint));
-
-        assertTrue(actual.isValid());
-        assertNull(actual.getReason());
-        verify(entitlementService).datahubRuntimeUpgradeEnabledForCustomTemplate(anyString());
-        verifyNoInteractions(cmTemplateProcessorFactory);
-    }
-
-    @Test
     public void testIsValidShouldReturnFalseWhenTheUpgradePermittedServicesListIsEmpty() {
         ReflectionTestUtils.setField(underTest, "permittedServicesForUpgrade", Collections.emptySet());
-        when(entitlementService.datahubRuntimeUpgradeEnabledForCustomTemplate(anyString())).thenReturn(false);
         when(cmTemplateProcessor.getAllComponents()).thenReturn(createServiceComponentsWithUpgradePermittedServices());
         when(cmTemplateProcessorFactory.get(BLUEPRINT_TEXT)).thenReturn(cmTemplateProcessor);
 
@@ -83,7 +64,6 @@ public class CustomTemplateUpgradeValidatorTest {
 
     @Test
     public void testIsValidShouldReturnTrueWhenAllUpgradePermittedServicesArePresentInTheServiceList() {
-        when(entitlementService.datahubRuntimeUpgradeEnabledForCustomTemplate(anyString())).thenReturn(false);
         when(cmTemplateProcessor.getAllComponents()).thenReturn(createServiceComponentsWithUpgradePermittedServices());
         when(cmTemplateProcessorFactory.get(BLUEPRINT_TEXT)).thenReturn(cmTemplateProcessor);
 
@@ -96,7 +76,6 @@ public class CustomTemplateUpgradeValidatorTest {
 
     @Test
     public void testIsValidShouldReturnFalseWhenUpgradePermittedServicesAreNotPresentInTheServiceList() {
-        when(entitlementService.datahubRuntimeUpgradeEnabledForCustomTemplate(anyString())).thenReturn(false);
         when(cmTemplateProcessor.getAllComponents()).thenReturn(createServiceComponentsWithUpgradePermittedServicesAndOneExtra());
         when(cmTemplateProcessorFactory.get(BLUEPRINT_TEXT)).thenReturn(cmTemplateProcessor);
 
