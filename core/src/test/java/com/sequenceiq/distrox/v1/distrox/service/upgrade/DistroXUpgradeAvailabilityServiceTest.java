@@ -1,12 +1,16 @@
 package com.sequenceiq.distrox.v1.distrox.service.upgrade;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -23,6 +27,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageComponentVersions;
@@ -32,8 +37,10 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.view.ClusterView;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.RuntimeVersionService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.StackViewService;
@@ -53,6 +60,8 @@ public class DistroXUpgradeAvailabilityServiceTest {
 
     private static final Stack STACK = new Stack();
 
+    private static final String DATALAKE_CRN = "crn:cdp:datalake:us-west-1:default:datalake:d3b8df82-878d-4395-94b1-2e355217446d";
+
     @Mock
     private EntitlementService entitlementService;
 
@@ -61,6 +70,9 @@ public class DistroXUpgradeAvailabilityServiceTest {
 
     @Mock
     private StackService stackService;
+
+    @Mock
+    private ClusterService clusterService;
 
     @Mock
     private StackViewService stackViewService;
@@ -105,6 +117,75 @@ public class DistroXUpgradeAvailabilityServiceTest {
         UpgradeV4Response result = underTest.checkForUpgrade(CLUSTER, WORKSPACE_ID, request, USER_CRN);
 
         assertEquals(response.getUpgradeCandidates(), result.getUpgradeCandidates());
+    }
+
+    @Test
+    public void testWhenRangerRazEnabledAndEntitlementNotGrantedThenUpgradeNotAllowed() {
+        Cluster datalakeCluster = TestUtil.cluster();
+        datalakeCluster.setRangerRazEnabled(true);
+        Stack datalake = TestUtil.stack();
+        STACK.setDatalakeCrn(DATALAKE_CRN);
+        UpgradeV4Request request = new UpgradeV4Request();
+        UpgradeV4Response response = new UpgradeV4Response();
+        ImageInfoV4Response currentImage = createImageResponse(2L, "7.2.0");
+        ImageInfoV4Response candidateImage1 = createImageResponse(3L, "7.2.1");
+        ImageInfoV4Response candidateImage2 = createImageResponse(4L, "7.2.2");
+
+        response.setUpgradeCandidates(List.of(candidateImage1, candidateImage2));
+        response.setCurrent(currentImage);
+        when(entitlementService.datahubRuntimeUpgradeEnabled(ACCOUNT_ID)).thenReturn(false);
+        when(stackService.getByCrn(DATALAKE_CRN)).thenReturn(datalake);
+        when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WORKSPACE_ID)).thenReturn(STACK);
+        when(stackOperations.checkForClusterUpgrade(ACCOUNT_ID, STACK, WORKSPACE_ID, request)).thenReturn(response);
+        when(clusterService.getCluster(datalake)).thenReturn(datalakeCluster);
+
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> underTest.checkForUpgrade(CLUSTER, WORKSPACE_ID, request, USER_CRN));
+
+        assertEquals("Data Hub Upgrade is not allowed as Ranger RAZ is enabled for [dummyCluster] cluster.", exception.getMessage());
+    }
+
+    @Test
+    public void testWhenRangerRazDisabledAndEntitlementNotGrantedThenUpgradeAllowed() {
+        Cluster datalakeCluster = TestUtil.cluster();
+        datalakeCluster.setRangerRazEnabled(false);
+        Stack datalake = TestUtil.stack();
+        STACK.setDatalakeCrn(DATALAKE_CRN);
+        UpgradeV4Request request = new UpgradeV4Request();
+        UpgradeV4Response response = new UpgradeV4Response();
+        ImageInfoV4Response currentImage = createImageResponse(2L, "7.2.0");
+        ImageInfoV4Response candidateImage1 = createImageResponse(3L, "7.2.1");
+        ImageInfoV4Response candidateImage2 = createImageResponse(4L, "7.2.2");
+
+        response.setUpgradeCandidates(List.of(candidateImage1, candidateImage2));
+        response.setCurrent(currentImage);
+        when(entitlementService.datahubRuntimeUpgradeEnabled(ACCOUNT_ID)).thenReturn(false);
+        when(stackService.getByCrn(DATALAKE_CRN)).thenReturn(datalake);
+        when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WORKSPACE_ID)).thenReturn(STACK);
+        when(stackOperations.checkForClusterUpgrade(ACCOUNT_ID, STACK, WORKSPACE_ID, request)).thenReturn(response);
+        when(clusterService.getCluster(datalake)).thenReturn(datalakeCluster);
+
+        assertDoesNotThrow(() -> underTest.checkForUpgrade(CLUSTER, WORKSPACE_ID, request, USER_CRN));
+
+        verify(clusterService, never()).getCluster(STACK);
+    }
+
+    @Test
+    public void testWhenRangerRazDisabledAndEntitlementGrantedThenUpgradeAllowed() {
+        UpgradeV4Request request = new UpgradeV4Request();
+        UpgradeV4Response response = new UpgradeV4Response();
+        ImageInfoV4Response currentImage = createImageResponse(2L, "7.2.0");
+        ImageInfoV4Response candidateImage1 = createImageResponse(3L, "7.2.1");
+        ImageInfoV4Response candidateImage2 = createImageResponse(4L, "7.2.2");
+
+        response.setUpgradeCandidates(List.of(candidateImage1, candidateImage2));
+        response.setCurrent(currentImage);
+        when(entitlementService.datahubRuntimeUpgradeEnabled(ACCOUNT_ID)).thenReturn(true);
+        when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WORKSPACE_ID)).thenReturn(STACK);
+        when(stackOperations.checkForClusterUpgrade(ACCOUNT_ID, STACK, WORKSPACE_ID, request)).thenReturn(response);
+
+        assertDoesNotThrow(() -> underTest.checkForUpgrade(CLUSTER, WORKSPACE_ID, request, USER_CRN));
+
+        verify(clusterService, never()).getCluster(STACK);
     }
 
     @Test
@@ -267,6 +348,8 @@ public class DistroXUpgradeAvailabilityServiceTest {
     @DisplayName("this test simulates that a Data Hub runtime upgrade entitlement is disabled"
             + " and all the image candidates are filtered for maintenance upgrade so empty response should be returned")
     public void testCheckForUpgradeWhenDataHubUpgradeIsDisabledAnNoMaintenanceUpgradeCandidatesAreAvaiable() {
+        Cluster datalakeCluster = TestUtil.cluster();
+        datalakeCluster.setRangerRazEnabled(false);
         UpgradeV4Request request = new UpgradeV4Request();
         UpgradeV4Response response = new UpgradeV4Response();
         ImageInfoV4Response current = createImageResponse(1L, "7.1.0");
@@ -278,6 +361,7 @@ public class DistroXUpgradeAvailabilityServiceTest {
         Stack stackWithEnv = new Stack();
         stackWithEnv.setName("stack");
         stackWithEnv.setEnvironmentCrn("envcrn");
+        when(clusterService.getCluster(any())).thenReturn(datalakeCluster);
         when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WORKSPACE_ID)).thenReturn(stackWithEnv);
         when(stackOperations.checkForClusterUpgrade(ACCOUNT_ID, stackWithEnv, WORKSPACE_ID, request)).thenReturn(response);
         when(entitlementService.datahubRuntimeUpgradeEnabled(ACCOUNT_ID)).thenReturn(false);
@@ -293,6 +377,8 @@ public class DistroXUpgradeAvailabilityServiceTest {
     @DisplayName("this test simulates that a Data Hub runtime upgrade entitlement is disabled"
             + " and there is 1 image candidate for maintenance upgrade")
     public void testCheckForUpgradeWhenDataHubUpgradeIsDisabledAnOneMaintenanceUpgradeCandidateIsAvaiable() {
+        Cluster datalakeCluster = TestUtil.cluster();
+        datalakeCluster.setRangerRazEnabled(false);
         UpgradeV4Request request = new UpgradeV4Request();
         UpgradeV4Response response = new UpgradeV4Response();
         ImageInfoV4Response current = createImageResponse(1L, "7.1.0");
@@ -304,6 +390,7 @@ public class DistroXUpgradeAvailabilityServiceTest {
         Stack stackWithEnv = new Stack();
         stackWithEnv.setName("stack");
         stackWithEnv.setEnvironmentCrn("envcrn");
+        when(clusterService.getCluster(any())).thenReturn(datalakeCluster);
         when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WORKSPACE_ID)).thenReturn(stackWithEnv);
         when(stackOperations.checkForClusterUpgrade(ACCOUNT_ID, stackWithEnv, WORKSPACE_ID, request)).thenReturn(response);
         when(entitlementService.datahubRuntimeUpgradeEnabled(ACCOUNT_ID)).thenReturn(false);
@@ -318,6 +405,8 @@ public class DistroXUpgradeAvailabilityServiceTest {
     @DisplayName("this test simulates that a Data Hub runtime upgrade entitlement is disabled"
             + " and there are 2 image candidates for maintenance upgrade and the latest should be returned with dry-run")
     public void testCheckForUpgradeWhenDataHubUpgradeIsDisabledAnMultipleMaintenanceUpgradeCandidatesAreAvaiable() {
+        Cluster datalakeCluster = TestUtil.cluster();
+        datalakeCluster.setRangerRazEnabled(false);
         UpgradeV4Request request = new UpgradeV4Request();
         request.setDryRun(true);
         UpgradeV4Response response = new UpgradeV4Response();
@@ -334,6 +423,7 @@ public class DistroXUpgradeAvailabilityServiceTest {
         ClusterView clusterView = new ClusterView();
         clusterView.setId(1L);
         ReflectionTestUtils.setField(stackView, "cluster", clusterView);
+        when(clusterService.getCluster(any())).thenReturn(datalakeCluster);
         when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WORKSPACE_ID)).thenReturn(stackWithEnv);
         when(stackOperations.checkForClusterUpgrade(ACCOUNT_ID, stackWithEnv, WORKSPACE_ID, request)).thenReturn(response);
         when(entitlementService.datahubRuntimeUpgradeEnabled(ACCOUNT_ID)).thenReturn(false);

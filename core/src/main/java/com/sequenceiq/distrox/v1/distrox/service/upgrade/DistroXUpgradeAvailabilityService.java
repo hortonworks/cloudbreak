@@ -24,7 +24,9 @@ import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnParseException;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.RuntimeVersionService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.StackViewService;
@@ -43,6 +45,9 @@ public class DistroXUpgradeAvailabilityService {
 
     @Inject
     private StackService stackService;
+
+    @Inject
+    private ClusterService clusterService;
 
     @Inject
     private StackViewService stackViewService;
@@ -68,31 +73,51 @@ public class DistroXUpgradeAvailabilityService {
         Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
         String accountId = Crn.safeFromString(userCrn).getAccountId();
         UpgradeV4Response response = stackOperations.checkForClusterUpgrade(accountId, stack, workspaceId, request);
+        validateRangerRaz(accountId, stack);
         List<ImageInfoV4Response> filteredCandidates = filterCandidates(accountId, stack, request, response);
         response.setUpgradeCandidates(filteredCandidates);
         return response;
     }
 
-    private List<ImageInfoV4Response> filterCandidates(String accountId, Stack stack, UpgradeV4Request request, UpgradeV4Response upgradeV4Response) {
-        filterOnlyPatchUpgradesIfRuntimeUpgradeDisabled(accountId, stack.getName(), upgradeV4Response);
-        List<ImageInfoV4Response> filteredCandidates;
-        String stackName = stack.getName();
-        boolean differentDataHubAndDataLakeVersionAllowed = entitlementService.isDifferentDataHubAndDataLakeVersionAllowed(accountId);
-        if (differentDataHubAndDataLakeVersionAllowed) {
-            LOGGER.info("Different Data Hub version is enabled, not filtering based on Data Lake version, Data Hub: {}", stackName);
-            filteredCandidates = upgradeV4Response.getUpgradeCandidates();
-        } else {
-            LOGGER.info("Filter Data Hub upgrade images based on the Data Lake version, Data Hub: {}", stackName);
-            filteredCandidates = filterForDatalakeVersion(stack, upgradeV4Response);
-        }
-        if (CollectionUtils.isNotEmpty(filteredCandidates) && Objects.nonNull(request)) {
-            if (LATEST_ONLY == request.getShowAvailableImages()) {
-                filteredCandidates = filterForLatestImagePerRuntime(filteredCandidates);
-            } else if (request.isDryRun()) {
-                filteredCandidates = filterForLatestImage(filteredCandidates);
+    private void validateRangerRaz(String accountId, Stack stack) {
+        if (!isRuntimeUpgradeEnabledByAccountId(accountId)) {
+            Stack datalakeStack = stackService.getByCrn(stack.getDatalakeCrn());
+            Cluster datalakeCluster = clusterService.getCluster(datalakeStack);
+            boolean rangerRazEnabled = datalakeCluster.isRangerRazEnabled();
+            String message = String.format(
+                    "Data Hub Upgrade is %s as Ranger RAZ is %s for [%s] cluster.",
+                    rangerRazEnabled ? "not allowed" : "allowed",
+                    rangerRazEnabled ? "enabled" : "disabled",
+                    datalakeCluster.getName());
+            LOGGER.debug(message);
+            if (rangerRazEnabled) {
+                throw new BadRequestException(message);
             }
+        } else {
+            LOGGER.debug("Bypassing Data Hub upgrade Ranger RAZ constraint as CDP_RUNTIME_UPGRADE is enabled in [{}] account.", accountId);
         }
-        return filteredCandidates;
+    }
+
+    private List<ImageInfoV4Response> filterCandidates(String accountId, Stack stack, UpgradeV4Request request, UpgradeV4Response upgradeV4Response) {
+            filterOnlyPatchUpgradesIfRuntimeUpgradeDisabled(accountId, stack.getName(), upgradeV4Response);
+            List<ImageInfoV4Response> filteredCandidates;
+            String stackName = stack.getName();
+            boolean differentDataHubAndDataLakeVersionAllowed = entitlementService.isDifferentDataHubAndDataLakeVersionAllowed(accountId);
+            if (differentDataHubAndDataLakeVersionAllowed) {
+                LOGGER.info("Different Data Hub version is enabled, not filtering based on Data Lake version, Data Hub: {}", stackName);
+                filteredCandidates = upgradeV4Response.getUpgradeCandidates();
+            } else {
+                LOGGER.info("Filter Data Hub upgrade images based on the Data Lake version, Data Hub: {}", stackName);
+                filteredCandidates = filterForDatalakeVersion(stack, upgradeV4Response);
+            }
+            if (CollectionUtils.isNotEmpty(filteredCandidates) && Objects.nonNull(request)) {
+                if (LATEST_ONLY == request.getShowAvailableImages()) {
+                    filteredCandidates = filterForLatestImagePerRuntime(filteredCandidates);
+                } else if (request.isDryRun()) {
+                    filteredCandidates = filterForLatestImage(filteredCandidates);
+                }
+            }
+            return filteredCandidates;
     }
 
     private void filterOnlyPatchUpgradesIfRuntimeUpgradeDisabled(String accountId, String clusterName, UpgradeV4Response upgradeV4Response) {
