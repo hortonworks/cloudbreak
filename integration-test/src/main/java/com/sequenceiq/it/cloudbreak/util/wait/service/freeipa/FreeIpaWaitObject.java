@@ -108,6 +108,6 @@ public class FreeIpaWaitObject implements WaitObject {
 
     @Override
     public boolean isFailedCheck() {
-        return false;
+        return desiredStatus.equals(CREATE_FAILED);
     }
 }

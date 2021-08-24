@@ -1,9 +1,12 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.spot;
 
 import java.util.Collection;
+import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -22,6 +25,8 @@ import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 public class AwsFreeIpaSpotInstanceTest extends AbstractE2ETest {
 
     private static final SpotTestResultProvider RESULT_PROVIDER = new SpotTestResultProvider("FreeIpa");
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AwsFreeIpaSpotInstanceTest.class);
 
     @Inject
     private FreeIpaTestClient freeIpaTestClient;
@@ -43,7 +48,18 @@ public class AwsFreeIpaSpotInstanceTest extends AbstractE2ETest {
                 .given(FreeIpaTestDto.class)
                     .withSpotPercentage(100)
                 .when(freeIpaTestClient.create())
-                .await(Status.UPDATE_IN_PROGRESS)
+                .then((tc, testDto, client) -> {
+                    testDto.await(Status.UPDATE_IN_PROGRESS);
+                    Map<String, Exception> exceptionMap = testContext.getExceptionMap();
+                    if (!exceptionMap.isEmpty()) {
+                        String key = testDto.getAwaitExceptionKey(Status.UPDATE_IN_PROGRESS);
+                        if (exceptionMap.containsKey(key)) {
+                            LOGGER.info("Awaiting UPDATE_IN_PROGRESS failed, clearing exception to check status reason", exceptionMap.get(key));
+                            exceptionMap.remove(key);
+                        }
+                    }
+                    return testDto;
+                })
                 .when(freeIpaTestClient.describe())
                 .then(assertSpotInstances())
                 .validate();

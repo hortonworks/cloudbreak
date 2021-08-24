@@ -1,9 +1,12 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.spot;
 
 import java.util.Collection;
+import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
@@ -23,6 +26,8 @@ public class AwsDistroXSpotInstanceTest extends AbstractE2ETest {
 
     private static final SpotTestResultProvider RESULT_PROVIDER = new SpotTestResultProvider("DistroX");
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(AwsDistroXSpotInstanceTest.class);
+
     @Inject
     private DistroXTestClient distroXTestClient;
 
@@ -33,7 +38,7 @@ public class AwsDistroXSpotInstanceTest extends AbstractE2ETest {
         initializeDefaultBlueprints(testContext);
         createDefaultCredential(testContext);
         createEnvironmentWithNetworkAndFreeIpa(testContext);
-        createDatalake(testContext);
+        createDatalakeWithoutDatabase(testContext);
     }
 
     @Test(dataProvider = TEST_CONTEXT)
@@ -47,7 +52,18 @@ public class AwsDistroXSpotInstanceTest extends AbstractE2ETest {
                 .given(DistroXTestDto.class)
                     .withSpotPercentage(100)
                 .when(distroXTestClient.create())
-                .awaitAndIgnoreFlows(STACK_CREATED)
+                .then((tc, testDto, client) -> {
+                    testDto.awaitAndIgnoreFlows(STACK_CREATED);
+                    Map<String, Exception> exceptionMap = testContext.getExceptionMap();
+                    if (!exceptionMap.isEmpty()) {
+                        String key = testDto.getAwaitExceptionKey(STACK_CREATED);
+                        if (exceptionMap.containsKey(key)) {
+                            LOGGER.info("Awaiting STACK_CREATED failed, clearing exception to check status reason", exceptionMap.get(key));
+                            exceptionMap.remove(key);
+                        }
+                    }
+                    return testDto;
+                })
                 .when(distroXTestClient.get())
                 .then(assertSpotInstances())
                 .validate();

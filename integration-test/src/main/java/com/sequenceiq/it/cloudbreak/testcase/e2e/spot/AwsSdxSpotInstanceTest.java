@@ -3,9 +3,12 @@ package com.sequenceiq.it.cloudbreak.testcase.e2e.spot;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
 import java.util.Collection;
+import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
@@ -20,12 +23,13 @@ import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
-import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
 public class AwsSdxSpotInstanceTest extends AbstractE2ETest {
 
     private static final SpotTestResultProvider RESULT_PROVIDER = new SpotTestResultProvider("SDX");
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AwsSdxSpotInstanceTest.class);
 
     @Inject
     private SdxTestClient sdxTestClient;
@@ -57,8 +61,18 @@ public class AwsSdxSpotInstanceTest extends AbstractE2ETest {
                     .withExternalDatabase(database)
                     .withSpotPercentage(100)
                 .when(sdxTestClient.create(), key(sdx))
-                .await(SdxClusterStatusResponse.STACK_CREATION_IN_PROGRESS, key(sdx))
-                .wait(STACK_CREATED, key(sdx))
+                .then((tc, testDto, client) -> {
+                    testDto.await(STACK_CREATED, key(sdx));
+                    Map<String, Exception> exceptionMap = testContext.getExceptionMap();
+                    if (!exceptionMap.isEmpty()) {
+                        String key = testDto.getAwaitExceptionKey(STACK_CREATED);
+                        if (exceptionMap.containsKey(key)) {
+                            LOGGER.info("Awaiting STACK_CREATED failed, clearing exception to check status reason", exceptionMap.get(key));
+                            exceptionMap.remove(key);
+                        }
+                    }
+                    return testDto;
+                })
                 .when(sdxTestClient.describe())
                 .then(assertSpotInstances())
                 .validate();

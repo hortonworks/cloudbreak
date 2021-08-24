@@ -45,7 +45,7 @@ public class ResourceAwait {
                 Log.await(null, String.format("[%s] is failed for statuses %s: %s, name: %s",
                         entity, desiredStatuses, ResponseUtil.getErrorMessage(e), entity.getName()));
             }
-            testContext.getExceptionMap().put("await " + entity + " for desired statuses " + desiredStatuses, e);
+            testContext.getExceptionMap().put(entity.getAwaitExceptionKey(desiredStatuses), e);
         }
         return entity;
     }

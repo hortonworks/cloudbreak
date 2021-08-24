@@ -108,6 +108,6 @@ public class DatalakeWaitObject implements WaitObject {
 
     @Override
     public boolean isFailedCheck() {
-        return false;
+        return desiredStatus.equals(PROVISIONING_FAILED);
     }
 }
