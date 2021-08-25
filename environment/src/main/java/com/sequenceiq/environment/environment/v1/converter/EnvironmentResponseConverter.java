@@ -13,6 +13,7 @@ import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.S3GuardRequestParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsDiskEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
@@ -34,6 +35,7 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.network.dto.NetworkDto;
+import com.sequenceiq.environment.parameter.dto.AwsDiskEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.AwsParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureResourceEncryptionParametersDto;
@@ -172,9 +174,13 @@ public class EnvironmentResponseConverter {
     }
 
     private AwsEnvironmentParameters awsEnvParamsToAwsEnvironmentParams(ParametersDto parameters) {
+        AwsDiskEncryptionParametersDto awsDiskEncryptionParametersDto = Optional.ofNullable(parameters.getAwsParametersDto())
+                .map(AwsParametersDto::getAwsDiskEncryptionParametersDto)
+                .orElse(null);
         return Optional.ofNullable(parameters.getAwsParametersDto())
                 .map(aws -> AwsEnvironmentParameters.builder()
                         .withS3guard(getIfNotNull(aws, this::awsParametersToS3guardParam))
+                        .withAwsDiskEncryptionParameters(getIfNotNull(awsDiskEncryptionParametersDto, this::awsParametersToAwsDiskEncryptionParameters))
                         .build())
                 .orElse(null);
     }
@@ -211,6 +217,12 @@ public class EnvironmentResponseConverter {
     private S3GuardRequestParameters awsParametersToS3guardParam(AwsParametersDto awsParametersDto) {
         return S3GuardRequestParameters.builder()
                 .withDynamoDbTableName(awsParametersDto.getS3GuardTableName())
+                .build();
+    }
+
+    private AwsDiskEncryptionParameters awsParametersToAwsDiskEncryptionParameters(AwsDiskEncryptionParametersDto awsDiskEncryptionParametersDto) {
+        return AwsDiskEncryptionParameters.builder()
+                .withEncryptionKeyArn(awsDiskEncryptionParametersDto.getEncryptionKeyArn())
                 .build();
     }
 
