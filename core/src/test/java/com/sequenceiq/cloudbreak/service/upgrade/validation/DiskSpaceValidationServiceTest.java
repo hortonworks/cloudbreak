@@ -84,7 +84,7 @@ public class DiskSpaceValidationServiceTest {
 
     @Test
     public void testValidateFreeSpaceForUpgradeShouldNotThrowExceptionWhenThereAreEnoughFreeSpaceForUpgrade() throws CloudbreakException {
-        when(parcelSizeService.getAllParcelSize(IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID, stack)).thenReturn(9000L);
+        when(parcelSizeService.getRequiredFreeSpace(IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID, stack)).thenReturn(9000L);
 
         underTest.validateFreeSpaceForUpgrade(stack, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID);
 
@@ -93,7 +93,7 @@ public class DiskSpaceValidationServiceTest {
 
     @Test
     public void testValidateFreeSpaceForUpgradeShouldThrowExceptionWhenThereAreNoEnoughFreeSpaceAndTheRequiredSpaceIsReturnedInMb() throws CloudbreakException {
-        when(parcelSizeService.getAllParcelSize(IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID, stack)).thenReturn(920000L);
+        when(parcelSizeService.getRequiredFreeSpace(IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID, stack)).thenReturn(920000L);
 
         Exception exception = assertThrows(UpgradeValidationFailedException.class, () -> {
             underTest.validateFreeSpaceForUpgrade(stack, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID);
@@ -106,7 +106,7 @@ public class DiskSpaceValidationServiceTest {
 
     @Test
     public void testValidateFreeSpaceForUpgradeShouldThrowExceptionWhenThereAreNoEnoughFreeSpaceAndTheRequiredSpaceIsReturnedInGb() throws CloudbreakException {
-        when(parcelSizeService.getAllParcelSize(IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID, stack)).thenReturn(1750000L);
+        when(parcelSizeService.getRequiredFreeSpace(IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID, stack)).thenReturn(1750000L);
 
         Exception exception = assertThrows(UpgradeValidationFailedException.class, () -> {
             underTest.validateFreeSpaceForUpgrade(stack, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID);
@@ -118,7 +118,7 @@ public class DiskSpaceValidationServiceTest {
     }
 
     private void verifyMocks() throws CloudbreakException {
-        verify(parcelSizeService).getAllParcelSize(IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID, stack);
+        verify(parcelSizeService).getRequiredFreeSpace(IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID, stack);
         verify(resourceService).getAllByStackId(STACK_ID);
         verify(stackUtil).collectNodesWithDiskData(stack);
         verify(gatewayConfigService).getAllGatewayConfigs(stack);

@@ -53,10 +53,10 @@ public class DiskSpaceValidationService {
     private ParcelSizeService parcelSizeService;
 
     public void validateFreeSpaceForUpgrade(Stack stack, String imageCatalogUrl, String imageCatalogName, String imageId) throws CloudbreakException {
-        long parcelSize = parcelSizeService.getAllParcelSize(imageCatalogUrl, imageCatalogName, imageId, stack);
+        long requiredFreeSpace = parcelSizeService.getRequiredFreeSpace(imageCatalogUrl, imageCatalogName, imageId, stack);
         Map<String, String> freeDiskSpaceByNodes = getFreeDiskSpaceByNodes(stack);
-        LOGGER.debug("Required free space for parcels {} KB. Free space by nodes in KB: {}", parcelSize, freeDiskSpaceByNodes);
-        Map<String, String> notEligibleNodes = getNotEligibleNodes(freeDiskSpaceByNodes, parcelSize, stack.getNotTerminatedGatewayInstanceMetadata());
+        LOGGER.debug("Required free space for parcels {} KB. Free space by nodes in KB: {}", requiredFreeSpace, freeDiskSpaceByNodes);
+        Map<String, String> notEligibleNodes = getNotEligibleNodes(freeDiskSpaceByNodes, requiredFreeSpace, stack.getNotTerminatedGatewayInstanceMetadata());
         if (!notEligibleNodes.isEmpty()) {
             throw new UpgradeValidationFailedException(String.format(
                     "There is not enough free space on the nodes to perform upgrade operation. The required free space by nodes: %s",
@@ -82,10 +82,10 @@ public class DiskSpaceValidationService {
             List<InstanceMetaData> gatewayInstances) {
         return freeDiskSpaceByNodes.entrySet()
                 .stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, map -> getRequiresFreeSpace(parcelSize, gatewayInstances, map.getKey())));
+                .collect(Collectors.toMap(Map.Entry::getKey, map -> getRequiredFreeSpace(parcelSize, gatewayInstances, map.getKey())));
     }
 
-    private long getRequiresFreeSpace(long parcelSize, List<InstanceMetaData> gatewayInstances, String hostname) {
+    private long getRequiredFreeSpace(long parcelSize, List<InstanceMetaData> gatewayInstances, String hostname) {
         return (long) (parcelSize * (isGatewayInstance(hostname, gatewayInstances) ? GATEWAY_NODE_PARCEL_SIZE_MULTIPLIER : PARCEL_SIZE_MULTIPLIER));
     }
 
