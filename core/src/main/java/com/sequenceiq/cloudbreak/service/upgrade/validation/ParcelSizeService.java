@@ -25,6 +25,8 @@ class ParcelSizeService {
 
     private static final long DIVIDER_TO_KB = 1024L;
 
+    private static final long CM_PACKAGE_SIZE_IN_KB = 3145728L;
+
     @Inject
     private RestClientFactory restClientFactory;
 
@@ -34,9 +36,9 @@ class ParcelSizeService {
     @Inject
     private ParcelUrlProvider parcelUrlProvider;
 
-    long getAllParcelSize(String imageCatalogUrl, String imageCatalogName, String imageId, Stack stack) throws CloudbreakException {
+    long getRequiredFreeSpace(String imageCatalogUrl, String imageCatalogName, String imageId, Stack stack) throws CloudbreakException {
         Map<String, Long> parcelsBySize = getParcelsBySize(imageCatalogUrl, imageCatalogName, imageId, stack);
-        return getRequiredFreeSpace(parcelsBySize);
+        return getAllParcelSize(parcelsBySize) + CM_PACKAGE_SIZE_IN_KB;
     }
 
     private Map<String, Long> getParcelsBySize(String imageCatalogUrl, String imageCatalogName, String imageId, Stack stack) throws CloudbreakException {
@@ -78,7 +80,7 @@ class ParcelSizeService {
                 .collect(Collectors.toSet());
     }
 
-    private long getRequiredFreeSpace(Map<String, Long> parcelsBySize) {
+    private long getAllParcelSize(Map<String, Long> parcelsBySize) {
         return addParcelSize(parcelsBySize) / DIVIDER_TO_KB;
     }
 

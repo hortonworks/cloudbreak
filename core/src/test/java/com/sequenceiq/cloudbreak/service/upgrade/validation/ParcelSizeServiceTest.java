@@ -36,6 +36,8 @@ public class ParcelSizeServiceTest {
 
     private static final String IMAGE_ID = "image-id";
 
+    private static final long CM_PACKAGE_SIZE = 3145728L;
+
     @Mock
     private RestClientFactory restClientFactory;
 
@@ -76,9 +78,9 @@ public class ParcelSizeServiceTest {
         when(request.head()).thenReturn(response);
         when(response.getHeaderString("Content-Length")).thenReturn("1000000000");
 
-        long actual = underTest.getAllParcelSize(IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID, stack);
+        long actual = underTest.getRequiredFreeSpace(IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID, stack);
 
-        assertEquals(2929687L, actual);
+        assertEquals(2929687L + CM_PACKAGE_SIZE, actual);
         verify(restClientFactory).getOrCreateDefault();
         verify(parcelUrlProvider).getRequiredParcelsFromImage(IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID, stack);
         verify(paywallCredentialPopulator, times(3)).populateWebTarget(any(), eq(webTarget));
@@ -92,7 +94,7 @@ public class ParcelSizeServiceTest {
         when(parcelUrlProvider.getRequiredParcelsFromImage(IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID, stack)).thenReturn(parcelUrls);
         when(request.head()).thenThrow(new ProcessingException("Error"));
 
-        underTest.getAllParcelSize(IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID, stack);
+        underTest.getRequiredFreeSpace(IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID, stack);
         verify(restClientFactory).getOrCreateDefault();
         verify(parcelUrlProvider).getRequiredParcelsFromImage(IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID, stack);
         verify(paywallCredentialPopulator).populateWebTarget(any(), eq(webTarget));
@@ -107,7 +109,7 @@ public class ParcelSizeServiceTest {
         when(request.head()).thenReturn(response);
         when(response.getHeaderString("Content-Length")).thenReturn("0");
 
-        underTest.getAllParcelSize(IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID, stack);
+        underTest.getRequiredFreeSpace(IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID, stack);
         verify(restClientFactory).getOrCreateDefault();
         verify(parcelUrlProvider).getRequiredParcelsFromImage(IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID, stack);
         verify(paywallCredentialPopulator).populateWebTarget(any(), eq(webTarget));
