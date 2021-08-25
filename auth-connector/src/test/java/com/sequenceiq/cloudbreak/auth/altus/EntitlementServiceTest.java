@@ -55,6 +55,9 @@ class EntitlementServiceTest {
                 {"CDP_CB_AWS_NATIVE", (EntitlementCheckFunction) EntitlementService::awsNativeEnabled, false},
                 {"CDP_CB_AWS_NATIVE", (EntitlementCheckFunction) EntitlementService::awsNativeEnabled, true},
 
+                {"CDP_CB_AWS_NATIVE_DATALAKE", (EntitlementCheckFunction) EntitlementService::awsNativeDataLakeEnabled, false},
+                {"CDP_CB_AWS_NATIVE_DATALAKE", (EntitlementCheckFunction) EntitlementService::awsNativeDataLakeEnabled, true},
+
                 {"CDP_BASE_IMAGE", (EntitlementCheckFunction) EntitlementService::baseImageEnabled, false},
                 {"CDP_BASE_IMAGE", (EntitlementCheckFunction) EntitlementService::baseImageEnabled, true},
 
