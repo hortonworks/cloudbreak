@@ -736,23 +736,23 @@ cb:
       sdx:
         enabled: false
     permittedServicesForUpgrade: >
-      DAS,
-      HDFS,
-      HIVE,
-      HIVE_ON_TEZ,
-      HUE,
-      KNOX,
-      LIVY,
-      LIVY_FOR_SPARK3,
-      OOZIE,
-      QUEUEMANAGER,
-      SPARK3_ON_YARN,
-      SPARK_ON_YARN,
-      SQOOP_CLIENT,
-      TEZ,
-      YARN,
-      ZEPPELIN,
-      ZOOKEEPER
+        DAS: 7.2.9,
+        HDFS: 7.2.9,
+        HIVE: 7.2.9,
+        HIVE_ON_TEZ: 7.2.9,
+        HUE: 7.2.9,
+        KNOX: 7.2.9,
+        LIVY: 7.2.9,
+        LIVY_FOR_SPARK3: 7.2.9,
+        OOZIE: 7.2.9,
+        QUEUEMANAGER: 7.2.9,
+        SPARK3_ON_YARN: 7.2.9,
+        SPARK_ON_YARN: 7.2.9,
+        SQOOP_CLIENT: 7.2.9,
+        TEZ: 7.2.9,
+        YARN: 7.2.9,
+        ZEPPELIN: 7.2.9,
+        ZOOKEEPER: 7.2.9
 
 cluster:
   monitoring:

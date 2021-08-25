@@ -7,7 +7,6 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
@@ -15,26 +14,28 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
 
 @Component
-class CustomTemplateUpgradeValidator {
+public class CustomTemplateUpgradeValidator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CustomTemplateUpgradeValidator.class);
-
-    @Value("${cb.upgrade.permittedServicesForUpgrade}")
-    private Set<String> permittedServicesForUpgrade;
 
     @Inject
     private CmTemplateProcessorFactory cmTemplateProcessorFactory;
 
+    @Inject
+    private PermittedServicesForUpgradeService permittedServicesForUpgradeService;
+
     BlueprintValidationResult isValid(Blueprint blueprint) {
         Set<String> services = getServicesFromBlueprint(blueprint);
-        LOGGER.debug("Validating custom template. Permitted services for upgrade: {}, available services: {}", permittedServicesForUpgrade, services);
-        Set<String> notUpgradePermittedServices = getNotUpgradePermittedServices(services);
+        String blueprintVersion = blueprint.getStackVersion();
+        LOGGER.debug("Validating custom template. Permitted services for upgrade with minimum required blueprint version: {}, available services: {}",
+                permittedServicesForUpgradeService.toString(), services);
+        Set<String> notUpgradePermittedServices = getNotUpgradePermittedServices(services, blueprintVersion);
         return new BlueprintValidationResult(notUpgradePermittedServices.isEmpty(), createReason(notUpgradePermittedServices));
     }
 
-    private Set<String> getNotUpgradePermittedServices(Set<String> services) {
+    private Set<String> getNotUpgradePermittedServices(Set<String> services, String blueprintVersion) {
         return services.stream()
-                .filter(service -> !permittedServicesForUpgrade.contains(service))
+                .filter(service -> !permittedServicesForUpgradeService.isAllowedForUpgrade(service, blueprintVersion))
                 .collect(Collectors.toSet());
     }
 
