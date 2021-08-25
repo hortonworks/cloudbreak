@@ -38,6 +38,7 @@ auth:
       loadbalancer.enable: false
       backup.on.upgrade.enable: false
       light.to.medium.migration.enable: false
+      multiaz.enable: false
     differentdatahubversionthandatalake.enabled: true
     database.wire.encryption.enable: true
     datahub.runtime.upgrade.enable: true
