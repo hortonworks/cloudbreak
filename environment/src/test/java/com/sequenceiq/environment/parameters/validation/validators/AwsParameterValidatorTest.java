@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -22,6 +23,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
@@ -30,6 +32,7 @@ import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.service.NoSqlTableCreationModeDeterminerService;
 import com.sequenceiq.environment.environment.validation.ValidationType;
 import com.sequenceiq.environment.parameter.dto.s3guard.S3GuardTableCreation;
+import com.sequenceiq.environment.parameter.dto.AwsDiskEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.AwsParametersDto;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
 import com.sequenceiq.environment.parameters.service.ParametersService;
@@ -45,6 +48,9 @@ class AwsParameterValidatorTest {
 
     @Mock
     private ParametersService parametersService;
+
+    @Mock
+    private EntitlementService entitlementService;
 
     @InjectMocks
     private AwsParameterValidator underTest;
@@ -69,6 +75,7 @@ class AwsParameterValidatorTest {
         AwsParametersDto awsParameters = AwsParametersDto.builder()
                 .withDynamoDbTableName("tablename")
                 .build();
+
         ParametersDto parametersDto = ParametersDto.builder()
                 .withAwsParameters(awsParameters)
                 .build();
@@ -105,6 +112,54 @@ class AwsParameterValidatorTest {
         verify(parametersService, times(1)).saveParameters(ENV_ID, parametersDto);
     }
 
+    @Test
+    public void testNoEncryptionKeyArnAndEntitlementEnabledThenNoError() {
+        EnvironmentDto environmentDto = new AwsParameterValidatorTest.EnvironmentDtoBuilder()
+                                        .withAwsParameters(AwsParametersDto.builder().build())
+                                        .build();
+        EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
+
+        ValidationResult validationResult = underTest.validate(environmentValidationDto, environmentDto.getParameters(), ValidationResult.builder());
+
+        assertFalse(validationResult.hasError());
+    }
+
+    @Test
+    public void testWhenEncryptionKeyArnPresentAndEntitlementDisabledThenError() {
+        EnvironmentDto environmentDto = new AwsParameterValidatorTest.EnvironmentDtoBuilder()
+                                        .withAwsParameters(AwsParametersDto.builder()
+                                        .withAwsDiskEncryptionParameters(AwsDiskEncryptionParametersDto.builder()
+                                            .withEncryptionKeyArn("dummy-key-arn")
+                                            .build())
+                                            .build())
+                                        .build();
+
+        EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
+        when(entitlementService.isAWSDiskEncryptionWithCMKEnabled(anyString())).thenReturn(false);
+        ValidationResult validationResult = underTest.validate(environmentValidationDto, environmentDto.getParameters(), ValidationResult.builder());
+        assertTrue(validationResult.hasError());
+        assertEquals(String.format("You specified encryptionKeyArn to use Server Side Encryption for AWS Managed disks with CMK, "
+                        + "but that feature is currently disabled. Get 'CDP_CB_AWS_DISK_ENCRYPTION_WITH_CMK' " +
+                        "enabled for your account to use SSE with CMK."),
+                validationResult.getFormattedErrors());
+    }
+
+    @Test
+    public void testWhenEncryptionKeyArnPresentAndEntitlementEnabledThenNoError() {
+        EnvironmentDto environmentDto = new AwsParameterValidatorTest.EnvironmentDtoBuilder()
+                                            .withAwsParameters(AwsParametersDto.builder()
+                                            .withAwsDiskEncryptionParameters(AwsDiskEncryptionParametersDto.builder()
+                                                    .withEncryptionKeyArn("dummy-key-arn")
+                                                    .build())
+                                                    .build())
+                                        .build();
+
+        EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
+        when(entitlementService.isAWSDiskEncryptionWithCMKEnabled(anyString())).thenReturn(true);
+        ValidationResult validationResult = underTest.validate(environmentValidationDto, environmentDto.getParameters(), ValidationResult.builder());
+        assertFalse(validationResult.hasError());
+    }
+
     @ParameterizedTest(name = "FreeIpa Spot percentage {0} is validated as {1}")
     @MethodSource("freeIpaSpotPercentageParameters")
     void validateFreeIpaSpotPercentage(int percentage, boolean hasError) {
@@ -131,5 +186,26 @@ class AwsParameterValidatorTest {
                 Arguments.of(100, false),
                 Arguments.of(101, true)
         );
+    }
+
+    private static class EnvironmentDtoBuilder {
+
+        private static final String ACCOUNT_ID = "accountId";
+
+        private final EnvironmentDto environmentDto = new EnvironmentDto();
+
+        private final ParametersDto.Builder parametersDtoBuilder = ParametersDto.builder();
+
+        public AwsParameterValidatorTest.EnvironmentDtoBuilder withAwsParameters(AwsParametersDto awsParametersDto) {
+            parametersDtoBuilder.withAwsParameters(awsParametersDto);
+            return this;
+        }
+
+        public EnvironmentDto build() {
+            ParametersDto parametersDto = parametersDtoBuilder.build();
+            environmentDto.setParameters(parametersDto);
+            environmentDto.setAccountId(ACCOUNT_ID);
+            return environmentDto;
+        }
     }
 }

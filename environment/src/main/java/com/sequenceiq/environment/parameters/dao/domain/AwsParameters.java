@@ -1,5 +1,11 @@
 package com.sequenceiq.environment.parameters.dao.domain;
 
+import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
+
+import com.sequenceiq.cloudbreak.service.secret.SecretValue;
+import com.sequenceiq.cloudbreak.service.secret.domain.AccountIdAwareResource;
+import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
+import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
 import com.sequenceiq.environment.parameter.dto.s3guard.S3GuardTableCreation;
 import com.sequenceiq.environment.parameters.dao.converter.S3GuardTableCreationConverter;
 
@@ -12,7 +18,7 @@ import javax.persistence.Entity;
 
 @Entity
 @DiscriminatorValue("AWS")
-public class AwsParameters extends BaseParameters {
+public class AwsParameters extends BaseParameters implements AccountIdAwareResource {
 
     @Column(name = "s3guard_dynamo_table_name")
     private String s3guardTableName;
@@ -26,6 +32,11 @@ public class AwsParameters extends BaseParameters {
 
     @Column(name = "freeipa_spot_max_price")
     private Double freeIpaSpotMaxPrice;
+
+    @Column(name = "encryption_key_arn")
+    @Convert(converter = SecretToString.class)
+    @SecretValue
+    private Secret encryptionKeyArn = Secret.EMPTY;
 
     public String getS3guardTableName() {
         return s3guardTableName;
@@ -57,5 +68,17 @@ public class AwsParameters extends BaseParameters {
 
     public void setFreeIpaSpotMaxPrice(Double freeIpaSpotMaxPrice) {
         this.freeIpaSpotMaxPrice = freeIpaSpotMaxPrice;
+    }
+
+    public String getEncryptionKeyArn() {
+        return getIfNotNull(encryptionKeyArn, Secret::getRaw);
+    }
+
+    public String getEncryptionKeyArnSecret() {
+        return getIfNotNull(encryptionKeyArn, Secret::getSecret);
+    }
+
+    public void setEncryptionKeyArn(String encryptionKeyArn) {
+        this.encryptionKeyArn = new Secret(encryptionKeyArn);
     }
 }
