@@ -7,6 +7,9 @@ import io.swagger.annotations.ApiModel;
 @ApiModel(value = "GcpEnvironmentV1Parameters")
 public class GcpEnvironmentParameters implements Serializable {
 
+    public GcpEnvironmentParameters() {
+    }
+
     private GcpEnvironmentParameters(Builder builder) {
     }
 
@@ -27,5 +30,7 @@ public class GcpEnvironmentParameters implements Serializable {
         public GcpEnvironmentParameters build() {
             return new GcpEnvironmentParameters(this);
         }
+
     }
+
 }
