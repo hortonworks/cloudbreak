@@ -203,6 +203,8 @@ public enum ResourceEvent {
     STACK_DIAGNOSTICS_PREFLIGHT_CHECK_RUNNING("stack.diagnostics.preflight.check.running"),
     STACK_DIAGNOSTICS_PREFLIGHT_CHECK_FINISHED("stack.diagnostics.preflight.check.finished"),
     STACK_DIAGNOSTICS_INIT_RUNNING("stack.diagnostics.init.running"),
+    STACK_DIAGNOSTICS_VM_PREFLIGHT_CHECK_RUNNING("stack.diagnostics.vm.preflight.check.running"),
+    STACK_DIAGNOSTICS_TELEMETRY_UPGRADE_RUNNING("stack.diagnostics.telemetry.upgrade.running"),
     STACK_DIAGNOSTICS_ENSURE_MACHINE_USER("stack.diagnostics.ensure.machine.user"),
     STACK_DIAGNOSTICS_COLLECTION_RUNNING("stack.diagnostics.collection.running"),
     STACK_DIAGNOSTICS_UPLOAD_RUNNING("stack.diagnostics.upload.running"),

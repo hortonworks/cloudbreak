@@ -1,7 +1,7 @@
 package com.sequenceiq.freeipa.flow.freeipa.diagnostics.handler;
 
-import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsCollectionHandlerSelectors.INIT_DIAGNOSTICS_EVENT;
-import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsCollectionStateSelectors.START_DIAGNOSTICS_UPGRADE_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsCollectionHandlerSelectors.VM_PREFLIGHT_CHECK_DIAGNOSTICS_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsCollectionStateSelectors.START_DIAGNOSTICS_ENSURE_MACHINE_USER_EVENT;
 
 import java.util.Map;
 
@@ -11,8 +11,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.common.api.telemetry.model.DiagnosticsDestination;
 import com.sequenceiq.common.model.diagnostics.DiagnosticParameters;
-import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
 import com.sequenceiq.freeipa.flow.freeipa.diagnostics.DiagnosticsFlowService;
@@ -23,9 +23,9 @@ import reactor.bus.Event;
 import reactor.bus.EventBus;
 
 @Component
-public class DiagnosticsInitHandler extends EventSenderAwareHandler<DiagnosticsCollectionEvent> {
+public class DiagnosticsVmPreFlightCheckHandler extends EventSenderAwareHandler<DiagnosticsCollectionEvent> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DiagnosticsInitHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DiagnosticsVmPreFlightCheckHandler.class);
 
     @Inject
     private EventBus eventBus;
@@ -33,7 +33,7 @@ public class DiagnosticsInitHandler extends EventSenderAwareHandler<DiagnosticsC
     @Inject
     private DiagnosticsFlowService diagnosticsFlowService;
 
-    public DiagnosticsInitHandler(EventSender eventSender) {
+    public DiagnosticsVmPreFlightCheckHandler(EventSender eventSender) {
         super(eventSender);
     }
 
@@ -43,21 +43,21 @@ public class DiagnosticsInitHandler extends EventSenderAwareHandler<DiagnosticsC
         Long resourceId = data.getResourceId();
         String resourceCrn = data.getResourceCrn();
         DiagnosticParameters parameters = data.getParameters();
-        parameters.setUuid(event.getHeaders().get(FlowConstants.FLOW_ID));
-
         Map<String, Object> parameterMap = parameters.toMap();
         try {
-            LOGGER.debug("Diagnostics collection initialization started. resourceCrn: '{}', parameters: '{}'", resourceCrn, parameterMap);
-            diagnosticsFlowService.init(resourceId, parameterMap, parameters.getExcludeHosts());
+            LOGGER.debug("Diagnostics collection VM preflight check started. resourceCrn: '{}', parameters: '{}'", resourceCrn, parameterMap);
+            if (!DiagnosticsDestination.ENG.equals(parameters.getDestination())) {
+                diagnosticsFlowService.vmPreFlightCheck(resourceId, parameterMap, parameters.getExcludeHosts());
+            }
             DiagnosticsCollectionEvent diagnosticsCollectionEvent = DiagnosticsCollectionEvent.builder()
                     .withResourceCrn(resourceCrn)
                     .withResourceId(resourceId)
-                    .withSelector(START_DIAGNOSTICS_UPGRADE_EVENT.selector())
+                    .withSelector(START_DIAGNOSTICS_ENSURE_MACHINE_USER_EVENT.selector())
                     .withParameters(parameters)
                     .build();
             eventSender().sendEvent(diagnosticsCollectionEvent, event.getHeaders());
         } catch (Exception e) {
-            LOGGER.debug("Diagnostics collection initialization failed. resourceCrn: '{}', parameters: '{}'.", resourceCrn, parameterMap, e);
+            LOGGER.debug("Diagnostics collection VM PreFlight check failed. resourceCrn: '{}', parameters: '{}'.", resourceCrn, parameterMap, e);
             DiagnosticsCollectionFailureEvent failureEvent = new DiagnosticsCollectionFailureEvent(resourceId, e, resourceCrn, parameters);
             eventBus.notify(failureEvent.selector(), new Event<>(event.getHeaders(), failureEvent));
         }
@@ -65,6 +65,6 @@ public class DiagnosticsInitHandler extends EventSenderAwareHandler<DiagnosticsC
 
     @Override
     public String selector() {
-        return INIT_DIAGNOSTICS_EVENT.selector();
+        return VM_PREFLIGHT_CHECK_DIAGNOSTICS_EVENT.selector();
     }
 }

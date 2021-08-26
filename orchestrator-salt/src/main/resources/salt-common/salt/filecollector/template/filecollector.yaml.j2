@@ -100,10 +100,10 @@ collector:
     compressFormat: gztar
     deleteCompressedFile: false
     useExternalCommandForCompression: true
-    usePerlScriptForAnonymization: true
+    usePerlScriptForAnonymization: false
     workspaceLimitBytes: 524288000
     workspaceWorkers: 1
-    logProcessorWorkers: 5
+    logProcessorWorkers: 1
     requiredDiskSpaceRatio: 1.7{% endif %}
     includeWorkspaceMetadata: true
     workspaceMetadataFileName: filecollector-metadata.json

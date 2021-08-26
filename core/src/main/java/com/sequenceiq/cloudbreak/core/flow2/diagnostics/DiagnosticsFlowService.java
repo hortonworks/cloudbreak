@@ -44,6 +44,7 @@ import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.telemetry.DataBusEndpointProvider;
+import com.sequenceiq.cloudbreak.telemetry.TelemetryVersionConfiguration;
 import com.sequenceiq.cloudbreak.usage.UsageReporter;
 
 @Service
@@ -78,6 +79,9 @@ public class DiagnosticsFlowService {
 
     @Inject
     private AltusDatabusConfiguration altusDatabusConfiguration;
+
+    @Inject
+    private TelemetryVersionConfiguration telemetryVersionConfiguration;
 
     @Inject
     private DataBusEndpointProvider dataBusEndpointProvider;
@@ -245,6 +249,37 @@ public class DiagnosticsFlowService {
             LOGGER.debug("Diagnostics initialization has been skipped. (no target minions)");
         } else {
             telemetryOrchestrator.initDiagnosticCollection(gatewayConfigs, allNodes, parameters, exitModel);
+        }
+    }
+
+    public void telemetryUpgrade(Long stackId, Map<String, Object> parameters, Set<String> hosts, Set<String> hostGroups, Set<String> excludeHosts,
+            boolean skipComponentRestart) throws CloudbreakOrchestratorFailedException {
+        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        Set<InstanceMetaData> instanceMetaDataSet = instanceMetaDataService.findNotTerminatedForStack(stackId);
+        List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
+        Set<Node> allNodes = getNodes(instanceMetaDataSet, hosts, hostGroups, excludeHosts);
+        LOGGER.debug("Starting cdp-telemetry upgrade for diagnostics. resourceCrn: '{}'", stack.getResourceCrn());
+        ClusterDeletionBasedExitCriteriaModel exitModel = new ClusterDeletionBasedExitCriteriaModel(stackId, stack.getCluster().getId());
+        if (allNodes.isEmpty()) {
+            LOGGER.debug("Diagnostics VM preflight check has been skipped. (no target minions)");
+        } else {
+            telemetryOrchestrator.updateTelemetryComponent(gatewayConfigs, allNodes, parameters, exitModel,
+                    "cdp-telemetry", telemetryVersionConfiguration.getDesiredCdpTelemetryVersion(), skipComponentRestart);
+        }
+    }
+
+    public void vmPreFlightCheck(Long stackId, Map<String, Object> parameters, Set<String> hosts, Set<String> hostGroups, Set<String> excludeHosts)
+            throws CloudbreakOrchestratorFailedException {
+        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        Set<InstanceMetaData> instanceMetaDataSet = instanceMetaDataService.findNotTerminatedForStack(stackId);
+        List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
+        Set<Node> allNodes = getNodes(instanceMetaDataSet, hosts, hostGroups, excludeHosts);
+        LOGGER.debug("Starting diagnostics VM preflight check. resourceCrn: '{}'", stack.getResourceCrn());
+        ClusterDeletionBasedExitCriteriaModel exitModel = new ClusterDeletionBasedExitCriteriaModel(stackId, stack.getCluster().getId());
+        if (allNodes.isEmpty()) {
+            LOGGER.debug("Diagnostics VM preflight check has been skipped. (no target minions)");
+        } else {
+            telemetryOrchestrator.preFlightDiagnosticsCheck(gatewayConfigs, allNodes, parameters, exitModel);
         }
     }
 
