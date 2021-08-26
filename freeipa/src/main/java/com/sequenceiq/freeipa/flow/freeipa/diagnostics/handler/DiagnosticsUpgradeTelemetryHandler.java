@@ -1,7 +1,7 @@
 package com.sequenceiq.freeipa.flow.freeipa.diagnostics.handler;
 
-import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsCollectionHandlerSelectors.INIT_DIAGNOSTICS_EVENT;
-import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsCollectionStateSelectors.START_DIAGNOSTICS_UPGRADE_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsCollectionHandlerSelectors.UPGRADE_DIAGNOSTICS_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsCollectionStateSelectors.START_DIAGNOSTICS_VM_PREFLIGHT_CHECK_EVENT;
 
 import java.util.Map;
 
@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.common.model.diagnostics.DiagnosticParameters;
-import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
 import com.sequenceiq.freeipa.flow.freeipa.diagnostics.DiagnosticsFlowService;
@@ -23,9 +22,9 @@ import reactor.bus.Event;
 import reactor.bus.EventBus;
 
 @Component
-public class DiagnosticsInitHandler extends EventSenderAwareHandler<DiagnosticsCollectionEvent> {
+public class DiagnosticsUpgradeTelemetryHandler extends EventSenderAwareHandler<DiagnosticsCollectionEvent>  {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DiagnosticsInitHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DiagnosticsUpgradeTelemetryHandler.class);
 
     @Inject
     private EventBus eventBus;
@@ -33,7 +32,7 @@ public class DiagnosticsInitHandler extends EventSenderAwareHandler<DiagnosticsC
     @Inject
     private DiagnosticsFlowService diagnosticsFlowService;
 
-    public DiagnosticsInitHandler(EventSender eventSender) {
+    public DiagnosticsUpgradeTelemetryHandler(EventSender eventSender) {
         super(eventSender);
     }
 
@@ -43,21 +42,19 @@ public class DiagnosticsInitHandler extends EventSenderAwareHandler<DiagnosticsC
         Long resourceId = data.getResourceId();
         String resourceCrn = data.getResourceCrn();
         DiagnosticParameters parameters = data.getParameters();
-        parameters.setUuid(event.getHeaders().get(FlowConstants.FLOW_ID));
-
         Map<String, Object> parameterMap = parameters.toMap();
         try {
-            LOGGER.debug("Diagnostics collection initialization started. resourceCrn: '{}', parameters: '{}'", resourceCrn, parameterMap);
-            diagnosticsFlowService.init(resourceId, parameterMap, parameters.getExcludeHosts());
+            LOGGER.debug("Diagnostics cdp-telemetry upgrade started. resourceCrn: '{}', parameters: '{}'", resourceCrn, parameterMap);
+            diagnosticsFlowService.telemetryUpgrade(resourceId, parameterMap, parameters.getExcludeHosts(), true);
             DiagnosticsCollectionEvent diagnosticsCollectionEvent = DiagnosticsCollectionEvent.builder()
                     .withResourceCrn(resourceCrn)
                     .withResourceId(resourceId)
-                    .withSelector(START_DIAGNOSTICS_UPGRADE_EVENT.selector())
+                    .withSelector(START_DIAGNOSTICS_VM_PREFLIGHT_CHECK_EVENT.selector())
                     .withParameters(parameters)
                     .build();
             eventSender().sendEvent(diagnosticsCollectionEvent, event.getHeaders());
         } catch (Exception e) {
-            LOGGER.debug("Diagnostics collection initialization failed. resourceCrn: '{}', parameters: '{}'.", resourceCrn, parameterMap, e);
+            LOGGER.debug("Diagnostics cdp-telemetry upgrade failed. resourceCrn: '{}', parameters: '{}'.", resourceCrn, parameterMap, e);
             DiagnosticsCollectionFailureEvent failureEvent = new DiagnosticsCollectionFailureEvent(resourceId, e, resourceCrn, parameters);
             eventBus.notify(failureEvent.selector(), new Event<>(event.getHeaders(), failureEvent));
         }
@@ -65,6 +62,6 @@ public class DiagnosticsInitHandler extends EventSenderAwareHandler<DiagnosticsC
 
     @Override
     public String selector() {
-        return INIT_DIAGNOSTICS_EVENT.selector();
+        return UPGRADE_DIAGNOSTICS_EVENT.selector();
     }
 }
