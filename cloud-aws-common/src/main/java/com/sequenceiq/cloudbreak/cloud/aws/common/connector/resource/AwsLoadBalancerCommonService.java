@@ -81,29 +81,45 @@ public class AwsLoadBalancerCommonService {
 
     @VisibleForTesting
     Set<String> selectLoadBalancerSubnetIds(LoadBalancerType type, AwsNetworkView awsNetworkView, CloudLoadBalancer cloudLoadBalancer) {
-        List<String> subnetIds = new ArrayList<>();
+        Set<String> subnetIds = new HashSet<>();
         if (type == LoadBalancerType.PRIVATE) {
             LOGGER.debug("Private load balancer detected. Using instance subnet for load balancer creation.");
             subnetIds.addAll(awsNetworkView.getSubnetList());
+            subnetIds.addAll(getMultiAZSubnets(cloudLoadBalancer));
         } else {
-            subnetIds.addAll(awsNetworkView.getEndpointGatewaySubnetList());
             LOGGER.debug("Public load balancer detected. Using endpoint gateway subnet for load balancer creation.");
+            subnetIds.addAll(awsNetworkView.getEndpointGatewaySubnetList());
+            subnetIds.addAll(getEndpointGatewayMultiAZSubnets(cloudLoadBalancer));
             if (subnetIds.isEmpty()) {
                 LOGGER.debug("Endpoint gateway subnet is not set. Falling back to instance subnet for load balancer creation.");
                 subnetIds.addAll(awsNetworkView.getSubnetList());
+                subnetIds.addAll(getMultiAZSubnets(cloudLoadBalancer));
             }
         }
         if (subnetIds.isEmpty()) {
             throw new CloudConnectorException("Unable to configure load balancer: Could not identify subnets.");
         }
+        return subnetIds;
+    }
+
+    private Set<String> getMultiAZSubnets(CloudLoadBalancer cloudLoadBalancer) {
         Set<String> multiAzSubnets = cloudLoadBalancer.getPortToTargetGroupMapping()
                 .values()
                 .stream()
                 .flatMap(groups -> groups.stream().flatMap(group -> group.getNetwork().getSubnets().stream().map(GroupSubnet::getSubnetId)))
                 .collect(Collectors.toSet());
         LOGGER.info("Adding subnets that have been configured via multi-AZ support: '{}'", String.join(",", multiAzSubnets));
-        subnetIds.addAll(multiAzSubnets);
-        return new HashSet<>(subnetIds);
+        return multiAzSubnets;
+    }
+
+    private Set<String> getEndpointGatewayMultiAZSubnets(CloudLoadBalancer cloudLoadBalancer) {
+        Set<String> multiAzSubnets = cloudLoadBalancer.getPortToTargetGroupMapping()
+                .values()
+                .stream()
+                .flatMap(groups -> groups.stream().flatMap(g -> g.getNetwork().getEndpointGatewaySubnets().stream().map(GroupSubnet::getSubnetId)))
+                .collect(Collectors.toSet());
+        LOGGER.info("Adding endpoint gateway subnets for multi-AZ support: '{}'", String.join(",", multiAzSubnets));
+        return multiAzSubnets;
     }
 
     private void setupLoadBalancer(CloudLoadBalancer cloudLoadBalancer, Map<String, List<String>> instanceIdsByGroupName,

@@ -10,6 +10,8 @@ public class NetworkConstants {
 
     public static final String ENDPOINT_GATEWAY_SUBNET_ID = "endpointGatewaySubnetId";
 
+    public static final String ENDPOINT_GATEWAY_SUBNET_IDS = "endpointGatewaySubnetIds";
+
     public static final String INTERNET_GATEWAY_ID = "internetGatewayId";
 
     public static final String CLOUD_PLATFORM = "cloudPlatform";
