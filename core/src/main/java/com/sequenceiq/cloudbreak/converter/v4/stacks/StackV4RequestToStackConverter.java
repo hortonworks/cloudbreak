@@ -43,6 +43,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.In
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.network.InstanceGroupNetworkV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
+import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
@@ -54,6 +55,7 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
+import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
@@ -79,6 +81,7 @@ import com.sequenceiq.cloudbreak.tag.request.CDPTagMergeRequest;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
+import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 
@@ -155,7 +158,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
             convertAsStack(source, stack);
             updateCloudPlatformAndRelatedFields(source, stack, environment);
             setNetworkIfApplicable(source, stack, environment);
-            setInstanceGroupNetworkIfApplicable(source, stack);
+            setInstanceGroupNetworkIfApplicable(source, stack, environment);
             stack.getComponents().add(getTelemetryComponent(stack, source));
         }
         Map<String, Object> asMap = providerParameterCalculator.get(source).asMap();
@@ -396,7 +399,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         }
     }
 
-    private void setInstanceGroupNetworkIfApplicable(StackV4Request source, Stack stack) {
+    private void setInstanceGroupNetworkIfApplicable(StackV4Request source, Stack stack, DetailedEnvironmentResponse environment) {
         String subnetId = getStackSubnetIdIfExists(stack);
         List<InstanceGroupV4Request> instanceGroups = source.getInstanceGroups();
         for (InstanceGroupV4Request instanceGroup : instanceGroups) {
@@ -404,6 +407,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
                 InstanceGroupNetworkV4Request instanceGroupNetworkV4Request = new InstanceGroupNetworkV4Request();
                 setNetworkByProvider(source, instanceGroup, instanceGroupNetworkV4Request, subnetId);
             }
+            setupEndpointGatewayNetwork(instanceGroup.getNetwork(), stack, instanceGroup.getName(), environment);
         }
     }
 
@@ -488,9 +492,52 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         return Optional.ofNullable(stack.getNetwork())
                 .map(Network::getAttributes)
                 .map(Json::getMap)
-                .map(attr -> attr.get("subnetId"))
+                .map(attr -> attr.get(NetworkConstants.SUBNET_ID))
                 .map(Object::toString)
                 .orElse(null);
+    }
+
+    private String getStackEndpointGatwaySubnetIdIfExists(Stack stack) {
+        return Optional.ofNullable(stack.getNetwork())
+                .map(Network::getAttributes)
+                .map(Json::getMap)
+                .map(attr -> attr.get(NetworkConstants.ENDPOINT_GATEWAY_SUBNET_ID))
+                .map(Object::toString)
+                .orElse(null);
+    }
+
+    private void setupEndpointGatewayNetwork(InstanceGroupNetworkV4Request instanceGroupNetworkV4Request, Stack stack, String instanceGroupName,
+            DetailedEnvironmentResponse environment) {
+        if (CloudPlatform.AWS.name().equals(stack.getCloudPlatform())) {
+            EnvironmentNetworkResponse envNetwork = environment == null ? null : environment.getNetwork();
+            if (envNetwork != null) {
+                if (PublicEndpointAccessGateway.ENABLED.equals(envNetwork.getPublicEndpointAccessGateway())) {
+                    LOGGER.info("Found AWS stack with endpoint gatewy enabled. Selecting endpoint gateway subnet ids.");
+                    List<String> subnetIds = instanceGroupNetworkV4Request.getAws().getSubnetIds();
+                    LOGGER.debug("Endpoint gateway selection: Found instance group network subnet list of {} for instance group {}",
+                            subnetIds, instanceGroupName);
+                    List<String> allAvailabilityZones = envNetwork.getSubnetMetas().values().stream()
+                            .filter(subnetMeta -> subnetIds.contains(subnetMeta.getId()))
+                            .map(CloudSubnet::getAvailabilityZone)
+                            .collect(Collectors.toList());
+                    LOGGER.debug("Endpoint gatway selection: Instance group network has availability zones {}", allAvailabilityZones);
+                    List<String> endpointGatewaySubnetIds = envNetwork.getGatewayEndpointSubnetMetas().values().stream()
+                            .filter(subnetMeta -> allAvailabilityZones.contains(subnetMeta.getAvailabilityZone()))
+                            .map(CloudSubnet::getId)
+                            .collect(Collectors.toList());
+
+                    if (endpointGatewaySubnetIds.isEmpty()) {
+                        String endpointGatewaySubnetId = getStackEndpointGatwaySubnetIdIfExists(stack);
+                        LOGGER.info("Unable to find endpoint gateway subnet metas to match AZs {}. Falling back to subnet {}.",
+                                allAvailabilityZones, endpointGatewaySubnetId);
+                        instanceGroupNetworkV4Request.getAws().setEndpointGatewaySubnetIds(List.of(endpointGatewaySubnetId));
+                    } else {
+                        LOGGER.info("Selected endpoint gateway subnets {} for instance group {}", endpointGatewaySubnetIds, instanceGroupName);
+                        instanceGroupNetworkV4Request.getAws().setEndpointGatewaySubnetIds(endpointGatewaySubnetIds);
+                    }
+                }
+            }
+        }
     }
 
     private void setNetworkIfApplicable(StackV4Request source, Stack stack, DetailedEnvironmentResponse environment) {
