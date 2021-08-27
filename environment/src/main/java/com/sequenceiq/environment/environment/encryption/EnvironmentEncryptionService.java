@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.cloudera.cdp.shaded.com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.cloud.AwsEncryptionParameters;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.EncryptionResources;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -20,6 +21,8 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
+import com.sequenceiq.cloudbreak.cloud.model.encryption.AwsDiskEncryptionParameterCreationRequest;
+import com.sequenceiq.cloudbreak.cloud.model.encryption.CreateAwsDiskEncryptionParameters;
 import com.sequenceiq.cloudbreak.cloud.model.encryption.CreatedDiskEncryptionSet;
 import com.sequenceiq.cloudbreak.cloud.model.encryption.DiskEncryptionSetCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.encryption.DiskEncryptionSetDeletionRequest;
@@ -27,6 +30,8 @@ import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.service.EnvironmentTagProvider;
+import com.sequenceiq.environment.parameter.dto.AwsDiskEncryptionParametersDto;
+import com.sequenceiq.environment.parameter.dto.AwsParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureResourceEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureResourceGroupDto;
@@ -51,6 +56,34 @@ public class EnvironmentEncryptionService {
         this.cloudPlatformConnectors = cloudPlatformConnectors;
         this.environmentTagProvider = environmentTagProvider;
         this.resourceRetriever = resourceRetriever;
+    }
+
+    public CreateAwsDiskEncryptionParameters createAwsDiskEncryptionParameters(EnvironmentDto environmentDto) {
+        AwsEncryptionParameters awsEncryptionParameters = getEncryptionParameters(environmentDto.getCloudPlatform());
+        return awsEncryptionParameters.createAwsDiskEncryptionParameters(createAwsDiskEncryptionParametersCreationRequest(environmentDto));
+
+    }
+
+    @VisibleForTesting
+    AwsEncryptionParameters getEncryptionParameters(String cloudPlatform){
+        CloudPlatformVariant cloudPlatformVariant = new CloudPlatformVariant(Platform.platform(cloudPlatform),
+                Variant.variant(cloudPlatform));
+        return Optional.ofNullable(cloudPlatformConnectors.get(cloudPlatformVariant))
+                .map(CloudConnector::awsEncryptionParameters)
+                .orElseThrow(() -> new EncryptionResourcesNotFoundException(("No Encryption resources component found for cloud platform: " + cloudPlatform)));
+    }
+
+    @VisibleForTesting
+    AwsDiskEncryptionParameterCreationRequest createAwsDiskEncryptionParametersCreationRequest(EnvironmentDto environment) {
+        String encryptionKeyArn = Optional.ofNullable(environment.getParameters())
+                .map(ParametersDto::getAwsParametersDto)
+                .map(AwsParametersDto::getAwsDiskEncryptionParametersDto)
+                .map(AwsDiskEncryptionParametersDto::getEncryptionKeyArn).orElse(null);
+        AwsDiskEncryptionParameterCreationRequest.Builder builder = new AwsDiskEncryptionParameterCreationRequest.Builder()
+                .withCloudCredential(credentialToCloudCredentialConverter.convert(environment.getCredential()))
+                .withCloudContext(getCloudContext(environment))
+                .withEncryptionKeyArn(environment.getParameters().getAwsParametersDto().getAwsDiskEncryptionParametersDto().getEncryptionKeyArn());
+        return builder.build();
     }
 
     public CreatedDiskEncryptionSet createEncryptionResources(EnvironmentDto environmentDto) {

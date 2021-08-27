@@ -96,10 +96,18 @@ public interface CloudConnector<R> extends CloudPlatformAware {
     EncryptionResources encryptionResources();
 
     /**
+     *  Access to the {@link AwsEncryptionParameters} object.
+     *
+     *  @return the {@link AwsEncryptionParameters} object
+     */
+    AwsEncryptionParameters awsEncryptionParameters();
+
+    /**
      * Giving back a valid provider display name. (because of CB-5013)
      *
      * @return the string object
      */
+
     default String regionToDisplayName(String region) {
         return region;
     }
