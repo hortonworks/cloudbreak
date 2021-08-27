@@ -282,8 +282,8 @@ public class StackOperations implements ResourcePropertyProvider {
     public UpgradeV4Response checkForClusterUpgrade(String accountId, @NotNull Stack stack, Long workspaceId, UpgradeV4Request request) {
         MDCBuilder.buildMdcContext(stack);
         boolean osUpgrade = upgradeService.isOsUpgrade(request);
-        boolean replacevms = determineReplaceVmsParameter(stack, request.getReplaceVms());
-        UpgradeV4Response upgradeResponse = clusterUpgradeAvailabilityService.checkForUpgradesByName(stack, osUpgrade, replacevms,
+        boolean replaceVms = determineReplaceVmsParameter(stack, request.getReplaceVms());
+        UpgradeV4Response upgradeResponse = clusterUpgradeAvailabilityService.checkForUpgradesByName(stack, osUpgrade, replaceVms,
                 request.getInternalUpgradeSettings());
         if (CollectionUtils.isNotEmpty(upgradeResponse.getUpgradeCandidates())) {
             clusterUpgradeAvailabilityService.filterUpgradeOptions(accountId, upgradeResponse, request, stack.isDatalake());

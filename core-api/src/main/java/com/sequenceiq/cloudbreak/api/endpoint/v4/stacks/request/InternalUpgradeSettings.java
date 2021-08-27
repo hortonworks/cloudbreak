@@ -10,19 +10,26 @@ public class InternalUpgradeSettings {
 
     private final boolean skipValidations;
 
-    private final boolean dataHubUpgradeEntitled;
+    private final boolean dataHubRuntimeUpgradeEntitled;
 
-    public InternalUpgradeSettings(boolean skipValidations, boolean dataHubUpgradeEntitled) {
+    private final boolean dataHubOsUpgradeEntitled;
+
+    public InternalUpgradeSettings(boolean skipValidations, boolean dataHubRuntimeUpgradeEntitled, boolean dataHubOsUpgradeEntitled) {
         this.skipValidations = skipValidations;
-        this.dataHubUpgradeEntitled = dataHubUpgradeEntitled;
+        this.dataHubRuntimeUpgradeEntitled = dataHubRuntimeUpgradeEntitled;
+        this.dataHubOsUpgradeEntitled = dataHubOsUpgradeEntitled;
     }
 
     public boolean isSkipValidations() {
         return skipValidations;
     }
 
-    public boolean isDataHubUpgradeEntitled() {
-        return dataHubUpgradeEntitled;
+    public boolean isDataHubRuntimeUpgradeEntitled() {
+        return dataHubRuntimeUpgradeEntitled;
+    }
+
+    public boolean isDataHubOsUpgradeEntitled() {
+        return dataHubOsUpgradeEntitled;
     }
 
     @Override
@@ -34,19 +41,22 @@ public class InternalUpgradeSettings {
             return false;
         }
         InternalUpgradeSettings that = (InternalUpgradeSettings) o;
-        return skipValidations == that.skipValidations && dataHubUpgradeEntitled == that.dataHubUpgradeEntitled;
+        return skipValidations == that.skipValidations
+                && dataHubRuntimeUpgradeEntitled == that.dataHubRuntimeUpgradeEntitled
+                && dataHubOsUpgradeEntitled == that.dataHubOsUpgradeEntitled;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(skipValidations, dataHubUpgradeEntitled);
+        return Objects.hash(skipValidations, dataHubRuntimeUpgradeEntitled, dataHubOsUpgradeEntitled);
     }
 
     @Override
     public String toString() {
         return new StringJoiner(", ", InternalUpgradeSettings.class.getSimpleName() + "[", "]")
                 .add("skipValidations=" + skipValidations)
-                .add("datahubUpgradeEntitled=" + dataHubUpgradeEntitled)
+                .add("dataHubUpgradeEntitled=" + dataHubRuntimeUpgradeEntitled)
+                .add("dataHubOsUpgradeEntitled=" + dataHubOsUpgradeEntitled)
                 .toString();
     }
 }

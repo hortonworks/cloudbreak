@@ -64,7 +64,7 @@ public class ImageFilterParams {
     }
 
     public boolean isDataHubUpgradeEntitled() {
-        return internalUpgradeSettings != null && internalUpgradeSettings.isDataHubUpgradeEntitled();
+        return internalUpgradeSettings != null && internalUpgradeSettings.isDataHubRuntimeUpgradeEntitled();
     }
 
     @Override

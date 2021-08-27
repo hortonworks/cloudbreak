@@ -140,7 +140,7 @@ public class ClusterUpgradeImageFilterTest {
     public void testFilterShouldReturnTheAvailableImage() {
         List<Image> properImages = List.of(properImage);
         ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, lockComponents, activatedParcels, DATALAKE_STACK_TYPE, blueprint, STACK_ID,
-                new InternalUpgradeSettings(false, true));
+                new InternalUpgradeSettings(false, true, true));
         ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, properImages, null, null), "");
         when(imageCatalogServiceProxy.getImageFilterResult(cloudbreakImageCatalogV3)).thenReturn(imageFilterResult);
 
@@ -155,7 +155,7 @@ public class ClusterUpgradeImageFilterTest {
     public void testFilterShouldReturnTheAvailableImageWhenTheStackTypeIsWorkload() {
         List<Image> properImages = List.of(properImage);
         ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, lockComponents, activatedParcels, StackType.WORKLOAD, blueprint, STACK_ID,
-                new InternalUpgradeSettings(false, true));
+                new InternalUpgradeSettings(false, true, true));
         ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, properImages, null, null), "");
         when(imageCatalogServiceProxy.getImageFilterResult(cloudbreakImageCatalogV3)).thenReturn(imageFilterResult);
         when(blueprintUpgradeOptionValidator.isValidBlueprint(blueprint, imageFilterParams.isLockComponents(), false, true))
@@ -171,7 +171,7 @@ public class ClusterUpgradeImageFilterTest {
     @Test
     public void testFilterShouldNotReturnTheAvailableImageWhenTheBlueprintIsNotEligibleForUpgradeAndTheStackTypeIsWorkload() {
         ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, lockComponents, activatedParcels, StackType.WORKLOAD, blueprint, STACK_ID,
-                new InternalUpgradeSettings(false, true));
+                new InternalUpgradeSettings(false, true, true));
         BlueprintValidationResult blueprintValidationResult = new BlueprintValidationResult(false, "The upgrade is not allowed for this template.");
         when(blueprintUpgradeOptionValidator.isValidBlueprint(blueprint, imageFilterParams.isLockComponents(), false, true))
                 .thenReturn(blueprintValidationResult);
@@ -188,7 +188,7 @@ public class ClusterUpgradeImageFilterTest {
     public void testFilterShouldNotReturnImageIfPackageFilterReturnFalse() {
         List<Image> properImages = List.of(properImage);
         ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, lockComponents, activatedParcels, DATALAKE_STACK_TYPE, blueprint, STACK_ID,
-                new InternalUpgradeSettings(false, true));
+                new InternalUpgradeSettings(false, true, true));
         ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, properImages, null, null), "");
 
         Predicate<Image> predicate = mock(Predicate.class);
@@ -206,7 +206,7 @@ public class ClusterUpgradeImageFilterTest {
     public void testFilterShouldNotReturnImageIfCmAndStackFilterReturnFalse() {
         List<Image> properImages = List.of(properImage);
         ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, lockComponents, activatedParcels, DATALAKE_STACK_TYPE, blueprint, STACK_ID,
-                new InternalUpgradeSettings(false, true));
+                new InternalUpgradeSettings(false, true, true));
         ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, properImages, null, null), "");
 
         Predicate<Image> predicate = mock(Predicate.class);
@@ -225,7 +225,7 @@ public class ClusterUpgradeImageFilterTest {
         Image availableImages = createImageWithDifferentPlatform();
         List<Image> allImage = List.of(availableImages, properImage);
         ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, lockComponents, activatedParcels, DATALAKE_STACK_TYPE, blueprint, STACK_ID,
-                new InternalUpgradeSettings(false, true));
+                new InternalUpgradeSettings(false, true, true));
         ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, allImage, null, null), "");
         when(imageCatalogServiceProxy.getImageFilterResult(cloudbreakImageCatalogV3)).thenReturn(imageFilterResult);
 
@@ -241,7 +241,7 @@ public class ClusterUpgradeImageFilterTest {
         Image imageWithDifferentPlatform = createImageWithDifferentPlatform();
         List<Image> allImage = List.of(imageWithDifferentPlatform);
         ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, lockComponents, activatedParcels, DATALAKE_STACK_TYPE, blueprint, STACK_ID,
-                new InternalUpgradeSettings(false, true));
+                new InternalUpgradeSettings(false, true, true));
         ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, allImage, null, null), "");
         when(imageCatalogServiceProxy.getImageFilterResult(cloudbreakImageCatalogV3)).thenReturn(imageFilterResult);
 
@@ -257,7 +257,7 @@ public class ClusterUpgradeImageFilterTest {
         Image imageWithDifferentOs = createImageWithDifferentOs();
         List<Image> allImage = List.of(imageWithDifferentOs);
         ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, lockComponents, activatedParcels, DATALAKE_STACK_TYPE, blueprint, STACK_ID,
-                new InternalUpgradeSettings(false, true));
+                new InternalUpgradeSettings(false, true, true));
         ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, allImage, null, null), "");
         when(imageCatalogServiceProxy.getImageFilterResult(cloudbreakImageCatalogV3)).thenReturn(imageFilterResult);
 
@@ -272,7 +272,7 @@ public class ClusterUpgradeImageFilterTest {
     public void testFilterShouldReturnReasonMessageWhenTheVersioningIsNotSupported() {
         List<Image> allImage = List.of(createImageWithDifferentStackVersioning());
         ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, lockComponents, activatedParcels, DATALAKE_STACK_TYPE, blueprint, STACK_ID,
-                new InternalUpgradeSettings(false, true));
+                new InternalUpgradeSettings(false, true, true));
         ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, allImage, null, null), "");
         when(imageCatalogServiceProxy.getImageFilterResult(cloudbreakImageCatalogV3)).thenReturn(imageFilterResult);
 
@@ -287,7 +287,7 @@ public class ClusterUpgradeImageFilterTest {
     public void testFilterShouldReturnReasonMessageWhenCmVersionIsNotAvailable() {
         List<Image> allImage = List.of(createImageWithoutCmVersion());
         ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, lockComponents, activatedParcels, DATALAKE_STACK_TYPE, blueprint, STACK_ID,
-                new InternalUpgradeSettings(false, true));
+                new InternalUpgradeSettings(false, true, true));
         ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, allImage, null, null), "");
         when(imageCatalogServiceProxy.getImageFilterResult(cloudbreakImageCatalogV3)).thenReturn(imageFilterResult);
 
@@ -303,7 +303,7 @@ public class ClusterUpgradeImageFilterTest {
         Image imageWithSameStackAndCmVersion = createImageWithSameStackAndCmVersion();
         List<Image> availableImages = List.of(imageWithSameStackAndCmVersion);
         ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, lockComponents, activatedParcels, DATALAKE_STACK_TYPE, blueprint, STACK_ID,
-                new InternalUpgradeSettings(false, true));
+                new InternalUpgradeSettings(false, true, true));
         ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, availableImages, null, null), "");
         when(imageCatalogServiceProxy.getImageFilterResult(cloudbreakImageCatalogV3)).thenReturn(imageFilterResult);
 
@@ -319,7 +319,7 @@ public class ClusterUpgradeImageFilterTest {
         Image imageWithSameId = createImageWithCurrentImageId();
         List<Image> availableImages = List.of(properImage, imageWithSameId);
         ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, lockComponents, activatedParcels, DATALAKE_STACK_TYPE, blueprint, STACK_ID,
-                new InternalUpgradeSettings(false, true));
+                new InternalUpgradeSettings(false, true, true));
         ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, availableImages, null, null), "");
         when(imageProvider.filterCurrentImage(STACK_ID, CURRENT_IMAGE_ID)).thenReturn(false);
         when(imageCatalogServiceProxy.getImageFilterResult(cloudbreakImageCatalogV3)).thenReturn(imageFilterResult);
@@ -336,7 +336,7 @@ public class ClusterUpgradeImageFilterTest {
         Image imageWithSameId = createImageWithCurrentImageId();
         List<Image> availableImages = List.of(properImage, imageWithSameId);
         ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, lockComponents, activatedParcels, DATALAKE_STACK_TYPE, blueprint, STACK_ID,
-                new InternalUpgradeSettings(false, true));
+                new InternalUpgradeSettings(false, true, true));
         ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, availableImages, null, null), "");
         when(imageProvider.filterCurrentImage(STACK_ID, CURRENT_IMAGE_ID)).thenReturn(true);
         when(imageCatalogServiceProxy.getImageFilterResult(cloudbreakImageCatalogV3)).thenReturn(imageFilterResult);
@@ -354,7 +354,7 @@ public class ClusterUpgradeImageFilterTest {
     public void testFilterShouldReturnReasonMessageWhenOnlyTheCurrentImageIsAvailable() {
         List<Image> availableImages = List.of(createImageWithCurrentImageId());
         ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, lockComponents, activatedParcels, DATALAKE_STACK_TYPE, blueprint, STACK_ID,
-                new InternalUpgradeSettings(false, true));
+                new InternalUpgradeSettings(false, true, true));
         ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, availableImages, null, null), "");
         when(imageProvider.filterCurrentImage(STACK_ID, CURRENT_IMAGE_ID)).thenReturn(false);
         when(imageCatalogServiceProxy.getImageFilterResult(cloudbreakImageCatalogV3)).thenReturn(imageFilterResult);
@@ -373,7 +373,7 @@ public class ClusterUpgradeImageFilterTest {
         Image imageWithDifferentStackVersioning = createImageWithDifferentStackVersioning();
         List<Image> availableImages = List.of(imageWithSameStackAndCmVersion1, imageWithSameStackAndCmVersion2, imageWithDifferentStackVersioning);
         ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, true, Map.of(PARCEL_NAME, PARCEL_VERSION), DATALAKE_STACK_TYPE, blueprint,
-                STACK_ID, new InternalUpgradeSettings(false, true));
+                STACK_ID, new InternalUpgradeSettings(false, true, true));
         ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, availableImages, null, null), "");
         when(imageCatalogServiceProxy.getImageFilterResult(cloudbreakImageCatalogV3)).thenReturn(imageFilterResult);
 
@@ -390,7 +390,7 @@ public class ClusterUpgradeImageFilterTest {
         Image imageWithDifferentStackVersioning = createImageWithDifferentStackVersioning();
         List<Image> availableImages = List.of(imageWithSameStackAndCmVersion1, imageWithSameStackAndCmVersion2, imageWithDifferentStackVersioning);
         ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, true, Map.of(PARCEL_NAME, PARCEL_VERSION), DATALAKE_STACK_TYPE, blueprint,
-                STACK_ID, new InternalUpgradeSettings(false, true));
+                STACK_ID, new InternalUpgradeSettings(false, true, true));
         ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, availableImages, null, null), "");
         when(imageCatalogServiceProxy.getImageFilterResult(cloudbreakImageCatalogV3)).thenReturn(imageFilterResult);
 
@@ -406,7 +406,7 @@ public class ClusterUpgradeImageFilterTest {
         blueprint = new Blueprint();
         blueprint.setName("SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas");
         ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, lockComponents, activatedParcels, StackType.DATALAKE, blueprint, STACK_ID,
-                new InternalUpgradeSettings(false, true));
+                new InternalUpgradeSettings(false, true, true));
 
         ImageFilterResult actual = underTest.filter(ACCOUNT_ID, cloudbreakImageCatalogV3, CLOUD_PLATFORM, imageFilterParams);
 
@@ -422,7 +422,7 @@ public class ClusterUpgradeImageFilterTest {
         blueprint.setName("SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas.");
         List<Image> properImages = List.of(properImage);
         ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, lockComponents, activatedParcels, DATALAKE_STACK_TYPE, blueprint, STACK_ID,
-                new InternalUpgradeSettings(false, true));
+                new InternalUpgradeSettings(false, true, true));
         ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, properImages, null, null), "");
         when(imageCatalogServiceProxy.getImageFilterResult(cloudbreakImageCatalogV3)).thenReturn(imageFilterResult);
 
@@ -436,7 +436,7 @@ public class ClusterUpgradeImageFilterTest {
     @Test
     public void testFilterShouldNotReturnTheAvailableImageByImageCatalogNameWhenTheBlueprintIsNotEligibleForUpgrade() {
         ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, lockComponents, activatedParcels, StackType.WORKLOAD, blueprint, STACK_ID,
-                new InternalUpgradeSettings(false, true));
+                new InternalUpgradeSettings(false, true, true));
         BlueprintValidationResult blueprintValidationResult = new BlueprintValidationResult(false, "The upgrade is not allowed for this template.");
         when(blueprintUpgradeOptionValidator.isValidBlueprint(blueprint, imageFilterParams.isLockComponents(), false, true))
                 .thenReturn(blueprintValidationResult);
@@ -453,7 +453,7 @@ public class ClusterUpgradeImageFilterTest {
     public void testFilterShouldReturnTheAvailableImageByImageCatalogName() throws CloudbreakImageCatalogException {
         List<Image> imageForUpgrade = List.of(properImage);
         ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, lockComponents, activatedParcels, StackType.WORKLOAD, blueprint, STACK_ID,
-                new InternalUpgradeSettings(false, true));
+                new InternalUpgradeSettings(false, true, true));
         when(imageCatalogService.getImages(WORKSPACE_ID, CATALOG_NAME, CLOUD_PLATFORM))
                 .thenReturn(StatedImages.statedImages(new Images(null, imageForUpgrade, null, null), null, null));
         when(blueprintUpgradeOptionValidator.isValidBlueprint(blueprint, imageFilterParams.isLockComponents(), false, true))

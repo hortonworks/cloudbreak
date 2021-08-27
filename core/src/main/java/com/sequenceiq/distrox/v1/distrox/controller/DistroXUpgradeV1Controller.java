@@ -64,7 +64,9 @@ public class DistroXUpgradeV1Controller implements DistroXUpgradeV1Endpoint {
             @InitiatorUserCrn String initiatorUserCrn) {
         NameOrCrn nameOrCrn = NameOrCrn.ofName(clusterName);
         boolean dataHubRuntimeUpgradeEnabled = upgradeAvailabilityService.isRuntimeUpgradeEnabledByUserCrn(initiatorUserCrn);
-        return upgradeCluster(clusterName, distroxUpgradeRequest, nameOrCrn, new InternalUpgradeSettings(true, dataHubRuntimeUpgradeEnabled));
+        boolean dataHubOsUpgradeEntitled = upgradeAvailabilityService.isOsUpgradeEnabledByUserCrn(initiatorUserCrn);
+        return upgradeCluster(clusterName, distroxUpgradeRequest, nameOrCrn, new InternalUpgradeSettings(true, dataHubRuntimeUpgradeEnabled,
+                dataHubOsUpgradeEntitled));
     }
 
     @Override
@@ -73,13 +75,17 @@ public class DistroXUpgradeV1Controller implements DistroXUpgradeV1Endpoint {
             @InitiatorUserCrn String initiatorUserCrn) {
         NameOrCrn nameOrCrn = NameOrCrn.ofCrn(clusterCrn);
         boolean dataHubRuntimeUpgradeEnabled = upgradeAvailabilityService.isRuntimeUpgradeEnabledByUserCrn(initiatorUserCrn);
-        return upgradeCluster(clusterCrn, distroxUpgradeRequest, nameOrCrn, new InternalUpgradeSettings(true, dataHubRuntimeUpgradeEnabled));
+        boolean dataHubOsUpgradeEntitled = upgradeAvailabilityService.isOsUpgradeEnabledByUserCrn(initiatorUserCrn);
+        return upgradeCluster(clusterCrn, distroxUpgradeRequest, nameOrCrn, new InternalUpgradeSettings(true, dataHubRuntimeUpgradeEnabled,
+                dataHubOsUpgradeEntitled));
     }
 
     private DistroXUpgradeV1Response upgradeCluster(String clusterNameOrCrn, DistroXUpgradeV1Request distroxUpgradeRequest, NameOrCrn nameOrCrn) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         boolean dataHubRuntimeUpgradeEnabled = upgradeAvailabilityService.isRuntimeUpgradeEnabledByAccountId(accountId);
-        return upgradeCluster(clusterNameOrCrn, distroxUpgradeRequest, nameOrCrn, new InternalUpgradeSettings(false, dataHubRuntimeUpgradeEnabled));
+        boolean dataHubOsUpgradeEntitled = upgradeAvailabilityService.isOsUpgradeEnabledByAccountId(accountId);
+        return upgradeCluster(clusterNameOrCrn, distroxUpgradeRequest, nameOrCrn, new InternalUpgradeSettings(false, dataHubRuntimeUpgradeEnabled,
+                dataHubOsUpgradeEntitled));
     }
 
     private DistroXUpgradeV1Response upgradeCluster(String clusterNameOrCrn, DistroXUpgradeV1Request distroxUpgradeRequest, NameOrCrn nameOrCrn,

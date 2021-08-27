@@ -23,6 +23,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.InternalUpgradeSettings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackImageChangeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
@@ -213,7 +214,7 @@ class DistroXUpgradeServiceTest {
     @Test
     public void testTriggerFlowWithoutTurnOffReplaceVmsParam() {
         // GIVEN
-        UpgradeV4Request request = new UpgradeV4Request();
+        UpgradeV4Request request = createRequest(true);
         UpgradeV4Response response = new UpgradeV4Response();
         response.setReplaceVms(true);
         response.setUpgradeCandidates(List.of(mock(ImageInfoV4Response.class)));
@@ -236,6 +237,26 @@ class DistroXUpgradeServiceTest {
         // THEN
         verify(reactorFlowManager).triggerDistroXUpgrade(STACK_ID, imageChangeDto, true, true);
         assertTrue(result.isReplaceVms());
+    }
+
+    @Test
+    public void testTriggerDistroXUpgradeShouldThrowBadRequestExceptionWhenTheOsUpgradeIsDisabledByEntitlement() {
+        UpgradeV4Request request = createRequest(false);
+        request.setLockComponents(true);
+        UpgradeV4Response response = new UpgradeV4Response();
+        response.setReplaceVms(true);
+        response.setUpgradeCandidates(List.of(mock(ImageInfoV4Response.class)));
+        when(upgradeAvailabilityService.checkForUpgrade(CLUSTER, WS_ID, request, USER_CRN)).thenReturn(response);
+        ImageInfoV4Response imageInfoV4Response = new ImageInfoV4Response();
+        imageInfoV4Response.setImageId("imgId");
+        imageInfoV4Response.setImageCatalogName("catalogName");
+        when(imageSelector.determineImageId(request, response.getUpgradeCandidates())).thenReturn(imageInfoV4Response);
+        ArgumentCaptor<StackImageChangeV4Request> imageChangeRequestArgumentCaptor = ArgumentCaptor.forClass(StackImageChangeV4Request.class);
+        ImageChangeDto imageChangeDto = new ImageChangeDto(STACK_ID, imageInfoV4Response.getImageId());
+        when(stackCommonService.createImageChangeDto(eq(CLUSTER), eq(WS_ID), imageChangeRequestArgumentCaptor.capture())).thenReturn(imageChangeDto);
+        when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WS_ID)).thenReturn(stack);
+
+        Assertions.assertThrows(BadRequestException.class, () -> underTest.triggerUpgrade(CLUSTER, WS_ID, USER_CRN, request));
     }
 
     @Test
@@ -264,5 +285,11 @@ class DistroXUpgradeServiceTest {
         // THEN
         verify(reactorFlowManager).triggerDistroXUpgrade(STACK_ID, imageChangeDto, false, LOCK_COMPONENTS);
         assertFalse(result.isReplaceVms());
+    }
+
+    private UpgradeV4Request createRequest(boolean osUpgradeEnabled) {
+        UpgradeV4Request request = new UpgradeV4Request();
+        request.setInternalUpgradeSettings(new InternalUpgradeSettings(true, true, osUpgradeEnabled));
+        return request;
     }
 }

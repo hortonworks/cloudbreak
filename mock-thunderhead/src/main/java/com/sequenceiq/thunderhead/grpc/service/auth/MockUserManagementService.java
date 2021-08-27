@@ -41,6 +41,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_GCP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MEDIUM_DUTY_SDX;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_NODESTATUS_ENABLE_SALT_PING;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_OS_UPGRADE_DATAHUB;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_AZURE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RAW_S3;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RAZ;
@@ -293,6 +294,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.datahub.runtime.upgrade.enable}")
     private boolean datahubRuntimeUpgradeEnabled;
+
+    @Value("${auth.mock.datahub.os.upgrade.enable}")
+    private boolean datahubOsUpgradeEnabled;
 
     @Value("${auth.mock.raz.enable}")
     private boolean razEnabled;
@@ -681,6 +685,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (datahubRuntimeUpgradeEnabled) {
             builder.addEntitlements(createEntitlement(CDP_RUNTIME_UPGRADE_DATAHUB));
+        }
+        if (datahubOsUpgradeEnabled) {
+            builder.addEntitlements(createEntitlement(CDP_OS_UPGRADE_DATAHUB));
         }
         if (razEnabled) {
             builder.addEntitlements(createEntitlement(CDP_RAZ));

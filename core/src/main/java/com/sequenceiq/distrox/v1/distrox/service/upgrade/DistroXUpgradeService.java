@@ -75,6 +75,7 @@ public class DistroXUpgradeService {
         ImageChangeDto imageChangeDto = createImageChangeDto(cluster, workspaceId, image);
         Stack stack = stackService.getByNameOrCrnInWorkspace(cluster, workspaceId);
         boolean lockComponents = request.getLockComponents() != null ? request.getLockComponents() : isComponentsLocked(stack, image);
+        validateOsUpgradeEntitled(lockComponents, request);
         boolean replaceVms = determineReplaceVmsParam(upgradeV4Response, lockComponents, stack);
         FlowIdentifier flowIdentifier = reactorFlowManager.triggerDistroXUpgrade(stack.getId(), imageChangeDto, replaceVms, lockComponents);
         UpgradeV4Response response = new UpgradeV4Response("Upgrade started with Image: " + image.getImageId(), flowIdentifier);
@@ -87,6 +88,12 @@ public class DistroXUpgradeService {
         stackImageChangeRequest.setImageId(image.getImageId());
         stackImageChangeRequest.setImageCatalogName(image.getImageCatalogName());
         return stackCommonService.createImageChangeDto(cluster, workspaceId, stackImageChangeRequest);
+    }
+
+    private void validateOsUpgradeEntitled(boolean lockComponents, UpgradeV4Request request) {
+        if (lockComponents && !request.getInternalUpgradeSettings().isDataHubOsUpgradeEntitled()) {
+            throw new BadRequestException("The OS upgrade is not allowed for DataHub clusters.");
+        }
     }
 
     private void validateUpgradeCandidates(NameOrCrn cluster, UpgradeV4Response upgradeResponse) {
