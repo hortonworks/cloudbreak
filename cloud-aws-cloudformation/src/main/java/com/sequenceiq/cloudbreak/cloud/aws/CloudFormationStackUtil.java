@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
+import static com.sequenceiq.cloudbreak.cloud.model.CloudResource.INSTANCE_TYPE;
 import static com.sequenceiq.cloudbreak.cloud.model.CloudResource.PRIVATE_ID;
 
 import java.util.ArrayList;
@@ -139,7 +140,9 @@ public class CloudFormationStackUtil {
                                 .persistent(false)
                                 .build();
                         if (groupInstancesIterator.hasNext()) {
-                            cloudResource.putParameter(PRIVATE_ID, groupInstancesIterator.next().getTemplate().getPrivateId());
+                            CloudInstance cloudInstance = groupInstancesIterator.next();
+                            cloudResource.putParameter(PRIVATE_ID, cloudInstance.getTemplate().getPrivateId());
+                            cloudResource.putParameter(INSTANCE_TYPE, cloudInstance.getTemplate().getFlavor());
                         }
                         cloudResources.add(cloudResource);
                     }

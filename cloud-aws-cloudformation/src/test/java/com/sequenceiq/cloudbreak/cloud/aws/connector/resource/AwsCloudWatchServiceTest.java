@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 
+import static com.sequenceiq.cloudbreak.cloud.model.CloudResource.INSTANCE_TYPE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -26,17 +27,23 @@ import com.amazonaws.services.cloudwatch.model.DeleteAlarmsRequest;
 import com.amazonaws.services.cloudwatch.model.DescribeAlarmsRequest;
 import com.amazonaws.services.cloudwatch.model.DescribeAlarmsResult;
 import com.amazonaws.services.cloudwatch.model.MetricAlarm;
+import com.amazonaws.services.cloudwatch.model.PutMetricAlarmRequest;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonCloudWatchClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.common.api.type.CommonStatus;
+import com.sequenceiq.common.api.type.ResourceType;
 
 @ExtendWith(MockitoExtension.class)
 class AwsCloudWatchServiceTest {
 
     private static final String REGION = "region";
+
+    private static final String ALARM_SUFFIX = "-Status-Check-Failed-System";
 
     @Mock
     private AwsCloudFormationClient awsClient;
@@ -48,6 +55,40 @@ class AwsCloudWatchServiceTest {
     public void setupConfiguration() {
         ReflectionTestUtils.setField(underTest, "alarmSuffix", "-Status-Check-Failed-System");
         ReflectionTestUtils.setField(underTest, "maxBatchsize", 100);
+    }
+
+    @Test
+    void testAddCloudWatchAlarmsForSystemFailures() {
+        CloudResource firstInst = CloudResource.builder().instanceId("i-1").name("i-1").type(ResourceType.AWS_INSTANCE).status(CommonStatus.CREATED).build();
+        CloudResource secondInst = CloudResource.builder().instanceId("i-2").name("i-2").type(ResourceType.AWS_INSTANCE).status(CommonStatus.CREATED).build();
+        AwsCredentialView credentialView = mock(AwsCredentialView.class);
+
+        AmazonCloudWatchClient cloudWatchClient = mock(AmazonCloudWatchClient.class);
+        when(awsClient.createCloudWatchClient(eq(credentialView), eq(REGION))).thenReturn(cloudWatchClient);
+        underTest.addCloudWatchAlarmsForSystemFailures(List.of(firstInst, secondInst), REGION, credentialView);
+
+        ArgumentCaptor<PutMetricAlarmRequest> captorPut = ArgumentCaptor.forClass(PutMetricAlarmRequest.class);
+        verify(cloudWatchClient, times(2)).putMetricAlarm(captorPut.capture());
+        assertEquals(2, captorPut.getAllValues().size());
+        assertEquals("i-1" + ALARM_SUFFIX, captorPut.getAllValues().get(0).getAlarmName());
+        assertEquals("i-2" + ALARM_SUFFIX, captorPut.getAllValues().get(1).getAlarmName());
+    }
+
+    @Test
+    void testAddCloudWatchAlarmsForSystemFailuresWithRecoveryNotSupportedType() {
+        CloudResource firstInst = CloudResource.builder().instanceId("i-1").name("i-1").type(ResourceType.AWS_INSTANCE).status(CommonStatus.CREATED).build();
+        CloudResource secondInst = CloudResource.builder().instanceId("i-2").name("i-2").type(ResourceType.AWS_INSTANCE).status(CommonStatus.CREATED).build();
+        secondInst.putParameter(INSTANCE_TYPE, "m5d.2xlarge");
+        AwsCredentialView credentialView = mock(AwsCredentialView.class);
+
+        AmazonCloudWatchClient cloudWatchClient = mock(AmazonCloudWatchClient.class);
+        when(awsClient.createCloudWatchClient(eq(credentialView), eq(REGION))).thenReturn(cloudWatchClient);
+        underTest.addCloudWatchAlarmsForSystemFailures(List.of(firstInst, secondInst), REGION, credentialView);
+
+        ArgumentCaptor<PutMetricAlarmRequest> captorPut = ArgumentCaptor.forClass(PutMetricAlarmRequest.class);
+        verify(cloudWatchClient, times(1)).putMetricAlarm(captorPut.capture());
+        assertEquals(1, captorPut.getAllValues().size());
+        assertEquals("i-1" + ALARM_SUFFIX, captorPut.getAllValues().get(0).getAlarmName());
     }
 
     @Test

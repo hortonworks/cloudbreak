@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 
+import static com.sequenceiq.cloudbreak.cloud.model.CloudResource.INSTANCE_TYPE;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +35,9 @@ public class AwsCloudWatchService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsCloudWatchService.class);
 
+    private static final List<String> RECOVERABLE_INSTANCE_TYPES = List.of("a1", "c3", "c4", "c5", "c5a", "c5n", "c6g", "c6gn", "inf1", "m3", "m4", "m5", "m5a",
+            "m5n", "m5zn", "m6g", "m6i", "p3", "p4", "r3", "r4", "r5", "r5a", "r5b", "r5n", "r6g", "t2", "t3", "t3a", "t4g", "x1", "x1e");
+
     @Value("${aws.cloudwatch.suffix:-Status-Check-Failed-System}")
     private String alarmSuffix;
 
@@ -54,7 +59,15 @@ public class AwsCloudWatchService {
     public void addCloudWatchAlarmsForSystemFailures(List<CloudResource> instances, String regionName, AwsCredentialView credentialView) {
         AmazonCloudWatchClient amazonCloudWatchClient = awsClient.createCloudWatchClient(credentialView, regionName);
 
-        instances.stream().forEach(instance -> {
+        instances.stream().filter(instance -> {
+            String instanceType = instance.getStringParameter(INSTANCE_TYPE);
+            if (instanceType == null) {
+                LOGGER.debug("Cannot determine if recovery is supported by instance type, attempting to set it up.");
+                return true;
+            }
+            String family = instanceType.contains(".") ? instanceType.split("\\.")[0] : instanceType;
+            return RECOVERABLE_INSTANCE_TYPES.contains(family);
+        }).forEach(instance -> {
             try {
                 PutMetricAlarmRequest metricAlarmRequest = new PutMetricAlarmRequest();
                 metricAlarmRequest.setAlarmActions(Arrays.asList("arn:aws:automate:" + regionName + ":ec2:recover"));
@@ -70,7 +83,8 @@ public class AwsCloudWatchService {
                 amazonCloudWatchClient.putMetricAlarm(metricAlarmRequest);
                 LOGGER.debug("Created cloudwatch alarm for instanceId {}.", instance.getInstanceId());
             } catch (AmazonCloudWatchException acwe) {
-                LOGGER.error("Unable to create cloudwatch alarm for instanceId {}: {}", instance.getInstanceId(), acwe.getLocalizedMessage());
+                LOGGER.info("Unable to create cloudwatch alarm for instanceId {} (instance type: {}): {}", instance.getInstanceId(),
+                        instance.getStringParameter(INSTANCE_TYPE), acwe.getLocalizedMessage());
             }
         });
     }
@@ -82,9 +96,9 @@ public class AwsCloudWatchService {
                 .collect(Collectors.toList());
         LOGGER.info("Found ids for running instances: [{}]. Cloudwatch alarms for these instances will be deleted.", instanceIds);
         List<String> deletedInstanceIds = stack.getGroups().stream()
-            .flatMap(group -> group.getDeletedInstances().stream())
-            .map(CloudInstance::getInstanceId)
-            .collect(Collectors.toList());
+                .flatMap(group -> group.getDeletedInstances().stream())
+                .map(CloudInstance::getInstanceId)
+                .collect(Collectors.toList());
         LOGGER.info("Found ids for deleted instances: [{}]. Deletion will be attempted on the cloudwatch alarms for these instances.", deletedInstanceIds);
         instanceIds.addAll(deletedInstanceIds);
         deleteCloudWatchAlarmsForSystemFailures(stack, regionName, credentialView, instanceIds);
@@ -96,15 +110,15 @@ public class AwsCloudWatchService {
         } else {
             LOGGER.info("Deleting alarms for instance ids [{}]", instanceIds);
             List<String> instanceIdsFromStack = stack.getGroups().stream()
-                .flatMap(group -> group.getInstances().stream())
-                .map(CloudInstance::getInstanceId)
-                .collect(Collectors.toList());
+                    .flatMap(group -> group.getInstances().stream())
+                    .map(CloudInstance::getInstanceId)
+                    .collect(Collectors.toList());
             List<String> instanceIdsNotInStack = instanceIds.stream()
-                .filter(instanceId -> !instanceIdsFromStack.contains(instanceId))
-                .collect(Collectors.toList());
+                    .filter(instanceId -> !instanceIdsFromStack.contains(instanceId))
+                    .collect(Collectors.toList());
             if (!instanceIdsNotInStack.isEmpty()) {
                 LOGGER.warn("Instance IDs [{}] are not part of cloud stack {}, these instances may have already been deleted on the cloud provider side.",
-                    instanceIdsNotInStack, stack);
+                        instanceIdsNotInStack, stack);
             }
             deleteCloudWatchAlarmsForSystemFailures(regionName, credentialView, instanceIds);
         }
