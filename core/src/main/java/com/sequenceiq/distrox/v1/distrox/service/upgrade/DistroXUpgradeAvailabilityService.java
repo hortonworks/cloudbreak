@@ -56,17 +56,28 @@ public class DistroXUpgradeAvailabilityService {
     private RuntimeVersionService runtimeVersionService;
 
     public boolean isRuntimeUpgradeEnabledByUserCrn(String userCrn) {
-        try {
-            String accountId = Crn.safeFromString(userCrn).getAccountId();
-            return entitlementService.datahubRuntimeUpgradeEnabled(accountId);
-        } catch (NullPointerException | CrnParseException e) {
-            LOGGER.warn("Can not parse CRN to find account ID: {}", userCrn, e);
-            throw new BadRequestException("Can not parse CRN to find account ID: " + userCrn);
-        }
+        return entitlementService.datahubRuntimeUpgradeEnabled(getAccountId(userCrn));
     }
 
     public boolean isRuntimeUpgradeEnabledByAccountId(String accountId) {
         return entitlementService.datahubRuntimeUpgradeEnabled(accountId);
+    }
+
+    public boolean isOsUpgradeEnabledByUserCrn(String userCrn) {
+        return entitlementService.datahubOsUpgradeEnabled(getAccountId(userCrn));
+    }
+
+    public boolean isOsUpgradeEnabledByAccountId(String accountId) {
+        return entitlementService.datahubOsUpgradeEnabled(accountId);
+    }
+
+    private String getAccountId(String userCrn) {
+        try {
+            return Crn.safeFromString(userCrn).getAccountId();
+        } catch (NullPointerException | CrnParseException e) {
+            LOGGER.warn("Can not parse CRN to find account ID: {}", userCrn, e);
+            throw new BadRequestException("Can not parse CRN to find account ID: " + userCrn);
+        }
     }
 
     public UpgradeV4Response checkForUpgrade(NameOrCrn nameOrCrn, Long workspaceId, UpgradeV4Request request, String userCrn) {
@@ -132,7 +143,7 @@ public class DistroXUpgradeAvailabilityService {
                         .collect(Collectors.toList());
                 upgradeV4Response.setUpgradeCandidates(upgradeCandidates);
                 if (upgradeCandidates.isEmpty()) {
-                    upgradeV4Response.setReason("No image is available for maintenance upgrade, CDP version: " + currentCdpVersion);
+                    upgradeV4Response.appendReason(" No image is available for maintenance upgrade, CDP version: " + currentCdpVersion);
                 }
                 LOGGER.debug("Patch upgrade candidates for [{}] cluster: [{}]", clusterName, upgradeCandidates);
             } else {

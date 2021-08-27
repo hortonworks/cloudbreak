@@ -40,7 +40,9 @@ auth:
       light.to.medium.migration.enable: false
     differentdatahubversionthandatalake.enabled: true
     database.wire.encryption.enable: true
-    datahub.runtime.upgrade.enable: true
+    datahub:
+      runtime.upgrade.enable: true
+      os.upgrade.enable: true
     ccmv2.enable: false
     ccmv2jumpgate.enable: false
     environment.experience.deletion.enable: true

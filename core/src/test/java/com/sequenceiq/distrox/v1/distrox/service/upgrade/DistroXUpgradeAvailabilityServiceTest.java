@@ -368,7 +368,7 @@ public class DistroXUpgradeAvailabilityServiceTest {
 
         UpgradeV4Response result = underTest.checkForUpgrade(CLUSTER, WORKSPACE_ID, request, USER_CRN);
 
-        String expectedMessage = "No image is available for maintenance upgrade, CDP version: 7.1.0";
+        String expectedMessage = " No image is available for maintenance upgrade, CDP version: 7.1.0";
         assertEquals(0, result.getUpgradeCandidates().size());
         assertEquals(expectedMessage, result.getReason());
     }
