@@ -23,6 +23,8 @@ public class CloudResource extends DynamicModel {
 
     public static final String PRIVATE_ID = "privateId";
 
+    public static final String INSTANCE_TYPE = "instanceType";
+
     private final ResourceType type;
 
     private CommonStatus status;
