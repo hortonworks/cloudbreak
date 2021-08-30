@@ -670,8 +670,8 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
     }
 
     private Predicate<ApiClusterTemplateRoleConfigGroup> filterNonCoordinatorImpalaRole() {
-        return roleConfigGroup -> roleConfigGroup.getRoleType().equals("IMPALAD") &&
-                roleConfigGroup.getConfigs().stream().anyMatch(config -> config.getValue().equals("COORDINATOR_ONLY"));
+        return roleConfigGroup -> "IMPALAD".equals(roleConfigGroup.getRoleType()) && roleConfigGroup.getConfigs() != null &&
+                roleConfigGroup.getConfigs().stream().anyMatch(config -> "COORDINATOR_ONLY".equals(config.getValue()));
     }
 
     public void removeDanglingVariableReferences() {
