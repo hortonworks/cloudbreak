@@ -35,7 +35,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ClouderaManagerClusterDecomissionServiceTest {
+public class ClouderaManagerClusterDecommissionServiceTest {
 
     private static final int GATEWAY_PORT = 8080;
 
@@ -64,11 +64,11 @@ public class ClouderaManagerClusterDecomissionServiceTest {
     private Stack stack = createStack();
 
     @InjectMocks
-    private ClouderaManagerClusterDecomissionService underTest;
+    private ClouderaManagerClusterDecommissionService underTest;
 
     @Before
     public void before() {
-        underTest = new ClouderaManagerClusterDecomissionService(stack, clientConfig);
+        underTest = new ClouderaManagerClusterDecommissionService(stack, clientConfig);
         ReflectionTestUtils.setField(underTest, "clouderaManagerApiFactory", clouderaManagerApiFactory);
         ReflectionTestUtils.setField(underTest, "clouderaManagerApiClientProvider", clouderaManagerApiClientProvider);
         ReflectionTestUtils.setField(underTest, "clouderaManagerDecomissioner", clouderaManagerDecomissioner);

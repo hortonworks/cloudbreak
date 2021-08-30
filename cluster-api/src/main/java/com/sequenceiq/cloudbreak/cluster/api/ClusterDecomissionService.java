@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cluster.api;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -24,6 +25,8 @@ public interface ClusterDecomissionService {
     void removeManagementServices();
 
     void deleteHostFromCluster(InstanceMetaData data);
+
+    void deleteHostsFromCluster(List<InstanceMetaData> hosts);
 
     void deleteUnusedCredentialsFromCluster();
 

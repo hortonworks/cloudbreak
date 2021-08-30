@@ -39,10 +39,12 @@ import com.cloudera.api.swagger.model.ApiHostList;
 import com.cloudera.api.swagger.model.ApiHostNameList;
 import com.cloudera.api.swagger.model.ApiHostTemplate;
 import com.cloudera.api.swagger.model.ApiHostTemplateList;
+import com.cloudera.api.swagger.model.ApiHostsToRemoveArgs;
 import com.cloudera.api.swagger.model.ApiRole;
 import com.cloudera.api.swagger.model.ApiService;
 import com.cloudera.api.swagger.model.ApiServiceConfig;
 import com.cloudera.api.swagger.model.ApiServiceList;
+import com.google.common.base.Joiner;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
@@ -315,6 +317,12 @@ public class ClouderaManagerDecomissioner {
         deleteHostFromClouderaManager(stack, data, client);
     }
 
+    public void deleteHosts(Stack stack, List<InstanceMetaData> hosts, ApiClient client) {
+        List<String> hostFqdns = hosts.stream().map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.toList());
+        LOGGER.debug("Deleting hosts: [{}]", Joiner.on(",").join(hostFqdns));
+        deleteHostsFromClouderaManager(stack, hostFqdns, client);
+    }
+
     public void deleteUnusedCredentialsFromCluster(Stack stack, ApiClient client) {
         LOGGER.debug("Deleting unused credentials");
         ClouderaManagerResourceApi clouderaManagerResourceApi = clouderaManagerApiFactory.getClouderaManagerResourceApi(client);
@@ -323,6 +331,34 @@ public class ClouderaManagerDecomissioner {
             clouderaManagerPollingServiceProvider.startPollingCmKerberosJob(stack, client, command.getId());
         } catch (ApiException e) {
             LOGGER.error("Failed to delete unused credentials", e);
+            throw new CloudbreakServiceException(e.getMessage(), e);
+        }
+    }
+
+    private void deleteHostsFromClouderaManager(Stack stack, List<String> hosts, ApiClient client) {
+        HostsResourceApi hostsResourceApi = clouderaManagerApiFactory.getHostsResourceApi(client);
+        try {
+            ApiHostList hostRefList = hostsResourceApi.readHosts(null, null, SUMMARY_REQUEST_VIEW);
+            List<String> knownDeletableHosts = hostRefList.getItems().stream()
+                    .filter(host -> hosts.contains(host.getHostname()))
+                    .map(ApiHost::getHostname)
+                    .collect(Collectors.toList());
+            if (!knownDeletableHosts.isEmpty()) {
+                ApiHostsToRemoveArgs body = new ApiHostsToRemoveArgs();
+                body.hostsToRemove(knownDeletableHosts);
+                ApiCommand command = hostsResourceApi.removeHostsFromCluster(body);
+                LOGGER.debug("Hosts remove request sent.");
+                PollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingRemoveHostsFromCluster(stack, client, command.getId());
+                if (isExited(pollingResult)) {
+                    throw new CancellationException("Cluster was terminated while waiting for hosts removal from CM.");
+                } else if (isTimeout(pollingResult)) {
+                    throw new CloudbreakServiceException("Timeout while Cloudera Manager tried to remove hosts from cluster.");
+                }
+            } else {
+                LOGGER.debug("Hosts already deleted.");
+            }
+        } catch (ApiException e) {
+            LOGGER.error("Failed to delete hosts: {}", Joiner.on(",").join(hosts), e);
             throw new CloudbreakServiceException(e.getMessage(), e);
         }
     }

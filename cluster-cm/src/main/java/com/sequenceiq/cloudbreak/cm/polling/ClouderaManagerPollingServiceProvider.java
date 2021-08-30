@@ -211,6 +211,12 @@ public class ClouderaManagerPollingServiceProvider {
         return startDefaultPolling(stack, apiClient, commandId, "Collect diagnostics");
     }
 
+    public PollingResult startPollingRemoveHostsFromCluster(Stack stack, ApiClient apiClient, BigDecimal commandId) {
+        LOGGER.debug("Waiting for Cloudera Manager to finish removal of hosts from cluster. [Server address: {}]", stack.getClusterManagerIp());
+        return pollCommandWithTimeListener(stack, apiClient, commandId, POLL_FOR_ONE_HOUR,
+                new ClouderaManagerDefaultListenerTask(clouderaManagerApiPojoFactory, clusterEventService, "Remove hosts from cluster"));
+    }
+
     public PollingResult startPollingCommandList(Stack stack, ApiClient apiClient, List<BigDecimal> commandIds, String commandName) {
         LOGGER.debug("Waiting for Cloudera Manager to finish the following commands: {}. [Server address: {}]", commandIds, stack.getClusterManagerIp());
         return pollCommandListWithTimeListener(stack, apiClient, commandIds, POLL_FOR_ONE_HOUR,

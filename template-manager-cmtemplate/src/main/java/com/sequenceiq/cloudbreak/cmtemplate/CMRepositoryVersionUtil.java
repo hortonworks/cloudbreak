@@ -158,6 +158,14 @@ public class CMRepositoryVersionUtil {
         return false;
     }
 
+    public static boolean isCmBulkHostsRemovalAllowed(Optional<String> runtimeVersion) {
+        if (runtimeVersion.isPresent()) {
+            LOGGER.info("Runtime version is compared for CM services health check.");
+            return isVersionNewerOrEqualThanLimited(runtimeVersion.get(), CLOUDERA_STACK_VERSION_7_2_12);
+        }
+        return false;
+    }
+
     public static boolean isVersionNewerOrEqualThanLimited(Versioned currentVersion, Versioned limitedAPIVersion) {
         LOGGER.info("Compared: Versioned {} with Versioned {}", currentVersion.getVersion(), limitedAPIVersion.getVersion());
         Comparator<Versioned> versionComparator = new VersionComparator();
