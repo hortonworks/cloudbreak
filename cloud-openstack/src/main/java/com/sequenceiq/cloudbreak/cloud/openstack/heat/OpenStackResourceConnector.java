@@ -407,6 +407,11 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
         return updateHeatStack(authenticatedContext, resources, heatTemplate, parameters);
     }
 
+    @Override
+    public void checkUpdate(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) throws Exception {
+        return;
+    }
+
     private List<CloudResourceStatus> updateHeatStack(AuthenticatedContext authenticatedContext, List<CloudResource> resources, String heatTemplate,
             Map<String, String> parameters) {
         CloudResource resource = utils.getHeatResource(resources);
