@@ -84,7 +84,8 @@ public class InstanceMetaDataService {
 
     public Stack saveInstanceAndGetUpdatedStack(Stack stack, List<CloudInstance> cloudInstances, boolean save, Set<String> hostNames, boolean repair) {
         LOGGER.info("Get updated stack with instances: {} and hostnames: {} and save: ({})", cloudInstances, hostNames, save);
-        Map<String, String> subnetAzPairs = getSubnetAzPairs(stack.getEnvironmentCrn(), stack, repair);
+        DetailedEnvironmentResponse environment = getDetailedEnvironmentResponse(stack.getEnvironmentCrn());
+        Map<String, String> subnetAzPairs = getAllSubnetAzPairs(environment);
         String stackSubnetId = getStackSubnetIdIfExists(stack);
         String stackAz = stackSubnetId == null ? null : subnetAzPairs.get(stackSubnetId);
         Iterator<String> hostNameIterator = hostNames.iterator();
@@ -99,6 +100,7 @@ public class InstanceMetaDataService {
                     String hostName = hostNameIterator.next();
                     LOGGER.info("We have hostname to be allocated: {}, set it to this instanceMetadata: {}", hostName, instanceMetaData);
                     instanceMetaData.setDiscoveryFQDN(hostName);
+                    subnetAzPairs = getSubnetAzPairsFilteredByHostNameIfRepair(environment, stack, repair, instanceGroup.getGroupName(), hostName);
                 }
                 prepareCloudInstanceSubnetAndAvailabilityZone(instanceGroup, cloudInstance, subnetAzPairs, stackSubnetId, stackAz);
                 prepareInstanceMetaDataSubnetAndAvailabilityZoneAndRackId(cloudInstance, instanceMetaData);
@@ -112,17 +114,22 @@ public class InstanceMetaDataService {
     }
 
     @VisibleForTesting
-    String getAzFromDiskOrNullIfRepair(Stack stack, boolean repair) {
+    String getAzFromDiskOrNullIfRepair(Stack stack, boolean repair, String instanceGroup, String hostname) {
         String availabilityZone = null;
         if (repair) {
             ResourceType resourceType = getSupportedReattachableDiskType(stack);
             if (resourceType != null) {
-                Optional<CloudResource> reattachableDiskResource = resourceRetriever.findFirstByStatusAndTypeAndStack(CommonStatus.DETACHED,
-                        resourceType, stack.getId());
+                List<CloudResource> reattachableDiskResources = resourceRetriever.findAllByStatusAndTypeAndStackAndInstanceGroup(CommonStatus.DETACHED,
+                        resourceType, stack.getId(), instanceGroup);
+                Optional<CloudResource> reattachableDiskResource = reattachableDiskResources.stream()
+                        .filter(d -> d.getParameter(ATTRIBUTES, VolumeSetAttributes.class).getDiscoveryFQDN().equals(hostname))
+                        .findFirst();
                 if (reattachableDiskResource.isPresent()) {
                     VolumeSetAttributes volumeSetAttributes = reattachableDiskResource.get().getParameter(ATTRIBUTES, VolumeSetAttributes.class);
                     availabilityZone = volumeSetAttributes.getAvailabilityZone();
                     LOGGER.debug("Found AZ for the {}: {}", resourceType, availabilityZone);
+                } else {
+                    LOGGER.debug("Cannot find {} for {} in instanceGroup of {}", resourceType, hostname, instanceGroup);
                 }
             }
         }
@@ -137,14 +144,23 @@ public class InstanceMetaDataService {
         return null;
     }
 
-    private Map<String, String> getSubnetAzPairs(String environmentCrn, Stack stack, boolean repair) {
+    private Map<String, String> getAllSubnetAzPairs(DetailedEnvironmentResponse environment) {
+        return getSubnetAzPairsFilteredByHostNameIfRepair(environment, null, false, null, null);
+    }
+
+    private Map<String, String> getSubnetAzPairsFilteredByHostNameIfRepair(DetailedEnvironmentResponse environment, Stack stack, boolean repair,
+            String instanceGroup, String hostname) {
+        String az = getAzFromDiskOrNullIfRepair(stack, repair, instanceGroup, hostname);
+        return multiAzCalculatorService.prepareSubnetAzMap(environment, az);
+    }
+
+    private DetailedEnvironmentResponse getDetailedEnvironmentResponse(String environmentCrn) {
         DetailedEnvironmentResponse environment = measure(() ->
                         ThreadBasedUserCrnProvider.doAsInternalActor(() ->
                                 environmentClientService.getByCrn(environmentCrn)),
                 LOGGER,
                 "Get Environment from Environment service took {} ms");
-        String az = getAzFromDiskOrNullIfRepair(stack, repair);
-        return multiAzCalculatorService.prepareSubnetAzMap(environment, az);
+        return environment;
     }
 
     private String getStackSubnetIdIfExists(Stack stack) {

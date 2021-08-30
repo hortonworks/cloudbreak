@@ -57,6 +57,11 @@ public class ResourceService {
         return repository.findByStackIdAndType(stackId, type);
     }
 
+    public List<Resource> findAllByResourceStatusAndResourceTypeAndStackIdAndInstanceGroup(CommonStatus status, ResourceType resourceType, Long stackId,
+            String instanceGroup) {
+        return repository.findAllByResourceStatusAndResourceTypeAndStackIdAndInstanceGroup(status, resourceType, stackId, instanceGroup);
+    }
+
     public void delete(Resource resource) {
         repository.delete(resource);
     }

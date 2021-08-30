@@ -17,7 +17,6 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -319,17 +318,19 @@ class InstanceMetaDataServiceTest {
         Stack stack = new Stack();
         stack.setId(1L);
         stack.setCloudPlatform(CloudPlatform.AWS.name());
+        VolumeSetAttributes volumeSetAttributes = new VolumeSetAttributes("az", false, "fstab", List.of(), 10, "type");
+        volumeSetAttributes.setDiscoveryFQDN("hostname");
         CloudResource cloudResource = CloudResource.builder()
                 .type(ResourceType.AWS_VOLUMESET)
                 .status(CommonStatus.DETACHED)
                 .name("name")
-                .params(Map.of(CloudResource.ATTRIBUTES, new VolumeSetAttributes("az", false, "fstab", List.of(), 10, "type")))
+                .params(Map.of(CloudResource.ATTRIBUTES, volumeSetAttributes))
                 .build();
-        when(resourceRetriever.findFirstByStatusAndTypeAndStack(CommonStatus.DETACHED, ResourceType.AWS_VOLUMESET, 1L))
-                .thenReturn(Optional.of(cloudResource));
-        String actual = underTest.getAzFromDiskOrNullIfRepair(stack, true);
+        when(resourceRetriever.findAllByStatusAndTypeAndStackAndInstanceGroup(CommonStatus.DETACHED, ResourceType.AWS_VOLUMESET, 1L, "ig"))
+                .thenReturn(List.of(cloudResource));
+        String actual = underTest.getAzFromDiskOrNullIfRepair(stack, true, "ig", "hostname");
         assertThat(actual).isEqualTo("az");
-        verify(resourceRetriever).findFirstByStatusAndTypeAndStack(CommonStatus.DETACHED, ResourceType.AWS_VOLUMESET, 1L);
+        verify(resourceRetriever).findAllByStatusAndTypeAndStackAndInstanceGroup(CommonStatus.DETACHED, ResourceType.AWS_VOLUMESET, 1L, "ig");
     }
 
     @Test
@@ -337,9 +338,29 @@ class InstanceMetaDataServiceTest {
         Stack stack = new Stack();
         stack.setId(1L);
         stack.setCloudPlatform(CloudPlatform.GCP.name());
-        String actual = underTest.getAzFromDiskOrNullIfRepair(stack, true);
+        String actual = underTest.getAzFromDiskOrNullIfRepair(stack, true, "ig", "hostname");
         assertThat(actual).isNull();
         verify(resourceRetriever, never()).findFirstByStatusAndTypeAndStack(CommonStatus.DETACHED, ResourceType.AWS_VOLUMESET, 1L);
+    }
+
+    @Test
+    public void testGetAzFromDiskOrNullIfRepairWhenRepairAndCloudPlatformSupportedButNoVolumeWithHostName() {
+        Stack stack = new Stack();
+        stack.setId(1L);
+        stack.setCloudPlatform(CloudPlatform.AWS.name());
+        VolumeSetAttributes volumeSetAttributes = new VolumeSetAttributes("az", false, "fstab", List.of(), 10, "type");
+        volumeSetAttributes.setDiscoveryFQDN("any-hostname");
+        CloudResource cloudResource = CloudResource.builder()
+                .type(ResourceType.AWS_VOLUMESET)
+                .status(CommonStatus.DETACHED)
+                .name("name")
+                .params(Map.of(CloudResource.ATTRIBUTES, volumeSetAttributes))
+                .build();
+        when(resourceRetriever.findAllByStatusAndTypeAndStackAndInstanceGroup(CommonStatus.DETACHED, ResourceType.AWS_VOLUMESET, 1L, "ig"))
+                .thenReturn(List.of(cloudResource));
+        String actual = underTest.getAzFromDiskOrNullIfRepair(stack, true, "ig", "hostname");
+        assertThat(actual).isNull();
+        verify(resourceRetriever).findAllByStatusAndTypeAndStackAndInstanceGroup(CommonStatus.DETACHED, ResourceType.AWS_VOLUMESET, 1L, "ig");
     }
 
     private Stack stack(int instanceGroupCount) {

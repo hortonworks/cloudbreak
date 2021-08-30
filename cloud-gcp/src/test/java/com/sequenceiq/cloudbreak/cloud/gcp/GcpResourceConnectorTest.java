@@ -46,6 +46,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.template.ResourceContextBuilder;
 import com.sequenceiq.cloudbreak.cloud.template.compute.ComputeResourceService;
@@ -210,7 +211,9 @@ public class GcpResourceConnectorTest {
         doNothing().when(resourceBuilderContext).addNetworkResources(anyCollection());
         when(groupResourceService.getGroupResources(any(Variant.class), anyCollection()))
                 .thenReturn(List.of(cloudResource("test-1", GCP_INSTANCE)));
-        when(cloudStack.getGroups()).thenReturn(List.of(group("master")));
+        Group master = group("master");
+        master.getInstances().get(0).putParameter(CloudInstance.FQDN, "fqdn");
+        when(cloudStack.getGroups()).thenReturn(List.of(master));
         doNothing().when(resourceBuilderContext).addComputeResources(anyLong(), anyList());
         when(computeResourceService.buildResourcesForUpscale(
                 any(ResourceBuilderContext.class),
@@ -234,12 +237,14 @@ public class GcpResourceConnectorTest {
     }
 
     private CloudResource cloudResource(String name, ResourceType resourceType) {
+        VolumeSetAttributes volumeSetAttributes = new VolumeSetAttributes("az", false, "fstab", List.of(), 1, "type");
+        volumeSetAttributes.setDiscoveryFQDN("fqdn");
         return CloudResource.builder()
                 .type(resourceType)
                 .name(name)
                 .group("master")
                 .status(CommonStatus.REQUESTED)
-                .params(Map.of())
+                .params(Map.of(CloudResource.ATTRIBUTES, volumeSetAttributes))
                 .build();
     }
 

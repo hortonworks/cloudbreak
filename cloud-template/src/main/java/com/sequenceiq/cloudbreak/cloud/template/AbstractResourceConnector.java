@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -27,6 +26,7 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.template.compute.ComputeResourceService;
 import com.sequenceiq.cloudbreak.cloud.template.compute.DatabaseServerCheckerService;
@@ -110,7 +110,7 @@ public abstract class AbstractResourceConnector implements ResourceConnector<Lis
 
     @Override
     public List<CloudResourceStatus> launchDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack,
-        PersistenceNotifier persistenceNotifier) throws Exception {
+            PersistenceNotifier persistenceNotifier) throws Exception {
         List<CloudResource> cloudResources = databaseServerLaunchService.launch(authenticatedContext, stack, persistenceNotifier);
         return cloudResources.stream()
                 .map(e -> new CloudResourceStatus(e, ResourceStatus.CREATED))
@@ -195,12 +195,17 @@ public abstract class AbstractResourceConnector implements ResourceConnector<Lis
                 .filter(cloudResource -> getDiskResourceType().equals(cloudResource.getType()))
                 .filter(cloudResource -> StringUtils.isEmpty(cloudResource.getInstanceId()) || CommonStatus.DETACHED.equals(cloudResource.getStatus()))
                 .collect(Collectors.toList());
-        for (int i = 0; i < diskSets.size(); i++) {
-            CloudResource cloudResource = diskSets.get(i);
-            Optional.ofNullable(scalingGroup.getInstances().get(i))
-                    .map(CloudInstance::getTemplate)
-                    .map(InstanceTemplate::getPrivateId)
-                    .ifPresent(privateId -> context.addComputeResources(privateId, List.of(cloudResource)));
+        for (CloudResource cloudResource : diskSets) {
+            VolumeSetAttributes volumeSetAttributes = cloudResource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
+            if (volumeSetAttributes != null) {
+                String discoveryFQDN = volumeSetAttributes.getDiscoveryFQDN();
+                scalingGroup.getInstances().stream()
+                        .filter(cloudInstance -> discoveryFQDN.equals(cloudInstance.getStringParameter(CloudInstance.FQDN)))
+                        .findFirst()
+                        .map(CloudInstance::getTemplate)
+                        .map(InstanceTemplate::getPrivateId)
+                        .ifPresent(privateId -> context.addComputeResources(privateId, List.of(cloudResource)));
+            }
         }
     }
 

@@ -337,6 +337,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
     }
 
     private void deleteOrphanedVolumes(List<CloudResourceStatus> cloudResourceStatuses, AmazonEc2Client client) {
+        LOGGER.debug("Deleting orphan volumes");
         cloudResourceStatuses.stream()
                 .filter(cloudResourceStatus -> CREATED.equals(cloudResourceStatus.getStatus()))
                 .map(CloudResourceStatus::getCloudResource)
