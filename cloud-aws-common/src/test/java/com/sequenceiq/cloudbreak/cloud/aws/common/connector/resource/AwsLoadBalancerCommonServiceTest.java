@@ -65,6 +65,10 @@ class AwsLoadBalancerCommonServiceTest {
 
     private static final String SUBNET_ID_2 = "anotherSubnetId";
 
+    private static final String PUBLIC_SUBNET_ID_1 = "publicSubnetId";
+
+    private static final String PUBLIC_SUBNET_ID_2 = "anotherPublicSubnetId";
+
     @Mock
     private LoadBalancerTypeConverter loadBalancerTypeConverter;
 
@@ -108,7 +112,8 @@ class AwsLoadBalancerCommonServiceTest {
         String expectedError = "Unable to configure load balancer: Could not identify subnets.";
         CloudConnectorException exception =
                 assertThrows(CloudConnectorException.class,
-                        () -> underTest.selectLoadBalancerSubnetIds(LoadBalancerType.PRIVATE, awsNetworkView, null));
+                        () -> underTest.selectLoadBalancerSubnetIds(LoadBalancerType.PRIVATE, awsNetworkView,
+                                new CloudLoadBalancer(LoadBalancerType.PRIVATE)));
         assertEquals(expectedError, exception.getMessage());
     }
 
@@ -118,7 +123,8 @@ class AwsLoadBalancerCommonServiceTest {
         String expectedError = "Unable to configure load balancer: Could not identify subnets.";
         CloudConnectorException exception =
                 assertThrows(CloudConnectorException.class,
-                        () -> underTest.selectLoadBalancerSubnetIds(LoadBalancerType.PUBLIC, awsNetworkView, null));
+                        () -> underTest.selectLoadBalancerSubnetIds(LoadBalancerType.PUBLIC, awsNetworkView,
+                                new CloudLoadBalancer(LoadBalancerType.PUBLIC)));
         assertEquals(expectedError, exception.getMessage());
     }
 
@@ -135,11 +141,12 @@ class AwsLoadBalancerCommonServiceTest {
     public void testSelectLoadBalancerSubnetIdsWhenEndpointGatewaySetAndInstanceGroupNetworkContainsSubnetForMultiAz() {
         AwsNetworkView awsNetworkView = createNetworkView(null, PUBLIC_ID_1);
         LoadBalancerType loadBalancerType = LoadBalancerType.PUBLIC;
-        CloudLoadBalancer cloudLoadBalancer = createCloudLoadBalancer(loadBalancerType, List.of(SUBNET_ID_1, SUBNET_ID_2));
+        CloudLoadBalancer cloudLoadBalancer = createCloudLoadBalancerWithEndpointGateay(loadBalancerType, List.of(SUBNET_ID_1, SUBNET_ID_2),
+                List.of(PUBLIC_SUBNET_ID_1, PUBLIC_SUBNET_ID_2));
 
         Set<String> subnetIds = underTest.selectLoadBalancerSubnetIds(loadBalancerType, awsNetworkView, cloudLoadBalancer);
 
-        assertEquals(Set.of(PUBLIC_ID_1, SUBNET_ID_1, SUBNET_ID_2), subnetIds);
+        assertEquals(Set.of(PUBLIC_ID_1, PUBLIC_SUBNET_ID_1, PUBLIC_SUBNET_ID_2), subnetIds);
     }
 
     @Test
@@ -262,11 +269,30 @@ class AwsLoadBalancerCommonServiceTest {
         return cloudLoadBalancer;
     }
 
+    private CloudLoadBalancer createCloudLoadBalancerWithEndpointGateay(LoadBalancerType type, List<String> instanceGroupNetworkSubnetIds,
+            List<String> endpointGatewaySubnetIds) {
+        Group group = new Group(INSTANCE_NAME, GATEWAY, List.of(), null, null, null, null,
+                null, null, 100, null, createGroupNetwork(instanceGroupNetworkSubnetIds, endpointGatewaySubnetIds));
+        CloudLoadBalancer cloudLoadBalancer = new CloudLoadBalancer(type);
+        cloudLoadBalancer.addPortToTargetGroupMapping(new TargetGroupPortPair(PORT, PORT), Set.of(group));
+        return cloudLoadBalancer;
+    }
+
     private GroupNetwork createGroupNetwork(List<String> instanceGroupNetworkSubnetIds) {
         Set<GroupSubnet> groupSubnets = instanceGroupNetworkSubnetIds.stream()
                 .map(GroupSubnet::new)
                 .collect(Collectors.toSet());
         return new GroupNetwork(OutboundInternetTraffic.DISABLED, groupSubnets, new HashMap<>());
+    }
+
+    private GroupNetwork createGroupNetwork(List<String> instanceGroupNetworkSubnetIds, List<String> endpointGatewaySubnetIds) {
+        Set<GroupSubnet> groupSubnets = instanceGroupNetworkSubnetIds.stream()
+                .map(GroupSubnet::new)
+                .collect(Collectors.toSet());
+        Set<GroupSubnet> endpointGatewaySubnets = endpointGatewaySubnetIds.stream()
+                .map(GroupSubnet::new)
+                .collect(Collectors.toSet());
+        return new GroupNetwork(OutboundInternetTraffic.DISABLED, groupSubnets, endpointGatewaySubnets, new HashMap<>());
     }
 
     private AwsNetworkView createNetworkView(String subnetId, String endpointGatewaSubnetId) {
