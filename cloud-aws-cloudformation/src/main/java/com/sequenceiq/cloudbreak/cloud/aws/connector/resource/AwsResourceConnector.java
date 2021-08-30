@@ -165,11 +165,6 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
     }
 
     @Override
-    public void checkUpdate(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) throws Exception {
-        awsUpdateService.checkUpdate(authenticatedContext, stack, resources);
-    }
-
-    @Override
     public List<CloudResourceStatus> upscale(AuthenticatedContext ac, CloudStack stack, List<CloudResource> resources) {
         return awsUpscaleService.upscale(ac, stack, resources);
     }

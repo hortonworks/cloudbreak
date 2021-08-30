@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
-import java.util.Map;
-
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.NotImplementedException;
@@ -18,15 +16,14 @@ public class AwsImageUpdateService {
     private AwsLaunchConfigurationImageUpdateService awsLaunchConfigurationImageUpdateService;
 
     @Inject
-    private AwsLaunchTemplateUpdateService awsLaunchTemplateUpdateService;
+    private AwsLaunchTemplateImageUpdateService awsLaunchTemplateImageUpdateService;
 
     public void updateImage(AuthenticatedContext authenticatedContext, CloudStack stack, CloudResource cfResource) {
         String cfTemplate = stack.getTemplate();
         if (cfTemplate.contains("AWS::AutoScaling::LaunchConfiguration")) {
             awsLaunchConfigurationImageUpdateService.updateImage(authenticatedContext, stack, cfResource);
         } else if (cfTemplate.contains("AWS::EC2::LaunchTemplate")) {
-            awsLaunchTemplateUpdateService.updateFields(authenticatedContext,
-                    cfResource, Map.of(LaunchTemplateField.IMAGE_ID, stack.getImage().getImageName()));
+            awsLaunchTemplateImageUpdateService.updateImage(authenticatedContext, stack, cfResource);
         } else {
             throw new NotImplementedException("Image update for stack template is not implemented yet.");
         }

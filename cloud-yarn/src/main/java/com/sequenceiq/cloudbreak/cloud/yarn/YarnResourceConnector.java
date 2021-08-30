@@ -240,11 +240,6 @@ public class YarnResourceConnector implements ResourceConnector<Object> {
     }
 
     @Override
-    public void checkUpdate(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) throws Exception {
-        return;
-    }
-
-    @Override
     public List<CloudResourceStatus> upscale(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) {
         throw new CloudOperationNotSupportedException("Upscale stack operation is not supported on YARN");
     }

@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
-import static org.mockito.ArgumentMatchers.anyMap;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
@@ -17,7 +15,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
-import com.sequenceiq.cloudbreak.cloud.model.Image;
 
 @ExtendWith(MockitoExtension.class)
 public class AwsImageUpdateServiceTest {
@@ -35,7 +32,7 @@ public class AwsImageUpdateServiceTest {
     private AwsLaunchConfigurationImageUpdateService awsLaunchConfigurationImageUpdateService;
 
     @Mock
-    private AwsLaunchTemplateUpdateService awsLaunchTemplateUpdateService;
+    private AwsLaunchTemplateImageUpdateService awsLaunchTemplateImageUpdateService;
 
     @InjectMocks
     private AwsImageUpdateService underTest;
@@ -47,17 +44,16 @@ public class AwsImageUpdateServiceTest {
         underTest.updateImage(ac, stack, cfResource);
 
         verify(awsLaunchConfigurationImageUpdateService).updateImage(ac, stack, cfResource);
-        verify(awsLaunchTemplateUpdateService, never()).updateFields(eq(ac), eq(cfResource), anyMap());
+        verify(awsLaunchTemplateImageUpdateService, never()).updateImage(ac, stack, cfResource);
     }
 
     @Test
     void shouldUpdateImageInLaunchTemplate() {
         Mockito.when(stack.getTemplate()).thenReturn("AWS::EC2::LaunchTemplate");
-        Mockito.when(stack.getImage()).thenReturn(new Image("imagename", null, null, null, null, null, "imageid", null));
 
         underTest.updateImage(ac, stack, cfResource);
 
-        verify(awsLaunchTemplateUpdateService).updateFields(eq(ac), eq(cfResource), anyMap());
+        verify(awsLaunchTemplateImageUpdateService).updateImage(ac, stack, cfResource);
         verify(awsLaunchConfigurationImageUpdateService, never()).updateImage(ac, stack, cfResource);
     }
 
@@ -67,7 +63,7 @@ public class AwsImageUpdateServiceTest {
 
         Assertions.assertThrows(NotImplementedException.class, () -> underTest.updateImage(ac, stack, cfResource));
 
-        verify(awsLaunchTemplateUpdateService, never()).updateFields(eq(ac), eq(cfResource), anyMap());
+        verify(awsLaunchTemplateImageUpdateService, never()).updateImage(ac, stack, cfResource);
         verify(awsLaunchConfigurationImageUpdateService, never()).updateImage(ac, stack, cfResource);
     }
 }
