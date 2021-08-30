@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.config;
 
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.ClusterUpgradeValidationState.CLUSTER_UPGRADE_CLOUDPROVIDER_CHECK_UPDATE_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.ClusterUpgradeValidationState.CLUSTER_UPGRADE_DISK_SPACE_VALIDATION_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.ClusterUpgradeValidationState.CLUSTER_UPGRADE_IMAGE_VALIDATION_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.ClusterUpgradeValidationState.CLUSTER_UPGRADE_SERVICE_VALIDATION_STATE;
@@ -10,6 +11,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.vali
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.ClusterUpgradeValidationState.INIT_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.FAILED_CLUSTER_UPGRADE_VALIDATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.FINALIZE_CLUSTER_UPGRADE_VALIDATION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.FINISH_CLUSTER_UPGRADE_CLOUDPROVIDER_UPDATECHECK_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.FINISH_CLUSTER_UPGRADE_DISK_SPACE_VALIDATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.FINISH_CLUSTER_UPGRADE_VALIDATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.HANDLED_FAILED_CLUSTER_UPGRADE_VALIDATION_EVENT;
@@ -46,8 +48,12 @@ public class ClusterUpgradeValidationFlowConfig extends AbstractFlowConfiguratio
                     .event(START_CLUSTER_UPGRADE_DISK_SPACE_VALIDATION_EVENT)
                     .defaultFailureEvent()
 
-                    .from(CLUSTER_UPGRADE_DISK_SPACE_VALIDATION_STATE).to(CLUSTER_UPGRADE_SERVICE_VALIDATION_STATE)
+                    .from(CLUSTER_UPGRADE_DISK_SPACE_VALIDATION_STATE).to(CLUSTER_UPGRADE_CLOUDPROVIDER_CHECK_UPDATE_STATE)
                     .event(FINISH_CLUSTER_UPGRADE_DISK_SPACE_VALIDATION_EVENT)
+                    .defaultFailureEvent()
+
+                    .from(CLUSTER_UPGRADE_CLOUDPROVIDER_CHECK_UPDATE_STATE).to(CLUSTER_UPGRADE_SERVICE_VALIDATION_STATE)
+                    .event(FINISH_CLUSTER_UPGRADE_CLOUDPROVIDER_UPDATECHECK_EVENT)
                     .defaultFailureEvent()
 
                     .from(CLUSTER_UPGRADE_SERVICE_VALIDATION_STATE).to(CLUSTER_UPGRADE_VALIDATION_FINISHED_STATE)
@@ -84,7 +90,7 @@ public class ClusterUpgradeValidationFlowConfig extends AbstractFlowConfiguratio
 
     @Override
     public ClusterUpgradeValidationStateSelectors[] getInitEvents() {
-        return new ClusterUpgradeValidationStateSelectors[] {
+        return new ClusterUpgradeValidationStateSelectors[]{
                 START_CLUSTER_UPGRADE_VALIDATION_INIT_EVENT
         };
     }
