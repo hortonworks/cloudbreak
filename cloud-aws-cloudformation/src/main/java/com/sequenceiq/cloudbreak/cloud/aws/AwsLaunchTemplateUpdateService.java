@@ -61,9 +61,9 @@ public class AwsLaunchTemplateUpdateService {
                     launchTemplateSpecification);
             modifyLaunchTemplate(ec2Client, launchTemplateSpecification, createLaunchTemplateVersionResult, !dryRun);
             if (dryRun) {
-                updateAutoScalingGroup(updatableFields, autoScalingClient, autoScalingGroup, launchTemplateSpecification, createLaunchTemplateVersionResult);
-            } else {
                 LOGGER.debug("Autoscale group update will be skipped because of dryrun, which just test the permissions for modifiying the launch template.");
+            } else {
+                updateAutoScalingGroup(updatableFields, autoScalingClient, autoScalingGroup, launchTemplateSpecification);
             }
         }
     }
@@ -129,11 +129,9 @@ public class AwsLaunchTemplateUpdateService {
     }
 
     private UpdateAutoScalingGroupResult updateAutoScalingGroup(Map<LaunchTemplateField, String> updatableFields, AmazonAutoScalingClient autoScalingClient,
-            AutoScalingGroup autoScalingGroup, LaunchTemplateSpecification launchTemplateSpecification,
-            CreateLaunchTemplateVersionResult createLaunchTemplateVersionResult) {
+            AutoScalingGroup autoScalingGroup, LaunchTemplateSpecification launchTemplateSpecification) {
         LaunchTemplateSpecification newLaunchTemplateSpecification = new LaunchTemplateSpecification()
-                .withLaunchTemplateId(launchTemplateSpecification.getLaunchTemplateId())
-                .withVersion(createLaunchTemplateVersionResult.getLaunchTemplateVersion().getVersionNumber().toString());
+                .withLaunchTemplateId(launchTemplateSpecification.getLaunchTemplateId());
         UpdateAutoScalingGroupResult updateAutoScalingGroupResult = autoScalingClient.updateAutoScalingGroup(new UpdateAutoScalingGroupRequest()
                 .withAutoScalingGroupName(autoScalingGroup.getAutoScalingGroupName())
                 .withLaunchTemplate(newLaunchTemplateSpecification));
