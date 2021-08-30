@@ -24,12 +24,23 @@ public class InstanceGroupAwsNetworkV1Parameters extends MappableBase implements
     @ApiModelProperty
     private List<String> subnetIds = new ArrayList<>();
 
+    @ApiModelProperty
+    private List<String> endpointGatewaySubnetIds = new ArrayList<>();
+
     public List<String> getSubnetIds() {
         return subnetIds;
     }
 
     public void setSubnetIds(List<String> subnetIds) {
         this.subnetIds = subnetIds;
+    }
+
+    public List<String> getEndpointGatewaySubnetIds() {
+        return endpointGatewaySubnetIds;
+    }
+
+    public void setEndpointGatewaySubnetIds(List<String> endpointGatewaySubnetIds) {
+        this.endpointGatewaySubnetIds = endpointGatewaySubnetIds;
     }
 
     @Override
@@ -42,12 +53,14 @@ public class InstanceGroupAwsNetworkV1Parameters extends MappableBase implements
     @Override
     public void parse(Map<String, Object> parameters) {
         subnetIds = getStringList(parameters, NetworkConstants.SUBNET_IDS);
+        endpointGatewaySubnetIds = getStringList(parameters, NetworkConstants.ENDPOINT_GATEWAY_SUBNET_IDS);
     }
 
     @Override
     public Map<String, Object> asMap() {
         Map<String, Object> map = super.asMap();
         map.put(NetworkConstants.SUBNET_IDS, subnetIds);
+        map.put(NetworkConstants.ENDPOINT_GATEWAY_SUBNET_IDS, endpointGatewaySubnetIds);
         return map;
     }
 }

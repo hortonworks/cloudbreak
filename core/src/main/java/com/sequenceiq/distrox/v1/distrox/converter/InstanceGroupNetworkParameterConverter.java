@@ -165,6 +165,12 @@ public class InstanceGroupNetworkParameterConverter {
             } else if (source.getValue() != null) {
                 response.setSubnetIds(List.of(source.getValue().getPreferedSubnetId()));
             }
+            List<String> endpointGatewaySubnetIds = key.getEndpointGatewaySubnetIds();
+            if (subnetIdsDefined(endpointGatewaySubnetIds)) {
+                response.setEndpointGatewaySubnetIds(endpointGatewaySubnetIds);
+            } else if (source.getValue() != null) {
+                response.setEndpointGatewaySubnetIds(List.copyOf(source.getValue().getEndpointGatewaySubnetIds()));
+            }
         }
 
         return response;
