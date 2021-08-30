@@ -111,11 +111,6 @@ class ResourceConnectorTest {
         }
 
         @Override
-        public void checkUpdate(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) throws Exception {
-            return;
-        }
-
-        @Override
         public List<CloudResourceStatus> terminateDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack, List<CloudResource> resources,
                 PersistenceNotifier persistenceNotifier, boolean force) {
             return null;
