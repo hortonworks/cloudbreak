@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.validation.annotation.Validated;
@@ -17,20 +16,20 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "Arguments used for Rolling Restart commands.")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
 
 public class ApiRollingRestartArgs   {
   @JsonProperty("slaveBatchSize")
-  private BigDecimal slaveBatchSize = null;
+  private Integer slaveBatchSize = null;
 
   @JsonProperty("sleepSeconds")
-  private BigDecimal sleepSeconds = null;
+  private Integer sleepSeconds = null;
 
   @JsonProperty("slaveFailCountThreshold")
-  private BigDecimal slaveFailCountThreshold = null;
+  private Integer slaveFailCountThreshold = null;
 
   @JsonProperty("staleConfigsOnly")
   private Boolean staleConfigsOnly = null;
@@ -46,7 +45,7 @@ public class ApiRollingRestartArgs   {
   @Valid
   private List<String> restartRoleNames = null;
 
-  public ApiRollingRestartArgs slaveBatchSize(BigDecimal slaveBatchSize) {
+  public ApiRollingRestartArgs slaveBatchSize(Integer slaveBatchSize) {
     this.slaveBatchSize = slaveBatchSize;
     return this;
   }
@@ -57,17 +56,16 @@ public class ApiRollingRestartArgs   {
   **/
   @ApiModelProperty(value = "Number of slave roles to restart at a time. Must be greater than zero. Default is 1.  Please note that for HDFS, this number should be less than the replication factor (default 3) to ensure data availability during rolling restart.")
 
-  @Valid
 
-  public BigDecimal getSlaveBatchSize() {
+  public Integer getSlaveBatchSize() {
     return slaveBatchSize;
   }
 
-  public void setSlaveBatchSize(BigDecimal slaveBatchSize) {
+  public void setSlaveBatchSize(Integer slaveBatchSize) {
     this.slaveBatchSize = slaveBatchSize;
   }
 
-  public ApiRollingRestartArgs sleepSeconds(BigDecimal sleepSeconds) {
+  public ApiRollingRestartArgs sleepSeconds(Integer sleepSeconds) {
     this.sleepSeconds = sleepSeconds;
     return this;
   }
@@ -78,17 +76,16 @@ public class ApiRollingRestartArgs   {
   **/
   @ApiModelProperty(value = "Number of seconds to sleep between restarts of slave role batches.  Must be greater than or equal to 0. Default is 0.")
 
-  @Valid
 
-  public BigDecimal getSleepSeconds() {
+  public Integer getSleepSeconds() {
     return sleepSeconds;
   }
 
-  public void setSleepSeconds(BigDecimal sleepSeconds) {
+  public void setSleepSeconds(Integer sleepSeconds) {
     this.sleepSeconds = sleepSeconds;
   }
 
-  public ApiRollingRestartArgs slaveFailCountThreshold(BigDecimal slaveFailCountThreshold) {
+  public ApiRollingRestartArgs slaveFailCountThreshold(Integer slaveFailCountThreshold) {
     this.slaveFailCountThreshold = slaveFailCountThreshold;
     return this;
   }
@@ -99,13 +96,12 @@ public class ApiRollingRestartArgs   {
   **/
   @ApiModelProperty(value = "The threshold for number of slave batches that are allowed to fail to restart before the entire command is considered failed.  Must be greather than or equal to 0. Default is 0. <p> This argument is for ADVANCED users only. </p>")
 
-  @Valid
 
-  public BigDecimal getSlaveFailCountThreshold() {
+  public Integer getSlaveFailCountThreshold() {
     return slaveFailCountThreshold;
   }
 
-  public void setSlaveFailCountThreshold(BigDecimal slaveFailCountThreshold) {
+  public void setSlaveFailCountThreshold(Integer slaveFailCountThreshold) {
     this.slaveFailCountThreshold = slaveFailCountThreshold;
   }
 
@@ -166,7 +162,7 @@ public class ApiRollingRestartArgs   {
    * Role types to restart. If not specified, all startable roles are restarted.  Both role types and role names should not be specified.
    * @return restartRoleTypes
   **/
-  @ApiModelProperty(example = "\"null\"", value = "Role types to restart. If not specified, all startable roles are restarted.  Both role types and role names should not be specified.")
+  @ApiModelProperty(value = "Role types to restart. If not specified, all startable roles are restarted.  Both role types and role names should not be specified.")
 
 
   public List<String> getRestartRoleTypes() {
@@ -194,7 +190,7 @@ public class ApiRollingRestartArgs   {
    * List of specific roles to restart. If none are specified, then all roles of specified role types are restarted.  Both role types and role names should not be specified.
    * @return restartRoleNames
   **/
-  @ApiModelProperty(example = "\"null\"", value = "List of specific roles to restart. If none are specified, then all roles of specified role types are restarted.  Both role types and role names should not be specified.")
+  @ApiModelProperty(value = "List of specific roles to restart. If none are specified, then all roles of specified role types are restarted.  Both role types and role names should not be specified.")
 
 
   public List<String> getRestartRoleNames() {

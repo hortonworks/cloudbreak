@@ -3,7 +3,6 @@ package com.sequenceiq.mock.clouderamanager.base;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -72,7 +71,7 @@ public class BatchResourceOperationTest {
         ApiBatchRequest body = new ApiBatchRequest().items(List.of(apiBatchRequestElement));
 
         when(batchApiHandler.canProcess(apiBatchRequestElement)).thenReturn(true);
-        when(batchApiHandler.process(MOCK_UUID, apiBatchRequestElement)).thenReturn(new ApiBatchResponseElement().statusCode(BigDecimal.valueOf(200)));
+        when(batchApiHandler.process(MOCK_UUID, apiBatchRequestElement)).thenReturn(new ApiBatchResponseElement().statusCode(Integer.valueOf(200)));
 
         ArgumentCaptor<ApiBatchResponse> responseArgument = ArgumentCaptor.forClass(ApiBatchResponse.class);
         underTest.execute(MOCK_UUID, body);
@@ -86,7 +85,7 @@ public class BatchResourceOperationTest {
         ApiBatchRequest body = new ApiBatchRequest().items(List.of(apiBatchRequestElement));
 
         when(batchApiHandler.canProcess(apiBatchRequestElement)).thenReturn(true);
-        when(batchApiHandler.process(MOCK_UUID, apiBatchRequestElement)).thenReturn(new ApiBatchResponseElement().statusCode(BigDecimal.valueOf(302)));
+        when(batchApiHandler.process(MOCK_UUID, apiBatchRequestElement)).thenReturn(new ApiBatchResponseElement().statusCode(Integer.valueOf(302)));
 
         ArgumentCaptor<ApiBatchResponse> responseArgument = ArgumentCaptor.forClass(ApiBatchResponse.class);
         underTest.execute(MOCK_UUID, body);
@@ -100,7 +99,7 @@ public class BatchResourceOperationTest {
         ApiBatchRequest body = new ApiBatchRequest().items(List.of(apiBatchRequestElement));
 
         when(batchApiHandler.canProcess(apiBatchRequestElement)).thenReturn(true);
-        when(batchApiHandler.process(MOCK_UUID, apiBatchRequestElement)).thenReturn(new ApiBatchResponseElement().statusCode(BigDecimal.valueOf(400)));
+        when(batchApiHandler.process(MOCK_UUID, apiBatchRequestElement)).thenReturn(new ApiBatchResponseElement().statusCode(Integer.valueOf(400)));
 
         ArgumentCaptor<ApiBatchResponse> responseArgument = ArgumentCaptor.forClass(ApiBatchResponse.class);
         underTest.execute(MOCK_UUID, body);

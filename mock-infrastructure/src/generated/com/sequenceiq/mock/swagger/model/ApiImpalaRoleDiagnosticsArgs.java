@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.math.BigDecimal;
 import org.springframework.validation.annotation.Validated;
 import javax.validation.Valid;
 import javax.validation.constraints.*;
@@ -15,7 +14,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "Arguments used for Rolling Restart commands.")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
@@ -28,10 +27,10 @@ public class ApiImpalaRoleDiagnosticsArgs   {
   private String comments = null;
 
   @JsonProperty("stacksCount")
-  private BigDecimal stacksCount = null;
+  private Integer stacksCount = null;
 
   @JsonProperty("stacksIntervalSeconds")
-  private BigDecimal stacksIntervalSeconds = null;
+  private Integer stacksIntervalSeconds = null;
 
   @JsonProperty("jmap")
   private Boolean jmap = null;
@@ -40,10 +39,10 @@ public class ApiImpalaRoleDiagnosticsArgs   {
   private Boolean gcore = null;
 
   @JsonProperty("minidumpsCount")
-  private BigDecimal minidumpsCount = null;
+  private Integer minidumpsCount = null;
 
   @JsonProperty("minidumpsIntervalSeconds")
-  private BigDecimal minidumpsIntervalSeconds = null;
+  private Integer minidumpsIntervalSeconds = null;
 
   @JsonProperty("phoneHome")
   private Boolean phoneHome = null;
@@ -88,7 +87,7 @@ public class ApiImpalaRoleDiagnosticsArgs   {
     this.comments = comments;
   }
 
-  public ApiImpalaRoleDiagnosticsArgs stacksCount(BigDecimal stacksCount) {
+  public ApiImpalaRoleDiagnosticsArgs stacksCount(Integer stacksCount) {
     this.stacksCount = stacksCount;
     return this;
   }
@@ -99,34 +98,32 @@ public class ApiImpalaRoleDiagnosticsArgs   {
   **/
   @ApiModelProperty(value = "")
 
-  @Valid
 
-  public BigDecimal getStacksCount() {
+  public Integer getStacksCount() {
     return stacksCount;
   }
 
-  public void setStacksCount(BigDecimal stacksCount) {
+  public void setStacksCount(Integer stacksCount) {
     this.stacksCount = stacksCount;
   }
 
-  public ApiImpalaRoleDiagnosticsArgs stacksIntervalSeconds(BigDecimal stacksIntervalSeconds) {
+  public ApiImpalaRoleDiagnosticsArgs stacksIntervalSeconds(Integer stacksIntervalSeconds) {
     this.stacksIntervalSeconds = stacksIntervalSeconds;
     return this;
   }
 
   /**
-   * Interval between stack collections.
+   * Interval between stack collections. Defaults to 0
    * @return stacksIntervalSeconds
   **/
-  @ApiModelProperty(value = "Interval between stack collections.")
+  @ApiModelProperty(value = "Interval between stack collections. Defaults to 0")
 
-  @Valid
 
-  public BigDecimal getStacksIntervalSeconds() {
+  public Integer getStacksIntervalSeconds() {
     return stacksIntervalSeconds;
   }
 
-  public void setStacksIntervalSeconds(BigDecimal stacksIntervalSeconds) {
+  public void setStacksIntervalSeconds(Integer stacksIntervalSeconds) {
     this.stacksIntervalSeconds = stacksIntervalSeconds;
   }
 
@@ -170,7 +167,7 @@ public class ApiImpalaRoleDiagnosticsArgs   {
     this.gcore = gcore;
   }
 
-  public ApiImpalaRoleDiagnosticsArgs minidumpsCount(BigDecimal minidumpsCount) {
+  public ApiImpalaRoleDiagnosticsArgs minidumpsCount(Integer minidumpsCount) {
     this.minidumpsCount = minidumpsCount;
     return this;
   }
@@ -181,17 +178,16 @@ public class ApiImpalaRoleDiagnosticsArgs   {
   **/
   @ApiModelProperty(value = "")
 
-  @Valid
 
-  public BigDecimal getMinidumpsCount() {
+  public Integer getMinidumpsCount() {
     return minidumpsCount;
   }
 
-  public void setMinidumpsCount(BigDecimal minidumpsCount) {
+  public void setMinidumpsCount(Integer minidumpsCount) {
     this.minidumpsCount = minidumpsCount;
   }
 
-  public ApiImpalaRoleDiagnosticsArgs minidumpsIntervalSeconds(BigDecimal minidumpsIntervalSeconds) {
+  public ApiImpalaRoleDiagnosticsArgs minidumpsIntervalSeconds(Integer minidumpsIntervalSeconds) {
     this.minidumpsIntervalSeconds = minidumpsIntervalSeconds;
     return this;
   }
@@ -202,13 +198,12 @@ public class ApiImpalaRoleDiagnosticsArgs   {
   **/
   @ApiModelProperty(value = "")
 
-  @Valid
 
-  public BigDecimal getMinidumpsIntervalSeconds() {
+  public Integer getMinidumpsIntervalSeconds() {
     return minidumpsIntervalSeconds;
   }
 
-  public void setMinidumpsIntervalSeconds(BigDecimal minidumpsIntervalSeconds) {
+  public void setMinidumpsIntervalSeconds(Integer minidumpsIntervalSeconds) {
     this.minidumpsIntervalSeconds = minidumpsIntervalSeconds;
   }
 

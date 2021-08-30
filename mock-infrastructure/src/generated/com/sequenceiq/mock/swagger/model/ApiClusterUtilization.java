@@ -16,7 +16,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "Utilization report information of a Cluster.")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
@@ -68,16 +68,16 @@ public class ApiClusterUtilization   {
   private ApiTenantUtilizationList tenantUtilizations = null;
 
   @JsonProperty("maxCpuUtilizationTimestampMs")
-  private BigDecimal maxCpuUtilizationTimestampMs = null;
+  private Integer maxCpuUtilizationTimestampMs = null;
 
   @JsonProperty("maxMemoryUtilizationTimestampMs")
-  private BigDecimal maxMemoryUtilizationTimestampMs = null;
+  private Integer maxMemoryUtilizationTimestampMs = null;
 
   @JsonProperty("maxWorkloadCpuTimestampMs")
-  private BigDecimal maxWorkloadCpuTimestampMs = null;
+  private Integer maxWorkloadCpuTimestampMs = null;
 
   @JsonProperty("maxWorkloadMemoryTimestampMs")
-  private BigDecimal maxWorkloadMemoryTimestampMs = null;
+  private Integer maxWorkloadMemoryTimestampMs = null;
 
   @JsonProperty("errorMessage")
   private String errorMessage = null;
@@ -397,7 +397,7 @@ public class ApiClusterUtilization   {
     this.tenantUtilizations = tenantUtilizations;
   }
 
-  public ApiClusterUtilization maxCpuUtilizationTimestampMs(BigDecimal maxCpuUtilizationTimestampMs) {
+  public ApiClusterUtilization maxCpuUtilizationTimestampMs(Integer maxCpuUtilizationTimestampMs) {
     this.maxCpuUtilizationTimestampMs = maxCpuUtilizationTimestampMs;
     return this;
   }
@@ -408,17 +408,16 @@ public class ApiClusterUtilization   {
   **/
   @ApiModelProperty(value = "Timestamp corresponding to maximum CPU utilization for the entire cluster during the report window.")
 
-  @Valid
 
-  public BigDecimal getMaxCpuUtilizationTimestampMs() {
+  public Integer getMaxCpuUtilizationTimestampMs() {
     return maxCpuUtilizationTimestampMs;
   }
 
-  public void setMaxCpuUtilizationTimestampMs(BigDecimal maxCpuUtilizationTimestampMs) {
+  public void setMaxCpuUtilizationTimestampMs(Integer maxCpuUtilizationTimestampMs) {
     this.maxCpuUtilizationTimestampMs = maxCpuUtilizationTimestampMs;
   }
 
-  public ApiClusterUtilization maxMemoryUtilizationTimestampMs(BigDecimal maxMemoryUtilizationTimestampMs) {
+  public ApiClusterUtilization maxMemoryUtilizationTimestampMs(Integer maxMemoryUtilizationTimestampMs) {
     this.maxMemoryUtilizationTimestampMs = maxMemoryUtilizationTimestampMs;
     return this;
   }
@@ -429,17 +428,16 @@ public class ApiClusterUtilization   {
   **/
   @ApiModelProperty(value = "Timestamp corresponding to maximum memory utilization for the entire cluster during the report window.")
 
-  @Valid
 
-  public BigDecimal getMaxMemoryUtilizationTimestampMs() {
+  public Integer getMaxMemoryUtilizationTimestampMs() {
     return maxMemoryUtilizationTimestampMs;
   }
 
-  public void setMaxMemoryUtilizationTimestampMs(BigDecimal maxMemoryUtilizationTimestampMs) {
+  public void setMaxMemoryUtilizationTimestampMs(Integer maxMemoryUtilizationTimestampMs) {
     this.maxMemoryUtilizationTimestampMs = maxMemoryUtilizationTimestampMs;
   }
 
-  public ApiClusterUtilization maxWorkloadCpuTimestampMs(BigDecimal maxWorkloadCpuTimestampMs) {
+  public ApiClusterUtilization maxWorkloadCpuTimestampMs(Integer maxWorkloadCpuTimestampMs) {
     this.maxWorkloadCpuTimestampMs = maxWorkloadCpuTimestampMs;
     return this;
   }
@@ -450,17 +448,16 @@ public class ApiClusterUtilization   {
   **/
   @ApiModelProperty(value = "Timestamp corresponds to maximum CPU consumption by workloads that ran on the cluster during the report window.")
 
-  @Valid
 
-  public BigDecimal getMaxWorkloadCpuTimestampMs() {
+  public Integer getMaxWorkloadCpuTimestampMs() {
     return maxWorkloadCpuTimestampMs;
   }
 
-  public void setMaxWorkloadCpuTimestampMs(BigDecimal maxWorkloadCpuTimestampMs) {
+  public void setMaxWorkloadCpuTimestampMs(Integer maxWorkloadCpuTimestampMs) {
     this.maxWorkloadCpuTimestampMs = maxWorkloadCpuTimestampMs;
   }
 
-  public ApiClusterUtilization maxWorkloadMemoryTimestampMs(BigDecimal maxWorkloadMemoryTimestampMs) {
+  public ApiClusterUtilization maxWorkloadMemoryTimestampMs(Integer maxWorkloadMemoryTimestampMs) {
     this.maxWorkloadMemoryTimestampMs = maxWorkloadMemoryTimestampMs;
     return this;
   }
@@ -471,13 +468,12 @@ public class ApiClusterUtilization   {
   **/
   @ApiModelProperty(value = "Timestamp corresponds to maximum memory resource consumption by workloads that ran on the cluster during the report window.")
 
-  @Valid
 
-  public BigDecimal getMaxWorkloadMemoryTimestampMs() {
+  public Integer getMaxWorkloadMemoryTimestampMs() {
     return maxWorkloadMemoryTimestampMs;
   }
 
-  public void setMaxWorkloadMemoryTimestampMs(BigDecimal maxWorkloadMemoryTimestampMs) {
+  public void setMaxWorkloadMemoryTimestampMs(Integer maxWorkloadMemoryTimestampMs) {
     this.maxWorkloadMemoryTimestampMs = maxWorkloadMemoryTimestampMs;
   }
 

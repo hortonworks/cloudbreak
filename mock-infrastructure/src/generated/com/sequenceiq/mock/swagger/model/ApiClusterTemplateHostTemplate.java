@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.sequenceiq.mock.swagger.model.ApiEntityTag;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.validation.annotation.Validated;
@@ -18,7 +17,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "Host templates will contain information about the role config groups that should be applied to a host. This basically means a host will have a role corresponding to each config group.")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
@@ -32,7 +31,7 @@ public class ApiClusterTemplateHostTemplate   {
   private List<String> roleConfigGroupsRefNames = null;
 
   @JsonProperty("cardinality")
-  private BigDecimal cardinality = null;
+  private Integer cardinality = null;
 
   @JsonProperty("tags")
   @Valid
@@ -75,7 +74,7 @@ public class ApiClusterTemplateHostTemplate   {
    * List of role config groups
    * @return roleConfigGroupsRefNames
   **/
-  @ApiModelProperty(example = "\"null\"", value = "List of role config groups")
+  @ApiModelProperty(value = "List of role config groups")
 
 
   public List<String> getRoleConfigGroupsRefNames() {
@@ -86,24 +85,23 @@ public class ApiClusterTemplateHostTemplate   {
     this.roleConfigGroupsRefNames = roleConfigGroupsRefNames;
   }
 
-  public ApiClusterTemplateHostTemplate cardinality(BigDecimal cardinality) {
+  public ApiClusterTemplateHostTemplate cardinality(Integer cardinality) {
     this.cardinality = cardinality;
     return this;
   }
 
   /**
-   * Represent the cardinality of this host template on source
+   * Represent the cardinality of this host template on source. Defaults to 0.
    * @return cardinality
   **/
-  @ApiModelProperty(value = "Represent the cardinality of this host template on source")
+  @ApiModelProperty(value = "Represent the cardinality of this host template on source. Defaults to 0.")
 
-  @Valid
 
-  public BigDecimal getCardinality() {
+  public Integer getCardinality() {
     return cardinality;
   }
 
-  public void setCardinality(BigDecimal cardinality) {
+  public void setCardinality(Integer cardinality) {
     this.cardinality = cardinality;
   }
 

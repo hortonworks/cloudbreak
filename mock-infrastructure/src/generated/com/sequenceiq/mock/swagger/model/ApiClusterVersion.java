@@ -26,6 +26,8 @@ public enum ApiClusterVersion {
   
   CDH7("CDH7"),
   
+  EXPERIENCE1("EXPERIENCE1"),
+  
   UNKNOWN("UNKNOWN");
 
   private String value;

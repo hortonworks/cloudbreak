@@ -17,7 +17,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "The response contains a list of applications and warnings.")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
@@ -77,7 +77,7 @@ public class ApiYarnApplicationResponse   {
    * This list of warnings for this response.
    * @return warnings
   **/
-  @ApiModelProperty(example = "\"null\"", value = "This list of warnings for this response.")
+  @ApiModelProperty(value = "This list of warnings for this response.")
 
 
   public List<String> getWarnings() {

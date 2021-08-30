@@ -29,6 +29,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_S
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION_AWS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION_AZURE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION_GCP;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CM_BULK_HOSTS_REMOVAL;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CM_HA;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CONCLUSION_CHECKER_SEND_USER_EVENT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_CUSTOM_CONFIGS;
@@ -887,6 +888,7 @@ public class MockUserManagementService extends UserManagementImplBase {
                                 .addEntitlements(createEntitlement(OJDBC_TOKEN_DH))
                                 .addEntitlements(createEntitlement(DATAHUB_STREAMING_SCALING))
                                 .addEntitlements(createEntitlement(CDP_RAW_S3))
+                                .addEntitlements(createEntitlement(CDP_CM_BULK_HOSTS_REMOVAL))
                                 .setGlobalPasswordPolicy(workloadPasswordPolicy)
                                 .setAccountId(request.getAccountId())
                                 .setExternalAccountId("external-" + request.getAccountId())

@@ -20,30 +20,30 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "Represents a Yarn application")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
 
 public class ApiYarnApplication   {
   @JsonProperty("allocatedMB")
-  private BigDecimal allocatedMB = null;
+  private Integer allocatedMB = null;
 
   @JsonProperty("allocatedVCores")
-  private BigDecimal allocatedVCores = null;
+  private Integer allocatedVCores = null;
 
   @JsonProperty("runningContainers")
-  private BigDecimal runningContainers = null;
+  private Integer runningContainers = null;
 
   @JsonProperty("applicationTags")
   @Valid
   private List<String> applicationTags = null;
 
   @JsonProperty("allocatedMemorySeconds")
-  private BigDecimal allocatedMemorySeconds = null;
+  private Integer allocatedMemorySeconds = null;
 
   @JsonProperty("allocatedVcoreSeconds")
-  private BigDecimal allocatedVcoreSeconds = null;
+  private Integer allocatedVcoreSeconds = null;
 
   @JsonProperty("applicationId")
   private String applicationId = null;
@@ -94,7 +94,7 @@ public class ApiYarnApplication   {
   @JsonProperty("containerAllocatedVcoreSeconds")
   private BigDecimal containerAllocatedVcoreSeconds = null;
 
-  public ApiYarnApplication allocatedMB(BigDecimal allocatedMB) {
+  public ApiYarnApplication allocatedMB(Integer allocatedMB) {
     this.allocatedMB = allocatedMB;
     return this;
   }
@@ -105,17 +105,16 @@ public class ApiYarnApplication   {
   **/
   @ApiModelProperty(value = "The sum of memory in MB allocated to the application's running containers Available since v12.")
 
-  @Valid
 
-  public BigDecimal getAllocatedMB() {
+  public Integer getAllocatedMB() {
     return allocatedMB;
   }
 
-  public void setAllocatedMB(BigDecimal allocatedMB) {
+  public void setAllocatedMB(Integer allocatedMB) {
     this.allocatedMB = allocatedMB;
   }
 
-  public ApiYarnApplication allocatedVCores(BigDecimal allocatedVCores) {
+  public ApiYarnApplication allocatedVCores(Integer allocatedVCores) {
     this.allocatedVCores = allocatedVCores;
     return this;
   }
@@ -126,17 +125,16 @@ public class ApiYarnApplication   {
   **/
   @ApiModelProperty(value = "The sum of virtual cores allocated to the application's running containers Available since v12.")
 
-  @Valid
 
-  public BigDecimal getAllocatedVCores() {
+  public Integer getAllocatedVCores() {
     return allocatedVCores;
   }
 
-  public void setAllocatedVCores(BigDecimal allocatedVCores) {
+  public void setAllocatedVCores(Integer allocatedVCores) {
     this.allocatedVCores = allocatedVCores;
   }
 
-  public ApiYarnApplication runningContainers(BigDecimal runningContainers) {
+  public ApiYarnApplication runningContainers(Integer runningContainers) {
     this.runningContainers = runningContainers;
     return this;
   }
@@ -147,13 +145,12 @@ public class ApiYarnApplication   {
   **/
   @ApiModelProperty(value = "The number of containers currently running for the application Available since v12.")
 
-  @Valid
 
-  public BigDecimal getRunningContainers() {
+  public Integer getRunningContainers() {
     return runningContainers;
   }
 
-  public void setRunningContainers(BigDecimal runningContainers) {
+  public void setRunningContainers(Integer runningContainers) {
     this.runningContainers = runningContainers;
   }
 
@@ -174,7 +171,7 @@ public class ApiYarnApplication   {
    * List of YARN application tags. Available since v12.
    * @return applicationTags
   **/
-  @ApiModelProperty(example = "\"null\"", value = "List of YARN application tags. Available since v12.")
+  @ApiModelProperty(value = "List of YARN application tags. Available since v12.")
 
 
   public List<String> getApplicationTags() {
@@ -185,7 +182,7 @@ public class ApiYarnApplication   {
     this.applicationTags = applicationTags;
   }
 
-  public ApiYarnApplication allocatedMemorySeconds(BigDecimal allocatedMemorySeconds) {
+  public ApiYarnApplication allocatedMemorySeconds(Integer allocatedMemorySeconds) {
     this.allocatedMemorySeconds = allocatedMemorySeconds;
     return this;
   }
@@ -196,17 +193,16 @@ public class ApiYarnApplication   {
   **/
   @ApiModelProperty(value = "Allocated memory to the application in units of mb-secs. Available since v12.")
 
-  @Valid
 
-  public BigDecimal getAllocatedMemorySeconds() {
+  public Integer getAllocatedMemorySeconds() {
     return allocatedMemorySeconds;
   }
 
-  public void setAllocatedMemorySeconds(BigDecimal allocatedMemorySeconds) {
+  public void setAllocatedMemorySeconds(Integer allocatedMemorySeconds) {
     this.allocatedMemorySeconds = allocatedMemorySeconds;
   }
 
-  public ApiYarnApplication allocatedVcoreSeconds(BigDecimal allocatedVcoreSeconds) {
+  public ApiYarnApplication allocatedVcoreSeconds(Integer allocatedVcoreSeconds) {
     this.allocatedVcoreSeconds = allocatedVcoreSeconds;
     return this;
   }
@@ -217,13 +213,12 @@ public class ApiYarnApplication   {
   **/
   @ApiModelProperty(value = "Allocated vcore-secs to the application. Available since v12.")
 
-  @Valid
 
-  public BigDecimal getAllocatedVcoreSeconds() {
+  public Integer getAllocatedVcoreSeconds() {
     return allocatedVcoreSeconds;
   }
 
-  public void setAllocatedVcoreSeconds(BigDecimal allocatedVcoreSeconds) {
+  public void setAllocatedVcoreSeconds(Integer allocatedVcoreSeconds) {
     this.allocatedVcoreSeconds = allocatedVcoreSeconds;
   }
 
@@ -385,7 +380,7 @@ public class ApiYarnApplication   {
    * A map of additional application attributes which is generated by Cloudera Manager. For example MR2 job counters are exposed as key/value pairs here. For more details see the Cloudera Manager documentation.
    * @return attributes
   **/
-  @ApiModelProperty(example = "\"null\"", value = "A map of additional application attributes which is generated by Cloudera Manager. For example MR2 job counters are exposed as key/value pairs here. For more details see the Cloudera Manager documentation.")
+  @ApiModelProperty(value = "A map of additional application attributes which is generated by Cloudera Manager. For example MR2 job counters are exposed as key/value pairs here. For more details see the Cloudera Manager documentation.")
 
 
   public Map<String, String> getAttributes() {

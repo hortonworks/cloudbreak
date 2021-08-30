@@ -1,29 +1,24 @@
 package com.sequenceiq.mock.swagger.model;
 
-import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sequenceiq.mock.swagger.model.ApiClusterVersion;
-import com.sequenceiq.mock.swagger.model.ApiDataContextRef;
-import com.sequenceiq.mock.swagger.model.ApiEntityStatus;
-import com.sequenceiq.mock.swagger.model.ApiEntityTag;
-import com.sequenceiq.mock.swagger.model.ApiEntityType;
-import com.sequenceiq.mock.swagger.model.ApiParcel;
-import com.sequenceiq.mock.swagger.model.ApiService;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
-import org.springframework.validation.annotation.Validated;
+import java.util.Objects;
+
 import javax.validation.Valid;
-import javax.validation.constraints.*;
+
+import org.springframework.validation.annotation.Validated;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * A cluster represents a set of interdependent services running on a set of hosts. All services on a given cluster are of the same software version (e.g. CDH4 or CDH5).
  */
 @ApiModel(description = "A cluster represents a set of interdependent services running on a set of hosts. All services on a given cluster are of the same software version (e.g. CDH4 or CDH5).")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
@@ -197,7 +192,7 @@ public class ApiCluster   {
    * Readonly. The list of objects that trigger this cluster to be in maintenance mode. Available since API v2.
    * @return maintenanceOwners
   **/
-  @ApiModelProperty(example = "\"null\"", value = "Readonly. The list of objects that trigger this cluster to be in maintenance mode. Available since API v2.")
+  @ApiModelProperty(value = "Readonly. The list of objects that trigger this cluster to be in maintenance mode. Available since API v2.")
 
   @Valid
 
@@ -383,10 +378,10 @@ public class ApiCluster   {
   }
 
   /**
-   * Readonly. The type of cluster. Available since APIv32.
+   * The type of cluster. If unspecified, defaults to either BASE_CLUSTER (if no data contexts are provided) or COMPUTE_CLUSTER (if one or more data contexts are provided). Available since APIv32.
    * @return clusterType
   **/
-  @ApiModelProperty(value = "Readonly. The type of cluster. Available since APIv32.")
+  @ApiModelProperty(value = "The type of cluster. If unspecified, defaults to either BASE_CLUSTER (if no data contexts are provided) or COMPUTE_CLUSTER (if one or more data contexts are provided). Available since APIv32.")
 
 
   public String getClusterType() {

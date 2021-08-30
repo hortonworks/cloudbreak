@@ -1,6 +1,5 @@
 package com.sequenceiq.mock.clouderamanager.base;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -85,13 +84,12 @@ public class BatchResourceOperation {
 
     private ApiBatchResponseElement getFailureApiBatchResponseElement() {
         return new ApiBatchResponseElement()
-                .statusCode(BigDecimal.valueOf(HttpStatus.BAD_REQUEST.value()));
+                .statusCode(HttpStatus.BAD_REQUEST.value());
     }
 
     private boolean isSuccessResponse(ApiBatchResponseElement apiBatchResponseElement) {
         HttpStatus httpStatus = Optional.ofNullable(apiBatchResponseElement)
                 .map(ApiBatchResponseElement::getStatusCode)
-                .map(BigDecimal::intValue)
                 .map(HttpStatus::resolve)
                 .orElse(null);
         if (httpStatus != null) {

@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.math.BigDecimal;
 import org.springframework.validation.annotation.Validated;
 import javax.validation.Valid;
 import javax.validation.constraints.*;
@@ -15,7 +14,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
@@ -28,13 +27,13 @@ public class ApiHdfsUsageReportRow   {
   private String user = null;
 
   @JsonProperty("size")
-  private BigDecimal size = null;
+  private Integer size = null;
 
   @JsonProperty("rawSize")
-  private BigDecimal rawSize = null;
+  private Integer rawSize = null;
 
   @JsonProperty("numFiles")
-  private BigDecimal numFiles = null;
+  private Integer numFiles = null;
 
   public ApiHdfsUsageReportRow date(String date) {
     this.date = date;
@@ -76,7 +75,7 @@ public class ApiHdfsUsageReportRow   {
     this.user = user;
   }
 
-  public ApiHdfsUsageReportRow size(BigDecimal size) {
+  public ApiHdfsUsageReportRow size(Integer size) {
     this.size = size;
     return this;
   }
@@ -87,17 +86,16 @@ public class ApiHdfsUsageReportRow   {
   **/
   @ApiModelProperty(value = "Total size (in bytes) of the files owned by this user. This does not include replication in HDFS.")
 
-  @Valid
 
-  public BigDecimal getSize() {
+  public Integer getSize() {
     return size;
   }
 
-  public void setSize(BigDecimal size) {
+  public void setSize(Integer size) {
     this.size = size;
   }
 
-  public ApiHdfsUsageReportRow rawSize(BigDecimal rawSize) {
+  public ApiHdfsUsageReportRow rawSize(Integer rawSize) {
     this.rawSize = rawSize;
     return this;
   }
@@ -108,17 +106,16 @@ public class ApiHdfsUsageReportRow   {
   **/
   @ApiModelProperty(value = "Total size (in bytes) of all the replicas of all the files owned by this user.")
 
-  @Valid
 
-  public BigDecimal getRawSize() {
+  public Integer getRawSize() {
     return rawSize;
   }
 
-  public void setRawSize(BigDecimal rawSize) {
+  public void setRawSize(Integer rawSize) {
     this.rawSize = rawSize;
   }
 
-  public ApiHdfsUsageReportRow numFiles(BigDecimal numFiles) {
+  public ApiHdfsUsageReportRow numFiles(Integer numFiles) {
     this.numFiles = numFiles;
     return this;
   }
@@ -129,13 +126,12 @@ public class ApiHdfsUsageReportRow   {
   **/
   @ApiModelProperty(value = "Number of files owned by this user.")
 
-  @Valid
 
-  public BigDecimal getNumFiles() {
+  public Integer getNumFiles() {
     return numFiles;
   }
 
-  public void setNumFiles(BigDecimal numFiles) {
+  public void setNumFiles(Integer numFiles) {
     this.numFiles = numFiles;
   }
 

@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,7 +17,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "Information about the number of nodes using which product features. <p> Usage information is provided for individual clusters, as well as totals across all clusters.")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
@@ -26,18 +25,18 @@ import javax.validation.constraints.*;
 public class ApiLicensedFeatureUsage   {
   @JsonProperty("totals")
   @Valid
-  private Map<String, BigDecimal> totals = null;
+  private Map<String, Integer> totals = null;
 
   @JsonProperty("clusters")
   @Valid
   private Map<String, Object> clusters = null;
 
-  public ApiLicensedFeatureUsage totals(Map<String, BigDecimal> totals) {
+  public ApiLicensedFeatureUsage totals(Map<String, Integer> totals) {
     this.totals = totals;
     return this;
   }
 
-  public ApiLicensedFeatureUsage putTotalsItem(String key, BigDecimal totalsItem) {
+  public ApiLicensedFeatureUsage putTotalsItem(String key, Integer totalsItem) {
     if (this.totals == null) {
       this.totals = new HashMap<>();
     }
@@ -51,13 +50,12 @@ public class ApiLicensedFeatureUsage   {
   **/
   @ApiModelProperty(value = "Map from named features to the total number of nodes using those features.")
 
-  @Valid
 
-  public Map<String, BigDecimal> getTotals() {
+  public Map<String, Integer> getTotals() {
     return totals;
   }
 
-  public void setTotals(Map<String, BigDecimal> totals) {
+  public void setTotals(Map<String, Integer> totals) {
     this.totals = totals;
   }
 

@@ -17,7 +17,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "Utilization report information of a Impala application service.")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
@@ -54,7 +54,7 @@ public class ApiImpalaUtilization   {
   private BigDecimal avgWaitTimeInQueue = null;
 
   @JsonProperty("peakAllocationTimestampMS")
-  private BigDecimal peakAllocationTimestampMS = null;
+  private Integer peakAllocationTimestampMS = null;
 
   @JsonProperty("maxAllocatedMemory")
   private BigDecimal maxAllocatedMemory = null;
@@ -69,7 +69,7 @@ public class ApiImpalaUtilization   {
   private BigDecimal utilizedAtMaxAllocatedPercentage = null;
 
   @JsonProperty("peakUsageTimestampMS")
-  private BigDecimal peakUsageTimestampMS = null;
+  private Integer peakUsageTimestampMS = null;
 
   @JsonProperty("maxUtilizedMemory")
   private BigDecimal maxUtilizedMemory = null;
@@ -305,7 +305,7 @@ public class ApiImpalaUtilization   {
     this.avgWaitTimeInQueue = avgWaitTimeInQueue;
   }
 
-  public ApiImpalaUtilization peakAllocationTimestampMS(BigDecimal peakAllocationTimestampMS) {
+  public ApiImpalaUtilization peakAllocationTimestampMS(Integer peakAllocationTimestampMS) {
     this.peakAllocationTimestampMS = peakAllocationTimestampMS;
     return this;
   }
@@ -316,13 +316,12 @@ public class ApiImpalaUtilization   {
   **/
   @ApiModelProperty(value = "The time when Impala reserved the maximum amount of memory for queries.")
 
-  @Valid
 
-  public BigDecimal getPeakAllocationTimestampMS() {
+  public Integer getPeakAllocationTimestampMS() {
     return peakAllocationTimestampMS;
   }
 
-  public void setPeakAllocationTimestampMS(BigDecimal peakAllocationTimestampMS) {
+  public void setPeakAllocationTimestampMS(Integer peakAllocationTimestampMS) {
     this.peakAllocationTimestampMS = peakAllocationTimestampMS;
   }
 
@@ -410,7 +409,7 @@ public class ApiImpalaUtilization   {
     this.utilizedAtMaxAllocatedPercentage = utilizedAtMaxAllocatedPercentage;
   }
 
-  public ApiImpalaUtilization peakUsageTimestampMS(BigDecimal peakUsageTimestampMS) {
+  public ApiImpalaUtilization peakUsageTimestampMS(Integer peakUsageTimestampMS) {
     this.peakUsageTimestampMS = peakUsageTimestampMS;
     return this;
   }
@@ -421,13 +420,12 @@ public class ApiImpalaUtilization   {
   **/
   @ApiModelProperty(value = "The time when Impala used the maximum amount of memory for queries.")
 
-  @Valid
 
-  public BigDecimal getPeakUsageTimestampMS() {
+  public Integer getPeakUsageTimestampMS() {
     return peakUsageTimestampMS;
   }
 
-  public void setPeakUsageTimestampMS(BigDecimal peakUsageTimestampMS) {
+  public void setPeakUsageTimestampMS(Integer peakUsageTimestampMS) {
     this.peakUsageTimestampMS = peakUsageTimestampMS;
   }
 

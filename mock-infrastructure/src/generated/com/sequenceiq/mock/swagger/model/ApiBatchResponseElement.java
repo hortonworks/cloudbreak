@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.math.BigDecimal;
 import org.springframework.validation.annotation.Validated;
 import javax.validation.Valid;
 import javax.validation.constraints.*;
@@ -15,19 +14,19 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "A single element of a batch response, often part of a list with other elements.")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
 
 public class ApiBatchResponseElement   {
   @JsonProperty("statusCode")
-  private BigDecimal statusCode = null;
+  private Integer statusCode = null;
 
   @JsonProperty("response")
   private Object response = null;
 
-  public ApiBatchResponseElement statusCode(BigDecimal statusCode) {
+  public ApiBatchResponseElement statusCode(Integer statusCode) {
     this.statusCode = statusCode;
     return this;
   }
@@ -38,13 +37,12 @@ public class ApiBatchResponseElement   {
   **/
   @ApiModelProperty(value = "Read-only. The HTTP status code of the response.")
 
-  @Valid
 
-  public BigDecimal getStatusCode() {
+  public Integer getStatusCode() {
     return statusCode;
   }
 
-  public void setStatusCode(BigDecimal statusCode) {
+  public void setStatusCode(Integer statusCode) {
     this.statusCode = statusCode;
   }
 

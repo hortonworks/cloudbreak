@@ -1,34 +1,29 @@
 package com.sequenceiq.mock.swagger.model;
 
 import java.util.Objects;
+
+import javax.validation.Valid;
+
+import org.springframework.validation.annotation.Validated;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sequenceiq.mock.swagger.model.ApiClusterRef;
-import com.sequenceiq.mock.swagger.model.ApiCommand;
-import com.sequenceiq.mock.swagger.model.ApiCommandList;
-import com.sequenceiq.mock.swagger.model.ApiHostRef;
-import com.sequenceiq.mock.swagger.model.ApiRoleRef;
-import com.sequenceiq.mock.swagger.model.ApiServiceRef;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.math.BigDecimal;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
 
 /**
  * Provides detailed information about a submitted command.  &lt;p&gt;There are two types of commands: synchronous and asynchronous. Synchronous commands complete immediately, and their results are passed back in the returned command object after the execution of an API call. Outside of that returned object, there is no way to check the result of a synchronous command.&lt;/p&gt;  &lt;p&gt;Asynchronous commands have unique non-negative IDs. They may still be running when the API call returns. Clients can check the status of such commands using the API.&lt;/p&gt;
  */
 @ApiModel(description = "Provides detailed information about a submitted command.  <p>There are two types of commands: synchronous and asynchronous. Synchronous commands complete immediately, and their results are passed back in the returned command object after the execution of an API call. Outside of that returned object, there is no way to check the result of a synchronous command.</p>  <p>Asynchronous commands have unique non-negative IDs. They may still be running when the API call returns. Clients can check the status of such commands using the API.</p>")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
 
 public class ApiCommand   {
   @JsonProperty("id")
-  private BigDecimal id = null;
+  private Integer id = null;
 
   @JsonProperty("name")
   private String name = null;
@@ -72,7 +67,7 @@ public class ApiCommand   {
   @JsonProperty("canRetry")
   private Boolean canRetry = null;
 
-  public ApiCommand id(BigDecimal id) {
+  public ApiCommand id(Integer id) {
     this.id = id;
     return this;
   }
@@ -83,13 +78,12 @@ public class ApiCommand   {
   **/
   @ApiModelProperty(value = "The command ID.")
 
-  @Valid
 
-  public BigDecimal getId() {
+  public Integer getId() {
     return id;
   }
 
-  public void setId(BigDecimal id) {
+  public void setId(Integer id) {
     this.id = id;
   }
 

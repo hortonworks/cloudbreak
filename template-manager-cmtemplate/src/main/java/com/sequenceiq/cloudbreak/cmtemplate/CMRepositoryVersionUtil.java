@@ -58,6 +58,8 @@ public class CMRepositoryVersionUtil {
 
     public static final Versioned CLOUDERA_STACK_VERSION_7_2_12 = () -> "7.2.12";
 
+    public static final Versioned CLOUDERA_STACK_VERSION_7_2_13 = () -> "7.2.13";
+
     public static final Versioned CLOUDERA_STACK_VERSION_7_2_14 = () -> "7.2.14";
 
     public static final Versioned CFM_VERSION_2_0_0_0 = () -> "2.0.0.0";
@@ -158,6 +160,14 @@ public class CMRepositoryVersionUtil {
         if (runtimeVersion.isPresent()) {
             LOGGER.info("Runtime version is compared for CM services health check.");
             return isVersionNewerOrEqualThanLimited(runtimeVersion.get(), CLOUDERA_STACK_VERSION_7_2_12);
+        }
+        return false;
+    }
+
+    public static boolean isCmBulkHostsRemovalAllowed(Optional<String> runtimeVersion) {
+        if (runtimeVersion.isPresent()) {
+            LOGGER.info("Runtime version is compared for CM bulk hosts removal.");
+            return isVersionNewerOrEqualThanLimited(runtimeVersion.get(), CLOUDERA_STACK_VERSION_7_2_13);
         }
         return false;
     }

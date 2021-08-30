@@ -5,6 +5,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.springframework.validation.annotation.Validated;
 import javax.validation.Valid;
 import javax.validation.constraints.*;
@@ -14,7 +17,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "Models audit events from both CM and CM managed services like HDFS, HBase and Hive. Audits for CM managed services are retrieved from Cloudera Navigator server.")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
@@ -46,6 +49,10 @@ public class ApiAudit   {
 
   @JsonProperty("allowed")
   private Boolean allowed = null;
+
+  @JsonProperty("serviceValues")
+  @Valid
+  private Map<String, String> serviceValues = null;
 
   public ApiAudit timestamp(String timestamp) {
     this.timestamp = timestamp;
@@ -227,6 +234,34 @@ public class ApiAudit   {
     this.allowed = allowed;
   }
 
+  public ApiAudit serviceValues(Map<String, String> serviceValues) {
+    this.serviceValues = serviceValues;
+    return this;
+  }
+
+  public ApiAudit putServiceValuesItem(String key, String serviceValuesItem) {
+    if (this.serviceValues == null) {
+      this.serviceValues = new HashMap<>();
+    }
+    this.serviceValues.put(key, serviceValuesItem);
+    return this;
+  }
+
+  /**
+   * 
+   * @return serviceValues
+  **/
+  @ApiModelProperty(value = "")
+
+
+  public Map<String, String> getServiceValues() {
+    return serviceValues;
+  }
+
+  public void setServiceValues(Map<String, String> serviceValues) {
+    this.serviceValues = serviceValues;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -245,12 +280,13 @@ public class ApiAudit   {
         Objects.equals(this.command, apiAudit.command) &&
         Objects.equals(this.resource, apiAudit.resource) &&
         Objects.equals(this.operationText, apiAudit.operationText) &&
-        Objects.equals(this.allowed, apiAudit.allowed);
+        Objects.equals(this.allowed, apiAudit.allowed) &&
+        Objects.equals(this.serviceValues, apiAudit.serviceValues);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(timestamp, service, username, impersonator, ipAddress, command, resource, operationText, allowed);
+    return Objects.hash(timestamp, service, username, impersonator, ipAddress, command, resource, operationText, allowed, serviceValues);
   }
 
   @Override
@@ -267,6 +303,7 @@ public class ApiAudit   {
     sb.append("    resource: ").append(toIndentedString(resource)).append("\n");
     sb.append("    operationText: ").append(toIndentedString(operationText)).append("\n");
     sb.append("    allowed: ").append(toIndentedString(allowed)).append("\n");
+    sb.append("    serviceValues: ").append(toIndentedString(serviceValues)).append("\n");
     sb.append("}");
     return sb.toString();
   }

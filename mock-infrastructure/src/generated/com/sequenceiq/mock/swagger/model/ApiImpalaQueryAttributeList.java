@@ -18,7 +18,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "The list of all the attributes that are applicable to Impala queries.")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
@@ -42,10 +42,10 @@ public class ApiImpalaQueryAttributeList extends ApiListBase  {
   }
 
   /**
-   * 
+   * The list of attributes.
    * @return items
   **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(value = "The list of attributes.")
 
   @Valid
 

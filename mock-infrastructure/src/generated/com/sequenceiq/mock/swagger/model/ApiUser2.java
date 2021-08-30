@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.sequenceiq.mock.swagger.model.ApiAuthRoleRef;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.validation.annotation.Validated;
@@ -18,7 +17,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "This is the model for user information in the API, v18 and beyond. <p> Note that any method that returns user information will not contain any password information. The password property is only used when creating or updating users.")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
@@ -38,7 +37,7 @@ public class ApiUser2   {
   private String pwHash = null;
 
   @JsonProperty("pwSalt")
-  private BigDecimal pwSalt = null;
+  private Integer pwSalt = null;
 
   @JsonProperty("pwLogin")
   private Boolean pwLogin = null;
@@ -132,7 +131,7 @@ public class ApiUser2   {
     this.pwHash = pwHash;
   }
 
-  public ApiUser2 pwSalt(BigDecimal pwSalt) {
+  public ApiUser2 pwSalt(Integer pwSalt) {
     this.pwSalt = pwSalt;
     return this;
   }
@@ -143,13 +142,12 @@ public class ApiUser2   {
   **/
   @ApiModelProperty(value = "NOTE: Only available in the \"export\" view")
 
-  @Valid
 
-  public BigDecimal getPwSalt() {
+  public Integer getPwSalt() {
     return pwSalt;
   }
 
-  public void setPwSalt(BigDecimal pwSalt) {
+  public void setPwSalt(Integer pwSalt) {
     this.pwSalt = pwSalt;
   }
 

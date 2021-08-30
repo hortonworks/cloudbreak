@@ -34,7 +34,7 @@ public class ClusterResourceV31Controller implements ClustersResourceApi {
 
     @Override
     public ResponseEntity<ApiHostRefList> listHosts(String mockUuid, String clusterName, @Valid String configName, @Valid String configValue) {
-        return clusterResourceOperation.listHosts(mockUuid, clusterName, configName, configValue);
+        return clusterResourceOperation.listRefHosts(mockUuid, clusterName, configName, configValue);
     }
 
     @Override

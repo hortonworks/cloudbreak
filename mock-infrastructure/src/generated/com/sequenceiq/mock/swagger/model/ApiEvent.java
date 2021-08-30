@@ -19,7 +19,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "Events model noteworthy incidents in Cloudera Manager or the managed Hadoop cluster. An event carries its event category, severity, and a string content. They also have generic attributes, which are free-form key value pairs. Important events may be promoted into alerts.")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
@@ -178,10 +178,10 @@ public class ApiEvent   {
   }
 
   /**
-   * Whether the event is promoted to an alert according to configuration.
+   * Whether the event is promoted to an alert according to configuration. Defaults to false
    * @return alert
   **/
-  @ApiModelProperty(value = "Whether the event is promoted to an alert according to configuration.")
+  @ApiModelProperty(value = "Whether the event is promoted to an alert according to configuration. Defaults to false")
 
 
   public Boolean isAlert() {

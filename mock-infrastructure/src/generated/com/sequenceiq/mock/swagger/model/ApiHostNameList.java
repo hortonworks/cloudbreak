@@ -17,7 +17,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "A list of host names.")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
@@ -44,7 +44,7 @@ public class ApiHostNameList extends ApiListBase  {
    * List of host names.
    * @return items
   **/
-  @ApiModelProperty(example = "\"null\"", value = "List of host names.")
+  @ApiModelProperty(value = "List of host names.")
 
 
   public List<String> getItems() {

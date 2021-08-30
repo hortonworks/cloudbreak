@@ -54,7 +54,7 @@ public class ClouderaManagerConnector implements ClusterApi {
 
     @Override
     public ClusterDecomissionService clusterDecomissionService() {
-        return applicationContext.getBean(ClouderaManagerClusterDecomissionService.class, stack, clientConfig);
+        return applicationContext.getBean(ClouderaManagerClusterDecommissionService.class, stack, clientConfig);
     }
 
     @Override

@@ -8,7 +8,6 @@ import com.sequenceiq.mock.swagger.model.ApiHiveTable;
 import com.sequenceiq.mock.swagger.model.ApiServiceRef;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.validation.annotation.Validated;
@@ -20,7 +19,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "Replication arguments for Hive services.")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
@@ -55,7 +54,7 @@ public class ApiHiveReplicationArguments   {
   private Boolean dryRun = null;
 
   @JsonProperty("numThreads")
-  private BigDecimal numThreads = null;
+  private Integer numThreads = null;
 
   @JsonProperty("sentryMigration")
   private Boolean sentryMigration = null;
@@ -139,10 +138,10 @@ public class ApiHiveReplicationArguments   {
   }
 
   /**
-   * Whether to force overwriting of mismatched tables.
+   * Whether to force overwriting of mismatched tables. Defaults to false.
    * @return force
   **/
-  @ApiModelProperty(value = "Whether to force overwriting of mismatched tables.")
+  @ApiModelProperty(value = "Whether to force overwriting of mismatched tables. Defaults to false.")
 
 
   public Boolean isForce() {
@@ -159,10 +158,10 @@ public class ApiHiveReplicationArguments   {
   }
 
   /**
-   * Whether to replicate table data stored in HDFS. <p/> If set, the \"hdfsArguments\" property must be set to configure the HDFS replication job.
+   * Whether to replicate table data stored in HDFS. Defaults to false. <p/> If set, the \"hdfsArguments\" property must be set to configure the HDFS replication job.
    * @return replicateData
   **/
-  @ApiModelProperty(value = "Whether to replicate table data stored in HDFS. <p/> If set, the \"hdfsArguments\" property must be set to configure the HDFS replication job.")
+  @ApiModelProperty(value = "Whether to replicate table data stored in HDFS. Defaults to false. <p/> If set, the \"hdfsArguments\" property must be set to configure the HDFS replication job.")
 
 
   public Boolean isReplicateData() {
@@ -240,10 +239,10 @@ public class ApiHiveReplicationArguments   {
   }
 
   /**
-   * Whether to perform a dry run. Defaults to false.
+   * Whether to perform a dry run. Defaults to false
    * @return dryRun
   **/
-  @ApiModelProperty(value = "Whether to perform a dry run. Defaults to false.")
+  @ApiModelProperty(value = "Whether to perform a dry run. Defaults to false")
 
 
   public Boolean isDryRun() {
@@ -254,7 +253,7 @@ public class ApiHiveReplicationArguments   {
     this.dryRun = dryRun;
   }
 
-  public ApiHiveReplicationArguments numThreads(BigDecimal numThreads) {
+  public ApiHiveReplicationArguments numThreads(Integer numThreads) {
     this.numThreads = numThreads;
     return this;
   }
@@ -265,13 +264,12 @@ public class ApiHiveReplicationArguments   {
   **/
   @ApiModelProperty(value = "Number of threads to use in multi-threaded export/import phase")
 
-  @Valid
 
-  public BigDecimal getNumThreads() {
+  public Integer getNumThreads() {
     return numThreads;
   }
 
-  public void setNumThreads(BigDecimal numThreads) {
+  public void setNumThreads(Integer numThreads) {
     this.numThreads = numThreads;
   }
 
@@ -284,7 +282,8 @@ public class ApiHiveReplicationArguments   {
    * 
    * @return sentryMigration
   **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(required = true, value = "")
+  @NotNull
 
 
   public Boolean isSentryMigration() {
@@ -304,7 +303,8 @@ public class ApiHiveReplicationArguments   {
    * Is skipUrlPermissions on.
    * @return skipUrlPermissions
   **/
-  @ApiModelProperty(value = "Is skipUrlPermissions on.")
+  @ApiModelProperty(required = true, value = "Is skipUrlPermissions on.")
+  @NotNull
 
 
   public Boolean isSkipUrlPermissions() {

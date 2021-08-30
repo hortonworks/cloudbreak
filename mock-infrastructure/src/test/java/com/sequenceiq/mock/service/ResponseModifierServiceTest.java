@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -175,12 +174,12 @@ public class ResponseModifierServiceTest {
 
     @Test
     public void testEvaluateResponseWhenTransformResponsePackage() throws Throwable {
-        MockResponse mockResponse1 = createMockResponse(0, 200, "/path1", "get", null, new ApiCommand().id(BigDecimal.ONE));
+        MockResponse mockResponse1 = createMockResponse(0, 200, "/path1", "get", null, new ApiCommand().id(Integer.valueOf(1)));
         mockResponse1.setClss("com.cloudera.api.swagger.model.ApiCommand");
         underTest.addResponse(mockResponse1);
 
         ApiCommand actualPost = underTest.evaluateResponse("get_/path1", ApiCommand.class, () -> null);
-        assertEquals(actualPost.getId(), BigDecimal.ONE);
+        assertEquals(actualPost.getId(), Integer.valueOf(1));
     }
 
     private void assertException(String path, String message, HttpStatus httpStatus) {

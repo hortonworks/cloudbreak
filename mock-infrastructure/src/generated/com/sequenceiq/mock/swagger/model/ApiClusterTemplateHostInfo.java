@@ -16,7 +16,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "This contains information about the host or host range on which provided host template will be applied.")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
@@ -135,7 +135,7 @@ public class ApiClusterTemplateHostInfo   {
    * This will used to resolve the roles defined in the cluster template. This roleRefName will be used to connect this host with that a role reference defined in cluster template.
    * @return roleRefNames
   **/
-  @ApiModelProperty(example = "\"null\"", value = "This will used to resolve the roles defined in the cluster template. This roleRefName will be used to connect this host with that a role reference defined in cluster template.")
+  @ApiModelProperty(value = "This will used to resolve the roles defined in the cluster template. This roleRefName will be used to connect this host with that a role reference defined in cluster template.")
 
 
   public List<String> getRoleRefNames() {

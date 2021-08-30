@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.sequenceiq.mock.swagger.model.ApiRolesToInclude;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.validation.annotation.Validated;
@@ -18,20 +17,20 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "Arguments used for Rolling Restart Cluster command.")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
 
 public class ApiRollingRestartClusterArgs   {
   @JsonProperty("slaveBatchSize")
-  private BigDecimal slaveBatchSize = null;
+  private Integer slaveBatchSize = null;
 
   @JsonProperty("sleepSeconds")
-  private BigDecimal sleepSeconds = null;
+  private Integer sleepSeconds = null;
 
   @JsonProperty("slaveFailCountThreshold")
-  private BigDecimal slaveFailCountThreshold = null;
+  private Integer slaveFailCountThreshold = null;
 
   @JsonProperty("staleConfigsOnly")
   private Boolean staleConfigsOnly = null;
@@ -49,7 +48,7 @@ public class ApiRollingRestartClusterArgs   {
   @Valid
   private List<String> restartServiceNames = null;
 
-  public ApiRollingRestartClusterArgs slaveBatchSize(BigDecimal slaveBatchSize) {
+  public ApiRollingRestartClusterArgs slaveBatchSize(Integer slaveBatchSize) {
     this.slaveBatchSize = slaveBatchSize;
     return this;
   }
@@ -60,17 +59,16 @@ public class ApiRollingRestartClusterArgs   {
   **/
   @ApiModelProperty(value = "Number of hosts with slave roles to restart at a time. Must be greater than zero. Default is 1.")
 
-  @Valid
 
-  public BigDecimal getSlaveBatchSize() {
+  public Integer getSlaveBatchSize() {
     return slaveBatchSize;
   }
 
-  public void setSlaveBatchSize(BigDecimal slaveBatchSize) {
+  public void setSlaveBatchSize(Integer slaveBatchSize) {
     this.slaveBatchSize = slaveBatchSize;
   }
 
-  public ApiRollingRestartClusterArgs sleepSeconds(BigDecimal sleepSeconds) {
+  public ApiRollingRestartClusterArgs sleepSeconds(Integer sleepSeconds) {
     this.sleepSeconds = sleepSeconds;
     return this;
   }
@@ -81,17 +79,16 @@ public class ApiRollingRestartClusterArgs   {
   **/
   @ApiModelProperty(value = "Number of seconds to sleep between restarts of slave host batches. <p> Must be greater than or equal to 0. Default is 0.")
 
-  @Valid
 
-  public BigDecimal getSleepSeconds() {
+  public Integer getSleepSeconds() {
     return sleepSeconds;
   }
 
-  public void setSleepSeconds(BigDecimal sleepSeconds) {
+  public void setSleepSeconds(Integer sleepSeconds) {
     this.sleepSeconds = sleepSeconds;
   }
 
-  public ApiRollingRestartClusterArgs slaveFailCountThreshold(BigDecimal slaveFailCountThreshold) {
+  public ApiRollingRestartClusterArgs slaveFailCountThreshold(Integer slaveFailCountThreshold) {
     this.slaveFailCountThreshold = slaveFailCountThreshold;
     return this;
   }
@@ -102,13 +99,12 @@ public class ApiRollingRestartClusterArgs   {
   **/
   @ApiModelProperty(value = "The threshold for number of slave host batches that are allowed to fail to restart before the entire command is considered failed. <p> Must be greater than or equal to 0. Default is 0. <p> This argument is for ADVANCED users only. </p>")
 
-  @Valid
 
-  public BigDecimal getSlaveFailCountThreshold() {
+  public Integer getSlaveFailCountThreshold() {
     return slaveFailCountThreshold;
   }
 
-  public void setSlaveFailCountThreshold(BigDecimal slaveFailCountThreshold) {
+  public void setSlaveFailCountThreshold(Integer slaveFailCountThreshold) {
     this.slaveFailCountThreshold = slaveFailCountThreshold;
   }
 
@@ -210,7 +206,7 @@ public class ApiRollingRestartClusterArgs   {
    * List of services to restart.
    * @return restartServiceNames
   **/
-  @ApiModelProperty(example = "\"null\"", value = "List of services to restart.")
+  @ApiModelProperty(value = "List of services to restart.")
 
 
   public List<String> getRestartServiceNames() {

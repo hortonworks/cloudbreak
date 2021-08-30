@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.math.BigDecimal;
 import org.springframework.validation.annotation.Validated;
 import javax.validation.Valid;
 import javax.validation.constraints.*;
@@ -15,7 +14,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "Arguments to run bandwidth diagnostics as part of performance inspector. Requires iperf3 package installed on hosts.")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
@@ -25,7 +24,7 @@ public class ApiPerfInspectorBandwidthArgs   {
   private Boolean runBandwidthDiagnostics = null;
 
   @JsonProperty("bandwidthTimeoutSecs")
-  private BigDecimal bandwidthTimeoutSecs = null;
+  private Integer bandwidthTimeoutSecs = null;
 
   public ApiPerfInspectorBandwidthArgs runBandwidthDiagnostics(Boolean runBandwidthDiagnostics) {
     this.runBandwidthDiagnostics = runBandwidthDiagnostics;
@@ -47,7 +46,7 @@ public class ApiPerfInspectorBandwidthArgs   {
     this.runBandwidthDiagnostics = runBandwidthDiagnostics;
   }
 
-  public ApiPerfInspectorBandwidthArgs bandwidthTimeoutSecs(BigDecimal bandwidthTimeoutSecs) {
+  public ApiPerfInspectorBandwidthArgs bandwidthTimeoutSecs(Integer bandwidthTimeoutSecs) {
     this.bandwidthTimeoutSecs = bandwidthTimeoutSecs;
     return this;
   }
@@ -56,15 +55,14 @@ public class ApiPerfInspectorBandwidthArgs   {
    * Timeout in seconds for the bandwidth request to each target host. If not specified, defaults to 10 seconds.
    * @return bandwidthTimeoutSecs
   **/
-  @ApiModelProperty(example = "10.0", value = "Timeout in seconds for the bandwidth request to each target host. If not specified, defaults to 10 seconds.")
+  @ApiModelProperty(example = "10", value = "Timeout in seconds for the bandwidth request to each target host. If not specified, defaults to 10 seconds.")
 
-  @Valid
 
-  public BigDecimal getBandwidthTimeoutSecs() {
+  public Integer getBandwidthTimeoutSecs() {
     return bandwidthTimeoutSecs;
   }
 
-  public void setBandwidthTimeoutSecs(BigDecimal bandwidthTimeoutSecs) {
+  public void setBandwidthTimeoutSecs(Integer bandwidthTimeoutSecs) {
     this.bandwidthTimeoutSecs = bandwidthTimeoutSecs;
   }
 

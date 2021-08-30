@@ -19,6 +19,6 @@ public class CommandsResourceV31Controller implements CommandsResourceApi {
 
     @Override
     public ResponseEntity<ApiCommand> readCommand(String mockUuid, BigDecimal commandId) {
-        return commandsResourceOperation.readCommand(mockUuid, commandId);
+        return commandsResourceOperation.readCommand(mockUuid, commandId != null ? commandId.intValue() : null);
     }
 }

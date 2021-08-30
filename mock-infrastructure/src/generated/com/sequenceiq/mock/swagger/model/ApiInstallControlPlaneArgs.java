@@ -14,7 +14,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "Arguments used to install CDP a Private Cloud Control Plane")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-04-23T12:05:48.864+02:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
@@ -87,10 +87,10 @@ public class ApiInstallControlPlaneArgs   {
   }
 
   /**
-   * A yaml file containing configuration parameters for the installation. To see sample values.yaml files, read the documentation <a target=\"_blank\"  href=http://tiny.cloudera.com/cdp-pvc.install-values-yaml>here</a>.
+   * A yaml file containing configuration parameters for the installation. To see sample values.yaml files, read the documentation <a target=\"_blank\"  href=https://docs.cloudera.com/r/cdp-pvc-install-values-yaml>here</a>.
    * @return valuesYaml
   **/
-  @ApiModelProperty(value = "A yaml file containing configuration parameters for the installation. To see sample values.yaml files, read the documentation <a target=\"_blank\"  href=http://tiny.cloudera.com/cdp-pvc.install-values-yaml>here</a>.")
+  @ApiModelProperty(value = "A yaml file containing configuration parameters for the installation. To see sample values.yaml files, read the documentation <a target=\"_blank\"  href=https://docs.cloudera.com/r/cdp-pvc-install-values-yaml>here</a>.")
 
 
   public String getValuesYaml() {
@@ -107,10 +107,10 @@ public class ApiInstallControlPlaneArgs   {
   }
 
   /**
-   * The content of the kubeconfig file of the kubernetes environment on which the install will be performed Simplified example:<br> <br> apiVersion: v1<br> clusters:<br> - cluster:<br> &emsp;&emsp;certificate-authority-data: abc123<br> &emsp;&emsp;server: https://example-server.domain.com:6443<br> &emsp;name: example-cluster.domain.com:6443<br> contexts:<br> - context:<br> &emsp;&emsp;cluster: ocp-cluster1<br> &emsp;&emsp;user: admin<br> &emsp;name: admin<br> current-context: admin<br> kind: Config<br> preferences: {}<br> users:<br> - name: admin<br> &emsp;user:<br> &emsp;&emsp;client-certificate-data: abc123<br> &emsp;&emsp;client-key-data: xyz987<br> <br> For more information on the kubeconfig file, read the documentation <a target=\"_blank\" href=http://tiny.cloudera.com/cdp-pvc.kubernetes>here</a>.
+   * The content of the kubeconfig file of the kubernetes environment on which the install will be performed Simplified example:<br> <br> apiVersion: v1<br> clusters:<br> - cluster:<br> &emsp;&emsp;certificate-authority-data: abc123<br> &emsp;&emsp;server: https://example-server.domain.com:6443<br> &emsp;name: example-cluster.domain.com:6443<br> contexts:<br> - context:<br> &emsp;&emsp;cluster: ocp-cluster1<br> &emsp;&emsp;user: admin<br> &emsp;name: admin<br> current-context: admin<br> kind: Config<br> preferences: {}<br> users:<br> - name: admin<br> &emsp;user:<br> &emsp;&emsp;client-certificate-data: abc123<br> &emsp;&emsp;client-key-data: xyz987<br> <br> For more information on the kubeconfig file, read the documentation <a target=\"_blank\" href=https://docs.cloudera.com/r/cdp-pvc-kubernetes>here</a>.
    * @return kubeConfig
   **/
-  @ApiModelProperty(value = "The content of the kubeconfig file of the kubernetes environment on which the install will be performed Simplified example:<br> <br> apiVersion: v1<br> clusters:<br> - cluster:<br> &emsp;&emsp;certificate-authority-data: abc123<br> &emsp;&emsp;server: https://example-server.domain.com:6443<br> &emsp;name: example-cluster.domain.com:6443<br> contexts:<br> - context:<br> &emsp;&emsp;cluster: ocp-cluster1<br> &emsp;&emsp;user: admin<br> &emsp;name: admin<br> current-context: admin<br> kind: Config<br> preferences: {}<br> users:<br> - name: admin<br> &emsp;user:<br> &emsp;&emsp;client-certificate-data: abc123<br> &emsp;&emsp;client-key-data: xyz987<br> <br> For more information on the kubeconfig file, read the documentation <a target=\"_blank\" href=http://tiny.cloudera.com/cdp-pvc.kubernetes>here</a>.")
+  @ApiModelProperty(value = "The content of the kubeconfig file of the kubernetes environment on which the install will be performed Simplified example:<br> <br> apiVersion: v1<br> clusters:<br> - cluster:<br> &emsp;&emsp;certificate-authority-data: abc123<br> &emsp;&emsp;server: https://example-server.domain.com:6443<br> &emsp;name: example-cluster.domain.com:6443<br> contexts:<br> - context:<br> &emsp;&emsp;cluster: ocp-cluster1<br> &emsp;&emsp;user: admin<br> &emsp;name: admin<br> current-context: admin<br> kind: Config<br> preferences: {}<br> users:<br> - name: admin<br> &emsp;user:<br> &emsp;&emsp;client-certificate-data: abc123<br> &emsp;&emsp;client-key-data: xyz987<br> <br> For more information on the kubeconfig file, read the documentation <a target=\"_blank\" href=https://docs.cloudera.com/r/cdp-pvc-kubernetes>here</a>.")
 
 
   public String getKubeConfig() {

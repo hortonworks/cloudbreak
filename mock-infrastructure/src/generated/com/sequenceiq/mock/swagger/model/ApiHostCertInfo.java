@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.ArrayList;
+import java.util.List;
 import org.springframework.validation.annotation.Validated;
 import javax.validation.Valid;
 import javax.validation.constraints.*;
@@ -14,7 +16,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "Associates a hostname with its corresponding certificate and private key")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
@@ -28,6 +30,10 @@ public class ApiHostCertInfo   {
 
   @JsonProperty("key")
   private String key = null;
+
+  @JsonProperty("subjectAltNames")
+  @Valid
+  private List<String> subjectAltNames = null;
 
   public ApiHostCertInfo hostname(String hostname) {
     this.hostname = hostname;
@@ -89,6 +95,34 @@ public class ApiHostCertInfo   {
     this.key = key;
   }
 
+  public ApiHostCertInfo subjectAltNames(List<String> subjectAltNames) {
+    this.subjectAltNames = subjectAltNames;
+    return this;
+  }
+
+  public ApiHostCertInfo addSubjectAltNamesItem(String subjectAltNamesItem) {
+    if (this.subjectAltNames == null) {
+      this.subjectAltNames = new ArrayList<>();
+    }
+    this.subjectAltNames.add(subjectAltNamesItem);
+    return this;
+  }
+
+  /**
+   * A list of alt names for a host.
+   * @return subjectAltNames
+  **/
+  @ApiModelProperty(example = "\"DNS:example.cloudera.com\"", value = "A list of alt names for a host.")
+
+
+  public List<String> getSubjectAltNames() {
+    return subjectAltNames;
+  }
+
+  public void setSubjectAltNames(List<String> subjectAltNames) {
+    this.subjectAltNames = subjectAltNames;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -101,12 +135,13 @@ public class ApiHostCertInfo   {
     ApiHostCertInfo apiHostCertInfo = (ApiHostCertInfo) o;
     return Objects.equals(this.hostname, apiHostCertInfo.hostname) &&
         Objects.equals(this.certificate, apiHostCertInfo.certificate) &&
-        Objects.equals(this.key, apiHostCertInfo.key);
+        Objects.equals(this.key, apiHostCertInfo.key) &&
+        Objects.equals(this.subjectAltNames, apiHostCertInfo.subjectAltNames);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(hostname, certificate, key);
+    return Objects.hash(hostname, certificate, key, subjectAltNames);
   }
 
   @Override
@@ -117,6 +152,7 @@ public class ApiHostCertInfo   {
     sb.append("    hostname: ").append(toIndentedString(hostname)).append("\n");
     sb.append("    certificate: ").append(toIndentedString(certificate)).append("\n");
     sb.append("    key: ").append(toIndentedString(key)).append("\n");
+    sb.append("    subjectAltNames: ").append(toIndentedString(subjectAltNames)).append("\n");
     sb.append("}");
     return sb.toString();
   }

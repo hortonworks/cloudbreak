@@ -1,6 +1,5 @@
 package com.sequenceiq.mock.clouderamanager;
 
-import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -46,7 +45,7 @@ public class DataProviderService {
     @Inject
     private HostNameService hostNameService;
 
-    public ApiCommand getSuccessfulApiCommand(BigDecimal id) {
+    public ApiCommand getSuccessfulApiCommand(Integer id) {
         ApiCommand result = new ApiCommand();
         result.setId(id);
         result.setActive(false);
@@ -59,6 +58,16 @@ public class DataProviderService {
         ApiHostRefList apiHostList = new ApiHostRefList();
         for (CloudVmMetaDataStatus cloudVmMetaDataStatus : metadata) {
             ApiHostRef apiHost = getApiHostRef(mockUuid, cloudVmMetaDataStatus);
+            apiHostList.addItemsItem(apiHost);
+        }
+        return apiHostList;
+    }
+
+    public ApiHostList getHostList(String mockUuid) {
+        List<CloudVmMetaDataStatus> metadata = spiStoreService.getMetadata(mockUuid);
+        ApiHostList apiHostList = new ApiHostList();
+        for (CloudVmMetaDataStatus cloudVmMetaDataStatus : metadata) {
+            ApiHost apiHost = getApiHost(mockUuid, cloudVmMetaDataStatus);
             apiHostList.addItemsItem(apiHost);
         }
         return apiHostList;

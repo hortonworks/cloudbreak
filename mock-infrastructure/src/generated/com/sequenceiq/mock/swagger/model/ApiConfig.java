@@ -15,7 +15,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "Model for a configuration parameter.  When an entry's <i>value</i> property is not available, it means the entry is not configured. This means that the default value for the entry, if any, will be used. Setting a value to <i>null</i> also can be used to unset any previously set value for the parameter, reverting to the default value (if any).")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 

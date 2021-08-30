@@ -7,7 +7,6 @@ import com.sequenceiq.mock.swagger.model.ApiHBaseSnapshot;
 import com.sequenceiq.mock.swagger.model.ApiHBaseSnapshotError;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.validation.annotation.Validated;
@@ -19,55 +18,55 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "Detailed information about an HBase snapshot command.")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
 
 public class ApiHBaseSnapshotResult   {
   @JsonProperty("processedTableCount")
-  private BigDecimal processedTableCount = null;
+  private Integer processedTableCount = null;
 
   @JsonProperty("processedTables")
   @Valid
   private List<String> processedTables = null;
 
   @JsonProperty("unprocessedTableCount")
-  private BigDecimal unprocessedTableCount = null;
+  private Integer unprocessedTableCount = null;
 
   @JsonProperty("unprocessedTables")
   @Valid
   private List<String> unprocessedTables = null;
 
   @JsonProperty("createdSnapshotCount")
-  private BigDecimal createdSnapshotCount = null;
+  private Integer createdSnapshotCount = null;
 
   @JsonProperty("createdSnapshots")
   @Valid
   private List<ApiHBaseSnapshot> createdSnapshots = null;
 
   @JsonProperty("deletedSnapshotCount")
-  private BigDecimal deletedSnapshotCount = null;
+  private Integer deletedSnapshotCount = null;
 
   @JsonProperty("deletedSnapshots")
   @Valid
   private List<ApiHBaseSnapshot> deletedSnapshots = null;
 
   @JsonProperty("creationErrorCount")
-  private BigDecimal creationErrorCount = null;
+  private Integer creationErrorCount = null;
 
   @JsonProperty("creationErrors")
   @Valid
   private List<ApiHBaseSnapshotError> creationErrors = null;
 
   @JsonProperty("deletionErrorCount")
-  private BigDecimal deletionErrorCount = null;
+  private Integer deletionErrorCount = null;
 
   @JsonProperty("deletionErrors")
   @Valid
   private List<ApiHBaseSnapshotError> deletionErrors = null;
 
-  public ApiHBaseSnapshotResult processedTableCount(BigDecimal processedTableCount) {
+  public ApiHBaseSnapshotResult processedTableCount(Integer processedTableCount) {
     this.processedTableCount = processedTableCount;
     return this;
   }
@@ -78,13 +77,12 @@ public class ApiHBaseSnapshotResult   {
   **/
   @ApiModelProperty(value = "Number of processed tables.")
 
-  @Valid
 
-  public BigDecimal getProcessedTableCount() {
+  public Integer getProcessedTableCount() {
     return processedTableCount;
   }
 
-  public void setProcessedTableCount(BigDecimal processedTableCount) {
+  public void setProcessedTableCount(Integer processedTableCount) {
     this.processedTableCount = processedTableCount;
   }
 
@@ -105,7 +103,7 @@ public class ApiHBaseSnapshotResult   {
    * The list of processed tables. <p/> This is only available in the full view.
    * @return processedTables
   **/
-  @ApiModelProperty(example = "\"null\"", value = "The list of processed tables. <p/> This is only available in the full view.")
+  @ApiModelProperty(value = "The list of processed tables. <p/> This is only available in the full view.")
 
 
   public List<String> getProcessedTables() {
@@ -116,7 +114,7 @@ public class ApiHBaseSnapshotResult   {
     this.processedTables = processedTables;
   }
 
-  public ApiHBaseSnapshotResult unprocessedTableCount(BigDecimal unprocessedTableCount) {
+  public ApiHBaseSnapshotResult unprocessedTableCount(Integer unprocessedTableCount) {
     this.unprocessedTableCount = unprocessedTableCount;
     return this;
   }
@@ -127,13 +125,12 @@ public class ApiHBaseSnapshotResult   {
   **/
   @ApiModelProperty(value = "Number of unprocessed tables.")
 
-  @Valid
 
-  public BigDecimal getUnprocessedTableCount() {
+  public Integer getUnprocessedTableCount() {
     return unprocessedTableCount;
   }
 
-  public void setUnprocessedTableCount(BigDecimal unprocessedTableCount) {
+  public void setUnprocessedTableCount(Integer unprocessedTableCount) {
     this.unprocessedTableCount = unprocessedTableCount;
   }
 
@@ -154,7 +151,7 @@ public class ApiHBaseSnapshotResult   {
    * The list of unprocessed tables. Note that tables that are currently being processed will also be included in this list. <p/> This is only available in the full view.
    * @return unprocessedTables
   **/
-  @ApiModelProperty(example = "\"null\"", value = "The list of unprocessed tables. Note that tables that are currently being processed will also be included in this list. <p/> This is only available in the full view.")
+  @ApiModelProperty(value = "The list of unprocessed tables. Note that tables that are currently being processed will also be included in this list. <p/> This is only available in the full view.")
 
 
   public List<String> getUnprocessedTables() {
@@ -165,7 +162,7 @@ public class ApiHBaseSnapshotResult   {
     this.unprocessedTables = unprocessedTables;
   }
 
-  public ApiHBaseSnapshotResult createdSnapshotCount(BigDecimal createdSnapshotCount) {
+  public ApiHBaseSnapshotResult createdSnapshotCount(Integer createdSnapshotCount) {
     this.createdSnapshotCount = createdSnapshotCount;
     return this;
   }
@@ -176,13 +173,12 @@ public class ApiHBaseSnapshotResult   {
   **/
   @ApiModelProperty(value = "Number of snapshots created.")
 
-  @Valid
 
-  public BigDecimal getCreatedSnapshotCount() {
+  public Integer getCreatedSnapshotCount() {
     return createdSnapshotCount;
   }
 
-  public void setCreatedSnapshotCount(BigDecimal createdSnapshotCount) {
+  public void setCreatedSnapshotCount(Integer createdSnapshotCount) {
     this.createdSnapshotCount = createdSnapshotCount;
   }
 
@@ -215,7 +211,7 @@ public class ApiHBaseSnapshotResult   {
     this.createdSnapshots = createdSnapshots;
   }
 
-  public ApiHBaseSnapshotResult deletedSnapshotCount(BigDecimal deletedSnapshotCount) {
+  public ApiHBaseSnapshotResult deletedSnapshotCount(Integer deletedSnapshotCount) {
     this.deletedSnapshotCount = deletedSnapshotCount;
     return this;
   }
@@ -226,13 +222,12 @@ public class ApiHBaseSnapshotResult   {
   **/
   @ApiModelProperty(value = "Number of snapshots deleted.")
 
-  @Valid
 
-  public BigDecimal getDeletedSnapshotCount() {
+  public Integer getDeletedSnapshotCount() {
     return deletedSnapshotCount;
   }
 
-  public void setDeletedSnapshotCount(BigDecimal deletedSnapshotCount) {
+  public void setDeletedSnapshotCount(Integer deletedSnapshotCount) {
     this.deletedSnapshotCount = deletedSnapshotCount;
   }
 
@@ -265,7 +260,7 @@ public class ApiHBaseSnapshotResult   {
     this.deletedSnapshots = deletedSnapshots;
   }
 
-  public ApiHBaseSnapshotResult creationErrorCount(BigDecimal creationErrorCount) {
+  public ApiHBaseSnapshotResult creationErrorCount(Integer creationErrorCount) {
     this.creationErrorCount = creationErrorCount;
     return this;
   }
@@ -276,13 +271,12 @@ public class ApiHBaseSnapshotResult   {
   **/
   @ApiModelProperty(value = "Number of errors detected when creating snapshots.")
 
-  @Valid
 
-  public BigDecimal getCreationErrorCount() {
+  public Integer getCreationErrorCount() {
     return creationErrorCount;
   }
 
-  public void setCreationErrorCount(BigDecimal creationErrorCount) {
+  public void setCreationErrorCount(Integer creationErrorCount) {
     this.creationErrorCount = creationErrorCount;
   }
 
@@ -315,7 +309,7 @@ public class ApiHBaseSnapshotResult   {
     this.creationErrors = creationErrors;
   }
 
-  public ApiHBaseSnapshotResult deletionErrorCount(BigDecimal deletionErrorCount) {
+  public ApiHBaseSnapshotResult deletionErrorCount(Integer deletionErrorCount) {
     this.deletionErrorCount = deletionErrorCount;
     return this;
   }
@@ -326,13 +320,12 @@ public class ApiHBaseSnapshotResult   {
   **/
   @ApiModelProperty(value = "Number of errors detected when deleting snapshots.")
 
-  @Valid
 
-  public BigDecimal getDeletionErrorCount() {
+  public Integer getDeletionErrorCount() {
     return deletionErrorCount;
   }
 
-  public void setDeletionErrorCount(BigDecimal deletionErrorCount) {
+  public void setDeletionErrorCount(Integer deletionErrorCount) {
     this.deletionErrorCount = deletionErrorCount;
   }
 

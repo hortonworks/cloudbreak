@@ -16,7 +16,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "Describe a time series entity type and attributes associated with this entity type. <p> Available since API v11.")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
@@ -173,7 +173,7 @@ public class ApiTimeSeriesEntityType   {
    * Returns the list of immutable attributes for this entity type. Immutable attributes values for an entity may not change over its lifetime.
    * @return immutableAttributeNames
   **/
-  @ApiModelProperty(example = "\"null\"", value = "Returns the list of immutable attributes for this entity type. Immutable attributes values for an entity may not change over its lifetime.")
+  @ApiModelProperty(value = "Returns the list of immutable attributes for this entity type. Immutable attributes values for an entity may not change over its lifetime.")
 
 
   public List<String> getImmutableAttributeNames() {
@@ -201,7 +201,7 @@ public class ApiTimeSeriesEntityType   {
    * Returns the list of mutable attributes for this entity type. Mutable attributes for an entity may change over its lifetime.
    * @return mutableAttributeNames
   **/
-  @ApiModelProperty(example = "\"null\"", value = "Returns the list of mutable attributes for this entity type. Mutable attributes for an entity may change over its lifetime.")
+  @ApiModelProperty(value = "Returns the list of mutable attributes for this entity type. Mutable attributes for an entity may change over its lifetime.")
 
 
   public List<String> getMutableAttributeNames() {
@@ -229,7 +229,7 @@ public class ApiTimeSeriesEntityType   {
    * Returns a list of attribute names that will be used to construct entity names for entities of this type. The attributes named here must be immutable attributes of this type or a parent type.
    * @return entityNameFormat
   **/
-  @ApiModelProperty(example = "\"null\"", value = "Returns a list of attribute names that will be used to construct entity names for entities of this type. The attributes named here must be immutable attributes of this type or a parent type.")
+  @ApiModelProperty(value = "Returns a list of attribute names that will be used to construct entity names for entities of this type. The attributes named here must be immutable attributes of this type or a parent type.")
 
 
   public List<String> getEntityNameFormat() {
@@ -277,7 +277,7 @@ public class ApiTimeSeriesEntityType   {
    * Returns a list of metric entity type names which are parents of this metric entity type. A metric entity type inherits the attributes of its ancestors. For example a role metric entity type has its service as a parent. A service metric entity type has a cluster as a parent. The role type inherits its cluster name attribute through its service parent. Only parent ancestors should be returned here. In the example given, only the service metric entity type should be specified in the parent list.
    * @return parentMetricEntityTypeNames
   **/
-  @ApiModelProperty(example = "\"null\"", value = "Returns a list of metric entity type names which are parents of this metric entity type. A metric entity type inherits the attributes of its ancestors. For example a role metric entity type has its service as a parent. A service metric entity type has a cluster as a parent. The role type inherits its cluster name attribute through its service parent. Only parent ancestors should be returned here. In the example given, only the service metric entity type should be specified in the parent list.")
+  @ApiModelProperty(value = "Returns a list of metric entity type names which are parents of this metric entity type. A metric entity type inherits the attributes of its ancestors. For example a role metric entity type has its service as a parent. A service metric entity type has a cluster as a parent. The role type inherits its cluster name attribute through its service parent. Only parent ancestors should be returned here. In the example given, only the service metric entity type should be specified in the parent list.")
 
 
   public List<String> getParentMetricEntityTypeNames() {

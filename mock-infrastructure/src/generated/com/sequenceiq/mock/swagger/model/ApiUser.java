@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.validation.annotation.Validated;
@@ -17,7 +16,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "This is the model for user information in the API prior to v18. Post v18, please refer to ApiUser2.java. <p> Note that any method that returns user information will not contain any password information. The password property is only used when creating or updating users.")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
@@ -37,7 +36,7 @@ public class ApiUser   {
   private String pwHash = null;
 
   @JsonProperty("pwSalt")
-  private BigDecimal pwSalt = null;
+  private Integer pwSalt = null;
 
   @JsonProperty("pwLogin")
   private Boolean pwLogin = null;
@@ -99,7 +98,7 @@ public class ApiUser   {
    * A list of roles this user belongs to. <p> In Cloudera Express, possible values are: <ul> <li><b>ROLE_ADMIN</b></li> <li><b>ROLE_USER</b></li> </ul> In Cloudera Enterprise Datahub Edition, additional possible values are: <ul> <li><b>ROLE_LIMITED</b>: Added in Cloudera Manager 5.0</li> <li><b>ROLE_OPERATOR</b>: Added in Cloudera Manager 5.1</li> <li><b>ROLE_CONFIGURATOR</b>: Added in Cloudera Manager 5.1</li> <li><b>ROLE_CLUSTER_ADMIN</b>: Added in Cloudera Manager 5.2</li> <li><b>ROLE_BDR_ADMIN</b>: Added in Cloudera Manager 5.2</li> <li><b>ROLE_NAVIGATOR_ADMIN</b>: Added in Cloudera Manager 5.2</li> <li><b>ROLE_USER_ADMIN</b>: Added in Cloudera Manager 5.2</li> <li><b>ROLE_KEY_ADMIN</b>: Added in Cloudera Manager 5.5</li> </ul> An empty list implies ROLE_USER. <p> Note that although this interface provides a list of roles, a user should only be assigned a single role at a time.
    * @return roles
   **/
-  @ApiModelProperty(example = "\"null\"", value = "A list of roles this user belongs to. <p> In Cloudera Express, possible values are: <ul> <li><b>ROLE_ADMIN</b></li> <li><b>ROLE_USER</b></li> </ul> In Cloudera Enterprise Datahub Edition, additional possible values are: <ul> <li><b>ROLE_LIMITED</b>: Added in Cloudera Manager 5.0</li> <li><b>ROLE_OPERATOR</b>: Added in Cloudera Manager 5.1</li> <li><b>ROLE_CONFIGURATOR</b>: Added in Cloudera Manager 5.1</li> <li><b>ROLE_CLUSTER_ADMIN</b>: Added in Cloudera Manager 5.2</li> <li><b>ROLE_BDR_ADMIN</b>: Added in Cloudera Manager 5.2</li> <li><b>ROLE_NAVIGATOR_ADMIN</b>: Added in Cloudera Manager 5.2</li> <li><b>ROLE_USER_ADMIN</b>: Added in Cloudera Manager 5.2</li> <li><b>ROLE_KEY_ADMIN</b>: Added in Cloudera Manager 5.5</li> </ul> An empty list implies ROLE_USER. <p> Note that although this interface provides a list of roles, a user should only be assigned a single role at a time.")
+  @ApiModelProperty(value = "A list of roles this user belongs to. <p> In Cloudera Express, possible values are: <ul> <li><b>ROLE_ADMIN</b></li> <li><b>ROLE_USER</b></li> </ul> In Cloudera Enterprise Datahub Edition, additional possible values are: <ul> <li><b>ROLE_LIMITED</b>: Added in Cloudera Manager 5.0</li> <li><b>ROLE_OPERATOR</b>: Added in Cloudera Manager 5.1</li> <li><b>ROLE_CONFIGURATOR</b>: Added in Cloudera Manager 5.1</li> <li><b>ROLE_CLUSTER_ADMIN</b>: Added in Cloudera Manager 5.2</li> <li><b>ROLE_BDR_ADMIN</b>: Added in Cloudera Manager 5.2</li> <li><b>ROLE_NAVIGATOR_ADMIN</b>: Added in Cloudera Manager 5.2</li> <li><b>ROLE_USER_ADMIN</b>: Added in Cloudera Manager 5.2</li> <li><b>ROLE_KEY_ADMIN</b>: Added in Cloudera Manager 5.5</li> </ul> An empty list implies ROLE_USER. <p> Note that although this interface provides a list of roles, a user should only be assigned a single role at a time.")
 
 
   public List<String> getRoles() {
@@ -130,7 +129,7 @@ public class ApiUser   {
     this.pwHash = pwHash;
   }
 
-  public ApiUser pwSalt(BigDecimal pwSalt) {
+  public ApiUser pwSalt(Integer pwSalt) {
     this.pwSalt = pwSalt;
     return this;
   }
@@ -141,13 +140,12 @@ public class ApiUser   {
   **/
   @ApiModelProperty(value = "NOTE: Only available in the \"export\" view")
 
-  @Valid
 
-  public BigDecimal getPwSalt() {
+  public Integer getPwSalt() {
     return pwSalt;
   }
 
-  public void setPwSalt(BigDecimal pwSalt) {
+  public void setPwSalt(Integer pwSalt) {
     this.pwSalt = pwSalt;
   }
 

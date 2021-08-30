@@ -17,7 +17,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "A metric represents a specific metric monitored by the Cloudera Management Services, and a list of values matching a user query. <p> These fields are available only in the \"full\" view: <ul> <li>displayName</li> <li>description</li> </ul>")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 

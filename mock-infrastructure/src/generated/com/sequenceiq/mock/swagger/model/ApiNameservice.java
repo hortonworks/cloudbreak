@@ -19,7 +19,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "Provides information about an HDFS nameservice. <p> Nameservices can be either a stand-alone NameNode, a NameNode paired with a SecondaryNameNode, or a high-availability pair formed by an active and a stand-by NameNode. <p> The following fields are only available in the object's full view: <ul> <li>healthSummary</li> <li>healthChecks</li> </ul>")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
@@ -196,7 +196,7 @@ public class ApiNameservice   {
    * Mount points assigned to this nameservice in a federation.
    * @return mountPoints
   **/
-  @ApiModelProperty(example = "\"null\"", value = "Mount points assigned to this nameservice in a federation.")
+  @ApiModelProperty(value = "Mount points assigned to this nameservice in a federation.")
 
 
   public List<String> getMountPoints() {

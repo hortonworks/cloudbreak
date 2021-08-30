@@ -7,7 +7,6 @@ import com.sequenceiq.mock.swagger.model.ApiHostCertInfo;
 import com.sequenceiq.mock.swagger.model.BaseApiSshCmdArguments;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.validation.annotation.Validated;
@@ -19,7 +18,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "Arguments to generate a Cloudera Manager Certificate Authority (CMCA).")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
@@ -51,6 +50,10 @@ public class ApiGenerateCmcaArguments extends BaseApiSshCmdArguments  {
 
   @JsonProperty("trustedCaCerts")
   private String trustedCaCerts = null;
+
+  @JsonProperty("additionalArguments")
+  @Valid
+  private List<String> additionalArguments = null;
 
   @JsonProperty("hostCerts")
   @Valid
@@ -239,6 +242,34 @@ public class ApiGenerateCmcaArguments extends BaseApiSshCmdArguments  {
     this.trustedCaCerts = trustedCaCerts;
   }
 
+  public ApiGenerateCmcaArguments additionalArguments(List<String> additionalArguments) {
+    this.additionalArguments = additionalArguments;
+    return this;
+  }
+
+  public ApiGenerateCmcaArguments addAdditionalArgumentsItem(String additionalArgumentsItem) {
+    if (this.additionalArguments == null) {
+      this.additionalArguments = new ArrayList<>();
+    }
+    this.additionalArguments.add(additionalArgumentsItem);
+    return this;
+  }
+
+  /**
+   * A list of additional arguments that can be passed to the certificate manager
+   * @return additionalArguments
+  **/
+  @ApiModelProperty(example = "\"--override\"", value = "A list of additional arguments that can be passed to the certificate manager")
+
+
+  public List<String> getAdditionalArguments() {
+    return additionalArguments;
+  }
+
+  public void setAdditionalArguments(List<String> additionalArguments) {
+    this.additionalArguments = additionalArguments;
+  }
+
   public ApiGenerateCmcaArguments hostCerts(List<ApiHostCertInfo> hostCerts) {
     this.hostCerts = hostCerts;
     return this;
@@ -274,10 +305,10 @@ public class ApiGenerateCmcaArguments extends BaseApiSshCmdArguments  {
   }
 
   /**
-   * Whether to configure all existing services to use Auto-TLS. If false, only MGMT services will be configured to use Auto-TLS. Use the cluster-level ConfigureAutoTlsServices command to configure Auto-TLS services for a single cluster only.  All future services will be configured to use Auto-TLS regardless of this setting.
+   * Whether to configure all existing services to use Auto-TLS. Defaults to false.  If false, only MGMT services will be configured to use Auto-TLS. Use the cluster-level ConfigureAutoTlsServices command to configure Auto-TLS services for a single cluster only.  All future services will be configured to use Auto-TLS regardless of this setting.
    * @return configureAllServices
   **/
-  @ApiModelProperty(value = "Whether to configure all existing services to use Auto-TLS. If false, only MGMT services will be configured to use Auto-TLS. Use the cluster-level ConfigureAutoTlsServices command to configure Auto-TLS services for a single cluster only.  All future services will be configured to use Auto-TLS regardless of this setting.")
+  @ApiModelProperty(value = "Whether to configure all existing services to use Auto-TLS. Defaults to false.  If false, only MGMT services will be configured to use Auto-TLS. Use the cluster-level ConfigureAutoTlsServices command to configure Auto-TLS services for a single cluster only.  All future services will be configured to use Auto-TLS regardless of this setting.")
 
 
   public Boolean isConfigureAllServices() {
@@ -307,6 +338,7 @@ public class ApiGenerateCmcaArguments extends BaseApiSshCmdArguments  {
         Objects.equals(this.keystorePasswd, apiGenerateCmcaArguments.keystorePasswd) &&
         Objects.equals(this.truststorePasswd, apiGenerateCmcaArguments.truststorePasswd) &&
         Objects.equals(this.trustedCaCerts, apiGenerateCmcaArguments.trustedCaCerts) &&
+        Objects.equals(this.additionalArguments, apiGenerateCmcaArguments.additionalArguments) &&
         Objects.equals(this.hostCerts, apiGenerateCmcaArguments.hostCerts) &&
         Objects.equals(this.configureAllServices, apiGenerateCmcaArguments.configureAllServices) &&
         super.equals(o);
@@ -314,7 +346,7 @@ public class ApiGenerateCmcaArguments extends BaseApiSshCmdArguments  {
 
   @Override
   public int hashCode() {
-    return Objects.hash(location, customCA, interpretAsFilenames, cmHostCert, cmHostKey, caCert, keystorePasswd, truststorePasswd, trustedCaCerts, hostCerts, configureAllServices, super.hashCode());
+    return Objects.hash(location, customCA, interpretAsFilenames, cmHostCert, cmHostKey, caCert, keystorePasswd, truststorePasswd, trustedCaCerts, additionalArguments, hostCerts, configureAllServices, super.hashCode());
   }
 
   @Override
@@ -331,6 +363,7 @@ public class ApiGenerateCmcaArguments extends BaseApiSshCmdArguments  {
     sb.append("    keystorePasswd: ").append(toIndentedString(keystorePasswd)).append("\n");
     sb.append("    truststorePasswd: ").append(toIndentedString(truststorePasswd)).append("\n");
     sb.append("    trustedCaCerts: ").append(toIndentedString(trustedCaCerts)).append("\n");
+    sb.append("    additionalArguments: ").append(toIndentedString(additionalArguments)).append("\n");
     sb.append("    hostCerts: ").append(toIndentedString(hostCerts)).append("\n");
     sb.append("    configureAllServices: ").append(toIndentedString(configureAllServices)).append("\n");
     sb.append("}");

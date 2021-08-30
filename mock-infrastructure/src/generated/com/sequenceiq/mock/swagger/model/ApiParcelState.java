@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.validation.annotation.Validated;
@@ -17,23 +16,23 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "The ApiParcelState encapsulates the state of a parcel while it is in transition and reports any errors that may have occurred.. <p> The complete progress of a parcel is broken up into two different reporting indicators - progress and count. Progress is the primary indicator that reports the global state of transitions. For example, when downloading, progress and totalProgress will show the current number of bytes downloaded and the total number of bytes needed to be downloaded respectively. </p> <p> The count and totalCount indicator is used when a state transition affects multiple hosts. The count and totalCount show the current number of hosts completed and the total number of hosts respectively. For example, during distribution, the progress and totalProgress will show how many bytes have been transferred to each host and the count will indicate how many hosts of of totalCount have had parcels unpacked. </p> <p> Along with the two progress indicators, the ApiParcelState shows both errors and warnings that may have turned up during a state transition. </p>")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
 
 public class ApiParcelState   {
   @JsonProperty("progress")
-  private BigDecimal progress = null;
+  private Integer progress = null;
 
   @JsonProperty("totalProgress")
-  private BigDecimal totalProgress = null;
+  private Integer totalProgress = null;
 
   @JsonProperty("count")
-  private BigDecimal count = null;
+  private Integer count = null;
 
   @JsonProperty("totalCount")
-  private BigDecimal totalCount = null;
+  private Integer totalCount = null;
 
   @JsonProperty("errors")
   @Valid
@@ -43,7 +42,7 @@ public class ApiParcelState   {
   @Valid
   private List<String> warnings = null;
 
-  public ApiParcelState progress(BigDecimal progress) {
+  public ApiParcelState progress(Integer progress) {
     this.progress = progress;
     return this;
   }
@@ -54,17 +53,16 @@ public class ApiParcelState   {
   **/
   @ApiModelProperty(value = "The progress of the state transition.")
 
-  @Valid
 
-  public BigDecimal getProgress() {
+  public Integer getProgress() {
     return progress;
   }
 
-  public void setProgress(BigDecimal progress) {
+  public void setProgress(Integer progress) {
     this.progress = progress;
   }
 
-  public ApiParcelState totalProgress(BigDecimal totalProgress) {
+  public ApiParcelState totalProgress(Integer totalProgress) {
     this.totalProgress = totalProgress;
     return this;
   }
@@ -75,17 +73,16 @@ public class ApiParcelState   {
   **/
   @ApiModelProperty(value = "The total amount that #getProgress() needs to get to.")
 
-  @Valid
 
-  public BigDecimal getTotalProgress() {
+  public Integer getTotalProgress() {
     return totalProgress;
   }
 
-  public void setTotalProgress(BigDecimal totalProgress) {
+  public void setTotalProgress(Integer totalProgress) {
     this.totalProgress = totalProgress;
   }
 
-  public ApiParcelState count(BigDecimal count) {
+  public ApiParcelState count(Integer count) {
     this.count = count;
     return this;
   }
@@ -96,17 +93,16 @@ public class ApiParcelState   {
   **/
   @ApiModelProperty(value = "The current hosts that have completed.")
 
-  @Valid
 
-  public BigDecimal getCount() {
+  public Integer getCount() {
     return count;
   }
 
-  public void setCount(BigDecimal count) {
+  public void setCount(Integer count) {
     this.count = count;
   }
 
-  public ApiParcelState totalCount(BigDecimal totalCount) {
+  public ApiParcelState totalCount(Integer totalCount) {
     this.totalCount = totalCount;
     return this;
   }
@@ -117,13 +113,12 @@ public class ApiParcelState   {
   **/
   @ApiModelProperty(value = "The total amount that #getCount() needs to get to.")
 
-  @Valid
 
-  public BigDecimal getTotalCount() {
+  public Integer getTotalCount() {
     return totalCount;
   }
 
-  public void setTotalCount(BigDecimal totalCount) {
+  public void setTotalCount(Integer totalCount) {
     this.totalCount = totalCount;
   }
 
@@ -144,7 +139,7 @@ public class ApiParcelState   {
    * The errors that exist for this parcel.
    * @return errors
   **/
-  @ApiModelProperty(example = "\"null\"", value = "The errors that exist for this parcel.")
+  @ApiModelProperty(value = "The errors that exist for this parcel.")
 
 
   public List<String> getErrors() {
@@ -172,7 +167,7 @@ public class ApiParcelState   {
    * The warnings that exist for this parcel.
    * @return warnings
   **/
-  @ApiModelProperty(example = "\"null\"", value = "The warnings that exist for this parcel.")
+  @ApiModelProperty(value = "The warnings that exist for this parcel.")
 
 
   public List<String> getWarnings() {

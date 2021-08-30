@@ -18,7 +18,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "A list of commands. <p> This list is returned whenever commands are issued in bulk, and contains a second list with information about errors issuing specific commands.")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
@@ -45,7 +45,7 @@ public class ApiBulkCommandList extends ApiCommandList  {
    * Errors that occurred when issuing individual commands.
    * @return errors
   **/
-  @ApiModelProperty(example = "\"null\"", value = "Errors that occurred when issuing individual commands.")
+  @ApiModelProperty(value = "Errors that occurred when issuing individual commands.")
 
 
   public List<String> getErrors() {

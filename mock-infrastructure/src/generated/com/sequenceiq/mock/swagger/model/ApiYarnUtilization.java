@@ -16,7 +16,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "Utilization report information of a Yarn application service.")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
@@ -32,7 +32,7 @@ public class ApiYarnUtilization   {
   private BigDecimal avgCpuDailyPeak = null;
 
   @JsonProperty("maxCpuUtilizationTimestampMs")
-  private BigDecimal maxCpuUtilizationTimestampMs = null;
+  private Integer maxCpuUtilizationTimestampMs = null;
 
   @JsonProperty("avgCpuUtilizationPercentage")
   private BigDecimal avgCpuUtilizationPercentage = null;
@@ -53,7 +53,7 @@ public class ApiYarnUtilization   {
   private BigDecimal avgMemoryDailyPeak = null;
 
   @JsonProperty("maxMemoryUtilizationTimestampMs")
-  private BigDecimal maxMemoryUtilizationTimestampMs = null;
+  private Integer maxMemoryUtilizationTimestampMs = null;
 
   @JsonProperty("avgMemoryUtilizationPercentage")
   private BigDecimal avgMemoryUtilizationPercentage = null;
@@ -133,7 +133,7 @@ public class ApiYarnUtilization   {
     this.avgCpuDailyPeak = avgCpuDailyPeak;
   }
 
-  public ApiYarnUtilization maxCpuUtilizationTimestampMs(BigDecimal maxCpuUtilizationTimestampMs) {
+  public ApiYarnUtilization maxCpuUtilizationTimestampMs(Integer maxCpuUtilizationTimestampMs) {
     this.maxCpuUtilizationTimestampMs = maxCpuUtilizationTimestampMs;
     return this;
   }
@@ -144,13 +144,12 @@ public class ApiYarnUtilization   {
   **/
   @ApiModelProperty(value = "Timestamp corresponds to maximum number of VCores used by YARN applications during the report window.")
 
-  @Valid
 
-  public BigDecimal getMaxCpuUtilizationTimestampMs() {
+  public Integer getMaxCpuUtilizationTimestampMs() {
     return maxCpuUtilizationTimestampMs;
   }
 
-  public void setMaxCpuUtilizationTimestampMs(BigDecimal maxCpuUtilizationTimestampMs) {
+  public void setMaxCpuUtilizationTimestampMs(Integer maxCpuUtilizationTimestampMs) {
     this.maxCpuUtilizationTimestampMs = maxCpuUtilizationTimestampMs;
   }
 
@@ -280,7 +279,7 @@ public class ApiYarnUtilization   {
     this.avgMemoryDailyPeak = avgMemoryDailyPeak;
   }
 
-  public ApiYarnUtilization maxMemoryUtilizationTimestampMs(BigDecimal maxMemoryUtilizationTimestampMs) {
+  public ApiYarnUtilization maxMemoryUtilizationTimestampMs(Integer maxMemoryUtilizationTimestampMs) {
     this.maxMemoryUtilizationTimestampMs = maxMemoryUtilizationTimestampMs;
     return this;
   }
@@ -291,13 +290,12 @@ public class ApiYarnUtilization   {
   **/
   @ApiModelProperty(value = "Timestamp corresponds to maximum memory used by YARN applications during the report window.")
 
-  @Valid
 
-  public BigDecimal getMaxMemoryUtilizationTimestampMs() {
+  public Integer getMaxMemoryUtilizationTimestampMs() {
     return maxMemoryUtilizationTimestampMs;
   }
 
-  public void setMaxMemoryUtilizationTimestampMs(BigDecimal maxMemoryUtilizationTimestampMs) {
+  public void setMaxMemoryUtilizationTimestampMs(Integer maxMemoryUtilizationTimestampMs) {
     this.maxMemoryUtilizationTimestampMs = maxMemoryUtilizationTimestampMs;
   }
 

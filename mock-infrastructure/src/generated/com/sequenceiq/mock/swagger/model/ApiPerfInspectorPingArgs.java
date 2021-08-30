@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.math.BigDecimal;
 import org.springframework.validation.annotation.Validated;
 import javax.validation.Valid;
 import javax.validation.constraints.*;
@@ -15,22 +14,22 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "Arguments to run ping test.")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
 
 public class ApiPerfInspectorPingArgs   {
   @JsonProperty("pingTimeoutSecs")
-  private BigDecimal pingTimeoutSecs = null;
+  private Integer pingTimeoutSecs = null;
 
   @JsonProperty("pingCount")
-  private BigDecimal pingCount = null;
+  private Integer pingCount = null;
 
   @JsonProperty("pingPacketSizeBytes")
-  private BigDecimal pingPacketSizeBytes = null;
+  private Integer pingPacketSizeBytes = null;
 
-  public ApiPerfInspectorPingArgs pingTimeoutSecs(BigDecimal pingTimeoutSecs) {
+  public ApiPerfInspectorPingArgs pingTimeoutSecs(Integer pingTimeoutSecs) {
     this.pingTimeoutSecs = pingTimeoutSecs;
     return this;
   }
@@ -39,19 +38,18 @@ public class ApiPerfInspectorPingArgs   {
    * Timeout in seconds for the ping request to each target host. If not specified, defaults to 10 seconds. Must be a value between 1 and 3600 seconds, inclusive.
    * @return pingTimeoutSecs
   **/
-  @ApiModelProperty(example = "10.0", value = "Timeout in seconds for the ping request to each target host. If not specified, defaults to 10 seconds. Must be a value between 1 and 3600 seconds, inclusive.")
+  @ApiModelProperty(example = "10", value = "Timeout in seconds for the ping request to each target host. If not specified, defaults to 10 seconds. Must be a value between 1 and 3600 seconds, inclusive.")
 
-  @Valid
 
-  public BigDecimal getPingTimeoutSecs() {
+  public Integer getPingTimeoutSecs() {
     return pingTimeoutSecs;
   }
 
-  public void setPingTimeoutSecs(BigDecimal pingTimeoutSecs) {
+  public void setPingTimeoutSecs(Integer pingTimeoutSecs) {
     this.pingTimeoutSecs = pingTimeoutSecs;
   }
 
-  public ApiPerfInspectorPingArgs pingCount(BigDecimal pingCount) {
+  public ApiPerfInspectorPingArgs pingCount(Integer pingCount) {
     this.pingCount = pingCount;
     return this;
   }
@@ -60,19 +58,18 @@ public class ApiPerfInspectorPingArgs   {
    * Number of iterations of the ping request to each target host. If not specified, defaults to 10 count.
    * @return pingCount
   **/
-  @ApiModelProperty(example = "10.0", value = "Number of iterations of the ping request to each target host. If not specified, defaults to 10 count.")
+  @ApiModelProperty(example = "10", value = "Number of iterations of the ping request to each target host. If not specified, defaults to 10 count.")
 
-  @Valid
 
-  public BigDecimal getPingCount() {
+  public Integer getPingCount() {
     return pingCount;
   }
 
-  public void setPingCount(BigDecimal pingCount) {
+  public void setPingCount(Integer pingCount) {
     this.pingCount = pingCount;
   }
 
-  public ApiPerfInspectorPingArgs pingPacketSizeBytes(BigDecimal pingPacketSizeBytes) {
+  public ApiPerfInspectorPingArgs pingPacketSizeBytes(Integer pingPacketSizeBytes) {
     this.pingPacketSizeBytes = pingPacketSizeBytes;
     return this;
   }
@@ -81,15 +78,14 @@ public class ApiPerfInspectorPingArgs   {
    * Packet size in bytes for each ping request. If not specified, defaults to 56 bytes. Must be a value between 1 and 65507 bytes, inclusive.
    * @return pingPacketSizeBytes
   **/
-  @ApiModelProperty(example = "56.0", value = "Packet size in bytes for each ping request. If not specified, defaults to 56 bytes. Must be a value between 1 and 65507 bytes, inclusive.")
+  @ApiModelProperty(example = "56", value = "Packet size in bytes for each ping request. If not specified, defaults to 56 bytes. Must be a value between 1 and 65507 bytes, inclusive.")
 
-  @Valid
 
-  public BigDecimal getPingPacketSizeBytes() {
+  public Integer getPingPacketSizeBytes() {
     return pingPacketSizeBytes;
   }
 
-  public void setPingPacketSizeBytes(BigDecimal pingPacketSizeBytes) {
+  public void setPingPacketSizeBytes(Integer pingPacketSizeBytes) {
     this.pingPacketSizeBytes = pingPacketSizeBytes;
   }
 

@@ -22,6 +22,8 @@ public enum ApiOsDistributionType {
   
   RHEL7("RHEL7"),
   
+  RHEL8("RHEL8"),
+  
   SLES11("SLES11"),
   
   SLES12("SLES12"),
@@ -42,7 +44,13 @@ public enum ApiOsDistributionType {
   
   UBUNTU_XENIAL("UBUNTU_XENIAL"),
   
-  UBUNTU_BIONIC("UBUNTU_BIONIC");
+  UBUNTU_BIONIC("UBUNTU_BIONIC"),
+  
+  UBUNTU_FOCAL("UBUNTU_FOCAL"),
+  
+  RHEL7_PPC64LE("RHEL7_PPC64LE"),
+  
+  RHEL8_PPC64LE("RHEL8_PPC64LE");
 
   private String value;
 

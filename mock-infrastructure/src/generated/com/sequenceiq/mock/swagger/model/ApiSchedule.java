@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.sequenceiq.mock.swagger.model.ApiScheduleInterval;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.math.BigDecimal;
 import org.springframework.validation.annotation.Validated;
 import javax.validation.Valid;
 import javax.validation.constraints.*;
@@ -16,14 +15,14 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "Base class for commands that can be scheduled in Cloudera Manager. <p/> Note that schedule IDs are not preserved upon import. <p/>")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
 
 public class ApiSchedule   {
   @JsonProperty("id")
-  private BigDecimal id = null;
+  private Integer id = null;
 
   @JsonProperty("displayName")
   private String displayName = null;
@@ -38,7 +37,7 @@ public class ApiSchedule   {
   private String endTime = null;
 
   @JsonProperty("interval")
-  private BigDecimal interval = null;
+  private Integer interval = null;
 
   @JsonProperty("intervalUnit")
   private ApiScheduleInterval intervalUnit = null;
@@ -61,7 +60,7 @@ public class ApiSchedule   {
   @JsonProperty("alertOnAbort")
   private Boolean alertOnAbort = null;
 
-  public ApiSchedule id(BigDecimal id) {
+  public ApiSchedule id(Integer id) {
     this.id = id;
     return this;
   }
@@ -72,13 +71,12 @@ public class ApiSchedule   {
   **/
   @ApiModelProperty(value = "The schedule id.")
 
-  @Valid
 
-  public BigDecimal getId() {
+  public Integer getId() {
     return id;
   }
 
-  public void setId(BigDecimal id) {
+  public void setId(Integer id) {
     this.id = id;
   }
 
@@ -162,24 +160,23 @@ public class ApiSchedule   {
     this.endTime = endTime;
   }
 
-  public ApiSchedule interval(BigDecimal interval) {
+  public ApiSchedule interval(Integer interval) {
     this.interval = interval;
     return this;
   }
 
   /**
-   * The duration between consecutive triggers of a scheduled activity.
+   * The duration between consecutive triggers of a scheduled activity. Defaults to 0.
    * @return interval
   **/
-  @ApiModelProperty(value = "The duration between consecutive triggers of a scheduled activity.")
+  @ApiModelProperty(value = "The duration between consecutive triggers of a scheduled activity. Defaults to 0.")
 
-  @Valid
 
-  public BigDecimal getInterval() {
+  public Integer getInterval() {
     return interval;
   }
 
-  public void setInterval(BigDecimal interval) {
+  public void setInterval(Integer interval) {
     this.interval = interval;
   }
 
@@ -230,10 +227,10 @@ public class ApiSchedule   {
   }
 
   /**
-   * The paused state for the schedule. The scheduled activity will not be triggered as long as the scheduled is paused.
+   * The paused state for the schedule. The scheduled activity will not be triggered as long as the scheduled is paused. Defaults to false.
    * @return paused
   **/
-  @ApiModelProperty(value = "The paused state for the schedule. The scheduled activity will not be triggered as long as the scheduled is paused.")
+  @ApiModelProperty(value = "The paused state for the schedule. The scheduled activity will not be triggered as long as the scheduled is paused. Defaults to false.")
 
 
   public Boolean isPaused() {
@@ -250,10 +247,10 @@ public class ApiSchedule   {
   }
 
   /**
-   * Whether to alert on start of the scheduled activity.
+   * Whether to alert on start of the scheduled activity. Defaults to false.
    * @return alertOnStart
   **/
-  @ApiModelProperty(value = "Whether to alert on start of the scheduled activity.")
+  @ApiModelProperty(value = "Whether to alert on start of the scheduled activity. Defaults to false.")
 
 
   public Boolean isAlertOnStart() {
@@ -270,10 +267,10 @@ public class ApiSchedule   {
   }
 
   /**
-   * Whether to alert on successful completion of the scheduled activity.
+   * Whether to alert on successful completion of the scheduled activity. Defaults to false.
    * @return alertOnSuccess
   **/
-  @ApiModelProperty(value = "Whether to alert on successful completion of the scheduled activity.")
+  @ApiModelProperty(value = "Whether to alert on successful completion of the scheduled activity. Defaults to false.")
 
 
   public Boolean isAlertOnSuccess() {
@@ -290,10 +287,10 @@ public class ApiSchedule   {
   }
 
   /**
-   * Whether to alert on failure of the scheduled activity.
+   * Whether to alert on failure of the scheduled activity. Defaults to false.
    * @return alertOnFail
   **/
-  @ApiModelProperty(value = "Whether to alert on failure of the scheduled activity.")
+  @ApiModelProperty(value = "Whether to alert on failure of the scheduled activity. Defaults to false.")
 
 
   public Boolean isAlertOnFail() {
@@ -310,10 +307,10 @@ public class ApiSchedule   {
   }
 
   /**
-   * Whether to alert on abort of the scheduled activity.
+   * Whether to alert on abort of the scheduled activity. Defaults to false.
    * @return alertOnAbort
   **/
-  @ApiModelProperty(value = "Whether to alert on abort of the scheduled activity.")
+  @ApiModelProperty(value = "Whether to alert on abort of the scheduled activity. Defaults to false.")
 
 
   public Boolean isAlertOnAbort() {

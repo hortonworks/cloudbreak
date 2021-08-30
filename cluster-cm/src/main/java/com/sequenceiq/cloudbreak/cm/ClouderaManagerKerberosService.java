@@ -87,7 +87,7 @@ public class ClouderaManagerKerberosService {
             ClouderaManagerModificationService modificationService = applicationContext.getBean(ClouderaManagerModificationService.class, stack, clientConfig);
             modificationService.stopCluster(false);
 
-            ClouderaManagerClusterDecomissionService decomissionService = applicationContext.getBean(ClouderaManagerClusterDecomissionService.class,
+            ClouderaManagerClusterDecommissionService decomissionService = applicationContext.getBean(ClouderaManagerClusterDecommissionService.class,
                     stack, clientConfig);
             decomissionService.removeManagementServices();
 

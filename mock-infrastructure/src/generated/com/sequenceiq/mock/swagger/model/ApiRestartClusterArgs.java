@@ -16,7 +16,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "Arguments used for Cluster Restart command.  Since V11: If both restartOnlyStaleServices and restartServiceNames are specified, a service must be specified in restartServiceNames and also be stale, in order to be restarted.")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
@@ -89,7 +89,7 @@ public class ApiRestartClusterArgs   {
    * Only restart services that are specified and their dependent services. Available since V11.
    * @return restartServiceNames
   **/
-  @ApiModelProperty(example = "\"null\"", value = "Only restart services that are specified and their dependent services. Available since V11.")
+  @ApiModelProperty(value = "Only restart services that are specified and their dependent services. Available since V11.")
 
 
   public List<String> getRestartServiceNames() {

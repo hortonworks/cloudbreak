@@ -14,7 +14,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "A parcelRef references a parcel. Each parcel is identified by its \"parcelName\" and \"parcelVersion\", and the \"clusterName\" of the cluster that is using it. To operate on the parcel object, use the API with the those fields as parameters.")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 

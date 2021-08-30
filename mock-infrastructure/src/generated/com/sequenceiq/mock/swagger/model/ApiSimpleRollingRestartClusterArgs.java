@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.math.BigDecimal;
 import org.springframework.validation.annotation.Validated;
 import javax.validation.Valid;
 import javax.validation.constraints.*;
@@ -15,22 +14,22 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "Basic arguments used for Rolling Restart Cluster commands.")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
 
 public class ApiSimpleRollingRestartClusterArgs   {
   @JsonProperty("slaveBatchSize")
-  private BigDecimal slaveBatchSize = null;
+  private Integer slaveBatchSize = null;
 
   @JsonProperty("sleepSeconds")
-  private BigDecimal sleepSeconds = null;
+  private Integer sleepSeconds = null;
 
   @JsonProperty("slaveFailCountThreshold")
-  private BigDecimal slaveFailCountThreshold = null;
+  private Integer slaveFailCountThreshold = null;
 
-  public ApiSimpleRollingRestartClusterArgs slaveBatchSize(BigDecimal slaveBatchSize) {
+  public ApiSimpleRollingRestartClusterArgs slaveBatchSize(Integer slaveBatchSize) {
     this.slaveBatchSize = slaveBatchSize;
     return this;
   }
@@ -41,17 +40,16 @@ public class ApiSimpleRollingRestartClusterArgs   {
   **/
   @ApiModelProperty(value = "Number of hosts with slave roles to restart at a time. Must be greater than zero. Default is 1.")
 
-  @Valid
 
-  public BigDecimal getSlaveBatchSize() {
+  public Integer getSlaveBatchSize() {
     return slaveBatchSize;
   }
 
-  public void setSlaveBatchSize(BigDecimal slaveBatchSize) {
+  public void setSlaveBatchSize(Integer slaveBatchSize) {
     this.slaveBatchSize = slaveBatchSize;
   }
 
-  public ApiSimpleRollingRestartClusterArgs sleepSeconds(BigDecimal sleepSeconds) {
+  public ApiSimpleRollingRestartClusterArgs sleepSeconds(Integer sleepSeconds) {
     this.sleepSeconds = sleepSeconds;
     return this;
   }
@@ -62,17 +60,16 @@ public class ApiSimpleRollingRestartClusterArgs   {
   **/
   @ApiModelProperty(value = "Number of seconds to sleep between restarts of slave host batches. <p> Must be greater than or equal to 0. Default is 0.")
 
-  @Valid
 
-  public BigDecimal getSleepSeconds() {
+  public Integer getSleepSeconds() {
     return sleepSeconds;
   }
 
-  public void setSleepSeconds(BigDecimal sleepSeconds) {
+  public void setSleepSeconds(Integer sleepSeconds) {
     this.sleepSeconds = sleepSeconds;
   }
 
-  public ApiSimpleRollingRestartClusterArgs slaveFailCountThreshold(BigDecimal slaveFailCountThreshold) {
+  public ApiSimpleRollingRestartClusterArgs slaveFailCountThreshold(Integer slaveFailCountThreshold) {
     this.slaveFailCountThreshold = slaveFailCountThreshold;
     return this;
   }
@@ -83,13 +80,12 @@ public class ApiSimpleRollingRestartClusterArgs   {
   **/
   @ApiModelProperty(value = "The threshold for number of slave host batches that are allowed to fail to restart before the entire command is considered failed. <p> Must be greater than or equal to 0. Default is 0. <p> This argument is for ADVANCED users only. </p>")
 
-  @Valid
 
-  public BigDecimal getSlaveFailCountThreshold() {
+  public Integer getSlaveFailCountThreshold() {
     return slaveFailCountThreshold;
   }
 
-  public void setSlaveFailCountThreshold(BigDecimal slaveFailCountThreshold) {
+  public void setSlaveFailCountThreshold(Integer slaveFailCountThreshold) {
     this.slaveFailCountThreshold = slaveFailCountThreshold;
   }
 

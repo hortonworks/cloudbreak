@@ -16,7 +16,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "A role config group contains roles of the same role type sharing the same configuration. While each role has to belong to a group, a role config group may be empty.  There exists a default role config group for each role type. Default groups cannot be removed nor created.  The name of a role config group is unique and cannot be changed.  The configuration of individual roles may be overridden on role level.")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 

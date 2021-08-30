@@ -16,7 +16,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "A Parcel encapsulate a specific product and version. For example, (CDH 4.1). A parcel is downloaded, distributed to all the machines of a cluster and then allowed to be activated. <p>> The available parcels are determined by which cluster they will be running on. For example, a SLES parcel won't show up for a RHEL cluster. </p>")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 

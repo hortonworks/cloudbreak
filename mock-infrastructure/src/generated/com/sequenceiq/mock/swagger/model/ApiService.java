@@ -29,7 +29,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "A service (such as HDFS, MapReduce, HBase) runs in a cluster. It has roles, which are the actual entities (NameNode, DataNodes, etc.) that perform the service's functions.  <h3>HDFS services and health checks</h3>  In CDH4, HDFS services may not present any health checks. This will happen if the service has more than one nameservice configured. In those cases, the health information will be available by fetching information about the nameservices instead. <p> The health summary is still available, and reflects a service-wide summary.")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
@@ -379,7 +379,7 @@ public class ApiService   {
    * Readonly. The list of objects that trigger this service to be in maintenance mode. Available since API v2.
    * @return maintenanceOwners
   **/
-  @ApiModelProperty(example = "\"null\"", value = "Readonly. The list of objects that trigger this service to be in maintenance mode. Available since API v2.")
+  @ApiModelProperty(value = "Readonly. The list of objects that trigger this service to be in maintenance mode. Available since API v2.")
 
   @Valid
 

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.validation.annotation.Validated;
@@ -17,7 +18,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "A metric schema represents the schema for a specific metric monitored by the Cloudera Management Services.")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
@@ -47,7 +48,7 @@ public class ApiMetricSchema   {
 
   @JsonProperty("sources")
   @Valid
-  private List<Map<String, String>> sources = null;
+  private Map<String, List<String>> sources = null;
 
   public ApiMetricSchema name(String name) {
     this.name = name;
@@ -186,7 +187,7 @@ public class ApiMetricSchema   {
    * Aliases for the metric. An alias is unique per metric (per source and version) but is not globally unique. Aliases usually refer to previous names for the metric as metrics are renamed or replaced.
    * @return aliases
   **/
-  @ApiModelProperty(example = "\"null\"", value = "Aliases for the metric. An alias is unique per metric (per source and version) but is not globally unique. Aliases usually refer to previous names for the metric as metrics are renamed or replaced.")
+  @ApiModelProperty(value = "Aliases for the metric. An alias is unique per metric (per source and version) but is not globally unique. Aliases usually refer to previous names for the metric as metrics are renamed or replaced.")
 
 
   public List<String> getAliases() {
@@ -197,16 +198,16 @@ public class ApiMetricSchema   {
     this.aliases = aliases;
   }
 
-  public ApiMetricSchema sources(List<Map<String, String>> sources) {
+  public ApiMetricSchema sources(Map<String, List<String>> sources) {
     this.sources = sources;
     return this;
   }
 
-  public ApiMetricSchema addSourcesItem(Map<String, String> sourcesItem) {
+  public ApiMetricSchema putSourcesItem(String key, List<String> sourcesItem) {
     if (this.sources == null) {
-      this.sources = new ArrayList<>();
+      this.sources = new HashMap<>();
     }
-    this.sources.add(sourcesItem);
+    this.sources.put(key, sourcesItem);
     return this;
   }
 
@@ -214,15 +215,15 @@ public class ApiMetricSchema   {
    * Sources for the metric. Each source entry contains the name of the source and a list of versions for which this source is valid
    * @return sources
   **/
-  @ApiModelProperty(example = "\"null\"", value = "Sources for the metric. Each source entry contains the name of the source and a list of versions for which this source is valid")
+  @ApiModelProperty(value = "Sources for the metric. Each source entry contains the name of the source and a list of versions for which this source is valid")
 
   @Valid
 
-  public List<Map<String, String>> getSources() {
+  public Map<String, List<String>> getSources() {
     return sources;
   }
 
-  public void setSources(List<Map<String, String>> sources) {
+  public void setSources(Map<String, List<String>> sources) {
     this.sources = sources;
   }
 
