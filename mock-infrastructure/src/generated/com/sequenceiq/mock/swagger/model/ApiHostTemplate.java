@@ -18,7 +18,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "A host template belongs to a cluster and contains a set of role config groups for slave roles (such as DataNodes and TaskTrackers) from services in the cluster. At most one role config group per role type can be present in a host template. Host templates can be applied to fresh hosts (those with no roles on them) in order to create a role for each of the role groups on each host.")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 

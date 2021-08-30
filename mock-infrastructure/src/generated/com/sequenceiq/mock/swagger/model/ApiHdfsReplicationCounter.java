@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.math.BigDecimal;
 import org.springframework.validation.annotation.Validated;
 import javax.validation.Valid;
 import javax.validation.constraints.*;
@@ -15,7 +14,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "A counter in an HDFS replication job.")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
@@ -28,7 +27,7 @@ public class ApiHdfsReplicationCounter   {
   private String name = null;
 
   @JsonProperty("value")
-  private BigDecimal value = null;
+  private Integer value = null;
 
   public ApiHdfsReplicationCounter group(String group) {
     this.group = group;
@@ -70,7 +69,7 @@ public class ApiHdfsReplicationCounter   {
     this.name = name;
   }
 
-  public ApiHdfsReplicationCounter value(BigDecimal value) {
+  public ApiHdfsReplicationCounter value(Integer value) {
     this.value = value;
     return this;
   }
@@ -81,13 +80,12 @@ public class ApiHdfsReplicationCounter   {
   **/
   @ApiModelProperty(value = "")
 
-  @Valid
 
-  public BigDecimal getValue() {
+  public Integer getValue() {
     return value;
   }
 
-  public void setValue(BigDecimal value) {
+  public void setValue(Integer value) {
     this.value = value;
   }
 

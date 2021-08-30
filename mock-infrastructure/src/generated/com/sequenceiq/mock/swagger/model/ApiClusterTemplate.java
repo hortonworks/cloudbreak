@@ -22,7 +22,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "Details of cluster template")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
@@ -30,6 +30,9 @@ import javax.validation.constraints.*;
 public class ApiClusterTemplate   {
   @JsonProperty("cdhVersion")
   private String cdhVersion = null;
+
+  @JsonProperty("experienceVersion")
+  private String experienceVersion = null;
 
   @JsonProperty("products")
   @Valid
@@ -81,6 +84,26 @@ public class ApiClusterTemplate   {
 
   public void setCdhVersion(String cdhVersion) {
     this.cdhVersion = cdhVersion;
+  }
+
+  public ApiClusterTemplate experienceVersion(String experienceVersion) {
+    this.experienceVersion = experienceVersion;
+    return this;
+  }
+
+  /**
+   * Experience version
+   * @return experienceVersion
+  **/
+  @ApiModelProperty(value = "Experience version")
+
+
+  public String getExperienceVersion() {
+    return experienceVersion;
+  }
+
+  public void setExperienceVersion(String experienceVersion) {
+    this.experienceVersion = experienceVersion;
   }
 
   public ApiClusterTemplate products(List<ApiProductVersion> products) {
@@ -248,7 +271,7 @@ public class ApiClusterTemplate   {
    * List of all repositories registered with CM
    * @return repositories
   **/
-  @ApiModelProperty(example = "\"null\"", value = "List of all repositories registered with CM")
+  @ApiModelProperty(value = "List of all repositories registered with CM")
 
 
   public List<String> getRepositories() {
@@ -320,6 +343,7 @@ public class ApiClusterTemplate   {
     }
     ApiClusterTemplate apiClusterTemplate = (ApiClusterTemplate) o;
     return Objects.equals(this.cdhVersion, apiClusterTemplate.cdhVersion) &&
+        Objects.equals(this.experienceVersion, apiClusterTemplate.experienceVersion) &&
         Objects.equals(this.products, apiClusterTemplate.products) &&
         Objects.equals(this.services, apiClusterTemplate.services) &&
         Objects.equals(this.hostTemplates, apiClusterTemplate.hostTemplates) &&
@@ -333,7 +357,7 @@ public class ApiClusterTemplate   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(cdhVersion, products, services, hostTemplates, displayName, cmVersion, instantiator, repositories, clusterSpec, tags);
+    return Objects.hash(cdhVersion, experienceVersion, products, services, hostTemplates, displayName, cmVersion, instantiator, repositories, clusterSpec, tags);
   }
 
   @Override
@@ -342,6 +366,7 @@ public class ApiClusterTemplate   {
     sb.append("class ApiClusterTemplate {\n");
     
     sb.append("    cdhVersion: ").append(toIndentedString(cdhVersion)).append("\n");
+    sb.append("    experienceVersion: ").append(toIndentedString(experienceVersion)).append("\n");
     sb.append("    products: ").append(toIndentedString(products)).append("\n");
     sb.append("    services: ").append(toIndentedString(services)).append("\n");
     sb.append("    hostTemplates: ").append(toIndentedString(hostTemplates)).append("\n");

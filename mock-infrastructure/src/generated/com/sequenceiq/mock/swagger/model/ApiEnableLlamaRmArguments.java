@@ -14,7 +14,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "Arguments used for enable Llama RM command.")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
@@ -147,7 +147,8 @@ public class ApiEnableLlamaRmArguments   {
    * Skip the restart of Yarn, Impala, and their dependent services, and don't deploy client configuration. Default is false (i.e., by default, the services are restarted and client configuration is deployed).
    * @return skipRestart
   **/
-  @ApiModelProperty(value = "Skip the restart of Yarn, Impala, and their dependent services, and don't deploy client configuration. Default is false (i.e., by default, the services are restarted and client configuration is deployed).")
+  @ApiModelProperty(required = true, value = "Skip the restart of Yarn, Impala, and their dependent services, and don't deploy client configuration. Default is false (i.e., by default, the services are restarted and client configuration is deployed).")
+  @NotNull
 
 
   public Boolean isSkipRestart() {

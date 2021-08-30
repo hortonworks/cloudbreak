@@ -3,9 +3,9 @@ package com.sequenceiq.mock.swagger.model;
 import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.sequenceiq.mock.swagger.model.ApiMapEntry;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.validation.annotation.Validated;
@@ -17,7 +17,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "Arguments to perform installation on one or more hosts")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
@@ -28,7 +28,7 @@ public class ApiHostInstallArguments   {
   private List<String> hostNames = null;
 
   @JsonProperty("sshPort")
-  private BigDecimal sshPort = null;
+  private Integer sshPort = null;
 
   @JsonProperty("userName")
   private String userName = null;
@@ -43,7 +43,7 @@ public class ApiHostInstallArguments   {
   private String passphrase = null;
 
   @JsonProperty("parallelInstallCount")
-  private BigDecimal parallelInstallCount = null;
+  private Integer parallelInstallCount = null;
 
   @JsonProperty("cmRepoUrl")
   private String cmRepoUrl = null;
@@ -59,6 +59,14 @@ public class ApiHostInstallArguments   {
 
   @JsonProperty("gpgKeyOverrideBundle")
   private String gpgKeyOverrideBundle = null;
+
+  @JsonProperty("agentReportedHostnames")
+  @Valid
+  private List<ApiMapEntry> agentReportedHostnames = null;
+
+  @JsonProperty("subjectAltNames")
+  @Valid
+  private List<String> subjectAltNames = null;
 
   public ApiHostInstallArguments hostNames(List<String> hostNames) {
     this.hostNames = hostNames;
@@ -77,7 +85,7 @@ public class ApiHostInstallArguments   {
    * List of hosts to configure for use with Cloudera Manager. A host may be specified by a hostname (FQDN) or an IP address.
    * @return hostNames
   **/
-  @ApiModelProperty(example = "\"null\"", value = "List of hosts to configure for use with Cloudera Manager. A host may be specified by a hostname (FQDN) or an IP address.")
+  @ApiModelProperty(value = "List of hosts to configure for use with Cloudera Manager. A host may be specified by a hostname (FQDN) or an IP address.")
 
 
   public List<String> getHostNames() {
@@ -88,7 +96,7 @@ public class ApiHostInstallArguments   {
     this.hostNames = hostNames;
   }
 
-  public ApiHostInstallArguments sshPort(BigDecimal sshPort) {
+  public ApiHostInstallArguments sshPort(Integer sshPort) {
     this.sshPort = sshPort;
     return this;
   }
@@ -99,13 +107,12 @@ public class ApiHostInstallArguments   {
   **/
   @ApiModelProperty(value = "SSH port. If unset, defaults to 22.")
 
-  @Valid
 
-  public BigDecimal getSshPort() {
+  public Integer getSshPort() {
     return sshPort;
   }
 
-  public void setSshPort(BigDecimal sshPort) {
+  public void setSshPort(Integer sshPort) {
     this.sshPort = sshPort;
   }
 
@@ -189,7 +196,7 @@ public class ApiHostInstallArguments   {
     this.passphrase = passphrase;
   }
 
-  public ApiHostInstallArguments parallelInstallCount(BigDecimal parallelInstallCount) {
+  public ApiHostInstallArguments parallelInstallCount(Integer parallelInstallCount) {
     this.parallelInstallCount = parallelInstallCount;
     return this;
   }
@@ -200,13 +207,12 @@ public class ApiHostInstallArguments   {
   **/
   @ApiModelProperty(value = "Number of simultaneous installations. Defaults to 10. Running a large number of installations at once can consume large amounts of network bandwidth and other system resources.")
 
-  @Valid
 
-  public BigDecimal getParallelInstallCount() {
+  public Integer getParallelInstallCount() {
     return parallelInstallCount;
   }
 
-  public void setParallelInstallCount(BigDecimal parallelInstallCount) {
+  public void setParallelInstallCount(Integer parallelInstallCount) {
     this.parallelInstallCount = parallelInstallCount;
   }
 
@@ -310,6 +316,63 @@ public class ApiHostInstallArguments   {
     this.gpgKeyOverrideBundle = gpgKeyOverrideBundle;
   }
 
+  public ApiHostInstallArguments agentReportedHostnames(List<ApiMapEntry> agentReportedHostnames) {
+    this.agentReportedHostnames = agentReportedHostnames;
+    return this;
+  }
+
+  public ApiHostInstallArguments addAgentReportedHostnamesItem(ApiMapEntry agentReportedHostnamesItem) {
+    if (this.agentReportedHostnames == null) {
+      this.agentReportedHostnames = new ArrayList<>();
+    }
+    this.agentReportedHostnames.add(agentReportedHostnamesItem);
+    return this;
+  }
+
+  /**
+   * Optional. A map from hostname to reported_hostname value to be set in the agent configuration file.
+   * @return agentReportedHostnames
+  **/
+  @ApiModelProperty(value = "Optional. A map from hostname to reported_hostname value to be set in the agent configuration file.")
+
+  @Valid
+
+  public List<ApiMapEntry> getAgentReportedHostnames() {
+    return agentReportedHostnames;
+  }
+
+  public void setAgentReportedHostnames(List<ApiMapEntry> agentReportedHostnames) {
+    this.agentReportedHostnames = agentReportedHostnames;
+  }
+
+  public ApiHostInstallArguments subjectAltNames(List<String> subjectAltNames) {
+    this.subjectAltNames = subjectAltNames;
+    return this;
+  }
+
+  public ApiHostInstallArguments addSubjectAltNamesItem(String subjectAltNamesItem) {
+    if (this.subjectAltNames == null) {
+      this.subjectAltNames = new ArrayList<>();
+    }
+    this.subjectAltNames.add(subjectAltNamesItem);
+    return this;
+  }
+
+  /**
+   * 
+   * @return subjectAltNames
+  **/
+  @ApiModelProperty(value = "")
+
+
+  public List<String> getSubjectAltNames() {
+    return subjectAltNames;
+  }
+
+  public void setSubjectAltNames(List<String> subjectAltNames) {
+    this.subjectAltNames = subjectAltNames;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -331,12 +394,14 @@ public class ApiHostInstallArguments   {
         Objects.equals(this.gpgKeyCustomUrl, apiHostInstallArguments.gpgKeyCustomUrl) &&
         Objects.equals(this.javaInstallStrategy, apiHostInstallArguments.javaInstallStrategy) &&
         Objects.equals(this.unlimitedJCE, apiHostInstallArguments.unlimitedJCE) &&
-        Objects.equals(this.gpgKeyOverrideBundle, apiHostInstallArguments.gpgKeyOverrideBundle);
+        Objects.equals(this.gpgKeyOverrideBundle, apiHostInstallArguments.gpgKeyOverrideBundle) &&
+        Objects.equals(this.agentReportedHostnames, apiHostInstallArguments.agentReportedHostnames) &&
+        Objects.equals(this.subjectAltNames, apiHostInstallArguments.subjectAltNames);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(hostNames, sshPort, userName, password, privateKey, passphrase, parallelInstallCount, cmRepoUrl, gpgKeyCustomUrl, javaInstallStrategy, unlimitedJCE, gpgKeyOverrideBundle);
+    return Objects.hash(hostNames, sshPort, userName, password, privateKey, passphrase, parallelInstallCount, cmRepoUrl, gpgKeyCustomUrl, javaInstallStrategy, unlimitedJCE, gpgKeyOverrideBundle, agentReportedHostnames, subjectAltNames);
   }
 
   @Override
@@ -356,6 +421,8 @@ public class ApiHostInstallArguments   {
     sb.append("    javaInstallStrategy: ").append(toIndentedString(javaInstallStrategy)).append("\n");
     sb.append("    unlimitedJCE: ").append(toIndentedString(unlimitedJCE)).append("\n");
     sb.append("    gpgKeyOverrideBundle: ").append(toIndentedString(gpgKeyOverrideBundle)).append("\n");
+    sb.append("    agentReportedHostnames: ").append(toIndentedString(agentReportedHostnames)).append("\n");
+    sb.append("    subjectAltNames: ").append(toIndentedString(subjectAltNames)).append("\n");
     sb.append("}");
     return sb.toString();
   }

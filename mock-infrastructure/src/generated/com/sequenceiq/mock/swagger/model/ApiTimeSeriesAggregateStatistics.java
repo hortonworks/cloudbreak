@@ -16,7 +16,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "Statistics related to one time series aggregate data point. It is available from v6 for data points containing aggregate data. It includes further statistics about the data point. An aggregate can be across entities (e.g., fd_open_across_datanodes), over time (e.g., a daily point for the fd_open metric for a specific DataNode), or both (e.g., a daily point for the fd_open_across_datanodes metric). If the data point is for non-aggregate date this will return null.")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
@@ -29,7 +29,7 @@ public class ApiTimeSeriesAggregateStatistics   {
   private BigDecimal sampleValue = null;
 
   @JsonProperty("count")
-  private BigDecimal count = null;
+  private Integer count = null;
 
   @JsonProperty("min")
   private BigDecimal min = null;
@@ -93,7 +93,7 @@ public class ApiTimeSeriesAggregateStatistics   {
     this.sampleValue = sampleValue;
   }
 
-  public ApiTimeSeriesAggregateStatistics count(BigDecimal count) {
+  public ApiTimeSeriesAggregateStatistics count(Integer count) {
     this.count = count;
     return this;
   }
@@ -104,13 +104,12 @@ public class ApiTimeSeriesAggregateStatistics   {
   **/
   @ApiModelProperty(value = "The number of individual data points aggregated in this data point.")
 
-  @Valid
 
-  public BigDecimal getCount() {
+  public Integer getCount() {
     return count;
   }
 
-  public void setCount(BigDecimal count) {
+  public void setCount(Integer count) {
     this.count = count;
   }
 

@@ -7,7 +7,6 @@ import com.sequenceiq.mock.swagger.model.ApiHdfsSnapshot;
 import com.sequenceiq.mock.swagger.model.ApiHdfsSnapshotError;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.validation.annotation.Validated;
@@ -19,55 +18,55 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "Detailed information about an HDFS snapshot command.")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
 
 public class ApiHdfsSnapshotResult   {
   @JsonProperty("processedPathCount")
-  private BigDecimal processedPathCount = null;
+  private Integer processedPathCount = null;
 
   @JsonProperty("processedPaths")
   @Valid
   private List<String> processedPaths = null;
 
   @JsonProperty("unprocessedPathCount")
-  private BigDecimal unprocessedPathCount = null;
+  private Integer unprocessedPathCount = null;
 
   @JsonProperty("unprocessedPaths")
   @Valid
   private List<String> unprocessedPaths = null;
 
   @JsonProperty("createdSnapshotCount")
-  private BigDecimal createdSnapshotCount = null;
+  private Integer createdSnapshotCount = null;
 
   @JsonProperty("createdSnapshots")
   @Valid
   private List<ApiHdfsSnapshot> createdSnapshots = null;
 
   @JsonProperty("deletedSnapshotCount")
-  private BigDecimal deletedSnapshotCount = null;
+  private Integer deletedSnapshotCount = null;
 
   @JsonProperty("deletedSnapshots")
   @Valid
   private List<ApiHdfsSnapshot> deletedSnapshots = null;
 
   @JsonProperty("creationErrorCount")
-  private BigDecimal creationErrorCount = null;
+  private Integer creationErrorCount = null;
 
   @JsonProperty("creationErrors")
   @Valid
   private List<ApiHdfsSnapshotError> creationErrors = null;
 
   @JsonProperty("deletionErrorCount")
-  private BigDecimal deletionErrorCount = null;
+  private Integer deletionErrorCount = null;
 
   @JsonProperty("deletionErrors")
   @Valid
   private List<ApiHdfsSnapshotError> deletionErrors = null;
 
-  public ApiHdfsSnapshotResult processedPathCount(BigDecimal processedPathCount) {
+  public ApiHdfsSnapshotResult processedPathCount(Integer processedPathCount) {
     this.processedPathCount = processedPathCount;
     return this;
   }
@@ -78,13 +77,12 @@ public class ApiHdfsSnapshotResult   {
   **/
   @ApiModelProperty(value = "Number of processed paths.")
 
-  @Valid
 
-  public BigDecimal getProcessedPathCount() {
+  public Integer getProcessedPathCount() {
     return processedPathCount;
   }
 
-  public void setProcessedPathCount(BigDecimal processedPathCount) {
+  public void setProcessedPathCount(Integer processedPathCount) {
     this.processedPathCount = processedPathCount;
   }
 
@@ -105,7 +103,7 @@ public class ApiHdfsSnapshotResult   {
    * The list of processed paths. <p/> This is only available in the full view.
    * @return processedPaths
   **/
-  @ApiModelProperty(example = "\"null\"", value = "The list of processed paths. <p/> This is only available in the full view.")
+  @ApiModelProperty(value = "The list of processed paths. <p/> This is only available in the full view.")
 
 
   public List<String> getProcessedPaths() {
@@ -116,7 +114,7 @@ public class ApiHdfsSnapshotResult   {
     this.processedPaths = processedPaths;
   }
 
-  public ApiHdfsSnapshotResult unprocessedPathCount(BigDecimal unprocessedPathCount) {
+  public ApiHdfsSnapshotResult unprocessedPathCount(Integer unprocessedPathCount) {
     this.unprocessedPathCount = unprocessedPathCount;
     return this;
   }
@@ -127,13 +125,12 @@ public class ApiHdfsSnapshotResult   {
   **/
   @ApiModelProperty(value = "Number of unprocessed paths.")
 
-  @Valid
 
-  public BigDecimal getUnprocessedPathCount() {
+  public Integer getUnprocessedPathCount() {
     return unprocessedPathCount;
   }
 
-  public void setUnprocessedPathCount(BigDecimal unprocessedPathCount) {
+  public void setUnprocessedPathCount(Integer unprocessedPathCount) {
     this.unprocessedPathCount = unprocessedPathCount;
   }
 
@@ -154,7 +151,7 @@ public class ApiHdfsSnapshotResult   {
    * The list of unprocessed paths. Note that paths that are currently being processed will also be included in this list. <p/> This is only available in the full view.
    * @return unprocessedPaths
   **/
-  @ApiModelProperty(example = "\"null\"", value = "The list of unprocessed paths. Note that paths that are currently being processed will also be included in this list. <p/> This is only available in the full view.")
+  @ApiModelProperty(value = "The list of unprocessed paths. Note that paths that are currently being processed will also be included in this list. <p/> This is only available in the full view.")
 
 
   public List<String> getUnprocessedPaths() {
@@ -165,7 +162,7 @@ public class ApiHdfsSnapshotResult   {
     this.unprocessedPaths = unprocessedPaths;
   }
 
-  public ApiHdfsSnapshotResult createdSnapshotCount(BigDecimal createdSnapshotCount) {
+  public ApiHdfsSnapshotResult createdSnapshotCount(Integer createdSnapshotCount) {
     this.createdSnapshotCount = createdSnapshotCount;
     return this;
   }
@@ -176,13 +173,12 @@ public class ApiHdfsSnapshotResult   {
   **/
   @ApiModelProperty(value = "Number of snapshots created.")
 
-  @Valid
 
-  public BigDecimal getCreatedSnapshotCount() {
+  public Integer getCreatedSnapshotCount() {
     return createdSnapshotCount;
   }
 
-  public void setCreatedSnapshotCount(BigDecimal createdSnapshotCount) {
+  public void setCreatedSnapshotCount(Integer createdSnapshotCount) {
     this.createdSnapshotCount = createdSnapshotCount;
   }
 
@@ -215,7 +211,7 @@ public class ApiHdfsSnapshotResult   {
     this.createdSnapshots = createdSnapshots;
   }
 
-  public ApiHdfsSnapshotResult deletedSnapshotCount(BigDecimal deletedSnapshotCount) {
+  public ApiHdfsSnapshotResult deletedSnapshotCount(Integer deletedSnapshotCount) {
     this.deletedSnapshotCount = deletedSnapshotCount;
     return this;
   }
@@ -226,13 +222,12 @@ public class ApiHdfsSnapshotResult   {
   **/
   @ApiModelProperty(value = "Number of snapshots deleted.")
 
-  @Valid
 
-  public BigDecimal getDeletedSnapshotCount() {
+  public Integer getDeletedSnapshotCount() {
     return deletedSnapshotCount;
   }
 
-  public void setDeletedSnapshotCount(BigDecimal deletedSnapshotCount) {
+  public void setDeletedSnapshotCount(Integer deletedSnapshotCount) {
     this.deletedSnapshotCount = deletedSnapshotCount;
   }
 
@@ -265,7 +260,7 @@ public class ApiHdfsSnapshotResult   {
     this.deletedSnapshots = deletedSnapshots;
   }
 
-  public ApiHdfsSnapshotResult creationErrorCount(BigDecimal creationErrorCount) {
+  public ApiHdfsSnapshotResult creationErrorCount(Integer creationErrorCount) {
     this.creationErrorCount = creationErrorCount;
     return this;
   }
@@ -276,13 +271,12 @@ public class ApiHdfsSnapshotResult   {
   **/
   @ApiModelProperty(value = "Number of errors detected when creating snapshots.")
 
-  @Valid
 
-  public BigDecimal getCreationErrorCount() {
+  public Integer getCreationErrorCount() {
     return creationErrorCount;
   }
 
-  public void setCreationErrorCount(BigDecimal creationErrorCount) {
+  public void setCreationErrorCount(Integer creationErrorCount) {
     this.creationErrorCount = creationErrorCount;
   }
 
@@ -315,7 +309,7 @@ public class ApiHdfsSnapshotResult   {
     this.creationErrors = creationErrors;
   }
 
-  public ApiHdfsSnapshotResult deletionErrorCount(BigDecimal deletionErrorCount) {
+  public ApiHdfsSnapshotResult deletionErrorCount(Integer deletionErrorCount) {
     this.deletionErrorCount = deletionErrorCount;
     return this;
   }
@@ -326,13 +320,12 @@ public class ApiHdfsSnapshotResult   {
   **/
   @ApiModelProperty(value = "Number of errors detected when deleting snapshots.")
 
-  @Valid
 
-  public BigDecimal getDeletionErrorCount() {
+  public Integer getDeletionErrorCount() {
     return deletionErrorCount;
   }
 
-  public void setDeletionErrorCount(BigDecimal deletionErrorCount) {
+  public void setDeletionErrorCount(Integer deletionErrorCount) {
     this.deletionErrorCount = deletionErrorCount;
   }
 

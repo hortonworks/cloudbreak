@@ -61,7 +61,7 @@ public class ClouderaManagerKerberosServiceTest {
     private ClouderaManagerApiFactory clouderaManagerApiFactory;
 
     @Mock
-    private ClouderaManagerClusterDecomissionService decommissionService;
+    private ClouderaManagerClusterDecommissionService decommissionService;
 
     @Mock
     private KerberosDetailService kerberosDetailService;
@@ -100,7 +100,7 @@ public class ClouderaManagerKerberosServiceTest {
         when(clouderaManagerApiFactory.getClouderaManagerResourceApi(client)).thenReturn(clouderaManagerResourceApi);
         when(clouderaManagerApiFactory.getClustersResourceApi(client)).thenReturn(clustersResourceApi);
         when(applicationContext.getBean(eq(ClouderaManagerModificationService.class), eq(stack), eq(clientConfig))).thenReturn(modificationService);
-        when(applicationContext.getBean(eq(ClouderaManagerClusterDecomissionService.class), eq(stack), eq(clientConfig))).thenReturn(decommissionService);
+        when(applicationContext.getBean(eq(ClouderaManagerClusterDecommissionService.class), eq(stack), eq(clientConfig))).thenReturn(decommissionService);
     }
 
     @Test

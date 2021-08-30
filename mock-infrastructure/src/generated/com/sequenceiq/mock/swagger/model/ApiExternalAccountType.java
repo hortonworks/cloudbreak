@@ -15,7 +15,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "A supported external account type. An external account type represents an external authentication source that is used by Cloudera Manager in its APIs to take suitable actions that require authentication to an external service.  An external account type is uniquely identified by a server-generated ID and identifies with a category identifier: e.g. The \"AWS\" category has an account type \"AWS_Access_Key_Authorization\"")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 

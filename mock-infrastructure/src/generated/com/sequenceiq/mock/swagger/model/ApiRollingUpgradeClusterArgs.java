@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.math.BigDecimal;
 import org.springframework.validation.annotation.Validated;
 import javax.validation.Valid;
 import javax.validation.constraints.*;
@@ -15,22 +14,22 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "Rolling upgrade arguments used in the CDH Upgrade Command. Part of ApiCdhUpgradeArgs.")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
 
 public class ApiRollingUpgradeClusterArgs   {
   @JsonProperty("slaveBatchSize")
-  private BigDecimal slaveBatchSize = null;
+  private Integer slaveBatchSize = null;
 
   @JsonProperty("sleepSeconds")
-  private BigDecimal sleepSeconds = null;
+  private Integer sleepSeconds = null;
 
   @JsonProperty("slaveFailCountThreshold")
-  private BigDecimal slaveFailCountThreshold = null;
+  private Integer slaveFailCountThreshold = null;
 
-  public ApiRollingUpgradeClusterArgs slaveBatchSize(BigDecimal slaveBatchSize) {
+  public ApiRollingUpgradeClusterArgs slaveBatchSize(Integer slaveBatchSize) {
     this.slaveBatchSize = slaveBatchSize;
     return this;
   }
@@ -41,17 +40,16 @@ public class ApiRollingUpgradeClusterArgs   {
   **/
   @ApiModelProperty(value = "Number of slave roles to restart at a time. Must be greater than zero. Default is 1.  Please note that for HDFS, this number should be less than the replication factor (default 3) to ensure data availability during rolling restart.")
 
-  @Valid
 
-  public BigDecimal getSlaveBatchSize() {
+  public Integer getSlaveBatchSize() {
     return slaveBatchSize;
   }
 
-  public void setSlaveBatchSize(BigDecimal slaveBatchSize) {
+  public void setSlaveBatchSize(Integer slaveBatchSize) {
     this.slaveBatchSize = slaveBatchSize;
   }
 
-  public ApiRollingUpgradeClusterArgs sleepSeconds(BigDecimal sleepSeconds) {
+  public ApiRollingUpgradeClusterArgs sleepSeconds(Integer sleepSeconds) {
     this.sleepSeconds = sleepSeconds;
     return this;
   }
@@ -62,17 +60,16 @@ public class ApiRollingUpgradeClusterArgs   {
   **/
   @ApiModelProperty(value = "Number of seconds to sleep between restarts of slave role batches.  Must be greater than or equal to 0. Default is 0.")
 
-  @Valid
 
-  public BigDecimal getSleepSeconds() {
+  public Integer getSleepSeconds() {
     return sleepSeconds;
   }
 
-  public void setSleepSeconds(BigDecimal sleepSeconds) {
+  public void setSleepSeconds(Integer sleepSeconds) {
     this.sleepSeconds = sleepSeconds;
   }
 
-  public ApiRollingUpgradeClusterArgs slaveFailCountThreshold(BigDecimal slaveFailCountThreshold) {
+  public ApiRollingUpgradeClusterArgs slaveFailCountThreshold(Integer slaveFailCountThreshold) {
     this.slaveFailCountThreshold = slaveFailCountThreshold;
     return this;
   }
@@ -83,13 +80,12 @@ public class ApiRollingUpgradeClusterArgs   {
   **/
   @ApiModelProperty(value = "The threshold for number of slave batches that are allowed to fail to restart before the entire command is considered failed.  Must be greather than or equal to 0. Default is 0. <p> This argument is for ADVANCED users only. </p>")
 
-  @Valid
 
-  public BigDecimal getSlaveFailCountThreshold() {
+  public Integer getSlaveFailCountThreshold() {
     return slaveFailCountThreshold;
   }
 
-  public void setSlaveFailCountThreshold(BigDecimal slaveFailCountThreshold) {
+  public void setSlaveFailCountThreshold(Integer slaveFailCountThreshold) {
     this.slaveFailCountThreshold = slaveFailCountThreshold;
   }
 

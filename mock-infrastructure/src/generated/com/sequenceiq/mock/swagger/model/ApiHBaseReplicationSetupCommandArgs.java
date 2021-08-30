@@ -15,7 +15,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "Command args for HBaseReplicationSetupCommand")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-04-23T12:05:48.864+02:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
@@ -30,8 +30,8 @@ public class ApiHBaseReplicationSetupCommandArgs   {
   @JsonProperty("sourceRef")
   private ApiServiceRef sourceRef = null;
 
-  @JsonProperty("cmPeerDefinitionName")
-  private String cmPeerDefinitionName = null;
+  @JsonProperty("cmPeerNameOnRemote")
+  private String cmPeerNameOnRemote = null;
 
   public ApiHBaseReplicationSetupCommandArgs keystorePassword(String keystorePassword) {
     this.keystorePassword = keystorePassword;
@@ -94,24 +94,24 @@ public class ApiHBaseReplicationSetupCommandArgs   {
     this.sourceRef = sourceRef;
   }
 
-  public ApiHBaseReplicationSetupCommandArgs cmPeerDefinitionName(String cmPeerDefinitionName) {
-    this.cmPeerDefinitionName = cmPeerDefinitionName;
+  public ApiHBaseReplicationSetupCommandArgs cmPeerNameOnRemote(String cmPeerNameOnRemote) {
+    this.cmPeerNameOnRemote = cmPeerNameOnRemote;
     return this;
   }
 
   /**
-   * 
-   * @return cmPeerDefinitionName
+   * The peer name of the local CM in the given sourceRef CM
+   * @return cmPeerNameOnRemote
   **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(value = "The peer name of the local CM in the given sourceRef CM")
 
 
-  public String getCmPeerDefinitionName() {
-    return cmPeerDefinitionName;
+  public String getCmPeerNameOnRemote() {
+    return cmPeerNameOnRemote;
   }
 
-  public void setCmPeerDefinitionName(String cmPeerDefinitionName) {
-    this.cmPeerDefinitionName = cmPeerDefinitionName;
+  public void setCmPeerNameOnRemote(String cmPeerNameOnRemote) {
+    this.cmPeerNameOnRemote = cmPeerNameOnRemote;
   }
 
 
@@ -127,12 +127,12 @@ public class ApiHBaseReplicationSetupCommandArgs   {
     return Objects.equals(this.keystorePassword, apiHBaseReplicationSetupCommandArgs.keystorePassword) &&
         Objects.equals(this.replicationUser, apiHBaseReplicationSetupCommandArgs.replicationUser) &&
         Objects.equals(this.sourceRef, apiHBaseReplicationSetupCommandArgs.sourceRef) &&
-        Objects.equals(this.cmPeerDefinitionName, apiHBaseReplicationSetupCommandArgs.cmPeerDefinitionName);
+        Objects.equals(this.cmPeerNameOnRemote, apiHBaseReplicationSetupCommandArgs.cmPeerNameOnRemote);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(keystorePassword, replicationUser, sourceRef, cmPeerDefinitionName);
+    return Objects.hash(keystorePassword, replicationUser, sourceRef, cmPeerNameOnRemote);
   }
 
   @Override
@@ -143,7 +143,7 @@ public class ApiHBaseReplicationSetupCommandArgs   {
     sb.append("    keystorePassword: ").append(toIndentedString(keystorePassword)).append("\n");
     sb.append("    replicationUser: ").append(toIndentedString(replicationUser)).append("\n");
     sb.append("    sourceRef: ").append(toIndentedString(sourceRef)).append("\n");
-    sb.append("    cmPeerDefinitionName: ").append(toIndentedString(cmPeerDefinitionName)).append("\n");
+    sb.append("    cmPeerNameOnRemote: ").append(toIndentedString(cmPeerNameOnRemote)).append("\n");
     sb.append("}");
     return sb.toString();
   }

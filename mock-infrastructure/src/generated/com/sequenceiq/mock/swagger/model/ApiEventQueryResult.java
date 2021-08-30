@@ -7,7 +7,6 @@ import com.sequenceiq.mock.swagger.model.ApiEvent;
 import com.sequenceiq.mock.swagger.model.ApiListBase;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.validation.annotation.Validated;
@@ -19,20 +18,20 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "A generic list.")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
 
 public class ApiEventQueryResult extends ApiListBase  {
   @JsonProperty("totalResults")
-  private BigDecimal totalResults = null;
+  private Integer totalResults = null;
 
   @JsonProperty("items")
   @Valid
   private List<ApiEvent> items = null;
 
-  public ApiEventQueryResult totalResults(BigDecimal totalResults) {
+  public ApiEventQueryResult totalResults(Integer totalResults) {
     this.totalResults = totalResults;
     return this;
   }
@@ -43,13 +42,12 @@ public class ApiEventQueryResult extends ApiListBase  {
   **/
   @ApiModelProperty(value = "The total number of matched results. Some are possibly not shown due to pagination.")
 
-  @Valid
 
-  public BigDecimal getTotalResults() {
+  public Integer getTotalResults() {
     return totalResults;
   }
 
-  public void setTotalResults(BigDecimal totalResults) {
+  public void setTotalResults(Integer totalResults) {
     this.totalResults = totalResults;
   }
 

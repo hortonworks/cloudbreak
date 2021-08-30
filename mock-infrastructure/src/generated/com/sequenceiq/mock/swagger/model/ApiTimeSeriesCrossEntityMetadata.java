@@ -15,7 +15,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "A class holding additional metadata to the ApiTimeSeriesAggregateStatistics class that applies specifically to cross-entity aggregate metrics.")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
@@ -125,7 +125,8 @@ public class ApiTimeSeriesCrossEntityMetadata   {
    * The number of entities covered by this point. For a raw cross-entity point this number is exact. For a rollup point this number is an average, since the number of entities being aggregated can change over the aggregation period.
    * @return numEntities
   **/
-  @ApiModelProperty(value = "The number of entities covered by this point. For a raw cross-entity point this number is exact. For a rollup point this number is an average, since the number of entities being aggregated can change over the aggregation period.")
+  @ApiModelProperty(required = true, value = "The number of entities covered by this point. For a raw cross-entity point this number is exact. For a rollup point this number is an average, since the number of entities being aggregated can change over the aggregation period.")
+  @NotNull
 
   @Valid
 

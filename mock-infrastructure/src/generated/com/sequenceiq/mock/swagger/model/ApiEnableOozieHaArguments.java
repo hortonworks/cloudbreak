@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.validation.annotation.Validated;
@@ -17,7 +16,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
@@ -38,10 +37,10 @@ public class ApiEnableOozieHaArguments   {
   private String loadBalancerHostname = null;
 
   @JsonProperty("loadBalancerPort")
-  private BigDecimal loadBalancerPort = null;
+  private Integer loadBalancerPort = null;
 
   @JsonProperty("loadBalancerSslPort")
-  private BigDecimal loadBalancerSslPort = null;
+  private Integer loadBalancerSslPort = null;
 
   @JsonProperty("loadBalancerHostPort")
   private String loadBalancerHostPort = null;
@@ -63,7 +62,7 @@ public class ApiEnableOozieHaArguments   {
    * IDs of the hosts on which new Oozie Servers will be added.
    * @return newOozieServerHostIds
   **/
-  @ApiModelProperty(example = "\"null\"", value = "IDs of the hosts on which new Oozie Servers will be added.")
+  @ApiModelProperty(value = "IDs of the hosts on which new Oozie Servers will be added.")
 
 
   public List<String> getNewOozieServerHostIds() {
@@ -91,7 +90,7 @@ public class ApiEnableOozieHaArguments   {
    * Names of the new Oozie Servers. This is an optional argument, but if provided, it should match the length of host IDs provided.
    * @return newOozieServerRoleNames
   **/
-  @ApiModelProperty(example = "\"null\"", value = "Names of the new Oozie Servers. This is an optional argument, but if provided, it should match the length of host IDs provided.")
+  @ApiModelProperty(value = "Names of the new Oozie Servers. This is an optional argument, but if provided, it should match the length of host IDs provided.")
 
 
   public List<String> getNewOozieServerRoleNames() {
@@ -142,7 +141,7 @@ public class ApiEnableOozieHaArguments   {
     this.loadBalancerHostname = loadBalancerHostname;
   }
 
-  public ApiEnableOozieHaArguments loadBalancerPort(BigDecimal loadBalancerPort) {
+  public ApiEnableOozieHaArguments loadBalancerPort(Integer loadBalancerPort) {
     this.loadBalancerPort = loadBalancerPort;
     return this;
   }
@@ -153,17 +152,16 @@ public class ApiEnableOozieHaArguments   {
   **/
   @ApiModelProperty(value = "HTTP port of the load balancer used for Oozie HA. Optional if load balancer host and ports are already set in CM.")
 
-  @Valid
 
-  public BigDecimal getLoadBalancerPort() {
+  public Integer getLoadBalancerPort() {
     return loadBalancerPort;
   }
 
-  public void setLoadBalancerPort(BigDecimal loadBalancerPort) {
+  public void setLoadBalancerPort(Integer loadBalancerPort) {
     this.loadBalancerPort = loadBalancerPort;
   }
 
-  public ApiEnableOozieHaArguments loadBalancerSslPort(BigDecimal loadBalancerSslPort) {
+  public ApiEnableOozieHaArguments loadBalancerSslPort(Integer loadBalancerSslPort) {
     this.loadBalancerSslPort = loadBalancerSslPort;
     return this;
   }
@@ -174,13 +172,12 @@ public class ApiEnableOozieHaArguments   {
   **/
   @ApiModelProperty(value = "HTTPS port of the load balancer used for Oozie HA when SSL is enabled. This port is only used for oozie.base.url -- the callback is always on HTTP. Optional if load balancer host and ports are already set in CM.")
 
-  @Valid
 
-  public BigDecimal getLoadBalancerSslPort() {
+  public Integer getLoadBalancerSslPort() {
     return loadBalancerSslPort;
   }
 
-  public void setLoadBalancerSslPort(BigDecimal loadBalancerSslPort) {
+  public void setLoadBalancerSslPort(Integer loadBalancerSslPort) {
     this.loadBalancerSslPort = loadBalancerSslPort;
   }
 

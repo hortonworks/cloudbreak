@@ -10,7 +10,6 @@ import com.sequenceiq.mock.swagger.model.ApiHiveUDF;
 import com.sequenceiq.mock.swagger.model.ApiImpalaUDF;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.validation.annotation.Validated;
@@ -22,7 +21,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "Detailed information about a Hive replication job.")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
@@ -32,17 +31,17 @@ public class ApiHiveReplicationResult   {
   private String phase = null;
 
   @JsonProperty("tableCount")
-  private BigDecimal tableCount = null;
+  private Integer tableCount = null;
 
   @JsonProperty("tables")
   @Valid
   private List<ApiHiveTable> tables = null;
 
   @JsonProperty("impalaUDFCount")
-  private BigDecimal impalaUDFCount = null;
+  private Integer impalaUDFCount = null;
 
   @JsonProperty("hiveUDFCount")
-  private BigDecimal hiveUDFCount = null;
+  private Integer hiveUDFCount = null;
 
   @JsonProperty("impalaUDFs")
   @Valid
@@ -53,7 +52,7 @@ public class ApiHiveReplicationResult   {
   private List<ApiHiveUDF> hiveUDFs = null;
 
   @JsonProperty("errorCount")
-  private BigDecimal errorCount = null;
+  private Integer errorCount = null;
 
   @JsonProperty("errors")
   @Valid
@@ -81,40 +80,40 @@ public class ApiHiveReplicationResult   {
   private Boolean statsAvailable = null;
 
   @JsonProperty("dbProcessed")
-  private BigDecimal dbProcessed = null;
+  private Integer dbProcessed = null;
 
   @JsonProperty("tableProcessed")
-  private BigDecimal tableProcessed = null;
+  private Integer tableProcessed = null;
 
   @JsonProperty("partitionProcessed")
-  private BigDecimal partitionProcessed = null;
+  private Integer partitionProcessed = null;
 
   @JsonProperty("functionProcessed")
-  private BigDecimal functionProcessed = null;
+  private Integer functionProcessed = null;
 
   @JsonProperty("indexProcessed")
-  private BigDecimal indexProcessed = null;
+  private Integer indexProcessed = null;
 
   @JsonProperty("statsProcessed")
-  private BigDecimal statsProcessed = null;
+  private Integer statsProcessed = null;
 
   @JsonProperty("dbExpected")
-  private BigDecimal dbExpected = null;
+  private Integer dbExpected = null;
 
   @JsonProperty("tableExpected")
-  private BigDecimal tableExpected = null;
+  private Integer tableExpected = null;
 
   @JsonProperty("partitionExpected")
-  private BigDecimal partitionExpected = null;
+  private Integer partitionExpected = null;
 
   @JsonProperty("functionExpected")
-  private BigDecimal functionExpected = null;
+  private Integer functionExpected = null;
 
   @JsonProperty("indexExpected")
-  private BigDecimal indexExpected = null;
+  private Integer indexExpected = null;
 
   @JsonProperty("statsExpected")
-  private BigDecimal statsExpected = null;
+  private Integer statsExpected = null;
 
   public ApiHiveReplicationResult phase(String phase) {
     this.phase = phase;
@@ -136,7 +135,7 @@ public class ApiHiveReplicationResult   {
     this.phase = phase;
   }
 
-  public ApiHiveReplicationResult tableCount(BigDecimal tableCount) {
+  public ApiHiveReplicationResult tableCount(Integer tableCount) {
     this.tableCount = tableCount;
     return this;
   }
@@ -147,13 +146,12 @@ public class ApiHiveReplicationResult   {
   **/
   @ApiModelProperty(value = "Number of tables that were successfully replicated. Available since API v4.")
 
-  @Valid
 
-  public BigDecimal getTableCount() {
+  public Integer getTableCount() {
     return tableCount;
   }
 
-  public void setTableCount(BigDecimal tableCount) {
+  public void setTableCount(Integer tableCount) {
     this.tableCount = tableCount;
   }
 
@@ -186,7 +184,7 @@ public class ApiHiveReplicationResult   {
     this.tables = tables;
   }
 
-  public ApiHiveReplicationResult impalaUDFCount(BigDecimal impalaUDFCount) {
+  public ApiHiveReplicationResult impalaUDFCount(Integer impalaUDFCount) {
     this.impalaUDFCount = impalaUDFCount;
     return this;
   }
@@ -197,17 +195,16 @@ public class ApiHiveReplicationResult   {
   **/
   @ApiModelProperty(value = "Number of impala UDFs that were successfully replicated. Available since API v6.")
 
-  @Valid
 
-  public BigDecimal getImpalaUDFCount() {
+  public Integer getImpalaUDFCount() {
     return impalaUDFCount;
   }
 
-  public void setImpalaUDFCount(BigDecimal impalaUDFCount) {
+  public void setImpalaUDFCount(Integer impalaUDFCount) {
     this.impalaUDFCount = impalaUDFCount;
   }
 
-  public ApiHiveReplicationResult hiveUDFCount(BigDecimal hiveUDFCount) {
+  public ApiHiveReplicationResult hiveUDFCount(Integer hiveUDFCount) {
     this.hiveUDFCount = hiveUDFCount;
     return this;
   }
@@ -218,13 +215,12 @@ public class ApiHiveReplicationResult   {
   **/
   @ApiModelProperty(value = "Number of hive UDFs that were successfully replicated. Available since API v14.")
 
-  @Valid
 
-  public BigDecimal getHiveUDFCount() {
+  public Integer getHiveUDFCount() {
     return hiveUDFCount;
   }
 
-  public void setHiveUDFCount(BigDecimal hiveUDFCount) {
+  public void setHiveUDFCount(Integer hiveUDFCount) {
     this.hiveUDFCount = hiveUDFCount;
   }
 
@@ -286,7 +282,7 @@ public class ApiHiveReplicationResult   {
     this.hiveUDFs = hiveUDFs;
   }
 
-  public ApiHiveReplicationResult errorCount(BigDecimal errorCount) {
+  public ApiHiveReplicationResult errorCount(Integer errorCount) {
     this.errorCount = errorCount;
     return this;
   }
@@ -297,13 +293,12 @@ public class ApiHiveReplicationResult   {
   **/
   @ApiModelProperty(value = "Number of errors detected during replication job. Available since API v4.")
 
-  @Valid
 
-  public BigDecimal getErrorCount() {
+  public Integer getErrorCount() {
     return errorCount;
   }
 
-  public void setErrorCount(BigDecimal errorCount) {
+  public void setErrorCount(Integer errorCount) {
     this.errorCount = errorCount;
   }
 
@@ -477,7 +472,7 @@ public class ApiHiveReplicationResult   {
     this.statsAvailable = statsAvailable;
   }
 
-  public ApiHiveReplicationResult dbProcessed(BigDecimal dbProcessed) {
+  public ApiHiveReplicationResult dbProcessed(Integer dbProcessed) {
     this.dbProcessed = dbProcessed;
     return this;
   }
@@ -488,17 +483,16 @@ public class ApiHiveReplicationResult   {
   **/
   @ApiModelProperty(value = "Number of Db's Imported/Exported. Available since API v19.")
 
-  @Valid
 
-  public BigDecimal getDbProcessed() {
+  public Integer getDbProcessed() {
     return dbProcessed;
   }
 
-  public void setDbProcessed(BigDecimal dbProcessed) {
+  public void setDbProcessed(Integer dbProcessed) {
     this.dbProcessed = dbProcessed;
   }
 
-  public ApiHiveReplicationResult tableProcessed(BigDecimal tableProcessed) {
+  public ApiHiveReplicationResult tableProcessed(Integer tableProcessed) {
     this.tableProcessed = tableProcessed;
     return this;
   }
@@ -509,17 +503,16 @@ public class ApiHiveReplicationResult   {
   **/
   @ApiModelProperty(value = "Number of Tables Imported/Exported. Available since API v19.")
 
-  @Valid
 
-  public BigDecimal getTableProcessed() {
+  public Integer getTableProcessed() {
     return tableProcessed;
   }
 
-  public void setTableProcessed(BigDecimal tableProcessed) {
+  public void setTableProcessed(Integer tableProcessed) {
     this.tableProcessed = tableProcessed;
   }
 
-  public ApiHiveReplicationResult partitionProcessed(BigDecimal partitionProcessed) {
+  public ApiHiveReplicationResult partitionProcessed(Integer partitionProcessed) {
     this.partitionProcessed = partitionProcessed;
     return this;
   }
@@ -530,17 +523,16 @@ public class ApiHiveReplicationResult   {
   **/
   @ApiModelProperty(value = "Number of Partitions Imported/Exported. Available since API v19.")
 
-  @Valid
 
-  public BigDecimal getPartitionProcessed() {
+  public Integer getPartitionProcessed() {
     return partitionProcessed;
   }
 
-  public void setPartitionProcessed(BigDecimal partitionProcessed) {
+  public void setPartitionProcessed(Integer partitionProcessed) {
     this.partitionProcessed = partitionProcessed;
   }
 
-  public ApiHiveReplicationResult functionProcessed(BigDecimal functionProcessed) {
+  public ApiHiveReplicationResult functionProcessed(Integer functionProcessed) {
     this.functionProcessed = functionProcessed;
     return this;
   }
@@ -551,17 +543,16 @@ public class ApiHiveReplicationResult   {
   **/
   @ApiModelProperty(value = "Number of Functions Imported/Exported. Available since API v19.")
 
-  @Valid
 
-  public BigDecimal getFunctionProcessed() {
+  public Integer getFunctionProcessed() {
     return functionProcessed;
   }
 
-  public void setFunctionProcessed(BigDecimal functionProcessed) {
+  public void setFunctionProcessed(Integer functionProcessed) {
     this.functionProcessed = functionProcessed;
   }
 
-  public ApiHiveReplicationResult indexProcessed(BigDecimal indexProcessed) {
+  public ApiHiveReplicationResult indexProcessed(Integer indexProcessed) {
     this.indexProcessed = indexProcessed;
     return this;
   }
@@ -572,17 +563,16 @@ public class ApiHiveReplicationResult   {
   **/
   @ApiModelProperty(value = "Number of Indexes Imported/Exported. Available since API v19.")
 
-  @Valid
 
-  public BigDecimal getIndexProcessed() {
+  public Integer getIndexProcessed() {
     return indexProcessed;
   }
 
-  public void setIndexProcessed(BigDecimal indexProcessed) {
+  public void setIndexProcessed(Integer indexProcessed) {
     this.indexProcessed = indexProcessed;
   }
 
-  public ApiHiveReplicationResult statsProcessed(BigDecimal statsProcessed) {
+  public ApiHiveReplicationResult statsProcessed(Integer statsProcessed) {
     this.statsProcessed = statsProcessed;
     return this;
   }
@@ -593,17 +583,16 @@ public class ApiHiveReplicationResult   {
   **/
   @ApiModelProperty(value = "Number of Table and Partitions Statistics Imported/Exported. Available since API v19.")
 
-  @Valid
 
-  public BigDecimal getStatsProcessed() {
+  public Integer getStatsProcessed() {
     return statsProcessed;
   }
 
-  public void setStatsProcessed(BigDecimal statsProcessed) {
+  public void setStatsProcessed(Integer statsProcessed) {
     this.statsProcessed = statsProcessed;
   }
 
-  public ApiHiveReplicationResult dbExpected(BigDecimal dbExpected) {
+  public ApiHiveReplicationResult dbExpected(Integer dbExpected) {
     this.dbExpected = dbExpected;
     return this;
   }
@@ -614,17 +603,16 @@ public class ApiHiveReplicationResult   {
   **/
   @ApiModelProperty(value = "Number of Db's Expected. Available since API v19.")
 
-  @Valid
 
-  public BigDecimal getDbExpected() {
+  public Integer getDbExpected() {
     return dbExpected;
   }
 
-  public void setDbExpected(BigDecimal dbExpected) {
+  public void setDbExpected(Integer dbExpected) {
     this.dbExpected = dbExpected;
   }
 
-  public ApiHiveReplicationResult tableExpected(BigDecimal tableExpected) {
+  public ApiHiveReplicationResult tableExpected(Integer tableExpected) {
     this.tableExpected = tableExpected;
     return this;
   }
@@ -635,17 +623,16 @@ public class ApiHiveReplicationResult   {
   **/
   @ApiModelProperty(value = "Number of Tables Expected. Available since API v19.")
 
-  @Valid
 
-  public BigDecimal getTableExpected() {
+  public Integer getTableExpected() {
     return tableExpected;
   }
 
-  public void setTableExpected(BigDecimal tableExpected) {
+  public void setTableExpected(Integer tableExpected) {
     this.tableExpected = tableExpected;
   }
 
-  public ApiHiveReplicationResult partitionExpected(BigDecimal partitionExpected) {
+  public ApiHiveReplicationResult partitionExpected(Integer partitionExpected) {
     this.partitionExpected = partitionExpected;
     return this;
   }
@@ -656,17 +643,16 @@ public class ApiHiveReplicationResult   {
   **/
   @ApiModelProperty(value = "Number of Partitions Expected. Available since API v19.")
 
-  @Valid
 
-  public BigDecimal getPartitionExpected() {
+  public Integer getPartitionExpected() {
     return partitionExpected;
   }
 
-  public void setPartitionExpected(BigDecimal partitionExpected) {
+  public void setPartitionExpected(Integer partitionExpected) {
     this.partitionExpected = partitionExpected;
   }
 
-  public ApiHiveReplicationResult functionExpected(BigDecimal functionExpected) {
+  public ApiHiveReplicationResult functionExpected(Integer functionExpected) {
     this.functionExpected = functionExpected;
     return this;
   }
@@ -677,17 +663,16 @@ public class ApiHiveReplicationResult   {
   **/
   @ApiModelProperty(value = "Number of Functions Expected. Available since API v19.")
 
-  @Valid
 
-  public BigDecimal getFunctionExpected() {
+  public Integer getFunctionExpected() {
     return functionExpected;
   }
 
-  public void setFunctionExpected(BigDecimal functionExpected) {
+  public void setFunctionExpected(Integer functionExpected) {
     this.functionExpected = functionExpected;
   }
 
-  public ApiHiveReplicationResult indexExpected(BigDecimal indexExpected) {
+  public ApiHiveReplicationResult indexExpected(Integer indexExpected) {
     this.indexExpected = indexExpected;
     return this;
   }
@@ -698,17 +683,16 @@ public class ApiHiveReplicationResult   {
   **/
   @ApiModelProperty(value = "Number of Indexes Expected. Available since API v19.")
 
-  @Valid
 
-  public BigDecimal getIndexExpected() {
+  public Integer getIndexExpected() {
     return indexExpected;
   }
 
-  public void setIndexExpected(BigDecimal indexExpected) {
+  public void setIndexExpected(Integer indexExpected) {
     this.indexExpected = indexExpected;
   }
 
-  public ApiHiveReplicationResult statsExpected(BigDecimal statsExpected) {
+  public ApiHiveReplicationResult statsExpected(Integer statsExpected) {
     this.statsExpected = statsExpected;
     return this;
   }
@@ -719,13 +703,12 @@ public class ApiHiveReplicationResult   {
   **/
   @ApiModelProperty(value = "Number of Table and Partition Statistics Expected. Available since API v19.")
 
-  @Valid
 
-  public BigDecimal getStatsExpected() {
+  public Integer getStatsExpected() {
     return statsExpected;
   }
 
-  public void setStatsExpected(BigDecimal statsExpected) {
+  public void setStatsExpected(Integer statsExpected) {
     this.statsExpected = statsExpected;
   }
 

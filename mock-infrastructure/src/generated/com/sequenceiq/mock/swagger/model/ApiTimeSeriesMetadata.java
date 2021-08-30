@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,7 +18,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "Metadata for a time series.")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
@@ -56,7 +55,7 @@ public class ApiTimeSeriesMetadata   {
   private String alias = null;
 
   @JsonProperty("metricCollectionFrequencyMs")
-  private BigDecimal metricCollectionFrequencyMs = null;
+  private Integer metricCollectionFrequencyMs = null;
 
   @JsonProperty("rollupUsed")
   private String rollupUsed = null;
@@ -158,7 +157,7 @@ public class ApiTimeSeriesMetadata   {
    * The attributes for the time series. Note that the entityName entry in this map is not the same as the entityName field in this ApiTimeSeriesMetadata. The entityName entry in this map is a unique identifier for the entity and not the name displayed in the UI.  For example, if this was a time series for the YARN Job History Server the entityName entry in this map might be something like \"yarn-JOBHISTORY-6bd17ceb1489aae93fef4c867350d0dd\"
    * @return attributes
   **/
-  @ApiModelProperty(example = "\"null\"", value = "The attributes for the time series. Note that the entityName entry in this map is not the same as the entityName field in this ApiTimeSeriesMetadata. The entityName entry in this map is a unique identifier for the entity and not the name displayed in the UI.  For example, if this was a time series for the YARN Job History Server the entityName entry in this map might be something like \"yarn-JOBHISTORY-6bd17ceb1489aae93fef4c867350d0dd\"")
+  @ApiModelProperty(value = "The attributes for the time series. Note that the entityName entry in this map is not the same as the entityName field in this ApiTimeSeriesMetadata. The entityName entry in this map is a unique identifier for the entity and not the name displayed in the UI.  For example, if this was a time series for the YARN Job History Server the entityName entry in this map might be something like \"yarn-JOBHISTORY-6bd17ceb1489aae93fef4c867350d0dd\"")
 
 
   public Map<String, String> getAttributes() {
@@ -186,7 +185,7 @@ public class ApiTimeSeriesMetadata   {
    * The numerators of the units for the time series.
    * @return unitNumerators
   **/
-  @ApiModelProperty(example = "\"null\"", value = "The numerators of the units for the time series.")
+  @ApiModelProperty(value = "The numerators of the units for the time series.")
 
 
   public List<String> getUnitNumerators() {
@@ -214,7 +213,7 @@ public class ApiTimeSeriesMetadata   {
    * The denominators of the units for the time series.
    * @return unitDenominators
   **/
-  @ApiModelProperty(example = "\"null\"", value = "The denominators of the units for the time series.")
+  @ApiModelProperty(value = "The denominators of the units for the time series.")
 
 
   public List<String> getUnitDenominators() {
@@ -265,7 +264,7 @@ public class ApiTimeSeriesMetadata   {
     this.alias = alias;
   }
 
-  public ApiTimeSeriesMetadata metricCollectionFrequencyMs(BigDecimal metricCollectionFrequencyMs) {
+  public ApiTimeSeriesMetadata metricCollectionFrequencyMs(Integer metricCollectionFrequencyMs) {
     this.metricCollectionFrequencyMs = metricCollectionFrequencyMs;
     return this;
   }
@@ -276,13 +275,12 @@ public class ApiTimeSeriesMetadata   {
   **/
   @ApiModelProperty(value = "The minimum frequency at which the underlying metric for this stream is collected. Note that this can be null if the stream returns irregularly sampled data.")
 
-  @Valid
 
-  public BigDecimal getMetricCollectionFrequencyMs() {
+  public Integer getMetricCollectionFrequencyMs() {
     return metricCollectionFrequencyMs;
   }
 
-  public void setMetricCollectionFrequencyMs(BigDecimal metricCollectionFrequencyMs) {
+  public void setMetricCollectionFrequencyMs(Integer metricCollectionFrequencyMs) {
     this.metricCollectionFrequencyMs = metricCollectionFrequencyMs;
   }
 

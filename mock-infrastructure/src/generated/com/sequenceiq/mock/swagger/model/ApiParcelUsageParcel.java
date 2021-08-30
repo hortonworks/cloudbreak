@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.sequenceiq.mock.swagger.model.ApiParcelRef;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.math.BigDecimal;
 import org.springframework.validation.annotation.Validated;
 import javax.validation.Valid;
 import javax.validation.constraints.*;
@@ -16,7 +15,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "This object is used to represent a parcel within an ApiParcelUsage.")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
@@ -26,7 +25,7 @@ public class ApiParcelUsageParcel   {
   private ApiParcelRef parcelRef = null;
 
   @JsonProperty("processCount")
-  private BigDecimal processCount = null;
+  private Integer processCount = null;
 
   @JsonProperty("activated")
   private Boolean activated = null;
@@ -52,7 +51,7 @@ public class ApiParcelUsageParcel   {
     this.parcelRef = parcelRef;
   }
 
-  public ApiParcelUsageParcel processCount(BigDecimal processCount) {
+  public ApiParcelUsageParcel processCount(Integer processCount) {
     this.processCount = processCount;
     return this;
   }
@@ -63,13 +62,12 @@ public class ApiParcelUsageParcel   {
   **/
   @ApiModelProperty(value = "How many running processes on the cluster are using the parcel.")
 
-  @Valid
 
-  public BigDecimal getProcessCount() {
+  public Integer getProcessCount() {
     return processCount;
   }
 
-  public void setProcessCount(BigDecimal processCount) {
+  public void setProcessCount(Integer processCount) {
     this.processCount = processCount;
   }
 

@@ -15,7 +15,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "A HBase snapshot operation error.")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
@@ -29,6 +29,9 @@ public class ApiHBaseSnapshotError   {
 
   @JsonProperty("storage")
   private Storage storage = null;
+
+  @JsonProperty("storageLocation")
+  private String storageLocation = null;
 
   @JsonProperty("error")
   private String error = null;
@@ -79,10 +82,10 @@ public class ApiHBaseSnapshotError   {
   }
 
   /**
-   * The location of the snapshot.
+   * Whether the snapshot is local or remote.
    * @return storage
   **/
-  @ApiModelProperty(value = "The location of the snapshot.")
+  @ApiModelProperty(value = "Whether the snapshot is local or remote.")
 
   @Valid
 
@@ -92,6 +95,26 @@ public class ApiHBaseSnapshotError   {
 
   public void setStorage(Storage storage) {
     this.storage = storage;
+  }
+
+  public ApiHBaseSnapshotError storageLocation(String storageLocation) {
+    this.storageLocation = storageLocation;
+    return this;
+  }
+
+  /**
+   * The remote location where a snapshot is stored. /_*  Optional - location comes from HBase service config if this is not defined
+   * @return storageLocation
+  **/
+  @ApiModelProperty(value = "The remote location where a snapshot is stored. /_*  Optional - location comes from HBase service config if this is not defined")
+
+
+  public String getStorageLocation() {
+    return storageLocation;
+  }
+
+  public void setStorageLocation(String storageLocation) {
+    this.storageLocation = storageLocation;
   }
 
   public ApiHBaseSnapshotError error(String error) {
@@ -127,12 +150,13 @@ public class ApiHBaseSnapshotError   {
     return Objects.equals(this.tableName, apiHBaseSnapshotError.tableName) &&
         Objects.equals(this.snapshotName, apiHBaseSnapshotError.snapshotName) &&
         Objects.equals(this.storage, apiHBaseSnapshotError.storage) &&
+        Objects.equals(this.storageLocation, apiHBaseSnapshotError.storageLocation) &&
         Objects.equals(this.error, apiHBaseSnapshotError.error);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(tableName, snapshotName, storage, error);
+    return Objects.hash(tableName, snapshotName, storage, storageLocation, error);
   }
 
   @Override
@@ -143,6 +167,7 @@ public class ApiHBaseSnapshotError   {
     sb.append("    tableName: ").append(toIndentedString(tableName)).append("\n");
     sb.append("    snapshotName: ").append(toIndentedString(snapshotName)).append("\n");
     sb.append("    storage: ").append(toIndentedString(storage)).append("\n");
+    sb.append("    storageLocation: ").append(toIndentedString(storageLocation)).append("\n");
     sb.append("    error: ").append(toIndentedString(error)).append("\n");
     sb.append("}");
     return sb.toString();

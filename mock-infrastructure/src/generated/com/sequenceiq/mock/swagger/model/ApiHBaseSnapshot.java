@@ -15,7 +15,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "An HBase snapshot descriptor.")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
@@ -32,6 +32,9 @@ public class ApiHBaseSnapshot   {
 
   @JsonProperty("storage")
   private Storage storage = null;
+
+  @JsonProperty("storageLocation")
+  private String storageLocation = null;
 
   public ApiHBaseSnapshot snapshotName(String snapshotName) {
     this.snapshotName = snapshotName;
@@ -99,10 +102,10 @@ public class ApiHBaseSnapshot   {
   }
 
   /**
-   * The location where a snapshot is stored.
+   * Whether the snapshot is local or remote.
    * @return storage
   **/
-  @ApiModelProperty(value = "The location where a snapshot is stored.")
+  @ApiModelProperty(value = "Whether the snapshot is local or remote.")
 
   @Valid
 
@@ -112,6 +115,26 @@ public class ApiHBaseSnapshot   {
 
   public void setStorage(Storage storage) {
     this.storage = storage;
+  }
+
+  public ApiHBaseSnapshot storageLocation(String storageLocation) {
+    this.storageLocation = storageLocation;
+    return this;
+  }
+
+  /**
+   * The remote location where a snapshot is stored. /_*  Optional - location comes from HBase service config if this is not defined
+   * @return storageLocation
+  **/
+  @ApiModelProperty(value = "The remote location where a snapshot is stored. /_*  Optional - location comes from HBase service config if this is not defined")
+
+
+  public String getStorageLocation() {
+    return storageLocation;
+  }
+
+  public void setStorageLocation(String storageLocation) {
+    this.storageLocation = storageLocation;
   }
 
 
@@ -127,12 +150,13 @@ public class ApiHBaseSnapshot   {
     return Objects.equals(this.snapshotName, apiHBaseSnapshot.snapshotName) &&
         Objects.equals(this.tableName, apiHBaseSnapshot.tableName) &&
         Objects.equals(this.creationTime, apiHBaseSnapshot.creationTime) &&
-        Objects.equals(this.storage, apiHBaseSnapshot.storage);
+        Objects.equals(this.storage, apiHBaseSnapshot.storage) &&
+        Objects.equals(this.storageLocation, apiHBaseSnapshot.storageLocation);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(snapshotName, tableName, creationTime, storage);
+    return Objects.hash(snapshotName, tableName, creationTime, storage, storageLocation);
   }
 
   @Override
@@ -144,6 +168,7 @@ public class ApiHBaseSnapshot   {
     sb.append("    tableName: ").append(toIndentedString(tableName)).append("\n");
     sb.append("    creationTime: ").append(toIndentedString(creationTime)).append("\n");
     sb.append("    storage: ").append(toIndentedString(storage)).append("\n");
+    sb.append("    storageLocation: ").append(toIndentedString(storageLocation)).append("\n");
     sb.append("}");
     return sb.toString();
   }

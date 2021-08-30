@@ -1,23 +1,24 @@
 package com.sequenceiq.mock.swagger.model;
 
-import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sequenceiq.mock.swagger.model.ApiClusterTemplateConfig;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
-import org.springframework.validation.annotation.Validated;
+import java.util.Objects;
+
 import javax.validation.Valid;
-import javax.validation.constraints.*;
+
+import org.springframework.validation.annotation.Validated;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * Role config group info.
  */
 @ApiModel(description = "Role config group info.")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
@@ -85,10 +86,10 @@ public class ApiClusterTemplateRoleConfigGroup   {
   }
 
   /**
-   * If true then it is the base config group for that role. There can only be one base role config group for a given role type.
+   * If true then it is the base config group for that role. There can only be one base role config group for a given role type. Defaults to false.
    * @return base
   **/
-  @ApiModelProperty(value = "If true then it is the base config group for that role. There can only be one base role config group for a given role type.")
+  @ApiModelProperty(value = "If true then it is the base config group for that role. There can only be one base role config group for a given role type. Defaults to false.")
 
 
   public Boolean isBase() {

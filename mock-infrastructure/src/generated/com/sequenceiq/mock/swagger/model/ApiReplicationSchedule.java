@@ -3,8 +3,10 @@ package com.sequenceiq.mock.swagger.model;
 import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.sequenceiq.mock.swagger.model.ApiHBaseReplicationArguments;
 import com.sequenceiq.mock.swagger.model.ApiHdfsCloudReplicationArguments;
 import com.sequenceiq.mock.swagger.model.ApiHdfsReplicationArguments;
+import com.sequenceiq.mock.swagger.model.ApiHive3ReplicationArguments;
 import com.sequenceiq.mock.swagger.model.ApiHiveCloudReplicationArguments;
 import com.sequenceiq.mock.swagger.model.ApiHiveReplicationArguments;
 import com.sequenceiq.mock.swagger.model.ApiReplicationCommand;
@@ -12,7 +14,6 @@ import com.sequenceiq.mock.swagger.model.ApiSchedule;
 import com.sequenceiq.mock.swagger.model.ApiScheduleInterval;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.validation.annotation.Validated;
@@ -24,7 +25,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "A replication job schedule. <p/> Replication jobs have service-specific arguments. This object has methods to retrieve arguments for all supported types of replication, but only one argument type is allowed to be set; the backend will check that the provided argument matches the service type where the replication is being scheduled. <p/> The replication job's arguments should match the underlying service. Refer to each property's documentation to find out which properties correspond to which services.")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
@@ -48,6 +49,12 @@ public class ApiReplicationSchedule extends ApiSchedule  {
 
   @JsonProperty("hiveCloudArguments")
   private ApiHiveCloudReplicationArguments hiveCloudArguments = null;
+
+  @JsonProperty("hbaseArguments")
+  private ApiHBaseReplicationArguments hbaseArguments = null;
+
+  @JsonProperty("hive3Arguments")
+  private ApiHive3ReplicationArguments hive3Arguments = null;
 
   public ApiReplicationSchedule hdfsArguments(ApiHdfsReplicationArguments hdfsArguments) {
     this.hdfsArguments = hdfsArguments;
@@ -182,6 +189,48 @@ public class ApiReplicationSchedule extends ApiSchedule  {
     this.hiveCloudArguments = hiveCloudArguments;
   }
 
+  public ApiReplicationSchedule hbaseArguments(ApiHBaseReplicationArguments hbaseArguments) {
+    this.hbaseArguments = hbaseArguments;
+    return this;
+  }
+
+  /**
+   * Arguments for HBase replication commands.
+   * @return hbaseArguments
+  **/
+  @ApiModelProperty(value = "Arguments for HBase replication commands.")
+
+  @Valid
+
+  public ApiHBaseReplicationArguments getHbaseArguments() {
+    return hbaseArguments;
+  }
+
+  public void setHbaseArguments(ApiHBaseReplicationArguments hbaseArguments) {
+    this.hbaseArguments = hbaseArguments;
+  }
+
+  public ApiReplicationSchedule hive3Arguments(ApiHive3ReplicationArguments hive3Arguments) {
+    this.hive3Arguments = hive3Arguments;
+    return this;
+  }
+
+  /**
+   * arguments for Hive3 schedules
+   * @return hive3Arguments
+  **/
+  @ApiModelProperty(value = "arguments for Hive3 schedules")
+
+  @Valid
+
+  public ApiHive3ReplicationArguments getHive3Arguments() {
+    return hive3Arguments;
+  }
+
+  public void setHive3Arguments(ApiHive3ReplicationArguments hive3Arguments) {
+    this.hive3Arguments = hive3Arguments;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -198,12 +247,14 @@ public class ApiReplicationSchedule extends ApiSchedule  {
         Objects.equals(this.history, apiReplicationSchedule.history) &&
         Objects.equals(this.active, apiReplicationSchedule.active) &&
         Objects.equals(this.hiveCloudArguments, apiReplicationSchedule.hiveCloudArguments) &&
+        Objects.equals(this.hbaseArguments, apiReplicationSchedule.hbaseArguments) &&
+        Objects.equals(this.hive3Arguments, apiReplicationSchedule.hive3Arguments) &&
         super.equals(o);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(hdfsArguments, hiveArguments, hdfsCloudArguments, history, active, hiveCloudArguments, super.hashCode());
+    return Objects.hash(hdfsArguments, hiveArguments, hdfsCloudArguments, history, active, hiveCloudArguments, hbaseArguments, hive3Arguments, super.hashCode());
   }
 
   @Override
@@ -217,6 +268,8 @@ public class ApiReplicationSchedule extends ApiSchedule  {
     sb.append("    history: ").append(toIndentedString(history)).append("\n");
     sb.append("    active: ").append(toIndentedString(active)).append("\n");
     sb.append("    hiveCloudArguments: ").append(toIndentedString(hiveCloudArguments)).append("\n");
+    sb.append("    hbaseArguments: ").append(toIndentedString(hbaseArguments)).append("\n");
+    sb.append("    hive3Arguments: ").append(toIndentedString(hive3Arguments)).append("\n");
     sb.append("}");
     return sb.toString();
   }

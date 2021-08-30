@@ -18,20 +18,20 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "Detailed information about an HDFS replication job.")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
 
 public class ApiHdfsReplicationResult   {
   @JsonProperty("progress")
-  private BigDecimal progress = null;
+  private Integer progress = null;
 
   @JsonProperty("throughput")
   private BigDecimal throughput = null;
 
   @JsonProperty("remainingTime")
-  private BigDecimal remainingTime = null;
+  private Integer remainingTime = null;
 
   @JsonProperty("estimatedCompletionTime")
   private String estimatedCompletionTime = null;
@@ -41,37 +41,37 @@ public class ApiHdfsReplicationResult   {
   private List<ApiHdfsReplicationCounter> counters = null;
 
   @JsonProperty("numFilesDryRun")
-  private BigDecimal numFilesDryRun = null;
+  private Integer numFilesDryRun = null;
 
   @JsonProperty("numBytesDryRun")
-  private BigDecimal numBytesDryRun = null;
+  private Integer numBytesDryRun = null;
 
   @JsonProperty("numFilesExpected")
-  private BigDecimal numFilesExpected = null;
+  private Integer numFilesExpected = null;
 
   @JsonProperty("numBytesExpected")
-  private BigDecimal numBytesExpected = null;
+  private Integer numBytesExpected = null;
 
   @JsonProperty("numFilesCopied")
-  private BigDecimal numFilesCopied = null;
+  private Integer numFilesCopied = null;
 
   @JsonProperty("numBytesCopied")
-  private BigDecimal numBytesCopied = null;
+  private Integer numBytesCopied = null;
 
   @JsonProperty("numFilesSkipped")
-  private BigDecimal numFilesSkipped = null;
+  private Integer numFilesSkipped = null;
 
   @JsonProperty("numBytesSkipped")
-  private BigDecimal numBytesSkipped = null;
+  private Integer numBytesSkipped = null;
 
   @JsonProperty("numFilesDeleted")
-  private BigDecimal numFilesDeleted = null;
+  private Integer numFilesDeleted = null;
 
   @JsonProperty("numFilesCopyFailed")
-  private BigDecimal numFilesCopyFailed = null;
+  private Integer numFilesCopyFailed = null;
 
   @JsonProperty("numBytesCopyFailed")
-  private BigDecimal numBytesCopyFailed = null;
+  private Integer numBytesCopyFailed = null;
 
   @JsonProperty("setupError")
   private String setupError = null;
@@ -102,7 +102,7 @@ public class ApiHdfsReplicationResult   {
   @Valid
   private List<String> failedFiles = null;
 
-  public ApiHdfsReplicationResult progress(BigDecimal progress) {
+  public ApiHdfsReplicationResult progress(Integer progress) {
     this.progress = progress;
     return this;
   }
@@ -113,13 +113,12 @@ public class ApiHdfsReplicationResult   {
   **/
   @ApiModelProperty(value = "The file copy progress percentage.")
 
-  @Valid
 
-  public BigDecimal getProgress() {
+  public Integer getProgress() {
     return progress;
   }
 
-  public void setProgress(BigDecimal progress) {
+  public void setProgress(Integer progress) {
     this.progress = progress;
   }
 
@@ -144,7 +143,7 @@ public class ApiHdfsReplicationResult   {
     this.throughput = throughput;
   }
 
-  public ApiHdfsReplicationResult remainingTime(BigDecimal remainingTime) {
+  public ApiHdfsReplicationResult remainingTime(Integer remainingTime) {
     this.remainingTime = remainingTime;
     return this;
   }
@@ -155,13 +154,12 @@ public class ApiHdfsReplicationResult   {
   **/
   @ApiModelProperty(value = "The time remaining for mapper phase (seconds).")
 
-  @Valid
 
-  public BigDecimal getRemainingTime() {
+  public Integer getRemainingTime() {
     return remainingTime;
   }
 
-  public void setRemainingTime(BigDecimal remainingTime) {
+  public void setRemainingTime(Integer remainingTime) {
     this.remainingTime = remainingTime;
   }
 
@@ -214,7 +212,7 @@ public class ApiHdfsReplicationResult   {
     this.counters = counters;
   }
 
-  public ApiHdfsReplicationResult numFilesDryRun(BigDecimal numFilesDryRun) {
+  public ApiHdfsReplicationResult numFilesDryRun(Integer numFilesDryRun) {
     this.numFilesDryRun = numFilesDryRun;
     return this;
   }
@@ -225,17 +223,16 @@ public class ApiHdfsReplicationResult   {
   **/
   @ApiModelProperty(value = "The number of files found to copy.")
 
-  @Valid
 
-  public BigDecimal getNumFilesDryRun() {
+  public Integer getNumFilesDryRun() {
     return numFilesDryRun;
   }
 
-  public void setNumFilesDryRun(BigDecimal numFilesDryRun) {
+  public void setNumFilesDryRun(Integer numFilesDryRun) {
     this.numFilesDryRun = numFilesDryRun;
   }
 
-  public ApiHdfsReplicationResult numBytesDryRun(BigDecimal numBytesDryRun) {
+  public ApiHdfsReplicationResult numBytesDryRun(Integer numBytesDryRun) {
     this.numBytesDryRun = numBytesDryRun;
     return this;
   }
@@ -246,17 +243,16 @@ public class ApiHdfsReplicationResult   {
   **/
   @ApiModelProperty(value = "The number of bytes found to copy.")
 
-  @Valid
 
-  public BigDecimal getNumBytesDryRun() {
+  public Integer getNumBytesDryRun() {
     return numBytesDryRun;
   }
 
-  public void setNumBytesDryRun(BigDecimal numBytesDryRun) {
+  public void setNumBytesDryRun(Integer numBytesDryRun) {
     this.numBytesDryRun = numBytesDryRun;
   }
 
-  public ApiHdfsReplicationResult numFilesExpected(BigDecimal numFilesExpected) {
+  public ApiHdfsReplicationResult numFilesExpected(Integer numFilesExpected) {
     this.numFilesExpected = numFilesExpected;
     return this;
   }
@@ -267,17 +263,16 @@ public class ApiHdfsReplicationResult   {
   **/
   @ApiModelProperty(value = "The number of files expected to be copied.")
 
-  @Valid
 
-  public BigDecimal getNumFilesExpected() {
+  public Integer getNumFilesExpected() {
     return numFilesExpected;
   }
 
-  public void setNumFilesExpected(BigDecimal numFilesExpected) {
+  public void setNumFilesExpected(Integer numFilesExpected) {
     this.numFilesExpected = numFilesExpected;
   }
 
-  public ApiHdfsReplicationResult numBytesExpected(BigDecimal numBytesExpected) {
+  public ApiHdfsReplicationResult numBytesExpected(Integer numBytesExpected) {
     this.numBytesExpected = numBytesExpected;
     return this;
   }
@@ -288,17 +283,16 @@ public class ApiHdfsReplicationResult   {
   **/
   @ApiModelProperty(value = "The number of bytes expected to be copied.")
 
-  @Valid
 
-  public BigDecimal getNumBytesExpected() {
+  public Integer getNumBytesExpected() {
     return numBytesExpected;
   }
 
-  public void setNumBytesExpected(BigDecimal numBytesExpected) {
+  public void setNumBytesExpected(Integer numBytesExpected) {
     this.numBytesExpected = numBytesExpected;
   }
 
-  public ApiHdfsReplicationResult numFilesCopied(BigDecimal numFilesCopied) {
+  public ApiHdfsReplicationResult numFilesCopied(Integer numFilesCopied) {
     this.numFilesCopied = numFilesCopied;
     return this;
   }
@@ -309,17 +303,16 @@ public class ApiHdfsReplicationResult   {
   **/
   @ApiModelProperty(value = "The number of files actually copied.")
 
-  @Valid
 
-  public BigDecimal getNumFilesCopied() {
+  public Integer getNumFilesCopied() {
     return numFilesCopied;
   }
 
-  public void setNumFilesCopied(BigDecimal numFilesCopied) {
+  public void setNumFilesCopied(Integer numFilesCopied) {
     this.numFilesCopied = numFilesCopied;
   }
 
-  public ApiHdfsReplicationResult numBytesCopied(BigDecimal numBytesCopied) {
+  public ApiHdfsReplicationResult numBytesCopied(Integer numBytesCopied) {
     this.numBytesCopied = numBytesCopied;
     return this;
   }
@@ -330,17 +323,16 @@ public class ApiHdfsReplicationResult   {
   **/
   @ApiModelProperty(value = "The number of bytes actually copied.")
 
-  @Valid
 
-  public BigDecimal getNumBytesCopied() {
+  public Integer getNumBytesCopied() {
     return numBytesCopied;
   }
 
-  public void setNumBytesCopied(BigDecimal numBytesCopied) {
+  public void setNumBytesCopied(Integer numBytesCopied) {
     this.numBytesCopied = numBytesCopied;
   }
 
-  public ApiHdfsReplicationResult numFilesSkipped(BigDecimal numFilesSkipped) {
+  public ApiHdfsReplicationResult numFilesSkipped(Integer numFilesSkipped) {
     this.numFilesSkipped = numFilesSkipped;
     return this;
   }
@@ -351,17 +343,16 @@ public class ApiHdfsReplicationResult   {
   **/
   @ApiModelProperty(value = "The number of files that were unchanged and thus skipped during copying.")
 
-  @Valid
 
-  public BigDecimal getNumFilesSkipped() {
+  public Integer getNumFilesSkipped() {
     return numFilesSkipped;
   }
 
-  public void setNumFilesSkipped(BigDecimal numFilesSkipped) {
+  public void setNumFilesSkipped(Integer numFilesSkipped) {
     this.numFilesSkipped = numFilesSkipped;
   }
 
-  public ApiHdfsReplicationResult numBytesSkipped(BigDecimal numBytesSkipped) {
+  public ApiHdfsReplicationResult numBytesSkipped(Integer numBytesSkipped) {
     this.numBytesSkipped = numBytesSkipped;
     return this;
   }
@@ -372,17 +363,16 @@ public class ApiHdfsReplicationResult   {
   **/
   @ApiModelProperty(value = "The aggregate number of bytes in the skipped files.")
 
-  @Valid
 
-  public BigDecimal getNumBytesSkipped() {
+  public Integer getNumBytesSkipped() {
     return numBytesSkipped;
   }
 
-  public void setNumBytesSkipped(BigDecimal numBytesSkipped) {
+  public void setNumBytesSkipped(Integer numBytesSkipped) {
     this.numBytesSkipped = numBytesSkipped;
   }
 
-  public ApiHdfsReplicationResult numFilesDeleted(BigDecimal numFilesDeleted) {
+  public ApiHdfsReplicationResult numFilesDeleted(Integer numFilesDeleted) {
     this.numFilesDeleted = numFilesDeleted;
     return this;
   }
@@ -393,17 +383,16 @@ public class ApiHdfsReplicationResult   {
   **/
   @ApiModelProperty(value = "The number of files deleted since they were present at destination, but missing from source.")
 
-  @Valid
 
-  public BigDecimal getNumFilesDeleted() {
+  public Integer getNumFilesDeleted() {
     return numFilesDeleted;
   }
 
-  public void setNumFilesDeleted(BigDecimal numFilesDeleted) {
+  public void setNumFilesDeleted(Integer numFilesDeleted) {
     this.numFilesDeleted = numFilesDeleted;
   }
 
-  public ApiHdfsReplicationResult numFilesCopyFailed(BigDecimal numFilesCopyFailed) {
+  public ApiHdfsReplicationResult numFilesCopyFailed(Integer numFilesCopyFailed) {
     this.numFilesCopyFailed = numFilesCopyFailed;
     return this;
   }
@@ -414,17 +403,16 @@ public class ApiHdfsReplicationResult   {
   **/
   @ApiModelProperty(value = "The number of files for which copy failed.")
 
-  @Valid
 
-  public BigDecimal getNumFilesCopyFailed() {
+  public Integer getNumFilesCopyFailed() {
     return numFilesCopyFailed;
   }
 
-  public void setNumFilesCopyFailed(BigDecimal numFilesCopyFailed) {
+  public void setNumFilesCopyFailed(Integer numFilesCopyFailed) {
     this.numFilesCopyFailed = numFilesCopyFailed;
   }
 
-  public ApiHdfsReplicationResult numBytesCopyFailed(BigDecimal numBytesCopyFailed) {
+  public ApiHdfsReplicationResult numBytesCopyFailed(Integer numBytesCopyFailed) {
     this.numBytesCopyFailed = numBytesCopyFailed;
     return this;
   }
@@ -435,13 +423,12 @@ public class ApiHdfsReplicationResult   {
   **/
   @ApiModelProperty(value = "The aggregate number of bytes in the files for which copy failed.")
 
-  @Valid
 
-  public BigDecimal getNumBytesCopyFailed() {
+  public Integer getNumBytesCopyFailed() {
     return numBytesCopyFailed;
   }
 
-  public void setNumBytesCopyFailed(BigDecimal numBytesCopyFailed) {
+  public void setNumBytesCopyFailed(Integer numBytesCopyFailed) {
     this.numBytesCopyFailed = numBytesCopyFailed;
   }
 
@@ -542,7 +529,7 @@ public class ApiHdfsReplicationResult   {
    * The list of directories for which snapshots were taken and used as part of this replication.
    * @return snapshottedDirs
   **/
-  @ApiModelProperty(example = "\"null\"", value = "The list of directories for which snapshots were taken and used as part of this replication.")
+  @ApiModelProperty(value = "The list of directories for which snapshots were taken and used as part of this replication.")
 
 
   public List<String> getSnapshottedDirs() {
@@ -630,7 +617,7 @@ public class ApiHdfsReplicationResult   {
    * The list of files that failed during replication. Available since API v11.
    * @return failedFiles
   **/
-  @ApiModelProperty(example = "\"null\"", value = "The list of files that failed during replication. Available since API v11.")
+  @ApiModelProperty(value = "The list of files that failed during replication. Available since API v11.")
 
 
   public List<String> getFailedFiles() {

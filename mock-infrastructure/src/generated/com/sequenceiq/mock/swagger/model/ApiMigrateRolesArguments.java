@@ -16,7 +16,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
@@ -49,7 +49,7 @@ public class ApiMigrateRolesArguments   {
    * The list of role names to migrate.
    * @return roleNamesToMigrate
   **/
-  @ApiModelProperty(example = "\"null\"", value = "The list of role names to migrate.")
+  @ApiModelProperty(value = "The list of role names to migrate.")
 
 
   public List<String> getRoleNamesToMigrate() {
@@ -86,10 +86,10 @@ public class ApiMigrateRolesArguments   {
   }
 
   /**
-   * Delete existing stale role data, if any. For example, when migrating a NameNode, if the destination host has stale data in the NameNode data directories (possibly because a NameNode role was previously located there), this stale data will be deleted before migrating the role.
+   * Delete existing stale role data, if any. For example, when migrating a NameNode, if the destination host has stale data in the NameNode data directories (possibly because a NameNode role was previously located there), this stale data will be deleted before migrating the role. Defaults to false.
    * @return clearStaleRoleData
   **/
-  @ApiModelProperty(value = "Delete existing stale role data, if any. For example, when migrating a NameNode, if the destination host has stale data in the NameNode data directories (possibly because a NameNode role was previously located there), this stale data will be deleted before migrating the role.")
+  @ApiModelProperty(value = "Delete existing stale role data, if any. For example, when migrating a NameNode, if the destination host has stale data in the NameNode data directories (possibly because a NameNode role was previously located there), this stale data will be deleted before migrating the role. Defaults to false.")
 
 
   public Boolean isClearStaleRoleData() {

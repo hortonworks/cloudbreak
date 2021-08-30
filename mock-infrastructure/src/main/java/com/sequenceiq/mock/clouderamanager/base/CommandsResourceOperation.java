@@ -1,7 +1,5 @@
 package com.sequenceiq.mock.clouderamanager.base;
 
-import java.math.BigDecimal;
-
 import javax.inject.Inject;
 
 import org.springframework.http.ResponseEntity;
@@ -16,7 +14,7 @@ public class CommandsResourceOperation {
     @Inject
     private ResponseCreatorComponent responseCreatorComponent;
 
-    public ResponseEntity<ApiCommand> readCommand(String mockUuid, BigDecimal commandId) {
+    public ResponseEntity<ApiCommand> readCommand(String mockUuid, Integer commandId) {
         ApiCommand apiCommand = new ApiCommand().id(commandId).active(Boolean.FALSE).success(Boolean.TRUE);
         return responseCreatorComponent.exec(apiCommand);
     }

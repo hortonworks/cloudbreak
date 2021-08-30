@@ -1,6 +1,5 @@
 package com.sequenceiq.mock.clouderamanager.base;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -59,12 +58,12 @@ public class ClouderaManagerResourceOperation {
     }
 
     public ResponseEntity<ApiCommand> importAdminCredentials(String mockUuid, @Valid String password, @Valid String username) {
-        return responseCreatorComponent.exec(new ApiCommand().id(new BigDecimal(1)));
+        return responseCreatorComponent.exec(new ApiCommand().id(Integer.valueOf(1)));
     }
 
     public ResponseEntity<ApiCommand> importClusterTemplate(String mockUuid, @Valid Boolean addRepositories, @Valid ApiClusterTemplate body) {
         clouderaManagerStoreService.importClusterTemplate(mockUuid, body);
-        ApiCommand response = new ApiCommand().id(BigDecimal.ONE).name("Import ClusterTemplate").active(Boolean.TRUE);
+        ApiCommand response = new ApiCommand().id(Integer.valueOf(1)).name("Import ClusterTemplate").active(Boolean.TRUE);
         return ResponseEntity.ok(response);
     }
 

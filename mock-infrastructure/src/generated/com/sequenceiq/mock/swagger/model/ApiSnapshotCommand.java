@@ -13,7 +13,6 @@ import com.sequenceiq.mock.swagger.model.ApiRoleRef;
 import com.sequenceiq.mock.swagger.model.ApiServiceRef;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.math.BigDecimal;
 import org.springframework.validation.annotation.Validated;
 import javax.validation.Valid;
 import javax.validation.constraints.*;
@@ -23,7 +22,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "Information about snapshot commands. <p/> This object holds all the information a regular ApiCommand object provides, and adds specific information about the results of a snapshot command. <p/> Depending on the type of the service where the snapshot command was run, a different result property will be populated.")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 

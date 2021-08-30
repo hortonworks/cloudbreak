@@ -11,11 +11,11 @@ import javax.validation.Valid;
 import javax.validation.constraints.*;
 
 /**
- * Information about a Cloudera Manager peer instance. &lt;p&gt; The requirement and usage of &lt;i&gt;username&lt;/i&gt; and &lt;i&gt;password&lt;/i&gt; properties are dependent on the &lt;i&gt;clouderaManagerCreatedUser&lt;/i&gt; flag. &lt;p&gt; When creating peers, if &#39;clouderaManagerCreatedUser&#39; is true, the username/password should be the credentials of a user with administrator privileges on the remote Cloudera Manager. These credentials are not stored, they are used to connect to the peer and create a user in that peer. The newly created user is stored and used for communication with that peer. If &#39;clouderaManagerCreatedUser&#39; is false, which is not applicable to REPLICATION peer type, the username/password to the remote Cloudera Manager are directly stored and used for all communications with that peer. &lt;p&gt; When updating peers, if &#39;clouderaManagerCreatedUser&#39; is true and username/password are set, a new remote user will be created. If &#39;clouderaManagerCreatedUser&#39; is false and username/password are set, the stored username/password will be updated.
+ * Information about a Cloudera Manager peer instance. &lt;p&gt; The requirement and usage of &lt;i&gt;username&lt;/i&gt; and &lt;i&gt;password&lt;/i&gt; properties are dependent on the &lt;i&gt;clouderaManagerCreatedUser&lt;/i&gt; flag. &lt;p&gt; When creating peers, if &#39;clouderaManagerCreatedUser&#39; is true, the username/password should be the credentials of a user with administrator privileges on the remote Cloudera Manager. These credentials are not stored, they are used to connect to the peer and create a user in that peer. The newly created user is stored and used for communication with that peer. If &#39;clouderaManagerCreatedUser&#39; is false, which is not applicable to REPLICATION peer type, the username/password to the remote Cloudera Manager are directly stored and used for all communications with that peer. &lt;p&gt; When updating peers, if &#39;clouderaManagerCreatedUser&#39; is true and username/password are set, a new remote user will be created. If &#39;clouderaManagerCreatedUser&#39; is false and username/password are set, the stored username/password will be updated. &lt;p&gt; If &#39;createUserWithAdminRole&#39; is true and &#39;clouderaManagerCreatedUser&#39; is true, the created internal user will also be granted admin role.
  */
-@ApiModel(description = "Information about a Cloudera Manager peer instance. <p> The requirement and usage of <i>username</i> and <i>password</i> properties are dependent on the <i>clouderaManagerCreatedUser</i> flag. <p> When creating peers, if 'clouderaManagerCreatedUser' is true, the username/password should be the credentials of a user with administrator privileges on the remote Cloudera Manager. These credentials are not stored, they are used to connect to the peer and create a user in that peer. The newly created user is stored and used for communication with that peer. If 'clouderaManagerCreatedUser' is false, which is not applicable to REPLICATION peer type, the username/password to the remote Cloudera Manager are directly stored and used for all communications with that peer. <p> When updating peers, if 'clouderaManagerCreatedUser' is true and username/password are set, a new remote user will be created. If 'clouderaManagerCreatedUser' is false and username/password are set, the stored username/password will be updated.")
+@ApiModel(description = "Information about a Cloudera Manager peer instance. <p> The requirement and usage of <i>username</i> and <i>password</i> properties are dependent on the <i>clouderaManagerCreatedUser</i> flag. <p> When creating peers, if 'clouderaManagerCreatedUser' is true, the username/password should be the credentials of a user with administrator privileges on the remote Cloudera Manager. These credentials are not stored, they are used to connect to the peer and create a user in that peer. The newly created user is stored and used for communication with that peer. If 'clouderaManagerCreatedUser' is false, which is not applicable to REPLICATION peer type, the username/password to the remote Cloudera Manager are directly stored and used for all communications with that peer. <p> When updating peers, if 'clouderaManagerCreatedUser' is true and username/password are set, a new remote user will be created. If 'clouderaManagerCreatedUser' is false and username/password are set, the stored username/password will be updated. <p> If 'createUserWithAdminRole' is true and 'clouderaManagerCreatedUser' is true, the created internal user will also be granted admin role.")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
@@ -38,6 +38,9 @@ public class ApiCmPeer   {
 
   @JsonProperty("clouderaManagerCreatedUser")
   private Boolean clouderaManagerCreatedUser = null;
+
+  @JsonProperty("createUserWithAdminRole")
+  private Boolean createUserWithAdminRole = null;
 
   public ApiCmPeer name(String name) {
     this.name = name;
@@ -160,6 +163,26 @@ public class ApiCmPeer   {
     this.clouderaManagerCreatedUser = clouderaManagerCreatedUser;
   }
 
+  public ApiCmPeer createUserWithAdminRole(Boolean createUserWithAdminRole) {
+    this.createUserWithAdminRole = createUserWithAdminRole;
+    return this;
+  }
+
+  /**
+   * If true and clouderaManagerCreatedUser is true, the created user will have admin role granted.  If false and clouderaManagerCreatedUser is true, the created user will have user role.  null means false.  Available since API v44.  Needs to be set during update if changing the URL.
+   * @return createUserWithAdminRole
+  **/
+  @ApiModelProperty(value = "If true and clouderaManagerCreatedUser is true, the created user will have admin role granted.  If false and clouderaManagerCreatedUser is true, the created user will have user role.  null means false.  Available since API v44.  Needs to be set during update if changing the URL.")
+
+
+  public Boolean isCreateUserWithAdminRole() {
+    return createUserWithAdminRole;
+  }
+
+  public void setCreateUserWithAdminRole(Boolean createUserWithAdminRole) {
+    this.createUserWithAdminRole = createUserWithAdminRole;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -175,12 +198,13 @@ public class ApiCmPeer   {
         Objects.equals(this.url, apiCmPeer.url) &&
         Objects.equals(this.username, apiCmPeer.username) &&
         Objects.equals(this.password, apiCmPeer.password) &&
-        Objects.equals(this.clouderaManagerCreatedUser, apiCmPeer.clouderaManagerCreatedUser);
+        Objects.equals(this.clouderaManagerCreatedUser, apiCmPeer.clouderaManagerCreatedUser) &&
+        Objects.equals(this.createUserWithAdminRole, apiCmPeer.createUserWithAdminRole);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, type, url, username, password, clouderaManagerCreatedUser);
+    return Objects.hash(name, type, url, username, password, clouderaManagerCreatedUser, createUserWithAdminRole);
   }
 
   @Override
@@ -194,6 +218,7 @@ public class ApiCmPeer   {
     sb.append("    username: ").append(toIndentedString(username)).append("\n");
     sb.append("    password: ").append(toIndentedString(password)).append("\n");
     sb.append("    clouderaManagerCreatedUser: ").append(toIndentedString(clouderaManagerCreatedUser)).append("\n");
+    sb.append("    createUserWithAdminRole: ").append(toIndentedString(createUserWithAdminRole)).append("\n");
     sb.append("}");
     return sb.toString();
   }

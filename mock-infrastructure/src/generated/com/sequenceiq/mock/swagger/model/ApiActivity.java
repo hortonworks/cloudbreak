@@ -1,22 +1,22 @@
 package com.sequenceiq.mock.swagger.model;
 
 import java.util.Objects;
+
+import javax.validation.Valid;
+
+import org.springframework.validation.annotation.Validated;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sequenceiq.mock.swagger.model.ApiActivityStatus;
-import com.sequenceiq.mock.swagger.model.ApiActivityType;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
 
 /**
  * Represents a user activity, such as a MapReduce job, a Hive query, an Oozie workflow, etc.
  */
 @ApiModel(description = "Represents a user activity, such as a MapReduce job, a Hive query, an Oozie workflow, etc.")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 

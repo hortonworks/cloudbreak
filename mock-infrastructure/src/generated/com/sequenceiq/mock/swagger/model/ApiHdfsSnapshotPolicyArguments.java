@@ -16,7 +16,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "HDFS specific snapshot policy arguments.")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
@@ -43,7 +43,7 @@ public class ApiHdfsSnapshotPolicyArguments   {
    * The path patterns specifying the paths. Paths matching any of them will be eligible for snapshot creation. <p/> The pattern matching characters that can be specific are those supported by HDFS. please see the documentation for HDFS globs for more details.
    * @return pathPatterns
   **/
-  @ApiModelProperty(example = "\"null\"", value = "The path patterns specifying the paths. Paths matching any of them will be eligible for snapshot creation. <p/> The pattern matching characters that can be specific are those supported by HDFS. please see the documentation for HDFS globs for more details.")
+  @ApiModelProperty(value = "The path patterns specifying the paths. Paths matching any of them will be eligible for snapshot creation. <p/> The pattern matching characters that can be specific are those supported by HDFS. please see the documentation for HDFS globs for more details.")
 
 
   public List<String> getPathPatterns() {

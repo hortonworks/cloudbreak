@@ -14,7 +14,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "A time series entity attribute represents a possible attribute of a time series entity type monitored by the Cloudera Management Services. <p> Available since API v11.")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
@@ -98,10 +98,10 @@ public class ApiTimeSeriesEntityAttribute   {
   }
 
   /**
-   * Returns whether to treat attribute values as case-sensitive.
+   * Returns whether to treat attribute values as case-sensitive. Defaults to false.
    * @return isValueCaseSensitive
   **/
-  @ApiModelProperty(value = "Returns whether to treat attribute values as case-sensitive.")
+  @ApiModelProperty(value = "Returns whether to treat attribute values as case-sensitive. Defaults to false.")
 
 
   public Boolean isIsValueCaseSensitive() {

@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.math.BigDecimal;
 import org.springframework.validation.annotation.Validated;
 import javax.validation.Valid;
 import javax.validation.constraints.*;
@@ -15,14 +14,14 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "Contains common arguments for commands which require SSH'ing into one or more hosts.")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
 
 public class BaseApiSshCmdArguments   {
   @JsonProperty("sshPort")
-  private BigDecimal sshPort = null;
+  private Integer sshPort = null;
 
   @JsonProperty("userName")
   private String userName = null;
@@ -36,7 +35,7 @@ public class BaseApiSshCmdArguments   {
   @JsonProperty("passphrase")
   private String passphrase = null;
 
-  public BaseApiSshCmdArguments sshPort(BigDecimal sshPort) {
+  public BaseApiSshCmdArguments sshPort(Integer sshPort) {
     this.sshPort = sshPort;
     return this;
   }
@@ -45,15 +44,14 @@ public class BaseApiSshCmdArguments   {
    * SSH port. If unset, defaults to 22.
    * @return sshPort
   **/
-  @ApiModelProperty(example = "22.0", value = "SSH port. If unset, defaults to 22.")
+  @ApiModelProperty(example = "22", value = "SSH port. If unset, defaults to 22.")
 
-  @Valid
 
-  public BigDecimal getSshPort() {
+  public Integer getSshPort() {
     return sshPort;
   }
 
-  public void setSshPort(BigDecimal sshPort) {
+  public void setSshPort(Integer sshPort) {
     this.sshPort = sshPort;
   }
 

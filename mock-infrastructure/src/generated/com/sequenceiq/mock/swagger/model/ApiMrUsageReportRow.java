@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.math.BigDecimal;
 import org.springframework.validation.annotation.Validated;
 import javax.validation.Valid;
 import javax.validation.constraints.*;
@@ -15,7 +14,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
@@ -31,55 +30,55 @@ public class ApiMrUsageReportRow   {
   private String group = null;
 
   @JsonProperty("cpuSec")
-  private BigDecimal cpuSec = null;
+  private Integer cpuSec = null;
 
   @JsonProperty("memoryBytes")
-  private BigDecimal memoryBytes = null;
+  private Integer memoryBytes = null;
 
   @JsonProperty("jobCount")
-  private BigDecimal jobCount = null;
+  private Integer jobCount = null;
 
   @JsonProperty("taskCount")
-  private BigDecimal taskCount = null;
+  private Integer taskCount = null;
 
   @JsonProperty("durationSec")
-  private BigDecimal durationSec = null;
+  private Integer durationSec = null;
 
   @JsonProperty("failedMaps")
-  private BigDecimal failedMaps = null;
+  private Integer failedMaps = null;
 
   @JsonProperty("totalMaps")
-  private BigDecimal totalMaps = null;
+  private Integer totalMaps = null;
 
   @JsonProperty("failedReduces")
-  private BigDecimal failedReduces = null;
+  private Integer failedReduces = null;
 
   @JsonProperty("totalReduces")
-  private BigDecimal totalReduces = null;
+  private Integer totalReduces = null;
 
   @JsonProperty("mapInputBytes")
-  private BigDecimal mapInputBytes = null;
+  private Integer mapInputBytes = null;
 
   @JsonProperty("mapOutputBytes")
-  private BigDecimal mapOutputBytes = null;
+  private Integer mapOutputBytes = null;
 
   @JsonProperty("hdfsBytesRead")
-  private BigDecimal hdfsBytesRead = null;
+  private Integer hdfsBytesRead = null;
 
   @JsonProperty("hdfsBytesWritten")
-  private BigDecimal hdfsBytesWritten = null;
+  private Integer hdfsBytesWritten = null;
 
   @JsonProperty("localBytesRead")
-  private BigDecimal localBytesRead = null;
+  private Integer localBytesRead = null;
 
   @JsonProperty("localBytesWritten")
-  private BigDecimal localBytesWritten = null;
+  private Integer localBytesWritten = null;
 
   @JsonProperty("dataLocalMaps")
-  private BigDecimal dataLocalMaps = null;
+  private Integer dataLocalMaps = null;
 
   @JsonProperty("rackLocalMaps")
-  private BigDecimal rackLocalMaps = null;
+  private Integer rackLocalMaps = null;
 
   public ApiMrUsageReportRow timePeriod(String timePeriod) {
     this.timePeriod = timePeriod;
@@ -141,7 +140,7 @@ public class ApiMrUsageReportRow   {
     this.group = group;
   }
 
-  public ApiMrUsageReportRow cpuSec(BigDecimal cpuSec) {
+  public ApiMrUsageReportRow cpuSec(Integer cpuSec) {
     this.cpuSec = cpuSec;
     return this;
   }
@@ -152,17 +151,16 @@ public class ApiMrUsageReportRow   {
   **/
   @ApiModelProperty(value = "Amount of CPU time (in seconds) taken up this user's MapReduce jobs.")
 
-  @Valid
 
-  public BigDecimal getCpuSec() {
+  public Integer getCpuSec() {
     return cpuSec;
   }
 
-  public void setCpuSec(BigDecimal cpuSec) {
+  public void setCpuSec(Integer cpuSec) {
     this.cpuSec = cpuSec;
   }
 
-  public ApiMrUsageReportRow memoryBytes(BigDecimal memoryBytes) {
+  public ApiMrUsageReportRow memoryBytes(Integer memoryBytes) {
     this.memoryBytes = memoryBytes;
     return this;
   }
@@ -173,17 +171,16 @@ public class ApiMrUsageReportRow   {
   **/
   @ApiModelProperty(value = "The sum of physical memory used (collected as a snapshot) by this user's MapReduce jobs.")
 
-  @Valid
 
-  public BigDecimal getMemoryBytes() {
+  public Integer getMemoryBytes() {
     return memoryBytes;
   }
 
-  public void setMemoryBytes(BigDecimal memoryBytes) {
+  public void setMemoryBytes(Integer memoryBytes) {
     this.memoryBytes = memoryBytes;
   }
 
-  public ApiMrUsageReportRow jobCount(BigDecimal jobCount) {
+  public ApiMrUsageReportRow jobCount(Integer jobCount) {
     this.jobCount = jobCount;
     return this;
   }
@@ -194,17 +191,16 @@ public class ApiMrUsageReportRow   {
   **/
   @ApiModelProperty(value = "Number of jobs.")
 
-  @Valid
 
-  public BigDecimal getJobCount() {
+  public Integer getJobCount() {
     return jobCount;
   }
 
-  public void setJobCount(BigDecimal jobCount) {
+  public void setJobCount(Integer jobCount) {
     this.jobCount = jobCount;
   }
 
-  public ApiMrUsageReportRow taskCount(BigDecimal taskCount) {
+  public ApiMrUsageReportRow taskCount(Integer taskCount) {
     this.taskCount = taskCount;
     return this;
   }
@@ -215,17 +211,16 @@ public class ApiMrUsageReportRow   {
   **/
   @ApiModelProperty(value = "Number of tasks.")
 
-  @Valid
 
-  public BigDecimal getTaskCount() {
+  public Integer getTaskCount() {
     return taskCount;
   }
 
-  public void setTaskCount(BigDecimal taskCount) {
+  public void setTaskCount(Integer taskCount) {
     this.taskCount = taskCount;
   }
 
-  public ApiMrUsageReportRow durationSec(BigDecimal durationSec) {
+  public ApiMrUsageReportRow durationSec(Integer durationSec) {
     this.durationSec = durationSec;
     return this;
   }
@@ -236,17 +231,16 @@ public class ApiMrUsageReportRow   {
   **/
   @ApiModelProperty(value = "Total duration of this user's MapReduce jobs.")
 
-  @Valid
 
-  public BigDecimal getDurationSec() {
+  public Integer getDurationSec() {
     return durationSec;
   }
 
-  public void setDurationSec(BigDecimal durationSec) {
+  public void setDurationSec(Integer durationSec) {
     this.durationSec = durationSec;
   }
 
-  public ApiMrUsageReportRow failedMaps(BigDecimal failedMaps) {
+  public ApiMrUsageReportRow failedMaps(Integer failedMaps) {
     this.failedMaps = failedMaps;
     return this;
   }
@@ -257,17 +251,16 @@ public class ApiMrUsageReportRow   {
   **/
   @ApiModelProperty(value = "Failed maps of this user's MapReduce jobs. Available since v11.")
 
-  @Valid
 
-  public BigDecimal getFailedMaps() {
+  public Integer getFailedMaps() {
     return failedMaps;
   }
 
-  public void setFailedMaps(BigDecimal failedMaps) {
+  public void setFailedMaps(Integer failedMaps) {
     this.failedMaps = failedMaps;
   }
 
-  public ApiMrUsageReportRow totalMaps(BigDecimal totalMaps) {
+  public ApiMrUsageReportRow totalMaps(Integer totalMaps) {
     this.totalMaps = totalMaps;
     return this;
   }
@@ -278,17 +271,16 @@ public class ApiMrUsageReportRow   {
   **/
   @ApiModelProperty(value = "Total maps of this user's MapReduce jobs. Available since v11.")
 
-  @Valid
 
-  public BigDecimal getTotalMaps() {
+  public Integer getTotalMaps() {
     return totalMaps;
   }
 
-  public void setTotalMaps(BigDecimal totalMaps) {
+  public void setTotalMaps(Integer totalMaps) {
     this.totalMaps = totalMaps;
   }
 
-  public ApiMrUsageReportRow failedReduces(BigDecimal failedReduces) {
+  public ApiMrUsageReportRow failedReduces(Integer failedReduces) {
     this.failedReduces = failedReduces;
     return this;
   }
@@ -299,17 +291,16 @@ public class ApiMrUsageReportRow   {
   **/
   @ApiModelProperty(value = "Failed reduces of this user's MapReduce jobs. Available since v11.")
 
-  @Valid
 
-  public BigDecimal getFailedReduces() {
+  public Integer getFailedReduces() {
     return failedReduces;
   }
 
-  public void setFailedReduces(BigDecimal failedReduces) {
+  public void setFailedReduces(Integer failedReduces) {
     this.failedReduces = failedReduces;
   }
 
-  public ApiMrUsageReportRow totalReduces(BigDecimal totalReduces) {
+  public ApiMrUsageReportRow totalReduces(Integer totalReduces) {
     this.totalReduces = totalReduces;
     return this;
   }
@@ -320,17 +311,16 @@ public class ApiMrUsageReportRow   {
   **/
   @ApiModelProperty(value = "Total reduces of this user's MapReduce jobs. Available since v11.")
 
-  @Valid
 
-  public BigDecimal getTotalReduces() {
+  public Integer getTotalReduces() {
     return totalReduces;
   }
 
-  public void setTotalReduces(BigDecimal totalReduces) {
+  public void setTotalReduces(Integer totalReduces) {
     this.totalReduces = totalReduces;
   }
 
-  public ApiMrUsageReportRow mapInputBytes(BigDecimal mapInputBytes) {
+  public ApiMrUsageReportRow mapInputBytes(Integer mapInputBytes) {
     this.mapInputBytes = mapInputBytes;
     return this;
   }
@@ -341,17 +331,16 @@ public class ApiMrUsageReportRow   {
   **/
   @ApiModelProperty(value = "Map input bytes of this user's MapReduce jobs. Available since v11.")
 
-  @Valid
 
-  public BigDecimal getMapInputBytes() {
+  public Integer getMapInputBytes() {
     return mapInputBytes;
   }
 
-  public void setMapInputBytes(BigDecimal mapInputBytes) {
+  public void setMapInputBytes(Integer mapInputBytes) {
     this.mapInputBytes = mapInputBytes;
   }
 
-  public ApiMrUsageReportRow mapOutputBytes(BigDecimal mapOutputBytes) {
+  public ApiMrUsageReportRow mapOutputBytes(Integer mapOutputBytes) {
     this.mapOutputBytes = mapOutputBytes;
     return this;
   }
@@ -362,17 +351,16 @@ public class ApiMrUsageReportRow   {
   **/
   @ApiModelProperty(value = "Map output bytes of this user's MapReduce jobs. Available since v11.")
 
-  @Valid
 
-  public BigDecimal getMapOutputBytes() {
+  public Integer getMapOutputBytes() {
     return mapOutputBytes;
   }
 
-  public void setMapOutputBytes(BigDecimal mapOutputBytes) {
+  public void setMapOutputBytes(Integer mapOutputBytes) {
     this.mapOutputBytes = mapOutputBytes;
   }
 
-  public ApiMrUsageReportRow hdfsBytesRead(BigDecimal hdfsBytesRead) {
+  public ApiMrUsageReportRow hdfsBytesRead(Integer hdfsBytesRead) {
     this.hdfsBytesRead = hdfsBytesRead;
     return this;
   }
@@ -383,17 +371,16 @@ public class ApiMrUsageReportRow   {
   **/
   @ApiModelProperty(value = "HDFS bytes read of this user's MapReduce jobs. Available since v11.")
 
-  @Valid
 
-  public BigDecimal getHdfsBytesRead() {
+  public Integer getHdfsBytesRead() {
     return hdfsBytesRead;
   }
 
-  public void setHdfsBytesRead(BigDecimal hdfsBytesRead) {
+  public void setHdfsBytesRead(Integer hdfsBytesRead) {
     this.hdfsBytesRead = hdfsBytesRead;
   }
 
-  public ApiMrUsageReportRow hdfsBytesWritten(BigDecimal hdfsBytesWritten) {
+  public ApiMrUsageReportRow hdfsBytesWritten(Integer hdfsBytesWritten) {
     this.hdfsBytesWritten = hdfsBytesWritten;
     return this;
   }
@@ -404,17 +391,16 @@ public class ApiMrUsageReportRow   {
   **/
   @ApiModelProperty(value = "HDFS bytes written of this user's MapReduce jobs. Available since v11.")
 
-  @Valid
 
-  public BigDecimal getHdfsBytesWritten() {
+  public Integer getHdfsBytesWritten() {
     return hdfsBytesWritten;
   }
 
-  public void setHdfsBytesWritten(BigDecimal hdfsBytesWritten) {
+  public void setHdfsBytesWritten(Integer hdfsBytesWritten) {
     this.hdfsBytesWritten = hdfsBytesWritten;
   }
 
-  public ApiMrUsageReportRow localBytesRead(BigDecimal localBytesRead) {
+  public ApiMrUsageReportRow localBytesRead(Integer localBytesRead) {
     this.localBytesRead = localBytesRead;
     return this;
   }
@@ -425,17 +411,16 @@ public class ApiMrUsageReportRow   {
   **/
   @ApiModelProperty(value = "Local bytes read of this user's MapReduce jobs. Available since v11.")
 
-  @Valid
 
-  public BigDecimal getLocalBytesRead() {
+  public Integer getLocalBytesRead() {
     return localBytesRead;
   }
 
-  public void setLocalBytesRead(BigDecimal localBytesRead) {
+  public void setLocalBytesRead(Integer localBytesRead) {
     this.localBytesRead = localBytesRead;
   }
 
-  public ApiMrUsageReportRow localBytesWritten(BigDecimal localBytesWritten) {
+  public ApiMrUsageReportRow localBytesWritten(Integer localBytesWritten) {
     this.localBytesWritten = localBytesWritten;
     return this;
   }
@@ -446,17 +431,16 @@ public class ApiMrUsageReportRow   {
   **/
   @ApiModelProperty(value = "Local bytes written of this user's MapReduce jobs. Available since v11.")
 
-  @Valid
 
-  public BigDecimal getLocalBytesWritten() {
+  public Integer getLocalBytesWritten() {
     return localBytesWritten;
   }
 
-  public void setLocalBytesWritten(BigDecimal localBytesWritten) {
+  public void setLocalBytesWritten(Integer localBytesWritten) {
     this.localBytesWritten = localBytesWritten;
   }
 
-  public ApiMrUsageReportRow dataLocalMaps(BigDecimal dataLocalMaps) {
+  public ApiMrUsageReportRow dataLocalMaps(Integer dataLocalMaps) {
     this.dataLocalMaps = dataLocalMaps;
     return this;
   }
@@ -467,17 +451,16 @@ public class ApiMrUsageReportRow   {
   **/
   @ApiModelProperty(value = "Data local maps of this user's MapReduce jobs. Available since v11.")
 
-  @Valid
 
-  public BigDecimal getDataLocalMaps() {
+  public Integer getDataLocalMaps() {
     return dataLocalMaps;
   }
 
-  public void setDataLocalMaps(BigDecimal dataLocalMaps) {
+  public void setDataLocalMaps(Integer dataLocalMaps) {
     this.dataLocalMaps = dataLocalMaps;
   }
 
-  public ApiMrUsageReportRow rackLocalMaps(BigDecimal rackLocalMaps) {
+  public ApiMrUsageReportRow rackLocalMaps(Integer rackLocalMaps) {
     this.rackLocalMaps = rackLocalMaps;
     return this;
   }
@@ -488,13 +471,12 @@ public class ApiMrUsageReportRow   {
   **/
   @ApiModelProperty(value = "Rack local maps of this user's MapReduce jobs. Available since v11.")
 
-  @Valid
 
-  public BigDecimal getRackLocalMaps() {
+  public Integer getRackLocalMaps() {
     return rackLocalMaps;
   }
 
-  public void setRackLocalMaps(BigDecimal rackLocalMaps) {
+  public void setRackLocalMaps(Integer rackLocalMaps) {
     this.rackLocalMaps = rackLocalMaps;
   }
 

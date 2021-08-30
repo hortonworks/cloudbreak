@@ -3,6 +3,7 @@ package com.sequenceiq.mock.swagger.model;
 import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.sequenceiq.mock.swagger.model.Origin;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import org.springframework.validation.annotation.Validated;
@@ -14,7 +15,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "Detailed information about a Hive replication job.")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-04-23T12:05:48.864+02:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
@@ -58,6 +59,9 @@ public class ApiHiveOnTezReplicationResult   {
 
   @JsonProperty("entitiesTotal")
   private Integer entitiesTotal = null;
+
+  @JsonProperty("origin")
+  private Origin origin = null;
 
   public ApiHiveOnTezReplicationResult type(String type) {
     this.type = type;
@@ -329,6 +333,27 @@ public class ApiHiveOnTezReplicationResult   {
     this.entitiesTotal = entitiesTotal;
   }
 
+  public ApiHiveOnTezReplicationResult origin(Origin origin) {
+    this.origin = origin;
+    return this;
+  }
+
+  /**
+   * 
+   * @return origin
+  **/
+  @ApiModelProperty(value = "")
+
+  @Valid
+
+  public Origin getOrigin() {
+    return origin;
+  }
+
+  public void setOrigin(Origin origin) {
+    this.origin = origin;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -351,12 +376,13 @@ public class ApiHiveOnTezReplicationResult   {
         Objects.equals(this.policiesCurrent, apiHiveOnTezReplicationResult.policiesCurrent) &&
         Objects.equals(this.policiesTotal, apiHiveOnTezReplicationResult.policiesTotal) &&
         Objects.equals(this.entitiesCurrent, apiHiveOnTezReplicationResult.entitiesCurrent) &&
-        Objects.equals(this.entitiesTotal, apiHiveOnTezReplicationResult.entitiesTotal);
+        Objects.equals(this.entitiesTotal, apiHiveOnTezReplicationResult.entitiesTotal) &&
+        Objects.equals(this.origin, apiHiveOnTezReplicationResult.origin);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(type, status, error, tablesCurrent, tablesTotal, functionsCurrent, functionsTotal, eventsCurrent, eventsTotal, policiesCurrent, policiesTotal, entitiesCurrent, entitiesTotal);
+    return Objects.hash(type, status, error, tablesCurrent, tablesTotal, functionsCurrent, functionsTotal, eventsCurrent, eventsTotal, policiesCurrent, policiesTotal, entitiesCurrent, entitiesTotal, origin);
   }
 
   @Override
@@ -377,6 +403,7 @@ public class ApiHiveOnTezReplicationResult   {
     sb.append("    policiesTotal: ").append(toIndentedString(policiesTotal)).append("\n");
     sb.append("    entitiesCurrent: ").append(toIndentedString(entitiesCurrent)).append("\n");
     sb.append("    entitiesTotal: ").append(toIndentedString(entitiesTotal)).append("\n");
+    sb.append("    origin: ").append(toIndentedString(origin)).append("\n");
     sb.append("}");
     return sb.toString();
   }

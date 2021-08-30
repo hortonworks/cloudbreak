@@ -8,7 +8,6 @@ import com.sequenceiq.mock.swagger.model.ApiServiceRef;
 import com.sequenceiq.mock.swagger.model.ReplicationStrategy;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.math.BigDecimal;
 import java.util.List;
 import org.springframework.validation.annotation.Validated;
 import javax.validation.Valid;
@@ -19,7 +18,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "Replication arguments for HDFS.")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 

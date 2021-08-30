@@ -15,7 +15,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "Histogram bin of Impala utilization.")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
@@ -28,7 +28,7 @@ public class ApiImpalaUtilizationHistogramBin   {
   private BigDecimal endPointExclusive = null;
 
   @JsonProperty("numberOfImpalaDaemons")
-  private BigDecimal numberOfImpalaDaemons = null;
+  private Integer numberOfImpalaDaemons = null;
 
   public ApiImpalaUtilizationHistogramBin startPointInclusive(BigDecimal startPointInclusive) {
     this.startPointInclusive = startPointInclusive;
@@ -72,7 +72,7 @@ public class ApiImpalaUtilizationHistogramBin   {
     this.endPointExclusive = endPointExclusive;
   }
 
-  public ApiImpalaUtilizationHistogramBin numberOfImpalaDaemons(BigDecimal numberOfImpalaDaemons) {
+  public ApiImpalaUtilizationHistogramBin numberOfImpalaDaemons(Integer numberOfImpalaDaemons) {
     this.numberOfImpalaDaemons = numberOfImpalaDaemons;
     return this;
   }
@@ -83,13 +83,12 @@ public class ApiImpalaUtilizationHistogramBin   {
   **/
   @ApiModelProperty(value = "Number of Impala daemons.")
 
-  @Valid
 
-  public BigDecimal getNumberOfImpalaDaemons() {
+  public Integer getNumberOfImpalaDaemons() {
     return numberOfImpalaDaemons;
   }
 
-  public void setNumberOfImpalaDaemons(BigDecimal numberOfImpalaDaemons) {
+  public void setNumberOfImpalaDaemons(Integer numberOfImpalaDaemons) {
     this.numberOfImpalaDaemons = numberOfImpalaDaemons;
   }
 

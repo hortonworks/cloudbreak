@@ -7,11 +7,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.mock.clouderamanager.ClouderaManagerStoreService;
+import com.sequenceiq.mock.clouderamanager.CommandId;
 import com.sequenceiq.mock.clouderamanager.DataProviderService;
 import com.sequenceiq.mock.clouderamanager.ResponseCreatorComponent;
 import com.sequenceiq.mock.spi.SpiService;
+import com.sequenceiq.mock.swagger.model.ApiCommand;
 import com.sequenceiq.mock.swagger.model.ApiHost;
 import com.sequenceiq.mock.swagger.model.ApiHostList;
+import com.sequenceiq.mock.swagger.model.ApiHostsToRemoveArgs;
 
 @Controller
 public class HostsResourceOperation {
@@ -42,5 +45,9 @@ public class HostsResourceOperation {
     public ResponseEntity<ApiHostList> readHosts(String mockUuid, @Valid String configName, @Valid String configValue, @Valid String view) {
         ApiHostList apiHostList = dataProviderService.readHosts(mockUuid);
         return responseCreatorComponent.exec(apiHostList);
+    }
+
+    public ResponseEntity<ApiCommand> removeHostsFromCluster(String mockUuid, ApiHostsToRemoveArgs body) {
+        return responseCreatorComponent.exec(dataProviderService.getSuccessfulApiCommand(CommandId.REMOVE_HOSTS));
     }
 }

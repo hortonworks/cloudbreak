@@ -19,7 +19,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "Replication Arguments for Hive3 schedules / policies")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-04-23T12:05:48.864+02:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
@@ -82,6 +82,9 @@ public class ApiHive3ReplicationArguments   {
 
   @JsonProperty("excludeTarget")
   private Boolean excludeTarget = null;
+
+  @JsonProperty("failoverStatus")
+  private String failoverStatus = null;
 
   public ApiHive3ReplicationArguments sourceHiveService(ApiServiceRef sourceHiveService) {
     this.sourceHiveService = sourceHiveService;
@@ -473,6 +476,26 @@ public class ApiHive3ReplicationArguments   {
     this.excludeTarget = excludeTarget;
   }
 
+  public ApiHive3ReplicationArguments failoverStatus(String failoverStatus) {
+    this.failoverStatus = failoverStatus;
+    return this;
+  }
+
+  /**
+   * 
+   * @return failoverStatus
+  **/
+  @ApiModelProperty(value = "")
+
+
+  public String getFailoverStatus() {
+    return failoverStatus;
+  }
+
+  public void setFailoverStatus(String failoverStatus) {
+    this.failoverStatus = failoverStatus;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -501,12 +524,13 @@ public class ApiHive3ReplicationArguments   {
         Objects.equals(this.hiveOp, apiHive3ReplicationArguments.hiveOp) &&
         Objects.equals(this.hiveUpdateOp, apiHive3ReplicationArguments.hiveUpdateOp) &&
         Objects.equals(this.excludeSource, apiHive3ReplicationArguments.excludeSource) &&
-        Objects.equals(this.excludeTarget, apiHive3ReplicationArguments.excludeTarget);
+        Objects.equals(this.excludeTarget, apiHive3ReplicationArguments.excludeTarget) &&
+        Objects.equals(this.failoverStatus, apiHive3ReplicationArguments.failoverStatus);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(sourceHiveService, status, rangerReplication, atlasReplication, externalTableReplication, externalTableBaseDir, distcpOnTarget, numMaps, bandwidthPerMap, policyOptions, sourceDbName, targetDbName, policyName, scheduleClause, runAs, hiveOp, hiveUpdateOp, excludeSource, excludeTarget);
+    return Objects.hash(sourceHiveService, status, rangerReplication, atlasReplication, externalTableReplication, externalTableBaseDir, distcpOnTarget, numMaps, bandwidthPerMap, policyOptions, sourceDbName, targetDbName, policyName, scheduleClause, runAs, hiveOp, hiveUpdateOp, excludeSource, excludeTarget, failoverStatus);
   }
 
   @Override
@@ -533,6 +557,7 @@ public class ApiHive3ReplicationArguments   {
     sb.append("    hiveUpdateOp: ").append(toIndentedString(hiveUpdateOp)).append("\n");
     sb.append("    excludeSource: ").append(toIndentedString(excludeSource)).append("\n");
     sb.append("    excludeTarget: ").append(toIndentedString(excludeTarget)).append("\n");
+    sb.append("    failoverStatus: ").append(toIndentedString(failoverStatus)).append("\n");
     sb.append("}");
     return sb.toString();
   }

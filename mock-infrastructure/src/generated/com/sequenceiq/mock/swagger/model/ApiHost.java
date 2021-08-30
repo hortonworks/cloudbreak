@@ -27,7 +27,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "This is the model for a host in the system.")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
@@ -76,10 +76,10 @@ public class ApiHost   {
   private ApiConfigList config = null;
 
   @JsonProperty("numCores")
-  private BigDecimal numCores = null;
+  private Integer numCores = null;
 
   @JsonProperty("numPhysicalCores")
-  private BigDecimal numPhysicalCores = null;
+  private Integer numPhysicalCores = null;
 
   @JsonProperty("totalPhysMemBytes")
   private BigDecimal totalPhysMemBytes = null;
@@ -354,7 +354,7 @@ public class ApiHost   {
    * Readonly. The list of objects that trigger this host to be in maintenance mode. Available since API v2.
    * @return maintenanceOwners
   **/
-  @ApiModelProperty(example = "\"null\"", value = "Readonly. The list of objects that trigger this host to be in maintenance mode. Available since API v2.")
+  @ApiModelProperty(value = "Readonly. The list of objects that trigger this host to be in maintenance mode. Available since API v2.")
 
   @Valid
 
@@ -387,7 +387,7 @@ public class ApiHost   {
     this.config = config;
   }
 
-  public ApiHost numCores(BigDecimal numCores) {
+  public ApiHost numCores(Integer numCores) {
     this.numCores = numCores;
     return this;
   }
@@ -398,17 +398,16 @@ public class ApiHost   {
   **/
   @ApiModelProperty(value = "Readonly. The number of logical CPU cores on this host. Only populated after the host has heartbeated to the server. Available since API v4.")
 
-  @Valid
 
-  public BigDecimal getNumCores() {
+  public Integer getNumCores() {
     return numCores;
   }
 
-  public void setNumCores(BigDecimal numCores) {
+  public void setNumCores(Integer numCores) {
     this.numCores = numCores;
   }
 
-  public ApiHost numPhysicalCores(BigDecimal numPhysicalCores) {
+  public ApiHost numPhysicalCores(Integer numPhysicalCores) {
     this.numPhysicalCores = numPhysicalCores;
     return this;
   }
@@ -419,13 +418,12 @@ public class ApiHost   {
   **/
   @ApiModelProperty(value = "Readonly. The number of physical CPU cores on this host. Only populated after the host has heartbeated to the server. Available since API v9.")
 
-  @Valid
 
-  public BigDecimal getNumPhysicalCores() {
+  public Integer getNumPhysicalCores() {
     return numPhysicalCores;
   }
 
-  public void setNumPhysicalCores(BigDecimal numPhysicalCores) {
+  public void setNumPhysicalCores(Integer numPhysicalCores) {
     this.numPhysicalCores = numPhysicalCores;
   }
 

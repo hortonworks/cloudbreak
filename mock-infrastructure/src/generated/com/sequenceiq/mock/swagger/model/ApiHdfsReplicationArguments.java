@@ -7,7 +7,6 @@ import com.sequenceiq.mock.swagger.model.ApiServiceRef;
 import com.sequenceiq.mock.swagger.model.ReplicationStrategy;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.validation.annotation.Validated;
@@ -19,7 +18,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "Replication arguments for HDFS.")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
@@ -47,13 +46,13 @@ public class ApiHdfsReplicationArguments   {
   private String sourceUser = null;
 
   @JsonProperty("numMaps")
-  private BigDecimal numMaps = null;
+  private Integer numMaps = null;
 
   @JsonProperty("dryRun")
   private Boolean dryRun = null;
 
   @JsonProperty("bandwidthPerMap")
-  private BigDecimal bandwidthPerMap = null;
+  private Integer bandwidthPerMap = null;
 
   @JsonProperty("abortOnError")
   private Boolean abortOnError = null;
@@ -239,7 +238,7 @@ public class ApiHdfsReplicationArguments   {
     this.sourceUser = sourceUser;
   }
 
-  public ApiHdfsReplicationArguments numMaps(BigDecimal numMaps) {
+  public ApiHdfsReplicationArguments numMaps(Integer numMaps) {
     this.numMaps = numMaps;
     return this;
   }
@@ -250,13 +249,12 @@ public class ApiHdfsReplicationArguments   {
   **/
   @ApiModelProperty(value = "The number of mappers to use for the mapreduce replication job.")
 
-  @Valid
 
-  public BigDecimal getNumMaps() {
+  public Integer getNumMaps() {
     return numMaps;
   }
 
-  public void setNumMaps(BigDecimal numMaps) {
+  public void setNumMaps(Integer numMaps) {
     this.numMaps = numMaps;
   }
 
@@ -280,7 +278,7 @@ public class ApiHdfsReplicationArguments   {
     this.dryRun = dryRun;
   }
 
-  public ApiHdfsReplicationArguments bandwidthPerMap(BigDecimal bandwidthPerMap) {
+  public ApiHdfsReplicationArguments bandwidthPerMap(Integer bandwidthPerMap) {
     this.bandwidthPerMap = bandwidthPerMap;
     return this;
   }
@@ -291,13 +289,12 @@ public class ApiHdfsReplicationArguments   {
   **/
   @ApiModelProperty(value = "The maximum bandwidth (in MB) per mapper in the mapreduce replication job.")
 
-  @Valid
 
-  public BigDecimal getBandwidthPerMap() {
+  public Integer getBandwidthPerMap() {
     return bandwidthPerMap;
   }
 
-  public void setBandwidthPerMap(BigDecimal bandwidthPerMap) {
+  public void setBandwidthPerMap(Integer bandwidthPerMap) {
     this.bandwidthPerMap = bandwidthPerMap;
   }
 
@@ -539,7 +536,7 @@ public class ApiHdfsReplicationArguments   {
    * Specify regular expression strings to match full paths of files and directories matching source paths and exclude them from the replication. Optional. Available since V11.
    * @return exclusionFilters
   **/
-  @ApiModelProperty(example = "\"null\"", value = "Specify regular expression strings to match full paths of files and directories matching source paths and exclude them from the replication. Optional. Available since V11.")
+  @ApiModelProperty(value = "Specify regular expression strings to match full paths of files and directories matching source paths and exclude them from the replication. Optional. Available since V11.")
 
 
   public List<String> getExclusionFilters() {

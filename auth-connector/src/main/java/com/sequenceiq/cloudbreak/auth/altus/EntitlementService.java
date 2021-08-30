@@ -30,6 +30,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_S
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION_AZURE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION_GCP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION_ON_VM;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CM_BULK_HOSTS_REMOVAL;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CM_DISABLE_AUTO_BUNDLE_COLLECTION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CM_HA;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CONCLUSION_CHECKER_SEND_USER_EVENT;
@@ -391,6 +392,10 @@ public class EntitlementService {
 
     public boolean isUnboundEliminationSupported(String accountId) {
         return isEntitlementRegistered(accountId, CDP_UNBOUND_ELIMINATION);
+    }
+
+    public boolean bulkHostsRemovalFromCMSupported(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_CM_BULK_HOSTS_REMOVAL);
     }
 
     public boolean isOjdbcTokenDh(String accountId) {

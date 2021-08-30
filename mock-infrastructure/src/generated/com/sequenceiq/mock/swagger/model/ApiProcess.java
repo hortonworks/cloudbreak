@@ -16,7 +16,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "A process represents a unix process to be managed by the Cloudera Manager agents. A process can be a daemon, e.g. if it is associated with a running role. It can also be a one-off process which is expected to start, run and finish.")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
@@ -43,7 +43,7 @@ public class ApiProcess   {
    * List of config files supplied to the process.
    * @return configFiles
   **/
-  @ApiModelProperty(example = "\"null\"", value = "List of config files supplied to the process.")
+  @ApiModelProperty(value = "List of config files supplied to the process.")
 
 
   public List<String> getConfigFiles() {

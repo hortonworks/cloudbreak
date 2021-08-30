@@ -8,7 +8,6 @@ import com.sequenceiq.mock.swagger.model.ApiHdfsSnapshotPolicyArguments;
 import com.sequenceiq.mock.swagger.model.ApiSnapshotCommand;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.validation.annotation.Validated;
@@ -20,7 +19,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "A snapshot policy. <p/> Snapshot policies have service specific arguments. This object has methods to retrieve arguments for all supported types of snapshots, but only one argument type is allowed to be set; the backend will check that the provided argument matches the type of the service with which the snapshot policy is associated.")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
@@ -33,38 +32,38 @@ public class ApiSnapshotPolicy   {
   private String description = null;
 
   @JsonProperty("hourlySnapshots")
-  private BigDecimal hourlySnapshots = null;
+  private Integer hourlySnapshots = null;
 
   @JsonProperty("dailySnapshots")
-  private BigDecimal dailySnapshots = null;
+  private Integer dailySnapshots = null;
 
   @JsonProperty("weeklySnapshots")
-  private BigDecimal weeklySnapshots = null;
+  private Integer weeklySnapshots = null;
 
   @JsonProperty("monthlySnapshots")
-  private BigDecimal monthlySnapshots = null;
+  private Integer monthlySnapshots = null;
 
   @JsonProperty("yearlySnapshots")
-  private BigDecimal yearlySnapshots = null;
+  private Integer yearlySnapshots = null;
 
   @JsonProperty("minuteOfHour")
-  private BigDecimal minuteOfHour = null;
+  private Integer minuteOfHour = null;
 
   @JsonProperty("hoursForHourlySnapshots")
   @Valid
-  private List<BigDecimal> hoursForHourlySnapshots = null;
+  private List<Integer> hoursForHourlySnapshots = null;
 
   @JsonProperty("hourOfDay")
-  private BigDecimal hourOfDay = null;
+  private Integer hourOfDay = null;
 
   @JsonProperty("dayOfWeek")
-  private BigDecimal dayOfWeek = null;
+  private Integer dayOfWeek = null;
 
   @JsonProperty("dayOfMonth")
-  private BigDecimal dayOfMonth = null;
+  private Integer dayOfMonth = null;
 
   @JsonProperty("monthOfYear")
-  private BigDecimal monthOfYear = null;
+  private Integer monthOfYear = null;
 
   @JsonProperty("alertOnStart")
   private Boolean alertOnStart = null;
@@ -133,112 +132,107 @@ public class ApiSnapshotPolicy   {
     this.description = description;
   }
 
-  public ApiSnapshotPolicy hourlySnapshots(BigDecimal hourlySnapshots) {
+  public ApiSnapshotPolicy hourlySnapshots(Integer hourlySnapshots) {
     this.hourlySnapshots = hourlySnapshots;
     return this;
   }
 
   /**
-   * Number of hourly snapshots to be retained.
+   * Number of hourly snapshots to be retained. Defaults to 0
    * @return hourlySnapshots
   **/
-  @ApiModelProperty(value = "Number of hourly snapshots to be retained.")
+  @ApiModelProperty(value = "Number of hourly snapshots to be retained. Defaults to 0")
 
-  @Valid
 
-  public BigDecimal getHourlySnapshots() {
+  public Integer getHourlySnapshots() {
     return hourlySnapshots;
   }
 
-  public void setHourlySnapshots(BigDecimal hourlySnapshots) {
+  public void setHourlySnapshots(Integer hourlySnapshots) {
     this.hourlySnapshots = hourlySnapshots;
   }
 
-  public ApiSnapshotPolicy dailySnapshots(BigDecimal dailySnapshots) {
+  public ApiSnapshotPolicy dailySnapshots(Integer dailySnapshots) {
     this.dailySnapshots = dailySnapshots;
     return this;
   }
 
   /**
-   * Number of daily snapshots to be retained.
+   * Number of daily snapshots to be retained. Defaults to 0
    * @return dailySnapshots
   **/
-  @ApiModelProperty(value = "Number of daily snapshots to be retained.")
+  @ApiModelProperty(value = "Number of daily snapshots to be retained. Defaults to 0")
 
-  @Valid
 
-  public BigDecimal getDailySnapshots() {
+  public Integer getDailySnapshots() {
     return dailySnapshots;
   }
 
-  public void setDailySnapshots(BigDecimal dailySnapshots) {
+  public void setDailySnapshots(Integer dailySnapshots) {
     this.dailySnapshots = dailySnapshots;
   }
 
-  public ApiSnapshotPolicy weeklySnapshots(BigDecimal weeklySnapshots) {
+  public ApiSnapshotPolicy weeklySnapshots(Integer weeklySnapshots) {
     this.weeklySnapshots = weeklySnapshots;
     return this;
   }
 
   /**
-   * Number of weekly snapshots to be retained.
+   * Number of weekly snapshots to be retained. Defaults to 0
    * @return weeklySnapshots
   **/
-  @ApiModelProperty(value = "Number of weekly snapshots to be retained.")
+  @ApiModelProperty(value = "Number of weekly snapshots to be retained. Defaults to 0")
 
-  @Valid
 
-  public BigDecimal getWeeklySnapshots() {
+  public Integer getWeeklySnapshots() {
     return weeklySnapshots;
   }
 
-  public void setWeeklySnapshots(BigDecimal weeklySnapshots) {
+  public void setWeeklySnapshots(Integer weeklySnapshots) {
     this.weeklySnapshots = weeklySnapshots;
   }
 
-  public ApiSnapshotPolicy monthlySnapshots(BigDecimal monthlySnapshots) {
+  public ApiSnapshotPolicy monthlySnapshots(Integer monthlySnapshots) {
     this.monthlySnapshots = monthlySnapshots;
     return this;
   }
 
   /**
-   * Number of monthly snapshots to be retained.
+   * Number of monthly snapshots to be retained. Defaults to 0
    * @return monthlySnapshots
   **/
-  @ApiModelProperty(value = "Number of monthly snapshots to be retained.")
+  @ApiModelProperty(value = "Number of monthly snapshots to be retained. Defaults to 0")
 
-  @Valid
 
-  public BigDecimal getMonthlySnapshots() {
+  public Integer getMonthlySnapshots() {
     return monthlySnapshots;
   }
 
-  public void setMonthlySnapshots(BigDecimal monthlySnapshots) {
+  public void setMonthlySnapshots(Integer monthlySnapshots) {
     this.monthlySnapshots = monthlySnapshots;
   }
 
-  public ApiSnapshotPolicy yearlySnapshots(BigDecimal yearlySnapshots) {
+  public ApiSnapshotPolicy yearlySnapshots(Integer yearlySnapshots) {
     this.yearlySnapshots = yearlySnapshots;
     return this;
   }
 
   /**
-   * Number of yearly snapshots to be retained.
+   * Number of yearly snapshots to be retained. Defaults to 0
    * @return yearlySnapshots
   **/
-  @ApiModelProperty(value = "Number of yearly snapshots to be retained.")
+  @ApiModelProperty(value = "Number of yearly snapshots to be retained. Defaults to 0")
 
-  @Valid
 
-  public BigDecimal getYearlySnapshots() {
+  public Integer getYearlySnapshots() {
     return yearlySnapshots;
   }
 
-  public void setYearlySnapshots(BigDecimal yearlySnapshots) {
+  public void setYearlySnapshots(Integer yearlySnapshots) {
     this.yearlySnapshots = yearlySnapshots;
   }
 
-  public ApiSnapshotPolicy minuteOfHour(BigDecimal minuteOfHour) {
+  public ApiSnapshotPolicy minuteOfHour(Integer minuteOfHour) {
     this.minuteOfHour = minuteOfHour;
     return this;
   }
@@ -249,22 +243,21 @@ public class ApiSnapshotPolicy   {
   **/
   @ApiModelProperty(value = "Minute in the hour that hourly, daily, weekly, monthly and yearly snapshots should be created. Valid values are 0 to 59. Default value is 0.")
 
-  @Valid
 
-  public BigDecimal getMinuteOfHour() {
+  public Integer getMinuteOfHour() {
     return minuteOfHour;
   }
 
-  public void setMinuteOfHour(BigDecimal minuteOfHour) {
+  public void setMinuteOfHour(Integer minuteOfHour) {
     this.minuteOfHour = minuteOfHour;
   }
 
-  public ApiSnapshotPolicy hoursForHourlySnapshots(List<BigDecimal> hoursForHourlySnapshots) {
+  public ApiSnapshotPolicy hoursForHourlySnapshots(List<Integer> hoursForHourlySnapshots) {
     this.hoursForHourlySnapshots = hoursForHourlySnapshots;
     return this;
   }
 
-  public ApiSnapshotPolicy addHoursForHourlySnapshotsItem(BigDecimal hoursForHourlySnapshotsItem) {
+  public ApiSnapshotPolicy addHoursForHourlySnapshotsItem(Integer hoursForHourlySnapshotsItem) {
     if (this.hoursForHourlySnapshots == null) {
       this.hoursForHourlySnapshots = new ArrayList<>();
     }
@@ -278,17 +271,16 @@ public class ApiSnapshotPolicy   {
   **/
   @ApiModelProperty(value = "Hours of the day that hourly snapshots should be created. Valid values are 0 to 23. If this list is null or empty, then hourly snapshots are created for every hour.")
 
-  @Valid
 
-  public List<BigDecimal> getHoursForHourlySnapshots() {
+  public List<Integer> getHoursForHourlySnapshots() {
     return hoursForHourlySnapshots;
   }
 
-  public void setHoursForHourlySnapshots(List<BigDecimal> hoursForHourlySnapshots) {
+  public void setHoursForHourlySnapshots(List<Integer> hoursForHourlySnapshots) {
     this.hoursForHourlySnapshots = hoursForHourlySnapshots;
   }
 
-  public ApiSnapshotPolicy hourOfDay(BigDecimal hourOfDay) {
+  public ApiSnapshotPolicy hourOfDay(Integer hourOfDay) {
     this.hourOfDay = hourOfDay;
     return this;
   }
@@ -299,17 +291,16 @@ public class ApiSnapshotPolicy   {
   **/
   @ApiModelProperty(value = "Hour in the day that daily, weekly, monthly and yearly snapshots should be created. Valid values are 0 to 23. Default value is 0.")
 
-  @Valid
 
-  public BigDecimal getHourOfDay() {
+  public Integer getHourOfDay() {
     return hourOfDay;
   }
 
-  public void setHourOfDay(BigDecimal hourOfDay) {
+  public void setHourOfDay(Integer hourOfDay) {
     this.hourOfDay = hourOfDay;
   }
 
-  public ApiSnapshotPolicy dayOfWeek(BigDecimal dayOfWeek) {
+  public ApiSnapshotPolicy dayOfWeek(Integer dayOfWeek) {
     this.dayOfWeek = dayOfWeek;
     return this;
   }
@@ -320,17 +311,16 @@ public class ApiSnapshotPolicy   {
   **/
   @ApiModelProperty(value = "Day of the week that weekly snapshots should be created. Valid values are 1 to 7, 1 representing Sunday. Default value is 1.")
 
-  @Valid
 
-  public BigDecimal getDayOfWeek() {
+  public Integer getDayOfWeek() {
     return dayOfWeek;
   }
 
-  public void setDayOfWeek(BigDecimal dayOfWeek) {
+  public void setDayOfWeek(Integer dayOfWeek) {
     this.dayOfWeek = dayOfWeek;
   }
 
-  public ApiSnapshotPolicy dayOfMonth(BigDecimal dayOfMonth) {
+  public ApiSnapshotPolicy dayOfMonth(Integer dayOfMonth) {
     this.dayOfMonth = dayOfMonth;
     return this;
   }
@@ -341,17 +331,16 @@ public class ApiSnapshotPolicy   {
   **/
   @ApiModelProperty(value = "Day of the month that monthly and yearly snapshots should be created. Values from 1 to 31 are allowed. Additionally 0 to -30 can be used to specify offsets from the last day of the month. Default value is 1. <p/> If this value is invalid for any month for which snapshots are required, the backend will throw an exception.")
 
-  @Valid
 
-  public BigDecimal getDayOfMonth() {
+  public Integer getDayOfMonth() {
     return dayOfMonth;
   }
 
-  public void setDayOfMonth(BigDecimal dayOfMonth) {
+  public void setDayOfMonth(Integer dayOfMonth) {
     this.dayOfMonth = dayOfMonth;
   }
 
-  public ApiSnapshotPolicy monthOfYear(BigDecimal monthOfYear) {
+  public ApiSnapshotPolicy monthOfYear(Integer monthOfYear) {
     this.monthOfYear = monthOfYear;
     return this;
   }
@@ -362,13 +351,12 @@ public class ApiSnapshotPolicy   {
   **/
   @ApiModelProperty(value = "Month of the year that yearly snapshots should be created. Valid values are 1 to 12, 1 representing January. Default value is 1.")
 
-  @Valid
 
-  public BigDecimal getMonthOfYear() {
+  public Integer getMonthOfYear() {
     return monthOfYear;
   }
 
-  public void setMonthOfYear(BigDecimal monthOfYear) {
+  public void setMonthOfYear(Integer monthOfYear) {
     this.monthOfYear = monthOfYear;
   }
 
@@ -378,10 +366,10 @@ public class ApiSnapshotPolicy   {
   }
 
   /**
-   * Whether to alert on start of snapshot creation/deletion activity.
+   * Whether to alert on start of snapshot creation/deletion activity. Defaults to false
    * @return alertOnStart
   **/
-  @ApiModelProperty(value = "Whether to alert on start of snapshot creation/deletion activity.")
+  @ApiModelProperty(value = "Whether to alert on start of snapshot creation/deletion activity. Defaults to false")
 
 
   public Boolean isAlertOnStart() {
@@ -398,10 +386,10 @@ public class ApiSnapshotPolicy   {
   }
 
   /**
-   * Whether to alert on successful completion of snapshot creation/deletion activity.
+   * Whether to alert on successful completion of snapshot creation/deletion activity. Defaults to false.
    * @return alertOnSuccess
   **/
-  @ApiModelProperty(value = "Whether to alert on successful completion of snapshot creation/deletion activity.")
+  @ApiModelProperty(value = "Whether to alert on successful completion of snapshot creation/deletion activity. Defaults to false.")
 
 
   public Boolean isAlertOnSuccess() {
@@ -418,10 +406,10 @@ public class ApiSnapshotPolicy   {
   }
 
   /**
-   * Whether to alert on failure of snapshot creation/deletion activity.
+   * Whether to alert on failure of snapshot creation/deletion activity. Defaults to false.
    * @return alertOnFail
   **/
-  @ApiModelProperty(value = "Whether to alert on failure of snapshot creation/deletion activity.")
+  @ApiModelProperty(value = "Whether to alert on failure of snapshot creation/deletion activity. Defaults to false.")
 
 
   public Boolean isAlertOnFail() {
@@ -438,10 +426,10 @@ public class ApiSnapshotPolicy   {
   }
 
   /**
-   * Whether to alert on abort of snapshot creation/deletion activity.
+   * Whether to alert on abort of snapshot creation/deletion activity. Defaults to false.
    * @return alertOnAbort
   **/
-  @ApiModelProperty(value = "Whether to alert on abort of snapshot creation/deletion activity.")
+  @ApiModelProperty(value = "Whether to alert on abort of snapshot creation/deletion activity. Defaults to false.")
 
 
   public Boolean isAlertOnAbort() {

@@ -21,6 +21,7 @@ import com.sequenceiq.mock.swagger.model.ApiCdhUpgradeArgs;
 import com.sequenceiq.mock.swagger.model.ApiCluster;
 import com.sequenceiq.mock.swagger.model.ApiCommand;
 import com.sequenceiq.mock.swagger.model.ApiCommandList;
+import com.sequenceiq.mock.swagger.model.ApiHostList;
 import com.sequenceiq.mock.swagger.model.ApiHostRef;
 import com.sequenceiq.mock.swagger.model.ApiHostRefList;
 import com.sequenceiq.mock.swagger.model.ApiRestartClusterArgs;
@@ -47,8 +48,12 @@ public class ClusterResourceOperation {
         return responseCreatorComponent.exec(something);
     }
 
-    public ResponseEntity<ApiHostRefList> listHosts(String mockUuid, String clusterName, @Valid String configName, @Valid String configValue) {
+    public ResponseEntity<ApiHostRefList> listRefHosts(String mockUuid, String clusterName, @Valid String configName, @Valid String configValue) {
         return responseCreatorComponent.exec(dataProviderService.getHostRefList(mockUuid));
+    }
+
+    public ResponseEntity<ApiHostList> listHosts(String mockUuid, String clusterName, @Valid String configName, @Valid String configValue) {
+        return responseCreatorComponent.exec(dataProviderService.getHostList(mockUuid));
     }
 
     public ResponseEntity<ApiCluster> readCluster(String mockUuid, String clusterName) {

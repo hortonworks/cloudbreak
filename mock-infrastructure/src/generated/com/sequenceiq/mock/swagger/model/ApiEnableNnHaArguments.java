@@ -17,7 +17,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "Arguments used for Enable NameNode High Availability command.")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
@@ -141,7 +141,7 @@ public class ApiEnableNnHaArguments   {
    * List of directories for the new Standby NameNode. If not provided then it will use same dirs as Active NameNode.
    * @return standbyNameDirList
   **/
-  @ApiModelProperty(example = "\"null\"", value = "List of directories for the new Standby NameNode. If not provided then it will use same dirs as Active NameNode.")
+  @ApiModelProperty(value = "List of directories for the new Standby NameNode. If not provided then it will use same dirs as Active NameNode.")
 
 
   public List<String> getStandbyNameDirList() {

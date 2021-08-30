@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.validation.annotation.Validated;
@@ -17,14 +16,14 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "Arguments used for the collectDiagnosticData command.")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
 
 public class ApiCollectDiagnosticDataArguments   {
   @JsonProperty("bundleSizeBytes")
-  private BigDecimal bundleSizeBytes = null;
+  private Integer bundleSizeBytes = null;
 
   @JsonProperty("startTime")
   private String startTime = null;
@@ -51,24 +50,26 @@ public class ApiCollectDiagnosticDataArguments   {
   @Valid
   private List<String> roles = null;
 
-  public ApiCollectDiagnosticDataArguments bundleSizeBytes(BigDecimal bundleSizeBytes) {
+  @JsonProperty("phoneHome")
+  private Boolean phoneHome = null;
+
+  public ApiCollectDiagnosticDataArguments bundleSizeBytes(Integer bundleSizeBytes) {
     this.bundleSizeBytes = bundleSizeBytes;
     return this;
   }
 
   /**
-   * The maximum approximate bundle size of the output file
+   * The maximum approximate bundle size of the output file. Defaults to 0.
    * @return bundleSizeBytes
   **/
-  @ApiModelProperty(value = "The maximum approximate bundle size of the output file")
+  @ApiModelProperty(value = "The maximum approximate bundle size of the output file. Defaults to 0.")
 
-  @Valid
 
-  public BigDecimal getBundleSizeBytes() {
+  public Integer getBundleSizeBytes() {
     return bundleSizeBytes;
   }
 
-  public void setBundleSizeBytes(BigDecimal bundleSizeBytes) {
+  public void setBundleSizeBytes(Integer bundleSizeBytes) {
     this.bundleSizeBytes = bundleSizeBytes;
   }
 
@@ -229,7 +230,7 @@ public class ApiCollectDiagnosticDataArguments   {
    * List of roles for which to get logs and metrics.  If set, this restricts the roles for log and metrics collection to the list specified.  If empty, the default is to get logs for all roles (in the selected cluster, if one is selected).  Introduced in API v10 of the API.
    * @return roles
   **/
-  @ApiModelProperty(example = "\"null\"", value = "List of roles for which to get logs and metrics.  If set, this restricts the roles for log and metrics collection to the list specified.  If empty, the default is to get logs for all roles (in the selected cluster, if one is selected).  Introduced in API v10 of the API.")
+  @ApiModelProperty(value = "List of roles for which to get logs and metrics.  If set, this restricts the roles for log and metrics collection to the list specified.  If empty, the default is to get logs for all roles (in the selected cluster, if one is selected).  Introduced in API v10 of the API.")
 
 
   public List<String> getRoles() {
@@ -238,6 +239,26 @@ public class ApiCollectDiagnosticDataArguments   {
 
   public void setRoles(List<String> roles) {
     this.roles = roles;
+  }
+
+  public ApiCollectDiagnosticDataArguments phoneHome(Boolean phoneHome) {
+    this.phoneHome = phoneHome;
+    return this;
+  }
+
+  /**
+   * Flag to enable or disable diagnostic bundle upload to EDH.  If not set, the PHONE_HOME setting decides whether the bundle will get uploaded or not.
+   * @return phoneHome
+  **/
+  @ApiModelProperty(value = "Flag to enable or disable diagnostic bundle upload to EDH.  If not set, the PHONE_HOME setting decides whether the bundle will get uploaded or not.")
+
+
+  public Boolean isPhoneHome() {
+    return phoneHome;
+  }
+
+  public void setPhoneHome(Boolean phoneHome) {
+    this.phoneHome = phoneHome;
   }
 
 
@@ -258,12 +279,13 @@ public class ApiCollectDiagnosticDataArguments   {
         Objects.equals(this.comments, apiCollectDiagnosticDataArguments.comments) &&
         Objects.equals(this.clusterName, apiCollectDiagnosticDataArguments.clusterName) &&
         Objects.equals(this.enableMonitorMetricsCollection, apiCollectDiagnosticDataArguments.enableMonitorMetricsCollection) &&
-        Objects.equals(this.roles, apiCollectDiagnosticDataArguments.roles);
+        Objects.equals(this.roles, apiCollectDiagnosticDataArguments.roles) &&
+        Objects.equals(this.phoneHome, apiCollectDiagnosticDataArguments.phoneHome);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(bundleSizeBytes, startTime, endTime, includeInfoLog, ticketNumber, comments, clusterName, enableMonitorMetricsCollection, roles);
+    return Objects.hash(bundleSizeBytes, startTime, endTime, includeInfoLog, ticketNumber, comments, clusterName, enableMonitorMetricsCollection, roles, phoneHome);
   }
 
   @Override
@@ -280,6 +302,7 @@ public class ApiCollectDiagnosticDataArguments   {
     sb.append("    clusterName: ").append(toIndentedString(clusterName)).append("\n");
     sb.append("    enableMonitorMetricsCollection: ").append(toIndentedString(enableMonitorMetricsCollection)).append("\n");
     sb.append("    roles: ").append(toIndentedString(roles)).append("\n");
+    sb.append("    phoneHome: ").append(toIndentedString(phoneHome)).append("\n");
     sb.append("}");
     return sb.toString();
   }

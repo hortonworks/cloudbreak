@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.math.BigDecimal;
 import org.springframework.validation.annotation.Validated;
 import javax.validation.Valid;
 import javax.validation.constraints.*;
@@ -15,19 +14,19 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "Arguments used to configure a cluster for Kerberos.")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 
 
 
 public class ApiConfigureForKerberosArguments   {
   @JsonProperty("datanodeTransceiverPort")
-  private BigDecimal datanodeTransceiverPort = null;
+  private Integer datanodeTransceiverPort = null;
 
   @JsonProperty("datanodeWebPort")
-  private BigDecimal datanodeWebPort = null;
+  private Integer datanodeWebPort = null;
 
-  public ApiConfigureForKerberosArguments datanodeTransceiverPort(BigDecimal datanodeTransceiverPort) {
+  public ApiConfigureForKerberosArguments datanodeTransceiverPort(Integer datanodeTransceiverPort) {
     this.datanodeTransceiverPort = datanodeTransceiverPort;
     return this;
   }
@@ -38,17 +37,16 @@ public class ApiConfigureForKerberosArguments   {
   **/
   @ApiModelProperty(value = "The HDFS DataNode transceiver port to use. This will be applied to all DataNode role configuration groups. If not specified, this will default to 1004.")
 
-  @Valid
 
-  public BigDecimal getDatanodeTransceiverPort() {
+  public Integer getDatanodeTransceiverPort() {
     return datanodeTransceiverPort;
   }
 
-  public void setDatanodeTransceiverPort(BigDecimal datanodeTransceiverPort) {
+  public void setDatanodeTransceiverPort(Integer datanodeTransceiverPort) {
     this.datanodeTransceiverPort = datanodeTransceiverPort;
   }
 
-  public ApiConfigureForKerberosArguments datanodeWebPort(BigDecimal datanodeWebPort) {
+  public ApiConfigureForKerberosArguments datanodeWebPort(Integer datanodeWebPort) {
     this.datanodeWebPort = datanodeWebPort;
     return this;
   }
@@ -59,13 +57,12 @@ public class ApiConfigureForKerberosArguments   {
   **/
   @ApiModelProperty(value = "The HDFS DataNode web port to use.  This will be applied to all DataNode role configuration groups. If not specified, this will default to 1006.")
 
-  @Valid
 
-  public BigDecimal getDatanodeWebPort() {
+  public Integer getDatanodeWebPort() {
     return datanodeWebPort;
   }
 
-  public void setDatanodeWebPort(BigDecimal datanodeWebPort) {
+  public void setDatanodeWebPort(Integer datanodeWebPort) {
     this.datanodeWebPort = datanodeWebPort;
   }
 
