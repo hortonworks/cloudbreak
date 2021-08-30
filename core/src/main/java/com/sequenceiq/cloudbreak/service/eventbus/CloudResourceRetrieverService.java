@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.service.eventbus;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -53,5 +55,13 @@ public class CloudResourceRetrieverService implements ResourceRetriever {
                 optionalResource.isPresent());
         return optionalResource
                 .map(resource -> cloudResourceConverter.convert(resource));
+    }
+
+    @Override
+    public List<CloudResource> findAllByStatusAndTypeAndStackAndInstanceGroup(CommonStatus status, ResourceType resourceType, Long stackId,
+            String instanceGroup) {
+        List<Resource> resources = resourceService.findAllByResourceStatusAndResourceTypeAndStackIdAndInstanceGroup(status, resourceType, stackId,
+                instanceGroup);
+        return resources.stream().map(resource -> cloudResourceConverter.convert(resource)).collect(Collectors.toList());
     }
 }
