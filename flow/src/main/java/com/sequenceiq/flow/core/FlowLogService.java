@@ -40,6 +40,8 @@ public interface FlowLogService {
 
     Optional<FlowLog> getLastFlowLog(String flowId);
 
+    List<FlowLog> findAllByFlowIdOrderByCreatedDesc(String flowId);
+
     void cancelTooOldTerminationFlowForResource(Long resourceId, long olderThan);
 
     Set<String> findAllRunningNonTerminationFlowIdsByStackId(Long stackId);

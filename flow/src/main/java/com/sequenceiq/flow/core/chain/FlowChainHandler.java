@@ -1,5 +1,7 @@
 package com.sequenceiq.flow.core.chain;
 
+import static com.sequenceiq.cloudbreak.service.flowlog.FlowLogUtil.tryDeserializeTriggerEvent;
+
 import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
@@ -8,18 +10,19 @@ import java.util.UUID;
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.cedarsoftware.util.io.JsonReader;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.flow.api.model.operation.OperationType;
-import com.sequenceiq.flow.core.Flow2Handler;
 import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.core.FlowLogService;
+import com.sequenceiq.flow.core.cache.FlowStatCache;
 import com.sequenceiq.flow.core.chain.config.FlowChainOperationTypeConfig;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
-import com.sequenceiq.flow.core.cache.FlowStatCache;
 import com.sequenceiq.flow.domain.FlowChainLog;
 
 import reactor.bus.Event;
@@ -27,6 +30,8 @@ import reactor.fn.Consumer;
 
 @Component
 public class FlowChainHandler implements Consumer<Event<? extends Payload>> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(FlowChainHandler.class);
 
     @Resource
     private Map<String, FlowEventChainFactory<Payload>> flowChainConfigMap;
@@ -52,6 +57,7 @@ public class FlowChainHandler implements Consumer<Event<? extends Payload>> {
         String flowOperationType = flowEventChainFactory.getFlowOperationType().name();
         String flowChainId = UUID.randomUUID().toString();
         flowChains.putFlowChain(flowChainId, parentFlowChainId, flowEventChainFactory.createFlowTriggerEventQueue(event.getData()));
+        flowChains.addNotSavedFlowChainLog(flowChainId);
         flowStatCache.putByFlowChainId(flowChainId, event.getData().getResourceId(), flowOperationType, false);
         flowChains.triggerNextFlow(flowChainId, flowTriggerUserCrn, Map.of(), flowOperationType);
     }
@@ -61,7 +67,11 @@ public class FlowChainHandler implements Consumer<Event<? extends Payload>> {
         if (chainLog.isPresent()) {
             String flowChainType = chainLog.get().getFlowChainType();
             Queue<Selectable> queue = (Queue<Selectable>) JsonReader.jsonToJava(chainLog.get().getChain());
-            FlowTriggerEventQueue chain = new FlowTriggerEventQueue(flowChainType, queue);
+            Payload triggerEvent = tryDeserializeTriggerEvent(chainLog.get());
+            FlowTriggerEventQueue chain = new FlowTriggerEventQueue(flowChainType, triggerEvent, queue);
+            if (chainLog.get().getParentFlowChainId() != null) {
+                chain.setParentFlowChainId(chainLog.get().getParentFlowChainId());
+            }
             flowChains.putFlowChain(flowChainId, chainLog.get().getParentFlowChainId(), chain);
             Selectable selectable = queue.peek();
             if (selectable != null) {
@@ -75,7 +85,7 @@ public class FlowChainHandler implements Consumer<Event<? extends Payload>> {
     }
 
     private String getFlowChainId(Event<?> event) {
-        return event.getHeaders().get(Flow2Handler.FLOW_CHAIN_ID);
+        return event.getHeaders().get(FlowConstants.FLOW_CHAIN_ID);
     }
 
     private String getFlowTriggerUserCrn(Event<?> event) {

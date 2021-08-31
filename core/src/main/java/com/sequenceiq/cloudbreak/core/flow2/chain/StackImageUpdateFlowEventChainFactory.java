@@ -30,6 +30,6 @@ public class StackImageUpdateFlowEventChainFactory implements FlowEventChainFact
         flowEventChain.add(new StackEvent(CLUSTER_SYNC_EVENT.event(), event.getResourceId()));
         flowEventChain.add(new StackImageUpdateTriggerEvent(StackImageUpdateEvent.STACK_IMAGE_UPDATE_EVENT.event(), event.getResourceId(), event.getNewImageId(),
                 event.getImageCatalogName(), event.getImageCatalogUrl()));
-        return new FlowTriggerEventQueue(getName(), flowEventChain);
+        return new FlowTriggerEventQueue(getName(), event, flowEventChain);
     }
 }

@@ -45,6 +45,9 @@ dependencies {
 
   testCompile group: 'org.mockito',                       name: 'mockito-core',                   version: mockitoVersion
   testCompile group: 'org.springframework.boot',          name: 'spring-boot-starter-test',       version: springBootVersion
+  testCompile group: 'org.awaitility',                    name: 'awaitility',                     version: awaitilityVersion
+  testCompile group: 'org.testcontainers',                name: 'postgresql',                     version: testContainersVersion
+  testCompile group: 'org.testcontainers',                name: 'junit-jupiter',                  version: testContainersVersion
   testCompile project(path: ':authorization-common', configuration: 'tests')
   testCompile project(path: ':common', configuration: 'tests')
 }
@@ -58,6 +61,14 @@ task testJar(type: Jar, dependsOn: testClasses) {
 
 configurations {
   tests
+}
+
+test {
+  if (project.hasProperty("componentTest")) {
+    include "com/sequenceiq/flow/component/**"
+  } else {
+    exclude "com/sequenceiq/flow/component/**"
+  }
 }
 
 artifacts {

@@ -65,7 +65,7 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
             Map<String, List<String>> nodeMap = getReplaceableInstancesByHostgroup(event);
             flowEventChain.add(new ClusterRepairTriggerEvent(FlowChainTriggers.CLUSTER_REPAIR_TRIGGER_EVENT, event.getResourceId(), nodeMap, false, true));
         }
-        return new FlowTriggerEventQueue(getName(), flowEventChain);
+        return new FlowTriggerEventQueue(getName(), event, flowEventChain);
     }
 
     private Optional<ClusterUpgradeValidationTriggerEvent> createUpgradeValidationEvent(DistroXUpgradeTriggerEvent event) {

@@ -42,6 +42,6 @@ public class EphemeralFlowEventChainFactory implements FlowEventChainFactory<Eph
                 LOGGER.debug("Cannot trigger ephemeral cluster update for stack: " + stack.getName(), e);
             }
         }
-        return new FlowTriggerEventQueue(getName(), new ConcurrentLinkedDeque<>());
+        return new FlowTriggerEventQueue(getName(), event, new ConcurrentLinkedDeque<>());
     }
 }

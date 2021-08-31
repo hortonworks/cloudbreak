@@ -6,6 +6,7 @@ import static java.util.stream.Collectors.toList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.stream.Collectors;
@@ -60,6 +61,14 @@ public class FlowChainLogService {
                 .stream()
                 .sorted(comparing(FlowChainLog::getCreated))
                 .collect(toList());
+    }
+
+    public Optional<FlowChainLog> findRootInitFlowChainLog(String flowChainId) {
+        Optional<FlowChainLog> initFlowChainLog = repository.findFirstByFlowChainIdOrderByCreatedAsc(flowChainId);
+        while (initFlowChainLog.isPresent() && !Objects.isNull(initFlowChainLog.get().getParentFlowChainId())) {
+            initFlowChainLog = repository.findFirstByFlowChainIdOrderByCreatedAsc(initFlowChainLog.get().getParentFlowChainId());
+        }
+        return initFlowChainLog;
     }
 
     private FlowChainLog collectRootFlowChain(FlowChainLog flowChain) {

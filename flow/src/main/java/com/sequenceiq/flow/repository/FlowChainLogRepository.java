@@ -21,6 +21,8 @@ public interface FlowChainLogRepository extends CrudRepository<FlowChainLog, Lon
 
     Optional<FlowChainLog> findFirstByFlowChainIdOrderByCreatedDesc(String flowChainId);
 
+    Optional<FlowChainLog> findFirstByFlowChainIdOrderByCreatedAsc(String flowChainId);
+
     @Modifying
     @Query("DELETE FROM FlowChainLog fch "
             + "WHERE fch.flowChainId NOT IN ( SELECT DISTINCT fl.flowChainId FROM FlowLog fl )"

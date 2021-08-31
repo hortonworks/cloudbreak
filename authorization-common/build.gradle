@@ -31,7 +31,7 @@ dependencies {
     exclude group: 'org.hamcrest'
   }
   testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
-  testCompile group: 'org.awaitility',            name: 'awaitility',                     version: '3.1.6'
+  testCompile group: 'org.awaitility',            name: 'awaitility',                     version: awaitilityVersion
 
   implementation(group: 'uk.co.jemos.podam',             name: 'podam',                           version: '7.1.0.RELEASE') {
     exclude group: 'javax.annotation',                   module: 'jsr250-api'

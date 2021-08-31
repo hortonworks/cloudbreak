@@ -46,6 +46,6 @@ public class MultiHostgroupDownscaleFlowEventChainFactory implements FlowEventCh
             }
         }
         flowEventChain.add(new FlowChainFinalizePayload(getName(), event.getResourceId(), event.accepted()));
-        return new FlowTriggerEventQueue(getName(), flowEventChain);
+        return new FlowTriggerEventQueue(getName(), event, flowEventChain);
     }
 }

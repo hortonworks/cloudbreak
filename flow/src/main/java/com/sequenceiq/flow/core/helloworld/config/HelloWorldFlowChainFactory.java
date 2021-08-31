@@ -23,6 +23,6 @@ public class HelloWorldFlowChainFactory implements FlowEventChainFactory<BaseFlo
     public FlowTriggerEventQueue createFlowTriggerEventQueue(BaseFlowEvent event) {
         Queue<Selectable> flowEventChain = new ConcurrentLinkedDeque<>();
         flowEventChain.add(new BaseFlowEvent(HELLOWORLD_TRIGGER_EVENT.event(), event.getResourceId(), event.getResourceCrn(), event.accepted()));
-        return new FlowTriggerEventQueue(getName(), flowEventChain);
+        return new FlowTriggerEventQueue(getName(), event, flowEventChain);
     }
 }

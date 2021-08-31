@@ -71,6 +71,7 @@ public class FlowLogDBService implements FlowLogService {
     @Inject
     private ResourceIdProvider resourceIdProvider;
 
+    @Override
     public FlowLog save(FlowParameters flowParameters, String flowChanId, String key, Payload payload, Map<Object, Object> variables, Class<?> flowType,
             FlowState currentState) {
         String payloadAsString = getSerializedString(payload);
@@ -100,14 +101,17 @@ public class FlowLogDBService implements FlowLogService {
         return flowLogRepository.saveAll(flowLogs);
     }
 
+    @Override
     public FlowLog close(Long stackId, String flowId) throws TransactionExecutionException {
         return finalize(stackId, flowId, FlowConstants.FINISHED_STATE);
     }
 
+    @Override
     public FlowLog cancel(Long stackId, String flowId) throws TransactionExecutionException {
         return finalize(stackId, flowId, FlowConstants.CANCELLED_STATE);
     }
 
+    @Override
     public FlowLog terminate(Long stackId, String flowId) throws TransactionExecutionException {
         return finalize(stackId, flowId, FlowConstants.TERMINATED_STATE);
     }
@@ -132,18 +136,25 @@ public class FlowLogDBService implements FlowLogService {
         });
     }
 
+    @Override
     public void saveChain(String flowChainId, String parentFlowChainId, FlowTriggerEventQueue chain, String flowTriggerUserCrn) {
         String chainType = chain.getFlowChainName();
         String chainJson = JsonWriter.objectToJson(chain.getQueue());
-        FlowChainLog chainLog = new FlowChainLog(chainType, flowChainId, parentFlowChainId, chainJson, flowTriggerUserCrn);
+        String triggerEventJson = null;
+        if (chain.getTriggerEvent() != null) {
+            triggerEventJson = JsonWriter.objectToJson(chain.getTriggerEvent(), writeOptions);
+        }
+        FlowChainLog chainLog = new FlowChainLog(chainType, flowChainId, parentFlowChainId, chainJson, flowTriggerUserCrn, triggerEventJson);
         flowChainLogService.save(chainLog);
     }
 
+    @Override
     public void updateLastFlowLogStatus(FlowLog lastFlowLog, boolean failureEvent) {
         StateStatus stateStatus = failureEvent ? StateStatus.FAILED : StateStatus.SUCCESSFUL;
         flowLogRepository.updateLastLogStatusInFlow(lastFlowLog.getId(), stateStatus);
     }
 
+    @Override
     public void cancelTooOldTerminationFlowForResource(Long resourceId, long olderThan) {
         Set<FlowLogIdWithTypeAndTimestamp> allRunningFlowIdsByResourceId = flowLogRepository.findAllRunningFlowLogByResourceId(resourceId);
         allRunningFlowIdsByResourceId.stream()
@@ -181,6 +192,7 @@ public class FlowLogDBService implements FlowLogService {
                 .collect(Collectors.toSet());
     }
 
+    @Override
     public boolean isOtherNonTerminationFlowRunning(Long resourceId) {
         Set<String> flowIds = findAllRunningNonTerminationFlowIdsByResourceId(resourceId);
         return !flowIds.isEmpty();
@@ -213,6 +225,7 @@ public class FlowLogDBService implements FlowLogService {
                 });
     }
 
+    @Override
     public Optional<FlowLog> getLastFlowLog(String flowId) {
         return flowLogRepository.findFirstByFlowIdOrderByCreatedDesc(flowId);
     }
@@ -260,6 +273,7 @@ public class FlowLogDBService implements FlowLogService {
         return flowLogRepository.findAllByResourceIdOrderByCreatedDesc(id);
     }
 
+    @Override
     public List<FlowLog> findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(Long id) {
         return flowLogRepository.findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(id);
     }
@@ -269,6 +283,7 @@ public class FlowLogDBService implements FlowLogService {
         return flowLogRepository.purgeFinalizedFlowLogs();
     }
 
+    @Override
     public List<FlowLog> findAllByFlowIdOrderByCreatedDesc(String flowId) {
         return flowLogRepository.findAllByFlowIdOrderByCreatedDesc(flowId);
     }

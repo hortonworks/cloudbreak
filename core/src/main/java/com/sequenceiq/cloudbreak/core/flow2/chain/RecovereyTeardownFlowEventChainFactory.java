@@ -29,6 +29,6 @@ public class RecovereyTeardownFlowEventChainFactory implements FlowEventChainFac
 
         flowEventChain.add(new TerminationEvent(StackTerminationEvent.TERMINATION_EVENT.event(), event.getResourceId(),
                 TerminationType.RECOVERY, event.accepted()));
-        return new FlowTriggerEventQueue(getName(), flowEventChain);
+        return new FlowTriggerEventQueue(getName(), event, flowEventChain);
     }
 }

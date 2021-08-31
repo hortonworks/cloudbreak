@@ -3,11 +3,11 @@ package com.sequenceiq.flow.core.cache;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -29,13 +29,13 @@ public class FlowStatCache {
 
     private static final int ONE_DAY = 1;
 
-    private final Map<String, FlowStat> flowIdStatCache = new HashMap<>();
+    private final Map<String, FlowStat> flowIdStatCache = new ConcurrentHashMap<>();
 
-    private final Map<String, FlowStat> flowChainIdStatCache = new HashMap<>();
+    private final Map<String, FlowStat> flowChainIdStatCache = new ConcurrentHashMap<>();
 
-    private final Map<String, FlowStat> resourceCrnFlowStatCache =  new HashMap<>();
+    private final Map<String, FlowStat> resourceCrnFlowStatCache = new ConcurrentHashMap<>();
 
-    private final Map<String, FlowStat> resourceCrnFlowChainStatCache = new HashMap<>();
+    private final Map<String, FlowStat> resourceCrnFlowChainStatCache = new ConcurrentHashMap<>();
 
     private final PayloadContextProvider payloadContextProvider;
 

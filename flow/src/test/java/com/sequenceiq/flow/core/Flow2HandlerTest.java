@@ -187,7 +187,7 @@ public class Flow2HandlerTest {
         underTest = new Flow2Handler();
         MockitoAnnotations.initMocks(this);
         Map<String, Object> headers = new HashMap<>();
-        headers.put(Flow2Handler.FLOW_ID, FLOW_ID);
+        headers.put(FlowConstants.FLOW_ID, FLOW_ID);
         dummyEvent = new Event<>(new Headers(headers), payload);
         flowState = new OwnFlowState();
         doAnswer(invocation -> {
@@ -294,7 +294,8 @@ public class Flow2HandlerTest {
     public void testNewFlowButNotHandled() {
         Event<Payload> event = new Event<>(payload);
         event.setKey("KEY");
-        underTest.accept(event);
+        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class, () -> underTest.accept(event));
+        assertEquals("Couldn't start process.", exception.getMessage());
         verify(flowConfigurationMap, times(1)).get(anyString());
         verify(runningFlows, never()).put(any(Flow.class), isNull(String.class));
         verify(flowLogService, never()).save(any(FlowParameters.class), anyString(), anyString(), any(Payload.class), anyMap(), any(), any(FlowState.class));
@@ -398,7 +399,7 @@ public class Flow2HandlerTest {
     @Test
     public void testFlowFinalFlowNotChained() throws TransactionExecutionException {
         given(runningFlows.remove(FLOW_ID)).willReturn(flow);
-        dummyEvent.setKey(Flow2Handler.FLOW_FINAL);
+        dummyEvent.setKey(FlowConstants.FLOW_FINAL);
         underTest.accept(dummyEvent);
         verify(flowLogService, times(1)).close(anyLong(), eq(FLOW_ID));
         verify(runningFlows, times(1)).remove(eq(FLOW_ID));
@@ -411,8 +412,8 @@ public class Flow2HandlerTest {
     @Test
     public void testFlowFinalFlowChained() throws TransactionExecutionException {
         given(runningFlows.remove(FLOW_ID)).willReturn(flow);
-        dummyEvent.setKey(Flow2Handler.FLOW_FINAL);
-        dummyEvent.getHeaders().set(Flow2Handler.FLOW_CHAIN_ID, FLOW_CHAIN_ID);
+        dummyEvent.setKey(FlowConstants.FLOW_FINAL);
+        dummyEvent.getHeaders().set(FlowConstants.FLOW_CHAIN_ID, FLOW_CHAIN_ID);
         dummyEvent.getHeaders().set(FlowConstants.FLOW_TRIGGER_USERCRN, FLOW_TRIGGER_USERCRN);
         underTest.accept(dummyEvent);
         verify(flowLogService, times(1)).close(anyLong(), eq(FLOW_ID));
@@ -427,7 +428,7 @@ public class Flow2HandlerTest {
     public void testFlowFinalFlowFailedNoChain() throws TransactionExecutionException {
         given(flow.isFlowFailed()).willReturn(Boolean.TRUE);
         given(runningFlows.remove(FLOW_ID)).willReturn(flow);
-        dummyEvent.setKey(Flow2Handler.FLOW_FINAL);
+        dummyEvent.setKey(FlowConstants.FLOW_FINAL);
         given(runningFlows.remove(anyString())).willReturn(flow);
         underTest.accept(dummyEvent);
         verify(flowLogService, times(1)).close(anyLong(), eq(FLOW_ID));
@@ -442,8 +443,8 @@ public class Flow2HandlerTest {
     public void testFlowFinalFlowFailedWithChain() throws TransactionExecutionException {
         given(flow.isFlowFailed()).willReturn(Boolean.TRUE);
         given(runningFlows.remove(FLOW_ID)).willReturn(flow);
-        dummyEvent.setKey(Flow2Handler.FLOW_FINAL);
-        dummyEvent.getHeaders().set(Flow2Handler.FLOW_CHAIN_ID, "FLOW_CHAIN_ID");
+        dummyEvent.setKey(FlowConstants.FLOW_FINAL);
+        dummyEvent.getHeaders().set(FlowConstants.FLOW_CHAIN_ID, "FLOW_CHAIN_ID");
         given(runningFlows.remove(anyString())).willReturn(flow);
         underTest.accept(dummyEvent);
         verify(flowLogService, times(1)).close(anyLong(), eq(FLOW_ID));
@@ -459,7 +460,7 @@ public class Flow2HandlerTest {
         given(flowLogService.findAllRunningNonTerminationFlowIdsByStackId(anyLong())).willReturn(Collections.singleton(FLOW_ID));
         given(runningFlows.remove(FLOW_ID)).willReturn(flow);
         given(runningFlows.getFlowChainId(eq(FLOW_ID))).willReturn(FLOW_CHAIN_ID);
-        dummyEvent.setKey(Flow2Handler.FLOW_CANCEL);
+        dummyEvent.setKey(FlowConstants.FLOW_CANCEL);
         underTest.accept(dummyEvent);
         verify(flowLogService, times(1)).cancel(anyLong(), eq(FLOW_ID));
         verify(flowChains, times(1)).removeFullFlowChain(eq(FLOW_CHAIN_ID), eq(false));

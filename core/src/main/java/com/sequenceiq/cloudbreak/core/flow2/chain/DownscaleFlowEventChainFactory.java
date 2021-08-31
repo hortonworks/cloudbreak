@@ -62,6 +62,6 @@ public class DownscaleFlowEventChainFactory implements FlowEventChainFactory<Clu
             }
             flowEventChain.add(sste);
         }
-        return new FlowTriggerEventQueue(getName(), flowEventChain);
+        return new FlowTriggerEventQueue(getName(), event, flowEventChain);
     }
 }

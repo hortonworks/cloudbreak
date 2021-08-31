@@ -28,6 +28,6 @@ public class StartFlowEventChainFactory implements FlowEventChainFactory<StackEv
         flowEventChain.add(new StackEvent(STACK_START_EVENT.event(), event.getResourceId(), event.accepted()));
         flowEventChain.add(new StackEvent(EXTERNAL_DATABASE_COMMENCE_START_EVENT.event(), event.getResourceId()));
         flowEventChain.add(new StackEvent(CLUSTER_START_EVENT.event(), event.getResourceId()));
-        return new FlowTriggerEventQueue(getName(), flowEventChain);
+        return new FlowTriggerEventQueue(getName(), event, flowEventChain);
     }
 }

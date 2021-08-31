@@ -48,7 +48,7 @@ public class UpscaleFlowEventChainFactory implements FlowEventChainFactory<Stack
         addStackSyncTriggerEvent(event, flowEventChain);
         addStackScaleTriggerEvent(event, flowEventChain);
         addClusterScaleTriggerEventIfNeeded(event, stackView, clusterView, flowEventChain);
-        return new FlowTriggerEventQueue(getName(), flowEventChain);
+        return new FlowTriggerEventQueue(getName(), event, flowEventChain);
     }
 
     private void addStackSyncTriggerEvent(StackAndClusterUpscaleTriggerEvent event, Queue<Selectable> flowEventChain) {

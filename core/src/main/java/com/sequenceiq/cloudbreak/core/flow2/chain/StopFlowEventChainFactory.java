@@ -27,6 +27,6 @@ public class StopFlowEventChainFactory implements FlowEventChainFactory<StackEve
         flowEventChain.add(new StackEvent(CLUSTER_STOP_EVENT.event(), event.getResourceId(), event.accepted()));
         flowEventChain.add(new StackEvent(EXTERNAL_DATABASE_COMMENCE_STOP_EVENT.event(), event.getResourceId()));
         flowEventChain.add(new StackEvent(STACK_STOP_EVENT.event(), event.getResourceId()));
-        return new FlowTriggerEventQueue(getName(), flowEventChain);
+        return new FlowTriggerEventQueue(getName(), event, flowEventChain);
     }
 }

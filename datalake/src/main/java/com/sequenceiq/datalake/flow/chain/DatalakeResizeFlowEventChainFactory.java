@@ -43,6 +43,6 @@ public class DatalakeResizeFlowEventChainFactory implements FlowEventChainFactor
         // Delete  De-attached Sdx
         chain.add(new SdxDeleteStartEvent(SDX_DELETE_EVENT.event(), event.getResourceId(), event.getUserId(), true));
 
-        return new FlowTriggerEventQueue(getName(), chain);
+        return new FlowTriggerEventQueue(getName(), event, chain);
     }
 }
