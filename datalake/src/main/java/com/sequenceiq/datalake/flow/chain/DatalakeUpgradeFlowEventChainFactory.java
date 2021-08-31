@@ -1,5 +1,14 @@
 package com.sequenceiq.datalake.flow.chain;
 
+import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_UPGRADE_EVENT;
+import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_UPGRADE_FLOW_CHAIN_EVENT;
+import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_TRIGGER_BACKUP_EVENT;
+
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradeFlowChainStartEvent;
 import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradeStartEvent;
@@ -7,14 +16,6 @@ import com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupFailureReason;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeTriggerBackupEvent;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
-import org.springframework.stereotype.Component;
-
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
-
-import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_UPGRADE_EVENT;
-import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_UPGRADE_FLOW_CHAIN_EVENT;
-import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_TRIGGER_BACKUP_EVENT;
 
 @Component
 public class DatalakeUpgradeFlowEventChainFactory implements FlowEventChainFactory<DatalakeUpgradeFlowChainStartEvent> {
@@ -31,6 +32,6 @@ public class DatalakeUpgradeFlowEventChainFactory implements FlowEventChainFacto
                 DatalakeBackupFailureReason.BACKUP_ON_UPGRADE, event.accepted()));
         chain.add(new DatalakeUpgradeStartEvent(DATALAKE_UPGRADE_EVENT.event(), event.getResourceId(), event.getUserId(),
                 event.getImageId(), event.getReplaceVms()));
-        return new FlowTriggerEventQueue(getName(), chain);
+        return new FlowTriggerEventQueue(getName(), event, chain);
     }
 }

@@ -44,8 +44,9 @@ public class MockSdxRetryTests extends AbstractMockTest {
                 .when(sdxTestClient.createInternal())
                 .mockSpi().launch().post()
                 .thenReturn("This is a bad request error", 400, 1)
-                .awaitForFlow()
+                .awaitForFlowFail()
                 .when(sdxTestClient.retry())
+                .awaitForFlow()
                 .await(SdxClusterStatusResponse.RUNNING)
                 .validate();
     }

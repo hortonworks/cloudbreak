@@ -39,7 +39,7 @@ public class RescheduleStatusCheckChainFactory implements FlowEventChainFactory<
         if (stack != null && stack.isAvailable() && stack.getClusterView() != null && stack.getClusterView().isAvailable()) {
             jobService.schedule(new StackJobAdapter(convertToStack(stack)), repairScheduleDelayInSeconds);
         }
-        return new FlowTriggerEventQueue(getName(), new ConcurrentLinkedDeque<>());
+        return new FlowTriggerEventQueue(getName(), event, new ConcurrentLinkedDeque<>());
     }
 
     private Stack convertToStack(StackView view) {

@@ -292,6 +292,9 @@ dependencies {
   testCompile group: 'com.jayway.restassured',   name: 'rest-assured'
   testCompile group: 'com.jayway.restassured',   name: 'json-path'
   testCompile group: 'com.h2database',           name: 'h2'
+  testCompile group: 'org.awaitility',           name: 'awaitility',          version: awaitilityVersion
+  testCompile group: 'org.testcontainers',       name: 'postgresql',          version: testContainersVersion
+  testCompile group: 'org.testcontainers',       name: 'junit-jupiter',       version: testContainersVersion
   testImplementation group: 'org.assertj',       name: 'assertj-core',        version: assertjVersion
   testImplementation group: "org.yaml",          name: "snakeyaml"
   testImplementation group: 'org.hamcrest',      name: 'hamcrest',            version: hamcrestVersion

@@ -1,7 +1,7 @@
 package com.sequenceiq.flow.service;
 
 import static com.google.common.base.Preconditions.checkState;
-import static com.sequenceiq.flow.domain.StateStatus.FAILED;
+import static com.sequenceiq.cloudbreak.service.flowlog.FlowLogUtil.isFlowFailHandled;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toSet;
 
@@ -135,7 +135,7 @@ public class FlowService {
             Set<String> relatedFlowIds = flowLogDBService.getFlowIdsByChainIds(relatedChainIds);
             List<FlowLog> relatedFlowLogs = flowLogDBService.getFlowLogsByFlowIdsCreatedDesc(relatedFlowIds);
             flowCheckResponse.setHasActiveFlow(!completed("Flow chain", chainId, relatedChains, relatedFlowLogs));
-            flowCheckResponse.setLatestFlowFinalizedAndFailed(firstIsFinalizedAndFailed(relatedFlowLogs));
+            flowCheckResponse.setLatestFlowFinalizedAndFailed(isFlowFailHandled(relatedFlowLogs, failHandledEvents));
             return flowCheckResponse;
         } else {
             flowCheckResponse.setHasActiveFlow(Boolean.FALSE);
@@ -155,7 +155,7 @@ public class FlowService {
             List<FlowLog> relatedFlowLogs = flowLogDBService.getFlowLogsByFlowIdsCreatedDesc(relatedFlowIds);
             validateResourceId(relatedFlowLogs, resourceId);
             flowCheckResponse.setHasActiveFlow(!completed("Flow chain", chainId, relatedChains, relatedFlowLogs));
-            flowCheckResponse.setLatestFlowFinalizedAndFailed(firstIsFinalizedAndFailed(relatedFlowLogs));
+            flowCheckResponse.setLatestFlowFinalizedAndFailed(isFlowFailHandled(relatedFlowLogs, failHandledEvents));
             return flowCheckResponse;
         } else {
             flowCheckResponse.setHasActiveFlow(Boolean.FALSE);
@@ -174,7 +174,7 @@ public class FlowService {
         FlowCheckResponse flowCheckResponse = new FlowCheckResponse();
         flowCheckResponse.setFlowId(flowId);
         flowCheckResponse.setHasActiveFlow(!completed("Flow", flowId, List.of(), allByFlowIdOrderByCreatedDesc));
-        flowCheckResponse.setLatestFlowFinalizedAndFailed(firstIsFinalizedAndFailed(allByFlowIdOrderByCreatedDesc));
+        flowCheckResponse.setLatestFlowFinalizedAndFailed(isFlowFailHandled(allByFlowIdOrderByCreatedDesc, failHandledEvents));
         return flowCheckResponse;
     }
 
@@ -190,7 +190,7 @@ public class FlowService {
         if (firstIsPending(flowLogs)) {
             return false;
         }
-        if (firstIsFinalizedAndFailed(flowLogs)) {
+        if (isFlowFailHandled(flowLogs, failHandledEvents)) {
             return true;
         }
         return hasFinishedFlow(marker, flowChainId, flowChainLogs, flowLogs);
@@ -215,14 +215,6 @@ public class FlowService {
             }
         }
         LOGGER.info("{} {} marked as not completed", marker, flowChainId);
-        return false;
-    }
-
-    private boolean firstIsFinalizedAndFailed(List<FlowLog> flowLogs) {
-        if (!flowLogs.isEmpty()) {
-            FlowLog recentFlowLog = flowLogs.get(0);
-            return recentFlowLog.getFinalized() && FAILED.equals(recentFlowLog.getStateStatus());
-        }
         return false;
     }
 

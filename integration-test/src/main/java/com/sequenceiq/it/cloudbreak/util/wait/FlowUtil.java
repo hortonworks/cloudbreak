@@ -15,6 +15,7 @@ import com.sequenceiq.flow.api.FlowPublicEndpoint;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.it.TestParameter;
 import com.sequenceiq.it.cloudbreak.MicroserviceClient;
+import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 
@@ -42,22 +43,22 @@ public class FlowUtil {
         return maxRetry;
     }
 
-    public boolean getFlowFailed() {
+    public boolean isFlowFailed() {
         return BooleanUtils.toBooleanDefaultIfNull(flowFailed, false);
     }
 
-    public <T extends CloudbreakTestDto> T waitBasedOnLastKnownFlow(T testDto, MicroserviceClient msClient) {
+    public <T extends CloudbreakTestDto> T waitBasedOnLastKnownFlow(T testDto, MicroserviceClient msClient, RunningParameter runningParameter) {
         FlowPublicEndpoint flowEndpoint = msClient.flowPublicEndpoint();
         if (flowEndpoint != null) {
-            waitForFlow(flowEndpoint, testDto.getCrn(), testDto.getLastKnownFlowChainId(), testDto.getLastKnownFlowId());
+            waitForFlow(flowEndpoint, testDto.getCrn(), testDto.getLastKnownFlowChainId(), testDto.getLastKnownFlowId(), runningParameter);
         }
         return testDto;
     }
 
-    private void waitForFlow(FlowPublicEndpoint flowEndpoint, String crn, String flowChainId, String flowId) {
+    private void waitForFlow(FlowPublicEndpoint flowEndpoint, String crn, String flowChainId, String flowId, RunningParameter runningParameter) {
         boolean flowRunning = true;
         int retryCount = 0;
-        while (!getFlowFailed() && flowRunning && retryCount < maxRetry) {
+        while (flowRunning && retryCount < maxRetry) {
             sleep(pollingInterval, crn, flowChainId, flowId);
             try {
                 if (StringUtils.isNotBlank(flowChainId)) {
@@ -81,9 +82,15 @@ public class FlowUtil {
             }
             retryCount++;
         }
-        if (getFlowFailed()) {
+        if (isFlowFailed() && runningParameter.isWaitForFlowSuccess()) {
             LOGGER.error("Flow has been finalized with failed status. Crn={}, FlowId={}, FlowChainId={}", crn, flowId, flowChainId);
             throw new TestFailException(String.format(" Flow has been finalized with failed status. Crn=%s, FlowId=%s , FlowChainId=%s ", crn, flowId,
+                    flowChainId));
+        }
+        if (!isFlowFailed() && runningParameter.isWaitForFlowFail()) {
+            LOGGER.error("Flow has been finalized with success status. Crn={}, FlowId={}, FlowChainId={}", crn, flowId, flowChainId);
+            throw new TestFailException(
+                    String.format(" Flow has been finalized with success status but it was expected to fail. Crn=%s, FlowId=%s , FlowChainId=%s ", crn, flowId,
                     flowChainId));
         }
     }

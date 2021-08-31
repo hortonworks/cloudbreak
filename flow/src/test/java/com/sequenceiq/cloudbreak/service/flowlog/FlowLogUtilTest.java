@@ -14,7 +14,7 @@ import org.junit.Test;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.StateStatus;
 
-public class FlowRetryUtilTest {
+public class FlowLogUtilTest {
 
     @Test
     public void getLastSuccessfulStateLog() {
@@ -47,7 +47,7 @@ public class FlowRetryUtilTest {
         failedFlowLog.setCreated(4L);
         flowLogs.add(failedFlowLog);
 
-        FlowLog lastSuccessfulFlowLog = FlowRetryUtil.getLastSuccessfulStateLog("FAILED_CURRENT_STATE", flowLogs);
+        FlowLog lastSuccessfulFlowLog = FlowLogUtil.getLastSuccessfulStateLog("FAILED_CURRENT_STATE", flowLogs);
         assertEquals(successfulFlowLog3, lastSuccessfulFlowLog);
     }
 
@@ -88,7 +88,7 @@ public class FlowRetryUtilTest {
         failedFlowLog.setCreated(2L);
         flowLogs.add(failedFlowLog);
 
-        Optional<FlowLog> mostRecentFailedLog = FlowRetryUtil.getMostRecentFailedLog(flowLogs);
+        Optional<FlowLog> mostRecentFailedLog = FlowLogUtil.getMostRecentFailedLog(flowLogs);
         assertEquals(mostRecentFailedLog.get(), failedFlowLog2);
     }
 
@@ -135,7 +135,7 @@ public class FlowRetryUtilTest {
         pendingFlowLog.setCreated(6L);
         flowLogs.add(pendingFlowLog);
 
-        assertTrue(FlowRetryUtil.isFlowPending(flowLogs));
+        assertTrue(FlowLogUtil.getPendingFlowLog(flowLogs).isPresent());
     }
 
     @Test
@@ -175,6 +175,6 @@ public class FlowRetryUtilTest {
         failedFlowLog.setCreated(2L);
         flowLogs.add(failedFlowLog);
 
-        assertFalse(FlowRetryUtil.isFlowPending(flowLogs));
+        assertFalse(FlowLogUtil.getPendingFlowLog(flowLogs).isPresent());
     }
 }

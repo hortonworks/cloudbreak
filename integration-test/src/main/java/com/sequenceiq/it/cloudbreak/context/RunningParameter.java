@@ -28,7 +28,13 @@ public class RunningParameter {
 
     private Method urlMethod;
 
-    private boolean waitForFlow = true;
+    private FlowWaitConfig waitForFlow = FlowWaitConfig.WAIT_SUCCESS;
+
+    public enum FlowWaitConfig {
+        WAIT_SUCCESS,
+        WAIT_FAILURE,
+        NOT_WAIT;
+    }
 
     @Inject
     private TestContext testContext;
@@ -56,7 +62,15 @@ public class RunningParameter {
     }
 
     public boolean isWaitForFlow() {
-        return waitForFlow;
+        return FlowWaitConfig.WAIT_SUCCESS.equals(waitForFlow) || FlowWaitConfig.WAIT_FAILURE.equals(waitForFlow);
+    }
+
+    public boolean isWaitForFlowSuccess() {
+        return FlowWaitConfig.WAIT_SUCCESS.equals(waitForFlow);
+    }
+
+    public boolean isWaitForFlowFail() {
+        return FlowWaitConfig.WAIT_FAILURE.equals(waitForFlow);
     }
 
     public RunningParameter withSkipOnFail(boolean skipOnFail) {
@@ -122,12 +136,17 @@ public class RunningParameter {
     }
 
     public RunningParameter withWaitForFlow(boolean waitForFlow) {
-        this.waitForFlow = waitForFlow;
+        this.waitForFlow = waitForFlow ? FlowWaitConfig.WAIT_SUCCESS :  FlowWaitConfig.NOT_WAIT;
         return this;
     }
 
-    public RunningParameter withWaitForFlow() {
-        this.waitForFlow = true;
+    public RunningParameter withWaitForFlowSuccess() {
+        this.waitForFlow = FlowWaitConfig.WAIT_SUCCESS;
+        return this;
+    }
+
+    public RunningParameter withWaitForFlowFail() {
+        this.waitForFlow = FlowWaitConfig.WAIT_FAILURE;
         return this;
     }
 

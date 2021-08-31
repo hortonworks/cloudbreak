@@ -3,6 +3,7 @@ package com.sequenceiq.it.cloudbreak.action.v4.util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -15,7 +16,8 @@ public class SdxRetryAction implements Action<SdxInternalTestDto, SdxClient> {
     @Override
     public SdxInternalTestDto action(TestContext testContext, SdxInternalTestDto testDto, SdxClient sdxClient)
             throws Exception {
-        sdxClient.getDefaultClient().sdxEndpoint().retryByCrn(testDto.getCrn());
+        FlowIdentifier flowIdentifier = sdxClient.getDefaultClient().sdxEndpoint().retryByCrn(testDto.getCrn());
+        testDto.setFlow("Retry", flowIdentifier);
         return testDto;
     }
 }

@@ -41,6 +41,6 @@ public class RepairFlowEventChainFactory implements FlowEventChainFactory<Repair
                 event.getResourceId(), event.getInstanceCountByGroup(), true, true, false, event.getOperationId()));
         flowEventChain.add(new ChangePrimaryGatewayEvent(ChangePrimaryGatewayFlowEvent.CHANGE_PRIMARY_GATEWAY_EVENT.event(), event.getResourceId(),
                 terminatedOrRemovedInstanceIds, true, event.getOperationId()));
-        return new FlowTriggerEventQueue(getName(), flowEventChain);
+        return new FlowTriggerEventQueue(getName(), event, flowEventChain);
     }
 }

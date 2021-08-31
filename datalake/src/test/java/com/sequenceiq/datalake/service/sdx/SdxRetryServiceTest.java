@@ -1,24 +1,18 @@
 package com.sequenceiq.datalake.service.sdx;
 
-import static com.sequenceiq.datalake.flow.create.SdxCreateEvent.STORAGE_VALIDATION_WAIT_EVENT;
 import static com.sequenceiq.datalake.flow.create.SdxCreateEvent.SDX_STACK_CREATION_IN_PROGRESS_EVENT;
-import static com.sequenceiq.datalake.flow.create.SdxCreateState.SDX_CREATION_FAILED_STATE;
+import static com.sequenceiq.datalake.flow.create.SdxCreateEvent.STORAGE_VALIDATION_WAIT_EVENT;
 import static com.sequenceiq.datalake.flow.create.SdxCreateState.SDX_CREATION_WAIT_RDS_STATE;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.function.Consumer;
 
-import javax.ws.rs.BadRequestException;
-
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,10 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.datalake.entity.SdxCluster;
-import com.sequenceiq.flow.api.model.FlowIdentifier;
-import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.flow.core.Flow2Handler;
-import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.StateStatus;
 
@@ -43,44 +34,30 @@ public class SdxRetryServiceTest {
     private Flow2Handler flow2Handler;
 
     @Mock
-    private FlowLogService flowLogService;
-
-    @Mock
     private StackV4Endpoint stackV4Endpoint;
 
     @InjectMocks
     private SdxRetryService sdxRetryService;
 
     @Test
-    public void badRequestExceptionIfPendingFlow() {
-        SdxCluster sdxCluster = new SdxCluster();
-        sdxCluster.setId(1L);
-        sdxCluster.setClusterName("sdxclustername");
-        List<FlowLog> flowLogs = new ArrayList<>();
-        FlowLog pendingFlowLog = new FlowLog();
-        pendingFlowLog.setStateStatus(StateStatus.PENDING);
-        flowLogs.add(pendingFlowLog);
-        when(flowLogService.findAllForLastFlowIdByResourceIdOrderByCreatedDesc(1L)).thenReturn(flowLogs);
-        Assertions.assertThrows(BadRequestException.class,
-                () -> sdxRetryService.retrySdx(sdxCluster),
-                "Retry cannot be performed, because there is already an active flow.");
-    }
-
-    @Test
     public void noRetryAndNoRestartFlowIfStateSuccessful() {
         SdxCluster sdxCluster = new SdxCluster();
         sdxCluster.setId(1L);
         sdxCluster.setClusterName("sdxclustername");
-        List<FlowLog> flowLogs = new ArrayList<>();
         FlowLog successfulFlowLog = new FlowLog();
+        successfulFlowLog.setFlowId("FLOW_ID_1");
         successfulFlowLog.setStateStatus(StateStatus.SUCCESSFUL);
-        flowLogs.add(successfulFlowLog);
-        when(flowLogService.findAllForLastFlowIdByResourceIdOrderByCreatedDesc(1L)).thenReturn(flowLogs);
-        Assertions.assertThrows(BadRequestException.class,
-                () -> sdxRetryService.retrySdx(sdxCluster),
-                "Retry cannot be performed, because the last action was successful");
+        successfulFlowLog.setNextEvent(STORAGE_VALIDATION_WAIT_EVENT.name());
+        successfulFlowLog.setCreated(1L);
+        successfulFlowLog.setCurrentState(SDX_CREATION_WAIT_RDS_STATE.name());
+        doAnswer(invocation -> {
+            ((Consumer<FlowLog>) invocation.getArgument(1)).accept(successfulFlowLog);
+            return null;
+        }).when(flow2Handler).retryLastFailedFlow(anyLong(), any());
+
+        sdxRetryService.retrySdx(sdxCluster);
+
         verify(stackV4Endpoint, times(0)).retry(any(), any(), anyString());
-        verify(flow2Handler, times(0)).restartFlow(anyString());
     }
 
     @Test
@@ -89,57 +66,21 @@ public class SdxRetryServiceTest {
         sdxCluster.setId(1L);
         sdxCluster.setClusterName("sdxclustername");
         sdxCluster.setAccountId("accountid");
-        List<FlowLog> flowLogs = new LinkedList<>();
         FlowLog successfulFlowLog = new FlowLog();
         successfulFlowLog.setFlowId("FLOW_ID_1");
         successfulFlowLog.setStateStatus(StateStatus.SUCCESSFUL);
         successfulFlowLog.setNextEvent(SDX_STACK_CREATION_IN_PROGRESS_EVENT.name());
         successfulFlowLog.setCreated(1L);
         successfulFlowLog.setCurrentState(SDX_CREATION_WAIT_RDS_STATE.name());
-        flowLogs.add(successfulFlowLog);
-        FlowLog failedFlowLog = new FlowLog();
-        failedFlowLog.setFlowId("FLOW_ID_2");
-        failedFlowLog.setStateStatus(StateStatus.FAILED);
-        failedFlowLog.setCurrentState(SDX_CREATION_FAILED_STATE.name());
-        failedFlowLog.setCreated(2L);
-        flowLogs.add(failedFlowLog);
 
-        when(flowLogService.findAllForLastFlowIdByResourceIdOrderByCreatedDesc(1L)).thenReturn(flowLogs);
+        doAnswer(invocation -> {
+            ((Consumer<FlowLog>) invocation.getArgument(1)).accept(successfulFlowLog);
+            return null;
+        }).when(flow2Handler).retryLastFailedFlow(anyLong(), any());
 
-        FlowIdentifier flowIdentifier = sdxRetryService.retrySdx(sdxCluster);
+        sdxRetryService.retrySdx(sdxCluster);
 
-        assertEquals(new FlowIdentifier(FlowType.FLOW, "FLOW_ID_1"), flowIdentifier);
         verify(stackV4Endpoint, times(1)).retry(any(), eq("sdxclustername"), anyString());
-        verify(flow2Handler, times(1)).restartFlow(any(FlowLog.class));
-    }
-
-    @Test
-    public void noRetryButRestartFlow() {
-        SdxCluster sdxCluster = new SdxCluster();
-        sdxCluster.setId(1L);
-        sdxCluster.setClusterName("sdxclustername");
-        List<FlowLog> flowLogs = new LinkedList<>();
-        FlowLog successfulFlowLog = new FlowLog();
-        successfulFlowLog.setFlowId("FLOW_ID_1");
-        successfulFlowLog.setStateStatus(StateStatus.SUCCESSFUL);
-        successfulFlowLog.setNextEvent(STORAGE_VALIDATION_WAIT_EVENT.name());
-        successfulFlowLog.setCreated(1L);
-        successfulFlowLog.setCurrentState(SDX_CREATION_WAIT_RDS_STATE.name());
-        flowLogs.add(successfulFlowLog);
-        FlowLog failedFlowLog = new FlowLog();
-        failedFlowLog.setFlowId("FLOW_ID_2");
-        failedFlowLog.setStateStatus(StateStatus.FAILED);
-        failedFlowLog.setCurrentState(SDX_CREATION_FAILED_STATE.name());
-        failedFlowLog.setCreated(2L);
-        flowLogs.add(failedFlowLog);
-
-        when(flowLogService.findAllForLastFlowIdByResourceIdOrderByCreatedDesc(1L)).thenReturn(flowLogs);
-
-        FlowIdentifier flowIdentifier = sdxRetryService.retrySdx(sdxCluster);
-
-        assertEquals(new FlowIdentifier(FlowType.FLOW, "FLOW_ID_1"), flowIdentifier);
-        verify(stackV4Endpoint, times(0)).retry(any(), any(), anyString());
-        verify(flow2Handler, times(1)).restartFlow(any(FlowLog.class));
     }
 
 }

@@ -47,7 +47,7 @@ public class EnvDeleteClustersFlowEventChainFactory implements FlowEventChainFac
 
         flowEventChain.addAll(getFlowEventsForParentEnvironment(event));
 
-        return new FlowTriggerEventQueue(getName(), flowEventChain);
+        return new FlowTriggerEventQueue(getName(), event, flowEventChain);
     }
 
     private List<Selectable> getFlowEventsForParentEnvironment(EnvDeleteEvent event) {

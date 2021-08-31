@@ -35,7 +35,7 @@ public class ProvisionFlowEventChainFactory implements FlowEventChainFactory<Sta
         flowEventChain.add(new StackEvent(START_EXTERNAL_DATABASE_CREATION_EVENT.event(), event.getResourceId(), event.accepted()));
         flowEventChain.add(new ProvisionEvent(START_CREATION_EVENT.event(), event.getResourceId(), ProvisionType.REGULAR, event.accepted()));
         flowEventChain.add(new ProvisionEvent(CLUSTER_CREATION_EVENT.event(), event.getResourceId(), ProvisionType.REGULAR));
-        return new FlowTriggerEventQueue(getName(), flowEventChain);
+        return new FlowTriggerEventQueue(getName(), event, flowEventChain);
     }
 
     @Override

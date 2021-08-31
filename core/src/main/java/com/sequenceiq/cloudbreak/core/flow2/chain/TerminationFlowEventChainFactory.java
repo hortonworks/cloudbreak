@@ -30,6 +30,6 @@ public class TerminationFlowEventChainFactory implements FlowEventChainFactory<T
                 event.accepted()));
         flowEventChain.add(new TerminationEvent(StackTerminationEvent.TERMINATION_EVENT.event(), event.getResourceId(), event.getTerminationType(),
                 event.accepted()));
-        return new FlowTriggerEventQueue(getName(), flowEventChain);
+        return new FlowTriggerEventQueue(getName(), event, flowEventChain);
     }
 }

@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.flow.core.EventParameterFactory;
 import com.sequenceiq.flow.core.Flow2Handler;
+import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
@@ -63,7 +64,7 @@ public class FlowCancelServiceTest {
 
         underTest.cancelRunningFlows(1L);
 
-        verify(reactor, times(1)).notify(eq(Flow2Handler.FLOW_CANCEL), any(Event.class));
+        verify(reactor, times(1)).notify(eq(FlowConstants.FLOW_CANCEL), any(Event.class));
     }
 
     @Test

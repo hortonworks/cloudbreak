@@ -314,6 +314,10 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
         return awaitForFlow(emptyRunningParameter());
     }
 
+    public SdxInternalTestDto awaitForFlowFail() {
+        return awaitForFlow(emptyRunningParameter().withWaitForFlowFail());
+    }
+
     @Override
     public SdxInternalTestDto awaitForFlow(RunningParameter runningParameter) {
         return getTestContext().awaitForFlow(this, runningParameter);

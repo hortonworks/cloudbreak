@@ -27,6 +27,6 @@ public class BackupDatalakeDatabaseFlowEventChainFactory implements FlowEventCha
         flowEventChain.add(new StackEvent(SaltUpdateEvent.SALT_UPDATE_EVENT.event(), event.getResourceId(), event.accepted()));
         flowEventChain.add(new DatabaseBackupTriggerEvent(DATABASE_BACKUP_EVENT.event(), event.getResourceId(),
                 event.getBackupLocation(), event.getBackupId()));
-        return new FlowTriggerEventQueue(getName(), flowEventChain);
+        return new FlowTriggerEventQueue(getName(), event, flowEventChain);
     }
 }

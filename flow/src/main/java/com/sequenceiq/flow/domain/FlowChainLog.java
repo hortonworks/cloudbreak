@@ -31,16 +31,19 @@ public class FlowChainLog {
 
     private String flowTriggerUserCrn;
 
+    private String triggerEvent;
+
     public FlowChainLog() {
 
     }
 
-    public FlowChainLog(String flowChainType, String flowChainId, String parentFlowChainId, String chain, String flowTriggerUserCrn) {
+    public FlowChainLog(String flowChainType, String flowChainId, String parentFlowChainId, String chain, String flowTriggerUserCrn, String triggerEvent) {
         this.flowChainType = flowChainType;
         this.flowChainId = flowChainId;
         this.parentFlowChainId = parentFlowChainId;
         this.chain = chain;
         this.flowTriggerUserCrn = flowTriggerUserCrn;
+        this.triggerEvent = triggerEvent;
     }
 
     public Long getId() {
@@ -97,5 +100,13 @@ public class FlowChainLog {
 
     public void setFlowChainType(String flowChainType) {
         this.flowChainType = flowChainType;
+    }
+
+    public String getTriggerEvent() {
+        return triggerEvent;
+    }
+
+    public void setTriggerEvent(String triggerEvent) {
+        this.triggerEvent = triggerEvent;
     }
 }

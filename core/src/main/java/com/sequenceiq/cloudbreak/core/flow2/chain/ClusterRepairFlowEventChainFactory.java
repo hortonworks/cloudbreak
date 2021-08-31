@@ -75,7 +75,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
     @Override
     public FlowTriggerEventQueue createFlowTriggerEventQueue(ClusterRepairTriggerEvent event) {
         RepairConfig repairConfig = createRepairConfig(event);
-        return new FlowTriggerEventQueue(getName(), createFlowTriggers(event, repairConfig));
+        return new FlowTriggerEventQueue(getName(), event, createFlowTriggers(event, repairConfig));
     }
 
     private RepairConfig createRepairConfig(ClusterRepairTriggerEvent event) {

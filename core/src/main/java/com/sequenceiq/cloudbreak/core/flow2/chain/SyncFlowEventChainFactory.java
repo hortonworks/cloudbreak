@@ -26,6 +26,6 @@ public class SyncFlowEventChainFactory implements FlowEventChainFactory<StackEve
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
         flowEventChain.add(new StackSyncTriggerEvent(STACK_SYNC_EVENT.event(), event.getResourceId(), true, event.accepted()));
         flowEventChain.add(new StackEvent(CLUSTER_SYNC_EVENT.event(), event.getResourceId()));
-        return new FlowTriggerEventQueue(getName(), flowEventChain);
+        return new FlowTriggerEventQueue(getName(), event, flowEventChain);
     }
 }

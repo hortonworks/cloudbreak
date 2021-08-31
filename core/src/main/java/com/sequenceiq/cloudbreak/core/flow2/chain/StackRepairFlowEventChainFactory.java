@@ -35,7 +35,7 @@ public class StackRepairFlowEventChainFactory implements FlowEventChainFactory<S
                     new StackAndClusterUpscaleTriggerEvent(fullUpscaleTriggerEvent, event.getResourceId(), hostGroupName,
                             instances.size(), ScalingType.UPSCALE_TOGETHER));
         }
-        return new FlowTriggerEventQueue(getName(), flowEventChain);
+        return new FlowTriggerEventQueue(getName(), event, flowEventChain);
     }
 
 }

@@ -25,10 +25,9 @@ public class RecoveryBringupFlowEventChainFactory implements FlowEventChainFacto
 
     @Override
     public FlowTriggerEventQueue createFlowTriggerEventQueue(StackEvent event) {
-
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
         flowEventChain.add(new ProvisionEvent(START_CREATION_EVENT.event(), event.getResourceId(), ProvisionType.RECOVERY, event.accepted()));
         flowEventChain.add(new ProvisionEvent(CLUSTER_CREATION_EVENT.event(), event.getResourceId(), ProvisionType.RECOVERY));
-        return new FlowTriggerEventQueue(getName(), flowEventChain);
+        return new FlowTriggerEventQueue(getName(), event, flowEventChain);
     }
 }

@@ -1005,7 +1005,7 @@ public abstract class TestContext implements ApplicationContextAware {
             try {
                 MicroserviceClient msClient = getAdminMicroserviceClient(awaitEntity.getClass(), Objects.requireNonNull(Crn.fromString(awaitEntity.getCrn()))
                         .getAccountId());
-                flowUtilSingleStatus.waitBasedOnLastKnownFlow(awaitEntity, msClient);
+                flowUtilSingleStatus.waitBasedOnLastKnownFlow(awaitEntity, msClient, runningParameter);
             } catch (Exception e) {
                 if (runningParameter.isLogError()) {
                     LOGGER.error("Cloudbreak await for flow '{}' is failed for: '{}', because of {}", awaitEntity, awaitEntity.getName(), e.getMessage(), e);
@@ -1013,15 +1013,6 @@ public abstract class TestContext implements ApplicationContextAware {
                             awaitEntity, awaitEntity.getName(), e.getMessage()));
                 }
                 getExceptionMap().put(String.format("Cloudbreak await for flow %s", awaitEntity), e);
-            }
-            if (flowUtilSingleStatus.getFlowFailed()) {
-                if (runningParameter.isLogError()) {
-                    LOGGER.error("Cloudbreak await for flow '{}' is failed for: '{}', because of latest flow status is FAILED", awaitEntity,
-                            awaitEntity.getName());
-                    Log.await(LOGGER, String.format(" Cloudbreak await for flow '%s' is failed for '%s', because of latest flow status is FAILED ",
-                            awaitEntity, awaitEntity.getName()));
-                }
-                getExceptionMap().put(String.format("Cloudbreak await for flow %s", awaitEntity), new TestFailException("Latest flow status is FAILED!"));
             }
         }
         entity.setLastKnownFlowId(null);
