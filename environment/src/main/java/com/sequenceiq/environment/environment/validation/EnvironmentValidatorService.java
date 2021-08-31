@@ -43,6 +43,7 @@ import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsSpotParamete
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.service.EnvironmentResourceService;
+import com.sequenceiq.environment.environment.validation.validators.EncryptionKeyArnValidator;
 import com.sequenceiq.environment.environment.validation.validators.EncryptionKeyUrlValidator;
 import com.sequenceiq.environment.environment.validation.validators.NetworkCreationValidator;
 import com.sequenceiq.environment.environment.validation.validators.PublicKeyValidator;
@@ -76,6 +77,8 @@ public class EnvironmentValidatorService {
 
     private final TagValidator tagValidator;
 
+    private final EncryptionKeyArnValidator encryptionKeyArnValidator;
+
     private final EncryptionKeyUrlValidator encryptionKeyUrlValidator;
 
     private final EntitlementService entitlementService;
@@ -88,6 +91,7 @@ public class EnvironmentValidatorService {
             @Value("${environment.enabledParentPlatforms}") Set<String> enabledParentPlatforms,
             @Value("${environment.enabledChildPlatforms}") Set<String> enabledChildPlatforms,
             TagValidator tagValidator,
+            EncryptionKeyArnValidator encryptionKeyArnValidator,
             EncryptionKeyUrlValidator encryptionKeyUrlValidator,
             EntitlementService entitlementService) {
         this.networkCreationValidator = networkCreationValidator;
@@ -98,6 +102,7 @@ public class EnvironmentValidatorService {
         this.enabledChildPlatforms = enabledChildPlatforms;
         this.enabledParentPlatforms = enabledParentPlatforms;
         this.tagValidator = tagValidator;
+        this.encryptionKeyArnValidator = encryptionKeyArnValidator;
         this.encryptionKeyUrlValidator = encryptionKeyUrlValidator;
         this.entitlementService = entitlementService;
     }
@@ -281,6 +286,28 @@ public class EnvironmentValidatorService {
                             + " Please get 'CDP_CB_AZURE_DISK_SSE_WITH_CMK' enabled for this account to use SSE with CMK."));
                 } else {
                     ValidationResult validationResult = encryptionKeyUrlValidator.validateEncryptionKeyUrl(encryptionKeyUrl);
+                    resultBuilder.merge(validationResult);
+                }
+            }
+        }
+        return resultBuilder.build();
+    }
+
+    public ValidationResult validateEncryptionKeyArn(EnvironmentCreationDto creationDto) {
+        ValidationResultBuilder resultBuilder = ValidationResult.builder();
+        if (AWS.name().equalsIgnoreCase(creationDto.getCloudPlatform())) {
+            String encryptionKeyArn = Optional.ofNullable(creationDto.getParameters())
+                    .map(paramsDto -> paramsDto.getAwsParametersDto())
+                    .map(awsParametersDto -> awsParametersDto.getAwsDiskEncryptionParametersDto())
+                    .map(awsREparamsDto -> awsREparamsDto.getEncryptionKeyArn()).orElse(null);
+            if (StringUtils.isNotEmpty(encryptionKeyArn)) {
+                if (!entitlementService.isAWSDiskEncryptionWithCMKEnabled(creationDto.getAccountId())) {
+                    resultBuilder.error(String.format("You specified encryptionKeyArn to use Server Side Encryption for " +
+                            "AWS Managed disks with CMK, "
+                            + "but that feature is currently disabled. Get 'CDP_CB_AWS_DISK_ENCRYPTION_WITH_CMK' " +
+                            "enabled for your account to use SSE with CMK."));
+                } else {
+                    ValidationResult validationResult = encryptionKeyArnValidator.validateEncryptionKeyArn(encryptionKeyArn);
                     resultBuilder.merge(validationResult);
                 }
             }
