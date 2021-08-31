@@ -15,6 +15,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.loadbalancer.Aw
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.loadbalancer.AwsTargetGroupResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.loadbalancer.AzureLoadBalancerResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.loadbalancer.AzureTargetGroupResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.loadbalancer.GcpLoadBalancerResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.loadbalancer.GcpTargetGroupResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.loadbalancer.LoadBalancerResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.loadbalancer.TargetGroupResponse;
 import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
@@ -29,6 +31,9 @@ import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.aws.AwsTargetGroupArn
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.aws.AwsTargetGroupConfigDb;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.azure.AzureLoadBalancerConfigDb;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.azure.AzureTargetGroupConfigDb;
+import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.gcp.GcpLoadBalancerConfigDb;
+import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.gcp.GcpLoadBalancerNamesDb;
+import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.gcp.GcpTargetGroupConfigDb;
 import com.sequenceiq.cloudbreak.service.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
@@ -60,6 +65,7 @@ public class LoadBalancerToLoadBalancerResponseConverter extends AbstractConvers
         if (source.getProviderConfig() != null) {
             response.setAwsResourceId(convertAwsLoadBalancer(source.getProviderConfig().getAwsConfig()));
             response.setAzureResourceId(convertAzureLoadBalancer(source.getProviderConfig().getAzureConfig()));
+            response.setGcpResourceId(convertGcpLoadBalancer(source.getProviderConfig().getGcpConfig()));
         }
 
         return response;
@@ -79,6 +85,15 @@ public class LoadBalancerToLoadBalancerResponseConverter extends AbstractConvers
             AzureLoadBalancerResponse azureSettings = new AzureLoadBalancerResponse();
             azureSettings.setName(azureMetadata.getName());
             return azureSettings;
+        }
+        return null;
+    }
+
+    private GcpLoadBalancerResponse convertGcpLoadBalancer(GcpLoadBalancerConfigDb gcpMetadata) {
+        if (gcpMetadata != null) {
+            GcpLoadBalancerResponse gcpResponse = new GcpLoadBalancerResponse();
+            gcpResponse.setName(gcpMetadata.getName());
+            return gcpResponse;
         }
         return null;
     }
@@ -111,6 +126,7 @@ public class LoadBalancerToLoadBalancerResponseConverter extends AbstractConvers
         if (targetGroupConfig != null) {
             response.setAwsResourceIds(convertAwsTargetGroup(targetGroupConfig.getAwsConfig(), portPair.getTrafficPort()));
             response.setAzureResourceId(convertAzureTargetGroup(targetGroupConfig.getAzureConfig(), portPair.getTrafficPort()));
+            response.setGcpResourceId(convertGcpTargetGroup(targetGroupConfig.getGcpConfig(), portPair.getTrafficPort()));
         }
         return response;
     }
@@ -139,6 +155,18 @@ public class LoadBalancerToLoadBalancerResponseConverter extends AbstractConvers
             return azureSettings;
         }
         return null;
+    }
+
+    private GcpTargetGroupResponse convertGcpTargetGroup(GcpTargetGroupConfigDb gcpConfig, Integer port) {
+        if (gcpConfig != null) {
+            GcpLoadBalancerNamesDb gcpLoadBalancerNamesDb = gcpConfig.getPortMapping().get(port);
+            GcpTargetGroupResponse gcpTargetGroupResponse = new GcpTargetGroupResponse();
+            gcpTargetGroupResponse.setGcpInstanceGroupName(gcpLoadBalancerNamesDb.getInstanceGroupName());
+            gcpTargetGroupResponse.setGcpBackendServiceName(gcpLoadBalancerNamesDb.getBackendServiceName());
+            return gcpTargetGroupResponse;
+        }
+        return null;
+
     }
 
     private List<InstanceMetaData> getInstanceMetadataForGroups(Set<InstanceGroup> instanceGroups) {

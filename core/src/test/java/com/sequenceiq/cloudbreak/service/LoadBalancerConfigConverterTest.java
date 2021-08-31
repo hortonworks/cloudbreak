@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service;
 
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AWS;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AZURE;
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.GCP;
 import static com.sequenceiq.cloudbreak.service.LoadBalancerConfigConverter.MISSING_CLOUD_RESOURCE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -21,16 +22,20 @@ import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsLoadBalancerMetadataView;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureLoadBalancerMetadataView;
+import com.sequenceiq.cloudbreak.cloud.gcp.view.GcpLoadBalancerMetadataView;
 import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancerMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
+import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancerConfigDbWrapper;
+import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.TargetGroup;
+import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.TargetGroupConfigDbWrapper;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.aws.AwsLoadBalancerConfigDb;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.aws.AwsTargetGroupArnsDb;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.aws.AwsTargetGroupConfigDb;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.azure.AzureLoadBalancerConfigDb;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.azure.AzureTargetGroupConfigDb;
-import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancerConfigDbWrapper;
-import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.TargetGroupConfigDbWrapper;
-import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.TargetGroup;
+import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.gcp.GcpLoadBalancerConfigDb;
+import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.gcp.GcpLoadBalancerNamesDb;
+import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.gcp.GcpTargetGroupConfigDb;
 import com.sequenceiq.common.api.type.TargetGroupType;
 
 public class LoadBalancerConfigConverterTest {
@@ -50,6 +55,10 @@ public class LoadBalancerConfigConverterTest {
     private static final String LB_NAME = "load-balancer-name";
 
     private static final String AVAILABILITY_SET_NAME = "availability-set";
+
+    private static final String INSTANCE_GROUP_NAME = "instace-group-name";
+
+    private static final String BACKEND_SERVICE_NAME = "backend-service-name";
 
     @Mock
     private LoadBalancerConfigService loadBalancerConfigService;
@@ -172,6 +181,42 @@ public class LoadBalancerConfigConverterTest {
         assertEquals(AVAILABILITY_SET_NAME, availabilitySets.get(0));
     }
 
+    @Test
+    public void testConvertGcpLoadBalancer() {
+        CloudLoadBalancerMetadata cloudLoadBalancerMetadata = new CloudLoadBalancerMetadata.Builder()
+                .withParameters(creatGcpParams(0))
+                .build();
+        LoadBalancerConfigDbWrapper cloudLoadBalancerConfigDbWrapper = underTest.convertLoadBalancer(GCP, cloudLoadBalancerMetadata);
+        assertNotNull(cloudLoadBalancerConfigDbWrapper.getGcpConfig());
+        GcpLoadBalancerConfigDb gcpLoadBalancerConfigDb = cloudLoadBalancerConfigDbWrapper.getGcpConfig();
+        assertEquals(LB_NAME, gcpLoadBalancerConfigDb.getName());
+
+    }
+
+    @Test
+    public void testConvertGcpTargetGroup() {
+        CloudLoadBalancerMetadata cloudLoadBalancerMetadata = new CloudLoadBalancerMetadata.Builder()
+                .withParameters(creatGcpParams(1))
+                .build();
+
+        TargetGroup targetGroup = new TargetGroup();
+        targetGroup.setType(TargetGroupType.KNOX);
+        TargetGroupPortPair portPair = new TargetGroupPortPair(PORT1, PORT2);
+
+        when(loadBalancerConfigService.getTargetGroupPortPairs(eq(targetGroup))).thenReturn(Set.of(portPair));
+
+        TargetGroupConfigDbWrapper targetGroupConfigDbWrapper = underTest.convertTargetGroup(GCP, cloudLoadBalancerMetadata, targetGroup);
+        assertNotNull(targetGroupConfigDbWrapper.getGcpConfig());
+        GcpTargetGroupConfigDb gcpTargetGroupConfigDb = targetGroupConfigDbWrapper.getGcpConfig();
+
+        assertEquals(1, gcpTargetGroupConfigDb.getPortMapping().size());
+        assertEquals(PORT1, gcpTargetGroupConfigDb.getPortMapping().keySet().iterator().next());
+        GcpLoadBalancerNamesDb gcpLoadBalancerNamesDb = gcpTargetGroupConfigDb.getPortMapping().get(PORT1);
+        assertEquals(BACKEND_SERVICE_NAME, gcpLoadBalancerNamesDb.getBackendServiceName());
+        assertEquals(INSTANCE_GROUP_NAME, gcpLoadBalancerNamesDb.getInstanceGroupName());
+
+    }
+
     private Map<String, Object> createAwsParams(int numPorts) {
         Map<String, Object> params = new HashMap<>();
         params.put(AwsLoadBalancerMetadataView.LOADBALANCER_ARN, LB_ARN);
@@ -189,6 +234,17 @@ public class LoadBalancerConfigConverterTest {
         for (int i = 0; i < numPorts; i++) {
             int port = PORT1 + i;
             params.put(AzureLoadBalancerMetadataView.getAvailabilitySetParam(port), AVAILABILITY_SET_NAME);
+        }
+        return params;
+    }
+
+    private Map<String, Object> creatGcpParams(int numPorts) {
+        Map<String, Object> params = new HashMap<>();
+        params.put(GcpLoadBalancerMetadataView.LOADBALANCER_NAME, LB_NAME);
+        for (int i = 0; i < numPorts; i++) {
+            int port = PORT1 + i;
+            params.put(GcpLoadBalancerMetadataView.getBackendServiceParam(port), BACKEND_SERVICE_NAME);
+            params.put(GcpLoadBalancerMetadataView.getInstanceGroupParam(port), INSTANCE_GROUP_NAME);
         }
         return params;
     }

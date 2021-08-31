@@ -19,6 +19,7 @@ import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.loadbalancer.AwsTargetGroupResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.loadbalancer.AzureTargetGroupResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.loadbalancer.GcpTargetGroupResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.loadbalancer.LoadBalancerResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.loadbalancer.TargetGroupResponse;
 import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
@@ -35,6 +36,9 @@ import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.aws.AwsTargetGroupArn
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.aws.AwsTargetGroupConfigDb;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.azure.AzureLoadBalancerConfigDb;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.azure.AzureTargetGroupConfigDb;
+import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.gcp.GcpLoadBalancerConfigDb;
+import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.gcp.GcpLoadBalancerNamesDb;
+import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.gcp.GcpTargetGroupConfigDb;
 import com.sequenceiq.cloudbreak.service.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
@@ -62,6 +66,12 @@ public class LoadBalancerToLoadBalancerResponseConverterTest extends AbstractEnt
     private static final String AZURE_LB_NAME = "load-balancer-name";
 
     private static final String AZURE_AS_NAME = "availability-set-name";
+
+    private static final String GCP_LB_NAME = "gcp-lb-name";
+
+    private static final String GCP_INSTANCE_GROUP_NAME = "instance-group-name";
+
+    private static final String GCP_BACKEND_SERVICE_NAME = "backend-service-name";
 
     @Mock
     private TargetGroupPersistenceService targetGroupService;
@@ -94,7 +104,7 @@ public class LoadBalancerToLoadBalancerResponseConverterTest extends AbstractEnt
         // WHEN
         LoadBalancerResponse response = underTest.convert(source);
         // THEN
-        assertAllFieldsNotNull(response, List.of("awsResourceId", "azureResourceId"));
+        assertAllFieldsNotNull(response, List.of("awsResourceId", "azureResourceId", "gcpResourceId"));
         assertNull(response.getAwsResourceId());
         assertNull(response.getAzureResourceId());
     }
@@ -108,7 +118,7 @@ public class LoadBalancerToLoadBalancerResponseConverterTest extends AbstractEnt
         // WHEN
         LoadBalancerResponse response = underTest.convert(source);
         // THEN
-        assertAllFieldsNotNull(response, List.of("azureResourceId"));
+        assertAllFieldsNotNull(response, List.of("azureResourceId", "gcpResourceId"));
         assertEquals(LB_ARN, response.getAwsResourceId().getArn());
         assertEquals(1, response.getTargets().size());
         TargetGroupResponse targetGroupResponse = response.getTargets().get(0);
@@ -129,7 +139,7 @@ public class LoadBalancerToLoadBalancerResponseConverterTest extends AbstractEnt
         // WHEN
         LoadBalancerResponse response = underTest.convert(source);
         // THEN
-        assertAllFieldsNotNull(response, List.of("awsResourceId"));
+        assertAllFieldsNotNull(response, List.of("awsResourceId", "gcpResourceId"));
         assertEquals(AZURE_LB_NAME, response.getAzureResourceId().getName());
         assertEquals(1, response.getTargets().size());
         TargetGroupResponse targetGroupResponse = response.getTargets().get(0);
@@ -138,6 +148,28 @@ public class LoadBalancerToLoadBalancerResponseConverterTest extends AbstractEnt
         AzureTargetGroupResponse azureTargetGroupResponse = targetGroupResponse.getAzureResourceId();
         assertNotNull(azureTargetGroupResponse);
         assertEquals(List.of(AZURE_AS_NAME), azureTargetGroupResponse.getAvailabilitySet());
+    }
+
+    @Test
+    public void testConvertGcp() {
+        LoadBalancer source = getSource();
+        //GIVEN
+        getSource().setProviderConfig(createGcpLoadBalancerConfig());
+        given(targetGroupService.findByLoadBalancerId(any())).willReturn(creatGcpTargetGroups());
+        //WHEN
+        LoadBalancerResponse response = underTest.convert(source);
+        //THEN
+        assertAllFieldsNotNull(response, List.of("awsResourceId", "azureResourceId"));
+        assertEquals(GCP_LB_NAME, response.getGcpResourceId().getName());
+        assertEquals(1, response.getTargets().size());
+        TargetGroupResponse targetGroupResponse = response.getTargets().get(0);
+        assertEquals(PORT, targetGroupResponse.getPort());
+        assertEquals(Set.of(INSTANCE_ID), targetGroupResponse.getTargetInstances());
+        GcpTargetGroupResponse gcpTargetGroupResponse = targetGroupResponse.getGcpResourceId();
+        assertNotNull(gcpTargetGroupResponse);
+        assertEquals(GCP_INSTANCE_GROUP_NAME, gcpTargetGroupResponse.getGcpInstanceGroupName());
+        assertEquals(GCP_BACKEND_SERVICE_NAME, gcpTargetGroupResponse.getGcpBackendServiceName());
+
     }
 
     @Override
@@ -193,5 +225,27 @@ public class LoadBalancerToLoadBalancerResponseConverterTest extends AbstractEnt
         TargetGroup targetGroup = new TargetGroup();
         targetGroup.setProviderConfig(targetGroupConfigDbWrapper);
         return Set.of(targetGroup);
+    }
+
+    private LoadBalancerConfigDbWrapper createGcpLoadBalancerConfig() {
+        GcpLoadBalancerConfigDb gcpLoadBalancerConfigDb = new GcpLoadBalancerConfigDb();
+        gcpLoadBalancerConfigDb.setName(GCP_LB_NAME);
+        LoadBalancerConfigDbWrapper configDbWrapper = new LoadBalancerConfigDbWrapper();
+        configDbWrapper.setGcpConfig(gcpLoadBalancerConfigDb);
+        return configDbWrapper;
+    }
+
+    private Set<TargetGroup> creatGcpTargetGroups() {
+        GcpTargetGroupConfigDb gcpTargetGroupConfigDb = new GcpTargetGroupConfigDb();
+        GcpLoadBalancerNamesDb gcpLoadBalancerNamesDb = new GcpLoadBalancerNamesDb();
+        gcpLoadBalancerNamesDb.setBackendServiceName(GCP_BACKEND_SERVICE_NAME);
+        gcpLoadBalancerNamesDb.setInstanceGroupName(GCP_INSTANCE_GROUP_NAME);
+        gcpTargetGroupConfigDb.addPortNameMapping(PORT, gcpLoadBalancerNamesDb);
+        TargetGroupConfigDbWrapper targetGroupConfigDbWrapper = new TargetGroupConfigDbWrapper();
+        targetGroupConfigDbWrapper.setGcpConfig(gcpTargetGroupConfigDb);
+        TargetGroup targetGroup = new TargetGroup();
+        targetGroup.setProviderConfig(targetGroupConfigDbWrapper);
+        return Set.of(targetGroup);
+
     }
 }
