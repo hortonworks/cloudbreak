@@ -60,6 +60,14 @@ format_disks_if_unformatted() {
             return_value=1
           fi
           log $LOG_FILE $format_result
+
+          log $LOG_FILE "Reducing reserved storage for root to 0 on device: $devicename"
+          $(tune2fs -m 0 $devicename >> $LOG_FILE 2>&1)
+          if [ ! $? -eq 0 ]; then
+            log $LOG_FILE "Reducing reserved storage on $devicename failed"
+          fi
+          tunefs_result=$(tune2fs -l $devicename | egrep "Block size:|Reserved block count")
+          log $LOG_FILE "Reserved storage on $devicename: $tunefs_result"
       fi
   done
   return $((return_value))
