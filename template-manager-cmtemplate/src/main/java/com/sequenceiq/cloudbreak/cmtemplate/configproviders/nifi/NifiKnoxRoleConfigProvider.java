@@ -27,8 +27,7 @@ public class NifiKnoxRoleConfigProvider extends AbstractRoleConfigProvider {
     @Override
     public List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
         LOGGER.info("add property values for NifiKnoxRoleConfigProvider");
-        List<ApiClusterTemplateConfig> configs = new ArrayList<>();
-        return configs;
+        return new ArrayList<>();
     }
 
     @Override
