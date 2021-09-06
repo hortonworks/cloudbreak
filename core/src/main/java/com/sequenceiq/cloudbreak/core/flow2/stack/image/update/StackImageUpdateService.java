@@ -91,9 +91,7 @@ public class StackImageUpdateService {
 
     public StatedImage getNewImageIfVersionsMatch(Stack stack, String newImageId, String imageCatalogName, String imageCatalogUrl) {
         try {
-            if (restRequestThreadLocalService.getRequestedWorkspaceId() == null) {
-                restRequestThreadLocalService.setRequestedWorkspaceId(stack.getWorkspace().getId());
-            }
+            restRequestThreadLocalService.setWorkspaceId(stack.getWorkspace());
 
             Image currentImage = getCurrentImage(stack);
 

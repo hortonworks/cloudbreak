@@ -143,7 +143,7 @@ public class StackImageUpdateServiceTest {
 
         StatedImage newImageIfVersionsMatch = underTest.getNewImageIfVersionsMatch(stack, "newimageid", "imagecatalogname", "imagecatalogurl");
         assertNotNull(newImageIfVersionsMatch);
-        verify(restRequestThreadLocalService).setRequestedWorkspaceId(WORKSPACE_ID);
+        verify(restRequestThreadLocalService).setWorkspaceId(stack.getWorkspace());
     }
 
     @Test

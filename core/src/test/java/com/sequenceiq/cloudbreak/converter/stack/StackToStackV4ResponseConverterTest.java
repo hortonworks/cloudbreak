@@ -176,18 +176,20 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("gcp", "mock", "openstack", "aws", "yarn", "azure",
                 "environmentName", "credentialName", "credentialCrn", "telemetry", "flowIdentifier", "loadBalancers"));
-        Mockito.verify(restRequestThreadLocalService).setRequestedWorkspaceId(source.getWorkspace().getId());
+        Mockito.verify(restRequestThreadLocalService).setWorkspaceId(source.getWorkspace());
     }
 
     @Test
-    public void testConvertWithoutCluster() throws CloudbreakImageNotFoundException {
+    public void testConvertWithSettingUpTheWorkspaceId() throws CloudbreakImageNotFoundException {
+
         Stack source = getSource();
         // GIVEN
-        getSource().setCluster(null);
+        given(restRequestThreadLocalService.getRequestedWorkspaceId()).willReturn(2L);
         given(imageService.getImage(source.getId())).willReturn(mock(Image.class));
         given(conversionService.convert(any(Image.class), eq(StackImageV4Response.class))).willReturn(new StackImageV4Response());
-        given(conversionService.convert(any(), eq(CustomDomainSettingsV4Response.class))).willReturn(new CustomDomainSettingsV4Response());
         given(conversionService.convert(any(), eq(StackAuthenticationV4Response.class))).willReturn(new StackAuthenticationV4Response());
+        given(conversionService.convert(any(), eq(CustomDomainSettingsV4Response.class))).willReturn(new CustomDomainSettingsV4Response());
+        given(conversionService.convert(any(), eq(ClusterV4Response.class))).willReturn(new ClusterV4Response());
         given(conversionService.convert(any(), eq(NetworkV4Response.class))).willReturn(new NetworkV4Response());
         given(conversionService.convert(any(), eq(WorkspaceResourceV4Response.class))).willReturn(new WorkspaceResourceV4Response());
         given(conversionService.convert(any(), eq(CloudbreakDetailsV4Response.class))).willReturn(new CloudbreakDetailsV4Response());
@@ -198,10 +200,9 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         // WHEN
         StackV4Response result = underTest.convert(source);
         // THEN
-        assertAllFieldsNotNull(result, Arrays.asList("cluster", "gcp", "mock", "openstack", "aws", "yarn", "azure",
-                "telemetry", "environmentName", "credentialName", "credentialCrn", "telemetry", "flowIdentifier", "loadBalancers"));
-
-        assertNull(result.getCluster());
+        assertAllFieldsNotNull(result, Arrays.asList("gcp", "mock", "openstack", "aws", "yarn", "azure",
+                "environmentName", "credentialName", "credentialCrn", "telemetry", "flowIdentifier", "loadBalancers"));
+        Mockito.verify(restRequestThreadLocalService).setWorkspaceId(source.getWorkspace());
     }
 
     @Test
