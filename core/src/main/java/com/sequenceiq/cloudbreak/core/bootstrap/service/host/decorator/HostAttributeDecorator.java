@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
+import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
@@ -33,7 +34,9 @@ public class HostAttributeDecorator {
     public Map<String, SaltPillarProperties> createHostAttributePillars(Stack stack, Set<Node> nodes) {
         stack.getCluster().getBlueprint().getBlueprintText();
         BlueprintTextProcessor blueprintTextProcessor = cmTemplateProcessorFactory.get(stack.getCluster().getBlueprint().getBlueprintText());
-        Map<String, Map<String, ServiceAttributes>> serviceAttributes = blueprintTextProcessor.getHostGroupBasedServiceAttributes();
+        Versioned blueprintVersion = () -> blueprintTextProcessor.getVersion().get();
+
+        Map<String, Map<String, ServiceAttributes>> serviceAttributes = blueprintTextProcessor.getHostGroupBasedServiceAttributes(blueprintVersion);
 
         Map<String, Map<String, Object>> attributes = new HashMap<>();
         for (Node node : nodes) {

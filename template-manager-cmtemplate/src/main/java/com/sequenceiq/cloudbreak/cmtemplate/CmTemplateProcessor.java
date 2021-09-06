@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cmtemplate;
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceCount.atLeast;
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceCount.exactly;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isTagsResourceSupportedViaBlueprint;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
@@ -63,6 +64,7 @@ import com.sequenceiq.cloudbreak.cmtemplate.configproviders.yarn.YarnConstants;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.yarn.YarnRoles;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.type.ClusterManagerType;
+import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.template.BlueprintProcessingException;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.model.ServiceAttributes;
@@ -272,20 +274,20 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
     }
 
     @Override
-    public AutoscaleRecommendation recommendAutoscale() {
-        Set<String> time = getRecommendationByBlacklist(BlackListedTimeBasedAutoscaleRole.class, true, List.of());
-        Set<String> load = getRecommendationByBlacklist(BlackListedLoadBasedAutoscaleRole.class, true, List.of());
+    public AutoscaleRecommendation recommendAutoscale(Versioned version) {
+        Set<String> time = getRecommendationByBlacklist(BlackListedTimeBasedAutoscaleRole.class, true, version, List.of());
+        Set<String> load = getRecommendationByBlacklist(BlackListedLoadBasedAutoscaleRole.class, true, version, List.of());
         return new AutoscaleRecommendation(time, load);
     }
 
     private <T extends Enum<T>> Set<String> getRecommendationByBlacklist(Class<T> enumClass, boolean emptyServiceListBlacklisted,
-            List<String> entitlements) {
+        Versioned version, List<String> entitlements) {
         Map<String, Set<String>> componentsByHostGroup = getNonGatewayComponentsByHostGroup();
-        return getRecommendationByBlacklist(enumClass, emptyServiceListBlacklisted, componentsByHostGroup, entitlements);
+        return getRecommendationByBlacklist(enumClass, emptyServiceListBlacklisted, componentsByHostGroup, version, entitlements);
     }
 
     private <T extends Enum<T>> Set<String> getRecommendationByBlacklist(Class<T> enumClass, boolean emptyServiceListBlacklisted,
-            Map<String, Set<String>> componentsByHostGroup, List<String> entitlements) {
+            Map<String, Set<String>> componentsByHostGroup, Versioned version, List<String> entitlements) {
         LOGGER.info("Get recommendation by blacklisted {} with entitlements {}.", enumClass, entitlements);
 
         Set<String> recos = new HashSet<>();
@@ -298,8 +300,9 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
                 com.google.common.base.Optional<T> enumValue = Enums.getIfPresent(enumClass, service);
                 if (enumValue.isPresent()) {
                     if (EntitledForServiceScale.class.isAssignableFrom(enumClass)) {
-                        Entitlement entitledFor = ((EntitledForServiceScale) enumValue.get()).getEntitledFor();
-                        if (!entitlements.contains(entitledFor.name())) {
+                        EntitledForServiceScale entitledForServiceScale = (EntitledForServiceScale) enumValue.get();
+                        Entitlement entitledFor = entitledForServiceScale.getEntitledFor();
+                        if (!entitlements.contains(entitledFor.name()) && !isVersionEnablesScaling(version, entitledForServiceScale)) {
                             foundBlackListItem = true;
                             break;
                         }
@@ -316,10 +319,15 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
         return recos;
     }
 
+    public boolean isVersionEnablesScaling(Versioned blueprintVersion, EntitledForServiceScale role) {
+        return role.getBlockedUntilCDPVersion().isPresent()
+                && isVersionNewerOrEqualThanLimited(blueprintVersion, role.getBlockedUntilCDPVersionAsVersion());
+    }
+
     @Override
-    public ResizeRecommendation recommendResize(List<String> entitlements) {
-        Set<String> upRecos = getRecommendationByBlacklist(BlackListedUpScaleRole.class, false, entitlements);
-        Set<String> downRecos = getRecommendationByBlacklist(BlackListedDownScaleRole.class, false, entitlements);
+    public ResizeRecommendation recommendResize(List<String> entitlements, Versioned version) {
+        Set<String> upRecos = getRecommendationByBlacklist(BlackListedUpScaleRole.class, false, version, entitlements);
+        Set<String> downRecos = getRecommendationByBlacklist(BlackListedDownScaleRole.class, false, version, entitlements);
         return new ResizeRecommendation(upRecos, downRecos);
     }
 
@@ -329,13 +337,13 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
     }
 
     @Override
-    public Map<String, Map<String, ServiceAttributes>> getHostGroupBasedServiceAttributes() {
+    public Map<String, Map<String, ServiceAttributes>> getHostGroupBasedServiceAttributes(Versioned version) {
         Map<String, Set<String>> componentsByHostGroup = collectComponentsByHostGroupWithYarnNMs();
 
         // Re-using the current LoadBasedAutoScaling recommendation to determine hostGroups which can
         // be autoscaled and marked as YarnConstants.ATTRIBUTE_NODE_INSTANCE_TYPE_COMPUTE
         Set<String> computeHostGroups = getRecommendationByBlacklist(BlackListedLoadBasedAutoscaleRole.class,
-                true, componentsByHostGroup, List.of());
+                true, componentsByHostGroup, version, List.of());
 
         Map<String, Map<String, ServiceAttributes>> result = new HashMap<>();
 
