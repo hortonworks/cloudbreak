@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.chain;
 
 public class FlowChainTriggers {
+
     public static final String FULL_PROVISION_TRIGGER_EVENT = "FULL_PROVISION_TRIGGER_EVENT";
 
     public static final String RECOVERY_PROVISION_TRIGGER_EVENT = "RECOVERY_PROVISION_TRIGGER_EVENT";
