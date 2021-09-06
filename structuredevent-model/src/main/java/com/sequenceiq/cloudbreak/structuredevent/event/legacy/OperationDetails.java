@@ -197,4 +197,25 @@ public class OperationDetails implements Serializable {
     public void setResourceEvent(String resourceEvent) {
         this.resourceEvent = resourceEvent;
     }
+
+    @Override
+    public String toString() {
+        return "OperationDetails{" +
+                "eventType=" + eventType +
+                ", resourceId=" + resourceId +
+                ", resourceCrn='" + resourceCrn + '\'' +
+                ", resourceName='" + resourceName + '\'' +
+                ", resourceType='" + resourceType + '\'' +
+                ", timestamp=" + timestamp +
+                ", userId='" + userId + '\'' +
+                ", cloudbreakId='" + cloudbreakId + '\'' +
+                ", cloudbreakVersion='" + cloudbreakVersion + '\'' +
+                ", workspaceId=" + workspaceId +
+                ", tenant='" + tenant + '\'' +
+                ", uuid='" + uuid + '\'' +
+                ", userCrn='" + userCrn + '\'' +
+                ", environmentCrn='" + environmentCrn + '\'' +
+                ", resourceEvent='" + resourceEvent + '\'' +
+                '}';
+    }
 }

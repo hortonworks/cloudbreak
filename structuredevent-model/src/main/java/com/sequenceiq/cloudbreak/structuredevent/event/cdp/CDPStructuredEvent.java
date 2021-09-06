@@ -69,4 +69,14 @@ public abstract class CDPStructuredEvent implements Serializable {
     public void setStatusReason(String statusReason) {
         this.statusReason = statusReason;
     }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "{" +
+                "type='" + type + '\'' +
+                ", operation=" + operation +
+                ", status='" + status + '\'' +
+                ", statusReason='" + statusReason + '\'' +
+                '}';
+    }
 }

@@ -823,4 +823,15 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
         return Objects.hash(id);
     }
 
+    @Override
+    public String toString() {
+        return "Cluster{" +
+                "id=" + id +
+                ", stackResourceCrn='" + stack.getResourceCrn() + '\'' +
+                ", name='" + name + '\'' +
+                ", status=" + status +
+                ", statusReason='" + statusReason + '\'' +
+                ", environmentCrn='" + environmentCrn + '\'' +
+                '}';
+    }
 }

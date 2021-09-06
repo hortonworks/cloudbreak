@@ -43,4 +43,14 @@ public class RPCMessage {
     public void setType(String type) {
         this.type = type;
     }
+
+    @Override
+    public String toString() {
+        return "RPCMessage{" +
+                "code=" + code +
+                ", message='" + message + '\'' +
+                ", name='" + name + '\'' +
+                ", type='" + type + '\'' +
+                '}';
+    }
 }

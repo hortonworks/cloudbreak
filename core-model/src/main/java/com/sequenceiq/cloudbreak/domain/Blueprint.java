@@ -189,4 +189,24 @@ public class Blueprint implements ProvisionEntity, WorkspaceAwareResource {
     public void setBlueprintUpgradeOption(BlueprintUpgradeOption blueprintUpgradeOption) {
         this.blueprintUpgradeOption = blueprintUpgradeOption;
     }
+
+    @Override
+    public String toString() {
+        return "Blueprint{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", stackName='" + stackName + '\'' +
+                ", description='" + description + '\'' +
+                ", hostGroupCount=" + hostGroupCount +
+                ", status=" + status +
+                ", tags=" + tags +
+                ", workspace=" + workspace +
+                ", resourceCrn='" + resourceCrn + '\'' +
+                ", creator='" + creator + '\'' +
+                ", stackType='" + stackType + '\'' +
+                ", stackVersion='" + stackVersion + '\'' +
+                ", created=" + created +
+                ", blueprintUpgradeOption=" + blueprintUpgradeOption +
+                '}';
+    }
 }

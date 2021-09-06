@@ -285,4 +285,14 @@ public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup>
     public void setInstanceGroupNetwork(InstanceGroupNetwork instanceGroupNetwork) {
         this.instanceGroupNetwork = instanceGroupNetwork;
     }
+
+    @Override
+    public String toString() {
+        return "InstanceGroup{" +
+                "id=" + id +
+                ", groupName='" + groupName + '\'' +
+                ", instanceGroupType=" + instanceGroupType +
+                ", stack=" + stack +
+                '}';
+    }
 }
