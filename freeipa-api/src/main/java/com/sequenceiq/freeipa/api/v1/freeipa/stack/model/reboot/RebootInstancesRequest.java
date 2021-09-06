@@ -51,4 +51,13 @@ public class RebootInstancesRequest {
     public void setInstanceIds(List<String> instanceIds) {
         this.instanceIds = instanceIds;
     }
+
+    @Override
+    public String toString() {
+        return "RebootInstancesRequest{" +
+                "environmentCrn='" + environmentCrn + '\'' +
+                ", forceReboot=" + forceReboot +
+                ", instanceIds=" + instanceIds +
+                '}';
+    }
 }

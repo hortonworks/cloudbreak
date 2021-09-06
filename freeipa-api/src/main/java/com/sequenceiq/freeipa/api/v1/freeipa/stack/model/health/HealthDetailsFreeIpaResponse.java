@@ -84,4 +84,14 @@ public class HealthDetailsFreeIpaResponse {
         this.status = status;
     }
 
+    @Override
+    public String toString() {
+        return "HealthDetailsFreeIpaResponse{" +
+                "environmentCrn='" + environmentCrn + '\'' +
+                ", name='" + name + '\'' +
+                ", crn='" + crn + '\'' +
+                ", nodeHealthDetails=" + nodeHealthDetails +
+                ", status=" + status +
+                '}';
+    }
 }

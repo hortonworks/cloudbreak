@@ -91,4 +91,17 @@ public class ListFreeIpaResponse {
     public void setAvailabilityStatus(AvailabilityStatus availabilityStatus) {
         this.availabilityStatus = availabilityStatus;
     }
+
+    @Override
+    public String toString() {
+        return "ListFreeIpaResponse{" +
+                "environmentCrn='" + environmentCrn + '\'' +
+                ", name='" + name + '\'' +
+                ", crn='" + crn + '\'' +
+                ", domain='" + domain + '\'' +
+                ", status=" + status +
+                ", statusString='" + statusString + '\'' +
+                ", availabilityStatus=" + availabilityStatus +
+                '}';
+    }
 }
