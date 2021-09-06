@@ -11,6 +11,7 @@ import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.ST
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -494,5 +495,48 @@ public class Stack implements AccountAwareResource {
                 ", minaSshdServiceId='" + minaSshdServiceId + '\'' +
                 ", ccmV2AgentCrn='" + ccmV2AgentCrn + '\'' +
                 '}';
+    }
+
+    @SuppressWarnings("checkstyle:CyclomaticComplexity")
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        } else if (o == null || getClass() != o.getClass()) {
+            return false;
+        } else {
+            Stack stack = (Stack) o;
+            return Objects.equals(id, stack.id)
+                    && Objects.equals(resourceCrn, stack.resourceCrn)
+                    && Objects.equals(name, stack.name)
+                    && Objects.equals(environmentCrn, stack.environmentCrn)
+                    && Objects.equals(accountId, stack.accountId)
+                    && Objects.equals(region, stack.region)
+                    && Objects.equals(created, stack.created)
+                    && Objects.equals(platformvariant, stack.platformvariant)
+                    && Objects.equals(availabilityZone, stack.availabilityZone)
+                    && Objects.equals(cloudPlatform, stack.cloudPlatform)
+                    && Objects.equals(gatewayport, stack.gatewayport)
+                    && Objects.equals(useCcm, stack.useCcm)
+                    && tunnel == stack.tunnel
+                    && Objects.equals(clusterProxyRegistered, stack.clusterProxyRegistered)
+                    && Objects.equals(terminated, stack.terminated)
+                    && Objects.equals(tags, stack.tags)
+                    && Objects.equals(telemetry, stack.telemetry)
+                    && Objects.equals(backup, stack.backup)
+                    && Objects.equals(template, stack.template)
+                    && Objects.equals(owner, stack.owner)
+                    && Objects.equals(appVersion, stack.appVersion)
+                    && Objects.equals(minaSshdServiceId, stack.minaSshdServiceId)
+                    && Objects.equals(ccmV2AgentCrn, stack.ccmV2AgentCrn)
+                    && Objects.equals(version, stack.version);
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, resourceCrn, name, environmentCrn, accountId, region, created, platformvariant, availabilityZone, cloudPlatform, gatewayport,
+                useCcm, tunnel, clusterProxyRegistered, terminated, tags, telemetry, backup, template, owner, appVersion, minaSshdServiceId, ccmV2AgentCrn,
+                version);
     }
 }

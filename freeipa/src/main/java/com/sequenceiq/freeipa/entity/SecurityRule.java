@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.entity;
 
+import java.util.Objects;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -93,5 +95,23 @@ public class SecurityRule {
                 + ", protocol='" + protocol + '\''
                 + ", modifiable=" + modifiable
                 + '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        } else if (o == null || getClass() != o.getClass()) {
+            return false;
+        } else {
+            SecurityRule that = (SecurityRule) o;
+            return modifiable == that.modifiable && Objects.equals(id, that.id) && Objects.equals(cidr, that.cidr) && Objects.equals(ports, that.ports)
+                    && Objects.equals(protocol, that.protocol);
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, cidr, ports, protocol, modifiable);
     }
 }

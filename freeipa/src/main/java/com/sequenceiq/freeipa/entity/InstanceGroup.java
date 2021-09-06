@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.entity;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -23,8 +24,8 @@ import javax.persistence.SequenceGenerator;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupType;
-
 import com.sequenceiq.freeipa.entity.util.InstanceGroupTypeConverter;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 @NamedEntityGraph(name = "InstanceGroup.instanceMetaData",
@@ -179,5 +180,28 @@ public class InstanceGroup implements Comparable<InstanceGroup> {
 
     public Set<InstanceMetaData> getInstanceMetaData() {
         return instanceMetaData;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        } else if (o == null || getClass() != o.getClass()) {
+            return false;
+        } else {
+            InstanceGroup that = (InstanceGroup) o;
+            return Objects.equals(id, that.id)
+                    && Objects.equals(template, that.template)
+                    && Objects.equals(instanceGroupNetwork, that.instanceGroupNetwork)
+                    && Objects.equals(groupName, that.groupName)
+                    && instanceGroupType == that.instanceGroupType
+                    && Objects.equals(attributes, that.attributes)
+                    && Objects.equals(nodeCount, that.nodeCount);
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, template, instanceGroupNetwork, groupName, instanceGroupType, attributes, nodeCount);
     }
 }

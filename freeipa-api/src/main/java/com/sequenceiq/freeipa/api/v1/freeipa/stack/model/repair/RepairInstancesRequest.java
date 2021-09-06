@@ -52,4 +52,13 @@ public class RepairInstancesRequest {
     public void setInstanceIds(List<String> instanceIds) {
         this.instanceIds = instanceIds;
     }
+
+    @Override
+    public String toString() {
+        return "RepairInstancesRequest{" +
+                "environmentCrn='" + environmentCrn + '\'' +
+                ", forceRepair=" + forceRepair +
+                ", instanceIds=" + instanceIds +
+                '}';
+    }
 }

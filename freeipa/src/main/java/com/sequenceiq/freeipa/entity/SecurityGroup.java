@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.entity;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -47,10 +48,6 @@ public class SecurityGroup {
         this.securityRules = securityRules;
     }
 
-    public String getFirstSecurityGroupId() {
-        return securityGroupIds == null || securityGroupIds.isEmpty() ? null : securityGroupIds.iterator().next();
-    }
-
     public Set<String> getSecurityGroupIds() {
         return securityGroupIds;
     }
@@ -65,5 +62,32 @@ public class SecurityGroup {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        } else if (o == null || getClass() != o.getClass()) {
+            return false;
+        } else {
+            SecurityGroup that = (SecurityGroup) o;
+            return Objects.equals(id, that.id) && Objects.equals(name, that.name);
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name);
+    }
+
+    @Override
+    public String toString() {
+        return "SecurityGroup{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", securityRules=" + securityRules +
+                ", securityGroupIds=" + securityGroupIds +
+                '}';
     }
 }
