@@ -67,7 +67,7 @@ public class HostAttributeDecoratorTest {
 
 
         CmTemplateProcessor blueprintTextProcessor = mock(CmTemplateProcessor.class);
-        when(blueprintTextProcessor.getHostGroupBasedServiceAttributes()).thenReturn(yarnAttrs);
+        when(blueprintTextProcessor.getHostGroupBasedServiceAttributes(any())).thenReturn(yarnAttrs);
 
         when(cmTemplateProcessorFactory.get(any(String.class))).thenReturn(blueprintTextProcessor);
 

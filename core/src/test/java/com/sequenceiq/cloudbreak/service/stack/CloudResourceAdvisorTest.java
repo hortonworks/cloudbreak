@@ -4,13 +4,16 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
+
 import java.util.Optional;
 import java.util.Set;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+
 import com.sequenceiq.cloudbreak.cloud.model.AutoscaleRecommendation;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -66,7 +69,7 @@ public class CloudResourceAdvisorTest {
         Blueprint blueprint = new Blueprint();
         blueprint.setBlueprintText("{\"Blueprints\":{123:2}}");
         when(blueprintTextProcessorFactory.createBlueprintTextProcessor("{\"Blueprints\":{123:2}}")).thenReturn(blueprintTextProcessor);
-        when(blueprintTextProcessor.recommendAutoscale()).thenReturn(new AutoscaleRecommendation(Set.of("compute"), Set.of("compute")));
+        when(blueprintTextProcessor.recommendAutoscale(any())).thenReturn(new AutoscaleRecommendation(Set.of("compute"), Set.of("compute")));
         when(blueprintService.getByNameForWorkspaceId(any(), anyLong())).thenReturn(blueprint);
         assertEquals(new AutoscaleRecommendation(Set.of("compute"), Set.of("compute")),
                 underTest.getAutoscaleRecommendation(workspace.getId(), TEST_BLUEPRINT_NAME));

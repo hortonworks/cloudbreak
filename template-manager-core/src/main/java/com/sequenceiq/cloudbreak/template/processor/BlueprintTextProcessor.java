@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.cloud.model.GatewayRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceCount;
 import com.sequenceiq.cloudbreak.cloud.model.ResizeRecommendation;
 import com.sequenceiq.cloudbreak.common.type.ClusterManagerType;
+import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.template.model.ServiceAttributes;
 import com.sequenceiq.cloudbreak.template.processor.configuration.HostgroupConfigurations;
 import com.sequenceiq.cloudbreak.template.processor.configuration.SiteConfigurations;
@@ -58,9 +59,9 @@ public interface BlueprintTextProcessor {
 
     GatewayRecommendation recommendGateway();
 
-    AutoscaleRecommendation recommendAutoscale();
+    AutoscaleRecommendation recommendAutoscale(Versioned version);
 
-    ResizeRecommendation recommendResize(List<String> entitlements);
+    ResizeRecommendation recommendResize(List<String> entitlements, Versioned version);
 
     /**
      * Retrieves attributes which may need to be configured for a service.
@@ -68,7 +69,7 @@ public interface BlueprintTextProcessor {
      *
      * @return a map containing hostGroups as key, and a map of serviceName to attributes as the value
      */
-    Map<String, Map<String, ServiceAttributes>> getHostGroupBasedServiceAttributes();
+    Map<String, Map<String, ServiceAttributes>> getHostGroupBasedServiceAttributes(Versioned version);
 
     String getStackVersion();
 
