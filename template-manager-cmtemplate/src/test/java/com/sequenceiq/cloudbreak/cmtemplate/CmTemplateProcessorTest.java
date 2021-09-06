@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.cluster.model.ClusterHostAttributes;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.yarn.YarnConstants;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.yarn.YarnRoles;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.model.ServiceAttributes;
@@ -486,34 +487,39 @@ public class CmTemplateProcessorTest {
 
     @Test
     public void recommendAutoscale() {
+        Versioned blueprintVersion = () -> "7.2.11";
+
         underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager-multi-gateway.bp"));
-        assertEquals(new AutoscaleRecommendation(Set.of(), Set.of()), underTest.recommendAutoscale());
+        assertEquals(new AutoscaleRecommendation(Set.of(), Set.of()), underTest
+                .recommendAutoscale(blueprintVersion));
 
         underTest = new CmTemplateProcessor(getBlueprintText("input/namenode-ha.bp"));
-        assertEquals(new AutoscaleRecommendation(Set.of("gateway"), Set.of("gateway")), underTest.recommendAutoscale());
+        assertEquals(new AutoscaleRecommendation(Set.of("gateway"), Set.of("gateway")), underTest.recommendAutoscale(blueprintVersion));
 
         underTest = new CmTemplateProcessor(getBlueprintText("input/kafka.bp"));
-        assertEquals(new AutoscaleRecommendation(Set.of(), Set.of()), underTest.recommendAutoscale());
+        assertEquals(new AutoscaleRecommendation(Set.of(), Set.of()), underTest.recommendAutoscale(blueprintVersion));
 
         underTest = new CmTemplateProcessor(getBlueprintText("input/de-ha.bp"));
-        assertEquals(new AutoscaleRecommendation(Set.of("compute"), Set.of("compute")), underTest.recommendAutoscale());
+        assertEquals(new AutoscaleRecommendation(Set.of("compute"), Set.of("compute")), underTest.recommendAutoscale(blueprintVersion));
     }
 
     @Test
     public void recommendResize() {
+        Versioned blueprintVersion = () -> "7.2.11";
+
         underTest = new CmTemplateProcessor(getBlueprintText("input/kafka.bp"));
-        assertEquals(new ResizeRecommendation(Set.of("quorum"), Set.of("quorum")), underTest.recommendResize(List.of()));
+        assertEquals(new ResizeRecommendation(Set.of("quorum"), Set.of("quorum")), underTest.recommendResize(List.of(), blueprintVersion));
 
         underTest = new CmTemplateProcessor(getBlueprintText("input/de-ha.bp"));
         Set<String> hostGroups = Set.of("gateway", "compute", "worker");
-        assertEquals(new ResizeRecommendation(hostGroups, hostGroups), underTest.recommendResize(List.of()));
+        assertEquals(new ResizeRecommendation(hostGroups, hostGroups), underTest.recommendResize(List.of(), blueprintVersion));
 
         underTest = new CmTemplateProcessor(getBlueprintText("input/cb5660.bp"));
         hostGroups = Set.of("gateway", "quorum", "worker", "compute");
-        assertEquals(new ResizeRecommendation(hostGroups, hostGroups), underTest.recommendResize(List.of()));
+        assertEquals(new ResizeRecommendation(hostGroups, hostGroups), underTest.recommendResize(List.of(), blueprintVersion));
 
         underTest = new CmTemplateProcessor(getBlueprintText("input/nifi.bp"));
-        assertEquals(new ResizeRecommendation(Set.of(), Set.of()), underTest.recommendResize(List.of()));
+        assertEquals(new ResizeRecommendation(Set.of(), Set.of()), underTest.recommendResize(List.of(), blueprintVersion));
     }
 
     @Test
@@ -525,9 +531,11 @@ public class CmTemplateProcessorTest {
 
     @Test
     public void testYARNServiceAttributes() {
+        Versioned blueprintVersion = () -> "7.2.11";
+
         underTest = new CmTemplateProcessor(getBlueprintText("input/custom-hostgroups-for-nms.bp"));
         assertEquals(7, underTest.getHostTemplateNames().size());
-        Map<String, Map<String, ServiceAttributes>> attrs = underTest.getHostGroupBasedServiceAttributes();
+        Map<String, Map<String, ServiceAttributes>> attrs = underTest.getHostGroupBasedServiceAttributes(blueprintVersion);
         assertEquals(4, attrs.size());
 
         Map<String, ServiceAttributes> serviceAttributesMap;

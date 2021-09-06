@@ -44,6 +44,7 @@ import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
 import com.sequenceiq.cloudbreak.common.type.ClusterManagerType;
+import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
@@ -223,7 +224,8 @@ public class CloudResourceAdvisor {
     }
 
     private ResizeRecommendation recommendResize(BlueprintTextProcessor blueprintTextProcessor, List<String> entitlements) {
-        ResizeRecommendation resizeRecommendation = blueprintTextProcessor.recommendResize(entitlements);
+        Versioned blueprintVersion = () -> blueprintTextProcessor.getVersion().get();
+        ResizeRecommendation resizeRecommendation = blueprintTextProcessor.recommendResize(entitlements, blueprintVersion);
 
         if (resizeRecommendation.getScaleUpHostGroups().isEmpty()) {
             Set<String> scaleUpHostGroups = filterHostGroupByPredicate(blueprintTextProcessor, this::fallbackScaleUpFilter);
@@ -255,12 +257,13 @@ public class CloudResourceAdvisor {
 
     private AutoscaleRecommendation recommendAutoscale(BlueprintTextProcessor blueprintTextProcessor) {
         String version = blueprintTextProcessor.getVersion().orElse("");
+        Versioned blueprintVersion = () -> blueprintTextProcessor.getVersion().get();
         if (!isVersionNewerOrEqualThanLimited(version, CLOUDERAMANAGER_VERSION_7_2_1)) {
             LOGGER.debug("Autoscale is not supported in this version {}.", version);
             return new AutoscaleRecommendation(Set.of(), Set.of());
         }
 
-        AutoscaleRecommendation autoscaleRecommendation = blueprintTextProcessor.recommendAutoscale();
+        AutoscaleRecommendation autoscaleRecommendation = blueprintTextProcessor.recommendAutoscale(blueprintVersion);
 
         if (autoscaleRecommendation.getTimeBasedHostGroups().isEmpty()) {
             Set<String> autoscaleGroups = filterHostGroupByPredicate(blueprintTextProcessor, this::fallbackTimeBasedAutoscaleFilter);
