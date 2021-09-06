@@ -97,6 +97,7 @@ else
     PUBLIC_IP=127.0.0.1
 fi
 
+mkdir -p ./apidefinitions
 curl -k http://${PUBLIC_IP}:8080/cb/api/swagger.json -o ./apidefinitions/cloudbreak.json
 curl -k http://${PUBLIC_IP}:8088/environmentservice/api/swagger.json -o ./apidefinitions/environment.json
 curl -k http://${PUBLIC_IP}:8090/freeipa/api/swagger.json -o ./apidefinitions/freeipa.json
