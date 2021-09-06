@@ -35,7 +35,6 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.EphemeralClusterEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterAndStackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterCertificatesRotationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterCredentialChangeTriggerEvent;
@@ -60,7 +59,6 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.CmSyncTriggerEvent;
-import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.EphemeralClusterUpdateTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StackRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.TerminationEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.TerminationType;
@@ -156,11 +154,6 @@ public class ReactorFlowManager {
     public FlowIdentifier triggerClusterInstall(Long stackId) {
         String selector = CLUSTER_CREATION_EVENT.event();
         return reactorNotifier.notify(stackId, selector, new StackEvent(selector, stackId));
-    }
-
-    public void triggerEphemeralUpdate(Long stackId) {
-        String selector = EphemeralClusterEvent.EPHEMERAL_CLUSTER_UPDATE_TRIGGER_EVENT.event();
-        reactorNotifier.notify(stackId, selector, new EphemeralClusterUpdateTriggerEvent(selector, stackId));
     }
 
     public FlowIdentifier triggerClusterReInstall(Long stackId) {
