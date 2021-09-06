@@ -25,11 +25,9 @@ without-build-with-ums: download-cbd runtest-ums
 
 build-with-docker: download-cbd docker-build runtest
 
-swagger-check: download-cbd buildswagger create-cloudbreak-context swagger-compare
+swagger-check: buildswagger swagger-compare
 
 bring-up-schema: download-cbd create-image create-cloudbreak-context schema-migration
-
-swagger-check: swagger-compare
 
 download-jar-from-s3:
 	./scripts/download-artifacts.sh
