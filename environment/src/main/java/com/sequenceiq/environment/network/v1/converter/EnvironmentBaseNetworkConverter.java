@@ -69,7 +69,15 @@ public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetw
     }
 
     Set<String> getNetworkCidrs(BaseNetwork source) {
-        return Strings.isNullOrEmpty(source.getNetworkCidrs()) ? null : Arrays.stream(source.getNetworkCidrs().split(",")).collect(Collectors.toSet());
+        if (Strings.isNullOrEmpty(source.getNetworkCidrs())) {
+            if (Strings.isNullOrEmpty(source.getNetworkCidr())) {
+                return Set.of();
+            } else {
+                return Set.of(source.getNetworkCidr());
+            }
+        } else {
+            return Arrays.stream(source.getNetworkCidrs().split(",")).collect(Collectors.toSet());
+        }
     }
 
     public void convertSubnets(BaseNetwork source, NetworkDto.Builder targetBuilder) {

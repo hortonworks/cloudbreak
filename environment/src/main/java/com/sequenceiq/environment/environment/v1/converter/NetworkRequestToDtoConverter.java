@@ -106,7 +106,7 @@ public class NetworkRequestToDtoConverter {
     }
 
     private Set<String> getNetworkCidrs(EnvironmentNetworkRequest network) {
-        return Strings.isNullOrEmpty(network.getNetworkCidr()) ? null : Set.of(network.getNetworkCidr());
+        return Strings.isNullOrEmpty(network.getNetworkCidr()) ? Set.of() : Set.of(network.getNetworkCidr());
     }
 
     private PrivateSubnetCreation getPrivateSubnetCreation(EnvironmentNetworkRequest network) {

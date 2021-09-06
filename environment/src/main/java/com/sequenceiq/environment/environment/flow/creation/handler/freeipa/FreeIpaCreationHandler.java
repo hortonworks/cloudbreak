@@ -204,15 +204,25 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
 
                 AddDnsZoneForSubnetsRequest addDnsZoneForSubnetsRequest = new AddDnsZoneForSubnetsRequest();
                 addDnsZoneForSubnetsRequest.setEnvironmentCrn(parentEnvironmentCrn);
-                addDnsZoneForSubnetsRequest.setSubnets(
-                        environmentDto.getNetwork()
-                                .getNetworkCidrs()
-                                .stream()
-                                .collect(Collectors.toList()));
+                addDnsZoneForSubnetsRequest.setSubnets(getSubnetCidrs(environmentDto));
 
                 dnsV1Endpoint.addDnsZoneForSubnets(addDnsZoneForSubnetsRequest);
             }
         }
+    }
+
+    private List<String> getSubnetCidrs(EnvironmentDto environmentDto) {
+        if (environmentDto.getNetwork() != null) {
+            if (environmentDto.getNetwork().getNetworkCidrs() != null) {
+                return environmentDto.getNetwork()
+                        .getNetworkCidrs()
+                        .stream()
+                        .collect(Collectors.toList());
+            } else if (!Strings.isNullOrEmpty(environmentDto.getNetwork().getNetworkCidr())) {
+                return List.of(environmentDto.getNetwork().getNetworkCidr());
+            }
+        }
+        return List.of();
     }
 
     private boolean shouldSendSubnetIdsToFreeIpa(AddDnsZoneForSubnetIdsRequest addDnsZoneForSubnetIdsRequest) {
