@@ -33,7 +33,6 @@ import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ChangePrimaryGatewayTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent;
-import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.EphemeralClustersUpgradeTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.RescheduleStatusCheckTriggerEvent;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
@@ -119,10 +118,6 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
                         event.isRestartServices(), false));
             }
         }
-        if (!event.isRemoveOnly() && (repairConfig.getSinglePrimaryGateway().isPresent())
-                && !stackService.findClustersConnectedToDatalakeByDatalakeStackId(event.getResourceId()).isEmpty()) {
-            flowTriggers.add(upgradeEphemeralClustersEvent(event));
-        }
         flowTriggers.add(rescheduleStatusCheckEvent(event));
         flowTriggers.add(new FlowChainFinalizePayload(getName(), event.getResourceId(), event.accepted()));
         return flowTriggers;
@@ -145,11 +140,6 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
 
     private ChangePrimaryGatewayTriggerEvent changePrimaryGatewayEvent(ClusterRepairTriggerEvent event) {
         return new ChangePrimaryGatewayTriggerEvent(ChangePrimaryGatewayEvent.CHANGE_PRIMARY_GATEWAY_TRIGGER_EVENT.event(),
-                event.getResourceId(), event.accepted());
-    }
-
-    private EphemeralClustersUpgradeTriggerEvent upgradeEphemeralClustersEvent(ClusterRepairTriggerEvent event) {
-        return new EphemeralClustersUpgradeTriggerEvent(FlowChainTriggers.EPHEMERAL_CLUSTERS_UPDATE_TRIGGER_EVENT,
                 event.getResourceId(), event.accepted());
     }
 

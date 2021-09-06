@@ -120,7 +120,6 @@ public class ClusterRepairFlowEventChainFactoryTest {
         assertEquals(List.of("FLOWCHAIN_INIT_TRIGGER_EVENT",
                 "STACK_DOWNSCALE_TRIGGER_EVENT",
                 "FULL_UPSCALE_TRIGGER_EVENT",
-                "EPHEMERAL_CLUSTERS_UPDATE_TRIGGER_EVENT",
                 "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT",
                 "FLOWCHAIN_FINALIZE_TRIGGER_EVENT"), triggeredOperations);
     }
@@ -191,7 +190,6 @@ public class ClusterRepairFlowEventChainFactoryTest {
                 "FLOWCHAIN_INIT_TRIGGER_EVENT",
                 "STACK_DOWNSCALE_TRIGGER_EVENT",
                 "FULL_UPSCALE_TRIGGER_EVENT",
-                "EPHEMERAL_CLUSTERS_UPDATE_TRIGGER_EVENT",
                 "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT",
                 "FLOWCHAIN_FINALIZE_TRIGGER_EVENT"), triggeredOperations);
     }
