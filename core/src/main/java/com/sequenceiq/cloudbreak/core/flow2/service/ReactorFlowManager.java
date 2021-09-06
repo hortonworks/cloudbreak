@@ -75,6 +75,7 @@ import reactor.rx.Promise;
  */
 @Service
 public class ReactorFlowManager {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ReactorFlowManager.class);
 
     @Inject
