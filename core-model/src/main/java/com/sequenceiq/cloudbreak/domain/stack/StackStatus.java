@@ -103,4 +103,13 @@ public class StackStatus implements ProvisionEntity {
     public Long getCreated() {
         return created;
     }
+
+    @Override
+    public String toString() {
+        return "StackStatus{" +
+                "status=" + status +
+                ", statusReason='" + statusReason + '\'' +
+                ", detailedStackStatus=" + detailedStackStatus +
+                '}';
+    }
 }

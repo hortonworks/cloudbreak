@@ -46,4 +46,13 @@ public class ImageSettingsV4Request implements JsonEntity {
     public void setOs(String os) {
         this.os = os;
     }
+
+    @Override
+    public String toString() {
+        return "ImageSettingsV4Request{" +
+                "catalog='" + catalog + '\'' +
+                ", id='" + id + '\'' +
+                ", os='" + os + '\'' +
+                '}';
+    }
 }

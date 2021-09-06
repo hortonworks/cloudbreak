@@ -53,4 +53,12 @@ public abstract class StructuredEvent implements Serializable {
     public abstract String getStatus();
 
     public abstract Long getDuration();
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "{" +
+                "type='" + type + '\'' +
+                ", operation=" + operation +
+                '}';
+    }
 }

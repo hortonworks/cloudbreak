@@ -852,4 +852,16 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
     public void setStackVersion(String stackVersion) {
         this.stackVersion = stackVersion;
     }
+
+    @Override
+    public String toString() {
+        return "Stack{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", resourceCrn='" + resourceCrn + '\'' +
+                ", cluster=" + cluster +
+                ", stackStatus=" + stackStatus +
+                ", environmentCrn='" + environmentCrn + '\'' +
+                '}';
+    }
 }
