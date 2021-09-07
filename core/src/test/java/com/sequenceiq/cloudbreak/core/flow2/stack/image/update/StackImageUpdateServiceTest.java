@@ -133,7 +133,7 @@ public class StackImageUpdateServiceTest {
     }
 
     @Test
-    public void testGetNewImageIfVersionsMatchAndWorkspaceIdIsNotInThreadLocal() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+    public void testGetNewImageIfVersionsMatch() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         com.sequenceiq.cloudbreak.cloud.model.Image imageInComponent =
                 new com.sequenceiq.cloudbreak.cloud.model.Image("imageOldName", Collections.emptyMap(), "centos7", "centos",
                         statedImage.getImageCatalogUrl(), statedImage.getImageCatalogName(), "uuid2", packageVersions);
@@ -143,20 +143,7 @@ public class StackImageUpdateServiceTest {
 
         StatedImage newImageIfVersionsMatch = underTest.getNewImageIfVersionsMatch(stack, "newimageid", "imagecatalogname", "imagecatalogurl");
         assertNotNull(newImageIfVersionsMatch);
-        verify(restRequestThreadLocalService).setRequestedWorkspaceId(WORKSPACE_ID);
-    }
-
-    @Test
-    public void testGetNewImageIfVersionsMatchAndWorkspaceIdIsInThreadLocal() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        com.sequenceiq.cloudbreak.cloud.model.Image imageInComponent =
-                new com.sequenceiq.cloudbreak.cloud.model.Image("imageOldName", Collections.emptyMap(), "centos7", "centos",
-                        statedImage.getImageCatalogUrl(), statedImage.getImageCatalogName(), "uuid2", packageVersions);
-        when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(WORKSPACE_ID);
-        when(componentConfigProviderService.getImage(anyLong())).thenReturn(imageInComponent);
-        when(imageCatalogService.getImage(anyString(), anyString(), anyString())).thenReturn(statedImage);
-
-        StatedImage newImageIfVersionsMatch = underTest.getNewImageIfVersionsMatch(stack, "newimageid", "imagecatalogname", "imagecatalogurl");
-        assertNotNull(newImageIfVersionsMatch);
+        verify(restRequestThreadLocalService).setWorkspace(stack.getWorkspace());
     }
 
     @Test(expected = OperationException.class)
@@ -167,6 +154,8 @@ public class StackImageUpdateServiceTest {
         when(componentConfigProviderService.getImage(anyLong())).thenReturn(imageInComponent);
         when(imageCatalogService.getImage(anyString(), anyString(), anyString())).thenReturn(statedImage);
         underTest.getNewImageIfVersionsMatch(stack, "newimageid", "imagecatalogname", "imagecatalogurl");
+
+        verify(restRequestThreadLocalService).setWorkspace(stack.getWorkspace());
     }
 
     @Test(expected = OperationException.class)
@@ -178,6 +167,8 @@ public class StackImageUpdateServiceTest {
         when(componentConfigProviderService.getImage(anyLong())).thenReturn(imageInComponent);
         when(imageCatalogService.getImage(anyString(), anyString(), anyString())).thenReturn(statedImage);
         underTest.getNewImageIfVersionsMatch(stack, "newimageid", "imagecatalogname", "imagecatalogurl");
+
+        verify(restRequestThreadLocalService).setWorkspace(stack.getWorkspace());
     }
 
     @Test
