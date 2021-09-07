@@ -82,6 +82,10 @@
         {
           "name": "core_defaultfs",
           "value": "s3a://cloudbreak-bucket/kafka"
+        },
+        {
+          "name": "core_site_safety_valve",
+          "value": "<property><name>hadoop.security.groups.cache.background.reload</name><value>true</value></property>"
         }
       ],
       "roleConfigGroups": [
