@@ -1,0 +1,5 @@
+name: "aws-ephemeral-disk-tests"
+tests:
+  - name: "aws-ephemeral-disk-tests"
+    classes:
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.AwsDistroXEphemeralTemporaryStorageStopStartTest
