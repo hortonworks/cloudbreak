@@ -37,6 +37,8 @@ public class CoreConfigProvider extends AbstractRoleConfigProvider {
 
     private static final String CORE_SITE_SAFETY_VALVE = "core_site_safety_valve";
 
+    private static final String HADOOP_SECURITY_GROUPS_CACHE_BACKGROUND_RELOAD = "hadoop.security.groups.cache.background.reload";
+
     @Inject
     private S3ConfigProvider s3ConfigProvider;
 
@@ -53,6 +55,8 @@ public class CoreConfigProvider extends AbstractRoleConfigProvider {
 
         StringBuilder hdfsCoreSiteSafetyValveValue = new StringBuilder();
         s3ConfigProvider.getServiceConfigs(source, hdfsCoreSiteSafetyValveValue);
+        hdfsCoreSiteSafetyValveValue.append(ConfigUtils.getSafetyValveProperty(HADOOP_SECURITY_GROUPS_CACHE_BACKGROUND_RELOAD, "true"));
+
         if (!hdfsCoreSiteSafetyValveValue.toString().isEmpty()) {
             apiClusterTemplateConfigs.add(config(CORE_SITE_SAFETY_VALVE, hdfsCoreSiteSafetyValveValue.toString()));
         }
