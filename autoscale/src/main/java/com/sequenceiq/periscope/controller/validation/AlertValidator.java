@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
+import com.sequenceiq.periscope.api.model.AdjustmentType;
 import com.sequenceiq.periscope.api.model.AlertType;
 import com.sequenceiq.periscope.api.model.DistroXAutoscaleClusterRequest;
 import com.sequenceiq.periscope.api.model.LoadAlertRequest;
@@ -25,6 +26,7 @@ import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.service.AutoscaleRecommendationService;
 import com.sequenceiq.periscope.service.DateService;
 import com.sequenceiq.periscope.service.EntitlementValidationService;
+import com.sequenceiq.periscope.service.configuration.LimitsConfigurationService;
 
 @Component
 public class AlertValidator {
@@ -43,6 +45,9 @@ public class AlertValidator {
 
     @Inject
     private AutoScaleClusterCommonService asClusterCommonService;
+
+    @Inject
+    private LimitsConfigurationService limitsConfigurationService;
 
     public void validateEntitlementAndDisableIfNotEntitled(Cluster cluster) {
         if (!entitlementValidationService.autoscalingEntitlementEnabled(ThreadBasedUserCrnProvider.getAccountId(), cluster.getCloudPlatform())) {
@@ -80,6 +85,8 @@ public class AlertValidator {
             Set<String> timeAlertHostGroups = distroXAutoscaleClusterRequest.getTimeAlertRequests().stream()
                     .map(timeAlertRequest -> {
                         validateSchedule(timeAlertRequest);
+                        validateClusterLimit(timeAlertRequest.getScalingPolicy().getAdjustmentType(),
+                                timeAlertRequest.getScalingPolicy().getScalingAdjustment());
                         return timeAlertRequest;
                     })
                     .map(TimeAlertRequest::getScalingPolicy)
@@ -90,10 +97,23 @@ public class AlertValidator {
 
         if (!distroXAutoscaleClusterRequest.getLoadAlertRequests().isEmpty()) {
             Set<String> loadAlertHostGroups = distroXAutoscaleClusterRequest.getLoadAlertRequests().stream()
+                    .map(loadAlertRequest -> {
+                        validateClusterLimit(loadAlertRequest.getScalingPolicy().getAdjustmentType(),
+                                loadAlertRequest.getLoadAlertConfiguration().getMaxResourceValue());
+                        return loadAlertRequest;
+                    })
                     .map(LoadAlertRequest::getScalingPolicy)
                     .map(ScalingPolicyBase::getHostGroup)
                     .collect(Collectors.toSet());
             validateSupportedHostGroup(cluster, loadAlertHostGroups, AlertType.LOAD);
+        }
+    }
+
+    public void validateClusterLimit(AdjustmentType adjustmentType, Integer configuredMax) {
+        if ((adjustmentType == AdjustmentType.LOAD_BASED || adjustmentType == AdjustmentType.EXACT)
+                && configuredMax > limitsConfigurationService.getMaxNodeCountLimit()) {
+            throw new BadRequestException(messagesService.getMessage(MessageCode.AUTOSCALING_CLUSTER_LIMIT_EXCEEDED,
+                    List.of(limitsConfigurationService.getMaxNodeCountLimit())));
         }
     }
 

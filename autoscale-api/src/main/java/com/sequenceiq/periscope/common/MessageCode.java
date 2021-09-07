@@ -10,6 +10,8 @@ public class MessageCode {
 
     public static final String AUTOSCALING_CONFIG_UPDATED = "autoscale.config.updated";
 
+    public static final String AUTOSCALING_CLUSTER_LIMIT_EXCEEDED = "autoscale.cluster.limit.exceeded";
+
     public static final String AUTOSCALING_ENABLED = "autoscale.enabled";
 
     public static final String AUTOSCALING_DISABLED = "autoscale.disabled";
@@ -19,6 +21,8 @@ public class MessageCode {
     public static final String AUTOSCALING_ACTIVITY_NOT_REQUIRED = "autoscale.activity.not.required";
 
     public static final String AUTOSCALING_ACTIVITY_SUCCESS = "autoscale.activity.success";
+
+    public static final String AUTOSCALING_ACTIVITY_NODE_LIMIT_EXCEEDED = "autoscale.activity.nodelimitexceeded";
 
     public static final String AUTOSCALING_TRIGGER_FAILURE = "autoscale.trigger.failure";
 

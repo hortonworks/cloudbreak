@@ -12,7 +12,9 @@ public class ScalingEvent extends ApplicationEvent {
 
     private List<String> decommissionNodeIds;
 
-    private transient Integer hostGroupNodeCount;
+    private transient Integer existingHostGroupNodeCount;
+
+    private transient Integer existingClusterNodeCount;
 
     private transient Integer desiredAbsoluteHostGroupNodeCount;
 
@@ -32,12 +34,12 @@ public class ScalingEvent extends ApplicationEvent {
         this.decommissionNodeIds = decommissionNodeIds;
     }
 
-    public Integer getHostGroupNodeCount() {
-        return hostGroupNodeCount;
+    public Integer getExistingHostGroupNodeCount() {
+        return existingHostGroupNodeCount;
     }
 
-    public void setHostGroupNodeCount(Integer hostGroupNodeCount) {
-        this.hostGroupNodeCount = hostGroupNodeCount;
+    public void setExistingHostGroupNodeCount(Integer existingHostGroupNodeCount) {
+        this.existingHostGroupNodeCount = existingHostGroupNodeCount;
     }
 
     public Integer getDesiredAbsoluteHostGroupNodeCount() {
@@ -46,5 +48,13 @@ public class ScalingEvent extends ApplicationEvent {
 
     public void setDesiredAbsoluteHostGroupNodeCount(Integer desiredAbsoluteHostGroupNodeCount) {
         this.desiredAbsoluteHostGroupNodeCount = desiredAbsoluteHostGroupNodeCount;
+    }
+
+    public Integer getExistingClusterNodeCount() {
+        return existingClusterNodeCount;
+    }
+
+    public void setExistingClusterNodeCount(Integer existingClusterNodeCount) {
+        this.existingClusterNodeCount = existingClusterNodeCount;
     }
 }

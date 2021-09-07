@@ -1,5 +1,6 @@
 package com.sequenceiq.periscope.controller.validation;
 
+import static com.sequenceiq.periscope.common.MessageCode.AUTOSCALING_CLUSTER_LIMIT_EXCEEDED;
 import static com.sequenceiq.periscope.common.MessageCode.AUTOSCALING_ENTITLEMENT_NOT_ENABLED;
 import static com.sequenceiq.periscope.common.MessageCode.UNSUPPORTED_AUTOSCALING_HOSTGROUP;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -28,8 +29,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.AutoscaleRe
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.common.api.type.Tunnel;
+import com.sequenceiq.periscope.api.model.AdjustmentType;
 import com.sequenceiq.periscope.api.model.AlertType;
 import com.sequenceiq.periscope.api.model.DistroXAutoscaleClusterRequest;
+import com.sequenceiq.periscope.api.model.LoadAlertConfigurationRequest;
 import com.sequenceiq.periscope.api.model.LoadAlertRequest;
 import com.sequenceiq.periscope.api.model.ScalingPolicyRequest;
 import com.sequenceiq.periscope.api.model.TimeAlertRequest;
@@ -38,6 +41,7 @@ import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.service.AutoscaleRecommendationService;
 import com.sequenceiq.periscope.service.DateService;
 import com.sequenceiq.periscope.service.EntitlementValidationService;
+import com.sequenceiq.periscope.service.configuration.LimitsConfigurationService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AlertValidatorTest {
@@ -63,6 +67,9 @@ public class AlertValidatorTest {
 
     @Mock
     private AutoScaleClusterCommonService asClusterCommonService;
+
+    @Mock
+    private LimitsConfigurationService limitsConfigurationService;
 
     private DateService dateService = new DateService();
 
@@ -214,8 +221,11 @@ public class AlertValidatorTest {
         DistroXAutoscaleClusterRequest request = new DistroXAutoscaleClusterRequest();
         ScalingPolicyRequest sp1 = new ScalingPolicyRequest();
         sp1.setHostGroup("compute");
+        LoadAlertConfigurationRequest loadAlertConfigurationRequest = new LoadAlertConfigurationRequest();
+        loadAlertConfigurationRequest.setMaxResourceValue(10);
         LoadAlertRequest loadAlertRequest = new LoadAlertRequest();
         loadAlertRequest.setScalingPolicy(sp1);
+        loadAlertRequest.setLoadAlertConfiguration(loadAlertConfigurationRequest);
         request.setLoadAlertRequests(List.of(loadAlertRequest));
 
         Set supportedHostGroups = Set.of("compute", "compute1", "compute3");
@@ -230,8 +240,11 @@ public class AlertValidatorTest {
         DistroXAutoscaleClusterRequest request = new DistroXAutoscaleClusterRequest();
         ScalingPolicyRequest sp1 = new ScalingPolicyRequest();
         sp1.setHostGroup("notsupported");
+        LoadAlertConfigurationRequest loadAlertConfigurationRequest = new LoadAlertConfigurationRequest();
+        loadAlertConfigurationRequest.setMaxResourceValue(10);
         LoadAlertRequest loadAlertRequest = new LoadAlertRequest();
         loadAlertRequest.setScalingPolicy(sp1);
+        loadAlertRequest.setLoadAlertConfiguration(loadAlertConfigurationRequest);
         request.setLoadAlertRequests(List.of(loadAlertRequest));
 
         Set supportedHostGroups = Set.of("compute", "compute1", "compute3");
@@ -243,6 +256,29 @@ public class AlertValidatorTest {
 
         expectedException.expect(BadRequestException.class);
         expectedException.expectMessage("unsupported.hostgroup");
+
+        underTest.validateDistroXAutoscaleClusterRequest(aCluster, request);
+    }
+
+        @Test
+    public void testValidateDistroXAutoscaleClusterRequestWhenClusterSizeExceeded() {
+        DistroXAutoscaleClusterRequest request = new DistroXAutoscaleClusterRequest();
+        ScalingPolicyRequest sp1 = new ScalingPolicyRequest();
+        sp1.setAdjustmentType(AdjustmentType.LOAD_BASED);
+        sp1.setHostGroup("compute");
+        LoadAlertConfigurationRequest loadAlertConfigurationRequest = new LoadAlertConfigurationRequest();
+        loadAlertConfigurationRequest.setMaxResourceValue(500);
+        LoadAlertRequest loadAlertRequest = new LoadAlertRequest();
+        loadAlertRequest.setScalingPolicy(sp1);
+        loadAlertRequest.setLoadAlertConfiguration(loadAlertConfigurationRequest);
+        request.setLoadAlertRequests(List.of(loadAlertRequest));
+
+        when(limitsConfigurationService.getMaxNodeCountLimit()).thenReturn(400);
+        when(messagesService.getMessage(AUTOSCALING_CLUSTER_LIMIT_EXCEEDED, List.of(400)))
+                .thenReturn("cluster limit exceeded");
+
+        expectedException.expect(BadRequestException.class);
+        expectedException.expectMessage("cluster limit exceeded");
 
         underTest.validateDistroXAutoscaleClusterRequest(aCluster, request);
     }

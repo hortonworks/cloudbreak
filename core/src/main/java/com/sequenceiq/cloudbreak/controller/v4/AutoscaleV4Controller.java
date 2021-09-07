@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.UpdateStackV
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.AuthorizeForAutoscaleV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.AutoscaleStackV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.CertificateV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.LimitsConfigurationResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.ClusterProxyConfiguration;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.AutoscaleRecommendationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
@@ -40,6 +41,7 @@ import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.cloud.model.AutoscaleRecommendation;
+import com.sequenceiq.cloudbreak.conf.LimitConfiguration;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.service.ClusterProxyService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.ClusterCommonService;
@@ -78,6 +80,9 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
 
     @Inject
     private BlueprintService blueprintService;
+
+    @Inject
+    private LimitConfiguration limitConfiguration;
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.SCALE_DATAHUB)
@@ -172,6 +177,13 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
     @InternalOnly
     public ClusterProxyConfiguration getClusterProxyconfiguration() {
         return clusterProxyService.getClusterProxyConfigurationForAutoscale();
+    }
+
+    @Override
+    @AccountIdNotNeeded
+    @InternalOnly
+    public LimitsConfigurationResponse getLimitsConfiguration() {
+        return new LimitsConfigurationResponse(limitConfiguration.getNodeCountLimit());
     }
 
     @Override

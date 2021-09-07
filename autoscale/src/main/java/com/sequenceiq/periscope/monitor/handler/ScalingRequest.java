@@ -1,5 +1,6 @@
 package com.sequenceiq.periscope.monitor.handler;
 
+import static com.sequenceiq.periscope.common.MessageCode.AUTOSCALING_ACTIVITY_NODE_LIMIT_EXCEEDED;
 import static com.sequenceiq.periscope.common.MessageCode.AUTOSCALING_ACTIVITY_SUCCESS;
 
 import java.util.List;
@@ -15,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.UpdateStackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustmentV4Request;
@@ -34,6 +36,7 @@ import com.sequenceiq.periscope.service.AuditService;
 import com.sequenceiq.periscope.service.HistoryService;
 import com.sequenceiq.periscope.service.PeriscopeMetricService;
 import com.sequenceiq.periscope.service.UsageReportingService;
+import com.sequenceiq.periscope.service.configuration.LimitsConfigurationService;
 import com.sequenceiq.periscope.utils.LoggingUtils;
 
 @Component("ScalingRequest")
@@ -44,9 +47,11 @@ public class ScalingRequest implements Runnable {
 
     private static final int STATUSREASON_MAX_LENGTH = 255;
 
-    private final int desiredNodeCount;
+    private final int existingClusterNodeCount;
 
-    private final int totalNodes;
+    private final int desiredHostGroupNodeCount;
+
+    private final int existingHostGroupNodeCount;
 
     private final Cluster cluster;
 
@@ -81,11 +86,16 @@ public class ScalingRequest implements Runnable {
     @Inject
     private UsageReportingService usageReportingService;
 
-    public ScalingRequest(Cluster cluster, ScalingPolicy policy, int totalNodes, int desiredNodeCount, List<String> decommissionNodeIds) {
+    @Inject
+    private LimitsConfigurationService limitsConfigurationService;
+
+    public ScalingRequest(Cluster cluster, ScalingPolicy policy, int existingClusterNodeCount, int existingHostGroupNodeCount,
+            int desiredHostGroupNodeCount, List<String> decommissionNodeIds) {
         this.cluster = cluster;
         this.policy = policy;
-        this.totalNodes = totalNodes;
-        this.desiredNodeCount = desiredNodeCount;
+        this.existingClusterNodeCount = existingClusterNodeCount;
+        this.existingHostGroupNodeCount = existingHostGroupNodeCount;
+        this.desiredHostGroupNodeCount = desiredHostGroupNodeCount;
         this.decommissionNodeIds = decommissionNodeIds;
     }
 
@@ -93,23 +103,26 @@ public class ScalingRequest implements Runnable {
     public void run() {
         LoggingUtils.buildMdcContext(cluster);
         try {
-            int scalingAdjustment = desiredNodeCount - totalNodes;
+            int scalingAdjustment = desiredHostGroupNodeCount - existingHostGroupNodeCount;
             if (!decommissionNodeIds.isEmpty()) {
                 scaleDownByNodeIds(decommissionNodeIds);
             } else if (scalingAdjustment > 0) {
-                scaleUp(scalingAdjustment, totalNodes);
+                Integer cbSupportedScalingAdjustment = getScaleUpNodeCountForCBSupportedMax(scalingAdjustment);
+                if (cbSupportedScalingAdjustment > 0) {
+                    scaleUp(cbSupportedScalingAdjustment, existingHostGroupNodeCount);
+                }
             } else if (scalingAdjustment < 0) {
-                scaleDown(scalingAdjustment, totalNodes);
+                scaleDown(scalingAdjustment, existingHostGroupNodeCount);
             }
         } catch (RuntimeException e) {
             LOGGER.error("Error while executing ScaleRequest", e);
         }
     }
 
-    private void scaleUp(int scalingAdjustment, int totalNodes) {
+    private void scaleUp(int scalingAdjustment, int hostGroupNodeCount) {
         metricService.incrementMetricCounter(MetricType.CLUSTER_UPSCALE_TRIGGERED);
         if (scalingHardLimitsService.isViolatingAutoscaleMaxStepInNodeCount(scalingAdjustment)) {
-            LOGGER.debug("Upscale requested for '{}' nodes. Upscaling with the maximum allowed of '{}' node(s)",
+            LOGGER.info("Upscale requested for '{}' nodes. Upscaling with the maximum allowed step size of '{}' node(s)",
                     scalingAdjustment, scalingHardLimitsService.getMaxAutoscaleStepInNodeCount());
             scalingAdjustment = scalingHardLimitsService.getMaxAutoscaleStepInNodeCount();
         }
@@ -137,10 +150,10 @@ public class ScalingRequest implements Runnable {
             scalingStatus = ScalingStatus.FAILED;
             statusReason = getMessageForCBException(e);
             LOGGER.error("Couldn't trigger upscaling for host group '{}', cluster '{}', desiredNodeCount '{}', error '{}' ",
-                    hostGroup, cluster.getStackCrn(), desiredNodeCount, statusReason, e);
+                    hostGroup, cluster.getStackCrn(), desiredHostGroupNodeCount, statusReason, e);
             metricService.incrementMetricCounter(MetricType.CLUSTER_UPSCALE_FAILED);
         } finally {
-            processAutoscalingTriggered(scalingAdjustment, totalNodes, statusReason, scalingStatus);
+            processAutoscalingTriggered(scalingAdjustment, hostGroupNodeCount, statusReason, scalingStatus);
         }
     }
 
@@ -171,7 +184,7 @@ public class ScalingRequest implements Runnable {
             metricService.incrementMetricCounter(MetricType.CLUSTER_DOWNSCALE_FAILED);
             statusReason = getMessageForCBException(e);
             LOGGER.error("Couldn't trigger downscaling for host group '{}', cluster '{}', desiredNodeCount '{}', error '{}' ",
-                    hostGroup, cluster.getStackCrn(), desiredNodeCount, statusReason, e);
+                    hostGroup, cluster.getStackCrn(), desiredHostGroupNodeCount, statusReason, e);
         } finally {
             processAutoscalingTriggered(scalingAdjustment, totalNodes, statusReason, scalingStatus);
         }
@@ -195,20 +208,34 @@ public class ScalingRequest implements Runnable {
             metricService.incrementMetricCounter(MetricType.CLUSTER_DOWNSCALE_FAILED);
             statusReason = getMessageForCBException(e);
             LOGGER.error("Couldn't trigger decommissioning for host group '{}', cluster '{}', decommissionNodeCount '{}', " +
-                    "decommissionNodeIds '{}', error '{}' ", hostGroup, cluster.getStackCrn(), decommissionNodeIds.size(),
+                            "decommissionNodeIds '{}', error '{}' ", hostGroup, cluster.getStackCrn(), decommissionNodeIds.size(),
                     decommissionNodeIds, statusReason, e);
         } finally {
-            processAutoscalingTriggered(-decommissionNodeIds.size(), totalNodes, statusReason, scalingStatus);
+            processAutoscalingTriggered(-decommissionNodeIds.size(), existingHostGroupNodeCount, statusReason, scalingStatus);
         }
     }
 
-    private void processAutoscalingTriggered(int adjustmentCount, int totalNodes, String statusReason, ScalingStatus scalingStatus) {
+    private Integer getScaleUpNodeCountForCBSupportedMax(Integer scalingAdjustment) {
+        int cbSupportedMaxClusterSize = limitsConfigurationService.getMaxNodeCountLimit();
+        if ((existingClusterNodeCount + scalingAdjustment) > cbSupportedMaxClusterSize) {
+            int requestedScalingAdjustment = scalingAdjustment;
+            scalingAdjustment = cbSupportedMaxClusterSize - existingClusterNodeCount;
+
+            String nodeLimitExceededMsg = messagesService.getMessage(AUTOSCALING_ACTIVITY_NODE_LIMIT_EXCEEDED,
+                    List.of(policy.getAlert().getAlertType(), requestedScalingAdjustment, cbSupportedMaxClusterSize, scalingAdjustment));
+            historyService.createEntry(ScalingStatus.TRIGGER_INFO, nodeLimitExceededMsg, cluster);
+            LOGGER.info(nodeLimitExceededMsg + " Existing Cluster Size '" + existingClusterNodeCount + "'.");
+        }
+        return scalingAdjustment;
+    }
+
+    private void processAutoscalingTriggered(int adjustmentCount, int hostGroupNodeCount, String statusReason, ScalingStatus scalingStatus) {
         History history = historyService.createEntry(scalingStatus,
-                StringUtils.left(statusReason, STATUSREASON_MAX_LENGTH), totalNodes, adjustmentCount, policy);
+                StringUtils.left(statusReason, STATUSREASON_MAX_LENGTH), hostGroupNodeCount, adjustmentCount, policy);
         notificationSender.sendHistoryUpdateNotification(history, cluster);
         auditService.auditAutoscaleServiceEvent(scalingStatus, statusReason, cluster.getStackCrn(),
                 cluster.getClusterPertain().getTenant(), System.currentTimeMillis());
-        usageReportingService.reportAutoscalingTriggered(adjustmentCount, totalNodes, scalingStatus, statusReason, policy.getAlert(), cluster);
+        usageReportingService.reportAutoscalingTriggered(adjustmentCount, hostGroupNodeCount, scalingStatus, statusReason, policy.getAlert(), cluster);
     }
 
     private String getMessageForCBException(Exception cbApiException) {
@@ -226,6 +253,51 @@ public class ScalingRequest implements Runnable {
 
     private String getMessageForCBSuccess() {
         return messagesService.getMessage(AUTOSCALING_ACTIVITY_SUCCESS,
-                List.of(policy.getAlert().getAlertType(), policy.getHostGroup(), totalNodes, desiredNodeCount));
+                List.of(policy.getAlert().getAlertType(), policy.getHostGroup(), existingHostGroupNodeCount, desiredHostGroupNodeCount));
+    }
+
+    @VisibleForTesting
+    void setMetricService(PeriscopeMetricService metricService) {
+        this.metricService = metricService;
+    }
+
+    @VisibleForTesting
+    void setScalingHardLimitsService(ScalingHardLimitsService scalingHardLimitsService) {
+        this.scalingHardLimitsService = scalingHardLimitsService;
+    }
+
+    @VisibleForTesting
+    void setLimitsConfigurationService(LimitsConfigurationService limitsConfigurationService) {
+        this.limitsConfigurationService = limitsConfigurationService;
+    }
+
+    @VisibleForTesting
+    void setCloudbreakInternalCrnClient(CloudbreakInternalCrnClient cloudbreakCrnClient) {
+        this.cloudbreakCrnClient = cloudbreakCrnClient;
+    }
+
+    @VisibleForTesting
+    void setCloudbreakMessagesService(CloudbreakMessagesService messagesService) {
+        this.messagesService = messagesService;
+    }
+
+    @VisibleForTesting
+    void setHistoryService(HistoryService historyService) {
+        this.historyService = historyService;
+    }
+
+    @VisibleForTesting
+    void setHttpNotificationSender(HttpNotificationSender notificationSender) {
+        this.notificationSender = notificationSender;
+    }
+
+    @VisibleForTesting
+    void setAuditService(AuditService auditService) {
+        this.auditService = auditService;
+    }
+
+    @VisibleForTesting
+    void setUsageReportingService(UsageReportingService usageReportingService) {
+        this.usageReportingService = usageReportingService;
     }
 }

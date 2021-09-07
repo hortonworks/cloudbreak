@@ -152,8 +152,9 @@ public class CronTimeEvaluator extends EvaluatorExecutor {
         int desiredAbsoluteNodeCount = scalingPolicyTargetCalculator.getDesiredAbsoluteNodeCount(event, hostGroupNodeCount);
         int targetIncrementNodeCount = desiredAbsoluteNodeCount - hostGroupNodeCount;
 
-        event.setHostGroupNodeCount(hostGroupNodeCount);
+        event.setExistingHostGroupNodeCount(hostGroupNodeCount);
         event.setDesiredAbsoluteHostGroupNodeCount(desiredAbsoluteNodeCount);
+        event.setExistingClusterNodeCount(stackV4Response.getNodeCount());
         if (targetIncrementNodeCount < 0) {
             populateDecommissionCandidates(event, stackV4Response, alert.getCluster(), alert.getScalingPolicy(), -targetIncrementNodeCount);
         }
