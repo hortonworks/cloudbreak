@@ -1,11 +1,16 @@
 package com.sequenceiq.cloudbreak.structuredevent;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @Service
 public class CloudbreakRestRequestThreadLocalService implements LegacyRestRequestThreadLocalService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakRestRequestThreadLocalService.class);
 
     private static final ThreadLocal<Long> REQUESTED_WORKSPACE_ID = new ThreadLocal<>();
 
@@ -40,5 +45,18 @@ public class CloudbreakRestRequestThreadLocalService implements LegacyRestReques
 
     public void setCloudbreakUserByUsernameAndTenant(String userId, String tenant) {
         CLOUDBREAK_USER.set(new CloudbreakUser(userId, "", "", "", tenant));
+    }
+
+    public void setWorkspace(Workspace workspace) {
+        if (workspace != null) {
+            LOGGER.debug("Set workspace id thread local variable to '{}'. Value was '{}'.",
+                    workspace.getId(),
+                    getRequestedWorkspaceId());
+            setRequestedWorkspaceId(workspace.getId());
+        } else {
+            LOGGER.error("Workspace is missing, unable to set the thread local variable to a valid workspace id. " +
+                    "Overwrite the previous value ('{}') with null.", getRequestedWorkspaceId());
+            setRequestedWorkspaceId(null);
+        }
     }
 }

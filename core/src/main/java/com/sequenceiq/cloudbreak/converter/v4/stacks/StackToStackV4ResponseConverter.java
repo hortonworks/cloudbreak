@@ -93,9 +93,8 @@ public class StackToStackV4ResponseConverter extends AbstractConversionServiceAw
     public StackV4Response convert(Stack source) {
         StackV4Response response = new StackV4Response();
         try {
-            if (restRequestThreadLocalService.getRequestedWorkspaceId() == null && source.getWorkspace() != null) {
-                restRequestThreadLocalService.setRequestedWorkspaceId(source.getWorkspace().getId());
-            }
+            restRequestThreadLocalService.setWorkspace(source.getWorkspace());
+
             Image image = imageService.getImage(source.getId());
             response.setImage(getConversionService().convert(image, StackImageV4Response.class));
         } catch (CloudbreakImageNotFoundException exc) {
