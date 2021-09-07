@@ -86,7 +86,8 @@ public class YcloudHybridCloudTest extends AbstractMockTest {
         createDefaultUser(testContext);
         initializeDefaultBlueprints(testContext);
         createDefaultCredential(testContext);
-        createEnvironmentWithFreeIpa(testContext);
+        createDefaultEnvironment(testContext);
+        createDefaultFreeIpa(testContext);
         createDefaultImageCatalog(testContext);
     }
 
