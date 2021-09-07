@@ -14,4 +14,9 @@ public class ClusterRecoveryTriggerEvent extends StackEvent {
     public ClusterRecoveryTriggerEvent(String selector, Long stackId, Promise<AcceptResult> accepted) {
         super(selector, stackId, accepted);
     }
+
+    @Override
+    public boolean equalsEvent(StackEvent other) {
+        return isClassAndEqualsEvent(ClusterRecoveryTriggerEvent.class, other);
+    }
 }

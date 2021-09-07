@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.event;
 
+import java.util.Objects;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.CertificateRotationType;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
@@ -22,5 +24,11 @@ public class ClusterCertificatesRotationTriggerEvent extends StackEvent {
 
     public CertificateRotationType getCertificateRotationType() {
         return certificateRotationType;
+    }
+
+    @Override
+    public boolean equalsEvent(StackEvent other) {
+        return isClassAndEqualsEvent(ClusterCertificatesRotationTriggerEvent.class, other,
+                event -> Objects.equals(certificateRotationType, event.certificateRotationType));
     }
 }

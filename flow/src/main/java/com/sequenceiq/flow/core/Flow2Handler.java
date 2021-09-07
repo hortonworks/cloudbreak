@@ -282,6 +282,9 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
         if (!previousTrigger.getClass().equals(currentTrigger.getClass())) {
             return false;
         }
+        if (previousTrigger == currentTrigger) {
+            return true;
+        }
         return ((IdempotentEvent) currentTrigger).equalsEvent((IdempotentEvent) previousTrigger);
     }
 

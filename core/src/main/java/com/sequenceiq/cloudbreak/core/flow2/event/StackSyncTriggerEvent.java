@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.event;
 
+import java.util.Objects;
+
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 
@@ -21,5 +23,11 @@ public class StackSyncTriggerEvent extends StackEvent {
 
     public Boolean getStatusUpdateEnabled() {
         return statusUpdateEnabled;
+    }
+
+    @Override
+    public boolean equalsEvent(StackEvent other) {
+        return isClassAndEqualsEvent(StackSyncTriggerEvent.class, other,
+                event -> Objects.equals(statusUpdateEnabled, event.statusUpdateEnabled));
     }
 }

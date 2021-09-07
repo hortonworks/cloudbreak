@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 
@@ -53,5 +54,14 @@ public class ClusterRepairTriggerEvent extends StackEvent {
         Map<String, List<String>> result = new HashMap<>();
         map.forEach((key, value) -> result.put(key, new ArrayList<>(value)));
         return result;
+    }
+
+    @Override
+    public boolean equalsEvent(StackEvent other) {
+        return isClassAndEqualsEvent(ClusterRepairTriggerEvent.class, other,
+                event -> removeOnly == event.removeOnly
+                        && restartServices == event.restartServices
+                        && Objects.equals(failedNodesMap, event.failedNodesMap)
+                        && Objects.equals(stackId, event.stackId));
     }
 }
