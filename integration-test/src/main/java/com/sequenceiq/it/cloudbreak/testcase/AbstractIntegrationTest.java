@@ -11,10 +11,7 @@ import org.testng.ITestResult;
 import org.testng.annotations.BeforeMethod;
 
 import com.sequenceiq.common.api.type.Tunnel;
-import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkMockParams;
-import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNetworkRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.it.cloudbreak.action.v4.imagecatalog.ImageCatalogCreateRetryAction;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakActor;
@@ -26,16 +23,11 @@ import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
 import com.sequenceiq.it.cloudbreak.client.KerberosTestClient;
 import com.sequenceiq.it.cloudbreak.client.LdapTestClient;
-import com.sequenceiq.it.cloudbreak.client.ProxyTestClient;
-import com.sequenceiq.it.cloudbreak.client.RedbeamsDatabaseTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.blueprint.BlueprintTestDto;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
-import com.sequenceiq.it.cloudbreak.dto.database.RedbeamsDatabaseTestDto;
-import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
-import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaUserSyncTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.kerberos.ActiveDirectoryKerberosDescriptorTestDto;
@@ -45,7 +37,6 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.mock.ImageCatalogMockServerSetup;
-import com.sequenceiq.it.cloudbreak.util.azure.azurecloudblob.AzureCloudBlobUtil;
 import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
@@ -64,9 +55,6 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
     private ImageCatalogTestClient imageCatalogTestClient;
 
     @Inject
-    private ProxyTestClient proxyTestClient;
-
-    @Inject
     private BlueprintTestClient blueprintTestClient;
 
     @Inject
@@ -76,16 +64,10 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
     private KerberosTestClient kerberosTestClient;
 
     @Inject
-    private RedbeamsDatabaseTestClient databaseTestClient;
-
-    @Inject
     private SdxTestClient sdxTestClient;
 
     @Inject
     private DistroXTestClient distroXTestClient;
-
-    @Inject
-    private AzureCloudBlobUtil azureCloudBlobUtil;
 
     @Inject
     private ImageCatalogMockServerSetup imageCatalogMockServerSetup;
@@ -154,10 +136,20 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
     }
 
     protected void createDatalake(TestContext testContext) {
+        initiateDatalakeCreation(testContext);
+        waitForDatalakeCreation(testContext);
+    }
+
+    protected void initiateDatalakeCreation(TestContext testContext) {
         testContext
                 .given(SdxInternalTestDto.class)
                     .withCloudStorage(getCloudStorageRequest(testContext))
                 .when(sdxTestClient.createInternal())
+                .validate();
+    }
+
+    protected void waitForDatalakeCreation(TestContext testContext) {
+        testContext.given(SdxInternalTestDto.class)
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForHealthyInstances()
                 .when(sdxTestClient.describeInternal())
@@ -176,16 +168,6 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForHealthyInstances()
                 .when(sdxTestClient.describeInternal())
-                .validate();
-    }
-
-    protected void createDatahub(TestContext testContext) {
-        testContext
-                .given(DistroXTestDto.class)
-                .when(distroXTestClient.create())
-                .await(STACK_AVAILABLE)
-                .awaitForHealthyInstances()
-                .when(distroXTestClient.get())
                 .validate();
     }
 
@@ -224,16 +206,20 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
         return validKerberos;
     }
 
-    protected Set<String> createDefaultRdsConfig(TestContext testContext) {
-        testContext
-                .given(RedbeamsDatabaseTestDto.class)
-                .when(databaseTestClient.createIfNotExistV4());
-        Set<String> validRds = new HashSet<>();
-        validRds.add(testContext.get(RedbeamsDatabaseTestDto.class).getName());
-        return validRds;
+    protected void createEnvironmentWithFreeIpa(TestContext testContext) {
+        initiateEnvironmentCreation(testContext);
+        waitForEnvironmentCreation(testContext);
+        waitForUserSync(testContext);
     }
 
-    protected void createEnvironmentWithFreeIpa(TestContext testContext) {
+    protected void waitForUserSync(TestContext testContext) {
+        testContext.given(FreeIpaUserSyncTestDto.class)
+                .when(freeIpaTestClient.getLastSyncOperationStatus())
+                .await(OperationState.COMPLETED)
+                .validate();
+    }
+
+    protected void initiateEnvironmentCreation(TestContext testContext) {
         testContext
                 .given("telemetry", TelemetryTestDto.class)
                     .withLogging()
@@ -242,54 +228,22 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
                     .withNetwork()
                     .withTelemetry("telemetry")
                     .withTunnel(Tunnel.CLUSTER_PROXY)
-                    .withCreateFreeIpa(Boolean.FALSE)
+                    .withCreateFreeIpa(Boolean.TRUE)
+                    .withFreeIpaImage(commonCloudProperties().getImageValidation().getFreeIpaImageCatalog(),
+                            commonCloudProperties().getImageValidation().getFreeIpaImageUuid())
                 .when(environmentTestClient.create())
-                .await(EnvironmentStatus.AVAILABLE)
-                .when(environmentTestClient.describe())
-                .given(FreeIpaTestDto.class)
-                    .withEnvironment()
-                    .withCatalog(commonCloudProperties().getImageValidation().getFreeIpaImageCatalog(),
-                        commonCloudProperties().getImageValidation().getFreeIpaImageUuid())
-                    .withTelemetry("telemetry")
-                    .withNetwork()
-                .when(freeIpaTestClient.create())
-                .await(Status.AVAILABLE)
-                .given(FreeIpaUserSyncTestDto.class)
-                .when(freeIpaTestClient.getLastSyncOperationStatus())
-                .await(OperationState.COMPLETED)
                 .validate();
     }
 
-    protected void createEnvironmentWithNetwork(TestContext testContext) {
-        testContext
-                .given("telemetry", TelemetryTestDto.class)
-                .withLogging()
-                .withReportClusterLogs()
-                .given(EnvironmentTestDto.class)
-                .withNetwork()
-                .withTelemetry("telemetry")
-                .withCreateFreeIpa(Boolean.FALSE)
-                .when(environmentTestClient.create())
+    protected void waitForEnvironmentCreation(TestContext testContext) {
+        testContext.given(EnvironmentTestDto.class)
                 .await(EnvironmentStatus.AVAILABLE)
                 .when(environmentTestClient.describe())
-                .validate();
-    }
-
-    protected void createImageCatalogWithUrl(TestContext testContext, String name, String url) {
-        testContext
-                .given(ImageCatalogTestDto.class)
-                .withName(name)
-                .withUrl(url)
-                .when(new ImageCatalogCreateRetryAction())
                 .validate();
     }
 
     protected void createDefaultUser(TestContext testContext) {
         testContext.as();
-    }
-
-    protected void createSecondUser(TestContext testContext) {
-        testContext.as(cloudbreakActor.secondUser());
     }
 
     protected void useRealUmsUser(TestContext testContext, String key) {
@@ -303,21 +257,6 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
                 .init(BlueprintTestDto.class)
                 .when(blueprintTestClient.listV4())
                 .validate();
-    }
-
-    protected void initializeAzureCloudStorage(TestContext testContext) {
-        azureCloudBlobUtil.createContainerIfNotExist();
-    }
-
-    protected EnvironmentNetworkRequest environmentNetwork() {
-        EnvironmentNetworkRequest networkReq = new EnvironmentNetworkRequest();
-        networkReq.setNetworkCidr("0.0.0.0/0");
-        EnvironmentNetworkMockParams mockReq = new EnvironmentNetworkMockParams();
-        mockReq.setVpcId("vepeceajdi");
-        mockReq.setInternetGatewayId("1.1.1.1");
-        networkReq.setMock(mockReq);
-        networkReq.setSubnetIds(Set.of("net1", "net2"));
-        return networkReq;
     }
 
     protected SdxCloudStorageRequest getCloudStorageRequest(TestContext testContext) {
