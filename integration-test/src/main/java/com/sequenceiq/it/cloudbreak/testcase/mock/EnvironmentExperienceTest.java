@@ -47,6 +47,7 @@ public class EnvironmentExperienceTest extends AbstractMockTest {
                 .given(CredentialTestDto.class)
                 .when(credentialTestClient.create())
                 .given(EnvironmentTestDto.class)
+                .withNetwork()
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE);
         String envName = testContext.given(EnvironmentTestDto.class).getName();

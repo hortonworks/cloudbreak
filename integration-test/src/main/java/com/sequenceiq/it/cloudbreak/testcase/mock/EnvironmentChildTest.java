@@ -39,7 +39,7 @@ public class EnvironmentChildTest extends AbstractMockTest {
         createDefaultUser(testContext);
         initializeDefaultBlueprints(testContext);
         createDefaultCredential(testContext);
-        createDefaultEnvironmentWithNetwork(testContext);
+        createDefaultEnvironment(testContext);
         createDefaultFreeIpa(testContext);
     }
 

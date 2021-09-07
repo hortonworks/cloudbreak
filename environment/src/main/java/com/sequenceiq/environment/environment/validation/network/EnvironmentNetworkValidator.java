@@ -62,4 +62,11 @@ public interface EnvironmentNetworkValidator {
         return diff;
     }
 
+    default void checkNullable(CloudPlatform cloudPlatform, NetworkDto networkDto, ValidationResultBuilder resultBuilder) {
+        boolean canBeNull = cloudPlatform == CloudPlatform.YARN || networkDto != null;
+        if (!canBeNull) {
+            resultBuilder.error("Environment network cannot be null");
+        }
+    }
+
 }

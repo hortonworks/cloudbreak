@@ -127,7 +127,7 @@ public class AwsYcloudHybridCloudTest extends AbstractE2ETest {
         testContext
                 .given(SecurityGroupTestDto.class)
                 .withSecurityGroupIds(hybridCloudSecurityGroupID);
-        createEnvironmentWithNetworkAndFreeIpa(testContext);
+        createEnvironmentWithFreeIpa(testContext);
 
         testContext
                 .given("childtelemetry", TelemetryTestDto.class)

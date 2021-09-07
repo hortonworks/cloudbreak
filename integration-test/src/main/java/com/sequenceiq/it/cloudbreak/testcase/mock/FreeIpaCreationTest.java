@@ -18,10 +18,11 @@ public class FreeIpaCreationTest extends AbstractMockTest {
     @Inject
     private FreeIpaTestClient freeIpaTestClient;
 
+    @Override
     protected void setupTest(TestContext testContext) {
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
-        createDefaultEnvironmentWithNetwork(testContext);
+        createDefaultEnvironment(testContext);
         createDefaultImageCatalog(testContext);
         initializeDefaultBlueprints(testContext);
     }

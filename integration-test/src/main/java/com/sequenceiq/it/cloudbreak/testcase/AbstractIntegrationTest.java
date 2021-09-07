@@ -34,7 +34,6 @@ import com.sequenceiq.it.cloudbreak.dto.blueprint.BlueprintTestDto;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.database.RedbeamsDatabaseTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
-import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaUserSyncTestDto;
@@ -154,18 +153,6 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
                 .validate();
     }
 
-    protected void createDefaultEnvironmentWithNetwork(TestContext testContext) {
-        testContext
-                .given(EnvironmentNetworkTestDto.class)
-                .given(EnvironmentTestDto.class)
-                .withNetwork()
-                .withCreateFreeIpa(Boolean.FALSE)
-                .when(environmentTestClient.create())
-                .await(EnvironmentStatus.AVAILABLE)
-                .when(environmentTestClient.describe())
-                .validate();
-    }
-
     protected void createDatalake(TestContext testContext) {
         testContext
                 .given(SdxInternalTestDto.class)
@@ -246,7 +233,7 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
         return validRds;
     }
 
-    protected void createEnvironmentWithNetworkAndFreeIpa(TestContext testContext) {
+    protected void createEnvironmentWithFreeIpa(TestContext testContext) {
         testContext
                 .given("telemetry", TelemetryTestDto.class)
                     .withLogging()

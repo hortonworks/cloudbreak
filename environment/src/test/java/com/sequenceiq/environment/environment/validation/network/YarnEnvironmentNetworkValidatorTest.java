@@ -1,12 +1,16 @@
 package com.sequenceiq.environment.environment.validation.network;
 
 import static org.junit.Assert.assertFalse;
+import static org.mockito.Mockito.mock;
 
 import java.util.List;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentValidationDto;
@@ -70,4 +74,20 @@ public class YarnEnvironmentNetworkValidatorTest {
         ));
     }
 
+    @Test
+    public void testCheckNullableWhenNetworkIsNull() {
+        ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
+        underTest.checkNullable(CloudPlatform.YARN, null, resultBuilder);
+        ValidationResult actual = resultBuilder.build();
+        Assertions.assertThat(actual.hasError()).isFalse();
+    }
+
+    @Test
+    public void testCheckNullableWhenNetworkIsNotNull() {
+        ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
+        NetworkDto  networkDto = mock(NetworkDto.class);
+        underTest.checkNullable(CloudPlatform.YARN, networkDto, resultBuilder);
+        ValidationResult actual = resultBuilder.build();
+        Assertions.assertThat(actual.hasError()).isFalse();
+    }
 }

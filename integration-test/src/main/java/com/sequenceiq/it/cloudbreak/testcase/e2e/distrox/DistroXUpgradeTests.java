@@ -36,7 +36,7 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
         initializeDefaultBlueprints(testContext);
-        createEnvironmentWithNetworkAndFreeIpa(testContext);
+        createEnvironmentWithFreeIpa(testContext);
     }
 
     @Test(dataProvider = TEST_CONTEXT)

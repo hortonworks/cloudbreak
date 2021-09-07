@@ -30,7 +30,7 @@ public class DistroXScaleTest extends AbstractE2ETest {
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
         initializeDefaultBlueprints(testContext);
-        createEnvironmentWithNetworkAndFreeIpa(testContext);
+        createEnvironmentWithFreeIpa(testContext);
         createDatalake(testContext);
     }
 
