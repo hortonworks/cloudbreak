@@ -48,7 +48,6 @@ public class ImageComponentUpdaterService {
         Stack stack = stackService.getById(stackId);
         try {
             restRequestThreadLocalService.setWorkspace(stack.getWorkspace());
-
             UpgradeImageInfo upgradeImageInfo = upgradeImageInfoFactory.create(targetImageId, stackId);
             Set<Component> targetComponents = imageService.getComponents(
                     stack, upgradeImageInfo.getCurrentImage().getUserdata(), upgradeImageInfo.getTargetStatedImage(),
