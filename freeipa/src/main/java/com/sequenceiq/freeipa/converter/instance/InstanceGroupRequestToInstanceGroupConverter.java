@@ -1,5 +1,9 @@
 package com.sequenceiq.freeipa.converter.instance;
 
+import static com.sequenceiq.freeipa.util.CloudArgsForIgConverter.DISK_ENCRYPTION_SET_ID;
+import static com.sequenceiq.freeipa.util.CloudArgsForIgConverter.GCP_KMS_ENCRYPTION_KEY;
+
+import java.util.EnumMap;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
@@ -15,6 +19,8 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
@@ -31,9 +37,11 @@ import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.stack.instance.DefaultInstanceGroupProvider;
+import com.sequenceiq.freeipa.util.CloudArgsForIgConverter;
 
 @Component
 public class InstanceGroupRequestToInstanceGroupConverter {
+    private static final Logger LOGGER = LoggerFactory.getLogger(InstanceGroupRequestToInstanceGroupConverter.class);
 
     @Inject
     private InstanceTemplateRequestToTemplateConverter templateConverter;
@@ -53,12 +61,14 @@ public class InstanceGroupRequestToInstanceGroupConverter {
         Stack stack,
         FreeIpaServerRequest ipaServerRequest,
         DetailedEnvironmentResponse environment,
-        String diskEncryptionSetId) {
+        EnumMap<CloudArgsForIgConverter, String> cloudArgsForIgConverter) {
         InstanceGroup instanceGroup = new InstanceGroup();
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(stack.getCloudPlatform());
         instanceGroup.setTemplate(source.getInstanceTemplate() == null
-                ? defaultInstanceGroupProvider.createDefaultTemplate(cloudPlatform, accountId, diskEncryptionSetId)
-                : templateConverter.convert(source.getInstanceTemplate(), cloudPlatform, accountId, diskEncryptionSetId));
+                ? defaultInstanceGroupProvider.createDefaultTemplate(cloudPlatform, accountId,
+                    cloudArgsForIgConverter.get(DISK_ENCRYPTION_SET_ID), cloudArgsForIgConverter.get(GCP_KMS_ENCRYPTION_KEY))
+                : templateConverter.convert(source.getInstanceTemplate(), cloudPlatform, accountId,
+                    cloudArgsForIgConverter.get(DISK_ENCRYPTION_SET_ID), cloudArgsForIgConverter.get(GCP_KMS_ENCRYPTION_KEY)));
         instanceGroup.setSecurityGroup(securityGroupConverter.convert(source.getSecurityGroup()));
         instanceGroup.setInstanceGroupNetwork(hasEmptyNetworkOnStackRequest(source, networkRequest, cloudPlatform)
                 ? defaultInstanceGroupProvider.createDefaultNetwork(cloudPlatform, networkRequest)
