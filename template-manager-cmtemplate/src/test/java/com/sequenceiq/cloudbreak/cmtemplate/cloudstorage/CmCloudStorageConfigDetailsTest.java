@@ -424,6 +424,39 @@ public class CmCloudStorageConfigDetailsTest {
         Assert.assertEquals(1, rangerAdminEntries.size());
     }
 
+    @Test
+    public void testSubFolder() {
+        prepareBlueprintProcessorFactoryMock(RANGER_ADMIN, ZEPPELIN_SERVER, HBASE_MASTER, NAMENODE);
+
+        FileSystemConfigQueryObject fileSystemConfigQueryObject = FileSystemConfigQueryObject.Builder.builder()
+                .withStorageName("hwx-remote.dfs.core.windows.net/subfolder")
+                .withClusterName(CLUSTER_NAME)
+                .withBlueprintText(BLUEPRINT_TEXT)
+                .withDatalakeCluster(false)
+                .withAttachedCluster(false)
+                .withFileSystemType(FileSystemType.ADLS_GEN_2.name())
+                .build();
+        Set<ConfigQueryEntry> bigCluster = underTest.queryParameters(fileSystemConfigQueryObject);
+        Assert.assertEquals(3L, bigCluster.size());
+
+        Set<ConfigQueryEntry> rangerAdmin = serviceEntry(bigCluster, RANGER_ADMIN);
+        Set<ConfigQueryEntry> zeppelin = serviceEntry(bigCluster, ZEPPELIN_SERVER);
+        Set<ConfigQueryEntry> hbaseMaster = serviceEntry(bigCluster, HBASE_MASTER);
+
+
+        Assert.assertEquals(1, rangerAdmin.size());
+        Assert.assertTrue(rangerAdmin.stream().map(ConfigQueryEntry::getDefaultPath)
+                .anyMatch("hwx-remote.dfs.core.windows.net/subfolder/ranger/audit"::equals));
+
+        Assert.assertEquals(1, zeppelin.size());
+        Assert.assertTrue(zeppelin.stream().map(ConfigQueryEntry::getDefaultPath)
+                .anyMatch("hwx-remote.dfs.core.windows.net/subfolder/bigCluster/zeppelin/notebook"::equals));
+
+        Assert.assertEquals(1, hbaseMaster.size());
+        Assert.assertTrue(hbaseMaster.stream().map(ConfigQueryEntry::getDefaultPath)
+                .anyMatch("hwx-remote.dfs.core.windows.net/subfolder/bigCluster/hbase"::equals));
+    }
+
     private Set<ConfigQueryEntry> getConfigQueryEntriesS3(String storageName) {
         FileSystemConfigQueryObject fileSystemConfigQueryObject = FileSystemConfigQueryObject.Builder.builder()
                 .withStorageName(storageName)
