@@ -23,7 +23,7 @@ public class MockSdxBlueprintLoadTests extends AbstractMockTest {
     protected void setupTest(TestContext testContext) {
         testContext.as(cloudbreakActor.create("sdxbploadtenant", "sdxbpload@cloudera.com"));
         createDefaultCredential(testContext);
-        createDefaultEnvironmentWithNetwork(testContext);
+        createDefaultEnvironment(testContext);
         createDefaultImageCatalog(testContext);
     }
 

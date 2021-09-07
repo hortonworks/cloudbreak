@@ -42,7 +42,7 @@ public class SdxBackupRestoreTest extends PreconditionSdxE2ETest {
         createDefaultUser(testContext);
         initializeDefaultBlueprints(testContext);
         createDefaultCredential(testContext);
-        createEnvironmentWithNetworkAndFreeIpa(testContext);
+        createEnvironmentWithFreeIpa(testContext);
         createSdx(testContext);
     }
 

@@ -25,7 +25,7 @@ public abstract class AbstractImageValidatorE2ETest extends AbstractE2ETest {
         createSourceCatalogIfNotExistsAndValidateDefaultImage(testContext);
         createDefaultCredential(testContext);
         initializeDefaultBlueprints(testContext);
-        createEnvironmentWithNetworkAndFreeIpa(testContext);
+        createEnvironmentWithFreeIpa(testContext);
     }
 
     @AfterMethod

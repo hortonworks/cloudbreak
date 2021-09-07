@@ -49,7 +49,7 @@ public class AwsDistroXEphemeralTemporaryStorageTest extends AbstractE2ETest {
         createDefaultUser(testContext);
         initializeDefaultBlueprints(testContext);
         createDefaultCredential(testContext);
-        createEnvironmentWithNetworkAndFreeIpa(testContext);
+        createEnvironmentWithFreeIpa(testContext);
         createDatalake(testContext);
     }
 

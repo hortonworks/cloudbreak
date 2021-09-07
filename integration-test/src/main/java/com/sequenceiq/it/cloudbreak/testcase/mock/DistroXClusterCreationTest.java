@@ -89,7 +89,7 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
     protected void setupTest(TestContext testContext) {
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
-        createDefaultEnvironmentWithNetwork(testContext);
+        createDefaultEnvironment(testContext);
         createDefaultImageCatalog(testContext);
         initializeDefaultBlueprints(testContext);
         createCmBlueprint(testContext);

@@ -28,7 +28,7 @@ public class FreeIpaAttachDetachChildEnvironmentTest extends AbstractMockTest {
     protected void setupTest(TestContext testContext) {
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
-        createDefaultEnvironmentWithNetwork(testContext);
+        createDefaultEnvironment(testContext);
         createDefaultImageCatalog(testContext);
         initializeDefaultBlueprints(testContext);
     }

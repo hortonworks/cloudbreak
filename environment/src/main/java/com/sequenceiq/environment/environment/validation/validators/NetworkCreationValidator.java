@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -47,11 +48,14 @@ public class NetworkCreationValidator {
         return resultBuilder;
     }
 
-    private void validateNetwork(Environment environment, NetworkDto network, ValidationResultBuilder resultBuilder) {
-        if (network != null) {
-            EnvironmentNetworkValidator environmentNetworkValidator =
-                    environmentNetworkValidatorsByCloudPlatform.get(CloudPlatform.valueOf(environment.getCloudPlatform().toUpperCase()));
-            if (environmentNetworkValidator != null) {
+    @VisibleForTesting
+    void validateNetwork(Environment environment, NetworkDto network, ValidationResultBuilder resultBuilder) {
+        CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform().toUpperCase());
+        EnvironmentNetworkValidator environmentNetworkValidator =
+                environmentNetworkValidatorsByCloudPlatform.get(cloudPlatform);
+        if (environmentNetworkValidator != null) {
+            environmentNetworkValidator.checkNullable(cloudPlatform, network, resultBuilder);
+            if (network != null) {
                 environmentNetworkValidator.validateDuringRequest(network, resultBuilder);
             }
         }

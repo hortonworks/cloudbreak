@@ -14,6 +14,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,14 +23,15 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentValidationDto;
+import com.sequenceiq.environment.environment.validation.network.aws.AwsEnvironmentNetworkValidator;
 import com.sequenceiq.environment.network.CloudNetworkService;
 import com.sequenceiq.environment.network.dao.domain.RegistrationType;
-import com.sequenceiq.environment.environment.validation.network.aws.AwsEnvironmentNetworkValidator;
 import com.sequenceiq.environment.network.dto.AwsParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 
@@ -255,6 +257,24 @@ class AwsEnvironmentNetworkValidatorTest {
 
         ValidationResult validationResult = validationResultBuilder.build();
         assertFalse(validationResult.hasError());
+    }
+
+    @Test
+    public void testCheckNullableWhenNetworkIsNull() {
+        ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
+        underTest.checkNullable(CloudPlatform.AWS, null, resultBuilder);
+        ValidationResult actual = resultBuilder.build();
+        Assertions.assertThat(actual.hasError()).isTrue();
+        Assertions.assertThat(actual.getFormattedErrors()).isEqualTo("Environment network cannot be null");
+    }
+
+    @Test
+    public void testCheckNullableWhenNetworkIsNotNull() {
+        ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
+        NetworkDto networkDto = mock(NetworkDto.class);
+        underTest.checkNullable(CloudPlatform.AWS, networkDto, resultBuilder);
+        ValidationResult actual = resultBuilder.build();
+        Assertions.assertThat(actual.hasError()).isFalse();
     }
 
     private AwsParams getAwsParams() {

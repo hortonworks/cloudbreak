@@ -105,6 +105,7 @@ public class EnvironmentTestDto
                 .withCloudplatform(getCloudPlatform().toString())
                 .withIdBrokerMappingSource(IdBrokerMappingSource.MOCK)
                 .withResourceGroup(getResourceGroupUsage(), getResourceGroupName())
+                .withNetwork()
                 .withCloudStorageValidation(CloudStorageValidation.ENABLED);
     }
 
@@ -210,6 +211,11 @@ public class EnvironmentTestDto
 
     public EnvironmentTestDto withSecurityAccess(SecurityAccessRequest securityAccessRequest) {
         getRequest().setSecurityAccess(securityAccessRequest);
+        return this;
+    }
+
+    public EnvironmentTestDto withoutNetwork() {
+        getRequest().setNetwork(null);
         return this;
     }
 

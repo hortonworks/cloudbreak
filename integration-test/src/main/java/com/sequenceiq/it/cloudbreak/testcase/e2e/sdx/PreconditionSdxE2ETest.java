@@ -34,7 +34,7 @@ public class PreconditionSdxE2ETest extends AbstractE2ETest {
         createDefaultUser(testContext);
         initializeDefaultBlueprints(testContext);
         createDefaultCredential(testContext);
-        createEnvironmentWithNetworkAndFreeIpa(testContext);
+        createEnvironmentWithFreeIpa(testContext);
     }
 
     protected SdxTestClient sdxTestClient() {

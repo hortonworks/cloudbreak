@@ -72,7 +72,7 @@ public class BasicEnvironmentVirtualGroupTest extends AbstractE2ETest {
         initializeDefaultBlueprints(testContext);
         useRealUmsUser(testContext, L0UserKeys.ENV_CREATOR_A);
         createDefaultCredential(testContext);
-        createEnvironmentWithNetworkAndFreeIpa(testContext);
+        createEnvironmentWithFreeIpa(testContext);
     }
 
     @Test(dataProvider = TEST_CONTEXT)
