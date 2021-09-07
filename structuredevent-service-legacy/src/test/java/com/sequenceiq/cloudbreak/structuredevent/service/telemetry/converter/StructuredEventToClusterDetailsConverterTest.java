@@ -36,6 +36,9 @@ public class StructuredEventToClusterDetailsConverterTest {
     @Mock
     private StructuredEventToVersionDetailsConverter versionDetailsConverter;
 
+    @Mock
+    private MultiAzConverter multiAzConverter;
+
     @BeforeEach
     public void setUp() {
         doReturn(UsageProto.CDPClusterShape.newBuilder().build()).when(clusterShapeConverter).convert((StructuredFlowEvent) any());
@@ -107,6 +110,7 @@ public class StructuredEventToClusterDetailsConverterTest {
     public void testVariantConversionWithNotNullVariant() {
         StackDetails stackDetails = new StackDetails();
         stackDetails.setPlatformVariant("AWS_NATIVE");
+        doReturn(true).when(multiAzConverter).convert(any());
 
         StructuredFlowEvent structuredFlowEvent = new StructuredFlowEvent();
         structuredFlowEvent.setStack(stackDetails);
@@ -119,6 +123,7 @@ public class StructuredEventToClusterDetailsConverterTest {
         clusterDetails = underTest.convert(structuredSyncEvent);
 
         Assertions.assertEquals(2, clusterDetails.getCloudProviderVariantValue());
+        Assertions.assertEquals(true, clusterDetails.getMultiAz());
     }
 
     @Test

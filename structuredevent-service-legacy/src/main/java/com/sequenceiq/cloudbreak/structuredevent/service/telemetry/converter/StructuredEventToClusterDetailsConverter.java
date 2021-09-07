@@ -24,6 +24,9 @@ public class StructuredEventToClusterDetailsConverter {
     @Inject
     private StructuredEventToVersionDetailsConverter versionDetailsConverter;
 
+    @Inject
+    private MultiAzConverter multiAzConverter;
+
     public UsageProto.CDPClusterDetails convert(StructuredFlowEvent structuredFlowEvent) {
 
         UsageProto.CDPClusterDetails.Builder cdpClusterDetails = UsageProto.CDPClusterDetails.newBuilder();
@@ -40,6 +43,7 @@ public class StructuredEventToClusterDetailsConverter {
             if (!Strings.isNullOrEmpty(platformVariant)) {
                 cdpClusterDetails.setCloudProviderVariant(UsageProto.CDPCloudProviderVariantType
                         .Value.valueOf(platformVariant));
+                cdpClusterDetails.setMultiAz(multiAzConverter.convert(platformVariant));
             }
         }
 
@@ -62,6 +66,7 @@ public class StructuredEventToClusterDetailsConverter {
             if (!Strings.isNullOrEmpty(platformVariant)) {
                 cdpClusterDetails.setCloudProviderVariant(UsageProto.CDPCloudProviderVariantType
                         .Value.valueOf(platformVariant));
+                cdpClusterDetails.setMultiAz(multiAzConverter.convert(platformVariant));
             }
         }
 
