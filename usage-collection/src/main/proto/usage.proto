@@ -982,6 +982,8 @@ message CDPFreeIPADetails {
   int32 nodes = 1;
   // Shows whether spot is used for any FreeIPA nodes
   bool spot = 2;
+  // multi az for freeipa
+  bool multiAz = 3;
 }
 
 // Azure specific environment details
@@ -1109,6 +1111,8 @@ message CDPClusterDetails {
   string userTags = 4;
   // The cluster specific variant e.g.: in case of AWS it can be AWS or AWS_NATIVE
   CDPCloudProviderVariantType.Value cloudProviderVariant = 5;
+  // multi az for freeipa
+  bool multiAz = 6;
 }
 
 message CDPStatusDetails {

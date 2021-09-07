@@ -26,6 +26,7 @@ public class EnvironmentDetailsToCDPFreeIPADetailsConverter {
 
             if (freeIpaCreationDto != null) {
                 cdpFreeIPADetails.setNodes(freeIpaCreationDto.getInstanceCountByGroup());
+                cdpFreeIPADetails.setMultiAz(freeIpaCreationDto.isEnableMultiAz());
 
                 FreeIpaCreationAwsParametersDto aws = freeIpaCreationDto.getAws();
 
