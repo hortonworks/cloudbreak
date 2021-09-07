@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.UpdateStackV
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.AuthorizeForAutoscaleV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.AutoscaleStackV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.CertificateV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.LimitsConfigurationResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.ClusterProxyConfiguration;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.AutoscaleRecommendationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
@@ -132,6 +133,11 @@ public interface AutoscaleV4Endpoint {
     @Path("clusterproxy")
     @Produces(MediaType.APPLICATION_JSON)
     ClusterProxyConfiguration getClusterProxyconfiguration();
+
+    @GET
+    @Path("limits_configuration")
+    @Produces(MediaType.APPLICATION_JSON)
+    LimitsConfigurationResponse getLimitsConfiguration();
 
     @GET
     @Path("/stack/crn/{crn}/recommendation")

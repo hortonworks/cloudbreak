@@ -137,16 +137,17 @@ public class YarnLoadEvaluator extends EvaluatorExecutor {
 
         if (yarnRecommendedScaleUpCount > 0 && isCoolDownTimeElapsed(cluster.getStackCrn(), "scaled-up",
                 loadAlertConfiguration.getScaleUpCoolDownMillis(), cluster.getLastScalingActivity()))  {
-            sendScaleUpEvent(existingHostGroupSize, yarnRecommendedScaleUpCount);
+            sendScaleUpEvent(stackV4Response.getNodeCount(), existingHostGroupSize, yarnRecommendedScaleUpCount);
         } else if (!yarnRecommendedDecommissionHosts.isEmpty() && isCoolDownTimeElapsed(cluster.getStackCrn(), "scaled-down",
                 loadAlertConfiguration.getScaleDownCoolDownMillis(), cluster.getLastScalingActivity()))  {
             sendScaleDownEvent(existingHostGroupSize, yarnRecommendedDecommissionHosts);
         }
     }
 
-    public void sendScaleUpEvent(Integer existingHostGroupSize, Integer targetScaleUpCount) {
+    public void sendScaleUpEvent(Integer existingClusterNodeCount, Integer existingHostGroupSize, Integer targetScaleUpCount) {
         ScalingEvent scalingEvent = new ScalingEvent(loadAlert);
-        scalingEvent.setHostGroupNodeCount(existingHostGroupSize);
+        scalingEvent.setExistingHostGroupNodeCount(existingHostGroupSize);
+        scalingEvent.setExistingClusterNodeCount(existingClusterNodeCount);
         scalingEvent.setDesiredAbsoluteHostGroupNodeCount(existingHostGroupSize + targetScaleUpCount);
         eventPublisher.publishEvent(scalingEvent);
         LOGGER.info("Triggered ScaleUp for Cluster '{}', NodeCount '{}', HostGroup '{}'",
@@ -155,7 +156,7 @@ public class YarnLoadEvaluator extends EvaluatorExecutor {
 
     public void sendScaleDownEvent(Integer existingHostGroupSize, List<String> yarnRecommendedDecommissionHosts) {
         ScalingEvent scalingEvent = new ScalingEvent(loadAlert);
-        scalingEvent.setHostGroupNodeCount(existingHostGroupSize);
+        scalingEvent.setExistingHostGroupNodeCount(existingHostGroupSize);
         scalingEvent.setDesiredAbsoluteHostGroupNodeCount(existingHostGroupSize - yarnRecommendedDecommissionHosts.size());
         scalingEvent.setDecommissionNodeIds(yarnRecommendedDecommissionHosts);
         eventPublisher.publishEvent(scalingEvent);

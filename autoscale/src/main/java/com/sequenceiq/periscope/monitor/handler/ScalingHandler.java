@@ -60,11 +60,11 @@ public class ScalingHandler implements ApplicationListener<ScalingEvent> {
         LoggingUtils.buildMdcContext(cluster);
         ScalingPolicy policy = alert.getScalingPolicy();
 
-        int hostGroupNodeCount = event.getHostGroupNodeCount();
+        int hostGroupNodeCount = event.getExistingHostGroupNodeCount();
         int desiredAbsoluteHostGroupNodeCount = event.getDesiredAbsoluteHostGroupNodeCount();
         if (hostGroupNodeCount != desiredAbsoluteHostGroupNodeCount) {
             Runnable scalingRequest = (Runnable) applicationContext.getBean("ScalingRequest", cluster, policy,
-                    hostGroupNodeCount, desiredAbsoluteHostGroupNodeCount, event.getDecommissionNodeIds());
+                    event.getExistingClusterNodeCount(), hostGroupNodeCount, desiredAbsoluteHostGroupNodeCount, event.getDecommissionNodeIds());
 
             executorService.submit(scalingRequest);
             rejectedThreadService.remove(cluster.getId());

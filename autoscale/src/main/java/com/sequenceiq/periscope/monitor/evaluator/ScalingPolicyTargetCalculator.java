@@ -40,8 +40,6 @@ public class ScalingPolicyTargetCalculator {
                 desiredAbsoluteHostGroupNodeCount = hostGroupNodeCount;
         }
         int minSize = ScalingConstants.DEFAULT_HOSTGROUP_MIN_SIZE;
-        int maxSize = ScalingConstants.DEFAULT_HOSTGROUP_MAX_SIZE;
-
-        return desiredAbsoluteHostGroupNodeCount < minSize ? minSize : desiredAbsoluteHostGroupNodeCount > maxSize ? maxSize : desiredAbsoluteHostGroupNodeCount;
+        return desiredAbsoluteHostGroupNodeCount < minSize ? minSize : desiredAbsoluteHostGroupNodeCount;
     }
 }

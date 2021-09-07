@@ -85,6 +85,7 @@ public class ScalingHandlerTest {
         LoadAlert loadAlertMock = mock(LoadAlert.class);
         Cluster cluster = getARunningCluster();
 
+        int clusterNodeSize = 100;
         int hostGroupNodeCount = 10;
         List nodeIds = List.of("nodeId1", "nodeId2", "nodeId3");
         int expectedNodeCount = hostGroupNodeCount - nodeIds.size();
@@ -94,11 +95,12 @@ public class ScalingHandlerTest {
         when(loadAlertMock.getScalingPolicy()).thenReturn(scalingPolicyMock);
         when(clusterService.findById(anyLong())).thenReturn(cluster);
         when(scalingPolicyMock.getAdjustmentType()).thenReturn(LOAD_BASED);
-        when(scalingEventMock.getHostGroupNodeCount()).thenReturn(hostGroupNodeCount);
+        when(scalingEventMock.getExistingClusterNodeCount()).thenReturn(clusterNodeSize);
+        when(scalingEventMock.getExistingHostGroupNodeCount()).thenReturn(hostGroupNodeCount);
         when(scalingEventMock.getDesiredAbsoluteHostGroupNodeCount()).thenReturn(expectedNodeCount);
         when(scalingEventMock.getDecommissionNodeIds()).thenReturn(nodeIds);
         when(applicationContext.getBean("ScalingRequest", cluster, scalingPolicyMock,
-                hostGroupNodeCount, expectedNodeCount, nodeIds)).thenReturn(runnableMock);
+                clusterNodeSize, hostGroupNodeCount, expectedNodeCount, nodeIds)).thenReturn(runnableMock);
 
         underTest.onApplicationEvent(scalingEventMock);
 
@@ -113,7 +115,7 @@ public class ScalingHandlerTest {
         TimeAlert timeAlertMock = mock(TimeAlert.class);
 
         when(scalingEventMock.getAlert()).thenReturn(timeAlertMock);
-        when(scalingEventMock.getHostGroupNodeCount()).thenReturn(2);
+        when(scalingEventMock.getExistingHostGroupNodeCount()).thenReturn(2);
         when(scalingEventMock.getDesiredAbsoluteHostGroupNodeCount()).thenReturn(2);
         when(scalingPolicyMock.getHostGroup()).thenReturn("compute");
         when(clusterService.findById(anyLong())).thenReturn(cluster);
@@ -134,32 +136,33 @@ public class ScalingHandlerTest {
 
     public static Stream<Arguments> dataClusterScaling() {
         return Stream.of(
-                //TestCase, CurrentHostGroupCount,ScalingAdjustment,ExpectedScalingCount
-                Arguments.of("SCALE_UP",  2,  5, 7),
-                Arguments.of("SCALE_UP", 10, 40, 50),
-                Arguments.of("SCALE_UP", 10, 15, 25),
-                Arguments.of("SCALE_UP", 10, 40, 50),
-                Arguments.of("SCALE_DOWN", 10, -5, 5),
-                Arguments.of("SCALE_DOWN", 15, -14, 1),
-                Arguments.of("SCALE_DOWN", 10, -7, 3)
+                //TestCase, CurrentClusterNodeCount, CurrentHostGroupCount,ScalingAdjustment,ExpectedScalingCount
+                Arguments.of("SCALE_UP", 10, 2,  5, 7),
+                Arguments.of("SCALE_UP", 10, 10, 40, 50),
+                Arguments.of("SCALE_UP", 10, 10, 15, 25),
+                Arguments.of("SCALE_UP", 10, 10, 40, 50),
+                Arguments.of("SCALE_DOWN", 10, 10, -5, 5),
+                Arguments.of("SCALE_DOWN", 10, 15, -14, 1),
+                Arguments.of("SCALE_DOWN", 10, 10, -7, 3)
         );
     }
 
-    @ParameterizedTest(name = "{0}: With currentHostGroupCount={1}, scalingAdjustment ={2}, expectedScalingCount={3} ")
+    @ParameterizedTest(name = "{0}: With currentClusterNodeCount={1}, currentHostGroupCount={2}, scalingAdjustment ={3}, expectedScalingCount={4} ")
     @MethodSource("dataClusterScaling")
-    public void testClusterScaling(String testType, int currentHostGroupCount,
+    public void testClusterScaling(String testType, int currentClusterNodeCount, int currentHostGroupCount,
             int scalingAdjustment, int expectedScalingCount) {
         LoadAlert loadAlertMock = mock(LoadAlert.class);
-        validateClusterScaling(loadAlertMock, currentHostGroupCount, scalingAdjustment, expectedScalingCount);
+        validateClusterScaling(loadAlertMock, currentClusterNodeCount, currentHostGroupCount, scalingAdjustment, expectedScalingCount);
     }
 
     private void validateClusterScaling(BaseAlert baseAlertMock,
-            int currentHostGroupCount, int scalingAdjument, int expectedScaleUpCount) {
+            int currentClusterNodeCount, int currentHostGroupCount, int scalingAdjument, int expectedScaleUpCount) {
         MockitoAnnotations.initMocks(this);
         Cluster cluster = getARunningCluster();
 
         when(scalingEventMock.getAlert()).thenReturn(baseAlertMock);
-        when(scalingEventMock.getHostGroupNodeCount()).thenReturn(currentHostGroupCount);
+        when(scalingEventMock.getExistingClusterNodeCount()).thenReturn(currentClusterNodeCount);
+        when(scalingEventMock.getExistingHostGroupNodeCount()).thenReturn(currentHostGroupCount);
         when(scalingEventMock.getDesiredAbsoluteHostGroupNodeCount()).thenReturn(currentHostGroupCount + scalingAdjument);
 
         when(clusterService.findById(anyLong())).thenReturn(cluster);
@@ -168,7 +171,7 @@ public class ScalingHandlerTest {
 
         when(scalingEventMock.getDecommissionNodeIds()).thenCallRealMethod();
         when(applicationContext.getBean("ScalingRequest", cluster, scalingPolicyMock,
-                currentHostGroupCount, expectedScaleUpCount, List.of())).thenReturn(runnableMock);
+                currentClusterNodeCount, currentHostGroupCount, expectedScaleUpCount, List.of())).thenReturn(runnableMock);
 
         underTest.onApplicationEvent(scalingEventMock);
 

@@ -56,6 +56,7 @@ import com.sequenceiq.periscope.repository.LoadAlertRepository;
 import com.sequenceiq.periscope.repository.TimeAlertRepository;
 import com.sequenceiq.periscope.service.AutoscaleRecommendationService;
 import com.sequenceiq.periscope.service.configuration.ClusterProxyConfigurationService;
+import com.sequenceiq.periscope.service.configuration.LimitsConfigurationService;
 import com.sequenceiq.periscope.testcontext.EndpointTestContext;
 
 @RunWith(SpringRunner.class)
@@ -97,6 +98,9 @@ public class DistroXAutoScaleClusterV1EndpointTest {
 
     @MockBean
     private ClusterProxyConfigurationService clusterProxyConfigurationService;
+
+    @MockBean
+    private LimitsConfigurationService limitsConfigurationService;
 
     @MockBean
     private AutoscaleRecommendationService recommendationService;
@@ -154,6 +158,7 @@ public class DistroXAutoScaleClusterV1EndpointTest {
         when(grpcUmsClient.getAccountDetails(anyString(), any())).thenReturn(UserManagementProto.Account.newBuilder().build());
         doNothing().when(resourceAuthorizationService).authorize(eq("crn:cdp:iam:us-west-1:accid:cluster:mockuser@cloudera.com"), any(), any(), any());
         when(clusterProxyConfigurationService.getClusterProxyUrl()).thenReturn(Optional.of("http://clusterproxy"));
+        when(limitsConfigurationService.getMaxNodeCountLimit()).thenReturn(400);
         when(recommendationService.getAutoscaleRecommendations(TEST_CLUSTER_CRN))
                 .thenReturn(new AutoscaleRecommendationV4Response(Set.of("compute"), Set.of("compute")));
     }
