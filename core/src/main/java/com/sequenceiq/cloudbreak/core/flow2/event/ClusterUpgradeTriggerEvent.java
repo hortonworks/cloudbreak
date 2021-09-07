@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.event;
 
+import java.util.Objects;
+
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 
@@ -21,5 +23,11 @@ public class ClusterUpgradeTriggerEvent extends StackEvent {
 
     public String getImageId() {
         return imageId;
+    }
+
+    @Override
+    public boolean equalsEvent(StackEvent other) {
+        return isClassAndEqualsEvent(ClusterUpgradeTriggerEvent.class, other,
+                event -> Objects.equals(imageId, event.imageId));
     }
 }

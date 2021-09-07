@@ -1,15 +1,17 @@
 package com.sequenceiq.cloudbreak.reactor.api.event;
 
+import java.util.Objects;
+import java.util.function.Predicate;
+
 import org.apache.commons.lang3.StringUtils;
 
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
-import com.sequenceiq.cloudbreak.common.event.Acceptable;
-import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.event.IdempotentEvent;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 
 import reactor.rx.Promise;
 
-public class StackEvent implements Selectable, Acceptable {
+public class StackEvent implements IdempotentEvent<StackEvent> {
     private final String selector;
 
     private final Long stackId;
@@ -54,5 +56,23 @@ public class StackEvent implements Selectable, Acceptable {
                 ", stackId=" + stackId +
                 ", accepted=" + accepted +
                 '}';
+    }
+
+    @Override
+    public boolean equalsEvent(StackEvent other) {
+        return isClassAndEqualsEvent(StackEvent.class, other);
+    }
+
+    protected <T extends StackEvent> boolean isClassAndEqualsEvent(Class<T> clazz, StackEvent other) {
+        return isClassAndEqualsEvent(clazz, other, stackEvent -> true);
+    }
+
+    protected <T extends StackEvent> boolean isClassAndEqualsEvent(Class<T> clazz, StackEvent other, Predicate<T> equalsSubclass) {
+        if (!clazz.equals(getClass())) {
+            return false;
+        }
+        return Objects.equals(selector, other.selector)
+                && Objects.equals(stackId, other.stackId)
+                && equalsSubclass.test((T) other);
     }
 }
