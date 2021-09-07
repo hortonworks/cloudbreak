@@ -1,11 +1,15 @@
 package com.sequenceiq.freeipa.converter.instance;
 
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.MOCK;
+import static com.sequenceiq.freeipa.util.CloudArgsForIgConverter.DISK_ENCRYPTION_SET_ID;
+import static com.sequenceiq.freeipa.util.CloudArgsForIgConverter.GCP_KMS_ENCRYPTION_KEY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
+import java.util.EnumMap;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,6 +31,7 @@ import com.sequenceiq.freeipa.entity.SecurityGroup;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.Template;
 import com.sequenceiq.freeipa.service.stack.instance.DefaultInstanceGroupProvider;
+import com.sequenceiq.freeipa.util.CloudArgsForIgConverter;
 
 @ExtendWith(MockitoExtension.class)
 public class InstanceGroupRequestToInstanceGroupConverterTest {
@@ -78,11 +83,12 @@ public class InstanceGroupRequestToInstanceGroupConverterTest {
         DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
 
         // GIVEN
-        given(defaultInstanceGroupProvider.createDefaultTemplate(eq(MOCK), eq(ACCOUNT_ID), eq(null))).willReturn(template);
+        given(defaultInstanceGroupProvider.createDefaultTemplate(eq(MOCK), eq(ACCOUNT_ID), eq(null), eq(null))).willReturn(template);
         given(securityGroupConverter.convert(eq(securityGroupRequest))).willReturn(securityGroup);
         // WHEN
         InstanceGroup result = underTest.convert(request, networkRequest, ACCOUNT_ID, stack, freeIpaServerRequest,
-                detailedEnvironmentResponse, null);
+                detailedEnvironmentResponse, createAndGetCloudArgsForIgCoverterMap(null, null));
+
         // THEN
         assertThat(result).isNotNull();
         assertThat(result.getGroupName()).isEqualTo(NAME);
@@ -118,7 +124,7 @@ public class InstanceGroupRequestToInstanceGroupConverterTest {
         InstanceTemplateRequest instanceTemplateRequest = mock(InstanceTemplateRequest.class);
         request.setInstanceTemplateRequest(instanceTemplateRequest);
         Template template = mock(Template.class);
-        when(templateConverter.convert(instanceTemplateRequest, MOCK, ACCOUNT_ID, null)).thenReturn(template);
+        when(templateConverter.convert(instanceTemplateRequest, MOCK, ACCOUNT_ID, "dummyDiskEncryptionSetId", "encryptionKey")).thenReturn(template);
 
         InstanceGroup result = underTest.convert(
                 request,
@@ -127,7 +133,8 @@ public class InstanceGroupRequestToInstanceGroupConverterTest {
                 stack,
                 freeIpaServerRequest,
                 detailedEnvironmentResponse,
-                null);
+                createAndGetCloudArgsForIgCoverterMap("dummyDiskEncryptionSetId", "encryptionKey"));
+
         assertThat(result).isNotNull();
         assertThat(result.getTemplate()).isSameAs(template);
     }
@@ -152,7 +159,7 @@ public class InstanceGroupRequestToInstanceGroupConverterTest {
         InstanceTemplateRequest instanceTemplateRequest = mock(InstanceTemplateRequest.class);
         request.setInstanceTemplateRequest(instanceTemplateRequest);
         Template template = mock(Template.class);
-        when(templateConverter.convert(instanceTemplateRequest, MOCK, ACCOUNT_ID, null)).thenReturn(template);
+        when(templateConverter.convert(instanceTemplateRequest, MOCK, ACCOUNT_ID, "dummyDiskEncryptionSetId", null)).thenReturn(template);
 
         InstanceGroup result = underTest.convert(
                 request,
@@ -161,7 +168,43 @@ public class InstanceGroupRequestToInstanceGroupConverterTest {
                 stack,
                 freeIpaServerRequest,
                 detailedEnvironmentResponse,
-                null);
+                createAndGetCloudArgsForIgCoverterMap("dummyDiskEncryptionSetId", null));
+
+        assertThat(result).isNotNull();
+        assertThat(result.getTemplate()).isSameAs(template);
+    }
+
+    @Test
+    void convertTestDefaultTemplateConversionWithDiskEncryptionSetId() {
+        InstanceGroupRequest request = new InstanceGroupRequest();
+
+        Stack stack = new Stack();
+        stack.setAccountId(ACCOUNT_ID);
+        stack.setCloudPlatform(MOCK.name());
+        stack.setName(NAME);
+
+        FreeIpaServerRequest freeIpaServerRequest = new FreeIpaServerRequest();
+        freeIpaServerRequest.setHostname(HOSTNAME);
+        freeIpaServerRequest.setDomain(DOMAINNAME);
+
+        NetworkRequest networkRequest = new NetworkRequest();
+
+        DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
+
+        InstanceTemplateRequest instanceTemplateRequest = mock(InstanceTemplateRequest.class);
+        request.setInstanceTemplateRequest(instanceTemplateRequest);
+        Template template = mock(Template.class);
+
+        when(templateConverter.convert(instanceTemplateRequest, MOCK, ACCOUNT_ID, "dummyDiskEncryptionSetId", null)).thenReturn(template);
+
+        InstanceGroup result = underTest.convert(
+                request,
+                networkRequest,
+                ACCOUNT_ID,
+                stack,
+                freeIpaServerRequest,
+                detailedEnvironmentResponse,
+                createAndGetCloudArgsForIgCoverterMap("dummyDiskEncryptionSetId", null));
 
         assertThat(result).isNotNull();
         assertThat(result.getTemplate()).isSameAs(template);
@@ -188,18 +231,63 @@ public class InstanceGroupRequestToInstanceGroupConverterTest {
 
         DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
 
-        when(templateConverter.convert(instanceTemplateRequest, MOCK, ACCOUNT_ID, "dummyEncryptionKey")).thenReturn(template);
+        when(templateConverter.convert(instanceTemplateRequest, MOCK, ACCOUNT_ID, null, "dummyEncryptionKey")).thenReturn(template);
 
-        InstanceGroup result = underTest.convert(request,
+        InstanceGroup result = underTest.convert(
+                request,
                 networkRequest,
                 ACCOUNT_ID,
                 stack,
                 freeIpaServerRequest,
                 detailedEnvironmentResponse,
-                "dummyEncryptionKey");
+                createAndGetCloudArgsForIgCoverterMap(null, "dummyEncryptionKey"));
 
         assertThat(result).isNotNull();
         assertThat(result.getTemplate()).isSameAs(template);
     }
 
+    @Test
+    void convertTestDefaultTemplateConversionWithEncryptionKey() {
+        InstanceGroupRequest request = new InstanceGroupRequest();
+
+        InstanceTemplateRequest instanceTemplateRequest = mock(InstanceTemplateRequest.class);
+        request.setInstanceTemplateRequest(instanceTemplateRequest);
+        Template template = mock(Template.class);
+
+        Stack stack = new Stack();
+        stack.setAccountId(ACCOUNT_ID);
+        stack.setCloudPlatform(MOCK.name());
+        stack.setName(NAME);
+
+        FreeIpaServerRequest freeIpaServerRequest = new FreeIpaServerRequest();
+        freeIpaServerRequest.setHostname(HOSTNAME);
+        freeIpaServerRequest.setDomain(DOMAINNAME);
+
+        NetworkRequest networkRequest = new NetworkRequest();
+
+        DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
+
+        when(templateConverter.convert(instanceTemplateRequest, MOCK, ACCOUNT_ID, null, "dummyEncryptionKey")).thenReturn(template);
+
+        InstanceGroup result = underTest.convert(
+                request,
+                networkRequest,
+                ACCOUNT_ID,
+                stack,
+                freeIpaServerRequest,
+                detailedEnvironmentResponse,
+                createAndGetCloudArgsForIgCoverterMap(null, "dummyEncryptionKey"));
+
+        assertThat(result).isNotNull();
+        assertThat(result.getTemplate()).isSameAs(template);
+    }
+
+    EnumMap<CloudArgsForIgConverter, String> createAndGetCloudArgsForIgCoverterMap(String diskEncryptionSetId, String encryptionKey) {
+        EnumMap<CloudArgsForIgConverter, String> cloudArgsForIgConverterMap = new EnumMap<>(CloudArgsForIgConverter.class);
+
+        cloudArgsForIgConverterMap.put(DISK_ENCRYPTION_SET_ID, diskEncryptionSetId);
+        cloudArgsForIgConverterMap.put(GCP_KMS_ENCRYPTION_KEY, encryptionKey);
+
+        return cloudArgsForIgConverterMap;
+    }
 }

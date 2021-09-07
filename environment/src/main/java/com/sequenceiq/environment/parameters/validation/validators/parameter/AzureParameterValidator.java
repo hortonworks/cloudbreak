@@ -199,7 +199,7 @@ public class AzureParameterValidator implements ParameterValidator {
     }
 
     @Override
-    public CloudPlatform getcloudPlatform() {
+    public CloudPlatform getCloudPlatform() {
         return CloudPlatform.AZURE;
     }
 }
