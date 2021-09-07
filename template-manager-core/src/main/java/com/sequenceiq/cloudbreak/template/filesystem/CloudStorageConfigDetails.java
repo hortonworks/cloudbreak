@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -109,17 +110,31 @@ public class CloudStorageConfigDetails {
         templateObject.put("clusterName", fileSystemConfigQueryObject.getClusterName());
         templateObject.put("attachedCluster", fileSystemConfigQueryObject.isAttachedCluster());
         templateObject.put("datalakeCluster", fileSystemConfigQueryObject.isDatalakeCluster());
-        templateObject.put("storageName", trimStoragePostfixIfNeeded(fileSystemConfigQueryObject.getStorageName(),
-                fileSystemConfigQueryObject.getFileSystemType()));
+        templateObject.put("storageName", calculateStorageName(fileSystemConfigQueryObject.getStorageName(), fileSystemConfigQueryObject.getFileSystemType()));
+        templateObject.put("subFolder", calculateSubFolder(fileSystemConfigQueryObject.getStorageName(), fileSystemConfigQueryObject.getFileSystemType()));
         templateObject.put("blueprintText", fileSystemConfigQueryObject.getBlueprintText());
         templateObject.put("accountName", fileSystemConfigQueryObject.getAccountName().orElse("default-account-name"));
         templateObject.put("protocol", fileSystemConfigQueryObject.isSecure() ? protocol + "s" : protocol);
         return templateObject;
     }
 
-    private String trimStoragePostfixIfNeeded(String storageName, String fileSystemTypeNm) {
-        FileSystemType fileSystemType = FileSystemType.valueOf(fileSystemTypeNm);
+    private String calculateSubFolder(String storageName, String fileSystemTypeName) {
+        FileSystemType fileSystemType = FileSystemType.valueOf(fileSystemTypeName);
         String postfix = fileSystemType.getPostFix();
-        return storageName.replaceAll(postfix, "");
+        if (StringUtils.isEmpty(postfix)) {
+            return "";
+        } else {
+            return StringUtils.substringAfter(storageName, postfix);
+        }
+    }
+
+    private String calculateStorageName(String storageName, String fileSystemTypeName) {
+        FileSystemType fileSystemType = FileSystemType.valueOf(fileSystemTypeName);
+        String postfix = fileSystemType.getPostFix();
+        if (StringUtils.isEmpty(postfix)) {
+            return storageName;
+        } else {
+            return StringUtils.substringBefore(storageName, postfix);
+        }
     }
 }

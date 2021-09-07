@@ -25,7 +25,7 @@ public enum FileSystemType {
 
     ADLS(AdlsFileSystem.class, "adl", Set.of("adl"), "{{{ accountName }}}.azuredatalakestore.net/{{{ storageName }}}", ""),
 
-    ADLS_GEN_2(AdlsGen2FileSystem.class, "abfs", Set.of("abfs", "abfss"), "{{{ storageName }}}.dfs.core.windows.net", ".dfs.core.windows.net"),
+    ADLS_GEN_2(AdlsGen2FileSystem.class, "abfs", Set.of("abfs", "abfss"), "{{{ storageName }}}.dfs.core.windows.net{{{ subFolder }}}", ".dfs.core.windows.net"),
 
     S3(S3FileSystem.class, "s3a", Set.of("s3", "s3a", "s3n"), "{{{ storageName }}}", ""),
 
