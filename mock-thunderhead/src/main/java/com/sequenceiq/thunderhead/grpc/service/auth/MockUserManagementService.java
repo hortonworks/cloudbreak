@@ -31,6 +31,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CONCLUS
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_METRICS_DATABUS_PROCESSING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_NODESTATUS_CHECK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_BACKUP_ON_UPGRADE;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MICRO_DUTY_SDX;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_METRICS_DATABUS_PROCESSING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_AWS_EFS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_LOAD_BALANCER;
@@ -312,6 +313,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.mediumdutysdx.enable}")
     private boolean mediumDutySdxEnabled;
+
+    @Value("${auth.mock.microdutysdx.enable}")
+    private boolean microDutySdxEnabled;
 
     @Value("${auth.mock.ha.repair.enable}")
     private boolean haRepairEnabled;
@@ -703,6 +707,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (mediumDutySdxEnabled) {
             builder.addEntitlements(createEntitlement(CDP_MEDIUM_DUTY_SDX));
+        }
+        if (microDutySdxEnabled) {
+            builder.addEntitlements(createEntitlement(CDP_MICRO_DUTY_SDX));
         }
         if (haUpgradeEnabled) {
             builder.addEntitlements(createEntitlement(CDP_ALLOW_HA_UPGRADE));

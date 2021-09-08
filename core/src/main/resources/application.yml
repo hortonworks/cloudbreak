@@ -521,6 +521,7 @@ cb:
           7.2.11 - Streaming Analytics Heavy Duty with Apache Flink=cdp-flink-heavy;
           7.2.11 COD Edge Node=cdp-cod-edge-node
         7.2.12: >
+          7.2.12 - SDX Micro Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-micro;
           7.2.12 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx;
           7.2.12 - SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-medium-ha;
           7.2.12 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie=cdp-data-engineering;
