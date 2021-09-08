@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common;
 
+import static com.google.common.base.Charsets.UTF_8;
 import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsCredentialConnector.ROLE_IS_NOT_ASSUMABLE_ERROR_MESSAGE_INDICATOR;
+import static com.sequenceiq.cloudbreak.experience.PolicyServiceName.MLX;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -26,7 +28,6 @@ import org.mockito.MockitoAnnotations;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.SdkBaseException;
-import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import com.sequenceiq.cloudbreak.cloud.aws.common.exception.AwsConfusedDeputyException;
 import com.sequenceiq.cloudbreak.cloud.aws.common.exception.AwsPermissionMissingException;
@@ -90,7 +91,7 @@ public class AwsCredentialConnectorTest {
     public void testVerifyIfRoleBasedCredentialVerificationThrowsSdkBaseExceptionThenFailedStatusShouldReturn()
         throws AwsPermissionMissingException, IOException {
         URL url = Resources.getResource("definitions/aws-environment-minimal-policy.json");
-        String awsEnvPolicy = Resources.toString(url, Charsets.UTF_8);
+        String awsEnvPolicy = Resources.toString(url, UTF_8);
         String encodedAwsEnvPolicy = Base64.getEncoder().encodeToString(awsEnvPolicy.getBytes());
         String roleArn = "someRoleArn";
         when(credentialView.getRoleArn()).thenReturn(roleArn);
@@ -131,7 +132,7 @@ public class AwsCredentialConnectorTest {
     public void testVerifyIfRoleBasedCredentialVerificationShouldFailWhenItIsCredentialCreationAndRoleIsAssumableWithoutExternalId()
             throws AwsPermissionMissingException, IOException {
         URL url = Resources.getResource("definitions/aws-environment-minimal-policy.json");
-        String awsEnvPolicy = Resources.toString(url, Charsets.UTF_8);
+        String awsEnvPolicy = Resources.toString(url, UTF_8);
         String encodedAwsEnvPolicy = Base64.getEncoder().encodeToString(awsEnvPolicy.getBytes());
         String roleArn = "someRoleArn";
         when(awsPlatformParameters.getEnvironmentMinimalPoliciesJson()).thenReturn(encodedAwsEnvPolicy);
@@ -151,7 +152,7 @@ public class AwsCredentialConnectorTest {
     public void testVerifyIfRoleBasedCredentialVerificationShouldReturnVerifiedStatusWhenItIsCredentialCreationAndRoleIsNotAssumableWithoutExternalId()
             throws AwsPermissionMissingException, IOException {
         URL url = Resources.getResource("definitions/aws-environment-minimal-policy.json");
-        String awsEnvPolicy = Resources.toString(url, Charsets.UTF_8);
+        String awsEnvPolicy = Resources.toString(url, UTF_8);
         String encodedAwsEnvPolicy = Base64.getEncoder().encodeToString(awsEnvPolicy.getBytes());
         String roleArn = "someRoleArn";
         when(awsPlatformParameters.getEnvironmentMinimalPoliciesJson()).thenReturn(encodedAwsEnvPolicy);
@@ -173,7 +174,7 @@ public class AwsCredentialConnectorTest {
     public void testVerifyIfRoleBasedCredentialVerificationShouldReturnFailedStatusWhenItIsCredentialCreationAndRoleAssumeFailsWithoutExternalId()
             throws AwsPermissionMissingException, IOException {
         URL url = Resources.getResource("definitions/aws-environment-minimal-policy.json");
-        String awsEnvPolicy = Resources.toString(url, Charsets.UTF_8);
+        String awsEnvPolicy = Resources.toString(url, UTF_8);
         String encodedAwsEnvPolicy = Base64.getEncoder().encodeToString(awsEnvPolicy.getBytes());
         String roleArn = "someRoleArn";
         when(credentialView.getRoleArn()).thenReturn(roleArn);
@@ -195,7 +196,7 @@ public class AwsCredentialConnectorTest {
             throws IOException {
 
         URL url = Resources.getResource("definitions/aws-environment-minimal-policy.json");
-        String awsEnvPolicy = Resources.toString(url, Charsets.UTF_8);
+        String awsEnvPolicy = Resources.toString(url, UTF_8);
         String encodedAwsEnvPolicy = Base64.getEncoder().encodeToString(awsEnvPolicy.getBytes());
         List<String> services = List.of("ml");
         Map<String, String> experiencePrerequisites = Map.of("ml", encodedAwsEnvPolicy);
@@ -222,9 +223,8 @@ public class AwsCredentialConnectorTest {
     @Test
     public void testVerifyByServiceIfRoleBasedCredentialVerificationThrowsAwsConfusedDeputyExceptionThenFailed503StatusShouldReturn()
             throws IOException {
-
         URL url = Resources.getResource("definitions/aws-environment-minimal-policy.json");
-        String awsEnvPolicy = Resources.toString(url, Charsets.UTF_8);
+        String awsEnvPolicy = Resources.toString(url, UTF_8);
         String encodedAwsEnvPolicy = Base64.getEncoder().encodeToString(awsEnvPolicy.getBytes());
         List<String> services = List.of("ml");
         Map<String, String> experiencePrerequisites = Map.of("ml", encodedAwsEnvPolicy);
@@ -248,11 +248,34 @@ public class AwsCredentialConnectorTest {
     }
 
     @Test
+    public void testInternalAlternativeLookupShouldWorkFine() throws IOException {
+        String awsEnvPolicy = Resources.toString(Resources.getResource("definitions/aws-environment-minimal-policy.json"), UTF_8);
+        String encodedAwsEnvPolicy = Base64.getEncoder().encodeToString(awsEnvPolicy.getBytes());
+        String service = MLX.getInternalAlternatives().stream().findFirst().get();
+        List<String> services = List.of(service);
+        Map<String, String> experiencePrerequisites = Map.of(MLX.getPublicName(), encodedAwsEnvPolicy);
+
+        when(credentialView.getRoleArn()).thenReturn("someRoleArn");
+        Exception sdkException = new AwsConfusedDeputyException("SomethingTerribleHappened");
+
+        when(awsPlatformParameters.getEnvironmentMinimalPoliciesJson()).thenReturn(encodedAwsEnvPolicy);
+        when(credentialClient.retrieveSessionCredentials(any())).thenThrow(sdkException);
+
+        CDPServicePolicyVerificationResponses result = underTest.verifyByServices(authenticatedContext, services, experiencePrerequisites);
+
+        assertNotNull(result);
+        assertEquals(result.getResults().size(), 1);
+        assertEquals(result.getResults().stream().findFirst().get().getServiceName(), service);
+        assertEquals(result.getResults().stream().findFirst().get().getServiceStatus(), "SomethingTerribleHappened");
+        assertEquals(result.getResults().stream().findFirst().get().getStatusCode(), 503);
+    }
+
+    @Test
     public void testVerifyByServiceIfRoleBasedCredentialVerificationThrowsSdkBaseExceptionThenFailedStatusShouldReturn()
             throws IOException {
 
         URL url = Resources.getResource("definitions/aws-environment-minimal-policy.json");
-        String awsEnvPolicy = Resources.toString(url, Charsets.UTF_8);
+        String awsEnvPolicy = Resources.toString(url, UTF_8);
         String encodedAwsEnvPolicy = Base64.getEncoder().encodeToString(awsEnvPolicy.getBytes());
         List<String> services = List.of("ml");
         Map<String, String> experiencePrerequisites = Map.of("ml", encodedAwsEnvPolicy);
@@ -280,7 +303,7 @@ public class AwsCredentialConnectorTest {
             throws IOException {
 
         URL url = Resources.getResource("definitions/aws-environment-minimal-policy.json");
-        String awsEnvPolicy = Resources.toString(url, Charsets.UTF_8);
+        String awsEnvPolicy = Resources.toString(url, UTF_8);
         String encodedAwsEnvPolicy = Base64.getEncoder().encodeToString(awsEnvPolicy.getBytes());
         List<String> services = List.of("ml");
         Map<String, String> experiencePrerequisites = Map.of("ml", encodedAwsEnvPolicy);
@@ -307,7 +330,7 @@ public class AwsCredentialConnectorTest {
             throws IOException {
 
         URL url = Resources.getResource("definitions/aws-environment-minimal-policy.json");
-        String awsEnvPolicy = Resources.toString(url, Charsets.UTF_8);
+        String awsEnvPolicy = Resources.toString(url, UTF_8);
         String encodedAwsEnvPolicy = Base64.getEncoder().encodeToString(awsEnvPolicy.getBytes());
         List<String> services = List.of("ml");
         Map<String, String> experiencePrerequisites = Map.of("ml", encodedAwsEnvPolicy);
@@ -334,7 +357,7 @@ public class AwsCredentialConnectorTest {
         throws IOException {
 
         URL url = Resources.getResource("definitions/aws-environment-minimal-policy.json");
-        String awsEnvPolicy = Resources.toString(url, Charsets.UTF_8);
+        String awsEnvPolicy = Resources.toString(url, UTF_8);
         String encodedAwsEnvPolicy = Base64.getEncoder().encodeToString(awsEnvPolicy.getBytes());
         List<String> services = List.of("ml");
         Map<String, String> experiencePrerequisites = Map.of("ml", encodedAwsEnvPolicy);
@@ -355,4 +378,5 @@ public class AwsCredentialConnectorTest {
         assertEquals(result.getResults().stream().findFirst().get().getServiceStatus(), exceptionMessageComesFromSdk);
         assertEquals(result.getResults().stream().findFirst().get().getStatusCode(), 503);
     }
+
 }

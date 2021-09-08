@@ -29,13 +29,14 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialViewProvider
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CDPServicePolicyVerificationResponse;
-import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CDPServicePolicyVerificationResponses;
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.credential.CredentialVerificationContext;
 import com.sequenceiq.cloudbreak.cloud.response.AwsCredentialPrerequisites;
 import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
+import com.sequenceiq.cloudbreak.experience.PolicyServiceName;
 import com.sequenceiq.common.model.CredentialType;
 
 @Service
@@ -89,7 +90,7 @@ public class AwsCredentialConnector implements CredentialConnector {
 
     @Override
     public CDPServicePolicyVerificationResponses verifyByServices(AuthenticatedContext authenticatedContext,
-        List<String> services, Map<String, String> experiencePrerequisites) {
+            List<String> services, Map<String, String> experiencePrerequisites) {
         CloudCredential credential = authenticatedContext.getCloudCredential();
         LOGGER.debug("Create credential: {}", credential);
         AwsCredentialView awsCredential = credentialViewProvider.createAwsCredentialView(credential);
@@ -154,14 +155,15 @@ public class AwsCredentialConnector implements CredentialConnector {
     }
 
     private CDPServicePolicyVerificationResponses verifyIamRoleIsAssumable(CloudCredential cloudCredential,
-        List<String> services, Map<String, String> experiencePrerequisites) {
+            List<String> services, Map<String, String> experiencePrerequisites) {
         AwsCredentialView awsCredential = credentialViewProvider.createAwsCredentialView(cloudCredential);
         CDPServicePolicyVerificationResponses credentialStatus;
         Map<String, String> servicesWithPolicies = new HashMap<>();
-        services.forEach(service -> {
-            String policy = experiencePrerequisites.get(service.toUpperCase());
-            servicesWithPolicies.put(service, policy);
-        });
+        services.forEach(service -> experiencePrerequisites.keySet()
+                .stream()
+                .filter(AwsCredentialConnector::isPolicyServiceMatchesForName)
+                .findFirst()
+                .ifPresent(policyKey -> servicesWithPolicies.put(service, experiencePrerequisites.get(policyKey))));
         try {
             credentialClient.retrieveSessionCredentials(awsCredential);
             credentialStatus = verifyCredentialsPermission(awsCredential, servicesWithPolicies);
@@ -173,11 +175,21 @@ public class AwsCredentialConnector implements CredentialConnector {
             credentialStatus = new CDPServicePolicyVerificationResponses(getServiceStatus(services, confusedDeputyEx.getMessage()));
         } catch (RuntimeException e) {
             String errorMessage = String.format("Unable to verify credential: check if the role '%s' exists and it's created with the correct external ID. " +
-                            "Cause: '%s'", awsCredential.getRoleArn(), e.getMessage());
+                    "Cause: '%s'", awsCredential.getRoleArn(), e.getMessage());
             LOGGER.warn(errorMessage, e);
             credentialStatus = new CDPServicePolicyVerificationResponses(getServiceStatus(services, errorMessage));
         }
         return credentialStatus;
+    }
+
+    private static boolean isPolicyServiceMatchesForName(String policyName) {
+        LOGGER.debug("Looking for policy service name alternatives for the given name: {}", policyName);
+        for (PolicyServiceName policyServiceName : PolicyServiceName.values()) {
+            if (policyName.equalsIgnoreCase(policyServiceName.getPublicName()) || policyServiceName.hasMatchForInternalAlternativesWithIgnoreCase(policyName)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private Set<CDPServicePolicyVerificationResponse> getServiceStatus(List<String> services, String errorMessage) {
@@ -229,7 +241,7 @@ public class AwsCredentialConnector implements CredentialConnector {
     }
 
     private CDPServicePolicyVerificationResponses verifyCredentialsPermission(AwsCredentialView awsCredential,
-        Map<String, String> servicesWithPolicies) {
+            Map<String, String> servicesWithPolicies) {
         Set<CDPServicePolicyVerificationResponse> cdpServicePolicyVerificationResponses = new HashSet<>();
         for (Map.Entry<String, String> entry : servicesWithPolicies.entrySet()) {
             String serviceName = entry.getKey();
