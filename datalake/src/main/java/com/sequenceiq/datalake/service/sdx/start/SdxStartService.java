@@ -75,11 +75,11 @@ public class SdxStartService {
         } catch (ClientErrorException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
             LOGGER.info("Can not start stack {} from cloudbreak: {}", sdxCluster.getStackId(), errorMessage, e);
-            throw new RuntimeException("Can not start stack, client error happened on Cloudbreak side: " + errorMessage);
+            throw new RuntimeException("Cannot start cluster, error happened during operation: " + errorMessage);
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
             LOGGER.info("Can not start stack {} from cloudbreak: {}", sdxCluster.getStackId(), errorMessage, e);
-            throw new RuntimeException("Can not start stack, web application error happened on Cloudbreak side: " + errorMessage);
+            throw new RuntimeException("Can not start cluster, error happened during operation: " + errorMessage);
         }
     }
 

@@ -147,7 +147,7 @@ public class SdxStartServiceTest {
         RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () -> underTest.start(CLUSTER_ID));
 
         verifyNoInteractions(cloudbreakFlowService);
-        assertEquals("Can not start stack, client error happened on Cloudbreak side: Error message: \"error\"", exception.getMessage());
+        assertEquals("Cannot start cluster, error happened during operation: Error message: \"error\"", exception.getMessage());
     }
 
     @Test
@@ -161,7 +161,7 @@ public class SdxStartServiceTest {
         RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () -> underTest.start(CLUSTER_ID));
 
         verifyNoInteractions(cloudbreakFlowService);
-        assertEquals("Can not start stack, web application error happened on Cloudbreak side: Error message: \"error\"", exception.getMessage());
+        assertEquals("Can not start cluster, error happened during operation: Error message: \"error\"", exception.getMessage());
     }
 
     private SdxCluster sdxCluster() {

@@ -105,10 +105,10 @@ public class SdxRepairService {
         } catch (ClientErrorException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
             LOGGER.info("Can not repair stack {} from cloudbreak: {}", sdxCluster.getStackId(), errorMessage, e);
-            throw new RuntimeException("Can not repair stack, client error happened on Cloudbreak side: " + errorMessage);
+            throw new RuntimeException("Cannot repair cluster, error happened during operation: " + errorMessage);
         } catch (WebApplicationException e) {
             LOGGER.info("Can not repair stack {} from cloudbreak: {}", sdxCluster.getStackId(), e.getMessage(), e);
-            throw new RuntimeException("Can not repair stack, client error happened on Cloudbreak side: " + e.getMessage());
+            throw new RuntimeException("Cannot repair cluster, error happened during the operation: " + e.getMessage());
         }
     }
 

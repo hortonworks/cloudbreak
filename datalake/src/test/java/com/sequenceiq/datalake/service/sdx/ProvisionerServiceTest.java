@@ -220,7 +220,7 @@ class ProvisionerServiceTest {
         when(webApplicationExceptionMessageExtractor.getErrorMessage(webApplicationException)).thenReturn("web-error");
 
         RuntimeException actual = Assertions.assertThrows(RuntimeException.class, () -> underTest.startStackDeletion(clusterId, false));
-        Assertions.assertEquals("Cannot delete stack, some error happened on Cloudbreak side: web-error", actual.getMessage());
+        Assertions.assertEquals("Cannot delete cluster, error happened during the operation: web-error", actual.getMessage());
 
         verify(stackV4Endpoint).deleteInternal(eq(0L), eq(null), eq(false), nullable(String.class));
     }

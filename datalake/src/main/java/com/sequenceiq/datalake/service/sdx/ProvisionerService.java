@@ -83,10 +83,10 @@ public class ProvisionerService {
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
             LOGGER.info("Cannot delete stack {} from cloudbreak: {}", sdxCluster.getStackId(), errorMessage, e);
-            throw new RuntimeException("Cannot delete stack, some error happened on Cloudbreak side: " + errorMessage);
+            throw new RuntimeException("Cannot delete cluster, error happened during the operation: " + errorMessage);
         } catch (ProcessingException e) {
             LOGGER.info("Cannot delete stack {} from cloudbreak: {}", sdxCluster.getStackId(), e);
-            throw new RuntimeException("Cannot delete stack, client error happened on Cloudbreak side: " + e.getMessage());
+            throw new RuntimeException("Cannot delete cluster, error happened during the operation: " + e.getMessage());
         }
     }
 
@@ -173,7 +173,7 @@ public class ProvisionerService {
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
             LOGGER.info("Cannot start provisioning: {}", errorMessage, e);
-            throw new RuntimeException("Cannot start provisioning, some error happened on Cloudbreak side: " + errorMessage);
+            throw new RuntimeException("Cannot start provisioning, error happened during the operation: " + errorMessage);
         } catch (IOException e) {
             LOGGER.info("Cannot parse stackrequest to json", e);
             throw new RuntimeException("Cannot write stackrequest to json: " + e.getMessage());

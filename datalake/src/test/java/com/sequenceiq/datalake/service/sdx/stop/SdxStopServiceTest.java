@@ -112,7 +112,7 @@ public class SdxStopServiceTest {
         when(sdxService.getById(CLUSTER_ID)).thenReturn(sdxCluster);
 
         RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () -> underTest.stop(CLUSTER_ID));
-        assertEquals("Can not stop stack, client error happened on Cloudbreak side: Error message: \"error\"", exception.getMessage());
+        assertEquals("Cannot stop cluster, error happened during operation: Error message: \"error\"", exception.getMessage());
     }
 
     @Test
@@ -124,7 +124,7 @@ public class SdxStopServiceTest {
         when(sdxService.getById(CLUSTER_ID)).thenReturn(sdxCluster);
 
         RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () -> underTest.stop(CLUSTER_ID));
-        assertEquals("Can not stop stack, web application error happened on Cloudbreak side: error", exception.getMessage());
+        assertEquals("Cannot stop cluster, error happened during operation: error", exception.getMessage());
     }
 
     private SdxCluster sdxCluster() {
