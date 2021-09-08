@@ -25,9 +25,6 @@ public class AzureLoadBalancerMetadataCollector {
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureLoadBalancerMetadataCollector.class);
 
     @Inject
-    private AzureUtils azureUtils;
-
-    @Inject
     private AvailabilitySetNameService availabilitySetNameService;
 
     public Map<String, Object> getParameters(AuthenticatedContext ac, String resourceGroup, String loadBalancerName) {
@@ -62,7 +59,7 @@ public class AzureLoadBalancerMetadataCollector {
     }
 
     private String generateAvailabilitySetName(AuthenticatedContext ac, LoadBalancerBackend backend) {
-        String stackName = azureUtils.getStackName(ac.getCloudContext());
+        String stackName = ac.getCloudContext().getName();
         String groupName = backend.inner().name().replace("-pool", "");
         return availabilitySetNameService.generateName(stackName, groupName);
     }

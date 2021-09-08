@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -53,9 +52,6 @@ public class AzureLoadBalancerMetadataCollectorTest {
     private AzureClient azureClient;
 
     @Mock
-    private AzureUtils azureUtils;
-
-    @Mock
     private AvailabilitySetNameService availabilitySetNameService;
 
     @InjectMocks
@@ -76,7 +72,6 @@ public class AzureLoadBalancerMetadataCollectorTest {
 
         when(azureClient.getLoadBalancerRules(eq(RESOURCE_GROUP), eq(LB_NAME))).thenReturn(rules);
         when(azureClient.getAvailabilitySet(eq(RESOURCE_GROUP), anyString())).thenReturn(mock(AvailabilitySet.class));
-        when(azureUtils.getStackName(any())).thenReturn(STACK_NAME);
         when(availabilitySetNameService.generateName(eq(STACK_NAME), eq(groupName))).thenReturn(availabilitySetName);
 
         Map<String, Object> parameters = underTest.getParameters(ac, RESOURCE_GROUP, LB_NAME);
@@ -105,7 +100,6 @@ public class AzureLoadBalancerMetadataCollectorTest {
 
         when(azureClient.getLoadBalancerRules(eq(RESOURCE_GROUP), eq(LB_NAME))).thenReturn(rules);
         when(azureClient.getAvailabilitySet(eq(RESOURCE_GROUP), anyString())).thenReturn(mock(AvailabilitySet.class));
-        when(azureUtils.getStackName(any())).thenReturn(STACK_NAME);
         when(availabilitySetNameService.generateName(eq(STACK_NAME), eq(groupName0))).thenReturn(availabilitySetName0);
         when(availabilitySetNameService.generateName(eq(STACK_NAME), eq(groupName1))).thenReturn(availabilitySetName1);
         when(availabilitySetNameService.generateName(eq(STACK_NAME), eq(groupName2))).thenReturn(availabilitySetName2);
@@ -137,7 +131,6 @@ public class AzureLoadBalancerMetadataCollectorTest {
         when(azureClient.getAvailabilitySet(eq(RESOURCE_GROUP), eq(availabilitySetName0))).thenReturn(mock(AvailabilitySet.class));
         when(azureClient.getAvailabilitySet(eq(RESOURCE_GROUP), eq(availabilitySetName1))).thenReturn(null);
         when(azureClient.getAvailabilitySet(eq(RESOURCE_GROUP), eq(availabilitySetName2))).thenReturn(mock(AvailabilitySet.class));
-        when(azureUtils.getStackName(any())).thenReturn(STACK_NAME);
         when(availabilitySetNameService.generateName(eq(STACK_NAME), eq(groupName0))).thenReturn(availabilitySetName0);
         when(availabilitySetNameService.generateName(eq(STACK_NAME), eq(groupName1))).thenReturn(availabilitySetName1);
         when(availabilitySetNameService.generateName(eq(STACK_NAME), eq(groupName2))).thenReturn(availabilitySetName2);
@@ -151,7 +144,7 @@ public class AzureLoadBalancerMetadataCollectorTest {
         Location location = Location.location(Region.region("region"), AvailabilityZone.availabilityZone("az"));
         CloudContext context = CloudContext.Builder.builder()
                 .withId(5L)
-                .withName("name")
+                .withName(STACK_NAME)
                 .withCrn("crn")
                 .withPlatform("platform")
                 .withVariant("variant")
