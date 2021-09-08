@@ -182,6 +182,33 @@ public class LoadBalancerConfigConverterTest {
     }
 
     @Test
+    public void testConvertAzureTargetGroupMissingAvailabilitySetInMetadata() {
+        Map<String, Object> azureParams = createAzureParams(1);
+        azureParams.put(AzureLoadBalancerMetadataView.getAvailabilitySetParam(PORT2), null);
+        CloudLoadBalancerMetadata cloudLoadBalancerMetadata = new CloudLoadBalancerMetadata.Builder()
+                .withParameters(azureParams)
+                .build();
+        TargetGroup targetGroup = new TargetGroup();
+        targetGroup.setType(TargetGroupType.KNOX);
+        TargetGroupPortPair portPair1 = new TargetGroupPortPair(PORT1, PORT2);
+        TargetGroupPortPair portPair2 = new TargetGroupPortPair(PORT2, PORT2);
+        TargetGroupPortPair portPair3 = new TargetGroupPortPair(PORT3, PORT3);
+
+        when(loadBalancerConfigService.getTargetGroupPortPairs(eq(targetGroup))).thenReturn(Set.of(portPair1, portPair2, portPair3));
+
+        TargetGroupConfigDbWrapper targetGroupConfigDbWrapper = underTest.convertTargetGroup(AZURE, cloudLoadBalancerMetadata, targetGroup);
+        assertNotNull(targetGroupConfigDbWrapper.getAzureConfig());
+        AzureTargetGroupConfigDb azureTargetGroupConfigDb = targetGroupConfigDbWrapper.getAzureConfig();
+        assertEquals(Set.of(PORT1, PORT2, PORT3), azureTargetGroupConfigDb.getPortAvailabilitySetMapping().keySet());
+        List<String> availabilitySets = azureTargetGroupConfigDb.getPortAvailabilitySetMapping().get(PORT1);
+        assertEquals(List.of(AVAILABILITY_SET_NAME), availabilitySets);
+        availabilitySets = azureTargetGroupConfigDb.getPortAvailabilitySetMapping().get(PORT2);
+        assertEquals(List.of(MISSING_CLOUD_RESOURCE), availabilitySets);
+        availabilitySets = azureTargetGroupConfigDb.getPortAvailabilitySetMapping().get(PORT3);
+        assertEquals(List.of(MISSING_CLOUD_RESOURCE), availabilitySets);
+    }
+
+    @Test
     public void testConvertGcpLoadBalancer() {
         CloudLoadBalancerMetadata cloudLoadBalancerMetadata = new CloudLoadBalancerMetadata.Builder()
                 .withParameters(creatGcpParams(0))
@@ -214,7 +241,6 @@ public class LoadBalancerConfigConverterTest {
         GcpLoadBalancerNamesDb gcpLoadBalancerNamesDb = gcpTargetGroupConfigDb.getPortMapping().get(PORT1);
         assertEquals(BACKEND_SERVICE_NAME, gcpLoadBalancerNamesDb.getBackendServiceName());
         assertEquals(INSTANCE_GROUP_NAME, gcpLoadBalancerNamesDb.getInstanceGroupName());
-
     }
 
     private Map<String, Object> createAwsParams(int numPorts) {

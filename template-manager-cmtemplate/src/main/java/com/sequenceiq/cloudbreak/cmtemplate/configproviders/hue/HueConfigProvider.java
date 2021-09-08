@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
@@ -23,6 +25,8 @@ import com.sequenceiq.cloudbreak.template.views.RdsView;
 
 @Component
 public class HueConfigProvider extends AbstractRdsRoleConfigProvider {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(HueConfigProvider.class);
 
     private static final String HUE_DATABASE_HOST = "hue-hue_database_host";
 
@@ -123,8 +127,10 @@ public class HueConfigProvider extends AbstractRdsRoleConfigProvider {
             if (!proxyHosts.isEmpty()) {
                 String proxyHostsString = String.join(",", proxyHosts);
                 if (isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERAMANAGER_VERSION_7_1_0)) {
+                    LOGGER.debug("Using {} settings of [{}]", HUE_KNOX_PROXYHOSTS, proxyHostsString);
                     result.add(new ApiClusterTemplateVariable().name(HUE_KNOX_PROXYHOSTS).value(proxyHostsString));
                 } else {
+                    LOGGER.debug("Adding knox proxy hosts [{}] to {}", proxyHostsString, HUE_SAFETY_VALVE);
                     String valveValue = SAFETY_VALVE_KNOX_PROXYHOSTS_KEY_PATTERN.concat(proxyHostsString);
                     result.add(new ApiClusterTemplateVariable().name(HUE_SAFETY_VALVE).value(valveValue));
                 }

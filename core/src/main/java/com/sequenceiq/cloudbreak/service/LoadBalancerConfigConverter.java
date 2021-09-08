@@ -112,7 +112,8 @@ public class LoadBalancerConfigConverter {
         AzureTargetGroupConfigDb azureTargetGroupConfigDb = new AzureTargetGroupConfigDb();
         for (Integer port : trafficPorts) {
             String availabilitySetName = azureMetadata.getAvailabilitySetByPort(port);
-            azureTargetGroupConfigDb.addPortAvailabilitySetMapping(port, List.of(availabilitySetName));
+            List<String> availabilitySetNames = List.of(StringUtils.isEmpty(availabilitySetName) ? MISSING_CLOUD_RESOURCE : availabilitySetName);
+            azureTargetGroupConfigDb.addPortAvailabilitySetMapping(port, availabilitySetNames);
         }
         targetGroupConfigDbWrapper.setAzureConfig(azureTargetGroupConfigDb);
         return targetGroupConfigDbWrapper;
