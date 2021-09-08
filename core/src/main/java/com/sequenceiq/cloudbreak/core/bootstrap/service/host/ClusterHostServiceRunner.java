@@ -256,7 +256,7 @@ public class ClusterHostServiceRunner {
             } else {
                 mountDisks.mountDisksOnNewNodes(stack.getId(), new HashSet<>(candidateAddresses.values()), allNodes);
             }
-            recipeEngine.executePreClusterManagerRecipes(stack, hostGroupService.getRecipesByCluster(cluster.getId()));
+            recipeEngine.executePreClusterManagerRecipes(stack, hostGroupService.getByClusterWithRecipes(cluster.getId()));
             hostOrchestrator.runService(gatewayConfigs, reachableNodes, saltConfig, exitCriteriaModel);
             modifyStartupMountRole(stack, reachableNodes, GrainOperation.REMOVE);
         } catch (CloudbreakOrchestratorCancelledException e) {

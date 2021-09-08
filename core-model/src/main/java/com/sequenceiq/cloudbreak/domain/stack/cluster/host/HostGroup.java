@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.domain.stack.cluster.host;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -21,11 +22,15 @@ import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
+import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.json.JsonToString;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.converter.RecoveryModeConverter;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.util.StringMapTypeReference;
 
 @NamedEntityGraphs({
         @NamedEntityGraph(name = "HostGroup.instanceGroup.instanceMetaData",
@@ -61,6 +66,23 @@ public class HostGroup implements ProvisionEntity {
     @Column(nullable = false)
     @Convert(converter = RecoveryModeConverter.class)
     private RecoveryMode recoveryMode;
+
+    @Convert(converter = JsonToString.class)
+    @Column(columnDefinition = "TEXT")
+    private Json recipeHashes;
+
+    public Map<String, String> getRecipeHashes() {
+        if (recipeHashes != null && recipeHashes.getValue() != null) {
+            return JsonUtil.jsonToTypeOpt(recipeHashes.getValue(), new StringMapTypeReference()).orElse(null);
+        }
+        return null;
+    }
+
+    public void setRecipeHashes(Map<String, String> recipeHashes) {
+        if (recipeHashes != null) {
+            this.recipeHashes = new Json(recipeHashes);
+        }
+    }
 
     public Long getId() {
         return id;

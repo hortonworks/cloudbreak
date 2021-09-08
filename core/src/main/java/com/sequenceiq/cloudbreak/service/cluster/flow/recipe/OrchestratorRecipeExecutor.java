@@ -98,6 +98,15 @@ class OrchestratorRecipeExecutor {
         }
     }
 
+    public void cleanupRecipes(Stack stack)  throws CloudbreakException {
+        List<GatewayConfig> allGatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
+        try {
+            hostOrchestrator.cleanupRecipes(allGatewayConfigs, clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId()));
+        } catch (CloudbreakOrchestratorFailedException e) {
+            throw new CloudbreakException(e);
+        }
+    }
+
     public void preClusterManagerStartRecipes(Stack stack) throws CloudbreakException {
         GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
         try {

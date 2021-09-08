@@ -842,6 +842,21 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
+    public void cleanupRecipes(List<GatewayConfig> allGatewayConfigs, ExitCriteriaModel clusterDeletionBasedModel) throws CloudbreakOrchestratorFailedException {
+        GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(allGatewayConfigs);
+        Set<String> gatewayTargets = getGatewayPrivateIps(allGatewayConfigs);
+        try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
+            String cleanupCommand = "rm -rf /srv/salt/pre-recipes/** && rm -rf /srv/salt/post-recipes/**";
+            Target<String> targets = new HostList(gatewayTargets);
+            Map<String, String> cleanupResponse = SaltStates.runCommandOnHosts(retry, sc, targets, cleanupCommand);
+            LOGGER.debug("Recipe cleanup response: {}", cleanupResponse);
+        } catch (Exception e) {
+            LOGGER.info("Error occurred during recipe cleanup", e);
+            throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
+        }
+    }
+
+    @Override
     public void uploadKeytabs(List<GatewayConfig> allGatewayConfigs, Set<KeytabModel> keytabModels, ExitCriteriaModel exitModel)
             throws CloudbreakOrchestratorFailedException {
         GatewayConfig primaryGatewayConfig = saltService.getPrimaryGatewayConfig(allGatewayConfigs);

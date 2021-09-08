@@ -4,6 +4,10 @@ create_recipe_log_dir_post_start:
     - name: /var/log/recipes/post-cloudera-manager-start
     - makedirs: True
 
+cleanup_post_cloudera_manager_start_scripts:
+  cmd.run:
+    - name: rm -rf /opt/scripts/post-cloudera-manager-start/*
+
 {% for hg, args in pillar.get('recipes', {}).items() %}
 {% if grains['hostgroup'] == hg %}
 {% if args['post-cloudera-manager-start'] is defined %}

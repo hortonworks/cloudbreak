@@ -7,6 +7,10 @@ create_recipe_log_dir_pre_start:
     - name: /var/log/recipes/pre-cloudera-manager-start
     - makedirs: True
 
+cleanup_pre_cloudera_manager_start_scripts:
+  cmd.run:
+    - name: rm -rf /opt/scripts/pre-cloudera-manager-start/*
+
 {% for hg, args in pillar.get('recipes', {}).items() %}
 {% if grains['hostgroup'] == hg %}
 {% if args['pre-cloudera-manager-start'] is defined %}

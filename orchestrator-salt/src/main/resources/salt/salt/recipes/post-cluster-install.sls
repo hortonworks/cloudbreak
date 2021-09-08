@@ -4,6 +4,10 @@ create_recipe_log_dir_post_cluster:
     - name: /var/log/recipes/post-cluster-install
     - makedirs: True
 
+cleanup_post_cluster_install_scripts:
+  cmd.run:
+    - name: rm -rf /opt/scripts/post-cluster-install/*
+
 {% for hg, args in pillar.get('recipes', {}).items() %}
 {% if grains['hostgroup'] == hg %}
 {% if args['post-cluster-install'] is defined %}

@@ -16,6 +16,9 @@ public interface HostRecipeExecutor {
     void uploadRecipes(List<GatewayConfig> allGatewayConfigs, Map<String, List<RecipeModel>> recipes, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorFailedException;
 
+    void cleanupRecipes(List<GatewayConfig> allGatewayConfigs, ExitCriteriaModel clusterDeletionBasedModel)
+            throws CloudbreakOrchestratorFailedException;
+
     void preClusterManagerStartRecipes(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorFailedException, CloudbreakOrchestratorTimeoutException;
 
@@ -27,5 +30,4 @@ public interface HostRecipeExecutor {
 
     void postInstallRecipes(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorFailedException, CloudbreakOrchestratorTimeoutException;
-
 }

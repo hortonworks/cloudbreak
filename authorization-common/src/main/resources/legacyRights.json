@@ -53,6 +53,7 @@
   "datahub/deleteDatahubInstance": "datahub/write",
   "datahub/setDatahubMaintenanceMode": "datahub/write",
   "datahub/rotateAutoTlsCertDatahub": "datahub/write",
+  "datahub/refreshRecipes": "datahub/write",
   "datahub/upgradeDatahub": "datahub/write",
   "environments/describeDatabase": "datalake/read",
   "environments/describeDatabaseServer": "datalake/read",

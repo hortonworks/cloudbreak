@@ -4,6 +4,10 @@ create_recipe_log_dir_pre_termination:
     - name: /var/log/recipes/pre-termination
     - makedirs: True
 
+cleanup_pre_termination_scripts:
+  cmd.run:
+    - name: rm -rf /opt/scripts/pre-termination/*
+
 {% for hg, args in pillar.get('recipes', {}).items() %}
 {% if grains['hostgroup'] == hg %}
 {% if args['pre-termination'] is defined %}

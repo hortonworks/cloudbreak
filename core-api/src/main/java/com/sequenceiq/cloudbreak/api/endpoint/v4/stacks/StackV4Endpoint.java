@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.ClusterOpDescr
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.ClusterOpDescription.UPDATE_PILLAR_CONFIG;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.ClusterOpDescription.UPDATE_SALT;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.RECOVER_CLUSTER_IN_WORKSPACE_INTERNAL;
+import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.REFRESH_RECIPES_IN_WORKSPACE_INTERNAL;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.SYNC_CM_BY_NAME_IN_WORKSPACE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.UPDATE_LOAD_BALANCERS;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.CHECK_FOR_UPGRADE_CLUSTER_IN_WORKSPACE;
@@ -71,6 +72,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UserNamePasswordV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerSyncV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.AttachRecipeV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.DetachRecipeV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.UpdateRecipesV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.CertificatesRotationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBlueprintV4Response;
@@ -80,6 +84,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.dr.BackupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.dr.RestoreV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.AttachRecipeV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.UpdateRecipesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.RecoveryV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeOptionV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
@@ -434,6 +440,27 @@ public interface StackV4Endpoint {
     @ApiOperation(value = RECOVER_CLUSTER_IN_WORKSPACE_INTERNAL, nickname = "recoverClusterInternal")
     RecoveryV4Response recoverClusterByNameInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+
+    @PUT
+    @Path("internal/{name}/refresh_recipes")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = REFRESH_RECIPES_IN_WORKSPACE_INTERNAL, nickname = "refreshRecipesInternal")
+    UpdateRecipesV4Response refreshRecipes(@PathParam("workspaceId") Long workspaceId, @Valid UpdateRecipesV4Request request,
+            @PathParam("name") String name, @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+
+    @POST
+    @Path("internal/{name}/attach_recipe")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "", nickname = "attachRecipeInternal")
+    AttachRecipeV4Response attachRecipe(@PathParam("workspaceId") Long workspaceId, @Valid AttachRecipeV4Request request,
+            @PathParam("name") String name, @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+
+    @POST
+    @Path("internal/{name}/detach_recipes")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "", nickname = "detachRecipeInternal")
+    void detachRecipe(@PathParam("workspaceId") Long workspaceId, @Valid DetachRecipeV4Request request,
+            @PathParam("name") String name, @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 
     @PUT
     @Path("internal/{name}/rotate_autotls_certificates")

@@ -28,6 +28,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UserNamePasswordV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerSyncV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.AttachRecipeV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.DetachRecipeV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.UpdateRecipesV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.CertificatesRotationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBlueprintV4Response;
@@ -38,6 +41,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.dr.BackupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.dr.RestoreV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.AttachRecipeV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.UpdateRecipesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.RecoveryV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeOptionV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
@@ -366,6 +371,26 @@ public class StackV4Controller extends NotificationController implements StackV4
     public RecoveryV4Response recoverClusterByNameInternal(Long workspaceId, String name, @InitiatorUserCrn String initiatorUserCrn) {
         FlowIdentifier flowIdentifier = stackOperations.recoverCluster(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId());
         return new RecoveryV4Response(flowIdentifier);
+    }
+
+    @Override
+    @InternalOnly
+    public UpdateRecipesV4Response refreshRecipes(Long workspaceId, @Valid UpdateRecipesV4Request request, String name,
+            @InitiatorUserCrn String initiatorUserCrn) {
+        return stackOperations.refreshRecipes(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId(), request);
+    }
+
+    @Override
+    @InternalOnly
+    public AttachRecipeV4Response attachRecipe(Long workspaceId, @Valid AttachRecipeV4Request request, String name,
+            @InitiatorUserCrn String initiatorUserCrn) {
+        return stackOperations.attachRecipe(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId(), request);
+    }
+
+    @Override
+    @InternalOnly
+    public void detachRecipe(Long workspaceId, @Valid DetachRecipeV4Request request, String name, @InitiatorUserCrn String initiatorUserCrn) {
+        stackOperations.detachRecipe(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId(), request);
     }
 
     @Override

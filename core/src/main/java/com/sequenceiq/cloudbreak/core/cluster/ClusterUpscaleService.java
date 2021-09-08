@@ -100,7 +100,7 @@ public class ClusterUpscaleService {
         HostGroup hostGroup = Optional.ofNullable(hostGroupService.getByClusterIdAndNameWithRecipes(stack.getCluster().getId(), hostGroupName))
                 .orElseThrow(NotFoundException.notFound("hostgroup", hostGroupName));
         Set<InstanceMetaData> runningInstanceMetaDataSet = hostGroup.getInstanceGroup().getRunningInstanceMetaDataSet();
-        recipeEngine.executePostAmbariStartRecipes(stack, hostGroup.getRecipes());
+        recipeEngine.executePostAmbariStartRecipes(stack, Set.of(hostGroup));
         ClusterApi connector = clusterApiConnectors.getConnector(stack);
         List<String> upscaledHosts = connector.upscaleCluster(hostGroup, runningInstanceMetaDataSet);
         if (shouldRestartServices(repair, restartServices, stack)) {
