@@ -8,7 +8,7 @@
     copytruncate
     daily
     size 50M
-    rotate 14
+    rotate 45
     dateext
     dateformat -%Y%m%d-%s.log
     nocompress
