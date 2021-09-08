@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.environment.dto;
 
+import com.sequenceiq.environment.environment.domain.Environment;
+
 public class EnvironmentExperienceDto {
 
     private final String name;
@@ -31,6 +33,14 @@ public class EnvironmentExperienceDto {
 
     public String getCloudPlatform() {
         return cloudPlatform;
+    }
+
+    public static EnvironmentExperienceDto fromEnvironment(Environment environment) {
+        return new Builder().withName(environment.getName())
+                .withCrn(environment.getResourceCrn())
+                .withCloudPlatform(environment.getCloudPlatform())
+                .withAccountId(environment.getAccountId())
+                .build();
     }
 
     @Override
@@ -78,6 +88,14 @@ public class EnvironmentExperienceDto {
 
         public EnvironmentExperienceDto build() {
             return new EnvironmentExperienceDto(name, crn, accountId, cloudPlatform);
+        }
+
+        public EnvironmentExperienceDto fromEnvironment(Environment environment) {
+            return withName(environment.getName())
+                    .withCrn(environment.getResourceCrn())
+                    .withCloudPlatform(environment.getCloudPlatform())
+                    .withAccountId(environment.getAccountId())
+                    .build();
         }
 
     }

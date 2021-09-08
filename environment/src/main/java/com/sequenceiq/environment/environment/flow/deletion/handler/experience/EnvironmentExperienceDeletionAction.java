@@ -1,8 +1,11 @@
 package com.sequenceiq.environment.environment.flow.deletion.handler.experience;
 
+import static com.sequenceiq.cloudbreak.polling.PollingResult.EXIT;
 import static com.sequenceiq.cloudbreak.polling.PollingResult.isSuccess;
 import static com.sequenceiq.environment.environment.flow.deletion.handler.experience.ExperienceDeletionRetrievalTask.EXPERIENCE_RETRYING_COUNT;
 import static com.sequenceiq.environment.environment.flow.deletion.handler.experience.ExperienceDeletionRetrievalTask.EXPERIENCE_RETRYING_INTERVAL;
+
+import java.util.function.Function;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -84,7 +87,14 @@ public class EnvironmentExperienceDeletionAction {
                 EXPERIENCE_RETRYING_COUNT,
                 SINGLE_FAILURE);
         if (!isSuccess(result.getLeft())) {
-            processFailureWithForceDelete(result, forceDelete);
+            if (result.getLeft().equals(EXIT)) {
+                reCheckDeletionOtherwise(
+                        environment,
+                        env -> experienceConnectorService.getConnectedExperienceCount(EnvironmentExperienceDto.fromEnvironment(env)) == 0,
+                        () -> processFailureWithForceDelete(result, forceDelete));
+            } else {
+                processFailureWithForceDelete(result, forceDelete);
+            }
         }
     }
 
@@ -103,6 +113,13 @@ public class EnvironmentExperienceDeletionAction {
             LOGGER.debug("Forced environment delete causes skipping of experience deletion failure.");
         } else {
             processFailure(result);
+        }
+    }
+
+    private void reCheckDeletionOtherwise(Environment environment, Function<Environment, Boolean> reCheck, Runnable processFailure) {
+        LOGGER.info("Re-checking experience deletion result for environment: {} [crn: {}]", environment.getName(), environment.getResourceCrn());
+        if (!reCheck.apply(environment)) {
+            processFailure.run();
         }
     }
 
