@@ -31,6 +31,7 @@ auth:
     azure.single.resourcegroup.dedicated.storage.account.enable: true
     cloudidentitymappinng.enable: true
     mediumdutysdx.enable: true
+    microdutysdx.enable: true
     upgrade.internalrepo.enable: true
     hbase.cloudstorage.enable: false
     datalake:
