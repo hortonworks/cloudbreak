@@ -52,6 +52,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RAZ;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RUNTIME_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RUNTIME_UPGRADE_DATAHUB;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_S3_DIRECTORY_MARKER_RETENTION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SDX_HBASE_CLOUD_STORAGE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_USER_SYNC_CREDENTIALS_UPDATE_OPTIMIZATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_USE_CM_SYNC_COMMAND_POLLER;
@@ -359,6 +360,10 @@ public class EntitlementService {
 
     public boolean isGcpDiskEncryptionWithCMEKEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_CB_GCP_DISK_ENCRYPTION_WITH_CMEK);
+    }
+
+    public boolean isS3DirectoryMarkerRetentionEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_S3_DIRECTORY_MARKER_RETENTION);
     }
 
     public List<String> getEntitlements(String accountId) {

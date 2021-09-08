@@ -11,6 +11,8 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.storage.LocationHelper;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
@@ -42,10 +44,17 @@ public class S3ConfigProvider {
 
     private static final String S3_BUCKET_ENDPOINT_PARAM_TEMPLATE = "fs.s3a.bucket.%s.endpoint";
 
+    private static final String S3GUARD_DIRECTORY_MARKER_RETENTION_PARAM = "fs.s3a.directory.marker.retention";
+
+    private static final String S3GUARD_DIRECTORY_MARKER_RETENTION_VALUE = "authoritative";
+
     private static final String S3_ENDPOINT_TEMPLATE = "s3.%s.amazonaws.com";
 
     @Inject
     private LocationHelper locationHelper;
+
+    @Inject
+    private EntitlementService entitlementService;
 
     public void getServiceConfigs(TemplatePreparationObject templatePreparationObject, StringBuilder hdfsCoreSiteSafetyValveValue) {
         if (isS3FileSystemConfigured(templatePreparationObject)) {
@@ -85,6 +94,10 @@ public class S3ConfigProvider {
             addTags(source, hdfsCoreSiteSafetyValveValue);
             hdfsCoreSiteSafetyValveValue.append(ConfigUtils
                     .getSafetyValveProperty(S3GUARD_TABLE_CREATE_PARAM, S3GUARD_TABLE_CREATE_VALUE));
+            if (entitlementService.isS3DirectoryMarkerRetentionEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
+                hdfsCoreSiteSafetyValveValue.append(ConfigUtils
+                        .getSafetyValveProperty(S3GUARD_DIRECTORY_MARKER_RETENTION_PARAM, S3GUARD_DIRECTORY_MARKER_RETENTION_VALUE));
+            }
             hdfsCoreSiteSafetyValveValue.append(ConfigUtils
                     .getSafetyValveProperty(S3GUARD_TABLE_NAME_PARAM, s3FileSystemConfigurationsView.getS3GuardDynamoTableName()));
 

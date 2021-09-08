@@ -170,7 +170,10 @@ class EntitlementServiceTest {
                 {"EPHEMERAL_DISKS_FOR_TEMP_DATA", (EntitlementCheckFunction) EntitlementService::ephemeralDisksForTempDataEnabled, true},
 
                 {"CDP_CB_GCP_DISK_ENCRYPTION_WITH_CMEK", (EntitlementCheckFunction) EntitlementService::isGcpDiskEncryptionWithCMEKEnabled, false},
-                {"CDP_CB_GCP_DISK_ENCRYPTION_WITH_CMEK", (EntitlementCheckFunction) EntitlementService::isGcpDiskEncryptionWithCMEKEnabled, true}
+                {"CDP_CB_GCP_DISK_ENCRYPTION_WITH_CMEK", (EntitlementCheckFunction) EntitlementService::isGcpDiskEncryptionWithCMEKEnabled, true},
+
+                {"CDP_S3_DIRECTORY_MARKER_RETENTION", (EntitlementCheckFunction) EntitlementService::isS3DirectoryMarkerRetentionEnabled, false},
+                {"CDP_S3_DIRECTORY_MARKER_RETENTION", (EntitlementCheckFunction) EntitlementService::isS3DirectoryMarkerRetentionEnabled, true}
         };
     }
 

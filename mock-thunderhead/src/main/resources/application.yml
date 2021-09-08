@@ -74,6 +74,7 @@ auth:
     ephemeral.disks.for.temp.data.enable: true
     ui:
       edp.progress.bar.enable: true
+    s3.directory.marker.retention.enable: true
 
 crn:
   partition: cdp

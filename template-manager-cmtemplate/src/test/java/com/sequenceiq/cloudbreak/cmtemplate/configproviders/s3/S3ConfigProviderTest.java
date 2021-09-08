@@ -10,12 +10,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import org.apache.commons.lang3.StringUtils;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.cloud.storage.LocationHelper;
 import com.sequenceiq.cloudbreak.domain.StorageLocation;
@@ -38,8 +42,19 @@ public class S3ConfigProviderTest {
     @Mock
     private LocationHelper locationHelper;
 
+    @Mock
+    private EntitlementService entitlementService;
+
     @InjectMocks
     private S3ConfigProvider underTest;
+
+    @BeforeEach
+    void setUp() {
+        if (StringUtils.isEmpty(ThreadBasedUserCrnProvider.getUserCrn())) {
+            ThreadBasedUserCrnProvider.setUserCrn("crn:cdp:iam:us-west-1:1234:user:1");
+        }
+        when(entitlementService.isS3DirectoryMarkerRetentionEnabled(anyString())).thenReturn(false);
+    }
 
     @Test
     void testGetHdfsServiceConfigsWithS3GuardWithoutAuthoriative() {
@@ -70,6 +85,29 @@ public class S3ConfigProviderTest {
                 "<property><name>fs.s3a.s3guard.ddb.table.tag.apple</name><value>apple1</value></property>" +
                 "<property><name>fs.s3a.s3guard.ddb.table.tag.cdp_table_role</name><value>s3guard</value></property>" +
                 "<property><name>fs.s3a.s3guard.ddb.table.create</name><value>true</value></property>" +
+                "<property><name>fs.s3a.s3guard.ddb.table</name><value>dynamoTable</value></property>" +
+                "<property><name>fs.s3a.s3guard.ddb.region</name><value>region</value></property>" +
+                "<property><name>fs.s3a.authoritative.path</name>" +
+                "<value>s3a://bucket-first/warehouse/managed</value></property>" +
+                "<property><name>fs.s3a.bucket.bucket-first.endpoint</name><value>s3.region.amazonaws.com</value></property>" +
+                "<property><name>fs.s3a.bucket.bucket-second.endpoint</name><value>s3.region.amazonaws.com</value></property>", sb.toString());
+    }
+
+    @Test
+    void testGetHdfsServiceConfigsWithS3DirectoryMarkerRetentionEntitlementEnabled() {
+        when(entitlementService.isS3DirectoryMarkerRetentionEnabled(anyString())).thenReturn(true);
+        when(locationHelper.parseS3BucketName(anyString())).thenCallRealMethod();
+        TemplatePreparationObject preparationObject = getTemplatePreparationObject(true, true, true);
+        StringBuilder sb = new StringBuilder();
+
+        underTest.getServiceConfigs(preparationObject, sb);
+
+        assertEquals("<property><name>fs.s3a.metadatastore.impl</name>" +
+        "<value>org.apache.hadoop.fs.s3a.s3guard.DynamoDBMetadataStore</value></property>" +
+                "<property><name>fs.s3a.s3guard.ddb.table.tag.apple</name><value>apple1</value></property>" +
+                "<property><name>fs.s3a.s3guard.ddb.table.tag.cdp_table_role</name><value>s3guard</value></property>" +
+                "<property><name>fs.s3a.s3guard.ddb.table.create</name><value>true</value></property>" +
+                "<property><name>fs.s3a.directory.marker.retention</name><value>authoritative</value></property>" +
                 "<property><name>fs.s3a.s3guard.ddb.table</name><value>dynamoTable</value></property>" +
                 "<property><name>fs.s3a.s3guard.ddb.region</name><value>region</value></property>" +
                 "<property><name>fs.s3a.authoritative.path</name>" +

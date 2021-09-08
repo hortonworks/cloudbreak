@@ -48,6 +48,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RAW_S3;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RAZ;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RUNTIME_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RUNTIME_UPGRADE_DATAHUB;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_S3_DIRECTORY_MARKER_RETENTION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SDX_HBASE_CLOUD_STORAGE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SHOW_CLI;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_USER_SYNC_CREDENTIALS_UPDATE_OPTIMIZATION;
@@ -395,6 +396,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.freeipa.multiaz.enable}")
     private boolean enableMultiAzFreeIpa;
+
+    @Value("${auth.mock.s3.directory.marker.retention.enable}")
+    private boolean enableS3DirectoryMarkerRetention;
 
     private String cbLicense;
 
@@ -814,6 +818,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (edpProgressBarEnabled) {
             builder.addEntitlements(createEntitlement(UI_EDP_PROGRESS_BAR));
+        }
+        if (enableS3DirectoryMarkerRetention) {
+            builder.addEntitlements(createEntitlement(CDP_S3_DIRECTORY_MARKER_RETENTION));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()

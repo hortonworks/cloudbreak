@@ -274,6 +274,9 @@ public class MockUserManagementServiceTest {
 
                 {"enableGcpDiskEncryptionWithCMEK false", "enableGcpDiskEncryptionWithCMEK", false, "CDP_CB_GCP_DISK_ENCRYPTION_WITH_CMEK", false},
                 {"enableGcpDiskEncryptionWithCMEK true", "enableGcpDiskEncryptionWithCMEK", true, "CDP_CB_GCP_DISK_ENCRYPTION_WITH_CMEK", true},
+
+                {"enableS3DirectoryMarkerRetention false", "enableS3DirectoryMarkerRetention", false, "CDP_S3_DIRECTORY_MARKER_RETENTION", false},
+                {"enableS3DirectoryMarkerRetention true", "enableS3DirectoryMarkerRetention", true, "CDP_S3_DIRECTORY_MARKER_RETENTION", true}
         };
     }
 
