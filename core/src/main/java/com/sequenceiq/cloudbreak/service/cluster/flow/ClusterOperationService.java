@@ -18,6 +18,7 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_START_IGNORE
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_START_REQUESTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_STOP_IGNORED;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
+import static java.lang.Math.abs;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -37,6 +38,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Sets;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
@@ -66,6 +68,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
+import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintValidatorFactory;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -139,6 +142,9 @@ public class ClusterOperationService {
 
     @Inject
     private StackStopRestrictionService stackStopRestrictionService;
+
+    @Inject
+    private StackUpdater stackUpdater;
 
     @Measure(ClusterOperationService.class)
     public Cluster create(Stack stack, Cluster cluster, List<ClusterComponent> components, User user) throws TransactionService.TransactionExecutionException {
@@ -239,8 +245,12 @@ public class ClusterOperationService {
         boolean downscaleRequest = updateHostsValidator.validateRequest(stack, hostGroupAdjustment);
         if (downscaleRequest) {
             clusterService.updateClusterStatusByStackId(stackId, UPDATE_REQUESTED);
+            stackUpdater.updateStackStatus(stackId, DetailedStackStatus.DOWNSCALE_REQUESTED,
+                    "Requested node count for downscaling: " + abs(hostGroupAdjustment.getScalingAdjustment()));
             return flowManager.triggerClusterDownscale(stackId, hostGroupAdjustment);
         } else {
+            stackUpdater.updateStackStatus(stackId, DetailedStackStatus.UPSCALE_REQUESTED,
+                    "Requested node count for upscaling: " + hostGroupAdjustment.getScalingAdjustment());
             return flowManager.triggerClusterUpscale(stackId, hostGroupAdjustment);
         }
     }

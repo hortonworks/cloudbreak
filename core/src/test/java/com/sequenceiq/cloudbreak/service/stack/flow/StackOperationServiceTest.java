@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.service.stack.flow;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_START_IGNORED;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -85,6 +84,9 @@ public class StackOperationServiceTest {
 
     @Mock
     private StackStopRestrictionService stackStopRestrictionService;
+
+    @Mock
+    private UpdateNodeCountValidator updateNodeCountValidator;
 
     @Test
     public void testStartWhenStackAvailable() {
@@ -215,5 +217,29 @@ public class StackOperationServiceTest {
 
         underTest.updateNodeCount(stack, adjustment, false);
         verify(environmentService).checkEnvironmentStatus(stack, EnvironmentStatus.upscalable());
+    }
+
+    @Test
+    public void testUpdateNodeCountAndCheckDownscaleAndUpscaleStatusChange() throws TransactionService.TransactionExecutionException {
+        Stack stack = new Stack();
+        stack.setId(9876L);
+        stack.setStackStatus(new StackStatus(stack, AVAILABLE));
+        InstanceGroupAdjustmentV4Request upscaleAdjustment = new InstanceGroupAdjustmentV4Request();
+        upscaleAdjustment.setScalingAdjustment(5);
+
+        when(transactionService.required(any(Supplier.class))).thenAnswer(ans -> ((Supplier) ans.getArgument(0)).get());
+        when(stackService.getByIdWithLists(stack.getId())).thenReturn(stack);
+
+        underTest.updateNodeCount(stack, upscaleAdjustment, true);
+        verify(stackUpdater).updateStackStatus(stack.getId(), DetailedStackStatus.UPSCALE_REQUESTED,
+                "Requested node count for upscaling: " + upscaleAdjustment.getScalingAdjustment());
+        verify(flowManager).triggerStackUpscale(stack.getId(), upscaleAdjustment, true);
+
+        InstanceGroupAdjustmentV4Request downscaleAdjustment = new InstanceGroupAdjustmentV4Request();
+        downscaleAdjustment.setScalingAdjustment(-5);
+        underTest.updateNodeCount(stack, downscaleAdjustment, true);
+        verify(stackUpdater).updateStackStatus(stack.getId(), DetailedStackStatus.DOWNSCALE_REQUESTED,
+                "Requested node count for downscaling: " + 5);
+        verify(flowManager).triggerStackDownscale(stack.getId(), downscaleAdjustment);
     }
 }

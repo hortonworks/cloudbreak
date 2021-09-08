@@ -39,9 +39,11 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterModificationService;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
@@ -59,6 +61,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.exception.FlowsAlreadyRunningException;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
+import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -129,6 +132,9 @@ public class ClusterOperationServiceTest {
 
     @Mock
     private UpdateHostsValidator updateHostsValidator;
+
+    @Mock
+    private StackUpdater stackUpdater;
 
     private Cluster cluster;
 
@@ -256,6 +262,29 @@ public class ClusterOperationServiceTest {
         verify(cloudbreakMessagesService, times(1)).getMessage(eq(CLUSTER_RECOVERED_NODES_REPORTED_HOST_EVENT.getMessage()), any());
         verify(cloudbreakEventService).fireCloudbreakEvent(STACK_ID, "AVAILABLE", CLUSTER_RECOVERED_NODES_REPORTED_CLUSTER_EVENT, List.of("host1"));
         assertEquals(InstanceStatus.SERVICES_HEALTHY, host1.getInstanceStatus());
+    }
+
+    @Test
+    public void updateHostsTestAndCheckDownscaleAndUpscaleStatusChange() {
+        HostGroupAdjustmentV4Request downscaleHostGroupAdjustment = new HostGroupAdjustmentV4Request();
+        downscaleHostGroupAdjustment.setHostGroup("worker");
+        downscaleHostGroupAdjustment.setScalingAdjustment(-5);
+        when(stackService.getById(STACK_ID)).thenReturn(stack);
+        when(updateHostsValidator.validateRequest(stack, downscaleHostGroupAdjustment)).thenReturn(true);
+        underTest.updateHosts(STACK_ID, downscaleHostGroupAdjustment);
+        verify(stackUpdater, times(1)).updateStackStatus(STACK_ID, DetailedStackStatus.DOWNSCALE_REQUESTED,
+                "Requested node count for downscaling: " + 5);
+        verify(flowManager, times(1)).triggerClusterDownscale(STACK_ID, downscaleHostGroupAdjustment);
+
+        HostGroupAdjustmentV4Request upscaleHostGroupAdjustment = new HostGroupAdjustmentV4Request();
+        upscaleHostGroupAdjustment.setHostGroup("worker");
+        upscaleHostGroupAdjustment.setScalingAdjustment(5);
+        when(stackService.getById(STACK_ID)).thenReturn(stack);
+        when(updateHostsValidator.validateRequest(stack, upscaleHostGroupAdjustment)).thenReturn(false);
+        underTest.updateHosts(STACK_ID, upscaleHostGroupAdjustment);
+        verify(stackUpdater, times(1)).updateStackStatus(STACK_ID, DetailedStackStatus.UPSCALE_REQUESTED,
+                "Requested node count for upscaling: " + 5);
+        verify(flowManager, times(1)).triggerClusterUpscale(STACK_ID, upscaleHostGroupAdjustment);
     }
 
     private InstanceMetaData getHost(String hostName, String groupName, InstanceStatus instanceStatus, InstanceGroupType instanceGroupType) {

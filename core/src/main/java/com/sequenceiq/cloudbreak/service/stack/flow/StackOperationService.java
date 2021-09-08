@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOP_REQUE
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_START_IGNORED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_STOP_IGNORED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_STOP_REQUESTED;
+import static java.lang.Math.abs;
 import static java.lang.String.format;
 
 import java.util.Collection;
@@ -232,13 +233,15 @@ public class StackOperationService {
                     updateNodeCountValidator.validataHostMetadataStatuses(stackWithLists, instanceGroupAdjustmentJson);
                 }
                 if (instanceGroupAdjustmentJson.getScalingAdjustment() > 0) {
-                    stackUpdater.updateStackStatus(stackWithLists.getId(), DetailedStackStatus.UPSCALE_REQUESTED);
+                    stackUpdater.updateStackStatus(stackWithLists.getId(), DetailedStackStatus.UPSCALE_REQUESTED,
+                            "Requested node count for upscaling: " + instanceGroupAdjustmentJson.getScalingAdjustment());
                     return flowManager.triggerStackUpscale(
                             stackWithLists.getId(),
                             instanceGroupAdjustmentJson,
                             withClusterEvent);
                 } else {
-                    stackUpdater.updateStackStatus(stackWithLists.getId(), DetailedStackStatus.DOWNSCALE_REQUESTED);
+                    stackUpdater.updateStackStatus(stackWithLists.getId(), DetailedStackStatus.DOWNSCALE_REQUESTED,
+                            "Requested node count for downscaling: " + abs(instanceGroupAdjustmentJson.getScalingAdjustment()));
                     return flowManager.triggerStackDownscale(stackWithLists.getId(), instanceGroupAdjustmentJson);
                 }
             });
