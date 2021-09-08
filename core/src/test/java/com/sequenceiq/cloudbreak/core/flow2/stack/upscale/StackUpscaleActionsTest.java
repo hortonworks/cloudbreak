@@ -28,7 +28,6 @@ import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackValidationRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackValidationResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
-import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
@@ -112,9 +111,6 @@ class StackUpscaleActionsTest {
     @Mock
     private CloudResourceStatus cloudResourceStatus;
 
-    @Mock
-    private CloudInstance cloudInstance;
-
     @BeforeEach
     void setUp() {
         context = new StackScalingFlowContext(flowParameters, stack, cloudContext, cloudCredential, cloudStack, INSTANCE_GROUP_NAME, Set.of(), ADJUSTMENT,
@@ -141,11 +137,9 @@ class StackUpscaleActionsTest {
 
         when(stackScalabilityCondition.isScalable(stack, INSTANCE_GROUP_NAME)).thenReturn(true);
 
-        List<CloudInstance> newInstances = List.of(cloudInstance);
-        when(stackUpscaleService.buildNewInstances(stack, INSTANCE_GROUP_NAME, ADJUSTMENT)).thenReturn(newInstances);
-
         Stack updatedStack = mock(Stack.class);
-        when(instanceMetaDataService.saveInstanceAndGetUpdatedStack(stack, newInstances, false, context.getHostNames(), false)).thenReturn(updatedStack);
+        when(instanceMetaDataService.saveInstanceAndGetUpdatedStack(stack, 3, INSTANCE_GROUP_NAME, false, context.getHostNames(), false))
+                .thenReturn(updatedStack);
 
         CloudStack convertedCloudStack = mock(CloudStack.class);
         when(cloudStackConverter.convert(updatedStack)).thenReturn(convertedCloudStack);

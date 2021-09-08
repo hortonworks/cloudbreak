@@ -27,7 +27,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
-import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -404,14 +403,14 @@ public class MultiAzCalculatorServiceTest {
         InstanceGroup instanceGroup = instanceGroup(cloudPlatform, instanceCount, subnetCount);
         initSubnetIdAndAvailabilityZoneForInstances(existingCounts, instanceGroup);
 
-        CloudInstance cloudInstance = new CloudInstance(INSTANCE_ID, null, null, null, null);
+        InstanceMetaData instanceMetaData = new InstanceMetaData();
 
         underTest.calculateByRoundRobin(
                 subnetAzPairs(subnetCount),
                 instanceGroup,
-                cloudInstance);
+                instanceMetaData);
 
-        verifyCloudInstance(expectedPermissibleSubnetIdIndexes, cloudInstance);
+        verifyCloudInstance(expectedPermissibleSubnetIdIndexes, instanceMetaData);
         verifySubnetIdAndAvailabilityZoneForInstancesAreUnchanged(existingCounts, instanceGroup, Set.of());
     }
 
@@ -429,14 +428,13 @@ public class MultiAzCalculatorServiceTest {
         InstanceMetaData instanceWithPrepopulatedForeignSubnetId = instanceMetaData(instanceCount, SUBNET_ID, AVAILABILITY_ZONE, InstanceStatus.REQUESTED);
         instanceGroup.getAllInstanceMetaData().add(instanceWithPrepopulatedForeignSubnetId);
 
-        CloudInstance cloudInstance = new CloudInstance(INSTANCE_ID, null, null, null, null);
-
+        InstanceMetaData instanceMetaData = new InstanceMetaData();
         underTest.calculateByRoundRobin(
                 subnetAzPairs(subnetCount),
                 instanceGroup,
-                cloudInstance);
+                instanceMetaData);
 
-        verifyCloudInstance(expectedPermissibleSubnetIdIndexes, cloudInstance);
+        verifyCloudInstance(expectedPermissibleSubnetIdIndexes, instanceMetaData);
         verifySubnetIdAndAvailabilityZoneForInstancesAreUnchanged(existingCounts, instanceGroup, Set.of(instanceWithPrepopulatedForeignSubnetId));
 
         assertThat(instanceWithPrepopulatedForeignSubnetId.getSubnetId()).isEqualTo(SUBNET_ID);
@@ -471,14 +469,14 @@ public class MultiAzCalculatorServiceTest {
         }
         instanceGroup.getAllInstanceMetaData().addAll(deletedInstancesWithPrepopulatedSubnetId);
 
-        CloudInstance cloudInstance = new CloudInstance(INSTANCE_ID, null, null, null, null);
+        InstanceMetaData instanceMetaData = new InstanceMetaData();
 
         underTest.calculateByRoundRobin(
                 subnetAzPairs(subnetCount),
                 instanceGroup,
-                cloudInstance);
+                instanceMetaData);
 
-        verifyCloudInstance(expectedPermissibleSubnetIdIndexes, cloudInstance);
+        verifyCloudInstance(expectedPermissibleSubnetIdIndexes, instanceMetaData);
         verifySubnetIdAndAvailabilityZoneForInstancesAreUnchanged(existingCounts, instanceGroup, deletedInstancesWithPrepopulatedSubnetId);
 
         deletedInstancesWithPrepopulatedSubnetId.forEach(instance -> {
@@ -516,16 +514,18 @@ public class MultiAzCalculatorServiceTest {
 
         String cloudInstanceSubnetId = prepopulateCloudInstanceSubnet ? SUBNET_ID : null;
         String cloudInstanceAvailabilityZone = prepopulateCloudInstanceSubnet ? AVAILABILITY_ZONE : null;
-        CloudInstance cloudInstance = new CloudInstance(INSTANCE_ID, null, null, cloudInstanceSubnetId, cloudInstanceAvailabilityZone);
+        InstanceMetaData instanceMetaData = new InstanceMetaData();
+        instanceMetaData.setSubnetId(cloudInstanceSubnetId);
+        instanceMetaData.setAvailabilityZone(cloudInstanceAvailabilityZone);
 
         underTest.calculateByRoundRobin(
                 subnetAzPairs(NO_SUBNETS),
                 instanceGroup,
-                cloudInstance);
+                instanceMetaData);
 
         verifyCloudInstance(cloudInstanceSubnetId == null ? Set.of() : Set.of(cloudInstanceSubnetId),
                 cloudInstanceAvailabilityZone == null ? Set.of() : Set.of(cloudInstanceAvailabilityZone),
-                cloudInstance);
+                instanceMetaData);
 
         instanceGroup.getAllInstanceMetaData().forEach(instance -> {
             assertThat(instance.getSubnetId()).isNull();
@@ -541,14 +541,16 @@ public class MultiAzCalculatorServiceTest {
         InstanceGroup instanceGroup = instanceGroup(CloudPlatform.AWS, SINGLE_INSTANCE, SINGLE_SUBNET);
         initSubnetIdAndAvailabilityZoneForInstances(existingCounts, instanceGroup);
 
-        CloudInstance cloudInstance = new CloudInstance(INSTANCE_ID, null, null, SUBNET_ID, AVAILABILITY_ZONE);
+        InstanceMetaData instanceMetaData = new InstanceMetaData();
+        instanceMetaData.setSubnetId(SUBNET_ID);
+        instanceMetaData.setAvailabilityZone(AVAILABILITY_ZONE);
 
         underTest.calculateByRoundRobin(
                 subnetAzPairs(SINGLE_SUBNET),
                 instanceGroup,
-                cloudInstance);
+                instanceMetaData);
 
-        verifyCloudInstance(Set.of(SUBNET_ID), Set.of(AVAILABILITY_ZONE), cloudInstance);
+        verifyCloudInstance(Set.of(SUBNET_ID), Set.of(AVAILABILITY_ZONE), instanceMetaData);
         verifySubnetIdAndAvailabilityZoneForInstancesAreUnchanged(existingCounts, instanceGroup, Set.of());
     }
 
@@ -582,14 +584,14 @@ public class MultiAzCalculatorServiceTest {
 
         InstanceGroup instanceGroup = instanceGroup(cloudPlatform, instanceCount, subnetCount);
 
-        CloudInstance cloudInstance = new CloudInstance(INSTANCE_ID, null, null, null, null);
+        InstanceMetaData instanceMetaData = new InstanceMetaData();
 
         underTest.calculateByRoundRobin(
                 subnetAzPairs(subnetCount),
                 instanceGroup,
-                cloudInstance);
+                instanceMetaData);
 
-        verifyCloudInstance(expectedPermissibleSubnetIdIndexes, cloudInstance);
+        verifyCloudInstance(expectedPermissibleSubnetIdIndexes, instanceMetaData);
 
         instanceGroup.getAllInstanceMetaData().forEach(instance -> {
             assertThat(instance.getSubnetId()).isNull();
@@ -696,7 +698,7 @@ public class MultiAzCalculatorServiceTest {
         });
     }
 
-    private void verifyCloudInstance(Set<Integer> expectedPermissibleSubnetIdIndexes, CloudInstance cloudInstance) {
+    private void verifyCloudInstance(Set<Integer> expectedPermissibleSubnetIdIndexes, InstanceMetaData instanceMetaData) {
         Set<String> expectedPermissibleSubnetIds = null;
         Set<String> expectedPermissibleAvailabilityZones = null;
         if (!CollectionUtils.isEmpty(expectedPermissibleSubnetIdIndexes)) {
@@ -708,27 +710,22 @@ public class MultiAzCalculatorServiceTest {
                     .collect(Collectors.toSet());
         }
 
-        verifyCloudInstance(expectedPermissibleSubnetIds, expectedPermissibleAvailabilityZones, cloudInstance);
+        verifyCloudInstance(expectedPermissibleSubnetIds, expectedPermissibleAvailabilityZones, instanceMetaData);
     }
 
-    private void verifyCloudInstance(Set<String> expectedPermissibleSubnetIds, Set<String> expectedPermissibleAvailabilityZones, CloudInstance cloudInstance) {
+    private void verifyCloudInstance(Set<String> expectedPermissibleSubnetIds, Set<String> expectedPermissibleAvailabilityZones,
+            InstanceMetaData instanceMetaData) {
         if (CollectionUtils.isEmpty(expectedPermissibleSubnetIds)) {
-            assertThat(cloudInstance.getSubnetId()).isNull();
+            assertThat(instanceMetaData.getSubnetId()).isNull();
         } else {
-            assertThat(cloudInstance.getSubnetId()).isIn(expectedPermissibleSubnetIds);
+            assertThat(instanceMetaData.getSubnetId()).isIn(expectedPermissibleSubnetIds);
         }
 
         if (CollectionUtils.isEmpty(expectedPermissibleAvailabilityZones)) {
-            assertThat(cloudInstance.getAvailabilityZone()).isNull();
+            assertThat(instanceMetaData.getAvailabilityZone()).isNull();
         } else {
-            assertThat(cloudInstance.getAvailabilityZone()).isIn(expectedPermissibleAvailabilityZones);
+            assertThat(instanceMetaData.getAvailabilityZone()).isIn(expectedPermissibleAvailabilityZones);
         }
-
-        assertThat(cloudInstance.getInstanceId()).isEqualTo(INSTANCE_ID);
-        assertThat(cloudInstance.getAuthentication()).isNull();
-        assertThat(cloudInstance.getTemplate()).isNull();
-        assertThat(cloudInstance.getParameters()).isNotNull();
-        assertThat(cloudInstance.getParameters()).isEmpty();
     }
 
     private void verifySubnetIdAndAvailabilityZoneForInstancesAreUnchanged(List<Integer> existingCounts, InstanceGroup instanceGroup,

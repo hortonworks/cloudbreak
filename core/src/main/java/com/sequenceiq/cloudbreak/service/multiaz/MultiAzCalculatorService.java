@@ -17,7 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.controller.validation.network.MultiAzValidator;
@@ -95,19 +94,19 @@ public class MultiAzCalculatorService {
         }
     }
 
-    public void calculateByRoundRobin(Map<String, String> subnetAzPairs, InstanceGroup instanceGroup, CloudInstance cloudInstance) {
+    public void calculateByRoundRobin(Map<String, String> subnetAzPairs, InstanceGroup instanceGroup, InstanceMetaData instanceMetaData) {
         Map<String, Integer> subnetUsage = new HashMap<>();
         Set<String> subnetIds = collectSubnetIds(instanceGroup);
         initializeSubnetUsage(subnetAzPairs, subnetIds, subnetUsage);
         collectCurrentSubnetUsage(instanceGroup, subnetUsage);
 
         if (!subnetIds.isEmpty() && multiAzValidator.supportedForInstanceMetadataGeneration(instanceGroup)) {
-            if (isNullOrEmpty(cloudInstance.getSubnetId())) {
+            if (isNullOrEmpty(instanceMetaData.getSubnetId())) {
                 Integer numberOfInstanceInASubnet = searchTheSmallestInstanceCountForSubnets(subnetUsage);
                 String leastUsedSubnetId = searchTheSmallestUsedSubnetID(subnetUsage, numberOfInstanceInASubnet);
 
-                cloudInstance.setSubnetId(leastUsedSubnetId);
-                cloudInstance.setAvailabilityZone(subnetAzPairs.get(leastUsedSubnetId));
+                instanceMetaData.setSubnetId(leastUsedSubnetId);
+                instanceMetaData.setAvailabilityZone(subnetAzPairs.get(leastUsedSubnetId));
                 subnetUsage.put(leastUsedSubnetId, numberOfInstanceInASubnet + 1);
             }
         }

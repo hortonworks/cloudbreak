@@ -12,7 +12,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -54,7 +53,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 @ExtendWith(MockitoExtension.class)
 class InstanceMetaDataServiceTest {
 
-    private static final int INSTANCE_GROUP_COUNT = 2;
+    private static final int INSTANCE_GROUP_COUNT = 1;
 
     private static final String ENVIRONMENT_CRN = "ENVIRONMENT_CRN";
 
@@ -119,14 +118,14 @@ class InstanceMetaDataServiceTest {
         Map<String, String> subnetAzPairs = Map.of();
         when(multiAzCalculatorService.prepareSubnetAzMap(environment, null)).thenReturn(subnetAzPairs);
         doAnswer(invocation -> {
-            CloudInstance cloudInstance = invocation.getArgument(2, CloudInstance.class);
-            cloudInstance.setSubnetId(subnetId);
-            cloudInstance.setAvailabilityZone(availabilityZone);
+            InstanceMetaData instanceMetaData = invocation.getArgument(2, InstanceMetaData.class);
+            instanceMetaData.setSubnetId(subnetId);
+            instanceMetaData.setAvailabilityZone(availabilityZone);
             return null;
-        }).when(multiAzCalculatorService).calculateByRoundRobin(eq(subnetAzPairs), any(InstanceGroup.class), any(CloudInstance.class));
+        }).when(multiAzCalculatorService).calculateByRoundRobin(eq(subnetAzPairs), any(InstanceGroup.class), any(InstanceMetaData.class));
         when(multiAzCalculatorService.determineRackId(subnetId, availabilityZone)).thenReturn(rackId);
 
-        Stack result = underTest.saveInstanceAndGetUpdatedStack(stack, cloudInstances(INSTANCE_GROUP_COUNT), save, new LinkedHashSet<>(hostnames), false);
+        Stack result = underTest.saveInstanceAndGetUpdatedStack(stack, 1, groupName(0), save, new LinkedHashSet<>(hostnames), false);
 
         assertThat(result).isSameAs(stack);
 
@@ -148,7 +147,6 @@ class InstanceMetaDataServiceTest {
             instanceGroup.getAllInstanceMetaData().forEach(instance -> {
                 if (instance != instanceToIgnore) {
                     instanceCount.incrementAndGet();
-                    assertThat(instance.getPrivateId()).isEqualTo(idx);
                     assertThat(instance.getInstanceStatus()).isEqualTo(com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.REQUESTED);
                     assertThat(instance.getInstanceGroup()).isEqualTo(instanceGroup);
                     assertThat(instance.getDiscoveryFQDN()).isEqualTo(idx < hostnames.size() ? hostnames.get(idx) : null);
@@ -207,14 +205,15 @@ class InstanceMetaDataServiceTest {
         Map<String, String> subnetAzPairs = Map.of();
         when(multiAzCalculatorService.prepareSubnetAzMap(environment, null)).thenReturn(subnetAzPairs);
         doAnswer(invocation -> {
-            CloudInstance cloudInstance = invocation.getArgument(2, CloudInstance.class);
-            cloudInstance.setSubnetId(subnetId);
-            cloudInstance.setAvailabilityZone(availabilityZone);
+            InstanceMetaData instanceMetaData = invocation.getArgument(2, InstanceMetaData.class);
+            instanceMetaData.setSubnetId(subnetId);
+            instanceMetaData.setAvailabilityZone(availabilityZone);
             return null;
-        }).when(multiAzCalculatorService).calculateByRoundRobin(eq(subnetAzPairs), any(InstanceGroup.class), any(CloudInstance.class));
+        }).when(multiAzCalculatorService).calculateByRoundRobin(eq(subnetAzPairs), any(InstanceGroup.class), any(InstanceMetaData.class));
         when(multiAzCalculatorService.determineRackId(subnetId, availabilityZone)).thenReturn(rackId);
 
-        Stack result = underTest.saveInstanceAndGetUpdatedStack(stack, cloudInstances(INSTANCE_GROUP_COUNT), save, new LinkedHashSet<>(hostnames), false);
+        Stack result = underTest.saveInstanceAndGetUpdatedStack(stack, INSTANCE_GROUP_COUNT, groupName(INSTANCE_GROUP_COUNT - 1), save,
+                new LinkedHashSet<>(hostnames), false);
 
         assertThat(result).isSameAs(stack);
 
@@ -245,25 +244,16 @@ class InstanceMetaDataServiceTest {
         when(environmentClientService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environment);
         Map<String, String> subnetAzPairs = Map.of();
         when(multiAzCalculatorService.prepareSubnetAzMap(environment, null)).thenReturn(subnetAzPairs);
-        doAnswer(invocation -> {
-            CloudInstance cloudInstance = invocation.getArgument(2, CloudInstance.class);
-            cloudInstance.setSubnetId(subnetId);
-            cloudInstance.setAvailabilityZone(availabilityZone);
-            return null;
-        }).when(multiAzCalculatorService).calculateByRoundRobin(eq(subnetAzPairs), any(InstanceGroup.class), any(CloudInstance.class));
-        when(multiAzCalculatorService.determineRackId(subnetId, availabilityZone)).thenReturn(rackId);
 
-        List<CloudInstance> cloudInstances = new ArrayList<>(cloudInstances(INSTANCE_GROUP_COUNT));
-        cloudInstances.add(cloudInstance(INSTANCE_GROUP_COUNT + 1));
-        Stack result = underTest.saveInstanceAndGetUpdatedStack(stack, cloudInstances, save, new LinkedHashSet<>(hostnames), false);
+        Stack result = underTest.saveInstanceAndGetUpdatedStack(stack, 1, groupName(3), save, new LinkedHashSet<>(hostnames), false);
 
         assertThat(result).isSameAs(stack);
 
         Set<InstanceGroup> resultInstanceGroups = result.getInstanceGroups();
         assertThat(resultInstanceGroups).isNotNull();
         assertThat(resultInstanceGroups).hasSize(INSTANCE_GROUP_COUNT);
-        verifyInstances(resultInstanceGroups, hostnames, subnetId, availabilityZone, rackId, null, INSTANCE_GROUP_COUNT);
-        verifyRepositorySave(resultInstanceGroups, save);
+        verifyInstances(resultInstanceGroups, hostnames, subnetId, availabilityZone, rackId, null, 0);
+        verifyRepositorySave(resultInstanceGroups, false);
     }
 
     @ParameterizedTest(name = "{0}")
@@ -278,10 +268,11 @@ class InstanceMetaDataServiceTest {
         when(environmentClientService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environment);
         Map<String, String> subnetAzPairs = subnetId == null || availabilityZone == null ? Map.of() : Map.of(subnetId, availabilityZone);
         when(multiAzCalculatorService.prepareSubnetAzMap(environment, null)).thenReturn(subnetAzPairs);
-        doNothing().when(multiAzCalculatorService).calculateByRoundRobin(eq(subnetAzPairs), any(InstanceGroup.class), any(CloudInstance.class));
+        doNothing().when(multiAzCalculatorService).calculateByRoundRobin(eq(subnetAzPairs), any(InstanceGroup.class), any(InstanceMetaData.class));
         when(multiAzCalculatorService.determineRackId(subnetId, availabilityZone)).thenReturn(rackId);
 
-        Stack result = underTest.saveInstanceAndGetUpdatedStack(stack, cloudInstances(INSTANCE_GROUP_COUNT), save, new LinkedHashSet<>(hostnames), false);
+        Stack result = underTest.saveInstanceAndGetUpdatedStack(stack, INSTANCE_GROUP_COUNT, groupName(INSTANCE_GROUP_COUNT - 1), save,
+                new LinkedHashSet<>(hostnames), false);
 
         assertThat(result).isSameAs(stack);
 
@@ -299,7 +290,7 @@ class InstanceMetaDataServiceTest {
         when(environmentClientService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environment);
         when(multiAzCalculatorService.prepareSubnetAzMap(environment, null)).thenReturn(Map.of());
 
-        Stack result = underTest.saveInstanceAndGetUpdatedStack(stack, List.of(), true, Set.of(), false);
+        Stack result = underTest.saveInstanceAndGetUpdatedStack(stack, 0, groupName(INSTANCE_GROUP_COUNT - 1), true, Set.of(), false);
 
         assertThat(result).isSameAs(stack);
 
@@ -309,7 +300,7 @@ class InstanceMetaDataServiceTest {
         verifyInstances(resultInstanceGroups, List.of(), null, null, null, null, 0);
         verifyRepositorySave(resultInstanceGroups, false);
 
-        verify(multiAzCalculatorService, never()).calculateByRoundRobin(anyMap(), any(InstanceGroup.class), any(CloudInstance.class));
+        verify(multiAzCalculatorService, never()).calculateByRoundRobin(anyMap(), any(InstanceGroup.class), any(InstanceMetaData.class));
         verify(multiAzCalculatorService, never()).determineRackId(anyString(), anyString());
     }
 
