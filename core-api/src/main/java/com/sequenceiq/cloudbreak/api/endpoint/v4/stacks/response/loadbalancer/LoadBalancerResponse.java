@@ -5,12 +5,12 @@ import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
-import io.swagger.annotations.ApiModelProperty;
-
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 import com.sequenceiq.common.api.type.LoadBalancerType;
+
+import io.swagger.annotations.ApiModelProperty;
 
 @JsonInclude(Include.NON_NULL)
 public class LoadBalancerResponse implements Serializable {
@@ -37,6 +37,9 @@ public class LoadBalancerResponse implements Serializable {
 
     @ApiModelProperty(StackModelDescription.LOAD_BALANCER_AZURE)
     private AzureLoadBalancerResponse azureResourceId;
+
+    @ApiModelProperty(StackModelDescription.LOAD_BALANCER_GCP)
+    private GcpLoadBalancerResponse gcpResourceId;
 
     public String getFqdn() {
         return fqdn;
@@ -92,5 +95,13 @@ public class LoadBalancerResponse implements Serializable {
 
     public void setAzureResourceId(AzureLoadBalancerResponse azureResourceId) {
         this.azureResourceId = azureResourceId;
+    }
+
+    public GcpLoadBalancerResponse getGcpResourceId() {
+        return gcpResourceId;
+    }
+
+    public void setGcpResourceId(GcpLoadBalancerResponse gcpResourceId) {
+        this.gcpResourceId = gcpResourceId;
     }
 }

@@ -277,6 +277,11 @@ public class ModelDescriptions {
         public static final String AZURE_LB_NAME = "The Azure Load Balancer name";
         public static final String AZURE_LB_AVAILABILITY_SET = "The availability set that contains the instances recieving traffic from the load balancer " +
                 "on the specificed port.";
+        public static final String LOAD_BALANCER_GCP = "The GCP load balancer information";
+        public static final String TARGET_GROUP_GCP = "The GCP instance group information";
+        public static final String GCP_LOAD_BALANCER_NAME = "The name in GCP of the load balancer forwarding rule";
+        public static final String GCP_LB_INSTANCE_GROUP = "The instances listed belong to any group receiving traffic from the loadbalancer for this port";
+        public static final String GCP_LB_BACKEND_SERVICE = "The backend service that assigns this instance group to the load balancer";
     }
 
     public static class ClusterModelDescription {

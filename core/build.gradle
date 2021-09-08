@@ -257,7 +257,6 @@ dependencies {
   compile project(':cluster-proxy')
   compile project(':status-checker')
   compile project(':node-status-monitor-client')
-  compile project(':cloud-azure')
 
   implementation project(":notification-sender")
 
@@ -270,6 +269,7 @@ dependencies {
   implementation project(':cloud-aws-native')
   runtime project(':cloud-mock')
   compile project(':cloud-azure')
+  compile project(':cloud-gcp')
   runtime project(':cloud-yarn')
   runtime project(':cluster-cm')
   runtime project(':auth-connector')
