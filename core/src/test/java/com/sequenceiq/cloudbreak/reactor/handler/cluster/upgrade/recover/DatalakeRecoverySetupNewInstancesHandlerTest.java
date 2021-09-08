@@ -2,13 +2,13 @@ package com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.recover;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -65,16 +65,12 @@ class DatalakeRecoverySetupNewInstancesHandlerTest {
 
     @Test
     void testDoAcceptWhenSuccess() {
-        List<CloudInstance> cloudInstances = new ArrayList<>();
-        cloudInstances.add(setupCloudInstance());
-        cloudInstances.add(setupCloudInstance());
         InstanceGroup instanceGroup1 = setupInstanceGroup(1L);
         InstanceGroup instanceGroup2 = setupInstanceGroup(2L);
         List<InstanceGroup> instanceGroups = List.of(instanceGroup1, instanceGroup2);
 
         when(stackService.getByIdWithClusterInTransaction(STACK_ID)).thenReturn(stack);
         when(stackCreatorService.sortInstanceGroups(stack)).thenReturn(instanceGroups);
-        when(stackUpscaleService.buildNewInstances(eq(stack), any(), eq(0))).thenReturn(cloudInstances);
 
         Selectable nextFlowStepSelector = underTest.doAccept(getHandlerEvent());
 
@@ -82,8 +78,7 @@ class DatalakeRecoverySetupNewInstancesHandlerTest {
         verify(stackService).getByIdWithClusterInTransaction(STACK_ID);
         verify(clusterService).updateClusterStatusByStackId(STACK_ID, Status.REQUESTED);
         verify(stackCreatorService).sortInstanceGroups(stack);
-        verify(stackUpscaleService, times(2)).buildNewInstances(eq(stack), any(), eq(0));
-        verify(instanceMetaDataService, times(2)).saveInstanceAndGetUpdatedStack(eq(stack), any(), eq(true), eq(Collections.emptySet()), eq(false));
+        verify(instanceMetaDataService, times(2)).saveInstanceAndGetUpdatedStack(eq(stack), anyInt(), any(), eq(true), eq(Collections.emptySet()), eq(false));
     }
 
     @Test

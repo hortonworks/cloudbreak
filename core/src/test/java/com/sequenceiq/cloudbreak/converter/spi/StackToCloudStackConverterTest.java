@@ -11,13 +11,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -26,7 +22,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -70,7 +65,6 @@ import com.sequenceiq.cloudbreak.converter.InstanceMetadataToImageIdConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
-import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
@@ -85,7 +79,6 @@ import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
-import com.sequenceiq.cloudbreak.service.multiaz.MultiAzCalculatorService;
 import com.sequenceiq.cloudbreak.service.securityrule.SecurityRuleService;
 import com.sequenceiq.cloudbreak.service.stack.DefaultRootVolumeSizeProvider;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
@@ -200,9 +193,6 @@ public class StackToCloudStackConverterTest {
     @Mock
     private LoadBalancerConfigService loadBalancerConfigService;
 
-    @Mock
-    private MultiAzCalculatorService multiAzCalculatorService;
-
     @BeforeEach
     public void setUp() {
         when(stack.getStackAuthentication()).thenReturn(stackAuthentication);
@@ -220,8 +210,6 @@ public class StackToCloudStackConverterTest {
         when(environmentClientService.getByCrn(anyString())).thenReturn(environmentResponse);
         when(loadBalancerPersistenceService.findByStackId(anyLong())).thenReturn(Collections.emptySet());
         when(targetGroupPersistenceService.findByLoadBalancerId(anyLong())).thenReturn(Collections.emptySet());
-        doNothing().when(multiAzCalculatorService).calculateByRoundRobin(anyMap(), any(InstanceGroup.class), any(CloudInstance.class));
-        when(multiAzCalculatorService.prepareSubnetAzMap(any(DetailedEnvironmentResponse.class))).thenReturn(new HashMap<>());
     }
 
     @Test
@@ -1041,11 +1029,11 @@ public class StackToCloudStackConverterTest {
         assertEquals(LoadBalancerType.PRIVATE, cloudLoadBalancer.getType());
         assertEquals(Set.of(targetGroupPortPair), cloudLoadBalancer.getPortToTargetGroupMapping().keySet());
         Set<String> groupNames = cloudLoadBalancer.getPortToTargetGroupMapping().values().stream()
-            .flatMap(Collection::stream)
-            .collect(Collectors.toSet())
-            .stream()
-            .map(Group::getName)
-            .collect(Collectors.toSet());
+                .flatMap(Collection::stream)
+                .collect(Collectors.toSet())
+                .stream()
+                .map(Group::getName)
+                .collect(Collectors.toSet());
         assertEquals(Set.of("group1", "group2"), groupNames);
     }
 
@@ -1084,12 +1072,12 @@ public class StackToCloudStackConverterTest {
 
         assertEquals(2, result.getLoadBalancers().size());
         Optional<CloudLoadBalancer> internalCloudLoadBalancer = result.getLoadBalancers().stream()
-            .filter(lb -> lb.getType() == LoadBalancerType.PRIVATE)
-            .findFirst();
+                .filter(lb -> lb.getType() == LoadBalancerType.PRIVATE)
+                .findFirst();
         assertTrue(internalCloudLoadBalancer.isPresent());
         Optional<CloudLoadBalancer> externalCloudLoadBalancer = result.getLoadBalancers().stream()
-            .filter(lb -> lb.getType() == LoadBalancerType.PUBLIC)
-            .findFirst();
+                .filter(lb -> lb.getType() == LoadBalancerType.PUBLIC)
+                .findFirst();
         assertTrue(externalCloudLoadBalancer.isPresent());
     }
 
@@ -1128,17 +1116,17 @@ public class StackToCloudStackConverterTest {
         assertEquals(1L, result.getGroups().get(0).getInstances().size());
         assertEquals(1L, result.getGroups().get(0).getDeletedInstances().size());
         assertEquals(fqdnParsedName,
-            result.getGroups().get(0).getInstances().get(0).getParameters().get(CloudInstance.DISCOVERY_NAME));
+                result.getGroups().get(0).getInstances().get(0).getParameters().get(CloudInstance.DISCOVERY_NAME));
         assertEquals(metaData.getSubnetId(),
-            result.getGroups().get(0).getInstances().get(0).getParameters().get(NetworkConstants.SUBNET_ID));
+                result.getGroups().get(0).getInstances().get(0).getParameters().get(NetworkConstants.SUBNET_ID));
         assertEquals(metaData.getInstanceName(),
-            result.getGroups().get(0).getInstances().get(0).getParameters().get(CloudInstance.INSTANCE_NAME));
+                result.getGroups().get(0).getInstances().get(0).getParameters().get(CloudInstance.INSTANCE_NAME));
         assertEquals(terminatedFqdnParsedName,
-            result.getGroups().get(0).getDeletedInstances().get(0).getParameters().get(CloudInstance.DISCOVERY_NAME));
+                result.getGroups().get(0).getDeletedInstances().get(0).getParameters().get(CloudInstance.DISCOVERY_NAME));
         assertEquals(terminatedMetaData.getSubnetId(),
-            result.getGroups().get(0).getDeletedInstances().get(0).getParameters().get(NetworkConstants.SUBNET_ID));
+                result.getGroups().get(0).getDeletedInstances().get(0).getParameters().get(NetworkConstants.SUBNET_ID));
         assertEquals(terminatedMetaData.getInstanceName(),
-            result.getGroups().get(0).getDeletedInstances().get(0).getParameters().get(CloudInstance.INSTANCE_NAME));
+                result.getGroups().get(0).getDeletedInstances().get(0).getParameters().get(CloudInstance.INSTANCE_NAME));
     }
 
     static Object[][] buildInstanceTestWhenInstanceMetaDataPresentAndSubnetAndAvailabilityZoneDataProvider() {
@@ -1200,106 +1188,4 @@ public class StackToCloudStackConverterTest {
         assertThat(parameters.get(CloudInstance.INSTANCE_NAME)).isEqualTo("worker3");
         assertThat(parameters.get(CloudInstance.FQDN)).isEqualTo("vm.empire.com");
     }
-
-    static Object[][] buildInstanceTestWhenInstanceMetaDataNullAndSubnetAndAvailabilityZoneAndRoundRobinDataProvider() {
-        return new Object[][]{
-                // testCaseName subnetId availabilityZone
-                {"subnetId=\"subnet-1\", availabilityZone=null", "subnet-1", null},
-                {"subnetId=\"subnet-1\", availabilityZone=\"az-1\"", "subnet-1", "az-1"},
-        };
-    }
-
-    @ParameterizedTest(name = "{0}")
-    @MethodSource("buildInstanceTestWhenInstanceMetaDataNullAndSubnetAndAvailabilityZoneAndRoundRobinDataProvider")
-    void buildInstanceTestWhenInstanceMetaDataNullAndSubnetAndAvailabilityZoneAndRoundRobin(String testCaseName, String subnetId, String availabilityZone) {
-        InstanceGroup instanceGroup = new InstanceGroup();
-        Template template = new Template();
-        template.setVolumeTemplates(Set.of());
-        instanceGroup.setTemplate(template);
-        Stack stack = new Stack();
-        stack.setCloudPlatform("AWS");
-        instanceGroup.setStack(stack);
-        instanceGroup.setGroupName("worker");
-
-        DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
-        Map<String, String> subnetAzPairs = Map.of("subnet-1", "az-1");
-        when(multiAzCalculatorService.prepareSubnetAzMap(environment)).thenReturn(subnetAzPairs);
-        doAnswer(invocation -> {
-            CloudInstance cloudInstance = invocation.getArgument(2, CloudInstance.class);
-            cloudInstance.setSubnetId(subnetId);
-            cloudInstance.setAvailabilityZone(availabilityZone);
-            return null;
-        }).when(multiAzCalculatorService).calculateByRoundRobin(eq(subnetAzPairs), eq(instanceGroup), any(CloudInstance.class));
-
-        CloudInstance cloudInstance = underTest.buildInstance(null, instanceGroup, new StackAuthentication(), 12L, InstanceStatus.CREATED, environment);
-
-        verifyCloudInstanceWhenInstanceMetaDataNull(cloudInstance, subnetId, availabilityZone);
-
-        verify(instanceMetadataToImageIdConverter, never()).convert(any(InstanceMetaData.class));
-    }
-
-    private void verifyCloudInstanceWhenInstanceMetaDataNull(CloudInstance cloudInstance, String subnetIdExpected, String availabilityZoneExpected) {
-        assertThat(cloudInstance).isNotNull();
-        assertThat(cloudInstance.getInstanceId()).isNull();
-
-        InstanceTemplate instanceTemplate = cloudInstance.getTemplate();
-        assertThat(instanceTemplate).isNotNull();
-        assertThat(instanceTemplate.getPrivateId()).isEqualTo(12L);
-        assertThat(instanceTemplate.getGroupName()).isEqualTo("worker");
-        assertThat(instanceTemplate.getStatus()).isEqualTo(InstanceStatus.CREATED);
-        assertThat(instanceTemplate.getImageId()).isNull();
-
-        assertThat(cloudInstance.getAuthentication()).isNotNull();
-
-        assertThat(cloudInstance.getSubnetId()).isEqualTo(subnetIdExpected);
-        assertThat(cloudInstance.getAvailabilityZone()).isEqualTo(availabilityZoneExpected);
-
-        Map<String, Object> parameters = cloudInstance.getParameters();
-        assertThat(parameters).isNotNull();
-        assertThat(parameters).doesNotContainKey(CloudInstance.DISCOVERY_NAME);
-        assertThat(parameters).doesNotContainKey(SUBNET_ID);
-        assertThat(parameters).doesNotContainKey(CloudInstance.INSTANCE_NAME);
-        assertThat(parameters).doesNotContainKey(CloudInstance.FQDN);
-    }
-
-    static Object[][] buildInstanceTestWhenInstanceMetaDataNullAndSubnetAndAvailabilityZoneAndStackFallbackDataProvider() {
-        return new Object[][]{
-                // testCaseName withStackNetwork
-                {"withStackNetwork=false", false},
-                {"withStackNetwork=true", true},
-        };
-    }
-
-    @ParameterizedTest(name = "{0}")
-    @MethodSource("buildInstanceTestWhenInstanceMetaDataNullAndSubnetAndAvailabilityZoneAndStackFallbackDataProvider")
-    void buildInstanceTestWhenInstanceMetaDataNullAndSubnetAndAvailabilityZoneAndStackFallback(String testCaseName, boolean withStackNetwork) {
-        InstanceGroup instanceGroup = new InstanceGroup();
-        Template template = new Template();
-        template.setVolumeTemplates(Set.of());
-        instanceGroup.setTemplate(template);
-        Stack stack = new Stack();
-        stack.setCloudPlatform("AWS");
-        String subnetId = null;
-        String availabilityZone = null;
-        if (withStackNetwork) {
-            Network network = new Network();
-            network.setAttributes(Json.silent(Map.of("subnetId", "subnet-1")));
-            stack.setNetwork(network);
-            subnetId = "subnet-1";
-            availabilityZone = "az-1";
-        }
-        instanceGroup.setStack(stack);
-        instanceGroup.setGroupName("worker");
-
-        DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
-        Map<String, String> subnetAzPairs = Map.of("subnet-1", "az-1");
-        when(multiAzCalculatorService.prepareSubnetAzMap(environment)).thenReturn(subnetAzPairs);
-
-        CloudInstance cloudInstance = underTest.buildInstance(null, instanceGroup, new StackAuthentication(), 12L, InstanceStatus.CREATED, environment);
-
-        verifyCloudInstanceWhenInstanceMetaDataNull(cloudInstance, subnetId, availabilityZone);
-
-        verify(instanceMetadataToImageIdConverter, never()).convert(any(InstanceMetaData.class));
-    }
-
 }

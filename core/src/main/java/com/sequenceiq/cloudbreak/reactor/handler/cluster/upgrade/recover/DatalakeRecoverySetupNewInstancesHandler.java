@@ -11,10 +11,8 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.controller.StackCreatorService;
-import com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.recovery.bringup.DatalakeRecoverySetupNewInstancesFailedEvent;
@@ -39,9 +37,6 @@ public class DatalakeRecoverySetupNewInstancesHandler extends ExceptionCatcherEv
 
     @Inject
     private StackCreatorService stackCreatorService;
-
-    @Inject
-    private StackUpscaleService stackUpscaleService;
 
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
@@ -79,9 +74,8 @@ public class DatalakeRecoverySetupNewInstancesHandler extends ExceptionCatcherEv
     private void setupNewInstances(Stack stack) {
         List<InstanceGroup> instanceGroups = stackCreatorService.sortInstanceGroups(stack);
         for (InstanceGroup instanceGroup : instanceGroups) {
-            List<CloudInstance> newInstances =
-                    stackUpscaleService.buildNewInstances(stack, instanceGroup.getGroupName(), instanceGroup.getInitialNodeCount());
-            instanceMetaDataService.saveInstanceAndGetUpdatedStack(stack, newInstances, true, Collections.emptySet(), false);
+            instanceMetaDataService.saveInstanceAndGetUpdatedStack(stack, instanceGroup.getInitialNodeCount(), instanceGroup.getGroupName(), true,
+                    Collections.emptySet(), false);
         }
     }
 }

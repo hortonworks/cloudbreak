@@ -121,10 +121,9 @@ public class StackUpscaleActions {
             @Override
             protected Selectable createRequest(StackScalingFlowContext context) {
                 LOGGER.debug("Assembling upscale stack event for stack: {}", context.getStack());
-                List<CloudInstance> newInstances = stackUpscaleService.buildNewInstances(context.getStack(), context.getInstanceGroupName(),
-                        getInstanceCountToCreate(context.getStack(), context.getInstanceGroupName(), context.getAdjustment()));
-                Stack updatedStack = instanceMetaDataService.saveInstanceAndGetUpdatedStack(context.getStack(), newInstances, false, context.getHostNames(),
-                        context.isRepair());
+                int instanceCountToCreate = getInstanceCountToCreate(context.getStack(), context.getInstanceGroupName(), context.getAdjustment());
+                Stack updatedStack = instanceMetaDataService.saveInstanceAndGetUpdatedStack(context.getStack(), instanceCountToCreate,
+                        context.getInstanceGroupName(), false, context.getHostNames(), context.isRepair());
                 CloudStack cloudStack = cloudStackConverter.convert(updatedStack);
                 return new UpscaleStackValidationRequest<UpscaleStackValidationResult>(context.getCloudContext(), context.getCloudCredential(), cloudStack);
             }
@@ -142,10 +141,9 @@ public class StackUpscaleActions {
             @Override
             protected Selectable createRequest(StackScalingFlowContext context) {
                 LOGGER.debug("Assembling upscale stack event for stack: {}", context.getStack());
-                List<CloudInstance> newInstances = stackUpscaleService.buildNewInstances(context.getStack(), context.getInstanceGroupName(),
-                        getInstanceCountToCreate(context.getStack(), context.getInstanceGroupName(), context.getAdjustment()));
-                Stack updatedStack = instanceMetaDataService.saveInstanceAndGetUpdatedStack(context.getStack(), newInstances, true, context.getHostNames(),
-                        context.isRepair());
+                int instanceCountToCreate = getInstanceCountToCreate(context.getStack(), context.getInstanceGroupName(), context.getAdjustment());
+                Stack updatedStack = instanceMetaDataService.saveInstanceAndGetUpdatedStack(context.getStack(), instanceCountToCreate,
+                        context.getInstanceGroupName(), true, context.getHostNames(), context.isRepair());
                 List<CloudResource> resources = cloudResourceConverter.convert(context.getStack().getResources());
                 CloudStack updatedCloudStack = cloudStackConverter.convert(updatedStack);
                 return new UpscaleStackRequest<UpscaleStackResult>(context.getCloudContext(), context.getCloudCredential(), updatedCloudStack, resources);

@@ -82,18 +82,20 @@ public class InstanceMetaDataService {
         }
     }
 
-    public Stack saveInstanceAndGetUpdatedStack(Stack stack, List<CloudInstance> cloudInstances, boolean save, Set<String> hostNames, boolean repair) {
-        LOGGER.info("Get updated stack with instances: {} and hostnames: {} and save: ({})", cloudInstances, hostNames, save);
+    public Stack saveInstanceAndGetUpdatedStack(Stack stack, int instanceToCreate, String groupName, boolean save, Set<String> hostNames, boolean repair) {
+        LOGGER.info("Get updated stack with instance count ({}) to instance group: {} and hostnames: {} and save: ({})", instanceToCreate, groupName, hostNames,
+                save);
         DetailedEnvironmentResponse environment = getDetailedEnvironmentResponse(stack.getEnvironmentCrn());
         Map<String, String> subnetAzPairs = getAllSubnetAzPairs(environment);
         String stackSubnetId = getStackSubnetIdIfExists(stack);
         String stackAz = stackSubnetId == null ? null : subnetAzPairs.get(stackSubnetId);
         Iterator<String> hostNameIterator = hostNames.iterator();
-        for (CloudInstance cloudInstance : cloudInstances) {
-            InstanceGroup instanceGroup = getInstanceGroup(stack.getInstanceGroups(), cloudInstance.getTemplate().getGroupName());
+        long privateId = getFirstValidPrivateId(stack.getInstanceGroupsAsList());
+        for (int i = 0; i < instanceToCreate; i++) {
+            InstanceGroup instanceGroup = getInstanceGroup(stack.getInstanceGroups(), groupName);
             if (instanceGroup != null) {
                 InstanceMetaData instanceMetaData = new InstanceMetaData();
-                instanceMetaData.setPrivateId(cloudInstance.getTemplate().getPrivateId());
+                instanceMetaData.setPrivateId(privateId++);
                 instanceMetaData.setInstanceStatus(com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.REQUESTED);
                 instanceMetaData.setInstanceGroup(instanceGroup);
                 if (hostNameIterator.hasNext()) {
@@ -102,8 +104,7 @@ public class InstanceMetaDataService {
                     instanceMetaData.setDiscoveryFQDN(hostName);
                     subnetAzPairs = getSubnetAzPairsFilteredByHostNameIfRepair(environment, stack, repair, instanceGroup.getGroupName(), hostName);
                 }
-                prepareCloudInstanceSubnetAndAvailabilityZone(instanceGroup, cloudInstance, subnetAzPairs, stackSubnetId, stackAz);
-                prepareInstanceMetaDataSubnetAndAvailabilityZoneAndRackId(cloudInstance, instanceMetaData);
+                prepareInstanceMetaDataSubnetAndAvailabilityZoneAndRackId(instanceGroup, instanceMetaData, subnetAzPairs, stackSubnetId, stackAz);
                 if (save) {
                     repository.save(instanceMetaData);
                 }
@@ -111,6 +112,19 @@ public class InstanceMetaDataService {
             }
         }
         return stack;
+    }
+
+    private long getFirstValidPrivateId(List<InstanceGroup> instanceGroups) {
+        LOGGER.debug("Get first valid PrivateId of instanceGroups");
+        long id = instanceGroups.stream()
+                .flatMap(ig -> ig.getAllInstanceMetaData().stream())
+                .filter(im -> im.getPrivateId() != null)
+                .map(InstanceMetaData::getPrivateId)
+                .map(i -> i + 1)
+                .max(Long::compare)
+                .orElse(0L);
+        LOGGER.debug("First valid privateId: {}", id);
+        return id;
     }
 
     @VisibleForTesting
@@ -172,27 +186,14 @@ public class InstanceMetaDataService {
                 .orElse(null);
     }
 
-    private void prepareCloudInstanceSubnetAndAvailabilityZone(InstanceGroup instanceGroup, CloudInstance cloudInstance, Map<String, String> subnetAzPairs,
-            String stackSubnetId, String stackAz) {
-        cloudInstance.setSubnetId(null);
-        cloudInstance.setAvailabilityZone(null);
-        multiAzCalculatorService.calculateByRoundRobin(
-                subnetAzPairs,
-                instanceGroup,
-                cloudInstance
-        );
-        if (Strings.isNullOrEmpty(cloudInstance.getSubnetId()) && Strings.isNullOrEmpty(cloudInstance.getAvailabilityZone())) {
-            cloudInstance.setSubnetId(stackSubnetId);
-            cloudInstance.setAvailabilityZone(stackAz);
+    private void prepareInstanceMetaDataSubnetAndAvailabilityZoneAndRackId(InstanceGroup instanceGroup, InstanceMetaData instanceMetaData,
+            Map<String, String> subnetAzPairs, String stackSubnetId, String stackAz) {
+        multiAzCalculatorService.calculateByRoundRobin(subnetAzPairs, instanceGroup, instanceMetaData);
+        if (Strings.isNullOrEmpty(instanceMetaData.getSubnetId()) && Strings.isNullOrEmpty(instanceMetaData.getAvailabilityZone())) {
+            instanceMetaData.setSubnetId(stackSubnetId);
+            instanceMetaData.setAvailabilityZone(stackAz);
         }
-    }
-
-    private void prepareInstanceMetaDataSubnetAndAvailabilityZoneAndRackId(CloudInstance cloudInstance, InstanceMetaData instanceMetaData) {
-        String subnetId = cloudInstance.getSubnetId();
-        String availabilityZone = cloudInstance.getAvailabilityZone();
-        instanceMetaData.setSubnetId(subnetId);
-        instanceMetaData.setAvailabilityZone(availabilityZone);
-        instanceMetaData.setRackId(multiAzCalculatorService.determineRackId(subnetId, availabilityZone));
+        instanceMetaData.setRackId(multiAzCalculatorService.determineRackId(instanceMetaData.getSubnetId(), instanceMetaData.getAvailabilityZone()));
     }
 
     public void saveInstanceRequests(Stack stack, List<Group> groups) {
