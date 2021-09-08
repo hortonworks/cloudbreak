@@ -79,11 +79,11 @@ public class SdxStopService {
         } catch (ClientErrorException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
             LOGGER.error("Can not stop stack {} from cloudbreak: {}", sdxCluster.getStackId(), errorMessage, e);
-            throw new RuntimeException("Can not stop stack, client error happened on Cloudbreak side: " + errorMessage);
+            throw new RuntimeException("Cannot stop cluster, error happened during operation: " + errorMessage);
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
             LOGGER.error("Can not stop stack {} from cloudbreak: {}", sdxCluster.getStackId(), errorMessage, e);
-            throw new RuntimeException("Can not stop stack, web application error happened on Cloudbreak side: " + errorMessage);
+            throw new RuntimeException("Cannot stop cluster, error happened during operation: " + errorMessage);
         }
     }
 
