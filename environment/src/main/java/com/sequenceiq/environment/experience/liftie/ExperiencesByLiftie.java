@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.experience.PolicyServiceName;
 import com.sequenceiq.environment.environment.dto.EnvironmentExperienceDto;
 import com.sequenceiq.environment.exception.ExperienceOperationFailedException;
 import com.sequenceiq.environment.experience.Experience;
@@ -75,7 +76,7 @@ public class ExperiencesByLiftie implements Experience {
     @Override
     @NotNull
     public Map<String, String> collectPolicy(EnvironmentExperienceDto environment) {
-        String key = "Kubernetes cluster manager";
+        String key = PolicyServiceName.LIFTIE.getPublicName();
         Map<String, String> result = new LinkedHashMap<>();
         try {
             ExperiencePolicyResponse fetchedPolicies = liftieApi.getPolicy(environment.getCloudPlatform());
