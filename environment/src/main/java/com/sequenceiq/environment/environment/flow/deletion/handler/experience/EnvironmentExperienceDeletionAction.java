@@ -1,8 +1,11 @@
 package com.sequenceiq.environment.environment.flow.deletion.handler.experience;
 
+import static com.sequenceiq.cloudbreak.polling.PollingResult.EXIT;
 import static com.sequenceiq.cloudbreak.polling.PollingResult.isSuccess;
 import static com.sequenceiq.environment.environment.flow.deletion.handler.experience.ExperienceDeletionRetrievalTask.EXPERIENCE_RETRYING_COUNT;
 import static com.sequenceiq.environment.environment.flow.deletion.handler.experience.ExperienceDeletionRetrievalTask.EXPERIENCE_RETRYING_INTERVAL;
+
+import java.util.function.Function;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -46,7 +49,7 @@ public class EnvironmentExperienceDeletionAction {
      */
     public void execute(Environment environment, boolean forceDelete) {
         LOGGER.debug("Experience deletion executing for environment {} with force delete={}", environment.getName(), forceDelete);
-        EnvironmentExperienceDto environmentExperienceDto = createEnvironmentExperienceDto(environment);
+        EnvironmentExperienceDto environmentExperienceDto = EnvironmentExperienceDto.fromEnvironment(environment);
         if (isDeleteCallWasSuccessful(environmentExperienceDto, forceDelete)) {
             waitForResult(environment, forceDelete);
         }
@@ -84,18 +87,15 @@ public class EnvironmentExperienceDeletionAction {
                 EXPERIENCE_RETRYING_COUNT,
                 SINGLE_FAILURE);
         if (!isSuccess(result.getLeft())) {
-            processFailureWithForceDelete(result, forceDelete);
+            if (result.getLeft().equals(EXIT)) {
+                reCheckDeletionOtherwise(
+                        environment,
+                        env -> experienceConnectorService.getConnectedExperienceCount(EnvironmentExperienceDto.fromEnvironment(env)) == 0,
+                        () -> processFailureWithForceDelete(result, forceDelete));
+            } else {
+                processFailureWithForceDelete(result, forceDelete);
+            }
         }
-    }
-
-    private EnvironmentExperienceDto createEnvironmentExperienceDto(Environment environment) {
-        EnvironmentExperienceDto environmentExperienceDto = new EnvironmentExperienceDto.Builder()
-                .withName(environment.getName())
-                .withCrn(environment.getResourceCrn())
-                .withAccountId(environment.getAccountId())
-                .withCloudPlatform(environment.getCloudPlatform())
-                .build();
-        return environmentExperienceDto;
     }
 
     private void processFailureWithForceDelete(Pair<PollingResult, Exception> result, boolean forceDelete) {
@@ -103,6 +103,13 @@ public class EnvironmentExperienceDeletionAction {
             LOGGER.debug("Forced environment delete causes skipping of experience deletion failure.");
         } else {
             processFailure(result);
+        }
+    }
+
+    private void reCheckDeletionOtherwise(Environment environment, Function<Environment, Boolean> reCheck, Runnable processFailure) {
+        LOGGER.info("Re-checking experience deletion result for environment: {} [crn: {}]", environment.getName(), environment.getResourceCrn());
+        if (!reCheck.apply(environment)) {
+            processFailure.run();
         }
     }
 

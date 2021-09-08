@@ -17,7 +17,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -43,9 +42,6 @@ class EnvironmentExperienceDeletionActionTest {
     private static final boolean FORCE_DELETE = true;
 
     private static final int ONCE = 1;
-
-    @Mock
-    private Pair<PollingResult, Exception> mockPollingResultPair;
 
     @Mock
     private ExperienceConnectorService mockExperienceConnectorService;
@@ -118,6 +114,58 @@ class EnvironmentExperienceDeletionActionTest {
     }
 
     @Test
+    void testExecuteWhenPollingResultWasGotBackWithExitThenReCheckShouldHappen() {
+        ImmutablePair<PollingResult, Exception> pollingResult = new ImmutablePair<>(PollingResult.EXIT, null);
+        when(mockExperiencePollingService.pollWithTimeout(
+                any(ExperienceDeletionRetrievalTask.class),
+                any(ExperiencePollerObject.class),
+                eq(Long.valueOf(EXPERIENCE_RETRYING_INTERVAL)),
+                eq(EXPERIENCE_RETRYING_COUNT),
+                eq(1)))
+                .thenReturn(pollingResult);
+
+        when(mockExperienceConnectorService.getConnectedExperienceCount(any(EnvironmentExperienceDto.class))).thenReturn(0);
+
+        underTest.execute(new Environment(), NO_FORCE_DELETE);
+
+        verify(mockExperienceConnectorService, times(ONCE)).getConnectedExperienceCount(any(EnvironmentExperienceDto.class));
+    }
+
+    @Test
+    void testExecuteWhenPollingResultWasGotBackWithExitAndTheConnectedExperienceCountIsMoreThanZeroThenReCheckShouldHappenAndFailureShouldHappen() {
+        ImmutablePair<PollingResult, Exception> pollingResult = new ImmutablePair<>(PollingResult.EXIT, null);
+        when(mockExperiencePollingService.pollWithTimeout(
+                any(ExperienceDeletionRetrievalTask.class),
+                any(ExperiencePollerObject.class),
+                eq(Long.valueOf(EXPERIENCE_RETRYING_INTERVAL)),
+                eq(EXPERIENCE_RETRYING_COUNT),
+                eq(1)))
+                .thenReturn(pollingResult);
+
+        when(mockExperienceConnectorService.getConnectedExperienceCount(any(EnvironmentExperienceDto.class))).thenReturn(1);
+
+        assertThrows(ExperienceOperationFailedException.class, () -> underTest.execute(new Environment(), NO_FORCE_DELETE));
+
+        verify(mockExperienceConnectorService, times(ONCE)).getConnectedExperienceCount(any(EnvironmentExperienceDto.class));
+    }
+
+    @Test
+    void testExecuteWhenPollingResultWasGotBackWithOtherThanExitThenReCheckShouldNotHappen() {
+        ImmutablePair<PollingResult, Exception> pollingResult = new ImmutablePair<>(PollingResult.FAILURE, null);
+        when(mockExperiencePollingService.pollWithTimeout(
+                any(ExperienceDeletionRetrievalTask.class),
+                any(ExperiencePollerObject.class),
+                eq(Long.valueOf(EXPERIENCE_RETRYING_INTERVAL)),
+                eq(EXPERIENCE_RETRYING_COUNT),
+                eq(1)))
+                .thenReturn(pollingResult);
+
+        assertThrows(ExperienceOperationFailedException.class, () -> underTest.execute(new Environment(), NO_FORCE_DELETE));
+
+        verify(mockExperienceConnectorService, never()).getConnectedExperienceCount(any(EnvironmentExperienceDto.class));
+    }
+
+    @Test
     void testForceDeleteWitPollingErrorShouldNotThrow() {
         ImmutablePair<PollingResult, Exception> pollingResult = new ImmutablePair<>(PollingResult.FAILURE, null);
         when(mockExperiencePollingService.pollWithTimeout(
@@ -157,7 +205,7 @@ class EnvironmentExperienceDeletionActionTest {
         doThrow(new IllegalArgumentException()).when(mockExperienceConnectorService).deleteConnectedExperiences(any());
 
         assertThatThrownBy(() -> underTest.execute(new Environment(), FORCE_DELETE))
-            .isExactlyInstanceOf(IllegalArgumentException.class);
+                .isExactlyInstanceOf(IllegalArgumentException.class);
 
         verify(mockExperiencePollingFailureResolver, never()).getMessageForFailure(any());
     }
