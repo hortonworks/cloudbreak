@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +46,7 @@ public abstract class AbstractCommandTableResource {
                     .execute();
             if (response.code() >= ERROR_CODES_FROM) {
                 LOGGER.debug("{} request against Cloudera Manager API returned with status code: {}, response: {}",
-                        request.httpUrl().toString(), response.toString(), response.code());
+                        request.httpUrl().toString(), response, response.code());
                 throw new CloudbreakException(
                         String.format("%s request against CM API returned with status code: %d",
                                 getUriPath(), response.code()));
@@ -115,14 +114,6 @@ public abstract class AbstractCommandTableResource {
      */
     private void enhanceRequestParams(Map<String, List<String>> headers, List<Pair> queryParams, Map<String, String> headerParams) {
         queryParams.add(new Pair("limit", "501"));
-        long startTime = new DateTime()
-                .minusMinutes(INTERVAL_MINUTES)
-                .toDate().toInstant().toEpochMilli();
-        long endTime = new DateTime()
-                .plusMinutes(INTERVAL_MINUTES)
-                .toDate().toInstant().toEpochMilli();
-        queryParams.add(new Pair("startTime", Long.toString(startTime)));
-        queryParams.add(new Pair("endTime", Long.toString(endTime)));
         if (headers.containsKey("Set-Cookie")) {
             LOGGER.debug("Copying Set-Cookie header from listActiveCommands to commandTable request (as Cookie header)");
             headerParams.put("Cookie", headers.get("Set-Cookie").get(0));

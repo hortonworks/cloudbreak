@@ -51,4 +51,14 @@ public class CommandResource {
     public void setSuccess(Boolean success) {
         this.success = success;
     }
+
+    @Override
+    public String toString() {
+        return "CommandResource{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", start=" + start +
+                ", success=" + success +
+                '}';
+    }
 }
