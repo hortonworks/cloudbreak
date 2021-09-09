@@ -120,7 +120,7 @@ public class SyncApiCommandRetriever {
         LOGGER.debug("The last {} command could not be found  by listing commands... Trying {} call", commandName, uriPath);
         List<CommandResource> commandsFromRunningCommandsTable = commandTable.getCommands(
                 commandName, api, headers);
-        LOGGER.debug("Processing of {} call has been completed", uriPath);
+        LOGGER.debug("Processing of {} call has been completed with commands {}", uriPath, commandsFromRunningCommandsTable);
         return Optional.ofNullable(getLatestCommandId(commandName, commandsFromRunningCommandsTable, commandTable.getUriPath()));
     }
 
