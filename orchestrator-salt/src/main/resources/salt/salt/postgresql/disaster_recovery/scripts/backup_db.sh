@@ -104,7 +104,7 @@ move_backup_to_cloud () {
 
   hdfs dfs -mkdir -p "$BACKUP_LOCATION"
   OBJECT_STORE_PATH="${BACKUP_LOCATION}/${SERVICE}_backup"
-  hdfs dfs -moveFromLocal "$LOCAL_BACKUP" "$OBJECT_STORE_PATH" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || errorExit "Unable to upload $SERVICE backup"
+  hdfs dfs -moveFromLocal -f "$LOCAL_BACKUP" "$OBJECT_STORE_PATH" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || errorExit "Unable to upload $SERVICE backup"
   doLog "INFO Completed upload to ${BACKUP_LOCATION}"
 }
 
