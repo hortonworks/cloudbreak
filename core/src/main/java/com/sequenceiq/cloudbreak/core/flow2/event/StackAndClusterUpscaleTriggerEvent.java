@@ -6,6 +6,7 @@ import java.util.Set;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.type.ClusterManagerType;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
+import com.sequenceiq.cloudbreak.core.flow2.dto.NetworkScaleDetails;
 
 import reactor.rx.Promise;
 
@@ -23,8 +24,9 @@ public class StackAndClusterUpscaleTriggerEvent extends StackScaleTriggerEvent {
 
     private final ClusterManagerType clusterManagerType;
 
-    public StackAndClusterUpscaleTriggerEvent(String selector, Long stackId, String instanceGroup, Integer adjustment, ScalingType scalingType) {
-        super(selector, stackId, instanceGroup, adjustment, Collections.emptySet());
+    public StackAndClusterUpscaleTriggerEvent(String selector, Long stackId, String instanceGroup, Integer adjustment, ScalingType scalingType,
+            NetworkScaleDetails networkScaleDetails) {
+        super(selector, stackId, instanceGroup, adjustment, Collections.emptySet(), networkScaleDetails);
         this.scalingType = scalingType;
         singleMasterGateway = false;
         kerberosSecured = false;

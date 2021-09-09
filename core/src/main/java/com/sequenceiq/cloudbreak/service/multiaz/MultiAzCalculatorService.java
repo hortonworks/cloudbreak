@@ -10,9 +10,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -20,6 +22,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.controller.validation.network.MultiAzValidator;
+import com.sequenceiq.cloudbreak.core.flow2.dto.NetworkScaleDetails;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.stack.instance.network.InstanceGroupNetwork;
@@ -75,7 +78,7 @@ public class MultiAzCalculatorService {
 
     public void calculateByRoundRobin(Map<String, String> subnetAzPairs, InstanceGroup instanceGroup) {
         Map<String, Integer> subnetUsage = new HashMap<>();
-        Set<String> subnetIds = collectSubnetIds(instanceGroup);
+        Set<String> subnetIds = collectSubnetIds(instanceGroup, NetworkScaleDetails.getEmpty());
         initializeSubnetUsage(subnetAzPairs, subnetIds, subnetUsage);
         collectCurrentSubnetUsage(instanceGroup, subnetUsage);
 
@@ -94,9 +97,10 @@ public class MultiAzCalculatorService {
         }
     }
 
-    public void calculateByRoundRobin(Map<String, String> subnetAzPairs, InstanceGroup instanceGroup, InstanceMetaData instanceMetaData) {
+    public void calculateByRoundRobin(Map<String, String> subnetAzPairs, InstanceGroup instanceGroup, InstanceMetaData instanceMetaData,
+            NetworkScaleDetails networkScaleDetails) {
         Map<String, Integer> subnetUsage = new HashMap<>();
-        Set<String> subnetIds = collectSubnetIds(instanceGroup);
+        Set<String> subnetIds = collectSubnetIds(instanceGroup, networkScaleDetails);
         initializeSubnetUsage(subnetAzPairs, subnetIds, subnetUsage);
         collectCurrentSubnetUsage(instanceGroup, subnetUsage);
 
@@ -149,7 +153,7 @@ public class MultiAzCalculatorService {
         }
     }
 
-    private Set<String> collectSubnetIds(InstanceGroup instanceGroup) {
+    private Set<String> collectSubnetIds(InstanceGroup instanceGroup, NetworkScaleDetails networkScaleDetails) {
         Set<String> allSubnetIds = new HashSet<>();
         InstanceGroupNetwork instanceGroupNetwork = instanceGroup.getInstanceGroupNetwork();
         if (instanceGroupNetwork != null) {
@@ -158,10 +162,27 @@ public class MultiAzCalculatorService {
                 List<String> subnetIds = (List<String>) attributes
                         .getMap()
                         .getOrDefault(SUBNET_IDS, new ArrayList<>());
-                allSubnetIds.addAll(subnetIds);
+                if (isPreferredSubnetsSpecifiedForScaling(networkScaleDetails)) {
+                    List<String> preferredSubnetIds = networkScaleDetails.getPreferredSubnetIds();
+                    String preferredSubnetIdList = String.join(",", preferredSubnetIds);
+                    LOGGER.debug("Collect subnet ids considering the customer preferred subnet ids: {}", preferredSubnetIdList);
+                    Set<String> subnetIdsMatchedWithPreferred = subnetIds.stream()
+                            .filter(preferredSubnetIds::contains)
+                            .collect(Collectors.toSet());
+                    LOGGER.info("Filtered subnet id list '{}' based on the customer preferred subnet id list '{}'",
+                            String.join(",", subnetIdsMatchedWithPreferred), preferredSubnetIdList);
+                    allSubnetIds.addAll(subnetIdsMatchedWithPreferred);
+                } else {
+                    allSubnetIds.addAll(subnetIds);
+                }
             }
 
         }
         return allSubnetIds;
+    }
+
+    private boolean isPreferredSubnetsSpecifiedForScaling(NetworkScaleDetails networkScaleDetails) {
+        return networkScaleDetails != null
+                && CollectionUtils.isNotEmpty(networkScaleDetails.getPreferredSubnetIds());
     }
 }

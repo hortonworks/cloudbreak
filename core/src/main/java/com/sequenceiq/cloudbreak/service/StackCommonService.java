@@ -10,6 +10,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +27,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackImageChange
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
@@ -34,6 +36,7 @@ import com.sequenceiq.cloudbreak.auth.crn.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.common.ScalingHardLimitsService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.StackCreatorService;
+import com.sequenceiq.cloudbreak.controller.validation.network.MultiAzValidator;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackScaleV4RequestToUpdateClusterV4RequestConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackScaleV4RequestToUpdateStackV4RequestConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackV4RequestToTemplatePreparationObjectConverter;
@@ -124,6 +127,9 @@ public class StackCommonService {
 
     @Inject
     private CloudbreakEventService eventService;
+
+    @Inject
+    private MultiAzValidator multiAzValidator;
 
     public StackV4Response createInWorkspace(StackV4Request stackRequest, User user, Workspace workspace, boolean distroxRequest) {
         return stackCreatorService.createStack(user, workspace, stackRequest, distroxRequest);
@@ -226,6 +232,7 @@ public class StackCommonService {
         Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
         MDCBuilder.buildMdcContext(stack);
         updateRequest.setStackId(stack.getId());
+        validateNetworkScaleRequest(stack, updateRequest.getStackNetworkScaleV4Request());
         UpdateStackV4Request updateStackJson = stackScaleV4RequestToUpdateStackV4RequestConverter.convert(updateRequest);
         Integer scalingAdjustment = updateStackJson.getInstanceGroupAdjustment().getScalingAdjustment();
         validateScalingRequest(stack, scalingAdjustment);
@@ -363,6 +370,24 @@ public class StackCommonService {
         if (violatingMaxNodeCount) {
             throw new BadRequestException(String.format("Upscaling by more than %d nodes is not supported",
                     forAutoscale ? scalingHardLimitsService.getMaxAutoscaleStepInNodeCount() : scalingHardLimitsService.getMaxUpscaleStepInNodeCount()));
+        }
+    }
+
+    private void validateNetworkScaleRequest(Stack stack, NetworkScaleV4Request stackNetworkScaleV4Request) {
+        if (stackNetworkScaleV4Request != null && CollectionUtils.isNotEmpty(stackNetworkScaleV4Request.getPreferredSubnetIds())) {
+            String platformVariant = stack.getPlatformVariant();
+            boolean supportedVariant = multiAzValidator.supportedVariant(platformVariant);
+            if (!supportedVariant) {
+                String errorMessage = String.format("Multiple availability zones are not supported on platform variant '%s'", platformVariant);
+                LOGGER.info(errorMessage);
+                throw new BadRequestException(errorMessage);
+            }
+            Set<String> subnetIds = multiAzValidator.collectSubnetIds(stack.getInstanceGroups());
+            if (subnetIds.size() < 2) {
+                String message = "It does not make sense to prefer subnets on a cluster that has been provisioned in a single subnet";
+                LOGGER.info(message);
+                throw new BadRequestException(message);
+            }
         }
     }
 }

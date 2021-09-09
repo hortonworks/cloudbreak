@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
+import com.sequenceiq.cloudbreak.core.flow2.dto.NetworkScaleDetails;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 
 import reactor.rx.Promise;
@@ -18,19 +19,23 @@ public class StackScaleTriggerEvent extends StackEvent {
 
     private boolean repair;
 
+    private NetworkScaleDetails networkScaleDetails;
+
     public StackScaleTriggerEvent(String selector, Long stackId, String instanceGroup, Integer adjustment) {
-        this(selector, stackId, instanceGroup, adjustment, Collections.emptySet());
+        this(selector, stackId, instanceGroup, adjustment, Collections.emptySet(), NetworkScaleDetails.getEmpty());
     }
 
     public StackScaleTriggerEvent(String selector, Long stackId, String instanceGroup, Integer adjustment, Promise<AcceptResult> accepted) {
         this(selector, stackId, instanceGroup, adjustment, Collections.emptySet(), accepted);
     }
 
-    public StackScaleTriggerEvent(String selector, Long stackId, String instanceGroup, Integer adjustment, Set<String> hostNames) {
+    public StackScaleTriggerEvent(String selector, Long stackId, String instanceGroup, Integer adjustment, Set<String> hostNames,
+            NetworkScaleDetails networkScaleDetails) {
         super(selector, stackId);
         this.instanceGroup = instanceGroup;
         this.adjustment = adjustment;
         this.hostNames = hostNames;
+        this.networkScaleDetails = networkScaleDetails;
     }
 
     public StackScaleTriggerEvent(String selector, Long stackId, String instanceGroup, Integer adjustment, Set<String> hostNames,
@@ -39,6 +44,7 @@ public class StackScaleTriggerEvent extends StackEvent {
         this.instanceGroup = instanceGroup;
         this.adjustment = adjustment;
         this.hostNames = hostNames;
+        this.networkScaleDetails = new NetworkScaleDetails();
     }
 
     public StackScaleTriggerEvent setRepair() {
@@ -60,5 +66,9 @@ public class StackScaleTriggerEvent extends StackEvent {
 
     public boolean isRepair() {
         return repair;
+    }
+
+    public NetworkScaleDetails getNetworkScaleDetails() {
+        return networkScaleDetails;
     }
 }

@@ -138,9 +138,9 @@ class StackUpscaleActionsTest {
         when(stackScalabilityCondition.isScalable(stack, INSTANCE_GROUP_NAME)).thenReturn(true);
 
         Stack updatedStack = mock(Stack.class);
-        when(instanceMetaDataService.saveInstanceAndGetUpdatedStack(stack, 3, INSTANCE_GROUP_NAME, false, context.getHostNames(), false))
+        when(instanceMetaDataService.saveInstanceAndGetUpdatedStack(stack, 3, INSTANCE_GROUP_NAME, false, context.getHostNames(), false,
+                context.getStackNetworkScaleDetails()))
                 .thenReturn(updatedStack);
-
         CloudStack convertedCloudStack = mock(CloudStack.class);
         when(cloudStackConverter.convert(updatedStack)).thenReturn(convertedCloudStack);
 

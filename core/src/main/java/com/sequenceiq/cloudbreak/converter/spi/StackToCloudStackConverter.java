@@ -60,6 +60,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.cloudbreak.converter.InstanceMetadataToImageIdConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
+import com.sequenceiq.cloudbreak.core.flow2.dto.NetworkScaleDetails;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
@@ -183,6 +184,17 @@ public class StackToCloudStackConverter {
 
     public CloudInstance buildInstance(InstanceMetaData instanceMetaData, InstanceGroup instanceGroup,
             StackAuthentication stackAuthentication, Long privateId, InstanceStatus status, DetailedEnvironmentResponse environment) {
+        return buildInstance(instanceMetaData,
+                instanceGroup,
+                stackAuthentication,
+                privateId,
+                status,
+                environment,
+                NetworkScaleDetails.getEmpty());
+    }
+
+    public CloudInstance buildInstance(InstanceMetaData instanceMetaData, InstanceGroup instanceGroup, StackAuthentication stackAuthentication, Long privateId,
+            InstanceStatus status, DetailedEnvironmentResponse environment, NetworkScaleDetails networkScaleDetails) {
         LOGGER.debug("Instance metadata is {}", instanceMetaData);
         String id = instanceMetaData == null ? null : instanceMetaData.getInstanceId();
         String instanceImageId = instanceMetaData == null ? null : instanceMetadataToImageIdConverter.convert(instanceMetaData);
@@ -316,13 +328,13 @@ public class StackToCloudStackConverter {
             for (TargetGroup targetGroup : targetGroupPersistenceService.findByLoadBalancerId(loadBalancer.getId())) {
                 Set<TargetGroupPortPair> portPairs = loadBalancerConfigService.getTargetGroupPortPairs(targetGroup);
                 Set<String> targetInstanceGroupName = instanceGroupService.findByTargetGroupId(targetGroup.getId()).stream()
-                    .map(InstanceGroup::getGroupName)
-                    .collect(Collectors.toSet());
+                        .map(InstanceGroup::getGroupName)
+                        .collect(Collectors.toSet());
 
                 for (TargetGroupPortPair portPair : portPairs) {
                     cloudLoadBalancer.addPortToTargetGroupMapping(portPair, instanceGroups.stream()
-                        .filter(ig -> targetInstanceGroupName.contains(ig.getName()))
-                        .collect(Collectors.toSet()));
+                            .filter(ig -> targetInstanceGroupName.contains(ig.getName()))
+                            .collect(Collectors.toSet()));
                 }
             }
             cloudLoadBalancers.add(cloudLoadBalancer);
@@ -385,7 +397,7 @@ public class StackToCloudStackConverter {
     }
 
     private CloudInstance buildCloudInstanceSkeleton(DetailedEnvironmentResponse environment, StackAuthentication stackAuthentication,
-        InstanceGroup instanceGroup) {
+            InstanceGroup instanceGroup) {
         CloudInstance skeleton = null;
         if (instanceGroup.getNodeCount() == 0) {
             skeleton = buildInstance(null, instanceGroup, stackAuthentication, 0L,

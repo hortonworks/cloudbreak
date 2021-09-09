@@ -3,9 +3,11 @@ package com.sequenceiq.distrox.api.v1.distrox.model;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sequenceiq.common.model.JsonEntity;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.InstanceGroupAdjustmentModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.InstanceGroupModelDescription;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.InstanceGroupNetworkScaleModelDescription;
+import com.sequenceiq.common.model.JsonEntity;
+import com.sequenceiq.distrox.api.v1.distrox.model.network.NetworkScaleV1Request;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -22,6 +24,9 @@ public class DistroXScaleV1Request implements JsonEntity {
     @ApiModelProperty(value = InstanceGroupAdjustmentModelDescription.SCALING_ADJUSTMENT, required = true)
     private Integer desiredCount;
 
+    @ApiModelProperty(value = InstanceGroupNetworkScaleModelDescription.NETWORK_SCALE_REQUEST)
+    private NetworkScaleV1Request networkScaleRequest;
+
     public String getGroup() {
         return group;
     }
@@ -36,5 +41,13 @@ public class DistroXScaleV1Request implements JsonEntity {
 
     public void setDesiredCount(Integer desiredCount) {
         this.desiredCount = desiredCount;
+    }
+
+    public NetworkScaleV1Request getNetworkScaleRequest() {
+        return networkScaleRequest;
+    }
+
+    public void setNetworkScaleRequest(NetworkScaleV1Request networkScaleRequest) {
+        this.networkScaleRequest = networkScaleRequest;
     }
 }
