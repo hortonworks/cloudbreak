@@ -34,6 +34,7 @@ public class StreamsReplicationManagerConfigProvider extends AbstractRoleConfigP
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         String cdpVersion = source.getBlueprintView().getProcessor().getStackVersion() == null ?
                 "" : source.getBlueprintView().getProcessor().getStackVersion();
+        StringBuilder replicationConfig = new StringBuilder();
 
         int kafkaBrokerPort = source.getGeneralClusterConfigs().getAutoTlsEnabled() ? KAFKA_SECURE_PORT : KAFKA_PLAIN_PORT;
         List<HostgroupView> hostGroups = source.getHostGroupsWithComponent(KafkaRoles.KAFKA_BROKER).collect(Collectors.toList());
@@ -49,11 +50,16 @@ public class StreamsReplicationManagerConfigProvider extends AbstractRoleConfigP
 
         String boostrapServers = brokerHosts.stream().map(h -> h + ":" + kafkaBrokerPort)
                 .collect(Collectors.joining(","));
+        replicationConfig.append("bootstrap.servers=" + boostrapServers);
+
+        if (isVersionNewerOrEqualThanLimited(cdpVersion, CLOUDERA_STACK_VERSION_7_2_12)) {
+            replicationConfig.append("|" + "security.protocol=SASL_SSL");
+        }
 
         return boostrapServers.isEmpty()
                 ? List.of()
                 : List.of(ConfigUtils.config(CLUSTERS_CONFIG, "primary,secondary"),
-                        ConfigUtils.config(REPLICATIONS_CONFIG, "bootstrap.servers=" + boostrapServers));
+                        ConfigUtils.config(REPLICATIONS_CONFIG, replicationConfig.toString()));
     }
 
     @Override
