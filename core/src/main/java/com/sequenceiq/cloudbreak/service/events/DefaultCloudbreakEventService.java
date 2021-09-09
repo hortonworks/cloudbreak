@@ -153,15 +153,18 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
                 eventMessage,
                 instanceGroupName);
 
-        StackV4Response stackV4Response = stackV4ResponseConverter.convert(stack);
-        stackV4Response = stackResponseDecorator.decorate(stackV4Response, stack, List.of(StackResponseEntries.HARDWARE_INFO.getEntryName()));
-        CloudbreakCompositeEvent compositeEvent = new CloudbreakCompositeEvent(
-                resourceEvent,
-                eventMessageArgs,
-                structuredNotificationEvent,
-                stackV4Response,
-                stack.getCreator().getUserCrn()
-        );
+        CloudbreakCompositeEvent compositeEvent = new CloudbreakCompositeEvent(resourceEvent, eventMessageArgs, structuredNotificationEvent);
+        if (stackTypeIsDistroX(stack.getType())) {
+            StackV4Response stackV4Response = stackV4ResponseConverter.convert(stack);
+            stackV4Response = stackResponseDecorator.decorate(stackV4Response, stack, List.of(StackResponseEntries.HARDWARE_INFO.getEntryName()));
+            compositeEvent = new CloudbreakCompositeEvent(
+                    resourceEvent,
+                    eventMessageArgs,
+                    structuredNotificationEvent,
+                    stackV4Response,
+                    stack.getCreator().getUserCrn()
+            );
+        }
         reactor.notify(CLOUDBREAK_EVENT, eventFactory.createEvent(compositeEvent));
     }
 
