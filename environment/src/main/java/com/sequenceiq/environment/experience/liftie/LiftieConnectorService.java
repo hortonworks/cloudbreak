@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.experience.liftie;
 
 import static com.sequenceiq.cloudbreak.util.NullUtil.putIfPresent;
+import static com.sequenceiq.environment.experience.QueryParamInjectorUtil.setQueryParams;
 
 import java.net.URI;
 import java.util.LinkedHashMap;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.environment.exception.ExperienceOperationFailedException;
 import com.sequenceiq.environment.experience.InvocationBuilderProvider;
+import com.sequenceiq.environment.experience.QueryParamInjectorUtil;
 import com.sequenceiq.environment.experience.ResponseReader;
 import com.sequenceiq.environment.experience.RetryableWebTarget;
 import com.sequenceiq.environment.experience.api.LiftieApi;
@@ -118,17 +120,6 @@ public class LiftieConnectorService implements LiftieApi {
             LOGGER.warn("Kubernetes Experience http call execution has failed due to:", re);
             throw new ExperienceOperationFailedException(re);
         }
-    }
-
-    private WebTarget setQueryParams(WebTarget webTarget, Map<String, String> nameValuePairs) {
-        WebTarget target = webTarget;
-        for (Map.Entry<String, String> entry : nameValuePairs.entrySet()) {
-            String value = entry.getValue();
-            if (value != null) {
-                target = target.queryParam(entry.getKey(), value);
-            }
-        }
-        return target;
     }
 
 }

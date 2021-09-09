@@ -1,8 +1,11 @@
 package com.sequenceiq.environment.experience.common;
 
+import static com.sequenceiq.environment.experience.QueryParamInjectorUtil.setQueryParams;
+import static javax.ws.rs.core.Response.Status.Family.SUCCESSFUL;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 
 import java.net.URI;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -24,7 +27,6 @@ import com.sequenceiq.environment.experience.RetryableWebTarget;
 import com.sequenceiq.environment.experience.api.CommonExperienceApi;
 import com.sequenceiq.environment.experience.common.responses.CpInternalCluster;
 import com.sequenceiq.environment.experience.common.responses.CpInternalEnvironmentResponse;
-import com.sequenceiq.environment.experience.common.responses.DeleteCommonExperienceWorkspaceResponse;
 import com.sequenceiq.environment.experience.policy.response.ExperiencePolicyResponse;
 
 @Service
@@ -76,16 +78,16 @@ public class CommonExperienceConnectorService implements CommonExperienceApi {
 
     @NotNull
     @Override
-    public DeleteCommonExperienceWorkspaceResponse deleteWorkspaceForEnvironment(String experienceBasePath, String environmentCrn) {
+    public void deleteWorkspaceForEnvironment(String experienceBasePath, String environmentCrn, boolean force) {
         WebTarget webTarget = commonExperienceWebTargetProvider.createWebTargetForClusterFetch(experienceBasePath, environmentCrn);
         LOGGER.info("WebTarget has created for deleting workspaces for environment [crn: {}]: {}",
                 environmentCrn, webTarget.toString());
-        Invocation.Builder call = invocationBuilderProvider.createInvocationBuilder(webTarget);
-        Optional<Response> response = executeCall(webTarget.getUri(), () -> retryableWebTarget.delete(call));
-        if (response.isPresent()) {
-            return responseReader.read(webTarget.getUri().toString(), response.get(), DeleteCommonExperienceWorkspaceResponse.class)
-                    .orElseThrow(() -> new ExperienceOperationFailedException(COMMON_XP_RESPONSE_RESOLVE_ERROR_MSG));
+        if (force) {
+            webTarget = setQueryParams(webTarget, Map.of("force", "true"));
         }
+        Invocation.Builder call = invocationBuilderProvider.createInvocationBuilder(webTarget);
+        executeCall(webTarget.getUri(), () -> retryableWebTarget.delete(call))
+                .ifPresentOrElse(this::throwExceptionIfResultIsUnsuccessful, this::throwExperienceOperationFailedException);
         throw new ExperienceOperationFailedException(COMMON_XP_RESPONSE_RESOLVE_ERROR_MSG);
     }
 
@@ -99,6 +101,16 @@ public class CommonExperienceConnectorService implements CommonExperienceApi {
             return responseReader.read(webTarget.getUri().toString(), response.get(), ExperiencePolicyResponse.class)
                     .orElseThrow(() -> new ExperienceOperationFailedException(COMMON_XP_RESPONSE_RESOLVE_ERROR_MSG));
         }
+        throw new ExperienceOperationFailedException(COMMON_XP_RESPONSE_RESOLVE_ERROR_MSG);
+    }
+
+    private void throwExceptionIfResultIsUnsuccessful(Response response) {
+        if (!response.getStatusInfo().getFamily().equals(SUCCESSFUL)) {
+            throw new ExperienceOperationFailedException("Something has happened during the delete execution!");
+        }
+    }
+
+    private void throwExperienceOperationFailedException() {
         throw new ExperienceOperationFailedException(COMMON_XP_RESPONSE_RESOLVE_ERROR_MSG);
     }
 

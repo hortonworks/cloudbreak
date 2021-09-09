@@ -79,8 +79,7 @@ public class CommonExperienceService implements Experience {
                 .stream()
                 .filter(CommonExperience::hasResourceDeleteAccess)
                 .filter(commonExperience -> activeExperiences.stream().anyMatch(c -> c.getExperienceName().equals(commonExperience.getName())))
-                .forEach(commonExperience -> experienceConnectorService
-                        .deleteWorkspaceForEnvironment(commonExperiencePathCreator.createPathToExperience(commonExperience), environment.getCrn()));
+                .forEach(commonExperience -> delete(commonExperience, environment));
     }
 
     @Override
@@ -102,6 +101,13 @@ public class CommonExperienceService implements Experience {
                     }
                 });
         return policies;
+    }
+
+    private void delete(CommonExperience commonExperience, EnvironmentExperienceDto environment) {
+        experienceConnectorService.deleteWorkspaceForEnvironment(
+                commonExperiencePathCreator.createPathToExperience(commonExperience),
+                environment.getCrn(),
+                commonExperience.isForceDeleteCapable());
     }
 
     /**
