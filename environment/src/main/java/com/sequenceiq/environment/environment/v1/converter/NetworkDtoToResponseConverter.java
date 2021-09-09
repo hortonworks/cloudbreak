@@ -11,10 +11,10 @@ import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkGcp
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkMockParams;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkYarnParams;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
-import com.sequenceiq.environment.network.service.domain.ProvidedSubnetIds;
 import com.sequenceiq.environment.network.dao.domain.RegistrationType;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.network.service.SubnetIdProvider;
+import com.sequenceiq.environment.network.service.domain.ProvidedSubnetIds;
 
 @Component
 public class NetworkDtoToResponseConverter {
@@ -75,15 +75,17 @@ public class NetworkDtoToResponseConverter {
     }
 
     public String getPreferedSubnetId(NetworkDto network, Tunnel tunnel, boolean detailedResponse) {
-        ProvidedSubnetIds providedSubnetIds = subnetIdProvider.subnets(
-                network,
-                tunnel,
-                network.getCloudPlatform(),
-                false);
         String subnetId = null;
-        if (providedSubnetIds != null) {
-            subnetId = providedSubnetIds.getSubnetId();
+        if (detailedResponse) {
+            ProvidedSubnetIds providedSubnetIds = subnetIdProvider.subnets(
+                    network,
+                    tunnel,
+                    network.getCloudPlatform(),
+                    false);
+            if (providedSubnetIds != null) {
+                subnetId = providedSubnetIds.getSubnetId();
+            }
         }
-        return detailedResponse ? subnetId : null;
+        return subnetId;
     }
 }
