@@ -12,26 +12,35 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.In
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
-import com.sequenceiq.cloudbreak.domain.SecurityGroup;
-import com.sequenceiq.cloudbreak.domain.Template;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.network.InstanceGroupNetworkV4RequestToInstanceGroupNetworkConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.securitygroup.SecurityGroupV4RequestToSecurityGroupConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.template.InstanceTemplateV4RequestToTemplateConverter;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.stack.instance.network.InstanceGroupNetwork;
 import com.sequenceiq.common.api.type.ScalabilityOption;
 
 @Component
-public class InstanceGroupV4RequestToInstanceGroupConverter extends AbstractConversionServiceAwareConverter<InstanceGroupV4Request, InstanceGroup> {
+public class InstanceGroupV4RequestToInstanceGroupConverter {
 
     @Inject
     private ProviderParameterCalculator providerParameterCalculator;
 
-    @Override
+    @Inject
+    private SecurityGroupV4RequestToSecurityGroupConverter securityGroupV4RequestToSecurityGroupConverter;
+
+    @Inject
+    private InstanceGroupNetworkV4RequestToInstanceGroupNetworkConverter instanceGroupNetworkV4RequestToInstanceGroupNetworkConverter;
+
+    @Inject
+    private InstanceTemplateV4RequestToTemplateConverter instanceTemplateV4RequestToTemplateConverter;
+
     public InstanceGroup convert(InstanceGroupV4Request source) {
         InstanceGroup instanceGroup = new InstanceGroup();
         source.getTemplate().setCloudPlatform(source.getCloudPlatform());
-        instanceGroup.setTemplate(getConversionService().convert(source.getTemplate(), Template.class));
-        instanceGroup.setSecurityGroup(getConversionService().convert(source.getSecurityGroup(), SecurityGroup.class));
+        instanceGroup.setTemplate(instanceTemplateV4RequestToTemplateConverter.convert(source.getTemplate()));
+        instanceGroup.setSecurityGroup(securityGroupV4RequestToSecurityGroupConverter
+                .convert(source.getSecurityGroup()));
         instanceGroup.setGroupName(source.getName().toLowerCase());
         instanceGroup.setMinimumNodeCount(source.getMinimumNodeCount() == null ? 0 : source.getMinimumNodeCount());
         setAttributes(source, instanceGroup);
@@ -48,7 +57,8 @@ public class InstanceGroupV4RequestToInstanceGroupConverter extends AbstractConv
     private void setNetwork(InstanceGroupV4Request source, InstanceGroup instanceGroup) {
         if (source.getNetwork() != null) {
             source.getNetwork().setCloudPlatform(source.getCloudPlatform());
-            InstanceGroupNetwork instanceGroupNetwork = getConversionService().convert(source.getNetwork(), InstanceGroupNetwork.class);
+            InstanceGroupNetwork instanceGroupNetwork = instanceGroupNetworkV4RequestToInstanceGroupNetworkConverter
+                    .convert(source.getNetwork());
             instanceGroup.setInstanceGroupNetwork(instanceGroupNetwork);
         }
     }

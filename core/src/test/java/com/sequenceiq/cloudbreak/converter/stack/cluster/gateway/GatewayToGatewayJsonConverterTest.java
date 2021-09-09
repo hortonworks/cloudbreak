@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.converter.stack.cluster.gateway;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import org.junit.Before;
@@ -11,7 +10,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.core.convert.ConversionService;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.GatewayType;
@@ -19,6 +17,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.SSOType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.GatewayV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.topology.GatewayTopologyV4Request;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cli.GatewayToGatewayV4RequestConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.cli.GatewayTopologyToGatewayTopologyV4RequestConverter;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
 
@@ -35,15 +34,15 @@ public class GatewayToGatewayJsonConverterTest {
 
     private static final String SIGN_CERT = "signCert";
 
-    @Mock
-    private ConversionService conversionService;
-
     @InjectMocks
     private final GatewayToGatewayV4RequestConverter underTest = new GatewayToGatewayV4RequestConverter();
 
+    @Mock
+    private GatewayTopologyToGatewayTopologyV4RequestConverter gatewayTopologyToGatewayTopologyV4RequestConverter;
+
     @Before
     public void setup() {
-        when(conversionService.convert(any(GatewayTopology.class), eq(GatewayTopologyV4Request.class))).thenReturn(new GatewayTopologyV4Request());
+        when(gatewayTopologyToGatewayTopologyV4RequestConverter.convert(any(GatewayTopology.class))).thenReturn(new GatewayTopologyV4Request());
     }
 
     @Test

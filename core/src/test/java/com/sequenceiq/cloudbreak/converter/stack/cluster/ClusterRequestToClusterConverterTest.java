@@ -17,7 +17,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.core.convert.ConversionService;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -28,6 +27,7 @@ import com.sequenceiq.cloudbreak.converter.IdBrokerConverterUtil;
 import com.sequenceiq.cloudbreak.converter.util.CloudStorageValidationUtil;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.CloudStorageConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.ClusterV4RequestToClusterConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.gateway.GatewayV4RequestToGatewayConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -43,9 +43,6 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
 
     @InjectMocks
     private ClusterV4RequestToClusterConverter underTest;
-
-    @Mock
-    private ConversionService conversionService;
 
     @Mock
     private CloudStorageValidationUtil cloudStorageValidationUtil;
@@ -64,6 +61,9 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
 
     @Mock
     private CloudStorageConverter cloudStorageConverter;
+
+    @Mock
+    private GatewayV4RequestToGatewayConverter gatewayV4RequestToGatewayConverter;
 
     @Spy
     @SuppressFBWarnings(value = "UrF", justification = "This gets injected")
@@ -87,7 +87,7 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
         Blueprint blueprint = new Blueprint();
         blueprint.setStackType(StackType.HDP.name());
         given(blueprintService.getByNameForWorkspaceAndLoadDefaultsIfNecessary(eq("my-blueprint"), any())).willReturn(blueprint);
-        given(conversionService.convert(request.getGateway(), Gateway.class)).willReturn(new Gateway());
+        given(gatewayV4RequestToGatewayConverter.convert(request.getGateway())).willReturn(new Gateway());
         // WHEN
         Cluster result = underTest.convert(request);
         // THEN
@@ -101,7 +101,7 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
         // GIVEN
         ClusterV4Request request = getRequest("cluster-with-cloud-storage.json");
 
-        given(conversionService.convert(request.getGateway(), Gateway.class)).willReturn(new Gateway());
+        given(gatewayV4RequestToGatewayConverter.convert(request.getGateway())).willReturn(new Gateway());
         given(cloudStorageConverter.requestToFileSystem(request.getCloudStorage())).willReturn(new FileSystem());
         given(cloudStorageValidationUtil.isCloudStorageConfigured(request.getCloudStorage())).willReturn(true);
         Blueprint blueprint = new Blueprint();

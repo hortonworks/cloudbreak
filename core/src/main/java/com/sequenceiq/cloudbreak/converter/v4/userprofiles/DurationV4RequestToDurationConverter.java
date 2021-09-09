@@ -5,12 +5,10 @@ import java.time.Duration;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.userprofile.requests.DurationV4Request;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 
 @Component
-public class DurationV4RequestToDurationConverter extends AbstractConversionServiceAwareConverter<DurationV4Request, Duration> {
+public class DurationV4RequestToDurationConverter {
 
-    @Override
     public Duration convert(DurationV4Request source) {
         return Duration
                 .ofMinutes(getValue(source.getMinutes()))

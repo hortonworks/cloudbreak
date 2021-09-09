@@ -86,7 +86,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 
 @Component
-public class StackToTemplatePreparationObjectConverter extends AbstractConversionServiceAwareConverter<Stack, TemplatePreparationObject> {
+public class StackToTemplatePreparationObjectConverter {
 
     @Inject
     private HostGroupService hostGroupService;
@@ -181,7 +181,6 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
     @Inject
     private DatalakeService datalakeService;
 
-    @Override
     public TemplatePreparationObject convert(Stack source) {
         try {
             Map<String, Collection<ClusterExposedServiceView>> views = serviceEndpointCollector

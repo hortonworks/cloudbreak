@@ -15,9 +15,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StackResponseEntrie
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.hardware.HardwareInfoGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.hardware.HardwareInfoV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.template.InstanceTemplateV4Response;
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.template.TemplateToInstanceTemplateV4ResponseConverter;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
@@ -34,7 +33,7 @@ public class StackResponseHardwareInfoProvider implements ResponseProvider {
     private HostGroupService hostGroupService;
 
     @Inject
-    private ConverterUtil converterUtil;
+    private TemplateToInstanceTemplateV4ResponseConverter templateToInstanceTemplateV4ResponseConverter;
 
     @Override
     public StackV4Response providerEntriesToStackResponse(Stack stack, StackV4Response stackResponse) {
@@ -83,7 +82,7 @@ public class StackResponseHardwareInfoProvider implements ResponseProvider {
 
             if (stack.getCluster() != null) {
                 if (template != null) {
-                    hardwareInfoResponse.setTemplate(converterUtil.convert(template, InstanceTemplateV4Response.class));
+                    hardwareInfoResponse.setTemplate(templateToInstanceTemplateV4ResponseConverter.convert(template));
                 }
             }
 

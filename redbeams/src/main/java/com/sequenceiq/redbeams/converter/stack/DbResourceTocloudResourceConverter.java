@@ -4,12 +4,11 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.redbeams.domain.stack.DBResource;
 
 @Component
-public class DbResourceTocloudResourceConverter  extends AbstractConversionServiceAwareConverter<DBResource, CloudResource> {
-    @Override
+public class DbResourceTocloudResourceConverter {
+
     public CloudResource convert(DBResource source) {
         return new Builder()
                 .type(source.getResourceType())

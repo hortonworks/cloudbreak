@@ -4,7 +4,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Response;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.structuredevent.event.LdapNotificationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.NotificationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.legacy.OperationDetails;
@@ -12,10 +11,8 @@ import com.sequenceiq.cloudbreak.structuredevent.event.RdsNotificationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEvent;
 
 @Component
-public class StructuredNotificationEventToCloudbreakEventV4ResponseConverter
-        extends AbstractConversionServiceAwareConverter<StructuredNotificationEvent, CloudbreakEventV4Response> {
+public class StructuredNotificationEventToCloudbreakEventV4ResponseConverter {
 
-    @Override
     public CloudbreakEventV4Response convert(StructuredNotificationEvent source) {
         CloudbreakEventV4Response cloudbreakEvent = new CloudbreakEventV4Response();
         if (source.getNotificationDetails() != null) {

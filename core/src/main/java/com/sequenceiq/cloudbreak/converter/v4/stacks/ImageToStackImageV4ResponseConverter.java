@@ -10,7 +10,6 @@ import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.StackImageV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
@@ -19,7 +18,7 @@ import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLoca
 import com.sequenceiq.cloudbreak.workspace.model.User;
 
 @Component
-public class ImageToStackImageV4ResponseConverter extends AbstractConversionServiceAwareConverter<Image, StackImageV4Response> {
+public class ImageToStackImageV4ResponseConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageToStackImageV4ResponseConverter.class);
 
@@ -35,7 +34,6 @@ public class ImageToStackImageV4ResponseConverter extends AbstractConversionServ
     @Inject
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
-    @Override
     public StackImageV4Response convert(Image source) {
         StackImageV4Response image = new StackImageV4Response();
         image.setName(source.getImageName());

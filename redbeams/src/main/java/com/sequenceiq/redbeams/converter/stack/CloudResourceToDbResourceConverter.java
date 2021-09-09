@@ -5,15 +5,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.redbeams.domain.stack.DBResource;
 
 @Component
-public class CloudResourceToDbResourceConverter extends AbstractConversionServiceAwareConverter<CloudResource, DBResource> {
+public class CloudResourceToDbResourceConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudResourceToDbResourceConverter.class);
 
-    @Override
     public DBResource convert(CloudResource source) {
         DBResource dbResource = new DBResource();
         dbResource.setResourceName(source.getName());

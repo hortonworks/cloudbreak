@@ -24,10 +24,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.requests.Cluste
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.FeatureState;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.clustertemplate.ClusterTemplateTestUtil;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.StackV4RequestToStackConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
@@ -44,9 +44,6 @@ import com.sequenceiq.distrox.v1.distrox.converter.DistroXV1RequestToStackV4Requ
 class ClusterTemplateV4RequestToClusterTemplateConverterTest {
 
     private static final Long TEST_WORKSPACE_ID = 1L;
-
-    @Mock
-    private ConverterUtil converterUtil;
 
     @Mock
     private WorkspaceService workspaceService;
@@ -77,6 +74,9 @@ class ClusterTemplateV4RequestToClusterTemplateConverterTest {
     @Mock
     private StackV4Request testStackV4Request;
 
+    @Mock
+    private StackV4RequestToStackConverter stackV4RequestToStackConverter;
+
     private Stack testStack;
 
     @BeforeEach
@@ -84,14 +84,19 @@ class ClusterTemplateV4RequestToClusterTemplateConverterTest {
         testStack = createStack();
 
         MockitoAnnotations.openMocks(this);
-        underTest = new ClusterTemplateV4RequestToClusterTemplateConverter(converterUtil, workspaceService, userService, restRequestThreadLocalService,
-                credentialClientService, stackV4RequestConverter);
+        underTest = new ClusterTemplateV4RequestToClusterTemplateConverter(
+                stackV4RequestToStackConverter,
+                workspaceService,
+                userService,
+                restRequestThreadLocalService,
+                credentialClientService,
+                stackV4RequestConverter);
         when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(testCloudbreakUser);
         when(userService.getOrCreate(testCloudbreakUser)).thenReturn(testUser);
         when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(TEST_WORKSPACE_ID);
         when(workspaceService.get(TEST_WORKSPACE_ID, testUser)).thenReturn(testWorkspace);
         when(stackV4RequestConverter.convert(any(DistroXV1Request.class))).thenReturn(testStackV4Request);
-        when(converterUtil.convert(testStackV4Request, Stack.class)).thenReturn(testStack);
+        when(stackV4RequestToStackConverter.convert(testStackV4Request)).thenReturn(testStack);
     }
 
     @Test
@@ -191,7 +196,7 @@ class ClusterTemplateV4RequestToClusterTemplateConverterTest {
     void testWhenClusterInStackIsNullThenIllegalStateExceptionComes() {
         Stack invalidStack = createStack();
         invalidStack.setCluster(null);
-        when(converterUtil.convert(testStackV4Request, Stack.class)).thenReturn(invalidStack);
+        when(stackV4RequestToStackConverter.convert(testStackV4Request)).thenReturn(invalidStack);
 
         assertThrows(IllegalStateException.class, () -> underTest.convert(ClusterTemplateTestUtil.createClusterTemplateV4RequestForAws()));
     }
@@ -200,7 +205,7 @@ class ClusterTemplateV4RequestToClusterTemplateConverterTest {
     void testWhenBlueprintInClusterIsNullThenIllegalStateExceptionComes() {
         Stack invalidStack = createStack();
         invalidStack.getCluster().setBlueprint(null);
-        when(converterUtil.convert(testStackV4Request, Stack.class)).thenReturn(invalidStack);
+        when(stackV4RequestToStackConverter.convert(testStackV4Request)).thenReturn(invalidStack);
 
         assertThrows(IllegalStateException.class, () -> underTest.convert(ClusterTemplateTestUtil.createClusterTemplateV4RequestForAws()));
     }

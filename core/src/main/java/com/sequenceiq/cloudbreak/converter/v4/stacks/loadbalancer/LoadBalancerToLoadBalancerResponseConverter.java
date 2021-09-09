@@ -20,7 +20,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.loadbalancer.Gc
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.loadbalancer.LoadBalancerResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.loadbalancer.TargetGroupResponse;
 import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
@@ -40,7 +39,7 @@ import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.TargetGroupPersistenceService;
 
 @Component
-public class LoadBalancerToLoadBalancerResponseConverter extends AbstractConversionServiceAwareConverter<LoadBalancer, LoadBalancerResponse> {
+public class LoadBalancerToLoadBalancerResponseConverter {
 
     @Inject
     private TargetGroupPersistenceService targetGroupService;
@@ -54,7 +53,6 @@ public class LoadBalancerToLoadBalancerResponseConverter extends AbstractConvers
     @Inject
     private LoadBalancerConfigService loadBalancerConfigService;
 
-    @Override
     public LoadBalancerResponse convert(LoadBalancer source) {
         LoadBalancerResponse response = new LoadBalancerResponse();
         response.setIp(source.getIp());

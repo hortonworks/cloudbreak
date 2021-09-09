@@ -3,19 +3,21 @@ package com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.clouderamanager;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerRepositoryV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ClouderaManagerInfoV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.component.RepositoryDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.RepositoryInfo;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 
 @Component
-public class RepositoryInfoToClouderaManagerInfoV4ResponseConverter
-        extends AbstractConversionServiceAwareConverter<RepositoryInfo, ClouderaManagerInfoV4Response> {
+public class RepositoryInfoToClouderaManagerInfoV4ResponseConverter {
 
-    @Override
+    @Inject
+    private RepoDetailsToClouderaManagerRepositoryV4ResponseConverter repoDetailsToClouderaManagerRepositoryV4ResponseConverter;
+
     public ClouderaManagerInfoV4Response convert(RepositoryInfo source) {
         ClouderaManagerInfoV4Response cmInfoJson = new ClouderaManagerInfoV4Response();
         cmInfoJson.setVersion(source.getVersion());
@@ -29,7 +31,8 @@ public class RepositoryInfoToClouderaManagerInfoV4ResponseConverter
         }
 
         Map<String, ClouderaManagerRepositoryV4Response> ret = new HashMap<>();
-        map.forEach((key, value) -> ret.put(key, getConversionService().convert(value, ClouderaManagerRepositoryV4Response.class)));
+        map.forEach((key, value) -> ret.put(key, repoDetailsToClouderaManagerRepositoryV4ResponseConverter
+                .convert(value)));
         return ret;
     }
 }

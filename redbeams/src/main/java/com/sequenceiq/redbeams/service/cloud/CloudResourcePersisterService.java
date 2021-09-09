@@ -8,13 +8,12 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.notification.model.ResourceNotification;
 import com.sequenceiq.cloudbreak.cloud.service.Persister;
+import com.sequenceiq.redbeams.converter.stack.CloudResourceToDbResourceConverter;
 import com.sequenceiq.redbeams.domain.stack.DBResource;
 import com.sequenceiq.redbeams.service.stack.DBResourceService;
 import com.sequenceiq.redbeams.service.stack.DBStackService;
@@ -25,21 +24,20 @@ public class CloudResourcePersisterService implements Persister<ResourceNotifica
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudResourcePersisterService.class);
 
     @Inject
-    @Qualifier("conversionService")
-    private ConversionService conversionService;
-
-    @Inject
     private DBResourceService dbResourceService;
 
     @Inject
     private DBStackService dbStackService;
+
+    @Inject
+    private CloudResourceToDbResourceConverter cloudResourceToDbResourceConverter;
 
     @Override
     public ResourceNotification persist(ResourceNotification notification) {
         LOGGER.debug("DBResource allocation notification received: {}", notification);
         Long dbStackId = notification.getCloudContext().getId();
         CloudResource cloudResource = notification.getCloudResource();
-        DBResource resource = conversionService.convert(cloudResource, DBResource.class);
+        DBResource resource = cloudResourceToDbResourceConverter.convert(cloudResource);
         Optional<DBResource> persistedResource = dbResourceService.findByStackAndNameAndType(dbStackId, cloudResource.getName(), cloudResource.getType());
         if (persistedResource.isPresent()) {
             LOGGER.debug("Trying to persist a resource (name: {}, type: {}, stackId: {}) that is already persisted, skipping..",
@@ -58,7 +56,7 @@ public class CloudResourcePersisterService implements Persister<ResourceNotifica
         CloudResource cloudResource = notification.getCloudResource();
         DBResource persistedResource = dbResourceService.findByStackAndNameAndType(dbStackId, cloudResource.getName(), cloudResource.getType())
                 .orElseThrow(notFound("dbResource", cloudResource.getName()));
-        DBResource resource = conversionService.convert(cloudResource, DBResource.class);
+        DBResource resource = cloudResourceToDbResourceConverter.convert(cloudResource);
         updateWithPersistedFields(resource, persistedResource);
         resource.setDbStack(dbStackService.getById(dbStackId));
         dbResourceService.save(resource);

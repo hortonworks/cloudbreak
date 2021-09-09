@@ -44,7 +44,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -68,7 +67,10 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRu
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.controller.validation.network.NetworkConfigurationValidator;
+import com.sequenceiq.cloudbreak.converter.stack.AutoscaleStackToAutoscaleStackResponseJsonConverter;
 import com.sequenceiq.cloudbreak.converter.stack.StackIdViewToStackResponseConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.StackToStackV4ResponseConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.cli.StackToStackV4RequestConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerOrchestratorResolver;
@@ -186,9 +188,6 @@ public class StackService implements ResourceIdProvider, ResourcePropertyProvide
     private StackRepository stackRepository;
 
     @Inject
-    private ConverterUtil converterUtil;
-
-    @Inject
     private ImageService imageService;
 
     @Inject
@@ -224,6 +223,15 @@ public class StackService implements ResourceIdProvider, ResourcePropertyProvide
     @Inject
     private RegionAwareCrnGenerator regionAwareCrnGenerator;
 
+    @Inject
+    private StackToStackV4ResponseConverter stackToStackV4ResponseConverter;
+
+    @Inject
+    private StackToStackV4RequestConverter stackToStackV4RequestConverter;
+
+    @Inject
+    private AutoscaleStackToAutoscaleStackResponseJsonConverter autoscaleStackToAutoscaleStackResponseJsonConverter;
+
     @Value("${cb.nginx.port}")
     private Integer nginxPort;
 
@@ -244,7 +252,7 @@ public class StackService implements ResourceIdProvider, ResourcePropertyProvide
         try {
             return transactionService.required(() -> {
                 Stack stack = getByIdWithLists(id);
-                StackV4Response stackResponse = converterUtil.convert(stack, StackV4Response.class);
+                StackV4Response stackResponse = stackToStackV4ResponseConverter.convert(stack);
                 stackResponse = stackResponseDecorator.decorate(stackResponse, stack, entry);
                 return stackResponse;
             });
@@ -257,7 +265,7 @@ public class StackService implements ResourceIdProvider, ResourcePropertyProvide
         try {
             return transactionService.required(() -> {
                 Stack stack = getByCrnWithLists(crn);
-                StackV4Response stackResponse = converterUtil.convert(stack, StackV4Response.class);
+                StackV4Response stackResponse = stackToStackV4ResponseConverter.convert(stack);
                 stackResponse = stackResponseDecorator.decorate(stackResponse, stack, entry);
                 return stackResponse;
             });
@@ -325,7 +333,9 @@ public class StackService implements ResourceIdProvider, ResourcePropertyProvide
                         .filter(stack -> !DELETE_IN_PROGRESS.equals(stack.getStackStatus()))
                         .collect(Collectors.toSet());
 
-                return converterUtil.convertAllAsSet(aliveNotUnderDeletion, AutoscaleStackV4Response.class);
+                return aliveNotUnderDeletion.stream()
+                        .map(a -> autoscaleStackToAutoscaleStackResponseJsonConverter.convert(a))
+                        .collect(Collectors.toSet());
             });
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
@@ -428,10 +438,6 @@ public class StackService implements ResourceIdProvider, ResourcePropertyProvide
         return stackRepository.findByEnvironmentCrnAndStackType(environmentCrn, stackType);
     }
 
-    public Long countByEnvironmentCrnAndStackType(String environmentCrn, StackType stackType) {
-        return stackRepository.countByEnvironmentCrnAndStackType(environmentCrn, stackType);
-    }
-
     public StackV4Response getByNameInWorkspaceWithEntries(String name, Long workspaceId, Set<String> entries, User user, StackType stackType) {
         try {
             return transactionService.required(() -> {
@@ -441,7 +447,7 @@ public class StackService implements ResourceIdProvider, ResourcePropertyProvide
                 if (stack.isEmpty()) {
                     throw new NotFoundException(format(STACK_NOT_FOUND_BY_NAME_EXCEPTION_MESSAGE, name));
                 }
-                StackV4Response stackResponse = converterUtil.convert(stack.get(), StackV4Response.class);
+                StackV4Response stackResponse = stackToStackV4ResponseConverter.convert(stack.get());
                 stackResponse = stackResponseDecorator.decorate(stackResponse, stack.get(), entries);
                 return stackResponse;
             });
@@ -459,7 +465,7 @@ public class StackService implements ResourceIdProvider, ResourcePropertyProvide
                 if (stack.isEmpty()) {
                     throw new NotFoundException(format("Stack not found by crn '%s'", crn));
                 }
-                StackV4Response stackResponse = converterUtil.convert(stack.get(), StackV4Response.class);
+                StackV4Response stackResponse = stackToStackV4ResponseConverter.convert(stack.get());
                 stackResponse = stackResponseDecorator.decorate(stackResponse, stack.get(), entries);
                 return stackResponse;
             });
@@ -476,7 +482,7 @@ public class StackService implements ResourceIdProvider, ResourcePropertyProvide
                 if (stack.isEmpty()) {
                     throw new NotFoundException(format(STACK_NOT_FOUND_BY_NAME_OR_CRN_EXCEPTION_MESSAGE, nameOrCrn));
                 }
-                StackV4Request request = converterUtil.convert(stack.get(), StackV4Request.class);
+                StackV4Request request = stackToStackV4RequestConverter.convert(stack.get());
                 request.getCluster().setName(null);
                 request.setName(stack.get().getName());
                 return request;
@@ -520,10 +526,6 @@ public class StackService implements ResourceIdProvider, ResourcePropertyProvide
 
     public Set<String> getResourceCrnsByNameListInTenant(List<String> names, String tenantName) {
         return stackViewService.findResourceCrnsByNameListAndTenant(names, tenantName);
-    }
-
-    public Set<String> getResourceCrnsByTenant(String tenantName) {
-        return stackViewService.findResourceCrnsByTenant(tenantName);
     }
 
     public Optional<Stack> getByNameInWorkspaceWithLists(String name, Long workspaceId) {

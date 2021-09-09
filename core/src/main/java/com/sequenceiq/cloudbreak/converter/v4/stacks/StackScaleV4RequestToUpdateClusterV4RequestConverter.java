@@ -5,7 +5,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Requ
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintTextProcessorFactory;
@@ -16,7 +15,7 @@ import org.springframework.stereotype.Component;
 import javax.inject.Inject;
 
 @Component
-public class StackScaleV4RequestToUpdateClusterV4RequestConverter extends AbstractConversionServiceAwareConverter<StackScaleV4Request, UpdateClusterV4Request> {
+public class StackScaleV4RequestToUpdateClusterV4RequestConverter {
 
     @Inject
     private StackService stackService;
@@ -27,7 +26,6 @@ public class StackScaleV4RequestToUpdateClusterV4RequestConverter extends Abstra
     @Inject
     private TransactionService transactionService;
 
-    @Override
     public UpdateClusterV4Request convert(StackScaleV4Request source) {
         try {
             return transactionService.required(() -> {

@@ -19,7 +19,6 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.core.convert.ConversionService;
 
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -63,9 +62,6 @@ public class OrchestratorRecipeExecutorTest {
 
     @Mock
     private CentralRecipeUpdater centralRecipeUpdater;
-
-    @Mock
-    private ConversionService conversionService;
 
     @InjectMocks
     private OrchestratorRecipeExecutor underTest;

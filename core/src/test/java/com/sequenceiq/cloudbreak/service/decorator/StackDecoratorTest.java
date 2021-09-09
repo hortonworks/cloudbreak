@@ -4,7 +4,6 @@ import static com.sequenceiq.common.api.type.InstanceGroupType.GATEWAY;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -30,7 +29,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.sharedservice.SharedServiceV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.EnvironmentSettingsV4Request;
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
@@ -42,20 +40,21 @@ import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrators;
 import com.sequenceiq.cloudbreak.cloud.model.SpecialParameters;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.InstanceGroupToInstanceGroupParameterRequestConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.structuredevent.LegacyRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
 import com.sequenceiq.cloudbreak.service.stack.SharedServiceValidator;
+import com.sequenceiq.cloudbreak.structuredevent.LegacyRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
@@ -85,9 +84,6 @@ public class StackDecoratorTest {
 
     @Mock
     private CredentialClientService credentialClientService;
-
-    @Mock
-    private ConverterUtil converterUtil;
 
     @Mock
     private CloudParameterService cloudParameterService;
@@ -157,6 +153,9 @@ public class StackDecoratorTest {
     @Mock
     private CredentialToExtendedCloudCredentialConverter extendedCloudCredentialConverter;
 
+    @Mock
+    private InstanceGroupToInstanceGroupParameterRequestConverter instanceGroupToInstanceGroupParameterRequestConverter;
+
     @Before
     public void setUp() {
         String credentialName = "credentialName";
@@ -177,7 +176,7 @@ public class StackDecoratorTest {
         when(cloudParameterService.getOrchestrators()).thenReturn(platformOrchestrators);
         when(platformOrchestrators.getDefaults()).thenReturn(defaultOrchestrator);
         when(defaultOrchestrator.get(any(Platform.class))).thenReturn(orchestrator);
-        when(converterUtil.convert(any(InstanceGroup.class), eq(InstanceGroupParameterRequest.class))).thenReturn(instanceGroupParameterRequest);
+        when(instanceGroupToInstanceGroupParameterRequestConverter.convert(any(InstanceGroup.class))).thenReturn(instanceGroupParameterRequest);
         when(request.getCluster()).thenReturn(clusterRequest);
         when(environmentSettingsRequest.getCredentialName()).thenReturn(credentialName);
         when(sharedServiceValidator.checkSharedServiceStackRequirements(any(StackV4Request.class), any(Workspace.class))).thenReturn(validationResult);

@@ -11,15 +11,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.core.convert.ConversionService;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
-import com.sequenceiq.common.api.type.CommonStatus;
-import com.sequenceiq.common.api.type.ResourceType;
+import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.repository.ResourceRepository;
+import com.sequenceiq.common.api.type.CommonStatus;
+import com.sequenceiq.common.api.type.ResourceType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ResourceServiceTest {
@@ -31,7 +31,7 @@ public class ResourceServiceTest {
     private ResourceRepository resourceRepository;
 
     @Mock
-    private ConversionService conversionService;
+    private ResourceToCloudResourceConverter cloudResourceToResourceConverter;
 
     @Test
     public void testGetAllAsCloudResourceStatusWhenNoResource() {
@@ -56,7 +56,7 @@ public class ResourceServiceTest {
                 .build();
 
         Mockito.when(resourceRepository.findAllByStackId(1L)).thenReturn(resources);
-        Mockito.when(conversionService.convert(resource, CloudResource.class)).thenReturn(cloudResource);
+        Mockito.when(cloudResourceToResourceConverter.convert(resource)).thenReturn(cloudResource);
 
         List<CloudResourceStatus> actual = underTest.getAllAsCloudResourceStatus(1L);
 

@@ -10,13 +10,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.TagSpecific
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.TagSpecification;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 
 @Component
-public class TagSpecificationsToTagSpecificationsV4ResponseConverter
-        extends AbstractConversionServiceAwareConverter<Map<Platform, PlatformParameters>, TagSpecificationsV4Response> {
+public class TagSpecificationsToTagSpecificationsV4ResponseConverter {
 
-    @Override
     public TagSpecificationsV4Response convert(Map<Platform, PlatformParameters> source) {
         TagSpecificationsV4Response json = new TagSpecificationsV4Response();
         Map<String, Map<String, Object>> specifications = new HashMap<>();

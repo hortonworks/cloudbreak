@@ -247,7 +247,7 @@ public class BlueprintServiceTest {
 
         BadRequestException exception = Assertions.assertThrows(BadRequestException.class, () -> underTest.delete(blueprint));
         assertEquals("There is a cluster ['ClusterDefinition'] which uses cluster template 'name'. "
-                + "Please remove this cluster before deleting the cluster template.",
+                        + "Please remove this cluster before deleting the cluster template.",
                 exception.getMessage());
     }
 
@@ -266,7 +266,7 @@ public class BlueprintServiceTest {
 
         BadRequestException exception = Assertions.assertThrows(BadRequestException.class, () -> underTest.delete(blueprint));
         assertEquals("There is a cluster ['ClusterDefinition'] which uses cluster template 'name'. "
-                + "Please remove this cluster before deleting the cluster template.",
+                        + "Please remove this cluster before deleting the cluster template.",
                 exception.getMessage());
     }
 
@@ -295,12 +295,12 @@ public class BlueprintServiceTest {
     @Test
     public void testGetByNameForWorkspaceAndLoadDefaultsIfNecessaryWhenFound() {
         Blueprint blueprint1 = getBlueprint("One", DEFAULT);
-        when(blueprintRepository.findAllByNotDeletedInWorkspace(1L)).thenReturn(Set.of(blueprint1));
+        when(blueprintRepository.findByNameAndWorkspaceId("One", 1L)).thenReturn(Optional.of(blueprint1));
 
         Blueprint foundBlueprint = underTest.getByNameForWorkspaceAndLoadDefaultsIfNecessary("One", getWorkspace());
 
         assertEquals("One", foundBlueprint.getName());
-        verify(blueprintRepository).findAllByNotDeletedInWorkspace(1L);
+        verify(blueprintRepository).findByNameAndWorkspaceId("One", 1L);
         verify(blueprintRepository, never()).findAllByWorkspaceIdAndStatusIn(anyLong(), any());
         verify(blueprintLoaderService, never()).isAddingDefaultBlueprintsNecessaryForTheUser(any());
     }
@@ -309,7 +309,7 @@ public class BlueprintServiceTest {
     public void testGetByNameForWorkspaceAndLoadDefaultsIfNecessaryWhenLoaded() {
         Blueprint blueprint1 = getBlueprint("One", DEFAULT);
         Blueprint blueprint2 = getBlueprint("Two", DEFAULT);
-        when(blueprintRepository.findAllByNotDeletedInWorkspace(1L)).thenReturn(Set.of(blueprint1));
+        when(blueprintRepository.findByNameAndWorkspaceId("Two", 1L)).thenReturn(Optional.empty());
         when(blueprintRepository.findAllByWorkspaceIdAndStatusIn(anyLong(), any())).thenReturn(Set.of(blueprint1));
         when(blueprintLoaderService.isAddingDefaultBlueprintsNecessaryForTheUser(any())).thenReturn(true);
         when(blueprintLoaderService.loadBlueprintsForTheWorkspace(any(), any(), any())).thenReturn(Set.of(blueprint1, blueprint2));
@@ -317,7 +317,7 @@ public class BlueprintServiceTest {
         Blueprint foundBlueprint = underTest.getByNameForWorkspaceAndLoadDefaultsIfNecessary("Two", getWorkspace());
 
         assertEquals("Two", foundBlueprint.getName());
-        verify(blueprintRepository).findAllByNotDeletedInWorkspace(1L);
+        verify(blueprintRepository).findByNameAndWorkspaceId("Two", 1L);
         verify(blueprintRepository).findAllByWorkspaceIdAndStatusIn(anyLong(), any());
         verify(blueprintLoaderService).isAddingDefaultBlueprintsNecessaryForTheUser(any());
         verify(blueprintLoaderService).loadBlueprintsForTheWorkspace(any(), any(), any());
@@ -327,7 +327,7 @@ public class BlueprintServiceTest {
     public void testGetByNameForWorkspaceAndLoadDefaultsIfNecessaryWhenNotFound() {
         Blueprint blueprint1 = getBlueprint("One", DEFAULT);
         Blueprint blueprint2 = getBlueprint("Two", DEFAULT);
-        when(blueprintRepository.findAllByNotDeletedInWorkspace(1L)).thenReturn(Set.of(blueprint1));
+        when(blueprintRepository.findByNameAndWorkspaceId("Three", 1L)).thenReturn(Optional.empty());
         when(blueprintRepository.findAllByWorkspaceIdAndStatusIn(anyLong(), any())).thenReturn(Set.of(blueprint1));
         when(blueprintLoaderService.isAddingDefaultBlueprintsNecessaryForTheUser(any())).thenReturn(true);
         when(blueprintLoaderService.loadBlueprintsForTheWorkspace(any(), any(), any())).thenReturn(Set.of(blueprint1, blueprint2));
@@ -338,7 +338,7 @@ public class BlueprintServiceTest {
             assertThat(e.getMessage(), containsString("Three"));
         }
 
-        verify(blueprintRepository).findAllByNotDeletedInWorkspace(1L);
+        verify(blueprintRepository).findByNameAndWorkspaceId("Three", 1L);
         verify(blueprintRepository).findAllByWorkspaceIdAndStatusIn(anyLong(), any());
         verify(blueprintLoaderService).isAddingDefaultBlueprintsNecessaryForTheUser(any());
         verify(blueprintLoaderService).loadBlueprintsForTheWorkspace(any(), any(), any());

@@ -6,15 +6,12 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTables;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformNoSqlTableResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformNoSqlTablesResponse;
 
 @Component
-public class CloudNoSqlTablesToPlatformNoSqlTablesV1ResponseConverter
-        extends AbstractConversionServiceAwareConverter<CloudNoSqlTables, PlatformNoSqlTablesResponse> {
+public class CloudNoSqlTablesToPlatformNoSqlTablesV1ResponseConverter {
 
-    @Override
     public PlatformNoSqlTablesResponse convert(CloudNoSqlTables source) {
         List<PlatformNoSqlTableResponse> result = source.getCloudNoSqlTables()
                 .stream()

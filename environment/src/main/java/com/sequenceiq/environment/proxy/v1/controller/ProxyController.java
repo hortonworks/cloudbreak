@@ -1,8 +1,5 @@
 package com.sequenceiq.environment.proxy.v1.controller;
 
-import static com.sequenceiq.environment.TempConstants.TEMP_ACCOUNT_ID;
-
-import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -25,7 +22,6 @@ import com.sequenceiq.environment.api.v1.proxy.model.response.ProxyResponse;
 import com.sequenceiq.environment.api.v1.proxy.model.response.ProxyResponses;
 import com.sequenceiq.environment.proxy.domain.ProxyConfig;
 import com.sequenceiq.environment.proxy.service.ProxyConfigService;
-import com.sequenceiq.environment.proxy.v1.converter.ProxyConfigToProxyRequestConverter;
 import com.sequenceiq.environment.proxy.v1.converter.ProxyConfigToProxyResponseConverter;
 import com.sequenceiq.environment.proxy.v1.converter.ProxyRequestToProxyConfigConverter;
 import com.sequenceiq.notification.NotificationController;
@@ -36,18 +32,14 @@ public class ProxyController extends NotificationController implements ProxyEndp
 
     private final ProxyConfigService proxyConfigService;
 
-    private final ProxyConfigToProxyRequestConverter proxyConfigToProxyRequestConverter;
-
     private final ProxyConfigToProxyResponseConverter proxyConfigToProxyResponseConverter;
 
     private final ProxyRequestToProxyConfigConverter proxyRequestToProxyConfigConverter;
 
     public ProxyController(ProxyConfigService proxyConfigService,
-            ProxyConfigToProxyRequestConverter proxyConfigToProxyRequestConverter,
             ProxyConfigToProxyResponseConverter proxyConfigToProxyResponseConverter,
             ProxyRequestToProxyConfigConverter proxyRequestToProxyConfigConverter) {
         this.proxyConfigService = proxyConfigService;
-        this.proxyConfigToProxyRequestConverter = proxyConfigToProxyRequestConverter;
         this.proxyConfigToProxyResponseConverter = proxyConfigToProxyResponseConverter;
         this.proxyRequestToProxyConfigConverter = proxyRequestToProxyConfigConverter;
     }
@@ -57,7 +49,9 @@ public class ProxyController extends NotificationController implements ProxyEndp
     public ProxyResponses list() {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         Set<ProxyConfig> listInAccount = proxyConfigService.listInAccount(accountId);
-        return new ProxyResponses(new HashSet<>(proxyConfigToProxyResponseConverter.convert(listInAccount)));
+        return new ProxyResponses(listInAccount.stream()
+                .map(proxy -> proxyConfigToProxyResponseConverter.convert(proxy))
+                .collect(Collectors.toSet()));
     }
 
     @Override
@@ -133,7 +127,6 @@ public class ProxyController extends NotificationController implements ProxyEndp
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public ProxyRequest getRequest(String name) {
-        ProxyConfig proxyConfig = proxyConfigService.getByNameForAccountId(name, TEMP_ACCOUNT_ID);
-        return proxyConfigToProxyRequestConverter.convert(proxyConfig);
+        throw new UnsupportedOperationException("not supported request");
     }
 }

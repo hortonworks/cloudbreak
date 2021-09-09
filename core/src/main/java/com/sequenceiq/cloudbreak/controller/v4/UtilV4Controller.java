@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.ws.rs.core.Response;
@@ -24,8 +25,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.SecurityRulesV4R
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackMatrixV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.SupportedExternalDatabaseServiceEntryV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.UsedImagesListV4Response;
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.converter.SupportedExternalDatabaseServiceEntryToSupportedExternalDatabaseServiceEntryResponseConverter;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.notification.NotificationSender;
 import com.sequenceiq.cloudbreak.service.StackMatrixService;
@@ -59,9 +60,6 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
     private SecurityRuleService securityRuleService;
 
     @Inject
-    private ConverterUtil converterUtil;
-
-    @Inject
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
     @Inject
@@ -69,6 +67,9 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
 
     @Inject
     private StackOperationService stackOperationService;
+
+    @Inject
+    private SupportedExternalDatabaseServiceEntryToSupportedExternalDatabaseServiceEntryResponseConverter supportedExternalDatabaseServiceEntryResponseConverter;
 
     @Inject
     private UsedImagesProvider usedImagesProvider;
@@ -112,7 +113,9 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
         DeploymentPreferencesV4Response response = new DeploymentPreferencesV4Response();
         response.setFeatureSwitchV4s(preferencesService.getFeatureSwitches());
         Set<SupportedExternalDatabaseServiceEntryV4Response> supportedExternalDatabases =
-                converterUtil.convertAllAsSet(SupportedDatabaseProvider.supportedExternalDatabases(), SupportedExternalDatabaseServiceEntryV4Response.class);
+                SupportedDatabaseProvider.supportedExternalDatabases().stream()
+                .map(s -> supportedExternalDatabaseServiceEntryResponseConverter.convert(s))
+                .collect(Collectors.toSet());
         response.setSupportedExternalDatabases(supportedExternalDatabases);
         response.setPlatformSelectionDisabled(preferencesService.isPlatformSelectionDisabled());
         response.setPlatformEnablement(preferencesService.platformEnablement());

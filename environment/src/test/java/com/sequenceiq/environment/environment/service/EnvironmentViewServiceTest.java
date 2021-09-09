@@ -19,7 +19,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
@@ -34,9 +33,6 @@ class EnvironmentViewServiceTest {
 
     @MockBean
     private EnvironmentViewRepository environmentViewRepository;
-
-    @MockBean
-    private ConversionService conversionService;
 
     @Test
     void findByNamesInAccount() {
@@ -68,12 +64,6 @@ class EnvironmentViewServiceTest {
     void findByResourceCrnsInAccountEmptyNameList() {
         assertEquals(Set.of(), environmentViewServiceUnderTest.findByResourceCrnsInAccount(Set.of(), ACCOUNT_ID),
                 "without name list the result should be empty");
-    }
-
-    @Test
-    void listByAccountId() {
-        environmentViewServiceUnderTest.listByAccountId(ACCOUNT_ID);
-        verify(environmentViewRepository).findAllByAccountId(eq(ACCOUNT_ID));
     }
 
     @Test

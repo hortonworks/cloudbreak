@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.controller.v4;
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.NAME;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
@@ -30,14 +31,16 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.RecipeV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4Responses;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeViewV4Responses;
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.authorization.RecipeFiltering;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
+import com.sequenceiq.cloudbreak.converter.v4.recipes.RecipeToRecipeV4RequestConverter;
+import com.sequenceiq.cloudbreak.converter.v4.recipes.RecipeToRecipeV4ResponseConverter;
+import com.sequenceiq.cloudbreak.converter.v4.recipes.RecipeV4RequestToRecipeConverter;
+import com.sequenceiq.cloudbreak.converter.v4.recipes.RecipeViewToRecipeV4ViewResponseConverter;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.view.RecipeView;
 import com.sequenceiq.cloudbreak.service.recipe.RecipeService;
@@ -53,26 +56,39 @@ public class RecipesV4Controller extends NotificationController implements Recip
     private RecipeService recipeService;
 
     @Inject
-    private ConverterUtil converterUtil;
-
-    @Inject
     private RecipeFiltering recipeFiltering;
 
     @Inject
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
+    @Inject
+    private RecipeViewToRecipeV4ViewResponseConverter recipeViewToRecipeV4ViewResponseConverter;
+
+    @Inject
+    private RecipeToRecipeV4ResponseConverter recipeToRecipeV4ResponseConverter;
+
+    @Inject
+    private RecipeToRecipeV4RequestConverter recipeToRecipeV4RequestConverter;
+
+    @Inject
+    private RecipeV4RequestToRecipeConverter recipeV4RequestToRecipeConverter;
+
     @Override
     @FilterListBasedOnPermissions
     public RecipeViewV4Responses list(Long workspaceId) {
         Set<RecipeView> allViewByWorkspaceId = recipeFiltering.filterRecipes(AuthorizationResourceAction.DESCRIBE_RECIPE);
-        return new RecipeViewV4Responses(converterUtil.convertAllAsSet(allViewByWorkspaceId, RecipeViewV4Response.class));
+        return new RecipeViewV4Responses(
+                allViewByWorkspaceId.stream()
+                .map(r -> recipeViewToRecipeV4ViewResponseConverter.convert(r))
+                .collect(Collectors.toSet())
+        );
     }
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_RECIPE)
     public RecipeV4Response getByName(Long workspaceId, @ResourceName String name) {
         Recipe recipe = recipeService.get(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId());
-        return converterUtil.convert(recipe, RecipeV4Response.class);
+        return recipeToRecipeV4ResponseConverter.convert(recipe);
     }
 
     @Override
@@ -85,7 +101,7 @@ public class RecipesV4Controller extends NotificationController implements Recip
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_RECIPE)
     public RecipeV4Response getByCrn(Long workspaceId, @TenantAwareParam @NotNull @ResourceCrn String crn) {
         Recipe recipe = recipeService.get(NameOrCrn.ofCrn(crn), restRequestThreadLocalService.getRequestedWorkspaceId());
-        return converterUtil.convert(recipe, RecipeV4Response.class);
+        return recipeToRecipeV4ResponseConverter.convert(recipe);
     }
 
     @Override
@@ -93,20 +109,20 @@ public class RecipesV4Controller extends NotificationController implements Recip
     public RecipeV4Response post(Long workspaceId, RecipeV4Request request) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         String creator = ThreadBasedUserCrnProvider.getUserCrn();
-        Recipe recipeToSave = converterUtil.convert(request, Recipe.class);
+        Recipe recipeToSave = recipeV4RequestToRecipeConverter.convert(request);
         Recipe recipe = recipeService.createForLoggedInUser(recipeToSave, restRequestThreadLocalService.getRequestedWorkspaceId(), accountId, creator);
         notify(ResourceEvent.RECIPE_CREATED);
-        return converterUtil.convert(recipe, RecipeV4Response.class);
+        return recipeToRecipeV4ResponseConverter.convert(recipe);
     }
 
     @Override
     @InternalOnly
     public RecipeV4Response postInternal(@AccountId String accountId, Long workspaceId, @Valid RecipeV4Request request) {
-        Recipe recipeToSave = converterUtil.convert(request, Recipe.class);
+        Recipe recipeToSave = recipeV4RequestToRecipeConverter.convert(request);
         Recipe recipe = recipeService.createWithInternalUser(recipeToSave,
                 restRequestThreadLocalService.getRequestedWorkspaceId(), accountId);
         notify(ResourceEvent.RECIPE_CREATED);
-        return converterUtil.convert(recipe, RecipeV4Response.class);
+        return recipeToRecipeV4ResponseConverter.convert(recipe);
     }
 
     @Override
@@ -114,7 +130,7 @@ public class RecipesV4Controller extends NotificationController implements Recip
     public RecipeV4Response deleteByName(Long workspaceId, @ResourceName String name) {
         Recipe deleted = recipeService.delete(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId());
         notify(ResourceEvent.RECIPE_DELETED);
-        return converterUtil.convert(deleted, RecipeV4Response.class);
+        return recipeToRecipeV4ResponseConverter.convert(deleted);
     }
 
     @Override
@@ -122,7 +138,7 @@ public class RecipesV4Controller extends NotificationController implements Recip
     public RecipeV4Response deleteByCrn(Long workspaceId, @NotNull @ResourceCrn String crn) {
         Recipe deleted = recipeService.delete(NameOrCrn.ofCrn(crn), restRequestThreadLocalService.getRequestedWorkspaceId());
         notify(ResourceEvent.RECIPE_DELETED);
-        return converterUtil.convert(deleted, RecipeV4Response.class);
+        return recipeToRecipeV4ResponseConverter.convert(deleted);
     }
 
     @Override
@@ -130,19 +146,22 @@ public class RecipesV4Controller extends NotificationController implements Recip
     public RecipeV4Responses deleteMultiple(Long workspaceId, @ResourceNameList Set<String> names) {
         Set<Recipe> deleted = recipeService.deleteMultipleByNameFromWorkspace(names, restRequestThreadLocalService.getRequestedWorkspaceId());
         notify(ResourceEvent.RECIPE_DELETED);
-        return new RecipeV4Responses(converterUtil.convertAllAsSet(deleted, RecipeV4Response.class));
+        return new RecipeV4Responses(deleted.stream()
+                .map(r -> recipeToRecipeV4ResponseConverter.convert(r))
+                .collect(Collectors.toSet())
+        );
     }
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_RECIPE)
     public RecipeV4Request getRequest(Long workspaceId, @ResourceName String name) {
         Recipe recipe = recipeService.getByNameForWorkspaceId(name, restRequestThreadLocalService.getRequestedWorkspaceId());
-        return converterUtil.convert(recipe, RecipeV4Request.class);
+        return recipeToRecipeV4RequestConverter.convert(recipe);
     }
 
     @Override
     @CheckPermissionByRequestProperty(path = "name", type = NAME, action = AuthorizationResourceAction.DESCRIBE_RECIPE)
     public CreateRecipeRequest getCreateRecipeRequestForCli(Long workspaceId, @RequestObject RecipeV4Request recipeV4Request) {
-        return converterUtil.convert(recipeV4Request, CreateRecipeRequest.class);
+        throw new UnsupportedOperationException("not supported request");
     }
 }

@@ -24,11 +24,11 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupV4Reque
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UserNamePasswordV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.CertificatesRotationV4Response;
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateValidator;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.updates.HostGroupV4RequestToHostGroupConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -54,9 +54,6 @@ import com.sequenceiq.flow.api.model.FlowIdentifier;
 @Service
 public class ClusterCommonService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterCommonService.class);
-
-    @Inject
-    private ConverterUtil converterUtil;
 
     @Inject
     private HostGroupDecorator hostGroupDecorator;
@@ -90,6 +87,9 @@ public class ClusterCommonService {
 
     @Inject
     private UpdateNodeCountValidator updateNodeCountValidator;
+
+    @Inject
+    private HostGroupV4RequestToHostGroupConverter hostGroupV4RequestToHostGroupConverter;
 
     public FlowIdentifier put(String crn, UpdateClusterV4Request updateJson) {
         Stack stack = stackService.getByCrn(crn);
@@ -149,7 +149,7 @@ public class ClusterCommonService {
     private FlowIdentifier recreateCluster(Stack stack, UpdateClusterV4Request updateCluster) throws TransactionExecutionException {
         Set<HostGroup> hostGroups = new HashSet<>();
         for (HostGroupV4Request json : updateCluster.getHostgroups()) {
-            HostGroup hostGroup = converterUtil.convert(json, HostGroup.class);
+            HostGroup hostGroup = hostGroupV4RequestToHostGroupConverter.convert(json);
             hostGroup = hostGroupDecorator.decorate(hostGroup, json, stack);
             hostGroups.add(hostGroup);
         }

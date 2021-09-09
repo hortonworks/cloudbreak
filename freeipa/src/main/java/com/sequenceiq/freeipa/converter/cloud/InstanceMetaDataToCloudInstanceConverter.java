@@ -15,7 +15,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
@@ -28,7 +27,7 @@ import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 
 @Component
-public class InstanceMetaDataToCloudInstanceConverter extends AbstractConversionServiceAwareConverter<InstanceMetaData, CloudInstance> {
+public class InstanceMetaDataToCloudInstanceConverter {
 
     @Inject
     private StackToCloudStackConverter stackToCloudStackConverter;
@@ -42,7 +41,6 @@ public class InstanceMetaDataToCloudInstanceConverter extends AbstractConversion
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
 
-    @Override
     public CloudInstance convert(InstanceMetaData metaDataEntity) {
         InstanceGroup group = metaDataEntity.getInstanceGroup();
         Optional<StackAuthenticationView> stackAuthenticationView = instanceMetaDataService

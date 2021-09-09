@@ -10,15 +10,11 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
 class InstanceGroupToInstanceGroupV4ResponseConverterTest {
-
-    @Mock
-    private ConverterUtil converterUtil;
 
     @Mock
     private ProviderParameterCalculator providerParameterCalculator;

@@ -6,7 +6,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -26,11 +25,12 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.core.convert.ConversionService;
 
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowLogResponse;
+import com.sequenceiq.flow.converter.FlowLogConverter;
+import com.sequenceiq.flow.converter.FlowProgressResponseConverter;
 import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.domain.FlowChainLog;
 import com.sequenceiq.flow.domain.FlowLog;
@@ -65,17 +65,20 @@ public class FlowServiceTest {
     private FlowChainLogService flowChainLogService;
 
     @Mock
-    private ConversionService conversionService;
+    private Set<String> failHandledEvents;
 
     @Mock
-    private Set<String> failHandledEvents;
+    private FlowProgressResponseConverter flowProgressResponseConverter;
+
+    @Mock
+    private FlowLogConverter flowLogConverter;
 
     @InjectMocks
     private FlowService underTest;
 
     @Before
     public void setup() {
-        when(conversionService.convert(any(), eq(FlowLogResponse.class))).thenReturn(new FlowLogResponse());
+        when(flowLogConverter.convert(any())).thenReturn(new FlowLogResponse());
         lenient().when(failHandledEvents.contains(FAIL_HANDLED_NEXT_EVENT)).thenReturn(true);
     }
 
@@ -86,7 +89,7 @@ public class FlowServiceTest {
         underTest.getLastFlowById(FLOW_ID);
 
         verify(flowLogDBService).getLastFlowLog(anyString());
-        verify(conversionService).convert(any(), eq(FlowLogResponse.class));
+        verify(flowLogConverter).convert(any());
     }
 
     @Test
@@ -99,7 +102,6 @@ public class FlowServiceTest {
         underTest.getLastFlowById(FLOW_ID);
 
         verify(flowLogDBService).getLastFlowLog(anyString());
-        verifyZeroInteractions(conversionService);
     }
 
     @Test
@@ -109,7 +111,6 @@ public class FlowServiceTest {
         assertEquals(0, underTest.getFlowLogsByFlowId(FLOW_ID).size());
 
         verify(flowLogDBService).findAllByFlowIdOrderByCreatedDesc(anyString());
-        verifyZeroInteractions(conversionService);
     }
 
     @Test
@@ -119,7 +120,7 @@ public class FlowServiceTest {
         assertEquals(1, underTest.getFlowLogsByFlowId(FLOW_ID).size());
 
         verify(flowLogDBService).findAllByFlowIdOrderByCreatedDesc(anyString());
-        verify(conversionService).convert(any(), eq(FlowLogResponse.class));
+        verify(flowLogConverter).convert(any());
     }
 
     @Test
@@ -135,7 +136,7 @@ public class FlowServiceTest {
         underTest.getLastFlowByResourceName("myLittleSdx");
 
         verify(flowLogDBService).getLastFlowLogByResourceCrnOrName(anyString());
-        verify(conversionService).convert(any(), eq(FlowLogResponse.class));
+        verify(flowLogConverter).convert(any());
     }
 
     @Test
@@ -151,7 +152,7 @@ public class FlowServiceTest {
         underTest.getFlowLogsByResourceName("myLittleSdx");
 
         verify(flowLogDBService).getFlowLogsByResourceCrnOrName(anyString());
-        verify(conversionService).convert(any(), eq(FlowLogResponse.class));
+        verify(flowLogConverter).convert(any());
     }
 
     @Test
@@ -167,7 +168,7 @@ public class FlowServiceTest {
         underTest.getLastFlowByResourceCrn(Crn.fromString(STACK_CRN).toString());
 
         verify(flowLogDBService).getLastFlowLogByResourceCrnOrName(anyString());
-        verify(conversionService).convert(any(), eq(FlowLogResponse.class));
+        verify(flowLogConverter).convert(any());
     }
 
     @Test
@@ -183,7 +184,7 @@ public class FlowServiceTest {
         underTest.getFlowLogsByResourceCrn(Crn.fromString(STACK_CRN).toString());
 
         verify(flowLogDBService).getFlowLogsByResourceCrnOrName(anyString());
-        verify(conversionService).convert(any(), eq(FlowLogResponse.class));
+        verify(flowLogConverter).convert(any());
     }
 
     @Test
@@ -237,7 +238,7 @@ public class FlowServiceTest {
         assertFalse(flowCheckResponse.getHasActiveFlow());
         assertEquals(FLOW_CHAIN_ID, flowCheckResponse.getFlowChainId());
         verify(flowChainLogService).findByFlowChainIdOrderByCreatedDesc(anyString());
-        verifyZeroInteractions(flowLogDBService, conversionService);
+        verifyZeroInteractions(flowLogDBService);
     }
 
     @Test

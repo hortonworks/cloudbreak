@@ -10,14 +10,12 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudSshKey;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSshKeys;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformSshKeyResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformSshKeysResponse;
 
 @Component
-public class CloudSshKeysToPlatformSshKeysV1ResponseConverter extends AbstractConversionServiceAwareConverter<CloudSshKeys, PlatformSshKeysResponse> {
+public class CloudSshKeysToPlatformSshKeysV1ResponseConverter {
 
-    @Override
     public PlatformSshKeysResponse convert(CloudSshKeys source) {
         Map<String, Set<PlatformSshKeyResponse>> result = new HashMap<>();
         for (Entry<String, Set<CloudSshKey>> entry : source.getCloudSshKeysResponses().entrySet()) {

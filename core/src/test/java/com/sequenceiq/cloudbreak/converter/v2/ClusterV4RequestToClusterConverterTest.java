@@ -30,7 +30,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.core.convert.ConversionService;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
@@ -49,6 +48,7 @@ import com.sequenceiq.cloudbreak.converter.util.CloudStorageValidationUtil;
 import com.sequenceiq.cloudbreak.converter.util.GatewayConvertUtil;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.CloudStorageConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.ClusterV4RequestToClusterConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.gateway.GatewayV4RequestToGatewayConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -88,13 +88,13 @@ public class ClusterV4RequestToClusterConverterTest {
     private GatewayConvertUtil gatewayConvertUtil;
 
     @Mock
-    private ConversionService conversionService;
-
-    @Mock
     private CloudStorageConverter cloudStorageConverter;
 
     @Mock
     private EntitlementService entitlementService;
+
+    @Mock
+    private GatewayV4RequestToGatewayConverter gatewayV4RequestToGatewayConverter;
 
     @Spy
     @SuppressFBWarnings(value = "UrF", justification = "This gets injected")
@@ -237,13 +237,13 @@ public class ClusterV4RequestToClusterConverterTest {
         when(blueprintService.getByNameForWorkspaceAndLoadDefaultsIfNecessary(eq(BLUEPRINT), any())).thenReturn(blueprint);
         Gateway gateway = new Gateway();
 
-        when(conversionService.convert(gatewayJson, Gateway.class)).thenReturn(gateway);
+        when(gatewayV4RequestToGatewayConverter.convert(gatewayJson)).thenReturn(gateway);
 
         Cluster actual = underTest.convert(source);
 
         assertThat(actual.getGateway(), is(gateway));
 
-        verify(conversionService, times(1)).convert(gatewayJson, Gateway.class);
+        verify(gatewayV4RequestToGatewayConverter, times(1)).convert(gatewayJson);
     }
 
     @Test

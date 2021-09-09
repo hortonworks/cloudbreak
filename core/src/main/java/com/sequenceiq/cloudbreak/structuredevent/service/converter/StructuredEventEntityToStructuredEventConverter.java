@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Maps;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.StructuredEventEntity;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredFlowEvent;
@@ -20,7 +19,7 @@ import com.sequenceiq.cloudbreak.structuredevent.event.StructuredRestCallEvent;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 
 @Component
-public class StructuredEventEntityToStructuredEventConverter extends AbstractConversionServiceAwareConverter<StructuredEventEntity, StructuredEvent> {
+public class StructuredEventEntityToStructuredEventConverter {
     private static final Logger LOGGER = LoggerFactory.getLogger(StructuredEventEntityToStructuredEventConverter.class);
 
     private final Map<String, Class<? extends StructuredEvent>> classes = Maps.newHashMap();
@@ -34,7 +33,6 @@ public class StructuredEventEntityToStructuredEventConverter extends AbstractCon
         classes.put("StructuredFlowErrorEvent", StructuredFlowEvent.class);
     }
 
-    @Override
     public StructuredEvent convert(StructuredEventEntity source) {
         try {
             JsonNode jsonNode = JsonUtil.readTree(source.getStructuredEventJson().getValue());

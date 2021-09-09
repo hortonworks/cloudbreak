@@ -7,9 +7,8 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 
 @Component
-public class ImageToClouderaManagerRepoConverter extends AbstractConversionServiceAwareConverter<Image, ClouderaManagerRepo> {
+public class ImageToClouderaManagerRepoConverter {
 
-    @Override
     public ClouderaManagerRepo convert(Image image) {
         ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
         clouderaManagerRepo.setPredefined(Boolean.TRUE);

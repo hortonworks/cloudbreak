@@ -9,14 +9,13 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.common.service.Clock;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.request.DatabaseV4Request;
 import com.sequenceiq.redbeams.api.util.DatabaseVendorUtil;
 import com.sequenceiq.redbeams.domain.DatabaseConfig;
 
 @Component
-public class DatabaseV4RequestToDatabaseConfigConverter  extends AbstractConversionServiceAwareConverter<DatabaseV4Request, DatabaseConfig> {
+public class DatabaseV4RequestToDatabaseConfigConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseV4RequestToDatabaseConfigConverter.class);
 
@@ -26,7 +25,6 @@ public class DatabaseV4RequestToDatabaseConfigConverter  extends AbstractConvers
     @Inject
     private DatabaseVendorUtil databaseVendorUtil;
 
-    @Override
     public DatabaseConfig convert(DatabaseV4Request source) {
         DatabaseConfig databaseConfig = new DatabaseConfig();
         databaseConfig.setName(source.getName());

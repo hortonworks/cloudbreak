@@ -11,13 +11,12 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV
 import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 
 @Component
-public class NetworkV4RequestToNetworkConverter extends AbstractConversionServiceAwareConverter<NetworkV4Request, Network> {
+public class NetworkV4RequestToNetworkConverter {
 
     @Inject
     private MissingResourceNameGenerator missingResourceNameGenerator;
@@ -25,7 +24,6 @@ public class NetworkV4RequestToNetworkConverter extends AbstractConversionServic
     @Inject
     private ProviderParameterCalculator providerParameterCalculator;
 
-    @Override
     public Network convert(NetworkV4Request source) {
         Network network = new Network();
         network.setName(missingResourceNameGenerator.generateName(APIResourceType.NETWORK));

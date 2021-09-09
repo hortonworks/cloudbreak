@@ -20,7 +20,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.core.convert.ConversionService;
 
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
@@ -66,9 +65,6 @@ public class ImageServiceTest {
 
     @Mock
     private CloudPlatformConnectors cloudPlatformConnectors;
-
-    @Mock
-    private ConversionService conversionService;
 
     @Mock
     private ComponentConfigProviderService componentConfigProviderService;

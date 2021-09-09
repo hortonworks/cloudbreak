@@ -11,7 +11,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.requests.Defaul
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateViewV4Response;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.view.ClusterTemplateClusterApiView;
 import com.sequenceiq.cloudbreak.domain.view.ClusterTemplateInstanceGroupView;
 import com.sequenceiq.cloudbreak.domain.view.ClusterTemplateStackApiView;
@@ -20,12 +19,10 @@ import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.InstanceGroupV1Request;
 
 @Component
-public class ClusterTemplateViewToClusterTemplateViewV4ResponseConverter
-        extends AbstractConversionServiceAwareConverter<ClusterTemplateView, ClusterTemplateViewV4Response> {
+public class ClusterTemplateViewToClusterTemplateViewV4ResponseConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterTemplateViewToClusterTemplateViewV4ResponseConverter.class);
 
-    @Override
     public ClusterTemplateViewV4Response convert(ClusterTemplateView source) {
         ClusterTemplateViewV4Response clusterTemplateViewV4Response = new ClusterTemplateViewV4Response();
         clusterTemplateViewV4Response.setName(source.getName());

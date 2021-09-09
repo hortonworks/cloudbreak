@@ -1,19 +1,21 @@
 package com.sequenceiq.distrox.v1.distrox.converter;
 
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.distrox.api.v1.distrox.model.DistroXRepairV1Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ClusterRepairNodesV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ClusterRepairV4Request;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
+import com.sequenceiq.distrox.api.v1.distrox.model.DistroXRepairV1Request;
 
 @Component
-public class DistroXRepairV1RequestToClusterRepairV4RequestConverter
-        extends AbstractConversionServiceAwareConverter<DistroXRepairV1Request, ClusterRepairV4Request> {
-    @Override
+public class DistroXRepairV1RequestToClusterRepairV4RequestConverter {
+
+    @Inject
+    private DistroXRepairNodesV1RequestToClusterRepairNodesV4Request distroXRepairNodesV1RequestToClusterRepairNodesV4Request;
+
     public ClusterRepairV4Request convert(DistroXRepairV1Request source) {
         ClusterRepairV4Request clusterRepairV4Request = new ClusterRepairV4Request();
-        clusterRepairV4Request.setNodes(getConversionService().convert(source.getNodes(), ClusterRepairNodesV4Request.class));
+        clusterRepairV4Request.setNodes(distroXRepairNodesV1RequestToClusterRepairNodesV4Request.convert(source.getNodes()));
         clusterRepairV4Request.setHostGroups(source.getHostGroups());
         clusterRepairV4Request.setRemoveOnly(source.isRemoveOnly());
         return clusterRepairV4Request;

@@ -6,8 +6,6 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -23,21 +21,20 @@ public class CloudResourcePersisterService implements Persister<ResourceNotifica
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudResourcePersisterService.class);
 
     @Inject
-    @Qualifier("conversionService")
-    private ConversionService conversionService;
-
-    @Inject
     private ResourceService resourceService;
 
     @Inject
     private EnvironmentService environmentService;
+
+    @Inject
+    private CloudResourceToResourceConverter cloudResourceToResourceConverter;
 
     @Override
     public ResourceNotification persist(ResourceNotification notification) {
         LOGGER.debug("Resource allocation notification received: {}", notification);
         Long envId = notification.getCloudContext().getId();
         CloudResource cloudResource = notification.getCloudResource();
-        Resource resource = conversionService.convert(cloudResource, Resource.class);
+        Resource resource = cloudResourceToResourceConverter.convert(cloudResource);
         Optional<Resource> persistedResource =
                 resourceService.findByResourceReferenceAndType(cloudResource.getReference(), cloudResource.getType());
         if (persistedResource.isPresent()) {
@@ -57,7 +54,7 @@ public class CloudResourcePersisterService implements Persister<ResourceNotifica
         CloudResource cloudResource = notification.getCloudResource();
         Resource persistedResource = resourceService.findByResourceReferenceAndType(cloudResource.getReference(),
                 ResourceType.valueOf(cloudResource.getType().name())).orElseThrow(NotFoundException.notFound("resource", cloudResource.getName()));
-        Resource resource = conversionService.convert(cloudResource, Resource.class);
+        Resource resource = cloudResourceToResourceConverter.convert(cloudResource);
         updateWithPersistedFields(resource, persistedResource);
         resource.setEnvironment(environmentService.findEnvironmentByIdOrThrow(envId));
         resourceService.save(resource);

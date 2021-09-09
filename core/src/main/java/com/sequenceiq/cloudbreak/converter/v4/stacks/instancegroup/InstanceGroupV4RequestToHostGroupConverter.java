@@ -9,7 +9,6 @@ import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
@@ -19,7 +18,7 @@ import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
 @Component
-public class InstanceGroupV4RequestToHostGroupConverter extends AbstractConversionServiceAwareConverter<InstanceGroupV4Request, HostGroup> {
+public class InstanceGroupV4RequestToHostGroupConverter {
 
     @Inject
     private RecipeService recipeService;
@@ -33,7 +32,6 @@ public class InstanceGroupV4RequestToHostGroupConverter extends AbstractConversi
     @Inject
     private WorkspaceService workspaceService;
 
-    @Override
     public HostGroup convert(InstanceGroupV4Request source) {
         HostGroup hostGroup = new HostGroup();
         hostGroup.setName(source.getName().toLowerCase());

@@ -19,12 +19,10 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -43,6 +41,7 @@ import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
+import com.sequenceiq.cloudbreak.converter.ImageToClouderaManagerRepoConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -69,10 +68,6 @@ public class ImageService {
     private ImageCatalogService imageCatalogService;
 
     @Inject
-    @Named("conversionService")
-    private ConversionService conversionService;
-
-    @Inject
     private BlueprintUtils blueprintUtils;
 
     @Inject
@@ -86,6 +81,9 @@ public class ImageService {
 
     @Inject
     private ClouderaManagerProductTransformer clouderaManagerProductTransformer;
+
+    @Inject
+    private ImageToClouderaManagerRepoConverter imageToClouderaManagerRepoConverter;
 
     public Image getImage(Long stackId) throws CloudbreakImageNotFoundException {
         return componentConfigProviderService.getImage(stackId);
@@ -309,7 +307,7 @@ public class ImageService {
             throws CloudbreakImageCatalogException {
         if (imgFromCatalog.getRepo() != null) {
             if (StackType.CDH.equals(stackType)) {
-                ClouderaManagerRepo clouderaManagerRepo = conversionService.convert(imgFromCatalog, ClouderaManagerRepo.class);
+                ClouderaManagerRepo clouderaManagerRepo = imageToClouderaManagerRepoConverter.convert(imgFromCatalog);
                 if (Objects.isNull(clouderaManagerRepo) || clouderaManagerRepo.getBaseUrl() == null) {
                     throw new CloudbreakImageCatalogException(
                             String.format("Cloudera Manager repo was not found in image for os: '%s'.", imgFromCatalog.getOsType()));

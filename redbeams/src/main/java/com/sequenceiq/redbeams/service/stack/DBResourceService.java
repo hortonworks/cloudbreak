@@ -6,14 +6,13 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.common.api.type.ResourceType;
+import com.sequenceiq.redbeams.converter.stack.DbResourceTocloudResourceConverter;
 import com.sequenceiq.redbeams.domain.stack.DBResource;
 import com.sequenceiq.redbeams.repository.DBResourceRepository;
 
@@ -24,8 +23,7 @@ public class DBResourceService {
     private DBResourceRepository dbResourceRepository;
 
     @Inject
-    @Qualifier("conversionService")
-    private ConversionService conversionService;
+    private DbResourceTocloudResourceConverter dbResourceTocloudResourceConverter;
 
     public List<CloudResourceStatus> getAllAsCloudResourceStatus(Long dbStackId) {
         return getAllAsCloudResource(dbStackId).stream()
@@ -35,7 +33,7 @@ public class DBResourceService {
 
     public List<CloudResource> getAllAsCloudResource(Long dbStackId) {
         return dbResourceRepository.findAllByStackId(dbStackId).stream()
-            .map(r -> conversionService.convert(r, CloudResource.class)).collect(Collectors.toList());
+            .map(r -> dbResourceTocloudResourceConverter.convert(r)).collect(Collectors.toList());
     }
 
     public DBResource save(DBResource resource) {

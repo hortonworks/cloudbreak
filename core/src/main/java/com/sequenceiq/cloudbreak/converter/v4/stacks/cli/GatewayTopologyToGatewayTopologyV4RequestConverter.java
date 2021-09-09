@@ -9,17 +9,15 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.topology.GatewayTopologyV4Request;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
 
 @Component
-public class GatewayTopologyToGatewayTopologyV4RequestConverter extends AbstractConversionServiceAwareConverter<GatewayTopology, GatewayTopologyV4Request> {
+public class GatewayTopologyToGatewayTopologyV4RequestConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GatewayTopologyToGatewayTopologyV4RequestConverter.class);
 
-    @Override
     public GatewayTopologyV4Request convert(GatewayTopology gatewayTopology) {
         GatewayTopologyV4Request gatewayTopologyJson = new GatewayTopologyV4Request();
         gatewayTopologyJson.setTopologyName(gatewayTopology.getTopologyName());

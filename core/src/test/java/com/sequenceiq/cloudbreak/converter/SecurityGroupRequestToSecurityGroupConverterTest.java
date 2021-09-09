@@ -5,7 +5,6 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
-import java.util.Collections;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -14,12 +13,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.securitygroup.SecurityGroupV4Request;
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.securitygroup.SecurityGroupV4RequestToSecurityGroupConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.securitygroup.securityrule.SecurityRuleV4RequestToSecurityRuleConverter;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
 
@@ -33,7 +31,7 @@ public class SecurityGroupRequestToSecurityGroupConverterTest extends AbstractJs
     private MissingResourceNameGenerator missingResourceNameGenerator;
 
     @Mock
-    private ConverterUtil converterUtil;
+    private SecurityRuleV4RequestToSecurityRuleConverter securityRuleV4RequestToSecurityRuleConverter;
 
     @Before
     public void setUp() {
@@ -43,7 +41,7 @@ public class SecurityGroupRequestToSecurityGroupConverterTest extends AbstractJs
     @Test
     public void testConvert() {
         // GIVEN
-        given(converterUtil.convertAllAsSet(any(), any())).willReturn(Sets.newConcurrentHashSet(Collections.singletonList(new SecurityRule())));
+        given(securityRuleV4RequestToSecurityRuleConverter.convert(any())).willReturn(new SecurityRule());
         // WHEN
         SecurityGroup result = underTest.convert(getRequest("security-group/security-group.json"));
         // THEN

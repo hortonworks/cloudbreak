@@ -2,15 +2,12 @@ package com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.filesystem;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.common.api.cloudstorage.old.WasbCloudStorageV1Parameters;
 import com.sequenceiq.common.api.filesystem.WasbFileSystem;
 
 @Component
-public class WasbFileSystemToWasbCloudStorageParametersV4Converter
-        extends AbstractConversionServiceAwareConverter<WasbFileSystem, WasbCloudStorageV1Parameters> {
+public class WasbFileSystemToWasbCloudStorageParametersV4Converter {
 
-    @Override
     public WasbCloudStorageV1Parameters convert(WasbFileSystem source) {
         WasbCloudStorageV1Parameters fileSystemConfigurations = new WasbCloudStorageV1Parameters();
         fileSystemConfigurations.setAccountName(source.getAccountName());

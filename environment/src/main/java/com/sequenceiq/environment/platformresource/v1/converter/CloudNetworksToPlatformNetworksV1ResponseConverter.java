@@ -10,14 +10,12 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.CloudNetworks;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformNetworkResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformNetworksResponse;
 
 @Component
-public class CloudNetworksToPlatformNetworksV1ResponseConverter extends AbstractConversionServiceAwareConverter<CloudNetworks, PlatformNetworksResponse> {
+public class CloudNetworksToPlatformNetworksV1ResponseConverter {
 
-    @Override
     public PlatformNetworksResponse convert(CloudNetworks source) {
         Map<String, Set<PlatformNetworkResponse>> result = new HashMap<>();
         for (Entry<String, Set<CloudNetwork>> entry : source.getCloudNetworkResponses().entrySet()) {

@@ -19,14 +19,13 @@ import javax.inject.Inject;
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
 import com.google.api.client.util.Joiner;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.converter.StackToTemplatePreparationObjectConverter;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -82,8 +81,7 @@ class OrchestratorRecipeExecutor {
     private CentralRecipeUpdater centralRecipeUpdater;
 
     @Inject
-    @Qualifier("conversionService")
-    private ConversionService conversionService;
+    private StackToTemplatePreparationObjectConverter stackToTemplatePreparationObjectConverter;
 
     public void uploadRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
         Map<HostGroup, List<RecipeModel>> recipeMap = getHostgroupToRecipeMap(stack, hostGroups);
@@ -214,7 +212,7 @@ class OrchestratorRecipeExecutor {
     }
 
     private Map<HostGroup, List<RecipeModel>> getHostgroupToRecipeMap(Stack stack, Set<HostGroup> hostGroups) {
-        TemplatePreparationObject templatePreparationObject = measure(() -> conversionService.convert(stack, TemplatePreparationObject.class),
+        TemplatePreparationObject templatePreparationObject = measure(() -> stackToTemplatePreparationObjectConverter.convert(stack),
             LOGGER, "Template prepartion object generation took {} ms for recipes generation.");
         Map<HostGroup, List<RecipeModel>> recipeModels = hostGroups.stream().filter(hg -> !hg.getRecipes().isEmpty())
                 .collect(Collectors.toMap(h -> h, h -> convert(stack, h.getRecipes(), templatePreparationObject)));

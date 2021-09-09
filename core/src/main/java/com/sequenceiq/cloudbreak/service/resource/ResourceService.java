@@ -8,13 +8,12 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.repository.ResourceRepository;
 import com.sequenceiq.common.api.type.CommonStatus;
@@ -27,14 +26,13 @@ public class ResourceService {
     private ResourceRepository repository;
 
     @Inject
-    @Qualifier("conversionService")
-    private ConversionService conversionService;
+    private ResourceToCloudResourceConverter cloudResourceToResourceConverter;
 
     public List<CloudResourceStatus> getAllAsCloudResourceStatus(Long stackId) {
         List<Resource> resources = repository.findAllByStackId(stackId);
         List<CloudResourceStatus> list = new ArrayList<>();
         resources.forEach(r -> {
-            CloudResource cloudResource = conversionService.convert(r, CloudResource.class);
+            CloudResource cloudResource = cloudResourceToResourceConverter.convert(r);
             list.add(new CloudResourceStatus(cloudResource, ResourceStatus.CREATED));
         });
 

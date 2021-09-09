@@ -9,12 +9,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.BlueprintSe
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.SupportedServiceV4Response;
 import com.sequenceiq.cloudbreak.cmtemplate.generator.support.domain.SupportedService;
 import com.sequenceiq.cloudbreak.cmtemplate.generator.support.domain.SupportedServices;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 
 @Component
-public class SupportedServicesToBlueprintServicesV4ResponseConverter
-        extends AbstractConversionServiceAwareConverter<SupportedServices, BlueprintServicesV4Response> {
-    @Override
+public class SupportedServicesToBlueprintServicesV4ResponseConverter {
+
     public BlueprintServicesV4Response convert(SupportedServices source) {
         BlueprintServicesV4Response blueprintServicesV4Response = new BlueprintServicesV4Response();
 

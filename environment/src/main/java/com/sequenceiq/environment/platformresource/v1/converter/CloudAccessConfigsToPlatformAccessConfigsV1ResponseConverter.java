@@ -7,16 +7,13 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfig;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.environment.api.v1.platformresource.model.AccessConfigResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.AccessConfigResponseComparator;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformAccessConfigsResponse;
 
 @Component
-public class CloudAccessConfigsToPlatformAccessConfigsV1ResponseConverter
-        extends AbstractConversionServiceAwareConverter<CloudAccessConfigs, PlatformAccessConfigsResponse> {
+public class CloudAccessConfigsToPlatformAccessConfigsV1ResponseConverter {
 
-    @Override
     public PlatformAccessConfigsResponse convert(CloudAccessConfigs source) {
         PlatformAccessConfigsResponse platformAccessConfigsResponse = new PlatformAccessConfigsResponse();
         List<AccessConfigResponse> result = new ArrayList<>();

@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFo
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -15,8 +16,8 @@ import org.springframework.stereotype.Service;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.responses.AuditEventV4Response;
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.comparator.audit.AuditEventComparator;
+import com.sequenceiq.cloudbreak.converter.v4.audit.StructuredEventEntityToAuditEventV4ResponseConverter;
 import com.sequenceiq.cloudbreak.domain.StructuredEventEntity;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
@@ -33,9 +34,6 @@ public class AuditEventService extends AbstractWorkspaceAwareResourceService<Str
     private static final Logger LOGGER = LoggerFactory.getLogger(AuditEventService.class);
 
     @Inject
-    private ConverterUtil converterUtil;
-
-    @Inject
     private WorkspaceService workspaceService;
 
     @Inject
@@ -47,6 +45,9 @@ public class AuditEventService extends AbstractWorkspaceAwareResourceService<Str
     @Inject
     private LegacyRestRequestThreadLocalService legacyRestRequestThreadLocalService;
 
+    @Inject
+    private StructuredEventEntityToAuditEventV4ResponseConverter structuredEventEntityToAuditEventV4ResponseConverter;
+
     public AuditEventV4Response getAuditEvent(Long auditId) {
         User user = userService.getOrCreate(legacyRestRequestThreadLocalService.getCloudbreakUser());
         return getAuditEventByWorkspaceId(workspaceService.getDefaultWorkspaceForUser(user).getId(), auditId);
@@ -55,7 +56,7 @@ public class AuditEventService extends AbstractWorkspaceAwareResourceService<Str
     public AuditEventV4Response getAuditEventByWorkspaceId(Long workspaceId, Long auditId) {
         StructuredEventEntity event = Optional.ofNullable(legacyStructuredEventDBService.findByWorkspaceIdAndId(workspaceId, auditId))
                 .orElseThrow(notFound("StructuredEvent", auditId));
-        return converterUtil.convert(event, AuditEventV4Response.class);
+        return structuredEventEntityToAuditEventV4ResponseConverter.convert(event);
     }
 
     public List<AuditEventV4Response> getAuditEventsByWorkspaceId(Long workspaceId, String resourceType, Long resourceId, String resourceCrn) {
@@ -75,7 +76,9 @@ public class AuditEventService extends AbstractWorkspaceAwareResourceService<Str
             LOGGER.info("Try to fetch audit events by resource type and id: {}: {}", resourceType, resourceId);
             events = legacyStructuredEventDBService.findByWorkspaceAndResourceTypeAndResourceId(workspace, resourceType, resourceId);
         }
-        return events != null ? converterUtil.convertAll(events, AuditEventV4Response.class) : Collections.emptyList();
+        return events != null ? events.stream()
+                        .map(e -> structuredEventEntityToAuditEventV4ResponseConverter.convert(e))
+                        .collect(Collectors.toList()) : Collections.emptyList();
     }
 
     @Override

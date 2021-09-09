@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNotNull;
 
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
+import javax.ws.rs.NotFoundException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.testng.annotations.Test;
@@ -284,7 +285,8 @@ public class ClusterTemplateTest extends AbstractMockTest {
                 .withBlueprintName("thisBlueprintDoesNotExistsForSure")
                 .given(ClusterTemplateTestDto.class)
                 .withDistroXTemplateKey("dixTemplate")
-                .whenException(clusterTemplateTestClient.createV4(), BadRequestException.class)
+                .whenException(clusterTemplateTestClient.createV4(), NotFoundException.class,
+                        expectedMessage("No cluster template found with name 'thisBlueprintDoesNotExistsForSure'"))
                 .validate();
     }
 

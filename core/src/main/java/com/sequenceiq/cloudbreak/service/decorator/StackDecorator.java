@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.placement.PlacementSettingsV4Request;
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
@@ -38,6 +37,7 @@ import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.conf.EmbeddedDatabaseConfig;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.InstanceGroupToInstanceGroupParameterRequestConverter;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
@@ -93,9 +93,6 @@ public class StackDecorator {
     private TemplateDecorator templateDecorator;
 
     @Inject
-    private ConverterUtil converterUtil;
-
-    @Inject
     private CloudParameterService cloudParameterService;
 
     @Inject
@@ -124,6 +121,9 @@ public class StackDecorator {
 
     @Inject
     private EmbeddedDatabaseConfig embeddedDatabaseConfig;
+
+    @Inject
+    private InstanceGroupToInstanceGroupParameterRequestConverter instanceGroupToInstanceGroupParameterRequestConverter;
 
     @Measure(StackDecorator.class)
     public Stack decorate(@Nonnull Stack subject, @Nonnull StackV4Request request, User user, Workspace workspace) {
@@ -336,7 +336,7 @@ public class StackDecorator {
     private Set<InstanceGroupParameterRequest> getInstanceGroupParameterRequests(Stack subject) {
         Set<InstanceGroupParameterRequest> instanceGroupParameterRequests = new HashSet<>();
         for (InstanceGroup instanceGroup : subject.getInstanceGroups()) {
-            InstanceGroupParameterRequest convert = converterUtil.convert(instanceGroup, InstanceGroupParameterRequest.class);
+            InstanceGroupParameterRequest convert = instanceGroupToInstanceGroupParameterRequestConverter.convert(instanceGroup);
             convert.setStackName(subject.getName());
             instanceGroupParameterRequests.add(convert);
         }

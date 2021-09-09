@@ -239,7 +239,9 @@ public class StackCreationActions {
             @Override
             protected Selectable createRequest(StackCreationContext context) {
                 List<CloudInstance> cloudInstances = cloudStackConverter.buildInstances(context.getStack());
-                List<CloudResource> cloudResources = cloudResourceConverter.convert(context.getStack().getResources());
+                List<CloudResource> cloudResources = context.getStack().getResources().stream()
+                        .map(r -> cloudResourceConverter.convert(r))
+                        .collect(Collectors.toList());
                 return new CollectMetadataRequest(context.getCloudContext(), context.getCloudCredential(), cloudResources, cloudInstances, cloudInstances);
             }
         };
@@ -261,7 +263,9 @@ public class StackCreationActions {
                 List<LoadBalancerType> loadBalancerTypes = loadBalancerPersistenceService.findByStackId(context.getStack().getId()).stream()
                     .map(LoadBalancer::getType)
                     .collect(Collectors.toList());
-                List<CloudResource> cloudResources = cloudResourceConverter.convert(context.getStack().getResources());
+                List<CloudResource> cloudResources = context.getStack().getResources().stream()
+                        .map(r -> cloudResourceConverter.convert(r))
+                        .collect(Collectors.toList());
                 return new CollectLoadBalancerMetadataRequest(context.getCloudContext(), context.getCloudCredential(),
                     loadBalancerTypes, cloudResources);
             }

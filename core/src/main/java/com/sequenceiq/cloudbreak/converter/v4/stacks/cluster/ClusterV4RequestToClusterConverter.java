@@ -33,9 +33,9 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.converter.util.CloudStorageValidationUtil;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.clouderamanager.ClouderaManagerRepositoryV4RequestToClouderaManagerRepoConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.gateway.GatewayV4RequestToGatewayConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.ClusterAttributes;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
@@ -50,7 +50,7 @@ import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @Component
-public class ClusterV4RequestToClusterConverter extends AbstractConversionServiceAwareConverter<ClusterV4Request, Cluster> {
+public class ClusterV4RequestToClusterConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterV4RequestToClusterConverter.class);
 
@@ -72,7 +72,9 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
     @Inject
     private EntitlementService entitlementService;
 
-    @Override
+    @Inject
+    private GatewayV4RequestToGatewayConverter gatewayV4RequestToGatewayConverter;
+
     public Cluster convert(ClusterV4Request source) {
         Workspace workspace = workspaceService.getForCurrentUser();
         Cluster cluster = new Cluster();
@@ -112,7 +114,7 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
             if (StringUtils.isEmpty(gatewayRequest.getPath())) {
                 gatewayRequest.setPath(source.getName());
             }
-            Gateway gateway = getConversionService().convert(gatewayRequest, Gateway.class);
+            Gateway gateway = gatewayV4RequestToGatewayConverter.convert(gatewayRequest);
             if (gateway != null) {
                 cluster.setGateway(gateway);
                 gateway.setCluster(cluster);

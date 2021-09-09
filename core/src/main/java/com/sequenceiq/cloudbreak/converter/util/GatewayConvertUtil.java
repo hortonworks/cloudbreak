@@ -12,8 +12,8 @@ import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.SSOType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.GatewayV4Request;
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.certificate.PkiUtil;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.gateway.topology.GatewayTopologyV4RequestToGatewayTopologyConverter;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
@@ -22,12 +22,12 @@ import com.sequenceiq.cloudbreak.util.PasswordUtil;
 public class GatewayConvertUtil {
 
     @Inject
-    private ConverterUtil converterUtil;
+    private GatewayTopologyV4RequestToGatewayTopologyConverter gatewayTopologyV4RequestToGatewayTopologyConverter;
 
     public void setTopologies(GatewayV4Request source, Gateway gateway) {
         if (!CollectionUtils.isEmpty(source.getTopologies())) {
             Set<GatewayTopology> gatewayTopologies = source.getTopologies().stream()
-                    .map(g -> converterUtil.convert(g, GatewayTopology.class))
+                    .map(g -> gatewayTopologyV4RequestToGatewayTopologyConverter.convert(g))
                     .collect(Collectors.toSet());
             gateway.setTopologies(gatewayTopologies);
             gatewayTopologies.forEach(g -> g.setGateway(gateway));

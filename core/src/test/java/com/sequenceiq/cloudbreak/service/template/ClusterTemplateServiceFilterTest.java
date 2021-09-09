@@ -7,9 +7,11 @@ import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,9 +24,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.converter.v4.clustertemplate.ClusterTemplateViewToClusterTemplateViewV4ResponseConverter;
 import com.sequenceiq.cloudbreak.domain.view.ClusterTemplateView;
 import com.sequenceiq.cloudbreak.service.runtimes.SupportedRuntimes;
 import com.sequenceiq.distrox.v1.distrox.service.EnvironmentServiceDecorator;
@@ -55,9 +57,6 @@ class ClusterTemplateServiceFilterTest {
     private TransactionService transactionService;
 
     @Mock
-    private ConverterUtil converterUtil;
-
-    @Mock
     private EnvironmentServiceDecorator environmentServiceDecorator;
 
     @Mock
@@ -65,6 +64,9 @@ class ClusterTemplateServiceFilterTest {
 
     @Spy
     private SupportedRuntimes supportedRuntimes;
+
+    @Mock
+    private ClusterTemplateViewToClusterTemplateViewV4ResponseConverter clusterTemplateViewToClusterTemplateViewV4ResponseConverter;
 
     @InjectMocks
     private ClusterTemplateService underTest;
@@ -153,11 +155,14 @@ class ClusterTemplateServiceFilterTest {
     void testListInWorkspaceAndCleanUpInvalidsWhenFilteringByCloudPlatform(String testCaseName, boolean awsEnabled, boolean azureEnabled,
             Set<ClusterTemplateViewV4Response> expectedResult) throws TransactionService.TransactionExecutionException {
         Set<ClusterTemplateView> views = Set.of(new ClusterTemplateView(), new ClusterTemplateView());
-        Set<ClusterTemplateViewV4Response> responses = Set.of(CLUSTER_TEMPLATE_VIEW_V4_RESPONSE_AWS, CLUSTER_TEMPLATE_VIEW_V4_RESPONSE_AZURE);
+        List<ClusterTemplateViewV4Response> responses = List.of(CLUSTER_TEMPLATE_VIEW_V4_RESPONSE_AWS, CLUSTER_TEMPLATE_VIEW_V4_RESPONSE_AZURE);
 
         when(transactionService.required(isA(Supplier.class))).thenAnswer(invocation -> invocation.getArgument(0, Supplier.class).get());
         when(clusterTemplateViewService.findAllActive(WORKSPACE_ID)).thenReturn(views);
-        when(converterUtil.convertAllAsSet(views, ClusterTemplateViewV4Response.class)).thenReturn(responses);
+        int index = 0;
+        for (ClusterTemplateView view : views) {
+            when(clusterTemplateViewToClusterTemplateViewV4ResponseConverter.convert(view)).thenReturn(responses.get(index++));
+        }
 
         when(cloudPlatformValidator.isClusterTemplateCloudPlatformValid(AWS, ACCOUNT_ID)).thenReturn(awsEnabled);
         when(cloudPlatformValidator.isClusterTemplateCloudPlatformValid(AZURE, ACCOUNT_ID)).thenReturn(azureEnabled);
@@ -166,7 +171,7 @@ class ClusterTemplateServiceFilterTest {
                 () -> underTest.listInWorkspaceAndCleanUpInvalids(WORKSPACE_ID));
 
         assertThat(result).isEqualTo(expectedResult);
-        verify(environmentServiceDecorator).prepareEnvironments(responses);
+        verify(environmentServiceDecorator).prepareEnvironments(responses.stream().collect(Collectors.toSet()));
     }
 
 }

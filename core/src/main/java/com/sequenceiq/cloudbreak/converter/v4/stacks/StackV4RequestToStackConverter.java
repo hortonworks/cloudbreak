@@ -58,12 +58,15 @@ import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.converter.v4.environment.network.EnvironmentNetworkConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.authentication.StackAuthenticationV4RequestToStackAuthenticationConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.ClusterV4RequestToClusterConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.InstanceGroupV4RequestToHostGroupConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.InstanceGroupV4RequestToInstanceGroupConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.network.NetworkV4RequestToNetworkConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
-import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -86,7 +89,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 
 @Component
-public class StackV4RequestToStackConverter extends AbstractConversionServiceAwareConverter<StackV4Request, Stack> {
+public class StackV4RequestToStackConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackV4RequestToStackConverter.class);
 
@@ -138,7 +141,21 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
     @Inject
     private DatalakeService datalakeService;
 
-    @Override
+    @Inject
+    private ClusterV4RequestToClusterConverter clusterV4RequestToClusterConverter;
+
+    @Inject
+    private NetworkV4RequestToNetworkConverter networkV4RequestToNetworkConverter;
+
+    @Inject
+    private InstanceGroupV4RequestToHostGroupConverter instanceGroupV4RequestToHostGroupConverter;
+
+    @Inject
+    private InstanceGroupV4RequestToInstanceGroupConverter instanceGroupV4RequestToInstanceGroupConverter;
+
+    @Inject
+    private StackAuthenticationV4RequestToStackAuthenticationConverter stackAuthenticationV4RequestToStackAuthenticationConverter;
+
     public Stack convert(StackV4Request source) {
         Workspace workspace = workspaceService.getForCurrentUser();
 
@@ -171,7 +188,8 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         stack.setWorkspace(workspace);
         stack.setDisplayName(source.getName());
         stack.setDatalakeCrn(datalakeService.getDatalakeCrn(source, workspace));
-        stack.setStackAuthentication(getConversionService().convert(source.getAuthentication(), StackAuthentication.class));
+        stack.setStackAuthentication(stackAuthenticationV4RequestToStackAuthenticationConverter
+                .convert(source.getAuthentication()));
         stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.PROVISION_REQUESTED));
         stack.setCreated(clock.getCurrentTimeMillis());
         stack.setInstanceGroups(convertInstanceGroups(source, stack));
@@ -336,7 +354,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         source.getInstanceGroups().stream()
                 .map(ig -> {
                     ig.setCloudPlatform(source.getCloudPlatform());
-                    return getConversionService().convert(ig, InstanceGroup.class);
+                    return instanceGroupV4RequestToInstanceGroupConverter.convert(ig);
                 })
                 .forEach(ig -> {
                     ig.setStack(stack);
@@ -348,11 +366,11 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
     private void updateCluster(StackV4Request source, Stack stack) {
         if (source.getCluster() != null) {
             source.getCluster().setName(stack.getName());
-            Cluster cluster = getConversionService().convert(source.getCluster(), Cluster.class);
+            Cluster cluster = clusterV4RequestToClusterConverter.convert(source.getCluster());
             fillCredentialValues(source, cluster);
             Set<HostGroup> hostGroups = source.getInstanceGroups().stream()
                     .map(ig -> {
-                        HostGroup hostGroup = getConversionService().convert(ig, HostGroup.class);
+                        HostGroup hostGroup = instanceGroupV4RequestToHostGroupConverter.convert(ig);
                         hostGroup.setCluster(cluster);
                         return hostGroup;
                     })
@@ -395,7 +413,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
     private void setNetworkAsTemplate(StackV4Request source, Stack stack) {
         if (source.getNetwork() != null) {
             source.getNetwork().setCloudPlatform(source.getCloudPlatform());
-            stack.setNetwork(getConversionService().convert(source.getNetwork(), Network.class));
+            stack.setNetwork(networkV4RequestToNetworkConverter.convert(source.getNetwork()));
         }
     }
 
@@ -544,7 +562,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
     private void setNetworkIfApplicable(StackV4Request source, Stack stack, DetailedEnvironmentResponse environment) {
         if (source.getNetwork() != null) {
             source.getNetwork().setCloudPlatform(source.getCloudPlatform());
-            Network network = getConversionService().convert(source.getNetwork(), Network.class);
+            Network network = networkV4RequestToNetworkConverter.convert(source.getNetwork());
             EnvironmentNetworkResponse envNetwork = environment == null ? null : environment.getNetwork();
             if (envNetwork != null) {
                 network.setNetworkCidrs(envNetwork.getNetworkCidrs());

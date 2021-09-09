@@ -6,6 +6,7 @@ import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CR
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
@@ -25,7 +26,6 @@ import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceCrnList;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
@@ -43,6 +43,9 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.Database
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Responses;
 import com.sequenceiq.redbeams.converter.stack.AllocateDatabaseServerV4RequestToDBStackConverter;
+import com.sequenceiq.redbeams.converter.v4.databaseserver.DBStackToDatabaseServerStatusV4ResponseConverter;
+import com.sequenceiq.redbeams.converter.v4.databaseserver.DatabaseServerConfigToDatabaseServerV4ResponseConverter;
+import com.sequenceiq.redbeams.converter.v4.databaseserver.DatabaseServerV4RequestToDatabaseServerConfigConverter;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.service.dbserverconfig.DatabaseServerConfigService;
@@ -76,34 +79,43 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     private AllocateDatabaseServerV4RequestToDBStackConverter dbStackConverter;
 
     @Inject
-    private ConverterUtil converterUtil;
+    private DatabaseServerConfigToDatabaseServerV4ResponseConverter databaseServerConfigToDatabaseServerV4ResponseConverter;
+
+    @Inject
+    private DBStackToDatabaseServerStatusV4ResponseConverter dbStackToDatabaseServerStatusV4ResponseConverter;
+
+    @Inject
+    private DatabaseServerV4RequestToDatabaseServerConfigConverter databaseServerV4RequestToDatabaseServerConfigConverter;
 
     @Override
     @CheckPermissionByResourceCrn(action = DESCRIBE_ENVIRONMENT)
     public DatabaseServerV4Responses list(@ResourceCrn @TenantAwareParam String environmentCrn) {
         Set<DatabaseServerConfig> all = databaseServerConfigService.findAll(DEFAULT_WORKSPACE, environmentCrn);
-        return new DatabaseServerV4Responses(converterUtil.convertAllAsSet(all, DatabaseServerV4Response.class));
+        return new DatabaseServerV4Responses(all.stream()
+                .map(d -> databaseServerConfigToDatabaseServerV4ResponseConverter.convert(d))
+                .collect(Collectors.toSet())
+        );
     }
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_DATABASE_SERVER)
     public DatabaseServerV4Response getByName(@TenantAwareParam String environmentCrn, @ResourceName String name) {
         DatabaseServerConfig server = databaseServerConfigService.getByName(DEFAULT_WORKSPACE, environmentCrn, name);
-        return converterUtil.convert(server, DatabaseServerV4Response.class);
+        return databaseServerConfigToDatabaseServerV4ResponseConverter.convert(server);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_DATABASE_SERVER)
     public DatabaseServerV4Response getByCrn(@TenantAwareParam @ResourceCrn String crn) {
         DatabaseServerConfig server = databaseServerConfigService.getByCrn(crn);
-        return converterUtil.convert(server, DatabaseServerV4Response.class);
+        return databaseServerConfigToDatabaseServerV4ResponseConverter.convert(server);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = DESCRIBE_ENVIRONMENT)
     public DatabaseServerV4Response getByClusterCrn(@ResourceCrn @TenantAwareParam String environmentCrn, String clusterCrn) {
         DatabaseServerConfig server = databaseServerConfigService.getByClusterCrn(environmentCrn, clusterCrn);
-        return converterUtil.convert(server, DatabaseServerV4Response.class);
+        return databaseServerConfigToDatabaseServerV4ResponseConverter.convert(server);
     }
 
     @Override
@@ -112,7 +124,7 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
         MDCBuilder.addEnvironmentCrn(request.getEnvironmentCrn());
         DBStack dbStack = dbStackConverter.convert(request, ThreadBasedUserCrnProvider.getUserCrn());
         DBStack savedDBStack = redbeamsCreationService.launchDatabaseServer(dbStack, request.getClusterCrn());
-        return converterUtil.convert(savedDBStack, DatabaseServerStatusV4Response.class);
+        return dbStackToDatabaseServerStatusV4ResponseConverter.convert(savedDBStack);
     }
 
     @Override
@@ -126,15 +138,16 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DELETE_DATABASE_SERVER)
     public DatabaseServerV4Response release(@TenantAwareParam @ResourceCrn String crn) {
         DatabaseServerConfig server = databaseServerConfigService.release(crn);
-        return converterUtil.convert(server, DatabaseServerV4Response.class);
+        return databaseServerConfigToDatabaseServerV4ResponseConverter.convert(server);
     }
 
     @CheckPermissionByAccount(action = AuthorizationResourceAction.REGISTER_DATABASE_SERVER)
     public DatabaseServerV4Response register(DatabaseServerV4Request request) {
         MDCBuilder.addEnvironmentCrn(request.getEnvironmentCrn());
-        DatabaseServerConfig server = databaseServerConfigService.create(converterUtil.convert(request, DatabaseServerConfig.class), DEFAULT_WORKSPACE, false);
+        DatabaseServerConfig server = databaseServerConfigService.create(
+                databaseServerV4RequestToDatabaseServerConfigConverter.convert(request), DEFAULT_WORKSPACE, false);
         //notify(ResourceEvent.DATABASE_SERVER_CONFIG_CREATED);
-        return converterUtil.convert(server, DatabaseServerV4Response.class);
+        return databaseServerConfigToDatabaseServerV4ResponseConverter.convert(server);
     }
 
     @Override
@@ -143,7 +156,7 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
         // RedbeamsTerminationService handles both service-managed and user-managed database servers
         DatabaseServerConfig deleted = redbeamsTerminationService.terminateByCrn(crn, force);
         //notify(ResourceEvent.DATABASE_SERVER_CONFIG_DELETED);
-        return converterUtil.convert(deleted, DatabaseServerV4Response.class);
+        return databaseServerConfigToDatabaseServerV4ResponseConverter.convert(deleted);
     }
 
     @Override
@@ -151,7 +164,7 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     public DatabaseServerV4Response deleteByName(@TenantAwareParam String environmentCrn, @ResourceName String name, boolean force) {
         // RedbeamsTerminationService handles both service-managed and user-managed database servers
         DatabaseServerConfig deleted = redbeamsTerminationService.terminateByName(environmentCrn, name, force);
-        return converterUtil.convert(deleted, DatabaseServerV4Response.class);
+        return databaseServerConfigToDatabaseServerV4ResponseConverter.convert(deleted);
     }
 
     @Override
@@ -160,21 +173,15 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
         // RedbeamsTerminationService handles both service-managed and user-managed database servers
         Set<DatabaseServerConfig> deleted = redbeamsTerminationService.terminateMultipleByCrn(crns, force);
         //notify(ResourceEvent.DATABASE_SERVER_CONFIG_DELETED);
-        return new DatabaseServerV4Responses(converterUtil.convertAllAsSet(deleted, DatabaseServerV4Response.class));
+        return new DatabaseServerV4Responses(deleted.stream()
+                .map(d -> databaseServerConfigToDatabaseServerV4ResponseConverter.convert(d))
+                .collect(Collectors.toSet()));
     }
 
     @Override
     @CheckPermissionByRequestProperty(path = "existingDatabaseServerCrn", type = CRN, action = AuthorizationResourceAction.DESCRIBE_DATABASE_SERVER)
     public DatabaseServerTestV4Response test(@RequestObject DatabaseServerTestV4Request request) {
         throw new UnsupportedOperationException("Connection testing is disabled for security reasons until further notice");
-        // String connectionResult;
-        // if (request.getExistingDatabaseServerCrn() != null) {
-        //     connectionResult = databaseServerConfigService.testConnection(request.getExistingDatabaseServerCrn());
-        // } else {
-        //     DatabaseServerConfig server = converterUtil.convert(request.getDatabaseServer(), DatabaseServerConfig.class);
-        //     connectionResult = databaseServerConfigService.testConnection(server);
-        // }
-        // return new DatabaseServerTestV4Response(connectionResult);
     }
 
     @Override

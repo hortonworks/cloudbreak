@@ -15,9 +15,8 @@ import com.google.common.io.BaseEncoding;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.requests.DefaultClusterTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.common.json.Json;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.cli.StackToStackV4RequestConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
 import com.sequenceiq.cloudbreak.service.stack.StackTemplateService;
@@ -26,12 +25,9 @@ import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.InstanceGroupV1
 import com.sequenceiq.distrox.v1.distrox.converter.DistroXV1RequestToStackV4RequestConverter;
 
 @Component
-public class ClusterTemplateToClusterTemplateV4ResponseConverter extends AbstractConversionServiceAwareConverter<ClusterTemplate, ClusterTemplateV4Response> {
+public class ClusterTemplateToClusterTemplateV4ResponseConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterTemplateToClusterTemplateV4ResponseConverter.class);
-
-    @Inject
-    private ConverterUtil converterUtil;
 
     @Inject
     private StackTemplateService stackTemplateService;
@@ -39,7 +35,9 @@ public class ClusterTemplateToClusterTemplateV4ResponseConverter extends Abstrac
     @Inject
     private DistroXV1RequestToStackV4RequestConverter stackV4RequestConverter;
 
-    @Override
+    @Inject
+    private StackToStackV4RequestConverter stackToStackV4RequestConverter;
+
     public ClusterTemplateV4Response convert(ClusterTemplate source) {
         ClusterTemplateV4Response clusterTemplateV4Response = new ClusterTemplateV4Response();
         clusterTemplateV4Response.setName(source.getName());
@@ -49,7 +47,7 @@ public class ClusterTemplateToClusterTemplateV4ResponseConverter extends Abstrac
             if (stack.isPresent()) {
                 StackV4Request stackV4Request;
                 try {
-                    stackV4Request = converterUtil.convert(stack.get(), StackV4Request.class);
+                    stackV4Request = stackToStackV4RequestConverter.convert(stack.get());
                 } catch (Exception e) {
                     stackV4Request = null;
                 }

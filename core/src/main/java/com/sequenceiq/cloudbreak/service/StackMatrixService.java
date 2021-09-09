@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ClouderaManagerInfoV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ClouderaManagerStackDescriptorV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackMatrixV4Response;
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
@@ -25,6 +24,8 @@ import com.sequenceiq.cloudbreak.cloud.model.component.ImageBasedDefaultCDHEntri
 import com.sequenceiq.cloudbreak.cloud.model.component.ImageBasedDefaultCDHInfo;
 import com.sequenceiq.cloudbreak.cloud.model.component.RepositoryDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.RepositoryInfo;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.clouderamanager.RepositoryInfoToClouderaManagerInfoV4ResponseConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.clouderamanager.StackInfoToClouderaManagerStackDescriptorV4ResponseConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cli.cm.ClouderaManagerProductToClouderaManagerProductV4Response;
 
@@ -34,10 +35,13 @@ public class StackMatrixService {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackMatrixService.class);
 
     @Inject
-    private ConverterUtil converterUtil;
+    private ImageBasedDefaultCDHEntries imageBasedDefaultCDHEntries;
 
     @Inject
-    private ImageBasedDefaultCDHEntries imageBasedDefaultCDHEntries;
+    private RepositoryInfoToClouderaManagerInfoV4ResponseConverter repositoryInfoToClouderaManagerInfoV4ResponseConverter;
+
+    @Inject
+    private StackInfoToClouderaManagerStackDescriptorV4ResponseConverter stackInfoToClouderaManagerStackDescriptorV4ResponseConverter;
 
     public StackMatrixV4Response getStackMatrix(String platform) throws CloudbreakImageCatalogException {
         return getStackMatrix(0L, platform, null);
@@ -72,7 +76,7 @@ public class StackMatrixService {
     }
 
     private ClouderaManagerStackDescriptorV4Response getImageBasedCMStackDescriptor(DefaultCDHInfo stackInfo, Image image) {
-        ClouderaManagerStackDescriptorV4Response stackDescriptorV4 = converterUtil.convert(stackInfo, ClouderaManagerStackDescriptorV4Response.class);
+        ClouderaManagerStackDescriptorV4Response stackDescriptorV4 = stackInfoToClouderaManagerStackDescriptorV4ResponseConverter.convert(stackInfo);
         RepositoryInfo cmInfo = new RepositoryInfo();
         cmInfo.setVersion(image.getPackageVersion(ImagePackageVersion.CM));
         cmInfo.setRepo(image.getRepo().entrySet().stream().collect(Collectors.toMap(Entry::getKey, e -> {
@@ -82,7 +86,7 @@ public class StackMatrixService {
             return repo;
         })));
 
-        ClouderaManagerInfoV4Response cmInfoJson = converterUtil.convert(cmInfo, ClouderaManagerInfoV4Response.class);
+        ClouderaManagerInfoV4Response cmInfoJson = repositoryInfoToClouderaManagerInfoV4ResponseConverter.convert(cmInfo);
         stackDescriptorV4.setClouderaManager(cmInfoJson);
         for (ClouderaManagerProduct parcel : stackInfo.getParcels()) {
             stackDescriptorV4.getProducts().add(ClouderaManagerProductToClouderaManagerProductV4Response.convert(parcel));

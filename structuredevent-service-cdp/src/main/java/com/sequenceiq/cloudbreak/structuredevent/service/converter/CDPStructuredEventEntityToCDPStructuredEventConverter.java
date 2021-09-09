@@ -12,7 +12,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.structuredevent.domain.CDPStructuredEventEntity;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredFlowEvent;
@@ -20,8 +19,7 @@ import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredNotifica
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredRestCallEvent;
 
 @Component
-public class CDPStructuredEventEntityToCDPStructuredEventConverter
-        extends AbstractConversionServiceAwareConverter<CDPStructuredEventEntity, CDPStructuredEvent> {
+public class CDPStructuredEventEntityToCDPStructuredEventConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CDPStructuredEventEntityToCDPStructuredEventConverter.class);
 
@@ -36,7 +34,6 @@ public class CDPStructuredEventEntityToCDPStructuredEventConverter
         classes.put("CDPStructuredFlowErrorEvent", CDPStructuredFlowEvent.class);
     }
 
-    @Override
     public CDPStructuredEvent convert(CDPStructuredEventEntity source) {
         try {
             JsonNode jsonNode = JsonUtil.readTree(source.getStructuredEventJson().getValue());

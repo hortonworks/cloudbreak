@@ -17,7 +17,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.GatewayV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.topology.GatewayTopologyV4Request;
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.gateway.topology.GatewayTopologyV4RequestToGatewayTopologyConverter;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
 
@@ -25,7 +25,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
 public class GatewayConvertUtilTest {
 
     @Mock
-    private ConverterUtil converterUtil;
+    private GatewayTopologyV4RequestToGatewayTopologyConverter gatewayTopologyV4RequestToGatewayTopologyConverter;
 
     @InjectMocks
     private GatewayConvertUtil underTest;
@@ -45,11 +45,11 @@ public class GatewayConvertUtilTest {
         source.setTopologies(Arrays.asList(topology1, topology2));
         Gateway result = new Gateway();
 
-        when(converterUtil.convert(any(), any())).thenReturn(new GatewayTopology());
+        when(gatewayTopologyV4RequestToGatewayTopologyConverter.convert(any())).thenReturn(new GatewayTopology());
 
         underTest.setTopologies(source, result);
 
-        verify(converterUtil, times(2)).convert(any(), any());
+        verify(gatewayTopologyV4RequestToGatewayTopologyConverter, times(2)).convert(any());
     }
 
     @Test

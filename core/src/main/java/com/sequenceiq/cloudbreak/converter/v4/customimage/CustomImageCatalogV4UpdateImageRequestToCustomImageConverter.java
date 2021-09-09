@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.converter.v4.customimage;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.customimage.request.CustomImageCatalogV4UpdateImageRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.customimage.request.CustomImageCatalogV4VmImageRequest;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.CustomImage;
 import com.sequenceiq.cloudbreak.domain.VmImage;
 import com.sequenceiq.common.api.type.ImageType;
@@ -12,10 +11,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
-public class CustomImageCatalogV4UpdateImageRequestToCustomImageConverter
-        extends AbstractConversionServiceAwareConverter<CustomImageCatalogV4UpdateImageRequest, CustomImage> {
+public class CustomImageCatalogV4UpdateImageRequestToCustomImageConverter {
 
-    @Override
     public CustomImage convert(CustomImageCatalogV4UpdateImageRequest source) {
         CustomImage result = new CustomImage();
         result.setImageType(source.getImageType() != null ? ImageType.valueOf(source.getImageType()) : null);

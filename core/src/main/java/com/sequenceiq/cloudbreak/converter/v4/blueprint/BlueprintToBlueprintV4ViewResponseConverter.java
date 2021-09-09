@@ -3,13 +3,11 @@ package com.sequenceiq.cloudbreak.converter.v4.blueprint;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.BlueprintV4ViewResponse;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 
 @Component
-public class BlueprintToBlueprintV4ViewResponseConverter extends AbstractConversionServiceAwareConverter<Blueprint, BlueprintV4ViewResponse> {
+public class BlueprintToBlueprintV4ViewResponseConverter {
 
-    @Override
     public BlueprintV4ViewResponse convert(Blueprint source) {
         BlueprintV4ViewResponse blueprintV4ViewResponse = new BlueprintV4ViewResponse();
         blueprintV4ViewResponse.setName(source.getName());

@@ -5,6 +5,7 @@ import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionConstant
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -196,7 +197,9 @@ public class StackProvisionActions {
             protected Selectable createRequest(StackContext context) {
                 List<CloudInstance> cloudInstances = cloudStackConverter.buildInstances(context.getStack());
                 List<Resource> resources = resourceService.findAllByStackId(context.getStack().getId());
-                List<CloudResource> cloudResources = resourceConverter.convert(resources);
+                List<CloudResource> cloudResources = resources.stream()
+                        .map(r -> resourceConverter.convert(r))
+                        .collect(Collectors.toList());
                 return new CollectMetadataRequest(context.getCloudContext(), context.getCloudCredential(), cloudResources, cloudInstances,
                         cloudInstances);
             }

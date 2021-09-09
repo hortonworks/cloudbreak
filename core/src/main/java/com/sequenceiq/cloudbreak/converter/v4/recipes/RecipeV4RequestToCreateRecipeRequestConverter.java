@@ -4,12 +4,10 @@ import org.springframework.stereotype.Component;
 
 import com.cloudera.cdp.datahub.model.CreateRecipeRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Request;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 
 @Component
-public class RecipeV4RequestToCreateRecipeRequestConverter extends AbstractConversionServiceAwareConverter<RecipeV4Request, CreateRecipeRequest> {
+public class RecipeV4RequestToCreateRecipeRequestConverter {
 
-    @Override
     public CreateRecipeRequest convert(RecipeV4Request source) {
         CreateRecipeRequest recipe = new CreateRecipeRequest();
         recipe.setRecipeName(source.getName());

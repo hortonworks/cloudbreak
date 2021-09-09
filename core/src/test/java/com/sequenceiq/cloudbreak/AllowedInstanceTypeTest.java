@@ -20,7 +20,6 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.requests.DefaultClusterTemplateV4Request;
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.config.ConversionConfig;
 import com.sequenceiq.cloudbreak.converter.StackToTemplatePreparationObjectConverter;
@@ -81,8 +80,7 @@ public class AllowedInstanceTypeTest {
 
     @Configuration
     @ComponentScan(basePackageClasses = {DefaultClusterTemplateCache.class,
-            ConversionConfig.class,
-            ConverterUtil.class})
+            ConversionConfig.class})
     @PropertySource("classpath:application.yml")
     static class TestAppContext {
 

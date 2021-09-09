@@ -1,9 +1,11 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
+import javax.validation.Valid;
 
 import org.springframework.stereotype.Controller;
 
@@ -22,21 +24,28 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.customimage.response.CustomImag
 import com.sequenceiq.cloudbreak.api.endpoint.v4.customimage.response.CustomImageCatalogV4DeleteResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.customimage.response.CustomImageCatalogV4GetImageResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.customimage.response.CustomImageCatalogV4GetResponse;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.customimage.response.CustomImageCatalogV4ListItemResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.customimage.response.CustomImageCatalogV4ListResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.customimage.response.CustomImageCatalogV4UpdateImageResponse;
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.authorization.ImageCatalogFiltering;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
+import com.sequenceiq.cloudbreak.converter.v4.customimage.CustomImageCatalogV4CreateImageRequestToCustomImageConverter;
+import com.sequenceiq.cloudbreak.converter.v4.customimage.CustomImageCatalogV4CreateRequestToImageCatalogConverter;
+import com.sequenceiq.cloudbreak.converter.v4.customimage.CustomImageCatalogV4UpdateImageRequestToCustomImageConverter;
+import com.sequenceiq.cloudbreak.converter.v4.customimage.CustomImageToCustomImageCatalogV4CreateImageResponseConverter;
+import com.sequenceiq.cloudbreak.converter.v4.customimage.CustomImageToCustomImageCatalogV4DeleteImageResponseConverter;
+import com.sequenceiq.cloudbreak.converter.v4.customimage.CustomImageToCustomImageCatalogV4GetImageResponseConverter;
+import com.sequenceiq.cloudbreak.converter.v4.customimage.CustomImageToCustomImageCatalogV4UpdateImageResponseConverter;
+import com.sequenceiq.cloudbreak.converter.v4.customimage.ImageCatalogToCustomImageCatalogV4CreateResponseConverter;
+import com.sequenceiq.cloudbreak.converter.v4.customimage.ImageCatalogToCustomImageCatalogV4DeleteResponseConverter;
+import com.sequenceiq.cloudbreak.converter.v4.customimage.ImageCatalogToCustomImageCatalogV4GetResponseConverter;
+import com.sequenceiq.cloudbreak.converter.v4.customimage.ImageCatalogToCustomImageCatalogV4ListItemResponseConverter;
 import com.sequenceiq.cloudbreak.domain.CustomImage;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.service.image.CustomImageCatalogService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
-
-import javax.validation.Valid;
 
 @Controller
 @Transactional(Transactional.TxType.NEVER)
@@ -50,35 +59,68 @@ public class CustomImageCatalogV4Controller implements CustomImageCatalogV4Endpo
     private CustomImageCatalogService customImageCatalogService;
 
     @Inject
-    private ConverterUtil converterUtil;
+    private ImageCatalogFiltering imageCatalogFiltering;
 
     @Inject
-    private ImageCatalogFiltering imageCatalogFiltering;
+    private ImageCatalogToCustomImageCatalogV4ListItemResponseConverter imageCatalogToCustomImageCatalogV4ListItemResponseConverter;
+
+    @Inject
+    private CustomImageToCustomImageCatalogV4GetImageResponseConverter customImageToCustomImageCatalogV4GetImageResponseConverter;
+
+    @Inject
+    private CustomImageToCustomImageCatalogV4CreateImageResponseConverter customImageToCustomImageCatalogV4CreateImageResponseConverter;
+
+    @Inject
+    private CustomImageToCustomImageCatalogV4DeleteImageResponseConverter customImageToCustomImageCatalogV4DeleteImageResponseConverter;
+
+    @Inject
+    private CustomImageCatalogV4CreateImageRequestToCustomImageConverter customImageCatalogV4CreateImageRequestToCustomImageConverter;
+
+    @Inject
+    private CustomImageToCustomImageCatalogV4UpdateImageResponseConverter customImageToCustomImageCatalogV4UpdateImageResponseConverter;
+
+    @Inject
+    private CustomImageCatalogV4UpdateImageRequestToCustomImageConverter customImageCatalogV4UpdateImageRequestToCustomImageConverter;
+
+    @Inject
+    private CustomImageCatalogV4CreateRequestToImageCatalogConverter customImageCatalogV4CreateRequestToImageCatalogConverter;
+
+    @Inject
+    private ImageCatalogToCustomImageCatalogV4GetResponseConverter imageCatalogToCustomImageCatalogV4GetResponseConverter;
+
+    @Inject
+    private ImageCatalogToCustomImageCatalogV4CreateResponseConverter imageCatalogToCustomImageCatalogV4CreateResponseConverter;
+
+    @Inject
+    private ImageCatalogToCustomImageCatalogV4DeleteResponseConverter imageCatalogToCustomImageCatalogV4DeleteResponseConverter;
 
     @Override
     @FilterListBasedOnPermissions
     public CustomImageCatalogV4ListResponse list(@AccountId String accountId) {
         Set<ImageCatalog> imageCatalogs = imageCatalogFiltering.filterImageCatalogs(AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG, true);
-        return new CustomImageCatalogV4ListResponse(converterUtil.convertAllAsSet(imageCatalogs, CustomImageCatalogV4ListItemResponse.class));
+        return new CustomImageCatalogV4ListResponse(
+                imageCatalogs.stream()
+                .map(i -> imageCatalogToCustomImageCatalogV4ListItemResponseConverter.convert(i))
+                .collect(Collectors.toSet())
+        );
     }
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG)
     public CustomImageCatalogV4GetResponse get(@ResourceName String name, @AccountId String accountId) {
         ImageCatalog imageCatalog = customImageCatalogService.getImageCatalog(restRequestThreadLocalService.getRequestedWorkspaceId(), name);
-
-        return converterUtil.convert(imageCatalog, CustomImageCatalogV4GetResponse.class);
+        return imageCatalogToCustomImageCatalogV4GetResponseConverter.convert(imageCatalog);
     }
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_IMAGE_CATALOG)
     public CustomImageCatalogV4CreateResponse create(@Valid CustomImageCatalogV4CreateRequest request, @AccountId String accountId) {
         String creator = ThreadBasedUserCrnProvider.getUserCrn();
-        ImageCatalog imageCatalog = converterUtil.convert(request, ImageCatalog.class);
+        ImageCatalog imageCatalog = customImageCatalogV4CreateRequestToImageCatalogConverter.convert(request);
         ImageCatalog savedImageCatalog = customImageCatalogService
                 .create(imageCatalog, restRequestThreadLocalService.getRequestedWorkspaceId(), accountId, creator);
 
-        return converterUtil.convert(savedImageCatalog, CustomImageCatalogV4CreateResponse.class);
+        return imageCatalogToCustomImageCatalogV4CreateResponseConverter.convert(savedImageCatalog);
     }
 
     @Override
@@ -86,7 +128,7 @@ public class CustomImageCatalogV4Controller implements CustomImageCatalogV4Endpo
     public CustomImageCatalogV4DeleteResponse delete(@ResourceName String name, @AccountId String accountId) {
         ImageCatalog imageCatalog = customImageCatalogService.delete(restRequestThreadLocalService.getRequestedWorkspaceId(), name);
 
-        return converterUtil.convert(imageCatalog, CustomImageCatalogV4DeleteResponse.class);
+        return imageCatalogToCustomImageCatalogV4DeleteResponseConverter.convert(imageCatalog);
     }
 
     @Override
@@ -94,7 +136,8 @@ public class CustomImageCatalogV4Controller implements CustomImageCatalogV4Endpo
     public CustomImageCatalogV4GetImageResponse getCustomImage(@ResourceName String name, String imageId, @AccountId String accountId) {
         CustomImage customImage = customImageCatalogService.getCustomImage(restRequestThreadLocalService.getRequestedWorkspaceId(), name, imageId);
         Image sourceImage = customImageCatalogService.getSourceImage(customImage);
-        CustomImageCatalogV4GetImageResponse response = converterUtil.convert(customImage, CustomImageCatalogV4GetImageResponse.class);
+        CustomImageCatalogV4GetImageResponse response = customImageToCustomImageCatalogV4GetImageResponseConverter
+                .convert(customImage);
         response.setSourceImageDate(sourceImage.getCreated());
 
         return response;
@@ -105,11 +148,11 @@ public class CustomImageCatalogV4Controller implements CustomImageCatalogV4Endpo
     public CustomImageCatalogV4CreateImageResponse createCustomImage(@ResourceName String name,
             @Valid CustomImageCatalogV4CreateImageRequest request, @AccountId String accountId) {
         String creator = ThreadBasedUserCrnProvider.getUserCrn();
-        CustomImage customImage = converterUtil.convert(request, CustomImage.class);
+        CustomImage customImage = customImageCatalogV4CreateImageRequestToCustomImageConverter.convert(request);
         CustomImage savedCustomImage = customImageCatalogService
                 .createCustomImage(restRequestThreadLocalService.getRequestedWorkspaceId(), accountId, creator, name, customImage);
 
-        return converterUtil.convert(savedCustomImage, CustomImageCatalogV4CreateImageResponse.class);
+        return customImageToCustomImageCatalogV4CreateImageResponseConverter.convert(savedCustomImage);
     }
 
     @Override
@@ -117,12 +160,12 @@ public class CustomImageCatalogV4Controller implements CustomImageCatalogV4Endpo
     public CustomImageCatalogV4UpdateImageResponse updateCustomImage(@ResourceName String name, String imageId,
             @Valid CustomImageCatalogV4UpdateImageRequest request, @AccountId String accountId) {
         String creator = ThreadBasedUserCrnProvider.getUserCrn();
-        CustomImage customImage = converterUtil.convert(request, CustomImage.class);
+        CustomImage customImage = customImageCatalogV4UpdateImageRequestToCustomImageConverter.convert(request);
         customImage.setName(imageId);
         CustomImage savedCustomImage = customImageCatalogService
                 .updateCustomImage(restRequestThreadLocalService.getRequestedWorkspaceId(), creator, name, customImage);
 
-        return converterUtil.convert(savedCustomImage, CustomImageCatalogV4UpdateImageResponse.class);
+        return customImageToCustomImageCatalogV4UpdateImageResponseConverter.convert(savedCustomImage);
     }
 
     @Override
@@ -130,6 +173,6 @@ public class CustomImageCatalogV4Controller implements CustomImageCatalogV4Endpo
     public CustomImageCatalogV4DeleteImageResponse deleteCustomImage(@ResourceName String name, String imageId, @AccountId String accountId) {
         CustomImage customImage = customImageCatalogService.deleteCustomImage(restRequestThreadLocalService.getRequestedWorkspaceId(), name, imageId);
 
-        return converterUtil.convert(customImage, CustomImageCatalogV4DeleteImageResponse.class);
+        return customImageToCustomImageCatalogV4DeleteImageResponseConverter.convert(customImage);
     }
 }

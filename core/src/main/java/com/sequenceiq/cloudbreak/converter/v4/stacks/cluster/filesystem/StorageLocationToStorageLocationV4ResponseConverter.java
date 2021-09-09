@@ -3,13 +3,11 @@ package com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.filesystem;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.storage.location.StorageLocationV4Response;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.StorageLocation;
 
 @Component
-public class StorageLocationToStorageLocationV4ResponseConverter extends AbstractConversionServiceAwareConverter<StorageLocation, StorageLocationV4Response> {
+public class StorageLocationToStorageLocationV4ResponseConverter {
 
-    @Override
     public StorageLocationV4Response convert(StorageLocation source) {
         StorageLocationV4Response storageLocation = new StorageLocationV4Response();
         storageLocation.setPropertyFile(source.getConfigFile());

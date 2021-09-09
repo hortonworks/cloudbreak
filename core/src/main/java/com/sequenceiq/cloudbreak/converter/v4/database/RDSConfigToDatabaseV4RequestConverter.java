@@ -10,15 +10,13 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.OracleParameters;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 
 @Component
-public class RDSConfigToDatabaseV4RequestConverter extends AbstractConversionServiceAwareConverter<RDSConfig, DatabaseV4Request> {
+public class RDSConfigToDatabaseV4RequestConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RDSConfigToDatabaseV4RequestConverter.class);
 
-    @Override
     public DatabaseV4Request convert(RDSConfig source) {
         DatabaseV4Request rdsConfigRequest = new DatabaseV4Request();
         rdsConfigRequest.setName(source.getName());

@@ -2,15 +2,13 @@ package com.sequenceiq.environment.tags.v1.converter;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.environment.api.v1.tags.model.AccountTagStatus;
 import com.sequenceiq.environment.api.v1.tags.model.response.AccountTagResponse;
 import com.sequenceiq.environment.tags.domain.AccountTag;
 
 @Component
-public class AccountTagToAccountTagResponsesConverter extends AbstractConversionServiceAwareConverter<AccountTag, AccountTagResponse> {
+public class AccountTagToAccountTagResponsesConverter {
 
-    @Override
     public AccountTagResponse convert(AccountTag source) {
         AccountTagResponse response = new AccountTagResponse();
         response.setKey(source.getTagKey());

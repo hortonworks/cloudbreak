@@ -4,14 +4,11 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.StackAuthenticationV4Request;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 
 @Component
-public class StackAuthenticationV4RequestToStackAuthenticationConverter
-        extends AbstractConversionServiceAwareConverter<StackAuthenticationV4Request, StackAuthentication> {
+public class StackAuthenticationV4RequestToStackAuthenticationConverter {
 
-    @Override
     public StackAuthentication convert(StackAuthenticationV4Request source) {
         StackAuthentication stackAuthentication = new StackAuthentication();
         stackAuthentication.setLoginUserName(Strings.isNullOrEmpty(source.getLoginUserName()) ? "cloudbreak" : source.getLoginUserName());

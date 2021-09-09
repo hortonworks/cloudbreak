@@ -13,9 +13,6 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
@@ -23,6 +20,7 @@ import com.sequenceiq.cloudbreak.cluster.api.ClusterSetupService;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.converter.StackToTemplatePreparationObjectConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
@@ -43,16 +41,11 @@ import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 
 @Service
 public class ClusterBuilderService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterBuilderService.class);
-
-    @Autowired
-    @Qualifier("conversionService")
-    private ConversionService conversionService;
 
     @Inject
     private StackService stackService;
@@ -99,6 +92,9 @@ public class ClusterBuilderService {
     @Inject
     private ResourceService resourceService;
 
+    @Inject
+    private StackToTemplatePreparationObjectConverter stackToTemplatePreparationObjectConverter;
+
     public void startCluster(Long stackId) throws CloudbreakException, ClusterClientInitException {
         Stack stack = stackService.getByIdWithTransaction(stackId);
         ClusterApi connector = clusterApiConnectors.getConnector(stack);
@@ -126,7 +122,8 @@ public class ClusterBuilderService {
                 stack.getCluster().getProxyConfigCrn(),
                 stack.getCluster().getEnvironmentCrn());
 
-        getClusterSetupService(stack).configureManagementServices(conversionService.convert(stack, TemplatePreparationObject.class),
+        getClusterSetupService(stack).configureManagementServices(
+                stackToTemplatePreparationObjectConverter.convert(stack),
                 getSdxContext(stack),
                 getSdxStackCrn(stack),
                 componentConfigProviderService.getTelemetry(stackId),
@@ -135,7 +132,7 @@ public class ClusterBuilderService {
 
     public void configureSupportTags(Long stackId) {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-        getClusterSetupService(stack).configureSupportTags(conversionService.convert(stack, TemplatePreparationObject.class));
+        getClusterSetupService(stack).configureSupportTags(stackToTemplatePreparationObjectConverter.convert(stack));
     }
 
     public void updateConfig(Long stackId) {
@@ -213,7 +210,7 @@ public class ClusterBuilderService {
         String template = getClusterSetupService(stack)
                 .prepareTemplate(
                         loadInstanceMetadataForHostGroups(hostGroups),
-                        conversionService.convert(stack, TemplatePreparationObject.class),
+                        stackToTemplatePreparationObjectConverter.convert(stack),
                         getSdxContext(stack),
                         getSdxStackCrn(stack),
                         kerberosConfigService.get(

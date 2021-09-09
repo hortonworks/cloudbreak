@@ -20,7 +20,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.GatewayType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.SSOType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.GatewayV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.topology.GatewayTopologyV4Request;
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.config.ConversionConfig;
 import com.sequenceiq.cloudbreak.conf.ConverterMockProvider;
 import com.sequenceiq.cloudbreak.conf.RepositoryMockProvider;
@@ -29,12 +28,15 @@ import com.sequenceiq.cloudbreak.controller.validation.stack.cluster.gateway.Gat
 import com.sequenceiq.cloudbreak.controller.validation.stack.cluster.gateway.GatewayV4RequestValidator;
 import com.sequenceiq.cloudbreak.converter.util.GatewayConvertUtil;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.gateway.GatewayV4RequestToGatewayConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.gateway.topology.GatewayTopologyV4RequestToExposedServicesConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.gateway.topology.GatewayTopologyV4RequestToGatewayTopologyConverter;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {GatewayV4RequestToGatewayConverter.class, ConversionConfig.class, ConverterUtil.class, GatewayConvertUtil.class,
-        GatewayV4RequestValidator.class, GatewayTopologyV4RequestToGatewayTopologyConverter.class, GatewayTopologyV4RequestValidator.class,
+@ContextConfiguration(classes = {GatewayV4RequestToGatewayConverter.class, ConversionConfig.class, GatewayConvertUtil.class,
+        GatewayV4RequestValidator.class, GatewayTopologyV4RequestToGatewayTopologyConverter.class,
+        GatewayTopologyV4RequestValidator.class,
+        GatewayTopologyV4RequestToExposedServicesConverter.class,
         ConverterMockProvider.class, RepositoryMockProvider.class})
 public class ClusterRequestToGatewayConverterTest {
 

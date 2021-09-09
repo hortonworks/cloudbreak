@@ -2,6 +2,8 @@ package com.sequenceiq.freeipa.flow.stack.stop.action;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import javax.inject.Inject;
 
@@ -11,12 +13,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StopInstancesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StopInstancesResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.freeipa.converter.cloud.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.freeipa.converter.cloud.ResourceToCloudResourceConverter;
 import com.sequenceiq.freeipa.entity.Resource;
 import com.sequenceiq.freeipa.flow.stack.AbstractStackFailureAction;
@@ -34,9 +36,6 @@ public class StackStopActions {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackStopActions.class);
 
     @Inject
-    private ConverterUtil converterUtil;
-
-    @Inject
     private StackStopService stackStopService;
 
     @Inject
@@ -44,6 +43,9 @@ public class StackStopActions {
 
     @Inject
     private ResourceToCloudResourceConverter resourceToCloudResourceConverter;
+
+    @Inject
+    private InstanceMetaDataToCloudInstanceConverter instanceMetaDataToCloudInstanceConverter;
 
     @Bean(name = "STOP_STATE")
     public Action<?, ?> stackStopAction() {
@@ -56,7 +58,9 @@ public class StackStopActions {
 
             @Override
             protected Selectable createRequest(StackStopContext context) {
-                List<CloudInstance> cloudInstances = converterUtil.convertAll(context.getInstanceMetaData(), CloudInstance.class);
+                List<CloudInstance> cloudInstances = StreamSupport.stream(context.getInstanceMetaData().spliterator(), false)
+                        .map(i -> instanceMetaDataToCloudInstanceConverter.convert(i))
+                        .collect(Collectors.toList());
                 List<CloudResource> cloudResources = getCloudResources(context.getStack().getId());
                 return new StopInstancesRequest<StopInstancesResult>(context.getCloudContext(), context.getCloudCredential(), cloudResources, cloudInstances);
             }
@@ -97,6 +101,8 @@ public class StackStopActions {
 
     private List<CloudResource> getCloudResources(Long stackId) {
         List<Resource> resources = resourceService.findAllByStackId(stackId);
-        return resourceToCloudResourceConverter.convert(resources);
+        return resources.stream()
+            .map(r -> resourceToCloudResourceConverter.convert(r))
+            .collect(Collectors.toList());
     }
 }

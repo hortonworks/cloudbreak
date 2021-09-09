@@ -37,10 +37,11 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4R
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.cloud.model.AutoscaleRecommendation;
+import com.sequenceiq.cloudbreak.converter.v4.clustertemplate.AutoscaleRecommendationToAutoscaleRecommendationV4ResponseConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.StackToAutoscaleStackV4ResponseConverter;
 import com.sequenceiq.cloudbreak.conf.LimitConfiguration;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.service.ClusterProxyService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -76,10 +77,13 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
     private ClusterProxyService clusterProxyService;
 
     @Inject
-    private ConverterUtil converterUtil;
+    private BlueprintService blueprintService;
 
     @Inject
-    private BlueprintService blueprintService;
+    private StackToAutoscaleStackV4ResponseConverter stackToAutoscaleStackV4ResponseConverter;
+
+    @Inject
+    private AutoscaleRecommendationToAutoscaleRecommendationV4ResponseConverter autoscaleRecommendationToAutoscaleRecommendationV4ResponseConverter;
 
     @Inject
     private LimitConfiguration limitConfiguration;
@@ -108,14 +112,14 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.SCALE_DATAHUB)
     public AutoscaleStackV4Response getAutoscaleClusterByCrn(@TenantAwareParam @ResourceCrn String crn) {
         Stack stack = stackService.getByCrnInWorkspace(crn, restRequestThreadLocalService.getRequestedWorkspaceId());
-        return converterUtil.convert(stack, AutoscaleStackV4Response.class);
+        return stackToAutoscaleStackV4ResponseConverter.convert(stack);
     }
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.SCALE_DATAHUB)
     public AutoscaleStackV4Response getAutoscaleClusterByName(@ResourceName String name) {
         Stack stack = stackService.getByNameInWorkspace(name, restRequestThreadLocalService.getRequestedWorkspaceId());
-        return converterUtil.convert(stack, AutoscaleStackV4Response.class);
+        return stackToAutoscaleStackV4ResponseConverter.convert(stack);
     }
 
     @Override
@@ -196,7 +200,7 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
 
         AutoscaleRecommendation autoscaleRecommendation = blueprintService.getAutoscaleRecommendation(workspaceId, blueprintName);
 
-        return converterUtil.convert(autoscaleRecommendation, AutoscaleRecommendationV4Response.class);
+        return autoscaleRecommendationToAutoscaleRecommendationV4ResponseConverter.convert(autoscaleRecommendation);
     }
 
     @Override
@@ -205,6 +209,6 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
         AutoscaleRecommendation autoscaleRecommendation = blueprintService.getAutoscaleRecommendation(
                 restRequestThreadLocalService.getRequestedWorkspaceId(), blueprintName);
 
-        return converterUtil.convert(autoscaleRecommendation, AutoscaleRecommendationV4Response.class);
+        return autoscaleRecommendationToAutoscaleRecommendationV4ResponseConverter.convert(autoscaleRecommendation);
     }
 }

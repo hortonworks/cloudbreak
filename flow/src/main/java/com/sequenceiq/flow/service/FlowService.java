@@ -12,13 +12,11 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.ws.rs.BadRequestException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Sets;
@@ -28,6 +26,7 @@ import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowLogResponse;
 import com.sequenceiq.flow.api.model.FlowProgressResponse;
 import com.sequenceiq.flow.api.model.operation.OperationFlowsView;
+import com.sequenceiq.flow.converter.FlowLogConverter;
 import com.sequenceiq.flow.converter.FlowProgressResponseConverter;
 import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
@@ -55,11 +54,10 @@ public class FlowService {
     private Set<String> failHandledEvents;
 
     @Inject
-    @Named("conversionService")
-    private ConversionService conversionService;
+    private FlowProgressResponseConverter flowProgressResponseConverter;
 
     @Inject
-    private FlowProgressResponseConverter flowProgressResponseConverter;
+    private FlowLogConverter flowLogConverter;
 
     @Inject
     private FlowOperationStatisticsService flowOperationStatisticsService;
@@ -68,7 +66,7 @@ public class FlowService {
         LOGGER.info("Getting last flow log by flow id {}", flowId);
         Optional<FlowLog> lastFlowLog = flowLogDBService.getLastFlowLog(flowId);
         if (lastFlowLog.isPresent()) {
-            return conversionService.convert(lastFlowLog.get(), FlowLogResponse.class);
+            return flowLogConverter.convert(lastFlowLog.get());
         }
         throw new BadRequestException("Not found flow for this flow id!");
     }
@@ -76,40 +74,40 @@ public class FlowService {
     public List<FlowLogResponse> getFlowLogsByFlowId(String flowId) {
         LOGGER.info("Getting flow logs by flow id {}", flowId);
         List<FlowLog> flowLogs = flowLogDBService.findAllByFlowIdOrderByCreatedDesc(flowId);
-        return flowLogs.stream().map(flowLog -> conversionService.convert(flowLog, FlowLogResponse.class)).collect(Collectors.toList());
+        return flowLogs.stream().map(flowLog -> flowLogConverter.convert(flowLog)).collect(Collectors.toList());
     }
 
     public FlowLogResponse getLastFlowByResourceName(String resourceName) {
         checkState(!Crn.isCrn(resourceName));
         LOGGER.info("Getting last flow log by resource name {}", resourceName);
-        return conversionService.convert(flowLogDBService.getLastFlowLogByResourceCrnOrName(resourceName), FlowLogResponse.class);
+        return flowLogConverter.convert(flowLogDBService.getLastFlowLogByResourceCrnOrName(resourceName));
     }
 
     public FlowLogResponse getLastFlowByResourceCrn(String resourceCrn) {
         checkState(Crn.isCrn(resourceCrn));
         LOGGER.info("Getting last flow log by resource crn {}", resourceCrn);
-        return conversionService.convert(flowLogDBService.getLastFlowLogByResourceCrnOrName(resourceCrn), FlowLogResponse.class);
+        return flowLogConverter.convert(flowLogDBService.getLastFlowLogByResourceCrnOrName(resourceCrn));
     }
 
     public List<FlowLogResponse> getFlowLogsByResourceCrn(String resourceCrn) {
         checkState(Crn.isCrn(resourceCrn));
         LOGGER.info("Getting flow logs by resource crn {}", resourceCrn);
         List<FlowLog> flowLogs = flowLogDBService.getFlowLogsByResourceCrnOrName(resourceCrn);
-        return flowLogs.stream().map(flowLog -> conversionService.convert(flowLog, FlowLogResponse.class)).collect(Collectors.toList());
+        return flowLogs.stream().map(flowLog -> flowLogConverter.convert(flowLog)).collect(Collectors.toList());
     }
 
     public <T extends AbstractFlowConfiguration> List<FlowLogResponse> getFlowLogsByCrnAndType(String resourceCrn, Class<T> clazz) {
         checkState(Crn.isCrn(resourceCrn));
         LOGGER.info("Getting flow logs by resource crn {} and type {}", resourceCrn, clazz.getCanonicalName());
         List<FlowLog> flowLogs = flowLogDBService.getFlowLogsByCrnAndType(resourceCrn, clazz);
-        return flowLogs.stream().map(flowLog -> conversionService.convert(flowLog, FlowLogResponse.class)).collect(Collectors.toList());
+        return flowLogs.stream().map(flowLog -> flowLogConverter.convert(flowLog)).collect(Collectors.toList());
     }
 
     public List<FlowLogResponse> getFlowLogsByResourceName(String resourceName) {
         checkState(!Crn.isCrn(resourceName));
         LOGGER.info("Getting flow logs by resource name {}", resourceName);
         List<FlowLog> flowLogs = flowLogDBService.getFlowLogsByResourceCrnOrName(resourceName);
-        return flowLogs.stream().map(flowLog -> conversionService.convert(flowLog, FlowLogResponse.class)).collect(Collectors.toList());
+        return flowLogs.stream().map(flowLog -> flowLogConverter.convert(flowLog)).collect(Collectors.toList());
     }
 
     public FlowCheckResponse getFlowChainStateByResourceCrn(String chainId, String resourceCrn) {

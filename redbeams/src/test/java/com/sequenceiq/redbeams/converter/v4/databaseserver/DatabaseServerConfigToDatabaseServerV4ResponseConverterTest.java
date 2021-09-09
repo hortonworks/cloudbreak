@@ -2,7 +2,6 @@ package com.sequenceiq.redbeams.converter.v4.databaseserver;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -17,13 +16,13 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
+import com.sequenceiq.cloudbreak.service.secret.model.StringToSecretResponseConverter;
 import com.sequenceiq.redbeams.TestData;
 import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslMode;
@@ -67,10 +66,10 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
     private static final String CLOUD_PLATFORM = CloudPlatform.AWS.name();
 
     @Mock
-    private ConversionService conversionService;
+    private DatabaseServerSslCertificateConfig databaseServerSslCertificateConfig;
 
     @Mock
-    private DatabaseServerSslCertificateConfig databaseServerSslCertificateConfig;
+    private StringToSecretResponseConverter stringToSecretResponseConverter;
 
     @InjectMocks
     private DatabaseServerConfigToDatabaseServerV4ResponseConverter converter;
@@ -93,11 +92,11 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
         DBStack dbStack = new DBStack();
         initDBStackStatus(dbStack);
         server.setDbStack(dbStack);
-        when(conversionService.convert(anyString(), eq(SecretResponse.class))).thenReturn(new SecretResponse());
+        when(stringToSecretResponseConverter.convert(anyString())).thenReturn(new SecretResponse());
 
         DatabaseServerV4Response response = converter.convert(server);
 
-        verify(conversionService, times(2)).convert(anyString(), eq(SecretResponse.class));
+        verify(stringToSecretResponseConverter, times(2)).convert(anyString());
         assertThat(response).isNotNull();
         assertThat(response.getId()).isEqualTo(server.getId());
         assertThat(response.getCrn()).isEqualTo(server.getResourceCrn().toString());
@@ -138,11 +137,11 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
         server.setCreationDate(System.currentTimeMillis());
         server.setEnvironmentId(ENVIRONMENT_ID);
         server.setResourceStatus(ResourceStatus.USER_MANAGED);
-        when(conversionService.convert(anyString(), eq(SecretResponse.class))).thenReturn(new SecretResponse());
+        when(stringToSecretResponseConverter.convert(anyString())).thenReturn(new SecretResponse());
 
         DatabaseServerV4Response response = converter.convert(server);
 
-        verify(conversionService, times(2)).convert(anyString(), eq(SecretResponse.class));
+        verify(stringToSecretResponseConverter, times(2)).convert(anyString());
         assertThat(response).isNotNull();
         assertThat(response.getResourceStatus()).isEqualTo(server.getResourceStatus());
         assertThat(response.getStatus()).isEqualTo(Status.AVAILABLE);

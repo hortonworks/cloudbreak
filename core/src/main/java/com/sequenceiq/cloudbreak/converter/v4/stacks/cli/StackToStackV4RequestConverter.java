@@ -19,14 +19,10 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.StackAuthenticationV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.customdomain.CustomDomainSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.placement.PlacementSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.network.InstanceGroupNetworkV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
@@ -34,9 +30,9 @@ import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.DatabaseAvailabilityTypeToExternalDatabaseRequestConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.TelemetryConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.network.InstanceGroupNetworkToInstanceGroupNetworkV4RequestConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -48,7 +44,7 @@ import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 
 @Component
-public class StackToStackV4RequestConverter extends AbstractConversionServiceAwareConverter<Stack, StackV4Request> {
+public class StackToStackV4RequestConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackToStackV4RequestConverter.class);
 
@@ -67,16 +63,30 @@ public class StackToStackV4RequestConverter extends AbstractConversionServiceAwa
     @Inject
     private DatalakeService datalakeService;
 
-    @Override
+    @Inject
+    private InstanceGroupToInstanceGroupV4RequestConverter instanceGroupToInstanceGroupV4RequestConverter;
+
+    @Inject
+    private InstanceGroupNetworkToInstanceGroupNetworkV4RequestConverter instanceGroupNetworkToInstanceGroupNetworkV4RequestConverter;
+
+    @Inject
+    private NetworkToNetworkV4RequestConverter networkToNetworkV4RequestConverter;
+
+    @Inject
+    private ClusterToClusterV4RequestConverter clusterToClusterV4RequestConverter;
+
+    @Inject
+    private StackAuthenticationToStackAuthenticationV4RequestConverter stackAuthenticationToStackAuthenticationV4RequestConverter;
+
     public StackV4Request convert(Stack source) {
         StackV4Request stackV4Request = new StackV4Request();
         stackV4Request.setCloudPlatform(getIfNotNull(source.getCloudPlatform(), cp -> Enum.valueOf(CloudPlatform.class, cp)));
         stackV4Request.setEnvironmentCrn(source.getEnvironmentCrn());
         stackV4Request.setCustomDomain(getCustomDomainSettings(source));
         providerParameterCalculator.parse(new HashMap<>(source.getParameters()), stackV4Request);
-        stackV4Request.setAuthentication(getConversionService().convert(source.getStackAuthentication(), StackAuthenticationV4Request.class));
-        stackV4Request.setNetwork(getConversionService().convert(source.getNetwork(), NetworkV4Request.class));
-        stackV4Request.setCluster(getConversionService().convert(source.getCluster(), ClusterV4Request.class));
+        stackV4Request.setAuthentication(stackAuthenticationToStackAuthenticationV4RequestConverter.convert(source.getStackAuthentication()));
+        stackV4Request.setNetwork(networkToNetworkV4RequestConverter.convert(source.getNetwork()));
+        stackV4Request.setCluster(clusterToClusterV4RequestConverter.convert(source.getCluster()));
         stackV4Request.setExternalDatabase(getIfNotNull(source.getExternalDatabaseCreationType(),
                 databaseAvailabilityTypeToExternalDatabaseRequestConverter::convert));
         if (!source.getLoadBalancers().isEmpty()) {
@@ -132,7 +142,8 @@ public class StackToStackV4RequestConverter extends AbstractConversionServiceAwa
     private List<InstanceGroupV4Request> getInstanceGroups(Stack stack) {
         List<InstanceGroupV4Request> ret = new ArrayList<>();
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-            InstanceGroupV4Request instanceGroupV4Request = getConversionService().convert(instanceGroup, InstanceGroupV4Request.class);
+            InstanceGroupV4Request instanceGroupV4Request = instanceGroupToInstanceGroupV4RequestConverter
+                    .convert(instanceGroup);
             collectInformationsFromActualHostgroup(stack.getCluster(), instanceGroup, instanceGroupV4Request);
             ret.add(instanceGroupV4Request);
         }
@@ -148,8 +159,8 @@ public class StackToStackV4RequestConverter extends AbstractConversionServiceAwa
                         Set<String> recipeNames = hostGroup.getRecipes().stream().map(Recipe::getName).collect(Collectors.toSet());
                         instanceGroupV4Request.setRecipeNames(recipeNames);
                         instanceGroupV4Request.setRecoveryMode(hostGroup.getRecoveryMode());
-                        instanceGroupV4Request.setNetwork(getConversionService()
-                                .convert(instanceGroup.getInstanceGroupNetwork(), InstanceGroupNetworkV4Request.class));
+                        instanceGroupV4Request.setNetwork(instanceGroupNetworkToInstanceGroupNetworkV4RequestConverter
+                                .convert(instanceGroup.getInstanceGroupNetwork()));
                     });
         }
     }

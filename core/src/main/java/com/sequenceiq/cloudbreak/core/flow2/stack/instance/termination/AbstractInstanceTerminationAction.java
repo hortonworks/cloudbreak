@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -89,7 +90,9 @@ abstract class AbstractInstanceTerminationAction<P extends InstancePayload>
         CloudCredential cloudCredential = stackUtil.getCloudCredential(stack);
         Set<String> instanceIds = payload.getInstanceIds();
         CloudStack cloudStack = cloudStackConverter.convert(stack, instanceIds);
-        List<CloudResource> cloudResources = cloudResourceConverter.convert(stack.getResources());
+        List<CloudResource> cloudResources = stack.getResources().stream()
+                .map(r -> cloudResourceConverter.convert(r))
+                .collect(Collectors.toList());
         List<InstanceMetaData> instanceMetaDataList = new ArrayList<>();
         List<CloudInstance> cloudInstances = new ArrayList<>();
         DetailedEnvironmentResponse environment = environmentClientService.getByCrnAsInternal(stack.getEnvironmentCrn());

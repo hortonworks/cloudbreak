@@ -5,13 +5,11 @@ import java.util.Arrays;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.SecurityRuleV4Response;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
 
 @Component
-public class SecurityRuleToSecurityRuleV4ResponseConverter extends AbstractConversionServiceAwareConverter<SecurityRule, SecurityRuleV4Response> {
+public class SecurityRuleToSecurityRuleV4ResponseConverter {
 
-    @Override
     public SecurityRuleV4Response convert(SecurityRule source) {
         SecurityRuleV4Response entity = new SecurityRuleV4Response();
         entity.setSubnet(source.getCidr());

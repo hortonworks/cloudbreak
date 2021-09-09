@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -75,7 +76,9 @@ abstract class AbstractStackTerminationAction<P extends Payload>
                 .build();
         CloudCredential cloudCredential = stackUtil.getCloudCredential(stack);
         CloudStack cloudStack = cloudStackConverter.convert(stack);
-        List<CloudResource> resources = cloudResourceConverter.convert(stack.getResources());
+        List<CloudResource> resources = stack.getResources().stream()
+                .map(r -> cloudResourceConverter.convert(r))
+                .collect(Collectors.toList());
         return createStackTerminationContext(flowParameters, stack, cloudContext, cloudCredential, cloudStack, resources, terminationType);
     }
 

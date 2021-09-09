@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -19,7 +20,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StopInstancesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StopInstancesResult;
@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
+import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractStackAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
@@ -52,13 +53,13 @@ public class StackStopActions {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackStopActions.class);
 
     @Inject
-    private ConverterUtil converterUtil;
-
-    @Inject
     private InstanceMetaDataToCloudInstanceConverter instanceMetaDataToCloudInstanceConverter;
 
     @Inject
     private StackStartStopService stackStartStopService;
+
+    @Inject
+    private ResourceToCloudResourceConverter resourceToCloudResourceConverter;
 
     @Bean(name = "STOP_STATE")
     public Action<?, ?> stackStopAction() {
@@ -74,7 +75,9 @@ public class StackStopActions {
                 Stack stack = context.getStack();
                 List<CloudInstance> cloudInstances = instanceMetaDataToCloudInstanceConverter.convert(context.getInstanceMetaData(),
                         stack.getEnvironmentCrn(), stack.getStackAuthentication());
-                List<CloudResource> cloudResources = converterUtil.convertAll(stack.getResources(), CloudResource.class);
+                List<CloudResource> cloudResources = stack.getResources().stream()
+                        .map(s -> resourceToCloudResourceConverter.convert(s))
+                        .collect(Collectors.toList());
                 cloudInstances.forEach(instance -> stack.getParameters().forEach(instance::putParameter));
                 return new StopInstancesRequest<StopInstancesResult>(context.getCloudContext(), context.getCloudCredential(), cloudResources, cloudInstances);
             }

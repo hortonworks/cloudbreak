@@ -9,7 +9,6 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
@@ -27,6 +26,8 @@ import com.sequenceiq.cloudbreak.structuredevent.repository.CDPPagingStructuredE
 import com.sequenceiq.cloudbreak.structuredevent.repository.CDPStructuredEventRepository;
 import com.sequenceiq.cloudbreak.structuredevent.service.AbstractAccountAwareResourceService;
 import com.sequenceiq.cloudbreak.structuredevent.service.CDPStructuredEventService;
+import com.sequenceiq.cloudbreak.structuredevent.service.converter.CDPStructuredEventEntityToCDPStructuredEventConverter;
+import com.sequenceiq.cloudbreak.structuredevent.service.converter.CDPStructuredEventToCDPStructuredEventEntityConverter;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 
 @Component
@@ -35,13 +36,16 @@ public class CDPStructuredEventDBService extends AbstractAccountAwareResourceSer
     private static final Logger LOGGER = LoggerFactory.getLogger(CDPStructuredEventDBService.class);
 
     @Inject
-    private ConversionService conversionService;
-
-    @Inject
     private CDPStructuredEventRepository structuredEventRepository;
 
     @Inject
     private CDPPagingStructuredEventRepository pagingStructuredEventRepository;
+
+    @Inject
+    private CDPStructuredEventToCDPStructuredEventEntityConverter cdpStructuredEventToCDPStructuredEventEntityConverter;
+
+    @Inject
+    private CDPStructuredEventEntityToCDPStructuredEventConverter cdpStructuredEventEntityToCDPStructuredEventConverter;
 
     @Override
     public void create(CDPStructuredEvent structuredEvent) {
@@ -51,7 +55,8 @@ public class CDPStructuredEventDBService extends AbstractAccountAwareResourceSer
         if (validationResult.hasError()) {
             LOGGER.warn(validationResult.getFormattedErrors());
         } else {
-            CDPStructuredEventEntity structuredEventEntityEntity = conversionService.convert(structuredEvent, CDPStructuredEventEntity.class);
+            CDPStructuredEventEntity structuredEventEntityEntity = cdpStructuredEventToCDPStructuredEventEntityConverter
+                    .convert(structuredEvent);
             create(structuredEventEntityEntity, structuredEventEntityEntity.getAccountId());
         }
     }
@@ -89,7 +94,8 @@ public class CDPStructuredEventDBService extends AbstractAccountAwareResourceSer
         List<StructuredEventType> types = getAllEventTypeIfEmpty(eventTypes);
         try {
             Page<CDPStructuredEventEntity> events = pagingStructuredEventRepository.findByEventTypeInAndResourceCrn(types, resourceCrn, pageable);
-            return (Page<T>) Optional.ofNullable(events).orElse(Page.empty()).map(event -> conversionService.convert(event, CDPStructuredEvent.class));
+            return (Page<T>) Optional.ofNullable(events).orElse(Page.empty()).map(event -> cdpStructuredEventEntityToCDPStructuredEventConverter
+                    .convert(event));
         } catch (Exception ex) {
             String msg = String.format("Failed get pageable events for types: '%s' and resource CRN: '%s'", types, resourceCrn);
             LOGGER.warn(msg, ex);
@@ -104,7 +110,8 @@ public class CDPStructuredEventDBService extends AbstractAccountAwareResourceSer
         try {
             List<CDPStructuredEventEntity> events = structuredEventRepository.findByEventTypeInAndResourceCrn(types, resourceCrn);
             return (List<T>) Optional.ofNullable(events).orElse(new ArrayList<>()).stream()
-                    .map(event -> conversionService.convert(event, CDPStructuredEvent.class))
+                    .map(event -> cdpStructuredEventEntityToCDPStructuredEventConverter
+                            .convert(event))
                     .collect(Collectors.toList());
         } catch (Exception ex) {
             String msg = String.format("Failed get events for types: '%s' and resource CRN: '%s'", types, resourceCrn);

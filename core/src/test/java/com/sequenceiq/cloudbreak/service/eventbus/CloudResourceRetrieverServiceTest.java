@@ -5,7 +5,6 @@ import static com.sequenceiq.common.api.type.ResourceType.AZURE_MANAGED_IMAGE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -16,7 +15,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.core.convert.ConversionService;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
@@ -35,9 +33,6 @@ public class CloudResourceRetrieverServiceTest {
 
     @Mock
     private ResourceToCloudResourceConverter cloudResourceConverter;
-
-    @Mock
-    private ConversionService conversionService;
 
     @Mock
     private ResourceService resourceService;
@@ -66,7 +61,6 @@ public class CloudResourceRetrieverServiceTest {
 
         assertTrue(actual.isEmpty());
         verify(resourceService).findByResourceReferenceAndStatusAndType(RESOURCE_REFERENCE, REQUESTED, AZURE_MANAGED_IMAGE);
-        verifyNoInteractions(conversionService);
     }
 
     private Resource createResource() {

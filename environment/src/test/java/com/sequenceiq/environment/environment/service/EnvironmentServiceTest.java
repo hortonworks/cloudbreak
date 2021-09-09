@@ -42,7 +42,6 @@ import com.sequenceiq.environment.environment.domain.RegionWrapper;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.repository.EnvironmentRepository;
-import com.sequenceiq.environment.environment.v1.cli.DelegatingCliEnvironmentRequestConverter;
 import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
 
 @ExtendWith(MockitoExtension.class)
@@ -56,9 +55,6 @@ class EnvironmentServiceTest {
 
     @Mock
     private EnvironmentDtoConverter environmentDtoConverter;
-
-    @Mock
-    private DelegatingCliEnvironmentRequestConverter delegatingCliEnvironmentRequestConverter;
 
     @Mock
     private EnvironmentValidatorService environmentValidatorService;

@@ -7,11 +7,10 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.SecurityRuleV4Request;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
 
 @Component
-public class SecurityRuleV4RequestToSecurityRuleConverter extends AbstractConversionServiceAwareConverter<SecurityRuleV4Request, SecurityRule> {
+public class SecurityRuleV4RequestToSecurityRuleConverter {
 
     private static final String PORT_REGEX = "^([1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])"
             + "(-([1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5]))?$";
@@ -20,7 +19,6 @@ public class SecurityRuleV4RequestToSecurityRuleConverter extends AbstractConver
 
     private static final int MAX_RANGE = 65535;
 
-    @Override
     public SecurityRule convert(SecurityRuleV4Request source) {
         SecurityRule entity = new SecurityRule();
         entity.setCidr(source.getSubnet());

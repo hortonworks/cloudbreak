@@ -2,14 +2,12 @@ package com.sequenceiq.cloudbreak.structuredevent.converter;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
 import com.sequenceiq.cloudbreak.structuredevent.event.SecurityRuleDetails;
 
 @Component
-public class SecurityRuleToSecurityRuleDetailsConverter extends AbstractConversionServiceAwareConverter<SecurityRule, SecurityRuleDetails> {
+public class SecurityRuleToSecurityRuleDetailsConverter {
 
-    @Override
     public SecurityRuleDetails convert(SecurityRule source) {
         SecurityRuleDetails securityRuleDetails = new SecurityRuleDetails();
         securityRuleDetails.setCidr(source.getCidr());

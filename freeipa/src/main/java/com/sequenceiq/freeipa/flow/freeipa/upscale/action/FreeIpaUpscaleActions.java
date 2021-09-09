@@ -280,7 +280,9 @@ public class FreeIpaUpscaleActions {
 
                 List<CloudInstance> allKnownInstances = cloudStackConverter.buildInstances(stack);
                 List<Resource> resources = resourceService.findAllByStackId(stack.getId());
-                List<CloudResource> cloudResources = resourceConverter.convert(resources);
+                List<CloudResource> cloudResources = resources.stream()
+                        .map(r -> resourceConverter.convert(r))
+                        .collect(Collectors.toList());
                 List<CloudInstance> newCloudInstances = allKnownInstances.stream()
                         .filter(this::isNewInstances)
                         .collect(Collectors.toList());

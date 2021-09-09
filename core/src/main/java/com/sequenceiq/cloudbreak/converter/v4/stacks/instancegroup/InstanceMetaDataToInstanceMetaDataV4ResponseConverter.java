@@ -3,16 +3,13 @@ package com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 
 @Component
-public class InstanceMetaDataToInstanceMetaDataV4ResponseConverter
-        extends AbstractConversionServiceAwareConverter<InstanceMetaData, InstanceMetaDataV4Response> {
+public class InstanceMetaDataToInstanceMetaDataV4ResponseConverter {
 
     private static final String NOT_AVAILABLE = "N/A";
 
-    @Override
     public InstanceMetaDataV4Response convert(InstanceMetaData source) {
         InstanceMetaDataV4Response metaDataJson = new InstanceMetaDataV4Response();
         metaDataJson.setPrivateIp(source.getPrivateIp());

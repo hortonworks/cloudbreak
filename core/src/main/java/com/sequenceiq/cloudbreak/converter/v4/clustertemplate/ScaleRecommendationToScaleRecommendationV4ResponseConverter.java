@@ -6,13 +6,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.AutoscaleRe
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.ResizeRecommendationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.ScaleRecommendationV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.ScaleRecommendation;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 
 @Component
-public class ScaleRecommendationToScaleRecommendationV4ResponseConverter
-        extends AbstractConversionServiceAwareConverter<ScaleRecommendation, ScaleRecommendationV4Response> {
+public class ScaleRecommendationToScaleRecommendationV4ResponseConverter {
 
-    @Override
     public ScaleRecommendationV4Response convert(ScaleRecommendation source) {
         AutoscaleRecommendationV4Response autoscaleRecommendation = new AutoscaleRecommendationV4Response(
                 source.getAutoscaleRecommendation().getTimeBasedHostGroups(), source.getAutoscaleRecommendation().getLoadBasedHostGroups());

@@ -5,18 +5,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.json.Json;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.structuredevent.domain.CDPStructuredEventEntity;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPOperationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEvent;
 
 @Component
-public class CDPStructuredEventToCDPStructuredEventEntityConverter
-        extends AbstractConversionServiceAwareConverter<CDPStructuredEvent, CDPStructuredEventEntity> {
+public class CDPStructuredEventToCDPStructuredEventEntityConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CDPStructuredEventToCDPStructuredEventEntityConverter.class);
 
-    @Override
     public CDPStructuredEventEntity convert(CDPStructuredEvent source) {
         try {
             CDPStructuredEventEntity structuredEventEntity = new CDPStructuredEventEntity();

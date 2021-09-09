@@ -10,8 +10,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
-import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
+import com.sequenceiq.cloudbreak.service.secret.model.StringToSecretResponseConverter;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.SslConfigV4Response;
 import com.sequenceiq.redbeams.api.model.common.Status;
@@ -21,13 +20,14 @@ import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.domain.stack.SslConfig;
 
 @Component
-public class DatabaseServerConfigToDatabaseServerV4ResponseConverter
-        extends AbstractConversionServiceAwareConverter<DatabaseServerConfig, DatabaseServerV4Response> {
+public class DatabaseServerConfigToDatabaseServerV4ResponseConverter {
 
     @Inject
     private DatabaseServerSslCertificateConfig databaseServerSslCertificateConfig;
 
-    @Override
+    @Inject
+    private StringToSecretResponseConverter stringToSecretResponseConverter;
+
     public DatabaseServerV4Response convert(DatabaseServerConfig source) {
         DatabaseServerV4Response response = new DatabaseServerV4Response();
         response.setId(source.getId());
@@ -40,8 +40,8 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverter
         response.setDatabaseVendor(source.getDatabaseVendor().databaseType());
         response.setDatabaseVendorDisplayName(source.getDatabaseVendor().displayName());
         response.setConnectionDriver(source.getConnectionDriver());
-        response.setConnectionUserName(getConversionService().convert(source.getConnectionUserNameSecret(), SecretResponse.class));
-        response.setConnectionPassword(getConversionService().convert(source.getConnectionPasswordSecret(), SecretResponse.class));
+        response.setConnectionUserName(stringToSecretResponseConverter.convert(source.getConnectionUserNameSecret()));
+        response.setConnectionPassword(stringToSecretResponseConverter.convert(source.getConnectionPasswordSecret()));
         response.setCreationDate(source.getCreationDate());
         response.setEnvironmentCrn(source.getEnvironmentId());
         response.setClusterCrn(source.getClusterCrn());

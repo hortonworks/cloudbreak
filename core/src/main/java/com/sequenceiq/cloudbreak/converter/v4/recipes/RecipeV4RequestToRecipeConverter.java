@@ -5,14 +5,12 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type;
 import com.sequenceiq.cloudbreak.common.model.recipe.RecipeType;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.CreationType;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 
 @Component
-public class RecipeV4RequestToRecipeConverter extends AbstractConversionServiceAwareConverter<RecipeV4Request, Recipe> {
+public class RecipeV4RequestToRecipeConverter {
 
-    @Override
     public Recipe convert(RecipeV4Request source) {
         Recipe recipe = new Recipe();
         recipe.setName(source.getName());

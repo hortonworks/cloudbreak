@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -17,23 +18,12 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.CloudbreakDetailsV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.PlacementSettingsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.authentication.StackAuthenticationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway.topology.GatewayTopologyV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.customdomain.CustomDomainSettingsV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.DatabaseResponse;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.StackImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.network.InstanceGroupNetworkV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.loadbalancer.LoadBalancerResponse;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.network.NetworkV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.tags.TagsV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
@@ -42,7 +32,16 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
+import com.sequenceiq.cloudbreak.converter.v4.recipes.RecipeToRecipeV4ResponseConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.authentication.StackAuthenticationToStackAuthenticationV4ResponseConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.ClusterToClusterV4ResponseConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.customdomains.StackToCustomDomainsSettingsV4Response;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.database.DatabaseAvailabilityTypeToDatabaseResponseConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.InstanceGroupToInstanceGroupV4ResponseConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.network.InstanceGroupNetworkToInstanceGroupNetworkV4ResponseConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.loadbalancer.LoadBalancerToLoadBalancerResponseConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.network.NetworkToNetworkV4ResponseConverter;
+import com.sequenceiq.cloudbreak.converter.v4.workspaces.WorkspaceToWorkspaceResourceV4ResponseConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -58,7 +57,7 @@ import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 
 @Component
-public class StackToStackV4ResponseConverter extends AbstractConversionServiceAwareConverter<Stack, StackV4Response> {
+public class StackToStackV4ResponseConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackToStackV4ResponseConverter.class);
 
@@ -67,9 +66,6 @@ public class StackToStackV4ResponseConverter extends AbstractConversionServiceAw
 
     @Inject
     private ComponentConfigProviderService componentConfigProviderService;
-
-    @Inject
-    private ConverterUtil converterUtil;
 
     @Inject
     private ProviderParameterCalculator providerParameterCalculator;
@@ -89,37 +85,80 @@ public class StackToStackV4ResponseConverter extends AbstractConversionServiceAw
     @Inject
     private LoadBalancerPersistenceService loadBalancerService;
 
-    @Override
+    @Inject
+    private StackToPlacementSettingsV4ResponseConverter stackToPlacementSettingsV4ResponseConverter;
+
+    @Inject
+    private ImageToStackImageV4ResponseConverter imageToStackImageV4ResponseConverter;
+
+    @Inject
+    private StackTagsToTagsV4ResponseConverter stackTagsToTagsV4ResponseConverter;
+
+    @Inject
+    private ClusterToClusterV4ResponseConverter clusterToClusterV4ResponseConverter;
+
+    @Inject
+    private NetworkToNetworkV4ResponseConverter networkToNetworkV4ResponseConverter;
+
+    @Inject
+    private WorkspaceToWorkspaceResourceV4ResponseConverter workspaceToWorkspaceResourceV4ResponseConverter;
+
+    @Inject
+    private StackToCustomDomainsSettingsV4Response stackToCustomDomainsSettingsV4Response;
+
+    @Inject
+    private InstanceGroupToInstanceGroupV4ResponseConverter instanceGroupToInstanceGroupV4ResponseConverter;
+
+    @Inject
+    private CloudbreakDetailsToCloudbreakDetailsV4ResponseConverter cloudbreakDetailsToCloudbreakDetailsV4ResponseConverter;
+
+    @Inject
+    private StackAuthenticationToStackAuthenticationV4ResponseConverter stackAuthenticationToStackAuthenticationV4ResponseConverter;
+
+    @Inject
+    private DatabaseAvailabilityTypeToDatabaseResponseConverter databaseAvailabilityTypeToDatabaseResponseConverter;
+
+    @Inject
+    private RecipeToRecipeV4ResponseConverter recipeToRecipeV4ResponseConverter;
+
+    @Inject
+    private LoadBalancerToLoadBalancerResponseConverter loadBalancerToLoadBalancerResponseConverter;
+
+    @Inject
+    private InstanceGroupNetworkToInstanceGroupNetworkV4ResponseConverter instanceGroupNetworkToInstanceGroupNetworkV4ResponseConverter;
+
     public StackV4Response convert(Stack source) {
         StackV4Response response = new StackV4Response();
         try {
             restRequestThreadLocalService.setWorkspace(source.getWorkspace());
 
             Image image = imageService.getImage(source.getId());
-            response.setImage(getConversionService().convert(image, StackImageV4Response.class));
+            response.setImage(imageToStackImageV4ResponseConverter.convert(image));
         } catch (CloudbreakImageNotFoundException exc) {
             LOGGER.debug(exc.getMessage());
         }
 
         response.setName(source.getName());
-        response.setAuthentication(getConversionService().convert(source.getStackAuthentication(), StackAuthenticationV4Response.class));
+        response.setAuthentication(stackAuthenticationToStackAuthenticationV4ResponseConverter
+                .convert(source.getStackAuthentication()));
         response.setCrn(source.getResourceCrn());
         response.setId(source.getId());
         response.setEnvironmentCrn(source.getEnvironmentCrn());
         response.setCloudPlatform(CloudPlatform.valueOf(source.getCloudPlatform()));
-        response.setPlacement(getConversionService().convert(source, PlacementSettingsV4Response.class));
+        response.setPlacement(stackToPlacementSettingsV4ResponseConverter.convert(source));
         response.setStatus(source.getStatus());
         response.setTerminated(source.getTerminated());
         response.setStatusReason(source.getStatusReason());
         response.setInstanceGroups(getInstanceGroups(source));
         response.setTunnel(source.getTunnel());
-        response.setCluster(getConversionService().convert(source.getCluster(), ClusterV4Response.class));
-        response.setNetwork(getConversionService().convert(source, NetworkV4Response.class));
+        response.setCluster(clusterToClusterV4ResponseConverter.convert(source.getCluster()));
+        response.setNetwork(networkToNetworkV4ResponseConverter.convert(source));
         providerParameterCalculator.parse(new HashMap<>(source.getParameters()), response);
         response.setCreated(source.getCreated());
         response.setGatewayPort(source.getGatewayPort());
-        response.setCustomDomains(getConversionService().convert(source, CustomDomainSettingsV4Response.class));
-        response.setWorkspace(getConversionService().convert(source.getWorkspace(), WorkspaceResourceV4Response.class));
+        response.setCustomDomains(stackToCustomDomainsSettingsV4Response.convert(source));
+        response.setWorkspace(workspaceToWorkspaceResourceV4ResponseConverter
+                .convert(source.getWorkspace()));
         addNodeCount(source, response);
         convertComponentConfig(response, source);
         convertTelemetryComponent(response, source);
@@ -127,7 +166,7 @@ public class StackToStackV4ResponseConverter extends AbstractConversionServiceAw
         response.setTimeToLive(getStackTimeToLive(source));
         response.setVariant(Strings.isNullOrEmpty(source.getPlatformVariant()) ? source.getCloudPlatform() : source.getPlatformVariant());
         response.setExternalDatabase(getIfNotNull(source.getExternalDatabaseCreationType(),
-                ed -> getConversionService().convert(ed, DatabaseResponse.class)));
+                ed -> databaseAvailabilityTypeToDatabaseResponseConverter.convert(ed)));
         datalakeService.addSharedServiceResponse(source, response);
         filterExposedServicesByType(source.getType(), response.getCluster());
         response.setLoadBalancers(convertLoadBalancers(source.getId()));
@@ -154,7 +193,7 @@ public class StackToStackV4ResponseConverter extends AbstractConversionServiceAw
         try {
             if (tag != null && tag.getValue() != null) {
                 StackTags stackTag = tag.get(StackTags.class);
-                return getConversionService().convert(stackTag, TagsV4Response.class);
+                return stackTagsToTagsV4ResponseConverter.convert(stackTag);
             }
         } catch (Exception e) {
             LOGGER.info("Failed to convert dynamic tags.", e);
@@ -181,7 +220,8 @@ public class StackToStackV4ResponseConverter extends AbstractConversionServiceAw
         try {
             CloudbreakDetails cloudbreakDetails = componentConfigProviderService.getCloudbreakDetails(source.getId());
             if (cloudbreakDetails != null) {
-                stackV4Response.setCloudbreakDetails(getConversionService().convert(cloudbreakDetails, CloudbreakDetailsV4Response.class));
+                stackV4Response.setCloudbreakDetails(cloudbreakDetailsToCloudbreakDetailsV4ResponseConverter
+                        .convert(cloudbreakDetails));
             }
         } catch (RuntimeException e) {
             LOGGER.info("Failed to convert dynamic component.", e);
@@ -192,7 +232,8 @@ public class StackToStackV4ResponseConverter extends AbstractConversionServiceAw
     private List<InstanceGroupV4Response> getInstanceGroups(Stack stack) {
         var instanceGroups = new LinkedList<InstanceGroupV4Response>();
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-            var instanceGroupResponse = getConversionService().convert(instanceGroup, InstanceGroupV4Response.class);
+            var instanceGroupResponse = instanceGroupToInstanceGroupV4ResponseConverter
+                    .convert(instanceGroup);
             collectInformationsFromActualHostgroup(stack.getCluster(), instanceGroup, instanceGroupResponse);
             instanceGroups.add(instanceGroupResponse);
         }
@@ -205,10 +246,15 @@ public class StackToStackV4ResponseConverter extends AbstractConversionServiceAw
                     .filter(hostGroup -> hostGroup.getName().equals(instanceGroup.getGroupName()))
                     .findFirst()
                     .ifPresent(hostGroup -> {
-                        instanceGroupResponse.setRecipes(converterUtil.convertAll(hostGroup.getRecipes(), RecipeV4Response.class));
+                        instanceGroupResponse.setRecipes(
+                                hostGroup.getRecipes().stream()
+                                        .map(e -> recipeToRecipeV4ResponseConverter.convert(e))
+                                        .collect(Collectors.toList())
+                        );
                         instanceGroupResponse.setRecoveryMode(hostGroup.getRecoveryMode());
                         instanceGroupResponse.setAvailabilityZones(instanceGroup.getAvailabilityZones());
-                        instanceGroupResponse.setNetwork(converterUtil.convert(instanceGroup.getInstanceGroupNetwork(), InstanceGroupNetworkV4Response.class));
+                        instanceGroupResponse.setNetwork(instanceGroupNetworkToInstanceGroupNetworkV4ResponseConverter
+                                .convert(instanceGroup.getInstanceGroupNetwork()));
                         instanceGroupResponse.getMetadata().stream()
                                 .filter(md -> md.getDiscoveryFQDN() != null)
                                 .forEach(md -> {
@@ -236,7 +282,9 @@ public class StackToStackV4ResponseConverter extends AbstractConversionServiceAw
 
     private List<LoadBalancerResponse> convertLoadBalancers(Long stackId) {
         Set<LoadBalancer> loadBalancers = loadBalancerService.findByStackId(stackId);
-        return loadBalancers.isEmpty() ? null : converterUtil.convertAll(loadBalancers, LoadBalancerResponse.class);
+        return loadBalancers.isEmpty() ? null : loadBalancers.stream()
+                .map(l -> loadBalancerToLoadBalancerResponseConverter.convert(l))
+                .collect(Collectors.toList());
     }
 
 }

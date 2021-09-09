@@ -192,7 +192,9 @@ public class EnvironmentDtoConverter {
         boolean internalTenant = entitlementService.internalTenant(creationDto.getAccountId());
         Map<String, String> userDefinedTags = creationDto.getTags();
         Set<AccountTag> accountTags = accountTagService.get(creationDto.getAccountId());
-        List<AccountTagResponse> accountTagResponses = accountTagToAccountTagResponsesConverter.convert(accountTags);
+        List<AccountTagResponse> accountTagResponses = accountTags.stream()
+                .map(a -> accountTagToAccountTagResponsesConverter.convert(a))
+                .collect(Collectors.toList());
         defaultInternalAccountTagService.merge(accountTagResponses);
         Map<String, String> accountTagsMap = accountTagResponses
                 .stream()

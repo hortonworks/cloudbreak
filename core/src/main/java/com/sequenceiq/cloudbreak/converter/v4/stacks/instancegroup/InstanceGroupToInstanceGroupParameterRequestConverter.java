@@ -6,14 +6,11 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceGroupParameterRequest;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 
 @Component
-public class InstanceGroupToInstanceGroupParameterRequestConverter
-        extends AbstractConversionServiceAwareConverter<InstanceGroup, InstanceGroupParameterRequest> {
+public class InstanceGroupToInstanceGroupParameterRequestConverter {
 
-    @Override
     public InstanceGroupParameterRequest convert(InstanceGroup source) {
         InstanceGroupParameterRequest instanceGroupParameterRequest = new InstanceGroupParameterRequest();
         instanceGroupParameterRequest.setGroupName(source.getGroupName());

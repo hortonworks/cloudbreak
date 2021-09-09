@@ -3,23 +3,24 @@ package com.sequenceiq.redbeams.converter.database;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.springframework.core.convert.ConversionService;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
-import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
+import com.sequenceiq.cloudbreak.service.secret.model.StringToSecretResponseConverter;
 import com.sequenceiq.redbeams.TestData;
+import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.redbeams.domain.DatabaseConfig;
-import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 
+@ExtendWith(MockitoExtension.class)
 public class DatabaseConfigToDatabaseV4ResponseConverterTest {
 
     private static final Crn CRN = TestData.getTestCrn("database", "name");
@@ -38,16 +39,13 @@ public class DatabaseConfigToDatabaseV4ResponseConverterTest {
 
     private static final String NAME = "name";
 
-    private final DatabaseConfigToDatabaseV4ResponseConverter underTest = spy(new DatabaseConfigToDatabaseV4ResponseConverter());
+    @InjectMocks
+    private DatabaseConfigToDatabaseV4ResponseConverter underTest;
+
+    @Mock
+    private StringToSecretResponseConverter stringToSecretResponseConverter;
 
     private final DatabaseConfig databaseConfig = new DatabaseConfig();
-
-    @Before
-    public void setup() {
-        ConversionService conversionService = mock(ConversionService.class);
-        when(conversionService.convert(any(), any())).thenReturn(new SecretResponse());
-        doReturn(conversionService).when(underTest).getConversionService();
-    }
 
     @Test
     public void testConvert() {
@@ -64,6 +62,8 @@ public class DatabaseConfigToDatabaseV4ResponseConverterTest {
         databaseConfig.setType(TYPE);
         databaseConfig.setEnvironmentId(ENVIRONMENT_CRN);
         databaseConfig.setStatus(ResourceStatus.SERVICE_MANAGED);
+
+        when(stringToSecretResponseConverter.convert(any())).thenReturn(new SecretResponse());
 
         DatabaseV4Response response = underTest.convert(databaseConfig);
 

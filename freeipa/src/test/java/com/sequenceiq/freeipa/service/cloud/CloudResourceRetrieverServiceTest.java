@@ -5,7 +5,6 @@ import static com.sequenceiq.common.api.type.ResourceType.AZURE_MANAGED_IMAGE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -16,7 +15,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.core.convert.ConversionService;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.freeipa.converter.cloud.ResourceToCloudResourceConverter;
@@ -39,9 +37,6 @@ public class CloudResourceRetrieverServiceTest {
     private ResourceToCloudResourceConverter cloudResourceConverter;
 
     @Mock
-    private ConversionService conversionService;
-
-    @Mock
     private ResourceService resourceService;
 
     @Test
@@ -53,7 +48,6 @@ public class CloudResourceRetrieverServiceTest {
 
         assertTrue(actual.isEmpty());
         verify(resourceService).findByResourceReferenceAndStatusAndTypeAndStack(RESOURCE_REFERENCE, REQUESTED, AZURE_MANAGED_IMAGE, STACK_ID);
-        verifyNoInteractions(conversionService);
     }
 
     @Test
@@ -63,14 +57,14 @@ public class CloudResourceRetrieverServiceTest {
 
         when(resourceService.findByResourceReferenceAndStatusAndTypeAndStack(RESOURCE_REFERENCE, REQUESTED, AZURE_MANAGED_IMAGE, STACK_ID))
                 .thenReturn(Optional.of(resource));
-        when(conversionService.convert(resource, CloudResource.class)).thenReturn(cloudResource);
+        when(cloudResourceConverter.convert(resource)).thenReturn(cloudResource);
 
         Optional<CloudResource> actual = underTest.findByResourceReferenceAndStatusAndTypeAndStack(RESOURCE_REFERENCE, REQUESTED, AZURE_MANAGED_IMAGE, STACK_ID);
 
         assertTrue(actual.isPresent());
         assertEquals(cloudResource, actual.get());
         verify(resourceService).findByResourceReferenceAndStatusAndTypeAndStack(RESOURCE_REFERENCE, REQUESTED, AZURE_MANAGED_IMAGE, STACK_ID);
-        verify(conversionService).convert(resource, CloudResource.class);
+        verify(cloudResourceConverter).convert(resource);
     }
 
     private Resource createResource() {

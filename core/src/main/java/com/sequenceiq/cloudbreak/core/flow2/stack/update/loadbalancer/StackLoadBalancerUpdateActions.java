@@ -121,7 +121,9 @@ public class StackLoadBalancerUpdateActions {
                 List<LoadBalancerType> loadBalancerTypes = loadBalancerPersistenceService.findByStackId(context.getStack().getId()).stream()
                     .map(LoadBalancer::getType)
                     .collect(Collectors.toList());
-                List<CloudResource> cloudResources = cloudResourceConverter.convert(context.getStack().getResources());
+                List<CloudResource> cloudResources = context.getStack().getResources().stream()
+                        .map(r -> cloudResourceConverter.convert(r))
+                        .collect(Collectors.toList());
                 return new LoadBalancerMetadataRequest(context.getStack(), context.getCloudContext(), context.getCloudCredential(),
                     context.getCloudStack(), loadBalancerTypes, cloudResources);
             }

@@ -10,10 +10,8 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
@@ -30,6 +28,7 @@ import com.sequenceiq.flow.core.PayloadConverter;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.FailureDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SuccessDetails;
 import com.sequenceiq.freeipa.converter.cloud.CredentialToCloudCredentialConverter;
+import com.sequenceiq.freeipa.converter.cloud.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.freeipa.converter.cloud.ResourceToCloudResourceConverter;
 import com.sequenceiq.freeipa.dto.Credential;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
@@ -43,9 +42,9 @@ import com.sequenceiq.freeipa.flow.instance.reboot.RebootEvent;
 import com.sequenceiq.freeipa.flow.instance.reboot.RebootInstanceEvent;
 import com.sequenceiq.freeipa.flow.instance.reboot.RebootService;
 import com.sequenceiq.freeipa.flow.instance.reboot.RebootState;
+import com.sequenceiq.freeipa.flow.instance.reboot.failure.WaitUntilAvailableFailedToInstanceFailureEventConverter;
 import com.sequenceiq.freeipa.flow.stack.HealthCheckRequest;
 import com.sequenceiq.freeipa.flow.stack.HealthCheckSuccess;
-import com.sequenceiq.freeipa.flow.instance.reboot.failure.WaitUntilAvailableFailedToInstanceFailureEventConverter;
 import com.sequenceiq.freeipa.service.CredentialService;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.resource.ResourceService;
@@ -78,8 +77,7 @@ public class RebootActions {
     private ResourceToCloudResourceConverter resourceToCloudResourceConverter;
 
     @Inject
-    @Qualifier("conversionService")
-    private ConversionService conversionService;
+    private InstanceMetaDataToCloudInstanceConverter instanceMetaDataToCloudInstanceConverter;
 
     @Bean(name = "REBOOT_STATE")
     public Action<?, ?> rebootAction() {
@@ -100,7 +98,7 @@ public class RebootActions {
             @Override
             protected Selectable createRequest(RebootContext context) {
                 List<CloudInstance> cloudInstances = context.getInstanceMetaDataList().stream().map(instanceMetaData ->
-                        conversionService.convert(instanceMetaData, CloudInstance.class)).collect(Collectors.toList());
+                        instanceMetaDataToCloudInstanceConverter.convert(instanceMetaData)).collect(Collectors.toList());
                 List<CloudResource> cloudResources = getCloudResources(context.getStack().getId());
 
                 return new RebootInstancesRequest<>(context.getCloudContext(), context.getCloudCredential(), cloudResources, cloudInstances);
@@ -249,6 +247,8 @@ public class RebootActions {
 
     private List<CloudResource> getCloudResources(Long stackId) {
         List<Resource> resources = resourceService.findAllByStackId(stackId);
-        return resourceToCloudResourceConverter.convert(resources);
+        return resources.stream()
+                .map(r -> resourceToCloudResourceConverter.convert(r))
+                .collect(Collectors.toList());
     }
 }

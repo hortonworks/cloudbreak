@@ -4,8 +4,6 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.common.api.type.CommonStatus;
@@ -16,10 +14,6 @@ public class ResourceService {
 
     @Inject
     private ResourceRepository repository;
-
-    @Inject
-    @Qualifier("conversionService")
-    private ConversionService conversionService;
 
     public Optional<Resource> findByEnvironmentIdAndNameAndType(Long environmentId, String name, ResourceType type) {
         return repository.findByEnvironmentIdAndNameAndType(environmentId, name, type);

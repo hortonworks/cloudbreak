@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.controller.validation.stack.cluster.gate
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -18,14 +17,14 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.core.convert.ConversionService;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.topology.GatewayTopologyV4Request;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.stack.cluster.gateway.GatewayTopologyV4RequestValidator;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.gateway.topology.GatewayTopologyV4RequestToExposedServicesConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.gateway.topology.GatewayTopologyV4RequestToGatewayTopologyConverter;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -37,10 +36,10 @@ public class GatewayTopologyV4RequestToGatewayTopologyConverterTest {
     public final ExpectedException thrown = ExpectedException.none();
 
     @Mock
-    private ConversionService conversionService;
+    private GatewayTopologyV4RequestValidator gatewayTopologyV4RequestValidator;
 
     @Mock
-    private GatewayTopologyV4RequestValidator gatewayTopologyV4RequestValidator;
+    private GatewayTopologyV4RequestToExposedServicesConverter gatewayTopologyV4RequestToExposedServicesConverter;
 
     @InjectMocks
     private GatewayTopologyV4RequestToGatewayTopologyConverter underTest;
@@ -68,7 +67,7 @@ public class GatewayTopologyV4RequestToGatewayTopologyConverterTest {
 
         when(gatewayTopologyV4RequestValidator.validate(any(GatewayTopologyV4Request.class))).thenReturn(
                 new ValidationResultBuilder().build());
-        when(conversionService.convert(any(GatewayTopologyV4Request.class), eq(ExposedServices.class))).thenReturn(exposedServices);
+        when(gatewayTopologyV4RequestToExposedServicesConverter.convert(any(GatewayTopologyV4Request.class))).thenReturn(exposedServices);
 
         GatewayTopology result = underTest.convert(gatewayTopologyJson);
 

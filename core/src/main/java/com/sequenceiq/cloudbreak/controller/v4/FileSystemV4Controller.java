@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
@@ -12,10 +13,9 @@ import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.FileSystemV4Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.responses.FileSystemParameterV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.responses.FileSystemParameterV4Responses;
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
+import com.sequenceiq.cloudbreak.converter.v4.filesystems.ConfigQueryEntryToFileSystemParameterV4ResponseConverter;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
@@ -30,10 +30,10 @@ public class FileSystemV4Controller implements FileSystemV4Endpoint {
     private BlueprintService blueprintService;
 
     @Inject
-    private ConverterUtil converterUtil;
+    private CloudbreakRestRequestThreadLocalService threadLocalService;
 
     @Inject
-    private CloudbreakRestRequestThreadLocalService threadLocalService;
+    private ConfigQueryEntryToFileSystemParameterV4ResponseConverter configQueryEntryToFileSystemParameterV4ResponseConverter;
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_CLUSTER_TEMPLATE)
@@ -48,7 +48,10 @@ public class FileSystemV4Controller implements FileSystemV4Endpoint {
             Boolean secure) {
         Set<ConfigQueryEntry> entries = blueprintService.queryFileSystemParameters(blueprintName, clusterName, storageName,
                 fileSystemType, accountName, attachedCluster, secure, threadLocalService.getRequestedWorkspaceId());
-        return new FileSystemParameterV4Responses(converterUtil.convertAll(entries, FileSystemParameterV4Response.class));
+        return new FileSystemParameterV4Responses(entries.stream()
+                .map(e -> configQueryEntryToFileSystemParameterV4ResponseConverter.convert(e))
+                .collect(Collectors.toList())
+        );
     }
 
     @Override

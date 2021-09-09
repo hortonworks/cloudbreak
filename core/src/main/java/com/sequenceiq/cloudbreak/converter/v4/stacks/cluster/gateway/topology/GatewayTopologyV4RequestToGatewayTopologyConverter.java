@@ -10,18 +10,19 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.State;
 import com.sequenceiq.cloudbreak.controller.validation.stack.cluster.gateway.GatewayTopologyV4RequestValidator;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 
 @Component
-public class GatewayTopologyV4RequestToGatewayTopologyConverter extends AbstractConversionServiceAwareConverter<GatewayTopologyV4Request, GatewayTopology> {
+public class GatewayTopologyV4RequestToGatewayTopologyConverter {
 
     @Inject
     private GatewayTopologyV4RequestValidator validator;
 
-    @Override
+    @Inject
+    private GatewayTopologyV4RequestToExposedServicesConverter gatewayTopologyV4RequestToExposedServicesConverter;
+
     public GatewayTopology convert(GatewayTopologyV4Request source) {
         ValidationResult validationResult = validator.validate(source);
         if (validationResult.getState() == State.ERROR) {
@@ -36,7 +37,7 @@ public class GatewayTopologyV4RequestToGatewayTopologyConverter extends Abstract
     private void convertExposedServices(GatewayTopology gatewayTopology, GatewayTopologyV4Request source) {
         try {
             if (!CollectionUtils.isEmpty(source.getExposedServices())) {
-                ExposedServices exposedServices = getConversionService().convert(source, ExposedServices.class);
+                ExposedServices exposedServices = gatewayTopologyV4RequestToExposedServicesConverter.convert(source);
                 gatewayTopology.setExposedServices(new Json(exposedServices));
             }
         } catch (IllegalArgumentException e) {

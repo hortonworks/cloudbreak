@@ -1,8 +1,10 @@
 package com.sequenceiq.cloudbreak.converter.v4.stacks.network;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -11,16 +13,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.network.NetworkV4Response;
 import com.sequenceiq.common.api.type.ResourceType;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 
 @Component
-public class NetworkToNetworkV4ResponseConverter extends AbstractConversionServiceAwareConverter<Stack, NetworkV4Response> {
+public class NetworkToNetworkV4ResponseConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NetworkToNetworkV4ResponseConverter.class);
 
@@ -38,7 +40,6 @@ public class NetworkToNetworkV4ResponseConverter extends AbstractConversionServi
     @Inject
     private ProviderParameterCalculator providerParameterCalculator;
 
-    @Override
     public NetworkV4Response convert(Stack source) {
         NetworkV4Response networkResp = null;
         Network network = source.getNetwork();
@@ -52,6 +53,18 @@ public class NetworkToNetworkV4ResponseConverter extends AbstractConversionServi
             }
         }
         return networkResp;
+    }
+
+    private Map<String, Object> cleanMap(Map<String, Object> input) {
+        Map<String, Object> result = new HashMap<>();
+        for (Map.Entry<String, Object> entry : input.entrySet()) {
+            if (!Objects.isNull(input.get(entry.getKey()))
+                    && !"null".equals(input.get(entry.getKey()))
+                    && !Strings.isNullOrEmpty(input.get(entry.getKey()).toString())) {
+                result.put(entry.getKey(), input.get(entry.getKey()));
+            }
+        }
+        return result;
     }
 
     private void putNetworkResourcesIntoResponse(Stack stack, Map<String, Object> parameters) {

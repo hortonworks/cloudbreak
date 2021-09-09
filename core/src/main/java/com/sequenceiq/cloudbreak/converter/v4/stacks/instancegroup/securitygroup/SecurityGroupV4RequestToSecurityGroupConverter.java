@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.securitygrou
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
@@ -13,23 +14,21 @@ import org.springframework.util.CollectionUtils;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.securitygroup.SecurityGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.SecurityRuleV4Request;
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.securitygroup.securityrule.SecurityRuleV4RequestToSecurityRuleConverter;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
 
 @Component
-public class SecurityGroupV4RequestToSecurityGroupConverter extends AbstractConversionServiceAwareConverter<SecurityGroupV4Request, SecurityGroup> {
+public class SecurityGroupV4RequestToSecurityGroupConverter {
 
     @Inject
     private MissingResourceNameGenerator missingResourceNameGenerator;
 
     @Inject
-    private ConverterUtil converterUtil;
+    private SecurityRuleV4RequestToSecurityRuleConverter securityRuleV4RequestToSecurityRuleConverter;
 
-    @Override
     public SecurityGroup convert(@Nonnull SecurityGroupV4Request source) {
         SecurityGroup entity = new SecurityGroup();
         entity.setName(missingResourceNameGenerator.generateName(APIResourceType.SECURITY_GROUP));
@@ -49,7 +48,9 @@ public class SecurityGroupV4RequestToSecurityGroupConverter extends AbstractConv
 
     private Set<SecurityRule> convertSecurityRules(List<SecurityRuleV4Request> securityRules, SecurityGroup securityGroup) {
         if (!CollectionUtils.isEmpty(securityRules)) {
-            Set<SecurityRule> convertedSet = converterUtil.convertAllAsSet(securityRules, SecurityRule.class);
+            Set<SecurityRule> convertedSet = securityRules.stream()
+                    .map(s -> securityRuleV4RequestToSecurityRuleConverter.convert(s))
+                    .collect(Collectors.toSet());
             for (SecurityRule securityRule : convertedSet) {
                 securityRule.setSecurityGroup(securityGroup);
             }
