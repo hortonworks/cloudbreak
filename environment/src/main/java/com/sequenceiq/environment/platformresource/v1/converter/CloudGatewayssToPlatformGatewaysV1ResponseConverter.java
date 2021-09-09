@@ -10,14 +10,12 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudGateWay;
 import com.sequenceiq.cloudbreak.cloud.model.CloudGateWays;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.environment.api.v1.platformresource.model.CloudGatewayRequest;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformGatewaysResponse;
 
 @Component
-public class CloudGatewayssToPlatformGatewaysV1ResponseConverter extends AbstractConversionServiceAwareConverter<CloudGateWays, PlatformGatewaysResponse> {
+public class CloudGatewayssToPlatformGatewaysV1ResponseConverter {
 
-    @Override
     public PlatformGatewaysResponse convert(CloudGateWays source) {
         Map<String, Set<CloudGatewayRequest>> result = new HashMap<>();
         for (Entry<String, Set<CloudGateWay>> entry : source.getCloudGateWayResponses().entrySet()) {

@@ -13,18 +13,16 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.Resource;
 
 @Component
-public class ResourceToCloudResourceConverter extends AbstractConversionServiceAwareConverter<Resource, CloudResource> {
+public class ResourceToCloudResourceConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourceToCloudResourceConverter.class);
 
     @Inject
     private ResourceAttributeUtil resourceAttributeUtil;
 
-    @Override
     public CloudResource convert(Resource resource) {
         Optional<Object> attributes = resourceAttributeUtil.getTypedAttributes(resource);
 

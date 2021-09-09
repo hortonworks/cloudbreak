@@ -1,6 +1,7 @@
 package com.sequenceiq.redbeams.controller.v4.databaseserver;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -15,10 +16,9 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
-import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.request.CreateDatabaseV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.responses.CreateDatabaseV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
@@ -27,6 +27,9 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.Database
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Responses;
 import com.sequenceiq.redbeams.converter.stack.AllocateDatabaseServerV4RequestToDBStackConverter;
+import com.sequenceiq.redbeams.converter.v4.databaseserver.DBStackToDatabaseServerStatusV4ResponseConverter;
+import com.sequenceiq.redbeams.converter.v4.databaseserver.DatabaseServerConfigToDatabaseServerV4ResponseConverter;
+import com.sequenceiq.redbeams.converter.v4.databaseserver.DatabaseServerV4RequestToDatabaseServerConfigConverter;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.service.dbserverconfig.DatabaseServerConfigService;
@@ -34,9 +37,6 @@ import com.sequenceiq.redbeams.service.stack.RedbeamsCreationService;
 import com.sequenceiq.redbeams.service.stack.RedbeamsStartService;
 import com.sequenceiq.redbeams.service.stack.RedbeamsStopService;
 import com.sequenceiq.redbeams.service.stack.RedbeamsTerminationService;
-
-// import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerTestV4Request;
-// import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerTestV4Response;
 
 public class DatabaseServerV4ControllerTest {
 
@@ -78,13 +78,19 @@ public class DatabaseServerV4ControllerTest {
     private AllocateDatabaseServerV4RequestToDBStackConverter dbStackConverter;
 
     @Mock
-    private ConverterUtil converterUtil;
-
-    @Mock
     private RedbeamsStartService redbeamsStartService;
 
     @Mock
     private RedbeamsStopService redbeamsStopService;
+
+    @Mock
+    private DatabaseServerConfigToDatabaseServerV4ResponseConverter databaseServerConfigToDatabaseServerV4ResponseConverter;
+
+    @Mock
+    private DBStackToDatabaseServerStatusV4ResponseConverter dbStackToDatabaseServerStatusV4ResponseConverter;
+
+    @Mock
+    private DatabaseServerV4RequestToDatabaseServerConfigConverter databaseServerV4RequestToDatabaseServerConfigConverter;
 
     private DatabaseServerConfig server;
 
@@ -140,8 +146,7 @@ public class DatabaseServerV4ControllerTest {
     public void testList() {
         Set<DatabaseServerConfig> serverSet = Collections.singleton(server);
         when(service.findAll(DatabaseServerV4Controller.DEFAULT_WORKSPACE, ENVIRONMENT_CRN)).thenReturn(serverSet);
-        Set<DatabaseServerV4Response> responseSet = Collections.singleton(serverResponse);
-        when(converterUtil.convertAllAsSet(serverSet, DatabaseServerV4Response.class)).thenReturn(responseSet);
+        when(databaseServerConfigToDatabaseServerV4ResponseConverter.convert(any())).thenReturn(serverResponse);
 
         DatabaseServerV4Responses responses = underTest.list(ENVIRONMENT_CRN);
 
@@ -152,7 +157,7 @@ public class DatabaseServerV4ControllerTest {
     @Test
     public void testGetByName() {
         when(service.getByName(DatabaseServerV4Controller.DEFAULT_WORKSPACE, ENVIRONMENT_CRN, SERVER_NAME)).thenReturn(server);
-        when(converterUtil.convert(server, DatabaseServerV4Response.class)).thenReturn(serverResponse);
+        when(databaseServerConfigToDatabaseServerV4ResponseConverter.convert(any())).thenReturn(serverResponse);
 
         DatabaseServerV4Response response = underTest.getByName(ENVIRONMENT_CRN, SERVER_NAME);
 
@@ -162,7 +167,7 @@ public class DatabaseServerV4ControllerTest {
     @Test
     public void testGetByCrn() {
         when(service.getByCrn(SERVER_CRN)).thenReturn(server);
-        when(converterUtil.convert(server, DatabaseServerV4Response.class)).thenReturn(serverResponse);
+        when(databaseServerConfigToDatabaseServerV4ResponseConverter.convert(any())).thenReturn(serverResponse);
 
         DatabaseServerV4Response response = underTest.getByCrn(SERVER_CRN);
 
@@ -174,7 +179,7 @@ public class DatabaseServerV4ControllerTest {
         when(dbStackConverter.convert(allocateRequest, USER_CRN)).thenReturn(dbStack);
         DBStack savedDBStack = new DBStack();
         when(creationService.launchDatabaseServer(dbStack, CLUSTER_CRN)).thenReturn(savedDBStack);
-        when(converterUtil.convert(savedDBStack, DatabaseServerStatusV4Response.class))
+        when(dbStackToDatabaseServerStatusV4ResponseConverter.convert(savedDBStack))
             .thenReturn(allocateResponse);
 
         DatabaseServerStatusV4Response response = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->  underTest.create(allocateRequest));
@@ -186,7 +191,7 @@ public class DatabaseServerV4ControllerTest {
     @Test
     public void testRelease() {
         when(service.release(SERVER_CRN)).thenReturn(server);
-        when(converterUtil.convert(server, DatabaseServerV4Response.class)).thenReturn(serverResponse);
+        when(databaseServerConfigToDatabaseServerV4ResponseConverter.convert(server)).thenReturn(serverResponse);
 
         DatabaseServerV4Response response = underTest.release(SERVER_CRN);
 
@@ -194,9 +199,9 @@ public class DatabaseServerV4ControllerTest {
     }
 
     public void testRegister() {
-        when(converterUtil.convert(request, DatabaseServerConfig.class)).thenReturn(server);
+        when(databaseServerV4RequestToDatabaseServerConfigConverter.convert(request)).thenReturn(server);
         when(service.create(server, DatabaseServerV4Controller.DEFAULT_WORKSPACE, false)).thenReturn(server);
-        when(converterUtil.convert(server, DatabaseServerV4Response.class)).thenReturn(serverResponse);
+        when(databaseServerConfigToDatabaseServerV4ResponseConverter.convert(server)).thenReturn(serverResponse);
 
         DatabaseServerV4Response response = underTest.register(request);
 
@@ -206,7 +211,7 @@ public class DatabaseServerV4ControllerTest {
     @Test
     public void testDeleteByCrn() {
         when(terminationService.terminateByCrn(SERVER_CRN, true)).thenReturn(server);
-        when(converterUtil.convert(server, DatabaseServerV4Response.class)).thenReturn(serverResponse);
+        when(databaseServerConfigToDatabaseServerV4ResponseConverter.convert(server)).thenReturn(serverResponse);
 
         DatabaseServerV4Response response = underTest.deleteByCrn(SERVER_CRN, true);
 
@@ -216,7 +221,7 @@ public class DatabaseServerV4ControllerTest {
     @Test
     public void testDeleteByName() {
         when(terminationService.terminateByName(ENVIRONMENT_CRN, SERVER_NAME, true)).thenReturn(server);
-        when(converterUtil.convert(server, DatabaseServerV4Response.class)).thenReturn(serverResponse);
+        when(databaseServerConfigToDatabaseServerV4ResponseConverter.convert(server)).thenReturn(serverResponse);
 
         DatabaseServerV4Response response = underTest.deleteByName(ENVIRONMENT_CRN, SERVER_NAME, true);
 
@@ -232,10 +237,8 @@ public class DatabaseServerV4ControllerTest {
         serverSet.add(server);
         serverSet.add(server2);
         when(terminationService.terminateMultipleByCrn(crnSet, true)).thenReturn(serverSet);
-        Set<DatabaseServerV4Response> responseSet = new HashSet<>();
-        responseSet.add(serverResponse);
-        responseSet.add(serverResponse2);
-        when(converterUtil.convertAllAsSet(serverSet, DatabaseServerV4Response.class)).thenReturn(responseSet);
+        when(databaseServerConfigToDatabaseServerV4ResponseConverter.convert(server)).thenReturn(serverResponse);
+        when(databaseServerConfigToDatabaseServerV4ResponseConverter.convert(server2)).thenReturn(serverResponse2);
 
         DatabaseServerV4Responses responses = underTest.deleteMultiple(crnSet, true);
 

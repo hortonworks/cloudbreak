@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
@@ -78,7 +79,9 @@ public class AccountTagController extends NotificationController implements Acco
     @InternalOnly
     public AccountTagResponses listInAccount(@AccountId String accountId) {
         Set<AccountTag> accountTags = accountTagService.get(accountId);
-        List<AccountTagResponse> accountTagResponses = accountTagToAccountTagResponsesConverter.convert(accountTags);
+        List<AccountTagResponse> accountTagResponses = accountTags.stream()
+                .map(accountTag -> accountTagToAccountTagResponsesConverter.convert(accountTag))
+                .collect(Collectors.toList());
         defaultInternalAccountTagService.merge(accountTagResponses);
         return new AccountTagResponses(new HashSet<>(accountTagResponses));
     }
@@ -87,10 +90,15 @@ public class AccountTagController extends NotificationController implements Acco
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public AccountTagResponses put(@Valid AccountTagRequests request) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        List<AccountTag> accountTags = accountTagsRequestToAccountTagConverter.convert(request.getTags());
+        List<AccountTag> accountTags = request.getTags().stream()
+                .map(a -> accountTagsRequestToAccountTagConverter.convert(a))
+                .collect(Collectors.toList());
         defaultInternalAccountTagService.validate(accountTags);
         accountTags = accountTagService.create(accountTags, accountId);
-        return new AccountTagResponses(new HashSet<>(accountTagToAccountTagResponsesConverter.convert(accountTags)));
+        return new AccountTagResponses(accountTags.stream()
+                .map(a -> accountTagToAccountTagResponsesConverter.convert(a))
+                .collect(Collectors.toSet())
+        );
     }
 
     @Override

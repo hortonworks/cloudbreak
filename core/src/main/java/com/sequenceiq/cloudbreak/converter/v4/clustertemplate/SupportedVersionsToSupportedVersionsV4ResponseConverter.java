@@ -11,13 +11,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.SupportedVe
 import com.sequenceiq.cloudbreak.cmtemplate.generator.support.domain.SupportedService;
 import com.sequenceiq.cloudbreak.cmtemplate.generator.support.domain.SupportedVersion;
 import com.sequenceiq.cloudbreak.cmtemplate.generator.support.domain.SupportedVersions;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 
 @Component
-public class SupportedVersionsToSupportedVersionsV4ResponseConverter
-        extends AbstractConversionServiceAwareConverter<SupportedVersions, SupportedVersionsV4Response> {
+public class SupportedVersionsToSupportedVersionsV4ResponseConverter {
 
-    @Override
     public SupportedVersionsV4Response convert(SupportedVersions source) {
         SupportedVersionsV4Response supportedVersionsV4Response = new SupportedVersionsV4Response();
         for (SupportedVersion supportedVersion : source.getSupportedVersions()) {

@@ -7,13 +7,10 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.ServiceDependencyMatrixV4Response;
 import com.sequenceiq.cloudbreak.cmtemplate.generator.dependencies.domain.ServiceDependencyMatrix;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 
 @Component
-public class ServiceDependencyMatrixToServiceDependencyMatrixV4Response
-        extends AbstractConversionServiceAwareConverter<ServiceDependencyMatrix, ServiceDependencyMatrixV4Response> {
+public class ServiceDependencyMatrixToServiceDependencyMatrixV4Response {
 
-    @Override
     public ServiceDependencyMatrixV4Response convert(ServiceDependencyMatrix source) {
         ServiceDependencyMatrixV4Response serviceDependencyMatrixV4Response = new ServiceDependencyMatrixV4Response();
 

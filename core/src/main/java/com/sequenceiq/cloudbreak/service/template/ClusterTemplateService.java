@@ -36,7 +36,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.requests.Defaul
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.CompactViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
@@ -47,6 +46,7 @@ import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.converter.v4.clustertemplate.ClusterTemplateViewToClusterTemplateViewV4ResponseConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.projection.ClusterTemplateStatusView;
@@ -118,9 +118,6 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
     private TransactionService transactionService;
 
     @Inject
-    private ConverterUtil converterUtil;
-
-    @Inject
     private EnvironmentServiceDecorator environmentServiceDecorator;
 
     @Inject
@@ -134,6 +131,9 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
 
     @Inject
     private RegionAwareCrnGenerator regionAwareCrnGenerator;
+
+    @Inject
+    private ClusterTemplateViewToClusterTemplateViewV4ResponseConverter clusterTemplateViewToClusterTemplateViewV4ResponseConverter;
 
     @Override
     protected WorkspaceResourceRepository<ClusterTemplate, Long> repository() {
@@ -319,8 +319,10 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
     public Set<ClusterTemplateViewV4Response> listInWorkspaceAndCleanUpInvalids(Long workspaceId) {
         try {
             Set<ClusterTemplateView> views = transactionService.required(() -> clusterTemplateViewService.findAllActive(workspaceId));
-            Set<ClusterTemplateViewV4Response> responses = transactionService.required(() ->
-                    converterUtil.convertAllAsSet(views, ClusterTemplateViewV4Response.class));
+            Set<ClusterTemplateViewV4Response> responses = transactionService.required(() -> views.stream()
+                    .map(v -> clusterTemplateViewToClusterTemplateViewV4ResponseConverter.convert(v))
+                    .collect(toSet())
+            );
             environmentServiceDecorator.prepareEnvironments(responses);
 
             cleanUpInvalidClusterDefinitions(workspaceId, responses);

@@ -24,15 +24,13 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.util.URLUtils;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.json.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.json.JsonHelper;
 
 @Component
-public class BlueprintV4RequestToBlueprintConverter
-        extends AbstractConversionServiceAwareConverter<BlueprintV4Request, Blueprint> {
+public class BlueprintV4RequestToBlueprintConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BlueprintV4RequestToBlueprintConverter.class);
 
@@ -50,7 +48,6 @@ public class BlueprintV4RequestToBlueprintConverter
     @Inject
     private CmTemplateGeneratorService clusterTemplateGeneratorService;
 
-    @Override
     public Blueprint convert(BlueprintV4Request json) {
         Blueprint blueprint = new Blueprint();
         if (StringUtils.isNotEmpty(json.getUrl())) {

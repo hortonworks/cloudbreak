@@ -41,7 +41,6 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.cloudbreak.structuredevent.repository.AccountAwareResourceRepository;
 import com.sequenceiq.cloudbreak.structuredevent.service.AbstractAccountAwareResourceService;
-import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.Region;
@@ -50,7 +49,6 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.repository.EnvironmentRepository;
-import com.sequenceiq.environment.environment.v1.cli.DelegatingCliEnvironmentRequestConverter;
 import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
 import com.sequenceiq.environment.platformresource.PlatformParameterService;
 import com.sequenceiq.environment.platformresource.PlatformResourceRequest;
@@ -77,8 +75,6 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
 
     private final EnvironmentDtoConverter environmentDtoConverter;
 
-    private final DelegatingCliEnvironmentRequestConverter delegatingCliEnvironmentRequestConverter;
-
     private final OwnerAssignmentService ownerAssignmentService;
 
     private final GrpcUmsClient grpcUmsClient;
@@ -92,7 +88,6 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
             EnvironmentRepository environmentRepository,
             PlatformParameterService platformParameterService,
             EnvironmentDtoConverter environmentDtoConverter,
-            DelegatingCliEnvironmentRequestConverter delegatingCliEnvironmentRequestConverter,
             OwnerAssignmentService ownerAssignmentService,
             GrpcUmsClient grpcUmsClient,
             TransactionService transactionService,
@@ -101,7 +96,6 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
         this.environmentRepository = environmentRepository;
         this.platformParameterService = platformParameterService;
         this.environmentDtoConverter = environmentDtoConverter;
-        this.delegatingCliEnvironmentRequestConverter = delegatingCliEnvironmentRequestConverter;
         this.ownerAssignmentService = ownerAssignmentService;
         this.grpcUmsClient = grpcUmsClient;
         this.transactionService = transactionService;
@@ -269,14 +263,6 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
         List<Environment> environments = environmentRepository
                 .findAllByStatusInAndArchivedIsFalse(environmentStatuses);
         return environments.stream().map(environmentDtoConverter::environmentToDto).collect(Collectors.toList());
-    }
-
-    public Object getCreateEnvironmentForCli(EnvironmentRequest environmentRequest, String cloudPlatform) {
-        return delegatingCliEnvironmentRequestConverter.convertRequest(environmentRequest);
-    }
-
-    public Object getCreateEnvironmentForCli(EnvironmentDto environmentDto) {
-        return delegatingCliEnvironmentRequestConverter.convertDto(environmentDto);
     }
 
     Optional<Environment> findByNameAndAccountIdAndArchivedIsFalse(String name, String accountId) {

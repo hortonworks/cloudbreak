@@ -2,6 +2,7 @@ package com.sequenceiq.freeipa.flow.stack.start.action;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -67,7 +68,9 @@ public class StackStartActions {
             protected Selectable createRequest(StackStartContext context) {
                 Stack stack = context.getStack();
                 LOGGER.debug("Assembling start request for stack: {}", stack);
-                List<CloudInstance> cloudInstances = metadataConverter.convert(stack.getNotDeletedInstanceMetaDataSet());
+                List<CloudInstance> cloudInstances = stack.getNotDeletedInstanceMetaDataSet().stream()
+                        .map(i -> metadataConverter.convert(i))
+                        .collect(Collectors.toList());
                 List<CloudResource> cloudResources = getCloudResources(stack.getId());
                 return new StartInstancesRequest(context.getCloudContext(), context.getCloudCredential(), cloudResources, cloudInstances);
             }
@@ -158,6 +161,8 @@ public class StackStartActions {
 
     private List<CloudResource> getCloudResources(Long stackId) {
         List<Resource> resources = resourceService.findAllByStackId(stackId);
-        return resourceToCloudResourceConverter.convert(resources);
+        return resources.stream()
+                .map(r -> resourceToCloudResourceConverter.convert(r))
+                .collect(Collectors.toList());
     }
 }

@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.converter.stack.instance;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 
 import java.util.HashMap;
@@ -15,17 +14,19 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.core.convert.ConversionService;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.network.InstanceGroupNetworkV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.securitygroup.SecurityGroupV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.mappable.Mappable;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.securitygroup.SecurityGroupV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.cloudbreak.converter.AbstractJsonConverterTest;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.InstanceGroupV4RequestToInstanceGroupConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.network.InstanceGroupNetworkV4RequestToInstanceGroupNetworkConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.securitygroup.SecurityGroupV4RequestToSecurityGroupConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.template.InstanceTemplateV4RequestToTemplateConverter;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
@@ -41,19 +42,25 @@ public class InstanceGroupV4RequestToInstanceGroupConverterTest extends Abstract
     private InstanceGroupV4RequestToInstanceGroupConverter underTest;
 
     @Mock
-    private ConversionService conversionService;
+    private ProviderParameterCalculator providerParameterCalculator;
 
     @Mock
-    private ProviderParameterCalculator providerParameterCalculator;
+    private SecurityGroupV4RequestToSecurityGroupConverter securityGroupV4RequestToSecurityGroupConverter;
+
+    @Mock
+    private InstanceGroupNetworkV4RequestToInstanceGroupNetworkConverter instanceGroupNetworkV4RequestToInstanceGroupNetworkConverter;
+
+    @Mock
+    private InstanceTemplateV4RequestToTemplateConverter instanceTemplateV4RequestToTemplateConverter;
 
     @Test
     public void testConvert() {
         InstanceGroupV4Request request = getRequest("instance-group.json");
         // GIVEN
         given(providerParameterCalculator.get(request)).willReturn(getMappable());
-        given(conversionService.convert(any(InstanceTemplateV4Request.class), eq(Template.class))).willReturn(new Template());
-        given(conversionService.convert(any(SecurityGroupV4Request.class), eq(SecurityGroup.class))).willReturn(new SecurityGroup());
-        given(conversionService.convert(any(InstanceGroupNetworkV4Request.class), eq(InstanceGroupNetwork.class)))
+        given(instanceTemplateV4RequestToTemplateConverter.convert(any(InstanceTemplateV4Request.class))).willReturn(new Template());
+        given(securityGroupV4RequestToSecurityGroupConverter.convert(any(SecurityGroupV4Request.class))).willReturn(new SecurityGroup());
+        given(instanceGroupNetworkV4RequestToInstanceGroupNetworkConverter.convert(any(InstanceGroupNetworkV4Request.class)))
                 .willReturn(new InstanceGroupNetwork());
         // WHEN
         InstanceGroup instanceGroup = underTest.convert(request);

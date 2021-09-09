@@ -11,13 +11,10 @@ import org.springframework.stereotype.Component;
 import com.cloudera.cdp.datahub.model.CreateClusterTemplateRequest;
 import com.cloudera.cdp.datahub.model.DatahubResourceTagRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.requests.BlueprintV4Request;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 
 @Component
-public class BlueprintV4RequestToCreateClusterTemplateRequestConverter
-        extends AbstractConversionServiceAwareConverter<BlueprintV4Request, CreateClusterTemplateRequest> {
+public class BlueprintV4RequestToCreateClusterTemplateRequestConverter {
 
-    @Override
     public CreateClusterTemplateRequest convert(BlueprintV4Request source) {
         CreateClusterTemplateRequest createClusterTemplateRequest = new CreateClusterTemplateRequest();
         createClusterTemplateRequest.setClusterTemplateName(source.getName());

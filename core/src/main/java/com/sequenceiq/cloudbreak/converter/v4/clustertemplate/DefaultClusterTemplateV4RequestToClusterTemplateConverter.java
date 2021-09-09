@@ -11,20 +11,17 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.requests.Defaul
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.FeatureState;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
 import com.sequenceiq.cloudbreak.init.clustertemplate.DefaultClusterTemplateCache;
 
 @Component
-public class DefaultClusterTemplateV4RequestToClusterTemplateConverter
-        extends AbstractConversionServiceAwareConverter<DefaultClusterTemplateV4Request, ClusterTemplate> {
+public class DefaultClusterTemplateV4RequestToClusterTemplateConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultClusterTemplateV4RequestToClusterTemplateConverter.class);
 
     @Inject
     private DefaultClusterTemplateCache defaultClusterTemplateCache;
 
-    @Override
     public ClusterTemplate convert(DefaultClusterTemplateV4Request source) {
         ClusterTemplate clusterTemplate = new ClusterTemplate();
         clusterTemplate.setTemplateContent(defaultClusterTemplateCache.getByName(source.getName()));

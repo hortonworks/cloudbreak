@@ -27,10 +27,10 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.requests.DefaultClusterTemplateV4Request;
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.converter.v4.clustertemplate.DefaultClusterTemplateV4RequestToClusterTemplateConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
 import com.sequenceiq.cloudbreak.service.user.UserService;
@@ -52,9 +52,6 @@ public class DefaultClusterTemplateCache {
     private String defaultTemplateDir = "defaults/clustertemplates";
 
     @Inject
-    private ConverterUtil converterUtil;
-
-    @Inject
     private WorkspaceService workspaceService;
 
     @Inject
@@ -62,6 +59,9 @@ public class DefaultClusterTemplateCache {
 
     @Inject
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
+
+    @Inject
+    private DefaultClusterTemplateV4RequestToClusterTemplateConverter defaultClusterTemplateV4RequestToClusterTemplateConverter;
 
     @PostConstruct
     public void loadClusterTemplatesFromFile() {
@@ -131,7 +131,7 @@ public class DefaultClusterTemplateCache {
         defaultClusterTemplateRequests().forEach((key, value) -> {
             String defaultTemplateJson = new String(Base64.getDecoder().decode(value));
             DefaultClusterTemplateV4Request defaultClusterTemplate = getDefaultClusterTemplate(defaultTemplateJson);
-            ClusterTemplate clusterTemplate = converterUtil.convert(defaultClusterTemplate, ClusterTemplate.class);
+            ClusterTemplate clusterTemplate = defaultClusterTemplateV4RequestToClusterTemplateConverter.convert(defaultClusterTemplate);
             defaultTemplates.put(key, clusterTemplate);
         });
         return defaultTemplates;
@@ -146,7 +146,7 @@ public class DefaultClusterTemplateCache {
             if (templateNamesMissingFromDb.contains(key)) {
                 String defaultTemplateJson = new String(Base64.getDecoder().decode(value));
                 DefaultClusterTemplateV4Request defaultClusterTemplate = getDefaultClusterTemplate(defaultTemplateJson);
-                ClusterTemplate clusterTemplate = converterUtil.convert(defaultClusterTemplate, ClusterTemplate.class);
+                ClusterTemplate clusterTemplate = defaultClusterTemplateV4RequestToClusterTemplateConverter.convert(defaultClusterTemplate);
                 clusterTemplate.setWorkspace(workspace);
                 Optional<Blueprint> blueprint = blueprints.stream()
                         .filter(e -> e.getName().equals(defaultClusterTemplate.getDistroXTemplate().getCluster().getBlueprintName()))

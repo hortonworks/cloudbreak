@@ -10,32 +10,32 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.template.InstanceTemplateV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.template.volume.DatabaseVolumeV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.template.volume.RootVolumeV4Response;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.template.InstanceTemplateV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.template.volume.RootVolumeV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.template.volume.VolumeV4Response;
-import com.sequenceiq.cloudbreak.common.json.Json;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
 import com.sequenceiq.cloudbreak.domain.VolumeUsageType;
 
 @Component
-public class TemplateToInstanceTemplateV4ResponseConverter extends AbstractConversionServiceAwareConverter<Template, InstanceTemplateV4Response> {
+public class TemplateToInstanceTemplateV4ResponseConverter {
 
     @Inject
     private ProviderParameterCalculator providerParameterCalculator;
 
-    @Override
+    @Inject
+    private TemplateToVolumeV4ResponseConverter templateToVolumeV4ResponseConverter;
+
     public InstanceTemplateV4Response convert(Template source) {
         InstanceTemplateV4Response response = new InstanceTemplateV4Response();
         response.setId(source.getId());
         response.setRootVolume(rootVolume(source));
         response.setAttachedVolumes(source.getVolumeTemplates().stream()
                 .filter(volume -> volume.getUsageType() == VolumeUsageType.GENERAL)
-                .map(volume -> getConversionService().convert(volume, VolumeV4Response.class))
+                .map(volume -> templateToVolumeV4ResponseConverter.convert(volume))
                 .collect(Collectors.toSet()));
         response.setDatabaseVolume(databaseVolume(source));
         response.setInstanceType(source.getInstanceType());

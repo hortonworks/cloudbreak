@@ -5,14 +5,13 @@ import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFo
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
@@ -30,6 +29,8 @@ import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredFlowEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredRestCallEvent;
+import com.sequenceiq.cloudbreak.structuredevent.service.converter.StructuredEventEntityToStructuredEventConverter;
+import com.sequenceiq.cloudbreak.structuredevent.service.converter.StructuredEventToStructuredEventEntityConverter;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
@@ -40,9 +41,6 @@ public class LegacyStructuredEventDBService extends AbstractWorkspaceAwareResour
     private static final Logger LOGGER = LoggerFactory.getLogger(LegacyStructuredEventDBService.class);
 
     @Inject
-    private ConversionService conversionService;
-
-    @Inject
     private LegacyStructuredEventRepository legacyStructuredEventRepository;
 
     @Inject
@@ -51,9 +49,15 @@ public class LegacyStructuredEventDBService extends AbstractWorkspaceAwareResour
     @Inject
     private StackService stackService;
 
+    @Inject
+    private StructuredEventToStructuredEventEntityConverter structuredEventToStructuredEventEntityConverter;
+
+    @Inject
+    private StructuredEventEntityToStructuredEventConverter structuredEventEntityToStructuredEventConverter;
+
     @Override
     public void create(StructuredEvent structuredEvent) {
-        StructuredEventEntity structuredEventEntityEntity = conversionService.convert(structuredEvent, StructuredEventEntity.class);
+        StructuredEventEntity structuredEventEntityEntity = structuredEventToStructuredEventEntityConverter.convert(structuredEvent);
         create(structuredEventEntityEntity, structuredEventEntityEntity.getWorkspace(), null);
     }
 
@@ -81,27 +85,27 @@ public class LegacyStructuredEventDBService extends AbstractWorkspaceAwareResour
     @Override
     public <T extends StructuredEvent> List<T> getEventsForWorkspaceWithType(Workspace workspace, Class<T> eventClass) {
         List<StructuredEventEntity> events = legacyStructuredEventRepository.findByWorkspaceAndEventType(workspace, StructuredEventType.getByClass(eventClass));
-        return events != null ? (List<T>) conversionService.convert(events,
-                TypeDescriptor.forObject(events),
-                TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(StructuredEvent.class))) : Collections.emptyList();
+        return events != null ? (List<T>) events.stream()
+                .map(e -> structuredEventEntityToStructuredEventConverter.convert(e))
+                .collect(Collectors.toList()) : Collections.emptyList();
     }
 
     @Override
     public <T extends StructuredEvent> List<T> getEventsForWorkspaceWithTypeSince(Workspace workspace, Class<T> eventClass, Long since) {
         List<StructuredEventEntity> events = legacyStructuredEventRepository.findByWorkspaceIdAndEventTypeSince(workspace.getId(),
                 StructuredEventType.getByClass(eventClass), since);
-        return events != null ? (List<T>) conversionService.convert(events,
-                TypeDescriptor.forObject(events),
-                TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(StructuredEvent.class))) : Collections.emptyList();
+        return events != null ? (List<T>) events.stream()
+                .map(e -> structuredEventEntityToStructuredEventConverter.convert(e))
+                .collect(Collectors.toList()) : Collections.emptyList();
     }
 
     @Override
     public <T extends StructuredEvent> List<T> getEventsWithTypeAndResourceId(Class<T> eventClass, String resourceType, Long resourceId) {
         List<StructuredEventEntity> events = legacyStructuredEventRepository
                 .findByEventTypeAndResourceTypeAndResourceId(StructuredEventType.getByClass(eventClass), resourceType, resourceId);
-        return events != null ? (List<T>) conversionService.convert(events,
-                TypeDescriptor.forObject(events),
-                TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(StructuredEvent.class))) : Collections.emptyList();
+        return events != null ? (List<T>) events.stream()
+                .map(e -> structuredEventEntityToStructuredEventConverter.convert(e))
+                .collect(Collectors.toList()) : Collections.emptyList();
     }
 
     @Override
@@ -109,7 +113,7 @@ public class LegacyStructuredEventDBService extends AbstractWorkspaceAwareResour
             Pageable pageable) {
         Page<StructuredEventEntity> events = legacyPagingStructuredEventRepository
                 .findByEventTypeAndResourceTypeAndResourceId(StructuredEventType.getByClass(eventClass), resourceType, resourceId, pageable);
-        return (Page<T>) Optional.ofNullable(events).orElse(Page.empty()).map(event -> conversionService.convert(event, StructuredEvent.class));
+        return (Page<T>) Optional.ofNullable(events).orElse(Page.empty()).map(event -> structuredEventEntityToStructuredEventConverter.convert(event));
     }
 
     @Override

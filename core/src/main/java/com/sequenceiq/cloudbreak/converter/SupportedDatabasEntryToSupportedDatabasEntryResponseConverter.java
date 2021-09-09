@@ -6,10 +6,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.SupportedDatabas
 import com.sequenceiq.cloudbreak.validation.externaldatabase.SupportedDatabaseEntry;
 
 @Component
-public class SupportedDatabasEntryToSupportedDatabasEntryResponseConverter
-        extends AbstractConversionServiceAwareConverter<SupportedDatabaseEntry, SupportedDatabaseEntryV4Response> {
+public class SupportedDatabasEntryToSupportedDatabasEntryResponseConverter {
 
-    @Override
     public SupportedDatabaseEntryV4Response convert(SupportedDatabaseEntry source) {
         SupportedDatabaseEntryV4Response supportedDatabaseEntryV4Response = new SupportedDatabaseEntryV4Response();
         supportedDatabaseEntryV4Response.setDisplayName(source.getDisplayName());

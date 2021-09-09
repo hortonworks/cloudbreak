@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.structuredevent;
 
 import static com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType.FLOW;
 import static com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType.NOTIFICATION;
+import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
@@ -10,7 +11,6 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
@@ -20,7 +20,9 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.structuredevent.converter.BlueprintToBlueprintDetailsConverter;
 import com.sequenceiq.cloudbreak.structuredevent.converter.ClusterToClusterDetailsConverter;
+import com.sequenceiq.cloudbreak.structuredevent.converter.StackToStackDetailsConverter;
 import com.sequenceiq.cloudbreak.structuredevent.event.BlueprintDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.structuredevent.event.ClusterDetails;
@@ -43,9 +45,6 @@ public class BaseLegacyStructuredFlowEventFactory implements LegacyStructuredFlo
     private StackService stackService;
 
     @Inject
-    private ConversionService conversionService;
-
-    @Inject
     private ClusterToClusterDetailsConverter clusterToClusterDetailsConverter;
 
     @Inject
@@ -53,6 +52,12 @@ public class BaseLegacyStructuredFlowEventFactory implements LegacyStructuredFlo
 
     @Inject
     private Clock clock;
+
+    @Inject
+    private BlueprintToBlueprintDetailsConverter blueprintToBlueprintDetailsConverter;
+
+    @Inject
+    private StackToStackDetailsConverter stackToStackDetailsConverter;
 
     @Value("${info.app.version:}")
     private String cbVersion;
@@ -75,11 +80,11 @@ public class BaseLegacyStructuredFlowEventFactory implements LegacyStructuredFlo
         ClusterDetails clusterDetails = null;
         BlueprintDetails blueprintDetails = null;
         if (detailed) {
-            stackDetails = conversionService.convert(stack, StackDetails.class);
+            stackDetails = stackToStackDetailsConverter.convert(stack);
             Cluster cluster = stack.getCluster();
             if (cluster != null) {
                 clusterDetails = clusterToClusterDetailsConverter.convert(cluster);
-                blueprintDetails = conversionService.convert(cluster.getBlueprint(), BlueprintDetails.class);
+                blueprintDetails = getIfNotNull(cluster.getBlueprint(), blueprintToBlueprintDetailsConverter::convert);
             }
         }
         StructuredFlowEvent event = new StructuredFlowEvent(operationDetails, flowDetails, stackDetails, clusterDetails, blueprintDetails);

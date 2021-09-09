@@ -8,6 +8,7 @@ import static java.lang.String.format;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -91,7 +92,9 @@ public class ServiceProviderConnectorAdapter {
                 .build();
         Credential credential = credentialClientService.getByEnvironmentCrn(stack.getEnvironmentCrn());
         CloudCredential cloudCredential = credentialConverter.convert(credential);
-        List<CloudResource> resources = cloudResourceConverter.convert(stack.getResources());
+        List<CloudResource> resources = stack.getResources().stream()
+                .map(r -> cloudResourceConverter.convert(r))
+                .collect(Collectors.toList());
         List<CloudInstance> instances = new ArrayList<>();
         InstanceGroup group = stack.getInstanceGroupByInstanceGroupName(instanceGroup);
         for (InstanceMetaData metaData : group.getAllInstanceMetaData()) {
@@ -134,7 +137,9 @@ public class ServiceProviderConnectorAdapter {
                 .build();
         Credential credential = credentialClientService.getByEnvironmentCrn(stack.getEnvironmentCrn());
         CloudCredential cloudCredential = credentialConverter.convert(credential);
-        List<CloudResource> resources = cloudResourceConverter.convert(stack.getResources());
+        List<CloudResource> resources = stack.getResources().stream()
+                .map(r -> cloudResourceConverter.convert(r))
+                .collect(Collectors.toList());
         CloudStack cloudStack = cloudStackConverter.convert(stack);
         TerminateStackRequest<TerminateStackResult> terminateRequest = new TerminateStackRequest<>(cloudContext, cloudStack, cloudCredential, resources);
         LOGGER.debug("Triggering terminate stack event: {}", terminateRequest);

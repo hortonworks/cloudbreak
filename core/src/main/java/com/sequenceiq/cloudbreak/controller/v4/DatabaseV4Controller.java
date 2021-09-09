@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
@@ -13,8 +14,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.database.DatabaseV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Responses;
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
+import com.sequenceiq.cloudbreak.converter.v4.database.DatabaseV4RequestToRDSConfigConverter;
+import com.sequenceiq.cloudbreak.converter.v4.database.RDSConfigToDatabaseV4RequestConverter;
+import com.sequenceiq.cloudbreak.converter.v4.database.RDSConfigToDatabaseV4ResponseConverter;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
@@ -36,29 +39,38 @@ public class DatabaseV4Controller extends NotificationController implements Data
     private RdsConfigService databaseService;
 
     @Inject
-    private ConverterUtil converterUtil;
+    private CloudbreakRestRequestThreadLocalService threadLocalService;
 
     @Inject
-    private CloudbreakRestRequestThreadLocalService threadLocalService;
+    private RDSConfigToDatabaseV4ResponseConverter rdsConfigToDatabaseV4ResponseConverter;
+
+    @Inject
+    private RDSConfigToDatabaseV4RequestConverter rdsConfigToDatabaseV4RequestConverter;
+
+    @Inject
+    private DatabaseV4RequestToRDSConfigConverter databaseV4RequestToRDSConfigConverter;
 
     @Override
     public DatabaseV4Responses list(Long workspaceId, String environment, Boolean attachGlobal) {
         Set<RDSConfig> allInWorkspaceAndEnvironment = databaseService.findAllByWorkspaceId(threadLocalService.getRequestedWorkspaceId());
-        return new DatabaseV4Responses(converterUtil.convertAllAsSet(allInWorkspaceAndEnvironment, DatabaseV4Response.class));
+        return new DatabaseV4Responses(allInWorkspaceAndEnvironment.stream()
+                .map(d -> rdsConfigToDatabaseV4ResponseConverter.convert(d))
+                .collect(Collectors.toSet())
+        );
     }
 
     @Override
     public DatabaseV4Response get(Long workspaceId, String name) {
         RDSConfig database = databaseService.getByNameForWorkspaceId(name, threadLocalService.getRequestedWorkspaceId());
-        return converterUtil.convert(database, DatabaseV4Response.class);
+        return rdsConfigToDatabaseV4ResponseConverter.convert(database);
     }
 
     @Override
     public DatabaseV4Response create(Long workspaceId, DatabaseV4Request request) {
-        RDSConfig database = databaseService.createForLoggedInUser(converterUtil.convert(request, RDSConfig.class),
+        RDSConfig database = databaseService.createForLoggedInUser(databaseV4RequestToRDSConfigConverter.convert(request),
                 threadLocalService.getRequestedWorkspaceId());
         notify(ResourceEvent.RDS_CONFIG_CREATED);
-        return converterUtil.convert(database, DatabaseV4Response.class);
+        return rdsConfigToDatabaseV4ResponseConverter.convert(database);
     }
 
     @Override
@@ -66,19 +78,22 @@ public class DatabaseV4Controller extends NotificationController implements Data
         RDSConfig deleted = databaseService.deleteByNameFromWorkspace(name,
                 threadLocalService.getRequestedWorkspaceId());
         notify(ResourceEvent.RDS_CONFIG_DELETED);
-        return converterUtil.convert(deleted, DatabaseV4Response.class);
+        return rdsConfigToDatabaseV4ResponseConverter.convert(deleted);
     }
 
     @Override
     public DatabaseV4Responses deleteMultiple(Long workspaceId, Set<String> names) {
         Set<RDSConfig> deleted = databaseService.deleteMultipleByNameFromWorkspace(names, threadLocalService.getRequestedWorkspaceId());
         notify(ResourceEvent.LDAP_DELETED);
-        return new DatabaseV4Responses(converterUtil.convertAllAsSet(deleted, DatabaseV4Response.class));
+        return new DatabaseV4Responses(deleted.stream()
+                .map(d -> rdsConfigToDatabaseV4ResponseConverter.convert(d))
+                .collect(Collectors.toSet())
+        );
     }
 
     @Override
     public DatabaseV4Request getRequest(Long workspaceId, String name) {
         RDSConfig database = databaseService.getByNameForWorkspaceId(name, threadLocalService.getRequestedWorkspaceId());
-        return converterUtil.convert(database, DatabaseV4Request.class);
+        return rdsConfigToDatabaseV4RequestConverter.convert(database);
     }
 }

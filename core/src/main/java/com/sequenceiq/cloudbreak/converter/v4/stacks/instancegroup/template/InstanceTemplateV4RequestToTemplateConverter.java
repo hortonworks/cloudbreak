@@ -22,14 +22,13 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
 import com.sequenceiq.cloudbreak.domain.VolumeUsageType;
 import com.sequenceiq.cloudbreak.service.stack.DefaultRootVolumeSizeProvider;
 
 @Component
-public class InstanceTemplateV4RequestToTemplateConverter extends AbstractConversionServiceAwareConverter<InstanceTemplateV4Request, Template> {
+public class InstanceTemplateV4RequestToTemplateConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InstanceTemplateV4RequestToTemplateConverter.class);
 
@@ -42,7 +41,6 @@ public class InstanceTemplateV4RequestToTemplateConverter extends AbstractConver
     @Inject
     private DefaultRootVolumeSizeProvider defaultRootVolumeSizeProvider;
 
-    @Override
     public Template convert(InstanceTemplateV4Request source) {
         Template template = new Template();
         template.setName(missingResourceNameGenerator.generateName(APIResourceType.TEMPLATE));

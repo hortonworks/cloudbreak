@@ -11,8 +11,6 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -28,7 +26,6 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.core.convert.ConversionService;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
@@ -53,6 +50,7 @@ import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConver
 import com.sequenceiq.cloudbreak.converter.util.CloudStorageValidationUtil;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackV4RequestToTemplatePreparationObjectConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.CloudStorageConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.gateway.StackV4RequestToGatewayConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -145,9 +143,6 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
     private CloudStorageValidationUtil cloudStorageValidationUtil;
 
     @Mock
-    private ConversionService conversionService;
-
-    @Mock
     private StackV4Request source;
 
     @Mock
@@ -214,6 +209,9 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
     @Mock
     private ExposedServiceCollector exposedServiceCollector;
 
+    @Mock
+    private StackV4RequestToGatewayConverter stackV4RequestToGatewayConverter;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -254,13 +252,12 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
 
     @Test
     public void testConvertWhenGatewayExistsInStack() {
-        when(conversionService.convert(source, Gateway.class)).thenReturn(new Gateway());
+        when(stackV4RequestToGatewayConverter.convert(source)).thenReturn(new Gateway());
         when(cluster.getGateway()).thenReturn(new GatewayV4Request());
 
         TemplatePreparationObject result = underTest.convert(source);
 
         assertNotNull(result.getGatewayView());
-        verify(conversionService, times(1)).convert(source, Gateway.class);
     }
 
     @Test

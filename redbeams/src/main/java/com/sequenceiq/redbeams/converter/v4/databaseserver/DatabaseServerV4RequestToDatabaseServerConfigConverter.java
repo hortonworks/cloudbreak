@@ -3,16 +3,13 @@ package com.sequenceiq.redbeams.converter.v4.databaseserver;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerV4Request;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 
 @Component
-public class DatabaseServerV4RequestToDatabaseServerConfigConverter
-    extends AbstractConversionServiceAwareConverter<DatabaseServerV4Request, DatabaseServerConfig> {
+public class DatabaseServerV4RequestToDatabaseServerConfigConverter {
 
-    @Override
     public DatabaseServerConfig convert(DatabaseServerV4Request source) {
         DatabaseServerConfig server = new DatabaseServerConfig();
         server.setName(source.getName());

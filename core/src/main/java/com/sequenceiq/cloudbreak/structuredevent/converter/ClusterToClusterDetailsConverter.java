@@ -1,21 +1,21 @@
 package com.sequenceiq.cloudbreak.structuredevent.converter;
 
+import java.util.stream.Collectors;
+
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.structuredevent.event.ClusterDetails;
-import com.sequenceiq.cloudbreak.structuredevent.event.RdsDetails;
 
 @Component
 public class ClusterToClusterDetailsConverter {
 
     @Inject
-    private ConverterUtil converterUtil;
+    private RdsConfigToRdsDetailsConverter rdsConfigToRdsDetailsConverter;
 
     public ClusterDetails convert(Cluster source) {
         ClusterDetails clusterDetails = new ClusterDetails();
@@ -36,7 +36,10 @@ public class ClusterToClusterDetailsConverter {
 
     private void addDatabaseInfo(ClusterDetails clusterDetails, Cluster source) {
         if (source.getRdsConfigs() != null && !source.getRdsConfigs().isEmpty()) {
-            clusterDetails.setDatabases(converterUtil.convertAll(source.getRdsConfigs(), RdsDetails.class));
+            clusterDetails.setDatabases(
+                    source.getRdsConfigs().stream()
+                            .map(e -> rdsConfigToRdsDetailsConverter.convert(e))
+                            .collect(Collectors.toList()));
         }
     }
 

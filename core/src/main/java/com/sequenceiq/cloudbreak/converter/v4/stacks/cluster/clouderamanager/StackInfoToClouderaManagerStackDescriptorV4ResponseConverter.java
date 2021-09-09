@@ -6,13 +6,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.Cloudera
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ClouderaManagerStackDescriptorV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.component.ClouderaManagerDefaultStackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultCDHInfo;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 
 @Component
-public class StackInfoToClouderaManagerStackDescriptorV4ResponseConverter
-        extends AbstractConversionServiceAwareConverter<DefaultCDHInfo, ClouderaManagerStackDescriptorV4Response> {
+public class StackInfoToClouderaManagerStackDescriptorV4ResponseConverter {
 
-    @Override
     public ClouderaManagerStackDescriptorV4Response convert(DefaultCDHInfo source) {
         ClouderaManagerStackDescriptorV4Response stackDescriptorV4 = new ClouderaManagerStackDescriptorV4Response();
         stackDescriptorV4.setVersion(source.getVersion());

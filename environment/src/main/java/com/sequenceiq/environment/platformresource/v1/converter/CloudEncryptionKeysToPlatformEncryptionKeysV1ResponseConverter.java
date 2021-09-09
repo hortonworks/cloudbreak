@@ -7,15 +7,12 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKey;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.environment.api.v1.platformresource.model.EncryptionKeyConfigResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformEncryptionKeysResponse;
 
 @Component
-public class CloudEncryptionKeysToPlatformEncryptionKeysV1ResponseConverter
-        extends AbstractConversionServiceAwareConverter<CloudEncryptionKeys, PlatformEncryptionKeysResponse> {
+public class CloudEncryptionKeysToPlatformEncryptionKeysV1ResponseConverter {
 
-    @Override
     public PlatformEncryptionKeysResponse convert(CloudEncryptionKeys source) {
         PlatformEncryptionKeysResponse platformEncryptionKeysResponse = new PlatformEncryptionKeysResponse();
         Set<EncryptionKeyConfigResponse> result = new HashSet<>();

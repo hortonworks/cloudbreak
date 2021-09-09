@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.util.Benchmark.checkedMeasure;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -60,7 +61,9 @@ public class StackInstanceProviderChecker {
                 .withAccountId(stack.getAccountId())
                 .build();
         CloudCredential cloudCredential = credentialConverter.convert(credentialService.getCredentialByEnvCrn(stack.getEnvironmentCrn()));
-        List<CloudInstance> instances = metadataConverter.convert(notTerminatedForStack);
+        List<CloudInstance> instances = notTerminatedForStack.stream()
+                .map(s -> metadataConverter.convert(s))
+                .collect(Collectors.toList());
         try {
             return checkedMeasure(() -> instanceStateQuery.getCloudVmInstanceStatusesWithoutRetry(cloudCredential, cloudContext, instances), LOGGER,
                     ":::Auto sync::: get instance statuses in {}ms");

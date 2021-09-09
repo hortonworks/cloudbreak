@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.converter.stack.cluster;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
 
@@ -19,20 +18,21 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.core.convert.ConversionService;
 
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.BlueprintV4Response;
-import com.sequenceiq.common.api.type.CertExpirationState;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.ConfigStrategy;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway.topology.ClusterExposedServiceV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.validation.StackServiceComponentDescriptor;
 import com.sequenceiq.cloudbreak.converter.AbstractEntityConverterTest;
+import com.sequenceiq.cloudbreak.converter.v4.blueprint.BlueprintToBlueprintV4ResponseConverter;
+import com.sequenceiq.cloudbreak.converter.v4.database.RDSConfigToDatabaseV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.ClusterToClusterV4ResponseConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.gateway.GatewayToGatewayV4ResponseConverter;
+import com.sequenceiq.cloudbreak.converter.v4.workspaces.WorkspaceToWorkspaceResourceV4ResponseConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -42,17 +42,16 @@ import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
+import com.sequenceiq.cloudbreak.service.secret.model.StringToSecretResponseConverter;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.common.api.type.CertExpirationState;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConverterTest<Cluster> {
 
     @InjectMocks
     private ClusterToClusterV4ResponseConverter underTest;
-
-    @Mock
-    private ConversionService conversionService;
 
     @Mock
     private StackUtil stackUtil;
@@ -64,14 +63,26 @@ public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConve
     private BlueprintService blueprintService;
 
     @Mock
-    private ConverterUtil converterUtil;
+    private ProxyConfigDtoService proxyConfigDtoService;
 
     @Mock
-    private ProxyConfigDtoService proxyConfigDtoService;
+    private WorkspaceToWorkspaceResourceV4ResponseConverter workspaceToWorkspaceResourceV4ResponseConverter;
+
+    @Mock
+    private BlueprintToBlueprintV4ResponseConverter blueprintToBlueprintV4ResponseConverter;
+
+    @Mock
+    private GatewayToGatewayV4ResponseConverter gatewayToGatewayV4ResponseConverter;
+
+    @Mock
+    private StringToSecretResponseConverter stringToSecretResponseConverter;
+
+    @Mock
+    private RDSConfigToDatabaseV4ResponseConverter rdsConfigToDatabaseV4ResponseConverter;
 
     @Before
     public void setUp() {
-        given(conversionService.convert(any(Workspace.class), eq(WorkspaceResourceV4Response.class)))
+        given(workspaceToWorkspaceResourceV4ResponseConverter.convert(any(Workspace.class)))
                 .willReturn(new WorkspaceResourceV4Response());
     }
 
@@ -90,8 +101,8 @@ public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConve
         TestUtil.setSecretField(Cluster.class, "cloudbreakAmbariPassword", source, "pass", "secret/path");
         TestUtil.setSecretField(Cluster.class, "dpAmbariUser", source, "user", "secret/path");
         TestUtil.setSecretField(Cluster.class, "dpAmbariPassword", source, "pass", "secret/path");
-        when(conversionService.convert("secret/path", SecretResponse.class)).thenReturn(new SecretResponse("kv", "pass"));
-        when(conversionService.convert(getSource().getBlueprint(), BlueprintV4Response.class)).thenReturn(new BlueprintV4Response());
+        when(stringToSecretResponseConverter.convert("secret/path")).thenReturn(new SecretResponse("kv", "pass"));
+        when(blueprintToBlueprintV4ResponseConverter.convert(getSource().getBlueprint())).thenReturn(new BlueprintV4Response());
         when(serviceEndpointCollector.getManagerServerUrl(any(Cluster.class), anyString())).thenReturn("http://server/");
         given(proxyConfigDtoService.getByCrn(anyString())).willReturn(ProxyConfig.builder().withCrn("crn").withName("name").build());
         // WHEN

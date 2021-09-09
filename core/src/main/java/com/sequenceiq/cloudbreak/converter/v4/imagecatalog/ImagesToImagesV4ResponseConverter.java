@@ -16,7 +16,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.Cloudera
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ClouderaManagerStackRepoDetailsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.StackDetails;
@@ -24,18 +23,16 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.ImageBasedDefaultCDHEntries;
 import com.sequenceiq.cloudbreak.cloud.model.component.ImageBasedDefaultCDHInfo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 
 @Component
-public class ImagesToImagesV4ResponseConverter extends AbstractConversionServiceAwareConverter<Images, ImagesV4Response> {
+public class ImagesToImagesV4ResponseConverter {
 
     @Inject
     private ImageBasedDefaultCDHEntries imageBasedDefaultCDHEntries;
 
     @Inject
-    private ConverterUtil converterUtil;
+    private ImageToImageV4ResponseConverter imageToImageV4ResponseConverter;
 
-    @Override
     public ImagesV4Response convert(Images source) {
         ImagesV4Response res = new ImagesV4Response();
         List<BaseImageV4Response> baseImages = getBaseImageResponses(source);
@@ -43,7 +40,9 @@ public class ImagesToImagesV4ResponseConverter extends AbstractConversionService
         List<ImageV4Response> cdhImages = convertImages(source.getCdhImages(), StackType.CDH);
         res.setCdhImages(cdhImages);
         res.setSupportedVersions(source.getSuppertedVersions());
-        res.setFreeipaImages(converterUtil.convertAll(source.getFreeIpaImages(), ImageV4Response.class));
+        res.setFreeipaImages(source.getFreeIpaImages().stream()
+                .map(image -> imageToImageV4ResponseConverter.convert(image))
+                .collect(Collectors.toList()));
         return res;
     }
 

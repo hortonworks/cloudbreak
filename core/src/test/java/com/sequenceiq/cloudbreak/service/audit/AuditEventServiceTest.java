@@ -20,10 +20,10 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.security.access.AccessDeniedException;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.responses.AuditEventV4Response;
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
-import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
-import com.sequenceiq.cloudbreak.domain.StructuredEventEntity;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.converter.v4.audit.StructuredEventEntityToAuditEventV4ResponseConverter;
+import com.sequenceiq.cloudbreak.domain.StructuredEventEntity;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.LegacyRestRequestThreadLocalService;
@@ -43,9 +43,6 @@ public class AuditEventServiceTest {
 
     @Rule
     public final ExpectedException thrown = ExpectedException.none();
-
-    @Mock
-    private ConverterUtil converterUtil;
 
     @Mock
     private LegacyStructuredEventDBService legacyStructuredEventDBService;
@@ -68,6 +65,9 @@ public class AuditEventServiceTest {
     @Mock
     private CloudbreakUser cloudbreakUser;
 
+    @Mock
+    private StructuredEventEntityToAuditEventV4ResponseConverter structuredEventEntityToAuditEventV4ResponseConverter;
+
     @InjectMocks
     private AuditEventService underTest;
 
@@ -84,13 +84,13 @@ public class AuditEventServiceTest {
     public void testGetAuditEventWhenEventExistsAndHasPermissionToReadItThenTheExpectedEventShouldReturn() {
         AuditEventV4Response expected = mock(AuditEventV4Response.class);
         StructuredEventEntity repoResult = new StructuredEventEntity();
-        when(converterUtil.convert(repoResult, AuditEventV4Response.class)).thenReturn(expected);
+        when(structuredEventEntityToAuditEventV4ResponseConverter.convert(repoResult)).thenReturn(expected);
         when(legacyStructuredEventDBService.findByWorkspaceIdAndId(TEST_DEFAULT_ORG_ID, TEST_AUDIT_ID)).thenReturn(repoResult);
 
         AuditEventV4Response actual = underTest.getAuditEvent(TEST_AUDIT_ID);
 
         Assert.assertEquals(expected, actual);
-        verify(converterUtil, times(1)).convert(repoResult, AuditEventV4Response.class);
+        verify(structuredEventEntityToAuditEventV4ResponseConverter, times(1)).convert(repoResult);
         verify(legacyStructuredEventDBService, times(1)).findByWorkspaceIdAndId(TEST_DEFAULT_ORG_ID, TEST_AUDIT_ID);
     }
 
@@ -104,7 +104,7 @@ public class AuditEventServiceTest {
         underTest.getAuditEvent(TEST_AUDIT_ID);
 
         verify(legacyStructuredEventDBService, times(1)).findByWorkspaceIdAndId(TEST_DEFAULT_ORG_ID, TEST_AUDIT_ID);
-        verify(converterUtil, times(0)).convert(any(StructuredEventEntity.class), AuditEventV4Response.class);
+        verify(structuredEventEntityToAuditEventV4ResponseConverter, times(0)).convert(any(StructuredEventEntity.class));
     }
 
     @Test
@@ -118,20 +118,20 @@ public class AuditEventServiceTest {
         underTest.getAuditEvent(TEST_AUDIT_ID);
 
         verify(legacyStructuredEventDBService, times(1)).findByWorkspaceIdAndId(TEST_DEFAULT_ORG_ID, TEST_AUDIT_ID);
-        verify(converterUtil, times(0)).convert(any(StructuredEventEntity.class), AuditEventV4Response.class);
+        verify(structuredEventEntityToAuditEventV4ResponseConverter, times(0)).convert(any(StructuredEventEntity.class));
     }
 
     @Test
     public void testGetAuditEventByWorkspaceIdWhenEventExistsAndHasPermissionToReadItThenTheExpectedEventShouldReturn() {
         AuditEventV4Response expected = mock(AuditEventV4Response.class);
         StructuredEventEntity repoResult = new StructuredEventEntity();
-        when(converterUtil.convert(repoResult, AuditEventV4Response.class)).thenReturn(expected);
+        when(structuredEventEntityToAuditEventV4ResponseConverter.convert(repoResult)).thenReturn(expected);
         when(legacyStructuredEventDBService.findByWorkspaceIdAndId(TEST_DEFAULT_ORG_ID, TEST_AUDIT_ID)).thenReturn(repoResult);
 
         AuditEventV4Response actual = underTest.getAuditEventByWorkspaceId(TEST_DEFAULT_ORG_ID, TEST_AUDIT_ID);
 
         Assert.assertEquals(expected, actual);
-        verify(converterUtil, times(1)).convert(repoResult, AuditEventV4Response.class);
+        verify(structuredEventEntityToAuditEventV4ResponseConverter, times(1)).convert(repoResult);
         verify(legacyStructuredEventDBService, times(1)).findByWorkspaceIdAndId(TEST_DEFAULT_ORG_ID, TEST_AUDIT_ID);
     }
 
@@ -145,7 +145,7 @@ public class AuditEventServiceTest {
         underTest.getAuditEvent(TEST_AUDIT_ID);
 
         verify(legacyStructuredEventDBService, times(1)).findByWorkspaceIdAndId(TEST_DEFAULT_ORG_ID, TEST_AUDIT_ID);
-        verify(converterUtil, times(0)).convert(any(StructuredEventEntity.class), AuditEventV4Response.class);
+        verify(structuredEventEntityToAuditEventV4ResponseConverter, times(0)).convert(any(StructuredEventEntity.class));
     }
 
     @Test
@@ -159,7 +159,7 @@ public class AuditEventServiceTest {
         underTest.getAuditEvent(TEST_AUDIT_ID);
 
         verify(legacyStructuredEventDBService, times(1)).findByWorkspaceIdAndId(TEST_DEFAULT_ORG_ID, TEST_AUDIT_ID);
-        verify(converterUtil, times(0)).convert(any(StructuredEventEntity.class), AuditEventV4Response.class);
+        verify(structuredEventEntityToAuditEventV4ResponseConverter, times(0)).convert(any(StructuredEventEntity.class));
     }
 
     @Test

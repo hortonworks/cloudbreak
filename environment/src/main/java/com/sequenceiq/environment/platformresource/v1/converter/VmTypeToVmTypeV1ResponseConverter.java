@@ -8,16 +8,13 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterConfig;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.environment.api.v1.platformresource.model.VmTypeMetaJson;
 import com.sequenceiq.environment.api.v1.platformresource.model.VmTypeResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.VolumeParameterConfigResponse;
 
 @Component
-public class VmTypeToVmTypeV1ResponseConverter
-        extends AbstractConversionServiceAwareConverter<VmType, VmTypeResponse> {
+public class VmTypeToVmTypeV1ResponseConverter {
 
-    @Override
     public VmTypeResponse convert(VmType source) {
         VmTypeResponse vmTypeResponse = new VmTypeResponse();
         List<VolumeParameterConfigResponse> configs = new ArrayList<>();

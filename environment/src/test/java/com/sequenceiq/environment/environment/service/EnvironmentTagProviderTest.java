@@ -1,7 +1,7 @@
 package com.sequenceiq.environment.environment.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -31,6 +31,7 @@ import com.sequenceiq.environment.api.v1.tags.model.response.AccountTagResponse;
 import com.sequenceiq.environment.environment.domain.EnvironmentTags;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.network.dto.NetworkDto;
+import com.sequenceiq.environment.tags.domain.AccountTag;
 import com.sequenceiq.environment.tags.service.AccountTagService;
 import com.sequenceiq.environment.tags.service.DefaultInternalAccountTagService;
 import com.sequenceiq.environment.tags.v1.converter.AccountTagToAccountTagResponsesConverter;
@@ -102,9 +103,9 @@ class EnvironmentTagProviderTest {
 
     @BeforeEach
     void setUp() {
-        when(accountTagService.get(ACCOUNT_ID)).thenReturn(Set.of());
+        when(accountTagService.get(ACCOUNT_ID)).thenReturn(Set.of(new AccountTag()));
 
-        when(accountTagToAccountTagResponsesConverter.convert(anySet())).thenReturn(ACCOUNT_TAGS);
+        when(accountTagToAccountTagResponsesConverter.convert(any())).thenReturn(ACCOUNT_TAGS.get(0));
 
         CrnUser crnUser = new CrnUser("userId", USER_CRN, USERNAME, "email", "tenant", "role");
         when(crnUserDetailsService.loadUserByUsername(USER_CRN)).thenReturn(crnUser);
@@ -114,8 +115,7 @@ class EnvironmentTagProviderTest {
     void tagsShouldIncludeUserDefinedTags() {
         Map<String, String> result = underTest.getTags(ENVIRONMENT, NETWORK_CRN);
 
-        assertThat(result)
-                .containsAllEntriesOf(USER_DEFINED_TAGS);
+        assertThat(result).containsAllEntriesOf(USER_DEFINED_TAGS);
     }
 
     @Test
@@ -132,8 +132,7 @@ class EnvironmentTagProviderTest {
     void tagsShouldIncludeApplicationTags() {
         Map<String, String> result = underTest.getTags(ENVIRONMENT, NETWORK_CRN);
 
-        assertThat(result)
-                .containsEntry(OWNER_TAG, USERNAME);
+        assertThat(result).containsEntry(OWNER_TAG, USERNAME);
     }
 
 }

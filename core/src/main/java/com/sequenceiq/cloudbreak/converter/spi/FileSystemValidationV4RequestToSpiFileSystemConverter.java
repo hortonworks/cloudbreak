@@ -10,18 +10,15 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.FileSystemValidationV4Request;
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.CloudStorageParametersConverter;
 import com.sequenceiq.common.model.FileSystemType;
 
 @Component
-public class FileSystemValidationV4RequestToSpiFileSystemConverter
-        extends AbstractConversionServiceAwareConverter<FileSystemValidationV4Request, SpiFileSystem> {
+public class FileSystemValidationV4RequestToSpiFileSystemConverter {
 
     @Inject
     private CloudStorageParametersConverter cloudStorageParametersConverter;
 
-    @Override
     public SpiFileSystem convert(FileSystemValidationV4Request source) {
         List<CloudFileSystemView> cloudFileSystemViews = new ArrayList<>();
         if (source.getAdls() != null) {

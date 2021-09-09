@@ -10,14 +10,12 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudIpPool;
 import com.sequenceiq.cloudbreak.cloud.model.CloudIpPools;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.environment.api.v1.platformresource.model.IpPoolResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformIpPoolsResponse;
 
 @Component
-public class CloudIpPoolsToPlatformIpPoolsV1ResponseConverter extends AbstractConversionServiceAwareConverter<CloudIpPools, PlatformIpPoolsResponse> {
+public class CloudIpPoolsToPlatformIpPoolsV1ResponseConverter {
 
-    @Override
     public PlatformIpPoolsResponse convert(CloudIpPools source) {
         Map<String, Set<IpPoolResponse>> result = new HashMap<>();
         for (Entry<String, Set<CloudIpPool>> entry : source.getCloudIpPools().entrySet()) {

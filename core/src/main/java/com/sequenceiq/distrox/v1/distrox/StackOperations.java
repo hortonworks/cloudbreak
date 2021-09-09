@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
@@ -42,19 +43,20 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Resp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeOptionV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.StackClusterStatusViewToStatusConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.UserNamePasswordV4RequestToUpdateClusterV4RequestConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.view.StackApiViewToStackViewV4ResponseConverter;
 import com.sequenceiq.cloudbreak.domain.projection.StackClusterStatusView;
 import com.sequenceiq.cloudbreak.domain.projection.StackCrnView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.flow.domain.RetryableFlow;
-import com.sequenceiq.cloudbreak.service.LoadBalancerUpdateService;
 import com.sequenceiq.cloudbreak.service.ClusterCommonService;
 import com.sequenceiq.cloudbreak.service.DatabaseBackupRestoreService;
+import com.sequenceiq.cloudbreak.service.LoadBalancerUpdateService;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterDBValidationService;
 import com.sequenceiq.cloudbreak.service.stack.StackApiViewService;
@@ -71,6 +73,7 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.distrox.v1.distrox.service.EnvironmentServiceDecorator;
 import com.sequenceiq.distrox.v1.distrox.service.SdxServiceDecorator;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.domain.RetryableFlow;
 
 @Service
 public class StackOperations implements ResourcePropertyProvider {
@@ -94,9 +97,6 @@ public class StackOperations implements ResourcePropertyProvider {
 
     @Inject
     private ClusterCommonService clusterCommonService;
-
-    @Inject
-    private ConverterUtil converterUtil;
 
     @Inject
     private StackApiViewService stackApiViewService;
@@ -131,12 +131,22 @@ public class StackOperations implements ResourcePropertyProvider {
     @Inject
     private UpgradePreconditionService upgradePreconditionService;
 
+    @Inject
+    private StackApiViewToStackViewV4ResponseConverter stackApiViewToStackViewV4ResponseConverter;
+
+    @Inject
+    private StackClusterStatusViewToStatusConverter stackClusterStatusViewToStatusConverter;
+
+    @Inject
+    private UserNamePasswordV4RequestToUpdateClusterV4RequestConverter userNamePasswordV4RequestToUpdateClusterV4RequestConverter;
+
     public StackViewV4Responses listByEnvironmentName(Long workspaceId, String environmentName, List<StackType> stackTypes) {
         Set<StackViewV4Response> stackViewResponses;
         LOGGER.info("List for Stack in workspace {} and environmentName {}.", workspaceId, environmentName);
-        stackViewResponses = converterUtil.convertAllAsSet(
-                stackApiViewService.retrieveStackViewsByWorkspaceIdAndEnvironmentName(workspaceId, environmentName, stackTypes),
-                StackViewV4Response.class);
+        stackViewResponses = stackApiViewService.retrieveStackViewsByWorkspaceIdAndEnvironmentName(workspaceId, environmentName, stackTypes)
+                .stream()
+                .map(s -> stackApiViewToStackViewV4ResponseConverter.convert(s))
+                .collect(Collectors.toSet());
         LOGGER.info("Adding environment name and credential to the responses.");
         NameOrCrn nameOrCrn = StringUtils.isEmpty(environmentName) ? NameOrCrn.empty() : NameOrCrn.ofName(environmentName);
         environmentServiceDecorator.prepareEnvironmentsAndCredentialName(stackViewResponses, nameOrCrn);
@@ -148,9 +158,10 @@ public class StackOperations implements ResourcePropertyProvider {
     public StackViewV4Responses listByEnvironmentCrn(Long workspaceId, String environmentCrn, List<StackType> stackTypes) {
         Set<StackViewV4Response> stackViewResponses;
         LOGGER.info("List for Stack in workspace {} and environmentCrn {}.", workspaceId, environmentCrn);
-        stackViewResponses = converterUtil.convertAllAsSet(
-                stackApiViewService.retrieveStackViewsByWorkspaceIdAndEnvironmentCrn(workspaceId, environmentCrn, stackTypes),
-                StackViewV4Response.class);
+        stackViewResponses = stackApiViewService.retrieveStackViewsByWorkspaceIdAndEnvironmentCrn(workspaceId, environmentCrn, stackTypes)
+                .stream()
+                .map(s -> stackApiViewToStackViewV4ResponseConverter.convert(s))
+                .collect(Collectors.toSet());
         LOGGER.info("Adding environment name and credential to the responses.");
         NameOrCrn nameOrCrn = StringUtils.isEmpty(environmentCrn) ? NameOrCrn.empty() : NameOrCrn.ofCrn(environmentCrn);
         environmentServiceDecorator.prepareEnvironmentsAndCredentialName(stackViewResponses, nameOrCrn);
@@ -161,9 +172,10 @@ public class StackOperations implements ResourcePropertyProvider {
 
     public StackViewV4Responses listByStackIds(Long workspaceId, List<Long> stackIds, String environmentCrn, List<StackType> stackTypes) {
         Set<StackViewV4Response> stackViewResponses;
-        stackViewResponses = converterUtil.convertAllAsSet(
-                stackApiViewService.retrieveStackViewsByStackIdsAndEnvironmentCrn(workspaceId, stackIds, environmentCrn, stackTypes),
-                StackViewV4Response.class);
+        stackViewResponses = stackApiViewService.retrieveStackViewsByStackIdsAndEnvironmentCrn(workspaceId, stackIds, environmentCrn, stackTypes)
+                .stream()
+                .map(s -> stackApiViewToStackViewV4ResponseConverter.convert(s))
+                .collect(Collectors.toSet());
         LOGGER.info("Adding environment name and credential to the responses.");
         NameOrCrn nameOrCrn = Strings.isNullOrEmpty(environmentCrn) ? NameOrCrn.empty() : NameOrCrn.ofCrn(environmentCrn);
         environmentServiceDecorator.prepareEnvironmentsAndCredentialName(stackViewResponses, nameOrCrn);
@@ -201,7 +213,7 @@ public class StackOperations implements ResourcePropertyProvider {
         LOGGER.info("Validate stack against internal user.");
         StackApiView stackApiView = stackApiViewService.retrieveStackByCrnAndType(nameOrCrn.getCrn(), stackType);
         LOGGER.info("Query Stack (view) successfully finished with crn {}", nameOrCrn.getCrn());
-        StackViewV4Response stackViewV4Response = converterUtil.convert(stackApiView, StackViewV4Response.class);
+        StackViewV4Response stackViewV4Response = stackApiViewToStackViewV4ResponseConverter.convert(stackApiView);
         LOGGER.info("Adding environment name to the response.");
         environmentServiceDecorator.prepareEnvironment(stackViewV4Response);
         return stackViewV4Response;
@@ -299,7 +311,7 @@ public class StackOperations implements ResourcePropertyProvider {
     private void validateDatalakeHasNoRunningDatahub(String accountId, Long workspaceId, Stack stack, UpgradeV4Response upgradeResponse) {
         if (entitlementService.runtimeUpgradeEnabled(accountId) && StackType.DATALAKE == stack.getType()) {
             LOGGER.info("Checking that the attached DataHubs of the Datalake are in stopped state only in case if Datalake runtime upgarda is enabled" +
-                            " in [{}] account on [{}] cluster.", accountId, stack.getName());
+                    " in [{}] account on [{}] cluster.", accountId, stack.getName());
             StackViewV4Responses stackViewV4Responses = listByEnvironmentCrn(workspaceId, stack.getEnvironmentCrn(), List.of(StackType.WORKLOAD));
             upgradePreconditionService.checkForRunningAttachedClusters(stackViewV4Responses, upgradeResponse);
         }
@@ -331,24 +343,24 @@ public class StackOperations implements ResourcePropertyProvider {
 
     public StackStatusV4Response getStatus(@NotNull NameOrCrn nameOrCrn, Long workspaceId) {
         StackClusterStatusView stackStatusView = stackService.getStatusByNameOrCrn(nameOrCrn, workspaceId);
-        return converterUtil.convert(stackStatusView, StackStatusV4Response.class);
+        return stackClusterStatusViewToStatusConverter.convert(stackStatusView);
     }
 
     public StackStatusV4Response getStatusByCrn(@NotNull NameOrCrn nameOrCrn, Long workspaceId) {
         StackClusterStatusView stackStatusView = stackService.getStatusByNameOrCrn(nameOrCrn, workspaceId);
-        return converterUtil.convert(stackStatusView, StackStatusV4Response.class);
+        return stackClusterStatusViewToStatusConverter.convert(stackStatusView);
     }
 
     public StackStatusV4Response getStatus(@NotNull String crn) {
         StackClusterStatusView stackStatusView = stackService.getStatusByCrn(crn);
-        return converterUtil.convert(stackStatusView, StackStatusV4Response.class);
+        return stackClusterStatusViewToStatusConverter.convert(stackStatusView);
     }
 
     public FlowIdentifier putPassword(@NotNull NameOrCrn nameOrCrn, Long workspaceId, @Valid UserNamePasswordV4Request userNamePasswordJson) {
         Stack stack = nameOrCrn.hasName()
                 ? stackService.getByNameInWorkspace(nameOrCrn.getName(), workspaceId)
                 : stackService.getByCrnInWorkspace(nameOrCrn.getCrn(), workspaceId);
-        UpdateClusterV4Request updateClusterJson = converterUtil.convert(userNamePasswordJson, UpdateClusterV4Request.class);
+        UpdateClusterV4Request updateClusterJson = userNamePasswordV4RequestToUpdateClusterV4RequestConverter.convert(userNamePasswordJson);
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         return clusterCommonService.put(stack.getResourceCrn(), updateClusterJson);

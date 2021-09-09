@@ -261,8 +261,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
     }
 
     public Blueprint getByNameForWorkspaceAndLoadDefaultsIfNecessary(String name, Workspace workspace) {
-        Set<Blueprint> blueprints = blueprintRepository.findAllByNotDeletedInWorkspace(workspace.getId());
-        Optional<Blueprint> blueprint = filterBlueprintsByName(name, blueprints);
+        Optional<Blueprint> blueprint = blueprintRepository.findByNameAndWorkspaceId(name, workspace.getId());
         if (blueprint.isPresent()) {
             return blueprint.get();
         } else {

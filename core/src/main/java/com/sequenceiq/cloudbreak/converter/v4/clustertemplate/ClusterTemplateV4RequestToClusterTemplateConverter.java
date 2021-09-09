@@ -12,10 +12,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.FeatureState;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.StackV4RequestToStackConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
@@ -28,11 +27,9 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.distrox.v1.distrox.converter.DistroXV1RequestToStackV4RequestConverter;
 
 @Component
-public class ClusterTemplateV4RequestToClusterTemplateConverter extends AbstractConversionServiceAwareConverter<ClusterTemplateV4Request, ClusterTemplate> {
+public class ClusterTemplateV4RequestToClusterTemplateConverter {
 
     private final UserService userService;
-
-    private final ConverterUtil converterUtil;
 
     private final WorkspaceService workspaceService;
 
@@ -42,10 +39,16 @@ public class ClusterTemplateV4RequestToClusterTemplateConverter extends Abstract
 
     private final CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
-    public ClusterTemplateV4RequestToClusterTemplateConverter(ConverterUtil converterUtil, WorkspaceService workspaceService, UserService userService,
-            CloudbreakRestRequestThreadLocalService restRequestThreadLocalService, CredentialClientService credentialClientService,
+    private final StackV4RequestToStackConverter stackV4RequestToStackConverter;
+
+    public ClusterTemplateV4RequestToClusterTemplateConverter(
+            StackV4RequestToStackConverter stackV4RequestToStackConverter,
+            WorkspaceService workspaceService,
+            UserService userService,
+            CloudbreakRestRequestThreadLocalService restRequestThreadLocalService,
+            CredentialClientService credentialClientService,
             DistroXV1RequestToStackV4RequestConverter stackV4RequestConverter) {
-        this.converterUtil = converterUtil;
+        this.stackV4RequestToStackConverter = stackV4RequestToStackConverter;
         this.workspaceService = workspaceService;
         this.userService = userService;
         this.restRequestThreadLocalService = restRequestThreadLocalService;
@@ -53,7 +56,6 @@ public class ClusterTemplateV4RequestToClusterTemplateConverter extends Abstract
         this.stackV4RequestConverter = stackV4RequestConverter;
     }
 
-    @Override
     public ClusterTemplate convert(ClusterTemplateV4Request source) {
         if (source.getDistroXTemplate() == null) {
             throw new BadRequestException("The Datahub template cannot be null.");
@@ -68,7 +70,7 @@ public class ClusterTemplateV4RequestToClusterTemplateConverter extends Abstract
         clusterTemplate.setWorkspace(workspace);
         StackV4Request stackV4Request = stackV4RequestConverter.convert(source.getDistroXTemplate());
         stackV4Request.setType(StackType.TEMPLATE);
-        Stack stack = converterUtil.convert(stackV4Request, Stack.class);
+        Stack stack = stackV4RequestToStackConverter.convert(stackV4Request);
         prepareEmptyInstanceMetadata(stack);
         clusterTemplate.setStackTemplate(stack);
         clusterTemplate.setCloudPlatform(getCloudPlatform(source, stack));

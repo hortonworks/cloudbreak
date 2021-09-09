@@ -6,15 +6,12 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseRequest;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 
 @Component
-public class DatabaseAvailabilityTypeToExternalDatabaseRequestConverter
-        extends AbstractConversionServiceAwareConverter<DatabaseAvailabilityType, DatabaseRequest> {
+public class DatabaseAvailabilityTypeToExternalDatabaseRequestConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseAvailabilityTypeToExternalDatabaseRequestConverter.class);
 
-    @Override
     public DatabaseRequest convert(DatabaseAvailabilityType source) {
         DatabaseRequest databaseRequest = new DatabaseRequest();
         databaseRequest.setAvailabilityType(source);

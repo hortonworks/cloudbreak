@@ -8,15 +8,13 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.HostGroupViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.HostMetadataViewV4Response;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.view.HostGroupView;
 import com.sequenceiq.cloudbreak.domain.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.domain.view.InstanceMetaDataView;
 
 @Component
-public class HostGroupViewToHostGroupViewV4ResponseConverter extends AbstractConversionServiceAwareConverter<HostGroupView, HostGroupViewV4Response> {
+public class HostGroupViewToHostGroupViewV4ResponseConverter {
 
-    @Override
     public HostGroupViewV4Response convert(HostGroupView source) {
         HostGroupViewV4Response hostGroupViewResponse = new HostGroupViewV4Response();
         hostGroupViewResponse.setId(source.getId());

@@ -15,17 +15,15 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.te
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.RootVolumeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.VolumeV4Request;
 import com.sequenceiq.cloudbreak.common.json.Json;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
 
 @Component
-public class TemplateToInstanceTemplateV4RequestConverter extends AbstractConversionServiceAwareConverter<Template, InstanceTemplateV4Request> {
+public class TemplateToInstanceTemplateV4RequestConverter {
 
     @Inject
     private ProviderParameterCalculator providerParameterCalculator;
 
-    @Override
     public InstanceTemplateV4Request convert(Template source) {
         InstanceTemplateV4Request templateRequest = new InstanceTemplateV4Request();
         Map<String, Object> parameters = new HashMap<>();

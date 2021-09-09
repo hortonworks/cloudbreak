@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -78,7 +79,9 @@ abstract class AbstractStackTerminationAction<P extends Payload>
         CloudCredential cloudCredential = credentialConverter.convert(credential);
         CloudStack cloudStack = cloudStackConverter.convert(stack);
         List<Resource> resourceList = resourceService.findAllByStackId(stack.getId());
-        List<CloudResource> resources = resourceConverter.convert(resourceList);
+        List<CloudResource> resources = resourceList.stream()
+                .map(r -> resourceConverter.convert(r))
+                .collect(Collectors.toList());
         return new StackTerminationContext(flowParameters, stack, cloudContext, cloudCredential, cloudStack, resources);
     }
 

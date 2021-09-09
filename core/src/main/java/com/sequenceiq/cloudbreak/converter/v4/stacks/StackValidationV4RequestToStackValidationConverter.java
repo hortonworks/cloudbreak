@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -16,7 +17,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackValidationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
@@ -24,8 +24,9 @@ import com.sequenceiq.cloudbreak.cloud.model.SpecialParameters;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.controller.validation.template.InstanceTemplateValidator;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.converter.v4.environment.network.EnvironmentNetworkConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.InstanceGroupV4RequestToInstanceGroupConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.network.NetworkV4RequestToNetworkConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.stack.StackValidation;
@@ -47,7 +48,7 @@ import com.sequenceiq.environment.api.v1.credential.model.response.CredentialRes
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Component
-public class StackValidationV4RequestToStackValidationConverter extends AbstractConversionServiceAwareConverter<StackValidationV4Request, StackValidation> {
+public class StackValidationV4RequestToStackValidationConverter {
 
     @Inject
     private BlueprintService blueprintService;
@@ -57,9 +58,6 @@ public class StackValidationV4RequestToStackValidationConverter extends Abstract
 
     @Inject
     private EnvironmentClientService environmentClientService;
-
-    @Inject
-    private ConverterUtil converterUtil;
 
     @Inject
     private CloudParameterCache cloudParameterCache;
@@ -82,10 +80,17 @@ public class StackValidationV4RequestToStackValidationConverter extends Abstract
     @Inject
     private InstanceTemplateValidator instanceTemplateValidator;
 
-    @Override
+    @Inject
+    private NetworkV4RequestToNetworkConverter networkV4RequestToNetworkConverter;
+
+    @Inject
+    private InstanceGroupV4RequestToInstanceGroupConverter instanceGroupV4RequestToInstanceGroupConverter;
+
     public StackValidation convert(StackValidationV4Request stackValidationRequest) {
         StackValidation stackValidation = new StackValidation();
-        Set<InstanceGroup> instanceGroups = converterUtil.convertAllAsSet(stackValidationRequest.getInstanceGroups(), InstanceGroup.class);
+        Set<InstanceGroup> instanceGroups = stackValidationRequest.getInstanceGroups().stream()
+                .map(i -> instanceGroupV4RequestToInstanceGroupConverter.convert(i))
+                .collect(Collectors.toSet());
         stackValidation.setInstanceGroups(instanceGroups);
         stackValidation.setEnvironmentCrn(stackValidationRequest.getEnvironmentCrn());
         stackValidation.setHostGroups(convertHostGroupsFromJson(instanceGroups, stackValidationRequest.getHostGroups()));
@@ -148,7 +153,7 @@ public class StackValidationV4RequestToStackValidationConverter extends Abstract
                     stackValidation.setNetwork(network);
                 }
             } else if (networkRequest != null) {
-                Network network = converterUtil.convert(networkRequest, Network.class);
+                Network network = networkV4RequestToNetworkConverter.convert(networkRequest);
                 stackValidation.setNetwork(network);
             } else if (specialParameters.getSpecialParameters().get(PlatformParametersConsts.NETWORK_IS_MANDATORY)) {
                 throw new BadRequestException("Network is not configured for the validation request!");

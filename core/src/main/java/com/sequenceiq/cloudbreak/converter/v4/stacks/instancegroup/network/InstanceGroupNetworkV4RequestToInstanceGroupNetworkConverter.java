@@ -15,19 +15,16 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.stack.instance.network.InstanceGroupNetwork;
 
 @Component
-public class InstanceGroupNetworkV4RequestToInstanceGroupNetworkConverter
-    extends AbstractConversionServiceAwareConverter<InstanceGroupNetworkV4Request, InstanceGroupNetwork> {
+public class InstanceGroupNetworkV4RequestToInstanceGroupNetworkConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InstanceGroupNetworkV4RequestToInstanceGroupNetworkConverter.class);
 
     @Inject
     private ProviderParameterCalculator providerParameterCalculator;
 
-    @Override
     public InstanceGroupNetwork convert(InstanceGroupNetworkV4Request source) {
         InstanceGroupNetwork network = new InstanceGroupNetwork();
         CloudPlatform cloudPlatform = providerParameterCalculator.get(source).getCloudPlatform();

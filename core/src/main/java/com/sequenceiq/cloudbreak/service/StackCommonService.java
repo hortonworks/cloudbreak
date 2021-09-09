@@ -30,7 +30,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4R
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -39,6 +38,10 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.StackCreatorService;
 import com.sequenceiq.cloudbreak.controller.validation.filesystem.FileSystemValidator;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.StackScaleV4RequestToUpdateClusterV4RequestConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.StackScaleV4RequestToUpdateStackV4RequestConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.StackV4RequestToTemplatePreparationObjectConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.StackValidationV4RequestToStackValidationConverter;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackValidation;
@@ -108,9 +111,6 @@ public class StackCommonService {
     private ClusterRepairService clusterRepairService;
 
     @Inject
-    private ConverterUtil converterUtil;
-
-    @Inject
     private StackService stackService;
 
     @Inject
@@ -124,6 +124,18 @@ public class StackCommonService {
 
     @Inject
     private NodeCountLimitValidator nodeCountLimitValidator;
+
+    @Inject
+    private StackScaleV4RequestToUpdateStackV4RequestConverter stackScaleV4RequestToUpdateStackV4RequestConverter;
+
+    @Inject
+    private StackValidationV4RequestToStackValidationConverter stackValidationV4RequestToStackValidationConverter;
+
+    @Inject
+    private StackV4RequestToTemplatePreparationObjectConverter stackV4RequestToTemplatePreparationObjectConverter;
+
+    @Inject
+    private StackScaleV4RequestToUpdateClusterV4RequestConverter stackScaleV4RequestToUpdateClusterV4RequestConverter;
 
     @Inject
     private CloudbreakEventService eventService;
@@ -222,7 +234,7 @@ public class StackCommonService {
         Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
         MDCBuilder.buildMdcContext(stack);
         updateRequest.setStackId(stack.getId());
-        UpdateStackV4Request updateStackJson = converterUtil.convert(updateRequest, UpdateStackV4Request.class);
+        UpdateStackV4Request updateStackJson = stackScaleV4RequestToUpdateStackV4RequestConverter.convert(updateRequest);
         Integer scalingAdjustment = updateStackJson.getInstanceGroupAdjustment().getScalingAdjustment();
         validateScalingRequest(stack, scalingAdjustment);
 
@@ -230,7 +242,7 @@ public class StackCommonService {
         if (scalingAdjustment > 0) {
             flowIdentifier = put(stack, updateStackJson);
         } else {
-            UpdateClusterV4Request updateClusterJson = converterUtil.convert(updateRequest, UpdateClusterV4Request.class);
+            UpdateClusterV4Request updateClusterJson = stackScaleV4RequestToUpdateClusterV4RequestConverter.convert(updateRequest);
             workspaceService.get(workspaceId, user);
             flowIdentifier = clusterCommonService.put(stack.getResourceCrn(), updateClusterJson);
         }
@@ -279,7 +291,7 @@ public class StackCommonService {
     }
 
     public GeneratedBlueprintV4Response postStackForBlueprint(StackV4Request stackRequest) {
-        TemplatePreparationObject templatePreparationObject = converterUtil.convert(stackRequest, TemplatePreparationObject.class);
+        TemplatePreparationObject templatePreparationObject = stackV4RequestToTemplatePreparationObjectConverter.convert(stackRequest);
 
         String blueprintText = blueprintUpdaterConnectors.getBlueprintText(templatePreparationObject);
         GeneratedBlueprintV4Response response = new GeneratedBlueprintV4Response();
@@ -298,7 +310,7 @@ public class StackCommonService {
     }
 
     public void validate(StackValidationV4Request request) {
-        StackValidation stackValidation = converterUtil.convert(request, StackValidation.class);
+        StackValidation stackValidation = stackValidationV4RequestToStackValidationConverter.convert(request);
         stackService.validateStack(stackValidation);
         CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(stackValidation.getCredential());
         fileSystemValidator.validateFileSystem(stackValidation.getCredential().cloudPlatform(), cloudCredential, request.getFileSystem(), null);
@@ -361,8 +373,8 @@ public class StackCommonService {
         boolean forAutoscale = InternalCrnBuilder.isInternalCrnForService(restRequestThreadLocalService.getCloudbreakUser().getUserCrn(),
                 Crn.Service.AUTOSCALE);
         boolean violatingMaxNodeCount = forAutoscale ?
-                        scalingHardLimitsService.isViolatingAutoscaleMaxStepInNodeCount(scalingAdjustment) :
-                        scalingHardLimitsService.isViolatingMaxUpscaleStepInNodeCount(scalingAdjustment);
+                scalingHardLimitsService.isViolatingAutoscaleMaxStepInNodeCount(scalingAdjustment) :
+                scalingHardLimitsService.isViolatingMaxUpscaleStepInNodeCount(scalingAdjustment);
         if (violatingMaxNodeCount) {
             throw new BadRequestException(String.format("Upscaling by more than %d nodes is not supported",
                     forAutoscale ? scalingHardLimitsService.getMaxAutoscaleStepInNodeCount() : scalingHardLimitsService.getMaxUpscaleStepInNodeCount()));

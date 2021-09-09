@@ -19,7 +19,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -29,6 +28,8 @@ import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredRestCallEvent;
 import com.sequenceiq.cloudbreak.structuredevent.repository.CDPPagingStructuredEventRepository;
 import com.sequenceiq.cloudbreak.structuredevent.repository.CDPStructuredEventRepository;
+import com.sequenceiq.cloudbreak.structuredevent.service.converter.CDPStructuredEventEntityToCDPStructuredEventConverter;
+import com.sequenceiq.cloudbreak.structuredevent.service.converter.CDPStructuredEventToCDPStructuredEventEntityConverter;
 
 @ExtendWith(MockitoExtension.class)
 public class CDPStructuredEventDBServiceTest {
@@ -40,10 +41,13 @@ public class CDPStructuredEventDBServiceTest {
     private CDPPagingStructuredEventRepository pagingStructuredEventRepository;
 
     @Mock
-    private ConversionService conversionService;
+    private CDPStructuredEventRepository structuredEventRepository;
 
     @Mock
-    private CDPStructuredEventRepository structuredEventRepository;
+    private CDPStructuredEventToCDPStructuredEventEntityConverter cdpStructuredEventToCDPStructuredEventEntityConverter;
+
+    @Mock
+    private CDPStructuredEventEntityToCDPStructuredEventConverter cdpStructuredEventEntityToCDPStructuredEventConverter;
 
     @Test
     public void testGetPagedEventsOfResourceWhenEventTypesEmpty() {
@@ -76,7 +80,7 @@ public class CDPStructuredEventDBServiceTest {
         operation.setResourceCrn(null);
         event.setOperation(operation);
         underTest.create(event);
-        verify(conversionService, never()).convert(event, CDPStructuredEventEntity.class);
+        verify(cdpStructuredEventToCDPStructuredEventEntityConverter, never()).convert(event);
     }
 
     @Test
@@ -86,7 +90,7 @@ public class CDPStructuredEventDBServiceTest {
         operation.setResourceCrn("");
         event.setOperation(operation);
         underTest.create(event);
-        verify(conversionService, never()).convert(event, CDPStructuredEventEntity.class);
+        verify(cdpStructuredEventToCDPStructuredEventEntityConverter, never()).convert(event);
     }
 
     @Test
@@ -96,9 +100,9 @@ public class CDPStructuredEventDBServiceTest {
         operation.setResourceCrn("crn");
         event.setOperation(operation);
         CDPStructuredEventEntity entity = new CDPStructuredEventEntity();
-        when(conversionService.convert(event, CDPStructuredEventEntity.class)).thenReturn(entity);
+        when(cdpStructuredEventToCDPStructuredEventEntityConverter.convert(event)).thenReturn(entity);
         underTest.create(event);
-        verify(conversionService, Mockito.times(1)).convert(event, CDPStructuredEventEntity.class);
+        verify(cdpStructuredEventToCDPStructuredEventEntityConverter, Mockito.times(1)).convert(event);
         verify(structuredEventRepository, Mockito.times(1)).save(entity);
     }
 }

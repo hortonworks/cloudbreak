@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -19,7 +20,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
+import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractStackAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
@@ -62,7 +63,7 @@ public class StackStartActions {
     private InstanceMetaDataToCloudInstanceConverter instanceMetaDataToCloudInstanceConverter;
 
     @Inject
-    private ConverterUtil converterUtil;
+    private ResourceToCloudResourceConverter resourceToCloudResourceConverter;
 
     @Bean(name = "START_STATE")
     public Action<?, ?> stackStartAction() {
@@ -79,7 +80,9 @@ public class StackStartActions {
                 LOGGER.debug("Assembling start request for stack: {}", stack);
                 List<CloudInstance> cloudInstances = instanceMetaDataToCloudInstanceConverter.convert(stack.getNotDeletedInstanceMetaDataList(),
                         stack.getEnvironmentCrn(), stack.getStackAuthentication());
-                List<CloudResource> resources = converterUtil.convertAll(stack.getResources(), CloudResource.class);
+                List<CloudResource> resources = stack.getResources().stream()
+                        .map(s -> resourceToCloudResourceConverter.convert(s))
+                        .collect(Collectors.toList());
                 cloudInstances.forEach(instance -> context.getStack().getParameters().forEach(instance::putParameter));
                 return new StartInstancesRequest(context.getCloudContext(), context.getCloudCredential(), resources, cloudInstances);
             }
@@ -98,7 +101,9 @@ public class StackStartActions {
             @Override
             protected Selectable createRequest(StackStartStopContext context) {
                 List<CloudInstance> cloudInstances = cloudStackConverter.buildInstances(context.getStack());
-                List<CloudResource> cloudResources = converterUtil.convertAll(context.getStack().getResources(), CloudResource.class);
+                List<CloudResource> cloudResources = context.getStack().getResources().stream()
+                        .map(s -> resourceToCloudResourceConverter.convert(s))
+                        .collect(Collectors.toList());
                 return new CollectMetadataRequest(context.getCloudContext(), context.getCloudCredential(), cloudResources, cloudInstances, cloudInstances);
             }
         };

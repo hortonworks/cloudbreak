@@ -1,22 +1,21 @@
 package com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.gateway;
 
+import java.util.stream.Collectors;
+
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway.GatewayV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway.topology.GatewayTopologyV4Response;
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.gateway.topology.GatewayTopologyToGatewayTopologyV4ResponseConverter;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 
 @Component
-public class GatewayToGatewayV4ResponseConverter extends AbstractConversionServiceAwareConverter<Gateway, GatewayV4Response> {
+public class GatewayToGatewayV4ResponseConverter {
 
     @Inject
-    private ConverterUtil converterUtil;
+    private GatewayTopologyToGatewayTopologyV4ResponseConverter gatewayTopologyToGatewayTopologyV4ResponseConverter;
 
-    @Override
     public GatewayV4Response convert(Gateway source) {
         GatewayV4Response response = new GatewayV4Response();
         response.setGatewayType(source.getGatewayType());
@@ -24,7 +23,9 @@ public class GatewayToGatewayV4ResponseConverter extends AbstractConversionServi
         response.setSsoProvider(source.getSsoProvider());
         response.setSsoType(source.getSsoType());
         response.setTokenCert(source.getTokenCert());
-        response.setTopologies(converterUtil.convertAll(source.getTopologies(), GatewayTopologyV4Response.class));
+        response.setTopologies(source.getTopologies().stream()
+                .map(t -> gatewayTopologyToGatewayTopologyV4ResponseConverter.convert(t))
+                .collect(Collectors.toList()));
         return response;
     }
 }

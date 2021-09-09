@@ -10,9 +10,8 @@ import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 
 @Component
-public class PlatformParametersToSpecialParametersJsonConverter extends
-        AbstractConversionServiceAwareConverter<Map<Platform, PlatformParameters>, Map<String, Map<String, Boolean>>> {
-    @Override
+public class PlatformParametersToSpecialParametersJsonConverter {
+
     public Map<String, Map<String, Boolean>> convert(Map<Platform, PlatformParameters> source) {
         Map<String, Map<String, Boolean>> specialParameters = new HashMap<>();
         source.keySet().forEach(p -> {

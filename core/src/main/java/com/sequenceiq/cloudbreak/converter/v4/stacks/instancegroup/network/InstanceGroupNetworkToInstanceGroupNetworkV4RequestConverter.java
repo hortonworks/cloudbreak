@@ -11,17 +11,14 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.network.InstanceGroupNetworkV4Request;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.stack.instance.network.InstanceGroupNetwork;
 
 @Component
-public class InstanceGroupNetworkToInstanceGroupNetworkV4RequestConverter
-    extends AbstractConversionServiceAwareConverter<InstanceGroupNetwork, InstanceGroupNetworkV4Request> {
+public class InstanceGroupNetworkToInstanceGroupNetworkV4RequestConverter {
 
     @Inject
     private ProviderParameterCalculator providerParameterCalculator;
 
-    @Override
     public InstanceGroupNetworkV4Request convert(InstanceGroupNetwork source) {
         InstanceGroupNetworkV4Request response = new InstanceGroupNetworkV4Request();
         Json attributes = source.getAttributes();

@@ -9,14 +9,11 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.TagSpecification;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.environment.api.v1.platformresource.model.TagSpecificationsResponse;
 
 @Component
-public class TagSpecificationsToTagSpecificationsV1ResponseConverter
-        extends AbstractConversionServiceAwareConverter<Map<Platform, PlatformParameters>, TagSpecificationsResponse> {
+public class TagSpecificationsToTagSpecificationsV1ResponseConverter {
 
-    @Override
     public TagSpecificationsResponse convert(Map<Platform, PlatformParameters> source) {
         TagSpecificationsResponse json = new TagSpecificationsResponse();
         Map<String, Map<String, Object>> specifications = new HashMap<>();

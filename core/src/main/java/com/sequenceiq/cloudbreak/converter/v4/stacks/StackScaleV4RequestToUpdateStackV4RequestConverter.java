@@ -10,17 +10,15 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGrou
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.UpdateStackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Request;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 
 @Component
-public class StackScaleV4RequestToUpdateStackV4RequestConverter extends AbstractConversionServiceAwareConverter<StackScaleV4Request, UpdateStackV4Request> {
+public class StackScaleV4RequestToUpdateStackV4RequestConverter {
 
     @Inject
     private InstanceGroupService instanceGroupService;
 
-    @Override
     public UpdateStackV4Request convert(StackScaleV4Request source) {
         UpdateStackV4Request updateStackJson = new UpdateStackV4Request();
         updateStackJson.setWithClusterEvent(true);

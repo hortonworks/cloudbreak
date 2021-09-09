@@ -351,25 +351,19 @@ public class EnvironmentController implements EnvironmentEndpoint {
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
     public Object getCreateEnvironmentForCliByName(@ResourceName String environmentName) {
-        String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        EnvironmentDto environmentDto = environmentService.getByNameAndAccountId(environmentName, accountId);
-        return environmentService.getCreateEnvironmentForCli(environmentDto);
+        throw new UnsupportedOperationException("not supported request");
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
     public Object getCreateEnvironmentForCliByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn @TenantAwareParam String crn) {
-        String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        EnvironmentDto environmentDto = environmentService.getByCrnAndAccountId(crn, accountId);
-        return environmentService.getCreateEnvironmentForCli(environmentDto);
+        throw new UnsupportedOperationException("not supported request");
     }
 
     @Override
     @CheckPermissionByRequestProperty(type = NAME, action = DESCRIBE_ENVIRONMENT, path = "name")
     public Object getCreateEnvironmentForCli(@RequestObject EnvironmentRequest environmentRequest) {
-        String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        Credential credential = credentialService.getByNameForAccountId(environmentRequest.getCredentialName(), accountId, ENVIRONMENT);
-        return environmentService.getCreateEnvironmentForCli(environmentRequest, credential.getCloudPlatform());
+        throw new UnsupportedOperationException("not supported request");
     }
 
     @Override

@@ -34,10 +34,10 @@ import com.sequenceiq.cloudbreak.cmtemplate.general.GeneralClusterConfigsProvide
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.converter.util.CloudStorageValidationUtil;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.CloudStorageConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.gateway.StackV4RequestToGatewayConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -77,7 +77,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 
 @Component
-public class StackV4RequestToTemplatePreparationObjectConverter extends AbstractConversionServiceAwareConverter<StackV4Request, TemplatePreparationObject> {
+public class StackV4RequestToTemplatePreparationObjectConverter {
 
     private static final int SERVER_PORT = 636;
 
@@ -138,7 +138,9 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
     @Inject
     private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
 
-    @Override
+    @Inject
+    private StackV4RequestToGatewayConverter stackV4RequestToGatewayConverter;
+
     public TemplatePreparationObject convert(StackV4Request source) {
         try {
             CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
@@ -151,7 +153,7 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
             Set<RDSConfig> rdsConfigs = getRdsConfigs(source, workspace);
             Blueprint blueprint = getBlueprint(source, workspace);
             Set<HostgroupView> hostgroupViews = getHostgroupViews(source);
-            Gateway gateway = source.getCluster().getGateway() == null ? null : getConversionService().convert(source, Gateway.class);
+            Gateway gateway = source.getCluster().getGateway() == null ? null : stackV4RequestToGatewayConverter.convert(source);
             BlueprintView blueprintView = blueprintViewProvider.getBlueprintView(blueprint);
             GeneralClusterConfigs generalClusterConfigs = generalClusterConfigsProvider.generalClusterConfigs(source, cloudbreakUser.getEmail(),
                     blueprintService.getBlueprintVariant(blueprint));

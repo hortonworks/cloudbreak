@@ -21,11 +21,16 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.Recommendat
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.ServiceDependencyMatrixV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.SupportedVersionsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.ScaleRecommendationV4Response;
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.ScaleRecommendation;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateGeneratorService;
+import com.sequenceiq.cloudbreak.converter.v4.clustertemplate.GeneratedCmTemplateToGeneratedCmTemplateV4Response;
+import com.sequenceiq.cloudbreak.converter.v4.clustertemplate.PlatformRecommendationToPlatformRecommendationV4ResponseConverter;
+import com.sequenceiq.cloudbreak.converter.v4.clustertemplate.ScaleRecommendationToScaleRecommendationV4ResponseConverter;
+import com.sequenceiq.cloudbreak.converter.v4.clustertemplate.ServiceDependencyMatrixToServiceDependencyMatrixV4Response;
+import com.sequenceiq.cloudbreak.converter.v4.clustertemplate.SupportedServicesToBlueprintServicesV4ResponseConverter;
+import com.sequenceiq.cloudbreak.converter.v4.clustertemplate.SupportedVersionsToSupportedVersionsV4ResponseConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
@@ -41,13 +46,28 @@ public class BlueprintUtilV4Controller extends NotificationController implements
     private CmTemplateGeneratorService clusterTemplateGeneratorService;
 
     @Inject
-    private ConverterUtil converterUtil;
-
-    @Inject
     private BlueprintService blueprintService;
 
     @Inject
     private CloudbreakRestRequestThreadLocalService threadLocalService;
+
+    @Inject
+    private ScaleRecommendationToScaleRecommendationV4ResponseConverter scaleRecommendationToScaleRecommendationV4ResponseConverter;
+
+    @Inject
+    private PlatformRecommendationToPlatformRecommendationV4ResponseConverter platformRecommendationToPlatformRecommendationV4ResponseConverter;
+
+    @Inject
+    private ServiceDependencyMatrixToServiceDependencyMatrixV4Response serviceDependencyMatrixToServiceDependencyMatrixV4Response;
+
+    @Inject
+    private SupportedVersionsToSupportedVersionsV4ResponseConverter supportedVersionsToSupportedVersionsV4ResponseConverter;
+
+    @Inject
+    private SupportedServicesToBlueprintServicesV4ResponseConverter supportedServicesToBlueprintServicesV4ResponseConverter;
+
+    @Inject
+    private GeneratedCmTemplateToGeneratedCmTemplateV4Response generatedCmTemplateToGeneratedCmTemplateV4Response;
 
     /**
      * @deprecated Do not use it, we can't use Credential's Name by themselves with internalCrn's
@@ -65,7 +85,7 @@ public class BlueprintUtilV4Controller extends NotificationController implements
                 platformVariant,
                 availabilityZone,
                 cdpResourceType);
-        return converterUtil.convert(recommendation, RecommendationV4Response.class);
+        return platformRecommendationToPlatformRecommendationV4ResponseConverter.convert(recommendation);
     }
 
     @Override
@@ -81,7 +101,7 @@ public class BlueprintUtilV4Controller extends NotificationController implements
                 platformVariant,
                 availabilityZone,
                 cdpResourceType);
-        return converterUtil.convert(recommendation, RecommendationV4Response.class);
+        return platformRecommendationToPlatformRecommendationV4ResponseConverter.convert(recommendation);
     }
 
     @Override
@@ -90,37 +110,35 @@ public class BlueprintUtilV4Controller extends NotificationController implements
         ScaleRecommendation recommendation = blueprintService.getScaleRecommendation(
                 threadLocalService.getRequestedWorkspaceId(),
                 blueprintName);
-        return converterUtil.convert(recommendation, ScaleRecommendationV4Response.class);
+        return scaleRecommendationToScaleRecommendationV4ResponseConverter.convert(recommendation);
     }
 
     @Override
     @DisableCheckPermissions
     public ServiceDependencyMatrixV4Response getServiceAndDependencies(Long workspaceId, Set<String> services,
             String platform) {
-        return converterUtil.convert(clusterTemplateGeneratorService.getServicesAndDependencies(services, platform),
-                ServiceDependencyMatrixV4Response.class);
+        return serviceDependencyMatrixToServiceDependencyMatrixV4Response
+                .convert(clusterTemplateGeneratorService.getServicesAndDependencies(services, platform));
     }
 
     @Override
     @DisableCheckPermissions
     public SupportedVersionsV4Response getServiceList(Long workspaceId) {
-        return converterUtil.convert(clusterTemplateGeneratorService.getVersionsAndSupportedServiceList(),
-                SupportedVersionsV4Response.class);
+        return supportedVersionsToSupportedVersionsV4ResponseConverter.convert(clusterTemplateGeneratorService.getVersionsAndSupportedServiceList());
     }
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_CLUSTER_TEMPLATE)
     public BlueprintServicesV4Response getServicesByBlueprint(Long workspaceId, @ResourceName String blueprintName) {
         Blueprint blueprint = blueprintService.getByNameForWorkspaceId(blueprintName, threadLocalService.getRequestedWorkspaceId());
-        return converterUtil.convert(clusterTemplateGeneratorService.getServicesByBlueprint(blueprint.getBlueprintText()),
-                BlueprintServicesV4Response.class);
+        return supportedServicesToBlueprintServicesV4ResponseConverter
+                .convert(clusterTemplateGeneratorService.getServicesByBlueprint(blueprint.getBlueprintText()));
     }
 
     @Override
     @DisableCheckPermissions
     public GeneratedCmTemplateV4Response getGeneratedTemplate(Long workspaceId, Set<String> services, String platform) {
-        return converterUtil.convert(clusterTemplateGeneratorService.generateTemplateByServices(services, platform),
-                GeneratedCmTemplateV4Response.class);
+        return generatedCmTemplateToGeneratedCmTemplateV4Response.convert(clusterTemplateGeneratorService.generateTemplateByServices(services, platform));
     }
 
 }

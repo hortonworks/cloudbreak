@@ -5,9 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.core.convert.ConversionService;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
@@ -18,9 +16,6 @@ public class InstanceGroupV4RequestToHostGroupConverterTest {
 
     @InjectMocks
     private InstanceGroupV4RequestToHostGroupConverter underTest;
-
-    @Mock
-    private ConversionService conversionService;
 
     @Test
     public void testConvertWhenHostNameUpperCase() {

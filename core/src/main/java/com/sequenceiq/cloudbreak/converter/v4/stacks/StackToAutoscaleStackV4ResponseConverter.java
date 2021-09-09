@@ -3,14 +3,12 @@ package com.sequenceiq.cloudbreak.converter.v4.stacks;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 
 @Component
-public class StackToAutoscaleStackV4ResponseConverter extends AbstractConversionServiceAwareConverter<Stack, AutoscaleStackV4Response> {
+public class StackToAutoscaleStackV4ResponseConverter {
 
-    @Override
     public AutoscaleStackV4Response convert(Stack source) {
         AutoscaleStackV4Response result = new AutoscaleStackV4Response();
         result.setTenant(source.getWorkspace().getTenant().getName());

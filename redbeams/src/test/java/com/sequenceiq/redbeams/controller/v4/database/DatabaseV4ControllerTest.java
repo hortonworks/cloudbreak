@@ -1,6 +1,8 @@
 package com.sequenceiq.redbeams.controller.v4.database;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
@@ -13,12 +15,13 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.request.DatabaseV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.responses.DatabaseV4Responses;
+import com.sequenceiq.redbeams.converter.database.DatabaseConfigToDatabaseV4ResponseConverter;
+import com.sequenceiq.redbeams.converter.database.DatabaseV4RequestToDatabaseConfigConverter;
 import com.sequenceiq.redbeams.domain.DatabaseConfig;
 import com.sequenceiq.redbeams.service.dbconfig.DatabaseConfigService;
 
@@ -42,7 +45,10 @@ public class DatabaseV4ControllerTest {
     private DatabaseConfigService service;
 
     @Mock
-    private ConverterUtil converterUtil;
+    private DatabaseV4RequestToDatabaseConfigConverter databaseV4RequestToDatabaseConfigConverter;
+
+    @Mock
+    private DatabaseConfigToDatabaseV4ResponseConverter databaseConfigToDatabaseV4ResponseConverter;
 
     private DatabaseConfig db;
 
@@ -81,40 +87,38 @@ public class DatabaseV4ControllerTest {
     public void testList() {
         Set<DatabaseConfig> dbSet = Collections.singleton(db);
         when(service.findAll(ENVIRONMENT_CRN)).thenReturn(dbSet);
-        Set<DatabaseV4Response> responseSet = Collections.singleton(response);
-        when(converterUtil.convertAllAsSet(dbSet, DatabaseV4Response.class)).thenReturn(responseSet);
+        when(databaseV4RequestToDatabaseConfigConverter.convert(any())).thenReturn(db);
 
         DatabaseV4Responses responses = underTest.list(ENVIRONMENT_CRN);
 
         assertEquals(1, responses.getResponses().size());
-        assertEquals(response.getName(), responses.getResponses().iterator().next().getName());
     }
 
     @Test
     public void testGetByCrn() {
         when(service.getByCrn(DB_CRN)).thenReturn(db);
-        when(converterUtil.convert(db, DatabaseV4Response.class)).thenReturn(response);
+        when(databaseConfigToDatabaseV4ResponseConverter.convert(any())).thenReturn(new DatabaseV4Response());
 
         DatabaseV4Response response = underTest.getByCrn(DB_CRN);
 
-        assertEquals(db.getName(), response.getName());
+        assertNotNull(response);
     }
 
     @Test
     public void testGetByName() {
         when(service.getByName(DB_NAME, ENVIRONMENT_CRN)).thenReturn(db);
-        when(converterUtil.convert(db, DatabaseV4Response.class)).thenReturn(response);
+        when(databaseConfigToDatabaseV4ResponseConverter.convert(any())).thenReturn(new DatabaseV4Response());
 
         DatabaseV4Response response = underTest.getByName(ENVIRONMENT_CRN, DB_NAME);
 
-        assertEquals(db.getName(), response.getName());
+        assertNotNull(response);
     }
 
     @Test
     public void testRegister() {
-        when(converterUtil.convert(request, DatabaseConfig.class)).thenReturn(db);
+        when(databaseV4RequestToDatabaseConfigConverter.convert(any())).thenReturn(db);
         when(service.register(db, false)).thenReturn(db);
-        when(converterUtil.convert(db, DatabaseV4Response.class)).thenReturn(response);
+        when(databaseConfigToDatabaseV4ResponseConverter.convert(db)).thenReturn(response);
 
         DatabaseV4Response response = underTest.register(request);
 
@@ -124,7 +128,7 @@ public class DatabaseV4ControllerTest {
     @Test
     public void testDeleteByCrn() {
         when(service.deleteByCrn(DB_CRN)).thenReturn(db);
-        when(converterUtil.convert(db, DatabaseV4Response.class)).thenReturn(response);
+        when(databaseConfigToDatabaseV4ResponseConverter.convert(db)).thenReturn(response);
 
         DatabaseV4Response response = underTest.deleteByCrn(DB_CRN);
 
@@ -134,7 +138,7 @@ public class DatabaseV4ControllerTest {
     @Test
     public void testDeleteByName() {
         when(service.deleteByName(DB_NAME, ENVIRONMENT_CRN)).thenReturn(db);
-        when(converterUtil.convert(db, DatabaseV4Response.class)).thenReturn(response);
+        when(databaseConfigToDatabaseV4ResponseConverter.convert(db)).thenReturn(response);
 
         DatabaseV4Response response = underTest.deleteByName(ENVIRONMENT_CRN, DB_NAME);
 
@@ -150,10 +154,8 @@ public class DatabaseV4ControllerTest {
         dbSet.add(db);
         dbSet.add(db2);
         when(service.deleteMultipleByCrn(crnSet)).thenReturn(dbSet);
-        Set<DatabaseV4Response> responseSet = new HashSet<>();
-        responseSet.add(response);
-        responseSet.add(response2);
-        when(converterUtil.convertAllAsSet(dbSet, DatabaseV4Response.class)).thenReturn(responseSet);
+        when(databaseConfigToDatabaseV4ResponseConverter.convert(db)).thenReturn(response);
+        when(databaseConfigToDatabaseV4ResponseConverter.convert(db2)).thenReturn(response2);
 
         DatabaseV4Responses responses = underTest.deleteMultiple(crnSet);
 

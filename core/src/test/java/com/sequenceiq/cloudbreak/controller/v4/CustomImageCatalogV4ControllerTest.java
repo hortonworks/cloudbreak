@@ -28,10 +28,21 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.customimage.response.CustomImag
 import com.sequenceiq.cloudbreak.api.endpoint.v4.customimage.response.CustomImageCatalogV4ListItemResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.customimage.response.CustomImageCatalogV4ListResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.customimage.response.CustomImageCatalogV4UpdateImageResponse;
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.authorization.ImageCatalogFiltering;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
+import com.sequenceiq.cloudbreak.converter.v4.customimage.CustomImageCatalogV4CreateImageRequestToCustomImageConverter;
+import com.sequenceiq.cloudbreak.converter.v4.customimage.CustomImageCatalogV4CreateRequestToImageCatalogConverter;
+import com.sequenceiq.cloudbreak.converter.v4.customimage.CustomImageCatalogV4UpdateImageRequestToCustomImageConverter;
+import com.sequenceiq.cloudbreak.converter.v4.customimage.CustomImageToCustomImageCatalogV4CreateImageResponseConverter;
+import com.sequenceiq.cloudbreak.converter.v4.customimage.CustomImageToCustomImageCatalogV4DeleteImageResponseConverter;
+import com.sequenceiq.cloudbreak.converter.v4.customimage.CustomImageToCustomImageCatalogV4GetImageResponseConverter;
+import com.sequenceiq.cloudbreak.converter.v4.customimage.CustomImageToCustomImageCatalogV4UpdateImageResponseConverter;
+import com.sequenceiq.cloudbreak.converter.v4.customimage.ImageCatalogToCustomImageCatalogV4CreateResponseConverter;
+import com.sequenceiq.cloudbreak.converter.v4.customimage.ImageCatalogToCustomImageCatalogV4DeleteResponseConverter;
+import com.sequenceiq.cloudbreak.converter.v4.customimage.ImageCatalogToCustomImageCatalogV4GetResponseConverter;
+import com.sequenceiq.cloudbreak.converter.v4.customimage.ImageCatalogToCustomImageCatalogV4ListItemResponseConverter;
+import com.sequenceiq.cloudbreak.converter.v4.imagecatalog.ImageCatalogV4RequestToImageCatalogConverter;
 import com.sequenceiq.cloudbreak.domain.CustomImage;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.service.image.CustomImageCatalogService;
@@ -59,10 +70,43 @@ public class CustomImageCatalogV4ControllerTest {
     private CustomImageCatalogService customImageCatalogService;
 
     @Mock
-    private ConverterUtil converterUtil;
+    private ImageCatalogFiltering imageCatalogFiltering;
 
     @Mock
-    private ImageCatalogFiltering imageCatalogFiltering;
+    private ImageCatalogToCustomImageCatalogV4ListItemResponseConverter imageCatalogToCustomImageCatalogV4ListItemResponseConverter;
+
+    @Mock
+    private CustomImageToCustomImageCatalogV4GetImageResponseConverter customImageToCustomImageCatalogV4GetImageResponseConverter;
+
+    @Mock
+    private ImageCatalogV4RequestToImageCatalogConverter imageCatalogV4RequestToImageCatalogConverter;
+
+    @Mock
+    private CustomImageToCustomImageCatalogV4CreateImageResponseConverter customImageToCustomImageCatalogV4CreateImageResponseConverter;
+
+    @Mock
+    private CustomImageToCustomImageCatalogV4DeleteImageResponseConverter customImageToCustomImageCatalogV4DeleteImageResponseConverter;
+
+    @Mock
+    private CustomImageCatalogV4CreateImageRequestToCustomImageConverter customImageCatalogV4CreateImageRequestToCustomImageConverter;
+
+    @Mock
+    private CustomImageToCustomImageCatalogV4UpdateImageResponseConverter customImageToCustomImageCatalogV4UpdateImageResponseConverter;
+
+    @Mock
+    private CustomImageCatalogV4UpdateImageRequestToCustomImageConverter customImageCatalogV4UpdateImageRequestToCustomImageConverter;
+
+    @Mock
+    private CustomImageCatalogV4CreateRequestToImageCatalogConverter customImageCatalogV4CreateRequestToImageCatalogConverter;
+
+    @Mock
+    private ImageCatalogToCustomImageCatalogV4GetResponseConverter imageCatalogToCustomImageCatalogV4GetResponseConverter;
+
+    @Mock
+    private ImageCatalogToCustomImageCatalogV4CreateResponseConverter imageCatalogToCustomImageCatalogV4CreateResponseConverter;
+
+    @Mock
+    private ImageCatalogToCustomImageCatalogV4DeleteResponseConverter imageCatalogToCustomImageCatalogV4DeleteResponseConverter;
 
     @InjectMocks
     private CustomImageCatalogV4Controller victim;
@@ -80,7 +124,6 @@ public class CustomImageCatalogV4ControllerTest {
         Set<CustomImageCatalogV4ListItemResponse> customImageCatalogV4ListItemResponses = new HashSet<>();
 
         when(imageCatalogFiltering.filterImageCatalogs(eq(AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG), eq(true))).thenReturn(imageCatalogs);
-        when(converterUtil.convertAllAsSet(imageCatalogs, CustomImageCatalogV4ListItemResponse.class)).thenReturn(customImageCatalogV4ListItemResponses);
 
         CustomImageCatalogV4ListResponse actual = victim.list(ACCOUNT_ID);
 
@@ -94,7 +137,7 @@ public class CustomImageCatalogV4ControllerTest {
 
         when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(WORKSPACE_ID);
         when(customImageCatalogService.getImageCatalog(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(imageCatalog);
-        when(converterUtil.convert(imageCatalog, CustomImageCatalogV4GetResponse.class)).thenReturn(expected);
+        when(imageCatalogToCustomImageCatalogV4GetResponseConverter.convert(imageCatalog)).thenReturn(expected);
 
         CustomImageCatalogV4GetResponse actual = victim.get(IMAGE_CATALOG_NAME, ACCOUNT_ID);
 
@@ -108,10 +151,10 @@ public class CustomImageCatalogV4ControllerTest {
         ImageCatalog savedImageCatalog = new ImageCatalog();
         CustomImageCatalogV4CreateResponse expected = new CustomImageCatalogV4CreateResponse();
 
-        when(converterUtil.convert(request, ImageCatalog.class)).thenReturn(imageCatalog);
+        when(customImageCatalogV4CreateRequestToImageCatalogConverter.convert(request)).thenReturn(imageCatalog);
         when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(WORKSPACE_ID);
         when(customImageCatalogService.create(eq(imageCatalog), eq(WORKSPACE_ID), anyString(), eq(USER_CRN))).thenReturn(savedImageCatalog);
-        when(converterUtil.convert(savedImageCatalog, CustomImageCatalogV4CreateResponse.class)).thenReturn(expected);
+        when(imageCatalogToCustomImageCatalogV4CreateResponseConverter.convert(savedImageCatalog)).thenReturn(expected);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
             CustomImageCatalogV4CreateResponse actual = victim.create(request, ACCOUNT_ID);
@@ -127,7 +170,7 @@ public class CustomImageCatalogV4ControllerTest {
 
         when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(WORKSPACE_ID);
         when(customImageCatalogService.delete(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(imageCatalog);
-        when(converterUtil.convert(imageCatalog, CustomImageCatalogV4DeleteResponse.class)).thenReturn(expected);
+        when(imageCatalogToCustomImageCatalogV4DeleteResponseConverter.convert(imageCatalog)).thenReturn(expected);
 
         CustomImageCatalogV4DeleteResponse actual = victim.delete(IMAGE_CATALOG_NAME, ACCOUNT_ID);
 
@@ -144,7 +187,7 @@ public class CustomImageCatalogV4ControllerTest {
 
         when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(WORKSPACE_ID);
         when(customImageCatalogService.getCustomImage(WORKSPACE_ID, IMAGE_CATALOG_NAME, IMAGE_ID)).thenReturn(customImage);
-        when(converterUtil.convert(customImage, CustomImageCatalogV4GetImageResponse.class)).thenReturn(expected);
+        when(customImageToCustomImageCatalogV4GetImageResponseConverter.convert(customImage)).thenReturn(expected);
         when(customImageCatalogService.getSourceImage(customImage)).thenReturn(sourceImage);
 
         CustomImageCatalogV4GetImageResponse actual = victim.getCustomImage(IMAGE_CATALOG_NAME, IMAGE_ID, ACCOUNT_ID);
@@ -159,11 +202,11 @@ public class CustomImageCatalogV4ControllerTest {
         CustomImage savedCustomImage = new CustomImage();
         CustomImageCatalogV4CreateImageResponse expected = new CustomImageCatalogV4CreateImageResponse();
 
-        when(converterUtil.convert(request, CustomImage.class)).thenReturn(customImage);
+        when(customImageCatalogV4CreateImageRequestToCustomImageConverter.convert(request)).thenReturn(customImage);
         when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(WORKSPACE_ID);
         when(customImageCatalogService.createCustomImage(eq(WORKSPACE_ID), anyString(), eq(USER_CRN), eq(IMAGE_CATALOG_NAME), eq(customImage)))
                 .thenReturn(savedCustomImage);
-        when(converterUtil.convert(savedCustomImage, CustomImageCatalogV4CreateImageResponse.class)).thenReturn(expected);
+        when(customImageToCustomImageCatalogV4CreateImageResponseConverter.convert(savedCustomImage)).thenReturn(expected);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
             CustomImageCatalogV4CreateImageResponse actual = victim.createCustomImage(IMAGE_CATALOG_NAME, request, ACCOUNT_ID);
@@ -179,11 +222,11 @@ public class CustomImageCatalogV4ControllerTest {
         CustomImage savedCustomImage = new CustomImage();
         CustomImageCatalogV4UpdateImageResponse expected = new CustomImageCatalogV4UpdateImageResponse();
 
-        when(converterUtil.convert(request, CustomImage.class)).thenReturn(customImage);
+        when(customImageCatalogV4UpdateImageRequestToCustomImageConverter.convert(request)).thenReturn(customImage);
         when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(WORKSPACE_ID);
         when(customImageCatalogService.updateCustomImage(eq(WORKSPACE_ID), eq(USER_CRN), eq(IMAGE_CATALOG_NAME), eq(customImage)))
                 .thenReturn(savedCustomImage);
-        when(converterUtil.convert(savedCustomImage, CustomImageCatalogV4UpdateImageResponse.class)).thenReturn(expected);
+        when(customImageToCustomImageCatalogV4UpdateImageResponseConverter.convert(savedCustomImage)).thenReturn(expected);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
             CustomImageCatalogV4UpdateImageResponse actual = victim.updateCustomImage(IMAGE_CATALOG_NAME, IMAGE_ID, request, ACCOUNT_ID);
@@ -199,7 +242,7 @@ public class CustomImageCatalogV4ControllerTest {
 
         when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(WORKSPACE_ID);
         when(customImageCatalogService.deleteCustomImage(WORKSPACE_ID, IMAGE_CATALOG_NAME, IMAGE_ID)).thenReturn(customImage);
-        when(converterUtil.convert(customImage, CustomImageCatalogV4DeleteImageResponse.class)).thenReturn(expected);
+        when(customImageToCustomImageCatalogV4DeleteImageResponseConverter.convert(customImage)).thenReturn(expected);
 
         CustomImageCatalogV4DeleteImageResponse actual = victim.deleteCustomImage(IMAGE_CATALOG_NAME, IMAGE_ID, ACCOUNT_ID);
 

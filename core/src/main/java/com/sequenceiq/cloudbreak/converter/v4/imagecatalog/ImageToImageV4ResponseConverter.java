@@ -4,14 +4,12 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.BaseStac
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.StackDetails;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 
 import org.springframework.stereotype.Component;
 
 @Component
-public class ImageToImageV4ResponseConverter extends AbstractConversionServiceAwareConverter<Image, ImageV4Response> {
+public class ImageToImageV4ResponseConverter {
 
-    @Override
     public ImageV4Response convert(Image source) {
         ImageV4Response result = new ImageV4Response();
         result.setDate(source.getDate());

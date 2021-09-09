@@ -6,7 +6,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageCatalogV4ShortResponse;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.structuredevent.LegacyRestRequestThreadLocalService;
@@ -14,7 +13,7 @@ import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Component
-public class ImageCatalogToImageCatalogV4ShortResponseConverter extends AbstractConversionServiceAwareConverter<ImageCatalog, ImageCatalogV4ShortResponse> {
+public class ImageCatalogToImageCatalogV4ShortResponseConverter {
 
     @Inject
     private ImageCatalogService imageCatalogService;
@@ -25,7 +24,6 @@ public class ImageCatalogToImageCatalogV4ShortResponseConverter extends Abstract
     @Inject
     private LegacyRestRequestThreadLocalService legacyRestRequestThreadLocalService;
 
-    @Override
     public ImageCatalogV4ShortResponse convert(ImageCatalog source) {
         ImageCatalogV4ShortResponse imageCatalogResponse = new ImageCatalogV4ShortResponse();
         imageCatalogResponse.setCreator(source.getCreator());

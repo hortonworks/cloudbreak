@@ -11,14 +11,12 @@ import com.sequenceiq.cloudbreak.cloud.model.DiskType;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDisks;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformDisksResponse;
 import com.sequenceiq.environment.platformresource.v1.PlatformConverterUtil;
 
 @Component
-public class PlatformDisksToPlatformDisksV1ResponseConverter extends AbstractConversionServiceAwareConverter<PlatformDisks, PlatformDisksResponse> {
+public class PlatformDisksToPlatformDisksV1ResponseConverter {
 
-    @Override
     public PlatformDisksResponse convert(PlatformDisks source) {
         PlatformDisksResponse json = new PlatformDisksResponse();
         json.setDefaultDisks(convertDefaults(source.getDefaultDisks()));

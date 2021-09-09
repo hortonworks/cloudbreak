@@ -12,7 +12,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -43,7 +42,6 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
 import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
@@ -146,9 +144,6 @@ public class StackToCloudStackConverterTest {
     private DefaultRootVolumeSizeProvider defaultRootVolumeSizeProvider;
 
     @Mock
-    private ConverterUtil converterUtil;
-
-    @Mock
     private Stack stack;
 
     @Mock
@@ -219,7 +214,6 @@ public class StackToCloudStackConverterTest {
         CloudStack result = underTest.convert(stack);
 
         assertFalse(result.getFileSystem().isPresent());
-        verify(converterUtil, times(0)).convert(any(FileSystem.class), eq(SpiFileSystem.class));
     }
 
     @Test

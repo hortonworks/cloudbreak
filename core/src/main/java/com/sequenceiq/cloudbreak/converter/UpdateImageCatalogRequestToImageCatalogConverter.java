@@ -9,12 +9,11 @@ import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 
 @Component
-public class UpdateImageCatalogRequestToImageCatalogConverter extends AbstractConversionServiceAwareConverter<UpdateImageCatalogV4Request, ImageCatalog> {
+public class UpdateImageCatalogRequestToImageCatalogConverter {
 
     @Inject
     private ImageCatalogService imageCatalogService;
 
-    @Override
     public ImageCatalog convert(UpdateImageCatalogV4Request source) {
         ImageCatalog original = imageCatalogService.findByResourceCrn(source.getCrn());
         ImageCatalog imageCatalog = new ImageCatalog();

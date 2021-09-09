@@ -11,15 +11,13 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.GatewayV4Request;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cli.cm.ClusterToClouderaManagerV4RequestConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.CloudStorageConverter;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 
 @Component
-public class ClusterToClusterV4RequestConverter extends AbstractConversionServiceAwareConverter<Cluster, ClusterV4Request> {
+public class ClusterToClusterV4RequestConverter {
 
     @Inject
     private ClusterToClouderaManagerV4RequestConverter clouderaManagerV4RequestConverter;
@@ -27,7 +25,9 @@ public class ClusterToClusterV4RequestConverter extends AbstractConversionServic
     @Inject
     private CloudStorageConverter cloudStorageConverter;
 
-    @Override
+    @Inject
+    private GatewayToGatewayV4RequestConverter gatewayToGatewayV4RequestConverter;
+
     public ClusterV4Request convert(Cluster source) {
         ClusterV4Request clusterRequest = new ClusterV4Request();
         convertClusterManager(source, clusterRequest);
@@ -53,7 +53,7 @@ public class ClusterToClusterV4RequestConverter extends AbstractConversionServic
         }
 
         if (source.getGateway() != null) {
-            clusterRequest.setGateway(getConversionService().convert(source.getGateway(), GatewayV4Request.class));
+            clusterRequest.setGateway(gatewayToGatewayV4RequestConverter.convert(source.getGateway()));
         }
         clusterRequest.setRangerRazEnabled(source.isRangerRazEnabled());
         return clusterRequest;

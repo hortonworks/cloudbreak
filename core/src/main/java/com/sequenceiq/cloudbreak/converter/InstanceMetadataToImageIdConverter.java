@@ -11,11 +11,10 @@ import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 
 @Component
-public class InstanceMetadataToImageIdConverter extends AbstractConversionServiceAwareConverter<InstanceMetaData, String> {
+public class InstanceMetadataToImageIdConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InstanceMetadataToImageIdConverter.class);
 
-    @Override
     public String convert(InstanceMetaData source) {
         Image image = null;
         if (source.getImage() != null && StringUtils.isNotBlank(source.getImage().getValue())) {

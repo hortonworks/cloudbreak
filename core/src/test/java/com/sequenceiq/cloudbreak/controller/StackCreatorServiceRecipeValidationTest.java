@@ -30,14 +30,14 @@ import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
-import com.sequenceiq.cloudbreak.common.service.TransactionService;
-import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
-import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
-import com.sequenceiq.cloudbreak.domain.Recipe;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.StackToStackV4ResponseConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.StackV4RequestToStackConverter;
+import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
+import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
 import com.sequenceiq.cloudbreak.service.recipe.RecipeService;
@@ -70,9 +70,6 @@ class StackCreatorServiceRecipeValidationTest {
     private ReactorFlowManager flowManager;
 
     @Mock
-    private ConverterUtil converterUtil;
-
-    @Mock
     private Validator<StackV4Request> stackRequestValidator;
 
     @Mock
@@ -86,6 +83,12 @@ class StackCreatorServiceRecipeValidationTest {
 
     @Mock
     private RecipeService recipeService;
+
+    @Mock
+    private StackV4RequestToStackConverter stackV4RequestToStackConverter;
+
+    @Mock
+    private StackToStackV4ResponseConverter stackToStackV4ResponseConverter;
 
     @InjectMocks
     private StackCreatorService underTest;
@@ -174,7 +177,7 @@ class StackCreatorServiceRecipeValidationTest {
         request.setInstanceGroups(List.of(getInstanceGroupWithRecipe(INSTANCE_GROUP_MASTER, Set.of(existingRecipeName))));
 
         when(recipeService.get(any(NameOrCrn.class), eq(WORKSPACE_ID))).thenReturn(getRecipeWithName(existingRecipeName));
-        when(converterUtil.convert(request, Stack.class)).thenReturn(TestUtil.stack());
+        when(stackV4RequestToStackConverter.convert(request)).thenReturn(TestUtil.stack());
         when(transactionService.required(any(Supplier.class))).thenReturn(TestUtil.stack());
         when(stackService.getIdByNameInWorkspace(anyString(), any(Long.class))).thenThrow(new NotFoundException("stack not found by name"));
         underTest.createStack(user, workspace, request, false);
@@ -189,7 +192,7 @@ class StackCreatorServiceRecipeValidationTest {
         request.setInstanceGroups(List.of(getInstanceGroupWithRecipe(INSTANCE_GROUP_MASTER, null),
                 getInstanceGroupWithRecipe(INSTANCE_GROUP_COMPUTE, null)));
 
-        when(converterUtil.convert(request, Stack.class)).thenReturn(TestUtil.stack());
+        when(stackV4RequestToStackConverter.convert(request)).thenReturn(TestUtil.stack());
         when(transactionService.required(any(Supplier.class))).thenReturn(TestUtil.stack());
         when(stackService.getIdByNameInWorkspace(anyString(), any(Long.class))).thenThrow(new NotFoundException("stack not found by name"));
 

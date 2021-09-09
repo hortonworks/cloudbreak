@@ -147,7 +147,9 @@ public class StackUpscaleActions {
                 int instanceCountToCreate = getInstanceCountToCreate(context.getStack(), context.getInstanceGroupName(), context.getAdjustment());
                 Stack updatedStack = instanceMetaDataService.saveInstanceAndGetUpdatedStack(context.getStack(), instanceCountToCreate,
                         context.getInstanceGroupName(), true, context.getHostNames(), context.isRepair());
-                List<CloudResource> resources = cloudResourceConverter.convert(context.getStack().getResources());
+                List<CloudResource> resources = context.getStack().getResources().stream()
+                        .map(r -> cloudResourceConverter.convert(r))
+                        .collect(Collectors.toList());
                 CloudStack updatedCloudStack = cloudStackConverter.convert(updatedStack);
                 return new UpscaleStackRequest<UpscaleStackResult>(context.getCloudContext(), context.getCloudCredential(), updatedCloudStack, resources);
             }
@@ -186,7 +188,9 @@ public class StackUpscaleActions {
 
             @Override
             protected Selectable createRequest(StackScalingFlowContext context) {
-                List<CloudResource> cloudResources = cloudResourceConverter.convert(context.getStack().getResources());
+                List<CloudResource> cloudResources = context.getStack().getResources().stream()
+                        .map(r -> cloudResourceConverter.convert(r))
+                        .collect(Collectors.toList());
                 List<CloudInstance> allKnownInstances = cloudStackConverter.buildInstances(context.getStack());
                 LOGGER.info("All known instances: {}", allKnownInstances);
                 Set<String> unusedInstancesForGroup = instanceMetaDataService.unusedInstancesInInstanceGroupByName(context.getStack().getId(),

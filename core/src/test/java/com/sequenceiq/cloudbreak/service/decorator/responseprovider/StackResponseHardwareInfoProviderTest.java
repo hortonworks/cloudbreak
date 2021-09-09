@@ -14,7 +14,6 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.core.convert.ConversionService;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.TestUtil;
@@ -34,9 +33,6 @@ public class StackResponseHardwareInfoProviderTest {
 
     @Mock
     private HostGroupService hostGroupService;
-
-    @Mock
-    private ConversionService conversionService;
 
     @Before
     public void setUp() {

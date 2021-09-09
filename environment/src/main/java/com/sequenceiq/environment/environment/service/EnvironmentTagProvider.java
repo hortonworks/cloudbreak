@@ -65,7 +65,9 @@ public class EnvironmentTagProvider {
 
     private Map<String, String> getAccountTags(String accountId) {
         Set<AccountTag> accountTags = accountTagService.get(accountId);
-        List<AccountTagResponse> accountTagResponses = accountTagToAccountTagResponsesConverter.convert(accountTags);
+        List<AccountTagResponse> accountTagResponses = accountTags.stream()
+                .map(a -> accountTagToAccountTagResponsesConverter.convert(a))
+                .collect(Collectors.toList());
         defaultInternalAccountTagService.merge(accountTagResponses);
         return accountTagResponses
                 .stream()

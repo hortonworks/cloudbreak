@@ -87,7 +87,6 @@ import com.sequenceiq.distrox.v1.distrox.converter.DistroXMaintenanceModeV1ToMai
 import com.sequenceiq.distrox.v1.distrox.converter.DistroXRepairV1RequestToClusterRepairV4RequestConverter;
 import com.sequenceiq.distrox.v1.distrox.converter.DistroXScaleV1RequestToStackScaleV4RequestConverter;
 import com.sequenceiq.distrox.v1.distrox.converter.DistroXV1RequestToStackV4RequestConverter;
-import com.sequenceiq.distrox.v1.distrox.converter.cli.DelegatingRequestToCliRequestConverter;
 import com.sequenceiq.distrox.v1.distrox.service.DistroXService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowProgressResponse;
@@ -116,9 +115,6 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Inject
     private DistroXMaintenanceModeV1ToMainenanceModeV4Converter maintenanceModeConverter;
-
-    @Inject
-    private DelegatingRequestToCliRequestConverter delegatingRequestToCliRequestConverter;
 
     @Inject
     private CloudbreakRestRequestThreadLocalService crnService;
@@ -366,15 +362,13 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     @Override
     @CheckPermissionByResourceName(action = DESCRIBE_DATAHUB)
     public Object getRequestfromName(@ResourceName String name) {
-        StackV4Request stackV4Request = getStackV4Request(NameOrCrn.ofName(name));
-        return getCreateAWSClusterRequest(stackV4Request);
+        throw new UnsupportedOperationException("not supported request");
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = DESCRIBE_DATAHUB)
     public Object getRequestfromCrn(@TenantAwareParam @ResourceCrn String crn) {
-        StackV4Request stackV4Request = getStackV4Request(NameOrCrn.ofCrn(crn));
-        return getCreateAWSClusterRequest(stackV4Request);
+        throw new UnsupportedOperationException("not supported request");
     }
 
     @Override
@@ -486,7 +480,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_READ)
     public Object getCreateAwsClusterForCli(DistroXV1Request request) {
-        return delegatingRequestToCliRequestConverter.convertDistroX(request);
+        throw new UnsupportedOperationException("not supported request");
     }
 
     private StackV4Request getStackV4Request(NameOrCrn nameOrCrn) {
@@ -578,9 +572,5 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
                 workspaceService.getForCurrentUser().getId(),
                 rotateCertificateRequest
         );
-    }
-
-    private Object getCreateAWSClusterRequest(StackV4Request stackV4Request) {
-        return delegatingRequestToCliRequestConverter.convertStack(stackV4Request);
     }
 }

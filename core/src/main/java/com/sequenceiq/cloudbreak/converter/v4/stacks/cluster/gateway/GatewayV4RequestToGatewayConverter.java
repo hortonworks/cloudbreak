@@ -10,7 +10,6 @@ import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.stack.cluster.gateway.GatewayV4RequestValidator;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.converter.util.GatewayConvertUtil;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.workspace.model.User;
@@ -20,7 +19,7 @@ import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
 @Component
-public class GatewayV4RequestToGatewayConverter extends AbstractConversionServiceAwareConverter<GatewayV4Request, Gateway> {
+public class GatewayV4RequestToGatewayConverter {
 
     @Inject
     private GatewayConvertUtil gatewayConvertUtil;
@@ -37,7 +36,6 @@ public class GatewayV4RequestToGatewayConverter extends AbstractConversionServic
     @Inject
     private WorkspaceService workspaceService;
 
-    @Override
     public Gateway convert(GatewayV4Request source) {
         ValidationResult validationResult = gatewayJsonValidator.validate(source);
         if (validationResult.hasError()) {

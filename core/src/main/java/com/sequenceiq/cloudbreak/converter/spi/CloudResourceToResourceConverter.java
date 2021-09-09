@@ -8,15 +8,13 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.common.json.Json;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.Resource;
 
 @Component
-public class CloudResourceToResourceConverter extends AbstractConversionServiceAwareConverter<CloudResource, Resource> {
+public class CloudResourceToResourceConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudResourceToResourceConverter.class);
 
-    @Override
     public Resource convert(CloudResource source) {
         Resource domainResource = new Resource();
         domainResource.setResourceType(source.getType());

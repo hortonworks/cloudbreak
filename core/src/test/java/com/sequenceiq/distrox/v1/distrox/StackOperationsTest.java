@@ -31,9 +31,11 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.StackClusterStatusViewToStatusConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.UserNamePasswordV4RequestToUpdateClusterV4RequestConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.view.StackApiViewToStackViewV4ResponseConverter;
 import com.sequenceiq.cloudbreak.domain.projection.StackCrnView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
@@ -80,9 +82,6 @@ public class StackOperationsTest {
     private ClusterCommonService clusterCommonService;
 
     @Mock
-    private ConverterUtil converterUtil;
-
-    @Mock
     private StackApiViewService stackApiViewService;
 
     @Mock
@@ -96,6 +95,15 @@ public class StackOperationsTest {
 
     @Mock
     private SdxServiceDecorator sdxServiceDecorator;
+
+    @Mock
+    private StackApiViewToStackViewV4ResponseConverter stackApiViewToStackViewV4ResponseConverter;
+
+    @Mock
+    private StackClusterStatusViewToStatusConverter stackClusterStatusViewToStatusConverter;
+
+    @Mock
+    private UserNamePasswordV4RequestToUpdateClusterV4RequestConverter userNamePasswordV4RequestToUpdateClusterV4RequestConverter;
 
     private Stack stack;
 
@@ -159,14 +167,14 @@ public class StackOperationsTest {
     public void testGetForInternalCrn() {
         when(cloudbreakUser.getUserCrn()).thenReturn("crn:altus:iam:us-west-1:altus:user:__internal__actor__");
         when(stackApiViewService.retrieveStackByCrnAndType(anyString(), any(StackType.class))).thenReturn(new StackApiView());
-        when(converterUtil.convert(any(StackApiView.class), any())).thenReturn(new StackViewV4Response());
+        when(stackApiViewToStackViewV4ResponseConverter.convert(any(StackApiView.class))).thenReturn(new StackViewV4Response());
         doNothing().when(environmentServiceDecorator).prepareEnvironment(any(StackViewV4Response.class));
 
         StackViewV4Response response = underTest.getForInternalCrn(NameOrCrn.ofCrn("myCrn"), STACK_TYPE);
 
         assertNotNull(response);
         verify(stackApiViewService, times(1)).retrieveStackByCrnAndType(anyString(), any(StackType.class));
-        verify(converterUtil, times(1)).convert(any(StackApiView.class), any());
+        verify(stackApiViewToStackViewV4ResponseConverter, times(1)).convert(any(StackApiView.class));
         verify(environmentServiceDecorator, times(1)).prepareEnvironment(any(StackViewV4Response.class));
     }
 

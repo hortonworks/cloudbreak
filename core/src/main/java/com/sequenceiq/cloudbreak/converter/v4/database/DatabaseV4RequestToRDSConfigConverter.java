@@ -15,18 +15,16 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
 import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 
 @Component
-public class DatabaseV4RequestToRDSConfigConverter extends AbstractConversionServiceAwareConverter<DatabaseV4Request, RDSConfig> {
+public class DatabaseV4RequestToRDSConfigConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseV4RequestToRDSConfigConverter.class);
 
     @Inject
     private MissingResourceNameGenerator missingResourceNameGenerator;
 
-    @Override
     public RDSConfig convert(DatabaseV4Request source) {
         RDSConfig rdsConfig = new RDSConfig();
         if (Strings.isNullOrEmpty(source.getName())) {

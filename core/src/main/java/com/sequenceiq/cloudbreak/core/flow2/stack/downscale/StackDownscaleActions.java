@@ -64,7 +64,9 @@ public class StackDownscaleActions {
                 stackDownscaleService.startStackDownscale(context, payload);
                 Stack stack = context.getStack();
                 LOGGER.debug("Assembling downscale stack event for stack: {}", stack);
-                List<CloudResource> resources = cloudResourceConverter.convert(stack.getResources());
+                List<CloudResource> resources = stack.getResources().stream()
+                        .map(r -> cloudResourceConverter.convert(r))
+                        .collect(Collectors.toList());
                 variables.put(RESOURCES, resources);
                 List<CloudInstance> instances = new ArrayList<>();
                 InstanceGroup group = stack.getInstanceGroupByInstanceGroupName(context.getInstanceGroupName());

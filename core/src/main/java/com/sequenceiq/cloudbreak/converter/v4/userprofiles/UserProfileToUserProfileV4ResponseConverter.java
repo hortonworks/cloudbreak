@@ -3,13 +3,11 @@ package com.sequenceiq.cloudbreak.converter.v4.userprofiles;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.userprofile.responses.UserProfileV4Response;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
 
 @Component
-public class UserProfileToUserProfileV4ResponseConverter extends AbstractConversionServiceAwareConverter<UserProfile, UserProfileV4Response> {
+public class UserProfileToUserProfileV4ResponseConverter {
 
-    @Override
     public UserProfileV4Response convert(UserProfile entity) {
         UserProfileV4Response userProfileV4Response = new UserProfileV4Response();
         userProfileV4Response.setUsername(entity.getUserName());

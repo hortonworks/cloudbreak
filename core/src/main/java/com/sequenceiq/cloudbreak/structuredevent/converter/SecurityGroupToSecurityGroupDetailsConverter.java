@@ -1,19 +1,20 @@
 package com.sequenceiq.cloudbreak.structuredevent.converter;
 
-import java.util.List;
+import java.util.stream.Collectors;
 
-import org.springframework.core.convert.TypeDescriptor;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.structuredevent.event.SecurityGroupDetails;
-import com.sequenceiq.cloudbreak.structuredevent.event.SecurityRuleDetails;
 
 @Component
-public class SecurityGroupToSecurityGroupDetailsConverter extends AbstractConversionServiceAwareConverter<SecurityGroup, SecurityGroupDetails> {
+public class SecurityGroupToSecurityGroupDetailsConverter {
 
-    @Override
+    @Inject
+    private SecurityRuleToSecurityRuleDetailsConverter securityRuleToSecurityRuleDetailsConverter;
+
     public SecurityGroupDetails convert(SecurityGroup source) {
         SecurityGroupDetails securityGroupDetails = new SecurityGroupDetails();
         securityGroupDetails.setId(source.getId());
@@ -21,9 +22,11 @@ public class SecurityGroupToSecurityGroupDetailsConverter extends AbstractConver
         securityGroupDetails.setDescription(source.getDescription());
         securityGroupDetails.setSecurityGroupId(source.getFirstSecurityGroupId());
         securityGroupDetails.setSecurityGroupIds(source.getSecurityGroupIds());
-        securityGroupDetails.setSecurityRules((List<SecurityRuleDetails>) getConversionService().convert(source.getSecurityRules(),
-                TypeDescriptor.forObject(source.getSecurityRules()),
-                TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(SecurityRuleDetails.class))));
+        securityGroupDetails.setSecurityRules(
+                source.getSecurityRules().stream()
+                .map(rule -> securityRuleToSecurityRuleDetailsConverter.convert(rule))
+                .collect(Collectors.toList())
+        );
         return securityGroupDetails;
     }
 }

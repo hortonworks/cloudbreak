@@ -8,6 +8,8 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.RecommendationV4Response;
@@ -21,19 +23,22 @@ import com.sequenceiq.cloudbreak.cloud.model.DiskType;
 import com.sequenceiq.cloudbreak.cloud.model.DisplayName;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
+import com.sequenceiq.cloudbreak.converter.v4.connectors.VmTypeToVmTypeV4ResponseConverter;
 
 @Component
-public class PlatformRecommendationToPlatformRecommendationV4ResponseConverter
-        extends AbstractConversionServiceAwareConverter<PlatformRecommendation, RecommendationV4Response> {
+public class PlatformRecommendationToPlatformRecommendationV4ResponseConverter {
 
-    @Override
+    @Inject
+    private VmTypeToVmTypeV4ResponseConverter vmTypeToVmTypeV4ResponseConverter;
+
     public RecommendationV4Response convert(PlatformRecommendation source) {
         Map<String, VmTypeV4Response> result = new HashMap<>();
-        source.getRecommendations().forEach((hostGroupName, vm) -> result.put(hostGroupName, getConversionService().convert(vm, VmTypeV4Response.class)));
+        source.getRecommendations().forEach((hostGroupName, vm) -> result.put(
+                hostGroupName,
+                vmTypeToVmTypeV4ResponseConverter.convert(vm)));
 
         Set<VmTypeV4Response> vmTypes = source.getVirtualMachines()
-                .stream().map(vmType -> getConversionService().convert(vmType, VmTypeV4Response.class)).collect(Collectors.toSet());
+                .stream().map(vmType -> vmTypeToVmTypeV4ResponseConverter.convert(vmType)).collect(Collectors.toSet());
 
         Set<DiskV4Response> diskResponses = new HashSet<>();
         for (Entry<DiskType, DisplayName> diskTypeDisplayName : source.getDiskTypes().displayNames().entrySet()) {

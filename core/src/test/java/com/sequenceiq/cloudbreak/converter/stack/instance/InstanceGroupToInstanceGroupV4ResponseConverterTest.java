@@ -1,32 +1,31 @@
 package com.sequenceiq.cloudbreak.converter.stack.instance;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.anySet;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.core.convert.ConversionService;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.converter.AbstractEntityConverterTest;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.InstanceGroupToInstanceGroupV4ResponseConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.InstanceMetaDataToInstanceMetaDataV4ResponseConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.network.InstanceGroupNetworkToInstanceGroupNetworkV4ResponseConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.securitygroup.SecurityGroupToSecurityGroupResponseConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.template.TemplateToInstanceTemplateV4ResponseConverter;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class InstanceGroupToInstanceGroupV4ResponseConverterTest extends AbstractEntityConverterTest<InstanceGroup> {
@@ -35,15 +34,24 @@ public class InstanceGroupToInstanceGroupV4ResponseConverterTest extends Abstrac
     private InstanceGroupToInstanceGroupV4ResponseConverter underTest;
 
     @Mock
-    private ConverterUtil converterUtil;
+    private TemplateToInstanceTemplateV4ResponseConverter templateToInstanceTemplateV4ResponseConverter;
 
     @Mock
-    private ConversionService conversionService;
+    private InstanceGroupNetworkToInstanceGroupNetworkV4ResponseConverter instanceGroupNetworkToInstanceGroupNetworkV4ResponseConverter;
+
+    @Mock
+    private SecurityGroupToSecurityGroupResponseConverter securityGroupToSecurityGroupResponseConverter;
+
+    @Mock
+    private InstanceMetaDataToInstanceMetaDataV4ResponseConverter instanceMetaDataToInstanceMetaDataV4ResponseConverter;
 
     @Test
     public void testConvert() {
         InstanceGroup source = getSource();
-        when(converterUtil.convertAllAsSet(anySet(), eq(InstanceMetaDataV4Response.class))).thenReturn(getInstanceMetaData(source));
+        for (InstanceMetaData allInstanceMetaDatum : source.getAllInstanceMetaData()) {
+            when(instanceMetaDataToInstanceMetaDataV4ResponseConverter.convert(any()))
+                    .thenReturn(getInstanceMetaData(allInstanceMetaDatum));
+        }
 
         InstanceGroupV4Response result = underTest.convert(getSource());
 
@@ -62,21 +70,18 @@ public class InstanceGroupToInstanceGroupV4ResponseConverterTest extends Abstrac
         return instanceGroup;
     }
 
-    private Set<InstanceMetaDataV4Response> getInstanceMetaData(InstanceGroup instanceGroup) {
-        var metaDataV4Response = instanceGroup.getInstanceMetaDataSet().stream().map(instanceMetaData -> {
-            InstanceMetaDataV4Response response = new InstanceMetaDataV4Response();
-            response.setPublicIp(instanceMetaData.getPublicIp());
-            response.setAmbariServer(instanceMetaData.getAmbariServer());
-            response.setDiscoveryFQDN(instanceMetaData.getDiscoveryFQDN());
-            response.setInstanceGroup(instanceMetaData.getInstanceGroupName());
-            response.setInstanceStatus(instanceMetaData.getInstanceStatus());
-            response.setInstanceId(instanceMetaData.getInstanceId());
-            response.setInstanceType(instanceMetaData.getInstanceMetadataType());
-            response.setPrivateIp(instanceMetaData.getPrivateIp());
-            response.setSshPort(instanceMetaData.getSshPort());
-            return response;
-        }).collect(Collectors.toSet());
-        return Sets.newHashSet(metaDataV4Response);
+    private InstanceMetaDataV4Response getInstanceMetaData(InstanceMetaData instanceMetaData) {
+        InstanceMetaDataV4Response response = new InstanceMetaDataV4Response();
+        response.setPublicIp(instanceMetaData.getPublicIp());
+        response.setAmbariServer(instanceMetaData.getAmbariServer());
+        response.setDiscoveryFQDN(instanceMetaData.getDiscoveryFQDN());
+        response.setInstanceGroup(instanceMetaData.getInstanceGroupName());
+        response.setInstanceStatus(instanceMetaData.getInstanceStatus());
+        response.setInstanceId(instanceMetaData.getInstanceId());
+        response.setInstanceType(instanceMetaData.getInstanceMetadataType());
+        response.setPrivateIp(instanceMetaData.getPrivateIp());
+        response.setSshPort(instanceMetaData.getSshPort());
+        return response;
     }
 
 }

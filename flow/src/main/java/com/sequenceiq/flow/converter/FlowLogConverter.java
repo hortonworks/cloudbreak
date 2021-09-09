@@ -2,15 +2,13 @@ package com.sequenceiq.flow.converter;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.flow.api.model.FlowLogResponse;
 import com.sequenceiq.flow.api.model.StateStatus;
 import com.sequenceiq.flow.domain.FlowLog;
 
 @Component
-public class FlowLogConverter extends AbstractConversionServiceAwareConverter<FlowLog, FlowLogResponse> {
+public class FlowLogConverter {
 
-    @Override
     public FlowLogResponse convert(FlowLog source) {
         FlowLogResponse flowLogResponse = new FlowLogResponse();
         flowLogResponse.setCreated(source.getCreated());

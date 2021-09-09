@@ -28,14 +28,12 @@ import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.environment.api.v1.credential.endpoint.CredentialEndpoint;
 import com.sequenceiq.environment.api.v1.credential.model.request.CredentialRequest;
 import com.sequenceiq.environment.api.v1.credential.model.request.EditCredentialRequest;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponses;
-import com.sequenceiq.environment.api.v1.credential.model.response.EmptyResponse;
 import com.sequenceiq.environment.api.v1.credential.model.response.InteractiveCredentialResponse;
 import com.sequenceiq.environment.authorization.EnvironmentCredentialFiltering;
 import com.sequenceiq.environment.credential.domain.Credential;
@@ -222,9 +220,6 @@ public class CredentialV1Controller extends NotificationController implements Cr
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_CREDENTIAL)
     public Object getCreateCredentialForCli(CredentialRequest credentialRequest) {
-        if (!CloudPlatform.AWS.equalsIgnoreCase(credentialRequest.getCloudPlatform())) {
-            return new EmptyResponse();
-        }
-        return credentialService.getCreateAWSCredentialForCli(credentialRequest);
+        throw new UnsupportedOperationException("not supported request");
     }
 }

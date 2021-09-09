@@ -1,20 +1,24 @@
 package com.sequenceiq.cloudbreak.structuredevent.converter;
 
+import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
+
 import java.util.stream.Collectors;
+
+import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.structuredevent.event.InstanceGroupDetails;
-import com.sequenceiq.cloudbreak.structuredevent.event.SecurityGroupDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.VolumeDetails;
 
 @Component
-public class InstanceGroupToInstanceGroupDetailsConverter extends AbstractConversionServiceAwareConverter<InstanceGroup, InstanceGroupDetails> {
+public class InstanceGroupToInstanceGroupDetailsConverter {
 
-    @Override
+    @Inject
+    private SecurityGroupToSecurityGroupDetailsConverter securityGroupToSecurityGroupDetailsConverter;
+
     public InstanceGroupDetails convert(InstanceGroup source) {
         InstanceGroupDetails instanceGroupDetails = new InstanceGroupDetails();
         instanceGroupDetails.setGroupName(source.getGroupName());
@@ -38,7 +42,7 @@ public class InstanceGroupToInstanceGroupDetailsConverter extends AbstractConver
                 instanceGroupDetails.setTemporaryStorage(template.getTemporaryStorage().name());
             }
         }
-        instanceGroupDetails.setSecurityGroup(getConversionService().convert(source.getSecurityGroup(), SecurityGroupDetails.class));
+        instanceGroupDetails.setSecurityGroup(getIfNotNull(source.getSecurityGroup(), securityGroupToSecurityGroupDetailsConverter::convert));
         return instanceGroupDetails;
     }
 }

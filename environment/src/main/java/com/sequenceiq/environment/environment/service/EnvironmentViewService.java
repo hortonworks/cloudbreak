@@ -5,15 +5,12 @@ import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFo
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.validation.constraints.NotNull;
 
-import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.environment.environment.repository.EnvironmentViewRepository;
 
@@ -22,11 +19,8 @@ public class EnvironmentViewService {
 
     private final EnvironmentViewRepository environmentViewRepository;
 
-    private final ConversionService conversionService;
-
-    public EnvironmentViewService(EnvironmentViewRepository environmentViewRepository, ConversionService conversionService) {
+    public EnvironmentViewService(EnvironmentViewRepository environmentViewRepository) {
         this.environmentViewRepository = environmentViewRepository;
-        this.conversionService = conversionService;
     }
 
     public Set<EnvironmentView> findByNamesInAccount(Set<String> names, @NotNull String accountid) {
@@ -37,12 +31,6 @@ public class EnvironmentViewService {
     public Set<EnvironmentView> findByResourceCrnsInAccount(Set<String> resourceCrns, @NotNull String accountid) {
         return CollectionUtils.isEmpty(resourceCrns) ? new HashSet<>() : environmentViewRepository
                 .findAllByResourceCrnInAndAccountIdAndArchivedIsFalse(resourceCrns, accountid);
-    }
-
-    public Set<SimpleEnvironmentResponse> listByAccountId(String accountId) {
-        return findAllByAccountId(accountId).stream()
-                .map(env -> conversionService.convert(env, SimpleEnvironmentResponse.class))
-                .collect(Collectors.toSet());
     }
 
     public Set<EnvironmentView> findAllByAccountId(String accountId) {

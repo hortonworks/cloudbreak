@@ -4,7 +4,6 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -18,7 +17,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.requests.DefaultClusterTemplateV4Request;
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
+import com.sequenceiq.cloudbreak.converter.v4.clustertemplate.DefaultClusterTemplateV4RequestToClusterTemplateConverter;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -28,7 +27,7 @@ public class DefaultClusterTemplateCacheTest {
     private DefaultClusterTemplateCache underTest;
 
     @Mock
-    private ConverterUtil converterUtil;
+    private DefaultClusterTemplateV4RequestToClusterTemplateConverter defaultClusterTemplateV4RequestToClusterTemplateConverter;
 
     @Before
     public void setUp() throws Exception {
@@ -39,7 +38,7 @@ public class DefaultClusterTemplateCacheTest {
     public void testLoadClusterTemplatesFromFileWhenClusterTemplateNamesProvided() {
         ClusterTemplate clusterTemplate = new ClusterTemplate();
         clusterTemplate.setName("template");
-        when(converterUtil.convert(any(), eq(ClusterTemplate.class))).thenReturn(clusterTemplate);
+        when(defaultClusterTemplateV4RequestToClusterTemplateConverter.convert(any())).thenReturn(clusterTemplate);
 
         underTest.setClusterTemplates(Collections.singletonList("default-template.json"));
         underTest.loadClusterTemplatesFromFile();
@@ -79,7 +78,7 @@ public class DefaultClusterTemplateCacheTest {
         clusterTemplateAzure.setName("cluster-template-azure");
         ClusterTemplate clusterTemplateAwsRanger = new ClusterTemplate();
         clusterTemplateAwsRanger.setName("cluster-template-aws-ranger");
-        when(converterUtil.convert(any(DefaultClusterTemplateV4Request.class), eq(ClusterTemplate.class)))
+        when(defaultClusterTemplateV4RequestToClusterTemplateConverter.convert(any(DefaultClusterTemplateV4Request.class)))
                 .thenReturn(clusterTemplate)
                 .thenReturn(clusterTemplate2)
                 .thenReturn(clusterTemplateAws)

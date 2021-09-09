@@ -41,7 +41,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
@@ -59,6 +58,8 @@ import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.controller.validation.stack.StackRuntimeVersionValidator;
 import com.sequenceiq.cloudbreak.converter.IdBrokerConverterUtil;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.StackToStackV4ResponseConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.StackV4RequestToStackConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
@@ -119,9 +120,6 @@ public class StackCreatorService {
     private ImageService imageService;
 
     @Inject
-    private ConverterUtil converterUtil;
-
-    @Inject
     private TransactionService transactionService;
 
     @Inject
@@ -176,6 +174,12 @@ public class StackCreatorService {
     @Inject
     private NodeCountLimitValidator nodeCountLimitValidator;
 
+    @Inject
+    private StackV4RequestToStackConverter stackV4RequestToStackConverter;
+
+    @Inject
+    private StackToStackV4ResponseConverter stackToStackV4ResponseConverter;
+
     public StackV4Response createStack(User user, Workspace workspace, StackV4Request stackRequest, boolean distroxRequest) {
         long start = System.currentTimeMillis();
         String stackName = stackRequest.getName();
@@ -192,7 +196,7 @@ public class StackCreatorService {
                 "Stack does not exist check took {} ms");
 
         Stack stackStub = measure(() ->
-                converterUtil.convert(stackRequest, Stack.class),
+                        stackV4RequestToStackConverter.convert(stackRequest),
                 LOGGER,
                 "Stack request converted to stack took {} ms for stack {}", stackName);
 
@@ -291,7 +295,7 @@ public class StackCreatorService {
             throw new TransactionRuntimeExecutionException(e);
         }
 
-        StackV4Response response = measure(() -> converterUtil.convert(savedStack, StackV4Response.class),
+        StackV4Response response = measure(() -> stackToStackV4ResponseConverter.convert(savedStack),
                 LOGGER, "Stack response has been created for stack took {} ms with name {}", stackName);
 
         LOGGER.info("Generated stack response after creation: {}", JsonUtil.writeValueAsStringSilentSafe(response));

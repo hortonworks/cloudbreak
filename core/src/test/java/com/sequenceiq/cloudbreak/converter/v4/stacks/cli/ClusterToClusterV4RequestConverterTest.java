@@ -6,8 +6,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -24,11 +22,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.core.convert.ConversionService;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cli.cm.ClusterToClouderaManagerV4RequestConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.CloudStorageConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -43,9 +39,6 @@ public class ClusterToClusterV4RequestConverterTest {
 
     @InjectMocks
     private ClusterToClusterV4RequestConverter underTest;
-
-    @Mock
-    private ConversionService conversionService;
 
     @Mock
     private Cluster cluster;
@@ -86,8 +79,6 @@ public class ClusterToClusterV4RequestConverterTest {
         ClusterV4Request result = underTest.convert(cluster);
 
         assertNull(result.getCloudStorage());
-        verify(conversionService, times(0)).convert(null, CloudStorageV4Request.class);
-        verify(conversionService, times(0)).convert(any(FileSystem.class), eq(CloudStorageV4Request.class));
     }
 
     @Test

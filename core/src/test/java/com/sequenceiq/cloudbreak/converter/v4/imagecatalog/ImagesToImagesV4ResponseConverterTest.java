@@ -19,7 +19,6 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.StackDetails;
@@ -38,10 +37,10 @@ public class ImagesToImagesV4ResponseConverterTest extends AbstractEntityConvert
     private ImageBasedDefaultCDHEntries imageBasedDefaultCDHEntries;
 
     @Mock
-    private ConverterUtil converterUtil;
+    private ImageToImageV4ResponseConverter imageToImageV4ResponseConverter;
 
     @InjectMocks
-    private ImagesToImagesV4ResponseConverter underTest = new ImagesToImagesV4ResponseConverter();
+    private ImagesToImagesV4ResponseConverter underTest;
 
     @Override
     public Images createSource() {

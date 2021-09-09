@@ -5,19 +5,22 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.GatewayV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.topology.GatewayTopologyV4Request;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
 
 @Component
-public class GatewayToGatewayV4RequestConverter extends AbstractConversionServiceAwareConverter<Gateway, GatewayV4Request> {
+public class GatewayToGatewayV4RequestConverter {
 
-    @Override
+    @Inject
+    private GatewayTopologyToGatewayTopologyV4RequestConverter gatewayTopologyToGatewayTopologyV4RequestConverter;
+
     public GatewayV4Request convert(Gateway gateway) {
         GatewayV4Request gatewayJson = new GatewayV4Request();
         gatewayJson.setPath(gateway.getPath());
@@ -33,7 +36,7 @@ public class GatewayToGatewayV4RequestConverter extends AbstractConversionServic
         Set<GatewayTopology> gatewayTopologies = gateway.getTopologies();
         if (!CollectionUtils.isEmpty(gatewayTopologies)) {
             return gatewayTopologies.stream()
-                    .map(t -> getConversionService().convert(t, GatewayTopologyV4Request.class))
+                    .map(t -> gatewayTopologyToGatewayTopologyV4RequestConverter.convert(t))
                     .collect(Collectors.toList());
         }
         return Collections.emptyList();

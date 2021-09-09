@@ -35,12 +35,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 
-import com.cloudera.cdp.environments.model.CreateAWSCredentialRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
+import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
@@ -48,9 +47,7 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
-import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.common.model.CredentialType;
-import com.sequenceiq.environment.api.v1.credential.model.request.CredentialRequest;
 import com.sequenceiq.environment.credential.attributes.CredentialAttributes;
 import com.sequenceiq.environment.credential.attributes.azure.AzureCredentialAttributes;
 import com.sequenceiq.environment.credential.attributes.azure.CodeGrantFlowAttributes;
@@ -562,25 +559,6 @@ class CredentialServiceTest {
                 credentialServiceUnderTest.authorizeCodeGrantFlow(DIFFERENT_CODE, STATE, ACCOUNT_ID, "platform");
         CredentialAttributes resultAttributes = new Json(result.getAttributes()).get(CredentialAttributes.class);
         assertEquals(DIFFERENT_CODE, resultAttributes.getAzure().getCodeGrantFlowBased().getAuthorizationCode());
-    }
-
-    @Test
-    void testGetCreateAWSCredentialForCli() {
-        CredentialRequest credentialRequest = new CredentialRequest();
-        CreateAWSCredentialRequest createAWSCredentialRequest = new CreateAWSCredentialRequest();
-        when(credentialValidator.validateAwsCredentialRequest(credentialRequest)).thenReturn(new ValidationResultBuilder().build());
-        when(credentialRequestToCreateAWSCredentialRequestConverter.convert(credentialRequest)).thenReturn(createAWSCredentialRequest);
-        CreateAWSCredentialRequest result = credentialServiceUnderTest.getCreateAWSCredentialForCli(credentialRequest);
-        assertEquals(createAWSCredentialRequest, result);
-    }
-
-    @Test
-    void testGetCreateAWSCredentialForCliHasErrors() {
-        CredentialRequest credentialRequest = new CredentialRequest();
-        CreateAWSCredentialRequest createAWSCredentialRequest = new CreateAWSCredentialRequest();
-        when(credentialValidator.validateAwsCredentialRequest(credentialRequest)).thenReturn(new ValidationResultBuilder().error("error").build());
-        when(credentialRequestToCreateAWSCredentialRequestConverter.convert(credentialRequest)).thenReturn(createAWSCredentialRequest);
-        assertThrows(BadRequestException.class, () -> credentialServiceUnderTest.getCreateAWSCredentialForCli(credentialRequest));
     }
 
     private String getTestAttributes(String state, String deploymentAddress, String url) {

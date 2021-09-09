@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.common.json.Json;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.StructuredEventEntity;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
@@ -16,7 +15,7 @@ import com.sequenceiq.cloudbreak.structuredevent.event.legacy.OperationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEvent;
 
 @Component
-public class StructuredEventToStructuredEventEntityConverter extends AbstractConversionServiceAwareConverter<StructuredEvent, StructuredEventEntity> {
+public class StructuredEventToStructuredEventEntityConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StructuredEventToStructuredEventEntityConverter.class);
 
@@ -26,7 +25,6 @@ public class StructuredEventToStructuredEventEntityConverter extends AbstractCon
     @Inject
     private UserService userService;
 
-    @Override
     public StructuredEventEntity convert(StructuredEvent source) {
         try {
             StructuredEventEntity structuredEventEntity = new StructuredEventEntity();

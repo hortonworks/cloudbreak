@@ -37,10 +37,9 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
@@ -48,6 +47,9 @@ import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.converter.stack.AutoscaleStackToAutoscaleStackResponseJsonConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.StackToStackV4ResponseConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.cli.StackToStackV4RequestConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
@@ -169,9 +171,6 @@ public class StackServiceTest {
     private UserService userService;
 
     @Mock
-    private ConverterUtil converterUtil;
-
-    @Mock
     private FlowLogService flowLogService;
 
     @Mock
@@ -185,6 +184,15 @@ public class StackServiceTest {
 
     @Mock
     private DatalakeService datalakeService;
+
+    @Mock
+    private StackToStackV4ResponseConverter stackToStackV4ResponseConverter;
+
+    @Mock
+    private StackToStackV4RequestConverter stackToStackV4RequestConverter;
+
+    @Mock
+    private AutoscaleStackToAutoscaleStackResponseJsonConverter autoscaleStackToAutoscaleStackResponseJsonConverter;
 
     @Before
     public void setUp() {
@@ -254,16 +262,11 @@ public class StackServiceTest {
             Supplier<AutoscaleStackV4Response> callback = invocation.getArgument(0);
             return callback.get();
         });
-        when(stackRepository.findAliveOnesWithClusterManager()).thenReturn(null);
-        ArgumentCaptor<Set> aliveStackCaptor = ArgumentCaptor.forClass(Set.class);
-        when(converterUtil.convertAllAsSet(aliveStackCaptor.capture(), eq(AutoscaleStackV4Response.class))).thenReturn(Set.of());
+        when(stackRepository.findAliveOnesWithClusterManager()).thenReturn(Set.of());
 
         Set<AutoscaleStackV4Response> allForAutoscale = underTest.getAllForAutoscale();
         assertNotNull(allForAutoscale);
         assertTrue(allForAutoscale.isEmpty());
-
-        assertNotNull(aliveStackCaptor.getValue());
-        assertTrue(aliveStackCaptor.getValue().isEmpty());
     }
 
     @Test
@@ -277,17 +280,17 @@ public class StackServiceTest {
         when(stack.getStackStatus()).thenReturn(Status.AVAILABLE);
         when(stackRepository.findAliveOnesWithClusterManager()).thenReturn(Set.of(stack));
 
-        ArgumentCaptor<Set> aliveStackCaptor = ArgumentCaptor.forClass(Set.class);
+        ArgumentCaptor<AutoscaleStack> aliveStackCaptor = ArgumentCaptor.forClass(AutoscaleStack.class);
         AutoscaleStackV4Response autoscaleStackResponse = new AutoscaleStackV4Response();
-        when(converterUtil.convertAllAsSet(aliveStackCaptor.capture(), eq(AutoscaleStackV4Response.class))).thenReturn(Set.of(autoscaleStackResponse));
+        when(autoscaleStackToAutoscaleStackResponseJsonConverter.convert(aliveStackCaptor.capture())).thenReturn(autoscaleStackResponse);
 
         Set<AutoscaleStackV4Response> allForAutoscale = underTest.getAllForAutoscale();
         assertNotNull(allForAutoscale);
         assertEquals(autoscaleStackResponse, allForAutoscale.iterator().next());
 
-        Set<AutoscaleStack> stackSet = aliveStackCaptor.getValue();
+        AutoscaleStack stackSet = aliveStackCaptor.getValue();
         assertNotNull(stackSet);
-        assertEquals(stack.getStackStatus(), stackSet.iterator().next().getStackStatus());
+        assertEquals(stack.getStackStatus(), stackSet.getStackStatus());
     }
 
     @Test
@@ -304,17 +307,17 @@ public class StackServiceTest {
         when(deleteInProgressStack.getStackStatus()).thenReturn(Status.AVAILABLE);
         when(stackRepository.findAliveOnesWithClusterManager()).thenReturn(Set.of(availableStack, deleteInProgressStack));
 
-        ArgumentCaptor<Set> aliveStackCaptor = ArgumentCaptor.forClass(Set.class);
+        ArgumentCaptor<AutoscaleStack> aliveStackCaptor = ArgumentCaptor.forClass(AutoscaleStack.class);
         AutoscaleStackV4Response autoscaleStackResponse = new AutoscaleStackV4Response();
-        when(converterUtil.convertAllAsSet(aliveStackCaptor.capture(), eq(AutoscaleStackV4Response.class))).thenReturn(Set.of(autoscaleStackResponse));
+        when(autoscaleStackToAutoscaleStackResponseJsonConverter.convert(aliveStackCaptor.capture())).thenReturn(autoscaleStackResponse);
 
         Set<AutoscaleStackV4Response> allForAutoscale = underTest.getAllForAutoscale();
         assertNotNull(allForAutoscale);
         assertEquals(autoscaleStackResponse, allForAutoscale.iterator().next());
 
-        Set<AutoscaleStack> stackSet = aliveStackCaptor.getValue();
+        AutoscaleStack stackSet = aliveStackCaptor.getValue();
         assertNotNull(stackSet);
-        assertEquals(availableStack.getStackStatus(), stackSet.iterator().next().getStackStatus());
+        assertEquals(availableStack.getStackStatus(), stackSet.getStackStatus());
     }
 
     @Test

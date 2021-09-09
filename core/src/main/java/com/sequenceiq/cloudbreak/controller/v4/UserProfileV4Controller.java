@@ -12,7 +12,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.userprofile.UserProfileV4Endpoi
 import com.sequenceiq.cloudbreak.api.endpoint.v4.userprofile.requests.ShowTerminatedClustersPreferencesV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.userprofile.responses.ShowTerminatedClusterPreferencesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.userprofile.responses.UserProfileV4Response;
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
+import com.sequenceiq.cloudbreak.converter.v4.userprofiles.ShowTerminatedClusterConfigToShowTerminatedClusterPreferencesV4ResponseConverter;
+import com.sequenceiq.cloudbreak.converter.v4.userprofiles.ShowTerminatedClustersPreferencesV4RequestToShowTerminatedClustersPreferencesConverter;
+import com.sequenceiq.cloudbreak.converter.v4.userprofiles.UserProfileToUserProfileV4ResponseConverter;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
 import com.sequenceiq.cloudbreak.service.stack.ShowTerminatedClusterConfigService;
 import com.sequenceiq.cloudbreak.service.stack.ShowTerminatedClustersConfig;
@@ -28,31 +30,39 @@ public class UserProfileV4Controller implements UserProfileV4Endpoint {
     private UserProfileService userProfileService;
 
     @Inject
-    private ConverterUtil converterUtil;
-
-    @Inject
     private ShowTerminatedClusterConfigService showTerminatedClusterConfigService;
 
     @Inject
     private UserProfileDecorator userProfileDecorator;
 
+    @Inject
+    private ShowTerminatedClusterConfigToShowTerminatedClusterPreferencesV4ResponseConverter showTerminatedClusterConfigConverter;
+
+    @Inject
+    private ShowTerminatedClustersPreferencesV4RequestToShowTerminatedClustersPreferencesConverter showTerminatedClustersPreferencesConverter;
+
+    @Inject
+    private UserProfileToUserProfileV4ResponseConverter userProfileToUserProfileV4ResponseConverter;
+
     @Override
     public UserProfileV4Response get() {
         UserProfile userProfile = userProfileService.getOrCreateForLoggedInUser();
-        UserProfileV4Response userProfileV4Response = converterUtil.convert(userProfile, UserProfileV4Response.class);
+        UserProfileV4Response userProfileV4Response = userProfileToUserProfileV4ResponseConverter.convert(userProfile);
         userProfileDecorator.decorate(userProfileV4Response, userProfile.getUser().getUserCrn());
         return userProfileV4Response;
     }
 
     @Override
     public ShowTerminatedClusterPreferencesV4Response getShowClusterPreferences() {
-        return converterUtil.convert(showTerminatedClusterConfigService.getConfig(), ShowTerminatedClusterPreferencesV4Response.class);
+        return showTerminatedClusterConfigConverter
+                .convert(showTerminatedClusterConfigService.getConfig());
     }
 
     @Override
     public void putTerminatedClustersPreferences(@Valid ShowTerminatedClustersPreferencesV4Request showInstancesPrefsV4Request) {
         ShowTerminatedClustersConfig showTerminatedClustersConfig =
-                converterUtil.convert(showInstancesPrefsV4Request, ShowTerminatedClustersConfig.class);
+                showTerminatedClustersPreferencesConverter
+                        .convert(showInstancesPrefsV4Request);
         showTerminatedClusterConfigService.set(showTerminatedClustersConfig);
     }
 

@@ -11,13 +11,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.VmTypeV4Response
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.VolumeParameterConfigV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterConfig;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 
 @Component
-public class VmTypeToVmTypeV4ResponseConverter
-        extends AbstractConversionServiceAwareConverter<VmType, VmTypeV4Response> {
+public class VmTypeToVmTypeV4ResponseConverter {
 
-    @Override
     public VmTypeV4Response convert(VmType source) {
         VmTypeV4Response vmTypeV4Response = new VmTypeV4Response();
         List<VolumeParameterConfigV4Response> configs = new ArrayList<>();

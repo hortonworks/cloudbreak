@@ -21,6 +21,7 @@ import org.springframework.core.convert.ConversionService;
 
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterSetupService;
+import com.sequenceiq.cloudbreak.converter.StackToTemplatePreparationObjectConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -34,6 +35,7 @@ import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 class ClusterBuilderServiceTest {
@@ -100,6 +102,9 @@ class ClusterBuilderServiceTest {
     @Mock
     private DatalakeService datalakeService;
 
+    @Mock
+    private StackToTemplatePreparationObjectConverter stackToTemplatePreparationObjectConverter;
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
@@ -122,6 +127,8 @@ class ClusterBuilderServiceTest {
     @Test
     void testPrepareExtendedTemplateWhenBlueprintTextDoesNotContainUnfilledHandlebarPropertiesThenItShouldNotThrowException() {
         when(mockClusterSetupService.prepareTemplate(any(), any(), any(), any(), any())).thenReturn(BLUEPRINT_TEXT);
+        when(stackToTemplatePreparationObjectConverter.convert(any()))
+                .thenReturn(new TemplatePreparationObject.Builder().build());
         underTest.prepareExtendedTemplate(STACK_ID);
 
         verify(mockCluster, times(2)).setExtendedBlueprintText(anyString());

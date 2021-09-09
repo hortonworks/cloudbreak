@@ -6,12 +6,10 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackValidationV4Request;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 
 @Component
-public class StackV4RequestToStackValidationRequestConverter extends AbstractConversionServiceAwareConverter<StackV4Request, StackValidationV4Request> {
+public class StackV4RequestToStackValidationRequestConverter {
 
-    @Override
     public StackValidationV4Request convert(StackV4Request source) {
         StackValidationV4Request stackValidationRequest = new StackValidationV4Request();
         stackValidationRequest.setBlueprintName(source.getCluster().getBlueprintName());
