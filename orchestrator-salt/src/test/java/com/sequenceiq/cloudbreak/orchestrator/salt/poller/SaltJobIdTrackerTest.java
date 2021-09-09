@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt.poller;
 
+import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.both;
 import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.core.StringContains.containsString;
@@ -17,8 +18,10 @@ import static org.mockito.Mockito.when;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import org.hamcrest.MatcherAssert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,6 +43,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Target;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.JobId;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.JobState;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.RunningJobsResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -64,6 +68,9 @@ public class SaltJobIdTrackerTest {
         SaltJobRunner saltJobRunner = Mockito.mock(SaltJobRunner.class);
         PowerMockito.mockStatic(SaltStates.class);
         PowerMockito.when(SaltStates.jobIsRunning(any(), any())).thenReturn(true);
+        RunningJobsResponse jobsResponse = new RunningJobsResponse();
+        jobsResponse.setResult(List.of());
+        PowerMockito.when(SaltStates.getRunningJobs(saltConnector)).thenReturn(jobsResponse);
 
         Set<String> targets = new HashSet<>();
         targets.add("10.0.0.1");
@@ -84,6 +91,37 @@ public class SaltJobIdTrackerTest {
         SaltStates.jobIsRunning(any(), eq(jobId));
         checkTargets(targets, targetCaptor.getAllValues());
         verify(saltJobRunner, times(2)).getJobState();
+    }
+
+    @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT")
+    @Test
+    public void callWithNotStartedWithAlreadyRunning() throws Exception {
+        String jobId = "1";
+        SaltConnector saltConnector = Mockito.mock(SaltConnector.class);
+        SaltJobRunner saltJobRunner = Mockito.mock(SaltJobRunner.class);
+        PowerMockito.mockStatic(SaltStates.class);
+        PowerMockito.when(SaltStates.jobIsRunning(any(), any())).thenReturn(true);
+        RunningJobsResponse jobsResponse = new RunningJobsResponse();
+        jobsResponse.setResult(List.of(Map.of("runningJob", Map.of())));
+        PowerMockito.when(SaltStates.getRunningJobs(saltConnector)).thenReturn(jobsResponse);
+
+        Set<String> targets = new HashSet<>();
+        targets.add("10.0.0.1");
+        targets.add("10.0.0.2");
+        targets.add("10.0.0.3");
+        when(saltJobRunner.getTargetHostnames()).thenReturn(targets);
+        when(saltJobRunner.getJid()).thenReturn(JobId.jobId(jobId));
+        when(saltJobRunner.getJobState()).thenReturn(JobState.NOT_STARTED);
+        when(saltJobRunner.submit(any(SaltConnector.class))).thenReturn(jobId);
+        SaltJobIdTracker saltJobIdTracker = new SaltJobIdTracker(saltConnector, saltJobRunner);
+        try {
+            saltJobIdTracker.call();
+            fail("should throw exception");
+        } catch (CloudbreakOrchestratorInProgressException e) {
+            MatcherAssert.assertThat(e.getMessage(), allOf(containsString("There are running job(s) with id:"), containsString("runningJob")));
+        }
+
+        verify(saltJobRunner, times(1)).getJobState();
     }
 
     @Test
@@ -284,6 +322,9 @@ public class SaltJobIdTrackerTest {
             PowerMockito.when(SaltStates.jobIsRunning(any(), any())).thenReturn(false);
             PowerMockito.when(SaltStates.jidInfo(any(SaltConnector.class), anyString(), any(Target.class), any()))
                     .thenThrow(new RuntimeException("Salt execution went wrong: saltErrorDetails"));
+            RunningJobsResponse jobsResponse = new RunningJobsResponse();
+            jobsResponse.setResult(List.of());
+            PowerMockito.when(SaltStates.getRunningJobs(saltConnector)).thenReturn(jobsResponse);
 
             try {
                 new SaltJobIdTracker(saltConnector, saltJobRunner).call();
