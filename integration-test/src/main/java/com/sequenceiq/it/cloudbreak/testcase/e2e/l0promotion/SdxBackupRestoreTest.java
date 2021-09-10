@@ -42,8 +42,7 @@ public class SdxBackupRestoreTest extends PreconditionSdxE2ETest {
         createDefaultUser(testContext);
         initializeDefaultBlueprints(testContext);
         createDefaultCredential(testContext);
-        createEnvironmentWithFreeIpa(testContext);
-        createSdx(testContext);
+        createEnvironmentWithFreeIpaAndDatalake(testContext);
     }
 
     @Test(dataProvider = TEST_CONTEXT, description = "We need to wait the CB-13322 to be resolved")

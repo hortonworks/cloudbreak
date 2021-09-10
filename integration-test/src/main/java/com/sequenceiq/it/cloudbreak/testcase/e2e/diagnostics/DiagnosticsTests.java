@@ -28,9 +28,8 @@ public class DiagnosticsTests extends AbstractE2ETest {
         testContext.getCloudProvider().getCloudFunctionality().cloudStorageInitialize();
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
-        createEnvironmentWithFreeIpa(testContext);
         initializeDefaultBlueprints(testContext);
-        createDatalake(testContext);
+        createEnvironmentWithFreeIpaAndDatalake(testContext);
     }
 
     @Test(dataProvider = TEST_CONTEXT)
