@@ -1,13 +1,11 @@
 package com.sequenceiq.datalake.flow.detach;
 
-import com.sequenceiq.datalake.flow.detach.event.DatalakeResizeFlowChainStartEvent;
+import com.sequenceiq.datalake.flow.detach.event.SdxDetachFailedEvent;
 import com.sequenceiq.datalake.flow.detach.event.SdxDetachInprogressEvent;
 import com.sequenceiq.datalake.flow.detach.event.SdxDetachSuccessEvent;
-import com.sequenceiq.datalake.flow.detach.event.SdxDetachFailedEvent;
 import com.sequenceiq.flow.core.FlowEvent;
 
 public enum SdxDetachEvent implements FlowEvent {
-    SDX_RESIZE_FLOW_CHAIN_START_EVENT(DatalakeResizeFlowChainStartEvent.class),
     SDX_DETACH_EVENT(),
     SDX_DETACH_IN_PROGRESS_EVENT(SdxDetachInprogressEvent.class),
     SDX_DETACH_SUCCESS_EVENT(SdxDetachSuccessEvent.class),

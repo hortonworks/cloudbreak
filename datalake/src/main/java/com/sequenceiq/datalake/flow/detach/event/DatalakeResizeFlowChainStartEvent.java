@@ -5,6 +5,8 @@ import com.sequenceiq.datalake.flow.SdxEvent;
 
 public class DatalakeResizeFlowChainStartEvent extends SdxEvent {
 
+    public static final String SDX_RESIZE_FLOW_CHAIN_START_EVENT = "DatalakeResizeFlowChainStartEvent";
+
     private SdxCluster sdxCluster;
 
     public DatalakeResizeFlowChainStartEvent(Long sdxId, SdxCluster newSdxCluster, String userId) {
@@ -18,6 +20,6 @@ public class DatalakeResizeFlowChainStartEvent extends SdxEvent {
 
     @Override
     public String selector() {
-        return "DatalakeResizeFlowChainStartEvent";
+        return SDX_RESIZE_FLOW_CHAIN_START_EVENT;
     }
 }
