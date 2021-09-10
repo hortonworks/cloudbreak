@@ -4,6 +4,8 @@ import com.sequenceiq.datalake.flow.SdxEvent;
 
 public class DatalakeUpgradeFlowChainStartEvent extends SdxEvent {
 
+    public static final String DATALAKE_UPGRADE_FLOW_CHAIN_EVENT = "DatalakeUpgradeFlowChainEvent";
+
     private final String imageId;
 
     private final boolean replaceVms;
@@ -31,6 +33,6 @@ public class DatalakeUpgradeFlowChainStartEvent extends SdxEvent {
 
     @Override
     public String selector() {
-        return "DatalakeUpgradeFlowChainEvent";
+        return DATALAKE_UPGRADE_FLOW_CHAIN_EVENT;
     }
 }
