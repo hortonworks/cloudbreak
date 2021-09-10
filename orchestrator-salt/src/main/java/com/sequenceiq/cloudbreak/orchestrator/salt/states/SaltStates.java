@@ -10,7 +10,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +24,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Table;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltActionType;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Glob;
@@ -39,6 +43,8 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltAction;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.StateType;
 
 public class SaltStates {
+
+    public static final Pattern RUNNING_HIGHSTATE_JID = Pattern.compile(".*The function .*state\\.highstate.* is running as PID.*with jid (\\d+).*");
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SaltStates.class);
 
@@ -71,11 +77,33 @@ public class SaltStates {
 
     public static Multimap<String, String> jidInfo(SaltConnector sc, String jid, Target<String> target, StateType stateType) {
         if (StateType.HIGH.equals(stateType)) {
-            return highStateJidInfo(sc, jid);
+            try {
+                return highStateJidInfo(sc, jid);
+            }   catch (SaltExecutionWentWrongException e) {
+                Optional<String> runningJid = extractJidIfPossible(e);
+                if (runningJid.isPresent()) {
+                    return highStateJidInfo(sc, runningJid.get());
+                } else {
+                    throw e;
+                }
+            }
         } else if (StateType.SIMPLE.equals(stateType)) {
             return applyStateJidInfo(sc, jid);
         }
         return ArrayListMultimap.create();
+    }
+
+    private static Optional<String> extractJidIfPossible(SaltExecutionWentWrongException e) {
+        Optional<String> jid = Optional.empty();
+        if (e.getMessage() != null) {
+            Matcher matcher = RUNNING_HIGHSTATE_JID.matcher(e.getMessage());
+            if (matcher.matches()) {
+                String runningHighStateJid = matcher.group(1);
+                LOGGER.info("Highstate is running, but with another jid, check that jid also: {}", runningHighStateJid);
+                jid = Optional.of(runningHighStateJid);
+            }
+        }
+        return jid;
     }
 
     private static Multimap<String, String> applyStateJidInfo(SaltConnector sc, String jid) {
@@ -126,6 +154,20 @@ public class SaltStates {
             }
         }
         return false;
+    }
+
+    public static RunningJobsResponse getRunningJobs(SaltConnector sc) throws CloudbreakOrchestratorFailedException {
+        RunningJobsResponse runningInfo = sc.run("jobs.active", RUNNER, RunningJobsResponse.class);
+        LOGGER.debug("Active salt jobs: {}", runningInfo);
+        validateRunningInfoResultNotNull(runningInfo);
+        return runningInfo;
+    }
+
+    private static void validateRunningInfoResultNotNull(RunningJobsResponse runningInfo) throws CloudbreakOrchestratorFailedException {
+        if (runningInfo == null || runningInfo.getResult() == null) {
+            throw new CloudbreakOrchestratorFailedException("Configuration Management Software (Salt) installed on CDP cluster has returned an empty response "
+                    + "multiple times. Contact Cloudera support with this message for resolving this error.");
+        }
     }
 
     public static MinionIpAddressesResponse collectMinionIpAddresses(SaltConnector sc) {

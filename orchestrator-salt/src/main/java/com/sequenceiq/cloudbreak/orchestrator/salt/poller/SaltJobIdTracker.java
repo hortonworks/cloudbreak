@@ -3,6 +3,9 @@ package com.sequenceiq.cloudbreak.orchestrator.salt.poller;
 import static com.sequenceiq.cloudbreak.orchestrator.salt.domain.JobId.jobId;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +18,7 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorTe
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.HostList;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.JobState;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.RunningJobsResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
 
 public class SaltJobIdTracker implements OrchestratorBootstrap {
@@ -41,7 +45,9 @@ public class SaltJobIdTracker implements OrchestratorBootstrap {
     public Boolean call() throws Exception {
         if (JobState.NOT_STARTED.equals(saltJobRunner.getJobState())) {
             LOGGER.info("Job has not started in the cluster. Starting for first time.");
-            saltJobRunner.setJid(jobId(saltJobRunner.submit(saltConnector)));
+            checkIsOtherJobRunning();
+            String submit = saltJobRunner.submit(saltConnector);
+            saltJobRunner.setJid(jobId(submit));
             checkIsFinished(saltJobRunner.getJid().getJobId());
         } else if (JobState.IN_PROGRESS.equals(saltJobRunner.getJobState())) {
             String jobId = saltJobRunner.getJid().getJobId();
@@ -67,6 +73,22 @@ public class SaltJobIdTracker implements OrchestratorBootstrap {
         }
         LOGGER.info("Job (jid: {}) was finished. Triggering next salt event.", saltJobRunner.getJid().getJobId());
         return true;
+    }
+
+    private void checkIsOtherJobRunning() throws CloudbreakOrchestratorFailedException, CloudbreakOrchestratorInProgressException {
+        RunningJobsResponse runningJobs = SaltStates.getRunningJobs(saltConnector);
+        List<String> runningJobIds = mapToRunningJobIds(runningJobs);
+        if (!runningJobIds.isEmpty()) {
+            LOGGER.warn("There are running job(s) with id: {}. Postpone starting the new job until these are finished.", runningJobIds);
+            throw new CloudbreakOrchestratorInProgressException("There are running job(s) with id: " + runningJobIds, saltJobRunner.getNodesWithError());
+        }
+    }
+
+    private List<String> mapToRunningJobIds(RunningJobsResponse runningJobs) {
+        return runningJobs.getResult().stream()
+                .map(Map::keySet)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
     }
 
     private void checkIsFinished(String jobId) throws CloudbreakOrchestratorFailedException {
