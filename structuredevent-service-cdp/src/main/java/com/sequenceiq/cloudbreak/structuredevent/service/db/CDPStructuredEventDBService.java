@@ -63,7 +63,8 @@ public class CDPStructuredEventDBService extends AbstractAccountAwareResourceSer
 
     private ValidationResult validate(CDPStructuredEvent event) {
         ValidationResult.ValidationResultBuilder builder = ValidationResult.builder();
-        if (StringUtils.isEmpty(event.getOperation().getResourceCrn())) {
+
+        if (!StringUtils.hasText(event.getOperation().getResourceCrn())) {
             builder.error("Resource crn cannot be null or empty");
         }
         return builder.build();

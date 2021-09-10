@@ -25,7 +25,6 @@ import javax.ws.rs.container.ContainerRequestContext;
  */
 public abstract class CDPRestUrlParser {
 
-    //todo: make these an enum of ParameterKeys
     public static final String RESOURCE_TYPE = "RESOURCE_TYPE";
 
     public static final String RESOURCE_ID = "RESOURCE_ID";
@@ -106,13 +105,10 @@ public abstract class CDPRestUrlParser {
      */
     protected abstract Pattern getPattern();
 
-    // as far as I can tell, this is always null
     protected Pattern getAntiPattern() {
         return null;
     }
 
-    // todo: the only required implementation looks to be getResourceName, all the others can return null.
-    // provide implementations here for the others, but keep getResourceName abstract
     protected abstract String getResourceName(Matcher matcher);
 
     protected abstract String getResourceCrn(Matcher matcher);

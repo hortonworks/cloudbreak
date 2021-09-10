@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.structuredevent.rest.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -117,19 +118,13 @@ class CDPStructuredEventV1ControllerTest {
     }
 
     @Test
-    void testGetAuditEventsZipWhenNotEmptyPageComingBackFromDbServiceThenNoHeaderShouldBeInTheResponse() {
-        Page<CDPStructuredEvent> mockPage = mock(Page.class);
-        when(mockPage.getContent()).thenReturn(List.of(createTestCDPStructuredEvent()));
-        when(mockStructuredEventDBService.getPagedEventsOfResource(eq(TEST_EVENT_TYPES), eq(RESOURCE_CRN), any(PageRequest.class))).thenReturn(mockPage);
+    void testGetAuditEventsZipWhenNotEmptyPageComingBackFromDbServiceThenZipHeaderShouldBeInResponse() {
+        when(mockStructuredEventDBService.getEventsOfResource(eq(TEST_EVENT_TYPES), eq(RESOURCE_CRN))).thenReturn(List.of(createTestCDPStructuredEvent()));
 
         Response response = underTest.getAuditEventsZip(RESOURCE_CRN, TEST_EVENT_TYPES);
 
         assertNotNull(response);
-        assertTrue(response.getHeaders().isEmpty());
-    }
-
-    private void checkZipHeader(Response response) {
-        assertNotNull(response);
+        assertFalse(response.getHeaders().isEmpty());
         assertTrue(response.getHeaders().containsKey(EXPECTED_ZIP_HEADER_KEY));
         assertEquals(EXPECTED_ZIP_HEADER_VALUE, response.getHeaders().get(EXPECTED_ZIP_HEADER_KEY).toString());
     }

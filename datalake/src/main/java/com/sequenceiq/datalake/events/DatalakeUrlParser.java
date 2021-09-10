@@ -7,10 +7,8 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.structuredevent.rest.urlparser.CDPRestUrlParser;
 
-// todo: https://jira.cloudera.com/browse/CB-13786 consider renaming to BackupRestoreParser
 @Component
 public class DatalakeUrlParser extends CDPRestUrlParser {
-    // todo: https://jira.cloudera.com/browse/CB-13786 implement me
     @Override
     protected Pattern getPattern() {
         return null;
