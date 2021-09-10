@@ -319,6 +319,8 @@ public enum ResourceEvent {
     CLUSTER_CM_CLUSTER_SERVICES_STOPPED("cm.cluster.services.stopped"),
     CLUSTER_CM_CLUSTER_SERVICES_STARTED("cm.cluster.services.started"),
     CLUSTER_CM_CLUSTER_SERVICES_STARTING("cm.cluster.services.starting"),
+    CLUSTER_CM_UPDATING_REMOTE_DATA_CONTEXT("cm.cluster.updating.remote.data.context"),
+    CLUSTER_CM_UPDATED_REMOTE_DATA_CONTEXT("cm.cluster.updated.remote.data.context"),
     CLUSTER_CM_SECURITY_GROUP_TOO_STRICT("cm.cluster.securitygroup.too.strict"),
     CLUSTER_CM_SERVICE_DEREGISTER_FAILED("cm.cluster.service.deregister.failed"),
     CLUSTER_CM_COMMAND_FAILED("cm.cluster.command.failed"),

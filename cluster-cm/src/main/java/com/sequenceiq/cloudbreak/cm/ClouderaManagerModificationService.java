@@ -6,6 +6,8 @@ import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUD
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CM_CLUSTER_SERVICES_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CM_CLUSTER_SERVICES_STARTING;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CM_UPDATING_REMOTE_DATA_CONTEXT;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CM_UPDATED_REMOTE_DATA_CONTEXT;
 import static com.sequenceiq.cloudbreak.polling.PollingResult.isExited;
 
 import java.math.BigDecimal;
@@ -527,6 +529,18 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         doRestartServicesIfNeeded(clustersResourceApi, true);
     }
 
+    private void deployConfig() throws ApiException, CloudbreakException {
+        LOGGER.debug("Deploying client configs and refreshing services in Cloudera Manager.");
+        ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(apiClient);
+        eventService
+                .fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_CM_UPDATING_REMOTE_DATA_CONTEXT);
+        ApiCommand deployCommand = clustersResourceApi.deployClientConfig(stack.getName());
+        pollRefresh(deployCommand);
+        eventService
+                .fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_CM_UPDATED_REMOTE_DATA_CONTEXT);
+        LOGGER.debug("Deployed client configs and refreshed services in Cloudera Manager.");
+    }
+
     private void restartServices(ClustersResourceApi clustersResourceApi) throws ApiException, CloudbreakException {
         doRestartServicesIfNeeded(clustersResourceApi, false);
     }
@@ -720,6 +734,27 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     private Collection<ApiService> readServices(Stack stack) throws ApiException {
         ServicesResourceApi api = clouderaManagerApiFactory.getServicesResourceApi(apiClient);
         return api.readServices(stack.getName(), SUMMARY).getItems();
+    }
+
+    @Override
+    public void startClusterMgmtServices() throws CloudbreakException {
+        startClouderaManager();
+        startAgents();
+    }
+
+    @Override
+    /**
+     * Deploy the client configuration and then start the cluster services.
+     */
+    public int deployConfigAndStartClusterServices() throws CloudbreakException {
+        try {
+            LOGGER.info("Deploying configuration and starting services");
+            deployConfig();
+            return startServices();
+        } catch (ApiException e) {
+            LOGGER.info("Couldn't start Cloudera Manager services", e);
+            throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
+        }
     }
 
     @Override
