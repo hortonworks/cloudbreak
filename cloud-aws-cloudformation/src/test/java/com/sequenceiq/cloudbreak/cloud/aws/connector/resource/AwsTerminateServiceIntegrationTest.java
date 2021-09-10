@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 
+import static java.util.Collections.emptyMap;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -160,7 +161,7 @@ public class AwsTerminateServiceIntegrationTest {
         CloudResource cf = new Builder().name("cfn-87654321").type(ResourceType.CLOUDFORMATION_STACK).build();
         CloudResource lc = new Builder().name("lc-87654321").type(ResourceType.AWS_LAUNCHCONFIGURATION).build();
         Group group = new Group("alma", InstanceGroupType.GATEWAY, List.of(), null,
-                null, null, null, "", 0, Optional.empty(), createGroupNetwork());
+                null, null, null, "", 0, Optional.empty(), createGroupNetwork(), emptyMap());
         DescribeAutoScalingGroupsResult describeAutoScalingGroupsResult = new DescribeAutoScalingGroupsResult();
         describeAutoScalingGroupsResult.setAutoScalingGroups(List.of());
 
@@ -185,7 +186,7 @@ public class AwsTerminateServiceIntegrationTest {
         CloudResource cf = new Builder().name("cfn-87654321").type(ResourceType.CLOUDFORMATION_STACK).build();
         CloudResource lc = new Builder().name("lc-87654321").type(ResourceType.AWS_LAUNCHCONFIGURATION).build();
         Group group = new Group("alma", InstanceGroupType.GATEWAY, List.of(), null, null,
-                null, null, "", 0, Optional.empty(), createGroupNetwork());
+                null, null, "", 0, Optional.empty(), createGroupNetwork(), emptyMap());
         DescribeAutoScalingGroupsResult describeAutoScalingGroupsResult = new DescribeAutoScalingGroupsResult();
         describeAutoScalingGroupsResult.setAutoScalingGroups(List.of());
 

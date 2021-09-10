@@ -263,7 +263,8 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
                                 instanceAuthentication.getPublicKey(),
                                 rootVolumeSize,
                                 fileSystemView,
-                                groupNetwork)
+                                groupNetwork,
+                                getUserDefinedTags(stack))
                 );
             }
         }

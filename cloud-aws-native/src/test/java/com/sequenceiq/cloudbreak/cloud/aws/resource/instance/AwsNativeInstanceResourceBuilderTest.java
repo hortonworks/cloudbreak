@@ -17,6 +17,7 @@ import java.util.function.Supplier;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -27,6 +28,7 @@ import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.InstanceState;
 import com.amazonaws.services.ec2.model.Reservation;
+import com.amazonaws.services.ec2.model.RunInstancesRequest;
 import com.amazonaws.services.ec2.model.RunInstancesResult;
 import com.amazonaws.services.ec2.model.TagSpecification;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsMethodExecutor;
@@ -114,6 +116,14 @@ public class AwsNativeInstanceResourceBuilderTest {
                 .params(emptyMap())
                 .build();
 
+        CloudResource securityGroupCloudResource = CloudResource.builder()
+                .name("name")
+                .type(ResourceType.AWS_SECURITY_GROUP)
+                .status(CommonStatus.CREATED)
+                .reference("sg-id")
+                .params(emptyMap())
+                .build();
+
         Image image = mock(Image.class);
 
         long privateId = 0;
@@ -123,13 +133,19 @@ public class AwsNativeInstanceResourceBuilderTest {
         when(amazonEc2Client.createInstance(any())).thenReturn(runInstancesResult);
         when(runInstancesResult.getReservation()).thenReturn(new Reservation().withInstances(instance));
         when(group.getReferenceInstanceTemplate()).thenReturn(instanceTemplate);
+        when(group.getName()).thenReturn("groupName");
         when(cloudStack.getImage()).thenReturn(image);
         when(image.getImageName()).thenReturn("img-name");
         when(cloudStack.getInstanceAuthentication()).thenReturn(authentication);
         when(awsContext.getAmazonEc2Client()).thenReturn(amazonEc2Client);
+        when(awsContext.getGroupResources("groupName")).thenReturn(List.of(securityGroupCloudResource));
 
+        ArgumentCaptor<RunInstancesRequest> runInstancesRequestArgumentCaptor = ArgumentCaptor.forClass(RunInstancesRequest.class);
         List<CloudResource> actual = underTest.build(awsContext, cloudInstance, privateId, ac, group, Collections.singletonList(cloudResource), cloudStack);
+        verify(amazonEc2Client).createInstance(runInstancesRequestArgumentCaptor.capture());
+        RunInstancesRequest runInstancesRequest = runInstancesRequestArgumentCaptor.getValue();
         Assertions.assertEquals(actual.get(0).getInstanceId(), "instanceId");
+        Assertions.assertEquals("sg-id", runInstancesRequest.getSecurityGroupIds().get(0));
     }
 
     @Test
@@ -184,6 +200,14 @@ public class AwsNativeInstanceResourceBuilderTest {
                 .params(emptyMap())
                 .build();
 
+        CloudResource securityGroupCloudResource = CloudResource.builder()
+                .name("name")
+                .type(ResourceType.AWS_SECURITY_GROUP)
+                .status(CommonStatus.CREATED)
+                .reference("sg-id")
+                .params(emptyMap())
+                .build();
+
         Image image = mock(Image.class);
 
         long privateId = 0;
@@ -197,6 +221,8 @@ public class AwsNativeInstanceResourceBuilderTest {
         when(image.getImageName()).thenReturn("img-name");
         when(cloudStack.getInstanceAuthentication()).thenReturn(authentication);
         when(awsContext.getAmazonEc2Client()).thenReturn(amazonEc2Client);
+        when(group.getName()).thenReturn("groupName");
+        when(awsContext.getGroupResources("groupName")).thenReturn(List.of(securityGroupCloudResource));
 
         List<CloudResource> actual = underTest.build(awsContext, cloudInstance, privateId, ac, group, Collections.singletonList(cloudResource), cloudStack);
         Assertions.assertEquals(actual.get(0).getInstanceId(), "instanceId");

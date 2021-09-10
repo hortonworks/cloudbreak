@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.validator;
 
 import static com.sequenceiq.cloudbreak.common.type.TemporaryStorage.EPHEMERAL_VOLUMES;
+import static java.util.Collections.emptyMap;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -137,9 +138,9 @@ public class AwsStorageValidatorsTest {
         CloudInstance noStorageInstance = new CloudInstance("", noStorageTemplate, null, "subnet-1", "az1");
         CloudInstance storageInstance = new CloudInstance("", storageTemplate, null, "subnet-1", "az1");
         Group noStoragegroup = new Group("worker", InstanceGroupType.CORE,
-                List.of(noStorageInstance), null, null, null, "", "", 0, Optional.empty(), createGroupNetwork());
+                List.of(noStorageInstance), null, null, null, "", "", 0, Optional.empty(), createGroupNetwork(), emptyMap());
         Group storageGroup = new Group("compute", InstanceGroupType.CORE,
-                List.of(storageInstance), null, null, null, "", "", 0, Optional.empty(), createGroupNetwork());
+                List.of(storageInstance), null, null, null, "", "", 0, Optional.empty(), createGroupNetwork(), emptyMap());
         CloudStack cloudStack = new CloudStack(List.of(noStoragegroup, storageGroup), null, null, Map.of(), Map.of(), "", null, "", "", null);
 
         CloudVmTypes cloudVmTypes = new CloudVmTypes();

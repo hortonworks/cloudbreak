@@ -1,16 +1,12 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.connector.resource;
 
-import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.services.ec2.model.PrefixList;
 import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.efs.AwsEfsFileSystem;
@@ -22,7 +18,6 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
-import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 
 @Service
 public class AwsModelService {
@@ -58,7 +53,7 @@ public class AwsModelService {
             .withExistingVpc(existingVPC)
             .withExistingIGW(awsNetworkView.isExistingIGW())
             .withExistingSubnetCidr(existingSubnet ? awsNetworkService.getExistingSubnetCidr(ac, stack) : null)
-            .withExistinVpcCidr(awsNetworkService.getVpcCidrs(ac, stack))
+            .withExistinVpcCidr(awsNetworkService.getVpcCidrs(ac, awsNetworkView))
             .withExistingSubnetIds(existingSubnet ? awsNetworkView.getSubnetList() : null)
             .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
             .withEnableInstanceProfile(awsInstanceProfileView.isInstanceProfileAvailable())
@@ -67,7 +62,7 @@ public class AwsModelService {
             .withDefaultSubnet(subnet)
             .withOutboundInternetTraffic(network.getOutboundInternetTraffic())
             .withVpcCidrs(network.getNetworkCidrs())
-            .withPrefixListIds(getPrefixListIds(amazonEC2Client, regionName, network.getOutboundInternetTraffic()));
+            .withPrefixListIds(awsNetworkService.getPrefixListIds(amazonEC2Client, regionName, network.getOutboundInternetTraffic()));
 
         AwsEfsFileSystem efsFileSystem = getAwsEfsFileSystem(stack);
 
@@ -97,19 +92,5 @@ public class AwsModelService {
 
     public boolean isNoCIDRProvided(boolean existingVPC, boolean existingSubnet, String cidr) {
         return existingVPC && !existingSubnet && cidr == null;
-    }
-
-    private List<String> getPrefixListIds(AmazonEc2Client amazonEC2Client, String regionName, OutboundInternetTraffic outboundInternetTraffic) {
-        List<String> result = List.of();
-        if (outboundInternetTraffic == OutboundInternetTraffic.DISABLED && CollectionUtils.isNotEmpty(enabledGatewayServices)) {
-            Set<String> gatewayRegionServices = enabledGatewayServices.stream()
-                .map(s -> String.format(VPC_INTERFACE_SERVICE_ENDPOINT_NAME_PATTERN, regionName, s))
-                .collect(Collectors.toSet());
-            result = amazonEC2Client.describePrefixLists().getPrefixLists().stream()
-                .filter(pl -> gatewayRegionServices.contains(pl.getPrefixListName()))
-                .map(PrefixList::getPrefixListId)
-                .collect(Collectors.toList());
-        }
-        return result;
     }
 }

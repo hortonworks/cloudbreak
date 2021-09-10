@@ -293,7 +293,8 @@ public abstract class AbstractResourceConnector implements ResourceConnector<Lis
                 scalingGroup.getInstanceAuthentication().getPublicKey(),
                 scalingGroup.getRootVolumeSize(),
                 scalingGroup.getIdentity(),
-                scalingGroup.getNetwork());
+                scalingGroup.getNetwork(),
+                scalingGroup.getTags());
     }
 
     protected Group getGroup(Iterable<Group> groups, String groupName) {

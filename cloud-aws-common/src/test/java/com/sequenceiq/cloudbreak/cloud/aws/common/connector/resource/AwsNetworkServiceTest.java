@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
+import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsNetworkView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -80,7 +81,7 @@ public class AwsNetworkServiceTest {
 
         Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, identity, createGroupNetwork());
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, identity, createGroupNetwork(), emptyMap());
         Map<String, Object> networkParameters = new HashMap<>();
 
         networkParameters.put("vpcId", "vpc-12345678");
@@ -130,7 +131,7 @@ public class AwsNetworkServiceTest {
 
         Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, identity, createGroupNetwork());
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, identity, createGroupNetwork(), emptyMap());
         Map<String, Object> networkParameters = new HashMap<>();
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
@@ -175,7 +176,7 @@ public class AwsNetworkServiceTest {
 
         Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, identity, createGroupNetwork());
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, identity, createGroupNetwork(), emptyMap());
         Map<String, Object> networkParameters = new HashMap<>();
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
@@ -220,7 +221,7 @@ public class AwsNetworkServiceTest {
 
         Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, identity, createGroupNetwork());
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, identity, createGroupNetwork(), emptyMap());
         Map<String, Object> networkParameters = new HashMap<>();
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
@@ -265,7 +266,7 @@ public class AwsNetworkServiceTest {
 
         Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, identity, createGroupNetwork());
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, identity, createGroupNetwork(), emptyMap());
         Map<String, Object> networkParameters = new HashMap<>();
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
@@ -304,7 +305,7 @@ public class AwsNetworkServiceTest {
 
         Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, identity, createGroupNetwork());
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, identity, createGroupNetwork(), emptyMap());
         Map<String, Object> networkParameters = new HashMap<>();
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
@@ -341,7 +342,7 @@ public class AwsNetworkServiceTest {
 
         Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, identity, createGroupNetwork());
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, identity, createGroupNetwork(), emptyMap());
         Map<String, Object> networkParameters = new HashMap<>();
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
@@ -386,7 +387,7 @@ public class AwsNetworkServiceTest {
 
         Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, identity, createGroupNetwork());
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, identity, createGroupNetwork(), emptyMap());
         Map<String, Object> networkParameters = new HashMap<>();
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
@@ -431,7 +432,7 @@ public class AwsNetworkServiceTest {
 
         Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, identity, createGroupNetwork());
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, identity, createGroupNetwork(), emptyMap());
         Map<String, Object> networkParameters = new HashMap<>();
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
@@ -485,7 +486,7 @@ public class AwsNetworkServiceTest {
 
         Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, identity, createGroupNetwork());
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, identity, createGroupNetwork(), emptyMap());
         Map<String, Object> networkParameters = new HashMap<>();
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
@@ -538,7 +539,7 @@ public class AwsNetworkServiceTest {
 
         Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, identity, createGroupNetwork());
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, identity, createGroupNetwork(), emptyMap());
         Map<String, Object> networkParameters = new HashMap<>();
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
@@ -591,7 +592,7 @@ public class AwsNetworkServiceTest {
 
         Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, identity, createGroupNetwork());
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, identity, createGroupNetwork(), emptyMap());
         Map<String, Object> networkParameters = new HashMap<>();
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
@@ -644,7 +645,7 @@ public class AwsNetworkServiceTest {
 
         Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, identity, createGroupNetwork());
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, identity, createGroupNetwork(), emptyMap());
         Map<String, Object> networkParameters = new HashMap<>();
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
@@ -691,7 +692,7 @@ public class AwsNetworkServiceTest {
 
         Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, identity, createGroupNetwork());
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, identity, createGroupNetwork(), emptyMap());
         Map<String, Object> networkParameters = new HashMap<>();
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
@@ -733,21 +734,20 @@ public class AwsNetworkServiceTest {
 
     @Test
     public void testGetVpcCidrs() {
+        AwsNetworkView awsNetworkView = new AwsNetworkView(new Network(new Subnet(null), Map.of("vpcId", "vpc-123")));
         String cidr1 = "1.2.3.0/24";
         String cidr2 = "10.0.0.0/8";
         AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
         CloudContext cloudContext = mock(CloudContext.class);
-        CloudStack cloudStack = mock(CloudStack.class);
         AmazonEc2Client ec2Client = mock(AmazonEc2Client.class);
         when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
-        when(cloudStack.getNetwork()).thenReturn(new Network(new Subnet(null), Map.of("vpcId", "vpc-123")));
         when(cloudContext.getLocation()).thenReturn(Location.location(Region.region("eu-west1")));
         when(awsClient.createEc2Client(any(AwsCredentialView.class), anyString())).thenReturn(ec2Client);
         when(ec2Client.describeVpcs(any(DescribeVpcsRequest.class)))
                 .thenReturn(new DescribeVpcsResult().withVpcs(new Vpc()
                         .withCidrBlockAssociationSet(new VpcCidrBlockAssociation().withCidrBlock(cidr1), new VpcCidrBlockAssociation().withCidrBlock(cidr2))));
 
-        List<String> vpcCidrs = underTest.getVpcCidrs(authenticatedContext, cloudStack);
+        List<String> vpcCidrs = underTest.getVpcCidrs(authenticatedContext, awsNetworkView);
 
         assertTrue(vpcCidrs.contains(cidr1));
         assertTrue(vpcCidrs.contains(cidr2));
@@ -755,11 +755,10 @@ public class AwsNetworkServiceTest {
 
     @Test
     public void testGetVpcCidrsEmpty() {
+        AwsNetworkView awsNetworkView = new AwsNetworkView(new Network(new Subnet(null)));
         AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
-        CloudStack cloudStack = mock(CloudStack.class);
-        when(cloudStack.getNetwork()).thenReturn(new Network(new Subnet(null)));
 
-        List<String> vpcCidrs = underTest.getVpcCidrs(authenticatedContext, cloudStack);
+        List<String> vpcCidrs = underTest.getVpcCidrs(authenticatedContext, awsNetworkView);
 
         assertTrue(vpcCidrs.isEmpty());
     }

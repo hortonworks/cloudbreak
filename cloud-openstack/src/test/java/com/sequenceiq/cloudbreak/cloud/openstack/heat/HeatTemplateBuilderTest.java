@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.openstack.heat;
 
 
 import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.core.IsNot.not;
@@ -131,7 +132,7 @@ public class HeatTemplateBuilderTest {
         Security security = new Security(rules, emptyList());
         groups.add(new Group(name, InstanceGroupType.CORE, singletonList(instance), security, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), 50, Optional.empty(), createGroupNetwork()));
+                instanceAuthentication.getPublicKey(), 50, Optional.empty(), createGroupNetwork(), emptyMap()));
         Map<InstanceGroupType, String> userData = ImmutableMap.of(
                 InstanceGroupType.CORE, "CORE",
                 InstanceGroupType.GATEWAY, "GATEWAY"
@@ -178,7 +179,7 @@ public class HeatTemplateBuilderTest {
         Security security = new Security(emptyList(), singletonList(cloudSecurityId));
         Group groupWithSecGroup = new Group(group.getName(), InstanceGroupType.CORE, group.getInstances(), security, null,
                 group.getInstanceAuthentication(), group.getInstanceAuthentication().getLoginUserName(),
-                group.getInstanceAuthentication().getPublicKey(), 50, Optional.empty(), createGroupNetwork());
+                group.getInstanceAuthentication().getPublicKey(), 50, Optional.empty(), createGroupNetwork(), emptyMap());
         groups.add(groupWithSecGroup);
 
         //WHEN

@@ -292,6 +292,7 @@ public class StackToCloudStackConverter {
             if (blueprintText != null) {
                 CmTemplateProcessor cmTemplateProcessor = cmTemplateProcessorFactory.get(blueprintText);
                 Map<String, Set<String>> componentsByHostGroup = cmTemplateProcessor.getComponentsByHostGroup();
+                Map<String, String> userDefinedTags = getUserDefinedTags(stack);
                 for (InstanceGroup instanceGroup : instanceGroups) {
                     if (instanceGroup.getTemplate() != null) {
                         InstanceAuthentication instanceAuthentication = buildInstanceAuthentication(stackAuthentication);
@@ -310,7 +311,8 @@ public class StackToCloudStackConverter {
                                         getRootVolumeSize(instanceGroup),
                                         cloudFileSystemView,
                                         buildDeletedCloudInstances(environment, stackAuthentication, instanceGroup),
-                                        buildGroupNetwork(stack.getNetwork(), instanceGroup))
+                                        buildGroupNetwork(stack.getNetwork(), instanceGroup),
+                                        userDefinedTags)
                         );
                     }
                 }

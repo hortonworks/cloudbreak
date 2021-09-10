@@ -104,11 +104,13 @@ public class AwsResourceNameService extends CloudbreakResourceNameService {
         checkArgs(ROOT_DISKS_PART_COUNT, parts);
         String name;
         String stackName = String.valueOf(parts[0]);
-        String instanceGroupName = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, String.valueOf(parts[1]).toLowerCase());
-        String privateId = String.valueOf(parts[2]);
+        String stackId = String.valueOf(parts[1]);
+        String instanceGroupName = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, String.valueOf(parts[2]).toLowerCase());
+        String privateId = String.valueOf(parts[PART_3]);
 
         name = normalize(stackName);
         name = adjustPartLength(name);
+        name = appendPart(name, stackId);
         name = appendPart(name, normalize(instanceGroupName));
         name = appendPart(name, privateId);
         name = adjustBaseLength(name, maxResourceNameLength);

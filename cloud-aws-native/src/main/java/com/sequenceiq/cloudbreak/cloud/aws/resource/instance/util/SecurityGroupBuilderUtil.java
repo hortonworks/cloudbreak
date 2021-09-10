@@ -4,10 +4,8 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -28,13 +26,15 @@ import com.amazonaws.services.ec2.model.IpPermission;
 import com.amazonaws.services.ec2.model.IpRange;
 import com.amazonaws.services.ec2.model.PrefixListId;
 import com.amazonaws.services.ec2.model.SecurityGroup;
-import com.sequenceiq.cloudbreak.cloud.aws.AwsNativeModel;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
+import com.sequenceiq.cloudbreak.cloud.aws.common.connector.resource.AwsNetworkService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.service.AwsResourceNameService;
-import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCloudStackView;
+import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsNetworkView;
+import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.PortDefinition;
 import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
@@ -46,10 +46,6 @@ public class SecurityGroupBuilderUtil {
 
     public static final int TO_PORT = 65535;
 
-    public static final String SECURITY_GROUP_ID = "SECURITY_GROUP_ID";
-
-    public static final String SECURITY_GROUP_NAME = "SECURITY_GROUP_NAME";
-
     private static final Logger LOGGER = getLogger(SecurityGroupBuilderUtil.class);
 
     @Inject
@@ -58,26 +54,29 @@ public class SecurityGroupBuilderUtil {
     @Inject
     private AwsTaggingService awsTaggingService;
 
-    public Map<String, String> createSecurityGroup(AwsCloudStackView awsCloudStackView, Group group, AmazonEc2Client amazonEc2Client,
-            CloudContext context, AwsNativeModel awsNativeModel) {
+    @Inject
+    private AwsNetworkService awsNetworkService;
+
+    public String createSecurityGroup(Network network, Group group, AmazonEc2Client amazonEc2Client,
+            CloudContext context, AuthenticatedContext ac) {
+        AwsNetworkView awsNetworkView = new AwsNetworkView(network);
         CreateSecurityGroupRequest request = new CreateSecurityGroupRequest()
                 .withDescription("Allow access from web and bastion as well as outbound HTTP and HTTPS traffic")
-                .withVpcId(awsCloudStackView.network().getExistingVpc())
+                .withVpcId(awsNetworkView.getExistingVpc())
                 .withGroupName(awsResourceNameService.resourceName(ResourceType.AWS_SECURITY_GROUP, context.getName(), group.getName(), context.getId()))
-                .withTagSpecifications(awsTaggingService.prepareEc2TagSpecification(awsCloudStackView.getTags(),
+                .withTagSpecifications(awsTaggingService.prepareEc2TagSpecification(group.getTags(),
                         com.amazonaws.services.ec2.model.ResourceType.SecurityGroup));
-        return createOrGetSecurityGroup(amazonEc2Client, request, group, awsNativeModel);
+        return createOrGetSecurityGroup(amazonEc2Client, request, group, awsNetworkView, ac);
     }
 
-    public Map<String, String> createOrGetSecurityGroup(AmazonEc2Client amazonEc2Client, CreateSecurityGroupRequest request, Group group,
-            AwsNativeModel awsNativeModel) {
-        Map<String, String> resources = new HashMap<>();
+    public String createOrGetSecurityGroup(AmazonEc2Client amazonEc2Client, CreateSecurityGroupRequest request, Group group,
+            AwsNetworkView awsNetworkView, AuthenticatedContext ac) {
         String securityGroupId;
         try {
             CreateSecurityGroupResult securityGroup = amazonEc2Client.createSecurityGroup(request);
             LOGGER.info("Security group created successfully for group: {} and vpc: {}", request.getGroupName(), request.getVpcId());
-            ingress(group, amazonEc2Client, awsNativeModel, securityGroup.getGroupId());
-            egress(amazonEc2Client, awsNativeModel, securityGroup.getGroupId(), Collections.emptyList());
+            ingress(group, ac, amazonEc2Client, awsNetworkView, securityGroup.getGroupId());
+            egress(amazonEc2Client, ac, awsNetworkView, securityGroup.getGroupId(), Collections.emptyList());
             securityGroupId = securityGroup.getGroupId();
         } catch (AmazonEC2Exception e) {
             if (!e.getErrorCode().equals("InvalidGroup.Duplicate")) {
@@ -87,14 +86,12 @@ public class SecurityGroupBuilderUtil {
             SecurityGroup securityGroup = getSecurityGroup(amazonEc2Client, request.getVpcId(), request.getGroupName());
             String groupId = securityGroup.getGroupId();
             if (securityGroup.getIpPermissions().isEmpty()) {
-                ingress(group, amazonEc2Client, awsNativeModel, groupId);
+                ingress(group, ac, amazonEc2Client, awsNetworkView, groupId);
             }
-            egress(amazonEc2Client, awsNativeModel, securityGroup.getGroupId(), securityGroup.getIpPermissionsEgress());
+            egress(amazonEc2Client, ac, awsNetworkView, securityGroup.getGroupId(), securityGroup.getIpPermissionsEgress());
             securityGroupId = groupId;
         }
-        resources.put(SECURITY_GROUP_ID, securityGroupId);
-        resources.put(SECURITY_GROUP_NAME, request.getGroupName());
-        return resources;
+        return securityGroupId;
     }
 
     public SecurityGroup getSecurityGroup(AmazonEc2Client amazonEc2Client, String vpcId, String groupName) {
@@ -110,7 +107,7 @@ public class SecurityGroupBuilderUtil {
         return securityGroupOpt.get();
     }
 
-    public void ingress(Group group, AmazonEc2Client amazonEc2Client, AwsNativeModel awsNativeModel, String securityGroupId) {
+    public void ingress(Group group, AuthenticatedContext ac, AmazonEc2Client amazonEc2Client, AwsNetworkView awsNetworkView, String securityGroupId) {
         Set<IpPermission> permissions = new HashSet<>();
         for (SecurityRule rule : group.getSecurity().getRules()) {
             for (PortDefinition port : rule.getPorts()) {
@@ -121,7 +118,7 @@ public class SecurityGroupBuilderUtil {
                         .withIpv4Ranges(new IpRange().withCidrIp(rule.getCidr())));
             }
         }
-        for (String cidr : awsNativeModel.getVpcSubnet()) {
+        for (String cidr : awsNetworkService.getVpcCidrs(ac, awsNetworkView)) {
             permissions.add(new IpPermission()
                     .withIpProtocol("icmp")
                     .withFromPort(-1)
@@ -145,10 +142,12 @@ public class SecurityGroupBuilderUtil {
         LOGGER.info("Ingress added to {}", securityGroupId);
     }
 
-    public void egress(AmazonEc2Client amazonEc2Client, AwsNativeModel awsNativeModel, String securityGroupId, List<IpPermission> egress) {
-        OutboundInternetTraffic outboundInternetTraffic = awsNativeModel.getOutboundInternetTraffic();
-        List<String> prefixListIds = awsNativeModel.getPrefixListIds();
-        List<String> vpcCidrs = awsNativeModel.getVpcCidrs();
+    public void egress(AmazonEc2Client amazonEc2Client, AuthenticatedContext ac, AwsNetworkView awsNetworkView, String securityGroupId,
+            List<IpPermission> egress) {
+        OutboundInternetTraffic outboundInternetTraffic = awsNetworkView.getOutboundInternetTraffic();
+        List<String> prefixListIds = awsNetworkService.getPrefixListIds(amazonEc2Client, ac.getCloudContext().getLocation().getRegion().getRegionName(),
+                outboundInternetTraffic);
+        List<String> vpcCidrs = awsNetworkService.getVpcCidrs(ac, awsNetworkView);
         if (outboundInternetTraffic == OutboundInternetTraffic.DISABLED && (!prefixListIds.isEmpty() || !vpcCidrs.isEmpty())) {
             List<IpPermission> permissions = new ArrayList<>();
             for (String existingVpcCidr : vpcCidrs) {

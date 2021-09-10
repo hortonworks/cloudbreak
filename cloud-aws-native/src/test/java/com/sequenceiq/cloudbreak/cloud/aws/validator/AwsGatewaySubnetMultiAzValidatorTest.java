@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.validator;
 
+import static java.util.Collections.emptyMap;
 import static java.util.Optional.empty;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -144,6 +145,7 @@ class AwsGatewaySubnetMultiAzValidatorTest {
                 "",
                 100,
                 empty(),
-                groupNetwork);
+                groupNetwork,
+                emptyMap());
     }
 }
