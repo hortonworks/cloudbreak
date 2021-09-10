@@ -13,11 +13,9 @@ import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
-import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
-import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 public class PreconditionSdxE2ETest extends AbstractE2ETest {
 
@@ -62,27 +60,5 @@ public class PreconditionSdxE2ETest extends AbstractE2ETest {
                 .sdxEndpoint()
                 .getDetailByCrn(testDto.getCrn(), Collections.emptySet())
                 .getStackV4Response().getInstanceGroups();
-    }
-
-    protected void createSdx(TestContext testContext) {
-        testContext
-                .given(SdxTestDto.class)
-                    .withCloudStorage(getCloudStorageRequest(testContext))
-                .when(sdxTestClient.create())
-                .await(SdxClusterStatusResponse.RUNNING)
-                .awaitForHealthyInstances()
-                .when(sdxTestClient.describe())
-                .validate();
-    }
-
-    protected void createInternalSdx(TestContext testContext) {
-        testContext
-                .given(SdxInternalTestDto.class)
-                    .withCloudStorage(getCloudStorageRequest(testContext))
-                .when(sdxTestClient.createInternal())
-                .await(SdxClusterStatusResponse.RUNNING)
-                .awaitForHealthyInstances()
-                .when(sdxTestClient.describeInternal())
-                .validate();
     }
 }

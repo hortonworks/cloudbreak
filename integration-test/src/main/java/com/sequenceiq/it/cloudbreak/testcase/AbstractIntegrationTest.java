@@ -242,6 +242,14 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
                 .validate();
     }
 
+    protected void createEnvironmentWithFreeIpaAndDatalake(TestContext testContext) {
+        initiateEnvironmentCreation(testContext);
+        initiateDatalakeCreation(testContext);
+        waitForEnvironmentCreation(testContext);
+        waitForUserSync(testContext);
+        waitForDatalakeCreation(testContext);
+    }
+
     protected void createDefaultUser(TestContext testContext) {
         testContext.as();
     }
