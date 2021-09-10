@@ -8,6 +8,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -67,7 +68,7 @@ public class SaltBootstrapTest {
         when(saltConnector.action(any(SaltAction.class))).thenReturn(genericResponses);
 
         minionIpAddressesResponse = new MinionIpAddressesResponse();
-        when(saltConnector.run(any(), ArgumentMatchers.eq("network.ipaddrs"), any(), any()))
+        when(saltConnector.run(any(), ArgumentMatchers.eq("network.ipaddrs"), any(), any(), anyLong()))
                 .thenReturn(minionIpAddressesResponse);
     }
 

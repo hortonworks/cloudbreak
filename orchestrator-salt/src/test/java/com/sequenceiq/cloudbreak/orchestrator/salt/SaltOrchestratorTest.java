@@ -71,7 +71,6 @@ import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.HostAndRoleTarget;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Target;
-import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionIpAddressesResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionStatus;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionStatusSaltResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Pillar;
@@ -407,13 +406,11 @@ public class SaltOrchestratorTest {
         downscaleTargets.add(new Node("10.0.0.3", "1.1.1.3", "10-0-0-3.example.com", "hg"));
 
         PowerMockito.mockStatic(SaltStates.class);
-        MinionIpAddressesResponse minionIpAddressesResponse = mock(MinionIpAddressesResponse.class);
-        ArrayList<String> responsiveAddresses = new ArrayList<>();
+        Set<String> responsiveAddresses = new HashSet<>();
         responsiveAddresses.add("10.0.0.1");
         responsiveAddresses.add("10.0.0.2");
         responsiveAddresses.add("10.0.0.3");
-        when(minionIpAddressesResponse.getAllIpAddresses()).thenReturn(responsiveAddresses);
-        PowerMockito.when(SaltStates.collectMinionIpAddresses(any(), any())).thenReturn(minionIpAddressesResponse);
+        PowerMockito.when(SaltStates.collectMinionIpAddresses(any(), any())).thenReturn(responsiveAddresses);
 
         Callable pillarSaveCallable = mock(Callable.class);
         when(saltRunner.runner(any(), any(), any(), anyInt(), anyInt())).thenReturn(pillarSaveCallable);
