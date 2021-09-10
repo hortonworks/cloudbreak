@@ -1,7 +1,6 @@
 package com.sequenceiq.datalake.flow.chain;
 
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_UPGRADE_EVENT;
-import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_UPGRADE_FLOW_CHAIN_EVENT;
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_TRIGGER_BACKUP_EVENT;
 
 import java.util.Queue;
@@ -21,7 +20,7 @@ import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 public class DatalakeUpgradeFlowEventChainFactory implements FlowEventChainFactory<DatalakeUpgradeFlowChainStartEvent> {
     @Override
     public String initEvent() {
-        return DATALAKE_UPGRADE_FLOW_CHAIN_EVENT.event();
+        return DatalakeUpgradeFlowChainStartEvent.DATALAKE_UPGRADE_FLOW_CHAIN_EVENT;
     }
 
     @Override

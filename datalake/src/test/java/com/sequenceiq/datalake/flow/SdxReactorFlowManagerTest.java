@@ -1,7 +1,6 @@
 package com.sequenceiq.datalake.flow;
 
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_UPGRADE_EVENT;
-import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_UPGRADE_FLOW_CHAIN_EVENT;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyMap;
@@ -24,6 +23,7 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.datalakedr.config.DatalakeDrConfig;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradeFlowChainStartEvent;
 import com.sequenceiq.datalake.service.EnvironmentClientService;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.flow.reactor.api.event.BaseFlowEvent;
@@ -91,7 +91,7 @@ public class SdxReactorFlowManagerTest {
                     underTest.triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, SdxUpgradeReplaceVms.DISABLED));
         } catch (Exception e) {
         }
-        verify(reactor, times(1)).notify(eq(DATALAKE_UPGRADE_FLOW_CHAIN_EVENT.event()), any(Event.class));
+        verify(reactor, times(1)).notify(eq(DatalakeUpgradeFlowChainStartEvent.DATALAKE_UPGRADE_FLOW_CHAIN_EVENT), any(Event.class));
 
         reset(reactor);
         sdxCluster = getValidSdxCluster("7.2.1");
@@ -101,7 +101,7 @@ public class SdxReactorFlowManagerTest {
                     underTest.triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, SdxUpgradeReplaceVms.DISABLED));
         } catch (Exception e) {
         }
-        verify(reactor, times(1)).notify(eq(DATALAKE_UPGRADE_FLOW_CHAIN_EVENT.event()), any(Event.class));
+        verify(reactor, times(1)).notify(eq(DatalakeUpgradeFlowChainStartEvent.DATALAKE_UPGRADE_FLOW_CHAIN_EVENT), any(Event.class));
     }
 
     @Test
@@ -119,7 +119,7 @@ public class SdxReactorFlowManagerTest {
                     underTest.triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, SdxUpgradeReplaceVms.DISABLED));
         } catch (Exception e) {
         }
-        verify(reactor, times(1)).notify(eq(DATALAKE_UPGRADE_FLOW_CHAIN_EVENT.event()), any(Event.class));
+        verify(reactor, times(1)).notify(eq(DatalakeUpgradeFlowChainStartEvent.DATALAKE_UPGRADE_FLOW_CHAIN_EVENT), any(Event.class));
     }
 
     @Test
@@ -134,7 +134,7 @@ public class SdxReactorFlowManagerTest {
                     underTest.triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, SdxUpgradeReplaceVms.DISABLED));
         } catch (Exception e) {
         }
-        verify(reactor, times(0)).notify(eq(DATALAKE_UPGRADE_FLOW_CHAIN_EVENT.event()), any(Event.class));
+        verify(reactor, times(0)).notify(eq(DatalakeUpgradeFlowChainStartEvent.DATALAKE_UPGRADE_FLOW_CHAIN_EVENT), any(Event.class));
 
         sdxCluster = getValidSdxCluster("7.2.1");
         sdxCluster.setRangerRazEnabled(false);
@@ -144,7 +144,7 @@ public class SdxReactorFlowManagerTest {
                     underTest.triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, SdxUpgradeReplaceVms.DISABLED));
         } catch (Exception e) {
         }
-        verify(reactor, times(0)).notify(eq(DATALAKE_UPGRADE_FLOW_CHAIN_EVENT.event()), any(Event.class));
+        verify(reactor, times(0)).notify(eq(DatalakeUpgradeFlowChainStartEvent.DATALAKE_UPGRADE_FLOW_CHAIN_EVENT), any(Event.class));
 
         sdxCluster = getValidSdxCluster("7.2.10");
         sdxCluster.setRangerRazEnabled(false);
@@ -154,7 +154,7 @@ public class SdxReactorFlowManagerTest {
                     underTest.triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, SdxUpgradeReplaceVms.DISABLED));
         } catch (Exception e) {
         }
-        verify(reactor, times(0)).notify(eq(DATALAKE_UPGRADE_FLOW_CHAIN_EVENT.event()), any(Event.class));
+        verify(reactor, times(0)).notify(eq(DatalakeUpgradeFlowChainStartEvent.DATALAKE_UPGRADE_FLOW_CHAIN_EVENT), any(Event.class));
     }
 
     @Test
@@ -167,7 +167,7 @@ public class SdxReactorFlowManagerTest {
                     underTest.triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, SdxUpgradeReplaceVms.DISABLED));
         } catch (Exception e) {
         }
-        verify(reactor, times(0)).notify(eq(DATALAKE_UPGRADE_FLOW_CHAIN_EVENT.event()), any(Event.class));
+        verify(reactor, times(0)).notify(eq(DatalakeUpgradeFlowChainStartEvent.DATALAKE_UPGRADE_FLOW_CHAIN_EVENT), any(Event.class));
     }
 
     @Test (expected = BadRequestException.class)
