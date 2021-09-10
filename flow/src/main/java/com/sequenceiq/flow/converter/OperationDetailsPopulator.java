@@ -22,8 +22,6 @@ public class OperationDetailsPopulator {
 
     private static final int DEFAULT_PROGRESS = -1;
 
-    private static final int DEFAULT_EXPECTED_NUMBER_OF_OPERATIONS = 1;
-
     private static final int MAX_PROGRESS = 100;
 
     public OperationView createOperationView(OperationFlowsView operationFlowsView,
@@ -36,31 +34,26 @@ public class OperationDetailsPopulator {
         OperationView response = new OperationView();
         response.setOperationType(operationFlowsView.getOperationType());
         response.setOperationResource(resource);
-        if (operationFlowsView.isInMemory()) {
-            response.setProgressStatus(OperationProgressStatus.RUNNING);
-            response.setProgress(operationFlowsView.getProgressFromHistory());
-            response.setOperationId(operationFlowsView.getOperationId());
-        } else {
-            List<String> typeOrderList = CollectionUtils.isNotEmpty(expectedTypeOrder)
-                    ? expectedTypeOrder.stream().map(Class::getCanonicalName).collect(Collectors.toList())
-                    : operationFlowsView.getTypeOrderList();
-            int expectedNumberOfFlows = typeOrderList.size();
-            Map<String, FlowProgressResponse> flowTypeProgressMap = operationFlowsView.getFlowTypeProgressMap();
-            List<Optional<FlowProgressResponse>> responseListToProcess = new ArrayList<>();
-            for (String typeName : typeOrderList) {
-                if (flowTypeProgressMap.containsKey(typeName)) {
-                    responseListToProcess.add(Optional.of(flowTypeProgressMap.get(typeName)));
-                } else {
-                    responseListToProcess.add(Optional.empty());
-                }
+        response.setOperationId(operationFlowsView.getOperationId());
+        List<String> typeOrderList = CollectionUtils.isNotEmpty(expectedTypeOrder)
+                ? expectedTypeOrder.stream().map(Class::getCanonicalName).collect(Collectors.toList())
+                : operationFlowsView.getTypeOrderList();
+        int expectedNumberOfFlows = typeOrderList.size();
+        Map<String, FlowProgressResponse> flowTypeProgressMap = operationFlowsView.getFlowTypeProgressMap();
+        List<Optional<FlowProgressResponse>> responseListToProcess = new ArrayList<>();
+        for (String typeName : typeOrderList) {
+            if (flowTypeProgressMap != null && flowTypeProgressMap.containsKey(typeName)) {
+                responseListToProcess.add(Optional.of(flowTypeProgressMap.get(typeName)));
+            } else {
+                responseListToProcess.add(Optional.empty());
             }
-            populateOperationDetails(response, responseListToProcess, expectedNumberOfFlows);
         }
+        populateOperationDetails(response, responseListToProcess, expectedNumberOfFlows, operationFlowsView.getProgressFromHistory());
         return response;
     }
 
     private void populateOperationDetails(OperationView source,
-            List<Optional<FlowProgressResponse>> operations, int expectedNumberOfFlows) {
+            List<Optional<FlowProgressResponse>> operations, int expectedNumberOfFlows, Integer progressFromHistory) {
         int preProgress = 0;
         int overallProgress = 0;
         boolean foundFlow = false;
@@ -82,6 +75,10 @@ public class OperationDetailsPopulator {
                 operationOpt.ifPresent(flowProgressResponse -> source.setOperationId(flowProgressResponse.getFlowChainId()));
             }
         }
+        setProgressAndStatus(source, expectedNumberOfFlows, progressFromHistory, overallProgress);
+    }
+
+    private void setProgressAndStatus(OperationView source, int expectedNumberOfFlows, Integer progressFromHistory, int overallProgress) {
         if (CollectionUtils.isNotEmpty(source.getOperations())) {
             int fullProgress = overallProgress / expectedNumberOfFlows;
             source.setProgress(fullProgress);
@@ -89,6 +86,9 @@ public class OperationDetailsPopulator {
                 source.setProgressStatus(calculateProgress(source.getOperations()));
             } else {
                 source.setProgressStatus(OperationProgressStatus.RUNNING);
+            }
+            if (progressFromHistory != null && progressFromHistory != DEFAULT_PROGRESS) {
+                source.setProgress(progressFromHistory);
             }
         } else {
             source.setProgress(DEFAULT_PROGRESS);

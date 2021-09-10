@@ -5,7 +5,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -16,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.PayloadContext;
-import com.sequenceiq.flow.api.model.operation.OperationFlowsView;
 import com.sequenceiq.flow.api.model.operation.OperationType;
 import com.sequenceiq.flow.core.PayloadContextProvider;
 import com.sequenceiq.flow.core.config.FlowConfiguration;
@@ -147,35 +145,6 @@ public class FlowStatCache {
 
     public Map<String, FlowStat> getResourceCrnFlowChainStatCache() {
         return resourceCrnFlowChainStatCache;
-    }
-
-    public Optional<OperationFlowsView> getOperationFlowByResourceCrn(String resourceCrn) {
-        if (getFlowChainStatByResourceCrn(resourceCrn) != null) {
-            FlowStat flowStat = getFlowChainStatByResourceCrn(resourceCrn);
-            if (OperationType.UNKNOWN.equals(flowStat.getOperationType())) {
-                return Optional.empty();
-            }
-            Integer progressFromHistory = flowOperationStatisticsService.getProgressFromHistory(flowStat);
-            return Optional.of(OperationFlowsView.Builder.newBuilder()
-                    .withOperationType(flowStat.getOperationType())
-                    .withInMemory(true)
-                    .withProgressFromHistory(progressFromHistory)
-                    .withOperationId(flowStat.getFlowChainId())
-                    .build());
-        } else if (getFlowStatByResourceCrn(resourceCrn) != null) {
-            FlowStat flowStat = getFlowStatByResourceCrn(resourceCrn);
-            if (OperationType.UNKNOWN.equals(flowStat.getOperationType())) {
-                return Optional.empty();
-            }
-            Integer progressFromHistory = flowOperationStatisticsService.getProgressFromHistory(flowStat);
-            return Optional.of(OperationFlowsView.Builder.newBuilder()
-                    .withOperationType(flowStat.getOperationType())
-                    .withInMemory(true)
-                    .withProgressFromHistory(progressFromHistory)
-                    .withOperationId(flowStat.getFlowId())
-                    .build());
-        }
-        return Optional.empty();
     }
 
     public void cleanOldCacheEntries(Set<String> runningFlowIds) {
