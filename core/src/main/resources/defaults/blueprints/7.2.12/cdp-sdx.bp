@@ -11,7 +11,6 @@
         "cardinality": 1,
         "refName": "master",
         "roleConfigGroupsRefNames": [
-          "atlas-ATLAS_SERVER-BASE",
           "hbase-GATEWAY-BASE",
           "hbase-HBASETHRIFTSERVER-BASE",
           "hbase-REGIONSERVER-BASE",
@@ -24,13 +23,20 @@
           "hive-HIVEMETASTORE-BASE",
           "kafka-GATEWAY-BASE",
           "kafka-KAFKA_BROKER-BASE",
+          "solr-SOLR_SERVER-BASE"
+        ]
+      },
+      {
+        "cardinality": 1,
+        "refName": "gateway",
+        "roleConfigGroupsRefNames": [
+          "atlas-ATLAS_SERVER-BASE",
           "knox-KNOX_GATEWAY-BASE",
           "ranger-RANGER_ADMIN-BASE",
           "ranger-RANGER_TAGSYNC-BASE",
           "ranger-RANGER_USERSYNC-BASE",
-          "solr-SOLR_SERVER-BASE",
           "zookeeper-SERVER-BASE"
-        ]
+          ]
       },
       {
         "cardinality": 1,

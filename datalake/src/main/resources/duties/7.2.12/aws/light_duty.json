@@ -25,7 +25,7 @@
       "recipeNames": []
     },
     {
-      "name": "master",
+      "name": "gateway",
       "template": {
         "instanceType": "m5.2xlarge",
         "attachedVolumes": [
@@ -38,6 +38,23 @@
       },
       "nodeCount": 1,
       "type": "GATEWAY",
+      "recoveryMode": "MANUAL",
+      "recipeNames": []
+    },
+    {
+      "name": "master",
+      "template": {
+        "instanceType": "m5.2xlarge",
+        "attachedVolumes": [
+          {
+            "count": 1,
+            "size": 250,
+            "type": "standard"
+          }
+        ]
+      },
+      "nodeCount": 1,
+      "type": "CORE",
       "recoveryMode": "MANUAL",
       "recipeNames": []
     }

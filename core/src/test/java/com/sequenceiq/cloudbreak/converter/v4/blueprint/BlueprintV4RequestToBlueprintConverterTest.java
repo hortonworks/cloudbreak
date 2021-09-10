@@ -88,7 +88,7 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
         assertNotNull(result);
         assertEquals("CDH", result.getStackType());
         assertEquals("7.2.12", result.getStackVersion());
-        assertEquals(2, result.getHostGroupCount());
+        assertEquals(3, result.getHostGroupCount());
         assertNotNull(result.getBlueprintText());
         assertNotEquals("", result.getBlueprintText());
     }

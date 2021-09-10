@@ -28,6 +28,17 @@
         }
       },
       "nodeCount": 1,
+      "type": "CORE"
+    },
+    {
+      "name": "gateway",
+      "template": {
+        "yarn": {
+          "cpus": 4,
+          "memory": 16384
+        }
+      },
+      "nodeCount": 1,
       "type": "GATEWAY"
     }
   ]
