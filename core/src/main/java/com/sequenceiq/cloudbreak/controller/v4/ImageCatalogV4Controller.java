@@ -11,10 +11,9 @@ import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
-import com.sequenceiq.authorization.annotation.AccountIdNotNeeded;
-import com.sequenceiq.cloudbreak.service.image.DefaultImageCatalogService;
 import org.springframework.stereotype.Controller;
 
+import com.sequenceiq.authorization.annotation.AccountIdNotNeeded;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
@@ -42,6 +41,7 @@ import com.sequenceiq.cloudbreak.authorization.ImageCatalogFiltering;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
+import com.sequenceiq.cloudbreak.service.image.DefaultImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
@@ -77,7 +77,7 @@ public class ImageCatalogV4Controller extends NotificationController implements 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG)
     public ImageCatalogV4Response getByName(Long workspaceId, @ResourceName String name, Boolean withImages) {
-        ImageCatalog catalog = imageCatalogService.get(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId());
+        ImageCatalog catalog = imageCatalogService.getImageCatalogByName(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId());
         ImageCatalogV4Response imageCatalogResponse = converterUtil.convert(catalog, ImageCatalogV4Response.class);
         Images images = imageCatalogService.propagateImagesIfRequested(restRequestThreadLocalService.getRequestedWorkspaceId(), name, withImages);
         if (images != null) {
@@ -89,7 +89,7 @@ public class ImageCatalogV4Controller extends NotificationController implements 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG)
     public ImageCatalogV4Response getByCrn(Long workspaceId, @ResourceCrn String crn, Boolean withImages) {
-        ImageCatalog catalog = imageCatalogService.get(NameOrCrn.ofCrn(crn), restRequestThreadLocalService.getRequestedWorkspaceId());
+        ImageCatalog catalog = imageCatalogService.getImageCatalogByName(NameOrCrn.ofCrn(crn), restRequestThreadLocalService.getRequestedWorkspaceId());
         ImageCatalogV4Response imageCatalogResponse = converterUtil.convert(catalog, ImageCatalogV4Response.class);
         Images images = imageCatalogService.propagateImagesIfRequested(restRequestThreadLocalService.getRequestedWorkspaceId(), catalog.getName(), withImages);
         if (images != null) {
@@ -145,7 +145,7 @@ public class ImageCatalogV4Controller extends NotificationController implements 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG)
     public ImageCatalogV4Request getRequest(Long workspaceId, @ResourceName String name) {
-        ImageCatalog imageCatalog = imageCatalogService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), name);
+        ImageCatalog imageCatalog = imageCatalogService.getImageCatalogByName(restRequestThreadLocalService.getRequestedWorkspaceId(), name);
         return converterUtil.convert(imageCatalog, ImageCatalogV4Request.class);
     }
 

@@ -30,4 +30,12 @@ public class BaseImageV4Response extends ImageV4Response {
     public void setClouderaManagerRepo(ClouderaManagerRepositoryV4Response clouderaManagerRepo) {
         this.clouderaManagerRepo = clouderaManagerRepo;
     }
+
+    @Override
+    public String toString() {
+        return "BaseImageV4Response{" +
+                "cdhStacks=" + cdhStacks +
+                ", clouderaManagerRepo=" + clouderaManagerRepo +
+                "} " + super.toString();
+    }
 }

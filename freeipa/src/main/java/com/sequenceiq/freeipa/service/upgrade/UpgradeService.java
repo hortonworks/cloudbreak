@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,7 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
+import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.model.FreeIpaUpgradeOptions;
 import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.model.FreeIpaUpgradeRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.model.FreeIpaUpgradeResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.model.ImageInfoResponse;
@@ -63,10 +65,18 @@ public class UpgradeService {
         validationService.validateStackForUpgrade(allInstances, stack);
         String pgwInstanceId = selectPrimaryGwInstanceId(allInstances);
         HashSet<String> nonPgwInstanceIds = collectNonPrimaryGwInstanceIds(allInstances, pgwInstanceId);
-        ImageSettingsRequest imageSettingsRequest = Optional.ofNullable(request.getImage()).orElseGet(ImageSettingsRequest::new);
+        ImageInfoResponse currentImage = imageService.fetchCurrentImage(stack);
+        ImageSettingsRequest imageSettingsRequest = assembleImageSettingsRequest(request, currentImage);
         ImageInfoResponse selectedImage = imageService.selectImage(stack, imageSettingsRequest);
-        ImageInfoResponse currentImage = imageService.currentImage(stack);
         return triggerUpgrade(request, stack, pgwInstanceId, nonPgwInstanceIds, imageSettingsRequest, selectedImage, currentImage);
+    }
+
+    private ImageSettingsRequest assembleImageSettingsRequest(FreeIpaUpgradeRequest request, ImageInfoResponse currentImage) {
+        ImageSettingsRequest imageSettingsRequest = Optional.ofNullable(request.getImage()).orElseGet(ImageSettingsRequest::new);
+        if (StringUtils.isBlank(imageSettingsRequest.getCatalog())) {
+            imageSettingsRequest.setCatalog(Optional.ofNullable(currentImage.getCatalog()).orElse(currentImage.getCatalogName()));
+        }
+        return imageSettingsRequest;
     }
 
     @SuppressWarnings("IllegalType")
@@ -105,5 +115,30 @@ public class UpgradeService {
                 .findFirst().orElseThrow(() -> new BadRequestException("No primary Gateway found")).getInstanceId();
         LOGGER.debug("Found primary gateway with instance id: [{}]", pgwInstanceId);
         return pgwInstanceId;
+    }
+
+    public FreeIpaUpgradeOptions collectUpgradeOptions(String accountId, String environmentCrn, String catalog) {
+        Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithLists(environmentCrn, accountId);
+        MDCBuilder.buildMdcContext(stack);
+        ImageInfoResponse currentImage = imageService.fetchCurrentImage(stack);
+        String catalogForRequest = Optional.ofNullable(catalog).or(() -> Optional.ofNullable(currentImage.getCatalog())).orElse(currentImage.getCatalogName());
+        List<ImageInfoResponse> targetImages = getTargetImages(catalogForRequest, stack, currentImage);
+        return createFreeIpaUpgradeOptions(targetImages, currentImage);
+    }
+
+    private FreeIpaUpgradeOptions createFreeIpaUpgradeOptions(List<ImageInfoResponse> targetImages, ImageInfoResponse currentImage) {
+        FreeIpaUpgradeOptions freeIpaUpgradeOptions = new FreeIpaUpgradeOptions();
+        freeIpaUpgradeOptions.setImages(targetImages);
+        freeIpaUpgradeOptions.setCurrentImage(currentImage);
+        return freeIpaUpgradeOptions;
+    }
+
+    private List<ImageInfoResponse> getTargetImages(String catalog, Stack stack, ImageInfoResponse currentImage) {
+        ImageSettingsRequest imageSettingsRequest = new ImageSettingsRequest();
+        imageSettingsRequest.setCatalog(catalog);
+        LOGGER.debug("Using ImageSettingsRequest to query for possible target images: {}", imageSettingsRequest);
+        List<ImageInfoResponse> targetImages = imageService.findTargetImages(stack, imageSettingsRequest, currentImage);
+        LOGGER.debug("Found target images: {}", targetImages);
+        return targetImages;
     }
 }

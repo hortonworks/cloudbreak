@@ -260,7 +260,8 @@ public class StackCommonService {
 
     public FlowIdentifier retryInWorkspace(NameOrCrn nameOrCrn, Long workspaceId) {
         Long stackId = stackService.getIdByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
-        return operationRetryService.retry(stackId);
+        FlowIdentifier retry = operationRetryService.retry(stackId);
+        return retry;
     }
 
     public List<RetryableFlow> getRetryableFlows(String name, Long workspaceId) {
@@ -324,7 +325,7 @@ public class StackCommonService {
     public ImageChangeDto createImageChangeDto(NameOrCrn nameOrCrn, Long workspaceId, StackImageChangeV4Request stackImageChangeRequest) {
         Long stackId = stackService.getIdByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
         if (StringUtils.isNotBlank(stackImageChangeRequest.getImageCatalogName())) {
-            ImageCatalog imageCatalog = imageCatalogService.get(workspaceId, stackImageChangeRequest.getImageCatalogName());
+            ImageCatalog imageCatalog = imageCatalogService.getImageCatalogByName(workspaceId, stackImageChangeRequest.getImageCatalogName());
             return new ImageChangeDto(stackId, stackImageChangeRequest.getImageId(), imageCatalog.getName(), imageCatalog.getImageCatalogUrl());
         } else {
             return new ImageChangeDto(stackId, stackImageChangeRequest.getImageId());

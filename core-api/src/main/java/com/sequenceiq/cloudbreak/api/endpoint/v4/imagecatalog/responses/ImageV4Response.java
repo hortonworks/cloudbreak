@@ -197,4 +197,26 @@ public class ImageV4Response extends ImageBasicInfoV4Response implements JsonEnt
     public void setSourceImageId(String sourceImageId) {
         this.sourceImageId = sourceImageId;
     }
+
+    @Override
+    public String toString() {
+        return "ImageV4Response{" +
+                "date='" + date + '\'' +
+                ", created=" + created +
+                ", description='" + description + '\'' +
+                ", os='" + os + '\'' +
+                ", osType='" + osType + '\'' +
+                ", version='" + version + '\'' +
+                ", cmBuildNumber='" + cmBuildNumber + '\'' +
+                ", repository=" + repository +
+                ", imageSetsByProvider=" + imageSetsByProvider +
+                ", stackDetails=" + stackDetails +
+                ", preWarmParcels=" + preWarmParcels +
+                ", preWarmCsd=" + preWarmCsd +
+                ", defaultImage=" + defaultImage +
+                ", packageVersions=" + packageVersions +
+                ", baseParcelUrl='" + baseParcelUrl + '\'' +
+                ", sourceImageId='" + sourceImageId + '\'' +
+                "} " + super.toString();
+    }
 }

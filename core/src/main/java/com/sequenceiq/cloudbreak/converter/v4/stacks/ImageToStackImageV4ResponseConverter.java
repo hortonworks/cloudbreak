@@ -49,17 +49,7 @@ public class ImageToStackImageV4ResponseConverter extends AbstractConversionServ
     private void decorateWithImageCatalogUrl(Image source, StackImageV4Response image) {
         if (Strings.isNullOrEmpty(source.getImageCatalogUrl())) {
             LOGGER.debug(String.format("Persisted image catalog url is null for image catalog '%s'", source.getImageCatalogName()));
-            ImageCatalog imageCatalog = null;
-            if (source.getImageCatalogName() != null) {
-                try {
-                    LOGGER.debug(String.format("Try to lookup image catalog '%s' from workspace %d",
-                            source.getImageCatalogName(), restRequestThreadLocalService.getRequestedWorkspaceId()));
-                    imageCatalog = imageCatalogService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), source.getImageCatalogName());
-                } catch (Exception ex) {
-                    LOGGER.debug(String.format("Failed to lookup image catalog '%s' from workspace %d",
-                            source.getImageCatalogName(), restRequestThreadLocalService.getRequestedWorkspaceId()));
-                }
-            }
+            ImageCatalog imageCatalog = getImageCatalog(source);
             if (shouldLookupImageCatalogUrlByCloudbreakUser(imageCatalog)) {
                 CloudbreakUser cloudbreakUser = legacyRestRequestThreadLocalService.getCloudbreakUser();
                 LOGGER.debug(String.format("Lookup the url of '%s' user's image catalog.", cloudbreakUser == null ? null : cloudbreakUser.getUserCrn()));
@@ -68,6 +58,22 @@ public class ImageToStackImageV4ResponseConverter extends AbstractConversionServ
             }
         } else {
             image.setCatalogUrl(source.getImageCatalogUrl());
+        }
+    }
+
+    private ImageCatalog getImageCatalog(Image source) {
+        if (source.getImageCatalogName() != null) {
+            try {
+                LOGGER.debug(String.format("Try to lookup image catalog '%s' from workspace %d",
+                        source.getImageCatalogName(), restRequestThreadLocalService.getRequestedWorkspaceId()));
+                return imageCatalogService.getImageCatalogByName(restRequestThreadLocalService.getRequestedWorkspaceId(), source.getImageCatalogName());
+            } catch (Exception ex) {
+                LOGGER.debug(String.format("Failed to lookup image catalog '%s' from workspace %d",
+                        source.getImageCatalogName(), restRequestThreadLocalService.getRequestedWorkspaceId()));
+                return null;
+            }
+        } else {
+            return null;
         }
     }
 

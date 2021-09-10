@@ -69,7 +69,7 @@ class StackCommonServiceTest {
         ImageCatalog catalog = new ImageCatalog();
         catalog.setName(stackImageChangeRequest.getImageCatalogName());
         catalog.setImageCatalogUrl("catalogUrl");
-        when(imageCatalogService.get(WORKSPACE_ID, stackImageChangeRequest.getImageCatalogName())).thenReturn(catalog);
+        when(imageCatalogService.getImageCatalogByName(WORKSPACE_ID, stackImageChangeRequest.getImageCatalogName())).thenReturn(catalog);
         when(stackService.getIdByNameOrCrnInWorkspace(STACK_NAME, WORKSPACE_ID)).thenReturn(STACK_ID);
 
         ImageChangeDto result = underTest.createImageChangeDto(STACK_NAME, WORKSPACE_ID, stackImageChangeRequest);

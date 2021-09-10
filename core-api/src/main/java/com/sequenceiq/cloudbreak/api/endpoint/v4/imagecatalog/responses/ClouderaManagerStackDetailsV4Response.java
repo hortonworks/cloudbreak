@@ -17,4 +17,11 @@ public class ClouderaManagerStackDetailsV4Response extends BaseStackDetailsV4Res
     public void setRepository(ClouderaManagerStackRepoDetailsV4Response repository) {
         this.repository = repository;
     }
+
+    @Override
+    public String toString() {
+        return "ClouderaManagerStackDetailsV4Response{" +
+                "repository=" + repository +
+                "} " + super.toString();
+    }
 }

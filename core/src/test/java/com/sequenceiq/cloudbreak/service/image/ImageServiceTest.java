@@ -10,6 +10,8 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
+import java.util.stream.Stream;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -26,15 +28,13 @@ import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.utils.BlueprintUtils;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.StackMatrixService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
-
-import java.util.stream.Stream;
 
 public class ImageServiceTest {
 
@@ -98,7 +98,7 @@ public class ImageServiceTest {
         imageSettingsV4Request.setId("anImageId");
         imageSettingsV4Request.setOs(OS);
         when(blueprintUtils.getCDHStackVersion(any())).thenReturn(STACK_VERSION);
-        when(imageCatalogService.get(WORKSPACE_ID, "aCatalog")).thenReturn(getImageCatalog());
+        when(imageCatalogService.getImageCatalogByName(WORKSPACE_ID, "aCatalog")).thenReturn(getImageCatalog());
     }
 
     @Test
@@ -158,7 +158,8 @@ public class ImageServiceTest {
 
     @Test
     public void testDetermineImageFromCatalogWithNonExistingCatalogName() {
-        when(imageCatalogService.get(WORKSPACE_ID, "aCatalog")).thenThrow(new NotFoundException("Image catalog not found with name: aCatalog"));
+        when(imageCatalogService.getImageCatalogByName(WORKSPACE_ID, "aCatalog"))
+                .thenThrow(new NotFoundException("Image catalog not found with name: aCatalog"));
         ImageSettingsV4Request imageRequest = new ImageSettingsV4Request();
         imageRequest.setCatalog("aCatalog");
         imageRequest.setOs(OS);

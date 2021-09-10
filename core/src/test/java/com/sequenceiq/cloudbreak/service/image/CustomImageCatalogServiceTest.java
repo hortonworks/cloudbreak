@@ -89,7 +89,7 @@ public class CustomImageCatalogServiceTest {
     public void testGetImageCatalog() {
         ImageCatalog expected = new ImageCatalog();
 
-        when(imageCatalogService.get(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(expected);
+        when(imageCatalogService.getImageCatalogByName(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(expected);
 
         ImageCatalog actual = victim.getImageCatalog(WORKSPACE_ID, IMAGE_CATALOG_NAME);
 
@@ -101,7 +101,7 @@ public class CustomImageCatalogServiceTest {
         ImageCatalog expected = new ImageCatalog();
         expected.setImageCatalogUrl(IMAGE_CATALOG_URL);
 
-        when(imageCatalogService.get(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(expected);
+        when(imageCatalogService.getImageCatalogByName(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(expected);
 
         assertThrows(BadRequestException.class, () -> victim.getImageCatalog(WORKSPACE_ID, IMAGE_CATALOG_NAME));
     }
@@ -137,7 +137,7 @@ public class CustomImageCatalogServiceTest {
     public void testDelete() {
         ImageCatalog expected = new ImageCatalog();
 
-        when(imageCatalogService.get(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(expected);
+        when(imageCatalogService.getImageCatalogByName(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(expected);
         when(imageCatalogService.delete(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(expected);
 
         ImageCatalog actual = victim.delete(WORKSPACE_ID, IMAGE_CATALOG_NAME);
@@ -150,7 +150,7 @@ public class CustomImageCatalogServiceTest {
         ImageCatalog expected = new ImageCatalog();
         expected.setImageCatalogUrl(IMAGE_CATALOG_URL);
 
-        when(imageCatalogService.get(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(expected);
+        when(imageCatalogService.getImageCatalogByName(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(expected);
 
         assertThrows(BadRequestException.class, () -> victim.delete(WORKSPACE_ID, IMAGE_CATALOG_NAME));
     }
@@ -162,7 +162,7 @@ public class CustomImageCatalogServiceTest {
         ImageCatalog imageCatalog = new ImageCatalog();
         imageCatalog.setCustomImages(Collections.singleton(expected));
 
-        when(imageCatalogService.get(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(imageCatalog);
+        when(imageCatalogService.getImageCatalogByName(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(imageCatalog);
 
         CustomImage actual = victim.getCustomImage(WORKSPACE_ID, IMAGE_CATALOG_NAME, IMAGE_NAME);
 
@@ -174,7 +174,7 @@ public class CustomImageCatalogServiceTest {
         ImageCatalog imageCatalog = new ImageCatalog();
         imageCatalog.setImageCatalogUrl(IMAGE_CATALOG_URL);
 
-        when(imageCatalogService.get(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(imageCatalog);
+        when(imageCatalogService.getImageCatalogByName(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(imageCatalog);
 
         assertThrows(BadRequestException.class, () -> victim.getCustomImage(WORKSPACE_ID, IMAGE_CATALOG_NAME, IMAGE_NAME));
     }
@@ -185,7 +185,7 @@ public class CustomImageCatalogServiceTest {
         CustomImage expected = new CustomImage();
         expected.setName(IMAGE_NAME);
 
-        when(imageCatalogService.get(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(imageCatalog);
+        when(imageCatalogService.getImageCatalogByName(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(imageCatalog);
 
         assertThrows(NotFoundException.class, () -> victim.getCustomImage(WORKSPACE_ID, IMAGE_CATALOG_NAME, IMAGE_NAME));
     }
@@ -213,7 +213,7 @@ public class CustomImageCatalogServiceTest {
 
         doAnswer(invocation -> ((Supplier<CustomImage>) invocation.getArgument(0)).get())
                 .when(transactionService).required(any(Supplier.class));
-        when(imageCatalogService.get(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(imageCatalog);
+        when(imageCatalogService.getImageCatalogByName(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(imageCatalog);
         when(imageCatalogService.pureSave(imageCatalog)).thenReturn(imageCatalog);
 
         CustomImage actual = victim.createCustomImage(WORKSPACE_ID, ACCOUNT_ID, CREATOR, IMAGE_CATALOG_NAME, expected);
@@ -243,7 +243,7 @@ public class CustomImageCatalogServiceTest {
 
         doAnswer(invocation -> ((Supplier<CustomImage>) invocation.getArgument(0)).get())
                 .when(transactionService).required(any(Supplier.class));
-        when(imageCatalogService.get(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(imageCatalog);
+        when(imageCatalogService.getImageCatalogByName(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(imageCatalog);
         when(imageCatalogService.getSourceImageByImageType(customImage)).thenThrow(new CloudbreakImageCatalogException(""));
 
 
@@ -258,7 +258,7 @@ public class CustomImageCatalogServiceTest {
 
         doAnswer(invocation -> ((Supplier<CustomImage>) invocation.getArgument(0)).get())
                 .when(transactionService).required(any(Supplier.class));
-        when(imageCatalogService.get(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(imageCatalog);
+        when(imageCatalogService.getImageCatalogByName(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(imageCatalog);
 
         assertThrows(BadRequestException.class, () -> victim.createCustomImage(WORKSPACE_ID, ACCOUNT_ID, CREATOR, IMAGE_CATALOG_NAME, null));
     }
@@ -271,7 +271,7 @@ public class CustomImageCatalogServiceTest {
 
         doAnswer(invocation -> ((Supplier<CustomImage>) invocation.getArgument(0)).get())
                 .when(transactionService).required(any(Supplier.class));
-        when(imageCatalogService.get(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(imageCatalog);
+        when(imageCatalogService.getImageCatalogByName(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(imageCatalog);
         when(imageCatalogService.pureSave(imageCatalog)).thenReturn(imageCatalog);
 
         CustomImage actual = victim.deleteCustomImage(WORKSPACE_ID, IMAGE_CATALOG_NAME, IMAGE_NAME);
@@ -287,7 +287,7 @@ public class CustomImageCatalogServiceTest {
 
         doAnswer(invocation -> ((Supplier<CustomImage>) invocation.getArgument(0)).get())
                 .when(transactionService).required(any(Supplier.class));
-        when(imageCatalogService.get(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(imageCatalog);
+        when(imageCatalogService.getImageCatalogByName(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(imageCatalog);
 
         assertThrows(BadRequestException.class, () -> victim.deleteCustomImage(WORKSPACE_ID, IMAGE_CATALOG_NAME, IMAGE_NAME));
     }
@@ -302,7 +302,7 @@ public class CustomImageCatalogServiceTest {
 
         doAnswer(invocation -> ((Supplier<CustomImage>) invocation.getArgument(0)).get())
                 .when(transactionService).required(any(Supplier.class));
-        when(imageCatalogService.get(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(imageCatalog);
+        when(imageCatalogService.getImageCatalogByName(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(imageCatalog);
         when(imageCatalogService.pureSave(imageCatalog)).thenReturn(imageCatalog);
 
         CustomImage actual = victim.updateCustomImage(WORKSPACE_ID, CREATOR, IMAGE_CATALOG_NAME, updatedCustomImage);
@@ -331,7 +331,7 @@ public class CustomImageCatalogServiceTest {
 
         doAnswer(invocation -> ((Supplier<CustomImage>) invocation.getArgument(0)).get())
                 .when(transactionService).required(any(Supplier.class));
-        when(imageCatalogService.get(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(imageCatalog);
+        when(imageCatalogService.getImageCatalogByName(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(imageCatalog);
         when(imageCatalogService.pureSave(imageCatalog)).thenReturn(imageCatalog);
 
         CustomImage actual = victim.updateCustomImage(WORKSPACE_ID, CREATOR, IMAGE_CATALOG_NAME, updatedCustomImage);
@@ -361,7 +361,7 @@ public class CustomImageCatalogServiceTest {
 
         doAnswer(invocation -> ((Supplier<CustomImage>) invocation.getArgument(0)).get())
                 .when(transactionService).required(any(Supplier.class));
-        when(imageCatalogService.get(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(imageCatalog);
+        when(imageCatalogService.getImageCatalogByName(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(imageCatalog);
         when(imageCatalogService.pureSave(imageCatalog)).thenReturn(imageCatalog);
 
         CustomImage actual = victim.updateCustomImage(WORKSPACE_ID, CREATOR, IMAGE_CATALOG_NAME, updatedCustomImage);
@@ -384,7 +384,7 @@ public class CustomImageCatalogServiceTest {
 
         doAnswer(invocation -> ((Supplier<CustomImage>) invocation.getArgument(0)).get())
                 .when(transactionService).required(any(Supplier.class));
-        when(imageCatalogService.get(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(imageCatalog);
+        when(imageCatalogService.getImageCatalogByName(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(imageCatalog);
         when(imageCatalogService.pureSave(imageCatalog)).thenReturn(imageCatalog);
 
         CustomImage actual = victim.updateCustomImage(WORKSPACE_ID, CREATOR, IMAGE_CATALOG_NAME, updatedCustomImage);
@@ -407,7 +407,7 @@ public class CustomImageCatalogServiceTest {
 
         doAnswer(invocation -> ((Supplier<CustomImage>) invocation.getArgument(0)).get())
                 .when(transactionService).required(any(Supplier.class));
-        when(imageCatalogService.get(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(imageCatalog);
+        when(imageCatalogService.getImageCatalogByName(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(imageCatalog);
 
         assertThrows(BadRequestException.class, () -> victim.updateCustomImage(WORKSPACE_ID, CREATOR, IMAGE_CATALOG_NAME, customImage));
     }
@@ -425,7 +425,7 @@ public class CustomImageCatalogServiceTest {
 
         doAnswer(invocation -> ((Supplier<CustomImage>) invocation.getArgument(0)).get())
                 .when(transactionService).required(any(Supplier.class));
-        when(imageCatalogService.get(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(imageCatalog);
+        when(imageCatalogService.getImageCatalogByName(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(imageCatalog);
         when(imageCatalogService.getSourceImageByImageType(savedCustomImage)).thenThrow(new CloudbreakImageCatalogException(""));
 
         assertThrows(NotFoundException.class, () -> victim.updateCustomImage(WORKSPACE_ID, CREATOR, IMAGE_CATALOG_NAME, updatedCustomImage));

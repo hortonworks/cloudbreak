@@ -161,7 +161,7 @@ public class ClusterUpgradeAvailabilityServiceTest {
         when(clusterRepairService.repairWithDryRun(stack.getId())).thenReturn(result);
         when(result.isError()).thenReturn(false);
         when(imageService.getImage(stack.getId())).thenReturn(currentImage);
-        when(imageCatalogService.get(stack.getWorkspace().getId(), CATALOG_NAME)).thenReturn(imageCatalogDomain);
+        when(imageCatalogService.getImageCatalogByName(stack.getWorkspace().getId(), CATALOG_NAME)).thenReturn(imageCatalogDomain);
         when(imageCatalogProvider.getImageCatalogV3(CATALOG_URL)).thenReturn(imageCatalog);
         ImageFilterResult filteredImages = createFilteredImages(properImage);
         when(clusterUpgradeImageFilter.filter(accountId, imageCatalog, stack.getCloudPlatform(), imageFilterParams)).thenReturn(filteredImages);
@@ -199,7 +199,7 @@ public class ClusterUpgradeAvailabilityServiceTest {
         when(clusterRepairService.repairWithDryRun(stack.getId())).thenReturn(result);
         when(result.isError()).thenReturn(false);
         when(imageService.getImage(stack.getId())).thenReturn(currentImage);
-        when(imageCatalogService.get(stack.getWorkspace().getId(), CATALOG_NAME)).thenThrow(new NotFoundException("not found"));
+        when(imageCatalogService.getImageCatalogByName(stack.getWorkspace().getId(), CATALOG_NAME)).thenThrow(new NotFoundException("not found"));
         when(imageCatalogProvider.getImageCatalogV3(FALLBACK_CATALOG_URL)).thenReturn(imageCatalog);
         ImageFilterResult filteredImages = createFilteredImages(properImage);
         when(clusterUpgradeImageFilter.filter(accountId, imageCatalog, stack.getCloudPlatform(), imageFilterParams)).thenReturn(filteredImages);
@@ -231,7 +231,7 @@ public class ClusterUpgradeAvailabilityServiceTest {
         UpgradeV4Response response = new UpgradeV4Response();
 
         when(imageService.getImage(stack.getId())).thenReturn(currentImage);
-        when(imageCatalogService.get(stack.getWorkspace().getId(), CATALOG_NAME)).thenReturn(imageCatalogDomain);
+        when(imageCatalogService.getImageCatalogByName(stack.getWorkspace().getId(), CATALOG_NAME)).thenReturn(imageCatalogDomain);
         when(imageCatalogProvider.getImageCatalogV3(CATALOG_URL)).thenReturn(imageCatalog);
         ImageFilterResult filteredImages = createFilteredImages(properImage);
         ImageFilterParams imageFilterParams = new ImageFilterParams(currentImageFromCatalog, lockComponents, activatedParcels,
@@ -285,7 +285,7 @@ public class ClusterUpgradeAvailabilityServiceTest {
         response.setUpgradeCandidates(List.of(imageInfo));
         Stack stack = createStack(createStackStatus(Status.CREATE_FAILED), StackType.WORKLOAD);
         when(imageService.getImage(stack.getId())).thenReturn(currentImage);
-        when(imageCatalogService.get(stack.getWorkspace().getId(), CATALOG_NAME)).thenReturn(imageCatalogDomain);
+        when(imageCatalogService.getImageCatalogByName(stack.getWorkspace().getId(), CATALOG_NAME)).thenReturn(imageCatalogDomain);
         when(imageCatalogProvider.getImageCatalogV3(CATALOG_URL)).thenReturn(imageCatalog);
         ImageFilterParams imageFilterParams = new ImageFilterParams(currentImageFromCatalog, lockComponents, activatedParcels,
                 stack.getType(), null, STACK_ID, new InternalUpgradeSettings(false, true, true));
@@ -330,7 +330,7 @@ public class ClusterUpgradeAvailabilityServiceTest {
         when(clusterRepairService.repairWithDryRun(stack.getId())).thenReturn(result);
         when(result.isError()).thenReturn(true);
         when(imageService.getImage(stack.getId())).thenReturn(currentImage);
-        when(imageCatalogService.get(stack.getWorkspace().getId(), CATALOG_NAME)).thenReturn(imageCatalogDomain);
+        when(imageCatalogService.getImageCatalogByName(stack.getWorkspace().getId(), CATALOG_NAME)).thenReturn(imageCatalogDomain);
         when(imageCatalogProvider.getImageCatalogV3(CATALOG_URL)).thenReturn(imageCatalog);
         ImageFilterParams imageFilterParams = new ImageFilterParams(currentImageFromCatalog, lockComponents, activatedParcels, stack.getType(), null,
                 STACK_ID, new InternalUpgradeSettings(false, true, true));

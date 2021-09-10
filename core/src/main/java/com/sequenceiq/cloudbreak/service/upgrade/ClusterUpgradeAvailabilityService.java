@@ -180,7 +180,7 @@ public class ClusterUpgradeAvailabilityService {
         String imageCatalogName = image.getImageCatalogName();
         String imageCatalogUrl = image.getImageCatalogUrl();
         try {
-            imageCatalogUrl = imageCatalogService.get(workspace.getId(), imageCatalogName).getImageCatalogUrl();
+            imageCatalogUrl = imageCatalogService.getImageCatalogByName(workspace.getId(), imageCatalogName).getImageCatalogUrl();
             LOGGER.info("Image catalog with name {} and url {} is used for image filtering.", imageCatalogName, imageCatalogUrl);
         } catch (NotFoundException ex) {
             LOGGER.info("Image catalog with name {} not found. The following image catalog url will be used for image filtering: {}.",

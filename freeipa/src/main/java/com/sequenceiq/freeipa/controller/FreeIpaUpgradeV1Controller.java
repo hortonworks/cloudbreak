@@ -11,7 +11,6 @@ import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.RequestObject;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.FreeIpaUpgradeV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.model.FreeIpaUpgradeOptions;
 import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.model.FreeIpaUpgradeRequest;
@@ -38,6 +37,7 @@ public class FreeIpaUpgradeV1Controller implements FreeIpaUpgradeV1Endpoint {
     @Override
     @CheckPermissionByResourceCrn(action = UPGRADE_FREEIPA)
     public FreeIpaUpgradeOptions getFreeIpaUpgradeOptions(@ResourceCrn String environmentCrn, String catalog) {
-        throw new BadRequestException("Not implemented");
+        String accountId = crnService.getCurrentAccountId();
+        return upgradeService.collectUpgradeOptions(accountId, environmentCrn, catalog);
     }
 }

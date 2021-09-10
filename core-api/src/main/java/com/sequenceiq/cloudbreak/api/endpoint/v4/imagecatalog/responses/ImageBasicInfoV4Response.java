@@ -21,4 +21,11 @@ public class ImageBasicInfoV4Response {
     public void setUuid(String uuid) {
         this.uuid = uuid;
     }
+
+    @Override
+    public String toString() {
+        return "ImageBasicInfoV4Response{" +
+                "uuid='" + uuid + '\'' +
+                '}';
+    }
 }

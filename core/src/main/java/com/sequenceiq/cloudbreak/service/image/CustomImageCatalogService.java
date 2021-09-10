@@ -45,7 +45,7 @@ public class CustomImageCatalogService {
 
     public ImageCatalog getImageCatalog(Long workspaceId, String imageCatalogName) {
         LOGGER.debug(String.format("Get custom image catalog '%s' from workspace '%d'", imageCatalogName, workspaceId));
-        ImageCatalog imageCatalog = imageCatalogService.get(workspaceId, imageCatalogName);
+        ImageCatalog imageCatalog = imageCatalogService.getImageCatalogByName(workspaceId, imageCatalogName);
 
         if (Strings.isNullOrEmpty(imageCatalog.getImageCatalogUrl())) {
             return imageCatalog;
@@ -67,7 +67,7 @@ public class CustomImageCatalogService {
 
     public ImageCatalog delete(Long workspaceId, String imageCatalogName) {
         LOGGER.debug(String.format("Delete custom image catalog '%s' in workspace '%d'", imageCatalogName, workspaceId));
-        ImageCatalog imageCatalog = imageCatalogService.get(workspaceId, imageCatalogName);
+        ImageCatalog imageCatalog = imageCatalogService.getImageCatalogByName(workspaceId, imageCatalogName);
         if (Strings.isNullOrEmpty(imageCatalog.getImageCatalogUrl())) {
             return imageCatalogService.delete(workspaceId, imageCatalogName);
         } else {
