@@ -52,9 +52,9 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.retry.RetryableFlow;
-import com.sequenceiq.cloudbreak.service.LoadBalancerUpdateService;
 import com.sequenceiq.cloudbreak.service.ClusterCommonService;
 import com.sequenceiq.cloudbreak.service.DatabaseBackupRestoreService;
+import com.sequenceiq.cloudbreak.service.LoadBalancerUpdateService;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterDBValidationService;
 import com.sequenceiq.cloudbreak.service.stack.StackApiViewService;
@@ -219,8 +219,8 @@ public class StackOperations implements ResourcePropertyProvider {
         return stackCommonService.syncInWorkspace(nameOrCrn, workspaceId);
     }
 
-    public FlowIdentifier syncCm(NameOrCrn nameOrCrn, Long workspaceId, Set<String> candidateImageUuids) {
-        return stackCommonService.syncCmInWorkspace(nameOrCrn, workspaceId, candidateImageUuids);
+    public FlowIdentifier syncComponentVersionsFromCm(NameOrCrn nameOrCrn, Long workspaceId, Set<String> candidateImageUuids) {
+        return stackCommonService.syncComponentVersionsFromCmInWorkspace(nameOrCrn, workspaceId, candidateImageUuids);
     }
 
     public FlowIdentifier retry(NameOrCrn nameOrCrn, Long workspaceId) {

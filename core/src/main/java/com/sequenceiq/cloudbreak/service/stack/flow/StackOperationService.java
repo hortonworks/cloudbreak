@@ -199,8 +199,8 @@ public class StackOperationService {
         }
     }
 
-    public FlowIdentifier syncCm(Stack stack, Set<String> candidateImageUuids) {
-        return flowManager.triggerCmSync(stack.getId(), candidateImageUuids);
+    public FlowIdentifier syncComponentVersionsFromCm(Stack stack, Set<String> candidateImageUuids) {
+        return flowManager.triggerSyncComponentVersionsFromCm(stack.getId(), candidateImageUuids);
     }
 
     private FlowIdentifier stop(Stack stack, Cluster cluster, boolean updateCluster, User user) {

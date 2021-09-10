@@ -124,7 +124,8 @@ public class StackV4Controller extends NotificationController implements StackV4
     @Override
     @InternalOnly
     public FlowIdentifier syncCm(Long workspaceId, String name, @InitiatorUserCrn String initiatorUserCrn, ClouderaManagerSyncV4Request syncRequest) {
-        return stackOperations.syncCm(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId(), syncRequest.getCandidateImageUuids());
+        return stackOperations.syncComponentVersionsFromCm(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId(),
+                syncRequest.getCandidateImageUuids());
     }
 
     @Override

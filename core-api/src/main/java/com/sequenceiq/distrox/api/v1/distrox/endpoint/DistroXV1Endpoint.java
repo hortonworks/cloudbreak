@@ -77,6 +77,7 @@ import com.sequenceiq.distrox.api.v1.distrox.model.cluster.DistroXMultiDeleteV1R
 import com.sequenceiq.distrox.api.v1.distrox.model.diagnostics.docs.DiagnosticsOperationDescriptions;
 import com.sequenceiq.distrox.api.v1.distrox.model.diagnostics.model.CmDiagnosticsCollectionV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.diagnostics.model.DiagnosticsCollectionV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXSyncCmV1Response;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowProgressResponse;
 import com.sequenceiq.flow.api.model.operation.OperationView;
@@ -437,4 +438,17 @@ public interface DistroXV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ROTATE_CERTIFICATES, nickname = "rotateAutoTlsCertificatesByCrn")
     CertificatesRotationV4Response rotateAutoTlsCertificatesByCrn(@PathParam("crn") String crn, @Valid CertificatesRotationV4Request rotateCertificateRequest);
+
+    @POST
+    @Path("{name}/sync_cm")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "syncs from distrox cluster CM the CM and parcel versions", produces = MediaType.APPLICATION_JSON, nickname = "syncDistroxCm")
+    DistroXSyncCmV1Response syncComponentVersionsFromCmByName(@PathParam("name") String name);
+
+    @POST
+    @Path("crn/{crn}/sync_cm")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "syncs from distrox cluster CM the CM and parcel versions", produces = MediaType.APPLICATION_JSON, nickname = "syncDistroxCmByCrn")
+    DistroXSyncCmV1Response syncComponentVersionsFromCmByCrn(@PathParam("crn") String crn);
+
 }

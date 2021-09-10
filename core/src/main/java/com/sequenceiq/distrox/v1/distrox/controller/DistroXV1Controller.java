@@ -81,6 +81,7 @@ import com.sequenceiq.distrox.api.v1.distrox.model.MultipleInstanceDeleteRequest
 import com.sequenceiq.distrox.api.v1.distrox.model.cluster.DistroXMultiDeleteV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.diagnostics.model.CmDiagnosticsCollectionV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.diagnostics.model.DiagnosticsCollectionV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXSyncCmV1Response;
 import com.sequenceiq.distrox.v1.distrox.StackOperations;
 import com.sequenceiq.distrox.v1.distrox.authorization.DataHubFiltering;
 import com.sequenceiq.distrox.v1.distrox.converter.DistroXMaintenanceModeV1ToMainenanceModeV4Converter;
@@ -578,6 +579,24 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
                 workspaceService.getForCurrentUser().getId(),
                 rotateCertificateRequest
         );
+    }
+
+    @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.SYNC_COMPONENT_VERSIONS_FROM_CM_DATAHUB)
+    public DistroXSyncCmV1Response syncComponentVersionsFromCmByName(@ResourceName String name) {
+        return launchSyncComponentVersionsFromCm(NameOrCrn.ofName(name));
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.SYNC_COMPONENT_VERSIONS_FROM_CM_DATAHUB)
+    public DistroXSyncCmV1Response syncComponentVersionsFromCmByCrn(@ResourceCrn String crn) {
+        return launchSyncComponentVersionsFromCm(NameOrCrn.ofCrn(crn));
+    }
+
+    private DistroXSyncCmV1Response launchSyncComponentVersionsFromCm(NameOrCrn nameOrCrn) {
+        Long workspaceId = workspaceService.getForCurrentUser().getId();
+        FlowIdentifier flowIdentifier = stackOperations.syncComponentVersionsFromCm(nameOrCrn, workspaceId, Set.of());
+        return new DistroXSyncCmV1Response(flowIdentifier);
     }
 
     private Object getCreateAWSClusterRequest(StackV4Request stackV4Request) {

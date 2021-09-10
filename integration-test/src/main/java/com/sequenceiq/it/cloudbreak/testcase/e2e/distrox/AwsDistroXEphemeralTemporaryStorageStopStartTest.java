@@ -49,8 +49,7 @@ public class AwsDistroXEphemeralTemporaryStorageStopStartTest extends AbstractE2
         createDefaultUser(testContext);
         initializeDefaultBlueprints(testContext);
         createDefaultCredential(testContext);
-        createEnvironmentWithFreeIpa(testContext);
-        createDatalake(testContext);
+        createEnvironmentWithFreeIpaAndDatalake(testContext);
     }
 
     @Test(dataProvider = TEST_CONTEXT)

@@ -30,8 +30,7 @@ public class DistroXScaleEdgeCasesTest extends AbstractE2ETest {
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
         initializeDefaultBlueprints(testContext);
-        createEnvironmentWithFreeIpa(testContext);
-        createDatalake(testContext);
+        createEnvironmentWithFreeIpaAndDatalake(testContext);
     }
 
     @Test(dataProvider = TEST_CONTEXT)
