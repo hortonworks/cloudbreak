@@ -53,17 +53,6 @@ public class OperationDetailsPopulatorTest {
     }
 
     @Test
-    public void testCreateOperationViewFromInMemoryResponse() {
-        // GIVEN
-        OperationFlowsView operationFlowsView = createOperationFlowsView(null);
-        // WHEN
-        OperationView operationView = underTest.createOperationView(operationFlowsView, OperationResource.ENVIRONMENT);
-        // THEN
-        assertEquals(OperationProgressStatus.RUNNING, operationView.getProgressStatus());
-        assertEquals(IN_PROGRESS, operationView.getProgress());
-    }
-
-    @Test
     public void testCreateOperationViewWithFailedState() {
         // GIVEN
         Map<String, FlowProgressResponse> flowProgressResponseMap = new HashMap<>();
@@ -105,20 +94,11 @@ public class OperationDetailsPopulatorTest {
     }
 
     private OperationFlowsView createOperationFlowsView(Map<String, FlowProgressResponse> flowProgressResponseMap, OperationType operationType) {
-        if (flowProgressResponseMap == null) {
-            return OperationFlowsView.Builder.newBuilder()
-                    .withOperationType(operationType)
-                    .withTypeOrderList(List.of(DUMMY_CLASS))
-                    .withInMemory(true)
-                    .withProgressFromHistory(IN_PROGRESS)
-                    .build();
-        } else {
-            return OperationFlowsView.Builder.newBuilder()
-                    .withOperationType(operationType)
-                    .withFlowTypeProgressMap(flowProgressResponseMap)
-                    .withTypeOrderList(List.of(DUMMY_CLASS))
-                    .build();
-        }
+        return OperationFlowsView.Builder.newBuilder()
+                .withOperationType(operationType)
+                .withFlowTypeProgressMap(flowProgressResponseMap)
+                .withTypeOrderList(List.of(DUMMY_CLASS))
+                .build();
     }
 
     private Optional<FlowProgressResponse> createFlowProgressResponse(String secondTransitionState, boolean finished) {
