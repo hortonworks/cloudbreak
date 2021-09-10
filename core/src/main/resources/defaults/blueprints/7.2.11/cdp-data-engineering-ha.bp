@@ -558,6 +558,13 @@
         "roleConfigGroupsRefNames": [
           "knox-KNOX_GATEWAY-BASE",
           "oozie-OOZIE_SERVER-BASE",
+          "hive-GATEWAY-BASE",
+          "hms-GATEWAY-BASE",
+          "livy-GATEWAY-BASE",
+          "hdfs-GATEWAY-BASE",
+          "tez-GATEWAY-BASE",
+          "yarn-GATEWAY-BASE",
+          "sqoop-SQOOP_CLIENT-GATEWAY-BASE",
           "spark_on_yarn-GATEWAY-BASE"
         ]
       }
