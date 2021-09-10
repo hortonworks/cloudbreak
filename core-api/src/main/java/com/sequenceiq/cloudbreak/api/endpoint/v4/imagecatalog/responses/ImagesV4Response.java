@@ -19,6 +19,8 @@ public class ImagesV4Response implements JsonEntity {
 
     private List<ImageV4Response> cdhImages;
 
+    private List<ImageV4Response> freeipaImages;
+
     private Set<String> supportedVersions;
 
     public List<BaseImageV4Response> getBaseImages() {
@@ -43,5 +45,23 @@ public class ImagesV4Response implements JsonEntity {
 
     public Set<String> getSupportedVersions() {
         return supportedVersions;
+    }
+
+    public List<ImageV4Response> getFreeipaImages() {
+        return freeipaImages;
+    }
+
+    public void setFreeipaImages(List<ImageV4Response> freeipaImages) {
+        this.freeipaImages = freeipaImages;
+    }
+
+    @Override
+    public String toString() {
+        return "ImagesV4Response{" +
+                "baseImages=" + baseImages +
+                ", cdhImages=" + cdhImages +
+                ", freeipaImages=" + freeipaImages +
+                ", supportedVersions=" + supportedVersions +
+                '}';
     }
 }

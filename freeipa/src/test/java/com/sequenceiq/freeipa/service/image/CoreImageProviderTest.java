@@ -1,25 +1,32 @@
 package com.sequenceiq.freeipa.service.image;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.ImageCatalogV4Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
-import com.sequenceiq.freeipa.api.model.image.Image;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
-import com.sequenceiq.freeipa.dto.ImageWrapper;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.when;
+import javax.ws.rs.WebApplicationException;
 
-@RunWith(MockitoJUnitRunner.class)
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.ImageCatalogV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
+import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
+import com.sequenceiq.freeipa.api.model.image.Image;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
+import com.sequenceiq.freeipa.dto.ImageWrapper;
+
+@ExtendWith(MockitoExtension.class)
 public class CoreImageProviderTest {
 
     private static final long WORKSPACE_ID_DEFAULT = 0L;
@@ -46,6 +53,9 @@ public class CoreImageProviderTest {
 
     @Mock
     private ImageCatalogV4Endpoint imageCatalogV4Endpoint;
+
+    @Mock
+    private WebApplicationExceptionMessageExtractor messageExtractor;
 
     @InjectMocks
     private CoreImageProvider victim;
@@ -75,6 +85,65 @@ public class CoreImageProviderTest {
         Optional<ImageWrapper> actual = victim.getImage(anImageSettings(), REGION, PLATFORM);
         Image image = actual.get().getImage();
 
+        assertEquals(DATE, image.getDate());
+        assertEquals(DESCRIPTION, image.getDescription());
+        assertEquals(UUID, image.getUuid());
+        assertEquals(OS_TYPE, image.getOsType());
+        assertEquals(VM_IMAGE_REFERENCE, image.getImageSetsByProvider().get(PLATFORM).get(REGION));
+    }
+
+    @Test
+    public void testGetImagesdReturnsEmptyListWhenFreeImagesNull() throws Exception {
+        when(imageCatalogV4Endpoint.getImagesByName(WORKSPACE_ID_DEFAULT, CATALOG_NAME, null, PLATFORM, null, null))
+                .thenReturn(new ImagesV4Response());
+
+        ImageSettingsRequest imageSettings = new ImageSettingsRequest();
+        imageSettings.setCatalog(CATALOG_NAME);
+        List<ImageWrapper> result = victim.getImages(imageSettings, "", PLATFORM);
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void testGetImagesdReturnsEmptyListWhenWebApplicationExceptionThrown() throws Exception {
+        when(imageCatalogV4Endpoint.getImagesByName(WORKSPACE_ID_DEFAULT, CATALOG_NAME, null, PLATFORM, null, null))
+                .thenThrow(new WebApplicationException());
+
+        ImageSettingsRequest imageSettings = new ImageSettingsRequest();
+        imageSettings.setCatalog(CATALOG_NAME);
+        List<ImageWrapper> result = victim.getImages(imageSettings, "", PLATFORM);
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void testGetImagesdReturnsEmptyListWhenExceptionThrown() throws Exception {
+        when(imageCatalogV4Endpoint.getImagesByName(WORKSPACE_ID_DEFAULT, CATALOG_NAME, null, PLATFORM, null, null))
+                .thenThrow(new Exception());
+
+        ImageSettingsRequest imageSettings = new ImageSettingsRequest();
+        imageSettings.setCatalog(CATALOG_NAME);
+        List<ImageWrapper> result = victim.getImages(imageSettings, "", PLATFORM);
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void testGetImages() throws Exception {
+        ImagesV4Response imagesV4Response = new ImagesV4Response();
+        imagesV4Response.setFreeipaImages(List.of(anImageResponse()));
+        when(imageCatalogV4Endpoint.getImagesByName(WORKSPACE_ID_DEFAULT, CATALOG_NAME, null, PLATFORM, null, null))
+                .thenReturn(imagesV4Response);
+
+        ImageSettingsRequest imageSettings = new ImageSettingsRequest();
+        imageSettings.setCatalog(CATALOG_NAME);
+        List<ImageWrapper> result = victim.getImages(imageSettings, "", PLATFORM);
+
+        assertEquals(1, result.size());
+        ImageWrapper imageWrapper = result.get(0);
+        assertEquals(CATALOG_NAME, imageWrapper.getCatalogName());
+        assertNull(imageWrapper.getCatalogUrl());
+        Image image = imageWrapper.getImage();
         assertEquals(DATE, image.getDate());
         assertEquals(DESCRIPTION, image.getDescription());
         assertEquals(UUID, image.getUuid());

@@ -4,6 +4,7 @@ import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 
 import java.util.Objects;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -42,6 +43,9 @@ public class ImageEntity {
     private String imageId;
 
     private String imageCatalogName;
+
+    @Column(name = "image_date")
+    private String date;
 
     public String getImageName() {
         return imageName;
@@ -115,16 +119,27 @@ public class ImageEntity {
         this.imageCatalogName = imageCatalogName;
     }
 
+    public String getDate() {
+        return date;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
+    }
+
     @Override
     public String toString() {
-        return "Image{"
-                + "imageName='" + imageName + '\''
-                + ", os='" + os + '\''
-                + ", osType='" + osType + '\''
-                + ", imageCatalogUrl='" + imageCatalogUrl + '\''
-                + ", imageId='" + imageId + '\''
-                + ", imageCatalogName='" + imageCatalogName + '\''
-                + ", userdata=" + userdata + '}';
+        return "ImageEntity{" +
+                "id=" + id +
+                ", imageName='" + imageName + '\'' +
+                ", userdata='" + userdata + '\'' +
+                ", os='" + os + '\'' +
+                ", osType='" + osType + '\'' +
+                ", imageCatalogUrl='" + imageCatalogUrl + '\'' +
+                ", imageId='" + imageId + '\'' +
+                ", imageCatalogName='" + imageCatalogName + '\'' +
+                ", date='" + date + '\'' +
+                '}';
     }
 
     @Override
@@ -147,11 +162,12 @@ public class ImageEntity {
                 && Objects.equals(osType, that.osType)
                 && Objects.equals(imageCatalogUrl, that.imageCatalogUrl)
                 && Objects.equals(imageId, that.imageId)
-                && Objects.equals(imageCatalogName, that.imageCatalogName);
+                && Objects.equals(imageCatalogName, that.imageCatalogName)
+                && Objects.equals(date, that.date);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, imageName, userdata, os, osType, imageCatalogUrl, imageId, imageCatalogName);
+        return Objects.hash(id, imageName, userdata, os, osType, imageCatalogUrl, imageId, imageCatalogName, date);
     }
 }

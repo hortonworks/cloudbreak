@@ -11,6 +11,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -27,6 +28,7 @@ import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.freeipa.api.model.Backup;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
+import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.model.FreeIpaUpgradeOptions;
 import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.model.FreeIpaUpgradeRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.model.FreeIpaUpgradeResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.model.ImageInfoResponse;
@@ -148,7 +150,7 @@ class UpgradeServiceTest {
 
     private ImageInfoResponse mockCurrentImage(Stack stack) {
         ImageInfoResponse currentImage = new ImageInfoResponse();
-        when(imageService.currentImage(stack)).thenReturn(currentImage);
+        when(imageService.fetchCurrentImage(stack)).thenReturn(currentImage);
         return currentImage;
     }
 
@@ -241,5 +243,67 @@ class UpgradeServiceTest {
         im3.setInstanceMetadataType(InstanceMetadataType.GATEWAY);
         im3.setInstanceId("im3");
         return Set.of(im1, im2, im3);
+    }
+
+    @Test
+    public void testUpgradeOptionsWithCatalogSet() {
+        Stack stack = new Stack();
+        when(stackService.getByEnvironmentCrnAndAccountIdWithLists(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(stack);
+        ImageInfoResponse currentImage = new ImageInfoResponse();
+        currentImage.setCatalog("cat2");
+        currentImage.setCatalogName("catName");
+        when(imageService.fetchCurrentImage(stack)).thenReturn(currentImage);
+        ArgumentCaptor<ImageSettingsRequest> captor = ArgumentCaptor.forClass(ImageSettingsRequest.class);
+        ImageInfoResponse targetImage = new ImageInfoResponse();
+        when(imageService.findTargetImages(eq(stack), captor.capture(), eq(currentImage))).thenReturn(List.of(targetImage));
+
+        FreeIpaUpgradeOptions result = underTest.collectUpgradeOptions(ACCOUNT_ID, ENVIRONMENT_CRN, "cat");
+
+        assertEquals(currentImage, result.getCurrentImage());
+        assertEquals(1, result.getImages().size());
+        assertEquals(targetImage, result.getImages().get(0));
+        ImageSettingsRequest imageSettingsRequest = captor.getValue();
+        assertEquals("cat", imageSettingsRequest.getCatalog());
+    }
+
+    @Test
+    public void testUpgradeOptionsCatalogFromCurrentImage() {
+        Stack stack = new Stack();
+        when(stackService.getByEnvironmentCrnAndAccountIdWithLists(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(stack);
+        ImageInfoResponse currentImage = new ImageInfoResponse();
+        currentImage.setCatalog("cat2");
+        currentImage.setCatalogName("catName");
+        when(imageService.fetchCurrentImage(stack)).thenReturn(currentImage);
+        ArgumentCaptor<ImageSettingsRequest> captor = ArgumentCaptor.forClass(ImageSettingsRequest.class);
+        ImageInfoResponse targetImage = new ImageInfoResponse();
+        when(imageService.findTargetImages(eq(stack), captor.capture(), eq(currentImage))).thenReturn(List.of(targetImage));
+
+        FreeIpaUpgradeOptions result = underTest.collectUpgradeOptions(ACCOUNT_ID, ENVIRONMENT_CRN, null);
+
+        assertEquals(currentImage, result.getCurrentImage());
+        assertEquals(1, result.getImages().size());
+        assertEquals(targetImage, result.getImages().get(0));
+        ImageSettingsRequest imageSettingsRequest = captor.getValue();
+        assertEquals("cat2", imageSettingsRequest.getCatalog());
+    }
+
+    @Test
+    public void testUpgradeOptionsCatalogNameFromCurrentImage() {
+        Stack stack = new Stack();
+        when(stackService.getByEnvironmentCrnAndAccountIdWithLists(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(stack);
+        ImageInfoResponse currentImage = new ImageInfoResponse();
+        currentImage.setCatalogName("catName");
+        when(imageService.fetchCurrentImage(stack)).thenReturn(currentImage);
+        ArgumentCaptor<ImageSettingsRequest> captor = ArgumentCaptor.forClass(ImageSettingsRequest.class);
+        ImageInfoResponse targetImage = new ImageInfoResponse();
+        when(imageService.findTargetImages(eq(stack), captor.capture(), eq(currentImage))).thenReturn(List.of(targetImage));
+
+        FreeIpaUpgradeOptions result = underTest.collectUpgradeOptions(ACCOUNT_ID, ENVIRONMENT_CRN, null);
+
+        assertEquals(currentImage, result.getCurrentImage());
+        assertEquals(1, result.getImages().size());
+        assertEquals(targetImage, result.getImages().get(0));
+        ImageSettingsRequest imageSettingsRequest = captor.getValue();
+        assertEquals("catName", imageSettingsRequest.getCatalog());
     }
 }

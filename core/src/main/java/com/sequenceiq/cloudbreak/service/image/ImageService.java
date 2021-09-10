@@ -197,7 +197,7 @@ public class ImageService {
             return imageCatalogService.getDefaultImageCatalog(user);
         } else {
             try {
-                return imageCatalogService.get(workspaceId, imageSettings.getCatalog());
+                return imageCatalogService.getImageCatalogByName(workspaceId, imageSettings.getCatalog());
             } catch (NotFoundException e) {
                 throw new CloudbreakImageCatalogException(e.getMessage());
             }

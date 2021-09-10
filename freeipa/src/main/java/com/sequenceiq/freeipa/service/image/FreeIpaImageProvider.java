@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -62,6 +61,25 @@ public class FreeIpaImageProvider implements ImageProvider {
                 .map(i -> new ImageWrapper(i, catalogUrl, null));
     }
 
+    public List<ImageWrapper> getImages(ImageSettingsRequest imageSettings, String region, String platform) {
+        String imageId = imageSettings.getId();
+        String catalogUrl = StringUtils.isNotBlank(imageSettings.getCatalog()) ? imageSettings.getCatalog() : defaultCatalogUrl;
+        String imageOs = StringUtils.isNotBlank(imageSettings.getOs()) ? imageSettings.getOs() : defaultOs;
+
+        ImageCatalog cachedImageCatalog = imageCatalogProvider.getImageCatalog(catalogUrl);
+        List<Image> compatibleImages = findImage(imageId, imageOs, cachedImageCatalog.getImages().getFreeipaImages(), region, platform);
+        List<String> imagesInVersions = filterFreeIpaVersionsByAppVersion(cachedImageCatalog.getVersions().getFreeIpaVersions()).stream()
+                .map(FreeIpaVersions::getImageIds)
+                .flatMap(Collection::stream)
+                .distinct()
+                .collect(Collectors.toList());
+        LOGGER.debug("Compatible images: {} " + System.lineSeparator() + "Images in versions: {}", compatibleImages, imagesInVersions);
+        return compatibleImages.stream()
+                .filter(image -> imagesInVersions.contains(image.getUuid()))
+                .map(image -> new ImageWrapper(image, catalogUrl, null))
+                .collect(Collectors.toList());
+    }
+
     private Optional<Image> findImageForAppVersion(String region, String platform, String imageId, String imageOs, ImageCatalog catalog) {
         List<FreeIpaVersions> versions = filterFreeIpaVersionsByAppVersion(catalog.getVersions().getFreeIpaVersions());
         List<Image> compatibleImages = findImage(imageId, imageOs, catalog.getImages().getFreeipaImages(), region, platform);
@@ -74,7 +92,7 @@ public class FreeIpaImageProvider implements ImageProvider {
     }
 
     private List<Image> findImage(String imageId, String imageOs, List<Image> images, String region, String platform) {
-        if (Objects.nonNull(imageId) && !imageId.isEmpty()) {
+        if (StringUtils.isNotBlank(imageId)) {
             return images.stream()
                     .filter(img -> img.getImageSetsByProvider().containsKey(platform) && filterRegion(region, platform, img))
                     //It's not clear why we check the provider image reference (eg. the AMI in case of AWS) as imageId here.
@@ -82,7 +100,7 @@ public class FreeIpaImageProvider implements ImageProvider {
                     .filter(img -> img.getUuid().equalsIgnoreCase(imageId) || img.getImageSetsByProvider().get(platform).get(region).equalsIgnoreCase(imageId))
                     .collect(Collectors.toList());
         } else {
-            if (Objects.nonNull(imageOs) && !imageOs.isEmpty()) {
+            if (StringUtils.isNotBlank(imageOs)) {
                 images = filterImages(images, imageOs, platform, region);
             }
 

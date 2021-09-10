@@ -28,4 +28,12 @@ public class BaseStackDetailsV4Response implements JsonEntity {
     public void setStackBuildNumber(String stackBuildNumber) {
         this.stackBuildNumber = stackBuildNumber;
     }
+
+    @Override
+    public String toString() {
+        return "BaseStackDetailsV4Response{" +
+                "version='" + version + '\'' +
+                ", stackBuildNumber='" + stackBuildNumber + '\'' +
+                '}';
+    }
 }

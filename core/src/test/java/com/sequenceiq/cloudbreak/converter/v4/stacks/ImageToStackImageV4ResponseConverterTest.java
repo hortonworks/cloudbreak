@@ -53,7 +53,7 @@ public class ImageToStackImageV4ResponseConverterTest {
         Image image = anImageWithoutImageCatalogUrl();
 
         when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(WORKSPACE_ID);
-        when(imageCatalogService.get(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(imageCatalog);
+        when(imageCatalogService.getImageCatalogByName(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(imageCatalog);
 
         StackImageV4Response actual = victim.convert(image);
         assertNull(actual.getCatalogUrl());

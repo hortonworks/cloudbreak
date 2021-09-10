@@ -584,7 +584,7 @@ public class ImageCatalogServiceTest {
         String name = "img-name";
         ImageCatalog imageCatalog = new ImageCatalog();
         when(imageCatalogRepository.findByNameAndWorkspaceId(name, ORG_ID)).thenReturn(Optional.of(imageCatalog));
-        ImageCatalog actual = underTest.get(ORG_ID, name);
+        ImageCatalog actual = underTest.getImageCatalogByName(ORG_ID, name);
 
         assertEquals(actual, imageCatalog);
     }
@@ -595,7 +595,7 @@ public class ImageCatalogServiceTest {
         ImageCatalog actual = ThreadBasedUserCrnProvider.doAs(CrnTestUtil.getUserCrnBuilder()
                 .setAccountId("ACCOUNT_ID")
                 .setResource("USER")
-                .build().toString(), () -> underTest.get(ORG_ID, name));
+                .build().toString(), () -> underTest.getImageCatalogByName(ORG_ID, name));
 
         verify(imageCatalogRepository, times(0)).findByNameAndWorkspace(eq(name), any(Workspace.class));
 
@@ -743,7 +743,7 @@ public class ImageCatalogServiceTest {
         ImageCatalog catalog = getImageCatalog();
         when(imageCatalogRepository.findByNameAndWorkspaceId(catalog.getName(), catalog.getWorkspace().getId())).thenReturn(Optional.of(catalog));
 
-        ImageCatalog result = underTest.get(NameOrCrn.ofName(catalog.getName()), catalog.getWorkspace().getId());
+        ImageCatalog result = underTest.getImageCatalogByName(NameOrCrn.ofName(catalog.getName()), catalog.getWorkspace().getId());
 
         assertEquals(catalog, result);
         verify(imageCatalogRepository, times(1)).findByNameAndWorkspaceId(anyString(), anyLong());
@@ -755,7 +755,7 @@ public class ImageCatalogServiceTest {
         ImageCatalog catalog = getImageCatalog();
         when(imageCatalogRepository.findByResourceCrnAndArchivedFalseAndImageCatalogUrlIsNotNull(catalog.getResourceCrn())).thenReturn(Optional.of(catalog));
 
-        ImageCatalog result = underTest.get(NameOrCrn.ofCrn(catalog.getResourceCrn()), catalog.getWorkspace().getId());
+        ImageCatalog result = underTest.getImageCatalogByName(NameOrCrn.ofCrn(catalog.getResourceCrn()), catalog.getWorkspace().getId());
 
         assertEquals(catalog, result);
         verify(imageCatalogRepository, times(1)).findByResourceCrnAndArchivedFalseAndImageCatalogUrlIsNotNull(anyString());

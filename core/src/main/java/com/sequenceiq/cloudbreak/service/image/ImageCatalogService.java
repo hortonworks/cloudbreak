@@ -185,7 +185,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
     }
 
     public ImageCatalog delete(NameOrCrn imageCatalogNameOrCrn, Long workspaceId) {
-        ImageCatalog catalog = get(imageCatalogNameOrCrn, workspaceId);
+        ImageCatalog catalog = getImageCatalogByName(imageCatalogNameOrCrn, workspaceId);
         return delete(workspaceId, catalog.getName());
     }
 
@@ -214,9 +214,9 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         }
     }
 
-    public ImageCatalog get(NameOrCrn imageCatalogNameOrCrn, Long workspaceId) {
+    public ImageCatalog getImageCatalogByName(NameOrCrn imageCatalogNameOrCrn, Long workspaceId) {
         return imageCatalogNameOrCrn.hasName()
-                ? get(workspaceId, imageCatalogNameOrCrn.getName())
+                ? getImageCatalogByName(workspaceId, imageCatalogNameOrCrn.getName())
                 : findByResourceCrn(imageCatalogNameOrCrn.getCrn());
     }
 
@@ -328,7 +328,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
 
     public StatedImages getImages(String userCrn, Long workspaceId, String imageCatalogName, Set<String> providers) throws CloudbreakImageCatalogException {
         try {
-            ImageCatalog imageCatalog = get(workspaceId, imageCatalogName);
+            ImageCatalog imageCatalog = getImageCatalogByName(workspaceId, imageCatalogName);
             if (isCustomImageCatalog(imageCatalog)) {
                 return getStatedImagesFromCustomImageCatalog(imageCatalog, providers);
             } else {
@@ -378,14 +378,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
 
     public StatedImage getImage(String catalogUrl, String catalogName, String imageId) throws CloudbreakImageNotFoundException,
             CloudbreakImageCatalogException {
-        ImageCatalog imageCatalog = null;
-        if (Strings.isNullOrEmpty(catalogUrl)) {
-            try {
-                imageCatalog = get(restRequestThreadLocalService.getRequestedWorkspaceId(), catalogName);
-            } catch (Exception ex) {
-                LOGGER.debug(String.format("Failed to lookup '%s' image catalog by name.", catalogName));
-            }
-        }
+        ImageCatalog imageCatalog = getImageCatalogByNameIfUrlIsEmpty(catalogUrl, catalogName);
         if (isCustomImageCatalog(imageCatalog)) {
             LOGGER.debug(String.format("'%s' image catalog is a custom image catalog.", catalogName));
             return getCustomStatedImage(imageCatalog, imageId);
@@ -396,19 +389,30 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         }
     }
 
+    private ImageCatalog getImageCatalogByNameIfUrlIsEmpty(String catalogUrl, String catalogName) {
+        if (Strings.isNullOrEmpty(catalogUrl)) {
+            try {
+                return getImageCatalogByName(restRequestThreadLocalService.getRequestedWorkspaceId(), catalogName);
+            } catch (Exception ex) {
+                LOGGER.debug(String.format("Failed to lookup '%s' image catalog by name.", catalogName));
+                return null;
+            }
+        } else {
+            return null;
+        }
+    }
+
     public StatedImage getImageByCatalogName(Long workspaceId, String imageId, String catalogName)
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        StatedImage image;
         if (StringUtils.isEmpty(catalogName)) {
-            image = getImage(imageId);
+            return getImage(imageId);
         } else {
             try {
-                image = getCustomStatedImage(workspaceId, catalogName, imageId);
+                return getCustomStatedImage(workspaceId, catalogName, imageId);
             } catch (NotFoundException e) {
                 throw new CloudbreakImageCatalogException(e.getMessage());
             }
         }
-        return image;
     }
 
     public ImageCatalog delete(Long workspaceId, String name) {
@@ -434,7 +438,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
 
     private ImageCatalog deleteNonDefault(Long workspaceId, String name) {
         User user = getLoggedInUser();
-        ImageCatalog imageCatalog = get(workspaceId, name);
+        ImageCatalog imageCatalog = getImageCatalogByName(workspaceId, name);
         imageCatalog.setArchived(true);
         setImageCatalogAsDefault(null, user);
         imageCatalog.setName(generateArchiveName(name));
@@ -445,7 +449,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         return imageCatalog;
     }
 
-    public ImageCatalog get(Long workspaceId, String name) {
+    public ImageCatalog getImageCatalogByName(Long workspaceId, String name) {
         return isEnvDefault(name) ? getDefaultCatalog(name) : getByNameForWorkspaceId(name, workspaceId);
     }
 
@@ -470,7 +474,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
     }
 
     private ImageCatalog findImageCatalog(Long workspaceId, String name) {
-        return Optional.ofNullable(get(workspaceId, name)).orElseThrow(notFound("Image catalog", name));
+        return Optional.ofNullable(getImageCatalogByName(workspaceId, name)).orElseThrow(notFound("Image catalog", name));
     }
 
     private void checkImageCatalog(ImageCatalog imageCatalog, Object filter) {
@@ -525,21 +529,18 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
     public StatedImages getImages(ImageFilter imageFilter) throws CloudbreakImageCatalogException {
         LOGGER.info("Determine images for imageCatalogUrl: '{}', platforms: '{}' and Cloudbreak version: '{}'.",
                 imageFilter.getImageCatalog().getImageCatalogUrl(), imageFilter.getPlatforms(), imageFilter.getCbVersion());
-        StatedImages images;
         validateRequestPlatforms(imageFilter.getPlatforms());
 
         CloudbreakImageCatalogV3 imageCatalogV3 = imageCatalogProvider.getImageCatalogV3(imageFilter.getImageCatalog().getImageCatalogUrl());
-
         if (imageCatalogV3 != null) {
             LOGGER.info("Image catalog found, filtering the images..");
-            images = imageCatalogServiceProxy.getImages(imageCatalogV3, imageFilter);
+            return imageCatalogServiceProxy.getImages(imageCatalogV3, imageFilter);
         } else {
             LOGGER.warn("Image catalog {} not found, returning empty response", imageFilter.getImageCatalog());
-            images = statedImages(emptyImages(),
-                    imageFilter.getImageCatalog().getImageCatalogUrl(),
-                    imageFilter.getImageCatalog().getName());
+            return statedImages(emptyImages(),
+                        imageFilter.getImageCatalog().getImageCatalogUrl(),
+                        imageFilter.getImageCatalog().getName());
         }
-        return images;
     }
 
     private void validateRequestPlatforms(Set<String> platforms) throws CloudbreakImageCatalogException {
@@ -581,12 +582,6 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         return images.stream()
                 .filter(img -> img.getUuid().equals(imageId))
                 .findFirst();
-    }
-
-    private List<Image> filterImagesByPlatforms(Collection<String> platforms, Collection<Image> images, Collection<String> vMImageUUIDs) {
-        return images.stream()
-                .filter(isPlatformMatching(platforms, vMImageUUIDs))
-                .collect(toList());
     }
 
     private static Predicate<Image> isPlatformMatching(Collection<String> platforms, Collection<String> vMImageUUIDs) {
@@ -745,7 +740,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
 
     public StatedImage getCustomStatedImage(long workspaceId, String catalogName, String imageId)
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        ImageCatalog imageCatalog = get(workspaceId, catalogName);
+        ImageCatalog imageCatalog = getImageCatalogByName(workspaceId, catalogName);
 
         return getCustomStatedImage(imageCatalog, imageId);
     }
@@ -753,19 +748,17 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
     private StatedImage getCustomStatedImage(ImageCatalog imageCatalog, String imageId)
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         Optional<CustomImage> optionalCustomImage = getCustomImage(imageCatalog, imageId);
-        StatedImage image;
         if (optionalCustomImage.isPresent()) {
             CustomImage customImage = optionalCustomImage.get();
             LOGGER.info("Custom image is available with id '{}'. Searching for source image '{}',", imageId);
             StatedImage sourceImage = getSourceImageByImageType(customImage);
             LOGGER.info("Custom image '{}' is a {} image '{}' customization.", imageId, customImage.getImageType(), customImage.getCustomizedImageId());
-            image = customImageProvider.mergeSourceImageAndCustomImageProperties(
-                    sourceImage, customImage, imageCatalog.getImageCatalogUrl(), imageCatalog.getName());
+            return customImageProvider.mergeSourceImageAndCustomImageProperties(
+                        sourceImage, customImage, imageCatalog.getImageCatalogUrl(), imageCatalog.getName());
         } else {
-            image = getImage(imageCatalog.getImageCatalogUrl(), imageCatalog.getName(), imageId);
+            return getImage(imageCatalog.getImageCatalogUrl(), imageCatalog.getName(), imageId);
         }
 
-        return image;
     }
 
     private Optional<CustomImage> getCustomImage(ImageCatalog imageCatalog, String imageId) {
@@ -774,19 +767,15 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
 
     public StatedImage getSourceImageByImageType(CustomImage customImage)
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        StatedImage sourceImage;
         switch (customImage.getImageType()) {
             case FREEIPA:
-                sourceImage = getImageByUrl(defaultFreeIpaCatalogUrl, FREEIPA_DEFAULT_CATALOG_NAME, customImage.getCustomizedImageId());
-                break;
+                return getImageByUrl(defaultFreeIpaCatalogUrl, FREEIPA_DEFAULT_CATALOG_NAME, customImage.getCustomizedImageId());
             case DATAHUB:
             case DATALAKE:
-                sourceImage = getImage(customImage.getCustomizedImageId());
-                break;
+                return getImage(customImage.getCustomizedImageId());
             default:
                 throw new CloudbreakImageCatalogException("Image type is not supported.");
         }
-        return sourceImage;
     }
 
     private StatedImage getImageByUrl(String catalogUrl, String catalogName, String imageId) throws CloudbreakImageNotFoundException,

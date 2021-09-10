@@ -1,7 +1,9 @@
 package com.sequenceiq.freeipa.service.image;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -55,6 +57,7 @@ public class ImageService {
         imageEntity.setImageName(imageWrapperAndNamePair.getRight());
         imageEntity.setImageCatalogUrl(imageWrapper.getCatalogUrl());
         imageEntity.setImageCatalogName(imageWrapper.getCatalogName());
+        imageEntity.setDate(imageWrapper.getImage().getDate());
         return imageEntity;
     }
 
@@ -74,6 +77,14 @@ public class ImageService {
         LOGGER.info("Selected VM image for CloudPlatform '{}' and region '{}' is: {} from: {} image catalog with '{}' catalog name",
                 platformString, region, imageName, imageWrapper.getCatalogUrl(), imageWrapper.getCatalogName());
         return Pair.of(imageWrapper, imageName);
+    }
+
+    public List<Pair<ImageWrapper, String>> fetchImagesWrapperAndName(Stack stack, ImageSettingsRequest imageRequest) {
+        String region = stack.getRegion();
+        String platformString = stack.getCloudPlatform().toLowerCase();
+        List<ImageWrapper> imageWrappers = getImages(imageRequest, region, platformString);
+        LOGGER.debug("Images found: {}", imageWrappers);
+        return imageWrappers.stream().map(imgw -> Pair.of(imgw, determineImageName(platformString, region, imgw.getImage()))).collect(Collectors.toList());
     }
 
     private ImageEntity updateImageWithNewValues(Stack stack, ImageWrapper imageWrapper, String imageName) {
@@ -121,6 +132,11 @@ public class ImageService {
                 .getImage(imageSettings, region, platform)
                 .orElseThrow(() -> throwImageNotFoundException(region, imageSettings.getId(), Optional.ofNullable(imageSettings.getOs()).orElse(defaultOs)));
 
+    }
+
+    private List<ImageWrapper> getImages(ImageSettingsRequest imageSettings, String region, String platform) {
+        return imageProviderFactory.getImageProvider(imageSettings.getCatalog())
+                .getImages(imageSettings, region, platform);
     }
 
     public String determineImageName(String platformString, String region, Image imgFromCatalog) {

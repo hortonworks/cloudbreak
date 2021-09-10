@@ -14,6 +14,8 @@ public class FreeIpaUpgradeOptions {
 
     private List<ImageInfoResponse> images;
 
+    private ImageInfoResponse currentImage;
+
     public List<ImageInfoResponse> getImages() {
         return images;
     }
@@ -22,10 +24,19 @@ public class FreeIpaUpgradeOptions {
         this.images = images;
     }
 
+    public ImageInfoResponse getCurrentImage() {
+        return currentImage;
+    }
+
+    public void setCurrentImage(ImageInfoResponse currentImage) {
+        this.currentImage = currentImage;
+    }
+
     @Override
     public String toString() {
         return "FreeIpaUpgradeOptions{" +
                 "images=" + images +
+                ", currentImage=" + currentImage +
                 '}';
     }
 }

@@ -1,17 +1,24 @@
 package com.sequenceiq.freeipa.service.image;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.ImageCatalogV4Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
-import com.sequenceiq.freeipa.api.model.image.Image;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
-import com.sequenceiq.freeipa.dto.ImageWrapper;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+import javax.ws.rs.WebApplicationException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import javax.inject.Inject;
-import java.util.Optional;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.ImageCatalogV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
+import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
+import com.sequenceiq.freeipa.api.model.image.Image;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
+import com.sequenceiq.freeipa.dto.ImageWrapper;
 
 @Service
 public class CoreImageProvider implements ImageProvider {
@@ -26,6 +33,9 @@ public class CoreImageProvider implements ImageProvider {
     @Inject
     private ImageCatalogV4Endpoint imageCatalogV4Endpoint;
 
+    @Inject
+    private WebApplicationExceptionMessageExtractor messageExtractor;
+
     @Override
     public Optional<ImageWrapper> getImage(ImageSettingsRequest imageSettings, String region, String platform) {
         try {
@@ -38,6 +48,28 @@ public class CoreImageProvider implements ImageProvider {
         } catch (Exception ex) {
             LOGGER.warn("Image lookup failed: {}", ex.getMessage());
             return Optional.empty();
+        }
+    }
+
+    @Override
+    public List<ImageWrapper> getImages(ImageSettingsRequest imageSettings, String region, String platform) {
+        try {
+            ImagesV4Response imagesV4Response = imageCatalogV4Endpoint.getImagesByName(WORKSPACE_ID_DEFAULT, imageSettings.getCatalog(), null, platform, null,
+                    null);
+            LOGGER.debug("Images received: {}", imagesV4Response);
+            return Optional.ofNullable(imagesV4Response.getFreeipaImages()).
+                    orElseGet(List::of).stream()
+                    .map(this::convert)
+                    .flatMap(Optional::stream)
+                    .map(img -> new ImageWrapper(img, null, imageSettings.getCatalog()))
+                    .collect(Collectors.toList());
+        } catch (WebApplicationException e) {
+            String errorMessage = messageExtractor.getErrorMessage(e);
+            LOGGER.warn("Fetching images failed with: {}", errorMessage, e);
+            return List.of();
+        } catch (Exception e) {
+            LOGGER.warn("Fetching images failed", e);
+            return List.of();
         }
     }
 

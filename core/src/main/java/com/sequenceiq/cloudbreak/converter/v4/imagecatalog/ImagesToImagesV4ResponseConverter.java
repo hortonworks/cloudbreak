@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.Cloudera
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ClouderaManagerStackRepoDetailsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
+import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.StackDetails;
@@ -31,6 +32,9 @@ public class ImagesToImagesV4ResponseConverter extends AbstractConversionService
     @Inject
     private ImageBasedDefaultCDHEntries imageBasedDefaultCDHEntries;
 
+    @Inject
+    private ConverterUtil converterUtil;
+
     @Override
     public ImagesV4Response convert(Images source) {
         ImagesV4Response res = new ImagesV4Response();
@@ -39,6 +43,7 @@ public class ImagesToImagesV4ResponseConverter extends AbstractConversionService
         List<ImageV4Response> cdhImages = convertImages(source.getCdhImages(), StackType.CDH);
         res.setCdhImages(cdhImages);
         res.setSupportedVersions(source.getSuppertedVersions());
+        res.setFreeipaImages(converterUtil.convertAll(source.getFreeIpaImages(), ImageV4Response.class));
         return res;
     }
 
