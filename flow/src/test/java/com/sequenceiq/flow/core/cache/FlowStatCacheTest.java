@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
@@ -13,7 +12,6 @@ import static org.mockito.Mockito.verify;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -24,7 +22,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.event.PayloadContext;
-import com.sequenceiq.flow.api.model.operation.OperationFlowsView;
 import com.sequenceiq.flow.api.model.operation.OperationType;
 import com.sequenceiq.flow.core.PayloadContextProvider;
 import com.sequenceiq.flow.core.stats.FlowOperationStatisticsService;
@@ -37,8 +34,6 @@ public class FlowStatCacheTest {
     private static final String SAMPLE_FREEIPA_CRN = "crn:cdp:freeipa:us-west-1:12345-6789:environment:12345-6789";
 
     private static final Long SAMPLE_RESOURCE_ID = 1L;
-
-    private static final Integer SAMPLE_PROGRESS = 66;
 
     private static final String SAMPLE_CLOUD_PLATFORM = "AWS";
 
@@ -148,55 +143,6 @@ public class FlowStatCacheTest {
         assertNull(resultWithEnvCrn);
         assertNull(resultByFlowChainId);
         verify(payloadContextProvider, times(1)).getPayloadContext(anyLong());
-    }
-
-    @Test
-    public void testGetOperationFlowByResourceCrn() {
-        // GIVEN
-        given(payloadContextProvider.getPayloadContext(SAMPLE_RESOURCE_ID)).willReturn(
-                PayloadContext.create(SAMPLE_RESOURCE_CRN, SAMPLE_CLOUD_PLATFORM));
-        given(flowOperationStatisticsService.getProgressFromHistory(any())).willReturn(SAMPLE_PROGRESS);
-        // WHEN
-        underTest.put(SAMPLE_FLOW_ID, null, SAMPLE_RESOURCE_ID, OperationType.PROVISION.name(), null, false);
-        Optional<OperationFlowsView> resultOpt = underTest.getOperationFlowByResourceCrn(SAMPLE_RESOURCE_CRN);
-        // THEN
-        assertEquals(SAMPLE_FLOW_ID, resultOpt.get().getOperationId());
-        assertEquals(OperationType.PROVISION, resultOpt.get().getOperationType());
-        assertTrue(resultOpt.get().isInMemory());
-        verify(payloadContextProvider, times(1)).getPayloadContext(anyLong());
-        verify(flowOperationStatisticsService, times(1)).getProgressFromHistory(any());
-    }
-
-    @Test
-    public void testGetOperationFlowChainByResourceCrn() {
-        // GIVEN
-        given(payloadContextProvider.getPayloadContext(SAMPLE_RESOURCE_ID)).willReturn(
-                PayloadContext.create(SAMPLE_RESOURCE_CRN, SAMPLE_CLOUD_PLATFORM));
-        given(flowOperationStatisticsService.getProgressFromHistory(any())).willReturn(SAMPLE_PROGRESS);
-        // WHEN
-        underTest.putByFlowChainId(SAMPLE_FLOW_CHAIN_ID, SAMPLE_RESOURCE_ID, OperationType.PROVISION.name(), false);
-        Optional<OperationFlowsView> resultOpt = underTest.getOperationFlowByResourceCrn(SAMPLE_RESOURCE_CRN);
-        // THEN
-        assertEquals(SAMPLE_FLOW_CHAIN_ID, resultOpt.get().getOperationId());
-        assertEquals(OperationType.PROVISION, resultOpt.get().getOperationType());
-        assertEquals(SAMPLE_PROGRESS, resultOpt.get().getProgressFromHistory());
-        assertTrue(resultOpt.get().isInMemory());
-        verify(payloadContextProvider, times(1)).getPayloadContext(anyLong());
-        verify(flowOperationStatisticsService, times(1)).getProgressFromHistory(any());
-    }
-
-    @Test
-    public void testGetOperationFlowByResourceCrnWithUnknownOperation() {
-        // GIVEN
-        given(payloadContextProvider.getPayloadContext(SAMPLE_RESOURCE_ID)).willReturn(
-                PayloadContext.create(SAMPLE_RESOURCE_CRN, SAMPLE_CLOUD_PLATFORM));
-        // WHEN
-        underTest.put(SAMPLE_FLOW_ID, null, SAMPLE_RESOURCE_ID, OperationType.UNKNOWN.name(), null, false);
-        Optional<OperationFlowsView> resultOpt = underTest.getOperationFlowByResourceCrn(SAMPLE_RESOURCE_CRN);
-        // THEN
-        assertTrue(resultOpt.isEmpty());
-        verify(payloadContextProvider, times(1)).getPayloadContext(anyLong());
-        verify(flowOperationStatisticsService, times(0)).getProgressFromHistory(any());
     }
 
     @Test

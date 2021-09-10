@@ -1,38 +1,44 @@
 package com.sequenceiq.flow.core.stats;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
-import java.util.Calendar;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.event.PayloadContext;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.flow.api.model.FlowProgressResponse;
+import com.sequenceiq.flow.api.model.operation.OperationFlowsView;
 import com.sequenceiq.flow.api.model.operation.OperationType;
-import com.sequenceiq.flow.core.cache.FlowStat;
+import com.sequenceiq.flow.converter.FlowProgressResponseConverter;
+import com.sequenceiq.flow.core.PayloadContextProvider;
+import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
+import com.sequenceiq.flow.domain.FlowLog;
+import com.sequenceiq.flow.domain.FlowOperationStats;
 import com.sequenceiq.flow.repository.FlowOperationStatsRepository;
 
 @ExtendWith(MockitoExtension.class)
 public class FlowOperationStatisticsServiceTest {
 
-    private static final String SAMPLE_RESOURCE_CRN = "crn:cdp:environments:us-west-1:12345-6789:environment:12345-6789";
+    private static final String DUMMY_CRN = "crn:cdp:environments:us-west-1:1234:environment:myenv";
 
-    private static final String SAMPLE_CLOUD_PLATFORM = "AWS";
+    private static final Integer DUMMY_PROGRESS = 66;
 
-    private static final Date OLD_DATE = new GregorianCalendar(2000, Calendar.JANUARY, 1).getTime();
-
-    private static final Double EXPECTED_TWO_MINUTES = 120d;
-
-    private static final Integer EXPECTED_PROGRESS_PERCENT = 99;
-
-    @InjectMocks
     private FlowOperationStatisticsService underTest;
 
     @Mock
@@ -41,37 +47,73 @@ public class FlowOperationStatisticsServiceTest {
     @Mock
     private TransactionService transactionService;
 
+    @Mock
+    private PayloadContextProvider payloadContextProvider;
+
+    @Mock
+    private FlowProgressResponseConverter flowProgressResponseConverter;
+
+    @Mock
+    private AbstractFlowConfiguration flowConfiguration;
+
     @BeforeEach
     public void setUp() {
-        underTest = new FlowOperationStatisticsService(flowOperationStatsRepository, transactionService);
+        underTest = new FlowOperationStatisticsService(flowOperationStatsRepository, payloadContextProvider,
+                transactionService, flowProgressResponseConverter);
     }
 
     @Test
-    public void testUpdateOperationAverageTime() {
+    public void testCreateOperationResponse() {
         // GIVEN
+        given(payloadContextProvider.getPayloadContext(1L)).willReturn(getPayloadContext());
+        given(flowOperationStatsRepository.findFirstByOperationTypeAndCloudPlatform(any(OperationType.class), anyString())).willReturn(createFlowStats());
+        given(flowProgressResponseConverter.convert(any(List.class), anyString())).willReturn(createFlowProgressResponse());
         // WHEN
-        underTest.updateOperationAverageTime(OperationType.PROVISION, SAMPLE_CLOUD_PLATFORM, "120");
-        Double result = underTest.getExpectedAverageTimeForOperation(OperationType.PROVISION, SAMPLE_CLOUD_PLATFORM);
+        Optional<OperationFlowsView> response = underTest.createOperationResponse(DUMMY_CRN, flowLogs());
         // THEN
-        assertEquals(EXPECTED_TWO_MINUTES, result);
+        assertFalse(response.get().getFlowTypeProgressMap().isEmpty());
+        verify(flowOperationStatsRepository, times(1)).findFirstByOperationTypeAndCloudPlatform(any(OperationType.class), anyString());
     }
 
     @Test
-    public void testGetProgressFromHistory() {
+    public void testCreateOperationResponseWithoutFlowLogs() {
         // GIVEN
         // WHEN
-        underTest.updateOperationAverageTime(OperationType.PROVISION, SAMPLE_CLOUD_PLATFORM, "120");
-        Integer result = underTest.getProgressFromHistory(createFlowStat());
+        Optional<OperationFlowsView> response = underTest.createOperationResponse(DUMMY_CRN, new ArrayList<>());
         // THEN
-        assertEquals(EXPECTED_PROGRESS_PERCENT, result);
+        assertTrue(response.isEmpty());
     }
 
-    private FlowStat createFlowStat() {
-        FlowStat flowStat = new FlowStat();
-        PayloadContext payloadContext = PayloadContext.create(SAMPLE_RESOURCE_CRN, SAMPLE_CLOUD_PLATFORM);
-        flowStat.setPayloadContext(payloadContext);
-        flowStat.setOperationType(OperationType.PROVISION);
-        flowStat.setStartTime(OLD_DATE.getTime());
-        return flowStat;
+    private List<FlowLog> flowLogs() {
+        List<FlowLog> result = new ArrayList<>();
+        FlowLog fl1 = new FlowLog();
+        fl1.setOperationType(OperationType.PROVISION);
+        fl1.setFlowId("flowid");
+        fl1.setResourceId(1L);
+        fl1.setFlowType(flowConfiguration.getClass());
+        result.add(fl1);
+        return result;
     }
+
+    private PayloadContext getPayloadContext() {
+        return PayloadContext.create(DUMMY_CRN, CloudPlatform.AWS.name());
+    }
+
+    private FlowProgressResponse createFlowProgressResponse() {
+        FlowProgressResponse response = new FlowProgressResponse();
+        response.setProgress(DUMMY_PROGRESS);
+        response.setFinalized(false);
+        response.setFlowId("flowid");
+        response.setCreated(new Date().getTime());
+        return response;
+    }
+
+    private Optional<FlowOperationStats> createFlowStats() {
+        FlowOperationStats flowOperationStats = new FlowOperationStats();
+        flowOperationStats.setCloudPlatform(CloudPlatform.AWS.name());
+        flowOperationStats.setOperationType(OperationType.PROVISION);
+        flowOperationStats.setDurationHistory("66,69");
+        return Optional.of(flowOperationStats);
+    }
+
 }
