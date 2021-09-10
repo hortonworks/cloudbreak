@@ -3,7 +3,7 @@ package com.sequenceiq.datalake.flow.chain;
 import static com.sequenceiq.datalake.flow.create.SdxCreateEvent.STORAGE_VALIDATION_WAIT_EVENT;
 import static com.sequenceiq.datalake.flow.delete.SdxDeleteEvent.SDX_DELETE_EVENT;
 import static com.sequenceiq.datalake.flow.detach.SdxDetachEvent.SDX_DETACH_EVENT;
-import static com.sequenceiq.datalake.flow.detach.SdxDetachEvent.SDX_RESIZE_FLOW_CHAIN_START_EVENT;
+import static com.sequenceiq.datalake.flow.detach.event.DatalakeResizeFlowChainStartEvent.SDX_RESIZE_FLOW_CHAIN_START_EVENT;
 import static com.sequenceiq.datalake.flow.stop.SdxStopEvent.SDX_STOP_EVENT;
 
 import java.util.Queue;
@@ -24,7 +24,7 @@ import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 public class DatalakeResizeFlowEventChainFactory implements FlowEventChainFactory<DatalakeResizeFlowChainStartEvent> {
     @Override
     public String initEvent() {
-        return SDX_RESIZE_FLOW_CHAIN_START_EVENT.event();
+        return SDX_RESIZE_FLOW_CHAIN_START_EVENT;
     }
 
     @Override
