@@ -6,20 +6,24 @@ import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.net.util.SubnetUtils;
 import org.apache.commons.net.util.SubnetUtils.SubnetInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.amazonaws.services.ec2.model.DescribeSubnetsRequest;
 import com.amazonaws.services.ec2.model.DescribeSubnetsResult;
 import com.amazonaws.services.ec2.model.DescribeVpcsRequest;
 import com.amazonaws.services.ec2.model.Filter;
+import com.amazonaws.services.ec2.model.PrefixList;
 import com.amazonaws.services.ec2.model.Subnet;
 import com.amazonaws.services.ec2.model.Vpc;
 import com.amazonaws.services.ec2.model.VpcCidrBlockAssociation;
@@ -34,9 +38,12 @@ import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 
 @Service
 public class AwsNetworkService {
+
+    public static final String VPC_INTERFACE_SERVICE_ENDPOINT_NAME_PATTERN = "com.amazonaws.%s.%s";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsNetworkService.class);
 
@@ -48,6 +55,9 @@ public class AwsNetworkService {
 
     @Inject
     private CommonAwsClient awsClient;
+
+    @Value("${cb.aws.vpcendpoints.enabled.gateway.services}")
+    private Set<String> enabledGatewayServices;
 
     public List<Group> getGatewayGroups(Collection<Group> groups) {
         return groups.stream().filter(group -> group.getType() == InstanceGroupType.GATEWAY).collect(Collectors.toList());
@@ -107,8 +117,7 @@ public class AwsNetworkService {
         return calculateSubnet(ac.getCloudContext().getName(), vpc, subnetCidrs);
     }
 
-    public List<String> getVpcCidrs(AuthenticatedContext ac, CloudStack stack) {
-        AwsNetworkView awsNetworkView = new AwsNetworkView(stack.getNetwork());
+    public List<String> getVpcCidrs(AuthenticatedContext ac, AwsNetworkView awsNetworkView) {
         if (awsNetworkView.isExistingVPC()) {
             String region = ac.getCloudContext().getLocation().getRegion().value();
             AmazonEc2Client ec2Client = awsClient.createEc2Client(new AwsCredentialView(ac.getCloudCredential()), region);
@@ -203,5 +212,19 @@ public class AwsNetworkService {
     private String toSubnetCidr(String ip) {
         int ipValue = InetAddresses.coerceToInteger(InetAddresses.forString(ip)) - 1;
         return InetAddresses.fromInteger(ipValue).getHostAddress() + "/24";
+    }
+
+    public List<String> getPrefixListIds(AmazonEc2Client amazonEC2Client, String regionName, OutboundInternetTraffic outboundInternetTraffic) {
+        List<String> result = List.of();
+        if (outboundInternetTraffic == OutboundInternetTraffic.DISABLED && CollectionUtils.isNotEmpty(enabledGatewayServices)) {
+            Set<String> gatewayRegionServices = enabledGatewayServices.stream()
+                    .map(s -> String.format(VPC_INTERFACE_SERVICE_ENDPOINT_NAME_PATTERN, regionName, s))
+                    .collect(Collectors.toSet());
+            result = amazonEC2Client.describePrefixLists().getPrefixLists().stream()
+                    .filter(pl -> gatewayRegionServices.contains(pl.getPrefixListName()))
+                    .map(PrefixList::getPrefixListId)
+                    .collect(Collectors.toList());
+        }
+        return result;
     }
 }

@@ -542,7 +542,7 @@ public class GcpInstanceResourceBuilderTest {
                 instanceAuthentication.getPublicKey(),
                 50,
                 Optional.ofNullable(cloudFileSystemView),
-                createGroupNetwork());
+                createGroupNetwork(), emptyMap());
     }
 
     public CloudInstance newCloudInstance(Map<String, Object> params, InstanceAuthentication instanceAuthentication) {

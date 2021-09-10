@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.openstack.common;
 
+import static java.util.Collections.emptyMap;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
@@ -74,7 +75,7 @@ public class OpenStackFlavorVerifierTest {
     public void openStackNullFlavor() {
         try {
             Group g1 = new Group("name", InstanceGroupType.GATEWAY, new ArrayList<>(), null, null,
-                    null, "loginUserName", "publicKey", 50, Optional.empty(), createGroupNetwork());
+                    null, "loginUserName", "publicKey", 50, Optional.empty(), createGroupNetwork(), emptyMap());
             List<Group> instanceGroups = ImmutableList.of(g1);
             when(flavorService.list()).thenReturn(null);
             underTest.flavorsExist(osClient, instanceGroups);
@@ -103,7 +104,7 @@ public class OpenStackFlavorVerifierTest {
 
         Group group = new Group("name", InstanceGroupType.GATEWAY, new ArrayList<>(), null, skeleton,
                 null, "loginUserName", "publicKey",
-                50, Optional.empty(), createGroupNetwork());
+                50, Optional.empty(), createGroupNetwork(), emptyMap());
         return group;
     }
 

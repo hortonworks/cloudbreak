@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
 import static com.sequenceiq.cloudbreak.common.type.TemporaryStorage.ATTACHED_VOLUMES;
+import static java.util.Collections.emptyMap;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
@@ -147,7 +148,8 @@ public class AwsValidatorsTest {
         InstanceTemplate template =
                 new InstanceTemplate("noStorage", "worker", 0L, List.of(), InstanceStatus.CREATE_REQUESTED, Map.of(), 0L, "", ATTACHED_VOLUMES);
         CloudInstance instance = new CloudInstance("", template, null, "subnet-1", "az1");
-        Group group = new Group("worker", InstanceGroupType.CORE, List.of(instance), null, null, null, "", "", 0, Optional.empty(), createGroupNetwork());
+        Group group = new Group("worker", InstanceGroupType.CORE, List.of(instance), null, null, null, "", "", 0, Optional.empty(), createGroupNetwork(),
+                emptyMap());
         CloudStack cloudStack = new CloudStack(List.of(group), null, null, Map.of(), Map.of(), "", null, "", "", null);
         awsStackValidatorUnderTest.validate(authenticatedContext, cloudStack);
     }

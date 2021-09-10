@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.yarn;
 
 import static com.sequenceiq.common.api.type.ResourceType.YARN_APPLICATION;
+import static java.util.Collections.emptyMap;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -181,7 +182,7 @@ public class YarnResourceConnectorTest {
         InstanceGroupType type = InstanceGroupType.CORE;
         Collection<CloudInstance> instances = Lists.newArrayList(cloudInstanceMock, cloudInstanceMock);
 
-        return new Group(name, type, instances, null, null, null, null, null, 50, Optional.empty(), createGroupNetwork());
+        return new Group(name, type, instances, null, null, null, null, null, 50, Optional.empty(), createGroupNetwork(), emptyMap());
     }
 
     private GroupNetwork createGroupNetwork() {

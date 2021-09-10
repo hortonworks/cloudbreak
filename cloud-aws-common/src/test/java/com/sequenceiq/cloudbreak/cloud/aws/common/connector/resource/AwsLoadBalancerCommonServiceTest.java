@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.VPC_ID;
 import static com.sequenceiq.common.api.type.CommonStatus.CREATED;
 import static com.sequenceiq.common.api.type.InstanceGroupType.GATEWAY;
 import static com.sequenceiq.common.api.type.ResourceType.AWS_INSTANCE;
+import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -263,7 +264,7 @@ class AwsLoadBalancerCommonServiceTest {
 
     private CloudLoadBalancer createCloudLoadBalancer(LoadBalancerType type, List<String> instanceGroupNetworkSubnetIds) {
         Group group = new Group(INSTANCE_NAME, GATEWAY, List.of(), null, null, null, null,
-                null, null, 100, null, createGroupNetwork(instanceGroupNetworkSubnetIds));
+                null, null, 100, null, createGroupNetwork(instanceGroupNetworkSubnetIds), emptyMap());
         CloudLoadBalancer cloudLoadBalancer = new CloudLoadBalancer(type);
         cloudLoadBalancer.addPortToTargetGroupMapping(new TargetGroupPortPair(PORT, PORT), Set.of(group));
         return cloudLoadBalancer;
@@ -272,7 +273,7 @@ class AwsLoadBalancerCommonServiceTest {
     private CloudLoadBalancer createCloudLoadBalancerWithEndpointGateay(LoadBalancerType type, List<String> instanceGroupNetworkSubnetIds,
             List<String> endpointGatewaySubnetIds) {
         Group group = new Group(INSTANCE_NAME, GATEWAY, List.of(), null, null, null, null,
-                null, null, 100, null, createGroupNetwork(instanceGroupNetworkSubnetIds, endpointGatewaySubnetIds));
+                null, null, 100, null, createGroupNetwork(instanceGroupNetworkSubnetIds, endpointGatewaySubnetIds), emptyMap());
         CloudLoadBalancer cloudLoadBalancer = new CloudLoadBalancer(type);
         cloudLoadBalancer.addPortToTargetGroupMapping(new TargetGroupPortPair(PORT, PORT), Set.of(group));
         return cloudLoadBalancer;

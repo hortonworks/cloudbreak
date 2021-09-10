@@ -306,7 +306,7 @@ public class AwsUpscaleService {
 
             return new Group(group.getName(), group.getType(), newInstances, group.getSecurity(), null, group.getParameters(),
                     group.getInstanceAuthentication(), group.getLoginUserName(),
-                    group.getPublicKey(), group.getRootVolumeSize(), group.getIdentity(), group.getNetwork());
+                    group.getPublicKey(), group.getRootVolumeSize(), group.getIdentity(), group.getNetwork(), group.getTags());
         }).collect(Collectors.toList());
     }
 

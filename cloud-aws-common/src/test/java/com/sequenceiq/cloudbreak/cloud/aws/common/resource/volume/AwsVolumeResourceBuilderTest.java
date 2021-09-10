@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.aws.common.resource.volume;
 
 import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -293,7 +294,7 @@ class AwsVolumeResourceBuilderTest {
                 TEMPLATE_ID, IMAGE_ID, TemporaryStorage.ATTACHED_VOLUMES);
         CloudInstance instance = new CloudInstance(INSTANCE_ID, template, null, "subnet-1", "az1");
         return new Group(GROUP_NAME, InstanceGroupType.GATEWAY, singletonList(instance), null, null, null, null, null,
-                null, ROOT_VOLUME_SIZE, null, createGroupNetwork());
+                null, ROOT_VOLUME_SIZE, null, createGroupNetwork(), emptyMap());
     }
 
     private VolumeSetAttributes.Volume createVolumeForVolumeSet(String type) {

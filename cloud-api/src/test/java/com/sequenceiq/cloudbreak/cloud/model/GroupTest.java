@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
 import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatNullPointerException;
@@ -144,7 +145,7 @@ class GroupTest {
 
     private Group createGroup(Collection<CloudInstance> instances, CloudInstance skeleton) {
         return new Group(GROUP_NAME, InstanceGroupType.GATEWAY, instances, security, skeleton, instanceAuthentication, LOGIN_USER_NAME, PUBLIC_KEY,
-                ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork());
+                ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap());
     }
 
     private CloudInstance createCloudInstance() {

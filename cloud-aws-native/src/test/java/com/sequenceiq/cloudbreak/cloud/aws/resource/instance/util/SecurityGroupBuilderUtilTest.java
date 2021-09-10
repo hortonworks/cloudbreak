@@ -10,11 +10,9 @@ import static org.mockito.Mockito.when;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -32,15 +30,18 @@ import com.amazonaws.services.ec2.model.IpPermission;
 import com.amazonaws.services.ec2.model.IpRange;
 import com.amazonaws.services.ec2.model.PrefixListId;
 import com.amazonaws.services.ec2.model.SecurityGroup;
-import com.sequenceiq.cloudbreak.cloud.aws.AwsNativeModel;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
+import com.sequenceiq.cloudbreak.cloud.aws.common.connector.resource.AwsNetworkService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.service.AwsResourceNameService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsNetworkView;
-import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCloudStackView;
+import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.model.Location;
+import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.PortDefinition;
+import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
@@ -49,11 +50,10 @@ import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 @ExtendWith(MockitoExtension.class)
 public class SecurityGroupBuilderUtilTest {
 
+    private static final String REGION_NAME = "regionName";
+
     @InjectMocks
     private SecurityGroupBuilderUtil underTest;
-
-    @Mock
-    private AwsCloudStackView awsCloudStackView;
 
     @Mock
     private Group group;
@@ -65,10 +65,10 @@ public class SecurityGroupBuilderUtilTest {
     private CloudContext context;
 
     @Mock
-    private AwsNativeModel awsNativeModel;
+    private AwsNetworkView awsNetworkView;
 
     @Mock
-    private AwsNetworkView awsNetworkView;
+    private Network network;
 
     @Mock
     private AwsResourceNameService resourceNameService;
@@ -76,20 +76,22 @@ public class SecurityGroupBuilderUtilTest {
     @Mock
     private AwsTaggingService awsTaggingService;
 
-    @BeforeEach
-    public void beforeEach() {
+    @Mock
+    private AuthenticatedContext ac;
 
-    }
+    @Mock
+    private AwsNetworkService awsNetworkService;
 
     @Test
     public void testSecurityGroupWhenCloudSecurityIdsNotEmptyThenCreateSecurityGroupAndIngressButNotEgressCreateCalled() {
         when(group.getSecurity()).thenReturn(mock(Security.class));
         when(resourceNameService.resourceName(any(), any())).thenReturn("secGroupName");
-        when(amazonEc2Client.createSecurityGroup(any())).thenReturn(new CreateSecurityGroupResult().withGroupId("groupId"));
-        when(awsCloudStackView.network()).thenReturn(awsNetworkView);
-        Map<String, String> actual = underTest.createSecurityGroup(awsCloudStackView, group, amazonEc2Client, context, awsNativeModel);
+        String groupId = "groupId";
+        when(amazonEc2Client.createSecurityGroup(any())).thenReturn(new CreateSecurityGroupResult().withGroupId(groupId));
+        stubRegionName();
+        String actual = underTest.createSecurityGroup(network, group, amazonEc2Client, context, ac);
 
-        Assertions.assertFalse(actual.isEmpty());
+        Assertions.assertEquals(groupId, actual);
         verify(amazonEc2Client, times(1)).createSecurityGroup(any());
         verify(amazonEc2Client, times(0)).addEgress(any());
         verify(amazonEc2Client, times(1)).addIngress(any());
@@ -103,14 +105,14 @@ public class SecurityGroupBuilderUtilTest {
         request.setGroupName(groupName);
         AmazonEC2Exception amazonEC2Exception = new AmazonEC2Exception("Duplicate error");
         amazonEC2Exception.setErrorCode("InvalidGroup.Duplicate");
+        stubRegionName();
         when(group.getSecurity()).thenReturn(mock(Security.class));
         when(amazonEc2Client.describeSecurityGroups(any())).thenReturn(new DescribeSecurityGroupsResult()
                 .withSecurityGroups(new SecurityGroup().withGroupId(groupId).withGroupName(groupName)));
         when(amazonEc2Client.createSecurityGroup(request)).thenThrow(amazonEC2Exception);
 
-        Map<String, String> actual = underTest.createOrGetSecurityGroup(amazonEc2Client, request, group, awsNativeModel);
-        Assertions.assertTrue(actual.containsKey("SECURITY_GROUP_ID"));
-        Assertions.assertTrue(actual.containsKey("SECURITY_GROUP_NAME"));
+        String actual = underTest.createOrGetSecurityGroup(amazonEc2Client, request, group, awsNetworkView, ac);
+        Assertions.assertEquals(groupId, actual);
         verify(amazonEc2Client, times(1)).addIngress(any());
     }
 
@@ -122,6 +124,7 @@ public class SecurityGroupBuilderUtilTest {
         request.setGroupName(groupName);
         AmazonEC2Exception amazonEC2Exception = new AmazonEC2Exception("Duplicate error");
         amazonEC2Exception.setErrorCode("InvalidGroup.Duplicate");
+        stubRegionName();
         when(amazonEc2Client.describeSecurityGroups(any())).thenReturn(new DescribeSecurityGroupsResult()
                 .withSecurityGroups(new SecurityGroup()
                         .withGroupId(groupId)
@@ -129,9 +132,8 @@ public class SecurityGroupBuilderUtilTest {
                         .withIpPermissions(new IpPermission())));
         when(amazonEc2Client.createSecurityGroup(request)).thenThrow(amazonEC2Exception);
 
-        Map<String, String> actual = underTest.createOrGetSecurityGroup(amazonEc2Client, request, group, awsNativeModel);
-        Assertions.assertTrue(actual.containsKey("SECURITY_GROUP_ID"));
-        Assertions.assertTrue(actual.containsKey("SECURITY_GROUP_NAME"));
+        String actual = underTest.createOrGetSecurityGroup(amazonEc2Client, request, group, awsNetworkView, ac);
+        Assertions.assertEquals(groupId, actual);
         verify(amazonEc2Client, times(0)).addIngress(any());
     }
 
@@ -151,7 +153,7 @@ public class SecurityGroupBuilderUtilTest {
         when(amazonEc2Client.createSecurityGroup(request)).thenThrow(amazonEC2Exception);
 
         NotFoundException actual = Assertions.assertThrows(NotFoundException.class,
-                () -> underTest.createOrGetSecurityGroup(amazonEc2Client, request, group, awsNativeModel));
+                () -> underTest.createOrGetSecurityGroup(amazonEc2Client, request, group, awsNetworkView, ac));
         Assertions.assertEquals("Aws Security Group 'groupName' not found.", actual.getMessage());
     }
 
@@ -166,7 +168,7 @@ public class SecurityGroupBuilderUtilTest {
         when(security.getRules()).thenReturn(List.of(securityRule));
         when(group.getSecurity()).thenReturn(security);
 
-        underTest.ingress(group, amazonEc2Client, awsNativeModel, securityGroupId);
+        underTest.ingress(group, ac, amazonEc2Client, awsNetworkView, securityGroupId);
 
         verify(amazonEc2Client).addIngress(ingressCaptor.capture());
 
@@ -192,7 +194,7 @@ public class SecurityGroupBuilderUtilTest {
         when(security.getRules()).thenReturn(List.of(securityRule1, securityRule21));
         when(group.getSecurity()).thenReturn(security);
 
-        underTest.ingress(group, amazonEc2Client, awsNativeModel, securityGroupId);
+        underTest.ingress(group, ac, amazonEc2Client, awsNetworkView, securityGroupId);
 
         verify(amazonEc2Client).addIngress(ingressCaptor.capture());
 
@@ -214,9 +216,9 @@ public class SecurityGroupBuilderUtilTest {
 
         when(security.getRules()).thenReturn(List.of());
         when(group.getSecurity()).thenReturn(security);
-        when(awsNativeModel.getVpcSubnet()).thenReturn(List.of("0.0.0.0/10"));
+        when(awsNetworkService.getVpcCidrs(ac, awsNetworkView)).thenReturn(List.of("0.0.0.0/10"));
 
-        underTest.ingress(group, amazonEc2Client, awsNativeModel, "groupId");
+        underTest.ingress(group, ac, amazonEc2Client, awsNetworkView, "groupId");
 
         verify(amazonEc2Client).addIngress(ingressCaptor.capture());
 
@@ -246,51 +248,56 @@ public class SecurityGroupBuilderUtilTest {
 
     @Test
     public void testEgressWhenOutboundInternetTrafficEnabledButPrefixListAndVpcCidrsEmpty() {
-        when(awsNativeModel.getOutboundInternetTraffic()).thenReturn(OutboundInternetTraffic.ENABLED);
-        when(awsNativeModel.getPrefixListIds()).thenReturn(emptyList());
-        when(awsNativeModel.getVpcCidrs()).thenReturn(emptyList());
+        stubRegionName();
+        when(awsNetworkView.getOutboundInternetTraffic()).thenReturn(OutboundInternetTraffic.ENABLED);
+        when(awsNetworkService.getPrefixListIds(amazonEc2Client, REGION_NAME, OutboundInternetTraffic.ENABLED)).thenReturn(emptyList());
+        when(awsNetworkService.getVpcCidrs(ac, awsNetworkView)).thenReturn(emptyList());
 
-        underTest.egress(amazonEc2Client, awsNativeModel, "id", emptyList());
+        underTest.egress(amazonEc2Client, ac, awsNetworkView, "id", emptyList());
         verify(amazonEc2Client, times(0)).addEgress(any());
     }
 
     @Test
     public void testEgressWhenOutboundInternetTrafficEnabledAndPrefixListNotEmptyButVpcCidrsEmpty() {
-        when(awsNativeModel.getOutboundInternetTraffic()).thenReturn(OutboundInternetTraffic.ENABLED);
-        when(awsNativeModel.getPrefixListIds()).thenReturn(List.of("id1"));
-        when(awsNativeModel.getVpcCidrs()).thenReturn(emptyList());
+        stubRegionName();
+        when(awsNetworkView.getOutboundInternetTraffic()).thenReturn(OutboundInternetTraffic.ENABLED);
+        when(awsNetworkService.getPrefixListIds(amazonEc2Client, REGION_NAME, OutboundInternetTraffic.ENABLED)).thenReturn(List.of("id1"));
+        when(awsNetworkService.getVpcCidrs(ac, awsNetworkView)).thenReturn(emptyList());
 
-        underTest.egress(amazonEc2Client, awsNativeModel, "id", emptyList());
+        underTest.egress(amazonEc2Client, ac, awsNetworkView, "id", emptyList());
         verify(amazonEc2Client, times(0)).addEgress(any());
     }
 
     @Test
     public void testEgressWhenOutboundInternetTrafficEnabledAndVpcCidrsNotEmptyButPrefixListEmpty() {
-        when(awsNativeModel.getOutboundInternetTraffic()).thenReturn(OutboundInternetTraffic.ENABLED);
-        when(awsNativeModel.getPrefixListIds()).thenReturn(emptyList());
-        when(awsNativeModel.getVpcCidrs()).thenReturn(List.of("id1"));
+        stubRegionName();
+        when(awsNetworkView.getOutboundInternetTraffic()).thenReturn(OutboundInternetTraffic.ENABLED);
+        when(awsNetworkService.getPrefixListIds(amazonEc2Client, REGION_NAME, OutboundInternetTraffic.ENABLED)).thenReturn(emptyList());
+        when(awsNetworkService.getVpcCidrs(ac, awsNetworkView)).thenReturn(List.of("id1"));
 
-        underTest.egress(amazonEc2Client, awsNativeModel, "id", emptyList());
+        underTest.egress(amazonEc2Client, ac, awsNetworkView, "id", emptyList());
         verify(amazonEc2Client, times(0)).addEgress(any());
     }
 
     @Test
     public void testEgressWhenOutboundInternetTrafficDisabledButPrefixListAndVpcCidrsEmpty() {
-        when(awsNativeModel.getOutboundInternetTraffic()).thenReturn(OutboundInternetTraffic.DISABLED);
-        when(awsNativeModel.getPrefixListIds()).thenReturn(emptyList());
-        when(awsNativeModel.getVpcCidrs()).thenReturn(emptyList());
+        stubRegionName();
+        when(awsNetworkView.getOutboundInternetTraffic()).thenReturn(OutboundInternetTraffic.DISABLED);
+        when(awsNetworkService.getPrefixListIds(amazonEc2Client, REGION_NAME, OutboundInternetTraffic.DISABLED)).thenReturn(emptyList());
+        when(awsNetworkService.getVpcCidrs(ac, awsNetworkView)).thenReturn(emptyList());
 
-        underTest.egress(amazonEc2Client, awsNativeModel, "id", emptyList());
+        underTest.egress(amazonEc2Client, ac, awsNetworkView, "id", emptyList());
         verify(amazonEc2Client, times(0)).addEgress(any());
     }
 
     @Test
     public void testEgressWhenOutboundInternetTrafficDisabledAndPrefixListNotEmptyButVpcCidrsEmpty() {
-        when(awsNativeModel.getOutboundInternetTraffic()).thenReturn(OutboundInternetTraffic.DISABLED);
-        when(awsNativeModel.getPrefixListIds()).thenReturn(List.of("id1", "id2"));
-        when(awsNativeModel.getVpcCidrs()).thenReturn(emptyList());
+        stubRegionName();
+        when(awsNetworkView.getOutboundInternetTraffic()).thenReturn(OutboundInternetTraffic.DISABLED);
+        when(awsNetworkService.getPrefixListIds(amazonEc2Client, REGION_NAME, OutboundInternetTraffic.DISABLED)).thenReturn(List.of("id1", "id2"));
+        when(awsNetworkService.getVpcCidrs(ac, awsNetworkView)).thenReturn(emptyList());
 
-        underTest.egress(amazonEc2Client, awsNativeModel, "id", emptyList());
+        underTest.egress(amazonEc2Client, ac, awsNetworkView, "id", emptyList());
         ArgumentCaptor<AuthorizeSecurityGroupEgressRequest> egressCaptor = ArgumentCaptor.forClass(AuthorizeSecurityGroupEgressRequest.class);
         verify(amazonEc2Client).addEgress(egressCaptor.capture());
         verify(amazonEc2Client, times(1)).addEgress(any());
@@ -305,11 +312,12 @@ public class SecurityGroupBuilderUtilTest {
 
     @Test
     public void testEgressWhenOutboundInternetTrafficDisabledAndVpcCidrsNotEmptyButPrefixListEmpty() {
-        when(awsNativeModel.getOutboundInternetTraffic()).thenReturn(OutboundInternetTraffic.DISABLED);
-        when(awsNativeModel.getPrefixListIds()).thenReturn(emptyList());
-        when(awsNativeModel.getVpcCidrs()).thenReturn(List.of("cidr1", "cidr2"));
+        stubRegionName();
+        when(awsNetworkView.getOutboundInternetTraffic()).thenReturn(OutboundInternetTraffic.DISABLED);
+        when(awsNetworkService.getPrefixListIds(amazonEc2Client, REGION_NAME, OutboundInternetTraffic.DISABLED)).thenReturn(emptyList());
+        when(awsNetworkService.getVpcCidrs(ac, awsNetworkView)).thenReturn(List.of("cidr1", "cidr2"));
 
-        underTest.egress(amazonEc2Client, awsNativeModel, "id", emptyList());
+        underTest.egress(amazonEc2Client, ac, awsNetworkView, "id", emptyList());
         ArgumentCaptor<AuthorizeSecurityGroupEgressRequest> egressCaptor = ArgumentCaptor.forClass(AuthorizeSecurityGroupEgressRequest.class);
         verify(amazonEc2Client).addEgress(egressCaptor.capture());
         verify(amazonEc2Client, times(1)).addEgress(any());
@@ -326,11 +334,12 @@ public class SecurityGroupBuilderUtilTest {
                 .withFromPort(0)
                 .withToPort(TO_PORT)
                 .withPrefixListIds(new PrefixListId().withPrefixListId("id1"));
-        when(awsNativeModel.getOutboundInternetTraffic()).thenReturn(OutboundInternetTraffic.DISABLED);
-        when(awsNativeModel.getPrefixListIds()).thenReturn(List.of("id1", "id2"));
-        when(awsNativeModel.getVpcCidrs()).thenReturn(emptyList());
+        stubRegionName();
+        when(awsNetworkView.getOutboundInternetTraffic()).thenReturn(OutboundInternetTraffic.DISABLED);
+        when(awsNetworkService.getPrefixListIds(amazonEc2Client, REGION_NAME, OutboundInternetTraffic.DISABLED)).thenReturn(List.of("id1", "id2"));
+        when(awsNetworkService.getVpcCidrs(ac, awsNetworkView)).thenReturn(emptyList());
 
-        underTest.egress(amazonEc2Client, awsNativeModel, "id", List.of(ipPermission));
+        underTest.egress(amazonEc2Client, ac, awsNetworkView, "id", List.of(ipPermission));
         ArgumentCaptor<AuthorizeSecurityGroupEgressRequest> egressCaptor = ArgumentCaptor.forClass(AuthorizeSecurityGroupEgressRequest.class);
         verify(amazonEc2Client).addEgress(egressCaptor.capture());
         verify(amazonEc2Client, times(1)).addEgress(any());
@@ -345,11 +354,12 @@ public class SecurityGroupBuilderUtilTest {
     @Test
     public void testEgressWhenOutboundInternetTrafficDisabledAndVpcCidrsNotEmptyButPrefixListEmptyButContainsAlready() {
         IpPermission cidrPermission = new IpPermission().withIpProtocol("-1").withIpv4Ranges(new IpRange().withCidrIp("cidr1"));
-        when(awsNativeModel.getOutboundInternetTraffic()).thenReturn(OutboundInternetTraffic.DISABLED);
-        when(awsNativeModel.getPrefixListIds()).thenReturn(emptyList());
-        when(awsNativeModel.getVpcCidrs()).thenReturn(List.of("cidr1", "cidr2"));
+        stubRegionName();
+        when(awsNetworkView.getOutboundInternetTraffic()).thenReturn(OutboundInternetTraffic.DISABLED);
+        when(awsNetworkService.getPrefixListIds(amazonEc2Client, REGION_NAME, OutboundInternetTraffic.DISABLED)).thenReturn(emptyList());
+        when(awsNetworkService.getVpcCidrs(ac, awsNetworkView)).thenReturn(List.of("cidr1", "cidr2"));
 
-        underTest.egress(amazonEc2Client, awsNativeModel, "id", List.of(cidrPermission));
+        underTest.egress(amazonEc2Client, ac, awsNetworkView, "id", List.of(cidrPermission));
         ArgumentCaptor<AuthorizeSecurityGroupEgressRequest> egressCaptor = ArgumentCaptor.forClass(AuthorizeSecurityGroupEgressRequest.class);
         verify(amazonEc2Client).addEgress(egressCaptor.capture());
         verify(amazonEc2Client, times(1)).addEgress(any());
@@ -359,4 +369,8 @@ public class SecurityGroupBuilderUtilTest {
         Assertions.assertEquals("cidr2", egressCaptor.getValue().getIpPermissions().get(0).getIpv4Ranges().get(0).getCidrIp());
     }
 
+    private void stubRegionName() {
+        when(ac.getCloudContext()).thenReturn(context);
+        when(context.getLocation()).thenReturn(Location.location(Region.region(REGION_NAME)));
+    }
 }

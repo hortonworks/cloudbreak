@@ -446,7 +446,8 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
                     stack.getInstanceAuthentication().getPublicKey(),
                     group.getRootVolumeSize(),
                     Optional.empty(),
-                    group.getNetwork()));
+                    group.getNetwork(),
+                    group.getTags()));
         }
         return new CloudStack(groups, stack.getNetwork(), stack.getImage(), stack.getParameters(), stack.getTags(),
                 stack.getTemplate(), stack.getInstanceAuthentication(), stack.getInstanceAuthentication().getLoginUserName(),

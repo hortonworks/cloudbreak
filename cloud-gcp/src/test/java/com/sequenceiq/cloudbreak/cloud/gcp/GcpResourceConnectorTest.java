@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 import static com.sequenceiq.common.api.type.ResourceType.GCP_ATTACHED_DISKSET;
 import static com.sequenceiq.common.api.type.ResourceType.GCP_INSTANCE;
 import static com.sequenceiq.common.api.type.ResourceType.GCP_RESERVED_IP;
+import static java.util.Collections.emptyMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -264,7 +265,7 @@ public class GcpResourceConnectorTest {
                 "publicKey",
                 50,
                 Optional.empty(),
-                createGroupNetwork());
+                createGroupNetwork(), emptyMap());
     }
 
     private InstanceTemplate instanceTemplate() {

@@ -552,7 +552,7 @@ class AwsUpscaleServiceTest {
         cloudInstances.add(workerInstance5);
         return new Group("worker", InstanceGroupType.CORE, cloudInstances, null, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), 50, Optional.empty(), createGroupNetwork());
+                instanceAuthentication.getPublicKey(), 50, Optional.empty(), createGroupNetwork(), emptyMap());
     }
 
     private Group getMasterGroup(InstanceAuthentication instanceAuthentication) {
@@ -563,7 +563,7 @@ class AwsUpscaleServiceTest {
         masterInstances.add(masterInstance2);
         return new Group("master", InstanceGroupType.GATEWAY, masterInstances, null, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), 50, Optional.empty(), createGroupNetwork());
+                instanceAuthentication.getPublicKey(), 50, Optional.empty(), createGroupNetwork(), emptyMap());
     }
 
     private Network getNetwork() {

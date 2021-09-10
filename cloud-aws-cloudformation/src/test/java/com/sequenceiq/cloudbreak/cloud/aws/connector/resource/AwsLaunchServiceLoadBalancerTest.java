@@ -9,6 +9,7 @@ import static com.sequenceiq.common.api.type.CommonStatus.FAILED;
 import static com.sequenceiq.common.api.type.InstanceGroupType.GATEWAY;
 import static com.sequenceiq.common.api.type.ResourceType.AWS_INSTANCE;
 import static com.sequenceiq.common.api.type.ResourceType.ELASTIC_LOAD_BALANCER;
+import static java.util.Collections.emptyMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -566,7 +567,7 @@ public class AwsLaunchServiceLoadBalancerTest {
 
     private CloudLoadBalancer createCloudLoadBalancer(LoadBalancerType type) {
         Group group = new Group(INSTANCE_NAME, GATEWAY, List.of(), null, null, null, null,
-                null, null, 100, null, createGroupNetwork());
+                null, null, 100, null, createGroupNetwork(), emptyMap());
         CloudLoadBalancer cloudLoadBalancer = new CloudLoadBalancer(type);
         cloudLoadBalancer.addPortToTargetGroupMapping(new TargetGroupPortPair(PORT, PORT), Set.of(group));
         return cloudLoadBalancer;
