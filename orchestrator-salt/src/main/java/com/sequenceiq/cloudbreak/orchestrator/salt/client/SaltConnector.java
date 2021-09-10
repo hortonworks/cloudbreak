@@ -153,8 +153,12 @@ public class SaltConnector implements Closeable {
         return run(null, fun, clientType, clazz, arg);
     }
 
-    @Measure(SaltConnector.class)
     public <T> T run(Target<String> target, String fun, SaltClientType clientType, Class<T> clazz, String... arg) {
+        return run(target, fun, clientType, clazz, null, arg);
+    }
+
+    @Measure(SaltConnector.class)
+    public <T> T run(Target<String> target, String fun, SaltClientType clientType, Class<T> clazz, Long timeout, String... arg) {
         Form form = new Form();
         form = addAuth(form)
                 .param("fun", fun)
@@ -162,6 +166,9 @@ public class SaltConnector implements Closeable {
         if (target != null) {
             form = form.param("tgt", target.getTarget())
                     .param("tgt_type", target.getType());
+        }
+        if (timeout != null) {
+            form = form.param("t", timeout.toString());
         }
         if ("state.show_sls".equals(fun)) {
             form.param("full_return", "True");

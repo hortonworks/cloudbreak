@@ -20,9 +20,19 @@ public class MinionIpAddressesResponse {
     public List<String> getAllIpAddresses() {
         return result.stream()
                 .flatMap(result -> result.entrySet().stream())
+                .filter(entry -> entry.getValue() != null)
                 .filter(entry -> !"false".equals(entry.getValue().asText()))
                 .flatMap(entry -> Streams.stream(entry.getValue().elements()))
                 .map(JsonNode::asText)
+                .collect(Collectors.toList());
+    }
+
+    @JsonIgnore
+    public List<String> getUnreachableNodes() {
+        return result.stream()
+                .flatMap(result -> result.entrySet().stream())
+                .filter(entry -> entry.getValue() == null || "false".equals(entry.getValue().asText()))
+                .map(entry -> entry.getKey())
                 .collect(Collectors.toList());
     }
 

@@ -64,7 +64,6 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Glob;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.HostAndRoleTarget;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.HostList;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Target;
-import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionIpAddressesResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionStatusSaltResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.grain.GrainUploader;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.BaseSaltJobRunner;
@@ -1327,19 +1326,15 @@ public class SaltOrchestrator implements HostOrchestrator {
 
     private Set<Node> getResponsiveNodes(Set<Node> nodes, SaltConnector sc) {
         Set<Node> responsiveNodes = new HashSet<>();
-        MinionIpAddressesResponse minionIpAddressesResponse = SaltStates.collectMinionIpAddresses(retry, sc);
-        if (minionIpAddressesResponse != null) {
-            nodes.forEach(node -> {
-                if (minionIpAddressesResponse.getAllIpAddresses().contains(node.getPrivateIp())) {
-                    LOGGER.info("Salt-minion is responding on host: {}", node);
-                    responsiveNodes.add(node);
-                } else {
-                    LOGGER.warn("Salt-minion is not responding on host: {}", node);
-                }
-            });
-        } else {
-            LOGGER.info("Minions ip address collection returned null value");
-        }
+        Set<String> minionIpAddresses = SaltStates.collectMinionIpAddresses(retry, sc);
+        nodes.forEach(node -> {
+            if (minionIpAddresses.contains(node.getPrivateIp())) {
+                LOGGER.info("Salt-minion is responding on host: {}", node);
+                responsiveNodes.add(node);
+            } else {
+                LOGGER.warn("Salt-minion is not responding on host: {}", node);
+            }
+        });
         return responsiveNodes;
     }
 }

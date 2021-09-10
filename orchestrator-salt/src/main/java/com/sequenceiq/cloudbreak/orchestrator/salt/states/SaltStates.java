@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -52,6 +53,8 @@ import com.sequenceiq.cloudbreak.service.Retry;
 public class SaltStates {
 
     public static final Pattern RUNNING_HIGHSTATE_JID = Pattern.compile(".*The function .*state\\.highstate.* is running as PID.*with jid (\\d+).*");
+
+    private static final long NETWORK_IPADDRS_TIMEOUT = 15L;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SaltStates.class);
 
@@ -204,10 +207,25 @@ public class SaltStates {
         }
     }
 
-    public static MinionIpAddressesResponse collectMinionIpAddresses(Retry retry, SaltConnector sc) {
+    public static Set<String> collectMinionIpAddresses(Retry retry, SaltConnector sc) {
+        Set<String> minionIpAddresses = new HashSet<>();
+        try {
+            return collectMinionIpAddressesWithRetry(retry, sc, minionIpAddresses);
+        } catch (Retry.ActionFailedException e) {
+            if ("Unreachable nodes found.".equals(e.getMessage())) {
+                return minionIpAddresses;
+            } else {
+                throw e;
+            }
+        }
+    }
+
+    private static Set<String> collectMinionIpAddressesWithRetry(Retry retry, SaltConnector sc, Set<String> minionIpAddresses) {
         return retry.testWith1SecDelayMax5Times(() -> {
             try {
-                return collectMinionIpAddresses(sc);
+                return collectMinionIpAddressesAndHandleUnreachableNodes(sc, minionIpAddresses);
+            } catch (Retry.ActionFailedException e) {
+                throw e;
             } catch (RuntimeException e) {
                 LOGGER.error("Collecting minion IP addresses failed", e);
                 throw new Retry.ActionFailedException("Collecting minion IP addresses failed", e);
@@ -215,8 +233,23 @@ public class SaltStates {
         });
     }
 
+    private static Set<String> collectMinionIpAddressesAndHandleUnreachableNodes(SaltConnector sc, Set<String> minionIpAddresses) {
+        MinionIpAddressesResponse minionIpAddressesResponse = collectMinionIpAddresses(sc);
+        if (minionIpAddressesResponse == null) {
+            LOGGER.debug("Minions ip address collection returned null value");
+            throw new Retry.ActionFailedException("Minions ip address collection returned null value");
+        }
+        minionIpAddresses.addAll(minionIpAddressesResponse.getAllIpAddresses());
+        if (!minionIpAddressesResponse.getUnreachableNodes().isEmpty()) {
+            LOGGER.debug("Unreachable nodes found: {}, retry and collect minion ip addresses.", minionIpAddressesResponse.getUnreachableNodes());
+            throw new Retry.ActionFailedException("Unreachable nodes found.");
+        }
+        return minionIpAddresses;
+    }
+
     public static MinionIpAddressesResponse collectMinionIpAddresses(SaltConnector sc) {
-        MinionIpAddressesResponse minionIpAddressesResponse = measure(() -> sc.run(Glob.ALL, "network.ipaddrs", LOCAL, MinionIpAddressesResponse.class),
+        MinionIpAddressesResponse minionIpAddressesResponse = measure(() -> sc.run(Glob.ALL, "network.ipaddrs", LOCAL,
+                        MinionIpAddressesResponse.class, NETWORK_IPADDRS_TIMEOUT),
                 LOGGER, "Network IP address call took {}ms");
         LOGGER.debug("Minion ip response: {}", minionIpAddressesResponse);
         return minionIpAddressesResponse;
