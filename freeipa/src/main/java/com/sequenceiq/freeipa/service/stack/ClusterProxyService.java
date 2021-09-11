@@ -163,20 +163,20 @@ public class ClusterProxyService {
         List<GatewayConfig> gatewayConfigs = gatewayConfigService.getNotDeletedGatewayConfigs(stack);
         ClientCertificate clientCertificate = clientCertificates(stack);
 
-        boolean usePrivateIpToTls = stack.getSecurityConfig().isUsePrivateIpToTls();
+        boolean preferPrivateIp = stack.getTunnel().useCcm();
         List<GatewayConfig> tunnelGatewayConfigs;
         List<ClusterServiceConfig> serviceConfigs = new LinkedList<>();
-        serviceConfigs.add(createServiceConfig(stack, FREEIPA_SERVICE_NAME, primaryGatewayConfig, clientCertificate, usePrivateIpToTls));
+        serviceConfigs.add(createServiceConfig(stack, FREEIPA_SERVICE_NAME, primaryGatewayConfig, clientCertificate, preferPrivateIp));
 
         if (bootstrap) {
             tunnelGatewayConfigs = List.of(primaryGatewayConfig);
-            serviceConfigs.add(createServiceConfig(stack, generateFreeIpaFqdn(stack), primaryGatewayConfig, clientCertificate, usePrivateIpToTls));
+            serviceConfigs.add(createServiceConfig(stack, generateFreeIpaFqdn(stack), primaryGatewayConfig, clientCertificate, preferPrivateIp));
         } else if (clusterProxyServiceAvailabilityChecker.isDnsBasedServiceNameAvailable(stack)) {
             List<GatewayConfig> targetGatewayConfigs = gatewayConfigs.stream()
                     .filter(gatewayConfig -> Objects.nonNull(gatewayConfig.getInstanceId()))
                     .filter(gatewayConfig -> Objects.isNull(instanceIdsToRegister) || instanceIdsToRegister.contains(gatewayConfig.getInstanceId()))
                     .collect(Collectors.toList());
-            serviceConfigs.addAll(createDnsMappedServiceConfigs(stack, targetGatewayConfigs, clientCertificate, usePrivateIpToTls));
+            serviceConfigs.addAll(createDnsMappedServiceConfigs(stack, targetGatewayConfigs, clientCertificate, preferPrivateIp));
             tunnelGatewayConfigs = targetGatewayConfigs;
         } else {
             tunnelGatewayConfigs = List.of(primaryGatewayConfig);
@@ -191,7 +191,7 @@ public class ClusterProxyService {
             requestBuilder.withCcmV2Entries(createCcmV2Configs(stack, tunnelGatewayConfigs));
         }
         ConfigRegistrationRequest request = requestBuilder.build();
-        LOGGER.debug("Registring cluser proxy configuration [{}]", request);
+        LOGGER.debug("Registering cluster proxy configuration [{}]", request);
         ConfigRegistrationResponse response = clusterProxyRegistrationClient.registerConfig(request);
 
         if (waitForGoodHealth) {
@@ -237,21 +237,21 @@ public class ClusterProxyService {
     }
 
     private ClusterServiceConfig createServiceConfig(Stack stack, String serviceName, GatewayConfig gatewayConfig, ClientCertificate clientCertificate,
-            boolean usePrivateIpToTls) {
+            boolean preferPrivateIp) {
         return new ClusterServiceConfig(serviceName,
-                List.of(getNginxEndpointForRegistration(stack, gatewayConfig, usePrivateIpToTls)),
+                List.of(getNginxEndpointForRegistration(stack, gatewayConfig, preferPrivateIp)),
                 List.of(),
                 clientCertificate
         );
     }
 
     private List<ClusterServiceConfig> createDnsMappedServiceConfigs(Stack stack, List<GatewayConfig> gatewayConfigs, ClientCertificate clientCertificate,
-            boolean usePrivateIpToTls) {
+            boolean preferPrivateIp) {
         List<ClusterServiceConfig> serviceConfigs = gatewayConfigs.stream()
-                .map(gatewayConfig -> createServiceConfig(stack, gatewayConfig.getHostname(), gatewayConfig, clientCertificate, usePrivateIpToTls))
+                .map(gatewayConfig -> createServiceConfig(stack, gatewayConfig.getHostname(), gatewayConfig, clientCertificate, preferPrivateIp))
                 .collect(Collectors.toList());
         List<String> endpoints = gatewayConfigs.stream()
-                .map(gatewayConfig -> getNginxEndpointForRegistration(stack, gatewayConfig, usePrivateIpToTls))
+                .map(gatewayConfig -> getNginxEndpointForRegistration(stack, gatewayConfig, preferPrivateIp))
                 .collect(Collectors.toList());
         serviceConfigs.add(new ClusterServiceConfig(generateFreeIpaFqdn(stack),
                 endpoints,
@@ -365,12 +365,9 @@ public class ClusterProxyService {
         return clientCertificate;
     }
 
-    private String getNginxEndpointForRegistration(Stack stack, GatewayConfig gatewayConfig, boolean usePrivateIpToTls) {
-        String ipAddresss = gatewayConfig.getPublicAddress();
-        if (usePrivateIpToTls) {
-            ipAddresss = gatewayConfig.getPrivateAddress();
-        }
-        return String.format("%s://%s:%d", NGINX_PROTOCOL, ipAddresss, getNginxPort(stack));
+    private String getNginxEndpointForRegistration(Stack stack, GatewayConfig gatewayConfig, boolean preferPrivateIp) {
+        String ipAddress = preferPrivateIp ? gatewayConfig.getPrivateAddress() : gatewayConfig.getPublicAddress();
+        return String.format("%s://%s:%d", NGINX_PROTOCOL, ipAddress, getNginxPort(stack));
     }
 
     private int getNginxPort(Stack stack) {
@@ -380,7 +377,7 @@ public class ClusterProxyService {
     public void pollForGoodHealth(Stack stack) {
         serviceEndpointHealthPollingService.pollWithTimeout(
                 serviceEndpointHealthListenerTask, new ServiceEndpointHealthPollerObject(stack.getResourceCrn(), clusterProxyRegistrationClient),
-                getIntervalInSec(stack) * MILLIS_PER_SEC, maxAttempts, maxFailure);
+                (long) getIntervalInSec(stack) * MILLIS_PER_SEC, maxAttempts, maxFailure);
     }
 
 }
