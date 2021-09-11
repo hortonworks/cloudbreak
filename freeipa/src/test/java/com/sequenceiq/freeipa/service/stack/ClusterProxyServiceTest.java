@@ -1,7 +1,10 @@
 package com.sequenceiq.freeipa.service.stack;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -20,12 +23,15 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.ccm.endpoint.ServiceFamilies;
 import com.sequenceiq.cloudbreak.clusterproxy.CcmV2Config;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyConfiguration;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyEnablementService;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyRegistrationClient;
+import com.sequenceiq.cloudbreak.clusterproxy.ClusterServiceConfig;
+import com.sequenceiq.cloudbreak.clusterproxy.ClusterServiceHealthCheck;
 import com.sequenceiq.cloudbreak.clusterproxy.ConfigRegistrationRequest;
 import com.sequenceiq.cloudbreak.clusterproxy.ConfigRegistrationResponse;
 import com.sequenceiq.cloudbreak.clusterproxy.ReadConfigResponse;
@@ -40,6 +46,7 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.SecurityConfigService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
+import com.sequenceiq.freeipa.service.polling.clusterproxy.ServiceEndpointHealthPollerObject;
 import com.sequenceiq.freeipa.util.ClusterProxyServiceAvailabilityChecker;
 import com.sequenceiq.freeipa.util.HealthCheckAvailabilityChecker;
 
@@ -51,6 +58,24 @@ public class ClusterProxyServiceTest {
     private static final String TEST_ACCOUNT_ID = "9d74eee4-1cad-45d7-b645-7ccf9edbb73d";
 
     private static final String FREEIPA_SERVICE = "freeipa";
+
+    private static final String PRIVATE_IP_ADDRESS = "privateIpAddress";
+
+    private static final String PRIVATE_IP_ADDRESS_1 = "privateIpAddress1";
+
+    private static final String PRIVATE_IP_ADDRESS_2 = "privateIpAddress2";
+
+    private static final String PRIVATE_ADDRESS = "privateAddress";
+
+    private static final int INTERVAL_IN_SEC_V_2 = 12;
+
+    private static final String HEALTH_STATUS_ENDPOINT_V_2 = "health.info";
+
+    private static final int TIMEOUT_IN_SEC_V_2 = 34;
+
+    private static final int HEALTHY_STATUS_CODE_V_2 = 200;
+
+    private static final String STACK_RESOURCE_CRN = "resourceCrn";
 
     @InjectMocks
     private ClusterProxyService underTest;
@@ -80,7 +105,7 @@ public class ClusterProxyServiceTest {
     private FreeIpaService freeIpaService;
 
     @Mock
-    private PollingService serviceEndpointHealthPollingService;
+    private PollingService<ServiceEndpointHealthPollerObject> serviceEndpointHealthPollingService;
 
     @Mock
     private HealthCheckAvailabilityChecker healthCheckAvailabilityChecker;
@@ -97,15 +122,15 @@ public class ClusterProxyServiceTest {
         FreeIpa freeIpa = new FreeIpa();
         freeIpa.setDomain("ipadom");
 
-        GatewayConfig gatewayConfig = new GatewayConfig("connectionAddress", null, "privateIpAddress",
+        GatewayConfig gatewayConfig = new GatewayConfig("connectionAddress", "publicIpAddress", PRIVATE_IP_ADDRESS,
                 ServiceFamilies.GATEWAY.getDefaultPort(), "testInstanceId", true);
-        ConfigRegistrationResponse configRegResposne = mock(ConfigRegistrationResponse.class);
+        ConfigRegistrationResponse configRegResponse = mock(ConfigRegistrationResponse.class);
 
         when(stackService.getStackById(STACK_ID)).thenReturn(aStack);
         when(clusterProxyEnablementService.isClusterProxyApplicable(any())).thenReturn(true);
         when(gatewayConfigService.getPrimaryGatewayConfig(aStack)).thenReturn(gatewayConfig);
         when(securityConfigService.findOneByStack(aStack)).thenReturn(null);
-        when(clusterProxyRegistrationClient.registerConfig(any())).thenReturn(configRegResposne);
+        when(clusterProxyRegistrationClient.registerConfig(any())).thenReturn(configRegResponse);
         when(stackUpdater.updateClusterProxyRegisteredFlag(aStack, true)).thenReturn(aStack);
         when(freeIpaService.findByStack(aStack)).thenReturn(freeIpa);
 
@@ -114,18 +139,25 @@ public class ClusterProxyServiceTest {
         ArgumentCaptor<ConfigRegistrationRequest> captor = ArgumentCaptor.forClass(ConfigRegistrationRequest.class);
         verify(clusterProxyRegistrationClient).registerConfig(captor.capture());
 
-        ConfigRegistrationRequest proxyRegisterationReq = captor.getValue();
+        ConfigRegistrationRequest proxyRegistrationReq = captor.getValue();
 
-        assertEquals(false, proxyRegisterationReq.isUseTunnel(), "CCMV1 tunnel should not be enabled");
-        assertEquals(true, proxyRegisterationReq.isUseCcmV2(), ccmv2Mode.toString() + " should be enabled.");
-        assertEquals(List.of(new CcmV2Config("testAgentCrn", "privateIpAddress", ServiceFamilies.GATEWAY.getDefaultPort(),
+        assertThat(proxyRegistrationReq.getClusterCrn()).isEqualTo(STACK_RESOURCE_CRN);
+        assertThat(proxyRegistrationReq.getAccountId()).isEqualTo(TEST_ACCOUNT_ID);
+
+        assertFalse(proxyRegistrationReq.isUseTunnel(), "CCMV1 tunnel should not be enabled");
+        assertTrue(proxyRegistrationReq.isUseCcmV2(), ccmv2Mode + " should be enabled.");
+        assertEquals(List.of(new CcmV2Config("testAgentCrn", PRIVATE_IP_ADDRESS, ServiceFamilies.GATEWAY.getDefaultPort(),
                         "testAgentCrn-testInstanceId", FREEIPA_SERVICE)),
-                proxyRegisterationReq.getCcmV2Configs(), ccmv2Mode.toString() + " config should match");
+                proxyRegistrationReq.getCcmV2Configs(), ccmv2Mode + " config should match");
+
+        assertThat(proxyRegistrationReq.getServices()).contains(new ClusterServiceConfig("freeipa", List.of("https://privateIpAddress:9443"), List.of(), null));
+        assertThat(proxyRegistrationReq.getServices()).contains(new ClusterServiceConfig("freeipa.ipadom", List.of("https://privateIpAddress:9443"), List.of(),
+                null));
     }
 
     @ParameterizedTest
     @EnumSource(value = Tunnel.class, names = {"CCMV2", "CCMV2_JUMPGATE"}, mode = EnumSource.Mode.INCLUDE)
-    public void testUpdateClusterProxyRegisterationWhenCCMV2OrJumpgate(Tunnel ccmv2Mode) {
+    public void testUpdateClusterProxyRegistrationWhenCCMV2OrJumpgate(Tunnel ccmv2Mode) {
         Stack aStack = getAStack();
         aStack.setTunnel(ccmv2Mode);
         aStack.setCcmV2AgentCrn("testAgentCrn");
@@ -137,39 +169,61 @@ public class ClusterProxyServiceTest {
         FreeIpa freeIpa = new FreeIpa();
         freeIpa.setDomain("test.freeipa.domain");
 
-        GatewayConfig primaryGateway = new GatewayConfig("primaryAddress", null, "primaryPrivateAddress",
+        GatewayConfig primaryGateway = new GatewayConfig("primaryAddress", "primaryPublicAddress", "primaryPrivateAddress",
                 ServiceFamilies.GATEWAY.getDefaultPort(), "privateInstanceId", true);
-        GatewayConfig gatewayConfig1 = new GatewayConfig("connectionAddress1", null, "privateIpAddress1",
+        GatewayConfig gatewayConfig1 = new GatewayConfig("connectionAddress1", "publicIpAddress1", PRIVATE_IP_ADDRESS_1,
                 ServiceFamilies.GATEWAY.getDefaultPort(), "testInstanceId1", true);
-        GatewayConfig gatewayConfig2 = new GatewayConfig("connectionAddress2", null, "privateIpAddress2",
+        ReflectionTestUtils.setField(gatewayConfig1, "hostname", "hostname1");
+        GatewayConfig gatewayConfig2 = new GatewayConfig("connectionAddress2", "publicIpAddress2", PRIVATE_IP_ADDRESS_2,
                 ServiceFamilies.GATEWAY.getDefaultPort(), "testInstanceId2", true);
-        ConfigRegistrationResponse configRegResposne = mock(ConfigRegistrationResponse.class);
+        ReflectionTestUtils.setField(gatewayConfig2, "hostname", "hostname2");
+        ConfigRegistrationResponse configRegResponse = mock(ConfigRegistrationResponse.class);
 
         when(stackService.getStackById(STACK_ID)).thenReturn(aStack);
         when(clusterProxyEnablementService.isClusterProxyApplicable(any())).thenReturn(true);
         when(gatewayConfigService.getPrimaryGatewayConfig(aStack)).thenReturn(primaryGateway);
         when(gatewayConfigService.getNotDeletedGatewayConfigs(aStack)).thenReturn(List.of(gatewayConfig1, gatewayConfig2));
-        when(clusterProxyRegistrationClient.registerConfig(any())).thenReturn(configRegResposne);
+        when(clusterProxyRegistrationClient.registerConfig(any())).thenReturn(configRegResponse);
         when(freeIpaService.findByStack(aStack)).thenReturn(freeIpa);
         when(clusterProxyServiceAvailabilityChecker.isDnsBasedServiceNameAvailable(aStack)).thenReturn(true);
         when(serviceEndpointHealthPollingService.pollWithTimeout(any(), any(), anyLong(), anyInt(), anyInt())).thenReturn(null);
         when(stackUpdater.updateClusterProxyRegisteredFlag(aStack, true)).thenReturn(aStack);
         when(healthCheckAvailabilityChecker.isCdpFreeIpaHeathAgentAvailable(aStack)).thenReturn(true);
 
+        ReflectionTestUtils.setField(underTest, "intervalInSecV2", INTERVAL_IN_SEC_V_2);
+        ReflectionTestUtils.setField(underTest, "healthStatusEndpointV2", HEALTH_STATUS_ENDPOINT_V_2);
+        ReflectionTestUtils.setField(underTest, "timeoutInSecV2", TIMEOUT_IN_SEC_V_2);
+        ReflectionTestUtils.setField(underTest, "healthyStatusCodeV2", HEALTHY_STATUS_CODE_V_2);
+
         underTest.updateFreeIpaRegistrationAndWait(STACK_ID, List.of("testInstanceId1", "testInstanceId2"));
 
         ArgumentCaptor<ConfigRegistrationRequest> captor = ArgumentCaptor.forClass(ConfigRegistrationRequest.class);
         verify(clusterProxyRegistrationClient).registerConfig(captor.capture());
 
-        ConfigRegistrationRequest proxyRegisterationReq = captor.getValue();
+        ConfigRegistrationRequest proxyRegistrationReq = captor.getValue();
 
-        assertEquals(false, proxyRegisterationReq.isUseTunnel(), "CCMV1 tunnel should not be enabled");
-        assertEquals(true, proxyRegisterationReq.isUseCcmV2(), ccmv2Mode.toString() + " should be enabled.");
+        assertThat(proxyRegistrationReq.getClusterCrn()).isEqualTo(STACK_RESOURCE_CRN);
+        assertThat(proxyRegistrationReq.getAccountId()).isEqualTo(TEST_ACCOUNT_ID);
+
+        assertFalse(proxyRegistrationReq.isUseTunnel(), "CCMV1 tunnel should not be enabled");
+        assertTrue(proxyRegistrationReq.isUseCcmV2(), ccmv2Mode + " should be enabled.");
         assertEquals(List.of(
-                new CcmV2Config("testAgentCrn", "privateIpAddress1", ServiceFamilies.GATEWAY.getDefaultPort(), "testAgentCrn-testInstanceId1", FREEIPA_SERVICE
+                new CcmV2Config("testAgentCrn", PRIVATE_IP_ADDRESS_1, ServiceFamilies.GATEWAY.getDefaultPort(), "testAgentCrn-testInstanceId1", FREEIPA_SERVICE
                 ),
-                new CcmV2Config("testAgentCrn", "privateIpAddress2", ServiceFamilies.GATEWAY.getDefaultPort(), "testAgentCrn-testInstanceId2", FREEIPA_SERVICE
-                )), proxyRegisterationReq.getCcmV2Configs(), ccmv2Mode.toString() + " config should match");
+                new CcmV2Config("testAgentCrn", PRIVATE_IP_ADDRESS_2, ServiceFamilies.GATEWAY.getDefaultPort(), "testAgentCrn-testInstanceId2", FREEIPA_SERVICE
+                )), proxyRegistrationReq.getCcmV2Configs(), ccmv2Mode + " config should match");
+
+        assertThat(proxyRegistrationReq.getServices()).contains(new ClusterServiceConfig("freeipa", List.of("https://primaryPrivateAddress:9443"), List.of(),
+                null));
+        assertThat(proxyRegistrationReq.getServices()).doesNotContain(new ClusterServiceConfig("freeipa.test.freeipa.domain",
+                List.of("https://primaryPrivateAddress:9443"), List.of(), null));
+        assertThat(proxyRegistrationReq.getServices()).contains(new ClusterServiceConfig("hostname1", List.of("https://privateIpAddress1:9443"), List.of(),
+                null));
+        assertThat(proxyRegistrationReq.getServices()).contains(new ClusterServiceConfig("hostname2", List.of("https://privateIpAddress2:9443"), List.of(),
+                null));
+        assertThat(proxyRegistrationReq.getServices()).contains(new ClusterServiceConfig("freeipa.test.freeipa.domain",
+                List.of("https://privateIpAddress1:9443", "https://privateIpAddress2:9443"), null, false, List.of(), null,
+                new ClusterServiceHealthCheck(INTERVAL_IN_SEC_V_2, HEALTH_STATUS_ENDPOINT_V_2, TIMEOUT_IN_SEC_V_2, HEALTHY_STATUS_CODE_V_2)));
     }
 
     @Test
@@ -178,10 +232,10 @@ public class ClusterProxyServiceTest {
         aStack.setTunnel(Tunnel.CCM);
         aStack.setMinaSshdServiceId("minaSshdServiceId");
 
-        GatewayConfig gatewayConfig = new GatewayConfig("connectionAddress", "publicAddress", "privateAddress",
+        GatewayConfig gatewayConfig = new GatewayConfig("connectionAddress", "publicAddress", PRIVATE_ADDRESS,
                 9443, "instanceId", false);
 
-        ConfigRegistrationResponse configRegResposne = mock(ConfigRegistrationResponse.class);
+        ConfigRegistrationResponse configRegResponse = mock(ConfigRegistrationResponse.class);
 
         FreeIpa freeIpa = new FreeIpa();
         freeIpa.setDomain("ipadom");
@@ -190,7 +244,7 @@ public class ClusterProxyServiceTest {
         when(clusterProxyEnablementService.isClusterProxyApplicable(any())).thenReturn(true);
         when(gatewayConfigService.getPrimaryGatewayConfig(aStack)).thenReturn(gatewayConfig);
         when(securityConfigService.findOneByStack(aStack)).thenReturn(null);
-        when(clusterProxyRegistrationClient.registerConfig(any())).thenReturn(configRegResposne);
+        when(clusterProxyRegistrationClient.registerConfig(any())).thenReturn(configRegResponse);
         when(stackUpdater.updateClusterProxyRegisteredFlag(aStack, true)).thenReturn(aStack);
         when(freeIpaService.findByStack(aStack)).thenReturn(freeIpa);
 
@@ -199,12 +253,19 @@ public class ClusterProxyServiceTest {
         ArgumentCaptor<ConfigRegistrationRequest> captor = ArgumentCaptor.forClass(ConfigRegistrationRequest.class);
         verify(clusterProxyRegistrationClient).registerConfig(captor.capture());
 
-        ConfigRegistrationRequest proxyRegisterationReq = captor.getValue();
+        ConfigRegistrationRequest proxyRegistrationReq = captor.getValue();
 
-        assertEquals(false, proxyRegisterationReq.isUseCcmV2(), "CCMV2 should not be enabled.");
-        assertEquals(true, proxyRegisterationReq.isUseTunnel(), "CCMV1 tunnel should be enabled");
-        assertEquals(List.of(new TunnelEntry("instanceId", "GATEWAY", "privateAddress", 9443, "minaSshdServiceId")),
-                proxyRegisterationReq.getTunnels(), "CCMV1 tunnel should be configured.");
+        assertThat(proxyRegistrationReq.getClusterCrn()).isEqualTo(STACK_RESOURCE_CRN);
+        assertThat(proxyRegistrationReq.getAccountId()).isEqualTo(TEST_ACCOUNT_ID);
+
+        assertFalse(proxyRegistrationReq.isUseCcmV2(), "CCMV2 should not be enabled.");
+        assertTrue(proxyRegistrationReq.isUseTunnel(), "CCMV1 tunnel should be enabled");
+        assertEquals(List.of(new TunnelEntry("instanceId", "GATEWAY", PRIVATE_ADDRESS, 9443, "minaSshdServiceId")),
+                proxyRegistrationReq.getTunnels(), "CCMV1 tunnel should be configured.");
+
+        assertThat(proxyRegistrationReq.getServices()).contains(new ClusterServiceConfig("freeipa", List.of("https://privateAddress:9443"), List.of(), null));
+        assertThat(proxyRegistrationReq.getServices()).contains(new ClusterServiceConfig("freeipa.ipadom", List.of("https://privateAddress:9443"), List.of(),
+                null));
     }
 
     @Test
@@ -213,14 +274,15 @@ public class ClusterProxyServiceTest {
         FreeIpa freeIpa = new FreeIpa();
         freeIpa.setDomain("ipadom");
 
-        GatewayConfig gatewayConfig = mock(GatewayConfig.class);
-        ConfigRegistrationResponse configRegResposne = mock(ConfigRegistrationResponse.class);
+        GatewayConfig gatewayConfig = new GatewayConfig("connectionAddress", "publicAddress", PRIVATE_ADDRESS,
+                9443, "instanceId", false);
+        ConfigRegistrationResponse configRegResponse = mock(ConfigRegistrationResponse.class);
 
         when(stackService.getStackById(STACK_ID)).thenReturn(aStack);
         when(clusterProxyEnablementService.isClusterProxyApplicable(any())).thenReturn(true);
         when(gatewayConfigService.getPrimaryGatewayConfig(aStack)).thenReturn(gatewayConfig);
         when(securityConfigService.findOneByStack(aStack)).thenReturn(null);
-        when(clusterProxyRegistrationClient.registerConfig(any())).thenReturn(configRegResposne);
+        when(clusterProxyRegistrationClient.registerConfig(any())).thenReturn(configRegResponse);
         when(stackUpdater.updateClusterProxyRegisteredFlag(aStack, true)).thenReturn(aStack);
         when(freeIpaService.findByStack(aStack)).thenReturn(freeIpa);
 
@@ -229,11 +291,19 @@ public class ClusterProxyServiceTest {
         ArgumentCaptor<ConfigRegistrationRequest> captor = ArgumentCaptor.forClass(ConfigRegistrationRequest.class);
         verify(clusterProxyRegistrationClient).registerConfig(captor.capture());
 
-        ConfigRegistrationRequest proxyRegisterationReq = captor.getValue();
-        assertEquals(false, proxyRegisterationReq.isUseCcmV2(), "CCMV2 should not be enabled.");
-        assertEquals(false, proxyRegisterationReq.isUseTunnel(), "CCMV1 tunnel should not be enabled");
-        assertNull(proxyRegisterationReq.getCcmV2Configs(), "CCMV2 config should not be initialized");
-        assertNull(proxyRegisterationReq.getTunnels(), "CCMV1 tunnel should not be initialized");
+        ConfigRegistrationRequest proxyRegistrationReq = captor.getValue();
+
+        assertThat(proxyRegistrationReq.getClusterCrn()).isEqualTo(STACK_RESOURCE_CRN);
+        assertThat(proxyRegistrationReq.getAccountId()).isEqualTo(TEST_ACCOUNT_ID);
+
+        assertFalse(proxyRegistrationReq.isUseCcmV2(), "CCMV2 should not be enabled.");
+        assertFalse(proxyRegistrationReq.isUseTunnel(), "CCMV1 tunnel should not be enabled");
+        assertNull(proxyRegistrationReq.getCcmV2Configs(), "CCMV2 config should not be initialized");
+        assertNull(proxyRegistrationReq.getTunnels(), "CCMV1 tunnel should not be initialized");
+
+        assertThat(proxyRegistrationReq.getServices()).contains(new ClusterServiceConfig("freeipa", List.of("https://publicAddress:9443"), List.of(), null));
+        assertThat(proxyRegistrationReq.getServices()).contains(new ClusterServiceConfig("freeipa.ipadom", List.of("https://publicAddress:9443"), List.of(),
+                null));
     }
 
     @Test
@@ -267,7 +337,7 @@ public class ClusterProxyServiceTest {
         when(freeIpaService.findByStack(stack)).thenReturn(freeIpa);
         ReadConfigResponse readConfigResponse = new ReadConfigResponse();
         readConfigResponse.setServices(List.of());
-        when(clusterProxyRegistrationClient.readConfig("resourceCrn")).thenReturn(readConfigResponse);
+        when(clusterProxyRegistrationClient.readConfig(STACK_RESOURCE_CRN)).thenReturn(readConfigResponse);
 
         String result = underTest.getProxyPath(stack, Optional.of("unregistered"));
 
@@ -282,7 +352,7 @@ public class ClusterProxyServiceTest {
         freeIpa.setDomain("ipadom");
         when(freeIpaService.findByStack(stack)).thenReturn(freeIpa);
         ReadConfigResponse readConfigResponse = new ReadConfigResponse();
-        when(clusterProxyRegistrationClient.readConfig("resourceCrn")).thenReturn(readConfigResponse);
+        when(clusterProxyRegistrationClient.readConfig(STACK_RESOURCE_CRN)).thenReturn(readConfigResponse);
 
         String result = underTest.getProxyPath(stack, Optional.of("unregistered"));
 
@@ -300,7 +370,7 @@ public class ClusterProxyServiceTest {
         ReadConfigService service = new ReadConfigService();
         service.setName("registered");
         readConfigResponse.setServices(List.of(service));
-        when(clusterProxyRegistrationClient.readConfig("resourceCrn")).thenReturn(readConfigResponse);
+        when(clusterProxyRegistrationClient.readConfig(STACK_RESOURCE_CRN)).thenReturn(readConfigResponse);
 
         String result = underTest.getProxyPath(stack, Optional.of("registered"));
 
@@ -310,9 +380,10 @@ public class ClusterProxyServiceTest {
     private Stack getAStack() {
         Stack stack = new Stack();
         stack.setAccountId(TEST_ACCOUNT_ID);
-        stack.setResourceCrn("resourceCrn");
+        stack.setResourceCrn(STACK_RESOURCE_CRN);
         SecurityConfig securityConfig = new SecurityConfig();
         stack.setSecurityConfig(securityConfig);
         return stack;
     }
+
 }
