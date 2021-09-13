@@ -63,6 +63,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.EPHEMERAL_D
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.FMS_FREEIPA_BATCH_CALL;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.LOCAL_DEV;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.OJDBC_TOKEN_DH;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.UI_EDP_PROGRESS_BAR;
 import static java.util.Collections.newSetFromMap;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
@@ -430,6 +431,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.freeipa.batch.call.enable}")
     private boolean enableFmsFreeipaBatchCall;
+
+    @Value("${auth.mock.ui.edp.progress.bar.enable}")
+    private boolean edpProgressBarEnabled;
 
     @PostConstruct
     public void init() {
@@ -800,6 +804,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (enableMultiAzFreeIpa) {
             builder.addEntitlements(createEntitlement(CDP_CB_AWS_NATIVE_FREEIPA));
+        }
+        if (edpProgressBarEnabled) {
+            builder.addEntitlements(createEntitlement(UI_EDP_PROGRESS_BAR));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()

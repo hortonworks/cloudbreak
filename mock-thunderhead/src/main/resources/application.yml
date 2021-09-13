@@ -71,6 +71,8 @@ auth:
     ha.repair.enable: true
     ha.upgrade.enable: true
     ephemeral.disks.for.temp.data.enable: true
+    ui:
+      edp.progress.bar.enable: true
 
 crn:
   partition: cdp
