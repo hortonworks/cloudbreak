@@ -2,6 +2,7 @@ package com.sequenceiq.datalake.service.sdx;
 
 import static com.sequenceiq.common.api.type.InstanceGroupType.CORE;
 import static com.sequenceiq.common.api.type.InstanceGroupType.GATEWAY;
+import static com.sequenceiq.datalake.service.sdx.SdxService.CCMV2_JUMPGATE_REQUIRED_VERSION;
 import static com.sequenceiq.datalake.service.sdx.SdxService.CCMV2_REQUIRED_VERSION;
 import static com.sequenceiq.datalake.service.sdx.SdxService.MEDIUM_DUTY_REQUIRED_VERSION;
 import static com.sequenceiq.sdx.api.model.SdxClusterShape.CUSTOM;
@@ -1381,18 +1382,20 @@ class SdxServiceTest {
         assertEquals(String.format("Resizing of the data lake is not supported"), badRequestException.getMessage());
     }
 
-    static Object[][] ccmScenarios() {
+    static Object[][] ccmV2Scenarios() {
         return new Object[][]{
                 // runtime  compatible
                 {null,      true  },
-                {"7.2.5",   false },
+                {"7.2.0",   false },
+                {"7.2.1",   true  },
+                {"7.2.5",   true  },
                 {"7.2.6",   true  },
                 {"7.2.7",   true  },
         };
     }
 
     @ParameterizedTest(name = "Runtime {0} is compatible with CCMv2 = {1}")
-    @MethodSource("ccmScenarios")
+    @MethodSource("ccmV2Scenarios")
     void testCcmV2VersionChecker(String runtime, boolean compatible) throws IOException {
         SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(runtime, LIGHT_DUTY);
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(new ArrayList<>());
@@ -1404,6 +1407,36 @@ class SdxServiceTest {
                     .isInstanceOf(BadRequestException.class)
                     .hasMessage(String.format("Runtime version %s does not support Cluster Connectivity Manager. "
                             + "Please try creating a datalake with runtime version at least %s.", runtime, CCMV2_REQUIRED_VERSION));
+        } else {
+            ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
+        }
+    }
+
+    static Object[][] ccmV2JumpgateScenarios() {
+        return new Object[][]{
+                // runtime  compatible
+                {null,      true  },
+                {"7.2.0",   false },
+                {"7.2.1",   false },
+                {"7.2.5",   false },
+                {"7.2.6",   true  },
+                {"7.2.7",   true  },
+        };
+    }
+
+    @ParameterizedTest(name = "Runtime {0} is compatible with CCMv2JumpGate = {1}")
+    @MethodSource("ccmV2JumpgateScenarios")
+    void testCcmV2JumpgateVersionChecker(String runtime, boolean compatible) throws IOException {
+        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(runtime, LIGHT_DUTY);
+        when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(new ArrayList<>());
+        String lightDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.10/aws/light_duty.json");
+        lenient().when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(lightDutyJson, StackV4Request.class));
+        mockEnvironmentCall(sdxClusterRequest, CloudPlatform.MOCK, Tunnel.CCMV2_JUMPGATE);
+        if (!compatible) {
+            assertThatThrownBy(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null)))
+                    .isInstanceOf(BadRequestException.class)
+                    .hasMessage(String.format("Runtime version %s does not support Cluster Connectivity Manager. "
+                            + "Please try creating a datalake with runtime version at least %s.", runtime, CCMV2_JUMPGATE_REQUIRED_VERSION));
         } else {
             ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
         }

@@ -108,7 +108,9 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
 
     public static final String MEDIUM_DUTY_REQUIRED_VERSION = "7.2.7";
 
-    public static final String CCMV2_REQUIRED_VERSION = "7.2.6";
+    public static final String CCMV2_JUMPGATE_REQUIRED_VERSION = "7.2.6";
+
+    public static final String CCMV2_REQUIRED_VERSION = "7.2.1";
 
     public static final String SDX_RESIZE_NAME_SUFFIX = "-md";
 
@@ -803,14 +805,20 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
     }
 
     private void validateCcmV2Requirement(DetailedEnvironmentResponse environment, String runtimeVersion) {
+        Comparator<Versioned> versionComparator = new VersionComparator();
+
         if (environment.getTunnel() != null && runtimeVersion != null) {
             switch (environment.getTunnel()) {
                 case CCMV2:
-                case CCMV2_JUMPGATE:
-                    Comparator<Versioned> versionComparator = new VersionComparator();
                     if (versionComparator.compare(() -> CCMV2_REQUIRED_VERSION, () -> runtimeVersion) > 0) {
                         throw new BadRequestException(String.format("Runtime version %s does not support Cluster Connectivity Manager. " +
                                 "Please try creating a datalake with runtime version at least %s.", runtimeVersion, CCMV2_REQUIRED_VERSION));
+                    }
+                    break;
+                case CCMV2_JUMPGATE:
+                    if (versionComparator.compare(() -> CCMV2_JUMPGATE_REQUIRED_VERSION, () -> runtimeVersion) > 0) {
+                        throw new BadRequestException(String.format("Runtime version %s does not support Cluster Connectivity Manager. " +
+                                "Please try creating a datalake with runtime version at least %s.", runtimeVersion, CCMV2_JUMPGATE_REQUIRED_VERSION));
                     }
                     break;
                 default:
