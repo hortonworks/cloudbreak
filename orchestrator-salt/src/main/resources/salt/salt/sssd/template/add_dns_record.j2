@@ -22,9 +22,17 @@ for attempt in {1..3}
 do
   sleep 10
   echo "add dns a-record hostname for ${HOSTNAME}, attempt ${attempt}"
+  IPA_STDERR=$(mktemp)
   retVal=0
-  ipa dnsrecord-mod {{ pillar['sssd-ipa']['domain'] }}. "${HOSTNAME}" "--a-rec=${IPADDR}" --ttl {{ pillar['sssd-ipa']['dns_ttl'] }} || retVal=$?
-  if [[ "$retVal" -le 1 ]]; then
+  alreadyExists=0
+  ipa dnsrecord-mod {{ pillar['sssd-ipa']['domain'] }}. "${HOSTNAME}" "--a-rec=${IPADDR}" --ttl {{ pillar['sssd-ipa']['dns_ttl'] }} 2>"${IPA_STDERR}" || retVal=$?
+  cat "${IPA_STDERR}" >&2
+  if grep "ERROR: no modifications to be performed" ${IPA_STDERR} &>/dev/null; then
+    alreadyExists=1
+    echo "DNS a-record already exists for ${HOSTNAME}"
+  fi
+  rm "${IPA_STDERR}"
+  if [[ "$retVal" -eq 0 || ( "$retVal" -eq 1 && "$alreadyExists" -eq 1 ) ]]; then
     break
   elif [[ "$attempt" -eq 3 ]]; then
     echo "Failed to set DNS A-record for ${HOSTNAME}"
