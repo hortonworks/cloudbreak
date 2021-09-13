@@ -152,10 +152,22 @@ public class ClusterStatusSyncHandlerTest {
     }
 
     @Test
-    public void testOnApplicationEventWhenCBStatusAmbigious() {
+    public void testOnApplicationEventWhenCBStatusUnreachable() {
         Cluster cluster = getACluster(ClusterState.RUNNING);
         when(clusterService.findById(anyLong())).thenReturn(cluster);
-        when(cloudbreakCommunicator.getStackStatusByCrn(anyString())).thenReturn(getStackResponse(Status.AMBIGUOUS));
+        when(cloudbreakCommunicator.getStackStatusByCrn(anyString())).thenReturn(getStackResponse(Status.UNREACHABLE));
+
+        underTest.onApplicationEvent(new ClusterStatusSyncEvent(AUTOSCALE_CLUSTER_ID));
+
+        verify(clusterService).setState(AUTOSCALE_CLUSTER_ID, ClusterState.SUSPENDED);
+        verify(cloudbreakCommunicator).getStackStatusByCrn(CLOUDBREAK_STACK_CRN);
+    }
+
+    @Test
+    public void testOnApplicationEventWhenCBStatusNodeFailure() {
+        Cluster cluster = getACluster(ClusterState.RUNNING);
+        when(clusterService.findById(anyLong())).thenReturn(cluster);
+        when(cloudbreakCommunicator.getStackStatusByCrn(anyString())).thenReturn(getStackResponse(Status.NODE_FAILURE));
 
         underTest.onApplicationEvent(new ClusterStatusSyncEvent(AUTOSCALE_CLUSTER_ID));
 

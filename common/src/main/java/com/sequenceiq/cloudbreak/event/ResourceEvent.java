@@ -151,7 +151,6 @@ public enum ResourceEvent {
     STACK_SYNC_INSTANCE_STATUS_COULDNT_DETERMINE("stack.sync.instance.status.couldnt.determine"),
     STACK_SYNC_INSTANCE_OPERATION_IN_PROGRESS("stack.sync.instance.operation.in.progress"),
     STACK_SYNC_INSTANCE_STOPPED_ON_PROVIDER("stack.sync.instance.stopped.on.provider"),
-    STACK_SYNC_INSTANCE_STATE_SYNCED("stack.sync.instance.state.synced"),
     STACK_SYNC_HOST_DELETED("stack.sync.host.deleted"),
     STACK_SYNC_INSTANCE_REMOVAL_FAILED("stack.sync.instance.removal.failed"),
     STACK_SYNC_HOST_UPDATED("stack.sync.host.updated"),
