@@ -1540,4 +1540,5 @@ class SdxServiceTest {
         assertEquals(String.format("Provisioning a micro duty data lake cluster is not enabled for %s. ", CloudPlatform.AZURE.name()) +
                 "Contact Cloudera support to enable CDP_MICRO_DUTY_SDX entitlement for the account.", badRequestException.getMessage());
     }
+
 }
