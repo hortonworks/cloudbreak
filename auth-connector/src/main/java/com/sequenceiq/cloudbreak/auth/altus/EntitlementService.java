@@ -65,6 +65,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.EPHEMERAL_D
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.FMS_FREEIPA_BATCH_CALL;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.LOCAL_DEV;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.PERSONAL_VIEW_CB_BY_RIGHT;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.UI_EDP_PROGRESS_BAR;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -309,6 +310,10 @@ public class EntitlementService {
 
     public boolean isDiagnosticsEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_VM_DIAGNOSTICS);
+    }
+
+    public boolean isEDPProgressBarEnabled(String accountID) {
+        return isEntitlementRegistered(accountID, UI_EDP_PROGRESS_BAR);
     }
 
     public boolean usersyncCredentialsUpdateOptimizationEnabled(String accountId) {
