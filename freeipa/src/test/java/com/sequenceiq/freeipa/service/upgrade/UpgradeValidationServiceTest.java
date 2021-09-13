@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
+import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.model.ImageInfoResponse;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackStatus;
@@ -51,7 +52,7 @@ class UpgradeValidationServiceTest {
     @Test
     public void testMoreThanTwoInstances() {
         Stack stack = mock(Stack.class);
-        Set<InstanceMetaData> allInstances = Set.of(createAvailableInstance("im1"), createAvailableInstance("im2"),  createAvailableInstance("im2"));
+        Set<InstanceMetaData> allInstances = Set.of(createAvailableInstance("im1"), createAvailableInstance("im2"), createAvailableInstance("im2"));
 
         assertThrows(BadRequestException.class, () -> underTest.validateStackForUpgrade(allInstances, stack));
     }
@@ -97,5 +98,25 @@ class UpgradeValidationServiceTest {
         when(entitlementService.isFreeIpaUpgradeEnabled(ACCOUNT_ID)).thenReturn(Boolean.FALSE);
 
         assertThrows(BadRequestException.class, () -> underTest.validateEntitlement(ACCOUNT_ID));
+    }
+
+    @Test
+    public void testCurrentAndSelectedImageAreTheSame() {
+        ImageInfoResponse currentImage = new ImageInfoResponse();
+        currentImage.setId("111-222");
+        ImageInfoResponse selectedImage = new ImageInfoResponse();
+        selectedImage.setId("111-222");
+
+        assertThrows(BadRequestException.class, () -> underTest.validateSelectedImageDifferentFromCurrent(currentImage, selectedImage));
+    }
+
+    @Test
+    public void testCurrentAndSelectedImageAreDifferent() {
+        ImageInfoResponse currentImage = new ImageInfoResponse();
+        currentImage.setId("111-222");
+        ImageInfoResponse selectedImage = new ImageInfoResponse();
+        selectedImage.setId("111-333");
+
+        underTest.validateSelectedImageDifferentFromCurrent(currentImage, selectedImage);
     }
 }
