@@ -55,6 +55,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.PolicyValida
 import com.sequenceiq.environment.credential.attributes.CredentialAttributes;
 import com.sequenceiq.environment.credential.attributes.azure.CodeGrantFlowAttributes;
 import com.sequenceiq.environment.credential.domain.Credential;
+import com.sequenceiq.environment.credential.domain.LightHouseInit;
 import com.sequenceiq.environment.credential.exception.CredentialOperationException;
 import com.sequenceiq.environment.credential.repository.CredentialRepository;
 import com.sequenceiq.environment.credential.v1.converter.CredentialRequestToCreateAWSCredentialRequestConverter;
@@ -172,6 +173,10 @@ public class CredentialService extends AbstractCredentialService implements Reso
     public Map<String, String> interactiveLogin(String accountId, Credential credential) {
         validateDeploymentAddress(credential);
         return credentialAdapter.interactiveLogin(credential, accountId);
+    }
+
+    public Map<String, String> lightHouseLogin(String accountId, LightHouseInit lightHouseInit) {
+        return credentialAdapter.lightHouseLogin(lightHouseInit, accountId);
     }
 
     public Credential verify(Credential credential) {

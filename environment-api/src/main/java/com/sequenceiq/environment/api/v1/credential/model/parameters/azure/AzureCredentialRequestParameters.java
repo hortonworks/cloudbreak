@@ -31,6 +31,10 @@ public class AzureCredentialRequestParameters implements Serializable {
 
     @Valid
     @ApiModelProperty
+    private AppBasedRequest lightHouseBased;
+
+    @Valid
+    @ApiModelProperty
     private RoleBasedRequest roleBased;
 
     public RoleBasedRequest getRoleBased() {
@@ -65,12 +69,21 @@ public class AzureCredentialRequestParameters implements Serializable {
         this.tenantId = tenantId;
     }
 
+    public AppBasedRequest getLightHouseBased() {
+        return lightHouseBased;
+    }
+
+    public void setLightHouseBased(AppBasedRequest lightHouseBased) {
+        this.lightHouseBased = lightHouseBased;
+    }
+
     @Override
     public String toString() {
         return "AzureCredentialRequestParameters{" +
                 "subscriptionId='" + subscriptionId + '\'' +
                 ", tenantId='" + tenantId + '\'' +
                 ", appBased=" + appBased +
+                ", lightHouseBased=" + lightHouseBased +
                 ", roleBased=" + roleBased +
                 '}';
     }

@@ -6,14 +6,17 @@ import java.util.Map;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.context.LightHouseInitContext;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CDPServicePolicyVerificationRequest;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialVerificationRequest;
 import com.sequenceiq.cloudbreak.cloud.event.credential.InitCodeGrantFlowRequest;
 import com.sequenceiq.cloudbreak.cloud.event.credential.InteractiveLoginRequest;
+import com.sequenceiq.cloudbreak.cloud.event.credential.LightHouseRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.ResourceDefinitionRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
+import com.sequenceiq.environment.credential.domain.LightHouseInit;
 
 @Component
 public class RequestProvider {
@@ -42,6 +45,13 @@ public class RequestProvider {
 
     public InteractiveLoginRequest getInteractiveLoginRequest(CloudContext cloudContext, ExtendedCloudCredential cloudCredential) {
         return new InteractiveLoginRequest(cloudContext, cloudCredential);
+    }
+
+    public LightHouseRequest getLightHouseRequest(
+            CloudContext cloudContext,
+            ExtendedCloudCredential cloudCredential,
+            LightHouseInitContext lightHouseInit) {
+        return new LightHouseRequest(cloudContext, cloudCredential, lightHouseInit);
     }
 
 }

@@ -59,6 +59,16 @@ public interface CredentialConnector {
     }
 
     /**
+     * Light House for credential creation.
+     *
+     * @return parameters for light house
+     */
+    default Map<String, String> lightHouse(CloudContext cloudContext, ExtendedCloudCredential extendedCloudCredential,
+        CredentialNotifier credentialNotifier) {
+        throw new UnsupportedOperationException("LightHouse not supported!");
+    }
+
+    /**
      * Delete the credential (e.g public key) associated with a stack (cluster) from Cloud provider.
      *
      * @param authenticatedContext the authenticated context which holds the client object

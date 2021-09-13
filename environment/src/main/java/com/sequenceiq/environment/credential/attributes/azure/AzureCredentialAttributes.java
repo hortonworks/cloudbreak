@@ -8,6 +8,8 @@ public class AzureCredentialAttributes {
 
     private AppBasedAttributes appBased;
 
+    private AppBasedAttributes lightHouseBased;
+
     private CodeGrantFlowAttributes codeGrantFlowBased;
 
     public String getSubscriptionId() {
@@ -40,5 +42,13 @@ public class AzureCredentialAttributes {
 
     public void setCodeGrantFlowBased(CodeGrantFlowAttributes codeGrantFlowBased) {
         this.codeGrantFlowBased = codeGrantFlowBased;
+    }
+
+    public AppBasedAttributes getLightHouseBased() {
+        return lightHouseBased;
+    }
+
+    public void setLightHouseBased(AppBasedAttributes lightHouseBased) {
+        this.lightHouseBased = lightHouseBased;
     }
 }

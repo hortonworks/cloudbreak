@@ -18,12 +18,15 @@ import org.springframework.stereotype.Component;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.service.secret.model.StringToSecretResponseConverter;
 import com.sequenceiq.environment.api.v1.credential.model.request.CredentialRequest;
 import com.sequenceiq.environment.api.v1.credential.model.request.EditCredentialRequest;
+import com.sequenceiq.environment.api.v1.credential.model.request.LightHouseInitRequest;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.credential.attributes.CredentialAttributes;
 import com.sequenceiq.environment.credential.domain.Credential;
+import com.sequenceiq.environment.credential.domain.LightHouseInit;
 import com.sequenceiq.environment.credential.v1.converter.aws.AwsCredentialV1ParametersToAwsCredentialAttributesConverter;
 import com.sequenceiq.environment.credential.v1.converter.azure.AzureCredentialV1ParametersToAzureCredentialAttributesConverter;
 import com.sequenceiq.environment.credential.v1.converter.gcp.GcpCredentialV1ParametersToGcpCredentialAttributesConverter;
@@ -154,6 +157,16 @@ public class CredentialToCredentialV1ResponseConverter {
         Map<String, Object> attributes = source.getParameters() == null ? new HashMap<>() : source.getParameters();
         credential.setAttributes(new Json(attributes).getValue());
         return credential;
+    }
+
+    public LightHouseInit convert(LightHouseInitRequest source) {
+        if (source == null) {
+            return null;
+        }
+        LightHouseInit lightHouseInit = new LightHouseInit();
+        lightHouseInit.setSubscriptionId(source.getSubscriptionId());
+        lightHouseInit.setCloudPlatform(CloudPlatform.AZURE);
+        return lightHouseInit;
     }
 
     private void convertAttributes(CredentialRequest source, Credential credential) {

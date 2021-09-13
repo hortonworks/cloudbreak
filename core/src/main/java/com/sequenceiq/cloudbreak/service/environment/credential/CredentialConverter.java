@@ -80,7 +80,7 @@ public class CredentialConverter {
                 .spDisplayName(roleBased.getSpDisplayName())
                 .build();
     }
-
+    
     private AwsRoleBasedAttributes roleBased(RoleBasedParameters roleBased) {
         return AwsRoleBasedAttributes.builder()
                 .roleArn(roleBased.getRoleArn())

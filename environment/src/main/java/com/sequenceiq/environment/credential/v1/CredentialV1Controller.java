@@ -33,12 +33,15 @@ import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.environment.api.v1.credential.endpoint.CredentialEndpoint;
 import com.sequenceiq.environment.api.v1.credential.model.request.CredentialRequest;
 import com.sequenceiq.environment.api.v1.credential.model.request.EditCredentialRequest;
+import com.sequenceiq.environment.api.v1.credential.model.request.LightHouseInitRequest;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponses;
 import com.sequenceiq.environment.api.v1.credential.model.response.EmptyResponse;
 import com.sequenceiq.environment.api.v1.credential.model.response.InteractiveCredentialResponse;
+import com.sequenceiq.environment.api.v1.credential.model.response.LightHouseCredentialResponse;
 import com.sequenceiq.environment.authorization.EnvironmentCredentialFiltering;
 import com.sequenceiq.environment.credential.domain.Credential;
+import com.sequenceiq.environment.credential.domain.LightHouseInit;
 import com.sequenceiq.environment.credential.service.CredentialDeleteService;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCredentialV1ResponseConverter;
@@ -165,6 +168,16 @@ public class CredentialV1Controller extends NotificationController implements Cr
         Map<String, String> result = credentialService.interactiveLogin(accountId, credential);
         return new InteractiveCredentialResponse(result.get("user_code"), result.get("verification_url"));
     }
+
+    @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_CREDENTIAL)
+    public LightHouseCredentialResponse lightHouseLogin(@Valid LightHouseInitRequest lightHouseInitRequest) {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        LightHouseInit lightHouseInit = credentialConverter.convert(lightHouseInitRequest);
+        Map<String, String> result = credentialService.lightHouseLogin(accountId, lightHouseInit);
+        return new LightHouseCredentialResponse(result.get("user_code"), result.get("verification_url"));
+    }
+
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_CREDENTIAL)

@@ -57,6 +57,8 @@ public class EnvironmentModelDescription {
     public static final String INTERACTIVE_LOGIN_CREDENTIAL_VERIFICATION_URL = "The url provided by Azure where the user has to use the given user code "
             + "to sign in";
     public static final String INTERACTIVE_LOGIN_CREDENTIAL_USER_CODE = "The user code what has to be used for the sign-in process on the Azure portal";
+    public static final String ARM_TEMPLATE = "The Arm template for customer";
+    public static final String SERVICE_PRINCIPAL_ID = "The Service Principal ID";
     public static final String REGIONS = "Regions of the environment.";
     public static final String REGION_DISPLAYNAMES = "regions with displayNames";
     public static final String LOCATION = "Location of the environment.";

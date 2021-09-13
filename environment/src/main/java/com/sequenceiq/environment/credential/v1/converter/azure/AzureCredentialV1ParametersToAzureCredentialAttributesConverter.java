@@ -20,6 +20,7 @@ public class AzureCredentialV1ParametersToAzureCredentialAttributesConverter {
         AzureCredentialAttributes response = new AzureCredentialAttributes();
         doIfNotNull(source.getAppBased(), param -> response.setAppBased(getAppBased(param)));
         doIfNotNull(source.getRoleBased(), param -> response.setCodeGrantFlowBased(getRoleBased(param)));
+        doIfNotNull(source.getLightHouseBased(), param -> response.setLightHouseBased(getAppBased(param)));
         response.setSubscriptionId(source.getSubscriptionId());
         response.setTenantId(source.getTenantId());
         return response;
@@ -31,6 +32,7 @@ public class AzureCredentialV1ParametersToAzureCredentialAttributesConverter {
 
         doIfNotNull(source.getAppBased(), param -> response.setAccessKey(param.getAccessKey()));
         doIfNotNull(source.getCodeGrantFlowBased(), param -> response.setAccessKey(param.getAccessKey()));
+        doIfNotNull(source.getLightHouseBased(), param -> response.setAccessKey(param.getAccessKey()));
 
         response.setSubscriptionId(source.getSubscriptionId());
         response.setTenantId(source.getTenantId());

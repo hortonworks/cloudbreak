@@ -32,6 +32,7 @@ import com.google.common.base.Strings;
 import com.microsoft.azure.CloudException;
 import com.microsoft.azure.PagedList;
 import com.microsoft.azure.management.Azure;
+import com.microsoft.azure.management.appservice.implementation.AppServicePlanInner;
 import com.microsoft.azure.management.compute.AvailabilitySet;
 import com.microsoft.azure.management.compute.CachingTypes;
 import com.microsoft.azure.management.compute.Disk;
@@ -56,6 +57,7 @@ import com.microsoft.azure.management.compute.implementation.DiskInner;
 import com.microsoft.azure.management.graphrbac.RoleAssignment;
 import com.microsoft.azure.management.graphrbac.RoleAssignments;
 import com.microsoft.azure.management.graphrbac.implementation.RoleAssignmentInner;
+import com.microsoft.azure.management.graphrbac.implementation.ServicePrincipalCreateParametersInner;
 import com.microsoft.azure.management.keyvault.KeyPermissions;
 import com.microsoft.azure.management.marketplaceordering.v2015_06_01.AgreementTerms;
 import com.microsoft.azure.management.marketplaceordering.v2015_06_01.implementation.MarketplaceOrderingManager;
@@ -200,6 +202,22 @@ public class AzureClient {
                 throw new RuntimeException(e);
             }
         });
+    }
+
+    public void createServicePrincipal(String resourceGroupName, String deploymentName, String templateContent, String parameterContent) {
+//        return handleAuthException(() -> {
+//            try {
+//                return azure.appServices().appServicePlans().inner()
+//                        .createOrUpdate("", "", new ServicePrincipalCreateParametersInner()
+//                                .withAppId(""))
+//                        .withTemplate(templateContent)
+//                        .withParameters(parameterContent)
+//                        .withMode(DeploymentMode.INCREMENTAL)
+//                        .create();
+//            } catch (IOException e) {
+//                throw new RuntimeException(e);
+//            }
+//        });
     }
 
     public boolean templateDeploymentExists(String resourceGroupName, String deploymentName) {

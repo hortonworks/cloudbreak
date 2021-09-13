@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.context.LightHouseInitContext;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CDPServicePolicyVerificationException;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CDPServicePolicyVerificationRequest;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CDPServicePolicyVerificationResult;
@@ -28,6 +29,8 @@ import com.sequenceiq.cloudbreak.cloud.event.credential.InitCodeGrantFlowRequest
 import com.sequenceiq.cloudbreak.cloud.event.credential.InitCodeGrantFlowResponse;
 import com.sequenceiq.cloudbreak.cloud.event.credential.InteractiveLoginRequest;
 import com.sequenceiq.cloudbreak.cloud.event.credential.InteractiveLoginResult;
+import com.sequenceiq.cloudbreak.cloud.event.credential.LightHouseRequest;
+import com.sequenceiq.cloudbreak.cloud.event.credential.LightHouseResult;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CDPServicePolicyVerificationResponses;
@@ -37,6 +40,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.environment.credential.domain.Credential;
+import com.sequenceiq.environment.credential.domain.LightHouseInit;
 import com.sequenceiq.environment.credential.exception.CredentialVerificationException;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToExtendedCloudCredentialConverter;
@@ -202,6 +206,33 @@ public class ServiceProviderCredentialAdapter {
         try {
             InteractiveLoginResult res = request.await();
             String message = "Interactive login Failed: ";
+            LOGGER.debug("Result: {}", res);
+            if (res.getStatus() != EventStatus.OK) {
+                LOGGER.info(message, res.getErrorDetails());
+                throw new BadRequestException(message + res.getErrorDetails(), res.getErrorDetails());
+            }
+            return res.getParameters();
+        } catch (InterruptedException e) {
+            LOGGER.error("Error while executing credential verification", e);
+            throw new OperationException(e);
+        }
+    }
+
+    public Map<String, String> lightHouseLogin(LightHouseInit lightHouseInit, String accountId) {
+        CloudContext cloudContext = CloudContext.Builder.builder()
+                .withPlatform(lightHouseInit.getCloudPlatform().name())
+                .withVariant(lightHouseInit.getCloudPlatform().name())
+                .withAccountId(accountId)
+                .build();
+        ExtendedCloudCredential cloudCredential = extendedCloudCredentialConverter.convert(lightHouseInit);
+        LightHouseInitContext lightHouseInitContext = extendedCloudCredentialConverter.convertToContext(lightHouseInit);
+        LOGGER.debug("Requesting lighthouse login cloudPlatform {} and creator {}.", lightHouseInit.getCloudPlatform());
+        LightHouseRequest request = requestProvider.getLightHouseRequest(cloudContext, cloudCredential, lightHouseInitContext);
+        LOGGER.debug("Triggering event: {}", request);
+        eventBus.notify(request.selector(), eventFactory.createEvent(request));
+        try {
+            LightHouseResult res = request.await();
+            String message = "lighthouse setup Failed: ";
             LOGGER.debug("Result: {}", res);
             if (res.getStatus() != EventStatus.OK) {
                 LOGGER.info(message, res.getErrorDetails());

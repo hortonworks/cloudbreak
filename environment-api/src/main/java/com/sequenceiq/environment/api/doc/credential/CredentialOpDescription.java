@@ -3,6 +3,7 @@ package com.sequenceiq.environment.api.doc.credential;
 public class CredentialOpDescription {
     public static final String PUT = "modify public credential resource";
     public static final String INTERACTIVE_LOGIN = "interactive login";
+    public static final String LIGHTHOUSE_LOGIN = "lightthouse";
     public static final String INIT_CODE_GRANT_FLOW = "start a credential creation with Oauth2 Authorization Code Grant flow";
     public static final String INIT_CODE_GRANT_FLOW_ON_EXISTING = "Reinitialize Oauth2 Authorization Code Grant flow on an existing credential";
     public static final String AUTHORIZE_CODE_GRANT_FLOW = "Authorize Oauth2 Authorization Code Grant flow";

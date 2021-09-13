@@ -25,9 +25,11 @@ import com.sequenceiq.environment.api.doc.credential.CredentialDescriptor;
 import com.sequenceiq.environment.api.doc.credential.CredentialOpDescription;
 import com.sequenceiq.environment.api.v1.credential.model.request.CredentialRequest;
 import com.sequenceiq.environment.api.v1.credential.model.request.EditCredentialRequest;
+import com.sequenceiq.environment.api.v1.credential.model.request.LightHouseInitRequest;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponses;
 import com.sequenceiq.environment.api.v1.credential.model.response.InteractiveCredentialResponse;
+import com.sequenceiq.environment.api.v1.credential.model.response.LightHouseCredentialResponse;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -114,6 +116,13 @@ public interface CredentialEndpoint {
     @ApiOperation(value = CredentialOpDescription.INTERACTIVE_LOGIN, produces = MediaType.APPLICATION_JSON, notes = CredentialDescriptor.CREDENTIAL_NOTES,
             nickname = "interactiveLoginCredentialV1", httpMethod = "POST")
     InteractiveCredentialResponse interactiveLogin(@Valid CredentialRequest credentialRequest);
+
+    @POST
+    @Path("lighthouse")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = CredentialOpDescription.LIGHTHOUSE_LOGIN, produces = MediaType.APPLICATION_JSON, notes = CredentialDescriptor.CREDENTIAL_NOTES,
+            nickname = "lighthouseCredentialV1", httpMethod = "POST")
+    LightHouseCredentialResponse lightHouseLogin(@Valid LightHouseInitRequest lightHouseInitRequest);
 
     @GET
     @Path("prerequisites/{cloudPlatform}")

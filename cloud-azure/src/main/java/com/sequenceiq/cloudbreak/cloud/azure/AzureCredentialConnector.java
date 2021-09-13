@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import com.microsoft.azure.AzureEnvironment;
 import com.microsoft.azure.credentials.ApplicationTokenCredentials;
+import com.sequenceiq.cloudbreak.cloud.azure.lighthouse.LightHouseMasterAppClient;
 import com.sequenceiq.cloudbreak.cloud.azure.util.AzureExceptionExtractor;
 import com.sequenceiq.cloudbreak.cloud.model.credential.CredentialVerificationContext;
 import com.sequenceiq.cloudbreak.cloud.response.AzureCredentialPrerequisites;
@@ -42,6 +43,9 @@ public class AzureCredentialConnector implements CredentialConnector {
     private AzureInteractiveLogin azureInteractiveLogin;
 
     @Inject
+    private AzureLightHouse azureLightHouse;
+
+    @Inject
     private AzureCredentialAppCreationCommand appCreationCommand;
 
     @Inject
@@ -55,6 +59,9 @@ public class AzureCredentialConnector implements CredentialConnector {
 
     @Inject
     private AzureExceptionExtractor exceptionExtractor;
+
+    @Inject
+    private LightHouseMasterAppClient lightHouseMasterAppClient;
 
     @Override
     public CloudCredentialStatus verify(AuthenticatedContext authenticatedContext, CredentialVerificationContext credentialVerificationContext) {
@@ -92,6 +99,12 @@ public class AzureCredentialConnector implements CredentialConnector {
     public Map<String, String> interactiveLogin(CloudContext cloudContext, ExtendedCloudCredential extendedCloudCredential,
             CredentialNotifier credentialNotifier) {
         return azureInteractiveLogin.login(cloudContext, extendedCloudCredential, credentialNotifier);
+    }
+
+    @Override
+    public Map<String, String> lightHouse(CloudContext cloudContext, ExtendedCloudCredential extendedCloudCredential,
+        CredentialNotifier credentialNotifier) {
+        return azureLightHouse.execute(cloudContext, extendedCloudCredential, credentialNotifier);
     }
 
     @Override
