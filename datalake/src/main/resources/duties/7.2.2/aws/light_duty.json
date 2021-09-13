@@ -27,7 +27,7 @@
     {
       "name": "master",
       "template": {
-        "instanceType": "m5.2xlarge",
+        "instanceType": "r5.2xlarge",
         "attachedVolumes": [
           {
             "count": 1,

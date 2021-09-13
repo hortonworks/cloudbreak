@@ -27,7 +27,7 @@
     {
       "name": "master",
       "template": {
-        "instanceType": "e2-standard-8",
+        "instanceType": "e2-highmem-8",
         "attachedVolumes": [
           {
             "count": 1,
