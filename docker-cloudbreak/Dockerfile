@@ -1,4 +1,4 @@
-FROM hortonworks/hwx_openjdk:11.0-jdk-slim
+FROM docker-private.infra.cloudera.com/cloudera_base/cldr-java:11.0.6-cldr1-jdk-slim-buster
 MAINTAINER info@hortonworks.com
 
 # REPO URL to download jar
