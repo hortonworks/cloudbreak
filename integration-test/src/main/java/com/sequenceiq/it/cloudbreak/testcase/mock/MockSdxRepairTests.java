@@ -72,7 +72,7 @@ public class MockSdxRepairTests extends AbstractMockTest {
         testRepair(testContext,
                 List.of(MASTER),
                 instanceBasePath -> getExecuteQueryToMockInfrastructure().call(instanceBasePath + "/terminate", w -> w),
-                SdxClusterStatusResponse.CLUSTER_AMBIGUOUS);
+                SdxClusterStatusResponse.NODE_FAILURE);
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, invocationCount = 1)

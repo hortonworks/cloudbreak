@@ -64,6 +64,8 @@ public class SdxClusterStatusCheckerJob extends StatusCheckerJob {
         handleSdxStatusChange();
     }
 
+    //It is hard to refactor something simpler than a switch case
+    //CHECKSTYLE:OFF: checkstyle:CyclomaticComplexity
     private void handleSdxStatusChange() {
         Optional<SdxCluster> cluster = sdxClusterRepository.findById(Long.valueOf(getLocalId()));
         cluster.ifPresent(sdx -> {
@@ -78,7 +80,9 @@ public class SdxClusterStatusCheckerJob extends StatusCheckerJob {
                     handleStoppedSdx(stack, sdx);
                     break;
                 case CLUSTER_AMBIGUOUS:
-                    handleAmbiguousSdx(stack, sdx);
+                case CLUSTER_UNREACHABLE:
+                case NODE_FAILURE:
+                    switchBackToAvailableIfClusterIsAvailable(stack, sdx, status.getStatus());
                     break;
                 case SYNC_FAILED:
                 case DATALAKE_UPGRADE_FAILED:
@@ -95,6 +99,7 @@ public class SdxClusterStatusCheckerJob extends StatusCheckerJob {
             }
         });
     }
+    //CHECKSTYLE:ON: checkstyle:CyclomaticComplexity
 
     private void updateCertExpirationStateIfDifferent(SdxCluster sdx, StackStatusV4Response stack) {
         if (sdx.getCertExpirationState() != stack.getCertExpirationState()) {
@@ -107,11 +112,11 @@ public class SdxClusterStatusCheckerJob extends StatusCheckerJob {
         return getRemoteResourceCrn() == null;
     }
 
-    private void handleAmbiguousSdx(StackStatusV4Response stack, SdxCluster sdx) {
+    private void switchBackToAvailableIfClusterIsAvailable(StackStatusV4Response stack, SdxCluster sdx, DatalakeStatusEnum originalState) {
         if (stack.getStatus() == Status.AVAILABLE && stack.getClusterStatus() == Status.AVAILABLE) {
             sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING, ResourceEvent.CLUSTER_AMBARI_CLUSTER_SYNCHRONIZED,
                     Collections.singleton(sdx.getClusterName()), "", sdx);
-            logStateChange(DatalakeStatusEnum.RUNNING, DatalakeStatusEnum.CLUSTER_AMBIGUOUS);
+            logStateChange(DatalakeStatusEnum.RUNNING, originalState);
         }
     }
 
@@ -172,12 +177,25 @@ public class SdxClusterStatusCheckerJob extends StatusCheckerJob {
             setDeleteFailed(stack, sdx);
         } else if (stack.getStatus() == Status.DELETED_ON_PROVIDER_SIDE) {
             setDeletedOnProviderSide(stack, sdx);
-        } else if (stack.getStatus() == Status.AMBIGUOUS || (stack.getStatus() == Status.AVAILABLE && stack.getClusterStatus() == Status.AMBIGUOUS)) {
-            String statusReason = stack.getStatus() == Status.AMBIGUOUS ? stack.getStatusReason() : stack.getClusterStatusReason();
-            sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.CLUSTER_AMBIGUOUS, ResourceEvent.CLUSTER_AMBARI_CLUSTER_SYNCHRONIZED,
+        } else if (isUnreachable(stack.getStatus(), stack.getClusterStatus())) {
+            String statusReason = stack.getStatus() == Status.UNREACHABLE ? stack.getStatusReason() : stack.getClusterStatusReason();
+            sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.CLUSTER_UNREACHABLE, ResourceEvent.CLUSTER_AMBARI_CLUSTER_SYNCHRONIZED,
                     Collections.singleton(sdx.getClusterName()), statusReason, sdx);
-            logStateChange(DatalakeStatusEnum.RUNNING, DatalakeStatusEnum.CLUSTER_AMBIGUOUS);
+            logStateChange(DatalakeStatusEnum.RUNNING, DatalakeStatusEnum.CLUSTER_UNREACHABLE);
+        } else if (isNodeFailure(stack.getStatus(), stack.getClusterStatus())) {
+            String statusReason = stack.getStatus() == Status.NODE_FAILURE ? stack.getStatusReason() : stack.getClusterStatusReason();
+            sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.NODE_FAILURE, ResourceEvent.CLUSTER_AMBARI_CLUSTER_SYNCHRONIZED,
+                    Collections.singleton(sdx.getClusterName()), statusReason, sdx);
+            logStateChange(DatalakeStatusEnum.RUNNING, DatalakeStatusEnum.NODE_FAILURE);
         }
+    }
+
+    private boolean isUnreachable(Status stackStatus, Status clusterStatus) {
+        return stackStatus == Status.UNREACHABLE || (stackStatus == Status.AVAILABLE && clusterStatus == Status.UNREACHABLE);
+    }
+
+    private boolean isNodeFailure(Status stackStatus, Status clusterStatus) {
+        return stackStatus == Status.NODE_FAILURE || (stackStatus == Status.AVAILABLE && clusterStatus == Status.NODE_FAILURE);
     }
 
     private void logStateChange(DatalakeStatusEnum from, DatalakeStatusEnum to) {

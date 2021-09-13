@@ -240,7 +240,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
         clusterService.updateClusterCertExpirationState(stack.getCluster(), hostCertExpiring);
         clusterOperationService.reportHealthChange(stack.getResourceCrn(), newFailedNodeNamesWithReason, newHealtyHostNames);
         if (!failedInstances.isEmpty()) {
-            clusterService.updateClusterStatusByStackId(stack.getId(), Status.AMBIGUOUS);
+            clusterService.updateClusterStatusByStackId(stack.getId(), Status.NODE_FAILURE);
         } else if (statesFromAvailableAllowed().contains(stack.getCluster().getStatus())) {
             clusterService.updateClusterStatusByStackId(stack.getId(), Status.AVAILABLE);
         }

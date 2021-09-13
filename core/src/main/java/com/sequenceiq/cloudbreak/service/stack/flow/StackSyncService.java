@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AMBIGUOUS;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UNREACHABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETED_ON_PROVIDER_SIDE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_FAILED;
@@ -10,7 +10,6 @@ import static com.sequenceiq.cloudbreak.cloud.model.CloudInstance.INSTANCE_NAME;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_FAILED_NODES_REPORTED_CLUSTER_EVENT;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_SYNC_INSTANCE_DELETED_BY_PROVIDER_CBMETADATA;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_SYNC_INSTANCE_DELETED_CBMETADATA;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_SYNC_INSTANCE_STATE_SYNCED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_SYNC_INSTANCE_STATUS_RETRIEVAL_FAILED;
 
 import java.util.Collection;
@@ -239,23 +238,19 @@ public class StackSyncService {
             if (syncConfig.isCmServerRunning()) {
                 if (stack.getStatus() != AVAILABLE) {
                     updateStackStatusIfEnabled(stack.getId(), DetailedStackStatus.AVAILABLE, SYNC_STATUS_REASON, syncConfig.isStackStatusUpdateEnabled());
-                    eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(), STACK_SYNC_INSTANCE_STATE_SYNCED);
                 }
             } else {
-                if (stack.getStatus() != AMBIGUOUS) {
+                if (stack.getStatus() != UNREACHABLE) {
                     updateStackStatusIfEnabled(stack.getId(), DetailedStackStatus.CLUSTER_MANAGER_NOT_RESPONDING, CM_SERVER_NOT_RESPONDING,
                             syncConfig.isStackStatusUpdateEnabled());
-                    eventService.fireCloudbreakEvent(stack.getId(), AMBIGUOUS.name(), STACK_SYNC_INSTANCE_STATE_SYNCED);
                 }
             }
         } else if (isAllStopped(instanceStateCounts, instances.size()) && stack.getStatus() != STOPPED) {
             updateStackStatusIfEnabled(stack.getId(), DetailedStackStatus.STOPPED, SYNC_STATUS_REASON, syncConfig.isStackStatusUpdateEnabled());
             updateClusterStatusIfEnabled(stack.getId(), STOPPED, syncConfig.isStackStatusUpdateEnabled());
-            eventService.fireCloudbreakEvent(stack.getId(), STOPPED.name(), STACK_SYNC_INSTANCE_STATE_SYNCED);
         } else if (isAllDeletedOnProvider(instanceStateCounts, instances.size()) && stack.getStatus() != DELETE_FAILED) {
             updateStackStatusIfEnabled(stack.getId(), DetailedStackStatus.DELETED_ON_PROVIDER_SIDE, SYNC_STATUS_REASON, syncConfig.isStackStatusUpdateEnabled());
             updateClusterStatusIfEnabled(stack.getId(), DELETED_ON_PROVIDER_SIDE, syncConfig.isStackStatusUpdateEnabled());
-            eventService.fireCloudbreakEvent(stack.getId(), DELETED_ON_PROVIDER_SIDE.name(), STACK_SYNC_INSTANCE_STATE_SYNCED);
         }
     }
 
