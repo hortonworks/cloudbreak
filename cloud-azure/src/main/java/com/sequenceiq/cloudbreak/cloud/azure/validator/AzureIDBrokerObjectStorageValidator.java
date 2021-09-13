@@ -14,10 +14,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +33,8 @@ import com.microsoft.azure.management.graphrbac.implementation.RoleAssignmentInn
 import com.microsoft.azure.management.msi.Identity;
 import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azure.management.resources.fluentcore.arm.ResourceId;
+import com.microsoft.azure.management.storage.Kind;
+import com.microsoft.azure.management.storage.StorageAccount;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureStorage;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
@@ -48,6 +53,8 @@ public class AzureIDBrokerObjectStorageValidator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureIDBrokerObjectStorageValidator.class);
 
+    private static final Pattern STORAGE_ACCOUNT_NAME_PATTERN = Pattern.compile("@(.*?)\\.dfs\\.core\\.windows\\.net");
+
     @Inject
     private AdlsGen2ConfigGenerator adlsGen2ConfigGenerator;
 
@@ -61,6 +68,7 @@ public class AzureIDBrokerObjectStorageValidator {
             ValidationResultBuilder resultBuilder) {
         LOGGER.info("Validating Azure identities...");
         List<CloudFileSystemView> cloudFileSystems = spiFileSystem.getCloudFileSystems();
+        validateHierarchicalNamespace(client, spiFileSystem, logsLocationBase, resultBuilder);
         if (Objects.nonNull(cloudFileSystems) && cloudFileSystems.size() > 0) {
             for (CloudFileSystemView cloudFileSystemView : cloudFileSystems) {
                 CloudAdlsGen2View cloudFileSystem = (CloudAdlsGen2View) cloudFileSystemView;
@@ -91,6 +99,39 @@ public class AzureIDBrokerObjectStorageValidator {
             }
         }
         return resultBuilder.build();
+    }
+
+    private void validateHierarchicalNamespace(AzureClient client, SpiFileSystem spiFileSystem, String logsLocationBase,
+            ValidationResultBuilder resultBuilder) {
+        for (String storageAccountName : getStorageAccountNames(spiFileSystem, logsLocationBase)) {
+            Optional<StorageAccount> storageAccount = client.getStorageAccount(storageAccountName, Kind.STORAGE_V2);
+            boolean hierarchical = storageAccount.map(StorageAccount::isHnsEnabled).orElse(false);
+            if (storageAccount.isPresent() && !hierarchical) {
+                addError(resultBuilder, String.format("Hierarchical namespace is not allowed for Storage Account '%s'.", storageAccountName));
+            }
+        }
+    }
+
+    private Set<String> getStorageAccountNames(SpiFileSystem spiFileSystem, String logsLocationBase) {
+        Set<String> locations = spiFileSystem.getCloudFileSystems().stream()
+                .flatMap(cloudFileSystemView -> cloudFileSystemView.getLocations().stream())
+                .map(StorageLocationBase::getValue)
+                .collect(Collectors.toSet());
+        if (StringUtils.isNotEmpty(logsLocationBase)) {
+            locations.add(logsLocationBase);
+        }
+        return extractStorageAccount(locations);
+    }
+
+    private Set<String> extractStorageAccount(Set<String> locations) {
+        Set<String> storageAccountNames = new HashSet<>();
+        for (String location : locations) {
+            Matcher m = STORAGE_ACCOUNT_NAME_PATTERN.matcher(location);
+            if (m.find()) {
+                storageAccountNames.add(m.group(1));
+            }
+        }
+        return storageAccountNames;
     }
 
     private void validateIDBroker(AzureClient client, List<RoleAssignmentInner> roleAssignments, Identity identity,
