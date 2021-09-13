@@ -27,7 +27,7 @@
     {
       "name": "master",
       "template": {
-        "instanceType": "Standard_D8s_v3",
+        "instanceType": "Standard_DS13_v2",
         "attachedVolumes": [
           {
             "count": 1,
