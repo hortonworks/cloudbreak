@@ -34,6 +34,8 @@ public class StatusToPollGroupConverter extends AbstractConversionServiceAwareCo
             case DELETE_IN_PROGRESS:
             case DELETED_ON_PROVIDER_SIDE:
             case AMBIGUOUS:
+            case UNREACHABLE:
+            case NODE_FAILURE:
             case EXTERNAL_DATABASE_CREATION_FAILED:
             case EXTERNAL_DATABASE_CREATION_IN_PROGRESS:
             case EXTERNAL_DATABASE_DELETION_FAILED:
