@@ -184,6 +184,8 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                 Status.STOPPED,
                 Status.STOP_FAILED,
                 Status.AMBIGUOUS,
+                Status.UNREACHABLE,
+                Status.NODE_FAILURE,
                 Status.RESTORE_FAILED,
                 Status.BACKUP_FAILED,
                 Status.BACKUP_FINISHED,
@@ -250,6 +252,8 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     private EnumSet<Status> statesFromAvailableAllowed() {
         return EnumSet.of(
                 Status.AMBIGUOUS,
+                Status.UNREACHABLE,
+                Status.NODE_FAILURE,
                 Status.STOPPED,
                 Status.START_FAILED,
                 Status.STOP_FAILED,
