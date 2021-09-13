@@ -28,6 +28,7 @@ import com.microsoft.azure.management.graphrbac.implementation.RoleAssignmentInn
 import com.microsoft.azure.management.msi.Identity;
 import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azure.management.resources.Subscription;
+import com.microsoft.azure.management.storage.StorageAccount;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureStorage;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
@@ -109,6 +110,9 @@ public class AzureIDBrokerObjectStorageValidatorTest {
     @Mock
     private ResourceGroup resourceGroup;
 
+    @Mock
+    private StorageAccount storageAccount;
+
     @InjectMocks
     private AzureIDBrokerObjectStorageValidator underTest;
 
@@ -125,6 +129,8 @@ public class AzureIDBrokerObjectStorageValidatorTest {
         when(client.getCurrentSubscription()).thenReturn(mock(Subscription.class));
         when(client.getCurrentSubscription().subscriptionId()).thenReturn(SUBSCRIPTION_ID);
         when(client.getResourceGroup(RESOURCE_GROUP_NAME)).thenReturn(resourceGroup);
+        when(client.getStorageAccount(any(), any())).thenReturn(Optional.of(storageAccount));
+        when(storageAccount.isHnsEnabled()).thenReturn(Boolean.TRUE);
         when(resourceGroup.id()).thenReturn(RESOURCE_GROUP_ID);
         AdlsGen2Config adlsGen2Config = new AdlsGen2Config("abfs://", ABFS_FILESYSTEM_NAME, ABFS_STORAGE_ACCOUNT_NAME, false);
         when(adlsGen2ConfigGenerator.generateStorageConfig(anyString())).thenReturn(adlsGen2Config);
