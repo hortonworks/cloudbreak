@@ -646,7 +646,6 @@ main() {
 
     circle-init
     compose-init
-    aws-init
     if is_macos; then
         machine-init
     fi
@@ -663,14 +662,6 @@ main() {
     cmd-export env-show
     cmd-export env-export
     cmd-export create-bundle create-bundle
-
-    cmd-export-ns aws "Amazon Webservice namespace"
-    cmd-export aws-show-role
-    cmd-export aws-generate-role
-    cmd-export aws-delete-role
-    cmd-export aws-list-roles
-    cmd-export aws-certs-upload-s3
-    cmd-export aws-certs-restore-s3
 
     cmd-export-ns machine "Docker-machine"
     cmd-export machine-create

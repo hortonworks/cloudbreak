@@ -55,7 +55,6 @@ echo '''
 ADDRESS_RESOLVING_TIMEOUT - DNS lookup timeout for internal service discovery
 AMBARI_CLIENT_LOG_LEVEL - Sets the log level of the Ambari client
 AWS_ACCESS_KEY_ID - Access key of the AWS account
-AWS_ROLE_NAME - Name of the AWS role for the `cbd aws [generate-rol, show role]` commands
 AWS_SECRET_ACCESS_KEY - Secret access key of the AWS account
 AZURE_SUBSCRIPTION_ID - Azure subscription ID for interactive login in Web UI
 AZURE_TENANT_ID - Azure tenant ID for interactive login in Web UI
@@ -66,7 +65,6 @@ CBD_TRAEFIK_TLS - Path inside of the Traefik container where TLS files located
 CB_AWS_CUSTOM_CF_TAGS - Comma separated list of AWS CloudFormation Stack tags
 CB_AWS_DEFAULT_CF_TAG - Default tag AWS CloudFormation Stack
 CB_AWS_DEFAULT_INBOUND_SECURITY_GROUP - Default inbound policy name for AWS CloudFormation Stack
-CB_AWS_EXTERNAL_ID - External ID of the assume role policy
 CB_AWS_HOSTKEY_VERIFY - Enables host fingerprint verification on AWS
 CB_AWS_VPC - Configures the VPC id on AWS if it is the same as provisioned cluster
 CB_BLUEPRINT_DEFAULTS - Comma separated list of the default blueprints what Cloudbreak initialize in database
@@ -117,7 +115,6 @@ CB_SMARTSENSE_ID - SmartSense subscription ID
 CB_TEMPLATE_DEFAULTS - Comma separated list of the default templates what Cloudbreak initialize in database
 CB_UI_MAX_WAIT - Wait timeout for `cbd start-wait` command
 CB_UPSCALE_MAX_NODECOUNT - Max number of nodes with which upscale is allowed (default is 100)
-CERTS_BUCKET - S3 bucket name for backup and restore certificates via `cbd aws [certs-restore-s3  certs-upload-s3]` commands
 CERT_VALIDATION - Enables cert validation in Cloudbreak and Autoscale
 COMMON_DB - Name of the database container
 COMMON_DB_VOL - Name of the database volume

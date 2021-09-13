@@ -60,7 +60,6 @@ cloudbreak-conf-tags() {
     env-import DOCKER_IMAGE_CBD_POSTGRES postgres
 
     env-import CB_DEFAULT_SUBSCRIPTION_ADDRESS http://uluwatu.service.consul:3000/notifications
-    env-import CERTS_BUCKET ""
 
 }
 
