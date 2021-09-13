@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.model.ImageInfoResponse;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 
@@ -59,5 +60,11 @@ public class UpgradeValidationService {
         }
     }
 
+    public void validateSelectedImageDifferentFromCurrent(ImageInfoResponse currentImage, ImageInfoResponse selectedImage) {
+        if (currentImage.getId().equals(selectedImage.getId())) {
+            LOGGER.warn("Selected {} and current {} image are the same", selectedImage, currentImage);
+            throw new BadRequestException("Selected and current image are the same with id: " + currentImage.getId());
+        }
+    }
 }
 

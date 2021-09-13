@@ -101,6 +101,7 @@ class UpgradeServiceTest {
 
         verify(validationService).validateEntitlement(ACCOUNT_ID);
         verify(validationService).validateStackForUpgrade(allInstances, stack);
+        verify(validationService).validateSelectedImageDifferentFromCurrent(currentImage, selectedImage);
     }
 
     @Test
@@ -138,6 +139,7 @@ class UpgradeServiceTest {
 
         verify(validationService).validateEntitlement(ACCOUNT_ID);
         verify(validationService).validateStackForUpgrade(allInstances, stack);
+        verify(validationService).validateSelectedImageDifferentFromCurrent(currentImage, selectedImage);
     }
 
     private Operation mockOperation(OperationState operationState) {
@@ -150,12 +152,14 @@ class UpgradeServiceTest {
 
     private ImageInfoResponse mockCurrentImage(Stack stack) {
         ImageInfoResponse currentImage = new ImageInfoResponse();
+        currentImage.setId("111-222");
         when(imageService.fetchCurrentImage(stack)).thenReturn(currentImage);
         return currentImage;
     }
 
     private ImageInfoResponse mockSelectedImage(FreeIpaUpgradeRequest request, Stack stack) {
         ImageInfoResponse selectedImage = new ImageInfoResponse();
+        selectedImage.setId("333-444");
         when(imageService.selectImage(stack, request.getImage())).thenReturn(selectedImage);
         return selectedImage;
     }
@@ -193,6 +197,7 @@ class UpgradeServiceTest {
 
         verify(validationService).validateEntitlement(ACCOUNT_ID);
         verify(validationService).validateStackForUpgrade(allInstances, stack);
+        verify(validationService).validateSelectedImageDifferentFromCurrent(currentImage, selectedImage);
     }
 
     @Test
@@ -222,14 +227,15 @@ class UpgradeServiceTest {
         when(stackService.getByEnvironmentCrnAndAccountIdWithLists(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(stack);
         Set<InstanceMetaData> allInstances = createValidImSet();
         when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(allInstances);
-        mockSelectedImage(request, stack);
-        mockCurrentImage(stack);
+        ImageInfoResponse selectedImage = mockSelectedImage(request, stack);
+        ImageInfoResponse currentImage = mockCurrentImage(stack);
         mockOperation(OperationState.REJECTED);
 
         assertThrows(BadRequestException.class, () -> underTest.upgradeFreeIpa(ACCOUNT_ID, request));
 
         verify(validationService).validateEntitlement(ACCOUNT_ID);
         verify(validationService).validateStackForUpgrade(allInstances, stack);
+        verify(validationService).validateSelectedImageDifferentFromCurrent(currentImage, selectedImage);
     }
 
     private Set<InstanceMetaData> createValidImSet() {

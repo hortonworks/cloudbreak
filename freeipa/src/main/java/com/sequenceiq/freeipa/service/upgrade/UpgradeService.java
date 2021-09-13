@@ -68,6 +68,7 @@ public class UpgradeService {
         ImageInfoResponse currentImage = imageService.fetchCurrentImage(stack);
         ImageSettingsRequest imageSettingsRequest = assembleImageSettingsRequest(request, currentImage);
         ImageInfoResponse selectedImage = imageService.selectImage(stack, imageSettingsRequest);
+        validationService.validateSelectedImageDifferentFromCurrent(currentImage, selectedImage);
         return triggerUpgrade(request, stack, pgwInstanceId, nonPgwInstanceIds, imageSettingsRequest, selectedImage, currentImage);
     }
 
