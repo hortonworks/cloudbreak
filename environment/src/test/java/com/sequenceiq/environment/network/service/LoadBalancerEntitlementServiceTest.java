@@ -69,7 +69,22 @@ public class LoadBalancerEntitlementServiceTest {
     }
 
     @Test
-    public void testGcpEndpointGatewayEnabled() {
+    public void testGcpEndpointGatewayEnabledWithEntitlement() {
+        when(entitlementService.gcpEndpointGatewayEnabled(any())).thenReturn(true);
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                underTest.validateNetworkForEndpointGateway(CloudConstants.GCP, ENV_NAME, PublicEndpointAccessGateway.ENABLED));
+    }
+
+    @Test
+    public void testGcpEndpointGatewayDisabledWithEntitlement() {
+        when(entitlementService.gcpEndpointGatewayEnabled(any())).thenReturn(true);
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                underTest.validateNetworkForEndpointGateway(CloudConstants.GCP, ENV_NAME, PublicEndpointAccessGateway.DISABLED));
+    }
+
+    @Test
+    public void testGcpEndpointGatewayEnabledWithNoEntitlement() {
+        when(entitlementService.gcpEndpointGatewayEnabled(any())).thenReturn(false);
         assertThrows(BadRequestException.class, () ->
             ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
                 underTest.validateNetworkForEndpointGateway(CloudConstants.GCP, ENV_NAME, PublicEndpointAccessGateway.ENABLED);
@@ -78,8 +93,10 @@ public class LoadBalancerEntitlementServiceTest {
     }
 
     @Test
-    public void testGcpEndpointGatewayDisabled() throws BadRequestException {
-        underTest.validateNetworkForEndpointGateway(CloudConstants.GCP, ENV_NAME, PublicEndpointAccessGateway.DISABLED);
+    public void testGcpEndpointGatewayDisabledWithNoEntitlement() throws BadRequestException {
+        when(entitlementService.gcpEndpointGatewayEnabled(any())).thenReturn(true);
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+        underTest.validateNetworkForEndpointGateway(CloudConstants.GCP, ENV_NAME, PublicEndpointAccessGateway.DISABLED));
     }
 
     @Test

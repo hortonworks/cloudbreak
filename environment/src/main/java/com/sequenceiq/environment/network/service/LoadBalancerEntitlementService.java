@@ -29,6 +29,8 @@ public class LoadBalancerEntitlementService {
     private boolean isEndpointGatewayEntitlementEnabledForPlatform(String cloudPlatform) {
         return CloudConstants.AWS.equals(cloudPlatform) ||
             (CloudConstants.AZURE.equals(cloudPlatform) &&
-                entitlementService.azureEndpointGatewayEnabled(ThreadBasedUserCrnProvider.getAccountId()));
+                entitlementService.azureEndpointGatewayEnabled(ThreadBasedUserCrnProvider.getAccountId())) ||
+            (CloudConstants.GCP.equals(cloudPlatform) &&
+                entitlementService.gcpEndpointGatewayEnabled(ThreadBasedUserCrnProvider.getAccountId()));
     }
 }
