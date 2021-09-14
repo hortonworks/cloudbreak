@@ -169,9 +169,6 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
     @Inject
     private RegionAwareCrnGenerator regionAwareCrnGenerator;
 
-    @Inject
-    private MultiAzDecorator multiAzDecorator;
-
     @Value("${info.app.version}")
     private String sdxClusterServiceVersion;
 
@@ -211,7 +208,7 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
     public SdxCluster getByNameOrCrn(String userCrn, NameOrCrn clusterNameOrCrn) {
         return clusterNameOrCrn.hasName()
                 ? getByNameInAccount(userCrn, clusterNameOrCrn.getName())
-                :  getByCrn(userCrn, clusterNameOrCrn.getCrn());
+                : getByCrn(userCrn, clusterNameOrCrn.getCrn());
     }
 
     public Iterable<SdxCluster> findAllById(List<Long> ids) {
@@ -364,7 +361,7 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
         externalDatabaseConfigurer.configure(cloudPlatform, sdxClusterRequest.getExternalDatabase(), sdxCluster);
         updateStackV4RequestWithEnvironmentCrnIfNotExistsOnIt(internalStackV4Request, environment.getCrn());
         StackV4Request stackRequest = getStackRequest(sdxClusterRequest.getClusterShape(), sdxClusterRequest.isEnableRangerRaz(),
-                internalStackV4Request, cloudPlatform, runtimeVersion, imageSettingsV4Request, environment);
+                internalStackV4Request, cloudPlatform, runtimeVersion, imageSettingsV4Request);
         prepareCloudStorageForStack(sdxClusterRequest, stackRequest, sdxCluster, environment);
         prepareDefaultSecurityConfigs(internalStackV4Request, stackRequest, cloudPlatform);
         prepareProviderSpecificParameters(stackRequest, sdxClusterRequest, cloudPlatform);
@@ -421,7 +418,7 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
         }
 
         newSdxCluster.setDatabaseAvailabilityType(sdxCluster.getDatabaseAvailabilityType());
-        StackV4Request stackRequest = getStackRequest(shape, sdxCluster.isRangerRazEnabled(), null, cloudPlatform, sdxCluster.getRuntime(), null, environment);
+        StackV4Request stackRequest = getStackRequest(shape, sdxCluster.isRangerRazEnabled(), null, cloudPlatform, sdxCluster.getRuntime(), null);
         prepareCloudStorageForStack(stackRequest, stackV4Response, newSdxCluster, environment);
         prepareDefaultSecurityConfigs(null, stackRequest, cloudPlatform);
         stackRequest.setResourceCrn(newSdxCluster.getCrn());
@@ -466,13 +463,10 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
     }
 
     private StackV4Request getStackRequest(SdxClusterShape shape, boolean razEnabled, StackV4Request internalStackV4Request, CloudPlatform cloudPlatform,
-            String runtimeVersion, ImageSettingsV4Request imageSettingsV4Request, DetailedEnvironmentResponse environment) {
+            String runtimeVersion, ImageSettingsV4Request imageSettingsV4Request) {
         if (internalStackV4Request == null) {
             StackV4Request stackRequest = cdpConfigService.getConfigForKey(
                     new CDPConfigKey(cloudPlatform, shape, runtimeVersion));
-            if (entitlementService.awsNativeDataLakeEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
-                multiAzDecorator.decorateStackRequestWithMultiAz(stackRequest, environment);
-            }
             if (stackRequest == null) {
                 LOGGER.error("Can't find template for cloudplatform: {}, shape {}, cdp version: {}", cloudPlatform, shape, runtimeVersion);
                 throw new BadRequestException("Can't find template for cloudplatform: " + cloudPlatform + ", shape: " + shape +

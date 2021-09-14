@@ -158,7 +158,7 @@ class AwsLoadBalancerCommonServiceTest {
 
         Set<String> subnetIds = underTest.selectLoadBalancerSubnetIds(loadBalancerType, awsNetworkView, cloudLoadBalancer);
 
-        assertEquals(Set.of(PRIVATE_ID_1, SUBNET_ID_1, SUBNET_ID_2), subnetIds);
+        assertEquals(Set.of(SUBNET_ID_1, SUBNET_ID_2), subnetIds);
     }
 
     @Test
