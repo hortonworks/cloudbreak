@@ -64,7 +64,7 @@ public class EnvironmentService {
             SdxCluster sdxCluster = sdxClusterOptional.get();
             sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.WAIT_FOR_ENVIRONMENT, "Waiting for environment creation", sdxCluster);
             DetailedEnvironmentResponse environmentResponse = Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
-                    .stopIfException(pollingConfig.getStopPollingIfExceptionOccured())
+                    .stopIfException(pollingConfig.getStopPollingIfExceptionOccurred())
                     .stopAfterDelay(pollingConfig.getDuration(), pollingConfig.getDurationTimeUnit())
                     .run(() -> {
                         if (PollGroup.CANCELLED.equals(DatalakeInMemoryStateStore.get(sdxCluster.getId()))) {

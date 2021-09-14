@@ -26,9 +26,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Re
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.statestore.DatalakeInMemoryStateStore;
-import com.sequenceiq.datalake.service.sdx.CloudbreakFlowService;
-import com.sequenceiq.datalake.service.sdx.CloudbreakFlowService.FlowState;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
+import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
+import com.sequenceiq.datalake.service.sdx.flowcheck.FlowState;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 
 @ExtendWith(MockitoExtension.class)

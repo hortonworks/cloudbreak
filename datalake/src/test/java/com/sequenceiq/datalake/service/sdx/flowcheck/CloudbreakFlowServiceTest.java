@@ -1,8 +1,6 @@
-package com.sequenceiq.datalake.service.sdx;
+package com.sequenceiq.datalake.service.sdx.flowcheck;
 
-import static com.sequenceiq.datalake.service.sdx.CloudbreakFlowService.FlowState.FINISHED;
-import static com.sequenceiq.datalake.service.sdx.CloudbreakFlowService.FlowState.RUNNING;
-import static com.sequenceiq.datalake.service.sdx.CloudbreakFlowService.FlowState.UNKNOWN;
+import static com.sequenceiq.datalake.service.sdx.flowcheck.FlowState.FAILED;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -51,6 +49,9 @@ public class CloudbreakFlowServiceTest {
     @Mock
     private SdxClusterRepository sdxClusterRepository;
 
+    @Mock
+    private FlowCheckResponseToFlowStateConverter flowCheckResponseToFlowStatusConverter;
+
     @InjectMocks
     private CloudbreakFlowService underTest;
 
@@ -59,32 +60,34 @@ public class CloudbreakFlowServiceTest {
 
     @Test
     public void testActiveFlowCheck() {
+        when(flowCheckResponseToFlowStatusConverter.convert(any())).thenCallRealMethod();
         SdxCluster cluster = new SdxCluster();
         cluster.setLastCbFlowChainId(FLOW_CHAIN_ID);
         cluster.setInitiatorUserCrn(USER_CRN);
         cluster.setClusterName(CLUSTER_NAME);
 
         when(flowEndpoint.hasFlowRunningByChainId(eq(FLOW_CHAIN_ID))).thenReturn(createFlowCheckResponse(TRUE));
-        assertEquals(RUNNING, underTest.getLastKnownFlowState(cluster));
+        assertEquals(FlowState.RUNNING, underTest.getLastKnownFlowState(cluster));
 
         when(flowEndpoint.hasFlowRunningByChainId(eq(FLOW_CHAIN_ID))).thenReturn(createFlowCheckResponse(TRUE));
-        assertEquals(RUNNING, underTest.getLastKnownFlowState(cluster));
+        assertEquals(FlowState.RUNNING, underTest.getLastKnownFlowState(cluster));
 
         verify(flowEndpoint, times(2)).hasFlowRunningByChainId(eq(FLOW_CHAIN_ID));
     }
 
     @Test
     public void testNoActiveFlowCheck() {
+        when(flowCheckResponseToFlowStatusConverter.convert(any())).thenCallRealMethod();
         SdxCluster cluster = new SdxCluster();
         cluster.setLastCbFlowChainId(FLOW_CHAIN_ID);
         cluster.setInitiatorUserCrn(USER_CRN);
         cluster.setClusterName(CLUSTER_NAME);
 
-        when(flowEndpoint.hasFlowRunningByChainId(eq(FLOW_CHAIN_ID))).thenReturn(createFlowCheckResponse(FALSE));
-        assertEquals(FINISHED, underTest.getLastKnownFlowState(cluster));
+        when(flowEndpoint.hasFlowRunningByChainId(eq(FLOW_CHAIN_ID))).thenReturn(createFlowCheckResponse(FALSE, TRUE));
+        assertEquals(FAILED, underTest.getLastKnownFlowState(cluster));
 
         cluster.setLastCbFlowChainId(null);
-        assertEquals(UNKNOWN, underTest.getLastKnownFlowState(cluster));
+        assertEquals(FlowState.UNKNOWN, underTest.getLastKnownFlowState(cluster));
 
         verify(flowEndpoint, atLeastOnce()).hasFlowRunningByChainId(eq(FLOW_CHAIN_ID));
     }
@@ -98,7 +101,7 @@ public class CloudbreakFlowServiceTest {
 
         when(flowEndpoint.hasFlowRunningByChainId(eq(FLOW_CHAIN_ID))).thenThrow(new RuntimeException("something"));
 
-        assertEquals(UNKNOWN, underTest.getLastKnownFlowState(cluster));
+        assertEquals(FlowState.UNKNOWN, underTest.getLastKnownFlowState(cluster));
     }
 
     @Test
@@ -110,11 +113,12 @@ public class CloudbreakFlowServiceTest {
 
         when(flowEndpoint.hasFlowRunningByChainId(eq(FLOW_CHAIN_ID))).thenThrow(new NotFoundException("something"));
 
-        assertEquals(UNKNOWN, underTest.getLastKnownFlowState(cluster));
+        assertEquals(FlowState.UNKNOWN, underTest.getLastKnownFlowState(cluster));
     }
 
     @Test
     public void testFlowCheckBasedOnFlowId() {
+        when(flowCheckResponseToFlowStatusConverter.convert(any())).thenCallRealMethod();
         SdxCluster cluster = new SdxCluster();
         cluster.setLastCbFlowId(FLOW_ID);
         cluster.setInitiatorUserCrn(USER_CRN);
@@ -126,7 +130,7 @@ public class CloudbreakFlowServiceTest {
         when(flowEndpoint.hasFlowRunningByFlowId(anyString()))
                 .thenReturn(flowCheckResponse);
 
-        assertEquals(RUNNING, underTest.getLastKnownFlowState(cluster));
+        assertEquals(FlowState.RUNNING, underTest.getLastKnownFlowState(cluster));
         verify(flowEndpoint).hasFlowRunningByFlowId(FLOW_ID);
     }
 
@@ -268,9 +272,15 @@ public class CloudbreakFlowServiceTest {
     }
 
     private FlowCheckResponse createFlowCheckResponse(Boolean hasActiveFlow) {
+        return createFlowCheckResponse(hasActiveFlow, null);
+    }
+
+    private FlowCheckResponse createFlowCheckResponse(Boolean hasActiveFlow, Boolean failed) {
         FlowCheckResponse flowCheckResponse = new FlowCheckResponse();
         flowCheckResponse.setFlowChainId(FLOW_CHAIN_ID);
         flowCheckResponse.setHasActiveFlow(hasActiveFlow);
+        flowCheckResponse.setLatestFlowFinalizedAndFailed(failed);
         return flowCheckResponse;
     }
+
 }

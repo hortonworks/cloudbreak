@@ -40,6 +40,7 @@ import com.sequenceiq.sdx.api.model.SdxClusterResizeRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxCustomClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
+import com.sequenceiq.sdx.api.model.SdxSyncComponentVersionsFromCmResponse;
 import com.sequenceiq.sdx.api.model.SdxValidateCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SetRangerCloudIdentityMappingRequest;
 
@@ -248,4 +249,17 @@ public interface SdxEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = CHANGE_IMAGE_CATALOG, nickname = "changeImageCatalog")
     void changeImageCatalog(@PathParam("name") String name, @Valid @NotNull SdxChangeImageCatalogRequest changeImageCatalogRequest);
+
+    @POST
+    @Path("{name}/sync_component_versions_from_cm")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "syncs CM and parcel versions from CM and updates SDX cluster version", nickname = "syncCmOnDatalakeCluster")
+    SdxSyncComponentVersionsFromCmResponse syncComponentVersionsFromCmByName(@PathParam("name") String name);
+
+    @POST
+    @Path("/crn/{crn}/sync_component_versions_from_cm")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "syncs CM and parcel versions from CM and updates SDX cluster version", nickname = "syncCmOnDatalakeClusterByCrn")
+    SdxSyncComponentVersionsFromCmResponse syncComponentVersionsFromCmByCrn(@PathParam("crn") String crn);
+
 }

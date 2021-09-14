@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -16,7 +17,7 @@ import io.swagger.annotations.ApiModelProperty;
 public class ClouderaManagerSyncV4Request implements JsonEntity {
 
     @ApiModelProperty(ModelDescriptions.CmSyncRequest.IMAGE_IDS)
-    private Set<String> candidateImageUuids;
+    private Set<String> candidateImageUuids = new HashSet<>();
 
     public Set<String> getCandidateImageUuids() {
         return candidateImageUuids;

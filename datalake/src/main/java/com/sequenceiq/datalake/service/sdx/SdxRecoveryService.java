@@ -1,8 +1,8 @@
 package com.sequenceiq.datalake.service.sdx;
 
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_RECOVERY_REQUESTED;
-import static com.sequenceiq.datalake.service.sdx.CloudbreakFlowService.FlowState.FINISHED;
-import static com.sequenceiq.datalake.service.sdx.CloudbreakFlowService.FlowState.RUNNING;
+import static com.sequenceiq.datalake.service.sdx.flowcheck.FlowState.FINISHED;
+import static com.sequenceiq.datalake.service.sdx.flowcheck.FlowState.RUNNING;
 
 import java.util.Collections;
 
@@ -29,7 +29,8 @@ import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.statestore.DatalakeInMemoryStateStore;
-import com.sequenceiq.datalake.service.sdx.CloudbreakFlowService.FlowState;
+import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
+import com.sequenceiq.datalake.service.sdx.flowcheck.FlowState;
 import com.sequenceiq.datalake.service.sdx.status.AvailabilityChecker;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -76,7 +77,7 @@ public class SdxRecoveryService {
     public void waitCloudbreakFlow(Long id, PollingConfig pollingConfig, String pollingMessage) {
         SdxCluster sdxCluster = sdxService.getById(id);
         Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
-                .stopIfException(pollingConfig.getStopPollingIfExceptionOccured())
+                .stopIfException(pollingConfig.getStopPollingIfExceptionOccurred())
                 .stopAfterDelay(pollingConfig.getDuration(), pollingConfig.getDurationTimeUnit())
                 .run(() -> checkClusterStatusDuringRecovery(sdxCluster, pollingMessage));
     }

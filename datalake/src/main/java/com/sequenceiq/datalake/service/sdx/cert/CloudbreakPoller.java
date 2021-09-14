@@ -1,8 +1,8 @@
 package com.sequenceiq.datalake.service.sdx.cert;
 
-import static com.sequenceiq.datalake.service.sdx.CloudbreakFlowService.FlowState.FAILED;
-import static com.sequenceiq.datalake.service.sdx.CloudbreakFlowService.FlowState.FINISHED;
-import static com.sequenceiq.datalake.service.sdx.CloudbreakFlowService.FlowState.RUNNING;
+import static com.sequenceiq.datalake.service.sdx.flowcheck.FlowState.FAILED;
+import static com.sequenceiq.datalake.service.sdx.flowcheck.FlowState.FINISHED;
+import static com.sequenceiq.datalake.service.sdx.flowcheck.FlowState.RUNNING;
 
 import java.util.Set;
 
@@ -24,9 +24,9 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.statestore.DatalakeInMemoryStateStore;
-import com.sequenceiq.datalake.service.sdx.CloudbreakFlowService;
-import com.sequenceiq.datalake.service.sdx.CloudbreakFlowService.FlowState;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
+import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
+import com.sequenceiq.datalake.service.sdx.flowcheck.FlowState;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 
 @Component
@@ -70,7 +70,7 @@ public class CloudbreakPoller {
             Set<Status> targetSatuses,
             Set<Status> failedStatuses) {
         Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
-                .stopIfException(pollingConfig.getStopPollingIfExceptionOccured())
+                .stopIfException(pollingConfig.getStopPollingIfExceptionOccurred())
                 .stopAfterDelay(pollingConfig.getDuration(), pollingConfig.getDurationTimeUnit())
                 .run(() -> checkClusterStatus(process, sdxCluster, targetSatuses, failedStatuses));
     }
