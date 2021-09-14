@@ -57,7 +57,7 @@ public class BlueprintUpgradeOptionValidatorTest {
     public void testIsValidBlueprintShouldReturnTrueWhenTheTemplateIsAValidCustomTemplate() {
         Blueprint blueprint = createBlueprint(ResourceStatus.USER_MANAGED, BlueprintUpgradeOption.ENABLED);
         when(customTemplateUpgradeValidator.isValid(blueprint)).thenReturn(new BlueprintValidationResult(true));
-        BlueprintValidationResult actual = underTest.isValidBlueprint(blueprint, false, false, true);
+        BlueprintValidationResult actual = underTest.isValidBlueprint(blueprint, false, false, false);
         assertTrue(actual.isValid());
         assertNull(actual.getReason());
         verify(customTemplateUpgradeValidator).isValid(blueprint);
@@ -68,16 +68,24 @@ public class BlueprintUpgradeOptionValidatorTest {
         Blueprint blueprint = createBlueprint(ResourceStatus.USER_MANAGED, BlueprintUpgradeOption.ENABLED);
         BlueprintValidationResult result = new BlueprintValidationResult(false, "Custom template not eligible.");
         when(customTemplateUpgradeValidator.isValid(blueprint)).thenReturn(result);
-        BlueprintValidationResult actual = underTest.isValidBlueprint(blueprint, false, false, true);
+        BlueprintValidationResult actual = underTest.isValidBlueprint(blueprint, false, false, false);
         assertFalse(actual.isValid());
         assertEquals(result.getReason(), actual.getReason());
         verify(customTemplateUpgradeValidator).isValid(blueprint);
     }
 
     @Test
+    public void testIsValidBlueprintShouldReturnTrueWhenTheTemplateIsANotValidCustomTemplateButTheEntitlementIsGranted() {
+        Blueprint blueprint = createBlueprint(ResourceStatus.USER_MANAGED, BlueprintUpgradeOption.ENABLED);
+        BlueprintValidationResult actual = underTest.isValidBlueprint(blueprint, false, false, true);
+        assertTrue(actual.isValid());
+        verifyNoInteractions(customTemplateUpgradeValidator);
+    }
+
+    @Test
     public void testIsValidBlueprintShouldReturnTrueWhenTheTemplateIsANotValidCustomTemplateButInternalApiUsed() {
         Blueprint blueprint = createBlueprint(ResourceStatus.USER_MANAGED, BlueprintUpgradeOption.DISABLED);
-        BlueprintValidationResult actual = underTest.isValidBlueprint(blueprint, false, true, true);
+        BlueprintValidationResult actual = underTest.isValidBlueprint(blueprint, false, true, false);
         assertTrue(actual.isValid());
         assertNull(actual.getReason());
         verifyNoInteractions(customTemplateUpgradeValidator);

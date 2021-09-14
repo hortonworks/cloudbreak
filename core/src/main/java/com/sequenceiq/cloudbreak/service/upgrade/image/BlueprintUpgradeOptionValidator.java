@@ -25,7 +25,7 @@ class BlueprintUpgradeOptionValidator {
         LOGGER.debug("Validating blueprint upgrade option. Name: {}, type: {}, upgradeOption: {}, lockComponents: {}", blueprint.getName(),
                 blueprint.getStatus(), blueprint.getBlueprintUpgradeOption(), lockComponents);
         return isDefaultBlueprint(blueprint) ? isEnabledForDefaultBlueprint(lockComponents, blueprint, skipValidations, dataHubUpgradeEntitled)
-                : isEnabledForCustomBlueprint(blueprint, skipValidations);
+                : isEnabledForCustomBlueprint(blueprint, skipValidations, dataHubUpgradeEntitled);
     }
 
     private boolean isDefaultBlueprint(Blueprint blueprint) {
@@ -61,10 +61,10 @@ class BlueprintUpgradeOptionValidator {
         return Optional.ofNullable(blueprint.getBlueprintUpgradeOption()).orElse(ENABLED);
     }
 
-    private BlueprintValidationResult isEnabledForCustomBlueprint(Blueprint blueprint, boolean skipValidations) {
+    private BlueprintValidationResult isEnabledForCustomBlueprint(Blueprint blueprint, boolean skipValidations, boolean dataHubUpgradeEntitled) {
         BlueprintValidationResult result;
-        if (skipValidations) {
-            LOGGER.debug("Custom blueprint options are not validated if the request is internal");
+        if (skipValidations || dataHubUpgradeEntitled) {
+            LOGGER.debug("Custom blueprint options are not validated if the request is internal or the DH upgrade entitlement is granted");
             result = createResult(true);
         } else {
             result = customTemplateUpgradeValidator.isValid(blueprint);
