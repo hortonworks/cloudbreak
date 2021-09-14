@@ -84,22 +84,29 @@ public class AwsLoadBalancerCommonService {
         Set<String> subnetIds = new HashSet<>();
         if (type == LoadBalancerType.PRIVATE) {
             LOGGER.debug("Private load balancer detected. Using instance subnet for load balancer creation.");
-            subnetIds.addAll(awsNetworkView.getSubnetList());
-            subnetIds.addAll(getMultiAZSubnets(cloudLoadBalancer));
+            populateSubnetIds(awsNetworkView, cloudLoadBalancer, subnetIds);
         } else {
             LOGGER.debug("Public load balancer detected. Using endpoint gateway subnet for load balancer creation.");
             subnetIds.addAll(awsNetworkView.getEndpointGatewaySubnetList());
             subnetIds.addAll(getEndpointGatewayMultiAZSubnets(cloudLoadBalancer));
             if (subnetIds.isEmpty()) {
                 LOGGER.debug("Endpoint gateway subnet is not set. Falling back to instance subnet for load balancer creation.");
-                subnetIds.addAll(awsNetworkView.getSubnetList());
-                subnetIds.addAll(getMultiAZSubnets(cloudLoadBalancer));
+                populateSubnetIds(awsNetworkView, cloudLoadBalancer, subnetIds);
             }
         }
         if (subnetIds.isEmpty()) {
             throw new CloudConnectorException("Unable to configure load balancer: Could not identify subnets.");
         }
         return subnetIds;
+    }
+
+    private void populateSubnetIds(AwsNetworkView awsNetworkView, CloudLoadBalancer cloudLoadBalancer, Set<String> subnetIds) {
+        Set<String> multiAZSubnets = getMultiAZSubnets(cloudLoadBalancer);
+        if (multiAZSubnets.isEmpty()) {
+            subnetIds.addAll(awsNetworkView.getSubnetList());
+        } else {
+            subnetIds.addAll(multiAZSubnets);
+        }
     }
 
     private Set<String> getMultiAZSubnets(CloudLoadBalancer cloudLoadBalancer) {

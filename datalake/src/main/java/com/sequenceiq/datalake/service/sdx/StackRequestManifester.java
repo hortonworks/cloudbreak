@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.S
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
@@ -90,6 +91,9 @@ public class StackRequestManifester {
     @Inject
     private SdxNotificationService sdxNotificationService;
 
+    @Inject
+    private MultiAzDecorator multiAzDecorator;
+
     public void configureStackForSdxCluster(SdxCluster sdxCluster, DetailedEnvironmentResponse environment) {
         StackV4Request generatedStackV4Request = setupStackRequestForCloudbreak(sdxCluster, environment);
         gatewayManifester.configureGatewayForSdxCluster(generatedStackV4Request);
@@ -144,6 +148,9 @@ public class StackRequestManifester {
             setupCloudStorageAccountMapping(stackRequest, environment.getCrn(), environment.getIdBrokerMappingSource(), environment.getCloudPlatform());
             validateCloudStorage(sdxCluster, environment, stackRequest);
             setupInstanceVolumeEncryption(stackRequest, environment);
+            if (entitlementService.awsNativeDataLakeEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
+                multiAzDecorator.decorateStackRequestWithMultiAz(stackRequest, environment);
+            }
             return stackRequest;
         } catch (IOException e) {
             LOGGER.error("Can not parse JSON to stack request");
