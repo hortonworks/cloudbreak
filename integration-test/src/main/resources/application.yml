@@ -76,13 +76,13 @@ integrationtest:
     defaultPassword: Admin123
     defaultPort: 7180
   cloudProvider: MOCK
-  runtimeVersion: 7.2.10
+  runtimeVersion: 7.2.12
   upgrade:
     currentHARuntimeVersion: 7.2.7
     currentRuntimeVersion: 7.2.0
-    targetRuntimeVersion: 7.2.10
+    targetRuntimeVersion: 7.2.12
     distroXUpgradeCurrentVersion: 7.2.7
-    distroXUpgradeTargetVersion: 7.2.10
+    distroXUpgradeTargetVersion: 7.2.12
   privateEndpointEnabled: false
 
   spot:
