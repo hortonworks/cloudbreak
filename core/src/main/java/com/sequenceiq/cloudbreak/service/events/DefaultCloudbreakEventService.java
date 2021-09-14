@@ -16,7 +16,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StackResponseEntries;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackToStackV4ResponseConverter;
@@ -163,10 +162,6 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
                 stack.getCreator().getUserCrn()
         );
         reactor.notify(CLOUDBREAK_EVENT, eventFactory.createEvent(compositeEvent));
-    }
-
-    private boolean stackTypeIsDistroX(StackType stackType) {
-        return stackType == null || StackType.WORKLOAD.equals(stackType);
     }
 
 }
