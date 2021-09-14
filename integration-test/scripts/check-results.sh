@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-: ${INTEGRATIONTEST_MAX_PG_NETWORK_OUTPUT:="7GB"}
+: ${INTEGRATIONTEST_MAX_PG_NETWORK_OUTPUT:="7.1GB"}
 
 status_code=0
 
