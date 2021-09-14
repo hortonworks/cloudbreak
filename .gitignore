@@ -14,7 +14,7 @@ gradle
 *.iws
 .shelf/
 
-.vscode
+.jpb/
 .nb-gradle-properties
 .nb-gradle
 *.iml
