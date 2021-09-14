@@ -94,7 +94,7 @@ public class ProvisionerService {
         SdxCluster sdxCluster = sdxService.getById(id);
         AtomicInteger deleteFailedCount = new AtomicInteger(1);
         Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
-                .stopIfException(pollingConfig.getStopPollingIfExceptionOccured())
+                .stopIfException(pollingConfig.getStopPollingIfExceptionOccurred())
                 .stopAfterDelay(pollingConfig.getDuration(), pollingConfig.getDurationTimeUnit())
                 .run(() -> {
                     LOGGER.info("Deletion polling cloudbreak for stack status: '{}' in '{}' env", sdxCluster.getClusterName(), sdxCluster.getEnvName());

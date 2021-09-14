@@ -18,6 +18,7 @@ import com.sequenceiq.flow.api.FlowEndpoint;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowLogResponse;
 import com.sequenceiq.flow.api.model.FlowType;
+import com.sequenceiq.flow.api.model.StateStatus;
 
 @Service
 public class CloudbreakFlowService {
@@ -30,7 +31,7 @@ public class CloudbreakFlowService {
     @Inject
     private SdxClusterRepository sdxClusterRepository;
 
-    public FlowLogResponse getLastCloudbreakFlowChainId(SdxCluster sdxCluster) {
+    public FlowLogResponse getLastCloudbreakFlowLog(SdxCluster sdxCluster) {
         FlowLogResponse lastFlowByResourceName = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
                 flowEndpoint.getLastFlowByResourceCrn(sdxCluster.getStackCrn()));
         logFlowLogResponse(lastFlowByResourceName);
@@ -40,6 +41,11 @@ public class CloudbreakFlowService {
     public List<FlowLogResponse> getFlowLogsByFlowId(String flowId) {
         return ThreadBasedUserCrnProvider.doAsInternalActor(() ->
                 flowEndpoint.getFlowLogsByFlowId(flowId));
+    }
+
+    public boolean getFlowResultByFlowId(SdxCluster sdxCluster) {
+        List<FlowLogResponse> flowLogsByFlowId = getFlowLogsByFlowId(sdxCluster.getLastCbFlowId());
+        return flowLogsByFlowId.stream().allMatch(fl -> StateStatus.SUCCESSFUL.equals(fl.getStateStatus()));
     }
 
     public FlowState getLastKnownFlowState(SdxCluster sdxCluster) {

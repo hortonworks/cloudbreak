@@ -223,7 +223,7 @@ public class DatabaseService {
     public DatabaseServerStatusV4Response waitAndGetDatabase(SdxCluster sdxCluster, String databaseCrn, PollingConfig pollingConfig,
             SdxDatabaseOperation sdxDatabaseOperation, boolean cancellable) {
         DatabaseServerStatusV4Response response = Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
-                .stopIfException(pollingConfig.getStopPollingIfExceptionOccured())
+                .stopIfException(pollingConfig.getStopPollingIfExceptionOccurred())
                 .stopAfterDelay(pollingConfig.getDuration(), pollingConfig.getDurationTimeUnit())
                 .run(() -> {
                     if (cancellable && PollGroup.CANCELLED.equals(DatalakeInMemoryStateStore.get(sdxCluster.getId()))) {

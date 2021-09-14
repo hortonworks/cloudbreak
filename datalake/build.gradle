@@ -88,7 +88,9 @@ dependencies {
   implementation     group: 'com.cloudera.api.swagger',    name: 'cloudera-manager-api-swagger',  version: cmClientVersion
 
   testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',        version: springBootVersion
-  testImplementation group: 'org.mockito',               name: 'mockito-core',                    version: mockitoVersion
+//  testImplementation group: 'org.mockito',               name: 'mockito-core',                    version: mockitoVersion
+  testImplementation group: 'org.mockito',               name: 'mockito-inline',                  version: mockitoVersion
+
 
   // mockito juniper depends on ByteBuddy 1.9.7, but hibernate use older version
   implementation group: 'net.bytebuddy',                 name: 'byte-buddy',                      version: '1.9.12'

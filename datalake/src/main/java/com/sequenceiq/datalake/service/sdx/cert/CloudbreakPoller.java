@@ -69,7 +69,7 @@ public class CloudbreakPoller {
             Set<Status> targetSatuses,
             Set<Status> failedStatuses) {
         Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
-                .stopIfException(pollingConfig.getStopPollingIfExceptionOccured())
+                .stopIfException(pollingConfig.getStopPollingIfExceptionOccurred())
                 .stopAfterDelay(pollingConfig.getDuration(), pollingConfig.getDurationTimeUnit())
                 .run(() -> checkClusterStatus(process, sdxCluster, targetSatuses, failedStatuses));
     }

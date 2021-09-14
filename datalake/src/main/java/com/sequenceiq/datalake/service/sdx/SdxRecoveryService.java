@@ -74,7 +74,7 @@ public class SdxRecoveryService {
     public void waitCloudbreakFlow(Long id, PollingConfig pollingConfig, String pollingMessage) {
         SdxCluster sdxCluster = sdxService.getById(id);
         Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
-                .stopIfException(pollingConfig.getStopPollingIfExceptionOccured())
+                .stopIfException(pollingConfig.getStopPollingIfExceptionOccurred())
                 .stopAfterDelay(pollingConfig.getDuration(), pollingConfig.getDurationTimeUnit())
                 .run(() -> checkClusterStatusDuringRecovery(sdxCluster, pollingMessage));
     }

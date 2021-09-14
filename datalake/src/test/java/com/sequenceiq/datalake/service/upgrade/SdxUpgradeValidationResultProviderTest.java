@@ -39,33 +39,33 @@ public class SdxUpgradeValidationResultProviderTest {
     @Test
     void testIsValidShouldReturnTrue() {
         FlowLogResponse flowLogResponse = createLastFlowLog();
-        when(cloudbreakFlowService.getLastCloudbreakFlowChainId(sdxCluster)).thenReturn(flowLogResponse);
+        when(cloudbreakFlowService.getLastCloudbreakFlowLog(sdxCluster)).thenReturn(flowLogResponse);
         when(cloudbreakFlowService.getFlowLogsByFlowId(FLOW_ID)).thenReturn(createFlowLogsWithFailedValidation());
 
         assertTrue(underTest.isValidationFailed(sdxCluster));
-        verify(cloudbreakFlowService).getLastCloudbreakFlowChainId(sdxCluster);
+        verify(cloudbreakFlowService).getLastCloudbreakFlowLog(sdxCluster);
         verify(cloudbreakFlowService).getFlowLogsByFlowId(FLOW_ID);
     }
 
     @Test
     void testIsValidShouldReturnFalseWhenTheFlowDoesNotContainsValidationInitState() {
         FlowLogResponse flowLogResponse = createLastFlowLog();
-        when(cloudbreakFlowService.getLastCloudbreakFlowChainId(sdxCluster)).thenReturn(flowLogResponse);
+        when(cloudbreakFlowService.getLastCloudbreakFlowLog(sdxCluster)).thenReturn(flowLogResponse);
         when(cloudbreakFlowService.getFlowLogsByFlowId(FLOW_ID)).thenReturn(createFlowLogsWithOutValidationInitState());
 
         assertFalse(underTest.isValidationFailed(sdxCluster));
-        verify(cloudbreakFlowService).getLastCloudbreakFlowChainId(sdxCluster);
+        verify(cloudbreakFlowService).getLastCloudbreakFlowLog(sdxCluster);
         verify(cloudbreakFlowService).getFlowLogsByFlowId(FLOW_ID);
     }
 
     @Test
     void testIsValidShouldReturnFalseWhenTheFlowDoesNotContainsFailedState() {
         FlowLogResponse flowLogResponse = createLastFlowLog();
-        when(cloudbreakFlowService.getLastCloudbreakFlowChainId(sdxCluster)).thenReturn(flowLogResponse);
+        when(cloudbreakFlowService.getLastCloudbreakFlowLog(sdxCluster)).thenReturn(flowLogResponse);
         when(cloudbreakFlowService.getFlowLogsByFlowId(FLOW_ID)).thenReturn(createFlowLogsWithOutFailedState());
 
         assertFalse(underTest.isValidationFailed(sdxCluster));
-        verify(cloudbreakFlowService).getLastCloudbreakFlowChainId(sdxCluster);
+        verify(cloudbreakFlowService).getLastCloudbreakFlowLog(sdxCluster);
         verify(cloudbreakFlowService).getFlowLogsByFlowId(FLOW_ID);
     }
 

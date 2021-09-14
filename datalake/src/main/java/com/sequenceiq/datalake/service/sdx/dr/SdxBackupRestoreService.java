@@ -221,7 +221,7 @@ public class SdxBackupRestoreService {
     public void waitCloudbreakFlow(Long id, PollingConfig pollingConfig, String pollingMessage) {
         SdxCluster sdxCluster = sdxClusterRepository.findById(id).orElseThrow(notFound("SDX cluster", id));
         Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
-                .stopIfException(pollingConfig.getStopPollingIfExceptionOccured())
+                .stopIfException(pollingConfig.getStopPollingIfExceptionOccurred())
                 .stopAfterDelay(pollingConfig.getDuration(), pollingConfig.getDurationTimeUnit())
                 .run(() -> checkDatabaseDrStatus(sdxCluster, pollingMessage));
     }
@@ -369,7 +369,7 @@ public class SdxBackupRestoreService {
             String pollingMessage) {
         SdxCluster sdxCluster = sdxClusterRepository.findById(id).orElseThrow(notFound("SDX cluster", id));
         Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
-            .stopIfException(pollingConfig.getStopPollingIfExceptionOccured())
+            .stopIfException(pollingConfig.getStopPollingIfExceptionOccurred())
             .stopAfterDelay(pollingConfig.getDuration(), pollingConfig.getDurationTimeUnit())
             .run(() -> getBackupStatusAttemptResult(sdxCluster, backupId, userCrn, pollingMessage));
     }
@@ -442,7 +442,7 @@ public class SdxBackupRestoreService {
             String pollingMessage) {
         SdxCluster sdxCluster = sdxClusterRepository.findById(id).orElseThrow(notFound("SDX cluster", id));
         Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
-            .stopIfException(pollingConfig.getStopPollingIfExceptionOccured())
+            .stopIfException(pollingConfig.getStopPollingIfExceptionOccurred())
             .stopAfterDelay(pollingConfig.getDuration(), pollingConfig.getDurationTimeUnit())
             .run(() -> getRestoreStatusAttemptResult(sdxCluster, restoreId, userCrn, pollingMessage));
     }

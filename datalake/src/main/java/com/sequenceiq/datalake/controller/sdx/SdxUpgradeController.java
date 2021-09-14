@@ -19,11 +19,14 @@ import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.upgrade.SdxRuntimeUpgradeService;
 import com.sequenceiq.datalake.service.upgrade.recovery.SdxUpgradeRecoveryService;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.sdx.api.endpoint.SdxUpgradeEndpoint;
 import com.sequenceiq.sdx.api.model.SdxRecoveryRequest;
 import com.sequenceiq.sdx.api.model.SdxRecoveryResponse;
+import com.sequenceiq.sdx.api.model.SdxSyncCmResponse;
 import com.sequenceiq.sdx.api.model.SdxUpgradeRequest;
 import com.sequenceiq.sdx.api.model.SdxUpgradeResponse;
 import com.sequenceiq.sdx.api.model.SdxUpgradeShowAvailableImages;
@@ -33,11 +36,16 @@ public class SdxUpgradeController implements SdxUpgradeEndpoint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxUpgradeController.class);
 
+    private static final String INITIATED = "Syncing CM and parcel versions from CM initiated.";
+
     @Inject
     private SdxRuntimeUpgradeService sdxRuntimeUpgradeService;
 
     @Inject
     private SdxUpgradeRecoveryService sdxUpgradeRecoveryService;
+
+    @Inject
+    private SdxService sdxService;
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.UPGRADE_DATALAKE)
@@ -73,6 +81,24 @@ public class SdxUpgradeController implements SdxUpgradeEndpoint {
     public SdxRecoveryResponse recoverClusterByCrn(@ResourceCrn String crn, @Valid SdxRecoveryRequest recoverSdxClusterRequest) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         return sdxUpgradeRecoveryService.triggerRecovery(userCrn, NameOrCrn.ofCrn(crn), recoverSdxClusterRequest);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.UPGRADE_DATALAKE)
+    public SdxSyncCmResponse syncCmByName(String name) {
+        NameOrCrn clusterNameOrCrn = NameOrCrn.ofName(name);
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        FlowIdentifier flowIdentifier = sdxService.syncCm(userCrn, clusterNameOrCrn);
+        return new SdxSyncCmResponse(INITIATED, flowIdentifier);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.UPGRADE_DATALAKE)
+    public SdxSyncCmResponse syncCmByCrn(String crn) {
+        NameOrCrn clusterNameOrCrn = NameOrCrn.ofCrn(crn);
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        FlowIdentifier flowIdentifier = sdxService.syncCm(userCrn, clusterNameOrCrn);
+        return new SdxSyncCmResponse(INITIATED, flowIdentifier);
     }
 
     private boolean isUpgradeTypeSpecified(SdxUpgradeRequest request) {

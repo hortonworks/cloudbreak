@@ -63,7 +63,10 @@ sdx:
     recoverable.status.list: >
       DATALAKE_UPGRADE_FAILED,
       RUNNING
-
+  stack:
+    cmsync:
+      sleeptime_sec: 10
+      duration_min: 10
   gateway:
     topology:
       name: cdp-proxy

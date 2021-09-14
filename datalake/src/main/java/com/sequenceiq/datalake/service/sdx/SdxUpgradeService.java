@@ -1,5 +1,6 @@
 package com.sequenceiq.datalake.service.sdx;
 
+import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -46,7 +47,7 @@ public class SdxUpgradeService {
     private WebApplicationExceptionMessageExtractor exceptionMessageExtractor;
 
     @Inject
-    private SdxUpgradeValidationResultProvider sdxUpgradeValidationResultProvider;
+    private SdxUpgradeValidationResultProvider cloudbreakFlowResultProvider;
 
     @Inject
     private CloudbreakPoller cloudbreakPoller;
@@ -98,12 +99,12 @@ public class SdxUpgradeService {
         }
     }
 
-    public void updateRuntimeVersionFromCloudbreak(Long sdxId) {
+    public Optional<String> updateRuntimeVersionFromCloudbreak(Long sdxId) {
         SdxCluster sdxCluster = sdxService.getById(sdxId);
         String clusterName = sdxCluster.getClusterName();
         LOGGER.info("Trying to update the runtime version from Cloudbreak for cluster: {}", clusterName);
         StackV4Response stack = ThreadBasedUserCrnProvider.doAsInternalActor(() -> stackV4Endpoint.get(0L, clusterName, Set.of(), sdxCluster.getAccountId()));
-        sdxService.updateRuntimeVersionFromStackResponse(sdxCluster, stack);
+        return sdxService.updateRuntimeVersionFromStackResponse(sdxCluster, stack);
     }
 
     public String getCurrentImageCatalogName(Long id) {
@@ -137,7 +138,7 @@ public class SdxUpgradeService {
     public void waitCloudbreakFlow(Long id, PollingConfig pollingConfig, String pollingMessage) {
         SdxCluster sdxCluster = sdxService.getById(id);
         cloudbreakPoller.pollUpdateUntilAvailable(pollingMessage, sdxCluster, pollingConfig);
-        if (sdxUpgradeValidationResultProvider.isValidationFailed(sdxCluster)) {
+        if (cloudbreakFlowResultProvider.isValidationFailed(sdxCluster)) {
             throw new UserBreakException(new UpgradeValidationFailedException("Upgrade validation failed."));
         }
     }
