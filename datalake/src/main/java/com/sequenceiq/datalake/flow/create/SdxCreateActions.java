@@ -41,6 +41,7 @@ import com.sequenceiq.datalake.metric.SdxMetricService;
 import com.sequenceiq.datalake.service.AbstractSdxAction;
 import com.sequenceiq.datalake.service.sdx.ProvisionerService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
+import com.sequenceiq.datalake.service.sdx.status.DatalakeStatusUpdateException;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowEvent;
@@ -244,6 +245,8 @@ public class SdxCreateActions {
                     metricService.incrementMetricCounter(MetricType.SDX_CREATION_FAILED, sdxCluster);
                 } catch (NotFoundException notFoundException) {
                     LOGGER.info("Can not set status to SDX_CREATION_FAILED because data lake was not found");
+                } catch (DatalakeStatusUpdateException datalakeStatusUpdateException) {
+                    LOGGER.info("Status update for data lake failed (possible reason: ongoing parallel deletion flow): ", exception.getMessage());
                 }
                 Flow flow = getFlow(context.getFlowParameters().getFlowId());
                 flow.setFlowFailed(payload.getException());
