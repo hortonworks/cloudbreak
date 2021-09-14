@@ -103,6 +103,7 @@ import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResizeRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxCustomClusterRequest;
+import com.sequenceiq.sdx.api.model.SdxSyncComponentVersionsFromCmResponse;
 
 @Service
 public class SdxService implements ResourceIdProvider, ResourcePropertyProvider, PayloadContextProvider {
@@ -557,6 +558,21 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
                 stackV4Endpoint.sync(WORKSPACE_ID_DEFAULT, sdxCluster.getClusterName(), Crn.fromString(crn).getAccountId()));
     }
 
+    public SdxSyncComponentVersionsFromCmResponse syncComponentVersionsFromCm(String userCrn, NameOrCrn clusterNameOrCrn) {
+        SdxCluster cluster = getByNameOrCrn(userCrn, clusterNameOrCrn);
+        MDCBuilder.buildMdcContext(cluster);
+        SdxStatusEntity sdxStatus = sdxStatusService.getActualStatusForSdx(cluster);
+        if (sdxStatus.getStatus().isStopState()) {
+            String message = "Syncing CM and parcel versions from CM cannot be initiated as the datalake is either stopped or is stopping";
+            LOGGER.info(message);
+            return new SdxSyncComponentVersionsFromCmResponse(message);
+        } else {
+            String message = "Syncing CM and parcel versions from CM initiated";
+            LOGGER.info(message);
+            return new SdxSyncComponentVersionsFromCmResponse(message, sdxReactorFlowManager.triggerDatalakeSyncComponentVersionsFromCmFlow(cluster));
+        }
+    }
+
     protected StackV4Request prepareDefaultSecurityConfigs(StackV4Request internalRequest, StackV4Request stackV4Request, CloudPlatform cloudPlatform) {
         if (internalRequest == null && !List.of("MOCK", "YARN").contains(cloudPlatform)) {
             stackV4Request.getInstanceGroups().forEach(instance -> {
@@ -941,7 +957,7 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
                 .orElseThrow(() -> notFound("SDX cluster", name).get());
     }
 
-    public void updateRuntimeVersionFromStackResponse(SdxCluster sdxCluster, StackV4Response stackV4Response) {
+    public Optional<String> updateRuntimeVersionFromStackResponse(SdxCluster sdxCluster, StackV4Response stackV4Response) {
         String clusterName = sdxCluster.getClusterName();
         Optional<String> cdpVersionOpt = getCdpVersion(stackV4Response);
         LOGGER.info("Update '{}' runtime version from stackV4Response", clusterName);
@@ -953,6 +969,7 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
         } else {
             LOGGER.warn("Cannot update the Sdx runtime version for cluster: {}", clusterName);
         }
+        return cdpVersionOpt;
     }
 
     private Optional<String> getCdpVersion(StackV4Response stack) {

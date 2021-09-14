@@ -37,6 +37,7 @@
   "datalake/startDatalake": "datalake/write",
   "datalake/stopDatalake": "datalake/write",
   "datalake/upgradeDatalake": "datalake/write",
+  "datalake/syncComponentVersionsFromCm": "datalake/write",
   "datalake/rotateAutoTlsCertDatalake": "datalake/write",
   "datalake/resizeDatalake": "datalake/write",
   "datahub/createDatahub": "datahub/write",

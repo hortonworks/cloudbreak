@@ -37,6 +37,7 @@ import com.sequenceiq.cloudbreak.exception.FlowsAlreadyRunningException;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.cert.renew.event.SdxStartCertRenewalEvent;
 import com.sequenceiq.datalake.flow.cert.rotation.event.SdxStartCertRotationEvent;
+import com.sequenceiq.datalake.flow.datalake.cmsync.event.SdxCmSyncStartEvent;
 import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradeFlowChainStartEvent;
 import com.sequenceiq.datalake.flow.datalake.recovery.event.DatalakeRecoveryStartEvent;
 import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradeStartEvent;
@@ -133,6 +134,13 @@ public class SdxReactorFlowManager {
             return notify(DATALAKE_UPGRADE_EVENT.event(), new DatalakeUpgradeStartEvent(DATALAKE_UPGRADE_EVENT.event(), cluster.getId(),
                     userId, imageId, replaceVms.getBooleanValue()));
         }
+    }
+
+    public FlowIdentifier triggerDatalakeSyncComponentVersionsFromCmFlow(SdxCluster cluster) {
+        LOGGER.info("Trigger Datalake sync component versions from CM");
+        String userId = ThreadBasedUserCrnProvider.getUserCrn();
+        SdxCmSyncStartEvent event = new SdxCmSyncStartEvent(cluster.getId(), userId);
+        return notify(event.selector(), event);
     }
 
     /**

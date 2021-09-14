@@ -65,7 +65,7 @@ public class SdxDiagnosticsFlowService {
         LOGGER.debug(startPollingMessage);
         sdxService.getById(sdxId);
         Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
-                .stopIfException(pollingConfig.getStopPollingIfExceptionOccured())
+                .stopIfException(pollingConfig.getStopPollingIfExceptionOccurred())
                 .stopAfterDelay(pollingConfig.getDuration(), pollingConfig.getDurationTimeUnit())
                 .run(() -> {
                     List<FlowLogResponse> flowLogs = ThreadBasedUserCrnProvider.doAsInternalActor(

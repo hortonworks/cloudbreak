@@ -5,8 +5,8 @@ import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAK
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_TRIGGER_BACKUP_EVENT;
 import static com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreEvent.DATALAKE_DATABASE_RESTORE_EVENT;
 import static com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreEvent.DATALAKE_TRIGGER_RESTORE_EVENT;
-import static com.sequenceiq.datalake.service.sdx.CloudbreakFlowService.FlowState.FINISHED;
-import static com.sequenceiq.datalake.service.sdx.CloudbreakFlowService.FlowState.RUNNING;
+import static com.sequenceiq.datalake.service.sdx.flowcheck.FlowState.FINISHED;
+import static com.sequenceiq.datalake.service.sdx.flowcheck.FlowState.RUNNING;
 
 import java.util.Collections;
 
@@ -52,8 +52,9 @@ import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeTriggerRestoreEvent
 import com.sequenceiq.datalake.flow.statestore.DatalakeInMemoryStateStore;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.repository.SdxOperationRepository;
-import com.sequenceiq.datalake.service.sdx.CloudbreakFlowService;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
+import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
+import com.sequenceiq.datalake.service.sdx.flowcheck.FlowState;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.sdx.api.model.DatalakeDatabaseDrStatus;
 import com.sequenceiq.sdx.api.model.SdxBackupResponse;
@@ -221,7 +222,7 @@ public class SdxBackupRestoreService {
     public void waitCloudbreakFlow(Long id, PollingConfig pollingConfig, String pollingMessage) {
         SdxCluster sdxCluster = sdxClusterRepository.findById(id).orElseThrow(notFound("SDX cluster", id));
         Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
-                .stopIfException(pollingConfig.getStopPollingIfExceptionOccured())
+                .stopIfException(pollingConfig.getStopPollingIfExceptionOccurred())
                 .stopAfterDelay(pollingConfig.getDuration(), pollingConfig.getDurationTimeUnit())
                 .run(() -> checkDatabaseDrStatus(sdxCluster, pollingMessage));
     }
@@ -233,7 +234,7 @@ public class SdxBackupRestoreService {
                 LOGGER.info("{} polling cancelled in in-memory store, id: {}", pollingMessage, sdxCluster.getId());
                 return AttemptResults.breakFor(pollingMessage + " polling cancelled in inmemory store, id: " + sdxCluster.getId());
             } else {
-                CloudbreakFlowService.FlowState flowState = cloudbreakFlowService.getLastKnownFlowState(sdxCluster);
+                FlowState flowState = cloudbreakFlowService.getLastKnownFlowState(sdxCluster);
                 if (RUNNING.equals(flowState)) {
                     LOGGER.info("{} polling will continue, cluster has an active flow in Cloudbreak, id: {}", pollingMessage, sdxCluster.getId());
                     return AttemptResults.justContinue();
@@ -247,7 +248,7 @@ public class SdxBackupRestoreService {
         }
     }
 
-    private AttemptResult<StackV4Response> getStackResponseAttemptResult(SdxCluster sdxCluster, String pollingMessage, CloudbreakFlowService.FlowState flowState)
+    private AttemptResult<StackV4Response> getStackResponseAttemptResult(SdxCluster sdxCluster, String pollingMessage, FlowState flowState)
             throws JsonProcessingException {
         StackV4Response stackV4Response = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
                 stackV4Endpoint.get(0L, sdxCluster.getClusterName(), Collections.emptySet(), sdxCluster.getAccountId()));
@@ -369,7 +370,7 @@ public class SdxBackupRestoreService {
             String pollingMessage) {
         SdxCluster sdxCluster = sdxClusterRepository.findById(id).orElseThrow(notFound("SDX cluster", id));
         Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
-            .stopIfException(pollingConfig.getStopPollingIfExceptionOccured())
+            .stopIfException(pollingConfig.getStopPollingIfExceptionOccurred())
             .stopAfterDelay(pollingConfig.getDuration(), pollingConfig.getDurationTimeUnit())
             .run(() -> getBackupStatusAttemptResult(sdxCluster, backupId, userCrn, pollingMessage));
     }
@@ -442,7 +443,7 @@ public class SdxBackupRestoreService {
             String pollingMessage) {
         SdxCluster sdxCluster = sdxClusterRepository.findById(id).orElseThrow(notFound("SDX cluster", id));
         Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
-            .stopIfException(pollingConfig.getStopPollingIfExceptionOccured())
+            .stopIfException(pollingConfig.getStopPollingIfExceptionOccurred())
             .stopAfterDelay(pollingConfig.getDuration(), pollingConfig.getDurationTimeUnit())
             .run(() -> getRestoreStatusAttemptResult(sdxCluster, restoreId, userCrn, pollingMessage));
     }

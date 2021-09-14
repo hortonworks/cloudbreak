@@ -97,6 +97,11 @@ public enum DatalakeStatusEnum {
         }
     }
 
+    public boolean isStopState() {
+        return STOPPED.equals(this)
+                || STOP_IN_PROGRESS.equals(this);
+    }
+
     public ResourceEvent getDefaultResourceEvent() {
         return resourceEvent;
     }

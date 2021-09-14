@@ -24,6 +24,7 @@ import com.sequenceiq.authorization.annotation.RequestObject;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -61,6 +62,7 @@ import com.sequenceiq.sdx.api.model.SdxClusterResizeRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxCustomClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
+import com.sequenceiq.sdx.api.model.SdxSyncComponentVersionsFromCmResponse;
 import com.sequenceiq.sdx.api.model.SdxValidateCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SetRangerCloudIdentityMappingRequest;
 
@@ -350,6 +352,20 @@ public class SdxController implements SdxEndpoint {
         // FIXME: Implement this!
         // API first approach so we can work in parallel on the CLI.
         // It is going to be implemented as a part of CB-14309
+    }
+
+    @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.SYNC_COMPONENT_VERSIONS_FROM_CM_DATALAKE)
+    public SdxSyncComponentVersionsFromCmResponse syncComponentVersionsFromCmByName(@ResourceName String name) {
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        return sdxService.syncComponentVersionsFromCm(userCrn, NameOrCrn.ofName(name));
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.SYNC_COMPONENT_VERSIONS_FROM_CM_DATALAKE)
+    public SdxSyncComponentVersionsFromCmResponse syncComponentVersionsFromCmByCrn(@ResourceCrn String crn) {
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        return sdxService.syncComponentVersionsFromCm(userCrn, NameOrCrn.ofCrn(crn));
     }
 
     private SdxCluster getSdxClusterByName(String name) {

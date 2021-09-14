@@ -1,4 +1,4 @@
-package com.sequenceiq.datalake.service.sdx;
+package com.sequenceiq.datalake.service.sdx.flowcheck;
 
 import java.util.List;
 import java.util.function.Supplier;
@@ -31,6 +31,9 @@ public class CloudbreakFlowService {
     @Inject
     private SdxClusterRepository sdxClusterRepository;
 
+    @Inject
+    private FlowCheckResponseToFlowStateConverter flowCheckResponseToFlowStateConverter;
+
     public FlowLogResponse getLastCloudbreakFlowChainId(SdxCluster sdxCluster) {
         FlowLogResponse lastFlowByResourceName = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
                 flowEndpoint.getLastFlowByResourceCrn(sdxCluster.getStackCrn()));
@@ -50,13 +53,13 @@ public class CloudbreakFlowService {
                 FlowCheckResponse flowCheckResponse = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
                         flowEndpoint.hasFlowRunningByChainId(sdxCluster.getLastCbFlowChainId()));
                 logCbFlowChainStatus(sdxCluster, flowCheckResponse.getHasActiveFlow());
-                return getFlowState(flowCheckResponse);
+                return flowCheckResponseToFlowStateConverter.convert(flowCheckResponse);
             } else if (sdxCluster.getLastCbFlowId() != null) {
                 LOGGER.info("Checking cloudbreak {} {}", FlowType.FLOW, sdxCluster.getLastCbFlowId());
                 FlowCheckResponse flowCheckResponse = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
                         flowEndpoint.hasFlowRunningByFlowId(sdxCluster.getLastCbFlowId()));
                 logCbFlowStatus(sdxCluster, flowCheckResponse.getHasActiveFlow());
-                return getFlowState(flowCheckResponse);
+                return flowCheckResponseToFlowStateConverter.convert(flowCheckResponse);
             }
             return FlowState.UNKNOWN;
         } catch (NotFoundException e) {
@@ -66,22 +69,6 @@ public class CloudbreakFlowService {
             LOGGER.error("Exception occured during checking if there is a flow for cluster {} in CB: {}", sdxCluster.getClusterName(), e.getMessage());
             return FlowState.UNKNOWN;
         }
-    }
-
-    private FlowState getFlowState(FlowCheckResponse flowCheckResponse) {
-        if (flowCheckResponse.getHasActiveFlow()) {
-            return FlowState.RUNNING;
-        } else {
-            if (flowCheckResponse.getLatestFlowFinalizedAndFailed() != null && flowCheckResponse.getLatestFlowFinalizedAndFailed()) {
-                return FlowState.FAILED;
-            } else {
-                return FlowState.FINISHED;
-            }
-        }
-    }
-
-    public enum FlowState {
-        RUNNING, FINISHED, FAILED, UNKNOWN
     }
 
     public void saveLastCloudbreakFlowChainId(SdxCluster sdxCluster, FlowIdentifier flowIdentifier) {

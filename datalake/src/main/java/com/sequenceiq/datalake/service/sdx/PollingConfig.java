@@ -4,13 +4,13 @@ import java.util.concurrent.TimeUnit;
 
 public class PollingConfig {
 
-    private long sleepTime;
+    private final long sleepTime;
 
-    private long duration;
+    private final long duration;
 
-    private TimeUnit sleepTimeUnit;
+    private final TimeUnit sleepTimeUnit;
 
-    private TimeUnit durationTimeUnit;
+    private final TimeUnit durationTimeUnit;
 
     private Boolean stopPollingIfExceptionOccured = Boolean.FALSE;
 
@@ -37,11 +37,23 @@ public class PollingConfig {
         return durationTimeUnit;
     }
 
-    public Boolean getStopPollingIfExceptionOccured() {
+    public Boolean getStopPollingIfExceptionOccurred() {
         return stopPollingIfExceptionOccured;
     }
 
-    public void setStopPollingIfExceptionOccured(Boolean stopPollingIfExceptionOccured) {
-        this.stopPollingIfExceptionOccured = stopPollingIfExceptionOccured;
+    public PollingConfig withStopPollingIfExceptionOccurred(Boolean stopPollingIfExceptionOccurred) {
+        this.stopPollingIfExceptionOccured = stopPollingIfExceptionOccurred;
+        return this;
+    }
+
+    @Override
+    public String toString() {
+        return "PollingConfig{" +
+                "sleepTime=" + sleepTime +
+                ", duration=" + duration +
+                ", sleepTimeUnit=" + sleepTimeUnit +
+                ", durationTimeUnit=" + durationTimeUnit +
+                ", stopPollingIfExceptionOccured=" + stopPollingIfExceptionOccured +
+                '}';
     }
 }
