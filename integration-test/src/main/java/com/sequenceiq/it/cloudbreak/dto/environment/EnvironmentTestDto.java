@@ -214,6 +214,15 @@ public class EnvironmentTestDto
         return this;
     }
 
+    public EnvironmentTestDto withDefaultSecurityGroup(String securityGroup) {
+        if (getRequest().getSecurityAccess() == null) {
+            getRequest().setSecurityAccess(new SecurityAccessRequest());
+        }
+        getRequest().getSecurityAccess().setDefaultSecurityGroupId(securityGroup);
+        getRequest().getSecurityAccess().setSecurityGroupIdForKnox(securityGroup);
+        return this;
+    }
+
     public EnvironmentTestDto withoutNetwork() {
         getRequest().setNetwork(null);
         return this;
