@@ -132,7 +132,7 @@ public class SshJClientActions extends SshJClient {
         return testDto;
     }
 
-    public void checkEphemeralDisksMounted(List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames, String mountDirPrefix) {
+    public void checkAwsEphemeralDisksMounted(List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames, String mountDirPrefix) {
         Map<String, Pair<Integer, String>> deviceMountPointMappingsByIp = getDeviceMountPointMappingsByIp(instanceGroups, hostGroupNames);
         Map<String, Pair<Integer, String>> deviceDiskTypeMappingsByIp = getDeviceDiskTypeMappingsByIp(instanceGroups, hostGroupNames);
 
@@ -167,7 +167,7 @@ public class SshJClientActions extends SshJClient {
         }
     }
 
-    public Set<String> getEphemeralVolumeMountPoints(List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames) {
+    public Set<String> getAwsEphemeralVolumeMountPoints(List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames) {
         Map<String, Pair<Integer, String>> deviceMountPointMappingsByIp = getDeviceMountPointMappingsByIp(instanceGroups, hostGroupNames);
         Map<String, Pair<Integer, String>> deviceDiskTypeMappingsByIp = getDeviceDiskTypeMappingsByIp(instanceGroups, hostGroupNames);
 
@@ -289,5 +289,21 @@ public class SshJClientActions extends SshJClient {
             throw new TestFailException(String.format(" SSH fail on '%s' host while running command: [%s]! ", instanceIP, fileListCommand), e);
         }
         return quantity.get();
+    }
+
+    public void checkAzureTemporalDisksMounted(List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames, String mountDir) {
+        String diskMountPointListCmd =
+                "df | grep " + mountDir + " | awk '{print $1,$6}' | " +
+                        "sed -e \"s/\\(.*\\) \\(.*\\)/\\\"\\1\\\":\\\"\\2\\\"/\" | paste -s -d ',' | sed 's/.*/{\\0}/'";
+
+        Map<String, Pair<Integer, String>> deviceMountPointMappingsByIp = getDistroXInstanceGroupIps(instanceGroups, hostGroupNames, true).stream()
+                .collect(Collectors.toMap(ip -> ip, ip -> executeSshCommand(ip, diskMountPointListCmd)));
+        Integer okStatusCode = 0;
+        deviceMountPointMappingsByIp.forEach((ip, outPair) -> {
+            if (outPair == null || !outPair.getKey().equals(okStatusCode)) {
+                LOGGER.error("Mount point {} should exist on node with IP {}!", mountDir, ip);
+                throw new TestFailException(String.format("Mount point %s should exist on node with IP %s!", mountDir, ip));
+            }
+        });
     }
 }

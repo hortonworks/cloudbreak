@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak.testcase.e2e.distrox;
+package com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.ephemeral;
 
 import java.util.List;
 import java.util.Set;
@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.util.SanitizerUtil;
 import com.sequenceiq.it.TestParameter;
@@ -24,9 +25,9 @@ import com.sequenceiq.it.cloudbreak.util.clouderamanager.ClouderaManagerUtil;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.it.cloudbreak.util.ssh.action.SshJClientActions;
 
-public class AwsDistroXEphemeralTemporaryStorageStopStartTest extends AbstractE2ETest {
+public class DistroXStopStartTest extends AbstractE2ETest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AwsDistroXEphemeralTemporaryStorageStopStartTest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DistroXStopStartTest.class);
 
     private static final String MOCK_UMS_PASSWORD = "Password123!";
 
@@ -44,9 +45,7 @@ public class AwsDistroXEphemeralTemporaryStorageStopStartTest extends AbstractE2
 
     @Override
     protected void setupTest(TestContext testContext) {
-
         testContext.getCloudProvider().getCloudFunctionality().cloudStorageInitialize();
-        checkCloudPlatform(CloudPlatform.AWS);
         createDefaultUser(testContext);
         initializeDefaultBlueprints(testContext);
         createDefaultCredential(testContext);
@@ -68,30 +67,24 @@ public class AwsDistroXEphemeralTemporaryStorageStopStartTest extends AbstractE2
                 .given("non_eph_dx", DistroXTestDto.class)
                 .withInstanceGroupsEntity(new DistroXInstanceGroupsBuilder(testContext)
                         .defaultHostGroup()
-                        .withInstanceType("r5d.xlarge")
+                        .withStorageOptimizedInstancetype()
                         .build())
                 .when(distroXTestClient.create(), RunningParameter.key("non_eph_dx"))
                 .given("eph_dx", DistroXTestDto.class)
                 .withInstanceGroupsEntity(new DistroXInstanceGroupsBuilder(testContext)
                         .defaultHostGroup()
                         .withEphemeralTemporaryStorage()
-                        .withInstanceType("r5d.xlarge")
+                        .withStorageOptimizedInstancetype()
                         .build())
                 .when(distroXTestClient.create(), RunningParameter.key("eph_dx"))
                 .given("non_eph_dx", DistroXTestDto.class)
                 .await(STACK_AVAILABLE, RunningParameter.key("non_eph_dx"))
                 .then((tc, testDto, client) -> {
-                    sshJClientActions.checkEphemeralDisksMounted(testDto.getResponse().getInstanceGroups(), List.of(HostGroupType.WORKER.getName()), "fs");
+                    verifyMountPointsUsedForTemporalDisks(testDto, "fs", "resource");
                     return testDto;
                 })
                 .then((tc, testDto, client) -> {
-                    Set<String> mountPoints = sshJClientActions.getEphemeralVolumeMountPoints(
-                            testDto.getResponse().getInstanceGroups(), List.of(HostGroupType.MASTER.getName()));
-                    clouderaManagerUtil.checkClouderaManagerHdfsNamenodeRoleConfigGroups(testDto, sanitizedUserName, MOCK_UMS_PASSWORD, mountPoints);
-
-                    mountPoints = sshJClientActions.getEphemeralVolumeMountPoints(
-                            testDto.getResponse().getInstanceGroups(), List.of(HostGroupType.WORKER.getName()));
-                    clouderaManagerUtil.checkClouderaManagerHdfsDatanodeRoleConfigGroups(testDto, sanitizedUserName, MOCK_UMS_PASSWORD, mountPoints);
+                    verifyEphemeralVolumesShouldNotBeConfiguredInHdfs(sanitizedUserName, testDto);
                     return testDto;
                 })
                 .when(distroXTestClient.stop(), RunningParameter.key("non_eph_dx"))
@@ -99,13 +92,17 @@ public class AwsDistroXEphemeralTemporaryStorageStopStartTest extends AbstractE2
                 .when(distroXTestClient.start(), RunningParameter.key("non_eph_dx"))
                 .await(STACK_AVAILABLE, RunningParameter.key("non_eph_dx"))
                 .then((tc, testDto, client) -> {
-                    sshJClientActions.checkEphemeralDisksMounted(testDto.getResponse().getInstanceGroups(), List.of(HostGroupType.WORKER.getName()), "fs");
+                    verifyMountPointsUsedForTemporalDisks(testDto, "fs", "resource");
                     return testDto;
                 })
                 .given("eph_dx", DistroXTestDto.class)
                 .await(STACK_AVAILABLE, RunningParameter.key("eph_dx"))
                 .then((tc, testDto, client) -> {
-                    sshJClientActions.checkEphemeralDisksMounted(testDto.getResponse().getInstanceGroups(), List.of(HostGroupType.WORKER.getName()), "ephfs");
+                    verifyMountPointsUsedForTemporalDisks(testDto, "ephfs", "ephfs1");
+                    return testDto;
+                })
+                .then((tc, testDto, client) -> {
+                    verifyEphemeralVolumesShouldNotBeConfiguredInHdfs(sanitizedUserName, testDto);
                     return testDto;
                 })
                 .then((tc, testDto, client) -> clouderaManagerUtil.checkClouderaManagerYarnNodemanagerRoleConfigGroups(testDto, sanitizedUserName,
@@ -115,11 +112,35 @@ public class AwsDistroXEphemeralTemporaryStorageStopStartTest extends AbstractE2
                 .when(distroXTestClient.start(), RunningParameter.key("eph_dx"))
                 .await(STACK_AVAILABLE, RunningParameter.key("eph_dx"))
                 .then((tc, testDto, client) -> {
-                    sshJClientActions.checkEphemeralDisksMounted(testDto.getResponse().getInstanceGroups(), List.of(HostGroupType.WORKER.getName()), "ephfs");
+                    verifyMountPointsUsedForTemporalDisks(testDto, "ephfs", "ephfs1");
                     return testDto;
                 })
                 .then((tc, testDto, client) -> clouderaManagerUtil.checkClouderaManagerYarnNodemanagerRoleConfigGroups(testDto, sanitizedUserName,
                         MOCK_UMS_PASSWORD))
                 .validate();
+    }
+
+    private void verifyEphemeralVolumesShouldNotBeConfiguredInHdfs(String sanitizedUserName, DistroXTestDto testDto) {
+        Set<String> mountPoints = Set.of();
+        if (activeCloudPlatform(CloudPlatform.AWS)) {
+            mountPoints = sshJClientActions.getAwsEphemeralVolumeMountPoints(testDto.getResponse().getInstanceGroups(), List.of(HostGroupType.MASTER.getName()));
+        } else if (activeCloudPlatform(CloudPlatform.AZURE)) {
+            mountPoints = Set.of("/mnt/resource", "/hadoopfs/ephfs1");
+        }
+        clouderaManagerUtil.checkClouderaManagerHdfsDatanodeRoleConfigGroups(testDto, sanitizedUserName, MOCK_UMS_PASSWORD, mountPoints);
+        clouderaManagerUtil.checkClouderaManagerHdfsNamenodeRoleConfigGroups(testDto, sanitizedUserName, MOCK_UMS_PASSWORD, mountPoints);
+    }
+
+    private void verifyMountPointsUsedForTemporalDisks(DistroXTestDto testDto, String awsMountPrefix, String azureMountDir) {
+        List<InstanceGroupV4Response> instanceGroups = testDto.getResponse().getInstanceGroups();
+        if (activeCloudPlatform(CloudPlatform.AWS)) {
+            sshJClientActions.checkAwsEphemeralDisksMounted(instanceGroups, List.of(HostGroupType.WORKER.getName()), awsMountPrefix);
+        } else if (activeCloudPlatform(CloudPlatform.AZURE)) {
+            sshJClientActions.checkAzureTemporalDisksMounted(instanceGroups, List.of(HostGroupType.WORKER.getName()), azureMountDir);
+        }
+    }
+
+    private boolean activeCloudPlatform(CloudPlatform cloudPlatform) {
+        return cloudPlatform.name().equalsIgnoreCase(commonCloudProperties().getCloudProvider());
     }
 }

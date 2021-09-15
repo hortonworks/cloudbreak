@@ -6,5 +6,7 @@ tests:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxRecoveryTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.environment.EnvironmentStopStartTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXUpgradeTests
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.AwsDistroXEphemeralTemporaryStorageStopStartTest
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.ephemeral.DistroXStopStartTest
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.ephemeral.DistroXRepairTests
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.ephemeral.DistroXUpgradeTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaUpgradeTests

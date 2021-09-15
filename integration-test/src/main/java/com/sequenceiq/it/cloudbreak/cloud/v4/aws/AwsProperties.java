@@ -29,6 +29,8 @@ public class AwsProperties {
 
     private final Instance instance = new Instance();
 
+    private final Instance storageOptimizedInstance = new Instance();
+
     private final Credential credential = new Credential();
 
     private final Baseimage baseimage = new Baseimage();
@@ -106,6 +108,10 @@ public class AwsProperties {
 
     public Instance getInstance() {
         return instance;
+    }
+
+    public Instance getStorageOptimizedInstance() {
+        return storageOptimizedInstance;
     }
 
     public Credential getCredential() {
