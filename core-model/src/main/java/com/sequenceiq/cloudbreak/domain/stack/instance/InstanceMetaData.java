@@ -283,6 +283,10 @@ public class InstanceMetaData implements ProvisionEntity {
         return publicIp;
     }
 
+    public String getIpWrapper(boolean preferPrivateIp) {
+        return preferPrivateIp ? privateIp : getPublicIpWrapper();
+    }
+
     public InstanceMetadataType getInstanceMetadataType() {
         return instanceMetadataType;
     }
