@@ -116,7 +116,7 @@ public class MockSdxRepairTests extends AbstractMockTest {
                             new HashMap<>(), null, response -> { }, w -> w);
                     return testDto;
                 })
-                .await(SdxClusterStatusResponse.CLUSTER_AMBIGUOUS, Duration.ofSeconds(POLLING_INTERVAL_FOR_REPAIR_SECONDS))
+                .await(SdxClusterStatusResponse.NODE_FAILURE, Duration.ofSeconds(POLLING_INTERVAL_FOR_REPAIR_SECONDS))
                 .when(sdxTestClient.repairInternal(MASTER.getName()), key(sdxInternal))
                 .awaitForMasterDeletedOnProvider()
                 .awaitForFlowFail()
