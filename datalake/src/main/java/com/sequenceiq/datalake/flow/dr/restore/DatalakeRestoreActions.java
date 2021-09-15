@@ -313,9 +313,9 @@ public class DatalakeRestoreActions {
             protected void doExecute(SdxContext context, DatalakeRestoreFailedEvent payload, Map<Object, Object> variables) {
                 Exception exception = payload.getException();
                 LOGGER.error("Datalake database restore could not be started for datalake with id: {}", payload.getResourceId(), exception);
-                SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_RESTORE_FAILED,
-                        ResourceEvent.DATALAKE_RESTORE_FAILED,
-                        "Datalake restore failed", payload.getResourceId());
+                SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING,
+                        ResourceEvent.DATALAKE_RESTORE_FINISHED,
+                        "Datalake is running, Datalake restore failed", payload.getResourceId());
 
                 eventSenderService.sendEventAndNotification(sdxCluster, context.getFlowTriggerUserCrn(), ResourceEvent.DATALAKE_RESTORE_FAILED);
 
