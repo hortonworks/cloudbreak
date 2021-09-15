@@ -169,4 +169,6 @@ public interface CloudProvider {
     String getFreeIpaImageCatalogUrl();
 
     String getVariant();
+
+    String getStorageOptimizedInstanceType();
 }

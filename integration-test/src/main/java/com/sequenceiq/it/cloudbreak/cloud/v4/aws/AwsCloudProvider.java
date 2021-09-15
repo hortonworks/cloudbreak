@@ -481,6 +481,11 @@ public class AwsCloudProvider extends AbstractCloudProvider {
         }
     }
 
+    @Override
+    public String getStorageOptimizedInstanceType() {
+        return awsProperties.getStorageOptimizedInstance().getType();
+    }
+
     private AttachedFreeIpaRequest getAttachedFreeIpaRequest() {
         AttachedFreeIpaRequest attachedFreeIpaRequest = new AttachedFreeIpaRequest();
         AwsFreeIpaParameters awsFreeIpaParameters = new AwsFreeIpaParameters();

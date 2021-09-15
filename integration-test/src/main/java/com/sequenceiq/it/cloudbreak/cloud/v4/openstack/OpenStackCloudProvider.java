@@ -165,6 +165,11 @@ public class OpenStackCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
+    public String getStorageOptimizedInstanceType() {
+        return null;
+    }
+
+    @Override
     public CloudPlatform getCloudPlatform() {
         return CloudPlatform.OPENSTACK;
     }

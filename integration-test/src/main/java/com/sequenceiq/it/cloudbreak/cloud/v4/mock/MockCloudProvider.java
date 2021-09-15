@@ -269,6 +269,11 @@ public class MockCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
+    public String getStorageOptimizedInstanceType() {
+        return mockProperties.getInstance().getType();
+    }
+
+    @Override
     public void setImageId(String id) {
         LOGGER.info("New base image UUID: {}", id);
         mockProperties.getBaseimage().getRedhat7().setImageId(id);

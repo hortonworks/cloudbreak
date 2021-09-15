@@ -383,6 +383,11 @@ public class CloudProviderProxy implements CloudProvider {
         return delegate.getVariant();
     }
 
+    @Override
+    public String getStorageOptimizedInstanceType() {
+        return delegate.getStorageOptimizedInstanceType();
+    }
+
     public CloudProvider getDelegate(CloudPlatform cloudPlatform) {
         return cloudProviderMap.getOrDefault(cloudPlatform, delegate);
     }
