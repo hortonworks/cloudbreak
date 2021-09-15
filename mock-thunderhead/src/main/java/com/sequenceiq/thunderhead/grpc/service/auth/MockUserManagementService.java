@@ -31,16 +31,17 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CONCLUS
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_METRICS_DATABUS_PROCESSING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_NODESTATUS_CHECK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_BACKUP_ON_UPGRADE;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MICRO_DUTY_SDX;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_METRICS_DATABUS_PROCESSING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_AWS_EFS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_LOAD_BALANCER;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENABLE_DISTROX_INSTANCE_TYPES;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENDPOINT_GATEWAY_SKIP_VALIDATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_EXPERIENCE_DELETION_BY_ENVIRONMENT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_HA_REPAIR;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_GCP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MEDIUM_DUTY_SDX;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MICRO_DUTY_SDX;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_NODESTATUS_ENABLE_SALT_PING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_OS_UPGRADE_DATAHUB;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_AZURE;
@@ -439,6 +440,9 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.ui.edp.progress.bar.enable}")
     private boolean edpProgressBarEnabled;
 
+    @Value("${auth.mock.datahub.instancetypes.enable}")
+    private boolean enableDistroxInstanceTypes;
+
     @PostConstruct
     public void init() {
         cbLicense = getLicense();
@@ -814,6 +818,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (edpProgressBarEnabled) {
             builder.addEntitlements(createEntitlement(UI_EDP_PROGRESS_BAR));
+        }
+        if (enableDistroxInstanceTypes) {
+            builder.addEntitlements(createEntitlement(CDP_ENABLE_DISTROX_INSTANCE_TYPES));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()
