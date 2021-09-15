@@ -150,7 +150,10 @@ public class FreeIpaDeletionHandler extends EventSenderAwareHandler<EnvironmentD
                 FreeIpaDeletionRetrievalTask.FREEIPA_RETRYING_COUNT,
                 FreeIpaDeletionRetrievalTask.FREEIPA_FAILURE_COUNT);
         if (!isSuccess(result.getLeft())) {
-            throw new FreeIpaOperationFailedException("Failed to delete FreeIpa! " + getIfNotNull(result.getRight(), Throwable::getMessage));
+            String message = "Failed to delete FreeIpa! (" + result.getLeft().name() + ") "
+                    + getIfNotNull(result.getRight(), Throwable::getMessage);
+            LOGGER.info(message);
+            throw new FreeIpaOperationFailedException(message);
         }
     }
 
