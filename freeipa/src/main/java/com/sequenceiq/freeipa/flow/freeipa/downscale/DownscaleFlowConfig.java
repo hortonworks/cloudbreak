@@ -60,9 +60,11 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
+import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
-public class DownscaleFlowConfig extends AbstractFlowConfiguration<DownscaleState, DownscaleFlowEvent> {
+public class DownscaleFlowConfig extends AbstractFlowConfiguration<DownscaleState, DownscaleFlowEvent>
+        implements RetryableFlowConfiguration<DownscaleFlowEvent> {
     private static final List<Transition<DownscaleState, DownscaleFlowEvent>> TRANSITIONS =
             new Transition.Builder<DownscaleState, DownscaleFlowEvent>()
                     .defaultFailureEvent(FAILURE_EVENT)
@@ -175,5 +177,10 @@ public class DownscaleFlowConfig extends AbstractFlowConfiguration<DownscaleStat
     @Override
     public String getDisplayName() {
         return "Downscale FreeIPA";
+    }
+
+    @Override
+    public DownscaleFlowEvent getRetryableEvent() {
+        return EDGE_CONFIG.getFailureHandled();
     }
 }

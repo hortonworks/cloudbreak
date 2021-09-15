@@ -36,9 +36,11 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
+import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
-public class FreeIpaProvisionFlowConfig extends AbstractFlowConfiguration<FreeIpaProvisionState, FreeIpaProvisionEvent> {
+public class FreeIpaProvisionFlowConfig extends AbstractFlowConfiguration<FreeIpaProvisionState, FreeIpaProvisionEvent>
+        implements RetryableFlowConfiguration<FreeIpaProvisionEvent> {
 
     private static final FreeIpaProvisionEvent[] FREEIPA_INIT_EVENTS = {FREEIPA_PROVISION_EVENT};
 
@@ -92,5 +94,10 @@ public class FreeIpaProvisionFlowConfig extends AbstractFlowConfiguration<FreeIp
     @Override
     public String getDisplayName() {
         return "Provision FreeIPA";
+    }
+
+    @Override
+    public FreeIpaProvisionEvent getRetryableEvent() {
+        return EDGE_CONFIG.getFailureHandled();
     }
 }

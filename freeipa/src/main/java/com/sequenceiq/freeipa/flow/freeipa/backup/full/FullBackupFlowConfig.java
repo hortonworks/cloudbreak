@@ -17,9 +17,10 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
+import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
-public class FullBackupFlowConfig extends AbstractFlowConfiguration<FullBackupState, FullBackupEvent> {
+public class FullBackupFlowConfig extends AbstractFlowConfiguration<FullBackupState, FullBackupEvent> implements RetryableFlowConfiguration<FullBackupEvent> {
 
     private static final List<Transition<FullBackupState, FullBackupEvent>> TRANSITIONS =
             new Builder<FullBackupState, FullBackupEvent>().defaultFailureEvent(FULL_BACKUP_FAILED_EVENT)
@@ -40,6 +41,9 @@ public class FullBackupFlowConfig extends AbstractFlowConfiguration<FullBackupSt
 
             .build();
 
+    private static final FlowEdgeConfig<FullBackupState, FullBackupEvent> EDGE_CONFIG =
+            new FlowEdgeConfig<>(INIT_SATE, FINAL_STATE, BACKUP_FAILED_STATE, FULL_BACKUP_FAILURE_HANDLED_EVENT);
+
     protected FullBackupFlowConfig() {
         super(FullBackupState.class, FullBackupEvent.class);
     }
@@ -51,7 +55,7 @@ public class FullBackupFlowConfig extends AbstractFlowConfiguration<FullBackupSt
 
     @Override
     protected FlowEdgeConfig<FullBackupState, FullBackupEvent> getEdgeConfig() {
-        return new FlowEdgeConfig<>(INIT_SATE, FINAL_STATE, BACKUP_FAILED_STATE, FULL_BACKUP_FAILURE_HANDLED_EVENT);
+        return EDGE_CONFIG;
     }
 
     @Override
@@ -67,5 +71,10 @@ public class FullBackupFlowConfig extends AbstractFlowConfiguration<FullBackupSt
     @Override
     public String getDisplayName() {
         return "FreeIPA full backup";
+    }
+
+    @Override
+    public FullBackupEvent getRetryableEvent() {
+        return EDGE_CONFIG.getFailureHandled();
     }
 }

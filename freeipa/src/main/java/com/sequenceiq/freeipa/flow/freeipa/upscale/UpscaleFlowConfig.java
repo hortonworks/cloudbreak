@@ -66,9 +66,11 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
+import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
-public class UpscaleFlowConfig extends AbstractFlowConfiguration<UpscaleState, UpscaleFlowEvent> {
+public class UpscaleFlowConfig extends AbstractFlowConfiguration<UpscaleState, UpscaleFlowEvent>
+        implements RetryableFlowConfiguration<UpscaleFlowEvent> {
     private static final List<Transition<UpscaleState, UpscaleFlowEvent>> TRANSITIONS =
             new Transition.Builder<UpscaleState, UpscaleFlowEvent>()
                     .defaultFailureEvent(FAILURE_EVENT)
@@ -189,5 +191,10 @@ public class UpscaleFlowConfig extends AbstractFlowConfiguration<UpscaleState, U
     @Override
     public String getDisplayName() {
         return "Upscale FreeIPA";
+    }
+
+    @Override
+    public UpscaleFlowEvent getRetryableEvent() {
+        return EDGE_CONFIG.getFailureHandled();
     }
 }

@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.structuredevent.rest.annotation.AccountEntityTy
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.State;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.api.model.RetryableFlowResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.cleanup.CleanupRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.attachchildenv.AttachChildEnvironmentRequest;
@@ -56,6 +57,7 @@ import com.sequenceiq.freeipa.service.binduser.BindUserCreateService;
 import com.sequenceiq.freeipa.service.freeipa.cert.root.FreeIpaRootCertificateService;
 import com.sequenceiq.freeipa.service.freeipa.cleanup.CleanupService;
 import com.sequenceiq.freeipa.service.image.ImageChangeService;
+import com.sequenceiq.freeipa.service.operation.FreeIpaRetryService;
 import com.sequenceiq.freeipa.service.stack.ChildEnvironmentService;
 import com.sequenceiq.freeipa.service.stack.ClusterProxyService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaCreationService;
@@ -130,6 +132,9 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
 
     @Inject
     private SaltUpdateService saltUpdateService;
+
+    @Inject
+    private FreeIpaRetryService retryService;
 
     @Override
     @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = EDIT_ENVIRONMENT)
@@ -288,5 +293,19 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
     public FlowIdentifier updateSaltByName(@ResourceCrn @NotEmpty String environmentCrn, @AccountId String accountId) {
         String currentAccountId = Optional.ofNullable(accountId).orElseGet(ThreadBasedUserCrnProvider::getAccountId);
         return saltUpdateService.updateSaltStates(environmentCrn, currentAccountId);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = EDIT_ENVIRONMENT)
+    public FlowIdentifier retry(@ResourceCrn @NotEmpty String environmentCrn) {
+        String accountId = crnService.getCurrentAccountId();
+        return retryService.retry(environmentCrn, accountId);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = EDIT_ENVIRONMENT)
+    public List<RetryableFlowResponse> listRetryableFlows(@ResourceCrn @NotEmpty String environmentCrn) {
+        String accountId = crnService.getCurrentAccountId();
+        return retryService.getRetryableFlows(environmentCrn, accountId);
     }
 }

@@ -1,9 +1,5 @@
-package com.sequenceiq.cloudbreak.service;
+package com.sequenceiq.flow.service;
 
-import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.SETUP_FINISHED_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.STACKCREATION_FAILURE_HANDLED_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.START_CREATION_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.VALIDATION_FINISHED_EVENT;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -11,7 +7,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.List;
 
 import javax.ws.rs.BadRequestException;
@@ -27,28 +22,23 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.google.common.collect.Lists;
-import com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationFlowConfig;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
-import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.flow.api.model.operation.OperationType;
 import com.sequenceiq.flow.core.Flow2Handler;
+import com.sequenceiq.flow.core.config.TestFlowConfig;
+import com.sequenceiq.flow.core.config.TestFlowConfig.TestFlowEvent;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.StateStatus;
 import com.sequenceiq.flow.repository.FlowLogRepository;
 
 @RunWith(MockitoJUnitRunner.class)
-public class OperationRetryServiceTest {
+public class FlowRetryServiceTest {
 
     private static final Long STACK_ID = 1L;
 
     private static final String FLOW_ID = "flowId";
 
-    private static final LocalDateTime BASE_DATE_TIME = LocalDateTime.of(2018, 1, 1, 0, 1);
-
     @InjectMocks
-    private OperationRetryService underTest;
+    private FlowRetryService underTest;
 
     @Mock
     private Flow2Handler flow2Handler;
@@ -56,33 +46,21 @@ public class OperationRetryServiceTest {
     @Mock
     private FlowLogRepository flowLogRepository;
 
-    @Mock
-    private Stack stackMock;
-
-    @Mock
-    private Cluster clusterMock;
-
-    @Mock
-    private CloudbreakEventService eventService;
-
-    @Mock
-    private CloudbreakMessagesService cloudbreakMessagesService;
-
-    private StackCreationFlowConfig flowConfig;
+    private TestFlowConfig flowConfig;
 
     @Before
     public void setUp() throws Exception {
-        ReflectionTestUtils.setField(underTest, "retryableEvents", List.of(STACKCREATION_FAILURE_HANDLED_EVENT.event()));
+        ReflectionTestUtils.setField(underTest, "retryableEvents", List.of(TestFlowConfig.TestFlowEvent.TEST_FAIL_HANDLED_EVENT.event()));
 
-        flowConfig = new StackCreationFlowConfig();
+        flowConfig = new TestFlowConfig();
         ReflectionTestUtils.setField(underTest, "flowConfigs", List.of(flowConfig));
     }
 
     @Test(expected = BadRequestException.class)
     public void retryPending() {
         List<FlowLog> pendingFlowLogs = Lists.newArrayList(
-                createFlowLog("INIT_STATE", StateStatus.SUCCESSFUL, Instant.now().toEpochMilli(), START_CREATION_EVENT.event()),
-                createFlowLog("START_STATE", StateStatus.PENDING, Instant.now().toEpochMilli(), VALIDATION_FINISHED_EVENT.event())
+                createFlowLog("INIT_STATE", StateStatus.SUCCESSFUL, Instant.now().toEpochMilli(), TestFlowEvent.TEST_FLOW_EVENT.event()),
+                createFlowLog("TEST_STATE", StateStatus.PENDING, Instant.now().toEpochMilli(), TestFlowEvent.TEST_FINISHED_EVENT.event())
                 );
         when(flowLogRepository.findAllByResourceIdOrderByCreatedDesc(STACK_ID, PageRequest.of(0, 50))).thenReturn(pendingFlowLogs);
         try {
@@ -102,15 +80,15 @@ public class OperationRetryServiceTest {
 
     @Test
     public void retry() {
-        FlowLog lastSuccessfulState = createFlowLog("INTERMEDIATE_STATE", StateStatus.SUCCESSFUL, 5, VALIDATION_FINISHED_EVENT.event());
+        FlowLog lastSuccessfulState = createFlowLog("INTERMEDIATE_STATE", StateStatus.SUCCESSFUL, 5, TestFlowEvent.TEST_FINISHED_EVENT.event());
         List<FlowLog> pendingFlowLogs = Lists.newArrayList(
                 createFlowLog("FINISHED", StateStatus.SUCCESSFUL, 7, null),
-                createFlowLog("NEXT_STATE", StateStatus.FAILED, 6, STACKCREATION_FAILURE_HANDLED_EVENT.event()),
+                createFlowLog("NEXT_STATE", StateStatus.FAILED, 6, TestFlowEvent.TEST_FAIL_HANDLED_EVENT.event()),
                 lastSuccessfulState,
                 createFlowLog("FINISHED", StateStatus.SUCCESSFUL, 4, null),
-                createFlowLog("NEXT_STATE", StateStatus.FAILED, 3, STACKCREATION_FAILURE_HANDLED_EVENT.event()),
-                createFlowLog("INTERMEDIATE_STATE", StateStatus.SUCCESSFUL, 2, VALIDATION_FINISHED_EVENT.event()),
-                createFlowLog("INIT_STATE", StateStatus.SUCCESSFUL, 1, START_CREATION_EVENT.event())
+                createFlowLog("NEXT_STATE", StateStatus.FAILED, 3, TestFlowEvent.TEST_FAIL_HANDLED_EVENT.event()),
+                createFlowLog("INTERMEDIATE_STATE", StateStatus.SUCCESSFUL, 2, TestFlowEvent.TEST_FINISHED_EVENT.event()),
+                createFlowLog("INIT_STATE", StateStatus.SUCCESSFUL, 1, TestFlowEvent.TEST_FLOW_EVENT.event())
                 );
         when(flowLogRepository.findAllByResourceIdOrderByCreatedDesc(STACK_ID, PageRequest.of(0, 50))).thenReturn(pendingFlowLogs);
         underTest.retry(STACK_ID);
@@ -122,9 +100,9 @@ public class OperationRetryServiceTest {
     public void retryNoFailed() {
         List<FlowLog> pendingFlowLogs = Lists.newArrayList(
                 createFlowLog("FINISHED", StateStatus.SUCCESSFUL, 4, null),
-                createFlowLog("NEXT_STATE", StateStatus.FAILED, 3, SETUP_FINISHED_EVENT.event()),
-                createFlowLog("INTERMEDIATE_STATE", StateStatus.SUCCESSFUL, 2, VALIDATION_FINISHED_EVENT.event()),
-                createFlowLog("INIT_STATE", StateStatus.SUCCESSFUL, 1, START_CREATION_EVENT.event())
+                createFlowLog("NEXT_STATE", StateStatus.FAILED, 3, TestFlowEvent.TEST_FINALIZED_EVENT.event()),
+                createFlowLog("INTERMEDIATE_STATE", StateStatus.SUCCESSFUL, 2, TestFlowEvent.TEST_FINISHED_EVENT.event()),
+                createFlowLog("INIT_STATE", StateStatus.SUCCESSFUL, 1, TestFlowEvent.TEST_FLOW_EVENT.event())
         );
         when(flowLogRepository.findAllByResourceIdOrderByCreatedDesc(STACK_ID, PageRequest.of(0, 50))).thenReturn(pendingFlowLogs);
         underTest.retry(STACK_ID);

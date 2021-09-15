@@ -23,8 +23,6 @@ public class ModelDescriptions {
     public static final String ENVIRONMENTS = "Environments of the resource";
     public static final String GOV_CLOUD_FLAG = "Flag indicating if the credential type is AWS Gov Cloud";
     public static final String TENANT_NAME = "name of the current tenant";
-    public static final String FAIL_DATE = "Date when the operation went failed.";
-    public static final String OPERATION_NAME = "Name of the failed operation, that is also retryable.";
 
     private ModelDescriptions() {
     }

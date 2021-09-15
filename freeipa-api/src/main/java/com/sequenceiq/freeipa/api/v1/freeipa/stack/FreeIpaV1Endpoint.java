@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.api.v1.freeipa.stack;
 
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaOperationDescriptions.LIST_RETRYABLE_FLOWS;
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaOperationDescriptions.RETRY;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaOperationDescriptions.UPDATE_SALT;
 
 import java.util.List;
@@ -21,6 +23,7 @@ import javax.ws.rs.core.MediaType;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.api.model.RetryableFlowResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.cleanup.CleanupRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaNotes;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaOperationDescriptions;
@@ -185,6 +188,18 @@ public interface FreeIpaV1Endpoint {
     @PUT
     @Path("salt_update")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = UPDATE_SALT, nickname = "updateSaltV1")
+    @ApiOperation(value = UPDATE_SALT, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES, nickname = "updateSaltV1")
     FlowIdentifier updateSaltByName(@QueryParam("environment") @NotEmpty String environmentCrn, @AccountId @QueryParam("accountId") String accountId);
+
+    @PUT
+    @Path("retry")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = RETRY, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES, nickname = "retryV1")
+    FlowIdentifier retry(@QueryParam("environment") @NotEmpty String environmentCrn);
+
+    @GET
+    @Path("retry")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = LIST_RETRYABLE_FLOWS,  produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES, nickname = "listRetryableFlowsV1")
+    List<RetryableFlowResponse> listRetryableFlows(@QueryParam("environment") @NotEmpty String environmentCrn);
 }

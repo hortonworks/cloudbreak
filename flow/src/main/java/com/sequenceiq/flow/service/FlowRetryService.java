@@ -1,6 +1,4 @@
-package com.sequenceiq.cloudbreak.service;
-
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_RETRY_FLOW_START;
+package com.sequenceiq.flow.service;
 
 import java.util.Collections;
 import java.util.List;
@@ -17,21 +15,20 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.cloudbreak.retry.RetryableFlow;
-import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.flow.core.Flow2Handler;
 import com.sequenceiq.flow.core.config.FlowConfiguration;
 import com.sequenceiq.flow.domain.FlowLog;
+import com.sequenceiq.flow.domain.RetryResponse;
+import com.sequenceiq.flow.domain.RetryableFlow;
 import com.sequenceiq.flow.domain.StateStatus;
 import com.sequenceiq.flow.repository.FlowLogRepository;
 
 @Service
-public class OperationRetryService {
+public class FlowRetryService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(OperationRetryService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FlowRetryService.class);
 
     private static final int INDEX_BEFORE_FINISHED_STATE = 1;
 
@@ -43,16 +40,13 @@ public class OperationRetryService {
     @Inject
     private FlowLogRepository flowLogRepository;
 
-    @Inject
-    private CloudbreakEventService eventService;
-
     @Resource
     private List<String> retryableEvents;
 
     @Resource
     private List<FlowConfiguration<?>> flowConfigs;
 
-    public FlowIdentifier retry(Long stackId) {
+    public RetryResponse retry(Long stackId) {
         if (isFlowPending(stackId)) {
             LOGGER.info("Retry cannot be performed, because there is already an active flow. stackId: {}", stackId);
             throw new BadRequestException("Retry cannot be performed, because there is already an active flow.");
@@ -66,17 +60,15 @@ public class OperationRetryService {
             throw new BadRequestException("Retry cannot be performed. The last flow did not fail or not retryable." + lastKnownState);
         }
 
-        String name = retryableFlows.get(0).getName();
-        eventService.fireCloudbreakEvent(stackId, Status.UPDATE_IN_PROGRESS.name(), STACK_RETRY_FLOW_START, List.of(name));
-
         Optional<FlowLog> failedFlowLog = getMostRecentFailedLog(flowLogs);
         Optional<FlowLog> lastSuccessfulStateFlowLog = failedFlowLog.map(log -> getLastSuccessfulStateLog(log.getCurrentState(), flowLogs));
         if (lastSuccessfulStateFlowLog.isPresent()) {
+            String name = retryableFlows.get(0).getName();
             flow2Handler.restartFlow(lastSuccessfulStateFlowLog.get());
             if (lastSuccessfulStateFlowLog.get().getFlowChainId() != null) {
-                return new FlowIdentifier(FlowType.FLOW_CHAIN, lastSuccessfulStateFlowLog.get().getFlowChainId());
+                return new RetryResponse(name, new FlowIdentifier(FlowType.FLOW_CHAIN, lastSuccessfulStateFlowLog.get().getFlowChainId()));
             } else {
-                return new FlowIdentifier(FlowType.FLOW, lastSuccessfulStateFlowLog.get().getFlowId());
+                return new RetryResponse(name, new FlowIdentifier(FlowType.FLOW, lastSuccessfulStateFlowLog.get().getFlowId()));
             }
         } else {
             LOGGER.info("Cannot restart previous flow because there is no successful state in the flow. stackId: {}", stackId);

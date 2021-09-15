@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackOperationService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
@@ -57,6 +58,9 @@ class StackCommonServiceTest {
 
     @Mock
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
+
+    @Mock
+    private CloudbreakEventService eventService;
 
     @InjectMocks
     private StackCommonService underTest;

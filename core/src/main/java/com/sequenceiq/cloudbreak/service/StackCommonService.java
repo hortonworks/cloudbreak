@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service;
 
 import static com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil.anonymize;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_RETRY_FLOW_START;
 
 import java.util.HashSet;
 import java.util.List;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.UpdateStackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.CertificateV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ClusterRepairV4Request;
@@ -41,7 +43,6 @@ import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackValidation;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.retry.RetryableFlow;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterRepairService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
@@ -52,11 +53,15 @@ import com.sequenceiq.cloudbreak.service.stack.flow.StackOperationService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.template.BlueprintUpdaterConnectors;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.domain.RetryResponse;
+import com.sequenceiq.flow.domain.RetryableFlow;
+import com.sequenceiq.flow.service.FlowRetryService;
 
 @Service
 public class StackCommonService {
@@ -73,7 +78,7 @@ public class StackCommonService {
     private ScalingHardLimitsService scalingHardLimitsService;
 
     @Inject
-    private OperationRetryService operationRetryService;
+    private FlowRetryService flowRetryService;
 
     @Inject
     private ClusterCommonService clusterCommonService;
@@ -119,6 +124,9 @@ public class StackCommonService {
 
     @Inject
     private NodeCountLimitValidator nodeCountLimitValidator;
+
+    @Inject
+    private CloudbreakEventService eventService;
 
     public StackV4Response createInWorkspace(StackV4Request stackRequest, User user, Workspace workspace, boolean distroxRequest) {
         return stackCreatorService.createStack(user, workspace, stackRequest, distroxRequest);
@@ -260,13 +268,14 @@ public class StackCommonService {
 
     public FlowIdentifier retryInWorkspace(NameOrCrn nameOrCrn, Long workspaceId) {
         Long stackId = stackService.getIdByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
-        FlowIdentifier retry = operationRetryService.retry(stackId);
-        return retry;
+        RetryResponse retry = flowRetryService.retry(stackId);
+        eventService.fireCloudbreakEvent(stackId, Status.UPDATE_IN_PROGRESS.name(), STACK_RETRY_FLOW_START, List.of(retry.getName()));
+        return retry.getFlowIdentifier();
     }
 
     public List<RetryableFlow> getRetryableFlows(String name, Long workspaceId) {
         Long stackId = stackService.getIdByNameInWorkspace(name, workspaceId);
-        return operationRetryService.getRetryableFlows(stackId);
+        return flowRetryService.getRetryableFlows(stackId);
     }
 
     public GeneratedBlueprintV4Response postStackForBlueprint(StackV4Request stackRequest) {

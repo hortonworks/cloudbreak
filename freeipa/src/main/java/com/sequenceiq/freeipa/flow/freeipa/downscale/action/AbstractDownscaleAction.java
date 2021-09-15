@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -29,11 +30,11 @@ import com.sequenceiq.freeipa.converter.cloud.ResourceToCloudResourceConverter;
 import com.sequenceiq.freeipa.converter.cloud.StackToCloudStackConverter;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.flow.chain.AbstractCommonChainAction;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState;
-import com.sequenceiq.freeipa.flow.chain.AbstractCommonChainAction;
+import com.sequenceiq.freeipa.flow.freeipa.downscale.event.DownscaleFailureEvent;
 import com.sequenceiq.freeipa.flow.stack.StackContext;
-import com.sequenceiq.freeipa.flow.stack.StackFailureEvent;
 import com.sequenceiq.freeipa.service.CredentialService;
 import com.sequenceiq.freeipa.service.resource.ResourceService;
 import com.sequenceiq.freeipa.service.stack.StackService;
@@ -89,7 +90,7 @@ public abstract class AbstractDownscaleAction<P extends Payload> extends Abstrac
 
     @Override
     protected Object getFailurePayload(P payload, Optional<StackContext> flowContext, Exception ex) {
-        return new StackFailureEvent(payload.getResourceId(), ex);
+        return new DownscaleFailureEvent(payload.getResourceId(), "Unexpected error during downscale action", Set.of(), Map.of(), ex);
     }
 
     protected List<InstanceMetaData> getInstanceMetadataFromStack(Stack stack, List<String> instanceIds) {

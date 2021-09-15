@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.retry;
+package com.sequenceiq.flow.domain;
 
 public class RetryableFlow {
     private String name;

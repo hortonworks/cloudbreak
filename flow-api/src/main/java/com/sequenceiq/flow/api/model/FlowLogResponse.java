@@ -104,4 +104,20 @@ public class FlowLogResponse {
     public void setFlowTriggerUserCrn(String flowTriggerUserCrn) {
         this.flowTriggerUserCrn = flowTriggerUserCrn;
     }
+
+    @Override
+    public String toString() {
+        return "FlowLogResponse{" +
+                "resourceId=" + resourceId +
+                ", created=" + created +
+                ", flowId='" + flowId + '\'' +
+                ", flowChainId='" + flowChainId + '\'' +
+                ", nextEvent='" + nextEvent + '\'' +
+                ", currentState='" + currentState + '\'' +
+                ", finalized=" + finalized +
+                ", nodeId='" + nodeId + '\'' +
+                ", stateStatus=" + stateStatus +
+                ", flowTriggerUserCrn='" + flowTriggerUserCrn + '\'' +
+                '}';
+    }
 }
