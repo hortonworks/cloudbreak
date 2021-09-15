@@ -46,6 +46,7 @@ auth:
     datahub:
       runtime.upgrade.enable: true
       os.upgrade.enable: true
+      instancetypes.enable: false
     ccmv2.enable: false
     ccmv2jumpgate.enable: false
     environment.experience.deletion.enable: true
