@@ -2,8 +2,6 @@ package com.sequenceiq.environment.environment.flow.deletion.handler.freeipa;
 
 import java.util.Optional;
 
-import javax.ws.rs.ProcessingException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,24 +74,6 @@ public class FreeIpaDeletionRetrievalTask extends SimpleStatusCheckerTask<FreeIp
 
     @Override
     public boolean exitPolling(FreeIpaPollerObject freeIpaPollerObject) {
-        try {
-            String environmentCrn = freeIpaPollerObject.getEnvironmentCrn();
-            Optional<DescribeFreeIpaResponse> freeIpaResponse = freeIpaService.describe(environmentCrn);
-            if (freeIpaResponse.isEmpty()) {
-                LOGGER.info("FreeIpa was not found for environment '{}'. Exiting polling", environmentCrn);
-                return false;
-            }
-            Status status = freeIpaResponse.get().getStatus();
-            if (status == Status.DELETE_FAILED || status == Status.CREATE_FAILED) {
-                return false;
-            }
-            return status.isFailed();
-        } catch (ProcessingException clientException) {
-            LOGGER.error("Failed to describe FreeIpa cluster due to API client exception: {}.", clientException.getMessage());
-        } catch (Exception e) {
-            LOGGER.error("Exception occurred during describing FreeIpa for environment '{}'.", freeIpaPollerObject.getEnvironmentCrn(), e);
-            return true;
-        }
         return false;
     }
 }
