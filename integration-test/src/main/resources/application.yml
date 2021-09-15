@@ -117,6 +117,12 @@ integrationtest:
       volumeSize: 100
       volumeCount: 1
       volumeType: gp2
+    storageOptimizedInstance:
+      type: m5d.large
+      rootVolumeSize: 100
+      volumeSize: 100
+      volumeCount: 1
+      volumeType: gp2
     baseimage:
       imageId:
     dynamoTableName: apitesting
@@ -150,6 +156,12 @@ integrationtest:
       tenantId:
     instance:
       type: Standard_D16_v3
+      rootVolumeSize: 100
+      volumeSize: 100
+      volumeCount: 1
+      volumeType: StandardSSD_LRS
+    storageOptimizedInstance:
+      type: Standard_L8s_v2
       rootVolumeSize: 100
       volumeSize: 100
       volumeCount: 1

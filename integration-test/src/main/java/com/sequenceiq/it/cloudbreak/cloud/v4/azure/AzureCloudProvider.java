@@ -139,6 +139,11 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     public void setInstanceTemplateV1Parameters(InstanceTemplateV1Request instanceTemplateV1Request) {
     }
 
+    @Override
+    public String getStorageOptimizedInstanceType() {
+        return azureProperties.getStorageOptimizedInstance().getType();
+    }
+
     public AzureDistroXV1Parameters distroXParameters() {
         return new AzureDistroXV1Parameters();
     }

@@ -45,6 +45,12 @@ public class DistroXInstanceGroupsBuilder {
         return this;
     }
 
+    public DistroXInstanceGroupsBuilder withStorageOptimizedInstancetype() {
+        CloudProvider cloudProvider = testContext.getCloudProvider();
+        getInstanceTemplates().forEach(template -> template.setInstanceType(cloudProvider.getStorageOptimizedInstanceType()));
+        return this;
+    }
+
     public List<DistroXInstanceGroupTestDto> build() {
         return distroXInstanceGroupTestDtoList;
     }

@@ -145,6 +145,11 @@ public class YarnCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
+    public String getStorageOptimizedInstanceType() {
+        return null;
+    }
+
+    @Override
     public VolumeV4TestDto attachedVolume(VolumeV4TestDto volume) {
         return volume.withSize(yarnProperties.getInstance().getVolumeSize())
                 .withCount(yarnProperties.getInstance().getVolumeCount());

@@ -175,4 +175,6 @@ public interface CloudProvider {
     String getFreeIpaUpgradeImageId();
 
     String getFreeIpaUpgradeImageCatalog();
+
+    String getStorageOptimizedInstanceType();
 }
