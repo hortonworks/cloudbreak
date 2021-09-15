@@ -36,7 +36,7 @@ public abstract class AbstractStackFailureAction<S extends FlowState, E extends 
 
     @Override
     protected Object getFailurePayload(StackFailureEvent payload, Optional<StackFailureContext> flowContext, Exception ex) {
-        return null;
+        return new StackFailureEvent(payload.getResourceId(), ex);
     }
 
     @Override

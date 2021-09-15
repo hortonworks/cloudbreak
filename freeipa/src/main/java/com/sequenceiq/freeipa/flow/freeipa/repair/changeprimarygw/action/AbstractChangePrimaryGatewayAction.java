@@ -1,6 +1,8 @@
 package com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.action;
 
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -14,7 +16,7 @@ import com.sequenceiq.freeipa.flow.chain.AbstractCommonChainAction;
 import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayContext;
 import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayState;
-import com.sequenceiq.freeipa.flow.stack.StackFailureEvent;
+import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.event.ChangePrimaryGatewayFailureEvent;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 public abstract class AbstractChangePrimaryGatewayAction<P extends Payload> extends
@@ -38,7 +40,7 @@ public abstract class AbstractChangePrimaryGatewayAction<P extends Payload> exte
 
     @Override
     protected Object getFailurePayload(P payload, Optional<ChangePrimaryGatewayContext> flowContext, Exception ex) {
-        return new StackFailureEvent(payload.getResourceId(), ex);
+        return new ChangePrimaryGatewayFailureEvent(payload.getResourceId(), "Unexpected error during action", Set.of(), Map.of(), ex);
     }
 
 }

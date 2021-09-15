@@ -12,8 +12,8 @@ import static com.sequenceiq.freeipa.flow.freeipa.cleanup.FreeIpaCleanupEvent.RE
 import static com.sequenceiq.freeipa.flow.freeipa.cleanup.FreeIpaCleanupEvent.REMOVE_ROLES_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.cleanup.FreeIpaCleanupEvent.REMOVE_USERS_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.cleanup.FreeIpaCleanupEvent.REMOVE_USERS_FINISHED_EVENT;
-import static com.sequenceiq.freeipa.flow.freeipa.cleanup.FreeIpaCleanupEvent.REMOVE_VAULT_ENTRIES_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.cleanup.FreeIpaCleanupEvent.REMOVE_VAULT_ENTRIES_FAILED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.cleanup.FreeIpaCleanupEvent.REMOVE_VAULT_ENTRIES_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.cleanup.FreeIpaCleanupEvent.REVOKE_CERTS_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.cleanup.FreeIpaCleanupEvent.REVOKE_CERTS_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.cleanup.FreeIpaCleanupState.CLEANUP_FAILED_STATE;
@@ -33,9 +33,11 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
+import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
-public class FreeIpaCleanupFlowConfig extends AbstractFlowConfiguration<FreeIpaCleanupState, FreeIpaCleanupEvent> {
+public class FreeIpaCleanupFlowConfig extends AbstractFlowConfiguration<FreeIpaCleanupState, FreeIpaCleanupEvent>
+        implements RetryableFlowConfiguration<FreeIpaCleanupEvent> {
 
     private static final FreeIpaCleanupEvent[] FREEIPA_INIT_EVENTS = {CLEANUP_EVENT};
 
@@ -81,5 +83,10 @@ public class FreeIpaCleanupFlowConfig extends AbstractFlowConfiguration<FreeIpaC
     @Override
     public String getDisplayName() {
         return "Cleanup FreeIPA";
+    }
+
+    @Override
+    public FreeIpaCleanupEvent getRetryableEvent() {
+        return EDGE_CONFIG.getFailureHandled();
     }
 }

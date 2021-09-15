@@ -24,9 +24,11 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
+import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
-public class SaltUpdateFlowConfig extends AbstractFlowConfiguration<SaltUpdateState, SaltUpdateEvent> {
+public class SaltUpdateFlowConfig extends AbstractFlowConfiguration<SaltUpdateState, SaltUpdateEvent>
+        implements RetryableFlowConfiguration<SaltUpdateEvent> {
 
     private static final List<Transition<SaltUpdateState, SaltUpdateEvent>> TRANSITIONS =
             new Builder<SaltUpdateState, SaltUpdateEvent>().defaultFailureEvent(SALT_UPDATE_FAILED_EVENT)
@@ -57,6 +59,9 @@ public class SaltUpdateFlowConfig extends AbstractFlowConfiguration<SaltUpdateSt
 
                     .build();
 
+    private static final FlowEdgeConfig<SaltUpdateState, SaltUpdateEvent> EDGE_CONFIG =
+            new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, SALT_UPDATE_FAILED_STATE, SALT_UPDATE_FAILURE_HANDLED_EVENT);
+
     public SaltUpdateFlowConfig() {
         super(SaltUpdateState.class, SaltUpdateEvent.class);
     }
@@ -68,7 +73,7 @@ public class SaltUpdateFlowConfig extends AbstractFlowConfiguration<SaltUpdateSt
 
     @Override
     protected FlowEdgeConfig<SaltUpdateState, SaltUpdateEvent> getEdgeConfig() {
-        return new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, SALT_UPDATE_FAILED_STATE, SALT_UPDATE_FAILURE_HANDLED_EVENT);
+        return EDGE_CONFIG;
     }
 
     @Override
@@ -84,5 +89,10 @@ public class SaltUpdateFlowConfig extends AbstractFlowConfiguration<SaltUpdateSt
     @Override
     public String getDisplayName() {
         return "Salt update";
+    }
+
+    @Override
+    public SaltUpdateEvent getRetryableEvent() {
+        return EDGE_CONFIG.getFailureHandled();
     }
 }
