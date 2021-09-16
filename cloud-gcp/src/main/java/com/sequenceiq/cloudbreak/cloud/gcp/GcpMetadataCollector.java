@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.model.AccessConfig;
+import com.google.api.services.compute.model.BackendService;
 import com.google.api.services.compute.model.ForwardingRule;
 import com.google.api.services.compute.model.ForwardingRuleList;
 import com.google.api.services.compute.model.NetworkInterface;
@@ -25,6 +26,7 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpComputeFactory;
 import com.sequenceiq.cloudbreak.cloud.gcp.loadbalancer.GcpLoadBalancerTypeConverter;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
+import com.sequenceiq.cloudbreak.cloud.gcp.view.GcpLoadBalancerMetadataView;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstanceMetaData;
@@ -159,10 +161,12 @@ public class GcpMetadataCollector implements MetadataCollector {
             for (ForwardingRule item : forwardingRuleList.getItems()) {
                 LoadBalancerType itemType = gcpLoadBalancerTypeConverter.getScheme(item.getLoadBalancingScheme()).getCbType();
                 if (names.contains(item.getName()) && loadBalancerTypes.contains(itemType)) {
+                    Map<String, Object> params = getParams(compute, projectId, item);
                     CloudLoadBalancerMetadata loadBalancerMetadata = new CloudLoadBalancerMetadata.Builder()
                             .withType(itemType)
                             .withIp(item.getIPAddress())
                             .withName(item.getName())
+                            .withParameters(params)
                             .build();
                     results.add(loadBalancerMetadata);
                 }
@@ -173,6 +177,26 @@ public class GcpMetadataCollector implements MetadataCollector {
 
         // no-op
         return results;
+    }
+
+    private Map<String, Object> getParams(Compute compute, String projectId, ForwardingRule item) {
+        Map<String, Object> params = new HashMap<>();
+        List<String> ports = item.getPorts();
+        if (ports == null || ports.size() != 1) {
+            LOGGER.warn("Unexpected port count on {}, {}", item.getName(), ports);
+        }
+        if (ports != null && !ports.isEmpty()) {
+            try {
+                String backendService = item.getBackendService();
+                params.put(GcpLoadBalancerMetadataView.getBackendServiceParam(ports.get(0)), backendService);
+                BackendService service = compute.backendServices().get(projectId, backendService).execute();
+
+                params.put(GcpLoadBalancerMetadataView.getInstanceGroupParam(ports.get(0)), service.getBackends().get(0).getGroup());
+            } catch (RuntimeException | IOException e) {
+                LOGGER.error("Couldn't deterimine instancegroups for {}", item.getName(), e);
+            }
+        }
+        return params;
     }
 
     @Override

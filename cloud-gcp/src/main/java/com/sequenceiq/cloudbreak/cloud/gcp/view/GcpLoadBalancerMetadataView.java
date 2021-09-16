@@ -29,10 +29,18 @@ public class GcpLoadBalancerMetadataView {
     }
 
     public static String getInstanceGroupParam(int port) {
+        return getInstanceGroupParam(String.valueOf(port));
+    }
+
+    public static String getInstanceGroupParam(String port) {
         return INSTANCE_GROUP_PREFIX + port;
     }
 
     public static String getBackendServiceParam(int port) {
+        return getBackendServiceParam(String.valueOf(port));
+    }
+
+    public static String getBackendServiceParam(String port) {
         return BACKEND_SERVICE_PREFIX + port;
     }
 }

@@ -1,9 +1,11 @@
 package com.sequenceiq.cloudbreak.cloud.gcp;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
@@ -21,6 +23,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.google.api.services.compute.Compute;
+import com.google.api.services.compute.model.BackendService;
+import com.google.api.services.compute.model.Backend;
 import com.google.api.services.compute.model.ForwardingRule;
 import com.google.api.services.compute.model.ForwardingRuleList;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -28,6 +32,7 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpComputeFactory;
 import com.sequenceiq.cloudbreak.cloud.gcp.loadbalancer.GcpLoadBalancerTypeConverter;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
+import com.sequenceiq.cloudbreak.cloud.gcp.view.GcpLoadBalancerMetadataView;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancerMetadata;
@@ -50,6 +55,14 @@ public class GCPLoadBalancerMetadataCollectorTest {
     private static final String PRIVATE_IP = "10.10.1.1";
 
     private static final String PUBLIC_IP2 = "192.168.1.2";
+
+    private static final String PORT1 = "8080";
+
+    private static final String PORT2 = "443";
+
+    private static final String BACKEND_SERVICE_NAME = "backend-service-1";
+
+    private static final String INSTANCE_GROUP_NAME = "instance-group-1";
 
     @Mock
     private GcpComputeFactory gcpComputeFactory;
@@ -75,6 +88,12 @@ public class GCPLoadBalancerMetadataCollectorTest {
     @Mock
     private GcpLoadBalancerTypeConverter gcpLoadBalancerTypeConverter;
 
+    @Mock
+    private Compute.BackendServices backendServices;
+
+    @Mock
+    private Compute.BackendServices.Get backendServicesGet;
+
     private AuthenticatedContext authenticatedContext;
 
     @BeforeEach
@@ -97,6 +116,10 @@ public class GCPLoadBalancerMetadataCollectorTest {
         when(forwardingRules.list(anyString(), anyString())).thenReturn(forwardingRulesList);
         when(forwardingRulesList.execute()).thenReturn(forwardingRuleListResponse);
         lenient().when(gcpLoadBalancerTypeConverter.getScheme(anyString())).thenCallRealMethod();
+
+        lenient().when(compute.backendServices()).thenReturn(backendServices);
+        lenient().when(backendServices.get(anyString(), eq(BACKEND_SERVICE_NAME))).thenReturn(backendServicesGet);
+        lenient().when(backendServicesGet.execute()).thenReturn(createBackendService());
     }
 
     @Test
@@ -111,6 +134,8 @@ public class GCPLoadBalancerMetadataCollectorTest {
         assertEquals(1, result.size());
         assertEquals(PUBLIC_IP, result.get(0).getIp());
         assertEquals(LoadBalancerType.PUBLIC, result.get(0).getType());
+        assertEquals(BACKEND_SERVICE_NAME, result.get(0).getStringParameter(GcpLoadBalancerMetadataView.getBackendServiceParam(8080)));
+        assertEquals(INSTANCE_GROUP_NAME, result.get(0).getStringParameter(GcpLoadBalancerMetadataView.getInstanceGroupParam(8080)));
     }
 
     @Test
@@ -131,6 +156,12 @@ public class GCPLoadBalancerMetadataCollectorTest {
         assertEquals(PUBLIC_IP, result.get(0).getIp());
         assertEquals(PUBLIC_IP2, result.get(1).getIp());
         assertEquals(LoadBalancerType.PUBLIC, result.get(0).getType());
+        assertEquals(BACKEND_SERVICE_NAME, result.get(0).getStringParameter(GcpLoadBalancerMetadataView.getBackendServiceParam(8080)));
+        assertEquals(INSTANCE_GROUP_NAME, result.get(0).getStringParameter(GcpLoadBalancerMetadataView.getInstanceGroupParam(8080)));
+
+        assertEquals(BACKEND_SERVICE_NAME, result.get(1).getStringParameter(GcpLoadBalancerMetadataView.getBackendServiceParam(8080)));
+        assertEquals(INSTANCE_GROUP_NAME, result.get(1).getStringParameter(GcpLoadBalancerMetadataView.getInstanceGroupParam(8080)));
+
     }
 
     @Test
@@ -151,10 +182,16 @@ public class GCPLoadBalancerMetadataCollectorTest {
         Optional<CloudLoadBalancerMetadata> publicResult = result.stream().filter(p -> p.getType().equals(LoadBalancerType.PUBLIC)).findFirst();
         assertTrue(publicResult.isPresent());
         assertEquals(PUBLIC_IP, publicResult.get().getIp());
+        assertEquals(BACKEND_SERVICE_NAME, publicResult.get().getStringParameter(GcpLoadBalancerMetadataView.getBackendServiceParam(8080)));
+        assertEquals(INSTANCE_GROUP_NAME, publicResult.get().getStringParameter(GcpLoadBalancerMetadataView.getInstanceGroupParam(8080)));
+
 
         Optional<CloudLoadBalancerMetadata> privateResult = result.stream().filter(p -> p.getType().equals(LoadBalancerType.PRIVATE)).findFirst();
         assertTrue(privateResult.isPresent());
         assertEquals(PRIVATE_IP, privateResult.get().getIp());
+        assertEquals(BACKEND_SERVICE_NAME, privateResult.get().getStringParameter(GcpLoadBalancerMetadataView.getBackendServiceParam(443)));
+        assertEquals(INSTANCE_GROUP_NAME, privateResult.get().getStringParameter(GcpLoadBalancerMetadataView.getInstanceGroupParam(443)));
+
 
     }
 
@@ -171,6 +208,10 @@ public class GCPLoadBalancerMetadataCollectorTest {
         assertEquals(1, result.size());
         assertEquals(PRIVATE_IP, result.get(0).getIp());
         assertEquals(LoadBalancerType.PRIVATE, result.get(0).getType());
+
+        assertEquals(BACKEND_SERVICE_NAME, result.get(0).getStringParameter(GcpLoadBalancerMetadataView.getBackendServiceParam(443)));
+        assertEquals(INSTANCE_GROUP_NAME, result.get(0).getStringParameter(GcpLoadBalancerMetadataView.getInstanceGroupParam(443)));
+
     }
 
     @Test
@@ -199,6 +240,27 @@ public class GCPLoadBalancerMetadataCollectorTest {
         assertEquals(1, result.size());
         assertEquals(null, result.get(0).getIp());
         assertEquals(LoadBalancerType.PUBLIC, result.get(0).getType());
+        assertNull(result.get(0).getStringParameter(GcpLoadBalancerMetadataView.getBackendServiceParam(8080)));
+        assertNull(result.get(0).getStringParameter(GcpLoadBalancerMetadataView.getInstanceGroupParam(8080)));
+
+    }
+
+    @Test
+    public void testNullPortInformation() {
+        List<CloudResource> resources = new ArrayList<>();
+        resources.add(createCloudResource(FORWARDING_RULE_NAME_1, ResourceType.GCP_FORWARDING_RULE));
+        ForwardingRule publicFowardingRule = createPublicFowardingRule();
+        publicFowardingRule.setPorts(null);
+        when(forwardingRuleListResponse.getItems()).thenReturn(List.of(publicFowardingRule));
+
+        List<CloudLoadBalancerMetadata> result = underTest.collectLoadBalancer(authenticatedContext, List.of(LoadBalancerType.PUBLIC), resources);
+
+        assertEquals(1, result.size());
+        assertEquals(PUBLIC_IP, result.get(0).getIp());
+        assertEquals(LoadBalancerType.PUBLIC, result.get(0).getType());
+        assertNull(result.get(0).getStringParameter(GcpLoadBalancerMetadataView.getBackendServiceParam(8080)));
+        assertNull(result.get(0).getStringParameter(GcpLoadBalancerMetadataView.getInstanceGroupParam(8080)));
+
     }
 
     @Test
@@ -218,6 +280,8 @@ public class GCPLoadBalancerMetadataCollectorTest {
         forwardingRule.setLoadBalancingScheme("EXTERNAL");
         forwardingRule.setName(FORWARDING_RULE_NAME_1);
         forwardingRule.setIPAddress(PUBLIC_IP);
+        forwardingRule.setPorts(List.of(PORT1));
+        forwardingRule.setBackendService(BACKEND_SERVICE_NAME);
         return forwardingRule;
     }
 
@@ -226,7 +290,18 @@ public class GCPLoadBalancerMetadataCollectorTest {
         forwardingRule.setLoadBalancingScheme("INTERNAL");
         forwardingRule.setName(FORWARDING_RULE_NAME_2);
         forwardingRule.setIPAddress(PRIVATE_IP);
+        forwardingRule.setPorts(List.of(PORT2));
+        forwardingRule.setBackendService(BACKEND_SERVICE_NAME);
         return forwardingRule;
+    }
+
+    private BackendService createBackendService() {
+        BackendService backendService = new BackendService();
+        backendService.setName(BACKEND_SERVICE_NAME);
+        Backend backend = new Backend();
+        backend.setGroup(INSTANCE_GROUP_NAME);
+        backendService.setBackends(List.of(backend));
+        return backendService;
     }
 
     static CloudResource createCloudResource(String name, ResourceType type) {
