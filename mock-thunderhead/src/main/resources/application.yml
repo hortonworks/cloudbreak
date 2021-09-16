@@ -49,6 +49,7 @@ auth:
       instancetypes.enable: false
     ccmv2.enable: false
     ccmv2jumpgate.enable: false
+    ccmv2.useOneWayTls: false
     environment.experience.deletion.enable: true
     endpointgateway.enable.azure: false
     endpointgateway.skip.validation: false
