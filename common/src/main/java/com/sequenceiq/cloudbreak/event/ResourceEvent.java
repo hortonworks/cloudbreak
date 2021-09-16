@@ -286,6 +286,7 @@ public enum ResourceEvent {
     CLUSTER_UPGRADE_DISTRIBUTE_PARCEL("cluster.upgrade.distribute.parcel"),
     CLUSTER_UPGRADE_ACTIVATE_PARCEL("cluster.upgrade.activate.parcel"),
     CLUSTER_UPGRADE_START_UPGRADE("cluster.upgrade.start.upgrade"),
+    CLUSTER_UPGRADE_START_POST_UPGRADE("cluster.upgrade.start.post-upgrade"),
     CLUSTER_UPGRADE_FAILED("cluster.upgrade.failed"),
     CLUSTER_UPGRADE_VALIDATION_STARTED("cluster.upgrade.validation.started"),
     CLUSTER_UPGRADE_VALIDATION_FINISHED("cluster.upgrade.validation.finished"),
