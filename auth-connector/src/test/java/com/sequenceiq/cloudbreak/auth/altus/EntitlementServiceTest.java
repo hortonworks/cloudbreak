@@ -97,6 +97,9 @@ class EntitlementServiceTest {
                 {"CDP_CCM_V2_JUMPGATE", (EntitlementCheckFunction) EntitlementService::ccmV2JumpgateEnabled, false},
                 {"CDP_CCM_V2_JUMPGATE", (EntitlementCheckFunction) EntitlementService::ccmV2JumpgateEnabled, true},
 
+                {"CDP_CCM_V2_USE_ONE_WAY_TLS", (EntitlementCheckFunction) EntitlementService::ccmV2UseOneWayTls, false},
+                {"CDP_CCM_V2_USE_ONE_WAY_TLS", (EntitlementCheckFunction) EntitlementService::ccmV2UseOneWayTls, true},
+
                 {"CDP_AZURE_SINGLE_RESOURCE_GROUP", (EntitlementCheckFunction) EntitlementService::azureSingleResourceGroupDeploymentEnabled, false},
                 {"CDP_AZURE_SINGLE_RESOURCE_GROUP", (EntitlementCheckFunction) EntitlementService::azureSingleResourceGroupDeploymentEnabled, true},
 

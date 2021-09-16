@@ -21,6 +21,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_DATA
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_GCP_DISK_ENCRYPTION_WITH_CMEK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CCM_V2;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CCM_V2_JUMPGATE;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CCM_V2_USE_ONE_WAY_TLS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_IDENTITY_MAPPING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION_AWS;
@@ -312,6 +313,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.ccmv2jumpgate.enable}")
     private boolean ccmV2JumpgateEnabled;
+
+    @Value("${auth.mock.ccmv2.useOneWayTls}")
+    private boolean ccmV2UseOneWayTls;
 
     @Value("${auth.mock.mediumdutysdx.enable}")
     private boolean mediumDutySdxEnabled;
@@ -712,6 +716,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (ccmV2JumpgateEnabled) {
             builder.addEntitlements(createEntitlement(CDP_CCM_V2_JUMPGATE));
+        }
+        if (ccmV2UseOneWayTls) {
+            builder.addEntitlements(createEntitlement(CDP_CCM_V2_USE_ONE_WAY_TLS));
         }
         if (mediumDutySdxEnabled) {
             builder.addEntitlements(createEntitlement(CDP_MEDIUM_DUTY_SDX));
