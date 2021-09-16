@@ -51,7 +51,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudS3View;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.common.model.AwsDiskType;
@@ -118,16 +117,13 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
             LOGGER.info("Create new instance with name: {}", cloudResource.getName());
             TagSpecification tagSpecification = awsTaggingService.prepareEc2TagSpecification(awsCloudStackView.getTags(),
                     com.amazonaws.services.ec2.model.ResourceType.Instance);
-            CloudResource securityGroupResource = context.getGroupResources(group.getName()).stream()
-                    .filter(g -> g.getType() == ResourceType.AWS_SECURITY_GROUP)
-                    .findFirst()
-                    .orElseThrow(NotFoundException.notFound("security group resource", ""));
+            String securityGroupId = getSecurityGroupId(context, group);
             tagSpecification.withTags(new Tag().withKey("Name").withValue(cloudResource.getName()));
             RunInstancesRequest request = new RunInstancesRequest()
                     .withInstanceType(instanceTemplate.getFlavor())
                     .withImageId(cloudStack.getImage().getImageName())
                     .withSubnetId(cloudInstance.getSubnetId())
-                    .withSecurityGroupIds(singletonList(securityGroupResource.getReference()))
+                    .withSecurityGroupIds(singletonList(securityGroupId))
                     .withEbsOptimized(isEbsOptimized(instanceTemplate))
                     .withTagSpecifications(tagSpecification)
                     .withIamInstanceProfile(getIamInstanceProfile(group))
@@ -142,6 +138,22 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
         }
         cloudResource.setInstanceId(instance.getInstanceId());
         return buildableResource;
+    }
+
+    private String getSecurityGroupId(AwsContext context, Group group) {
+        List<CloudResource> groupResources = context.getGroupResources(group.getName());
+        String securityGroupId = null;
+        if (groupResources != null) {
+            securityGroupId = groupResources.stream()
+                    .filter(g -> g.getType() == ResourceType.AWS_SECURITY_GROUP)
+                    .findFirst()
+                    .map(CloudResource::getReference)
+                    .orElse(null);
+        }
+        if (securityGroupId == null) {
+            securityGroupId = group.getSecurity().getCloudSecurityId();
+        }
+        return securityGroupId;
     }
 
     Collection<BlockDeviceMapping> blocks(Group group, CloudStack cloudStack, AuthenticatedContext ac) {
