@@ -27,6 +27,10 @@ class ClouderaManagerUpgradeService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerUpgradeService.class);
 
+    private static final String RUNTIME_UPGRADE_COMMAND = "UpgradeCluster";
+
+    private static final String POST_RUNTIME_UPGRADE_COMMAND = "PostClouderaRuntimeUpgradeCommand";
+
     @Inject
     private ClouderaManagerPollingServiceProvider clouderaManagerPollingServiceProvider;
 
@@ -43,7 +47,7 @@ class ClouderaManagerUpgradeService {
             throws ApiException, CloudbreakException {
         LOGGER.info("Upgrading the CDP Runtime...");
         try {
-            BigDecimal upgradeCommandId = determineUpgradeLogic(stackProductVersion, clustersResourceApi, stack, apiClient);
+            BigDecimal upgradeCommandId = determineUpgradeLogic(stackProductVersion, clustersResourceApi, stack, apiClient, false);
             PollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCdpRuntimeUpgrade(stack, apiClient, upgradeCommandId);
             pollingResultErrorHandler.handlePollingResult(pollingResult, "Cluster was terminated while waiting for CDP Runtime to be upgraded",
                     "Timeout during CDP Runtime upgrade.");
@@ -58,9 +62,21 @@ class ClouderaManagerUpgradeService {
         LOGGER.info("Runtime is successfully upgraded!");
     }
 
-    private BigDecimal determineUpgradeLogic(String stackProductVersion, ClustersResourceApi clustersResourceApi, Stack stack, ApiClient apiClient)
-            throws ApiException {
-        Optional<BigDecimal> optionalUpgradeCommand = findUpgradeApiCommandId(clustersResourceApi, stack);
+    void callPostRuntimeUpgradeCommand(ClustersResourceApi clustersResourceApi, Stack stack, ApiClient apiClient)
+            throws ApiException, CloudbreakException {
+        LOGGER.info("Call post runtime upgrade command after maintenance upgrade");
+        BigDecimal upgradeCommandId = determineUpgradeLogic("", clustersResourceApi, stack, apiClient, true);
+        PollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCdpRuntimeUpgrade(stack, apiClient, upgradeCommandId);
+        pollingResultErrorHandler.handlePollingResult(pollingResult, "Cluster was terminated while waiting for CDP Runtime to be upgraded",
+                "Timeout during CDP Runtime upgrade.");
+        LOGGER.info("Runtime is successfully upgraded!");
+    }
+
+    private BigDecimal determineUpgradeLogic(String stackProductVersion, ClustersResourceApi clustersResourceApi, Stack stack,
+            ApiClient apiClient, boolean postRuntimeUpgrade) throws ApiException {
+        String command = postRuntimeUpgrade ? POST_RUNTIME_UPGRADE_COMMAND : RUNTIME_UPGRADE_COMMAND;
+        LOGGER.debug("Upgrade command to execute: {}", command);
+        Optional<BigDecimal> optionalUpgradeCommand = findUpgradeApiCommandId(clustersResourceApi, stack, command);
         BigDecimal upgradeCommandId;
         if (optionalUpgradeCommand.isPresent()) {
             upgradeCommandId = optionalUpgradeCommand.get();
@@ -78,11 +94,24 @@ class ClouderaManagerUpgradeService {
                     LOGGER.debug("Last upgrade command ({}) is not active, it was {} successful and {} retryable, submitting it now", upgradeCommandId,
                             commandSuccess ? "" : "not",
                             commandCanRetry ? "" : "not");
-                    upgradeCommandId = callUpgrade(stackProductVersion, clustersResourceApi, stack);
+                    upgradeCommandId = executeUpgrade(stackProductVersion, clustersResourceApi, stack, postRuntimeUpgrade);
                 }
             }
         } else {
             LOGGER.debug("There is no upgrade command submitted yet, submitting it now");
+            upgradeCommandId = executeUpgrade(stackProductVersion, clustersResourceApi, stack, postRuntimeUpgrade);
+        }
+        return upgradeCommandId;
+    }
+
+    private BigDecimal executeUpgrade(String stackProductVersion, ClustersResourceApi clustersResourceApi, Stack stack,
+            boolean postRuntimeUpgrade) throws ApiException {
+        BigDecimal upgradeCommandId;
+        if (postRuntimeUpgrade) {
+            LOGGER.debug("Calling post upgrade with command {}", POST_RUNTIME_UPGRADE_COMMAND);
+            upgradeCommandId = callPostUpgrade(clustersResourceApi, stack);
+        } else {
+            LOGGER.debug("Calling upgrade with command {}", RUNTIME_UPGRADE_COMMAND);
             upgradeCommandId = callUpgrade(stackProductVersion, clustersResourceApi, stack);
         }
         return upgradeCommandId;
@@ -94,9 +123,13 @@ class ClouderaManagerUpgradeService {
         return clustersResourceApi.upgradeCdhCommand(stack.getName(), upgradeArgs).getId();
     }
 
-    private Optional<BigDecimal> findUpgradeApiCommandId(ClustersResourceApi clustersResourceApi, Stack stack) {
+    private BigDecimal callPostUpgrade(ClustersResourceApi clustersResourceApi, Stack stack) throws ApiException {
+        return clustersResourceApi.postClouderaRuntimeUpgrade(stack.getName()).getId();
+    }
+
+    private Optional<BigDecimal> findUpgradeApiCommandId(ClustersResourceApi clustersResourceApi, Stack stack, String command) {
         try {
-            return syncApiCommandRetriever.getCommandId("UpgradeCluster", clustersResourceApi, stack);
+            return syncApiCommandRetriever.getCommandId(command, clustersResourceApi, stack);
         } catch (CloudbreakException | ApiException e) {
             LOGGER.warn("Unexpected error during CM command table fetching, assuming no such command exists", e);
             return Optional.empty();

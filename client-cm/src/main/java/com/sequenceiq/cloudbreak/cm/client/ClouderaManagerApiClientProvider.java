@@ -30,6 +30,8 @@ public class ClouderaManagerApiClientProvider {
 
     public static final String API_V_43 = API_ROOT + "/v43";
 
+    public static final String API_V_45 = API_ROOT + "/v45";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerApiClientProvider.class);
 
     @Value("${cb.cm.client.cluster.proxy.timeout}")
@@ -137,6 +139,10 @@ public class ClouderaManagerApiClientProvider {
         return config.getClientCert() != null && config.getServerCert() != null && config.getClientKey() != null;
     }
 
+    public ApiClient getV31Client(Integer gatewayPort, String user, String password, HttpClientConfig clientConfig) throws ClouderaManagerClientInitException {
+        return getApiClientByApiVersion(gatewayPort, user, password, clientConfig, API_V_31);
+    }
+
     public ApiClient getV40Client(Integer gatewayPort, String user, String password, HttpClientConfig clientConfig) throws ClouderaManagerClientInitException {
         return getApiClientByApiVersion(gatewayPort, user, password, clientConfig, API_V_40);
     }
@@ -145,7 +151,7 @@ public class ClouderaManagerApiClientProvider {
         return getApiClientByApiVersion(gatewayPort, user, password, clientConfig, API_V_43);
     }
 
-    public ApiClient getV31Client(Integer gatewayPort, String user, String password, HttpClientConfig clientConfig) throws ClouderaManagerClientInitException {
-        return getApiClientByApiVersion(gatewayPort, user, password, clientConfig, API_V_31);
+    public ApiClient getV45Client(Integer gatewayPort, String user, String password, HttpClientConfig clientConfig) throws ClouderaManagerClientInitException {
+        return getApiClientByApiVersion(gatewayPort, user, password, clientConfig, API_V_45);
     }
 }

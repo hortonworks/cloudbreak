@@ -141,7 +141,7 @@ public class ClouderaManagerUpgradeServiceTest {
         when(clouderaManagerCommandsService.getApiCommand(apiClient, COMMAND_ID)).thenReturn(apiCommand);
         when(clouderaManagerCommandsService.retryApiCommand(apiClient, COMMAND_ID)).thenReturn(apiCommand);
 
-        underTest.callUpgradeCdhCommand(STACK_PRODUCT_VERSION, clustersResourceApi, stack,  apiClient);
+        underTest.callUpgradeCdhCommand(STACK_PRODUCT_VERSION, clustersResourceApi, stack, apiClient);
 
         verify(syncApiCommandRetriever).getCommandId(COMMAND_NAME, clustersResourceApi, stack);
         verify(clouderaManagerCommandsService).getApiCommand(apiClient, COMMAND_ID);
@@ -188,6 +188,63 @@ public class ClouderaManagerUpgradeServiceTest {
 
         verify(clustersResourceApi).upgradeCdhCommand(eq(CLUSTER_NAME), any());
         verifyNoInteractions(clouderaManagerPollingServiceProvider);
+    }
+
+    @Test
+    public void testCallPostRuntimeUpgradeCommandForNewSubmit() throws ApiException, CloudbreakException {
+        Stack stack = createStack();
+        ApiCommand apiCommand = createApiCommand();
+        when(syncApiCommandRetriever.getCommandId("PostClouderaRuntimeUpgradeCommand", clustersResourceApi, stack)).thenReturn(Optional.empty());
+        when(clustersResourceApi.postClouderaRuntimeUpgrade(eq(CLUSTER_NAME))).thenReturn(apiCommand);
+        PollingResult pollingResult = PollingResult.SUCCESS;
+        when(clouderaManagerPollingServiceProvider.startPollingCdpRuntimeUpgrade(stack, apiClient, COMMAND_ID)).thenReturn(pollingResult);
+
+        underTest.callPostRuntimeUpgradeCommand(clustersResourceApi, stack, apiClient);
+
+        verify(syncApiCommandRetriever).getCommandId("PostClouderaRuntimeUpgradeCommand", clustersResourceApi, stack);
+        verify(clouderaManagerPollingServiceProvider).startPollingCdpRuntimeUpgrade(stack, apiClient, COMMAND_ID);
+        verify(clustersResourceApi, times(1)).postClouderaRuntimeUpgrade(CLUSTER_NAME);
+    }
+
+    @Test
+    public void testCallPostRuntimeUpgradeCommandWhenItsAlreadyRunning() throws ApiException, CloudbreakException {
+        Stack stack = createStack();
+        ApiCommand apiCommand = createApiCommand();
+        apiCommand.setActive(Boolean.TRUE);
+        apiCommand.setSuccess(Boolean.FALSE);
+        apiCommand.setCanRetry(Boolean.FALSE);
+        when(syncApiCommandRetriever.getCommandId("PostClouderaRuntimeUpgradeCommand", clustersResourceApi, stack)).thenReturn(Optional.of(COMMAND_ID));
+        when(clouderaManagerCommandsService.getApiCommand(apiClient, COMMAND_ID)).thenReturn(apiCommand);
+        PollingResult pollingResult = PollingResult.SUCCESS;
+        when(clouderaManagerPollingServiceProvider.startPollingCdpRuntimeUpgrade(stack, apiClient, COMMAND_ID)).thenReturn(pollingResult);
+
+        underTest.callPostRuntimeUpgradeCommand(clustersResourceApi, stack, apiClient);
+
+        verify(syncApiCommandRetriever).getCommandId("PostClouderaRuntimeUpgradeCommand", clustersResourceApi, stack);
+        verify(clouderaManagerPollingServiceProvider).startPollingCdpRuntimeUpgrade(stack, apiClient, COMMAND_ID);
+        verify(clouderaManagerCommandsService, times(0)).retryApiCommand(apiClient, COMMAND_ID);
+        verifyNoMoreInteractions(clustersResourceApi);
+    }
+
+    @Test
+    public void testCallPostRuntimeUpgradeCommandWhenItsAlreadySucceededAndShouldBeSubmittedAgain() throws ApiException, CloudbreakException {
+        Stack stack = createStack();
+        ApiCommand apiCommand = createApiCommand();
+        apiCommand.setActive(Boolean.FALSE);
+        apiCommand.setSuccess(Boolean.TRUE);
+        apiCommand.setCanRetry(Boolean.FALSE);
+        when(syncApiCommandRetriever.getCommandId("PostClouderaRuntimeUpgradeCommand", clustersResourceApi, stack)).thenReturn(Optional.of(COMMAND_ID));
+        when(clouderaManagerCommandsService.getApiCommand(apiClient, COMMAND_ID)).thenReturn(apiCommand);
+        when(clustersResourceApi.postClouderaRuntimeUpgrade(eq(CLUSTER_NAME))).thenReturn(apiCommand);
+        PollingResult pollingResult = PollingResult.SUCCESS;
+        when(clouderaManagerPollingServiceProvider.startPollingCdpRuntimeUpgrade(stack, apiClient, COMMAND_ID)).thenReturn(pollingResult);
+
+        underTest.callPostRuntimeUpgradeCommand(clustersResourceApi, stack, apiClient);
+
+        verify(syncApiCommandRetriever).getCommandId("PostClouderaRuntimeUpgradeCommand", clustersResourceApi, stack);
+        verify(clouderaManagerPollingServiceProvider).startPollingCdpRuntimeUpgrade(stack, apiClient, COMMAND_ID);
+        verify(clouderaManagerCommandsService, times(0)).retryApiCommand(apiClient, COMMAND_ID);
+        verify(clustersResourceApi, times(1)).postClouderaRuntimeUpgrade(CLUSTER_NAME);
     }
 
     private ApiCommand createApiCommand() {
