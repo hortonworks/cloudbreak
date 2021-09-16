@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.sql;
 
+import static com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -17,6 +19,7 @@ import com.google.api.services.compute.model.Subnetwork;
 import com.google.api.services.sqladmin.SQLAdmin;
 import com.google.api.services.sqladmin.model.BackupConfiguration;
 import com.google.api.services.sqladmin.model.DatabaseInstance;
+import com.google.api.services.sqladmin.model.DiskEncryptionConfiguration;
 import com.google.api.services.sqladmin.model.InstancesListResponse;
 import com.google.api.services.sqladmin.model.IpConfiguration;
 import com.google.api.services.sqladmin.model.Operation;
@@ -33,6 +36,7 @@ import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.gcp.view.GcpDatabaseNetworkView;
 import com.sequenceiq.cloudbreak.cloud.gcp.view.GcpDatabaseServerView;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.template.compute.DatabaseServerLaunchService;
@@ -156,7 +160,8 @@ public class GcpDatabaseServerLaunchService extends GcpDatabaseServerBaseService
     }
 
     private DatabaseInstance getDatabaseInstance(DatabaseStack stack, String deploymentName, Compute compute, String projectId) throws java.io.IOException {
-        GcpDatabaseServerView databaseServerView = new GcpDatabaseServerView(stack.getDatabaseServer());
+        DatabaseServer databaseServer = stack.getDatabaseServer();
+        GcpDatabaseServerView databaseServerView = new GcpDatabaseServerView(databaseServer);
         GcpDatabaseNetworkView databaseNetworkView = new GcpDatabaseNetworkView(stack.getNetwork());
         Subnetwork subnetworkForRedbeams;
         if (Strings.isNullOrEmpty(databaseNetworkView.getSharedProjectId())) {
@@ -181,6 +186,12 @@ public class GcpDatabaseServerLaunchService extends GcpDatabaseServerBaseService
         databaseInstance.setGceZone(databaseNetworkView.getAvailabilityZone());
         databaseInstance.setDatabaseVersion(databaseServerView.getDatabaseVersion());
         databaseInstance.setSettings(getSettings(stack, databaseServerView, subnetworkForRedbeams));
+        String keyName = databaseServer.getStringParameter(VOLUME_ENCRYPTION_KEY_ID);
+        if (keyName != null && !keyName.isEmpty()) {
+            DiskEncryptionConfiguration diskEncryptionConfiguration = new DiskEncryptionConfiguration();
+            diskEncryptionConfiguration.setKmsKeyName(keyName);
+            databaseInstance.setDiskEncryptionConfiguration(diskEncryptionConfiguration);
+        }
         return databaseInstance;
     }
 

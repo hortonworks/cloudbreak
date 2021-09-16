@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.ENCRYPTIO
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_GROUP_NAME_PARAMETER;
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_GROUP_USAGE_PARAMETER;
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.CREATE_REQUESTED;
+import static com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.SslCertificateType.NONE;
 
@@ -35,6 +36,8 @@ import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEn
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.ResourceGroupUsage;
+import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpEnvironmentParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpResourceEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.domain.stack.SecurityGroup;
@@ -142,8 +145,7 @@ public class DBStackToDatabaseStackConverter {
         Map<String, Object> params = attributes == null ? Collections.emptyMap() : attributes.getMap();
 
         if (CloudPlatform.AZURE.name().equals(stack.getCloudPlatform())) {
-            DetailedEnvironmentResponse environment = measure(() -> environmentService.getByCrn(stack.getEnvironmentId()),
-                    LOGGER, "Environment properties were queried under {} ms for environment {}", stack.getEnvironmentId());
+            DetailedEnvironmentResponse environment = getDetailedEnvironmentResponse(stack);
             if (!stack.getParameters().containsKey(RESOURCE_GROUP_NAME_PARAMETER)) {
                 Optional<AzureResourceGroup> resourceGroupOptional = getResourceGroupFromEnv(environment);
 
@@ -154,26 +156,39 @@ public class DBStackToDatabaseStackConverter {
                     Map<String, Object> resourceGroupParameters = Map.of(
                             RESOURCE_GROUP_NAME_PARAMETER, resourceGroupName,
                             RESOURCE_GROUP_USAGE_PARAMETER, resourceGroupUsage.name());
-                    params = Stream.of(params, resourceGroupParameters)
-                            .flatMap(map -> map.entrySet().stream())
-                            .collect(Collectors.toMap(
-                                    Map.Entry::getKey,
-                                    Map.Entry::getValue,
-                                    (existingOne, newOne) -> existingOne));
+                    params = getMergedMap(params, resourceGroupParameters);
                 }
             }
             if (azureEncryptionParametersPresent(environment)) {
                 Map<String, Object> encryptionParameters = Map.of(
                         ENCRYPTION_KEY_URL, getEncryptionKeyUrlFromEnv(environment),
                         ENCRYPTION_KEY_RESOURCE_GROUP_NAME, getEncryptionKeyResourceGroupNameFromEnv(environment));
-                params = Stream.of(params, encryptionParameters)
-                        .flatMap(map -> map.entrySet().stream())
-                        .collect(Collectors.toMap(
-                                Map.Entry::getKey,
-                                Map.Entry::getValue,
-                                (existingOne, newOne) -> existingOne));
+                params = getMergedMap(params, encryptionParameters);
+            }
+        } else if (CloudPlatform.GCP.name().equals(stack.getCloudPlatform())) {
+            DetailedEnvironmentResponse environment = getDetailedEnvironmentResponse(stack);
+            Optional<String> key = getGcpEncryptionKeyFromEnv(environment);
+            if (key.isPresent()) {
+                Map<String, Object> encryptionParameters = Map.of(
+                        VOLUME_ENCRYPTION_KEY_ID, key.get());
+                params = getMergedMap(params, encryptionParameters);
             }
         }
+        return params;
+    }
+
+    private DetailedEnvironmentResponse getDetailedEnvironmentResponse(DBStack stack) {
+        return measure(() -> environmentService.getByCrn(stack.getEnvironmentId()),
+                LOGGER, "Environment properties were queried under {} ms for environment {}", stack.getEnvironmentId());
+    }
+
+    private Map<String, Object> getMergedMap(Map<String, Object> params, Map<String, Object> cloudParams) {
+        params = Stream.of(params, cloudParams)
+                .flatMap(map -> map.entrySet().stream())
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (existingOne, newOne) -> existingOne));
         return params;
     }
 
@@ -192,6 +207,13 @@ public class DBStackToDatabaseStackConverter {
                 .map(DetailedEnvironmentResponse::getAzure)
                 .map(AzureEnvironmentParameters::getResourceEncryptionParameters)
                 .map(AzureResourceEncryptionParameters::getEncryptionKeyUrl).orElse(null);
+    }
+
+    private Optional<String> getGcpEncryptionKeyFromEnv(DetailedEnvironmentResponse environment) {
+        return Optional.ofNullable(environment)
+                .map(DetailedEnvironmentResponse::getGcp)
+                .map(GcpEnvironmentParameters::getGcpResourceEncryptionParameters)
+                .map(GcpResourceEncryptionParameters::getEncryptionKey);
     }
 
     private String getEncryptionKeyResourceGroupNameFromEnv(DetailedEnvironmentResponse environment) {

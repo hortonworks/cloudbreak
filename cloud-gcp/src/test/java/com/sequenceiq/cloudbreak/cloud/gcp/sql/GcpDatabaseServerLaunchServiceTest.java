@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.gcp.sql;
 import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -20,6 +21,8 @@ import java.util.Map;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -73,6 +76,9 @@ public class GcpDatabaseServerLaunchServiceTest {
 
     @Mock
     private CloudContext cloudContext;
+
+    @Captor
+    private ArgumentCaptor<DatabaseInstance> databaseInstanceArgumentCaptor;
 
     @InjectMocks
     private GcpDatabaseServerLaunchService underTest;
@@ -212,7 +218,7 @@ public class GcpDatabaseServerLaunchServiceTest {
         when(databaseInstance.getName()).thenReturn("name");
         when(sqlAdminInstances.get(anyString(), anyString())).thenReturn(instancesGet);
         when(instancesGet.execute()).thenReturn(databaseInstance);
-        when(sqlAdminInstances.insert(anyString(), any(DatabaseInstance.class))).thenReturn(sqlAdminInstancesInsert);
+        when(sqlAdminInstances.insert(anyString(), databaseInstanceArgumentCaptor.capture())).thenReturn(sqlAdminInstancesInsert);
         when(sqlAdminInstancesInsert.setPrettyPrint(anyBoolean())).thenReturn(sqlAdminInstancesInsert);
         when(sqlAdminInstancesInsert.execute()).thenReturn(operation);
         when(databaseInstance.getIpAddresses()).thenReturn(List.of(ipMapping));
@@ -224,6 +230,8 @@ public class GcpDatabaseServerLaunchServiceTest {
         when(cloudContext.getLocation()).thenReturn(location(region("region"), availabilityZone("az1")));
 
         List<CloudResource> launch = underTest.launch(authenticatedContext, databaseStack, persistenceNotifier);
+
+        assertNull(databaseInstanceArgumentCaptor.getValue().getDiskEncryptionConfiguration());
 
         Assert.assertEquals(1, launch.size());
     }
@@ -238,6 +246,7 @@ public class GcpDatabaseServerLaunchServiceTest {
 
         Map<String, Object> map = new HashMap<>();
         map.put("engineVersion", "1");
+        map.put("key", "value");
         DatabaseServer databaseServer = DatabaseServer.builder()
                 .connectionDriver("driver")
                 .serverId("driver")
@@ -292,7 +301,7 @@ public class GcpDatabaseServerLaunchServiceTest {
         when(databaseInstance.getName()).thenReturn("name");
         when(sqlAdminInstances.get(anyString(), anyString())).thenReturn(instancesGet);
         when(instancesGet.execute()).thenReturn(databaseInstance);
-        when(sqlAdminInstances.insert(anyString(), any(DatabaseInstance.class))).thenReturn(sqlAdminInstancesInsert);
+        when(sqlAdminInstances.insert(anyString(), databaseInstanceArgumentCaptor.capture())).thenReturn(sqlAdminInstancesInsert);
         when(sqlAdminInstancesInsert.setPrettyPrint(anyBoolean())).thenReturn(sqlAdminInstancesInsert);
         when(sqlAdminInstancesInsert.execute()).thenReturn(operation);
         when(databaseInstance.getIpAddresses()).thenReturn(List.of(ipMapping));
@@ -304,6 +313,8 @@ public class GcpDatabaseServerLaunchServiceTest {
         when(cloudContext.getLocation()).thenReturn(location(region("region"), availabilityZone("az1")));
 
         List<CloudResource> launch = underTest.launch(authenticatedContext, databaseStack, persistenceNotifier);
+
+        Assert.assertEquals("value", databaseInstanceArgumentCaptor.getValue().getDiskEncryptionConfiguration().getKmsKeyName());
 
         Assert.assertEquals(1, launch.size());
     }
