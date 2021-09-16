@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.amazonaws.services.ec2.model.DeleteSecurityGroupRequest;
 import com.amazonaws.services.ec2.model.DeleteSecurityGroupResult;
+import com.amazonaws.services.ec2.model.SecurityGroup;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.context.AwsContext;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsMethodExecutor;
@@ -64,10 +65,15 @@ public class AwsSecurityGroupResourceBuilder extends AbstractAwsNativeGroupBuild
     @Override
     public CloudResource delete(AwsContext context, AuthenticatedContext auth, CloudResource resource, Network network) throws Exception {
         AmazonEc2Client amazonEc2Client = context.getAmazonEc2Client();
-        DeleteSecurityGroupRequest request = new DeleteSecurityGroupRequest()
-                .withGroupId(resource.getReference());
-        DeleteSecurityGroupResult result = awsMethodExecutor.execute(() -> amazonEc2Client.deleteSecurityGroup(request), null);
-        return result == null ? null : resource;
+        if (resource.getReference() != null) {
+            DeleteSecurityGroupRequest request = new DeleteSecurityGroupRequest()
+                    .withGroupId(resource.getReference());
+            DeleteSecurityGroupResult result = awsMethodExecutor.execute(() -> amazonEc2Client.deleteSecurityGroup(request), null);
+            return result == null ? null : resource;
+        }
+        SecurityGroup securityGroup = securityGroupBuilderUtil.getSecurityGroupSilent(amazonEc2Client, network.getStringParameter("vpcId"), resource.getName());
+        LOGGER.info("Reference is null, cannot be deleted on the provider. Maybe it is not a Cloudbreak managed security group: {}", securityGroup);
+        return  null;
     }
 
     @Override

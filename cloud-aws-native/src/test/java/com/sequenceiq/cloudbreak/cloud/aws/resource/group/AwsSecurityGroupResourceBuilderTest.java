@@ -119,6 +119,7 @@ public class AwsSecurityGroupResourceBuilderTest {
                 .type(ResourceType.AWS_SECURITY_GROUP)
                 .status(CommonStatus.CREATED)
                 .name("name")
+                .reference("ref")
                 .params(Collections.emptyMap())
                 .build();
 
@@ -135,6 +136,7 @@ public class AwsSecurityGroupResourceBuilderTest {
                 .type(ResourceType.AWS_SECURITY_GROUP)
                 .status(CommonStatus.CREATED)
                 .name("name")
+                .reference("ref")
                 .params(Collections.emptyMap())
                 .build();
 
@@ -142,6 +144,20 @@ public class AwsSecurityGroupResourceBuilderTest {
 
         CloudResource actual = underTest.delete(awsContext, ac, resource, network);
 
-        Assertions.assertEquals(actual, resource);
+        Assertions.assertEquals(resource, actual);
+    }
+
+    @Test
+    public void testDeleteWhenReferenceNull() throws Exception {
+        CloudResource resource = CloudResource.builder()
+                .type(ResourceType.AWS_SECURITY_GROUP)
+                .status(CommonStatus.CREATED)
+                .name("name")
+                .params(Collections.emptyMap())
+                .build();
+
+        CloudResource actual = underTest.delete(awsContext, ac, resource, network);
+
+        Assertions.assertNull(actual);
     }
 }

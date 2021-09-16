@@ -27,6 +27,7 @@ public class AwsMethodExecutor {
                 LOGGER.info("Aws resource does not found: {}", e.getMessage());
                 ret = def;
             } else {
+                LOGGER.error("Cannot execute aws method: {}", e);
                 throw e;
             }
         }

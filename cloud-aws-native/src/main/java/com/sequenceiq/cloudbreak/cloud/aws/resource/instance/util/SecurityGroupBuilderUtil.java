@@ -95,16 +95,31 @@ public class SecurityGroupBuilderUtil {
     }
 
     public SecurityGroup getSecurityGroup(AmazonEc2Client amazonEc2Client, String vpcId, String groupName) {
+        Optional<SecurityGroup> securityGroupOpt = describeSecurityGroup(amazonEc2Client, vpcId, groupName);
+        if (securityGroupOpt.isEmpty()) {
+            LOGGER.debug("Security group is not exist on the provider with {} groupName in the vpc: {}.", groupName, vpcId);
+            throw NotFoundException.notFoundException("Aws Security Group", groupName);
+        }
+        LOGGER.debug("Security group fetched from aws by vpc id: {} and group name: {}", vpcId, groupName);
+        return securityGroupOpt.get();
+    }
+
+    public SecurityGroup getSecurityGroupSilent(AmazonEc2Client amazonEc2Client, String vpcId, String groupName) {
+        Optional<SecurityGroup> securityGroupOpt = describeSecurityGroup(amazonEc2Client, vpcId, groupName);
+        if (securityGroupOpt.isEmpty()) {
+            LOGGER.debug("Security group is not exist on the provider with {} groupName in the vpc: {}. Does not need exception", groupName, vpcId);
+            return null;
+        }
+        LOGGER.debug("Security group fetched from aws by vpc id: {} and group name: {}", vpcId, groupName);
+        return securityGroupOpt.get();
+    }
+
+    private Optional<SecurityGroup> describeSecurityGroup(AmazonEc2Client amazonEc2Client, String vpcId, String groupName) {
         DescribeSecurityGroupsRequest describeSecurityGroupsRequest = new DescribeSecurityGroupsRequest()
                 .withFilters(new Filter().withName("vpc-id").withValues(vpcId));
         DescribeSecurityGroupsResult describeSecurityGroupsResult = amazonEc2Client.describeSecurityGroups(describeSecurityGroupsRequest);
-        Optional<SecurityGroup> securityGroupOpt = describeSecurityGroupsResult.getSecurityGroups().stream()
+        return describeSecurityGroupsResult.getSecurityGroups().stream()
                 .filter(result -> result.getGroupName().equals(groupName)).findFirst();
-        if (securityGroupOpt.isEmpty()) {
-            throw NotFoundException.notFoundException("Aws Security Group", groupName);
-        }
-        LOGGER.debug("Securoty group fetched from aws by vpc id: {} and group name: {}", vpcId, groupName);
-        return securityGroupOpt.get();
     }
 
     public void ingress(Group group, AuthenticatedContext ac, AmazonEc2Client amazonEc2Client, AwsNetworkView awsNetworkView, String securityGroupId) {
