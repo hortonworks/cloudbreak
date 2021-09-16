@@ -4,7 +4,6 @@ buildscript {
   repositories {
     mavenCentral()
     maven { url = "$repoUrl" }
-    jcenter()
   }
   dependencies {
     classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.8'

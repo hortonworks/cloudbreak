@@ -3,7 +3,6 @@ buildscript {
     mavenCentral()
     maven { url = "$repoUrl" }
     maven { url = "$springRepoUrl" }
-    jcenter()
   }
   dependencies {
     classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
