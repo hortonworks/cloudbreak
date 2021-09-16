@@ -65,14 +65,19 @@ public class GroupResourceService {
             for (Group group : getOrderedCopy(groups)) {
                 try {
                     CloudResource buildableResource = builder.create(context, auth, group, network);
-                    createResource(auth, buildableResource);
-                    CloudResource resource = builder.build(context, auth, group, network, group.getSecurity(), buildableResource);
-                    updateResource(auth, resource);
-                    PollTask<List<CloudResourceStatus>> task = statusCheckFactory.newPollResourceTask(builder, auth, Collections.singletonList(resource),
-                            context, true);
-                    List<CloudResourceStatus> pollerResult = syncPollingScheduler.schedule(task);
-                    context.addGroupResources(group.getName(), Collections.singletonList(resource));
-                    results.addAll(pollerResult);
+                    if (buildableResource != null) {
+                        createResource(auth, buildableResource);
+                        CloudResource resource = builder.build(context, auth, group, network, group.getSecurity(), buildableResource);
+                        updateResource(auth, resource);
+                        PollTask<List<CloudResourceStatus>> task = statusCheckFactory.newPollResourceTask(builder, auth, Collections.singletonList(resource),
+                                context, true);
+                        List<CloudResourceStatus> pollerResult = syncPollingScheduler.schedule(task);
+                        context.addGroupResources(group.getName(), Collections.singletonList(resource));
+                        results.addAll(pollerResult);
+                    } else {
+                        LOGGER.debug("CloudResource is null for {} with resourceType: {} and builder: {}, build is skipped.",
+                                group.getName(), builder.resourceType(), builder.getClass().getSimpleName());
+                    }
                 } catch (ResourceNotNeededException e) {
                     LOGGER.debug("Skipping resource creation: {}", e.getMessage());
                 }
