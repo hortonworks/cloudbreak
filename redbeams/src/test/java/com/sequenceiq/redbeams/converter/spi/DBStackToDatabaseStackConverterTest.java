@@ -30,6 +30,8 @@ import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEn
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.ResourceGroupUsage;
+import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpEnvironmentParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpResourceEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.SslCertificateType;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
@@ -229,6 +231,35 @@ public class DBStackToDatabaseStackConverterTest {
         assertThat(parameters.get(ENCRYPTION_KEY_URL).toString()).isEqualTo(KEY_URL);
         assertThat(parameters.get(ENCRYPTION_KEY_RESOURCE_GROUP_NAME).toString()).isEqualTo(RESOURCE_GROUP);
         assertThat(parameters.size()).isEqualTo(4);
+    }
+
+    @Test
+    public void testConversionGcpWithGcpEncryptionResourcesPresent() {
+        Network network = new Network();
+        network.setAttributes(new Json(NETWORK_ATTRIBUTES));
+        dbStack.setNetwork(network);
+        dbStack.setCloudPlatform("GCP");
+        dbStack.setParameters(new HashMap<>());
+        DatabaseServer server = new DatabaseServer();
+        server.setDatabaseVendor(DatabaseVendor.POSTGRES);
+        server.setAttributes(new Json(DATABASE_SERVER_ATTRIBUTES));
+        dbStack.setDatabaseServer(server);
+        dbStack.setTags(new Json(STACK_TAGS));
+        dbStack.setTemplate("template");
+        DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
+        environmentResponse.setCloudPlatform("GCP");
+        environmentResponse.setGcp(GcpEnvironmentParameters.builder()
+                .withResourceEncryptionParameters(GcpResourceEncryptionParameters.builder()
+                        .withEncryptionKey("value")
+                        .build())
+                .build());
+        when(environmentService.getByCrn(anyString())).thenReturn(environmentResponse);
+
+        DatabaseStack convertedStack = underTest.convert(dbStack);
+
+        Map<String, Object> parameters = convertedStack.getDatabaseServer().getParameters();
+        assertThat(parameters.get("key").toString()).isEqualTo("value");
+        assertThat(parameters.size()).isEqualTo(3);
     }
 
     @Test
