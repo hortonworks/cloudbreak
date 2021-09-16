@@ -46,6 +46,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MICRO_D
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_NODESTATUS_ENABLE_SALT_PING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_OS_UPGRADE_DATAHUB;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_AZURE;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_GCP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RAW_S3;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RAZ;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RUNTIME_UPGRADE;
@@ -367,6 +368,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.endpointgateway.enable.azure}")
     private boolean azureEndpointGatewayEnabled;
+
+    @Value("${auth.mock.endpointgateway.enable.gcp}")
+    private boolean gcpEndpointGatewayEnabled;
 
     @Value("${auth.mock.datalake.backup.on.upgrade.enable}")
     private boolean datalakeBackupOnUpgrade;
@@ -767,6 +771,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (azureEndpointGatewayEnabled) {
             builder.addEntitlements(createEntitlement(CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_AZURE));
+        }
+        if (gcpEndpointGatewayEnabled) {
+            builder.addEntitlements(createEntitlement(CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_GCP));
         }
         if (datalakeBackupOnUpgrade) {
             builder.addEntitlements(createEntitlement(CDP_DATALAKE_BACKUP_ON_UPGRADE));
