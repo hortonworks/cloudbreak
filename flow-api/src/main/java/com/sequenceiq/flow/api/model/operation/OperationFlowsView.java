@@ -13,8 +13,6 @@ public class OperationFlowsView {
 
     private final List<String> typeOrderList;
 
-    private final boolean inMemory;
-
     private final Integer progressFromHistory;
 
     private final String operationId;
@@ -23,7 +21,6 @@ public class OperationFlowsView {
         this.operationType = builder.operationType;
         this.flowTypeProgressMap = builder.flowTypeProgressMap;
         this.typeOrderList = builder.typeOrderList;
-        this.inMemory = builder.inMemory;
         this.progressFromHistory = builder.progressFromHistory;
         this.operationId = builder.operationId;
     }
@@ -44,10 +41,6 @@ public class OperationFlowsView {
         return progressFromHistory;
     }
 
-    public boolean isInMemory() {
-        return inMemory;
-    }
-
     public String getOperationId() {
         return operationId;
     }
@@ -58,7 +51,6 @@ public class OperationFlowsView {
                 "operationType=" + operationType +
                 ", flowTypeProgressMap=" + flowTypeProgressMap +
                 ", typeOrderList=" + typeOrderList +
-                ", inMemory=" + inMemory +
                 ", progressFromHistory=" + progressFromHistory +
                 ", operationId='" + operationId + '\'' +
                 '}';
@@ -71,8 +63,6 @@ public class OperationFlowsView {
         private Map<String, FlowProgressResponse> flowTypeProgressMap;
 
         private List<String> typeOrderList;
-
-        private boolean inMemory;
 
         private Integer progressFromHistory;
 
@@ -101,11 +91,6 @@ public class OperationFlowsView {
 
         public Builder withTypeOrderList(List<String> typeOrderList) {
             this.typeOrderList = typeOrderList;
-            return this;
-        }
-
-        public Builder withInMemory(boolean inMemory) {
-            this.inMemory = inMemory;
             return this;
         }
 

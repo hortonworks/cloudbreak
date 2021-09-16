@@ -2,17 +2,12 @@ package com.sequenceiq.flow.service;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.sequenceiq.cloudbreak.service.flowlog.FlowLogUtil.isFlowFailHandled;
-import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toSet;
 
-import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
@@ -20,7 +15,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.BadRequestException;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,11 +28,10 @@ import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowLogResponse;
 import com.sequenceiq.flow.api.model.FlowProgressResponse;
 import com.sequenceiq.flow.api.model.operation.OperationFlowsView;
-import com.sequenceiq.flow.api.model.operation.OperationType;
 import com.sequenceiq.flow.converter.FlowProgressResponseConverter;
 import com.sequenceiq.flow.core.FlowConstants;
-import com.sequenceiq.flow.core.cache.FlowStatCache;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
+import com.sequenceiq.flow.core.stats.FlowOperationStatisticsService;
 import com.sequenceiq.flow.domain.FlowChainLog;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.StateStatus;
@@ -69,7 +62,7 @@ public class FlowService {
     private FlowProgressResponseConverter flowProgressResponseConverter;
 
     @Inject
-    private FlowStatCache flowStatCache;
+    private FlowOperationStatisticsService flowOperationStatisticsService;
 
     public FlowLogResponse getLastFlowById(String flowId) {
         LOGGER.info("Getting last flow log by flow id {}", flowId);
@@ -258,35 +251,7 @@ public class FlowService {
 
     public Optional<OperationFlowsView> getLastFlowOperationByResourceCrn(String resourceCrn) {
         checkState(Crn.isCrn(resourceCrn));
-        Optional<OperationFlowsView> operationFlowsView = flowStatCache.getOperationFlowByResourceCrn(resourceCrn);
-        if (operationFlowsView.isPresent()) {
-            return operationFlowsView;
-        }
         List<FlowLog> flowLogs = flowLogDBService.getLatestFlowLogsByCrnInFlowChain(resourceCrn);
-        OperationType operationType = flowLogs.isEmpty() ? OperationType.UNKNOWN : flowLogs.get(0).getOperationType();
-        Map<String, List<FlowLog>> flowLogsPerType = flowLogs.stream()
-                .filter(fl -> fl.getFlowType() != null)
-                .collect(groupingBy(fl -> fl.getFlowType().getCanonicalName()));
-        Map<String, FlowProgressResponse> response = new HashMap<>();
-        Map<Long, String> createdMap = new TreeMap<>();
-        List<String> typeOrderList = new ArrayList<>();
-        for (Map.Entry<String, List<FlowLog>> entry : flowLogsPerType.entrySet()) {
-            FlowProgressResponse progressResponse = flowProgressResponseConverter.convert(entry.getValue(), resourceCrn);
-            response.put(entry.getKey(), progressResponse);
-            createdMap.put(progressResponse.getCreated(), entry.getKey());
-        }
-        for (Map.Entry<Long, String> entry : createdMap.entrySet()) {
-            typeOrderList.add(entry.getValue());
-        }
-        if (CollectionUtils.isEmpty(response.entrySet())) {
-            LOGGER.debug("Not found any historical flow data for requested resource (crn: {})", resourceCrn);
-            return Optional.empty();
-        }
-        return Optional.of(OperationFlowsView.Builder.newBuilder()
-                .withOperationType(operationType)
-                .withFlowTypeProgressMap(response)
-                .withInMemory(false)
-                .withTypeOrderList(typeOrderList)
-                .build());
+        return flowOperationStatisticsService.createOperationResponse(resourceCrn, flowLogs);
     }
 }

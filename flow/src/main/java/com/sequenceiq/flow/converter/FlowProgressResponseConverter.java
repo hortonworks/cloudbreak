@@ -50,9 +50,10 @@ public class FlowProgressResponseConverter {
             FlowLog firstFlowLog = flowLogs.get(flowLogs.size() - 1);
             response.setFlowId(lastFlowLog.getFlowId());
             response.setFlowChainId(lastFlowLog.getFlowChainId());
-            response.setProgress(flowTypeOpt.map(s ->
+            Integer prgoressFromSteps = flowTypeOpt.map(s ->
                     flowProgressHolder.getProgressPercentageForState(s, lastFlowLog.getCurrentState()))
-                    .orElse(UNKNOWN_PROGRESS_PERCENTAGE));
+                    .orElse(UNKNOWN_PROGRESS_PERCENTAGE);
+            response.setProgress(prgoressFromSteps);
             response.setMaxNumberOfTransitions(flowTypeOpt
                     .map(flowProgressHolder::getTransitionsSize)
                     .orElse(null));
