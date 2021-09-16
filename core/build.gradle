@@ -5,11 +5,9 @@ buildscript {
         maven { url = "$repoUrl" }
         maven { url = "$springRepoUrl" }
         mavenCentral()
-        jcenter()
     }
     dependencies {
         classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
-        classpath "com.smokejumperit.gradle.license:Gradle-License-Report:0.0.2"
         classpath "gradle.plugin.com.github.jk1:gradle-license-report:0.3.4"
         classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.7"
     }

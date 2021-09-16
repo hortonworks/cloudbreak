@@ -5,14 +5,12 @@ buildscript {
   repositories {
     maven { url = "$repoUrl" }
     mavenCentral()
-    jcenter()
     maven {
       url "https://plugins.gradle.org/m2/"
     }
   }
   dependencies {
     classpath 'org.ajoberstar.grgit:grgit-gradle:4.1.0'
-    classpath 'com.smokejumperit.gradle.license:Gradle-License-Report:0.0.2'
   }
 }
 
