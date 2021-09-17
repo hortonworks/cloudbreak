@@ -54,6 +54,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.resource.BootstrapNewNodesRes
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ExtendHostMetadataRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ExtendHostMetadataResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.CleanupFreeIpaEvent;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 import com.sequenceiq.cloudbreak.service.publicendpoint.ClusterPublicEndpointManagementService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
@@ -61,6 +62,7 @@ import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Configuration
 public class StackUpscaleActions {
@@ -95,6 +97,9 @@ public class StackUpscaleActions {
 
     @Inject
     private ClusterPublicEndpointManagementService clusterPublicEndpointManagementService;
+
+    @Inject
+    private EnvironmentClientService environmentClientService;
 
     @Bean(name = "UPSCALE_PREVALIDATION_STATE")
     public Action<?, ?> prevalidate() {
@@ -220,7 +225,8 @@ public class StackUpscaleActions {
                     if (null == gatewayMetaData) {
                         throw new CloudbreakServiceException("Could not get gateway instance metadata from the cloud provider.");
                     }
-                    CloudInstance gatewayInstance = metadataConverter.convert(gatewayMetaData, stack.getEnvironmentCrn(), stack.getStackAuthentication());
+                    DetailedEnvironmentResponse environment = environmentClientService.getByCrnAsInternal(stack.getEnvironmentCrn());
+                    CloudInstance gatewayInstance = metadataConverter.convert(gatewayMetaData, environment, stack.getStackAuthentication());
                     LOGGER.info("Send GetSSHFingerprintsRequest because we need to collect SSH fingerprints");
                     Selectable sshFingerPrintReq = new GetSSHFingerprintsRequest<GetSSHFingerprintsResult>(context.getCloudContext(),
                             context.getCloudCredential(), gatewayInstance);

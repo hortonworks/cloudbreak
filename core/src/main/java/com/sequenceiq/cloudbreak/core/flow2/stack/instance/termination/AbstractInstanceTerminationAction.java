@@ -21,19 +21,21 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractStackAction;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.core.FlowParameters;
 
 abstract class AbstractInstanceTerminationAction<P extends InstancePayload>
@@ -59,6 +61,9 @@ abstract class AbstractInstanceTerminationAction<P extends InstancePayload>
 
     @Inject
     private ResourceService resourceService;
+
+    @Inject
+    private EnvironmentClientService environmentClientService;
 
     protected AbstractInstanceTerminationAction(Class<P> payloadClass) {
         super(payloadClass);
@@ -87,10 +92,11 @@ abstract class AbstractInstanceTerminationAction<P extends InstancePayload>
         List<CloudResource> cloudResources = cloudResourceConverter.convert(stack.getResources());
         List<InstanceMetaData> instanceMetaDataList = new ArrayList<>();
         List<CloudInstance> cloudInstances = new ArrayList<>();
+        DetailedEnvironmentResponse environment = environmentClientService.getByCrnAsInternal(stack.getEnvironmentCrn());
         for (String instanceId : instanceIds) {
             InstanceMetaData instanceMetaData = instanceMetaDataService.findByStackIdAndInstanceId(stack.getId(), instanceId)
                     .orElseThrow(NotFoundException.notFound("instanceMetadata", instanceId));
-            CloudInstance cloudInstance = metadataConverter.convert(instanceMetaData, stack.getEnvironmentCrn(), stack.getStackAuthentication());
+            CloudInstance cloudInstance = metadataConverter.convert(instanceMetaData, environment, stack.getStackAuthentication());
             instanceMetaDataList.add(instanceMetaData);
             cloudInstances.add(cloudInstance);
         }

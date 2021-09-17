@@ -34,7 +34,9 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.publicendpoint.ClusterPublicEndpointManagementService;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Configuration
 public class StackDownscaleActions {
@@ -56,6 +58,9 @@ public class StackDownscaleActions {
     @Inject
     private ClusterPublicEndpointManagementService clusterPublicEndpointManagementService;
 
+    @Inject
+    private EnvironmentClientService environmentClientService;
+
     @Bean(name = "DOWNSCALE_COLLECT_RESOURCES_STATE")
     public Action<?, ?> stackDownscaleCollectResourcesAction() {
         return new AbstractStackDownscaleAction<>(StackDownscaleTriggerEvent.class) {
@@ -73,8 +78,9 @@ public class StackDownscaleActions {
                         .filter(im -> context.getInstanceIds().contains(im.getInstanceId()))
                         .collect(Collectors.toSet());
 
+                DetailedEnvironmentResponse environment = environmentClientService.getByCrnAsInternal(stack.getEnvironmentCrn());
                 candidatesInstanceMetadata.forEach(metaData -> {
-                    CloudInstance cloudInstance = metadataConverter.convert(metaData, stack.getEnvironmentCrn(), stack.getStackAuthentication());
+                    CloudInstance cloudInstance = metadataConverter.convert(metaData, environment, stack.getStackAuthentication());
                     instances.add(cloudInstance);
                 });
                 variables.put(INSTANCES, instances);

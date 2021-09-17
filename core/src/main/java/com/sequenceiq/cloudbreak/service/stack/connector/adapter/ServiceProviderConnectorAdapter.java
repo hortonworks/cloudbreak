@@ -45,7 +45,9 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.service.OperationException;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
 import reactor.bus.EventBus;
@@ -76,6 +78,9 @@ public class ServiceProviderConnectorAdapter {
     @Inject
     private CredentialClientService credentialClientService;
 
+    @Inject
+    private EnvironmentClientService environmentClientService;
+
     public Set<String> removeInstances(Stack stack, Set<String> instanceIds, String instanceGroup) {
         LOGGER.debug("Assembling downscale stack event for stack: {}", stack);
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
@@ -94,9 +99,10 @@ public class ServiceProviderConnectorAdapter {
         List<CloudResource> resources = cloudResourceConverter.convert(stack.getResources());
         List<CloudInstance> instances = new ArrayList<>();
         InstanceGroup group = stack.getInstanceGroupByInstanceGroupName(instanceGroup);
+        DetailedEnvironmentResponse environment = environmentClientService.getByCrnAsInternal(stack.getEnvironmentCrn());
         for (InstanceMetaData metaData : group.getAllInstanceMetaData()) {
             if (instanceIds.contains(metaData.getInstanceId())) {
-                CloudInstance cloudInstance = metadataConverter.convert(metaData, stack.getEnvironmentCrn(), stack.getStackAuthentication());
+                CloudInstance cloudInstance = metadataConverter.convert(metaData, environment, stack.getStackAuthentication());
                 instances.add(cloudInstance);
             }
         }

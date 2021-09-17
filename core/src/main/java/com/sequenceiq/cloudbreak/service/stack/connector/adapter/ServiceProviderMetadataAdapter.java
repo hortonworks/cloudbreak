@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.cloudbreak.service.stack.flow.InstanceSyncState;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
 import reactor.bus.EventBus;
@@ -46,7 +47,7 @@ public class ServiceProviderMetadataAdapter {
     @Inject
     private StackUtil stackUtil;
 
-    public InstanceSyncState getState(Stack stack, InstanceGroup instanceGroup, String instanceId) {
+    public InstanceSyncState getState(Stack stack, InstanceGroup instanceGroup, String instanceId, DetailedEnvironmentResponse environment) {
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = CloudContext.Builder.builder()
                 .withId(stack.getId())
@@ -63,7 +64,7 @@ public class ServiceProviderMetadataAdapter {
         CloudInstance instance = null;
         for (InstanceMetaData metaData : ig.getAllInstanceMetaData()) {
             if (instanceId.equalsIgnoreCase(metaData.getInstanceId())) {
-                instance = metadataConverter.convert(metaData, stack.getEnvironmentCrn(), stack.getStackAuthentication());
+                instance = metadataConverter.convert(metaData, environment, stack.getStackAuthentication());
                 break;
             }
         }
