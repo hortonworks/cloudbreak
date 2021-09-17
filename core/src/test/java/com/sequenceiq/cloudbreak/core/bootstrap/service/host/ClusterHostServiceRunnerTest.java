@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -25,6 +26,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import com.sequenceiq.cloudbreak.api.service.ExposedService;
 import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
 import com.sequenceiq.cloudbreak.auth.CMLicenseParser;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -33,16 +35,21 @@ import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.CsdParcelDecorator;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.HostAttributeDecorator;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.TelemetryDecorator;
+import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
+import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.DefaultClouderaManagerRepoService;
@@ -66,6 +73,7 @@ import com.sequenceiq.cloudbreak.template.kerberos.KerberosDetailService;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.NodesUnreachableException;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.common.api.type.Tunnel;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ClusterHostServiceRunnerTest {
@@ -274,5 +282,58 @@ public class ClusterHostServiceRunnerTest {
         assertEquals("https://archive.cloudera.com/cm/7.2.0/", ((ClouderaManagerRepo) values.get("repo")).getBaseUrl());
         assertNull(values.get("paywall_username"));
         assertNull(values.get("paywall_password"));
+    }
+
+    @Test
+    public void testDecoratePillarWithMountInfo() {
+        when(stack.getCluster()).thenReturn(cluster);
+        when(stack.getTunnel()).thenReturn(Tunnel.DIRECT);
+        when(cluster.getName()).thenReturn("clustername");
+        when(cluster.getStack()).thenReturn(stack);
+        when(componentLocator.getComponentLocation(any(), any())).thenReturn(new HashMap<>());
+        when(exposedServiceCollector.getImpalaService()).thenReturn(mock(ExposedService.class));
+        when(environmentConfigProvider.getParentEnvironmentCrn(any())).thenReturn("crn:cdp:iam:us-west-1:accid:user:mockuser@cloudera.com");
+        ClouderaManagerRepo clouderaManagerRepo = mock(ClouderaManagerRepo.class);
+        when(clouderaManagerRepo.getVersion()).thenReturn("7.2.2");
+        GatewayConfig gatewayConfig = mock(GatewayConfig.class);
+        when(gatewayConfig.getHostname()).thenReturn("hostname");
+        when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
+        when(clusterComponentConfigProvider.getClouderaManagerRepoDetails(any())).thenReturn(clouderaManagerRepo);
+        when(exposedServiceCollector.getRangerService()).thenReturn(mock(ExposedService.class));
+        ExposedService cmExposedService = mock(ExposedService.class);
+        when(cmExposedService.getServiceName()).thenReturn("CM");
+        when(exposedServiceCollector.getClouderaManagerService()).thenReturn(cmExposedService);
+
+        Set<InstanceGroup> instanceGroups = new HashSet<>();
+        InstanceGroup workerInstanceGroup = new InstanceGroup();
+        Template template = new Template();
+        template.setTemporaryStorage(TemporaryStorage.EPHEMERAL_VOLUMES);
+        workerInstanceGroup.setTemplate(template);
+
+        Set<InstanceMetaData> workerInstanceMetaDatas = new HashSet<>();
+        InstanceMetaData worker1 = new InstanceMetaData();
+        worker1.setDiscoveryFQDN("fqdn1");
+        workerInstanceMetaDatas.add(worker1);
+        InstanceMetaData worker2 = new InstanceMetaData();
+        worker2.setDiscoveryFQDN(null);
+        workerInstanceMetaDatas.add(worker2);
+        workerInstanceGroup.setInstanceMetaData(workerInstanceMetaDatas);
+        instanceGroups.add(workerInstanceGroup);
+
+        InstanceGroup computeInstanceGroup = new InstanceGroup();
+        computeInstanceGroup.setTemplate(template);
+
+        Set<InstanceMetaData> computeInstanceMetaDatas = new HashSet<>();
+        InstanceMetaData compute1 = new InstanceMetaData();
+        compute1.setDiscoveryFQDN("fqdn2");
+        computeInstanceMetaDatas.add(compute1);
+        InstanceMetaData compute2 = new InstanceMetaData();
+        compute2.setDiscoveryFQDN(null);
+        computeInstanceMetaDatas.add(compute2);
+        computeInstanceGroup.setInstanceMetaData(computeInstanceMetaDatas);
+        instanceGroups.add(computeInstanceGroup);
+
+        when(stack.getInstanceGroups()).thenReturn(instanceGroups);
+        underTest.runClusterServices(stack, cluster, Map.of());
     }
 }
