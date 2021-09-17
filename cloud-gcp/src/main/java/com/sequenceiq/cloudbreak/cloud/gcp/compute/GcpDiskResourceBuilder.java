@@ -6,6 +6,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -49,14 +50,14 @@ public class GcpDiskResourceBuilder extends AbstractGcpComputeBuilder {
     public List<CloudResource> create(GcpContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group, Image image) {
         CloudContext cloudContext = auth.getCloudContext();
         String resourceName = getResourceNameService().resourceName(resourceType(), cloudContext.getName(), group.getName(), privateId);
-        return Collections.singletonList(createNamedResource(resourceType(), resourceName, instance.getAvailabilityZone()));
+        return Collections.singletonList(createNamedResource(resourceType(), resourceName, getLocation(instance, context)));
     }
 
     @Override
     public List<CloudResource> build(GcpContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group,
             List<CloudResource> buildableResources, CloudStack cloudStack) throws Exception {
         String projectId = context.getProjectId();
-        String location = instance.getAvailabilityZone();
+        String location = getLocation(instance, context);
 
         Disk disk = new Disk();
         disk.setDescription(description());
@@ -80,6 +81,17 @@ public class GcpDiskResourceBuilder extends AbstractGcpComputeBuilder {
             return Collections.singletonList(createOperationAwareCloudResource(buildableResources.get(0), operation));
         } catch (GoogleJsonResponseException e) {
             throw new GcpResourceException(checkException(e), resourceType(), buildableResources.get(0).getName());
+        }
+    }
+
+    private String getLocation(CloudInstance instance, GcpContext context) {
+        if (StringUtils.isBlank(instance.getAvailabilityZone())) {
+            String location = context.getLocation().getAvailabilityZone().value();
+            LOGGER.debug("Availabilty zone in instance is null, fallback to context based availability zone: {}", location);
+            return location;
+        } else {
+            LOGGER.debug("Using instance based availability zone: {}", instance.getAvailabilityZone());
+            return instance.getAvailabilityZone();
         }
     }
 

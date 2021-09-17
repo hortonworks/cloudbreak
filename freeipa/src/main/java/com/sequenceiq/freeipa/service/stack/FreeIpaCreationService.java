@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformTemplateRequest;
@@ -120,9 +119,6 @@ public class FreeIpaCreationService {
     private CachedEnvironmentClientService cachedEnvironmentClientService;
 
     @Inject
-    private EntitlementService entitlementService;
-
-    @Inject
     private MultiAzValidator multiAzValidator;
 
     @Value("${info.app.version:}")
@@ -197,8 +193,7 @@ public class FreeIpaCreationService {
                 instanceMetaData.setPrivateId(privateIdNumber++);
                 instanceMetaData.setInstanceStatus(InstanceStatus.REQUESTED);
             }
-            multiAzCalculatorService.calculateByRoundRobin(multiAzCalculatorService.prepareSubnetAzMap(environment),
-                    instanceGroup, stack.getPlatformvariant());
+            multiAzCalculatorService.calculateByRoundRobin(multiAzCalculatorService.prepareSubnetAzMap(environment), instanceGroup);
         }
     }
 }
