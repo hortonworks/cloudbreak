@@ -8,7 +8,6 @@ import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.CREATE_REQUES
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.DELETE_REQUESTED;
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.TERMINATED;
 import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_ID;
-import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 import static com.sequenceiq.cloudbreak.util.NullUtil.putIfPresent;
 
@@ -32,7 +31,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Maps;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
@@ -141,7 +139,7 @@ public class StackToCloudStackConverter {
     public CloudStack convert(Stack stack, Collection<String> deleteRequestedInstances) {
         Image image = null;
         String environmentCrn = stack.getEnvironmentCrn();
-        DetailedEnvironmentResponse environment = getEnvironmentByEnvironmentCrn(environmentCrn);
+        DetailedEnvironmentResponse environment = environmentClientService.getByCrnAsInternal(environmentCrn);
         List<Group> instanceGroups = buildInstanceGroups(stack,
                 stack.getInstanceGroupsAsList(),
                 stack.getStackAuthentication(),
@@ -169,18 +167,6 @@ public class StackToCloudStackConverter {
                 cloudFileSystem, cloudLoadBalancers, additionalCloudFileSystem);
     }
 
-    private DetailedEnvironmentResponse getEnvironmentByEnvironmentCrn(String environmentCrn) {
-        DetailedEnvironmentResponse environment = null;
-        if (Objects.nonNull(environmentCrn)) {
-            environment = measure(() ->
-                            ThreadBasedUserCrnProvider.doAsInternalActor(() ->
-                                    environmentClientService.getByCrn(environmentCrn)),
-                    LOGGER,
-                    "Get Environment from Environment service in StackToCloudStackConverter took {} ms");
-        }
-        return environment;
-    }
-
     public List<CloudInstance> buildInstances(Stack stack, DetailedEnvironmentResponse environment) {
         List<Group> groups = buildInstanceGroups(stack, stack.getInstanceGroupsAsList(), stack.getStackAuthentication(),
                 Collections.emptySet(), environment);
@@ -192,7 +178,7 @@ public class StackToCloudStackConverter {
     }
 
     public List<CloudInstance> buildInstances(Stack stack) {
-        return buildInstances(stack, getEnvironmentByEnvironmentCrn(stack.getEnvironmentCrn()));
+        return buildInstances(stack, environmentClientService.getByCrnAsInternal(stack.getEnvironmentCrn()));
     }
 
     public CloudInstance buildInstance(InstanceMetaData instanceMetaData, InstanceGroup instanceGroup,
@@ -514,12 +500,6 @@ public class StackToCloudStackConverter {
             params.put(RESOURCE_GROUP_USAGE_PARAMETER, resourceGroupUsage.name());
         }
         return params;
-    }
-
-    public Map<String, Object> buildCloudInstanceParameters(String environmentCrn, InstanceMetaData instanceMetaData, CloudPlatform platform) {
-        return buildCloudInstanceParameters(getEnvironmentByEnvironmentCrn(environmentCrn),
-                instanceMetaData,
-                platform);
     }
 
     private Map<String, String> buildCloudStackParameters(Stack stack, DetailedEnvironmentResponse environment) {

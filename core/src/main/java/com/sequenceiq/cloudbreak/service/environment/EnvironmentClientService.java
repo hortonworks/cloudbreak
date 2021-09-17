@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.service.environment;
 
+import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
+
+import java.util.Objects;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -12,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.ResourcePropertyProvider;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
@@ -95,6 +99,16 @@ public class EnvironmentClientService implements ResourcePropertyProvider {
             LOGGER.error(message, e);
             throw new CloudbreakServiceException(message, e);
         }
+    }
+
+    public DetailedEnvironmentResponse getByCrnAsInternal(String environmentCrn) {
+        DetailedEnvironmentResponse environment = null;
+        if (Objects.nonNull(environmentCrn)) {
+            environment = measure(() -> ThreadBasedUserCrnProvider.doAsInternalActor(() -> getByCrn(environmentCrn)),
+                    LOGGER,
+                    "Get Environment from Environment service in as internal user took {} ms");
+        }
+        return environment;
     }
 
     @Override

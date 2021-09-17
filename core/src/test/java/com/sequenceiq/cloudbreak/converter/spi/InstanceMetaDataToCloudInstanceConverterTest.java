@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.converter.spi;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
@@ -26,6 +25,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @ExtendWith(MockitoExtension.class)
 public class InstanceMetaDataToCloudInstanceConverterTest extends AbstractEntityConverterTest<InstanceMetaData> {
@@ -42,13 +42,14 @@ public class InstanceMetaDataToCloudInstanceConverterTest extends AbstractEntity
 
     private static final String AVAILABILITY_ZONE_2 = "AVAILABILITY_ZONE_2";
 
-    private static final String ENV_CRN = "envCrn";
-
     @Mock
     private StackToCloudStackConverter stackToCloudStackConverter;
 
     @Mock
     private InstanceMetadataToImageIdConverter instanceMetadataToImageIdConverter;
+
+    @Mock
+    private DetailedEnvironmentResponse environment;
 
     @InjectMocks
     private InstanceMetaDataToCloudInstanceConverter underTest;
@@ -58,7 +59,7 @@ public class InstanceMetaDataToCloudInstanceConverterTest extends AbstractEntity
         InstanceMetaData source = getSource();
         initStackToCloudStackConverter(true);
 
-        CloudInstance cloudInstance = underTest.convert(source, ENV_CRN, new StackAuthentication());
+        CloudInstance cloudInstance = underTest.convert(source, environment, new StackAuthentication());
 
         verifyParams(cloudInstance, SUBNET_ID, INSTANCE_NAME, AVAILABILITY_ZONE);
         assertEquals(source.getInstanceId(), cloudInstance.getInstanceId());
@@ -76,7 +77,7 @@ public class InstanceMetaDataToCloudInstanceConverterTest extends AbstractEntity
             params.put(NetworkConstants.SUBNET_ID, SUBNET_ID);
             params.put(CloudInstance.INSTANCE_NAME, INSTANCE_NAME);
         }
-        when(stackToCloudStackConverter.buildCloudInstanceParameters(anyString(), any(), any())).thenReturn(params);
+        when(stackToCloudStackConverter.buildCloudInstanceParameters(any(), any(), any())).thenReturn(params);
     }
 
     @Test
@@ -85,7 +86,7 @@ public class InstanceMetaDataToCloudInstanceConverterTest extends AbstractEntity
         addParamsToInstanceMetaData(source);
         initStackToCloudStackConverter(true);
 
-        CloudInstance cloudInstance = underTest.convert(source, ENV_CRN, new StackAuthentication());
+        CloudInstance cloudInstance = underTest.convert(source, environment, new StackAuthentication());
 
         verifyParams(cloudInstance, SUBNET_ID, INSTANCE_NAME, AVAILABILITY_ZONE);
         assertEquals(source.getInstanceId(), cloudInstance.getInstanceId());
@@ -103,7 +104,7 @@ public class InstanceMetaDataToCloudInstanceConverterTest extends AbstractEntity
         addParamsToInstanceMetaData(source);
         initStackToCloudStackConverter(false);
 
-        CloudInstance cloudInstance = underTest.convert(source, ENV_CRN, new StackAuthentication());
+        CloudInstance cloudInstance = underTest.convert(source, environment, new StackAuthentication());
 
         verifyParams(cloudInstance, SUBNET_ID_2, INSTANCE_NAME_2, AVAILABILITY_ZONE_2);
         assertEquals(source.getInstanceId(), cloudInstance.getInstanceId());

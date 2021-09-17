@@ -193,6 +193,9 @@ public class StackToCloudStackConverterTest {
     @Mock
     private LoadBalancerConfigService loadBalancerConfigService;
 
+    @Mock
+    private DetailedEnvironmentResponse environment;
+
     @BeforeEach
     public void setUp() {
         when(stack.getStackAuthentication()).thenReturn(stackAuthentication);
@@ -811,7 +814,7 @@ public class StackToCloudStackConverterTest {
         metaData.setAvailabilityZone(AVAILABILITY_ZONE);
         metaData.setInstanceName(INSTANCE_NAME);
 
-        Map<String, Object> result = underTest.buildCloudInstanceParameters(ENV_CRN, metaData, CloudPlatform.AWS);
+        Map<String, Object> result = underTest.buildCloudInstanceParameters(environment, metaData, CloudPlatform.AWS);
 
         assertThat(result).hasSize(4);
         assertThat(result).doesNotContainKey(RESOURCE_GROUP_NAME_PARAMETER);
@@ -827,14 +830,14 @@ public class StackToCloudStackConverterTest {
         InstanceMetaData metaData = new InstanceMetaData();
         metaData.setId(1L);
 
-        Map<String, Object> result = underTest.buildCloudInstanceParameters(ENV_CRN, metaData, CloudPlatform.AWS);
+        Map<String, Object> result = underTest.buildCloudInstanceParameters(environment, metaData, CloudPlatform.AWS);
 
         assertThat(result).isEmpty();
     }
 
     @Test
     public void testBuildCloudInstanceParametersAWSWithNullInstanceMetaData() {
-        Map<String, Object> result = underTest.buildCloudInstanceParameters(ENV_CRN, null, CloudPlatform.AWS);
+        Map<String, Object> result = underTest.buildCloudInstanceParameters(environment, null, CloudPlatform.AWS);
 
         assertThat(result).isEmpty();
     }
@@ -855,9 +858,8 @@ public class StackToCloudStackConverterTest {
                         .withResourceGroupUsage(ResourceGroupUsage.SINGLE)
                         .build())
                 .build());
-        when(environmentClientService.getByCrn(anyString())).thenReturn(environmentResponse);
 
-        Map<String, Object> result = underTest.buildCloudInstanceParameters(ENV_CRN, metaData, CloudPlatform.AZURE);
+        Map<String, Object> result = underTest.buildCloudInstanceParameters(environmentResponse, metaData, CloudPlatform.AZURE);
 
         assertEquals(RESOURCE_GROUP, result.get(RESOURCE_GROUP_NAME_PARAMETER).toString());
         assertEquals(ResourceGroupUsage.SINGLE.name(), result.get(RESOURCE_GROUP_USAGE_PARAMETER).toString());
@@ -885,7 +887,7 @@ public class StackToCloudStackConverterTest {
                 .build());
         when(environmentClientService.getByCrn(anyString())).thenReturn(environmentResponse);
 
-        Map<String, Object> result = underTest.buildCloudInstanceParameters(ENV_CRN, metaData, CloudPlatform.AZURE);
+        Map<String, Object> result = underTest.buildCloudInstanceParameters(environment, metaData, CloudPlatform.AZURE);
 
         assertFalse(result.containsKey(RESOURCE_GROUP_NAME_PARAMETER));
         assertFalse(result.containsKey(RESOURCE_GROUP_USAGE_PARAMETER));
@@ -908,7 +910,7 @@ public class StackToCloudStackConverterTest {
                         .build())
                 .build());
         when(stack.getCloudPlatform()).thenReturn("AZURE");
-        when(environmentClientService.getByCrn(anyString())).thenReturn(environmentResponse);
+        when(environmentClientService.getByCrnAsInternal(anyString())).thenReturn(environmentResponse);
         Map<String, String> expected = new LinkedHashMap<>();
         expected.put("key", "value");
         when(stack.getParameters()).thenReturn(expected);

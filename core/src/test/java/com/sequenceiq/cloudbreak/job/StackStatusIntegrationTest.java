@@ -60,6 +60,7 @@ import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
+import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintValidatorFactory;
@@ -67,6 +68,7 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.UpdateHostsValidator;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
@@ -83,8 +85,8 @@ import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.util.UsageLoggingUtil;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.core.FlowLogService;
-import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 
 import io.opentracing.Tracer;
 
@@ -140,17 +142,24 @@ class StackStatusIntegrationTest {
     @MockBean
     private RuntimeVersionService runtimeVersionService;
 
+    @MockBean
+    private EnvironmentClientService environmentClientService;
+
     private Stack stack;
 
     private Set<InstanceMetaData> runningInstances;
 
     private Map<HostName, Set<HealthCheck>> hostStatuses;
 
+    @Mock
+    private DetailedEnvironmentResponse environment;
+
     @BeforeEach
     void setUp() {
         setUpRunningInstances();
         setUpStack();
         setUpClusterApi();
+        when(environmentClientService.getByCrnAsInternal(anyString())).thenReturn(environment);
     }
 
     private void setUpRunningInstances() {
