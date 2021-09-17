@@ -712,9 +712,6 @@ public class MockUserManagementService extends UserManagementImplBase {
         if (razEnabled) {
             builder.addEntitlements(createEntitlement(CDP_RAZ));
         }
-        if (rawS3Enabled) {
-            builder.addEntitlements(createEntitlement(CDP_RAW_S3));
-        }
         if (ccmV2Enabled) {
             builder.addEntitlements(createEntitlement(CDP_CCM_V2));
         }
@@ -856,6 +853,7 @@ public class MockUserManagementService extends UserManagementImplBase {
                                 .addEntitlements(createEntitlement(OJDBC_TOKEN_DH))
                                 .addEntitlements(createEntitlement(CDP_FREEIPA_UPGRADE))
                                 .addEntitlements(createEntitlement(DATAHUB_STREAMING_SCALING))
+                                .addEntitlements(createEntitlement(CDP_RAW_S3))
                                 .setGlobalPasswordPolicy(workloadPasswordPolicy)
                                 .setAccountId(request.getAccountId())
                                 .setExternalAccountId("external-" + request.getAccountId())
