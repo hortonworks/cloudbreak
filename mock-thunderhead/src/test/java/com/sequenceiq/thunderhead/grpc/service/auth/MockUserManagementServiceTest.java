@@ -205,9 +205,6 @@ public class MockUserManagementServiceTest {
                 {"razEnabled false", "razEnabled", false, "CDP_RAZ", false},
                 {"razEnabled true", "razEnabled", true, "CDP_RAZ", true},
 
-                {"rawS3Enabled false", "rawS3Enabled", false, "CDP_RAW_S3", false},
-                {"rawS3Enabled true", "rawS3Enabled", true, "CDP_RAW_S3", true},
-
                 {"ccmV2Enabled false", "ccmV2Enabled", false, "CDP_CCM_V2", false},
                 {"ccmV2Enabled true", "ccmV2Enabled", true, "CDP_CCM_V2", true},
 
