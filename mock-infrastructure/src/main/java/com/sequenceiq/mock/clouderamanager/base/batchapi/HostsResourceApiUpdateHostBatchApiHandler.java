@@ -19,7 +19,7 @@ public class HostsResourceApiUpdateHostBatchApiHandler extends AbstractBatchApiH
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HostsResourceApiUpdateHostBatchApiHandler.class);
 
-    private static final Pattern HOSTS_RESOURCE_API_UPDATE_HOST_PATTERN = Pattern.compile("^/api/v31/hosts/(.+)$");
+    private static final Pattern HOSTS_RESOURCE_API_UPDATE_HOST_PATTERN = Pattern.compile("^/api/v[0-9]+/hosts/(.+)$");
 
     private static final int GROUP_HOST_ID = 1;
 
