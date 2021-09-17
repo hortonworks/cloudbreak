@@ -7,7 +7,7 @@ import java.util.Map;
 
 import javax.annotation.Nonnull;
 
-public class DefaultCcmV2Parameters implements CcmV2JumpgateParameters, Serializable {
+public class DefaultCcmV2Parameters implements CcmV2Parameters, Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -33,31 +33,37 @@ public class DefaultCcmV2Parameters implements CcmV2JumpgateParameters, Serializ
         this.agentCertificate = agentCertificate;
     }
 
+    @Override
     public String getInvertingProxyCertificate() {
         return invertingProxyCertificate;
     }
 
+    @Override
     public String getInvertingProxyHost() {
         return invertingProxyHost;
     }
 
+    @Override
     public String getAgentCertificate() {
         return agentCertificate;
     }
 
+    @Override
     public String getAgentKeyId() {
         return agentKeyId;
     }
 
+    @Override
     public String getAgentCrn() {
         return agentCrn;
     }
 
+    @Override
     public String getAgentEncipheredPrivateKey() {
         return agentEncipheredPrivateKey;
     }
 
-    public void addToTemplateModel(Map<String, Object> model) {
+    public void addToTemplateModel(@Nonnull Map<String, Object> model) {
         model.put(CcmV2ParameterConstants.CCMV2_INVERTING_PROXY_HOST, getInvertingProxyHost());
         model.put(CcmV2ParameterConstants.CCMV2_INVERTING_PROXY_CERTIFICATE, getInvertingProxyCertificate());
 

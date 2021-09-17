@@ -8,10 +8,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxy;
+import com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgent;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmV2JumpgateParameterSupplier;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmV2JumpgateParameters;
-import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmV2Parameters;
-import com.sequenceiq.cloudbreak.ccm.cloudinit.DefaultCcmV2Parameters;
+import com.sequenceiq.cloudbreak.ccm.cloudinit.DefaultCcmV2JumpgateParameters;
 
 @Component("DefaultCcmV2JumpgateParameterSupplier")
 public class DefaultCcmV2JumpgateParameterSupplier extends DefaultCcmV2ParameterSupplier implements CcmV2JumpgateParameterSupplier {
@@ -21,10 +22,16 @@ public class DefaultCcmV2JumpgateParameterSupplier extends DefaultCcmV2Parameter
     public CcmV2JumpgateParameters getCcmV2JumpgateParameters(@Nonnull String accountId, @Nonnull Optional<String> environmentCrnOpt,
         @Nonnull String clusterGatewayDomain, @Nonnull String agentKeyId) {
 
-        LOGGER.debug("Returning CCMV2 Jumpgate parameters");
-        CcmV2Parameters ccmV2Parameters = getCcmV2Parameters(accountId, environmentCrnOpt, clusterGatewayDomain, agentKeyId);
-        return new DefaultCcmV2Parameters(ccmV2Parameters.getInvertingProxyHost(), ccmV2Parameters.getInvertingProxyCertificate(),
-                ccmV2Parameters.getAgentCrn(), agentKeyId, ccmV2Parameters.getAgentEncipheredPrivateKey(), ccmV2Parameters.getAgentCertificate());
-    }
+        InvertingProxyAndAgent invertingProxyAndAgent = getInvertingProxyAndAgent(accountId, environmentCrnOpt, clusterGatewayDomain, agentKeyId);
+        InvertingProxy invertingProxy = invertingProxyAndAgent.getInvertingProxy();
+        InvertingProxyAgent invertingProxyAgent = invertingProxyAndAgent.getInvertingProxyAgent();
 
+        LOGGER.debug("CcmV2JumpgateConfig successfully retrieved InvertingProxyHost: '{}', InvertingProxyStatus: '{}', InvertingProxyAgentCrn: '{}', " +
+                        "EnvironmentCrnOpt: '{}'", invertingProxy.getHostname(), invertingProxy.getStatus(),
+                invertingProxyAgent.getAgentCrn(), Optional.of(invertingProxyAgent.getEnvironmentCrn()));
+
+        return new DefaultCcmV2JumpgateParameters(invertingProxy.getHostname(), invertingProxy.getCertificate(), invertingProxyAgent.getAgentCrn(), agentKeyId,
+                invertingProxyAgent.getEncipheredPrivateKey(), invertingProxyAgent.getCertificate(),
+                invertingProxyAgent.getAccessKeyId(), invertingProxyAgent.getEncipheredAccessKey());
+    }
 }

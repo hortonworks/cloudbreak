@@ -46,17 +46,19 @@ public class UserDataBuilder {
     @Inject
     private FreeMarkerTemplateUtils freeMarkerTemplateUtils;
 
-    public String buildUserData(Platform cloudPlatform, byte[] cbSshKeyDer, String sshUser,
+    public String buildUserData(String environmentCrn, Platform cloudPlatform, byte[] cbSshKeyDer, String sshUser,
             PlatformParameters parameters, String saltBootPassword, String cbCert,
             CcmConnectivityParameters ccmConnectivityParameters, ProxyConfig proxyConfig) {
-        String userData = build(cloudPlatform, cbSshKeyDer, sshUser, parameters, saltBootPassword, cbCert, ccmConnectivityParameters, proxyConfig);
+        String userData = build(environmentCrn, cloudPlatform, cbSshKeyDer, sshUser, parameters, saltBootPassword,
+                cbCert, ccmConnectivityParameters, proxyConfig);
         LOGGER.debug("User data  content; {}", anonymize(userData));
         return userData;
     }
 
-    private String build(Platform cloudPlatform, byte[] cbSshKeyDer, String sshUser,
+    private String build(String environmentCrn, Platform cloudPlatform, byte[] cbSshKeyDer, String sshUser,
             PlatformParameters params, String saltBootPassword, String cbCert, CcmConnectivityParameters ccmConnectivityParameters, ProxyConfig proxyConfig) {
         Map<String, Object> model = new HashMap<>();
+        model.put("environmentCrn", environmentCrn);
         model.put("cloudPlatform", cloudPlatform.value());
         model.put("platformDiskPrefix", params.scriptParams().getDiskPrefix());
         model.put("platformDiskStartLabel", params.scriptParams().getStartLabel());

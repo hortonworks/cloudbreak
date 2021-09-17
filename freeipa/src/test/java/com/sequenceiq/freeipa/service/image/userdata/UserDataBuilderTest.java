@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmParameters;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmV2JumpgateParameters;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmV2Parameters;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.DefaultCcmParameters;
+import com.sequenceiq.cloudbreak.ccm.cloudinit.DefaultCcmV2JumpgateParameters;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.DefaultCcmV2Parameters;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.DefaultInstanceParameters;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.DefaultServerParameters;
@@ -41,11 +42,11 @@ import freemarker.template.TemplateException;
 @ExtendWith(MockitoExtension.class)
 public class UserDataBuilderTest {
 
-    @InjectMocks
-    private UserDataBuilder underTest;
-
     @Spy
     private FreeMarkerTemplateUtils freeMarkerTemplateUtils;
+
+    @InjectMocks
+    private UserDataBuilder underTest;
 
     @BeforeEach
     public void setup() throws IOException, TemplateException {
@@ -78,7 +79,7 @@ public class UserDataBuilderTest {
         when(scriptParams.getStartLabel()).thenReturn(98);
         when(platformParameters.scriptParams()).thenReturn(scriptParams);
 
-        String userData = underTest.buildUserData(Platform.platform("AZURE"), "priv-key".getBytes(),
+        String userData = underTest.buildUserData("environmentCrn", Platform.platform("AZURE"), "priv-key".getBytes(),
                 "cloudbreak", platformParameters, "pass", "cert", ccmConnectivityParameters, null);
 
         String expectedUserData = FileReaderUtils.readFileFromClasspath("azure-ccm-init.sh");
@@ -98,7 +99,7 @@ public class UserDataBuilderTest {
         when(scriptParams.getStartLabel()).thenReturn(98);
         when(platformParameters.scriptParams()).thenReturn(scriptParams);
 
-        String userData = underTest.buildUserData(Platform.platform("AZURE"), "priv-key".getBytes(),
+        String userData = underTest.buildUserData("environmentCrn", Platform.platform("AZURE"), "priv-key".getBytes(),
                 "cloudbreak", platformParameters, "pass", "cert", ccmConnectivityParameters, null);
 
         String expectedUserData = FileReaderUtils.readFileFromClasspath("azure-ccm-v2-init.sh");
@@ -108,8 +109,9 @@ public class UserDataBuilderTest {
     @Test
     @DisplayName("test if CCM V2 Jumpgate parameters are passed the user data contains them")
     public void testBuildUserDataWithCCMV2JumpgateParams() throws IOException {
-        CcmV2JumpgateParameters ccmV2JumpgateParameters = new DefaultCcmV2Parameters("invertingProxyHost", "invertingProxyCertificate",
-                "agentCrn", "agentKeyId", "agentEncipheredPrivateKey", "agentCertificate");
+        CcmV2JumpgateParameters ccmV2JumpgateParameters = new DefaultCcmV2JumpgateParameters("invertingProxyHost", "invertingProxyCertificate",
+                "agentCrn", "agentKeyId", "agentEncipheredPrivateKey", "agentCertificate",
+                "agentMachineUserAccessKey", "agentMachineUserEncipheredAccessKey");
         CcmConnectivityParameters ccmConnectivityParameters = new CcmConnectivityParameters(ccmV2JumpgateParameters);
 
         PlatformParameters platformParameters = mock(PlatformParameters.class);
@@ -118,7 +120,7 @@ public class UserDataBuilderTest {
         when(scriptParams.getStartLabel()).thenReturn(98);
         when(platformParameters.scriptParams()).thenReturn(scriptParams);
 
-        String userData = underTest.buildUserData(Platform.platform("AZURE"), "priv-key".getBytes(),
+        String userData = underTest.buildUserData("environmentCrn", Platform.platform("AZURE"), "priv-key".getBytes(),
                 "cloudbreak", platformParameters, "pass", "cert", ccmConnectivityParameters, null);
 
         String expectedUserData = FileReaderUtils.readFileFromClasspath("azure-ccm-v2-jumpgate-init.sh");
@@ -134,7 +136,7 @@ public class UserDataBuilderTest {
         when(scriptParams.getStartLabel()).thenReturn(98);
         when(platformParameters.scriptParams()).thenReturn(scriptParams);
 
-        String userData = underTest.buildUserData(Platform.platform("AZURE"), "priv-key".getBytes(),
+        String userData = underTest.buildUserData("environmentCrn", Platform.platform("AZURE"), "priv-key".getBytes(),
                 "cloudbreak", platformParameters, "pass", "cert", new CcmConnectivityParameters(), null);
 
         String expectedUserData = FileReaderUtils.readFileFromClasspath("azure-init.sh");

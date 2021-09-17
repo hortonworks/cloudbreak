@@ -5,6 +5,7 @@ exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1
 
 set -x
 
+export ENVIRONMENT_CRN="${environmentCrn}"
 export CLOUD_PLATFORM="${cloudPlatform}"
 export START_LABEL=${platformDiskStartLabel}
 export PLATFORM_DISK_PREFIX=${platformDiskPrefix}
@@ -64,6 +65,8 @@ export IS_CCM_V2_ENABLED=false
 </#if>
 <#if ccmV2JumpgateEnabled!false>
 export IS_CCM_V2_JUMPGATE_ENABLED=true
+export CCM_V2_AGENT_ACCESS_KEY_ID="${ccmV2AgentMachineUserAccessKey}"
+export CCM_V2_AGENT_ENCIPHERED_ACCESS_KEY="${ccmV2AgentMachineUserEncipheredAccessKey}"
 <#else>
 export IS_CCM_V2_JUMPGATE_ENABLED=false
 </#if>
