@@ -1,8 +1,13 @@
 package com.sequenceiq.freeipa.service.stack.instance;
 
+import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
+
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -14,13 +19,16 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.projection.StackAuthenticationView;
 import com.sequenceiq.freeipa.repository.InstanceMetaDataRepository;
+import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
+import com.sequenceiq.freeipa.service.multiaz.MultiAzCalculatorService;
 
 @Service
 public class InstanceMetaDataService {
@@ -28,6 +36,12 @@ public class InstanceMetaDataService {
 
     @Inject
     private InstanceMetaDataRepository instanceMetaDataRepository;
+
+    @Inject
+    private MultiAzCalculatorService multiAzCalculatorService;
+
+    @Inject
+    private CachedEnvironmentClientService cachedEnvironmentClientService;
 
     @Inject
     private FreeIpaService freeIpaService;
@@ -74,7 +88,7 @@ public class InstanceMetaDataService {
         return instanceMetaDataRepository.findAllByInstanceIdIn(Set.of(instanceId));
     }
 
-    public Set<InstanceMetaData> getByInstanceIds(Iterable<String>  instanceIds) {
+    public Set<InstanceMetaData> getByInstanceIds(Iterable<String> instanceIds) {
         return instanceMetaDataRepository.findAllByInstanceIdIn(instanceIds);
     }
 
@@ -82,13 +96,8 @@ public class InstanceMetaDataService {
         return instanceMetaDataRepository.findById(id);
     }
 
-    private InstanceGroup getInstanceGroup(Iterable<InstanceGroup> instanceGroups, String groupName) {
-        for (InstanceGroup instanceGroup : instanceGroups) {
-            if (groupName.equalsIgnoreCase(instanceGroup.getGroupName())) {
-                return instanceGroup;
-            }
-        }
-        return null;
+    private InstanceGroup getInstanceGroup(Collection<InstanceGroup> instanceGroups, String groupName) {
+        return instanceGroups.stream().filter(ig -> groupName.equalsIgnoreCase(ig.getGroupName())).findFirst().orElse(null);
     }
 
     public Iterable<InstanceMetaData> saveAll(Iterable<InstanceMetaData> allInstanceMetaData) {
@@ -101,18 +110,27 @@ public class InstanceMetaDataService {
 
     public Stack saveInstanceAndGetUpdatedStack(Stack stack, List<CloudInstance> cloudInstances) {
         FreeIpa freeIpa = freeIpaService.findByStack(stack);
-        for (CloudInstance cloudInstance : cloudInstances) {
-            InstanceGroup instanceGroup = getInstanceGroup(stack.getInstanceGroups(), cloudInstance.getTemplate().getGroupName());
+        DetailedEnvironmentResponse environment = measure(() -> cachedEnvironmentClientService.getByCrn(stack.getEnvironmentCrn()),
+                LOGGER, "Environment properties were queried under {} ms for environment {}", stack.getEnvironmentCrn());
+        Map<String, List<CloudInstance>> instancesPerGroup = cloudInstances.stream()
+                .collect(Collectors.groupingBy(cloudInstance -> cloudInstance.getTemplate().getGroupName()));
+        for (Map.Entry<String, List<CloudInstance>> instancesPerGroupEntry : instancesPerGroup.entrySet()) {
+            InstanceGroup instanceGroup = getInstanceGroup(stack.getInstanceGroups(), instancesPerGroupEntry.getKey());
             if (instanceGroup != null) {
-                InstanceMetaData instanceMetaData = new InstanceMetaData();
-                Long privateId = cloudInstance.getTemplate().getPrivateId();
-                instanceMetaData.setPrivateId(privateId);
-                instanceMetaData.setInstanceStatus(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus.REQUESTED);
-                instanceMetaData.setInstanceGroup(instanceGroup);
-                instanceMetaData.setDiscoveryFQDN(freeIpa.getHostname() + String.format("%d.", privateId) + freeIpa.getDomain());
-                instanceMetaDataRepository.save(instanceMetaData);
-                LOGGER.debug("Saved InstanceMetaData: {}", instanceMetaData);
-                instanceGroup.getInstanceMetaDataSet().add(instanceMetaData);
+                Map<String, String> subnetAzMap = multiAzCalculatorService.prepareSubnetAzMap(environment);
+                Map<String, Integer> currentSubnetUsage = multiAzCalculatorService.calculateCurrentSubnetUsage(subnetAzMap, instanceGroup);
+                for (CloudInstance cloudInstance : instancesPerGroupEntry.getValue()) {
+                    InstanceMetaData instanceMetaData = new InstanceMetaData();
+                    Long privateId = cloudInstance.getTemplate().getPrivateId();
+                    instanceMetaData.setPrivateId(privateId);
+                    instanceMetaData.setInstanceStatus(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus.REQUESTED);
+                    instanceMetaData.setInstanceGroup(instanceGroup);
+                    instanceMetaData.setDiscoveryFQDN(freeIpa.getHostname() + String.format("%d.", privateId) + freeIpa.getDomain());
+                    multiAzCalculatorService.updateSubnetIdForSingleInstanceIfEligible(subnetAzMap, currentSubnetUsage, instanceMetaData, instanceGroup);
+                    instanceMetaDataRepository.save(instanceMetaData);
+                    LOGGER.debug("Saved InstanceMetaData: {}", instanceMetaData);
+                    instanceGroup.getInstanceMetaDataSet().add(instanceMetaData);
+                }
             }
         }
         return stack;

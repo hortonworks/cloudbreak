@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -21,6 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.entity.FreeIpa;
@@ -28,16 +30,15 @@ import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.repository.InstanceMetaDataRepository;
-import com.sequenceiq.freeipa.repository.StackRepository;
+import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
+import com.sequenceiq.freeipa.service.multiaz.MultiAzCalculatorService;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 
 @ExtendWith(MockitoExtension.class)
 public class InstanceMetaDataServiceTest {
 
     private static final String ENVIRONMENT_ID = "crn:cdp:environments:us-west-1:f39af961-e0ce-4f79-826c-45502efb9ca3:environment:12345-6789";
-
-    private static final String ACCOUNT_ID = "accountId";
 
     private static final String INSTANCE_ID_1 = "instance_1";
 
@@ -57,11 +58,10 @@ public class InstanceMetaDataServiceTest {
 
     private static Stack stack;
 
+    private static InstanceGroup instanceGroup;
+
     @InjectMocks
     private InstanceMetaDataService underTest;
-
-    @Mock
-    private StackRepository stackRepository;
 
     @Mock
     private InstanceMetaDataRepository instanceMetaDataRepository;
@@ -69,12 +69,18 @@ public class InstanceMetaDataServiceTest {
     @Mock
     private FreeIpaService freeIpaService;
 
+    @Mock
+    private MultiAzCalculatorService multiAzCalculatorService;
+
+    @Mock
+    private CachedEnvironmentClientService cachedEnvironmentClientService;
+
     @BeforeAll
     public static void init() {
         stack = new Stack();
-        stack.setResourceCrn(ENVIRONMENT_ID);
+        stack.setEnvironmentCrn(ENVIRONMENT_ID);
         stack.setId(STACK_ID);
-        InstanceGroup instanceGroup = new InstanceGroup();
+        instanceGroup = new InstanceGroup();
         stack.getInstanceGroups().add(instanceGroup);
         instanceGroup.setInstanceGroupType(InstanceGroupType.MASTER);
         InstanceMetaData instanceMetaData = new InstanceMetaData();
@@ -132,6 +138,12 @@ public class InstanceMetaDataServiceTest {
         when(template.getGroupName()).thenReturn(GROUP_NAME);
         when(template.getPrivateId()).thenReturn(INSTANCE_PRIVATE_ID_3);
         List<CloudInstance> cloudInstances = List.of(new CloudInstance(INSTANCE_ID_3, template, null, "subnet-1", "az1"));
+        DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
+        when(cachedEnvironmentClientService.getByCrn(ENVIRONMENT_ID)).thenReturn(environmentResponse);
+        Map<String, String> subnetAzMap = Map.of();
+        when(multiAzCalculatorService.prepareSubnetAzMap(environmentResponse)).thenReturn(subnetAzMap);
+        Map<String, Integer> subentUsage = Map.of();
+        when(multiAzCalculatorService.calculateCurrentSubnetUsage(subnetAzMap, instanceGroup)).thenReturn(subentUsage);
 
         Stack stack1 = underTest.saveInstanceAndGetUpdatedStack(stack, cloudInstances);
 
@@ -142,5 +154,6 @@ public class InstanceMetaDataServiceTest {
                 .filter(im -> INSTANCE_PRIVATE_ID_3 == im.getPrivateId())
                 .findFirst().get();
         assertEquals("ipa3.dom", instanceMetaData.getDiscoveryFQDN());
+        verify(multiAzCalculatorService).updateSubnetIdForSingleInstanceIfEligible(subnetAzMap, subentUsage, instanceMetaData, instanceGroup);
     }
 }
