@@ -8,6 +8,7 @@ import java.util.TreeSet;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.amazonaws.services.identitymanagement.model.InstanceProfile;
@@ -46,6 +47,7 @@ public class AwsIDBrokerObjectStorageValidator {
     public ValidationResult validateObjectStorage(AmazonIdentityManagementClient iam,
             SpiFileSystem spiFileSystem,
             String logsLocationBase,
+            String backupLocationBase,
             ValidationResultBuilder resultBuilder) {
         List<CloudFileSystemView> cloudFileSystems = spiFileSystem.getCloudFileSystems();
         for (CloudFileSystemView cloudFileSystemView : cloudFileSystems) {
@@ -58,30 +60,29 @@ public class AwsIDBrokerObjectStorageValidator {
                 if (CloudIdentityType.ID_BROKER.equals(cloudIdentityType)) {
                     validateIDBroker(iam, instanceProfile, cloudFileSystem, resultBuilder);
                 } else if (CloudIdentityType.LOG.equals(cloudIdentityType)) {
-                    validateLog(iam, instanceProfile, cloudFileSystem, logsLocationBase, resultBuilder);
+                    validateLog(iam, instanceProfile, cloudFileSystem, logsLocationBase, backupLocationBase, resultBuilder);
                 }
             }
         }
-
         return resultBuilder.build();
     }
 
     private void validateIDBroker(AmazonIdentityManagementClient iam, InstanceProfile instanceProfile,
             CloudS3View cloudFileSystem, ValidationResultBuilder resultBuilder) {
         awsInstanceProfileEC2TrustValidator.isTrusted(instanceProfile, cloudFileSystem.getCloudIdentityType(), resultBuilder);
-
         Set<Role> allMappedRoles = getAllMappedRoles(iam, cloudFileSystem, resultBuilder);
         awsIDBrokerAssumeRoleValidator.canAssumeRoles(iam, instanceProfile, allMappedRoles, resultBuilder);
-
         awsDataAccessRolePermissionValidator.validate(iam, cloudFileSystem, resultBuilder);
-
         awsRangerAuditRolePermissionValidator.validate(iam, cloudFileSystem, resultBuilder);
     }
 
     private void validateLog(AmazonIdentityManagementClient iam, InstanceProfile instanceProfile, CloudS3View cloudFileSystem,
-            String logsLocationBase, ValidationResultBuilder resultBuilder) {
+            String logsLocationBase, String backupLocationBase, ValidationResultBuilder resultBuilder) {
         awsInstanceProfileEC2TrustValidator.isTrusted(instanceProfile, cloudFileSystem.getCloudIdentityType(), resultBuilder);
         awsLogRolePermissionValidator.validate(iam, instanceProfile, cloudFileSystem, logsLocationBase, resultBuilder);
+        if (StringUtils.isNotEmpty(backupLocationBase) && !backupLocationBase.equals(logsLocationBase)) {
+            awsLogRolePermissionValidator.validate(iam, instanceProfile, cloudFileSystem, backupLocationBase, resultBuilder);
+        }
     }
 
     private Set<Role> getAllMappedRoles(AmazonIdentityManagementClient iam, CloudFileSystemView cloudFileSystemView,

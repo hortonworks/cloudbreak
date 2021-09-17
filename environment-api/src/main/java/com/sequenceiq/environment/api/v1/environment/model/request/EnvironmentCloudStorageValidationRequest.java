@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import javax.validation.constraints.NotNull;
 
+import com.sequenceiq.common.api.backup.request.BackupRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 
@@ -21,6 +22,9 @@ public class EnvironmentCloudStorageValidationRequest implements Serializable {
     @NotNull
     private TelemetryRequest telemetry;
 
+    @ApiModelProperty(EnvironmentModelDescription.TELEMETRY)
+    private BackupRequest backup;
+
     public String getCredentialCrn() {
         return credentialCrn;
     }
@@ -35,6 +39,14 @@ public class EnvironmentCloudStorageValidationRequest implements Serializable {
 
     public void setTelemetry(TelemetryRequest telemetry) {
         this.telemetry = telemetry;
+    }
+
+    public BackupRequest getBackup() {
+        return backup;
+    }
+
+    public void setBackup(BackupRequest backup) {
+        this.backup = backup;
     }
 
     @Override

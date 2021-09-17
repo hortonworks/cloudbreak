@@ -60,6 +60,9 @@ public class CloudStorageValidator {
         if (loggingConfigured) {
             objectStorageValidateBuilder.withLogsLocationBase(telemetryRequest.getLogging().getStorageLocation());
         }
+        if (environmentCloudStorageValidationRequest.getBackup() != null) {
+            objectStorageValidateBuilder.withBackupLocationBase(environmentCloudStorageValidationRequest.getBackup().getStorageLocation());
+        }
         ObjectStorageValidateRequest objectStorageValidateRequest = objectStorageValidateBuilder.build();
         return ThreadBasedUserCrnProvider.doAsInternalActor(() ->
                 cloudProviderServicesV4Endpoint.validateObjectStorage(objectStorageValidateRequest));
