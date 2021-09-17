@@ -64,11 +64,12 @@ public class AzureIDBrokerObjectStorageValidator {
     public ValidationResult validateObjectStorage(AzureClient client,
             SpiFileSystem spiFileSystem,
             String logsLocationBase,
+            String backupLocationBase,
             String singleResourceGroupName,
             ValidationResultBuilder resultBuilder) {
         LOGGER.info("Validating Azure identities...");
         List<CloudFileSystemView> cloudFileSystems = spiFileSystem.getCloudFileSystems();
-        validateHierarchicalNamespace(client, spiFileSystem, logsLocationBase, resultBuilder);
+        validateHierarchicalNamespace(client, spiFileSystem, logsLocationBase, backupLocationBase, resultBuilder);
         if (Objects.nonNull(cloudFileSystems) && cloudFileSystems.size() > 0) {
             for (CloudFileSystemView cloudFileSystemView : cloudFileSystems) {
                 CloudAdlsGen2View cloudFileSystem = (CloudAdlsGen2View) cloudFileSystemView;
@@ -101,9 +102,10 @@ public class AzureIDBrokerObjectStorageValidator {
         return resultBuilder.build();
     }
 
-    private void validateHierarchicalNamespace(AzureClient client, SpiFileSystem spiFileSystem, String logsLocationBase,
+    private void validateHierarchicalNamespace(AzureClient client, SpiFileSystem spiFileSystem,
+            String logsLocationBase, String backupLocationBase,
             ValidationResultBuilder resultBuilder) {
-        for (String storageAccountName : getStorageAccountNames(spiFileSystem, logsLocationBase)) {
+        for (String storageAccountName : getStorageAccountNames(spiFileSystem, logsLocationBase, backupLocationBase)) {
             Optional<StorageAccount> storageAccount = client.getStorageAccount(storageAccountName, Kind.STORAGE_V2);
             boolean hierarchical = storageAccount.map(StorageAccount::isHnsEnabled).orElse(false);
             if (storageAccount.isPresent() && !hierarchical) {
@@ -112,13 +114,16 @@ public class AzureIDBrokerObjectStorageValidator {
         }
     }
 
-    private Set<String> getStorageAccountNames(SpiFileSystem spiFileSystem, String logsLocationBase) {
+    private Set<String> getStorageAccountNames(SpiFileSystem spiFileSystem, String logsLocationBase, String backupLocationBase) {
         Set<String> locations = spiFileSystem.getCloudFileSystems().stream()
                 .flatMap(cloudFileSystemView -> cloudFileSystemView.getLocations().stream())
                 .map(StorageLocationBase::getValue)
                 .collect(Collectors.toSet());
         if (StringUtils.isNotEmpty(logsLocationBase)) {
             locations.add(logsLocationBase);
+        }
+        if (StringUtils.isNotEmpty(backupLocationBase)) {
+            locations.add(backupLocationBase);
         }
         return extractStorageAccount(locations);
     }

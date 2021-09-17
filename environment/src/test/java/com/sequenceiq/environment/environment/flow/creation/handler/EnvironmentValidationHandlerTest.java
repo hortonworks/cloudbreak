@@ -29,6 +29,7 @@ import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationFai
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.cloudstorage.CloudStorageValidator;
+import com.sequenceiq.environment.environment.v1.converter.BackupConverter;
 import com.sequenceiq.environment.environment.v1.converter.TelemetryApiConverter;
 import com.sequenceiq.environment.environment.validation.EnvironmentFlowValidatorService;
 import com.sequenceiq.environment.environment.validation.ValidationType;
@@ -57,8 +58,10 @@ class EnvironmentValidationHandlerTest {
 
     private final TelemetryApiConverter telemetryApiConverter = mock(TelemetryApiConverter.class);
 
+    private final BackupConverter backupConverter = mock(BackupConverter.class);
+
     private final EnvironmentValidationHandler underTest = new EnvironmentValidationHandler(eventSender, environmentService, validatorService,
-            webApplicationExceptionMessageExtractor, eventBus, eventSenderService, cloudStorageValidator, telemetryApiConverter);
+            webApplicationExceptionMessageExtractor, eventBus, eventSenderService, cloudStorageValidator, telemetryApiConverter, backupConverter);
 
     @Test
     void acceptAndSendStartNetworkCreationEventWhenNoValidationErrorFound() {

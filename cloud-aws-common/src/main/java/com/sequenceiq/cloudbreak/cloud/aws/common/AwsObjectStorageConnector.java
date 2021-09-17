@@ -88,7 +88,7 @@ public class AwsObjectStorageConnector implements ObjectStorageConnector {
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
         resultBuilder.prefix("Cloud Storage validation failed");
         ValidationResult validationResult = awsIDBrokerObjectStorageValidator.validateObjectStorage(
-                iam, spiFileSystem, request.getLogsLocationBase(), resultBuilder);
+                iam, spiFileSystem, request.getLogsLocationBase(), request.getBackupLocationBase(), resultBuilder);
         ObjectStorageValidateResponse response;
         if (validationResult.hasError()) {
             response = ObjectStorageValidateResponse.builder()

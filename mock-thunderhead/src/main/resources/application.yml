@@ -19,7 +19,7 @@ auth:
         repair.enable: true
     cloudstoragevalidation.enable:
       global: true
-      aws: false
+      aws: true
       azure: true
       gcp: false
     runtime.upgrade.enable: true

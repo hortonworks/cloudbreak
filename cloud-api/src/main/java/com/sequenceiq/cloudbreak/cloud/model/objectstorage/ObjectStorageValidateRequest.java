@@ -24,6 +24,8 @@ public class ObjectStorageValidateRequest implements CloudPlatformAware {
 
     private String logsLocationBase;
 
+    private String backupLocationBase;
+
     private AzureParameters azure;
 
     private MockAccountMappingSettings mockAccountMappingSettings;
@@ -37,6 +39,7 @@ public class ObjectStorageValidateRequest implements CloudPlatformAware {
         this.cloudStorageRequest = builder.cloudStorageRequest;
         this.spiFileSystem = builder.spiFileSystem;
         this.logsLocationBase = builder.logsLocationBase;
+        this.backupLocationBase = builder.backupLocationBase;
         this.mockAccountMappingSettings = builder.mockAccountMappingSettings;
         this.azure = builder.azure;
     }
@@ -83,6 +86,14 @@ public class ObjectStorageValidateRequest implements CloudPlatformAware {
 
     public void setLogsLocationBase(String logsLocationBase) {
         this.logsLocationBase = logsLocationBase;
+    }
+
+    public String getBackupLocationBase() {
+        return backupLocationBase;
+    }
+
+    public void setBackupLocationBase(String backupLocationBase) {
+        this.backupLocationBase = backupLocationBase;
     }
 
     public MockAccountMappingSettings getMockAccountMappingSettings() {
@@ -156,6 +167,8 @@ public class ObjectStorageValidateRequest implements CloudPlatformAware {
 
         private String logsLocationBase;
 
+        private String backupLocationBase;
+
         private MockAccountMappingSettings mockAccountMappingSettings;
 
         private AzureParameters azure;
@@ -182,6 +195,11 @@ public class ObjectStorageValidateRequest implements CloudPlatformAware {
 
         public Builder withLogsLocationBase(String logsLocationBase) {
             this.logsLocationBase = logsLocationBase;
+            return this;
+        }
+
+        public Builder withBackupLocationBase(String backupLocationBase) {
+            this.backupLocationBase = backupLocationBase;
             return this;
         }
 

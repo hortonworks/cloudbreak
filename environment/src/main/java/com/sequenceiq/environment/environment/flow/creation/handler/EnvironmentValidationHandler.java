@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.common.api.backup.request.BackupRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentCloudStorageValidationRequest;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -29,6 +30,7 @@ import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEve
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationFailureEvent;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.cloudstorage.CloudStorageValidator;
+import com.sequenceiq.environment.environment.v1.converter.BackupConverter;
 import com.sequenceiq.environment.environment.v1.converter.TelemetryApiConverter;
 import com.sequenceiq.environment.environment.validation.EnvironmentFlowValidatorService;
 import com.sequenceiq.environment.events.EventSenderService;
@@ -58,6 +60,8 @@ public class EnvironmentValidationHandler extends EventSenderAwareHandler<Enviro
 
     private TelemetryApiConverter telemetryApiConverter;
 
+    private BackupConverter backupConverter;
+
     protected EnvironmentValidationHandler(
             EventSender eventSender,
             EnvironmentService environmentService,
@@ -66,7 +70,8 @@ public class EnvironmentValidationHandler extends EventSenderAwareHandler<Enviro
             EventBus eventBus,
             EventSenderService eventSenderService,
             CloudStorageValidator cloudStorageValidator,
-            TelemetryApiConverter telemetryApiConverter) {
+            TelemetryApiConverter telemetryApiConverter,
+            BackupConverter backupConverter) {
         super(eventSender);
         this.validatorService = validatorService;
         this.environmentService = environmentService;
@@ -75,6 +80,7 @@ public class EnvironmentValidationHandler extends EventSenderAwareHandler<Enviro
         this.eventSenderService = eventSenderService;
         this.cloudStorageValidator = cloudStorageValidator;
         this.telemetryApiConverter = telemetryApiConverter;
+        this.backupConverter = backupConverter;
     }
 
     @Override
@@ -102,7 +108,10 @@ public class EnvironmentValidationHandler extends EventSenderAwareHandler<Enviro
         EnvironmentCloudStorageValidationRequest cloudStorageValidationRequest = new EnvironmentCloudStorageValidationRequest();
         cloudStorageValidationRequest.setCredentialCrn(environmentDto.getCredential().getResourceCrn());
         TelemetryRequest telemetryRequest = telemetryApiConverter.convertToRequest(environmentDto.getTelemetry());
+        BackupRequest backupRequest = backupConverter.convertToRequest(environmentDto.getBackup());
         cloudStorageValidationRequest.setTelemetry(telemetryRequest);
+        cloudStorageValidationRequest.setBackup(backupRequest);
+
         ObjectStorageValidateResponse response = null;
         try {
             response = cloudStorageValidator.validateCloudStorage(environmentDto.getAccountId(), cloudStorageValidationRequest);

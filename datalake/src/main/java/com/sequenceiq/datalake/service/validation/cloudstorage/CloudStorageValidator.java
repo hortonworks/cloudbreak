@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidate
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.common.api.backup.response.BackupResponse;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
 import com.sequenceiq.common.api.telemetry.base.LoggingBase;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
@@ -86,13 +87,6 @@ public class CloudStorageValidator {
         }
     }
 
-    private String getLogsLocationBase(DetailedEnvironmentResponse env) {
-        return Optional.ofNullable(env.getTelemetry())
-                .map(TelemetryResponse::getLogging)
-                .map(LoggingBase::getStorageLocation)
-                .orElse(null);
-    }
-
     private String getSingleResourceGroupName(DetailedEnvironmentResponse env) {
         return Optional.ofNullable(env.getAzure())
                 .map(AzureEnvironmentParameters::getResourceGroup)
@@ -110,11 +104,25 @@ public class CloudStorageValidator {
                 .withCredential(credential)
                 .withCloudStorageRequest(cloudStorageRequest)
                 .withLogsLocationBase(getLogsLocationBase(environment))
+                .withBackupLocationBase(getBackupLocationBase(environment))
                 .withAzureParameters(getSingleResourceGroupName(environment));
         if (environment.getIdBrokerMappingSource() == MOCK) {
             result.withMockSettings(environment.getLocation().getName(), environment.getAdminGroupName());
         }
         return result.build();
+    }
+
+    private String getLogsLocationBase(DetailedEnvironmentResponse env) {
+        return Optional.ofNullable(env.getTelemetry())
+                .map(TelemetryResponse::getLogging)
+                .map(LoggingBase::getStorageLocation)
+                .orElse(null);
+    }
+
+    private String getBackupLocationBase(DetailedEnvironmentResponse environment) {
+        return Optional.ofNullable(environment.getBackup())
+                .map(BackupResponse::getStorageLocation)
+                .orElse(null);
     }
 
     private Credential getCredential(DetailedEnvironmentResponse environment) {
