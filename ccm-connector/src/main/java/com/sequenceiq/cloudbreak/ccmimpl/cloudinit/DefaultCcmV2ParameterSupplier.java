@@ -30,12 +30,10 @@ public class DefaultCcmV2ParameterSupplier implements CcmV2ParameterSupplier {
 
     public CcmV2Parameters getCcmV2Parameters(@Nonnull String accountId, @Nonnull Optional<String> environmentCrnOpt,
         @Nonnull String clusterGatewayDomain, @Nonnull String agentKeyId) {
-        String requestId = MDCBuilder.getOrGenerateRequestId();
 
-        InvertingProxy invertingProxy = ccmV2Client.awaitReadyInvertingProxyForAccount(requestId, accountId);
-        InvertingProxyAgent invertingProxyAgent = ccmV2Client.registerInvertingProxyAgent(requestId, accountId, environmentCrnOpt,
-                clusterGatewayDomain, agentKeyId);
-        validateCcmV2ConfigResponse(invertingProxy, invertingProxyAgent);
+        InvertingProxyAndAgent invertingProxyAndAgent = getInvertingProxyAndAgent(accountId, environmentCrnOpt, clusterGatewayDomain, agentKeyId);
+        InvertingProxy invertingProxy = invertingProxyAndAgent.getInvertingProxy();
+        InvertingProxyAgent invertingProxyAgent = invertingProxyAndAgent.getInvertingProxyAgent();
 
         LOGGER.debug("CcmV2Config successfully retrieved InvertingProxyHost: '{}', InvertingProxyStatus: '{}', InvertingProxyAgentCrn: '{}', " +
                         "EnvironmentCrnOpt: '{}'", invertingProxy.getHostname(), invertingProxy.getStatus(),
@@ -45,11 +43,30 @@ public class DefaultCcmV2ParameterSupplier implements CcmV2ParameterSupplier {
                 invertingProxyAgent.getEncipheredPrivateKey(), invertingProxyAgent.getCertificate());
     }
 
+    protected InvertingProxyAndAgent getInvertingProxyAndAgent(@Nonnull String accountId, @Nonnull Optional<String> environmentCrnOpt,
+            @Nonnull String clusterGatewayDomain, @Nonnull String agentKeyId) {
+        String requestId = MDCBuilder.getOrGenerateRequestId();
+
+        InvertingProxy invertingProxy = ccmV2Client.awaitReadyInvertingProxyForAccount(requestId, accountId);
+        InvertingProxyAgent invertingProxyAgent = ccmV2Client.registerInvertingProxyAgent(requestId, accountId, environmentCrnOpt,
+                clusterGatewayDomain, agentKeyId);
+        validateCcmV2ConfigResponse(invertingProxy, invertingProxyAgent);
+        return new InvertingProxyAndAgent(invertingProxy, invertingProxyAgent);
+    }
+
     private void validateCcmV2ConfigResponse(InvertingProxy invertingProxy, InvertingProxyAgent invertingProxyAgent) {
         checkArgument(StringUtils.isNotEmpty(invertingProxy.getHostname()), "InvertingProxy Hostname is not initialized.");
         checkArgument(StringUtils.isNotEmpty(invertingProxy.getCertificate()), "InvertingProxy Certificate is not initialized.");
         checkArgument(StringUtils.isNotEmpty(invertingProxyAgent.getAgentCrn()), "InvertingProxyAgent Crn is not initialized.");
-        checkArgument(StringUtils.isNotEmpty(invertingProxyAgent.getEncipheredPrivateKey()), "InvertingProxyAgent EncipheredKey is not initialized.");
-        checkArgument(StringUtils.isNotEmpty(invertingProxyAgent.getCertificate()), "InvertingProxyAgent Certificate is not initialized.");
+        if (StringUtils.isNotEmpty(invertingProxyAgent.getAccessKeyId())) {
+            checkArgument(StringUtils.isNotEmpty(invertingProxyAgent.getEncipheredAccessKey()),
+                    "InvertingProxyAgent Access Key is present but Enciphered Access Key is not initialized.");
+        } else {
+            checkArgument(StringUtils.isEmpty(invertingProxyAgent.getEncipheredAccessKey()),
+                    "InvertingProxyAgent Access Key is not present but Enciphered Access Key is initialized. Error in inverting proxy logic.");
+            checkArgument(StringUtils.isNotEmpty(invertingProxyAgent.getEncipheredPrivateKey()),
+                    "InvertingProxyAgent EncipheredKey is not initialized.");
+            checkArgument(StringUtils.isNotEmpty(invertingProxyAgent.getCertificate()), "InvertingProxyAgent Certificate is not initialized.");
+        }
     }
 }

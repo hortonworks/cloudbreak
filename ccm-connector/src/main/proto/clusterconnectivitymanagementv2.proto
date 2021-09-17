@@ -14,33 +14,38 @@ import "paging.proto";
 service ClusterConnectivityManagementV2 {
   // Get the service version.
   rpc GetVersion (version.VersionRequest)
-    returns (version.VersionResponse) {}
+      returns (version.VersionResponse) {}
 
   // CreateOrGetInvertingProxy will create new deployment If it is not already present.
   // It also polls for the status and updates the status accordingly.
   rpc CreateOrGetInvertingProxy(CreateOrGetInvertingProxyRequest)
-    returns (CreateOrGetInvertingProxyResponse) {}
+      returns (CreateOrGetInvertingProxyResponse) {}
 
   // RemoveInvertingProxy will remove inverting-proxy deployment.
   // Mainly used for reaper process.
   rpc RemoveInvertingProxy(RemoveInvertingProxyRequest)
-    returns (RemoveInvertingProxyResponse) {}
+      returns (RemoveInvertingProxyResponse) {}
 
   // RegisterAgent for generating and registering agent key-cert pair.
   rpc RegisterAgent(RegisterAgentRequest)
-    returns (RegisterAgentResponse) {}
+      returns (RegisterAgentResponse) {}
 
   // UnregisterAgent for removing agent key-cert pair while environment deletion.
   rpc UnregisterAgent(UnregisterAgentRequest)
-    returns (UnregisterAgentResponse) {}
+      returns (UnregisterAgentResponse) {}
 
   // Lists all registered agents matching a supplied query
   rpc ListAgents(ListAgentsRequest)
-    returns (ListAgentsResponse) {}
+      returns (ListAgentsResponse) {}
 
   // GetAllAgentsCertificates for getting certificates of all the agents for an account.
   rpc GetAllAgentsCertificates(GetAllAgentsCertificatesRequest)
-    returns (GetAllAgentsCertificatesResponse) {}
+      returns (GetAllAgentsCertificatesResponse) {}
+
+  // RotateAgentAccessKey for rotating workload machine user key pair
+  rpc RotateAgentAccessKey(RotateAgentAccessKeyRequest)
+      returns (RotateAgentAccessKeyResponse) {}
+
 }
 
 message CreateOrGetInvertingProxyRequest {
@@ -141,6 +146,11 @@ message InvertingProxyAgent {
   string environmentCrn = 4;
   // Generated certificate and the trust chain for agent
   repeated string certificates = 5 [(options.FieldExtension.skipLogging) = true];
+  // The access key ID for the machine user
+  string accessKeyId = 6;
+  // The access key is the private key for the machine user. This is an Ed25519 private key and is
+  // 32 bytes encoded in base64 that should be used to sign requests.
+  string encipheredAccessKey = 7 [(options.FieldExtension.sensitive) = true];
 }
 
 message ListAgentsRequest {
@@ -161,4 +171,13 @@ message ListAgentsResponse {
 
   // List of all agents (matching the optional filter if supplied)
   repeated InvertingProxyAgent agents = 2;
+}
+
+message RotateAgentAccessKeyRequest {
+  // The agentCrn
+  string agentCrn = 1;
+}
+
+message RotateAgentAccessKeyResponse {
+  InvertingProxyAgent invertingProxyAgent = 1;
 }

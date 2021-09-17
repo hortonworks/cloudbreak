@@ -20,6 +20,7 @@ dependencies {
 
   testCompile group: 'org.mockito',                       name: 'mockito-core',                   version: mockitoVersion
   testCompile group: 'org.hamcrest',                      name: 'hamcrest',                       version: hamcrestVersion
+  testCompile group: "org.assertj",                       name: "assertj-core",                   version: assertjVersion
 }
 
 checkstyle {

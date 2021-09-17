@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmParameters;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmV2JumpgateParameters;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmV2Parameters;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.DefaultCcmParameters;
+import com.sequenceiq.cloudbreak.ccm.cloudinit.DefaultCcmV2JumpgateParameters;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.DefaultCcmV2Parameters;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.DefaultInstanceParameters;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.DefaultServerParameters;
@@ -122,8 +123,9 @@ public class UserDataBuilderTest {
 
     @Test
     public void testBuildUserDataWithCCMV2Jumpgate() throws IOException {
-        CcmV2JumpgateParameters ccmV2JumpgateParameters = new DefaultCcmV2Parameters("invertingProxyHost", "invertingProxyCertificate",
-                "agentCrn", "agentKeyId", "agentEncipheredPrivateKey", "agentCertificate");
+        CcmV2JumpgateParameters ccmV2JumpgateParameters = new DefaultCcmV2JumpgateParameters("invertingProxyHost", "invertingProxyCertificate",
+                "agentCrn", "agentKeyId", "agentEncipheredPrivateKey", "agentCertificate",
+                "agentMachineUserAccessKey", "agentMachineUserEncipheredAccessKey");
         CcmConnectivityParameters ccmConnectivityParameters = new CcmConnectivityParameters(ccmV2JumpgateParameters);
 
         Map<InstanceGroupType, String> userdata = underTest.buildUserData(Platform.platform("AZURE"), "priv-key".getBytes(),

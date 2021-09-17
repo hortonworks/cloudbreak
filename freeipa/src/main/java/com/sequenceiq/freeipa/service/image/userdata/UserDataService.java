@@ -73,8 +73,8 @@ public class UserDataService {
             PlatformParameters platformParameters = platformParametersFuture.get();
             CcmConnectivityParameters ccmParameters = ccmUserDataService.fetchAndSaveCcmParameters(stack);
             Optional<ProxyConfig> proxyConfig = proxyConfigDtoService.getByEnvironmentCrn(stack.getEnvironmentCrn());
-            String userData = userDataBuilder.buildUserData(Platform.platform(stack.getCloudPlatform()), cbSshKeyDer, sshUser, platformParameters,
-                    saltBootPassword, cbCert, ccmParameters, proxyConfig.orElse(null));
+            String userData = userDataBuilder.buildUserData(stack.getEnvironmentCrn(), Platform.platform(stack.getCloudPlatform()),
+                    cbSshKeyDer, sshUser, platformParameters, saltBootPassword, cbCert, ccmParameters, proxyConfig.orElse(null));
             imageService.decorateImageWithUserDataForStack(stack, userData);
         } catch (InterruptedException | ExecutionException e) {
             LOGGER.error("Failed to get Platform parmaters", e);

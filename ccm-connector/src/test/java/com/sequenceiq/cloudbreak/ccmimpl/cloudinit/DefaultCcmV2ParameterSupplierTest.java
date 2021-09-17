@@ -6,23 +6,22 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import java.util.Optional;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxy;
 import com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgent;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmV2Parameters;
-import com.sequenceiq.cloudbreak.ccm.exception.CcmException;
 import com.sequenceiq.cloudbreak.ccmimpl.ccmv2.CcmV2ManagementClient;
 
-import java.util.Optional;
-
-@RunWith(MockitoJUnitRunner.class)
-public class DefaultCcmV2ParameterSupplierTest {
+@ExtendWith(MockitoExtension.class)
+class DefaultCcmV2ParameterSupplierTest {
 
     private static final String TEST_ACCOUNT_ID = "us-west-1:e7b1345f-4ae1-4594-9113-fc91f22ef8bd";
 
@@ -41,7 +40,7 @@ public class DefaultCcmV2ParameterSupplierTest {
     private CcmV2ManagementClient ccmV2Client;
 
     @Test
-    public void testGetCcmV2Parameters() throws CcmException {
+    void testGetCcmV2Parameter() {
         String gatewayDomain = "test.gateway.domain";
         InvertingProxy mockInvertingProxy = InvertingProxy.newBuilder()
                 .setHostname("invertingProxyHost")
@@ -63,10 +62,10 @@ public class DefaultCcmV2ParameterSupplierTest {
         assertNotNull(resultParameters, "CCMV2 Parameters should not be null");
 
         assertEquals("invertingProxyAgentCrn", resultParameters.getAgentCrn(), "AgentCRN should match");
-        assertEquals("invertingProxyAgentCertificate", resultParameters.getAgentCertificate(), "AgentCertificate should match");
-        assertEquals("invertingProxyAgentEncipheredKey", resultParameters.getAgentEncipheredPrivateKey(), "AgentEncipheredPrivateKey should match");
         assertEquals("invertingProxyHost", resultParameters.getInvertingProxyHost(), "InvertingProxyHost should match");
         assertEquals("invertingProxyCertificate", resultParameters.getInvertingProxyCertificate(), "InvertingProxyCertificate should match");
+        assertEquals("invertingProxyAgentCertificate", resultParameters.getAgentCertificate(), "AgentCertificate should match");
+        assertEquals("invertingProxyAgentEncipheredKey", resultParameters.getAgentEncipheredPrivateKey(), "AgentEncipheredPrivateKey should match");
         assertEquals(TEST_RESOURCE_ID, resultParameters.getAgentKeyId(), "AgentKeyId should match");
     }
 }

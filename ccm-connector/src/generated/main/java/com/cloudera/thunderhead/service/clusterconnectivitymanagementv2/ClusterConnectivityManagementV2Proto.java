@@ -7871,6 +7871,44 @@ public final class ClusterConnectivityManagementV2Proto {
      */
     com.google.protobuf.ByteString
         getCertificatesBytes(int index);
+
+    /**
+     * <pre>
+     * The access key ID for the machine user
+     * </pre>
+     *
+     * <code>string accessKeyId = 6;</code>
+     */
+    java.lang.String getAccessKeyId();
+    /**
+     * <pre>
+     * The access key ID for the machine user
+     * </pre>
+     *
+     * <code>string accessKeyId = 6;</code>
+     */
+    com.google.protobuf.ByteString
+        getAccessKeyIdBytes();
+
+    /**
+     * <pre>
+     * The access key is the private key for the machine user. This is an Ed25519 private key and is
+     * 32 bytes encoded in base64 that should be used to sign requests.
+     * </pre>
+     *
+     * <code>string encipheredAccessKey = 7 [(.options.FieldExtension.sensitive) = true];</code>
+     */
+    java.lang.String getEncipheredAccessKey();
+    /**
+     * <pre>
+     * The access key is the private key for the machine user. This is an Ed25519 private key and is
+     * 32 bytes encoded in base64 that should be used to sign requests.
+     * </pre>
+     *
+     * <code>string encipheredAccessKey = 7 [(.options.FieldExtension.sensitive) = true];</code>
+     */
+    com.google.protobuf.ByteString
+        getEncipheredAccessKeyBytes();
   }
   /**
    * Protobuf type {@code clusterconnectivitymanagementv2.InvertingProxyAgent}
@@ -7890,6 +7928,8 @@ public final class ClusterConnectivityManagementV2Proto {
       certificate_ = "";
       environmentCrn_ = "";
       certificates_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+      accessKeyId_ = "";
+      encipheredAccessKey_ = "";
     }
 
     @java.lang.Override
@@ -7947,6 +7987,18 @@ public final class ClusterConnectivityManagementV2Proto {
                 mutable_bitField0_ |= 0x00000010;
               }
               certificates_.add(s);
+              break;
+            }
+            case 50: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              accessKeyId_ = s;
+              break;
+            }
+            case 58: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              encipheredAccessKey_ = s;
               break;
             }
             default: {
@@ -8206,6 +8258,92 @@ public final class ClusterConnectivityManagementV2Proto {
       return certificates_.getByteString(index);
     }
 
+    public static final int ACCESSKEYID_FIELD_NUMBER = 6;
+    private volatile java.lang.Object accessKeyId_;
+    /**
+     * <pre>
+     * The access key ID for the machine user
+     * </pre>
+     *
+     * <code>string accessKeyId = 6;</code>
+     */
+    public java.lang.String getAccessKeyId() {
+      java.lang.Object ref = accessKeyId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        accessKeyId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The access key ID for the machine user
+     * </pre>
+     *
+     * <code>string accessKeyId = 6;</code>
+     */
+    public com.google.protobuf.ByteString
+        getAccessKeyIdBytes() {
+      java.lang.Object ref = accessKeyId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        accessKeyId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int ENCIPHEREDACCESSKEY_FIELD_NUMBER = 7;
+    private volatile java.lang.Object encipheredAccessKey_;
+    /**
+     * <pre>
+     * The access key is the private key for the machine user. This is an Ed25519 private key and is
+     * 32 bytes encoded in base64 that should be used to sign requests.
+     * </pre>
+     *
+     * <code>string encipheredAccessKey = 7 [(.options.FieldExtension.sensitive) = true];</code>
+     */
+    public java.lang.String getEncipheredAccessKey() {
+      java.lang.Object ref = encipheredAccessKey_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        encipheredAccessKey_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The access key is the private key for the machine user. This is an Ed25519 private key and is
+     * 32 bytes encoded in base64 that should be used to sign requests.
+     * </pre>
+     *
+     * <code>string encipheredAccessKey = 7 [(.options.FieldExtension.sensitive) = true];</code>
+     */
+    public com.google.protobuf.ByteString
+        getEncipheredAccessKeyBytes() {
+      java.lang.Object ref = encipheredAccessKey_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        encipheredAccessKey_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -8234,6 +8372,12 @@ public final class ClusterConnectivityManagementV2Proto {
       }
       for (int i = 0; i < certificates_.size(); i++) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 5, certificates_.getRaw(i));
+      }
+      if (!getAccessKeyIdBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 6, accessKeyId_);
+      }
+      if (!getEncipheredAccessKeyBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 7, encipheredAccessKey_);
       }
       unknownFields.writeTo(output);
     }
@@ -8264,6 +8408,12 @@ public final class ClusterConnectivityManagementV2Proto {
         size += dataSize;
         size += 1 * getCertificatesList().size();
       }
+      if (!getAccessKeyIdBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, accessKeyId_);
+      }
+      if (!getEncipheredAccessKeyBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, encipheredAccessKey_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -8290,6 +8440,10 @@ public final class ClusterConnectivityManagementV2Proto {
           .equals(other.getEnvironmentCrn());
       result = result && getCertificatesList()
           .equals(other.getCertificatesList());
+      result = result && getAccessKeyId()
+          .equals(other.getAccessKeyId());
+      result = result && getEncipheredAccessKey()
+          .equals(other.getEncipheredAccessKey());
       result = result && unknownFields.equals(other.unknownFields);
       return result;
     }
@@ -8313,6 +8467,10 @@ public final class ClusterConnectivityManagementV2Proto {
         hash = (37 * hash) + CERTIFICATES_FIELD_NUMBER;
         hash = (53 * hash) + getCertificatesList().hashCode();
       }
+      hash = (37 * hash) + ACCESSKEYID_FIELD_NUMBER;
+      hash = (53 * hash) + getAccessKeyId().hashCode();
+      hash = (37 * hash) + ENCIPHEREDACCESSKEY_FIELD_NUMBER;
+      hash = (53 * hash) + getEncipheredAccessKey().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -8456,6 +8614,10 @@ public final class ClusterConnectivityManagementV2Proto {
 
         certificates_ = com.google.protobuf.LazyStringArrayList.EMPTY;
         bitField0_ = (bitField0_ & ~0x00000010);
+        accessKeyId_ = "";
+
+        encipheredAccessKey_ = "";
+
         return this;
       }
 
@@ -8493,6 +8655,8 @@ public final class ClusterConnectivityManagementV2Proto {
           bitField0_ = (bitField0_ & ~0x00000010);
         }
         result.certificates_ = certificates_;
+        result.accessKeyId_ = accessKeyId_;
+        result.encipheredAccessKey_ = encipheredAccessKey_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -8566,6 +8730,14 @@ public final class ClusterConnectivityManagementV2Proto {
             ensureCertificatesIsMutable();
             certificates_.addAll(other.certificates_);
           }
+          onChanged();
+        }
+        if (!other.getAccessKeyId().isEmpty()) {
+          accessKeyId_ = other.accessKeyId_;
+          onChanged();
+        }
+        if (!other.getEncipheredAccessKey().isEmpty()) {
+          encipheredAccessKey_ = other.encipheredAccessKey_;
           onChanged();
         }
         this.mergeUnknownFields(other.unknownFields);
@@ -9100,6 +9272,189 @@ public final class ClusterConnectivityManagementV2Proto {
   checkByteStringIsUtf8(value);
         ensureCertificatesIsMutable();
         certificates_.add(value);
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object accessKeyId_ = "";
+      /**
+       * <pre>
+       * The access key ID for the machine user
+       * </pre>
+       *
+       * <code>string accessKeyId = 6;</code>
+       */
+      public java.lang.String getAccessKeyId() {
+        java.lang.Object ref = accessKeyId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          accessKeyId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The access key ID for the machine user
+       * </pre>
+       *
+       * <code>string accessKeyId = 6;</code>
+       */
+      public com.google.protobuf.ByteString
+          getAccessKeyIdBytes() {
+        java.lang.Object ref = accessKeyId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          accessKeyId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The access key ID for the machine user
+       * </pre>
+       *
+       * <code>string accessKeyId = 6;</code>
+       */
+      public Builder setAccessKeyId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        accessKeyId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The access key ID for the machine user
+       * </pre>
+       *
+       * <code>string accessKeyId = 6;</code>
+       */
+      public Builder clearAccessKeyId() {
+        
+        accessKeyId_ = getDefaultInstance().getAccessKeyId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The access key ID for the machine user
+       * </pre>
+       *
+       * <code>string accessKeyId = 6;</code>
+       */
+      public Builder setAccessKeyIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        accessKeyId_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object encipheredAccessKey_ = "";
+      /**
+       * <pre>
+       * The access key is the private key for the machine user. This is an Ed25519 private key and is
+       * 32 bytes encoded in base64 that should be used to sign requests.
+       * </pre>
+       *
+       * <code>string encipheredAccessKey = 7 [(.options.FieldExtension.sensitive) = true];</code>
+       */
+      public java.lang.String getEncipheredAccessKey() {
+        java.lang.Object ref = encipheredAccessKey_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          encipheredAccessKey_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The access key is the private key for the machine user. This is an Ed25519 private key and is
+       * 32 bytes encoded in base64 that should be used to sign requests.
+       * </pre>
+       *
+       * <code>string encipheredAccessKey = 7 [(.options.FieldExtension.sensitive) = true];</code>
+       */
+      public com.google.protobuf.ByteString
+          getEncipheredAccessKeyBytes() {
+        java.lang.Object ref = encipheredAccessKey_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          encipheredAccessKey_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The access key is the private key for the machine user. This is an Ed25519 private key and is
+       * 32 bytes encoded in base64 that should be used to sign requests.
+       * </pre>
+       *
+       * <code>string encipheredAccessKey = 7 [(.options.FieldExtension.sensitive) = true];</code>
+       */
+      public Builder setEncipheredAccessKey(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        encipheredAccessKey_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The access key is the private key for the machine user. This is an Ed25519 private key and is
+       * 32 bytes encoded in base64 that should be used to sign requests.
+       * </pre>
+       *
+       * <code>string encipheredAccessKey = 7 [(.options.FieldExtension.sensitive) = true];</code>
+       */
+      public Builder clearEncipheredAccessKey() {
+        
+        encipheredAccessKey_ = getDefaultInstance().getEncipheredAccessKey();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The access key is the private key for the machine user. This is an Ed25519 private key and is
+       * 32 bytes encoded in base64 that should be used to sign requests.
+       * </pre>
+       *
+       * <code>string encipheredAccessKey = 7 [(.options.FieldExtension.sensitive) = true];</code>
+       */
+      public Builder setEncipheredAccessKeyBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        encipheredAccessKey_ = value;
         onChanged();
         return this;
       }
@@ -11387,6 +11742,1199 @@ public final class ClusterConnectivityManagementV2Proto {
 
   }
 
+  public interface RotateAgentAccessKeyRequestOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:clusterconnectivitymanagementv2.RotateAgentAccessKeyRequest)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * The agentCrn
+     * </pre>
+     *
+     * <code>string agentCrn = 1;</code>
+     */
+    java.lang.String getAgentCrn();
+    /**
+     * <pre>
+     * The agentCrn
+     * </pre>
+     *
+     * <code>string agentCrn = 1;</code>
+     */
+    com.google.protobuf.ByteString
+        getAgentCrnBytes();
+  }
+  /**
+   * Protobuf type {@code clusterconnectivitymanagementv2.RotateAgentAccessKeyRequest}
+   */
+  public  static final class RotateAgentAccessKeyRequest extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:clusterconnectivitymanagementv2.RotateAgentAccessKeyRequest)
+      RotateAgentAccessKeyRequestOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use RotateAgentAccessKeyRequest.newBuilder() to construct.
+    private RotateAgentAccessKeyRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private RotateAgentAccessKeyRequest() {
+      agentCrn_ = "";
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private RotateAgentAccessKeyRequest(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              agentCrn_ = s;
+              break;
+            }
+            default: {
+              if (!parseUnknownFieldProto3(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.internal_static_clusterconnectivitymanagementv2_RotateAgentAccessKeyRequest_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.internal_static_clusterconnectivitymanagementv2_RotateAgentAccessKeyRequest_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyRequest.class, com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyRequest.Builder.class);
+    }
+
+    public static final int AGENTCRN_FIELD_NUMBER = 1;
+    private volatile java.lang.Object agentCrn_;
+    /**
+     * <pre>
+     * The agentCrn
+     * </pre>
+     *
+     * <code>string agentCrn = 1;</code>
+     */
+    public java.lang.String getAgentCrn() {
+      java.lang.Object ref = agentCrn_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        agentCrn_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The agentCrn
+     * </pre>
+     *
+     * <code>string agentCrn = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getAgentCrnBytes() {
+      java.lang.Object ref = agentCrn_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        agentCrn_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!getAgentCrnBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, agentCrn_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!getAgentCrnBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, agentCrn_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyRequest)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyRequest other = (com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyRequest) obj;
+
+      boolean result = true;
+      result = result && getAgentCrn()
+          .equals(other.getAgentCrn());
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + AGENTCRN_FIELD_NUMBER;
+      hash = (53 * hash) + getAgentCrn().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyRequest parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyRequest parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyRequest parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyRequest parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyRequest parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyRequest parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyRequest parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyRequest parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyRequest parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyRequest parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyRequest parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyRequest parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyRequest prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code clusterconnectivitymanagementv2.RotateAgentAccessKeyRequest}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:clusterconnectivitymanagementv2.RotateAgentAccessKeyRequest)
+        com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyRequestOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.internal_static_clusterconnectivitymanagementv2_RotateAgentAccessKeyRequest_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.internal_static_clusterconnectivitymanagementv2_RotateAgentAccessKeyRequest_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyRequest.class, com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyRequest.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyRequest.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        agentCrn_ = "";
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.internal_static_clusterconnectivitymanagementv2_RotateAgentAccessKeyRequest_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyRequest getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyRequest.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyRequest build() {
+        com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyRequest result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyRequest buildPartial() {
+        com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyRequest result = new com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyRequest(this);
+        result.agentCrn_ = agentCrn_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyRequest) {
+          return mergeFrom((com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyRequest)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyRequest other) {
+        if (other == com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyRequest.getDefaultInstance()) return this;
+        if (!other.getAgentCrn().isEmpty()) {
+          agentCrn_ = other.agentCrn_;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyRequest parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyRequest) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private java.lang.Object agentCrn_ = "";
+      /**
+       * <pre>
+       * The agentCrn
+       * </pre>
+       *
+       * <code>string agentCrn = 1;</code>
+       */
+      public java.lang.String getAgentCrn() {
+        java.lang.Object ref = agentCrn_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          agentCrn_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The agentCrn
+       * </pre>
+       *
+       * <code>string agentCrn = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getAgentCrnBytes() {
+        java.lang.Object ref = agentCrn_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          agentCrn_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The agentCrn
+       * </pre>
+       *
+       * <code>string agentCrn = 1;</code>
+       */
+      public Builder setAgentCrn(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        agentCrn_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The agentCrn
+       * </pre>
+       *
+       * <code>string agentCrn = 1;</code>
+       */
+      public Builder clearAgentCrn() {
+        
+        agentCrn_ = getDefaultInstance().getAgentCrn();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The agentCrn
+       * </pre>
+       *
+       * <code>string agentCrn = 1;</code>
+       */
+      public Builder setAgentCrnBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        agentCrn_ = value;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFieldsProto3(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:clusterconnectivitymanagementv2.RotateAgentAccessKeyRequest)
+    }
+
+    // @@protoc_insertion_point(class_scope:clusterconnectivitymanagementv2.RotateAgentAccessKeyRequest)
+    private static final com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyRequest DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyRequest();
+    }
+
+    public static com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyRequest getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<RotateAgentAccessKeyRequest>
+        PARSER = new com.google.protobuf.AbstractParser<RotateAgentAccessKeyRequest>() {
+      @java.lang.Override
+      public RotateAgentAccessKeyRequest parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new RotateAgentAccessKeyRequest(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<RotateAgentAccessKeyRequest> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<RotateAgentAccessKeyRequest> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyRequest getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface RotateAgentAccessKeyResponseOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:clusterconnectivitymanagementv2.RotateAgentAccessKeyResponse)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>.clusterconnectivitymanagementv2.InvertingProxyAgent invertingProxyAgent = 1;</code>
+     */
+    boolean hasInvertingProxyAgent();
+    /**
+     * <code>.clusterconnectivitymanagementv2.InvertingProxyAgent invertingProxyAgent = 1;</code>
+     */
+    com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgent getInvertingProxyAgent();
+    /**
+     * <code>.clusterconnectivitymanagementv2.InvertingProxyAgent invertingProxyAgent = 1;</code>
+     */
+    com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgentOrBuilder getInvertingProxyAgentOrBuilder();
+  }
+  /**
+   * Protobuf type {@code clusterconnectivitymanagementv2.RotateAgentAccessKeyResponse}
+   */
+  public  static final class RotateAgentAccessKeyResponse extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:clusterconnectivitymanagementv2.RotateAgentAccessKeyResponse)
+      RotateAgentAccessKeyResponseOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use RotateAgentAccessKeyResponse.newBuilder() to construct.
+    private RotateAgentAccessKeyResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private RotateAgentAccessKeyResponse() {
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private RotateAgentAccessKeyResponse(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgent.Builder subBuilder = null;
+              if (invertingProxyAgent_ != null) {
+                subBuilder = invertingProxyAgent_.toBuilder();
+              }
+              invertingProxyAgent_ = input.readMessage(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgent.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(invertingProxyAgent_);
+                invertingProxyAgent_ = subBuilder.buildPartial();
+              }
+
+              break;
+            }
+            default: {
+              if (!parseUnknownFieldProto3(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.internal_static_clusterconnectivitymanagementv2_RotateAgentAccessKeyResponse_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.internal_static_clusterconnectivitymanagementv2_RotateAgentAccessKeyResponse_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyResponse.class, com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyResponse.Builder.class);
+    }
+
+    public static final int INVERTINGPROXYAGENT_FIELD_NUMBER = 1;
+    private com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgent invertingProxyAgent_;
+    /**
+     * <code>.clusterconnectivitymanagementv2.InvertingProxyAgent invertingProxyAgent = 1;</code>
+     */
+    public boolean hasInvertingProxyAgent() {
+      return invertingProxyAgent_ != null;
+    }
+    /**
+     * <code>.clusterconnectivitymanagementv2.InvertingProxyAgent invertingProxyAgent = 1;</code>
+     */
+    public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgent getInvertingProxyAgent() {
+      return invertingProxyAgent_ == null ? com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgent.getDefaultInstance() : invertingProxyAgent_;
+    }
+    /**
+     * <code>.clusterconnectivitymanagementv2.InvertingProxyAgent invertingProxyAgent = 1;</code>
+     */
+    public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgentOrBuilder getInvertingProxyAgentOrBuilder() {
+      return getInvertingProxyAgent();
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (invertingProxyAgent_ != null) {
+        output.writeMessage(1, getInvertingProxyAgent());
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (invertingProxyAgent_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, getInvertingProxyAgent());
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyResponse)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyResponse other = (com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyResponse) obj;
+
+      boolean result = true;
+      result = result && (hasInvertingProxyAgent() == other.hasInvertingProxyAgent());
+      if (hasInvertingProxyAgent()) {
+        result = result && getInvertingProxyAgent()
+            .equals(other.getInvertingProxyAgent());
+      }
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (hasInvertingProxyAgent()) {
+        hash = (37 * hash) + INVERTINGPROXYAGENT_FIELD_NUMBER;
+        hash = (53 * hash) + getInvertingProxyAgent().hashCode();
+      }
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyResponse parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyResponse parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyResponse parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyResponse parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyResponse parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyResponse parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyResponse parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyResponse parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyResponse parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyResponse parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyResponse parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyResponse parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyResponse prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code clusterconnectivitymanagementv2.RotateAgentAccessKeyResponse}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:clusterconnectivitymanagementv2.RotateAgentAccessKeyResponse)
+        com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyResponseOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.internal_static_clusterconnectivitymanagementv2_RotateAgentAccessKeyResponse_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.internal_static_clusterconnectivitymanagementv2_RotateAgentAccessKeyResponse_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyResponse.class, com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyResponse.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyResponse.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        if (invertingProxyAgentBuilder_ == null) {
+          invertingProxyAgent_ = null;
+        } else {
+          invertingProxyAgent_ = null;
+          invertingProxyAgentBuilder_ = null;
+        }
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.internal_static_clusterconnectivitymanagementv2_RotateAgentAccessKeyResponse_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyResponse getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyResponse.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyResponse build() {
+        com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyResponse result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyResponse buildPartial() {
+        com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyResponse result = new com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyResponse(this);
+        if (invertingProxyAgentBuilder_ == null) {
+          result.invertingProxyAgent_ = invertingProxyAgent_;
+        } else {
+          result.invertingProxyAgent_ = invertingProxyAgentBuilder_.build();
+        }
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyResponse) {
+          return mergeFrom((com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyResponse)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyResponse other) {
+        if (other == com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyResponse.getDefaultInstance()) return this;
+        if (other.hasInvertingProxyAgent()) {
+          mergeInvertingProxyAgent(other.getInvertingProxyAgent());
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyResponse parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyResponse) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgent invertingProxyAgent_ = null;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgent, com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgent.Builder, com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgentOrBuilder> invertingProxyAgentBuilder_;
+      /**
+       * <code>.clusterconnectivitymanagementv2.InvertingProxyAgent invertingProxyAgent = 1;</code>
+       */
+      public boolean hasInvertingProxyAgent() {
+        return invertingProxyAgentBuilder_ != null || invertingProxyAgent_ != null;
+      }
+      /**
+       * <code>.clusterconnectivitymanagementv2.InvertingProxyAgent invertingProxyAgent = 1;</code>
+       */
+      public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgent getInvertingProxyAgent() {
+        if (invertingProxyAgentBuilder_ == null) {
+          return invertingProxyAgent_ == null ? com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgent.getDefaultInstance() : invertingProxyAgent_;
+        } else {
+          return invertingProxyAgentBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>.clusterconnectivitymanagementv2.InvertingProxyAgent invertingProxyAgent = 1;</code>
+       */
+      public Builder setInvertingProxyAgent(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgent value) {
+        if (invertingProxyAgentBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          invertingProxyAgent_ = value;
+          onChanged();
+        } else {
+          invertingProxyAgentBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <code>.clusterconnectivitymanagementv2.InvertingProxyAgent invertingProxyAgent = 1;</code>
+       */
+      public Builder setInvertingProxyAgent(
+          com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgent.Builder builderForValue) {
+        if (invertingProxyAgentBuilder_ == null) {
+          invertingProxyAgent_ = builderForValue.build();
+          onChanged();
+        } else {
+          invertingProxyAgentBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <code>.clusterconnectivitymanagementv2.InvertingProxyAgent invertingProxyAgent = 1;</code>
+       */
+      public Builder mergeInvertingProxyAgent(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgent value) {
+        if (invertingProxyAgentBuilder_ == null) {
+          if (invertingProxyAgent_ != null) {
+            invertingProxyAgent_ =
+              com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgent.newBuilder(invertingProxyAgent_).mergeFrom(value).buildPartial();
+          } else {
+            invertingProxyAgent_ = value;
+          }
+          onChanged();
+        } else {
+          invertingProxyAgentBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <code>.clusterconnectivitymanagementv2.InvertingProxyAgent invertingProxyAgent = 1;</code>
+       */
+      public Builder clearInvertingProxyAgent() {
+        if (invertingProxyAgentBuilder_ == null) {
+          invertingProxyAgent_ = null;
+          onChanged();
+        } else {
+          invertingProxyAgent_ = null;
+          invertingProxyAgentBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <code>.clusterconnectivitymanagementv2.InvertingProxyAgent invertingProxyAgent = 1;</code>
+       */
+      public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgent.Builder getInvertingProxyAgentBuilder() {
+        
+        onChanged();
+        return getInvertingProxyAgentFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.clusterconnectivitymanagementv2.InvertingProxyAgent invertingProxyAgent = 1;</code>
+       */
+      public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgentOrBuilder getInvertingProxyAgentOrBuilder() {
+        if (invertingProxyAgentBuilder_ != null) {
+          return invertingProxyAgentBuilder_.getMessageOrBuilder();
+        } else {
+          return invertingProxyAgent_ == null ?
+              com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgent.getDefaultInstance() : invertingProxyAgent_;
+        }
+      }
+      /**
+       * <code>.clusterconnectivitymanagementv2.InvertingProxyAgent invertingProxyAgent = 1;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgent, com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgent.Builder, com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgentOrBuilder> 
+          getInvertingProxyAgentFieldBuilder() {
+        if (invertingProxyAgentBuilder_ == null) {
+          invertingProxyAgentBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgent, com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgent.Builder, com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgentOrBuilder>(
+                  getInvertingProxyAgent(),
+                  getParentForChildren(),
+                  isClean());
+          invertingProxyAgent_ = null;
+        }
+        return invertingProxyAgentBuilder_;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFieldsProto3(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:clusterconnectivitymanagementv2.RotateAgentAccessKeyResponse)
+    }
+
+    // @@protoc_insertion_point(class_scope:clusterconnectivitymanagementv2.RotateAgentAccessKeyResponse)
+    private static final com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyResponse DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyResponse();
+    }
+
+    public static com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyResponse getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<RotateAgentAccessKeyResponse>
+        PARSER = new com.google.protobuf.AbstractParser<RotateAgentAccessKeyResponse>() {
+      @java.lang.Override
+      public RotateAgentAccessKeyResponse parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new RotateAgentAccessKeyResponse(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<RotateAgentAccessKeyResponse> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<RotateAgentAccessKeyResponse> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyResponse getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_clusterconnectivitymanagementv2_CreateOrGetInvertingProxyRequest_descriptor;
   private static final 
@@ -11457,6 +13005,16 @@ public final class ClusterConnectivityManagementV2Proto {
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_clusterconnectivitymanagementv2_ListAgentsResponse_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_clusterconnectivitymanagementv2_RotateAgentAccessKeyRequest_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_clusterconnectivitymanagementv2_RotateAgentAccessKeyRequest_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_clusterconnectivitymanagementv2_RotateAgentAccessKeyResponse_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_clusterconnectivitymanagementv2_RotateAgentAccessKeyResponse_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -11491,45 +13049,55 @@ public final class ClusterConnectivityManagementV2Proto {
       "OfFailure\030\003 \001(\t\022\035\n\013certificate\030\004 \001(\tB\010\210\265" +
       "\030\001\370\265\030\001\022\033\n\rcaCertificate\030\005 \001(\tB\004\210\265\030\001\"-\n\006S" +
       "tatus\022\014\n\010CREATING\020\000\022\t\n\005READY\020\001\022\n\n\006FAILED" +
-      "\020\002\"\236\001\n\023InvertingProxyAgent\022\020\n\010agentCrn\030\001" +
+      "\020\002\"\326\001\n\023InvertingProxyAgent\022\020\n\010agentCrn\030\001" +
       " \001(\t\022\"\n\024encipheredPrivateKey\030\002 \001(\tB\004\210\265\030\001" +
       "\022\035\n\013certificate\030\003 \001(\tB\010\210\265\030\001\370\265\030\001\022\026\n\016envir" +
       "onmentCrn\030\004 \001(\t\022\032\n\014certificates\030\005 \003(\tB\004\210" +
-      "\265\030\001\"\212\001\n\021ListAgentsRequest\022\020\n\010pageSize\030\001 " +
-      "\001(\005\022$\n\tpageToken\030\002 \001(\0132\021.paging.PageToke" +
-      "n\022\023\n\taccountId\030\003 \001(\tH\000\022\030\n\016environmentCrn" +
-      "\030\004 \001(\tH\000B\016\n\014filter_oneof\"\204\001\n\022ListAgentsR" +
-      "esponse\022(\n\rnextPageToken\030\001 \001(\0132\021.paging." +
-      "PageToken\022D\n\006agents\030\002 \003(\01324.clusterconne" +
-      "ctivitymanagementv2.InvertingProxyAgent2" +
-      "\314\007\n\037ClusterConnectivityManagementV2\022A\n\nG" +
-      "etVersion\022\027.version.VersionRequest\032\030.ver" +
-      "sion.VersionResponse\"\000\022\244\001\n\031CreateOrGetIn" +
-      "vertingProxy\022A.clusterconnectivitymanage" +
-      "mentv2.CreateOrGetInvertingProxyRequest\032" +
-      "B.clusterconnectivitymanagementv2.Create" +
-      "OrGetInvertingProxyResponse\"\000\022\225\001\n\024Remove" +
-      "InvertingProxy\022<.clusterconnectivitymana" +
-      "gementv2.RemoveInvertingProxyRequest\032=.c" +
-      "lusterconnectivitymanagementv2.RemoveInv" +
-      "ertingProxyResponse\"\000\022\200\001\n\rRegisterAgent\022" +
-      "5.clusterconnectivitymanagementv2.Regist" +
-      "erAgentRequest\0326.clusterconnectivitymana" +
-      "gementv2.RegisterAgentResponse\"\000\022\206\001\n\017Unr" +
-      "egisterAgent\0227.clusterconnectivitymanage" +
-      "mentv2.UnregisterAgentRequest\0328.clusterc" +
-      "onnectivitymanagementv2.UnregisterAgentR" +
-      "esponse\"\000\022w\n\nListAgents\0222.clusterconnect" +
-      "ivitymanagementv2.ListAgentsRequest\0323.cl" +
-      "usterconnectivitymanagementv2.ListAgents" +
-      "Response\"\000\022\241\001\n\030GetAllAgentsCertificates\022" +
-      "@.clusterconnectivitymanagementv2.GetAll" +
-      "AgentsCertificatesRequest\032A.clusterconne" +
-      "ctivitymanagementv2.GetAllAgentsCertific" +
-      "atesResponse\"\000B\203\001\n@com.cloudera.thunderh" +
-      "ead.service.clusterconnectivitymanagemen" +
-      "tv2B$ClusterConnectivityManagementV2Prot" +
-      "oZ\031com/cloudera/cdp/protobufb\006proto3"
+      "\265\030\001\022\023\n\013accessKeyId\030\006 \001(\t\022!\n\023encipheredAc" +
+      "cessKey\030\007 \001(\tB\004\200\265\030\001\"\212\001\n\021ListAgentsReques" +
+      "t\022\020\n\010pageSize\030\001 \001(\005\022$\n\tpageToken\030\002 \001(\0132\021" +
+      ".paging.PageToken\022\023\n\taccountId\030\003 \001(\tH\000\022\030" +
+      "\n\016environmentCrn\030\004 \001(\tH\000B\016\n\014filter_oneof" +
+      "\"\204\001\n\022ListAgentsResponse\022(\n\rnextPageToken" +
+      "\030\001 \001(\0132\021.paging.PageToken\022D\n\006agents\030\002 \003(" +
+      "\01324.clusterconnectivitymanagementv2.Inve" +
+      "rtingProxyAgent\"/\n\033RotateAgentAccessKeyR" +
+      "equest\022\020\n\010agentCrn\030\001 \001(\t\"q\n\034RotateAgentA" +
+      "ccessKeyResponse\022Q\n\023invertingProxyAgent\030" +
+      "\001 \001(\01324.clusterconnectivitymanagementv2." +
+      "InvertingProxyAgent2\344\010\n\037ClusterConnectiv" +
+      "ityManagementV2\022A\n\nGetVersion\022\027.version." +
+      "VersionRequest\032\030.version.VersionResponse" +
+      "\"\000\022\244\001\n\031CreateOrGetInvertingProxy\022A.clust" +
+      "erconnectivitymanagementv2.CreateOrGetIn" +
+      "vertingProxyRequest\032B.clusterconnectivit" +
+      "ymanagementv2.CreateOrGetInvertingProxyR" +
+      "esponse\"\000\022\225\001\n\024RemoveInvertingProxy\022<.clu" +
+      "sterconnectivitymanagementv2.RemoveInver" +
+      "tingProxyRequest\032=.clusterconnectivityma" +
+      "nagementv2.RemoveInvertingProxyResponse\"" +
+      "\000\022\200\001\n\rRegisterAgent\0225.clusterconnectivit" +
+      "ymanagementv2.RegisterAgentRequest\0326.clu" +
+      "sterconnectivitymanagementv2.RegisterAge" +
+      "ntResponse\"\000\022\206\001\n\017UnregisterAgent\0227.clust" +
+      "erconnectivitymanagementv2.UnregisterAge" +
+      "ntRequest\0328.clusterconnectivitymanagemen" +
+      "tv2.UnregisterAgentResponse\"\000\022w\n\nListAge" +
+      "nts\0222.clusterconnectivitymanagementv2.Li" +
+      "stAgentsRequest\0323.clusterconnectivityman" +
+      "agementv2.ListAgentsResponse\"\000\022\241\001\n\030GetAl" +
+      "lAgentsCertificates\022@.clusterconnectivit" +
+      "ymanagementv2.GetAllAgentsCertificatesRe" +
+      "quest\032A.clusterconnectivitymanagementv2." +
+      "GetAllAgentsCertificatesResponse\"\000\022\225\001\n\024R" +
+      "otateAgentAccessKey\022<.clusterconnectivit" +
+      "ymanagementv2.RotateAgentAccessKeyReques" +
+      "t\032=.clusterconnectivitymanagementv2.Rota" +
+      "teAgentAccessKeyResponse\"\000B\203\001\n@com.cloud" +
+      "era.thunderhead.service.clusterconnectiv" +
+      "itymanagementv2B$ClusterConnectivityMana" +
+      "gementV2ProtoZ\031com/cloudera/cdp/protobuf" +
+      "b\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -11617,7 +13185,7 @@ public final class ClusterConnectivityManagementV2Proto {
     internal_static_clusterconnectivitymanagementv2_InvertingProxyAgent_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_clusterconnectivitymanagementv2_InvertingProxyAgent_descriptor,
-        new java.lang.String[] { "AgentCrn", "EncipheredPrivateKey", "Certificate", "EnvironmentCrn", "Certificates", });
+        new java.lang.String[] { "AgentCrn", "EncipheredPrivateKey", "Certificate", "EnvironmentCrn", "Certificates", "AccessKeyId", "EncipheredAccessKey", });
     internal_static_clusterconnectivitymanagementv2_ListAgentsRequest_descriptor =
       getDescriptor().getMessageTypes().get(12);
     internal_static_clusterconnectivitymanagementv2_ListAgentsRequest_fieldAccessorTable = new
@@ -11630,9 +13198,22 @@ public final class ClusterConnectivityManagementV2Proto {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_clusterconnectivitymanagementv2_ListAgentsResponse_descriptor,
         new java.lang.String[] { "NextPageToken", "Agents", });
+    internal_static_clusterconnectivitymanagementv2_RotateAgentAccessKeyRequest_descriptor =
+      getDescriptor().getMessageTypes().get(14);
+    internal_static_clusterconnectivitymanagementv2_RotateAgentAccessKeyRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_clusterconnectivitymanagementv2_RotateAgentAccessKeyRequest_descriptor,
+        new java.lang.String[] { "AgentCrn", });
+    internal_static_clusterconnectivitymanagementv2_RotateAgentAccessKeyResponse_descriptor =
+      getDescriptor().getMessageTypes().get(15);
+    internal_static_clusterconnectivitymanagementv2_RotateAgentAccessKeyResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_clusterconnectivitymanagementv2_RotateAgentAccessKeyResponse_descriptor,
+        new java.lang.String[] { "InvertingProxyAgent", });
     com.google.protobuf.ExtensionRegistry registry =
         com.google.protobuf.ExtensionRegistry.newInstance();
     registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.deprecated);
+    registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.sensitive);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.skipLogging);
     com.google.protobuf.Descriptors.FileDescriptor
         .internalUpdateFileDescriptor(descriptor, registry);

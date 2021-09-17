@@ -14,6 +14,10 @@ public class CcmV2ParameterConstants {
 
     public static final String CCMV2_AGENT_KEY_ID = "ccmV2AgentKeyId";
 
+    public static final String CCMV2_AGENT_MACHINE_USER_ACCESS_KEY = "ccmV2AgentMachineUserAccessKey";
+
+    public static final String CCMV2_AGENT_MACHINE_USER_ENCIPHERED_ACCESS_KEY = "ccmV2AgentMachineUserEncipheredAccessKey";
+
     public static final String CCMV2_AGENT_CRN = "ccmV2AgentCrn";
 
     public static final String CCMV2_AGENT_BACKEND_ID_PREFIX = "ccmV2AgentBackendIdPrefix";

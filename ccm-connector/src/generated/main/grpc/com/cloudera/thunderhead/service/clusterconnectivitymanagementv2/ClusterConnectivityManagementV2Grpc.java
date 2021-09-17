@@ -289,6 +289,43 @@ public final class ClusterConnectivityManagementV2Grpc {
      }
      return getGetAllAgentsCertificatesMethod;
   }
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @java.lang.Deprecated // Use {@link #getRotateAgentAccessKeyMethod()} instead. 
+  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyRequest,
+      com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyResponse> METHOD_ROTATE_AGENT_ACCESS_KEY = getRotateAgentAccessKeyMethodHelper();
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyRequest,
+      com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyResponse> getRotateAgentAccessKeyMethod;
+
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyRequest,
+      com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyResponse> getRotateAgentAccessKeyMethod() {
+    return getRotateAgentAccessKeyMethodHelper();
+  }
+
+  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyRequest,
+      com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyResponse> getRotateAgentAccessKeyMethodHelper() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyRequest, com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyResponse> getRotateAgentAccessKeyMethod;
+    if ((getRotateAgentAccessKeyMethod = ClusterConnectivityManagementV2Grpc.getRotateAgentAccessKeyMethod) == null) {
+      synchronized (ClusterConnectivityManagementV2Grpc.class) {
+        if ((getRotateAgentAccessKeyMethod = ClusterConnectivityManagementV2Grpc.getRotateAgentAccessKeyMethod) == null) {
+          ClusterConnectivityManagementV2Grpc.getRotateAgentAccessKeyMethod = getRotateAgentAccessKeyMethod = 
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyRequest, com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(
+                  "clusterconnectivitymanagementv2.ClusterConnectivityManagementV2", "RotateAgentAccessKey"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyResponse.getDefaultInstance()))
+                  .setSchemaDescriptor(new ClusterConnectivityManagementV2MethodDescriptorSupplier("RotateAgentAccessKey"))
+                  .build();
+          }
+        }
+     }
+     return getRotateAgentAccessKeyMethod;
+  }
 
   /**
    * Creates a new async stub that supports all call types for the service
@@ -392,6 +429,16 @@ public final class ClusterConnectivityManagementV2Grpc {
       asyncUnimplementedUnaryCall(getGetAllAgentsCertificatesMethodHelper(), responseObserver);
     }
 
+    /**
+     * <pre>
+     * RotateAgentAccessKey for rotating workload machine user key pair
+     * </pre>
+     */
+    public void rotateAgentAccessKey(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getRotateAgentAccessKeyMethodHelper(), responseObserver);
+    }
+
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
       return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
           .addMethod(
@@ -443,6 +490,13 @@ public final class ClusterConnectivityManagementV2Grpc {
                 com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.GetAllAgentsCertificatesRequest,
                 com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.GetAllAgentsCertificatesResponse>(
                   this, METHODID_GET_ALL_AGENTS_CERTIFICATES)))
+          .addMethod(
+            getRotateAgentAccessKeyMethodHelper(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyRequest,
+                com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyResponse>(
+                  this, METHODID_ROTATE_AGENT_ACCESS_KEY)))
           .build();
     }
   }
@@ -546,6 +600,17 @@ public final class ClusterConnectivityManagementV2Grpc {
       asyncUnaryCall(
           getChannel().newCall(getGetAllAgentsCertificatesMethodHelper(), getCallOptions()), request, responseObserver);
     }
+
+    /**
+     * <pre>
+     * RotateAgentAccessKey for rotating workload machine user key pair
+     * </pre>
+     */
+    public void rotateAgentAccessKey(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getRotateAgentAccessKeyMethodHelper(), getCallOptions()), request, responseObserver);
+    }
   }
 
   /**
@@ -639,6 +704,16 @@ public final class ClusterConnectivityManagementV2Grpc {
     public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.GetAllAgentsCertificatesResponse getAllAgentsCertificates(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.GetAllAgentsCertificatesRequest request) {
       return blockingUnaryCall(
           getChannel(), getGetAllAgentsCertificatesMethodHelper(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * RotateAgentAccessKey for rotating workload machine user key pair
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyResponse rotateAgentAccessKey(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getRotateAgentAccessKeyMethodHelper(), getCallOptions(), request);
     }
   }
 
@@ -741,6 +816,17 @@ public final class ClusterConnectivityManagementV2Grpc {
       return futureUnaryCall(
           getChannel().newCall(getGetAllAgentsCertificatesMethodHelper(), getCallOptions()), request);
     }
+
+    /**
+     * <pre>
+     * RotateAgentAccessKey for rotating workload machine user key pair
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyResponse> rotateAgentAccessKey(
+        com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getRotateAgentAccessKeyMethodHelper(), getCallOptions()), request);
+    }
   }
 
   private static final int METHODID_GET_VERSION = 0;
@@ -750,6 +836,7 @@ public final class ClusterConnectivityManagementV2Grpc {
   private static final int METHODID_UNREGISTER_AGENT = 4;
   private static final int METHODID_LIST_AGENTS = 5;
   private static final int METHODID_GET_ALL_AGENTS_CERTIFICATES = 6;
+  private static final int METHODID_ROTATE_AGENT_ACCESS_KEY = 7;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -795,6 +882,10 @@ public final class ClusterConnectivityManagementV2Grpc {
         case METHODID_GET_ALL_AGENTS_CERTIFICATES:
           serviceImpl.getAllAgentsCertificates((com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.GetAllAgentsCertificatesRequest) request,
               (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.GetAllAgentsCertificatesResponse>) responseObserver);
+          break;
+        case METHODID_ROTATE_AGENT_ACCESS_KEY:
+          serviceImpl.rotateAgentAccessKey((com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyResponse>) responseObserver);
           break;
         default:
           throw new AssertionError();
@@ -864,6 +955,7 @@ public final class ClusterConnectivityManagementV2Grpc {
               .addMethod(getUnregisterAgentMethodHelper())
               .addMethod(getListAgentsMethodHelper())
               .addMethod(getGetAllAgentsCertificatesMethodHelper())
+              .addMethod(getRotateAgentAccessKeyMethodHelper())
               .build();
         }
       }

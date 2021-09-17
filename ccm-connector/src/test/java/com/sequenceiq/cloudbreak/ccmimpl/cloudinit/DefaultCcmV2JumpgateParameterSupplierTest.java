@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.ccmimpl.cloudinit;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -10,6 +12,8 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -18,7 +22,6 @@ import com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterC
 import com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgent;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmV2JumpgateParameters;
-import com.sequenceiq.cloudbreak.ccm.exception.CcmException;
 import com.sequenceiq.cloudbreak.ccmimpl.ccmv2.CcmV2ManagementClient;
 
 @ExtendWith(MockitoExtension.class)
@@ -40,19 +43,15 @@ class DefaultCcmV2JumpgateParameterSupplierTest {
     @Mock
     private CcmV2ManagementClient ccmV2Client;
 
-    @Test
-    public void testGetCcmV2JumpgateParameters() throws CcmException {
+    @ParameterizedTest
+    @ValueSource(booleans = { false, true })
+    void testGetCcmV2JumpgateParameters(boolean singleWayTls) {
         String gatewayDomain = "test.gateway.domain";
         InvertingProxy mockInvertingProxy = InvertingProxy.newBuilder()
                 .setHostname("invertingProxyHost")
                 .setCertificate("invertingProxyCertificate")
                 .build();
-        InvertingProxyAgent mockInvertingProxyAgent = InvertingProxyAgent.newBuilder()
-                .setAgentCrn("invertingProxyAgentCrn")
-                .setEnvironmentCrn(TEST_ENVIRONMENT_CRN)
-                .setCertificate("invertingProxyAgentCertificate")
-                .setEncipheredPrivateKey("invertingProxyAgentEncipheredKey")
-                .build();
+        InvertingProxyAgent mockInvertingProxyAgent = getInvertingProxyAgent(singleWayTls);
 
         when(ccmV2Client.awaitReadyInvertingProxyForAccount(anyString(), anyString())).thenReturn(mockInvertingProxy);
         when(ccmV2Client.registerInvertingProxyAgent(anyString(), anyString(), any(Optional.class), anyString(), anyString()))
@@ -63,10 +62,78 @@ class DefaultCcmV2JumpgateParameterSupplierTest {
         assertNotNull(resultParameters, "CCMV2 Jumpgate Parameters should not be null");
 
         assertEquals("invertingProxyAgentCrn", resultParameters.getAgentCrn(), "AgentCRN should match");
-        assertEquals("invertingProxyAgentCertificate", resultParameters.getAgentCertificate(), "AgentCertificate should match");
-        assertEquals("invertingProxyAgentEncipheredKey", resultParameters.getAgentEncipheredPrivateKey(), "AgentEncipheredPrivateKey should match");
         assertEquals("invertingProxyHost", resultParameters.getInvertingProxyHost(), "InvertingProxyHost should match");
         assertEquals("invertingProxyCertificate", resultParameters.getInvertingProxyCertificate(), "InvertingProxyCertificate should match");
         assertEquals(TEST_RESOURCE_ID, resultParameters.getAgentKeyId(), "AgentKeyId should match");
+    }
+
+    private void assertAgentCertOrMachineUser(CcmV2JumpgateParameters resultParameters, boolean singleWayTls) {
+        if (singleWayTls) {
+            assertThat(resultParameters.getAgentCertificate())
+                    .withFailMessage("AgentCertificate should be null for one-way TLS")
+                    .isNullOrEmpty();
+            assertThat(resultParameters.getAgentEncipheredPrivateKey())
+                    .withFailMessage("AgentEncipheredPrivateKey should be null for one-way TLS")
+                    .isNullOrEmpty();
+            assertEquals("invertingProxyAgentMachineUserAccessKey",
+                    resultParameters.getAgentMachineUserAccessKey(),
+                    "AgentMachineUserAccessKey should match");
+            assertEquals("invertingProxyAgentMachineUserEncipheredAccessKey",
+                    resultParameters.getAgentMachineUserEncipheredAccessKey(),
+                    "AgentMachineUserEncipheredAccessKey should match");
+        } else {
+            assertEquals("invertingProxyAgentCertificate", resultParameters.getAgentCertificate(),
+                    "AgentCertificate should match");
+            assertEquals("invertingProxyAgentEncipheredKey", resultParameters.getAgentEncipheredPrivateKey(),
+                    "AgentEncipheredPrivateKey should match");
+            assertThat(resultParameters.getAgentMachineUserAccessKey())
+                    .withFailMessage("AgentMachineUserAccessKey should be null for two-way TLS")
+                    .isNullOrEmpty();
+            assertThat(resultParameters.getAgentMachineUserEncipheredAccessKey())
+                    .withFailMessage("AgentMachineUserEncipheredAccessKey should be null for two-way TLS")
+                    .isNullOrEmpty();
+        }
+    }
+
+    private InvertingProxyAgent getInvertingProxyAgent(boolean singleWayTls) {
+        InvertingProxyAgent.Builder mockInvertingProxyAgentBuilder = InvertingProxyAgent.newBuilder()
+                .setAgentCrn("invertingProxyAgentCrn")
+                .setEnvironmentCrn(TEST_ENVIRONMENT_CRN);
+        if (singleWayTls) {
+            mockInvertingProxyAgentBuilder
+                    .setAccessKeyId("invertingProxyAgentMachineUserAccessKey")
+                    .setEncipheredAccessKey("invertingProxyAgentMachineUserEncipheredAccessKey");
+        } else {
+            mockInvertingProxyAgentBuilder
+                    .setCertificate("invertingProxyAgentCertificate")
+                    .setEncipheredPrivateKey("invertingProxyAgentEncipheredKey");
+
+        }
+        return mockInvertingProxyAgentBuilder.build();
+    }
+
+    @Test
+    void testInvertingProxyReturnsOnlyEncipheredAccessKey() {
+        String gatewayDomain = "test.gateway.domain";
+        InvertingProxy mockInvertingProxy = InvertingProxy.newBuilder()
+                .setHostname("invertingProxyHost")
+                .setCertificate("invertingProxyCertificate")
+                .build();
+        InvertingProxyAgent mockInvertingProxyAgent = InvertingProxyAgent.newBuilder()
+                .setAgentCrn("invertingProxyAgentCrn")
+                .setEnvironmentCrn(TEST_ENVIRONMENT_CRN)
+                .setCertificate("invertingProxyAgentCertificate")
+                .setEncipheredPrivateKey("invertingProxyAgentEncipheredKey")
+                .setEncipheredAccessKey("invertingProxyAgentMachineUserEncipheredAccessKey")
+                .build();
+
+        when(ccmV2Client.awaitReadyInvertingProxyForAccount(anyString(), anyString())).thenReturn(mockInvertingProxy);
+        when(ccmV2Client.registerInvertingProxyAgent(anyString(), anyString(), any(Optional.class), anyString(), anyString()))
+                .thenReturn(mockInvertingProxyAgent);
+
+        assertThatThrownBy(() -> underTest.getCcmV2Parameters(TEST_ACCOUNT_ID, Optional.of(TEST_ENVIRONMENT_CRN), gatewayDomain,
+                Crn.fromString(TEST_CLUSTER_CRN).getResource()))
+                .hasMessage("InvertingProxyAgent Access Key is not present but Enciphered Access Key is initialized. Error in inverting proxy logic.")
+                .isInstanceOf(IllegalArgumentException.class);
     }
 }

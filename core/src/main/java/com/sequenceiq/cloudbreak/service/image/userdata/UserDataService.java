@@ -36,8 +36,6 @@ public class UserDataService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserDataService.class);
 
-    private static final int CCM_KEY_ID_LENGTH = 36;
-
     @Inject
     private UserDataBuilder userDataBuilder;
 
