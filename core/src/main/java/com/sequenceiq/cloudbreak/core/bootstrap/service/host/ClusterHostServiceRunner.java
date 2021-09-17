@@ -364,6 +364,7 @@ public class ClusterHostServiceRunner {
         saveDockerPillar(cluster.getExecutorType(), servicePillar);
 
         Map<String, Map<String, String>> mountPathMap = stack.getInstanceGroups().stream().flatMap(group -> group.getInstanceMetaDataSet().stream()
+                .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null)
                 .collect(Collectors.toMap(
                         InstanceMetaData::getDiscoveryFQDN,
                         node -> singletonMap("mount_path", getMountPath(group)),
