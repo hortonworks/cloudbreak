@@ -1,15 +1,15 @@
 package com.sequenceiq.cloudbreak.cmtemplate;
 
+import java.util.Objects;
+import java.util.Optional;
+
 import com.sequenceiq.cloudbreak.auth.altus.model.Entitlement;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.cruisecontrol.CruiseControlRoles;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
 
-import java.util.Objects;
-import java.util.Optional;
-
 public enum BlackListedDownScaleRole implements EntitledForServiceScale {
     KAFKA_BROKER(Entitlement.DATAHUB_STREAMING_SCALING, "7.2.12", CruiseControlRoles.CRUISECONTROL),
-    NIFI_NODE(Entitlement.DATAHUB_FLOW_SCALING),
+    NIFI_NODE(Entitlement.DATAHUB_FLOW_SCALING, "7.2.11"),
     ZEPPELIN_SERVER(Entitlement.DATAHUB_DEFAULT_SCALING),
     NAMENODE(Entitlement.DATAHUB_DEFAULT_SCALING);
 
