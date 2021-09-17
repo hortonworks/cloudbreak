@@ -12,6 +12,13 @@
     - source: salt://postgresql/disaster_recovery/scripts/restore_db.sh
     - template: jinja
 
+/opt/salt/scripts/backup_and_restore_dh.sh:
+  file.managed:
+    - makedirs: True
+    - mode: 750
+    - source: salt://postgresql/disaster_recovery/scripts/backup_and_restore_dh.sh
+    - template: jinja
+
 /opt/salt/postgresql/.pgpass:
   file.managed:
     - makedirs: True
