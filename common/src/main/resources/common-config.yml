@@ -10,6 +10,6 @@ altus:
         endpoint: https://cloudera-dbus-stage.s3.amazonaws.com
 telemetry:
   cdpTelemetry:
-    desiredVersion: 0.4.14
+    desiredVersion: 0.4.15
   cdpLoggingAgent:
     desiredVersion: 0.2.11
