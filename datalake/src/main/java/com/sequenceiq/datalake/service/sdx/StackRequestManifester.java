@@ -148,7 +148,7 @@ public class StackRequestManifester {
             setupCloudStorageAccountMapping(stackRequest, environment.getCrn(), environment.getIdBrokerMappingSource(), environment.getCloudPlatform());
             validateCloudStorage(sdxCluster, environment, stackRequest);
             setupInstanceVolumeEncryption(stackRequest, environment);
-            if (entitlementService.awsNativeDataLakeEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
+            if (entitlementService.awsNativeDataLakeEnabled(ThreadBasedUserCrnProvider.getAccountId()) && sdxCluster.isEnableMultiAz()) {
                 multiAzDecorator.decorateStackRequestWithMultiAz(stackRequest, environment);
             }
             return stackRequest;

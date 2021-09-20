@@ -127,6 +127,8 @@ public class SdxCluster implements AccountAwareResource {
     @Column(name = "ranger_raz_enabled")
     private boolean rangerRazEnabled;
 
+    private boolean enableMultiAz;
+
     @Convert(converter = CertExpirationStateConverter.class)
     private CertExpirationState certExpirationState = CertExpirationState.VALID;
 
@@ -339,6 +341,14 @@ public class SdxCluster implements AccountAwareResource {
         this.certExpirationState = certExpirationState;
     }
 
+    public boolean isEnableMultiAz() {
+        return enableMultiAz;
+    }
+
+    public void setEnableMultiAz(boolean enableMultiAz) {
+        this.enableMultiAz = enableMultiAz;
+    }
+
     public SdxDatabaseAvailabilityType getDatabaseAvailabilityType() {
         if (databaseAvailabilityType != null) {
             return databaseAvailabilityType;
@@ -413,6 +423,7 @@ public class SdxCluster implements AccountAwareResource {
                 Objects.equals(created, that.created) &&
                 Objects.equals(databaseCrn, that.databaseCrn) &&
                 Objects.equals(cloudStorageBaseLocation, that.cloudStorageBaseLocation) &&
+                Objects.equals(enableMultiAz, that.enableMultiAz) &&
                 cloudStorageFileSystemType == that.cloudStorageFileSystemType &&
                 databaseAvailabilityType == that.databaseAvailabilityType &&
                 rangerRazEnabled == that.rangerRazEnabled &&
@@ -424,7 +435,7 @@ public class SdxCluster implements AccountAwareResource {
     public int hashCode() {
         return Objects.hash(id, accountId, crn, clusterName, initiatorUserCrn, envName, envCrn, stackCrn, clusterShape, tags, stackId, stackRequest,
                 stackRequestToCloudbreak, deleted, created, createDatabase, databaseCrn, cloudStorageBaseLocation, cloudStorageFileSystemType,
-                databaseAvailabilityType, rangerRazEnabled, certExpirationState, sdxClusterServiceVersion);
+                databaseAvailabilityType, rangerRazEnabled, certExpirationState, sdxClusterServiceVersion, enableMultiAz);
     }
 
     @Override
@@ -442,6 +453,7 @@ public class SdxCluster implements AccountAwareResource {
                 ", rangerRazEnabled=" + rangerRazEnabled +
                 ", certExpirationState=" + certExpirationState +
                 ", sdxClusterServiceVersion=" + sdxClusterServiceVersion +
+                ", enableMultiAz=" + enableMultiAz +
                 '}';
     }
 
