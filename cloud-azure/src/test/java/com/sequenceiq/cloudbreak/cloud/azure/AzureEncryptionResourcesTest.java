@@ -37,6 +37,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.microsoft.azure.keyvault.models.KeyAttributes;
+import com.microsoft.azure.keyvault.models.KeyBundle;
+import com.microsoft.azure.keyvault.webkey.JsonWebKey;
 import com.microsoft.azure.management.compute.DiskEncryptionSetIdentityType;
 import com.microsoft.azure.management.compute.DiskEncryptionSetType;
 import com.microsoft.azure.management.compute.EncryptionSetIdentity;
@@ -216,11 +219,54 @@ public class AzureEncryptionResourcesTest {
     }
 
     @Test
+    public void testCreateDiskEncryptionSetShouldCheckEncryptionKeyExistenceOnCloudAndThrowExistenceError() {
+        DiskEncryptionSetCreationRequest requestedSet = new DiskEncryptionSetCreationRequest.Builder()
+                .withId("uniqueId")
+                .withCloudCredential(cloudCredential)
+                .withCloudContext(cloudContext)
+                .withDiskEncryptionSetResourceGroupName("dummyResourceGroup")
+                .withTags(new HashMap<>())
+                .withEncryptionKeyUrl("https://dummyVaultName.vault.azure.net/wrongKey")
+                .build();
+        when(azureClientService.createAuthenticatedContext(cloudContext, cloudCredential)).thenReturn(authenticatedContext);
+        when(authenticatedContext.getParameter(AzureClient.class)).thenReturn(azureClient);
+        initExceptionConversion();
+
+        verifyException(IllegalArgumentException.class, () -> underTest.createDiskEncryptionSet(requestedSet),
+                "Key specified with keyUrl 'https://dummyVaultName.vault.azure.net/wrongKey' - either does not exist or insufficient" +
+                        " permissions to access it. Please ensure that the key exists and user has 'List' permissions on the keyVault dummyVaultName");
+    }
+
+    @Test
+    public void testCreateDiskEncryptionSetShouldCheckEncryptionKeyExistenceOnCloudAndThrowEnabledError() {
+        DiskEncryptionSetCreationRequest requestedSet = new DiskEncryptionSetCreationRequest.Builder()
+                .withId("uniqueId")
+                .withCloudCredential(cloudCredential)
+                .withCloudContext(cloudContext)
+                .withDiskEncryptionSetResourceGroupName("dummyResourceGroup")
+                .withEncryptionKeyResourceGroupName("dummyResourceGroup")
+                .withTags(new HashMap<>())
+                .withEncryptionKeyUrl("https://dummyVaultName.vault.azure.net/keys/dummyKeyName/dummyKeyVersion")
+                .build();
+        when(azureClientService.createAuthenticatedContext(cloudContext, cloudCredential)).thenReturn(authenticatedContext);
+        when(authenticatedContext.getParameter(AzureClient.class)).thenReturn(azureClient);
+        when(azureClient.checkEncryptionKeyExistenceOnCloud(any(String.class), any(String.class), any(String.class)))
+                .thenReturn(new KeyBundle()
+                        .withAttributes((KeyAttributes) new KeyAttributes().withEnabled(Boolean.FALSE))
+                        .withKey(new JsonWebKey().withKid("https://dummyVaultName.vault.azure.net/keys/dummyKeyName/dummyKeyVersion")));
+        initExceptionConversion();
+
+        verifyException(IllegalArgumentException.class, () -> underTest.createDiskEncryptionSet(requestedSet),
+                "keyName dummyKeyName is not enabled to be used for encryption. Please 'enable' the key using Azure portal.");
+    }
+
+    @Test
     public void testCreateDiskEncryptionSetShouldMakeCloudCallAndThrowException() {
         DiskEncryptionSetCreationRequest requestedSet = new DiskEncryptionSetCreationRequest.Builder()
                 .withId("uniqueId")
                 .withCloudCredential(cloudCredential)
                 .withCloudContext(cloudContext)
+                .withEncryptionKeyResourceGroupName("dummyResourceGroup")
                 .withDiskEncryptionSetResourceGroupName("dummyResourceGroup")
                 .withTags(new HashMap<>())
                 .withEncryptionKeyUrl("https://dummyVaultName.vault.azure.net/keys/dummyKeyName/dummyKeyVersion")
@@ -230,6 +276,8 @@ public class AzureEncryptionResourcesTest {
         when(azureUtils.generateDesNameByNameAndId("envName-DES-", "uniqueId")).thenReturn("dummyEnvName-DES-uniqueId");
         when(azureClientService.createAuthenticatedContext(cloudContext, cloudCredential)).thenReturn(authenticatedContext);
         when(authenticatedContext.getParameter(AzureClient.class)).thenReturn(azureClient);
+        when(azureClient.checkEncryptionKeyExistenceOnCloud(any(String.class), any(String.class), any(String.class)))
+                .thenReturn(new KeyBundle().withAttributes((KeyAttributes) new KeyAttributes().withEnabled(Boolean.TRUE)));
         initExceptionConversion();
         when(azureClient.getCurrentSubscription()).thenReturn(subscription);
 
@@ -263,6 +311,8 @@ public class AzureEncryptionResourcesTest {
                 .withTags(new HashMap<>());
         ReflectionTestUtils.setField(des, "id", DES_RESOURCE_ID);
         Subscription subscription = mock(Subscription.class);
+        when(azureClient.checkEncryptionKeyExistenceOnCloud(any(String.class), any(String.class), any(String.class)))
+                .thenReturn(new KeyBundle().withAttributes((KeyAttributes) new KeyAttributes().withEnabled(Boolean.TRUE)));
         when(persistenceNotifier.notifyAllocation(any(CloudResource.class), eq(cloudContext))).thenReturn(new ResourcePersisted());
         when(subscription.subscriptionId()).thenReturn("dummySubscriptionId");
         when(azureUtils.generateDesNameByNameAndId(any(String.class), any(String.class))).thenReturn("dummyEnvName-DES-uniqueId");
@@ -353,6 +403,8 @@ public class AzureEncryptionResourcesTest {
                 .withTags(new HashMap<>());
         ReflectionTestUtils.setField(desAfterPolling, "id", DES_RESOURCE_ID);
         Subscription subscription = mock(Subscription.class);
+        when(azureClient.checkEncryptionKeyExistenceOnCloud(any(String.class), any(String.class), any(String.class)))
+                .thenReturn(new KeyBundle().withAttributes((KeyAttributes) new KeyAttributes().withEnabled(Boolean.TRUE)));
         when(persistenceNotifier.notifyAllocation(any(CloudResource.class), eq(cloudContext))).thenReturn(new ResourcePersisted());
         when(subscription.subscriptionId()).thenReturn("dummySubscriptionId");
         when(azureUtils.generateDesNameByNameAndId(any(String.class), any(String.class))).thenReturn("dummyEnvName-DES-uniqueId");
@@ -402,6 +454,8 @@ public class AzureEncryptionResourcesTest {
                 .withTags(new HashMap<>());
         ReflectionTestUtils.setField(des, "id", DES_RESOURCE_ID);
         Subscription subscription = mock(Subscription.class);
+        when(azureClient.checkEncryptionKeyExistenceOnCloud(any(String.class), any(String.class), any(String.class)))
+                .thenReturn(new KeyBundle().withAttributes((KeyAttributes) new KeyAttributes().withEnabled(Boolean.TRUE)));
         when(persistenceNotifier.notifyAllocation(any(CloudResource.class), eq(cloudContext))).thenReturn(new ResourcePersisted());
         when(subscription.subscriptionId()).thenReturn("dummySubscriptionId");
         when(azureUtils.generateDesNameByNameAndId(any(String.class), any(String.class))).thenReturn("dummyEnvName-DES-uniqueId");
@@ -449,6 +503,8 @@ public class AzureEncryptionResourcesTest {
                 .withTags(new HashMap<>());
         ReflectionTestUtils.setField(des, "id", DES_RESOURCE_ID);
         Subscription subscription = mock(Subscription.class);
+        when(azureClient.checkEncryptionKeyExistenceOnCloud(any(String.class), any(String.class), any(String.class)))
+                .thenReturn(new KeyBundle().withAttributes((KeyAttributes) new KeyAttributes().withEnabled(Boolean.TRUE)));
         when(persistenceNotifier.notifyAllocation(any(CloudResource.class), eq(cloudContext))).thenReturn(new ResourcePersisted());
         when(subscription.subscriptionId()).thenReturn("dummySubscriptionId");
         when(azureUtils.generateDesNameByNameAndId(any(String.class), any(String.class))).thenReturn("dummyEnvName-DES-uniqueId");
@@ -496,6 +552,8 @@ public class AzureEncryptionResourcesTest {
                 .withTags(new HashMap<>());
         ReflectionTestUtils.setField(des, "id", DES_RESOURCE_ID);
         Subscription subscription = mock(Subscription.class);
+        when(azureClient.checkEncryptionKeyExistenceOnCloud(any(String.class), any(String.class), any(String.class)))
+                .thenReturn(new KeyBundle().withAttributes((KeyAttributes) new KeyAttributes().withEnabled(Boolean.TRUE)));
         when(persistenceNotifier.notifyAllocation(any(CloudResource.class), eq(cloudContext))).thenReturn(new ResourcePersisted());
         when(subscription.subscriptionId()).thenReturn("dummySubscriptionId");
         when(azureUtils.generateDesNameByNameAndId(any(String.class), any(String.class))).thenReturn("dummyEnvName-DES-uniqueId");
@@ -562,6 +620,8 @@ public class AzureEncryptionResourcesTest {
         ResourceGroup resourceGroup = mock(ResourceGroup.class);
         ReflectionTestUtils.setField(des, "id", DES_RESOURCE_ID);
         Subscription subscription = mock(Subscription.class);
+        when(azureClient.checkEncryptionKeyExistenceOnCloud(any(String.class), any(String.class), any(String.class)))
+                .thenReturn(new KeyBundle().withAttributes((KeyAttributes) new KeyAttributes().withEnabled(Boolean.TRUE)));
         when(persistenceNotifier.notifyAllocation(any(CloudResource.class), eq(cloudContext))).thenReturn(new ResourcePersisted());
         when(subscription.subscriptionId()).thenReturn("dummySubscriptionId");
         when(azureUtils.generateDesNameByNameAndId(any(String.class), any(String.class))).thenReturn("dummyEnvName-DES-uniqueId");

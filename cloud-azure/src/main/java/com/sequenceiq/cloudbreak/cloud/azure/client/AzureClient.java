@@ -31,6 +31,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.microsoft.azure.CloudException;
 import com.microsoft.azure.PagedList;
+import com.microsoft.azure.keyvault.models.KeyBundle;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.compute.AvailabilitySet;
 import com.microsoft.azure.management.compute.CachingTypes;
@@ -103,8 +104,8 @@ import com.microsoft.azure.storage.blob.CopyState;
 import com.microsoft.azure.storage.blob.ListBlobItem;
 import com.sequenceiq.cloudbreak.client.ProviderAuthenticationFailedException;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType;
-import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureMarketplaceImage;
 import com.sequenceiq.cloudbreak.cloud.azure.AzurePrivateDnsZoneServiceEnum;
+import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureMarketplaceImage;
 import com.sequenceiq.cloudbreak.cloud.azure.status.AzureStatusMapper;
 import com.sequenceiq.cloudbreak.cloud.azure.util.AzureAuthExceptionHandler;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -1021,4 +1022,12 @@ public class AzureClient {
         return azureClientCredentials.getAccesToken();
     }
 
+    public KeyBundle checkEncryptionKeyExistenceOnCloud(String encryptionKeyUrl, String keyVaultName, String keyVaultResourceGroupName) {
+        return handleAuthException(() -> {
+            return azure.vaults()
+                    .getByResourceGroup(keyVaultResourceGroupName, keyVaultName)
+                    .client()
+                    .getKey(encryptionKeyUrl);
+        });
+    }
 }
