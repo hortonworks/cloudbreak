@@ -284,7 +284,7 @@ public class StackOperationService {
 
     private boolean isStopNeeded(Stack stack) {
         boolean result = true;
-        StopRestrictionReason reason = stackStopRestrictionService.isInfrastructureStoppable(stack.getCloudPlatform(), stack.getInstanceGroups());
+        StopRestrictionReason reason = stackStopRestrictionService.isInfrastructureStoppable(stack);
         if (stack.isStopped()) {
             eventService.fireCloudbreakEvent(stack.getId(), STOPPED.name(), STACK_STOP_IGNORED);
             result = false;

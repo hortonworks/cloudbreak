@@ -484,7 +484,7 @@ public class ClusterOperationService {
     }
 
     private FlowIdentifier stop(Stack stack, Cluster cluster) {
-        StopRestrictionReason reason = stackStopRestrictionService.isInfrastructureStoppable(stack.getCloudPlatform(), stack.getInstanceGroups());
+        StopRestrictionReason reason = stackStopRestrictionService.isInfrastructureStoppable(stack);
         FlowIdentifier flowIdentifier = FlowIdentifier.notTriggered();
         if (cluster.isStopped()) {
             eventService.fireCloudbreakEvent(stack.getId(), stack.getStatus().name(), CLUSTER_STOP_IGNORED);
