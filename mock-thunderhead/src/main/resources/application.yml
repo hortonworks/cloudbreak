@@ -14,7 +14,7 @@ auth:
     event-generation:
       expiration-minutes: 10
     freeipa:
-      multiaz.enable: false
+      multiaz.enable: true
       ha:
         repair.enable: true
     cloudstoragevalidation.enable:
@@ -40,7 +40,7 @@ auth:
       loadbalancer.enable: false
       backup.on.upgrade.enable: false
       light.to.medium.migration.enable: false
-      multiaz.enable: false
+      multiaz.enable: true
     differentdatahubversionthandatalake.enabled: true
     database.wire.encryption.enable: true
     datahub:

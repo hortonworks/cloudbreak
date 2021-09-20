@@ -638,14 +638,16 @@ class SdxServiceTest {
     static Object[][] razCloudPlatformDataProvider() {
         return new Object[][]{
                 // testCaseName cloudPlatform
-                {"CloudPlatform.AWS", CloudPlatform.AWS},
-                {"CloudPlatform.AZURE", CloudPlatform.AZURE}
+                {"CloudPlatform.AWS multiaz=true", CloudPlatform.AWS, true},
+                {"CloudPlatform.AWS multiaz=false", CloudPlatform.AWS, false},
+                {"CloudPlatform.AZURE multiaz=false", CloudPlatform.AZURE, false}
         };
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("razCloudPlatformDataProvider")
-    void testSdxCreateRazNotRequested(String testCaseName, CloudPlatform cloudPlatform) throws IOException, TransactionExecutionException {
+    void testSdxCreateRazNotRequestedAndMultiAzRequested(String testCaseName, CloudPlatform cloudPlatform, boolean multiAz)
+            throws IOException, TransactionExecutionException {
         when(transactionService.required(isA(Supplier.class))).thenAnswer(invocation -> invocation.getArgument(0, Supplier.class).get());
         String lightDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.1.0/aws/light_duty.json");
         when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(lightDutyJson, StackV4Request.class));
@@ -662,6 +664,7 @@ class SdxServiceTest {
         when(clock.getCurrentTimeMillis()).thenReturn(1L);
         mockEnvironmentCall(sdxClusterRequest, cloudPlatform, null);
         sdxClusterRequest.setEnableRangerRaz(false);
+        sdxClusterRequest.setEnableMultiAz(multiAz);
         Pair<SdxCluster, FlowIdentifier> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                 underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
         SdxCluster createdSdxCluster = result.getLeft();
@@ -670,6 +673,7 @@ class SdxServiceTest {
         verify(sdxClusterRepository, times(1)).save(captor.capture());
         SdxCluster capturedSdx = captor.getValue();
         assertFalse(capturedSdx.isRangerRazEnabled());
+        assertEquals(multiAz, capturedSdx.isEnableMultiAz());
     }
 
     static Object[][] razCloudPlatformAndRuntimeDataProvider() {

@@ -41,6 +41,8 @@ public class SdxClusterResponse {
 
     private boolean rangerRazEnabled;
 
+    private boolean enableMultiAz;
+
     private Map<String, String> tags;
 
     @ApiModelProperty(ClusterModelDescription.CERT_EXPIRATION)
@@ -58,7 +60,7 @@ public class SdxClusterResponse {
             SdxClusterShape clusterShape, String cloudStorageBaseLocation,
             FileSystemType cloudStorageFileSystemType, String runtime,
             boolean rangerRazEnabled, Map<String, String> tags, CertExpirationState certExpirationState,
-            String sdxClusterServiceVersion, boolean detached) {
+            String sdxClusterServiceVersion, boolean detached, boolean enableMultiAz) {
         this.crn = crn;
         this.name = name;
         this.status = status;
@@ -75,6 +77,7 @@ public class SdxClusterResponse {
         this.certExpirationState = certExpirationState;
         this.sdxClusterServiceVersion = sdxClusterServiceVersion;
         this.detached = detached;
+        this.enableMultiAz = enableMultiAz;
     }
 
     public String getCrn() {
@@ -229,6 +232,14 @@ public class SdxClusterResponse {
         this.detached = detached;
     }
 
+    public boolean isEnableMultiAz() {
+        return enableMultiAz;
+    }
+
+    public void setEnableMultiAz(boolean enableMultiAz) {
+        this.enableMultiAz = enableMultiAz;
+    }
+
     @Override
     public String toString() {
         return "SdxClusterResponse{" +
@@ -251,6 +262,7 @@ public class SdxClusterResponse {
                 ", certExpirationState=" + certExpirationState +
                 ", sdxClusterServiceVersion=" + sdxClusterServiceVersion +
                 ", Detached=" + detached +
+                ", enableMultiAz=" + enableMultiAz +
                 '}';
     }
 }

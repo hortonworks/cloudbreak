@@ -341,8 +341,13 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
         String runtimeVersion = getRuntime(sdxClusterRequest, internalStackV4Request, imageV4Response);
         validateCcmV2Requirement(environment, runtimeVersion);
 
-        SdxCluster sdxCluster = validateAndCreateNewSdxCluster(userCrn, name, runtimeVersion,
-                sdxClusterRequest.getClusterShape(), sdxClusterRequest.isEnableRangerRaz(), environment);
+        SdxCluster sdxCluster = validateAndCreateNewSdxCluster(userCrn,
+                name,
+                runtimeVersion,
+                sdxClusterRequest.getClusterShape(),
+                sdxClusterRequest.isEnableRangerRaz(),
+                sdxClusterRequest.isEnableMultiAz(),
+                environment);
         setTagsSafe(sdxClusterRequest, sdxCluster);
 
         if (isCloudStorageConfigured(sdxClusterRequest)) {
@@ -403,8 +408,12 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
         DetailedEnvironmentResponse environment = validateAndGetEnvironment(environmentName);
 
         SdxCluster newSdxCluster = validateAndCreateNewSdxCluster(userCrn,
-                clusterName + SDX_RESIZE_NAME_SUFFIX, sdxCluster.getRuntime(), shape,
-                sdxCluster.isRangerRazEnabled(), environment);
+                clusterName + SDX_RESIZE_NAME_SUFFIX,
+                sdxCluster.getRuntime(),
+                shape,
+                sdxCluster.isRangerRazEnabled(),
+                sdxCluster.isEnableMultiAz(),
+                environment);
         newSdxCluster.setTags(sdxCluster.getTags());
 
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
@@ -432,9 +441,11 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
             String runtime,
             SdxClusterShape shape,
             boolean razEnabled,
+            boolean enableMultiAz,
             DetailedEnvironmentResponse environmentResponse) {
         validateMicroDutySdxEnablement(shape, runtime, environmentResponse);
         validateMediumDutySdxEnablement(shape, runtime, environmentResponse);
+        validateMultiAz(enableMultiAz, environmentResponse);
         SdxCluster newSdxCluster = new SdxCluster();
         newSdxCluster.setInitiatorUserCrn(userCrn);
         newSdxCluster.setCrn(createCrn(getAccountIdFromCrn(userCrn)));
@@ -447,7 +458,22 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
         newSdxCluster.setSdxClusterServiceVersion(sdxClusterServiceVersion);
         newSdxCluster.setRangerRazEnabled(razEnabled);
         newSdxCluster.setRuntime(runtime);
+        newSdxCluster.setEnableMultiAz(enableMultiAz);
         return newSdxCluster;
+    }
+
+    private void validateMultiAz(boolean enableMultiAz, DetailedEnvironmentResponse environmentResponse) {
+        ValidationResultBuilder validationBuilder = new ValidationResultBuilder();
+        if (enableMultiAz) {
+            if (!environmentResponse.getCloudPlatform().equals(AWS.name())) {
+                validationBuilder.error(String.format("Provisioning a multi AZ cluster is only enabled for AWS."));
+            }
+        }
+        ValidationResult validationResult = validationBuilder.build();
+        if (validationResult.hasError()) {
+            throw new BadRequestException(validationResult.getFormattedErrors());
+        }
+
     }
 
     private void validateEnv(DetailedEnvironmentResponse environment) {
