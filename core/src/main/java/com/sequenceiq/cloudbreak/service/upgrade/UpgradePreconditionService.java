@@ -67,7 +67,7 @@ public class UpgradePreconditionService {
 
     private boolean notUsingEphemeralVolume(Stack stack) {
         return !StopRestrictionReason.EPHEMERAL_VOLUMES
-                .equals(stackStopRestrictionService.isInfrastructureStoppable(stack.getCloudPlatform(), stack.getInstanceGroups()));
+                .equals(stackStopRestrictionService.isInfrastructureStoppable(stack));
     }
 
     private boolean notRunsOnSpotInstances(Stack stack) {
