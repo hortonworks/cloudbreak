@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.microsoft.azure.keyvault.models.KeyBundle;
 import com.microsoft.azure.management.compute.implementation.DiskEncryptionSetInner;
 import com.microsoft.azure.management.resources.ResourceGroup;
 import com.sequenceiq.cloudbreak.cloud.EncryptionResources;
@@ -80,18 +81,20 @@ public class AzureEncryptionResources implements EncryptionResources {
     @Override
     public CreatedDiskEncryptionSet createDiskEncryptionSet(DiskEncryptionSetCreationRequest diskEncryptionSetCreationRequest) {
         try {
-            String vaultName;
+            String encryptionKeyUrl = diskEncryptionSetCreationRequest.getEncryptionKeyUrl();
             AuthenticatedContext authenticatedContext = azureClientService.createAuthenticatedContext(diskEncryptionSetCreationRequest.getCloudContext(),
                     diskEncryptionSetCreationRequest.getCloudCredential());
             AzureClient azureClient = authenticatedContext.getParameter(AzureClient.class);
 
-            Matcher matcher = ENCRYPTION_KEY_URL_VAULT_NAME.matcher(diskEncryptionSetCreationRequest.getEncryptionKeyUrl());
+            String vaultName;
+            Matcher matcher = ENCRYPTION_KEY_URL_VAULT_NAME.matcher(encryptionKeyUrl);
             if (matcher.matches()) {
                 vaultName = matcher.group(1);
             } else {
                 throw new IllegalArgumentException("vaultName cannot be fetched from encryptionKeyUrl. encryptionKeyUrl should be of format - " +
                         "'https://<vaultName>.vault.azure.net/keys/<keyName>/<keyVersion>'");
             }
+
             boolean singleResourceGroup = Boolean.TRUE;
             String vaultResourceGroupName = diskEncryptionSetCreationRequest.getEncryptionKeyResourceGroupName();
             String desResourceGroupName = diskEncryptionSetCreationRequest.getDiskEncryptionSetResourceGroupName();
@@ -105,6 +108,18 @@ public class AzureEncryptionResources implements EncryptionResources {
                 desResourceGroupName = azureUtils.generateResourceGroupNameByNameAndId(
                         String.format("%s-CDP_DES-", diskEncryptionSetCreationRequest.getCloudContext().getName()),
                         diskEncryptionSetCreationRequest.getId());
+            }
+
+            KeyBundle key = azureClient.checkEncryptionKeyExistenceOnCloud(encryptionKeyUrl, vaultName, vaultResourceGroupName);
+            if (key != null && key.attributes() != null) {
+                if (!key.attributes().enabled()) {
+                    throw new IllegalArgumentException(String.format("keyName %s is not enabled to be used for encryption. " +
+                            "Please 'enable' the key using Azure portal.", key.keyIdentifier().name()));
+                }
+            } else {
+                throw new IllegalArgumentException(String.format("Key specified with keyUrl '%s' - either does not exist or " +
+                                "insufficient permissions to access it. Please ensure that the key exists and user has 'List' permissions on the keyVault %s",
+                        encryptionKeyUrl, vaultName));
             }
 
             String sourceVaultId = String.format("/subscriptions/%s/resourceGroups/%s/providers/Microsoft.KeyVault/vaults/%s",
