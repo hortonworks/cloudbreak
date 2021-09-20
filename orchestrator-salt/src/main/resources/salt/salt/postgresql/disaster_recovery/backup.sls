@@ -6,7 +6,7 @@ include:
 {% if 'None' != configure_remote_db %}
 backup_postgresql_db:
   cmd.run:
-    - name: /opt/salt/scripts/backup_db.sh {{salt['pillar.get']('disaster_recovery:object_storage_url')}} {{salt['pillar.get']('postgres:remote_db_url')}} {{salt['pillar.get']('postgres:remote_db_port')}} {{salt['pillar.get']('postgres:remote_admin')}} {{salt['pillar.get']('disaster_recovery:ranger_admin_group')}} {{salt['pillar.get']('disaster_recovery:close_connections')}} {{salt['pillar.get']('disaster_recovery:database_name') or ''}}
+    - name: /opt/salt/scripts/backup_db.sh {{salt['pillar.get']('disaster_recovery:object_storage_url')}} {{salt['pillar.get']('postgres:clouderamanager:remote_db_url')}} {{salt['pillar.get']('postgres:clouderamanager:remote_db_port')}} {{salt['pillar.get']('postgres:clouderamanager:remote_admin')}} {{salt['pillar.get']('disaster_recovery:ranger_admin_group')}} {{salt['pillar.get']('disaster_recovery:close_connections')}} {{salt['pillar.get']('disaster_recovery:database_name') or ''}}
     - require:
       - sls: postgresql.disaster_recovery
 
