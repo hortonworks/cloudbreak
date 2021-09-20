@@ -36,7 +36,6 @@ import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractStackAction;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.EphemeralClusterFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.downscale.ClusterDownscaleFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.maintenance.MaintenanceModeValidationFlowConfig;
@@ -101,7 +100,6 @@ public class OfflineStateGenerator {
                     new ClusterTerminationFlowConfig(),
                     new ClusterUpgradeFlowConfig(),
                     new ClusterUpscaleFlowConfig(),
-                    new EphemeralClusterFlowConfig(),
                     new InstanceTerminationFlowConfig(),
                     new ManualStackRepairTriggerFlowConfig(),
                     new StackCreationFlowConfig(),
