@@ -13,6 +13,8 @@ public class ApiExceptionRetryPolicy implements RetryPolicy {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApiExceptionRetryPolicy.class);
 
+    private static final String REGEX_5XX = "5\\d{2}";
+
     private static final int DEFAULT_MAX_ATTEMPTS = 5;
 
     private volatile int maxAttempts;
@@ -64,10 +66,19 @@ public class ApiExceptionRetryPolicy implements RetryPolicy {
     }
 
     private boolean handleStatusCodeNotZero(RetryContext context, int code) {
-        HttpStatus httpStatus = HttpStatus.valueOf(code);
-        boolean httpStatus5xxServerError = httpStatus.is5xxServerError();
+        boolean httpStatus5xxServerError = isHttpStatus5xxServerError(code);
         LOGGER.warn("{} Exception occurred during CM API call, retryable: {} ({}/{})", code, httpStatus5xxServerError, context.getRetryCount(), maxAttempts);
         return httpStatus5xxServerError;
+    }
+
+    private boolean isHttpStatus5xxServerError(int code) {
+        try {
+            HttpStatus httpStatus = HttpStatus.valueOf(code);
+            return httpStatus.is5xxServerError();
+        } catch (IllegalArgumentException e) {
+            LOGGER.error(String.format("HTTP response status cannot be recognized, possibly it is a custom HTTP status (not specified in any RFCs): %d", code));
+            return String.valueOf(code).matches(REGEX_5XX);
+        }
     }
 
     private boolean handleNotApiException(Throwable lastThrowable) {
