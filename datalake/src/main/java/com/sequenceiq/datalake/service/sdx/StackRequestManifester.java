@@ -19,11 +19,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.KeyEncryptionMethod;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.YarnStackV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsEncryptionV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AzureEncryptionV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AzureInstanceTemplateV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.GcpEncryptionV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.GcpInstanceTemplateV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.StackAuthenticationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
@@ -62,6 +65,8 @@ import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkYar
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceEncryptionParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpEnvironmentParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpResourceEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SecurityAccessResponse;
 
@@ -373,6 +378,25 @@ public class StackRequestManifester {
                     }
                     azure.getEncryption().setType(EncryptionType.CUSTOM);
                     azure.getEncryption().setDiskEncryptionSetId(diskEncryptionSetId.get());
+                });
+            }
+        } else if (CloudPlatform.GCP.name().equals(environmentResponse.getCloudPlatform())) {
+            String encryptionKey = Optional.of(environmentResponse)
+                    .map(DetailedEnvironmentResponse::getGcp)
+                    .map(GcpEnvironmentParameters::getGcpResourceEncryptionParameters)
+                    .map(GcpResourceEncryptionParameters::getEncryptionKey)
+                    .orElse(null);
+            if (encryptionKey != null) {
+                stackRequest.getInstanceGroups().forEach(ig -> {
+                    GcpInstanceTemplateV4Parameters gcp = ig.getTemplate().createGcp();
+                    GcpEncryptionV4Parameters encryption = gcp.getEncryption();
+                    if (encryption == null) {
+                        encryption = new GcpEncryptionV4Parameters();
+                        gcp.setEncryption(encryption);
+                    }
+                    gcp.getEncryption().setType(EncryptionType.CUSTOM);
+                    gcp.getEncryption().setKey(encryptionKey);
+                    gcp.getEncryption().setKeyEncryptionMethod(KeyEncryptionMethod.KMS);
                 });
             }
         }

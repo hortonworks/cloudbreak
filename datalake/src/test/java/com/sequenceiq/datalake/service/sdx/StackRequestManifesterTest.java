@@ -27,6 +27,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AzureEncryptionV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AzureInstanceTemplateV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.GcpEncryptionV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.GcpInstanceTemplateV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
@@ -47,6 +49,8 @@ import com.sequenceiq.common.model.CloudIdentityType;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceEncryptionParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpEnvironmentParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpResourceEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @ExtendWith(MockitoExtension.class)
@@ -370,6 +374,94 @@ public class StackRequestManifesterTest {
     }
 
     @Test
+    void setupInstanceVolumeEncryptionTestWhenGcpAndEncryptionKeyIsNotPresent() {
+        DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
+        envResponse.setCloudPlatform(CloudPlatform.GCP.name());
+
+        underTest.setupInstanceVolumeEncryption(stackV4Request, envResponse);
+
+        verify(stackV4Request, never()).getInstanceGroups();
+    }
+
+    @Test
+    void setupInstanceVolumeEncryptionTestWhenGcpAndEncryptionKeyAndNoInstanceGroups() {
+        DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
+        envResponse.setCloudPlatform(CloudPlatform.GCP.name());
+        envResponse.setGcp(GcpEnvironmentParameters.builder()
+                .withResourceEncryptionParameters(GcpResourceEncryptionParameters.builder()
+                        .withEncryptionKey(ENCRYPTION_KEY)
+                        .build())
+                .build());
+
+        List<InstanceGroupV4Request> instanceGroups = new ArrayList<>();
+        when(stackV4Request.getInstanceGroups()).thenReturn(instanceGroups);
+
+        underTest.setupInstanceVolumeEncryption(stackV4Request, envResponse);
+
+        assertThat(instanceGroups).isEmpty();
+    }
+
+    @Test
+    void setupInstanceVolumeEncryptionTestWhenGcpAndEncryptionKeyAndNoInstanceTemplateParameters() {
+        DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
+        envResponse.setCloudPlatform(CloudPlatform.GCP.name());
+        envResponse.setGcp(GcpEnvironmentParameters.builder()
+                .withResourceEncryptionParameters(GcpResourceEncryptionParameters.builder()
+                        .withEncryptionKey(ENCRYPTION_KEY)
+                        .build())
+                .build());
+        InstanceGroupV4Request instanceGroupV4Request = createInstanceGroupV4Request();
+        when(stackV4Request.getInstanceGroups()).thenReturn(List.of(instanceGroupV4Request));
+
+        underTest.setupInstanceVolumeEncryption(stackV4Request, envResponse);
+
+        verifyGcpEncryption(instanceGroupV4Request.getTemplate(), EncryptionType.CUSTOM, ENCRYPTION_KEY);
+    }
+
+    @Test
+    void setupInstanceVolumeEncryptionTestWhenGcpAndEncryptionKeydAndNoEncryptionParameters() {
+        DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
+        envResponse.setCloudPlatform(CloudPlatform.GCP.name());
+        envResponse.setGcp(GcpEnvironmentParameters.builder()
+                .withResourceEncryptionParameters(GcpResourceEncryptionParameters.builder()
+                        .withEncryptionKey(ENCRYPTION_KEY)
+                        .build())
+                .build());
+        InstanceGroupV4Request instanceGroupV4Request = createInstanceGroupV4Request();
+        InstanceTemplateV4Request instanceTemplateV4Request = instanceGroupV4Request.getTemplate();
+        instanceTemplateV4Request.createGcp();
+        when(stackV4Request.getInstanceGroups()).thenReturn(List.of(instanceGroupV4Request));
+
+        underTest.setupInstanceVolumeEncryption(stackV4Request, envResponse);
+
+        verifyGcpEncryption(instanceTemplateV4Request, EncryptionType.CUSTOM, ENCRYPTION_KEY);
+    }
+
+    @Test
+    void setupInstanceVolumeEncryptionTestWhenGcpAndEncryptionKeyAndTwoInstanceGroups() {
+        DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
+        envResponse.setGcp(GcpEnvironmentParameters.builder()
+                .withResourceEncryptionParameters(GcpResourceEncryptionParameters.builder()
+                        .withEncryptionKey(ENCRYPTION_KEY)
+                        .build())
+                .build());
+        envResponse.setCloudPlatform(CloudPlatform.GCP.name());
+
+        InstanceGroupV4Request instanceGroupV4Request1 = createInstanceGroupV4Request();
+        InstanceTemplateV4Request instanceTemplateV4Request1 = instanceGroupV4Request1.getTemplate();
+
+        InstanceGroupV4Request instanceGroupV4Request2 = createInstanceGroupV4Request();
+        InstanceTemplateV4Request instanceTemplateV4Request2 = instanceGroupV4Request2.getTemplate();
+        instanceTemplateV4Request2.createGcp().setEncryption(createGcpEncryptionV4Parameters(EncryptionType.CUSTOM, ENCRYPTION_KEY));
+
+        when(stackV4Request.getInstanceGroups()).thenReturn(List.of(instanceGroupV4Request1, instanceGroupV4Request2));
+
+        underTest.setupInstanceVolumeEncryption(stackV4Request, envResponse);
+        verifyGcpEncryption(instanceTemplateV4Request1, EncryptionType.CUSTOM, ENCRYPTION_KEY);
+        verifyGcpEncryption(instanceTemplateV4Request2, EncryptionType.CUSTOM, ENCRYPTION_KEY);
+    }
+
+    @Test
     void setupInstanceVolumeEncryptionTestWhenAwsAndNoInstanceGroups() {
         DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
         envResponse.setCloudPlatform(CloudPlatform.AWS.name());
@@ -506,6 +598,23 @@ public class StackRequestManifesterTest {
         assertThat(encryption).isNotNull();
         assertThat(encryption.getType()).isEqualTo(expectedEncryptionType);
         assertThat(encryption.getDiskEncryptionSetId()).isEqualTo(expectedDiskEncryptionSetId);
+    }
+
+    private GcpEncryptionV4Parameters createGcpEncryptionV4Parameters(EncryptionType encryptionType, String encryptionKey) {
+        GcpEncryptionV4Parameters gcpEncryptionV4Parameters = new GcpEncryptionV4Parameters();
+        gcpEncryptionV4Parameters.setType(encryptionType);
+        gcpEncryptionV4Parameters.setKey(encryptionKey);
+        return gcpEncryptionV4Parameters;
+    }
+
+    private void verifyGcpEncryption(InstanceTemplateV4Request instanceTemplateV4Request, EncryptionType expectedEncryptionType,
+            String expectedEncryptionKey) {
+        GcpInstanceTemplateV4Parameters gcp = instanceTemplateV4Request.getGcp();
+        assertThat(gcp).isNotNull();
+        GcpEncryptionV4Parameters encryption = gcp.getEncryption();
+        assertThat(encryption).isNotNull();
+        assertThat(encryption.getType()).isEqualTo(expectedEncryptionType);
+        assertThat(encryption.getKey()).isEqualTo(expectedEncryptionKey);
     }
 
 }
