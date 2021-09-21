@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.common.api.telemetry.model.Features;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
+import com.sequenceiq.common.api.type.CcmV2TlsType;
 import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.model.base.CloudStorageValidation;
@@ -398,6 +399,7 @@ public class EnvironmentApiConverterTest {
         assertEquals(request.getIdBrokerMappingSource(), actual.getIdBrokerMappingSource());
         assertEquals(request.getCloudStorageValidation(), actual.getCloudStorageValidation());
         assertEquals(request.getTunnel(), actual.getTunnel());
+        assertEquals(request.getCcmV2TlsType(), actual.getCcmV2TlsType());
     }
 
     private void assertParameters(EnvironmentRequest request, ParametersDto actual, CloudPlatform cloudPlatform) {
@@ -456,6 +458,7 @@ public class EnvironmentApiConverterTest {
         request.setProxyConfigName("my-proxy");
         request.setTags(Map.of("owner", "cloudbreak"));
         request.setParentEnvironmentName("parent-env");
+        request.setCcmV2TlsType(CcmV2TlsType.ONE_WAY_TLS);
         setParameters(request, cloudPlatform);
         return request;
     }

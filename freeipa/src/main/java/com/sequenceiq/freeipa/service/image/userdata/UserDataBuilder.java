@@ -1,6 +1,8 @@
 package com.sequenceiq.freeipa.service.image.userdata;
 
 import static com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil.anonymize;
+import static com.sequenceiq.common.api.type.InstanceGroupType.isGateway;
+import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.io.BaseEncoding;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmConnectivityMode;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmConnectivityParameters;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmParameterConstants;
@@ -27,7 +30,9 @@ import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
+import com.sequenceiq.common.api.type.CcmV2TlsType;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
@@ -46,19 +51,22 @@ public class UserDataBuilder {
     @Inject
     private FreeMarkerTemplateUtils freeMarkerTemplateUtils;
 
-    public String buildUserData(String environmentCrn, Platform cloudPlatform, byte[] cbSshKeyDer, String sshUser,
+    @Inject
+    private EntitlementService entitlementService;
+
+    public String buildUserData(String accountId, DetailedEnvironmentResponse environment, Platform cloudPlatform, byte[] cbSshKeyDer, String sshUser,
             PlatformParameters parameters, String saltBootPassword, String cbCert,
             CcmConnectivityParameters ccmConnectivityParameters, ProxyConfig proxyConfig) {
-        String userData = build(environmentCrn, cloudPlatform, cbSshKeyDer, sshUser, parameters, saltBootPassword,
+        String userData = build(accountId, environment, cloudPlatform, cbSshKeyDer, sshUser, parameters, saltBootPassword,
                 cbCert, ccmConnectivityParameters, proxyConfig);
         LOGGER.debug("User data content: {}", anonymize(userData));
         return userData;
     }
 
-    private String build(String environmentCrn, Platform cloudPlatform, byte[] cbSshKeyDer, String sshUser,
+    private String build(String accountId, DetailedEnvironmentResponse environment, Platform cloudPlatform, byte[] cbSshKeyDer, String sshUser,
             PlatformParameters params, String saltBootPassword, String cbCert, CcmConnectivityParameters ccmConnectivityParameters, ProxyConfig proxyConfig) {
         Map<String, Object> model = new HashMap<>();
-        model.put("environmentCrn", environmentCrn);
+        model.put("environmentCrn", environment.getCrn());
         model.put("cloudPlatform", cloudPlatform.value());
         model.put("platformDiskPrefix", params.scriptParams().getDiskPrefix());
         model.put("platformDiskStartLabel", params.scriptParams().getStartLabel());
@@ -68,22 +76,35 @@ public class UserDataBuilder {
         model.put("customUserData", userDataBuilderParams.getCustomData());
         model.put("saltBootPassword", saltBootPassword);
         model.put("cbCert", cbCert);
-        extendModelWithCcmConnectivity(InstanceGroupType.GATEWAY, ccmConnectivityParameters, model);
+        extendModelWithCcmConnectivity(InstanceGroupType.GATEWAY, ccmConnectivityParameters, accountId, environment, model);
         extendModelWithProxyParams(proxyConfig, model);
         return build(model);
     }
 
-    private void extendModelWithCcmConnectivity(InstanceGroupType type, CcmConnectivityParameters ccmConnectivityParameters, Map<String, Object> model) {
+    private void extendModelWithCcmConnectivity(InstanceGroupType type, CcmConnectivityParameters ccmConnectivityParameters,
+            String accountId, DetailedEnvironmentResponse environment, Map<String, Object> model) {
         if (CcmConnectivityMode.CCMV1.equals(ccmConnectivityParameters.getConnectivityMode())) {
             CcmParameters.addToTemplateModel(type, ccmConnectivityParameters.getCcmParameters(), model);
         } else if (CcmConnectivityMode.CCMV2.equals(ccmConnectivityParameters.getConnectivityMode())) {
             CcmV2Parameters.addToTemplateModel(type, ccmConnectivityParameters.getCcmV2Parameters(), model);
         } else if (CcmConnectivityMode.CCMV2_JUMPGATE.equals(ccmConnectivityParameters.getConnectivityMode())) {
             CcmV2JumpgateParameters.addToTemplateModel(type, ccmConnectivityParameters.getCcmV2JumpgateParameters(), model);
+            removeIfNotEntitledOrForced(type, accountId, environment, model);
         } else {
             model.put(CcmParameterConstants.CCM_ENABLED_KEY, Boolean.FALSE);
             model.put(CcmV2ParameterConstants.CCM_V2_ENABLED_KEY, Boolean.FALSE);
             model.put(CcmV2JumpgateParameterConstants.CCM_V2_JUMPGATE_ENABLED_KEY, Boolean.FALSE);
+        }
+    }
+
+    private void removeIfNotEntitledOrForced(InstanceGroupType type, String accountId, DetailedEnvironmentResponse environment, Map<String, Object> model) {
+        if (isGateway(type)) {
+            if (CcmV2TlsType.TWO_WAY_TLS == environment.getCcmV2TlsType() ||
+                    environment.getCcmV2TlsType() == null && !entitlementService.ccmV2UseOneWayTls(accountId)) {
+
+                model.put(CcmV2ParameterConstants.CCMV2_AGENT_MACHINE_USER_ACCESS_KEY_ID, EMPTY);
+                model.put(CcmV2ParameterConstants.CCMV2_AGENT_MACHINE_USER_ENCIPHERED_ACCESS_KEY, EMPTY);
+            }
         }
     }
 

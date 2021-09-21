@@ -23,6 +23,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.backup.response.BackupResponse;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
+import com.sequenceiq.common.api.type.CcmV2TlsType;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialViewResponse;
@@ -143,6 +144,7 @@ public class EnvironmentResponseConverterTest {
         assertEquals(environment.getExperimentalFeatures().getTunnel(), actual.getTunnel());
         assertEquals(environment.getExperimentalFeatures().getIdBrokerMappingSource(), actual.getIdBrokerMappingSource());
         assertEquals(environment.getExperimentalFeatures().getCloudStorageValidation(), actual.getCloudStorageValidation());
+        assertEquals(environment.getExperimentalFeatures().getCcmV2TlsType(), actual.getCcmV2TlsType());
         assertEquals(environment.getAdminGroupName(), actual.getAdminGroupName());
         assertParameters(environment, actual, cloudPlatform);
         assertEquals(environment.getParentEnvironmentCrn(), actual.getParentEnvironmentCrn());
@@ -194,6 +196,7 @@ public class EnvironmentResponseConverterTest {
         assertEquals(environment.getStatusReason(), actual.getStatusReason());
         assertEquals(environment.getCreated(), actual.getCreated());
         assertEquals(environment.getExperimentalFeatures().getTunnel(), actual.getTunnel());
+        assertEquals(environment.getExperimentalFeatures().getCcmV2TlsType(), actual.getCcmV2TlsType());
         assertEquals(environment.getAdminGroupName(), actual.getAdminGroupName());
         assertEquals(environment.getTags().getUserDefinedTags(), actual.getTags().getUserDefined());
         assertEquals(environment.getTags().getDefaultTags(), actual.getTags().getDefaults());
@@ -358,6 +361,7 @@ public class EnvironmentResponseConverterTest {
                 .withTunnel(Tunnel.CCM)
                 .withIdBrokerMappingSource(IdBrokerMappingSource.IDBMMS)
                 .withCloudStorageValidation(CloudStorageValidation.ENABLED)
+                .withCcmV2TlsType(CcmV2TlsType.ONE_WAY_TLS)
                 .build();
     }
 

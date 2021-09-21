@@ -136,6 +136,7 @@ public class EnvironmentApiConverter {
                         .withCloudStorageValidation(request.getCloudStorageValidation())
                         .withTunnel(tunnelConverter.convert(request.getTunnel()))
                         .withOverrideTunnel(request.getOverrideTunnel())
+                        .withCcmV2TlsType(request.getCcmV2TlsType())
                         .build())
                 .withParameters(paramsToParametersDto(request, cloudPlatform))
                 .withParentEnvironmentName(request.getParentEnvironmentName())
