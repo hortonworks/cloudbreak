@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.tag;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -49,8 +50,17 @@ public class TagTemplateProcessor {
         templateModelContext.put(HandleBarModelKey.CLOUD_PLATFORM.modelKey(), model.getCloudPlatform());
         templateModelContext.put(HandleBarModelKey.RESOURCE_CRN.modelKey(), model.getResourceCrn());
         templateModelContext.put(HandleBarModelKey.USER_CRN.modelKey(), model.getUserCrn());
-        templateModelContext.put(HandleBarModelKey.USER_NAME.modelKey(), model.getUserName());
+        templateModelContext.put(HandleBarModelKey.USER_NAME.modelKey(), getUserName(model));
         templateModelContext.put(HandleBarModelKey.TIME.modelKey(), String.valueOf(clock.getCurrentInstant().getEpochSecond()));
         return templateModelContext;
+    }
+
+    /**
+     * Extract username from email, so that user@cloudera.com and user@ums.mock will have the same tag value
+     */
+    private String getUserName(TagPreparationObject model) {
+        return Optional.ofNullable(model.getUserName())
+                .map(username -> username.split("@")[0])
+                .orElse(null);
     }
 }
