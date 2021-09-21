@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.validation.ValidEnvironmentName;
 import com.sequenceiq.common.api.backup.request.BackupRequest;
 import com.sequenceiq.common.api.tag.request.TaggableRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
+import com.sequenceiq.common.api.type.CcmV2TlsType;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.doc.ModelDescriptions;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
@@ -117,6 +118,8 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
 
     @ApiModelProperty(EnvironmentModelDescription.ENVIRONMENT_SERVICE_VERSION)
     private String environmentServiceVersion;
+
+    private CcmV2TlsType ccmV2TlsType;
 
     public AttachedFreeIpaRequest getFreeIpa() {
         return freeIpa;
@@ -301,6 +304,22 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
         this.environmentServiceVersion = environmentServiceVersion;
     }
 
+    public GcpEnvironmentParameters getGcp() {
+        return gcp;
+    }
+
+    public void setGcp(GcpEnvironmentParameters gcp) {
+        this.gcp = gcp;
+    }
+
+    public CcmV2TlsType getCcmV2TlsType() {
+        return ccmV2TlsType;
+    }
+
+    public void setCcmV2TlsType(CcmV2TlsType ccmV2TlsType) {
+        this.ccmV2TlsType = ccmV2TlsType;
+    }
+
     @Override
     public String toString() {
         return "EnvironmentRequest{" +
@@ -322,17 +341,11 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
                 ", proxyConfigName='" + proxyConfigName + '\'' +
                 ", aws=" + aws +
                 ", azure=" + azure +
+                ", gcp=" + gcp +
                 ", tags=" + tags +
                 ", parentEnvironmentName='" + parentEnvironmentName + '\'' +
                 ", environmentServiceVersion='" + environmentServiceVersion + '\'' +
+                ", ccmV2TlsType='" + ccmV2TlsType + '\'' +
                 '}';
-    }
-
-    public GcpEnvironmentParameters getGcp() {
-        return gcp;
-    }
-
-    public void setGcp(GcpEnvironmentParameters gcp) {
-        this.gcp = gcp;
     }
 }

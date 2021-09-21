@@ -19,11 +19,13 @@ import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.service.GetCloudParameterException;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.freeipa.dto.Credential;
 import com.sequenceiq.freeipa.entity.SaltSecurityConfig;
 import com.sequenceiq.freeipa.entity.SecurityConfig;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.CredentialService;
+import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
 import com.sequenceiq.freeipa.service.cloud.PlatformParameterService;
 import com.sequenceiq.freeipa.service.image.ImageService;
 import com.sequenceiq.freeipa.service.stack.StackService;
@@ -57,8 +59,12 @@ public class UserDataService {
     @Inject
     private CcmUserDataService ccmUserDataService;
 
+    @Inject
+    private CachedEnvironmentClientService environmentClientService;
+
     public void createUserData(Long stackId) {
         Stack stack = stackService.getStackById(stackId);
+        DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stack.getEnvironmentCrn());
         Credential credential = credentialService.getCredentialByEnvCrn(stack.getEnvironmentCrn());
         Future<PlatformParameters> platformParametersFuture =
                 intermediateBuilderExecutor.submit(() -> platformParameterService.getPlatformParameters(stack, credential));
@@ -73,7 +79,7 @@ public class UserDataService {
             PlatformParameters platformParameters = platformParametersFuture.get();
             CcmConnectivityParameters ccmParameters = ccmUserDataService.fetchAndSaveCcmParameters(stack);
             Optional<ProxyConfig> proxyConfig = proxyConfigDtoService.getByEnvironmentCrn(stack.getEnvironmentCrn());
-            String userData = userDataBuilder.buildUserData(stack.getEnvironmentCrn(), Platform.platform(stack.getCloudPlatform()),
+            String userData = userDataBuilder.buildUserData(stack.getAccountId(), environment, Platform.platform(stack.getCloudPlatform()),
                     cbSshKeyDer, sshUser, platformParameters, saltBootPassword, cbCert, ccmParameters, proxyConfig.orElse(null));
             imageService.decorateImageWithUserDataForStack(stack, userData);
         } catch (InterruptedException | ExecutionException e) {

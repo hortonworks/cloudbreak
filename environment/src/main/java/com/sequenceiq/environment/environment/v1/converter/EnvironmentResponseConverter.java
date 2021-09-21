@@ -111,7 +111,8 @@ public class EnvironmentResponseConverter {
                 .withParentEnvironmentCrn(environmentDto.getParentEnvironmentCrn())
                 .withParentEnvironmentName(environmentDto.getParentEnvironmentName())
                 .withParentEnvironmentCloudPlatform(environmentDto.getParentEnvironmentCloudPlatform())
-                .withEnvironmentServiceVersion(environmentDto.getEnvironmentServiceVersion());
+                .withEnvironmentServiceVersion(environmentDto.getEnvironmentServiceVersion())
+                .withCcmV2TlsType(environmentDto.getExperimentalFeatures().getCcmV2TlsType());
 
         NullUtil.doIfNotNull(environmentDto.getProxyConfig(),
                 proxyConfig -> builder.withProxyConfig(proxyConfigToProxyResponseConverter.convert(environmentDto.getProxyConfig())));
@@ -149,7 +150,8 @@ public class EnvironmentResponseConverter {
                 .withAzure(getIfNotNull(environmentDto.getParameters(), this::azureEnvParamsToAzureEnvironmentParams))
                 .withYarn(getIfNotNull(environmentDto.getParameters(), this::yarnEnvParamsToYarnEnvironmentParams))
                 .withGcp(getIfNotNull(environmentDto.getParameters(), this::gcpEnvParamsToGcpEnvironmentParams))
-                .withParentEnvironmentName(environmentDto.getParentEnvironmentName());
+                .withParentEnvironmentName(environmentDto.getParentEnvironmentName())
+                .withCcmV2TlsType(environmentDto.getExperimentalFeatures().getCcmV2TlsType());
 
         NullUtil.doIfNotNull(environmentDto.getProxyConfig(),
                 proxyConfig -> builder.withProxyConfig(proxyConfigToProxyResponseConverter.convertToView(environmentDto.getProxyConfig())));

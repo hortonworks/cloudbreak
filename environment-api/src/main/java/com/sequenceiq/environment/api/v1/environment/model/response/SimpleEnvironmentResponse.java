@@ -3,6 +3,7 @@ package com.sequenceiq.environment.api.v1.environment.model.response;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.common.api.backup.response.BackupResponse;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
+import com.sequenceiq.common.api.type.CcmV2TlsType;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialViewResponse;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
@@ -101,6 +102,8 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
         private YarnEnvironmentParameters yarn;
 
         private String environmentServiceVersion;
+
+        private CcmV2TlsType ccmV2TlsType;
 
         private Builder() {
         }
@@ -235,6 +238,11 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
             return this;
         }
 
+        public Builder withCcmV2TlsType(CcmV2TlsType ccmV2TlsType) {
+            this.ccmV2TlsType = ccmV2TlsType;
+            return this;
+        }
+
         public SimpleEnvironmentResponse build() {
             SimpleEnvironmentResponse simpleEnvironmentResponse = new SimpleEnvironmentResponse();
             simpleEnvironmentResponse.setCrn(crn);
@@ -263,6 +271,7 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
             simpleEnvironmentResponse.setParentEnvironmentName(parentEnvironmentName);
             simpleEnvironmentResponse.setProxyConfig(proxyConfig);
             simpleEnvironmentResponse.setEnvironmentServiceVersion(environmentServiceVersion);
+            simpleEnvironmentResponse.setCcmV2TlsType(ccmV2TlsType);
             return simpleEnvironmentResponse;
         }
     }

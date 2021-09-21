@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.common.api.backup.response.BackupResponse;
 import com.sequenceiq.common.api.tag.response.TaggedResponse;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
+import com.sequenceiq.common.api.type.CcmV2TlsType;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.doc.ModelDescriptions;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
@@ -112,6 +113,8 @@ public abstract class EnvironmentBaseResponse implements TaggedResponse {
 
     @ApiModelProperty(EnvironmentModelDescription.ENVIRONMENT_SERVICE_VERSION)
     private String environmentServiceVersion;
+
+    private CcmV2TlsType ccmV2TlsType;
 
     @JsonIgnore
     public boolean isCloudStorageLoggingEnabled() {
@@ -366,6 +369,14 @@ public abstract class EnvironmentBaseResponse implements TaggedResponse {
         this.environmentServiceVersion = environmentServiceVersion;
     }
 
+    public CcmV2TlsType getCcmV2TlsType() {
+        return ccmV2TlsType;
+    }
+
+    public void setCcmV2TlsType(CcmV2TlsType ccmV2TlsType) {
+        this.ccmV2TlsType = ccmV2TlsType;
+    }
+
     @Override
     public String toString() {
         return "EnvironmentBaseResponse{" +
@@ -399,6 +410,7 @@ public abstract class EnvironmentBaseResponse implements TaggedResponse {
                 ", gcp=" + gcp +
                 ", yarn=" + yarn +
                 ", environmentServiceVersion='" + environmentServiceVersion + '\'' +
+                ", ccmV2TlsType='" + ccmV2TlsType + '\'' +
                 '}';
     }
 }

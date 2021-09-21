@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.common.api.backup.response.BackupResponse;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
+import com.sequenceiq.common.api.type.CcmV2TlsType;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
@@ -122,6 +123,8 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
         private YarnEnvironmentParameters yarn;
 
         private String environmentServiceVersion;
+
+        private CcmV2TlsType ccmV2TlsType;
 
         private Builder() {
         }
@@ -286,6 +289,11 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             return this;
         }
 
+        public Builder withCcmV2TlsType(CcmV2TlsType ccmV2TlsType) {
+            this.ccmV2TlsType = ccmV2TlsType;
+            return this;
+        }
+
         public DetailedEnvironmentResponse build() {
             DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
             detailedEnvironmentResponse.setCrn(crn);
@@ -320,6 +328,7 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             detailedEnvironmentResponse.setGcp(gcp);
             detailedEnvironmentResponse.setYarn(yarn);
             detailedEnvironmentResponse.setEnvironmentServiceVersion(environmentServiceVersion);
+            detailedEnvironmentResponse.setCcmV2TlsType(ccmV2TlsType);
             return detailedEnvironmentResponse;
         }
     }
