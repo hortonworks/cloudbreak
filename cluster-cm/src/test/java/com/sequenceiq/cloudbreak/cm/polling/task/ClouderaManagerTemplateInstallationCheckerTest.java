@@ -234,12 +234,12 @@ class ClouderaManagerTemplateInstallationCheckerTest {
     }
 
     private String expectMessageForCommands(ApiCommand... commands) {
-        String msgFormat = "Installation of CDP with Cloudera Manager has failed: [%s]";
-        String cmdFormat = "Command [%s], with id [%d] failed: %s";
+        String msgFormat = "Installation of CDP with Cloudera Manager has failed. Please find more details on Cloudera Manager UI. Failed command(s): %s";
+        String cmdFormat = "%s(id=%d): %s";
         return String.format(msgFormat,
                 Arrays.stream(commands)
                         .map(cmd -> String.format(cmdFormat, cmd.getName(), cmd.getId().intValue(), cmd.getResultMessage()))
-                        .collect(Collectors.joining(", "))
+                        .collect(Collectors.joining(" "))
         );
     }
 

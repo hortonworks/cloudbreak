@@ -9,18 +9,14 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
-import org.springframework.util.CollectionUtils;
 
 import com.cloudera.api.swagger.CommandsResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
-import com.cloudera.api.swagger.model.ApiCommand;
-import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterBasedStatusCheckerTask;
 import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollerObject;
-import com.sequenceiq.cloudbreak.cm.util.ClouderaManagerCommandApiErrorParserUtil;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
@@ -103,31 +99,6 @@ public abstract class AbstractClouderaManagerApiCheckerTask<T extends ClouderaMa
                 || e.getCause() instanceof SocketException
                 || e.getCause() instanceof IOException
                 || e.getCause() instanceof SocketTimeoutException;
-    }
-
-    @VisibleForTesting
-    String getResultMessageWithDetailedErrorsPostFix(ApiCommand apiCommand, CommandsResourceApi commandsResourceApi) {
-        if (apiCommand == null) {
-            LOGGER.debug("The provided apiCommand is null.");
-            return "";
-        }
-        String resultMessage = apiCommand.getResultMessage();
-        List<String> failedMessages = ClouderaManagerCommandApiErrorParserUtil.getErrors(apiCommand, commandsResourceApi);
-        if (resultMessage == null) {
-            resultMessage = "";
-        } else if (resultMessage.endsWith(".")) {
-            resultMessage += " ";
-        } else if (!resultMessage.endsWith(". ")) {
-            resultMessage += ". ";
-        }
-        if (!failedMessages.isEmpty()) {
-            if (apiCommand.getChildren() == null || CollectionUtils.isEmpty(apiCommand.getChildren().getItems())) {
-                resultMessage = "Detailed messages: " + String.join("\n", failedMessages);
-            } else {
-                resultMessage += "Detailed messages: " + String.join("\n", failedMessages);
-            }
-        }
-        return resultMessage;
     }
 
     protected abstract boolean doStatusCheck(T pollerObject, CommandsResourceApi commandsResourceApi) throws ApiException;
