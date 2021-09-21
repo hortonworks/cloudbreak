@@ -2,6 +2,9 @@ package com.sequenceiq.environment.environment.v1.converter;
 
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.common.api.type.Tunnel;
@@ -26,6 +29,8 @@ public class NetworkDtoToResponseConverter {
     }
 
     public EnvironmentNetworkResponse convert(NetworkDto network, Tunnel tunnel, boolean detailedResponse) {
+        ProvidedSubnetIds preferedSubnetId = getPreferedSubnetId(network, tunnel, detailedResponse);
+
         return EnvironmentNetworkResponse.builder()
                 .withCrn(network.getResourceCrn())
                 .withSubnetIds(network.getSubnetIds())
@@ -36,7 +41,8 @@ public class NetworkDtoToResponseConverter {
                 .withDwxSubnets(network.getDwxSubnets())
                 .withMlxSubnets(network.getMlxSubnets())
                 .withLiftieSubnets(network.getMlxSubnets())
-                .withPreferedSubnetId(getPreferedSubnetId(network, tunnel, detailedResponse))
+                .withPreferedSubnetId(getPreferedSubnetId(preferedSubnetId, detailedResponse))
+                .withPreferedSubnetIds(getPreferedSubnetIds(preferedSubnetId, detailedResponse))
                 .withPrivateSubnetCreation(network.getPrivateSubnetCreation())
                 .withServiceEndpointCreation(network.getServiceEndpointCreation())
                 .withOutboundInternetTraffic(network.getOutboundInternetTraffic())
@@ -74,18 +80,35 @@ public class NetworkDtoToResponseConverter {
                 .build();
     }
 
-    public String getPreferedSubnetId(NetworkDto network, Tunnel tunnel, boolean detailedResponse) {
-        String subnetId = null;
+    public ProvidedSubnetIds getPreferedSubnetId(NetworkDto network, Tunnel tunnel, boolean detailedResponse) {
+        ProvidedSubnetIds providedSubnetIds = null;
         if (detailedResponse) {
-            ProvidedSubnetIds providedSubnetIds = subnetIdProvider.subnets(
+            providedSubnetIds = subnetIdProvider.subnets(
                     network,
                     tunnel,
                     network.getCloudPlatform(),
                     false);
+        }
+        return providedSubnetIds;
+    }
+
+    public String getPreferedSubnetId(ProvidedSubnetIds providedSubnetIds, boolean detailedResponse) {
+        String subnetId = null;
+        if (detailedResponse) {
             if (providedSubnetIds != null) {
                 subnetId = providedSubnetIds.getSubnetId();
             }
         }
         return subnetId;
+    }
+
+    public Set<String> getPreferedSubnetIds(ProvidedSubnetIds providedSubnetIds, boolean detailedResponse) {
+        Set<String> subnetIds = new HashSet<>();
+        if (detailedResponse) {
+            if (providedSubnetIds != null) {
+                subnetIds = providedSubnetIds.getSubnetIds();
+            }
+        }
+        return subnetIds;
     }
 }

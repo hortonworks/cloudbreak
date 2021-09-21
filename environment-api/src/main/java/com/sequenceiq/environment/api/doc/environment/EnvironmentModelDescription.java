@@ -11,6 +11,8 @@ public class EnvironmentModelDescription {
     public static final String EXISTING_NETWORK = "The existing network is created by the user, otherwise created by the Cloudbreak.";
     public static final String PREFERED_SUBNET_ID = "The subnet in which resource should be deployed if not specified by user. " +
             "It's a null in case of environment list";
+    public static final String PREFERED_SUBNET_IDS = "The subnets in which resource should be deployed if not specified by user. " +
+            "It's a null in case of environment list";
     public static final String NETWORKCIDRS = "The network cidrs for the configured vpc";
     public static final String PRIVATE_SUBNET_CREATION = "A flag to enable or disable the private subnet creation.";
     public static final String SERVICE_ENDPOINT_CREATION = "A flag to enable or disable the service endpoint creation.";
