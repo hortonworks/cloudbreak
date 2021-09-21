@@ -18,8 +18,14 @@ configure_cm_principal:
 replace_ipa_env_host_to_server:
   file.replace:
     - name: /opt/cloudera/cm/bin/gen_credentials_ipa.sh
-    - pattern: "ipa env host"
-    - repl: "ipa env server"
+    - pattern: "IPA_HOST=.*"
+    - repl: "IPA_HOST=$(ipa server-find  --pkey-only --raw | grep 'cn' | sed 's/  cn: //g' | head -1)"
+
+add_host_to_getkeytab:
+  file.replace:
+    - name: /opt/cloudera/cm/bin/gen_credentials_ipa.sh
+    - pattern: "keytab=\\$KEYTAB_PATH$"
+    - repl: "keytab=$KEYTAB_PATH -s $IPA_HOST"
 
 replace_max_renew_life_ipa:
   file.replace:
