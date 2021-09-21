@@ -23,7 +23,9 @@ class TagTemplateProcessorTest {
 
     private static final String RESOURCE_CRN = "aResourceCrn";
 
-    private static final String USER_ID = "aUser@cldr.com";
+    private static final String USER_NAME_SHORT = "aUser";
+
+    private static final String USER_NAME = USER_NAME_SHORT + "@cldr.com";
 
     private static final String USER_CRN = "aUserCrn";
 
@@ -90,6 +92,15 @@ class TagTemplateProcessorTest {
     }
 
     @Test
+    void testUsernameDoesNotContainFullEmail() throws IOException {
+        TagPreparationObject tagPreparationObject = getTagPreparationObject();
+
+        String actual = underTest.process("{{{userName}}}", tagPreparationObject);
+
+        Assertions.assertEquals(USER_NAME_SHORT, actual);
+    }
+
+    @Test
     void testProcessWhenModelDoesHaveMultiplePropertiesThatIsReferencedFromTemplate() throws IOException {
         String valuePattern = "%s and %s on %s";
         String templateWithMultipleReference = String.format(valuePattern, "{{{accountId}}}", "{{{userName}}}", "{{{cloudPlatform}}}");
@@ -97,12 +108,12 @@ class TagTemplateProcessorTest {
 
         String actual = underTest.process(templateWithMultipleReference, model);
 
-        String expected = String.format(valuePattern, model.getAccountId(), model.getUserName(), model.getCloudPlatform());
+        String expected = String.format(valuePattern, model.getAccountId(), USER_NAME_SHORT, model.getCloudPlatform());
         Assertions.assertEquals(expected, actual);
     }
 
     @ParameterizedTest
-    @ValueSource(strings = { "accountId", "cloudPlatform", "resourceCrn", "userName", "userCrn" })
+    @ValueSource(strings = { "accountId", "cloudPlatform", "resourceCrn", "userCrn" })
     void testProcessWhenModelDoesHavePropertyThatIsReferencedFromTemplateShouldReplaceExpressionWithPropertyValue(String propertyName) throws IOException {
         String notExistingExpressionReference = "{{{" + propertyName + "}}}";
         TagPreparationObject tagPreparationObject = getTagPreparationObject();
@@ -119,7 +130,7 @@ class TagTemplateProcessorTest {
                 .withAccountId(ACCOUNT_ID)
                 .withCloudPlatform(CloudPlatform.MOCK.name())
                 .withResourceCrn(RESOURCE_CRN)
-                .withUserName(USER_ID)
+                .withUserName(USER_NAME)
                 .withUserCrn(USER_CRN)
                 .build();
     }
