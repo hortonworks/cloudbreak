@@ -51,6 +51,9 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
     @ApiModelProperty(EnvironmentModelDescription.PREFERED_SUBNET_ID)
     private String preferedSubnetId;
 
+    @ApiModelProperty(EnvironmentModelDescription.PREFERED_SUBNET_IDS)
+    private Set<String> preferedSubnetIds;
+
     @ApiModelProperty(EnvironmentModelDescription.NETWORKCIDRS)
     private Set<String> networkCidrs = new HashSet<>();
 
@@ -129,6 +132,14 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
         this.preferedSubnetId = preferedSubnetId;
     }
 
+    public Set<String> getPreferedSubnetIds() {
+        return preferedSubnetIds;
+    }
+
+    public void setPreferedSubnetIds(Set<String> preferedSubnetIds) {
+        this.preferedSubnetIds = preferedSubnetIds;
+    }
+
     public Set<String> getNetworkCidrs() {
         return networkCidrs;
     }
@@ -157,6 +168,7 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
                 ", liftieSubnets=" + liftieSubnets +
                 ", existingNetwork=" + existingNetwork +
                 ", preferedSubnetId='" + preferedSubnetId + '\'' +
+                ", preferedSubnetIds='" + preferedSubnetIds + '\'' +
                 ", networkCidrs=" + networkCidrs +
                 ", gatewayEndpointSubnetMetas=" + gatewayEndpointSubnetMetas +
                 '}';
@@ -194,6 +206,8 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
         private OutboundInternetTraffic outboundInternetTraffic;
 
         private String preferedSubnetId;
+
+        private Set<String> preferedSubnetIds;
 
         private Set<String> networkCidrs;
 
@@ -263,6 +277,11 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
 
         public Builder withPreferedSubnetId(String preferedSubnetId) {
             this.preferedSubnetId = preferedSubnetId;
+            return this;
+        }
+
+        public Builder withPreferedSubnetIds(Set<String> preferedSubnetIds) {
+            this.preferedSubnetIds = preferedSubnetIds;
             return this;
         }
 
@@ -356,6 +375,7 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
             environmentNetworkResponse.setPublicEndpointAccessGateway(publicEndpointAccessGateway);
             environmentNetworkResponse.setGatewayEndpointSubnetMetas(endpointGatewaySubnetMetas);
             environmentNetworkResponse.setEndpointGatewaySubnetIds(endpointGatewaySubnetIds);
+            environmentNetworkResponse.setPreferedSubnetIds(preferedSubnetIds);
             return environmentNetworkResponse;
         }
     }
