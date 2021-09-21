@@ -65,7 +65,7 @@ export IS_CCM_V2_ENABLED=false
 </#if>
 <#if ccmV2JumpgateEnabled!false>
 export IS_CCM_V2_JUMPGATE_ENABLED=true
-export CCM_V2_AGENT_ACCESS_KEY_ID="${ccmV2AgentMachineUserAccessKey}"
+export CCM_V2_AGENT_ACCESS_KEY_ID="${ccmV2AgentMachineUserAccessKeyId}"
 export CCM_V2_AGENT_ENCIPHERED_ACCESS_KEY="${ccmV2AgentMachineUserEncipheredAccessKey}"
 <#else>
 export IS_CCM_V2_JUMPGATE_ENABLED=false

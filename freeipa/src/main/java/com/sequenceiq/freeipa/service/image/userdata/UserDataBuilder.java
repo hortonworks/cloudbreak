@@ -51,7 +51,7 @@ public class UserDataBuilder {
             CcmConnectivityParameters ccmConnectivityParameters, ProxyConfig proxyConfig) {
         String userData = build(environmentCrn, cloudPlatform, cbSshKeyDer, sshUser, parameters, saltBootPassword,
                 cbCert, ccmConnectivityParameters, proxyConfig);
-        LOGGER.debug("User data  content; {}", anonymize(userData));
+        LOGGER.debug("User data content: {}", anonymize(userData));
         return userData;
     }
 
