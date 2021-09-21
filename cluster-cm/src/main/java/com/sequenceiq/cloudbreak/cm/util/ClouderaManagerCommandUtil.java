@@ -14,12 +14,13 @@ import com.cloudera.api.swagger.CommandsResourceApi;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiCommand;
 import com.cloudera.api.swagger.model.ApiCommandList;
+import com.sequenceiq.cloudbreak.cm.exception.CommandDetails;
 
-public class ClouderaManagerCommandApiErrorParserUtil {
+public class ClouderaManagerCommandUtil {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerCommandApiErrorParserUtil.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerCommandUtil.class);
 
-    private ClouderaManagerCommandApiErrorParserUtil() {
+    private ClouderaManagerCommandUtil() {
 
     }
 
@@ -46,23 +47,19 @@ public class ClouderaManagerCommandApiErrorParserUtil {
         };
     }
 
-    public static List<String> getErrors(ApiCommand apiCommand, CommandsResourceApi commandsResourceApi) {
-        List<String> errors = new LinkedList<>();
+    public static List<CommandDetails> getFailedOrActiveCommands(ApiCommand apiCommand, CommandsResourceApi commandsResourceApi) {
+        List<CommandDetails> failedCommands = new LinkedList<>();
         try {
             Optional.ofNullable(apiCommand.getChildren()).map(ApiCommandList::getItems).orElse(List.of()).stream()
                     .filter(commandFailed())
                     .map(readCommand(commandsResourceApi))
-                    .forEach(cmd -> errors.addAll(getErrors(cmd, commandsResourceApi)));
-
-            if (errors.isEmpty() && StringUtils.isNotEmpty(apiCommand.getResultMessage())) {
-                String reason = String.format("Command [%s], with id [%.0f] failed: %s",
-                        apiCommand.getName(), apiCommand.getId(), apiCommand.getResultMessage());
-                errors.add(reason);
+                    .forEach(cmd -> failedCommands.addAll(getFailedOrActiveCommands(cmd, commandsResourceApi)));
+            if (failedCommands.isEmpty() && StringUtils.isNotEmpty(apiCommand.getResultMessage())) {
+                failedCommands.add(CommandDetails.fromApiCommand(apiCommand));
             }
         } catch (RuntimeException e) {
-            LOGGER.warn("We have tried to get the error reason an go through the command tree, but it has failed. It is still better to proceed silently", e);
+            LOGGER.warn("Failed to get all command failure from Cloudera Manager. Proceeding silently.", e);
         }
-
-        return errors;
+        return failedCommands;
     }
 }

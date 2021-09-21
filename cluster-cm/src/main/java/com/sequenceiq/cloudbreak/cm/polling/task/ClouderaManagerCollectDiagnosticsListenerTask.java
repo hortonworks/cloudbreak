@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cm.polling.task;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -8,7 +10,10 @@ import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiCommand;
 import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
+import com.sequenceiq.cloudbreak.cm.exception.CommandDetails;
+import com.sequenceiq.cloudbreak.cm.exception.CommandDetailsFormatter;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerCommandPollerObject;
+import com.sequenceiq.cloudbreak.cm.util.ClouderaManagerCommandUtil;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 
 public class ClouderaManagerCollectDiagnosticsListenerTask extends AbstractClouderaManagerCommandCheckerTask<ClouderaManagerCommandPollerObject> {
@@ -29,10 +34,10 @@ public class ClouderaManagerCollectDiagnosticsListenerTask extends AbstractCloud
         } else if (apiCommand.getSuccess()) {
             return true;
         } else {
-            String detailedErrorMessage = getResultMessageWithDetailedErrorsPostFix(apiCommand, commandsResourceApi);
-            String msg = "Collect diagnostics failed: " + detailedErrorMessage;
-            LOGGER.info(msg);
-            throw new ClouderaManagerOperationFailedException(msg);
+            List<CommandDetails> commandDetails = ClouderaManagerCommandUtil.getFailedOrActiveCommands(apiCommand, commandsResourceApi);
+            String message = "Collecting diagnostics failed. " + CommandDetailsFormatter.formatFailedCommands(commandDetails);
+            LOGGER.debug("Top level command {}. Failed or active commands: {}", CommandDetails.fromApiCommand(apiCommand), commandDetails);
+            throw new ClouderaManagerOperationFailedException(message);
         }
     }
 

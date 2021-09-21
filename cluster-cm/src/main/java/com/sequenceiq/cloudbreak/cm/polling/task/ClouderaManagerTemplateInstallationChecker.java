@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cm.polling.task;
 
 import java.util.List;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,11 +13,21 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cm.exception.CloudStorageConfigurationFailedException;
+import com.sequenceiq.cloudbreak.cm.exception.CommandDetails;
+import com.sequenceiq.cloudbreak.cm.exception.CommandDetailsFormatter;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerCommandPollerObject;
-import com.sequenceiq.cloudbreak.cm.util.ClouderaManagerCommandApiErrorParserUtil;
+import com.sequenceiq.cloudbreak.cm.util.ClouderaManagerCommandUtil;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 
 public class ClouderaManagerTemplateInstallationChecker extends AbstractClouderaManagerCommandCheckerTask<ClouderaManagerCommandPollerObject> {
+
+    private static final Set<String> CLOUD_STORAGE_RELATED_COMMANDS = Set.of(
+            "RangerPluginCreateAuditDir",
+            "CreateRangerAuditDir",
+            "CreateRangerKafkaPluginAuditDirCommand",
+            "CreateHiveWarehouseExternalDir",
+            "CreateHiveWarehouseDir",
+            "CreateRangerKnoxPluginAuditDirCommand");
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerTemplateInstallationChecker.class);
 
@@ -65,17 +76,16 @@ public class ClouderaManagerTemplateInstallationChecker extends AbstractCloudera
     }
 
     private void fail(String messagePrefix, ApiCommand apiCommand, CommandsResourceApi commandsResourceApi, StackType stackType) {
-        List<String> errorReasons = ClouderaManagerCommandApiErrorParserUtil.getErrors(apiCommand, commandsResourceApi);
-        String msg = messagePrefix + "Installation of CDP with Cloudera Manager has failed: [" + String.join(", ", errorReasons) + "]";
-        LOGGER.info(msg);
+        List<CommandDetails> failedCommands = ClouderaManagerCommandUtil.getFailedOrActiveCommands(apiCommand, commandsResourceApi);
+        String msg = messagePrefix + "Installation of CDP with Cloudera Manager has failed. " + CommandDetailsFormatter.formatFailedCommands(failedCommands);
+        LOGGER.debug("Top level command {}. Failed or active commands: {}", CommandDetails.fromApiCommand(apiCommand), failedCommands);
         if (stackType == StackType.DATALAKE) {
-            for (String errorReason : errorReasons) {
+            for (CommandDetails failedCommand : failedCommands) {
                 // Unfortunately CM is not giving back too many details about the errors, and what is returned usually nondeterministic:
                 // In a good case it returns "Failed to create HDFS directory",
                 // but sometimes it just returns "Aborted command" or "Command timed-out after 186 seconds", so matching on such generic error messages
                 // has no added value, therefore we are just checking whether AuditDir related commands are failing or not.
-                if (errorReason.matches(".*(RangerPluginCreateAuditDir|CreateRangerAuditDir|CreateRangerKafkaPluginAuditDirCommand|" +
-                        "CreateHiveWarehouseExternalDir|CreateHiveWarehouseDir|CreateRangerKnoxPluginAuditDirCommand).*")) {
+                if (CLOUD_STORAGE_RELATED_COMMANDS.contains(failedCommand.getName())) {
                     throw new CloudStorageConfigurationFailedException(msg);
                 }
             }
