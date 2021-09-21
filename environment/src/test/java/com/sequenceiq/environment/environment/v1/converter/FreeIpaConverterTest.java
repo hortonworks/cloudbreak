@@ -13,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.environment.api.v1.environment.model.request.AttachedFreeIpaRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.FreeIpaImageRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.FreeIpaResponse;
@@ -123,9 +124,10 @@ public class FreeIpaConverterTest {
         AttachedFreeIpaRequest request = new AttachedFreeIpaRequest();
         request.setCreate(true);
         request.setImage(aFreeIpaImage(IMAGE_CATALOG, IMAGE_ID));
+        request.setEnableMultiAz(true);
         // WHEN
-        when(entitlementService.awsNativeFreeIpaEnabled(anyString())).thenReturn(false);
-        FreeIpaCreationDto result = underTest.convert(request, "id");
+        when(entitlementService.awsNativeFreeIpaEnabled(anyString())).thenReturn(true);
+        FreeIpaCreationDto result = underTest.convert(request, "id", CloudConstants.AWS);
         // THEN
         assertEquals(IMAGE_CATALOG, result.getImageCatalog());
         assertEquals(IMAGE_ID, result.getImageId());
@@ -138,8 +140,7 @@ public class FreeIpaConverterTest {
         request.setCreate(true);
         request.setImage(null);
         // WHEN
-        when(entitlementService.awsNativeFreeIpaEnabled(anyString())).thenReturn(false);
-        FreeIpaCreationDto result = underTest.convert(request, "id");
+        FreeIpaCreationDto result = underTest.convert(request, "id", CloudConstants.AWS);
         // THEN
         assertNull(result.getImageCatalog());
         assertNull(result.getImageId());
@@ -152,8 +153,7 @@ public class FreeIpaConverterTest {
         request.setCreate(true);
         request.setImage(aFreeIpaImage(null, null));
         // WHEN
-        when(entitlementService.awsNativeFreeIpaEnabled(anyString())).thenReturn(false);
-        FreeIpaCreationDto result = underTest.convert(request, "id");
+        FreeIpaCreationDto result = underTest.convert(request, "id", CloudConstants.AWS);
         // THEN
         assertNull(result.getImageCatalog());
         assertNull(result.getImageId());
