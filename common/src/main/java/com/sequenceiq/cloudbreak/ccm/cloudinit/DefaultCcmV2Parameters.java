@@ -63,6 +63,7 @@ public class DefaultCcmV2Parameters implements CcmV2Parameters, Serializable {
         return agentEncipheredPrivateKey;
     }
 
+    @Override
     public void addToTemplateModel(@Nonnull Map<String, Object> model) {
         model.put(CcmV2ParameterConstants.CCMV2_INVERTING_PROXY_HOST, getInvertingProxyHost());
         model.put(CcmV2ParameterConstants.CCMV2_INVERTING_PROXY_CERTIFICATE, getInvertingProxyCertificate());

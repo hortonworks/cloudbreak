@@ -60,12 +60,12 @@ public class DefaultCcmV2ParameterSupplier implements CcmV2ParameterSupplier {
         checkArgument(StringUtils.isNotEmpty(invertingProxyAgent.getAgentCrn()), "InvertingProxyAgent Crn is not initialized.");
         if (StringUtils.isNotEmpty(invertingProxyAgent.getAccessKeyId())) {
             checkArgument(StringUtils.isNotEmpty(invertingProxyAgent.getEncipheredAccessKey()),
-                    "InvertingProxyAgent Access Key is present but Enciphered Access Key is not initialized.");
+                    "InvertingProxyAgent Access Key ID is present but Enciphered Access Key is not initialized.");
         } else {
             checkArgument(StringUtils.isEmpty(invertingProxyAgent.getEncipheredAccessKey()),
-                    "InvertingProxyAgent Access Key is not present but Enciphered Access Key is initialized. Error in inverting proxy logic.");
+                    "InvertingProxyAgent Access Key ID is not present but Enciphered Access Key is initialized. Error in inverting proxy logic.");
             checkArgument(StringUtils.isNotEmpty(invertingProxyAgent.getEncipheredPrivateKey()),
-                    "InvertingProxyAgent EncipheredKey is not initialized.");
+                    "InvertingProxyAgent Enciphered Private Key is not initialized.");
             checkArgument(StringUtils.isNotEmpty(invertingProxyAgent.getCertificate()), "InvertingProxyAgent Certificate is not initialized.");
         }
     }

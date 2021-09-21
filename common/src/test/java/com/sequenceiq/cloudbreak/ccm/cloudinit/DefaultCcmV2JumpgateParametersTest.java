@@ -5,7 +5,7 @@ import static com.sequenceiq.cloudbreak.ccm.cloudinit.CcmV2ParameterConstants.CC
 import static com.sequenceiq.cloudbreak.ccm.cloudinit.CcmV2ParameterConstants.CCMV2_AGENT_CRN;
 import static com.sequenceiq.cloudbreak.ccm.cloudinit.CcmV2ParameterConstants.CCMV2_AGENT_ENCIPHERED_KEY;
 import static com.sequenceiq.cloudbreak.ccm.cloudinit.CcmV2ParameterConstants.CCMV2_AGENT_KEY_ID;
-import static com.sequenceiq.cloudbreak.ccm.cloudinit.CcmV2ParameterConstants.CCMV2_AGENT_MACHINE_USER_ACCESS_KEY;
+import static com.sequenceiq.cloudbreak.ccm.cloudinit.CcmV2ParameterConstants.CCMV2_AGENT_MACHINE_USER_ACCESS_KEY_ID;
 import static com.sequenceiq.cloudbreak.ccm.cloudinit.CcmV2ParameterConstants.CCMV2_AGENT_MACHINE_USER_ENCIPHERED_ACCESS_KEY;
 import static com.sequenceiq.cloudbreak.ccm.cloudinit.CcmV2ParameterConstants.CCMV2_INVERTING_PROXY_CERTIFICATE;
 import static com.sequenceiq.cloudbreak.ccm.cloudinit.CcmV2ParameterConstants.CCMV2_INVERTING_PROXY_HOST;
@@ -43,7 +43,7 @@ class DefaultCcmV2JumpgateParametersTest {
 
         assertEquals("agentCertificate", expectedParams.get(CCMV2_AGENT_CERTIFICATE), "CcmV2 Agent Certificate should match");
         assertEquals("agentMachineUserAccessKey",
-                expectedParams.get(CCMV2_AGENT_MACHINE_USER_ACCESS_KEY), "CcmV2 Agent Machine User Access Key should match");
+                expectedParams.get(CCMV2_AGENT_MACHINE_USER_ACCESS_KEY_ID), "CcmV2 Agent Machine User Access Key ID should match");
         assertEquals("agentMachineUserEncipheredAccessKey",
                 expectedParams.get(CCMV2_AGENT_MACHINE_USER_ENCIPHERED_ACCESS_KEY), "CcmV2 Agent Machine User Enciphered Access Key should match");
     }

@@ -28,9 +28,10 @@ public class DefaultCcmV2JumpgateParameters extends DefaultCcmV2Parameters imple
         return agentMachineUserEncipheredAccessKey;
     }
 
+    @Override
     public void addToTemplateModel(@Nonnull Map<String, Object> model) {
         super.addToTemplateModel(model);
-        model.put(CcmV2ParameterConstants.CCMV2_AGENT_MACHINE_USER_ACCESS_KEY, getAgentMachineUserAccessKey());
+        model.put(CcmV2ParameterConstants.CCMV2_AGENT_MACHINE_USER_ACCESS_KEY_ID, getAgentMachineUserAccessKey());
         model.put(CcmV2ParameterConstants.CCMV2_AGENT_MACHINE_USER_ENCIPHERED_ACCESS_KEY, getAgentMachineUserEncipheredAccessKey());
     }
 }

@@ -133,7 +133,7 @@ class DefaultCcmV2JumpgateParameterSupplierTest {
 
         assertThatThrownBy(() -> underTest.getCcmV2Parameters(TEST_ACCOUNT_ID, Optional.of(TEST_ENVIRONMENT_CRN), gatewayDomain,
                 Crn.fromString(TEST_CLUSTER_CRN).getResource()))
-                .hasMessage("InvertingProxyAgent Access Key is not present but Enciphered Access Key is initialized. Error in inverting proxy logic.")
+                .hasMessage("InvertingProxyAgent Access Key ID is not present but Enciphered Access Key is initialized. Error in inverting proxy logic.")
                 .isInstanceOf(IllegalArgumentException.class);
     }
 }

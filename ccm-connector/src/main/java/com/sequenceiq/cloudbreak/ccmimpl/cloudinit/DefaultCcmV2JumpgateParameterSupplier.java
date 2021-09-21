@@ -19,6 +19,7 @@ public class DefaultCcmV2JumpgateParameterSupplier extends DefaultCcmV2Parameter
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultCcmV2JumpgateParameterSupplier.class);
 
+    @Override
     public CcmV2JumpgateParameters getCcmV2JumpgateParameters(@Nonnull String accountId, @Nonnull Optional<String> environmentCrnOpt,
         @Nonnull String clusterGatewayDomain, @Nonnull String agentKeyId) {
 

@@ -21,4 +21,12 @@ class InvertingProxyAndAgent {
     public InvertingProxyAgent getInvertingProxyAgent() {
         return invertingProxyAgent;
     }
+
+    @Override
+    public String toString() {
+        return "InvertingProxyAndAgent{" +
+                "invertingProxy=" + invertingProxy +
+                ", invertingProxyAgent=" + invertingProxyAgent +
+                '}';
+    }
 }
