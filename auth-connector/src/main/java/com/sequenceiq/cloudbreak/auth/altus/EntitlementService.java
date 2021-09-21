@@ -37,6 +37,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CONCLUS
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_CUSTOM_CONFIGS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_METRICS_DATABUS_PROCESSING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_NODESTATUS_CHECK;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_BACKUP_ON_RESIZE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_BACKUP_ON_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_METRICS_DATABUS_PROCESSING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_AWS_EFS;
@@ -317,6 +318,10 @@ public class EntitlementService {
 
     public boolean isDatalakeBackupOnUpgradeEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_DATALAKE_BACKUP_ON_UPGRADE);
+    }
+
+    public boolean isDatalakeBackupOnResizeEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_DATALAKE_BACKUP_ON_RESIZE);
     }
 
     public boolean isDatalakeLightToMediumMigrationEnabled(String accountId) {

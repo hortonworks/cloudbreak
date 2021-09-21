@@ -11,6 +11,7 @@ import com.sequenceiq.thunderhead.grpc.service.audit.MockAuditLogService;
 import com.sequenceiq.thunderhead.grpc.service.auth.MockAuthorizationService;
 import com.sequenceiq.thunderhead.grpc.service.auth.MockPersonalResourceViewService;
 import com.sequenceiq.thunderhead.grpc.service.auth.MockUserManagementService;
+import com.sequenceiq.thunderhead.grpc.service.datalakedr.MockDatalakeDrService;
 
 @Configuration
 public class GrpcServerConfig {
@@ -27,8 +28,14 @@ public class GrpcServerConfig {
     @Inject
     private MockAuditLogService mockAuditLogService;
 
+    @Inject
+    private MockDatalakeDrService datalakeDrService;
+
     @Value("${grpc.server.port:8982}")
     private int grpcServerPort;
+
+    @Value("${datalakedr.server.port:8989}")
+    private int datalakeDrServerPort;
 
     @Bean
     public GrpcServer grpcServer() {
@@ -38,5 +45,10 @@ public class GrpcServerConfig {
                 mockAuthorizationService.bindService(),
                 mockPersonalResourceViewService.bindService(),
                 mockAuditLogService.bindService());
+    }
+
+    @Bean
+    public GrpcServer datalakedrServer() {
+        return new GrpcServer(datalakeDrServerPort, datalakeDrService.bindService());
     }
 }

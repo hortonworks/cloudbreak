@@ -20,6 +20,7 @@ import javax.inject.Inject;
 import org.testng.util.Strings;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.common.api.backup.request.BackupRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
@@ -146,6 +147,13 @@ public class EnvironmentTestDto
     public EnvironmentTestDto withName(String name) {
         getRequest().setName(name);
         setName(name);
+        return this;
+    }
+
+    public EnvironmentTestDto withBackup(String backupLocation) {
+        BackupRequest backupRequest = new BackupRequest();
+        backupRequest.setStorageLocation(backupLocation);
+        getRequest().setBackup(backupRequest);
         return this;
     }
 

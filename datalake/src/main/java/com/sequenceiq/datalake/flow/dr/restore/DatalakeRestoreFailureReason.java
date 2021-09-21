@@ -1,12 +1,12 @@
 package com.sequenceiq.datalake.flow.dr.restore;
 
-public enum DatalakeRestoreReason {
+public enum DatalakeRestoreFailureReason {
     RESTORE_ON_UPGRADE_FAILURE("Restore performed on upgrade"),
-    RESTORE_ON_MIGRATION("Restore performed on migration"),
+    RESTORE_ON_RESIZE("Restore performed on resize"),
     USER_TRIGGERED("Restore performed by user");
     private final String message;
 
-    DatalakeRestoreReason(String message) {
+    DatalakeRestoreFailureReason(String message) {
         this.message = message;
     }
 

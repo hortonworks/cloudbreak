@@ -79,5 +79,6 @@ dependencies {
   implementation (project(':audit-connector')) {
     transitive = false;
   }
+  implementation project(':datalake-dr-connector')
   implementation project (':cloud-api')
 }

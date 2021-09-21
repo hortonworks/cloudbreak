@@ -46,7 +46,7 @@ import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupFailureReason;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeDatabaseBackupStartEvent;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeTriggerBackupEvent;
-import com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreReason;
+import com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreFailureReason;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeDatabaseRestoreStartEvent;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeTriggerRestoreEvent;
 import com.sequenceiq.datalake.flow.statestore.DatalakeInMemoryStateStore;
@@ -113,7 +113,7 @@ public class SdxBackupRestoreService {
         LOGGER.info("Triggering datalake backup for datalake: '{}' in '{}' env",
                 sdxCluster.getClusterName(), sdxCluster.getEnvName());
         return datalakeDrClient.triggerBackup(
-                sdxCluster.getClusterName(), backupName, backupLocation, userCrn);
+                sdxCluster.getClusterName(), backupLocation, backupName, userCrn);
     }
 
     public SdxDatabaseRestoreResponse triggerDatabaseRestore(SdxCluster sdxCluster, String backupId, String restoreId, String backupLocation) {
@@ -174,7 +174,7 @@ public class SdxBackupRestoreService {
         String selector = DATALAKE_TRIGGER_RESTORE_EVENT.event();
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
         DatalakeTriggerRestoreEvent startEvent = new DatalakeTriggerRestoreEvent(selector, clusterId, userId,
-                backupId, backupLocation, backupLocationOverride, DatalakeRestoreReason.USER_TRIGGERED);
+                backupId, backupLocation, backupLocationOverride, DatalakeRestoreFailureReason.USER_TRIGGERED);
         FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerDatalakeRestoreFlow(startEvent);
         return new SdxRestoreResponse(startEvent.getDrStatus().getOperationId(), flowIdentifier);
     }
