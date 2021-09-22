@@ -186,6 +186,11 @@
         ],
         "roleConfigGroups": [
           {
+            "refName": "nifiregistry-GATEWAY-BASE",
+            "roleType": "GATEWAY",
+            "base": true
+          },
+          {
             "refName": "nifiregistry-NIFI_REGISTRY_SERVER-BASE",
             "roleType": "NIFI_REGISTRY_SERVER",
             "base": true,
@@ -296,6 +301,7 @@
         "cardinality": 3,
         "roleConfigGroupsRefNames": [
           "nifi-NIFI_NODE-BASE",
+          "nifiregistry-GATEWAY-BASE",
           "core_settings-STORAGEOPERATIONS-BASE"
         ]
       },
