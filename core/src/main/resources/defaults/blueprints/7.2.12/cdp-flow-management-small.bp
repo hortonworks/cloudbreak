@@ -210,6 +210,11 @@
         ],
         "roleConfigGroups": [
           {
+            "refName": "nifiregistry-GATEWAY-BASE",
+            "roleType": "GATEWAY",
+            "base": true
+          },
+          {
             "refName": "nifiregistry-NIFI_REGISTRY_SERVER-BASE",
             "roleType": "NIFI_REGISTRY_SERVER",
             "base": true,
@@ -314,6 +319,7 @@
         "roleConfigGroupsRefNames": [
           "nifi-NIFI_NODE-BASE",
           "zookeeper-SERVER-BASE",
+          "nifiregistry-GATEWAY-BASE",
           "core_settings-STORAGEOPERATIONS-BASE"
         ]
       },
