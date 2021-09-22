@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.profilermanager;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
+import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRdsRoleConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
@@ -15,19 +16,32 @@ import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.c
 @Component
 public class ProfilerMetricsRoleConfigProvider extends AbstractRdsRoleConfigProvider {
 
+    @VisibleForTesting
+    static final String PROFILER_METRICS_DATABASE_HOST = "profiler_metrics_database_host";
+
+    @VisibleForTesting
+    static final String PROFILER_METRICS_DATABASE_NAME = "profiler_metrics_database_name";
+
+    @VisibleForTesting
+    static final String PROFILER_METRICS_DATABASE_TYPE = "profiler_metrics_database_type";
+
+    @VisibleForTesting
+    static final String PROFILER_METRICS_DATABASE_USER = "profiler_metrics_database_user";
+
+    @VisibleForTesting
+    static final String PROFILER_METRICS_DATABASE_PASSWORD = "profiler_metrics_database_password";
+
     @Override
     protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
-        switch (roleType) {
-            case ProfilerManagerRoles.PROFILER_METRICS_AGENT:
-                RdsView profilerManagerRdsView = getRdsView(source);
-                return List.of(config("profiler_metrics_database_host", profilerManagerRdsView.getHost()),
-                        config("profiler_metrics_database_name", profilerManagerRdsView.getDatabaseName()),
-                        config("profiler_metrics_database_type", ConfigUtils.getDbTypePostgres(profilerManagerRdsView, ProfilerManagerRoles.PROFILER_MANAGER)),
-                        config("profiler_metrics_database_user", profilerManagerRdsView.getConnectionUserName()),
-                        config("profiler_metrics_database_password", profilerManagerRdsView.getConnectionPassword()));
-            default:
-                return List.of();
+        if (ProfilerManagerRoles.PROFILER_METRICS_AGENT.equals(roleType)) {
+            RdsView profilerManagerRdsView = getRdsView(source);
+            return List.of(config(PROFILER_METRICS_DATABASE_HOST, profilerManagerRdsView.getHost()),
+                    config(PROFILER_METRICS_DATABASE_NAME, profilerManagerRdsView.getDatabaseName()),
+                    config(PROFILER_METRICS_DATABASE_TYPE, ConfigUtils.getDbTypePostgres(profilerManagerRdsView, ProfilerManagerRoles.PROFILER_MANAGER)),
+                    config(PROFILER_METRICS_DATABASE_USER, profilerManagerRdsView.getConnectionUserName()),
+                    config(PROFILER_METRICS_DATABASE_PASSWORD, profilerManagerRdsView.getConnectionPassword()));
         }
+        return List.of();
     }
 
     @Override
