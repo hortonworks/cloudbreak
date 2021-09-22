@@ -313,6 +313,11 @@ public class AzureResourceConnector extends AbstractResourceConnector {
     }
 
     @Override
+    public void updateUserData(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources, String userData) {
+        LOGGER.info("Update userdata is not implemented on Azure!");
+    }
+
+    @Override
     public List<CloudResourceStatus> upscale(AuthenticatedContext ac, CloudStack stack, List<CloudResource> resources) {
         AzureClient client = ac.getParameter(AzureClient.class);
         AzureStackView azureStackView = azureStackViewProvider.getAzureStack(new AzureCredentialView(ac.getCloudCredential()), stack, client, ac);

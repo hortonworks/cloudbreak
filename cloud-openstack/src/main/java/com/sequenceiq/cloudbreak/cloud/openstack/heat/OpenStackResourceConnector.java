@@ -408,6 +408,11 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
     }
 
     @Override
+    public void updateUserData(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources, String userData) throws Exception {
+
+    }
+
+    @Override
     public void checkUpdate(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) throws Exception {
         return;
     }

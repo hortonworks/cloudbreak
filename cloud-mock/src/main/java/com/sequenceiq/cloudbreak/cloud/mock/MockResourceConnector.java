@@ -133,6 +133,11 @@ public class MockResourceConnector implements ResourceConnector<Object> {
     }
 
     @Override
+    public void updateUserData(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources, String userData) {
+
+    }
+
+    @Override
     public void checkUpdate(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) throws Exception {
         return;
     }
