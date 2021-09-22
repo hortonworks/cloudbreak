@@ -1,0 +1,124 @@
+{
+  "cdhVersion": "7.2.13",
+  "displayName": "Profiler-Cluster",
+  "services": [
+    {
+      "refName": "hdfs",
+      "serviceType": "HDFS",
+      "roleConfigGroups": [
+        {
+          "refName": "hdfs-NAMENODE-BASE",
+          "roleType": "NAMENODE",
+          "base": true
+        },
+        {
+          "refName": "hdfs-SECONDARYNAMENODE-BASE",
+          "roleType": "SECONDARYNAMENODE",
+          "base": true
+        },
+        {
+          "refName": "hdfs-DATANODE-BASE",
+          "roleType": "DATANODE",
+          "base": true
+        }
+      ]
+    },
+    {
+      "refName": "hive",
+      "displayName": "Hive Metastore",
+      "roleConfigGroups": [
+        {
+          "base": true,
+          "refName": "hive-GATEWAY-BASE",
+          "roleType": "GATEWAY"
+        },
+        {
+          "base": true,
+          "refName": "hive-HIVEMETASTORE-BASE",
+          "roleType": "HIVEMETASTORE",
+          "configs": [
+            {
+              "name": "hive_compactor_initiator_on",
+              "value": "false"
+            }
+          ]
+        }
+      ],
+      "serviceType": "HIVE"
+    },
+    {
+      "refName": "zookeeper",
+      "serviceType": "ZOOKEEPER",
+      "roleConfigGroups": [
+        {
+          "refName": "zookeeper-SERVER-BASE",
+          "roleType": "SERVER",
+          "base": true
+        }
+      ]
+    },
+    {
+      "refName": "profiler_manager",
+      "serviceConfigs": [
+        {
+          "name": "hdfs_service",
+          "ref": "hdfs"
+        },
+        {
+          "name": "zookeeper_service",
+          "ref": "zookeeper"
+        },
+        {
+          "name": "hive_service",
+          "ref": "hive"
+        }
+      ],
+      "roleConfigGroups": [
+        {
+          "refName": "profiler_manager-PROFILER_ADMIN_AGENT-BASE",
+          "roleType": "PROFILER_ADMIN_AGENT",
+          "base": true
+        },
+        {
+          "refName": "profiler_manager-DATA_DISCOVERY_SERVICE_AGENT-BASE",
+          "roleType": "DATA_DISCOVERY_SERVICE_AGENT",
+          "base": true
+        },
+        {
+          "refName": "profiler_manager-PROFILER_METRICS_AGENT-BASE",
+          "roleType": "PROFILER_METRICS_AGENT",
+          "base": true
+        },
+        {
+          "refName": "profiler_manager-GATEWAY-BASE",
+          "roleType": "GATEWAY",
+          "base": true
+        }
+      ],
+      "serviceType": "PROFILER_MANAGER"
+    }
+  ],
+  "hostTemplates": [
+   {
+      "cardinality": 1,
+      "refName": "master",
+      "roleConfigGroupsRefNames": [
+        "hive-HIVEMETASTORE-BASE",
+        "zookeeper-SERVER-BASE",
+        "hdfs-NAMENODE-BASE",
+        "hdfs-SECONDARYNAMENODE-BASE",
+        "hdfs-DATANODE-BASE"
+      ]
+   },
+   {
+      "refName": "gateway",
+      "cardinality": 1,
+      "roleConfigGroupsRefNames": [
+        "profiler_manager-PROFILER_ADMIN_AGENT-BASE",
+        "profiler_manager-DATA_DISCOVERY_SERVICE_AGENT-BASE",
+        "profiler_manager-PROFILER_METRICS_AGENT-BASE",
+        "profiler_manager-GATEWAY-BASE"
+      ]
+    }
+  ]
+}

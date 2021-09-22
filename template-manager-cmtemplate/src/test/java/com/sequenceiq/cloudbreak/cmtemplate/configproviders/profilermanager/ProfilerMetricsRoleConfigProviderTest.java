@@ -18,7 +18,12 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.sequenceiq.cloudbreak.TestUtil.rdsConfig;
-import static org.junit.Assert.assertEquals;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.profilermanager.ProfilerMetricsRoleConfigProvider.PROFILER_METRICS_DATABASE_HOST;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.profilermanager.ProfilerMetricsRoleConfigProvider.PROFILER_METRICS_DATABASE_NAME;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.profilermanager.ProfilerMetricsRoleConfigProvider.PROFILER_METRICS_DATABASE_TYPE;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.profilermanager.ProfilerMetricsRoleConfigProvider.PROFILER_METRICS_DATABASE_USER;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.profilermanager.ProfilerMetricsRoleConfigProvider.PROFILER_METRICS_DATABASE_PASSWORD;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ProfilerMetricsRoleConfigProviderTest {
@@ -42,21 +47,22 @@ public class ProfilerMetricsRoleConfigProviderTest {
                 profilerMetrics =
                 roleConfigs.get("profiler_manager-PROFILER_METRICS_AGENT-BASE");
 
-        assertEquals(5, profilerMetrics.size());
-        assertEquals("profiler_metrics_database_host", profilerMetrics.get(0).getName());
-        assertEquals("10.1.1.1", profilerMetrics.get(0).getValue());
+        assertThat(profilerMetrics.size()).isEqualTo(5);
 
-        assertEquals("profiler_metrics_database_name", profilerMetrics.get(1).getName());
-        assertEquals("profiler_metric", profilerMetrics.get(1).getValue());
+        assertThat(profilerMetrics.get(0).getName()).isEqualTo(PROFILER_METRICS_DATABASE_HOST);
+        assertThat(profilerMetrics.get(0).getValue()).isEqualTo("10.1.1.1");
 
-        assertEquals("profiler_metrics_database_type", profilerMetrics.get(2).getName());
-        assertEquals("POSTGRES", profilerMetrics.get(2).getValue());
+        assertThat(profilerMetrics.get(1).getName()).isEqualTo(PROFILER_METRICS_DATABASE_NAME);
+        assertThat(profilerMetrics.get(1).getValue()).isEqualTo("profiler_metric");
 
-        assertEquals("profiler_metrics_database_user", profilerMetrics.get(3).getName());
-        assertEquals("heyitsme", profilerMetrics.get(3).getValue());
+        assertThat(profilerMetrics.get(2).getName()).isEqualTo(PROFILER_METRICS_DATABASE_TYPE);
+        assertThat(profilerMetrics.get(2).getValue()).isEqualTo("POSTGRES");
 
-        assertEquals("profiler_metrics_database_password", profilerMetrics.get(4).getName());
-        assertEquals("iamsoosecure", profilerMetrics.get(4).getValue());
+        assertThat(profilerMetrics.get(3).getName()).isEqualTo(PROFILER_METRICS_DATABASE_USER);
+        assertThat(profilerMetrics.get(3).getValue()).isEqualTo("heyitsme");
+
+        assertThat(profilerMetrics.get(4).getName()).isEqualTo(PROFILER_METRICS_DATABASE_PASSWORD);
+        assertThat(profilerMetrics.get(4).getValue()).isEqualTo("iamsoosecure");
     }
 
     private TemplatePreparationObject getTemplatePreparationObject() {
@@ -65,6 +71,41 @@ public class ProfilerMetricsRoleConfigProviderTest {
 
         return Builder.builder().withHostgroupViews(Set.of(master, worker))
                 .withRdsConfigs(Set.of(rdsConfig(DatabaseType.PROFILER_METRIC))).build();
+    }
+
+    @Test
+    public void testGetRoleConfigsInGatewayHostGroup() {
+        HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.CORE, 1);
+        HostgroupView gateway = new HostgroupView("gateway", 1, InstanceGroupType.GATEWAY, 1);
+
+        String inputJson = getBlueprintText("input/profilermanager.bp");
+        CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
+        TemplatePreparationObject preparationObject = Builder.builder()
+                .withHostgroupViews(Set.of(master, gateway))
+                .withRdsConfigs(Set.of(rdsConfig(DatabaseType.PROFILER_METRIC)))
+                .build();
+
+        Map<String, List<ApiClusterTemplateConfig>> roleConfigs =
+                underTest.getRoleConfigs(cmTemplateProcessor, preparationObject);
+        List<ApiClusterTemplateConfig> profilerMetrics =
+                roleConfigs.get("profiler_manager-PROFILER_METRICS_AGENT-BASE");
+
+        assertThat(profilerMetrics.size()).isEqualTo(5);
+
+        assertThat(profilerMetrics.get(0).getName()).isEqualTo(PROFILER_METRICS_DATABASE_HOST);
+        assertThat(profilerMetrics.get(0).getValue()).isEqualTo("10.1.1.1");
+
+        assertThat(profilerMetrics.get(1).getName()).isEqualTo(PROFILER_METRICS_DATABASE_NAME);
+        assertThat(profilerMetrics.get(1).getValue()).isEqualTo("profiler_metric");
+
+        assertThat(profilerMetrics.get(2).getName()).isEqualTo(PROFILER_METRICS_DATABASE_TYPE);
+        assertThat(profilerMetrics.get(2).getValue()).isEqualTo("POSTGRES");
+
+        assertThat(profilerMetrics.get(3).getName()).isEqualTo(PROFILER_METRICS_DATABASE_USER);
+        assertThat(profilerMetrics.get(3).getValue()).isEqualTo("heyitsme");
+
+        assertThat(profilerMetrics.get(4).getName()).isEqualTo(PROFILER_METRICS_DATABASE_PASSWORD);
+        assertThat(profilerMetrics.get(4).getValue()).isEqualTo("iamsoosecure");
     }
 
     private String getBlueprintText(String path) {
