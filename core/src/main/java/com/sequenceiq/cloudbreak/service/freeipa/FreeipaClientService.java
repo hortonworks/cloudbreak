@@ -1,8 +1,10 @@
 package com.sequenceiq.cloudbreak.service.freeipa;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.inject.Inject;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 
@@ -33,6 +35,24 @@ public class FreeipaClientService {
     public DescribeFreeIpaResponse getByEnvironmentCrn(String environmentCrn) {
         try {
             return freeIpaV1Endpoint.describe(environmentCrn);
+        } catch (WebApplicationException e) {
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            String message = String.format("Failed to GET FreeIPA by environment crn: %s, due to: %s. %s.", environmentCrn, e.getMessage(), errorMessage);
+            LOGGER.error(message, e);
+            throw new CloudbreakServiceException(message, e);
+        } catch (ProcessingException | IllegalStateException e) {
+            String message = String.format("Failed to GET FreeIPA by environment crn: %s, due to: %s.", environmentCrn, e.getMessage());
+            LOGGER.error(message, e);
+            throw new CloudbreakServiceException(message, e);
+        }
+    }
+
+    public Optional<DescribeFreeIpaResponse> findByEnvironmentCrn(String environmentCrn) {
+        try {
+            return Optional.ofNullable(freeIpaV1Endpoint.describe(environmentCrn));
+        } catch (NotFoundException e) {
+            LOGGER.info("FreeIPA is not found for env: {}", environmentCrn, e);
+            return Optional.empty();
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
             String message = String.format("Failed to GET FreeIPA by environment crn: %s, due to: %s. %s.", environmentCrn, e.getMessage(), errorMessage);

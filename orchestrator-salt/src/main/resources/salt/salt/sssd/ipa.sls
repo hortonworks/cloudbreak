@@ -38,6 +38,34 @@ join_ipa:
         - PW: "{{salt['pillar.get']('sssd-ipa:password')}}"
 {% endif %}
 
+{%- if salt['pillar.get']('freeipa:host', None) != None %}
+{%- set freeipa_fqdn = salt['pillar.get']('freeipa:host') %}
+update_default_server:
+  file.replace:
+    - name: /etc/ipa/default.conf
+    - pattern: "server =.*"
+    - repl: "server = {{ freeipa_fqdn }}"
+    - require:
+        - cmd: join_ipa
+
+update_default_host:
+  file.replace:
+    - name: /etc/ipa/default.conf
+    - pattern: "host =.*"
+    - repl: "host = {{ freeipa_fqdn }}"
+    - require:
+        - cmd: join_ipa
+
+update_default_xmlrpc_uri:
+  file.replace:
+    - name: /etc/ipa/default.conf
+    - pattern: "xmlrpc_uri =.*"
+    - repl: "xmlrpc_uri = https://{{ freeipa_fqdn }}/ipa/xml"
+    - require:
+        - cmd: join_ipa
+
+{%- endif %}
+
 {% if metadata.platform == 'YARN' and not metadata.cluster_in_childenvironment %}
 dns_remove_script:
   file.managed:
