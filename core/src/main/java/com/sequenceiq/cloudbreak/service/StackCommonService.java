@@ -25,26 +25,20 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ClusterRepairV4R
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackImageChangeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackValidationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.InternalCrnBuilder;
-import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.common.ScalingHardLimitsService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.StackCreatorService;
-import com.sequenceiq.cloudbreak.controller.validation.filesystem.FileSystemValidator;
-import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackScaleV4RequestToUpdateClusterV4RequestConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackScaleV4RequestToUpdateStackV4RequestConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackV4RequestToTemplatePreparationObjectConverter;
-import com.sequenceiq.cloudbreak.converter.v4.stacks.StackValidationV4RequestToStackValidationConverter;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.StackValidation;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterRepairService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
@@ -72,9 +66,6 @@ public class StackCommonService {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackCommonService.class);
 
     @Inject
-    private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
-
-    @Inject
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
     @Inject
@@ -91,9 +82,6 @@ public class StackCommonService {
 
     @Inject
     private ImageCatalogService imageCatalogService;
-
-    @Inject
-    private FileSystemValidator fileSystemValidator;
 
     @Inject
     private StackCreatorService stackCreatorService;
@@ -127,9 +115,6 @@ public class StackCommonService {
 
     @Inject
     private StackScaleV4RequestToUpdateStackV4RequestConverter stackScaleV4RequestToUpdateStackV4RequestConverter;
-
-    @Inject
-    private StackValidationV4RequestToStackValidationConverter stackValidationV4RequestToStackValidationConverter;
 
     @Inject
     private StackV4RequestToTemplatePreparationObjectConverter stackV4RequestToTemplatePreparationObjectConverter;
@@ -307,13 +292,6 @@ public class StackCommonService {
     public Set<AutoscaleStackV4Response> getAllForAutoscale() {
         LOGGER.debug("Get all stack, autoscale authorized only.");
         return stackService.getAllForAutoscale();
-    }
-
-    public void validate(StackValidationV4Request request) {
-        StackValidation stackValidation = stackValidationV4RequestToStackValidationConverter.convert(request);
-        stackService.validateStack(stackValidation);
-        CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(stackValidation.getCredential());
-        fileSystemValidator.validateFileSystem(stackValidation.getCredential().cloudPlatform(), cloudCredential, request.getFileSystem(), null);
     }
 
     public FlowIdentifier deleteInstanceInWorkspace(NameOrCrn nameOrCrn, Long workspaceId, String instanceId, boolean forced) {
