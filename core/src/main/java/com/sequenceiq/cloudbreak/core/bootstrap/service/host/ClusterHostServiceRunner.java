@@ -24,6 +24,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
@@ -102,6 +103,7 @@ import com.sequenceiq.cloudbreak.service.blueprint.ComponentLocatorService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentConfigProvider;
+import com.sequenceiq.cloudbreak.service.freeipa.FreeipaClientService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.idbroker.IdBrokerService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigProvider;
@@ -120,6 +122,9 @@ import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.common.api.telemetry.model.DataBusCredential;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.type.LoadBalancerType;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetaDataResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 
 @Component
 public class ClusterHostServiceRunner {
@@ -241,6 +246,9 @@ public class ClusterHostServiceRunner {
     @Inject
     private DatalakeService datalakeService;
 
+    @Inject
+    private FreeipaClientService freeipaClient;
+
     public void runClusterServices(@Nonnull Stack stack, @Nonnull Cluster cluster, Map<String, String> candidateAddresses) {
         try {
             Set<Node> allNodes = stackUtil.collectNodes(stack);
@@ -360,7 +368,7 @@ public class ClusterHostServiceRunner {
         ldapView.ifPresent(ldap -> saveLdapPillar(ldap, servicePillar));
 
         saveSssdAdPillar(servicePillar, kerberosConfig);
-        saveSssdIpaPillar(servicePillar, kerberosConfig, serviceLocations);
+        servicePillar.putAll(saveSssdIpaPillar(kerberosConfig, serviceLocations, stack.getEnvironmentCrn()));
         saveDockerPillar(cluster.getExecutorType(), servicePillar);
 
         Map<String, Map<String, String>> mountPathMap = stack.getInstanceGroups().stream().flatMap(group -> group.getInstanceMetaDataSet().stream()
@@ -451,23 +459,52 @@ public class ClusterHostServiceRunner {
         return new VirtualGroupRequest(virtualGroupsEnvironmentCrn, adminGroup);
     }
 
-    private void saveSssdIpaPillar(Map<String, SaltPillarProperties> servicePillar, KerberosConfig kerberosConfig,
-            Map<String, List<String>> serviceLocations) {
+    private Map<String, SaltPillarProperties> saveSssdIpaPillar(KerberosConfig kerberosConfig, Map<String, List<String>> serviceLocations,
+            String environmentCrn) {
         if (kerberosDetailService.isIpaJoinable(kerberosConfig)) {
-            Map<String, Object> sssdConnfig = new HashMap<>();
-            sssdConnfig.put("principal", kerberosConfig.getPrincipal());
-            sssdConnfig.put("realm", kerberosConfig.getRealm().toUpperCase());
-            sssdConnfig.put("domain", kerberosConfig.getDomain());
-            sssdConnfig.put("password", kerberosConfig.getPassword());
-            sssdConnfig.put("server", kerberosConfig.getUrl());
-            sssdConnfig.put("dns_ttl", kerberosDetailService.getDnsTtl());
+            Map<String, Object> sssdConfig = new HashMap<>();
+            sssdConfig.put("principal", kerberosConfig.getPrincipal());
+            sssdConfig.put("realm", kerberosConfig.getRealm().toUpperCase());
+            sssdConfig.put("domain", kerberosConfig.getDomain());
+            sssdConfig.put("password", kerberosConfig.getPassword());
+            sssdConfig.put("server", kerberosConfig.getUrl());
+            sssdConfig.put("dns_ttl", kerberosDetailService.getDnsTtl());
             // enumeration has performance impacts so it's only enabled if Ranger is installed on the cluster
             // otherwise the usersync does not work with nss
             boolean enumerate = !CollectionUtils.isEmpty(serviceLocations.get("RANGER_ADMIN"))
                     || !CollectionUtils.isEmpty(serviceLocations.get("NIFI_REGISTRY_SERVER"))
                     || !CollectionUtils.isEmpty(serviceLocations.get("NIFI_NODE"));
-            sssdConnfig.put("enumerate", enumerate);
-            servicePillar.put("sssd-ipa", new SaltPillarProperties("/sssd/ipa.sls", singletonMap("sssd-ipa", sssdConnfig)));
+            sssdConfig.put("enumerate", enumerate);
+            Map<String, Object> freeIpaConfig = createFreeIpaConfig(environmentCrn);
+            return Map.of("sssd-ipa", new SaltPillarProperties("/sssd/ipa.sls",
+                    Map.of("sssd-ipa", sssdConfig, "freeipa", freeIpaConfig)));
+        } else {
+            return Map.of();
+        }
+    }
+
+    private Map<String, Object> createFreeIpaConfig(String environmentCrn) {
+        Optional<DescribeFreeIpaResponse> freeIpaResponse = freeipaClient.findByEnvironmentCrn(environmentCrn);
+        if (freeIpaResponse.isPresent()) {
+            Stream<InstanceMetaDataResponse> instanceMetaDataStream = freeIpaResponse.get().getInstanceGroups().stream()
+                    .flatMap(ig -> ig.getMetaData().stream());
+            InstanceMetaDataResponse instanceMetaDataResponse = instanceMetaDataStream
+                    .filter(im -> InstanceStatus.CREATED == im.getInstanceStatus())
+                    .min(Comparator.comparing(InstanceMetaDataResponse::getDiscoveryFQDN))
+                    .orElseGet(() -> instanceMetaDataStream
+                            .min(Comparator.comparing(InstanceMetaDataResponse::getDiscoveryFQDN))
+                            .orElse(null));
+            LOGGER.info("Chosen instance for default FreeIPA server: {}", instanceMetaDataResponse);
+            if (instanceMetaDataResponse == null) {
+                LOGGER.debug("No FreeIPA instance available");
+                return Map.of();
+            } else {
+                LOGGER.debug("Setting [{}] FreeIPA FQDN as default FreeIPA server", instanceMetaDataResponse.getDiscoveryFQDN());
+                return Map.of("host", instanceMetaDataResponse.getDiscoveryFQDN());
+            }
+        } else {
+            LOGGER.info("FreeIPA describe didn't return result");
+            return Map.of();
         }
     }
 
