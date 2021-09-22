@@ -4,14 +4,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 import javax.ws.rs.BadRequestException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
@@ -48,6 +46,16 @@ import com.sequenceiq.environment.api.v1.platformresource.model.PlatformVmtypesR
 import com.sequenceiq.environment.api.v1.platformresource.model.RegionResponse;
 import com.sequenceiq.environment.platformresource.PlatformParameterService;
 import com.sequenceiq.environment.platformresource.PlatformResourceRequest;
+import com.sequenceiq.environment.platformresource.v1.converter.CloudAccessConfigsToPlatformAccessConfigsV1ResponseConverter;
+import com.sequenceiq.environment.platformresource.v1.converter.CloudEncryptionKeysToPlatformEncryptionKeysV1ResponseConverter;
+import com.sequenceiq.environment.platformresource.v1.converter.CloudGatewayssToPlatformGatewaysV1ResponseConverter;
+import com.sequenceiq.environment.platformresource.v1.converter.CloudIpPoolsToPlatformIpPoolsV1ResponseConverter;
+import com.sequenceiq.environment.platformresource.v1.converter.CloudNetworksToPlatformNetworksV1ResponseConverter;
+import com.sequenceiq.environment.platformresource.v1.converter.CloudNoSqlTablesToPlatformNoSqlTablesV1ResponseConverter;
+import com.sequenceiq.environment.platformresource.v1.converter.CloudSecurityGroupsToPlatformSecurityGroupsV1ResponseConverter;
+import com.sequenceiq.environment.platformresource.v1.converter.CloudSshKeysToPlatformSshKeysV1ResponseConverter;
+import com.sequenceiq.environment.platformresource.v1.converter.CloudVmTypesToPlatformVmTypesV1ResponseConverter;
+import com.sequenceiq.environment.platformresource.v1.converter.PlatformRegionsToRegionV1ResponseConverter;
 
 @Controller
 @Transactional(TxType.NEVER)
@@ -56,11 +64,37 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentPlatformResourceController.class);
 
     @Inject
-    @Named("conversionService")
-    private ConversionService convertersionService;
+    private PlatformParameterService platformParameterService;
 
     @Inject
-    private PlatformParameterService platformParameterService;
+    private PlatformRegionsToRegionV1ResponseConverter platformRegionsToRegionV1ResponseConverter;
+
+    @Inject
+    private CloudVmTypesToPlatformVmTypesV1ResponseConverter cloudVmTypesToPlatformVmTypesV1ResponseConverter;
+
+    @Inject
+    private CloudNetworksToPlatformNetworksV1ResponseConverter cloudNetworksToPlatformNetworksV1ResponseConverter;
+
+    @Inject
+    private CloudIpPoolsToPlatformIpPoolsV1ResponseConverter cloudIpPoolsToPlatformIpPoolsV1ResponseConverter;
+
+    @Inject
+    private CloudGatewayssToPlatformGatewaysV1ResponseConverter cloudGatewayssToPlatformGatewaysV1ResponseConverter;
+
+    @Inject
+    private CloudEncryptionKeysToPlatformEncryptionKeysV1ResponseConverter cloudEncryptionKeysToPlatformEncryptionKeysV1ResponseConverter;
+
+    @Inject
+    private CloudSecurityGroupsToPlatformSecurityGroupsV1ResponseConverter cloudSecurityGroupsToPlatformSecurityGroupsV1ResponseConverter;
+
+    @Inject
+    private CloudSshKeysToPlatformSshKeysV1ResponseConverter cloudSshKeysToPlatformSshKeysV1ResponseConverter;
+
+    @Inject
+    private CloudAccessConfigsToPlatformAccessConfigsV1ResponseConverter cloudAccessConfigsToPlatformAccessConfigsV1ResponseConverter;
+
+    @Inject
+    private CloudNoSqlTablesToPlatformNoSqlTablesV1ResponseConverter cloudNoSqlTablesToPlatformNoSqlTablesV1ResponseConverter;
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
@@ -83,7 +117,7 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
                 cdpResourceType);
         LOGGER.info("Get /platform_resources/machine_types, request: {}", request);
         CloudVmTypes cloudVmTypes = platformParameterService.getVmTypesByCredential(request);
-        PlatformVmtypesResponse response = convertersionService.convert(cloudVmTypes, PlatformVmtypesResponse.class);
+        PlatformVmtypesResponse response = cloudVmTypesToPlatformVmTypesV1ResponseConverter.convert(cloudVmTypes);
         LOGGER.info("Resp /platform_resources/machine_types, request: {}, cloudVmTypes: {}, response: {}", request, cloudVmTypes, response);
         return response;
     }
@@ -107,7 +141,7 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
                 null);
         LOGGER.info("Get /platform_resources/regions, request: {}", request);
         CloudRegions regions = platformParameterService.getRegionsByCredential(request, availabilityZonesNeeded);
-        RegionResponse response = convertersionService.convert(regions, RegionResponse.class);
+        RegionResponse response = platformRegionsToRegionV1ResponseConverter.convert(regions);
         LOGGER.info("Resp /platform_resources/regions, request: {}, regions: {}, response: {}", request, regions, response);
         return response;
     }
@@ -131,7 +165,7 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
                 sharedProjectId);
         LOGGER.info("Get /platform_resources/networks, request: {}", request);
         CloudNetworks networks = platformParameterService.getCloudNetworks(request);
-        PlatformNetworksResponse response = convertersionService.convert(networks, PlatformNetworksResponse.class);
+        PlatformNetworksResponse response = cloudNetworksToPlatformNetworksV1ResponseConverter.convert(networks);
         LOGGER.info("Resp /platform_resources/networks, request: {}, networks: {}, response: {}", request, networks, response);
         return response;
 
@@ -155,7 +189,7 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
                 null);
         LOGGER.info("Get /platform_resources/ip_pools, request: {}", request);
         CloudIpPools ipPools = platformParameterService.getIpPoolsCredentialId(request);
-        PlatformIpPoolsResponse response = convertersionService.convert(ipPools, PlatformIpPoolsResponse.class);
+        PlatformIpPoolsResponse response = cloudIpPoolsToPlatformIpPoolsV1ResponseConverter.convert(ipPools);
         LOGGER.info("Resp /platform_resources/ip_pools, request: {}, ipPools: {}, response: {}", request, ipPools, response);
         return response;
     }
@@ -178,7 +212,7 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
                 null);
         LOGGER.info("Get /platform_resources/gateways, request: {}", request);
         CloudGateWays gateways = platformParameterService.getGatewaysCredentialId(request);
-        PlatformGatewaysResponse response = convertersionService.convert(gateways, PlatformGatewaysResponse.class);
+        PlatformGatewaysResponse response = cloudGatewayssToPlatformGatewaysV1ResponseConverter.convert(gateways);
         LOGGER.info("Resp /platform_resources/gateways, request: {}, ipPools: {}, response: {}", request, gateways, response);
         return response;
 
@@ -202,7 +236,7 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
                 null);
         LOGGER.info("Get /platform_resources/encryption_keys, request: {}", request);
         CloudEncryptionKeys encryptionKeys = platformParameterService.getEncryptionKeys(request);
-        PlatformEncryptionKeysResponse response = convertersionService.convert(encryptionKeys, PlatformEncryptionKeysResponse.class);
+        PlatformEncryptionKeysResponse response = cloudEncryptionKeysToPlatformEncryptionKeysV1ResponseConverter.convert(encryptionKeys);
         LOGGER.info("Resp /platform_resources/encryption_keys, request: {}, ipPools: {}, response: {}", request, encryptionKeys, response);
         return response;
     }
@@ -226,7 +260,7 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
                 sharedProjectId);
         LOGGER.info("Get /platform_resources/security_groups, request: {}", request);
         CloudSecurityGroups securityGroups = platformParameterService.getSecurityGroups(request);
-        PlatformSecurityGroupsResponse response = convertersionService.convert(securityGroups, PlatformSecurityGroupsResponse.class);
+        PlatformSecurityGroupsResponse response = cloudSecurityGroupsToPlatformSecurityGroupsV1ResponseConverter.convert(securityGroups);
         LOGGER.info("Resp /platform_resources/security_groups, request: {}, securityGroups: {}, response: {}", request, securityGroups, response);
         return response;
     }
@@ -249,7 +283,7 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
                 null);
         LOGGER.info("Get /platform_resources/ssh_keys, request: {}", request);
         CloudSshKeys sshKeys = platformParameterService.getCloudSshKeys(request);
-        PlatformSshKeysResponse response = convertersionService.convert(sshKeys, PlatformSshKeysResponse.class);
+        PlatformSshKeysResponse response = cloudSshKeysToPlatformSshKeysV1ResponseConverter.convert(sshKeys);
         LOGGER.info("Resp /platform_resources/ssh_keys, request: {}, sshKeys: {}, response: {}", request, sshKeys, response);
         return response;
     }
@@ -274,7 +308,7 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
                 accessConfigType);
         LOGGER.info("Get /platform_resources/access_configs, request: {}", request);
         CloudAccessConfigs accessConfigs = platformParameterService.getAccessConfigs(request);
-        PlatformAccessConfigsResponse response = convertersionService.convert(accessConfigs, PlatformAccessConfigsResponse.class);
+        PlatformAccessConfigsResponse response = cloudAccessConfigsToPlatformAccessConfigsV1ResponseConverter.convert(accessConfigs);
         LOGGER.info("Resp /platform_resources/access_configs, request: {}, accessConfigs: {}, response: {}", request, accessConfigs, response);
         return response;
     }
@@ -297,7 +331,7 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
                 null);
         LOGGER.info("Get /platform_resources/nosql_tables, request: {}", request);
         CloudNoSqlTables noSqlTables = platformParameterService.getNoSqlTables(request);
-        PlatformNoSqlTablesResponse response = convertersionService.convert(noSqlTables, PlatformNoSqlTablesResponse.class);
+        PlatformNoSqlTablesResponse response = cloudNoSqlTablesToPlatformNoSqlTablesV1ResponseConverter.convert(noSqlTables);
         LOGGER.info("Resp /platform_resources/nosql_tables, request: {}, noSqlTables: {}, response: {}", request, noSqlTables, response);
         return response;
     }
