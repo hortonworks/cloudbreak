@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +10,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +27,10 @@ import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
 public class AwsUpdateService {
+    public static final String LAUNCH_CONFIGURATION = "AWS::AutoScaling::LaunchConfiguration";
+
+    public static final String LAUNCH_TEMPLATE = "AWS::EC2::LaunchTemplate";
+
     @Inject
     private AwsImageUpdateService awsImageUpdateService;
 
@@ -48,9 +54,20 @@ public class AwsUpdateService {
         return cloudResourceStatuses;
     }
 
+    public void updateUserData(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources, String userData) {
+        String cfTemplate = stack.getTemplate();
+        if (cfTemplate.contains(LAUNCH_TEMPLATE)) {
+            CloudResource cfResource = resources.stream().filter(resource -> ResourceType.CLOUDFORMATION_STACK == resource.getType()).findFirst().orElseThrow();
+            awsLaunchTemplateUpdateService.updateFields(authenticatedContext, cfResource.getName(), Map.of(LaunchTemplateField.USER_DATA,
+                    Base64.getEncoder().encodeToString(userData.getBytes())));
+        } else {
+            throw new NotImplementedException("UserData update for stack template is not implemented yet, only for AWS::EC2::LaunchTemplate.");
+        }
+    }
+
     public void checkUpdate(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) throws Exception {
         CloudResource cfResource = resources.stream().filter(resource -> ResourceType.CLOUDFORMATION_STACK == resource.getType()).findFirst().orElseThrow();
-        awsLaunchTemplateUpdateService.updateFields(authenticatedContext, cfResource, Map.of(LaunchTemplateField.DESCRIPTION,
+        awsLaunchTemplateUpdateService.updateFields(authenticatedContext, cfResource.getName(), Map.of(LaunchTemplateField.DESCRIPTION,
                 String.format("Latest modifyLaunchTemplate check for upgrade: %s", new SimpleDateFormat("yyyy.MM.dd HH:mm:ss").format(new Date()))),
                 true);
     }

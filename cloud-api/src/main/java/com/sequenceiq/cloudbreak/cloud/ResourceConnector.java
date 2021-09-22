@@ -208,6 +208,16 @@ public interface ResourceConnector<R> {
     List<CloudResourceStatus> update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) throws Exception;
 
     /**
+     * Update yser data for the cluster instances which contains parameters for user-data scricpt run during intsances' bootstrap.
+     *
+     * @param authenticatedContext the authenticated context which holds the client object
+     * @param stack                contains the full description of the new infrastructure (e.g new security groups)
+     * @param userData             the user data
+     * @throws Exception in case of any error
+     */
+    void updateUserData(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources, String userData) throws Exception;
+
+    /**
      * Update of infrastructure on Cloud platform, add new instances. It does not need to wait/block until the infrastructure update is
      * finished, but it can return immediately and the {@link #check(AuthenticatedContext, List)} method is invoked to check regularly whether the
      * infrastructure and all resources have already been updated or not.

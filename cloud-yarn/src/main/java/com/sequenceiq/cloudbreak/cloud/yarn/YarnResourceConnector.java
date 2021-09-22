@@ -240,6 +240,11 @@ public class YarnResourceConnector implements ResourceConnector<Object> {
     }
 
     @Override
+    public void updateUserData(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources, String userData) {
+        LOGGER.info("Update userdata is not implemented on Yarn!");
+    }
+
+    @Override
     public void checkUpdate(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) throws Exception {
         return;
     }

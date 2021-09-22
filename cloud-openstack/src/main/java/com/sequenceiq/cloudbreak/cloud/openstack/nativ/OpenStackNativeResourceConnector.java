@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.cloud.openstack.nativ;
 import java.util.Collections;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -18,6 +20,7 @@ import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
 public class OpenStackNativeResourceConnector extends AbstractResourceConnector {
+    private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackNativeResourceConnector.class);
 
     @Override
     public TlsInfo getTlsInfo(AuthenticatedContext authenticatedContext, CloudStack cloudStack) {
@@ -48,5 +51,10 @@ public class OpenStackNativeResourceConnector extends AbstractResourceConnector 
     public List<CloudResourceStatus> launchLoadBalancers(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier persistenceNotifier)
             throws Exception {
         throw new UnsupportedOperationException("Load balancers are not supported for the open stack native resource connector.");
+    }
+
+    @Override
+    public void updateUserData(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources, String userData) {
+        LOGGER.info("Update userdata is not implemented on OpenStack Native!");
     }
 }

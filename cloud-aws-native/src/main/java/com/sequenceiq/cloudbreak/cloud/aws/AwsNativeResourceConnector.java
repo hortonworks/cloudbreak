@@ -54,6 +54,11 @@ public class AwsNativeResourceConnector extends AbstractResourceConnector {
     }
 
     @Override
+    public void updateUserData(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources, String userData) {
+        LOGGER.info("Update userdata is not implemented on AWS Native!");
+    }
+
+    @Override
     public TlsInfo getTlsInfo(AuthenticatedContext authenticatedContext, CloudStack cloudStack) {
         Network network = cloudStack.getNetwork();
         AwsNetworkView networkView = new AwsNetworkView(network);

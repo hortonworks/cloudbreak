@@ -35,8 +35,13 @@ public class AutoScalingGroupHandler {
 
     public Map<AutoScalingGroup, String> getAutoScalingGroups(AmazonCloudFormationClient cloudFormationClient,
             AmazonAutoScalingClient autoScalingClient, CloudResource cfResource) {
+        return getAutoScalingGroups(cloudFormationClient, autoScalingClient, cfResource.getName());
+    }
+
+    public Map<AutoScalingGroup, String> getAutoScalingGroups(AmazonCloudFormationClient cloudFormationClient,
+            AmazonAutoScalingClient autoScalingClient, String stackName) {
         DescribeStackResourcesRequest resourcesRequest = new DescribeStackResourcesRequest();
-        resourcesRequest.setStackName(cfResource.getName());
+        resourcesRequest.setStackName(stackName);
         DescribeStackResourcesResult resourcesResult = cloudFormationClient.describeStackResources(resourcesRequest);
         Map<String, String> autoScalingGroups = resourcesResult.getStackResources().stream()
                 .filter(stackResource -> "AWS::AutoScaling::AutoScalingGroup".equalsIgnoreCase(stackResource.getResourceType()))

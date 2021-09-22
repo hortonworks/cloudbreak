@@ -6,6 +6,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
@@ -28,6 +30,7 @@ import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
 public class GcpResourceConnector extends AbstractResourceConnector {
+    private static final Logger LOGGER = LoggerFactory.getLogger(GcpResourceConnector.class);
 
     @Inject
     private LoadBalancerResourceService loadBalancerResourceService;
@@ -107,5 +110,10 @@ public class GcpResourceConnector extends AbstractResourceConnector {
     @Override
     public List<CloudResourceStatus> check(AuthenticatedContext authenticatedContext, List<CloudResource> resources) {
         return List.of();
+    }
+
+    @Override
+    public void updateUserData(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources, String userData) {
+        LOGGER.info("Update userdata is not implemented on GCP!");
     }
 }

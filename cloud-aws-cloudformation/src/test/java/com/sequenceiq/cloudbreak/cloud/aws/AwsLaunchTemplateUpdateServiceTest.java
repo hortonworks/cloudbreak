@@ -126,7 +126,7 @@ public class AwsLaunchTemplateUpdateServiceTest {
         when(autoScalingClient.updateAutoScalingGroup(any(UpdateAutoScalingGroupRequest.class))).thenReturn(new UpdateAutoScalingGroupResult());
 
         // WHEN
-        underTest.updateFields(ac, cfResource, Map.of(LaunchTemplateField.IMAGE_ID, stack.getImage().getImageName()));
+        underTest.updateFields(ac, cfResource.getName(), Map.of(LaunchTemplateField.IMAGE_ID, stack.getImage().getImageName()));
 
         // THEN no exception
     }
@@ -145,13 +145,13 @@ public class AwsLaunchTemplateUpdateServiceTest {
         when(cloudFormationClient.getTemplate(any())).thenReturn(new GetTemplateResult().withTemplateBody(cfTemplateBody));
 
         Map<AutoScalingGroup, String> autoScalingGroupsResult = createAutoScalingGroupHandler();
-        when(autoScalingGroupHandler.getAutoScalingGroups(cloudFormationClient, autoScalingClient, cfResource)).thenReturn(autoScalingGroupsResult);
+        when(autoScalingGroupHandler.getAutoScalingGroups(cloudFormationClient, autoScalingClient, cfResource.getName())).thenReturn(autoScalingGroupsResult);
         when(ec2Client.createLaunchTemplateVersion(any(CreateLaunchTemplateVersionRequest.class))).thenReturn(new CreateLaunchTemplateVersionResult()
                 .withWarning(new ValidationWarning().withErrors(new ValidationError().withCode("1").withMessage("error"))));
 
         // WHEN and THEN exception
         Assert.assertThrows(CloudConnectorException.class,
-                () -> underTest.updateFields(ac, cfResource, Map.of(LaunchTemplateField.IMAGE_ID, stack.getImage().getImageName())));
+                () -> underTest.updateFields(ac, cfResource.getName(), Map.of(LaunchTemplateField.IMAGE_ID, stack.getImage().getImageName())));
     }
 
     private Map<AutoScalingGroup, String> createAutoScalingGroupHandler() {

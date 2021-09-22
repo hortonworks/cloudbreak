@@ -26,7 +26,6 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
-import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 
 @Service
 public class AwsLaunchTemplateUpdateService {
@@ -38,18 +37,18 @@ public class AwsLaunchTemplateUpdateService {
     @Inject
     private AutoScalingGroupHandler autoScalingGroupHandler;
 
-    public void updateFields(AuthenticatedContext authenticatedContext, CloudResource cfResource, Map<LaunchTemplateField, String> updatableFields) {
-        updateFields(authenticatedContext, cfResource, updatableFields, false);
+    public void updateFields(AuthenticatedContext authenticatedContext, String stackName, Map<LaunchTemplateField, String> updatableFields) {
+        updateFields(authenticatedContext, stackName, updatableFields, false);
     }
 
-    public void updateFields(AuthenticatedContext authenticatedContext, CloudResource cfResource, Map<LaunchTemplateField, String> updatableFields,
+    public void updateFields(AuthenticatedContext authenticatedContext, String stackName, Map<LaunchTemplateField, String> updatableFields,
             boolean dryRun) {
         AwsCredentialView credentialView = new AwsCredentialView(authenticatedContext.getCloudCredential());
         String regionName = authenticatedContext.getCloudContext().getLocation().getRegion().getRegionName();
         AmazonCloudFormationClient cloudFormationClient = awsClient.createCloudFormationClient(credentialView, regionName);
         AmazonAutoScalingClient autoScalingClient = awsClient.createAutoScalingClient(credentialView, regionName);
         AmazonEc2Client ec2Client = awsClient.createEc2Client(credentialView, regionName);
-        Map<AutoScalingGroup, String> autoScalingGroups = autoScalingGroupHandler.getAutoScalingGroups(cloudFormationClient, autoScalingClient, cfResource);
+        Map<AutoScalingGroup, String> autoScalingGroups = autoScalingGroupHandler.getAutoScalingGroups(cloudFormationClient, autoScalingClient, stackName);
         autoScalingGroups = filterGroupsForDryRun(autoScalingGroups, dryRun);
         LOGGER.debug("Modifying the {} fields for the [{}] autoscaling groups' launchtemplates [dryrun: {}]", updatableFields, autoScalingGroups.values(),
                 dryRun);
@@ -98,7 +97,8 @@ public class AwsLaunchTemplateUpdateService {
                 .withLaunchTemplateId(launchTemplateSpecification.getLaunchTemplateId())
                 .withSourceVersion(launchTemplateSpecification.getVersion())
                 .withLaunchTemplateData(new RequestLaunchTemplateData().withImageId(updatableFields.getOrDefault(LaunchTemplateField.IMAGE_ID, null)))
-                .withVersionDescription(updatableFields.getOrDefault(LaunchTemplateField.DESCRIPTION, null));
+                .withVersionDescription(updatableFields.getOrDefault(LaunchTemplateField.DESCRIPTION, null))
+                .withLaunchTemplateData(new RequestLaunchTemplateData().withUserData(updatableFields.getOrDefault(LaunchTemplateField.USER_DATA, null)));
         CreateLaunchTemplateVersionResult createLaunchTemplateVersionResult = ec2Client.createLaunchTemplateVersion(createLaunchTemplateVersionRequest);
         validateCreatedLaunchTemplateVersionResult(createLaunchTemplateVersionResult);
         LOGGER.debug("Updated field in new launch template version: {}", updatableFields);

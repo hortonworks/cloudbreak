@@ -55,6 +55,11 @@ public class AbstractResourceConnectorTest {
             }
 
             @Override
+            public void updateUserData(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources, String userData) {
+
+            }
+
+            @Override
             public TlsInfo getTlsInfo(AuthenticatedContext authenticatedContext, CloudStack cloudStack) {
                 return null;
             }
