@@ -1,5 +1,7 @@
 package com.sequenceiq.distrox.v1.distrox.converter;
 
+import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
+
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
@@ -15,7 +17,7 @@ public class DistroXRepairV1RequestToClusterRepairV4RequestConverter {
 
     public ClusterRepairV4Request convert(DistroXRepairV1Request source) {
         ClusterRepairV4Request clusterRepairV4Request = new ClusterRepairV4Request();
-        clusterRepairV4Request.setNodes(distroXRepairNodesV1RequestToClusterRepairNodesV4Request.convert(source.getNodes()));
+        clusterRepairV4Request.setNodes(getIfNotNull(source.getNodes(), distroXRepairNodesV1RequestToClusterRepairNodesV4Request::convert));
         clusterRepairV4Request.setHostGroups(source.getHostGroups());
         clusterRepairV4Request.setRemoveOnly(source.isRemoveOnly());
         return clusterRepairV4Request;
