@@ -114,7 +114,7 @@ class ClusterServiceTest {
 
     static Object[][] updateClusterMetadataScenarios() {
         return new Object[][]{
-                {"CM returns HEALTHY", HEALTHY, InstanceStatus.SERVICES_HEALTHY, STATUS_REASON_SERVER},
+                {"CM returns HEALTHY", HEALTHY, InstanceStatus.SERVICES_HEALTHY, ""},
                 {"CM returns UNHEALTHY", UNHEALTHY, InstanceStatus.SERVICES_UNHEALTHY, STATUS_REASON_SERVER},
                 {"CM returns no data for the host", null, InstanceStatus.SERVICES_RUNNING, STATUS_REASON_ORIGINAL},
         };
