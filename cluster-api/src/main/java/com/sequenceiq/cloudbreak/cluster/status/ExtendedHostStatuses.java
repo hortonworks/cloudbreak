@@ -52,6 +52,7 @@ public class ExtendedHostStatuses {
     public String statusReasonForHost(HostName hostName) {
         return emptyIfNull(hostsHealth.get(hostName)).stream()
                 .sorted(Comparator.comparing(HealthCheck::getType))
+                .filter(hc -> HealthCheckResult.UNHEALTHY == hc.getResult())
                 .map(HealthCheck::getReason)
                 .flatMap(Optional::stream)
                 .collect(Collectors.joining(" "));

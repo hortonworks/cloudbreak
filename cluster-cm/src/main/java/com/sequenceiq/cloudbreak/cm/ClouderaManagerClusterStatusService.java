@@ -290,9 +290,10 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
                 .filter(health -> HOST_AGENT_CERTIFICATE_EXPIRY.equals(health.getName()))
                 .findFirst();
         if (healthCheck.isPresent()) {
-            HealthCheckResult result = !ApiHealthSummary.GOOD.equals(healthCheck.get().getSummary()) ?
-                    HealthCheckResult.UNHEALTHY : HealthCheckResult.HEALTHY;
-            return Optional.of(new HealthCheck(HealthCheckType.CERT, result, Optional.empty()));
+            HealthCheckResult result = ApiHealthSummary.BAD.equals(healthCheck.get().getSummary())
+                    || ApiHealthSummary.CONCERNING.equals(healthCheck.get().getSummary()) ? HealthCheckResult.UNHEALTHY : HealthCheckResult.HEALTHY;
+            Optional<String> reason = Optional.ofNullable(healthCheck.get().getSummary()).map(apiSum -> "Cert health on CM: " + apiSum.getValue());
+            return Optional.of(new HealthCheck(HealthCheckType.CERT, result, reason));
         }
         return Optional.empty();
     }
