@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.core.convert.ConversionService;
 
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterSetupService;
@@ -59,9 +58,6 @@ class ClusterBuilderServiceTest {
 
     @Mock
     private StackService mockStackService;
-
-    @Mock
-    private ConversionService mockConversionService;
 
     @Mock
     private KerberosConfigService mockKerberosConfigService;
