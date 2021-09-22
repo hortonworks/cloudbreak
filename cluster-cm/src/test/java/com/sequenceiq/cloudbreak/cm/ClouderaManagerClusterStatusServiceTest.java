@@ -122,8 +122,8 @@ public class ClouderaManagerClusterStatusServiceTest {
     public void reportsClusterStatusPendingWhenAnyServiceIsStarting() throws ApiException {
         cmIsReachable();
         servicesAre(
-            new ApiService().name("service1").serviceState(ApiServiceState.STARTING),
-            new ApiService().name("service2").serviceState(ApiServiceState.STARTED)
+                new ApiService().name("service1").serviceState(ApiServiceState.STARTING),
+                new ApiService().name("service2").serviceState(ApiServiceState.STARTED)
         );
 
         assertEquals(ClusterStatus.PENDING, subject.getStatus(true).getClusterStatus());
@@ -245,7 +245,7 @@ public class ClouderaManagerClusterStatusServiceTest {
         );
 
         ExtendedHostStatuses extendedHostStatuses = subject.getExtendedHostStatuses(Optional.of("7.2.12"));
-        assertEquals("explanation.", extendedHostStatuses.statusReasonForHost(hostName("host3")));
+        assertEquals("explanation. Cert health on CM: BAD", extendedHostStatuses.statusReasonForHost(hostName("host3")));
         assertTrue(extendedHostStatuses.isAnyCertExpiring());
         assertTrue(extendedHostStatuses.isHostHealthy(hostName("host1")));
         assertTrue(extendedHostStatuses.isHostHealthy(hostName("host2")));
@@ -275,7 +275,7 @@ public class ClouderaManagerClusterStatusServiceTest {
         hostsAre(
                 new ApiHost().hostname("host1")
                         .addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.BAD)
-                            .explanation("explanation"))
+                                .explanation("explanation"))
                         .addHealthChecksItem(new ApiHealthCheck().name(HOST_AGENT_CERTIFICATE_EXPIRY).summary(ApiHealthSummary.GOOD))
                         .addRoleRefsItem(roleRef("badservice", ApiHealthSummary.BAD)),
                 new ApiHost().hostname("host2")
