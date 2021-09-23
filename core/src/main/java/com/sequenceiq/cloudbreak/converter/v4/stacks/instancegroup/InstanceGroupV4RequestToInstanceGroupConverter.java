@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup;
 
+import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
+
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -39,8 +41,8 @@ public class InstanceGroupV4RequestToInstanceGroupConverter {
         InstanceGroup instanceGroup = new InstanceGroup();
         source.getTemplate().setCloudPlatform(source.getCloudPlatform());
         instanceGroup.setTemplate(instanceTemplateV4RequestToTemplateConverter.convert(source.getTemplate()));
-        instanceGroup.setSecurityGroup(securityGroupV4RequestToSecurityGroupConverter
-                .convert(source.getSecurityGroup()));
+        instanceGroup.setSecurityGroup(getIfNotNull(source.getSecurityGroup(), securityGroupV4RequestToSecurityGroupConverter
+                ::convert));
         instanceGroup.setGroupName(source.getName().toLowerCase());
         instanceGroup.setMinimumNodeCount(source.getMinimumNodeCount() == null ? 0 : source.getMinimumNodeCount());
         setAttributes(source, instanceGroup);

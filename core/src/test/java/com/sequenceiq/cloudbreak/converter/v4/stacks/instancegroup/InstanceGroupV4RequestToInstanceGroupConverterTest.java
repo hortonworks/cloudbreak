@@ -17,7 +17,6 @@ import com.sequenceiq.cloudbreak.common.mappable.Mappable;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.securitygroup.SecurityGroupV4RequestToSecurityGroupConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.template.InstanceTemplateV4RequestToTemplateConverter;
-import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 
@@ -44,7 +43,6 @@ public class InstanceGroupV4RequestToInstanceGroupConverterTest {
 
         when(providerParameterCalculator.get(source)).thenReturn(mock(Mappable.class));
         when(instanceTemplateV4RequestToTemplateConverter.convert(any())).thenReturn(new Template());
-        when(securityGroupV4RequestToSecurityGroupConverter.convert(any())).thenReturn(new SecurityGroup());
 
         InstanceGroup actual = underTest.convert(source);
         assertEquals(actual.getGroupName(), "mixedname");
