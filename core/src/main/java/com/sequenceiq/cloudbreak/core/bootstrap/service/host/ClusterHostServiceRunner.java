@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.core.bootstrap.service.host;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_0_2;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_0;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_1;
-import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_4_3;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel;
 import static java.util.Collections.singletonMap;
@@ -77,7 +76,6 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
@@ -94,6 +92,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
+import com.sequenceiq.cloudbreak.san.LoadBalancerSANProvider;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
@@ -111,7 +110,6 @@ import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
-import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.MountDisks;
 import com.sequenceiq.cloudbreak.template.kerberos.KerberosDetailService;
@@ -121,7 +119,6 @@ import com.sequenceiq.cloudbreak.util.NodesUnreachableException;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.common.api.telemetry.model.DataBusCredential;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
-import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetaDataResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
@@ -160,7 +157,7 @@ public class ClusterHostServiceRunner {
     private InstanceMetaDataService instanceMetaDataService;
 
     @Inject
-    private LoadBalancerPersistenceService loadBalancerPersistenceService;
+    private LoadBalancerSANProvider loadBalancerSANProvider;
 
     @Inject
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
@@ -536,15 +533,9 @@ public class ClusterHostServiceRunner {
         ClouderaManagerRepo clouderaManagerRepo) {
         Boolean autoTls = cluster.getAutoTlsEnabled();
         Map<String, Object> communication = new HashMap<>();
-        if (isVersionNewerOrEqualThanLimited(clouderaManagerRepo.getVersion(), CLOUDERAMANAGER_VERSION_7_4_3)) {
-            Set<LoadBalancer> loadBalancers = loadBalancerPersistenceService.findByStackId(stack.getId());
-            if (!loadBalancers.isEmpty()) {
-                Optional<LoadBalancer> loadBalancer = loadBalancerConfigService.selectLoadBalancer(loadBalancers, LoadBalancerType.PUBLIC);
-                Optional<String> san = loadBalancer.flatMap(this::getBestSANForLB);
-                if (san.isPresent()) {
-                    communication.put("internal_loadbalancer_san", san.get());
-                }
-            }
+        Optional<String> san = loadBalancerSANProvider.getLoadBalancerSAN(stack);
+        if (san.isPresent()) {
+            communication.put("internal_loadbalancer_san", san.get());
         }
         communication.put("port", autoTls ? CM_HTTPS_PORT : CM_HTTP_PORT);
         communication.put("protocol", autoTls ? "https" : "http");
@@ -552,16 +543,6 @@ public class ClusterHostServiceRunner {
         servicePillar.put("cloudera-manager-communication",
             new SaltPillarProperties("/cloudera-manager/communication.sls",
                 singletonMap("cloudera-manager", singletonMap("communication", communication))));
-    }
-
-    private Optional<String> getBestSANForLB(LoadBalancer lb) {
-        if (isNotBlank(lb.getFqdn())) {
-            return Optional.of("DNS:" + lb.getFqdn());
-        }
-        if (isNotBlank(lb.getDns())) {
-            return Optional.of("DNS:" + lb.getDns());
-        }
-        return Optional.of("IP:" + lb.getIp());
     }
 
     private void decoratePillarWithClouderaManagerAutoTls(Cluster cluster, Map<String, SaltPillarProperties> servicePillar) {
