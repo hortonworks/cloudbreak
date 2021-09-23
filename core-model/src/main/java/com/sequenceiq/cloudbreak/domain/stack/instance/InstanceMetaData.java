@@ -106,6 +106,8 @@ public class InstanceMetaData implements ProvisionEntity {
     @Convert(converter = InstanceLifeCycleConverter.class)
     private InstanceLifeCycle lifeCycle;
 
+    private String variant;
+
     public InstanceGroup getInstanceGroup() {
         return instanceGroup;
     }
@@ -373,6 +375,14 @@ public class InstanceMetaData implements ProvisionEntity {
         this.lifeCycle = lifeCycle;
     }
 
+    public String getVariant() {
+        return variant;
+    }
+
+    public void setVariant(String variant) {
+        this.variant = variant;
+    }
+
     @Override
     public String toString() {
         return new StringJoiner(", ", InstanceMetaData.class.getSimpleName() + "[", "]")
@@ -386,6 +396,7 @@ public class InstanceMetaData implements ProvisionEntity {
                 .add("instanceMetadataType=" + instanceMetadataType)
                 .add("instanceName='" + instanceName + "'")
                 .add("statusReason='" + statusReason + "'")
+                .add("variant='" + variant + "'")
                 .toString();
     }
 }

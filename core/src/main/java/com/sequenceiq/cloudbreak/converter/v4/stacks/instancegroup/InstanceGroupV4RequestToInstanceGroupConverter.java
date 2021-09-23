@@ -37,7 +37,7 @@ public class InstanceGroupV4RequestToInstanceGroupConverter {
     @Inject
     private InstanceTemplateV4RequestToTemplateConverter instanceTemplateV4RequestToTemplateConverter;
 
-    public InstanceGroup convert(InstanceGroupV4Request source) {
+    public InstanceGroup convert(InstanceGroupV4Request source, String variant) {
         InstanceGroup instanceGroup = new InstanceGroup();
         source.getTemplate().setCloudPlatform(source.getCloudPlatform());
         instanceGroup.setTemplate(instanceTemplateV4RequestToTemplateConverter.convert(source.getTemplate()));
@@ -51,7 +51,7 @@ public class InstanceGroupV4RequestToInstanceGroupConverter {
         instanceGroup.setScalabilityOption(source.getScalabilityOption() == null ? ScalabilityOption.ALLOWED : source.getScalabilityOption());
         setNetwork(source, instanceGroup);
         if (source.getNodeCount() > 0) {
-            addInstanceMetadatas(source, instanceGroup);
+            addInstanceMetadatas(source, instanceGroup, variant);
         }
         return instanceGroup;
     }
@@ -65,11 +65,12 @@ public class InstanceGroupV4RequestToInstanceGroupConverter {
         }
     }
 
-    private void addInstanceMetadatas(InstanceGroupV4Request request, InstanceGroup instanceGroup) {
+    private void addInstanceMetadatas(InstanceGroupV4Request request, InstanceGroup instanceGroup, String variant) {
         Set<InstanceMetaData> instanceMetaDataSet = new HashSet<>();
         for (int i = 0; i < request.getNodeCount(); i++) {
             InstanceMetaData instanceMetaData = new InstanceMetaData();
             instanceMetaData.setInstanceGroup(instanceGroup);
+            instanceMetaData.setVariant(variant);
             instanceMetaDataSet.add(instanceMetaData);
         }
         instanceGroup.setInstanceMetaData(instanceMetaDataSet);

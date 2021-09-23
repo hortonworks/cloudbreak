@@ -1,5 +1,6 @@
 {
   "name": "mystack",
+  "variant": "variant",
   "environmentCrn": "crn",
   "image": {
     "catalog": "aws-catalog",

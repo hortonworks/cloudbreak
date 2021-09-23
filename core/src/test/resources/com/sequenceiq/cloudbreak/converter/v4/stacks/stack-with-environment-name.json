@@ -1,5 +1,6 @@
 {
   "name": "mystack",
+  "variant": "variant",
   "image": {
     "catalog": "aws-catalog",
     "id": "aws-image"

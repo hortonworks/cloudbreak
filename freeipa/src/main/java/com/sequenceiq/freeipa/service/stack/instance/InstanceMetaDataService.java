@@ -60,6 +60,7 @@ public class InstanceMetaDataService {
                     instanceMetaData.setPrivateId(instanceTemplate.getPrivateId());
                     instanceMetaData.setInstanceStatus(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus.REQUESTED);
                     instanceMetaData.setInstanceGroup(instanceGroup);
+                    instanceMetaData.setVariant(stack.getPlatformvariant());
                     instanceMetaDataRepository.save(instanceMetaData);
                 }
             }

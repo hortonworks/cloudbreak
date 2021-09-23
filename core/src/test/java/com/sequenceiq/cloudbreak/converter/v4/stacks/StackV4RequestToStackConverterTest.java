@@ -326,7 +326,7 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
         when(instanceGroup.getInstanceGroupType()).thenReturn(InstanceGroupType.GATEWAY);
         given(credentialClientService.getByName(anyString())).willReturn(credential);
         given(credentialClientService.getByCrn(anyString())).willReturn(credential);
-        given(instanceGroupV4RequestToInstanceGroupConverter.convert(any(InstanceGroupV4Request.class))).willReturn(instanceGroup);
+        given(instanceGroupV4RequestToInstanceGroupConverter.convert(any(InstanceGroupV4Request.class), anyString())).willReturn(instanceGroup);
         given(providerParameterCalculator.get(request)).willReturn(getMappable());
         given(clusterV4RequestToClusterConverter.convert(any(ClusterV4Request.class))).willReturn(new Cluster());
 
@@ -411,7 +411,7 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
         instanceGroup.setGroupName("master");
 
         given(stackAuthenticationV4RequestToStackAuthenticationConverter.convert(any(StackAuthenticationV4Request.class))).willReturn(new StackAuthentication());
-        given(instanceGroupV4RequestToInstanceGroupConverter.convert(any(InstanceGroupV4Request.class))).willReturn(instanceGroup);
+        given(instanceGroupV4RequestToInstanceGroupConverter.convert(any(InstanceGroupV4Request.class), anyString())).willReturn(instanceGroup);
     }
 
     private StackV4Request setupForEndpointGateway(boolean enabled) {

@@ -44,7 +44,7 @@ public class InstanceGroupV4RequestToInstanceGroupConverterTest {
         when(providerParameterCalculator.get(source)).thenReturn(mock(Mappable.class));
         when(instanceTemplateV4RequestToTemplateConverter.convert(any())).thenReturn(new Template());
 
-        InstanceGroup actual = underTest.convert(source);
+        InstanceGroup actual = underTest.convert(source, "variant");
         assertEquals(actual.getGroupName(), "mixedname");
     }
 }
