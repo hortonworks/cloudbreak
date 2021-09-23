@@ -175,15 +175,19 @@ public enum Status {
             case REQUESTED:
             case CREATE_IN_PROGRESS:
                 return CREATE_FAILED;
+            case UPDATE_REQUESTED:
             case UPDATE_IN_PROGRESS:
                 return UPDATE_FAILED;
+            case RECOVERY_REQUESTED:
             case RECOVERY_IN_PROGRESS:
                 return RECOVERY_FAILED;
             case DELETE_IN_PROGRESS:
             case PRE_DELETE_IN_PROGRESS:
                 return DELETE_FAILED;
+            case START_REQUESTED:
             case START_IN_PROGRESS:
                 return START_FAILED;
+            case STOP_REQUESTED:
             case STOP_IN_PROGRESS:
                 return STOP_FAILED;
             case BACKUP_IN_PROGRESS:
