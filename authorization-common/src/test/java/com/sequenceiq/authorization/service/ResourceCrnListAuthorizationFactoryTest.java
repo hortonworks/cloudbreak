@@ -24,6 +24,7 @@ import com.sequenceiq.authorization.annotation.ResourceCrnList;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.service.model.AuthorizationRule;
 import com.sequenceiq.authorization.service.model.HasRightOnAll;
+import com.sequenceiq.authorization.utils.CrnAccountValidator;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ResourceCrnListAuthorizationFactoryTest {
@@ -42,6 +43,9 @@ public class ResourceCrnListAuthorizationFactoryTest {
 
     @Mock
     private EnvironmentBasedAuthorizationProvider environmentBasedAuthorizationProvider;
+
+    @Mock
+    private CrnAccountValidator crnAccountValidator;
 
     @InjectMocks
     private ResourceCrnListAuthorizationFactory underTest;

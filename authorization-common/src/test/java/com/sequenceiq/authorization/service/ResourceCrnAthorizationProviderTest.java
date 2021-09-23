@@ -23,6 +23,7 @@ import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.service.model.AuthorizationRule;
 import com.sequenceiq.authorization.service.model.HasRight;
 import com.sequenceiq.authorization.service.model.HasRightOnAny;
+import com.sequenceiq.authorization.utils.CrnAccountValidator;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ResourceCrnAthorizationProviderTest {
@@ -43,6 +44,9 @@ public class ResourceCrnAthorizationProviderTest {
 
     @Mock
     private DefaultResourceAuthorizationProvider defaultResourceAuthorizationProvider;
+
+    @Mock
+    private CrnAccountValidator crnAccountValidator;
 
     @InjectMocks
     private ResourceCrnAthorizationFactory underTest;

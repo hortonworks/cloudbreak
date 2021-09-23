@@ -91,6 +91,10 @@ public class EnvironmentServiceIntegrationTest {
 
     private static final String TEST_RESOURCE_CRN = String.format("crn:cdp:environments:us-west-1:%s:credential:asdasd", TEST_ACCOUNT_ID);
 
+    private static final String TEST_RESOURCE_CRN_IN_OTHER_ACCOUNT = String.format("crn:cdp:environments:us-west-1:%s:credential:asdasd", "otherAccountId");
+
+    private static final String NOT_EXISTING_RESOURCE_CRN = String.format("crn:cdp:environments:us-west-1:%s:credential:nonexisting", TEST_ACCOUNT_ID);
+
     private static final String USER_CODE = "1234";
 
     private static final String VERIFICATION_URL = "http://cloudera.com";
@@ -268,7 +272,12 @@ public class EnvironmentServiceIntegrationTest {
 
     @Test
     public void testCredentialGetByCrnNotFound() {
-        assertThrows(NotFoundException.class, () -> client.credentialV1Endpoint().getByResourceCrn("nonexisting"));
+        assertThrows(NotFoundException.class, () -> client.credentialV1Endpoint().getByResourceCrn(NOT_EXISTING_RESOURCE_CRN));
+    }
+
+    @Test
+    public void testCredentialGetByCrnAccessDeniedIfAccountDoesntMatch() {
+        assertThrows(ForbiddenException.class, () -> client.credentialV1Endpoint().getByResourceCrn(TEST_RESOURCE_CRN_IN_OTHER_ACCOUNT));
     }
 
     @Test
@@ -294,7 +303,7 @@ public class EnvironmentServiceIntegrationTest {
 
     @Test
     public void testCredentialDeleteByCrnNotFound() {
-        assertThrows(NotFoundException.class, () -> client.credentialV1Endpoint().deleteByResourceCrn("nonexisting"));
+        assertThrows(NotFoundException.class, () -> client.credentialV1Endpoint().deleteByResourceCrn(NOT_EXISTING_RESOURCE_CRN));
     }
 
     @Test

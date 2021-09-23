@@ -19,6 +19,7 @@ import com.sequenceiq.authorization.annotation.RequestObject;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationVariableType;
 import com.sequenceiq.authorization.service.model.AuthorizationRule;
+import com.sequenceiq.authorization.utils.CrnAccountValidator;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 
 @Component
@@ -41,23 +42,26 @@ public class RequestPropertyAuthorizationFactory extends TypedAuthorizationFacto
     @Inject
     private ResourceNameListAuthorizationFactory resourceNameListAuthorizationFactory;
 
+    @Inject
+    private CrnAccountValidator crnAccountValidator;
+
     @Override
     public Optional<AuthorizationRule> doGetAuthorization(CheckPermissionByRequestProperty methodAnnotation, String userCrn,
             ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature) {
         Object requestObject = commonPermissionCheckingUtils.getParameter(proceedingJoinPoint, methodSignature, RequestObject.class, Object.class);
         LOGGER.debug("Getting authorization rule to authorize user [{}] for action [{}] over property [{}] of request object.",
                 userCrn, methodAnnotation.action(), methodAnnotation.path());
-        return calcAuthorization(requestObject, methodAnnotation);
+        return calcAuthorization(requestObject, methodAnnotation, userCrn);
     }
 
-    private Optional<AuthorizationRule> calcAuthorization(Object resourceObject, CheckPermissionByRequestProperty methodAnnotation) {
+    private Optional<AuthorizationRule> calcAuthorization(Object resourceObject, CheckPermissionByRequestProperty methodAnnotation, String userCrn) {
         boolean skipOnNull = methodAnnotation.skipOnNull();
         try {
             Object fieldObject = PropertyUtils.getProperty(resourceObject, methodAnnotation.path());
             AuthorizationVariableType authorizationVariableType = methodAnnotation.type();
             AuthorizationResourceAction action = methodAnnotation.action();
             if (fieldObject != null) {
-                return calcAuthorizationFromObject(action, authorizationVariableType, fieldObject);
+                return calcAuthorizationFromObject(action, authorizationVariableType, fieldObject, userCrn);
             } else if (!methodAnnotation.skipOnNull()) {
                 throw new AccessDeniedException(String.format("Property [%s] of request object is null and it should be authorized, " +
                         "thus should be filled in.", methodAnnotation.path()));
@@ -80,16 +84,16 @@ public class RequestPropertyAuthorizationFactory extends TypedAuthorizationFacto
     }
 
     private Optional<AuthorizationRule> calcAuthorizationFromObject(AuthorizationResourceAction action, AuthorizationVariableType authorizationVariableType,
-            Object requestObject) {
+            Object requestObject, String userCrn) {
         switch (authorizationVariableType) {
             case NAME:
                 return getAuthorizationFromResourceName(requestObject, action);
             case CRN:
-                return getAuthorizationFromResourceCrn(requestObject, action);
+                return getAuthorizationFromResourceCrn(requestObject, action, userCrn);
             case NAME_LIST:
                 return getAuthorizationFromResouurceNameList(requestObject, action);
             case CRN_LIST:
-                return getAuthorizationFromResourceCrnList(requestObject, action);
+                return getAuthorizationFromResourceCrnList(requestObject, action, userCrn);
             default:
                 throw new AccessDeniedException("We cannot determine the type of field from authorization point of view, " +
                         "thus access is denied!");
@@ -104,19 +108,21 @@ public class RequestPropertyAuthorizationFactory extends TypedAuthorizationFacto
         return resourceNameAuthorizationProvider.calcAuthorization(resourceName, action);
     }
 
-    private Optional<AuthorizationRule> getAuthorizationFromResourceCrn(Object resultObject, AuthorizationResourceAction action) {
+    private Optional<AuthorizationRule> getAuthorizationFromResourceCrn(Object resultObject, AuthorizationResourceAction action, String userCrn) {
         if (!(resultObject instanceof String)) {
             throw new AccessDeniedException("Referred property within request object is not string, thus access is denied!");
         }
         String resourceCrn = (String) resultObject;
+        crnAccountValidator.validateSameAccount(userCrn, resourceCrn);
         return resourceCrnAthorizationProvider.calcAuthorization(resourceCrn, action);
     }
 
-    private Optional<AuthorizationRule> getAuthorizationFromResourceCrnList(Object resultObject, AuthorizationResourceAction action) {
+    private Optional<AuthorizationRule> getAuthorizationFromResourceCrnList(Object resultObject, AuthorizationResourceAction action, String userCrn) {
         if (!(resultObject instanceof Collection)) {
             throw new AccessDeniedException("Referred property within request object is not collection, thus access is denied!");
         }
         Collection<String> resourceCrns = (Collection<String>) resultObject;
+        crnAccountValidator.validateSameAccount(userCrn, resourceCrns);
         return resourceCrnListAuthorizationFactory.calcAuthorization(resourceCrns, action);
     }
 

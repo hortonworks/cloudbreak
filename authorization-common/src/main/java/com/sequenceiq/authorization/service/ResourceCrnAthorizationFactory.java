@@ -15,6 +15,7 @@ import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.service.model.AuthorizationRule;
 import com.sequenceiq.authorization.service.model.HasRight;
+import com.sequenceiq.authorization.utils.CrnAccountValidator;
 
 @Component
 public class ResourceCrnAthorizationFactory extends TypedAuthorizationFactory<CheckPermissionByResourceCrn> {
@@ -30,10 +31,14 @@ public class ResourceCrnAthorizationFactory extends TypedAuthorizationFactory<Ch
     @Inject
     private DefaultResourceAuthorizationProvider defaultResourceAuthorizationProvider;
 
+    @Inject
+    private CrnAccountValidator crnAccountValidator;
+
     @Override
     public Optional<AuthorizationRule> doGetAuthorization(CheckPermissionByResourceCrn methodAnnotation, String userCrn, ProceedingJoinPoint proceedingJoinPoint,
             MethodSignature methodSignature) {
         String resourceCrn = commonPermissionCheckingUtils.getParameter(proceedingJoinPoint, methodSignature, ResourceCrn.class, String.class);
+        crnAccountValidator.validateSameAccount(userCrn, resourceCrn);
         AuthorizationResourceAction action = methodAnnotation.action();
         LOGGER.debug("Getting authorization rule to authorize user [{}] for action [{}] over resource [{}]", userCrn, action, resourceCrn);
         return calcAuthorization(resourceCrn, action);
