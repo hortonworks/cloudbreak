@@ -153,14 +153,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         String user = cluster.getCloudbreakAmbariUser();
         String password = cluster.getCloudbreakAmbariPassword();
         try {
-            ClouderaManagerRepo clouderaManagerRepoDetails = clusterComponentConfigProvider.getClouderaManagerRepoDetails(cluster.getId());
-            if (isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_7_5_1)) {
-                LOGGER.debug("Cloudera Manager version {} is newer than {} hence using v45 API", clouderaManagerRepoDetails.getVersion(),
-                        CLOUDERAMANAGER_VERSION_7_5_1.getVersion());
-                apiClient = clouderaManagerApiClientProvider.getV45Client(stack.getGatewayPort(), user, password, clientConfig);
-            } else {
-                apiClient = clouderaManagerApiClientProvider.getV31Client(stack.getGatewayPort(), user, password, clientConfig);
-            }
+            apiClient = clouderaManagerApiClientProvider.getV31Client(stack.getGatewayPort(), user, password, clientConfig);
         } catch (ClouderaManagerClientInitException e) {
             throw new ClusterClientInitException(e);
         }
@@ -341,11 +334,21 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         String currentCMVersion = clouderaManagerRepo.getVersion();
         Versioned baseCMVersion = CLOUDERAMANAGER_VERSION_7_5_1;
         if (isVersionNewerOrEqualThanLimited(currentCMVersion, baseCMVersion)) {
-            LOGGER.debug("Cloudera Manager version {} is newer than {} hence calling post runtime upgrade command",
+            LOGGER.debug("Cloudera Manager version {} is newer than {} hence calling post runtime upgrade command using /v45 API",
                     currentCMVersion, baseCMVersion.getVersion());
             eventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_UPGRADE_START_POST_UPGRADE);
             waitForRestartCommandIfThereIsAny(clustersResourceApi);
-            clouderaManagerUpgradeService.callPostRuntimeUpgradeCommand(clustersResourceApi, stack, apiClient);
+            Cluster cluster = stack.getCluster();
+            String user = cluster.getCloudbreakAmbariUser();
+            String password = cluster.getCloudbreakAmbariPassword();
+            try {
+                ApiClient v45Client = clouderaManagerApiClientProvider.getV45Client(stack.getGatewayPort(), user, password, clientConfig);
+                ClustersResourceApi clustersResourceV45Api = clouderaManagerApiFactory.getClustersResourceApi(v45Client);
+                clouderaManagerUpgradeService.callPostRuntimeUpgradeCommand(clustersResourceV45Api, stack, v45Client);
+            } catch (ClouderaManagerClientInitException e) {
+                LOGGER.info("Couldn't build CM v45 client", e);
+                throw new CloudbreakException(e);
+            }
         } else {
             LOGGER.debug("Cloudera Manager version {} is older than {} hence NOT calling post runtime upgrade command",
                     currentCMVersion, baseCMVersion.getVersion());
