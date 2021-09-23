@@ -63,7 +63,7 @@ public class InstanceGroupV4RequestToInstanceGroupConverterTest extends Abstract
         given(instanceGroupNetworkV4RequestToInstanceGroupNetworkConverter.convert(any(InstanceGroupNetworkV4Request.class)))
                 .willReturn(new InstanceGroupNetwork());
         // WHEN
-        InstanceGroup instanceGroup = underTest.convert(request);
+        InstanceGroup instanceGroup = underTest.convert(request, "variant");
         // THEN
         assertAllFieldsNotNull(instanceGroup, List.of("stack", "targetGroups"));
     }

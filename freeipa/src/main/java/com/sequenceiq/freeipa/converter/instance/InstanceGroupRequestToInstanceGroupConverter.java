@@ -1,16 +1,15 @@
 package com.sequenceiq.freeipa.converter.instance;
 
-import static com.sequenceiq.freeipa.util.CloudArgsForIgConverter.DISK_ENCRYPTION_SET_ID;
-import static com.sequenceiq.freeipa.util.CloudArgsForIgConverter.GCP_KMS_ENCRYPTION_KEY;
-
-import java.util.EnumMap;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.MOCK;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.YARN;
+import static com.sequenceiq.freeipa.util.CloudArgsForIgConverter.DISK_ENCRYPTION_SET_ID;
+import static com.sequenceiq.freeipa.util.CloudArgsForIgConverter.GCP_KMS_ENCRYPTION_KEY;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -79,7 +78,7 @@ public class InstanceGroupRequestToInstanceGroupConverter {
         instanceGroup.setInstanceGroupType(source.getType());
         instanceGroup.setAttributes(defaultInstanceGroupProvider.createAttributes(cloudPlatform, stack.getName(), instanceGroupName));
         if (source.getNodeCount() > 0) {
-            addInstanceMetadatas(source, instanceGroup, ipaServerRequest.getHostname(), ipaServerRequest.getDomain());
+            addInstanceMetadatas(source, instanceGroup, ipaServerRequest.getHostname(), ipaServerRequest.getDomain(), stack.getPlatformvariant());
         }
         instanceGroup.setNodeCount(source.getNodeCount());
         return instanceGroup;
@@ -128,13 +127,14 @@ public class InstanceGroupRequestToInstanceGroupConverter {
                 && Strings.isNullOrEmpty(networkRequest.getAws().getSubnetId());
     }
 
-    private void addInstanceMetadatas(InstanceGroupRequest request, InstanceGroup instanceGroup, String hostname, String domain) {
+    private void addInstanceMetadatas(InstanceGroupRequest request, InstanceGroup instanceGroup, String hostname, String domain, String variant) {
         Set<InstanceMetaData> instanceMetaDataSet = new LinkedHashSet<>();
         for (int i = 0; i < request.getNodeCount(); i++) {
             InstanceMetaData instanceMetaData = new InstanceMetaData();
             instanceMetaData.setInstanceGroup(instanceGroup);
             instanceMetaData.setDiscoveryFQDN(hostname + String.format("%d.", i) + domain);
             instanceMetaDataSet.add(instanceMetaData);
+            instanceMetaData.setVariant(variant);
         }
         instanceGroup.setInstanceMetaData(instanceMetaDataSet);
     }

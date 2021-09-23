@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.entity;
 
+import java.util.StringJoiner;
+
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
@@ -15,8 +17,6 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.Instanc
 import com.sequenceiq.freeipa.entity.util.InstanceLifeCycleConverter;
 import com.sequenceiq.freeipa.entity.util.InstanceMetadataTypeConverter;
 import com.sequenceiq.freeipa.entity.util.InstanceStatusConverter;
-
-import java.util.StringJoiner;
 
 @Entity
 public class InstanceMetaData {
@@ -63,6 +63,8 @@ public class InstanceMetaData {
 
     @Convert(converter = InstanceLifeCycleConverter.class)
     private InstanceLifeCycle lifeCycle;
+
+    private String variant;
 
     public String getPrivateIp() {
         return privateIp;
@@ -241,6 +243,14 @@ public class InstanceMetaData {
         this.availabilityZone = availabilityZone;
     }
 
+    public String getVariant() {
+        return variant;
+    }
+
+    public void setVariant(String variant) {
+        this.variant = variant;
+    }
+
     @Override
     public String toString() {
         return new StringJoiner(", ", InstanceMetaData.class.getSimpleName() + "[", "]")
@@ -254,6 +264,7 @@ public class InstanceMetaData {
                 .add("instanceStatus='" + instanceStatus + "'")
                 .add("availabilityZone='" + availabilityZone + "'")
                 .add("subnetId='" + subnetId + "'")
+                .add("variant='" + variant + "'")
                 .toString();
     }
 }

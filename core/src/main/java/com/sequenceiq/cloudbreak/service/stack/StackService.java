@@ -650,7 +650,14 @@ public class StackService implements ResourceIdProvider, ResourcePropertyProvide
     }
 
     private void setPlatformVariant(Stack stack) {
-        stack.setPlatformVariant(connector.checkAndGetPlatformVariant(stack).value());
+        if (StringUtils.isEmpty(stack.getPlatformVariant())) {
+            String variant = connector.checkAndGetPlatformVariant(stack).value();
+            stack.setPlatformVariant(variant);
+        }
+        stack.getInstanceGroups().stream()
+                .flatMap(it -> it.getAllInstanceMetaData().stream())
+                .filter(it -> StringUtils.isEmpty(it.getVariant()))
+                .forEach(it -> it.setVariant(stack.getPlatformVariant()));
     }
 
     Optional<Stack> findTemplateWithLists(Long id) {

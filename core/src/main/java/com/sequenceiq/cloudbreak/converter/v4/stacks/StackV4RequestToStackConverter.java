@@ -354,7 +354,7 @@ public class StackV4RequestToStackConverter {
         source.getInstanceGroups().stream()
                 .map(ig -> {
                     ig.setCloudPlatform(source.getCloudPlatform());
-                    return instanceGroupV4RequestToInstanceGroupConverter.convert(ig);
+                    return instanceGroupV4RequestToInstanceGroupConverter.convert(ig, stack.getPlatformVariant());
                 })
                 .forEach(ig -> {
                     ig.setStack(stack);

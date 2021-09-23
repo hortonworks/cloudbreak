@@ -99,6 +99,7 @@ public class InstanceMetaDataService {
                 instanceMetaData.setPrivateId(privateId++);
                 instanceMetaData.setInstanceStatus(com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.REQUESTED);
                 instanceMetaData.setInstanceGroup(instanceGroup);
+                instanceMetaData.setVariant(stack.getPlatformVariant());
                 if (hostNameIterator.hasNext()) {
                     String hostName = hostNameIterator.next();
                     repository.findHostInStack(stack.getId(), hostName).ifPresent(existingHost -> {
@@ -215,6 +216,7 @@ public class InstanceMetaDataService {
                     instanceMetaData.setPrivateId(instanceTemplate.getPrivateId());
                     instanceMetaData.setInstanceStatus(com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.REQUESTED);
                     instanceMetaData.setInstanceGroup(instanceGroup);
+                    instanceMetaData.setVariant(stack.getPlatformVariant());
                     repository.save(instanceMetaData);
                 }
             }
