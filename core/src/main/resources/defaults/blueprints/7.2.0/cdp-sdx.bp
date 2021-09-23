@@ -114,6 +114,10 @@
               {
                 "name": "atlas_authentication_method_file",
                 "value": "false"
+              },
+              {
+                "name": "atlas_ssl_exclude_protocols",
+                "value": "TLSv1,TLSv1.1"
               }
             ],
             "refName": "atlas-ATLAS_SERVER-BASE",

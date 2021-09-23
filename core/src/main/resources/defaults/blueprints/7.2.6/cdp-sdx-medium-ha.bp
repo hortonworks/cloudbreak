@@ -171,6 +171,10 @@
               {
                 "name": "atlas_solr_replication_factor",
                 "value": "2"
+              },
+              {
+                "name": "atlas_ssl_exclude_protocols",
+                "value": "TLSv1,TLSv1.1"
               }
             ],
             "refName": "atlas-ATLAS_SERVER-BASE",
