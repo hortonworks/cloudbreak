@@ -35,6 +35,7 @@ import com.sequenceiq.authorization.resource.AuthorizationVariableType;
 import com.sequenceiq.authorization.service.model.AuthorizationRule;
 import com.sequenceiq.authorization.service.model.HasRight;
 import com.sequenceiq.authorization.service.model.HasRightOnAll;
+import com.sequenceiq.authorization.utils.CrnAccountValidator;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RequestPropertyAuthorizationFactoryTest {
@@ -62,6 +63,9 @@ public class RequestPropertyAuthorizationFactoryTest {
 
     @Mock
     private ResourceNameListAuthorizationFactory resourceNameListAuthorizationFactory;
+
+    @Mock
+    private CrnAccountValidator crnAccountValidator;
 
     @InjectMocks
     private RequestPropertyAuthorizationFactory underTest;
