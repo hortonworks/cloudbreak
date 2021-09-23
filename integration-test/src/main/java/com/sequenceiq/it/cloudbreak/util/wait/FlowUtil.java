@@ -4,7 +4,6 @@ import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,18 +32,12 @@ public class FlowUtil {
     @Value("#{'${integrationtest.cloudProvider}'.equals('MOCK') ? 300 : ${integrationtest.testsuite.maxRetry:2700}}")
     private int maxRetry;
 
-    private boolean flowFailed;
-
     public long getPollingInterval() {
         return pollingInterval;
     }
 
     public int getMaxRetry() {
         return maxRetry;
-    }
-
-    public boolean isFlowFailed() {
-        return BooleanUtils.toBooleanDefaultIfNull(flowFailed, false);
     }
 
     public <T extends CloudbreakTestDto> T waitBasedOnLastKnownFlow(T testDto, MicroserviceClient msClient, RunningParameter runningParameter) {
@@ -57,6 +50,8 @@ public class FlowUtil {
 
     private void waitForFlow(FlowPublicEndpoint flowEndpoint, String crn, String flowChainId, String flowId, RunningParameter runningParameter) {
         boolean flowRunning = true;
+        boolean flowFailed = false;
+
         int retryCount = 0;
         while (flowRunning && retryCount < maxRetry) {
             sleep(pollingInterval, crn, flowChainId, flowId);
@@ -65,6 +60,7 @@ public class FlowUtil {
                     LOGGER.info("Waiting for flow chain: '{}' at resource: '{}', retry count: '{}'", flowChainId, crn, retryCount);
                     FlowCheckResponse flowCheckResponse = flowEndpoint.hasFlowRunningByChainId(flowChainId, crn);
                     flowRunning = flowCheckResponse.getHasActiveFlow();
+                    flowFailed = flowCheckResponse.getLatestFlowFinalizedAndFailed();
                 } else if (StringUtils.isNoneBlank(flowId)) {
                     LOGGER.info("Waiting for flow: '{}' at resource: '{}', retry count: '{}'", flowId, crn, retryCount);
                     FlowCheckResponse flowCheckResponse = flowEndpoint.hasFlowRunningByFlowId(flowId, crn);
@@ -82,12 +78,12 @@ public class FlowUtil {
             }
             retryCount++;
         }
-        if (isFlowFailed() && runningParameter.isWaitForFlowSuccess()) {
+        if (flowFailed && runningParameter.isWaitForFlowSuccess()) {
             LOGGER.error("Flow has been finalized with failed status. Crn={}, FlowId={}, FlowChainId={}", crn, flowId, flowChainId);
             throw new TestFailException(String.format(" Flow has been finalized with failed status. Crn=%s, FlowId=%s , FlowChainId=%s ", crn, flowId,
                     flowChainId));
         }
-        if (!isFlowFailed() && runningParameter.isWaitForFlowFail()) {
+        if (!flowFailed && runningParameter.isWaitForFlowFail()) {
             LOGGER.error("Flow has been finalized with success status. Crn={}, FlowId={}, FlowChainId={}", crn, flowId, flowChainId);
             throw new TestFailException(
                     String.format(" Flow has been finalized with success status but it was expected to fail. Crn=%s, FlowId=%s , FlowChainId=%s ", crn, flowId,
