@@ -65,18 +65,22 @@ public class ExtendedHostStatusesTest {
     @Test
     public void testGetReason() {
         assertEquals("reason2 reason3 reason1", new ExtendedHostStatuses(Map.of(TEST_HOST,
+                Set.of(createHealthCheck(SERVICES, UNHEALTHY, "reason3"),
+                        createHealthCheck(CERT, UNHEALTHY, "reason1"),
+                        createHealthCheck(HOST, UNHEALTHY, "reason2")))).statusReasonForHost(TEST_HOST));
+        assertEquals("", new ExtendedHostStatuses(Map.of(TEST_HOST,
                 Set.of(createHealthCheck(SERVICES, HEALTHY, "reason3"),
                         createHealthCheck(CERT, HEALTHY, "reason1"),
                         createHealthCheck(HOST, HEALTHY, "reason2")))).statusReasonForHost(TEST_HOST));
         assertEquals("reason1 reason2 reason3", new ExtendedHostStatuses(Map.of(TEST_HOST,
-                Set.of(createHealthCheck(SERVICES, HEALTHY, "reason2"),
-                        createHealthCheck(CERT, HEALTHY, "reason3"),
-                        createHealthCheck(HOST, HEALTHY, "reason1")))).statusReasonForHost(TEST_HOST));
+                Set.of(createHealthCheck(SERVICES, UNHEALTHY, "reason2"),
+                        createHealthCheck(CERT, UNHEALTHY, "reason3"),
+                        createHealthCheck(HOST, UNHEALTHY, "reason1")))).statusReasonForHost(TEST_HOST));
         ExtendedHostStatuses extendedHostStatuses2 = new ExtendedHostStatuses(Map.of(TEST_HOST,
-                Set.of(createHealthCheck(SERVICES, HEALTHY, "reason2"),
-                        createHealthCheck(CERT, HEALTHY, "reason3"),
-                        createHealthCheck(HOST, HEALTHY, "reason1")),
-                TEST_HOST_2, Set.of(createHealthCheck(HOST, HEALTHY, "whatever"))));
+                Set.of(createHealthCheck(SERVICES, UNHEALTHY, "reason2"),
+                        createHealthCheck(CERT, UNHEALTHY, "reason3"),
+                        createHealthCheck(HOST, UNHEALTHY, "reason1")),
+                TEST_HOST_2, Set.of(createHealthCheck(HOST, UNHEALTHY, "whatever"))));
         assertEquals("reason1 reason2 reason3", extendedHostStatuses2.statusReasonForHost(TEST_HOST));
         assertEquals("whatever", extendedHostStatuses2.statusReasonForHost(TEST_HOST_2));
     }
