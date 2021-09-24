@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.certrotate.ClusterCertificatesRotationFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.certrotate.ClusterHostCertificatesRotationRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.certrotate.ClusterHostCertificatesRotationSuccess;
+import com.sequenceiq.cloudbreak.san.LoadBalancerSANProvider;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.ssh.SshKeyService;
@@ -45,6 +46,9 @@ public class ClusterHostCertificatesRotationHandler extends ExceptionCatcherEven
     @Inject
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
 
+    @Inject
+    private LoadBalancerSANProvider loadBalancerSANProvider;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(ClusterHostCertificatesRotationRequest.class);
@@ -62,10 +66,11 @@ public class ClusterHostCertificatesRotationHandler extends ExceptionCatcherEven
         try {
             Stack stack = stackService.getByIdWithListsInTransaction(request.getResourceId());
             ClusterApi clusterApi = apiConnectors.getConnector(stack);
+            String subAltName = loadBalancerSANProvider.getLoadBalancerSAN(stack).orElse(null);
             if (isRootSshAccessNeededForHostCertRotation(stack)) {
-                rotateCertsWithSsh(stack, clusterApi);
+                rotateCertsWithSsh(stack, clusterApi, subAltName);
             } else {
-                clusterApi.rotateHostCertificates(null, null);
+                clusterApi.rotateHostCertificates(null, null, subAltName);
             }
             result = new ClusterHostCertificatesRotationSuccess(request.getResourceId());
         } catch (Exception e) {
@@ -80,10 +85,10 @@ public class ClusterHostCertificatesRotationHandler extends ExceptionCatcherEven
                 clusterComponentConfigProvider.getClouderaManagerRepoDetails(stack.getCluster().getId()));
     }
 
-    private void rotateCertsWithSsh(Stack stack, ClusterApi clusterApi) throws Exception {
+    private void rotateCertsWithSsh(Stack stack, ClusterApi clusterApi, String subAltName) throws Exception {
         KeyPair sshKeyPair = sshKeyService.generateKeyPair();
         sshKeyService.addSshPublicKeyToHosts(stack, ROOT_USER, sshKeyPair, TEMPORARY_SSH_KEY);
-        clusterApi.rotateHostCertificates(ROOT_USER, sshKeyPair);
+        clusterApi.rotateHostCertificates(ROOT_USER, sshKeyPair, subAltName);
         sshKeyService.removeSshPublicKeyFromHosts(stack, ROOT_USER, TEMPORARY_SSH_KEY);
     }
 }
