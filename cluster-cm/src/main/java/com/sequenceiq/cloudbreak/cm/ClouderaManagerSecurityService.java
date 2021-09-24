@@ -335,7 +335,7 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
     }
 
     @Override
-    public void rotateHostCertificates(String sshUser, KeyPair sshKeyPair) throws CloudbreakException {
+    public void rotateHostCertificates(String sshUser, KeyPair sshKeyPair, String subAltName) throws CloudbreakException {
         Cluster cluster = stack.getCluster();
         String user = cluster.getCloudbreakAmbariUser();
         String password = cluster.getCloudbreakAmbariPassword();
@@ -344,7 +344,7 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
             HostsResourceApi hostsResourceApi = clouderaManagerApiFactory.getHostsResourceApi(client);
             BatchResourceApi batchResourceApi = clouderaManagerApiFactory.getBatchResourceApi(client);
             ApiHostList hostList = hostsResourceApi.readHosts(null, null, "SUMMARY");
-            ApiBatchRequest batchRequest = createHostCertsBatchRequest(hostList, sshUser, sshKeyPair);
+            ApiBatchRequest batchRequest = createHostCertsBatchRequest(hostList, sshUser, sshKeyPair, subAltName);
             ApiBatchResponse apiBatchResponse = batchResourceApi.execute(batchRequest);
             processHostCertsBatchResponse(client, apiBatchResponse);
         } catch (ApiException | ClouderaManagerClientInitException e) {
@@ -380,8 +380,8 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
         }
     }
 
-    private ApiBatchRequest createHostCertsBatchRequest(ApiHostList hostList, String sshUser, KeyPair sshKeyPair) {
-        ApiGenerateHostCertsArguments apiGenerateHostCertsArguments = createApiGenerateHostCertsArguments(sshUser, sshKeyPair);
+    private ApiBatchRequest createHostCertsBatchRequest(ApiHostList hostList, String sshUser, KeyPair sshKeyPair, String subAltName) {
+        ApiGenerateHostCertsArguments apiGenerateHostCertsArguments = createApiGenerateHostCertsArguments(sshUser, sshKeyPair, subAltName);
         List<ApiBatchRequestElement> batchRequestElements = hostList.getItems().stream()
                 .filter(host -> host.getClusterRef() != null)
                 .map(host -> new ApiBatchRequestElement()
@@ -394,10 +394,13 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
         return new ApiBatchRequest().items(batchRequestElements);
     }
 
-    private ApiGenerateHostCertsArguments createApiGenerateHostCertsArguments(String sshUser, KeyPair sshKeyPair) {
+    private ApiGenerateHostCertsArguments createApiGenerateHostCertsArguments(String sshUser, KeyPair sshKeyPair, String subAltName) {
         ApiGenerateHostCertsArguments apiGenerateHostCertsArguments = new ApiGenerateHostCertsArguments();
         if (StringUtils.isNotEmpty(sshUser)) {
             apiGenerateHostCertsArguments.userName(sshUser).privateKey(createPrivateKeyString(sshKeyPair));
+        }
+        if (StringUtils.isNotEmpty(subAltName)) {
+            apiGenerateHostCertsArguments.addSubjectAltNameItem(subAltName);
         }
         return apiGenerateHostCertsArguments;
     }

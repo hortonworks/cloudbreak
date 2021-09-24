@@ -116,8 +116,8 @@ public interface ClusterApi {
         return clusterModificationService().getRoleConfigValueByServiceType(clusterName, roleConfigGroup, serviceType, configName);
     }
 
-    default void rotateHostCertificates(String sshUser, KeyPair sshKeyPair) throws CloudbreakException {
-        clusterSecurityService().rotateHostCertificates(sshUser, sshKeyPair);
+    default void rotateHostCertificates(String sshUser, KeyPair sshKeyPair, String subAltName) throws CloudbreakException {
+        clusterSecurityService().rotateHostCertificates(sshUser, sshKeyPair, subAltName);
     }
 
     default ClusterStatus getStatus(boolean blueprintPresent) {

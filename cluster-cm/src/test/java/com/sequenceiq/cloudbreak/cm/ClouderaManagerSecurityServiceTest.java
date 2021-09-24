@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cm;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -43,6 +44,7 @@ import com.cloudera.api.swagger.model.ApiBatchResponseElement;
 import com.cloudera.api.swagger.model.ApiClusterRef;
 import com.cloudera.api.swagger.model.ApiCommand;
 import com.cloudera.api.swagger.model.ApiEcho;
+import com.cloudera.api.swagger.model.ApiGenerateHostCertsArguments;
 import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostList;
 import com.cloudera.api.swagger.model.ApiHostRef;
@@ -292,8 +294,9 @@ public class ClouderaManagerSecurityServiceTest {
         verify(newUsersResourceApi).deleteUser2(ADMIN);
     }
 
-    @Test
-    public void testRotateHostCertificates() throws Exception {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("testRotateHostCertificatesWhenBatchExecuteSucceededDataProvider")
+    public void testRotateHostCertificates(String testCaseName, String subAltName) throws Exception {
         // GIVEN
         initTestInput("user");
         when(clouderaManagerApiClientProvider.getClouderaManagerClient(clientConfig, GATEWAY_PORT, stack.getCluster().getCloudbreakAmbariUser(),
@@ -307,13 +310,13 @@ public class ClouderaManagerSecurityServiceTest {
         ArgumentCaptor<ApiBatchRequest> batchRequestArgumentCaptor = ArgumentCaptor.forClass(ApiBatchRequest.class);
         when(batchResourceApi.execute(batchRequestArgumentCaptor.capture())).thenReturn(createApiBatchResponse(hostList, true));
         // WHEN
-        underTest.rotateHostCertificates(null, null);
+        underTest.rotateHostCertificates(null, null, subAltName);
         // THEN no exception
-        verifyBatchRequest(batchRequestArgumentCaptor.getValue(), "/api/v31/hosts/host-1/commands/generateHostCerts",
+        verifyBatchRequest(batchRequestArgumentCaptor.getValue(), subAltName, "/api/v31/hosts/host-1/commands/generateHostCerts",
                 "/api/v31/hosts/host%40company.com%202/commands/generateHostCerts");
     }
 
-    private void verifyBatchRequest(ApiBatchRequest batchRequest, String... urlsExpected) {
+    private void verifyBatchRequest(ApiBatchRequest batchRequest, String subAltName, String... urlsExpected) {
         assertThat(batchRequest).isNotNull();
         List<ApiBatchRequestElement> batchRequestElements = batchRequest.getItems();
         assertThat(batchRequestElements).isNotNull();
@@ -325,8 +328,22 @@ public class ClouderaManagerSecurityServiceTest {
                 ApiBatchRequestElement batchRequestElement = batchRequestElements.get(i);
                 assertThat(batchRequestElement).isNotNull();
                 assertThat(batchRequestElement.getUrl()).isEqualTo(urlsExpected[i]);
+                ApiGenerateHostCertsArguments apiGenerateHostCertsArguments = (ApiGenerateHostCertsArguments) batchRequestElement.getBody();
+                if (subAltName == null) {
+                    assertNull(apiGenerateHostCertsArguments.getSubjectAltName());
+                } else {
+                    assertThat(apiGenerateHostCertsArguments.getSubjectAltName().get(0)).isEqualTo(subAltName);
+                }
             }
         }
+    }
+
+    static Object[][] testRotateHostCertificatesWhenBatchExecuteSucceededDataProvider() {
+        return new Object[][]{
+                // testCaseName subAltName
+                {"subAltName=null", null},
+                {"subAltName!=null", "DNS:gateway.company.com"},
+        };
     }
 
     static Object[][] testRotateHostCertificatesWhenBatchExecuteFailedDataProvider() {
@@ -357,7 +374,7 @@ public class ClouderaManagerSecurityServiceTest {
         when(batchResourceApi.execute(batchRequestArgumentCaptor.capture())).thenReturn(batchResponseFactory.apply(hostList));
         // WHEN
         ClouderaManagerOperationFailedException exception = assertThrows(ClouderaManagerOperationFailedException.class,
-                () -> underTest.rotateHostCertificates(null, null));
+                () -> underTest.rotateHostCertificates(null, null, null));
         // THEN exception
         assertThat(exception).hasMessageStartingWith("Host certificates rotation batch operation failed: ");
     }
@@ -379,7 +396,7 @@ public class ClouderaManagerSecurityServiceTest {
         when(clouderaManagerPollingServiceProvider.startPollingCommandList(eq(stack), eq(apiClient), any(List.class), eq("Rotate host certificates")))
                 .thenReturn(PollingResult.EXIT);
         // WHEN
-        CancellationException exception = assertThrows(CancellationException.class, () -> underTest.rotateHostCertificates(null, null));
+        CancellationException exception = assertThrows(CancellationException.class, () -> underTest.rotateHostCertificates(null, null, null));
         // THEN exception
         assertThat(exception).hasMessage("Cluster was terminated during rotation of host certificates");
     }
@@ -402,7 +419,7 @@ public class ClouderaManagerSecurityServiceTest {
                 .thenReturn(PollingResult.TIMEOUT);
         // WHEN
         ClouderaManagerOperationFailedException exception = assertThrows(ClouderaManagerOperationFailedException.class,
-                () -> underTest.rotateHostCertificates(null, null));
+                () -> underTest.rotateHostCertificates(null, null, null));
         // THEN exception
         assertThat(exception).hasMessage("Timeout while Cloudera Manager rotates the host certificates.");
     }
@@ -419,7 +436,7 @@ public class ClouderaManagerSecurityServiceTest {
         when(clouderaManagerApiFactory.getBatchResourceApi(apiClient)).thenReturn(batchResourceApi);
         when(hostsResourceApi.readHosts(null, null, "SUMMARY")).thenThrow(new ApiException("Serious problem"));
         // WHEN
-        CloudbreakException exception = assertThrows(CloudbreakException.class, () -> underTest.rotateHostCertificates(null, null));
+        CloudbreakException exception = assertThrows(CloudbreakException.class, () -> underTest.rotateHostCertificates(null, null, null));
         // THEN exception
         assertThat(exception).hasMessage("Can't rotate the host certificates due to: Serious problem");
     }
