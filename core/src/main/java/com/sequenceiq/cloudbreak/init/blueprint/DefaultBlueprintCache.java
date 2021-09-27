@@ -10,11 +10,11 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import com.cloudera.cdp.shaded.com.google.common.collect.Sets;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -24,14 +24,16 @@ import com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.converter.v4.blueprint.BlueprintV4RequestToBlueprintConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.BlueprintFile;
 import com.sequenceiq.cloudbreak.domain.BlueprintUpgradeOption;
 
-@Service
+@Component
+@Scope("prototype")
 public class DefaultBlueprintCache {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultBlueprintCache.class);
 
-    private final Map<String, Blueprint> defaultBlueprints = new HashMap<>();
+    private final Map<String, BlueprintFile> defaultBlueprints = new HashMap<>();
 
     @Inject
     private BlueprintEntities blueprintEntities;
@@ -65,7 +67,17 @@ public class DefaultBlueprintCache {
                         bp.setDescription(description == null ? split[0] : description.asText(split[0]));
                         JsonNode blueprintUpgradeOption = blueprintNode.isMissingNode() ? null : blueprintNode.get("blueprintUpgradeOption");
                         bp.setBlueprintUpgradeOption(getBlueprintUpgradeOption(blueprintUpgradeOption));
-                        defaultBlueprints.put(bp.getName(), bp);
+                        BlueprintFile bpf = new BlueprintFile.Builder()
+                                .name(bp.getName())
+                                .blueprintText(bp.getBlueprintText())
+                                .stackName(bp.getStackName())
+                                .stackVersion(bp.getStackVersion())
+                                .stackType(bp.getStackType())
+                                .blueprintUpgradeOption(bp.getBlueprintUpgradeOption())
+                                .hostGroupCount(bp.getHostGroupCount())
+                                .description(bp.getDescription())
+                                .build();
+                        defaultBlueprints.put(bp.getName(), bpf);
                     }
                 }
             } catch (IOException e) {
@@ -74,10 +86,8 @@ public class DefaultBlueprintCache {
         }
     }
 
-    public Map<String, Blueprint> defaultBlueprints() {
-        Map<String, Blueprint> result = new HashMap<>();
-        defaultBlueprints.forEach((key, value) -> result.put(key, SerializationUtils.clone(value)));
-        return result;
+    public Map<String, BlueprintFile> defaultBlueprints() {
+        return defaultBlueprints;
     }
 
     private Map<String, Set<String>> blueprints() {

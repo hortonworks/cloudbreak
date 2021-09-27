@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.cmtemplate.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.converter.v4.blueprint.BlueprintV4RequestToBlueprintConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.BlueprintFile;
 import com.sequenceiq.cloudbreak.domain.BlueprintUpgradeOption;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -48,7 +49,7 @@ public class DefaulBlueprintCacheTest {
 
         // WHEN
         underTest.loadBlueprintsFromFile();
-        Map<String, Blueprint> defaultBlueprints = underTest.defaultBlueprints();
+        Map<String, BlueprintFile> defaultBlueprints = underTest.defaultBlueprints();
 
         // WHEN
         assertTrue("No blueprint passed, defaults is expected to be empty", defaultBlueprints.isEmpty());
@@ -59,12 +60,20 @@ public class DefaulBlueprintCacheTest {
         // GIVEN
         Blueprint bp1 = new Blueprint();
         bp1.setName("bp1");
+        bp1.setBlueprintText("txt");
+        bp1.setStackName("stckn");
+        bp1.setStackType("stckt");
+        bp1.setStackVersion("stckv");
         String bp1JsonString = "{\"inputs\":[],\"blueprint\":{\"Blueprints\":{\"blueprint_name\":\"bp1\"}}}";
         JsonNode bpText1 = JsonUtil.readTree(bp1JsonString);
         when(blueprintUtils.convertStringToJsonNode(any())).thenReturn(bpText1);
 
         Blueprint bp2 = new Blueprint();
         bp2.setName("bp2");
+        bp2.setBlueprintText("txt");
+        bp2.setStackName("stckn");
+        bp2.setStackType("stckt");
+        bp2.setStackVersion("stckv");
         String bp2JsonString = "{\"inputs\":[],\"blueprint\":{\"Blueprints\":{\"blueprint_name\":\"bp2\"}}}";
         JsonNode bpText2 = JsonUtil.readTree(bp2JsonString);
         when(blueprintUtils.convertStringToJsonNode(any())).thenReturn(bpText2);
@@ -82,7 +91,7 @@ public class DefaulBlueprintCacheTest {
 
         // WHEN
         underTest.loadBlueprintsFromFile();
-        Map<String, Blueprint> defaultBlueprints = underTest.defaultBlueprints();
+        Map<String, BlueprintFile> defaultBlueprints = underTest.defaultBlueprints();
 
         // WHEN
         assertEquals(2L, defaultBlueprints.size());
@@ -95,6 +104,10 @@ public class DefaulBlueprintCacheTest {
         // GIVEN
         Blueprint bp1 = new Blueprint();
         bp1.setName("bp1");
+        bp1.setBlueprintText("txt");
+        bp1.setStackName("stckn");
+        bp1.setStackType("stckt");
+        bp1.setStackVersion("stckv");
         String bp1JsonString = "{\"description\":\"7.2.10 - Data Engineering\",\"blueprint\":{\"cdhVersion\":\"7.2.10\",\"displayName\":\"dataengineering\","
                 + "\"blueprintUpgradeOption\":\"DISABLED\"}}";
         JsonNode bpText1 = JsonUtil.readTree(bp1JsonString);
@@ -109,7 +122,7 @@ public class DefaulBlueprintCacheTest {
 
         underTest.loadBlueprintsFromFile();
 
-        Map<String, Blueprint> defaultBlueprints = underTest.defaultBlueprints();
+        Map<String, BlueprintFile> defaultBlueprints = underTest.defaultBlueprints();
         assertEquals(1L, defaultBlueprints.size());
         assertEquals("7.2.10 - Data Engineering", defaultBlueprints.get("bp1").getDescription());
         assertEquals(BlueprintUpgradeOption.DISABLED, defaultBlueprints.get("bp1").getBlueprintUpgradeOption());
