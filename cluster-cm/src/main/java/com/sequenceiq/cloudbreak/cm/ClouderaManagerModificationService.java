@@ -238,6 +238,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             ClouderaManagerResourceApi clouderaManagerResourceApi = clouderaManagerApiFactory.getClouderaManagerResourceApi(apiClient);
             checkParcelApiAvailability();
             Set<ClouderaManagerProduct> products = getProducts(components);
+            LOGGER.info("The following products will be downloaded and distributed: {}", products);
             setParcelRepo(products, clouderaManagerResourceApi);
             refreshParcelRepos(clouderaManagerResourceApi);
             if (patchUpgrade) {

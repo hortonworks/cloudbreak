@@ -82,4 +82,23 @@ public class ClusterComponentUpdater {
         LOGGER.debug("Removing unused components: {}", unusedCdhProductDetails);
         clusterComponentConfigProvider.deleteClusterComponents(unusedCdhProductDetails);
     }
+
+    public void removeUnusedCdhProductsFromClusterComponents(Long clusterId, Set<ClusterComponent> clusterComponentsByBlueprint) {
+        Set<ClusterComponent> clusterComponentsFromDb = clusterComponentConfigProvider.getComponentsByClusterId(clusterId);
+        Set<ClusterComponent> componentsToDelete = getUnusedComponents(clusterComponentsByBlueprint, clusterComponentsFromDb);
+        if (componentsToDelete.isEmpty()) {
+            LOGGER.debug("There is no cluster component to be deleted.");
+        } else {
+            LOGGER.debug("The following cluster components will be deleted: {}", componentsToDelete);
+            clusterComponentConfigProvider.deleteClusterComponents(componentsToDelete);
+        }
+    }
+
+    private Set<ClusterComponent> getUnusedComponents(Set<ClusterComponent> clusterComponentsByBlueprint, Set<ClusterComponent> clusterComponentsFromDb) {
+        return clusterComponentsFromDb.stream()
+                .filter(clusterComponent -> ComponentType.CDH_PRODUCT_DETAILS.equals(clusterComponent.getComponentType()))
+                .filter(clusterComponent -> clusterComponentsByBlueprint.stream()
+                        .noneMatch(component -> clusterComponent.getName().equals(component.getName())))
+                .collect(Collectors.toSet());
+    }
 }
