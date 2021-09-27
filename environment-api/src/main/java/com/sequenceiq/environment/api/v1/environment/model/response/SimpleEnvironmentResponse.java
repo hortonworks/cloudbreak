@@ -105,6 +105,8 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
 
         private CcmV2TlsType ccmV2TlsType;
 
+        private EnvironmentDeletionType deletionType;
+
         private Builder() {
         }
 
@@ -233,6 +235,11 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
             return this;
         }
 
+        public Builder withDeletionType(EnvironmentDeletionType deletionType) {
+            this.deletionType = deletionType;
+            return this;
+        }
+
         public Builder withEnvironmentServiceVersion(String environmentServiceVersion) {
             this.environmentServiceVersion = environmentServiceVersion;
             return this;
@@ -272,6 +279,7 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
             simpleEnvironmentResponse.setProxyConfig(proxyConfig);
             simpleEnvironmentResponse.setEnvironmentServiceVersion(environmentServiceVersion);
             simpleEnvironmentResponse.setCcmV2TlsType(ccmV2TlsType);
+            simpleEnvironmentResponse.setDeletionType(deletionType);
             return simpleEnvironmentResponse;
         }
     }

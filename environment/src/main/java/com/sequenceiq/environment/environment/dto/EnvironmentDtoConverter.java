@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.environment.dto;
 
 import static com.sequenceiq.cloudbreak.util.NullUtil.doIfNotNull;
+import static com.sequenceiq.environment.environment.EnvironmentDeletionType.NONE;
 
 import java.util.HashMap;
 import java.util.List;
@@ -16,9 +17,9 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.security.CrnUserDetailsService;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.tag.AccountTagValidationFailed;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagGenerationRequest;
@@ -111,6 +112,7 @@ public class EnvironmentDtoConverter {
                 .withSecurityAccess(environmentToSecurityAccessDto(environment))
                 .withAdminGroupName(environment.getAdminGroupName())
                 .withProxyConfig(environment.getProxyConfig())
+                .withEnvironmentDeletionType(environment.getDeletionType())
                 .withEnvironmentServiceVersion(environment.getEnvironmentServiceVersion());
 
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
@@ -145,6 +147,7 @@ public class EnvironmentDtoConverter {
         environment.setFreeIpaInstanceCountByGroup(creationDto.getFreeIpaCreation().getInstanceCountByGroup());
         environment.setFreeIpaImageCatalog(creationDto.getFreeIpaCreation().getImageCatalog());
         environment.setFreeIpaEnableMultiAz(creationDto.getFreeIpaCreation().isEnableMultiAz());
+        environment.setDeletionType(NONE);
         environment.setFreeIpaImageId(creationDto.getFreeIpaCreation().getImageId());
         environment.setAdminGroupName(creationDto.getAdminGroupName());
         environment.setCreated(System.currentTimeMillis());

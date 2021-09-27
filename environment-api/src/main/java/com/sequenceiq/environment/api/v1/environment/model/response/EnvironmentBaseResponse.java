@@ -116,6 +116,9 @@ public abstract class EnvironmentBaseResponse implements TaggedResponse {
 
     private CcmV2TlsType ccmV2TlsType;
 
+    @ApiModelProperty(EnvironmentModelDescription.ENVIRONMENT_DELETION_TYPE)
+    private EnvironmentDeletionType deletionType;
+
     @JsonIgnore
     public boolean isCloudStorageLoggingEnabled() {
         return telemetry != null && telemetry.getFeatures() != null && telemetry.getFeatures().getCloudStorageLogging() != null
@@ -377,6 +380,14 @@ public abstract class EnvironmentBaseResponse implements TaggedResponse {
         this.ccmV2TlsType = ccmV2TlsType;
     }
 
+    public EnvironmentDeletionType getDeletionType() {
+        return deletionType;
+    }
+
+    public void setDeletionType(EnvironmentDeletionType deletionType) {
+        this.deletionType = deletionType;
+    }
+
     @Override
     public String toString() {
         return "EnvironmentBaseResponse{" +
@@ -411,6 +422,7 @@ public abstract class EnvironmentBaseResponse implements TaggedResponse {
                 ", yarn=" + yarn +
                 ", environmentServiceVersion='" + environmentServiceVersion + '\'' +
                 ", ccmV2TlsType='" + ccmV2TlsType + '\'' +
+                ", deletionType='" + deletionType + '\'' +
                 '}';
     }
 }

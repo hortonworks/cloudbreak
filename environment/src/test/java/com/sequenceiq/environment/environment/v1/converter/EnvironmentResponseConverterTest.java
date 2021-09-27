@@ -45,6 +45,7 @@ import com.sequenceiq.environment.api.v1.proxy.model.response.ProxyViewResponse;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCredentialV1ResponseConverter;
 import com.sequenceiq.environment.credential.v1.converter.CredentialViewConverter;
+import com.sequenceiq.environment.environment.EnvironmentDeletionType;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.EnvironmentTags;
 import com.sequenceiq.environment.environment.domain.ExperimentalFeatures;
@@ -287,6 +288,7 @@ public class EnvironmentResponseConverterTest {
                 .withProxyConfig(new ProxyConfig())
                 .withNetwork(NetworkDto.builder().build())
                 .withSecurityAccess(createSecurityAccess())
+                .withEnvironmentDeletionType(EnvironmentDeletionType.FORCE)
                 .build();
     }
 
