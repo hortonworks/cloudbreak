@@ -478,20 +478,6 @@ public class GrpcUmsClient {
         return makeCheckRightCall(userCrn, right, null, requestId);
     }
 
-    @Cacheable(cacheNames = "umsUserRightsCache", key = "{ #userCrn, #right }")
-    public boolean checkAccountRightLegacy(String userCrn, String right, Optional<String> requestId) {
-        if (InternalCrnBuilder.isInternalCrn(userCrn)) {
-            LOGGER.info("InternalCrn, allow account right {} for user {}!", right, userCrn);
-            return true;
-        }
-        if (isReadRight(right)) {
-            LOGGER.info("In account {} authorization related entitlement disabled, thus skipping permission check!!",
-                    ThreadBasedUserCrnProvider.getAccountId());
-            return true;
-        }
-        return makeCheckRightCall(userCrn, right, null, requestId);
-    }
-
     private boolean makeCheckRightCall(String userCrn, String right, String resource, Optional<String> requestId) {
         checkArgument(VALID_AUTHZ_RESOURCE.test(resource), String.format("Provided resource [%s] is not in CRN format", resource));
         try {

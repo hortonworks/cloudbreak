@@ -17,7 +17,6 @@ import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrnList;
 import com.sequenceiq.authorization.annotation.ResourceCrnList;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.service.model.AuthorizationRule;
-import com.sequenceiq.authorization.service.model.HasRightOnAll;
 import com.sequenceiq.authorization.utils.CrnAccountValidator;
 
 @Component
@@ -54,13 +53,7 @@ public class ResourceCrnListAuthorizationFactory extends TypedAuthorizationFacto
             return Optional.empty();
         }
         return defaultResourceAuthorizationProvider.authorizeDefaultOrElseCompute(resourceCrns, action,
-                filteredResourceCrns -> {
-                    if (commonPermissionCheckingUtils.legacyAuthorizationNeeded()) {
-                        return Optional.of(new HasRightOnAll(action, filteredResourceCrns));
-                    } else {
-                        return environmentBasedAuthorizationProvider.getAuthorizations(filteredResourceCrns, action);
-                    }
-                });
+                filteredResourceCrns -> environmentBasedAuthorizationProvider.getAuthorizations(filteredResourceCrns, action));
     }
 
     @Override

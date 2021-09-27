@@ -29,9 +29,8 @@ import com.google.common.collect.Maps;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.utils.AuthorizationMessageUtilsService;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 
 @ExtendWith(MockitoExtension.class)
 public class UmsResourceAuthorizationServiceTest {
@@ -49,9 +48,6 @@ public class UmsResourceAuthorizationServiceTest {
 
     @Mock
     private UmsRightProvider umsRightProvider;
-
-    @Mock
-    private EntitlementService entitlementService;
 
     @InjectMocks
     private UmsResourceAuthorizationService underTest;
@@ -74,7 +70,6 @@ public class UmsResourceAuthorizationServiceTest {
 
     @Test
     public void testCheckRightOnResource() {
-        when(entitlementService.isAuthorizationEntitlementRegistered(anyString())).thenReturn(TRUE);
         when(umsClient.checkResourceRight(anyString(), anyString(), anyString(), any())).thenReturn(false);
 
         AccessDeniedException exception = assertThrows(AccessDeniedException.class, () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.
@@ -86,7 +81,6 @@ public class UmsResourceAuthorizationServiceTest {
     @Test
     public void testCheckRightOnResourcesFailure() {
         when(umsClient.hasRights(anyString(), anyList(), anyString(), any())).thenReturn(hasRightsResultMap());
-        when(entitlementService.isAuthorizationEntitlementRegistered(anyString())).thenReturn(TRUE);
 
         AccessDeniedException exception = assertThrows(AccessDeniedException.class, () -> ThreadBasedUserCrnProvider.doAs(USER_CRN,
                 () -> underTest.checkRightOfUserOnResources(USER_CRN,
@@ -104,7 +98,6 @@ public class UmsResourceAuthorizationServiceTest {
         Map<String, Boolean> resultMap = hasRightsResultMap();
         resultMap.put(RESOURCE_CRN2, TRUE);
         when(umsClient.hasRights(anyString(), anyList(), anyString(), any())).thenReturn(resultMap);
-        when(entitlementService.isAuthorizationEntitlementRegistered(anyString())).thenReturn(TRUE);
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.
                 checkRightOfUserOnResources(USER_CRN, AuthorizationResourceAction.DESCRIBE_ENVIRONMENT, Lists.newArrayList(RESOURCE_CRN, RESOURCE_CRN2)));
     }

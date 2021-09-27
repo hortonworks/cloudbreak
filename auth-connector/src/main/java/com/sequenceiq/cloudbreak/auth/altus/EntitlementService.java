@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.auth.altus;
 
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.AUDIT_ARCHIVING_GCP;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CB_AUTHZ_POWER_USERS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_DIFFERENT_DATAHUB_VERSION_THAN_DATALAKE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_HA_REPAIR;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_HA_UPGRADE;
@@ -294,10 +293,6 @@ public class EntitlementService {
 
     public boolean ccmV2UseOneWayTls(String accountId) {
         return isEntitlementRegistered(accountId, CDP_CCM_V2_USE_ONE_WAY_TLS);
-    }
-
-    public boolean isAuthorizationEntitlementRegistered(String accountId) {
-        return isEntitlementRegistered(accountId, CB_AUTHZ_POWER_USERS);
     }
 
     public boolean databaseWireEncryptionEnabled(String accountId) {

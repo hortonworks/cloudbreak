@@ -24,9 +24,9 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.test.context.ActiveProfiles;
 
-import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
+import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
 import com.sequenceiq.cloudbreak.cloud.event.platform.ResourceDefinitionRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.ResourceDefinitionResult;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
@@ -71,11 +71,11 @@ public class AuditCredentialAuthorizationIntegrationTest {
     @MockBean
     private RequestProvider requestProvider;
 
-    @Mock
-    private ResourceDefinitionRequest resourceDefinitionRequest;
-
     @MockBean
     private EntitlementService entitlementService;
+
+    @Mock
+    private ResourceDefinitionRequest resourceDefinitionRequest;
 
     @Inject
     private CredentialRepository credentialRepository;
@@ -89,7 +89,6 @@ public class AuditCredentialAuthorizationIntegrationTest {
         firstUserClient = getClient(FIRST_USER_CRN);
         secondUserClient = getClient(SECOND_USER_CRN);
         doNothing().when(grpcUmsClient).assignResourceRole(anyString(), anyString(), anyString(), any());
-        when(entitlementService.isAuthorizationEntitlementRegistered(anyString())).thenReturn(Boolean.TRUE);
         mockPermissions();
     }
 

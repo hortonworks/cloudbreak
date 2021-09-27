@@ -43,7 +43,6 @@ import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.info.model.ApiAuthorizationInfo;
 import com.sequenceiq.authorization.info.model.ApiAuthorizationInfoBuilder;
 import com.sequenceiq.authorization.info.model.FieldAuthorizationInfo;
-import com.sequenceiq.authorization.info.model.LegacyAuthorizationInfo;
 import com.sequenceiq.authorization.info.model.NewAuthorizationInfo;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.service.UmsRightProvider;
@@ -116,12 +115,11 @@ public class ApiPermissionInfoGenerator {
 
     private ApiAuthorizationInfo getAuthorizationInfoFromAnnotations(String methodPath, String httpMethod, Method method) {
         NewAuthorizationInfo newAuthorizationInfo = new NewAuthorizationInfo();
-        LegacyAuthorizationInfo legacyAuthorizationInfo = new LegacyAuthorizationInfo();
         String message = null;
-        getInfoFromRegularAnnotation(method, newAuthorizationInfo, legacyAuthorizationInfo);
+        getInfoFromRegularAnnotation(method, newAuthorizationInfo);
         if (method.isAnnotationPresent(CheckPermissionByRequestProperty.class) ||
                 method.isAnnotationPresent(CheckPermissionByCompositeRequestProperty.class)) {
-            getInfoFromResourceObjectAnnotation(method, newAuthorizationInfo, legacyAuthorizationInfo);
+            getInfoFromResourceObjectAnnotation(method, newAuthorizationInfo);
             message = "Authorization happening on specific field(s) of request object, this is happening only in case of new authorization." +
                     "Please check request object in Cloudbreak code for more details.";
         }
@@ -138,35 +136,32 @@ public class ApiPermissionInfoGenerator {
                 .withHttpMethod(httpMethod)
                 .withPath(methodPath)
                 .withMessage(message)
-                .withLegacyAuthorization(legacyAuthorizationInfo)
                 .withNewAuthorization(newAuthorizationInfo)
                 .build();
     }
 
-    private void getInfoFromResourceObjectAnnotation(Method method, NewAuthorizationInfo newAuthorizationInfo, LegacyAuthorizationInfo legacyAuthorizationInfo) {
+    private void getInfoFromResourceObjectAnnotation(Method method, NewAuthorizationInfo newAuthorizationInfo) {
         Set<FieldAuthorizationInfo> fieldPermissions = Sets.newHashSet();
         Arrays.stream(method.getAnnotations())
                 .forEach(annotation -> {
                     if (annotation.annotationType().equals(CheckPermissionByRequestProperty.class)) {
-                        getAuthorizationInfoFromRequestPropertyAnnotation(legacyAuthorizationInfo,
-                                fieldPermissions, (CheckPermissionByRequestProperty) annotation);
+                        getAuthorizationInfoFromRequestPropertyAnnotation(fieldPermissions, (CheckPermissionByRequestProperty) annotation);
                     } else if (annotation.annotationType().equals(CheckPermissionByCompositeRequestProperty.class)) {
                         Arrays.stream(((CheckPermissionByCompositeRequestProperty) annotation).value()).forEach(byRequestProperty ->
-                                getAuthorizationInfoFromRequestPropertyAnnotation(legacyAuthorizationInfo, fieldPermissions, byRequestProperty));
+                                getAuthorizationInfoFromRequestPropertyAnnotation(fieldPermissions, byRequestProperty));
                     }
                 });
         newAuthorizationInfo.getPermissionsNeededForRequestObject().addAll(fieldPermissions);
     }
 
-    private void getAuthorizationInfoFromRequestPropertyAnnotation(LegacyAuthorizationInfo legacyAuthorizationInfo, Set<FieldAuthorizationInfo> fieldPermissions,
+    private void getAuthorizationInfoFromRequestPropertyAnnotation(Set<FieldAuthorizationInfo> fieldPermissions,
             CheckPermissionByRequestProperty annotation) {
         FieldAuthorizationInfo fieldAuthorizationInfo = new FieldAuthorizationInfo(annotation.path(),
-                umsRightProvider.getNewRight(annotation.action()));
+                umsRightProvider.getRight(annotation.action()));
         fieldPermissions.add(fieldAuthorizationInfo);
-        legacyAuthorizationInfo.getPermissionNeeded().add(umsRightProvider.getLegacyRight(annotation.action()));
     }
 
-    private void getInfoFromRegularAnnotation(Method method, NewAuthorizationInfo newAuthorizationInfo, LegacyAuthorizationInfo legacyAuthorizationInfo) {
+    private void getInfoFromRegularAnnotation(Method method, NewAuthorizationInfo newAuthorizationInfo) {
         AuthorizationAnnotationUtils.getPossibleMethodAnnotations().stream()
                 .filter(annotation -> method.isAnnotationPresent(annotation))
                 .filter(annotation -> Arrays.stream(method.getAnnotation(annotation).annotationType().getMethods())
@@ -178,8 +173,7 @@ public class ApiPermissionInfoGenerator {
                         Annotation actualAnnotation = method.getAnnotation(annotation);
                         Method actionMethod = actualAnnotation.annotationType().getMethod("action");
                         AuthorizationResourceAction action = (AuthorizationResourceAction) actionMethod.invoke(actualAnnotation);
-                        newAuthorizationInfo.getPermissionsNeededForApi().add(umsRightProvider.getNewRight(action));
-                        legacyAuthorizationInfo.getPermissionNeeded().add(umsRightProvider.getLegacyRight(action));
+                        newAuthorizationInfo.getPermissionsNeededForApi().add(umsRightProvider.getRight(action));
                     } catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
                         LOGGER.error("Error: ", e);
                     }

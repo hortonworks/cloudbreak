@@ -26,8 +26,6 @@ import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.defaults.CrnsByCategory;
 import com.sequenceiq.authorization.service.defaults.DefaultResourceChecker;
 import com.sequenceiq.authorization.utils.AuthorizationMessageUtilsService;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 
 @Component
 public class CommonPermissionCheckingUtils {
@@ -44,19 +42,12 @@ public class CommonPermissionCheckingUtils {
     private UmsRightProvider umsRightProvider;
 
     @Inject
-    private EntitlementService entitlementService;
-
-    @Inject
     private Map<AuthorizationResourceType, DefaultResourceChecker> defaultResourceCheckerMap;
 
     @Inject
     private Map<AuthorizationResourceType, ResourcePropertyProvider> resourceBasedCrnProviderMap;
 
     private AuthorizationMessageUtilsService authorizationMessageUtilsService;
-
-    public boolean legacyAuthorizationNeeded() {
-        return !entitlementService.isAuthorizationEntitlementRegistered(ThreadBasedUserCrnProvider.getAccountId());
-    }
 
     public ResourcePropertyProvider getResourceBasedCrnProvider(AuthorizationResourceAction action) {
         AuthorizationResourceType resourceType = umsRightProvider.getResourceType(action);

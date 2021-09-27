@@ -79,15 +79,6 @@ public class ResourceCrnAthorizationProviderTest {
         assertEquals(expected, authorization);
     }
 
-    @Test
-    public void testLegacyAuthorization() {
-        when(commonPermissionCheckingUtils.legacyAuthorizationNeeded()).thenReturn(Boolean.TRUE);
-
-        Optional<AuthorizationRule> authorization = underTest.getAuthorization(getAnnotation(), USER_CRN, null, null);
-
-        assertEquals(Optional.of(new HasRight(ACTION, RESOURCE_CRN)), authorization);
-    }
-
     private CheckPermissionByResourceCrn getAnnotation() {
         return new CheckPermissionByResourceCrn() {
 

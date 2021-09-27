@@ -20,8 +20,7 @@ public class UmsRightProviderTest {
 
     @Test
     public void testIfEveryActionIsInMap() {
-        underTest.init();
         assertTrue(Arrays.stream(AuthorizationResourceAction.values())
-                .allMatch(action -> StringUtils.isNotBlank(underTest.getLegacyRight(action))));
+                .allMatch(action -> StringUtils.isNotBlank(underTest.getRight(action))));
     }
 }
