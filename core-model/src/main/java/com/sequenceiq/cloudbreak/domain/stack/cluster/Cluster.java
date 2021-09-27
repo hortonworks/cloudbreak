@@ -825,9 +825,13 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
 
     @Override
     public String toString() {
+        String resourceCrn = "Stack not set yet";
+        if (stack != null) {
+            resourceCrn = stack.getResourceCrn();
+        }
         return "Cluster{" +
                 "id=" + id +
-                ", stackResourceCrn='" + stack.getResourceCrn() + '\'' +
+                ", stackResourceCrn='" + resourceCrn + '\'' +
                 ", name='" + name + '\'' +
                 ", status=" + status +
                 ", statusReason='" + statusReason + '\'' +
