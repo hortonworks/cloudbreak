@@ -165,9 +165,9 @@ public class StackSyncService {
             try {
                 InstanceSyncState instanceState = instanceSyncStates.getOrDefault(instance.getInstanceId(), defaultState);
                 syncInstanceStatusByState(stack, instanceStateCounts, instance, instanceState);
-                if (!syncConfig.isCmServerRunning() && InstanceSyncState.RUNNING.equals(instanceState) && instance.isGateway()) {
+                if (!syncConfig.isCmServerRunning() && InstanceSyncState.RUNNING.equals(instanceState) && instance.isPrimaryGateway()) {
                     instanceMetaDataService.updateInstanceStatus(instance, InstanceStatus.SERVICES_UNHEALTHY,
-                            "Cloudera Manager server not responding");
+                            CM_SERVER_NOT_RESPONDING);
                 }
             } catch (CloudConnectorException e) {
                 LOGGER.warn(e.getMessage(), e);
