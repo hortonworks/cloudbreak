@@ -265,6 +265,10 @@ public class InstanceMetaData implements ProvisionEntity {
                 || InstanceStatus.DECOMMISSION_FAILED.equals(instanceStatus);
     }
 
+    public boolean isPrimaryGateway() {
+        return InstanceMetadataType.GATEWAY_PRIMARY == instanceMetadataType;
+    }
+
     public boolean isGateway() {
         return InstanceMetadataType.GATEWAY == instanceMetadataType || InstanceMetadataType.GATEWAY_PRIMARY == instanceMetadataType
                 || (instanceMetadataType == null && instanceGroup != null && InstanceGroupType.GATEWAY == instanceGroup.getInstanceGroupType());
