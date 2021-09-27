@@ -8,8 +8,6 @@ public final class ApiAuthorizationInfoBuilder {
 
     private NewAuthorizationInfo newAuthorization;
 
-    private LegacyAuthorizationInfo legacyAuthorization;
-
     private String message;
 
     private ApiAuthorizationInfoBuilder() {
@@ -34,11 +32,6 @@ public final class ApiAuthorizationInfoBuilder {
         return this;
     }
 
-    public ApiAuthorizationInfoBuilder withLegacyAuthorization(LegacyAuthorizationInfo legacyAuthorization) {
-        this.legacyAuthorization = legacyAuthorization;
-        return this;
-    }
-
     public ApiAuthorizationInfoBuilder withMessage(String message) {
         this.message = message;
         return this;
@@ -49,7 +42,6 @@ public final class ApiAuthorizationInfoBuilder {
         apiAuthorizationInfo.setPath(path);
         apiAuthorizationInfo.setHttpMethod(httpMethod);
         apiAuthorizationInfo.setNewAuthorization(newAuthorization);
-        apiAuthorizationInfo.setLegacyAuthorization(legacyAuthorization);
         apiAuthorizationInfo.setMessage(message);
         return apiAuthorizationInfo;
     }

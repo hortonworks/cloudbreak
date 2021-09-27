@@ -8,8 +8,6 @@ public class ApiAuthorizationInfo {
 
     private NewAuthorizationInfo newAuthorization;
 
-    private LegacyAuthorizationInfo legacyAuthorization;
-
     private String message;
 
     public String getPath() {
@@ -34,14 +32,6 @@ public class ApiAuthorizationInfo {
 
     public void setNewAuthorization(NewAuthorizationInfo newAuthorization) {
         this.newAuthorization = newAuthorization;
-    }
-
-    public LegacyAuthorizationInfo getLegacyAuthorization() {
-        return legacyAuthorization;
-    }
-
-    public void setLegacyAuthorization(LegacyAuthorizationInfo legacyAuthorization) {
-        this.legacyAuthorization = legacyAuthorization;
     }
 
     public String getMessage() {

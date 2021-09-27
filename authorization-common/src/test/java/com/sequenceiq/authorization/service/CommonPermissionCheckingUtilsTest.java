@@ -44,7 +44,6 @@ import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.defaults.CrnsByCategory;
 import com.sequenceiq.authorization.service.defaults.DefaultResourceChecker;
 import com.sequenceiq.authorization.utils.AuthorizationMessageUtilsService;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CommonPermissionCheckingUtilsTest {
@@ -68,9 +67,6 @@ public class CommonPermissionCheckingUtilsTest {
 
     @Mock
     private UmsRightProvider umsRightProvider;
-
-    @Mock
-    private EntitlementService entitlementService;
 
     @Spy
     private Map<AuthorizationResourceType, DefaultResourceChecker> defaultResourceCheckerMap = new EnumMap<>(AuthorizationResourceType.class);

@@ -24,10 +24,8 @@ __Table of content__
 * [Introduction of new resources](#introduction-of-new-resources)
 * [How does it work internally](#how-does-it-work-internally)
     + [Resource based authorization internals](#resource-based-authorization-internals)
-        - [Compatibility with the legacy authorization](#compatibility-with-the-legacy-authorization)
     + [Example authorization](#example-authorization)
         - [In the new resource based authorization](#in-the-new-resource-based-authorization)
-        - [In the legacy authorization](#in-the-legacy-authorization)
 
 ## Usage
 
@@ -254,13 +252,12 @@ You can support authorization on new resources, and you can specify the rights a
 
 1. Define new resource types in `AuthorizationResourceType`,
 2. define new rights by extending `AuthorizationResourceAction` enum with new (String right, AuthorizationResourceType type) values (the new right should be defined in UMS previously),
-3. to support legacy authorization add a mapping from the new right to the legacy right in the `legacyRights.json`,
-4. implement `ResourceBasedCrnProvider`'s methods to support different scenarios on API level,
+3. implement `ResourceBasedCrnProvider`'s methods to support different scenarios on API level,
     - `ResourceBasedCrnProvider.getResourceCrnByResourceName(String)` - if you want to support resoure names,
     - `ResourceBasedCrnProvider.getResourceCrnListByResourceNameList(Collection<String>)` - if you want to support list of resoure names,
     - `ResourceBasedCrnProvider.getEnvironmentCrnByResourceCrn(String)` - if you want to support environment level authorization as well (has right on resource or on resource's environment),
     - `ResourceBasedCrnProvider.getEnvironmentCrnsByResourceCrns(Collection<String>)` - if you want to support environment level authorization when the request contains a list of crn-s, names,
-5. if certain resoures should be handled as default resources (for example default image catalog), and the authorization shouldn't call UMS at all, implement `DefaultResourceChecker` interface.
+4. if certain resoures should be handled as default resources (for example default image catalog), and the authorization shouldn't call UMS at all, implement `DefaultResourceChecker` interface.
 
 ## How does it work internally
 
@@ -311,14 +308,6 @@ __Note:__ `AuthorizationFactory` implementations can throw access denied excepti
 
 You can create additional authorization related annotations and implement `AuthorizationFactory` / `AuthorizationRule`-s to support them.
 
-#### Compatibility with the legacy authorization
-
-If a customer not entitled to use the resource based authorization than the framework falls back to the legacy authorization where the following rules apply:
-
-- if the legacy right is a `read` like right (`environments/read`) then we will skip the UMS check and assume he or she has this right,
-- if the legacy right is not a `read` like right (`environments/write`) then we will make an account level UMS right without the resource,
-- no check will happen on the resource's parent environment.
-
 ### Example authorization
 
 ```java
@@ -338,16 +327,6 @@ public enum AuthorizationResourceAction {
 }
 ```
 
-`legacyRights.json` content:
-
-```json
-{
-  "environments/describeEnvironment": "environments/read",
-  "a/action": "a/read",
-  "a/action_on_resource": "a/read",
-}
-```
-
 Let's assume this resource has an environment.
 
 #### In the new resource based authorization
@@ -357,9 +336,3 @@ Let's assume this resource has an environment.
     - has this user "a/action_on_resource" right on the resource, or it's environment? (`new HasRightOnAny(A_ACTION_ON_RESOURCE, List.of("crn:...:a:...", "crn:...:environment:..."))`)
     - UMS says `[false, true]`
     - Evaluation result: authorization succeeds since user has right on the environment.
-
-#### In the legacy authorization
-
-1. Account authorization -> has this user "a/read" right in the acccount? - The framework (without UMS) since it is a `read` right says yes
-2. Resource authorization (acount level actually) -> 
-    - has this user "a/read" right in the account? Since this is `read` right the framework (without UMS) says yes.

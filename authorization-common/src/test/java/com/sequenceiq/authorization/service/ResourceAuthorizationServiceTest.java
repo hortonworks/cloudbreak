@@ -36,7 +36,6 @@ import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.service.model.HasRight;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 
 @ExtendWith(MockitoExtension.class)
@@ -49,9 +48,6 @@ public class ResourceAuthorizationServiceTest {
 
     @Mock
     private GrpcUmsClient grpcUmsClient;
-
-    @Mock
-    private EntitlementService entitlementService;
 
     @Spy
     private List<AuthorizationFactory<? extends Annotation>> authorizationFactories = new ArrayList<>();
@@ -79,12 +75,11 @@ public class ResourceAuthorizationServiceTest {
 
     @BeforeEach
     public void setUp() {
-        when(entitlementService.isAuthorizationEntitlementRegistered(anyString())).thenReturn(true);
         authorizationFactories.add(authorizationFactory1);
         authorizationFactories.add(authorizationFactory2);
         when(authorizationFactory1.supportedAnnotation()).thenReturn(CheckPermissionByResourceCrn.class);
         when(authorizationFactory2.supportedAnnotation()).thenReturn(CheckPermissionByResourceName.class);
-        lenient().when(umsRightProvider.getRightMapper(true)).thenReturn(AuthorizationResourceAction::getRight);
+        lenient().when(umsRightProvider.getRightMapper()).thenReturn(AuthorizationResourceAction::getRight);
     }
 
     @Test
@@ -138,61 +133,6 @@ public class ResourceAuthorizationServiceTest {
         assertEquals("crn1", rightChecks.get(0).getResource());
         assertEquals("environments/describeCredential", rightChecks.get(1).getRight());
         assertEquals("crn2", rightChecks.get(1).getResource());
-    }
-
-    @Test
-    public void testLegacyAuthorizationWithMixed() throws NoSuchMethodException {
-        Method method = ExampleClass.class.getMethod("methodCombined", String.class, String.class);
-        when(methodSignature.getMethod()).thenReturn(method);
-        when(authorizationFactory1.getAuthorization(any(), any(), any(), any()))
-                .thenReturn(Optional.of(new HasRight(AuthorizationResourceAction.EDIT_ENVIRONMENT, "crn1")));
-        when(authorizationFactory2.getAuthorization(any(), any(), any(), any()))
-                .thenReturn(Optional.of(new HasRight(AuthorizationResourceAction.DESCRIBE_CREDENTIAL, "crn2")));
-        when(entitlementService.isAuthorizationEntitlementRegistered(anyString())).thenReturn(false);
-        when(umsRightProvider.getRightMapper(false)).thenReturn(a -> {
-            if (a.equals(AuthorizationResourceAction.EDIT_ENVIRONMENT)) {
-                return "environments/write";
-            } else {
-                return "environments/read";
-            }
-        });
-        when(grpcUmsClient.hasRights(anyString(), anyList(), any()))
-                .thenReturn(List.of(true));
-
-        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.authorize(USER_CRN, proceedingJoinPoint, methodSignature, Optional.of("requestId")));
-
-        verify(grpcUmsClient).hasRights(anyString(), captor.capture(), any());
-
-        List<RightCheck> rightChecks = captor.getValue();
-        assertEquals(1, rightChecks.size());
-        assertEquals("environments/write", rightChecks.get(0).getRight());
-        assertEquals("", rightChecks.get(0).getResource());
-    }
-
-    @Test
-    public void testLegacyAuthorizationWithMixedWhenThrows() throws NoSuchMethodException {
-        Method method = ExampleClass.class.getMethod("methodCombined", String.class, String.class);
-        when(methodSignature.getMethod()).thenReturn(method);
-        when(authorizationFactory1.getAuthorization(any(), any(), any(), any()))
-                .thenReturn(Optional.of(new HasRight(AuthorizationResourceAction.EDIT_ENVIRONMENT, "crn1")));
-        when(authorizationFactory2.getAuthorization(any(), any(), any(), any()))
-                .thenReturn(Optional.of(new HasRight(AuthorizationResourceAction.DESCRIBE_CREDENTIAL, "crn2")));
-        when(entitlementService.isAuthorizationEntitlementRegistered(anyString())).thenReturn(false);
-        when(umsRightProvider.getRightMapper(false)).thenReturn(a -> {
-            if (a.equals(AuthorizationResourceAction.EDIT_ENVIRONMENT)) {
-                return "environments/write";
-            } else {
-                return "environments/read";
-            }
-        });
-        when(grpcUmsClient.hasRights(anyString(), anyList(), any()))
-                .thenReturn(List.of(false));
-
-        AccessDeniedException exception = assertThrows(AccessDeniedException.class, () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
-                underTest.authorize(USER_CRN, proceedingJoinPoint, methodSignature, Optional.of("requestId"))));
-
-        assertEquals("You have no right to perform environments/write in account 1234.", exception.getMessage());
-        verify(grpcUmsClient).hasRights(anyString(), captor.capture(), any());
     }
 
     private static class ExampleClass {

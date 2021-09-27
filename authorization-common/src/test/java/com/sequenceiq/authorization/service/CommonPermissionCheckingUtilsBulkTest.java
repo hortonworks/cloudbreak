@@ -26,7 +26,6 @@ import com.google.common.collect.Lists;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.defaults.DefaultResourceChecker;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 
 @RunWith(Parameterized.class)
 public class CommonPermissionCheckingUtilsBulkTest {
@@ -61,9 +60,6 @@ public class CommonPermissionCheckingUtilsBulkTest {
     private UmsRightProvider umsRightProvider;
 
     @Mock
-    private EntitlementService entitlementService;
-
-    @Mock
     private Map<AuthorizationResourceType, DefaultResourceChecker> defaultResourceCheckerMap;
 
     @Mock
@@ -83,7 +79,6 @@ public class CommonPermissionCheckingUtilsBulkTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        umsRightProvider.init();
         when(umsRightProvider.getResourceType(any())).thenReturn(AuthorizationResourceType.IMAGE_CATALOG);
     }
 

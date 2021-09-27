@@ -18,21 +18,7 @@ public class AuthUserKeys {
 
     public static final String ENV_DATA_STEWARD = "CB-Machine-DataSteward";
 
-    public static final String DH_ADMIN_A = "CB-Machine-DhAdminA";
-
-    public static final String DH_ADMIN_B = "CB-Machine-DhAdminB";
-
-    public static final String DH_USER_A = "CB-Machine-DhUserA";
-
-    public static final String DH_USER_B = "CB-Machine-DhUserB";
-
     public static final String ZERO_RIGHTS = "CB-zero-roles";
-
-    public static final String LEGACY_NON_POWER = "legacy-authz-CB-nonpower";
-
-    public static final String LEGACY_POWER = "legacy-authz-CB-power";
-
-    public static final String LEGACY_ACC_ENV_ADMIN = "legacy-authz-CB-acc-envadmin";
 
     private AuthUserKeys() {
 

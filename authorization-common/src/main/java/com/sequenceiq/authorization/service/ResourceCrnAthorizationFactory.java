@@ -14,7 +14,6 @@ import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.service.model.AuthorizationRule;
-import com.sequenceiq.authorization.service.model.HasRight;
 import com.sequenceiq.authorization.utils.CrnAccountValidator;
 
 @Component
@@ -45,13 +44,8 @@ public class ResourceCrnAthorizationFactory extends TypedAuthorizationFactory<Ch
     }
 
     public Optional<AuthorizationRule> calcAuthorization(String resourceCrn, AuthorizationResourceAction action) {
-        return defaultResourceAuthorizationProvider.authorizeDefaultOrElseCompute(resourceCrn, action, () -> {
-            if (commonPermissionCheckingUtils.legacyAuthorizationNeeded()) {
-                return Optional.of(new HasRight(action, resourceCrn));
-            } else {
-                return environmentBasedAuthorizationProvider.getAuthorizations(resourceCrn, action);
-            }
-        });
+        return defaultResourceAuthorizationProvider.authorizeDefaultOrElseCompute(resourceCrn, action, () ->
+                environmentBasedAuthorizationProvider.getAuthorizations(resourceCrn, action));
     }
 
     @Override

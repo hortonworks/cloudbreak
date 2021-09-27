@@ -1,5 +1,0 @@
-name: "legacy-authz-mock-tests"
-tests:
-  - name: "legacy_authz_mock_tests"
-    classes:
-      - name: com.sequenceiq.it.cloudbreak.testcase.authorization.EnvironmentLegacyAuthzGetTest
