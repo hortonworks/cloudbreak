@@ -79,6 +79,14 @@
       "dependencies": ["SPARK3_ON_YARN"]
     },
     {
+      "name": "LIVY_FOR_SPARK3",
+      "displayName": "Livy for Spark 3",
+      "componentNameInParcel": "spark3",
+      "components": [
+      ],
+      "dependencies": ["SPARK3_ON_YARN"]
+    },
+    {
       "name": "ZEPPELIN",
       "displayName": "Zeppelin",
       "componentNameInParcel": "zeppelin",
