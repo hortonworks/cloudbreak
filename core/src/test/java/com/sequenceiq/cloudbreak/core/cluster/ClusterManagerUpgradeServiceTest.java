@@ -30,8 +30,8 @@ import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
-import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterComponentUpdater;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
 public class ClusterManagerUpgradeServiceTest {
@@ -63,7 +63,7 @@ public class ClusterManagerUpgradeServiceTest {
     private ClusterHostServiceRunner clusterHostServiceRunner;
 
     @Mock
-    private ParcelService parcelService;
+    private ClusterComponentUpdater clusterComponentUpdater;
 
     @Mock
     private CsdParcelDecorator csdParcelDecorator;
@@ -134,8 +134,6 @@ public class ClusterManagerUpgradeServiceTest {
     public void testUpgradeClusterManagerShouldAddCsdToPillarWhenTheClusterTypeIsWorkload() throws CloudbreakOrchestratorException, CloudbreakException {
         Cluster cluster = stack.getCluster();
         stack.setType(StackType.WORKLOAD);
-        Set<ClusterComponent> clusterComponents = Collections.emptySet();
-        when(parcelService.getParcelComponentsByBlueprint(stack)).thenReturn(clusterComponents);
 
         underTest.upgradeClusterManager(STACK_ID, true);
 
@@ -147,5 +145,19 @@ public class ClusterManagerUpgradeServiceTest {
         verify(clusterHostServiceRunner, times(1)).decoratePillarWithClouderaManagerSettings(any(), any(), any());
         verify(clusterApi).startCluster();
         verify(csdParcelDecorator, times(1)).decoratePillarWithCsdParcels(any(), any());
+    }
+
+    @Test
+    public void testRemoveUnusedComponents() throws CloudbreakException {
+        Set<ClusterComponent> clusterComponentsByBlueprint = Collections.emptySet();
+        when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
+        when(clusterApiConnectors.getConnector(stack)).thenReturn(clusterApi);
+
+        underTest.removeUnusedComponents(STACK_ID, clusterComponentsByBlueprint);
+
+        verify(stackService).getByIdWithListsInTransaction(STACK_ID);
+        verify(clusterApiConnectors).getConnector(stack);
+        verify(clusterApi).removeUnusedParcels(clusterComponentsByBlueprint);
+        verify(clusterComponentUpdater).removeUnusedCdhProductsFromClusterComponents(stack.getCluster().getId(), clusterComponentsByBlueprint);
     }
 }
