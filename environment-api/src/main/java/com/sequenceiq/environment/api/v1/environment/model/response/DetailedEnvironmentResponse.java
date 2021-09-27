@@ -126,6 +126,8 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
 
         private CcmV2TlsType ccmV2TlsType;
 
+        private EnvironmentDeletionType deletionType;
+
         private Builder() {
         }
 
@@ -294,6 +296,11 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             return this;
         }
 
+        public Builder withDeletionType(EnvironmentDeletionType deletionType) {
+            this.deletionType = deletionType;
+            return this;
+        }
+
         public DetailedEnvironmentResponse build() {
             DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
             detailedEnvironmentResponse.setCrn(crn);
@@ -329,6 +336,7 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             detailedEnvironmentResponse.setYarn(yarn);
             detailedEnvironmentResponse.setEnvironmentServiceVersion(environmentServiceVersion);
             detailedEnvironmentResponse.setCcmV2TlsType(ccmV2TlsType);
+            detailedEnvironmentResponse.setDeletionType(deletionType);
             return detailedEnvironmentResponse;
         }
     }

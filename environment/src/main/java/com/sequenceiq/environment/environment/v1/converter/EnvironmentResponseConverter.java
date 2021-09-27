@@ -23,6 +23,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpResour
 import com.sequenceiq.environment.api.v1.environment.model.request.yarn.YarnEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentAuthenticationResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentDeletionType;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.LocationResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SecurityAccessResponse;
@@ -112,6 +113,7 @@ public class EnvironmentResponseConverter {
                 .withParentEnvironmentName(environmentDto.getParentEnvironmentName())
                 .withParentEnvironmentCloudPlatform(environmentDto.getParentEnvironmentCloudPlatform())
                 .withEnvironmentServiceVersion(environmentDto.getEnvironmentServiceVersion())
+                .withDeletionType(deletionType(environmentDto.getDeletionType()))
                 .withCcmV2TlsType(environmentDto.getExperimentalFeatures().getCcmV2TlsType());
 
         NullUtil.doIfNotNull(environmentDto.getProxyConfig(),
@@ -150,6 +152,7 @@ public class EnvironmentResponseConverter {
                 .withAzure(getIfNotNull(environmentDto.getParameters(), this::azureEnvParamsToAzureEnvironmentParams))
                 .withYarn(getIfNotNull(environmentDto.getParameters(), this::yarnEnvParamsToYarnEnvironmentParams))
                 .withGcp(getIfNotNull(environmentDto.getParameters(), this::gcpEnvParamsToGcpEnvironmentParams))
+                .withDeletionType(deletionType(environmentDto.getDeletionType()))
                 .withParentEnvironmentName(environmentDto.getParentEnvironmentName())
                 .withCcmV2TlsType(environmentDto.getExperimentalFeatures().getCcmV2TlsType());
 
@@ -269,6 +272,19 @@ public class EnvironmentResponseConverter {
                 return ResourceGroupUsage.SINGLE_WITH_DEDICATED_STORAGE_ACCOUNT;
             default:
                 throw new BadRequestException("Unknown resource group usage pattern: %s" + resourceGroupUsagePattern);
+        }
+    }
+
+    private EnvironmentDeletionType deletionType(com.sequenceiq.environment.environment.EnvironmentDeletionType deletionType) {
+        switch (deletionType) {
+            case NONE:
+                return EnvironmentDeletionType.NONE;
+            case SIMPLE:
+                return EnvironmentDeletionType.SIMPLE;
+            case FORCE:
+                return EnvironmentDeletionType.FORCE;
+            default:
+                throw new BadRequestException("Unknown deletion type: %s" + deletionType);
         }
     }
 

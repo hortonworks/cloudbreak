@@ -41,6 +41,7 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.cloudbreak.structuredevent.repository.AccountAwareResourceRepository;
 import com.sequenceiq.cloudbreak.structuredevent.service.AbstractAccountAwareResourceService;
+import com.sequenceiq.environment.environment.EnvironmentDeletionType;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.Region;
@@ -299,6 +300,16 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
             environment.setSecurityGroupIdForKnox(securityAccess.getSecurityGroupIdForKnox());
             environment.setDefaultSecurityGroupId(securityAccess.getDefaultSecurityGroupId());
         }
+    }
+
+    Environment editDeletionType(Environment environment, boolean forced) {
+        LOGGER.debug("Editing deletion type for environment.");
+        if (forced) {
+            environment.setDeletionType(EnvironmentDeletionType.FORCE);
+        } else {
+            environment.setDeletionType(EnvironmentDeletionType.SIMPLE);
+        }
+        return save(environment);
     }
 
     public void setAdminGroupName(Environment environment, String adminGroupName) {

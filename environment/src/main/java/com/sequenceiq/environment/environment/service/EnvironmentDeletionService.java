@@ -76,6 +76,7 @@ public class EnvironmentDeletionService {
             boolean cascading, boolean forced) {
         MDCBuilder.buildMdcContext(environment);
         validateDeletion(environment, cascading);
+        environment = updateEnvironmentDeletionType(environment, forced);
         LOGGER.debug("Deleting environment with name: {}", environment.getName());
         environmentJobService.unschedule(environment);
         if (cascading) {
@@ -85,6 +86,10 @@ public class EnvironmentDeletionService {
             reactorFlowManager.triggerDeleteFlow(environment, userCrn, forced);
         }
         return environment;
+    }
+
+    private Environment updateEnvironmentDeletionType(Environment environment, boolean forced) {
+        return environmentService.editDeletionType(environment, forced);
     }
 
     public List<EnvironmentDto> deleteMultipleByNames(Set<String> environmentNames, String accountId, String actualUserCrn,

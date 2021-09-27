@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.tag.request.CDPTagMergeRequest;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.domain.CredentialView;
+import com.sequenceiq.environment.environment.EnvironmentDeletionType;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.EnvironmentTags;
 import com.sequenceiq.environment.environment.domain.ExperimentalFeatures;
@@ -88,6 +89,8 @@ public class EnvironmentDto implements Payload, AccountAwareResource, Environmen
     private ProxyConfig proxyConfig;
 
     private String environmentServiceVersion;
+
+    private EnvironmentDeletionType deletionType;
 
     @Override
     public Long getResourceId() {
@@ -393,6 +396,14 @@ public class EnvironmentDto implements Payload, AccountAwareResource, Environmen
         this.environmentServiceVersion = environmentServiceVersion;
     }
 
+    public EnvironmentDeletionType getDeletionType() {
+        return deletionType;
+    }
+
+    public void setDeletionType(EnvironmentDeletionType deletionType) {
+        this.deletionType = deletionType;
+    }
+
     public Map<String, String> mergeTags(CostTagging costTagging) {
         CDPTagMergeRequest mergeRequest = CDPTagMergeRequest.Builder
                 .builder()
@@ -479,6 +490,8 @@ public class EnvironmentDto implements Payload, AccountAwareResource, Environmen
         private ProxyConfig proxyConfig;
 
         private String environmentServiceVersion;
+
+        private EnvironmentDeletionType deletionType;
 
         private Builder() {
         }
@@ -638,6 +651,11 @@ public class EnvironmentDto implements Payload, AccountAwareResource, Environmen
             return this;
         }
 
+        public Builder withEnvironmentDeletionType(EnvironmentDeletionType deletionType) {
+            this.deletionType = deletionType;
+            return this;
+        }
+
         public EnvironmentDto build() {
             EnvironmentDto environmentDto = new EnvironmentDto();
             environmentDto.setId(id);
@@ -671,6 +689,7 @@ public class EnvironmentDto implements Payload, AccountAwareResource, Environmen
             environmentDto.setParentEnvironmentCloudPlatform(parentEnvironmentCloudPlatform);
             environmentDto.setProxyConfig(proxyConfig);
             environmentDto.setEnvironmentServiceVersion(environmentServiceVersion);
+            environmentDto.setDeletionType(deletionType);
             return environmentDto;
         }
     }

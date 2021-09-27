@@ -24,10 +24,12 @@ import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.structuredevent.repository.AccountAwareResource;
 import com.sequenceiq.environment.credential.domain.Credential;
+import com.sequenceiq.environment.environment.EnvironmentDeletionType;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.dto.EnvironmentBackup;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
+import com.sequenceiq.environment.parameters.dao.converter.EnvironmentDeletionTypeConverter;
 import com.sequenceiq.environment.parameters.dao.converter.EnvironmentStatusConverter;
 import com.sequenceiq.environment.parameters.dao.domain.BaseParameters;
 import com.sequenceiq.environment.proxy.domain.ProxyConfig;
@@ -109,6 +111,9 @@ public class Environment implements AuthResource, AccountAwareResource {
 
     @Convert(converter = EnvironmentStatusConverter.class)
     private EnvironmentStatus status;
+
+    @Convert(converter = EnvironmentDeletionTypeConverter.class)
+    private EnvironmentDeletionType deletionType;
 
     @JoinColumn(name = "environment_authentication_id")
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
@@ -509,6 +514,14 @@ public class Environment implements AuthResource, AccountAwareResource {
         this.freeIpaEnableMultiAz = freeIpaEnableMultiAz;
     }
 
+    public EnvironmentDeletionType getDeletionType() {
+        return deletionType;
+    }
+
+    public void setDeletionType(EnvironmentDeletionType deletionType) {
+        this.deletionType = deletionType;
+    }
+
     @Override
     public String toString() {
         return "Environment{" +
@@ -519,6 +532,7 @@ public class Environment implements AuthResource, AccountAwareResource {
                 ", status=" + status +
                 ", statusReason='" + statusReason + '\'' +
                 ", freeIpaEnableMultiAz='" + freeIpaEnableMultiAz + '\'' +
+                ", deletionType='" + deletionType + '\'' +
                 '}';
     }
 }
