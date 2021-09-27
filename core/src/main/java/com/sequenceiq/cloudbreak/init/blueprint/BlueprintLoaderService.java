@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.BlueprintFile;
 import com.sequenceiq.cloudbreak.domain.BlueprintUpgradeOption;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.template.ClusterTemplateService;
@@ -43,9 +44,8 @@ public class BlueprintLoaderService {
     private ClusterTemplateService clusterTemplateService;
 
     public boolean isAddingDefaultBlueprintsNecessaryForTheUser(Collection<Blueprint> blueprints) {
-        Map<String, Blueprint> defaultBlueprints = defaultBlueprintCache.defaultBlueprints();
         for (Blueprint blueprintFromDatabase : blueprints) {
-            Blueprint defaultBlueprint = defaultBlueprints.get(blueprintFromDatabase.getName());
+            BlueprintFile defaultBlueprint = defaultBlueprintCache.defaultBlueprints().get(blueprintFromDatabase.getName());
             if (mustUpdateTheExistingBlueprint(blueprintFromDatabase, defaultBlueprint)) {
                 return true;
             }
@@ -115,10 +115,13 @@ public class BlueprintLoaderService {
     private Set<Blueprint> addMissingBlueprints(Collection<Blueprint> blueprintsInDatabase, Workspace workspace) {
         Set<Blueprint> resultList = new HashSet<>();
         LOGGER.debug("Adding default blueprints which are missing for the user.");
-        for (Entry<String, Blueprint> diffBlueprint : collectDeviationOfExistingAndDefaultBlueprints(blueprintsInDatabase).entrySet()) {
+        for (Entry<String, BlueprintFile> diffBlueprint : collectDeviationOfExistingAndDefaultBlueprints(blueprintsInDatabase).entrySet()) {
             LOGGER.debug("Default blueprint '{}' needs to be added for the '{}' workspace because the default validation missing.",
                     diffBlueprint.getKey(), workspace.getId());
-            Blueprint bp = setupBlueprint(diffBlueprint.getValue(), workspace);
+            Blueprint bp = new Blueprint();
+            prepareBlueprint(bp, diffBlueprint.getValue(), workspace);
+            bp.setName(diffBlueprint.getValue().getName());
+            bp = setupBlueprint(bp, workspace);
             String accountId = ThreadBasedUserCrnProvider.getAccountId();
             String creator = ThreadBasedUserCrnProvider.getUserCrn();
             blueprintService.decorateWithCrn(bp, accountId, creator);
@@ -132,9 +135,8 @@ public class BlueprintLoaderService {
     private Set<Blueprint> updateDefaultBlueprints(Iterable<Blueprint> blueprintsInDatabase, Workspace workspace) {
         Set<Blueprint> resultList = new HashSet<>();
         LOGGER.debug("Updating default blueprints which are contains text modifications.");
-        Map<String, Blueprint> defaultBlueprints = defaultBlueprintCache.defaultBlueprints();
         for (Blueprint blueprintInDatabase : blueprintsInDatabase) {
-            Blueprint defaultBlueprint = defaultBlueprints.get(blueprintInDatabase.getName());
+            BlueprintFile defaultBlueprint = defaultBlueprintCache.defaultBlueprints().get(blueprintInDatabase.getName());
             if (isActiveBlueprintMustBeUpdatedAndNotUserManaged(blueprintInDatabase, defaultBlueprint)
                     || isNotActiveAndMustComeBack(blueprintInDatabase, defaultBlueprint)) {
                 LOGGER.debug("Default blueprint '{}' needs to modify for the '{}' workspace because the validation text changed.",
@@ -146,7 +148,7 @@ public class BlueprintLoaderService {
         return resultList;
     }
 
-    private boolean isActiveBlueprintMustBeUpdatedAndNotUserManaged(Blueprint blueprintInDatabase, Blueprint defaultBlueprint) {
+    private boolean isActiveBlueprintMustBeUpdatedAndNotUserManaged(Blueprint blueprintInDatabase, BlueprintFile defaultBlueprint) {
         return isActiveDefaultBlueprint(blueprintInDatabase)
                 && isBlueprintInTheDefaultCache(defaultBlueprint)
                 && (defaultBlueprintNotSameAsNewTexts(blueprintInDatabase, defaultBlueprint.getBlueprintText())
@@ -155,15 +157,15 @@ public class BlueprintLoaderService {
                         || isUpgradeOptionModified(blueprintInDatabase, defaultBlueprint));
     }
 
-    private boolean isUpgradeOptionModified(Blueprint blueprintInDatabase, Blueprint defaultBlueprint) {
+    private boolean isUpgradeOptionModified(Blueprint blueprintInDatabase, BlueprintFile defaultBlueprint) {
         return blueprintInDatabase.getBlueprintUpgradeOption() != defaultBlueprint.getBlueprintUpgradeOption();
     }
 
-    private boolean isBlueprintInDBSameNameButUserManaged(Blueprint blueprintInDatabase, Blueprint defaultBlueprint) {
+    private boolean isBlueprintInDBSameNameButUserManaged(Blueprint blueprintInDatabase, BlueprintFile defaultBlueprint) {
         return blueprintInDatabase.getName().equals(defaultBlueprint.getName()) && blueprintInDatabase.getStatus() == USER_MANAGED;
     }
 
-    private Blueprint prepareBlueprint(Blueprint blueprintFromDatabase, Blueprint newBlueprint,
+    private Blueprint prepareBlueprint(Blueprint blueprintFromDatabase, BlueprintFile newBlueprint,
             Workspace workspace) {
         setupBlueprint(blueprintFromDatabase, workspace);
         blueprintFromDatabase.setBlueprintText(newBlueprint.getBlueprintText());
@@ -182,15 +184,15 @@ public class BlueprintLoaderService {
         return blueprint;
     }
 
-    private BlueprintUpgradeOption getBlueprintUpgradeOption(Blueprint blueprint) {
+    private BlueprintUpgradeOption getBlueprintUpgradeOption(BlueprintFile blueprint) {
         return Optional.ofNullable(blueprint.getBlueprintUpgradeOption())
                 .orElse(BlueprintUpgradeOption.ENABLED);
     }
 
-    private Map<String, Blueprint> collectDeviationOfExistingAndDefaultBlueprints(Collection<Blueprint> blueprintsInDatabase) {
+    private Map<String, BlueprintFile> collectDeviationOfExistingAndDefaultBlueprints(Collection<Blueprint> blueprintsInDatabase) {
         LOGGER.debug("Collecting blueprints which are missing from the defaults.");
-        Map<String, Blueprint> diff = new HashMap<>();
-        for (Entry<String, Blueprint> stringBlueprintEntry : defaultBlueprintCache.defaultBlueprints().entrySet()) {
+        Map<String, BlueprintFile> diff = new HashMap<>();
+        for (Entry<String, BlueprintFile> stringBlueprintEntry : defaultBlueprintCache.defaultBlueprints().entrySet()) {
             if (blueprintsInDatabase
                     .stream()
                     .noneMatch(bp -> bp.getName().equals(stringBlueprintEntry.getKey()))) {
@@ -224,11 +226,11 @@ public class BlueprintLoaderService {
         return blueprintText == null || !blueprintText.equals(blueprintsText);
     }
 
-    private boolean defaultBlueprintContainsNewDescription(Blueprint cd, Blueprint blueprint) {
+    private boolean defaultBlueprintContainsNewDescription(Blueprint cd, BlueprintFile blueprint) {
         return !cd.getDescription().equals(blueprint.getDescription());
     }
 
-    private boolean defaultBlueprintDefaultDeleted(Blueprint cd, Blueprint blueprint) {
+    private boolean defaultBlueprintDefaultDeleted(Blueprint cd, BlueprintFile blueprint) {
         return cd.getStatus().equals(DEFAULT_DELETED);
     }
 
@@ -236,17 +238,17 @@ public class BlueprintLoaderService {
         return blueprints.isEmpty();
     }
 
-    private boolean mustUpdateTheExistingBlueprint(Blueprint blueprintFromDatabase, Blueprint defaultBlueprint) {
+    private boolean mustUpdateTheExistingBlueprint(Blueprint blueprintFromDatabase, BlueprintFile defaultBlueprint) {
         return isActiveAndMustBeUpdated(blueprintFromDatabase, defaultBlueprint)
                 || isNotActiveAndMustComeBack(blueprintFromDatabase, defaultBlueprint);
     }
 
-    private boolean isNotActiveAndMustComeBack(Blueprint blueprintFromDatabase, Blueprint defaultBlueprint) {
+    private boolean isNotActiveAndMustComeBack(Blueprint blueprintFromDatabase, BlueprintFile defaultBlueprint) {
         return defaultBlueprintDefaultDeleted(blueprintFromDatabase, defaultBlueprint)
                 && isBlueprintInTheDefaultCache(defaultBlueprint);
     }
 
-    private boolean isActiveAndMustBeUpdated(Blueprint blueprintFromDatabase, Blueprint defaultBlueprint) {
+    private boolean isActiveAndMustBeUpdated(Blueprint blueprintFromDatabase, BlueprintFile defaultBlueprint) {
         return isActiveDefaultBlueprint(blueprintFromDatabase)
                 && isBlueprintInTheDefaultCache(defaultBlueprint)
                 && (defaultBlueprintNotSameAsNewTexts(blueprintFromDatabase, defaultBlueprint.getBlueprintText())
@@ -258,7 +260,7 @@ public class BlueprintLoaderService {
         return !collectDeviationOfExistingAndDefaultBlueprints(blueprints).isEmpty();
     }
 
-    private boolean isBlueprintInTheDefaultCache(Blueprint actualDefaultBlueprint) {
+    private boolean isBlueprintInTheDefaultCache(BlueprintFile actualDefaultBlueprint) {
         return actualDefaultBlueprint != null;
     }
 }
