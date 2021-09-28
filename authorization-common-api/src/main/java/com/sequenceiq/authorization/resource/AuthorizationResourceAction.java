@@ -51,6 +51,7 @@ public enum AuthorizationResourceAction {
     ROTATE_CERT_DATALAKE("datalake/rotateAutoTlsCertDatalake", AuthorizationResourceType.DATALAKE),
     ENVIRONMENT_CREATE_DATAHUB("environments/createDatahub", AuthorizationResourceType.ENVIRONMENT),
     DESCRIBE_DATAHUB("datahub/describeDatahub", AuthorizationResourceType.DATAHUB),
+    RECOVER_DATAHUB("datahub/recoverDatahub", AuthorizationResourceType.DATAHUB),
     DELETE_DATAHUB("datahub/deleteDatahub", AuthorizationResourceType.DATAHUB),
     REPAIR_DATAHUB("datahub/repairDatahub", AuthorizationResourceType.DATAHUB),
     SYNC_DATAHUB("datahub/syncDatahub", AuthorizationResourceType.DATAHUB),

@@ -11,7 +11,6 @@ import java.util.Collection;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -225,20 +224,22 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     }
 
     private void reportHealthAndSyncInstances(Stack stack, Collection<InstanceMetaData> runningInstances,
-            Map<InstanceMetaData, Optional<String>> failedInstances, Set<String> newHealtyHostNames, boolean hostCertExpiring) {
-        Map<String, Optional<String>> newFailedNodeNamesWithReason = failedInstances.entrySet().stream()
-                .filter(e -> !Set.of(SERVICES_UNHEALTHY, STOPPED).contains(e.getKey().getInstanceStatus()))
-                .collect(Collectors.toMap(e -> e.getKey().getDiscoveryFQDN(), e -> e.getValue()));
-        ifFlowNotRunning(() -> updateStates(stack, failedInstances.keySet(), newFailedNodeNamesWithReason, newHealtyHostNames, hostCertExpiring));
+            Map<InstanceMetaData, Optional<String>> failedInstances, Set<String> newHealthyHostNames, boolean hostCertExpiring) {
+        Map<String, Optional<String>> newFailedNodeNamesWithReason = failedInstances.entrySet()
+                .stream()
+                .filter(e -> !Set.of(SERVICES_UNHEALTHY, STOPPED)
+                        .contains(e.getKey().getInstanceStatus()))
+                .collect(Collectors.toMap(e -> e.getKey().getDiscoveryFQDN(), Map.Entry::getValue));
+        ifFlowNotRunning(() -> updateStates(stack, failedInstances.keySet(), newFailedNodeNamesWithReason, newHealthyHostNames, hostCertExpiring));
         syncInstances(stack, runningInstances, failedInstances.keySet(), InstanceSyncState.RUNNING, true);
     }
 
     private void updateStates(Stack stack, Collection<InstanceMetaData> failedInstances, Map<String, Optional<String>> newFailedNodeNamesWithReason,
-            Set<String> newHealtyHostNames, boolean hostCertExpiring) {
+            Set<String> newHealthyHostNames, boolean hostCertExpiring) {
         LOGGER.info("Updating status: Failed instances: {} New failed node names: {} New healthy host name: {} Host cert expiring: {}",
-                failedInstances, newFailedNodeNamesWithReason.keySet(), newHealtyHostNames, hostCertExpiring);
+                failedInstances, newFailedNodeNamesWithReason.keySet(), newHealthyHostNames, hostCertExpiring);
         clusterService.updateClusterCertExpirationState(stack.getCluster(), hostCertExpiring);
-        clusterOperationService.reportHealthChange(stack.getResourceCrn(), newFailedNodeNamesWithReason, newHealtyHostNames);
+        clusterOperationService.reportHealthChange(stack.getResourceCrn(), newFailedNodeNamesWithReason, newHealthyHostNames);
         if (!failedInstances.isEmpty()) {
             clusterService.updateClusterStatusByStackId(stack.getId(), Status.NODE_FAILURE);
         } else if (statesFromAvailableAllowed().contains(stack.getCluster().getStatus())) {
@@ -289,9 +290,8 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     }
 
     private Set<String> getNewHealthyHostNames(ExtendedHostStatuses hostStatuses, Set<InstanceMetaData> runningInstances) {
-        Set<String> healthyHosts = hostStatuses.getHostsHealth().entrySet().stream()
-                .filter(e -> hostStatuses.isHostHealthy(e.getKey()))
-                .map(Entry::getKey)
+        Set<String> healthyHosts = hostStatuses.getHostsHealth().keySet().stream()
+                .filter(hostStatuses::isHostHealthy)
                 .map(HostName::value)
                 .collect(toSet());
         Set<String> unhealthyStoredHosts = runningInstances.stream()
@@ -307,8 +307,8 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                 .filter(e -> !hostStatuses.isHostHealthy(e.getKey()))
                 .collect(Collectors.toMap(e -> e.getKey().value(), e -> Optional.ofNullable(hostStatuses.statusReasonForHost(e.getKey()))));
         Set<String> noReportHosts = runningInstances.stream()
-                .filter(i -> hostStatuses.getHostsHealth().get(hostName(i.getDiscoveryFQDN())) == null)
                 .map(InstanceMetaData::getDiscoveryFQDN)
+                .filter(discoveryFQDN -> hostStatuses.getHostsHealth().get(hostName(discoveryFQDN)) == null)
                 .collect(toSet());
         return runningInstances.stream()
                 .filter(i -> failedHosts.containsKey(i.getDiscoveryFQDN()) || noReportHosts.contains(i.getDiscoveryFQDN()))

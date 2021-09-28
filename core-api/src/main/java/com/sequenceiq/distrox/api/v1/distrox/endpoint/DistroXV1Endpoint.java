@@ -76,6 +76,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.AttachRecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.UpdateRecipesV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.RecoveryValidationV4Response;
 import com.sequenceiq.cloudbreak.doc.Notes;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
@@ -505,4 +506,16 @@ public interface DistroXV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = CHANGE_IMAGE_CATALOG, nickname = "changeImageCatalog")
     void changeImageCatalog(@PathParam("name") String name, @Valid @NotNull ChangeImageCatalogV4Request changeImageCatalogRequest);
+
+    @GET
+    @Path("{name}/get_cluster_recoverable")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "validates if the distrox cluster is recoverable or not", nickname = "getClusterRecoverableByName")
+    RecoveryValidationV4Response getClusterRecoverableByName(@PathParam("name") String name);
+
+    @GET
+    @Path("/crn/{crn}/get_cluster_recoverable")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "validates if the distrox cluster is recoverable or not", nickname = "getClusterRecoverableByCrn")
+    RecoveryValidationV4Response getClusterRecoverableByCrn(@PathParam("crn") String crn);
 }

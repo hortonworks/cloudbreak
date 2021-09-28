@@ -327,8 +327,8 @@ public class ClusterOperationService {
 
     private void logUnknownNodes(Map<String, Optional<String>> failedNodes, Set<InstanceMetaData> notTerminatedInstanceMetadataSet) {
         Set<String> unknownNodes = notTerminatedInstanceMetadataSet.stream()
-                .filter(i -> !failedNodes.containsKey(i.getDiscoveryFQDN()))
                 .map(InstanceMetaData::getDiscoveryFQDN)
+                .filter(discoveryFQDN -> !failedNodes.containsKey(discoveryFQDN))
                 .collect(Collectors.toSet());
         LOGGER.error("No metadata information for the nodes: " + unknownNodes);
     }

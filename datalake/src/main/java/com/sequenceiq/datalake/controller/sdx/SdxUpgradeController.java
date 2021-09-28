@@ -1,9 +1,5 @@
 package com.sequenceiq.datalake.controller.sdx;
 
-import static com.sequenceiq.sdx.api.model.SdxUpgradeShowAvailableImages.LATEST_ONLY;
-import static com.sequenceiq.sdx.api.model.SdxUpgradeShowAvailableImages.SHOW;
-import static org.apache.commons.lang3.StringUtils.isEmpty;
-
 import javax.inject.Inject;
 import javax.validation.Valid;
 
@@ -19,16 +15,19 @@ import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.cloudbreak.structuredevent.rest.annotation.AccountEntityType;
+import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.service.upgrade.SdxRuntimeUpgradeService;
 import com.sequenceiq.datalake.service.upgrade.recovery.SdxUpgradeRecoveryService;
 import com.sequenceiq.sdx.api.endpoint.SdxUpgradeEndpoint;
+import com.sequenceiq.sdx.api.model.SdxRecoverableResponse;
 import com.sequenceiq.sdx.api.model.SdxRecoveryRequest;
 import com.sequenceiq.sdx.api.model.SdxRecoveryResponse;
 import com.sequenceiq.sdx.api.model.SdxUpgradeRequest;
 import com.sequenceiq.sdx.api.model.SdxUpgradeResponse;
-import com.sequenceiq.sdx.api.model.SdxUpgradeShowAvailableImages;
 
 @Controller
+@AccountEntityType(SdxCluster.class)
 public class SdxUpgradeController implements SdxUpgradeEndpoint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxUpgradeController.class);
@@ -70,25 +69,24 @@ public class SdxUpgradeController implements SdxUpgradeEndpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.RECOVER_DATALAKE)
-    public SdxRecoveryResponse recoverClusterByCrn(@ResourceCrn String crn, @Valid SdxRecoveryRequest recoverSdxClusterRequest) {
+    public SdxRecoveryResponse recoverClusterByCrn(@ResourceCrn @TenantAwareParam String crn,
+            @Valid SdxRecoveryRequest recoverSdxClusterRequest) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         return sdxUpgradeRecoveryService.triggerRecovery(userCrn, NameOrCrn.ofCrn(crn), recoverSdxClusterRequest);
     }
 
-    private boolean isUpgradeTypeSpecified(SdxUpgradeRequest request) {
-        return !(request.isEmpty() || isDryRunOnly(request));
+    @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.RECOVER_DATALAKE)
+    public SdxRecoverableResponse getClusterRecoverableByName(@ResourceName String name) {
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        return sdxUpgradeRecoveryService.validateRecovery(userCrn, NameOrCrn.ofName(name));
     }
 
-    private boolean isDryRunOnly(SdxUpgradeRequest request) {
-        return request.isDryRun() && isRequestTypeEmpty(request);
+    @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.RECOVER_DATALAKE)
+    public SdxRecoverableResponse getClusterRecoverableByCrn(@ResourceCrn @TenantAwareParam String crn) {
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        return sdxUpgradeRecoveryService.validateRecovery(userCrn, NameOrCrn.ofCrn(crn));
     }
 
-    private boolean isRequestTypeEmpty(SdxUpgradeRequest request) {
-        return isEmpty(request.getRuntime()) && isEmpty(request.getImageId()) && !sdxRuntimeUpgradeService.isOsUpgrade(request);
-    }
-
-    private boolean isShowOnly(SdxUpgradeRequest request) {
-        SdxUpgradeShowAvailableImages showOption = request.getShowAvailableImages();
-        return (LATEST_ONLY.equals(showOption) || SHOW.equals(showOption)) && isRequestTypeEmpty(request);
-    }
 }
