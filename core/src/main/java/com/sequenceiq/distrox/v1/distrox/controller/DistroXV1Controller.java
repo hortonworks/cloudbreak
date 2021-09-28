@@ -50,9 +50,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRota
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.CertificatesRotationV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.DistroXSyncCmV1Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBlueprintV4Response;
-import com.sequenceiq.flow.api.model.RetryableFlowResponse;
-import com.sequenceiq.flow.api.model.RetryableFlowResponse.Builder;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
@@ -60,7 +59,6 @@ import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.flow.domain.RetryableFlow;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterDiagnosticsService;
 import com.sequenceiq.cloudbreak.service.diagnostics.DiagnosticsService;
 import com.sequenceiq.cloudbreak.service.operation.OperationService;
@@ -90,7 +88,10 @@ import com.sequenceiq.distrox.v1.distrox.converter.DistroXV1RequestToStackV4Requ
 import com.sequenceiq.distrox.v1.distrox.service.DistroXService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowProgressResponse;
+import com.sequenceiq.flow.api.model.RetryableFlowResponse;
+import com.sequenceiq.flow.api.model.RetryableFlowResponse.Builder;
 import com.sequenceiq.flow.api.model.operation.OperationView;
+import com.sequenceiq.flow.domain.RetryableFlow;
 
 @Controller
 public class DistroXV1Controller implements DistroXV1Endpoint {
@@ -572,5 +573,23 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
                 workspaceService.getForCurrentUser().getId(),
                 rotateCertificateRequest
         );
+    }
+
+    @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.SYNC_COMPONENT_VERSIONS_FROM_CM_DATAHUB)
+    public DistroXSyncCmV1Response syncComponentVersionsFromCmByName(@ResourceName String name) {
+        return launchSyncComponentVersionsFromCm(NameOrCrn.ofName(name));
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.SYNC_COMPONENT_VERSIONS_FROM_CM_DATAHUB)
+    public DistroXSyncCmV1Response syncComponentVersionsFromCmByCrn(@ResourceCrn String crn) {
+        return launchSyncComponentVersionsFromCm(NameOrCrn.ofCrn(crn));
+    }
+
+    private DistroXSyncCmV1Response launchSyncComponentVersionsFromCm(NameOrCrn nameOrCrn) {
+        Long workspaceId = workspaceService.getForCurrentUser().getId();
+        FlowIdentifier flowIdentifier = stackOperations.syncComponentVersionsFromCm(nameOrCrn, workspaceId, Set.of());
+        return new DistroXSyncCmV1Response(flowIdentifier);
     }
 }

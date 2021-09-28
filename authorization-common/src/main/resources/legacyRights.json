@@ -54,6 +54,7 @@
   "datahub/setDatahubMaintenanceMode": "datahub/write",
   "datahub/rotateAutoTlsCertDatahub": "datahub/write",
   "datahub/upgradeDatahub": "datahub/write",
+  "datahub/syncComponentVersionsFromCm": "datahub/write",
   "environments/describeDatabase": "datalake/read",
   "environments/describeDatabaseServer": "datalake/read",
   "environments/deleteDatabase": "datalake/write",

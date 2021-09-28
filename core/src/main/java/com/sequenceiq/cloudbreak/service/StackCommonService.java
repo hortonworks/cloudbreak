@@ -180,12 +180,19 @@ public class StackCommonService {
         return put(stack, updateStackJson);
     }
 
-    public FlowIdentifier syncCmInWorkspace(NameOrCrn nameOrCrn, Long workspaceId, Set<String> candidateImageUuids) {
+    public FlowIdentifier syncComponentVersionsFromCmInWorkspace(NameOrCrn nameOrCrn, Long workspaceId, Set<String> candidateImageUuids) {
         Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
         MDCBuilder.buildMdcContext(stack);
+        if (stack.getStackStatus().getStatus().isStopState()) {
+            String message = String.format("Syncing CM and parcel versions from CM cannot be initiated as cluster is in %s state",
+                    stack.getStackStatus().getStatus());
+            LOGGER.debug(message);
+            throw new BadRequestException(message);
+        }
+
         LOGGER.debug("Triggering sync from CM to db: syncing versions from CM to db, nameOrCrn: {}, workspaceId: {}, candidateImageUuids: {}",
                 nameOrCrn, workspaceId, candidateImageUuids);
-        return syncCm(stack, candidateImageUuids);
+        return syncComponentVersionsFromCm(stack, candidateImageUuids);
     }
 
     public FlowIdentifier deleteMultipleInstancesInWorkspace(NameOrCrn nameOrCrn, Long workspaceId, Set<String> instanceIds, boolean forced) {
@@ -331,8 +338,8 @@ public class StackCommonService {
         }
     }
 
-    private FlowIdentifier syncCm(Stack stack, Set<String> candidateImageUuids) {
-        return stackOperationService.syncCm(stack, candidateImageUuids);
+    private FlowIdentifier syncComponentVersionsFromCm(Stack stack, Set<String> candidateImageUuids) {
+        return stackOperationService.syncComponentVersionsFromCm(stack, candidateImageUuids);
     }
 
     private FlowIdentifier put(Stack stack, UpdateStackV4Request updateRequest) {
