@@ -46,6 +46,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Resp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.AttachRecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.UpdateRecipesV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.RecoveryValidationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeOptionV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -66,9 +67,9 @@ import com.sequenceiq.cloudbreak.service.StackCommonService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterDBValidationService;
 import com.sequenceiq.cloudbreak.service.stack.StackApiViewService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterRecoveryService;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeAvailabilityService;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradePreconditionService;
-import com.sequenceiq.cloudbreak.service.upgrade.UpgradeRecoveryService;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradeService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
@@ -116,7 +117,7 @@ public class StackOperations implements ResourcePropertyProvider {
     private UpgradeService upgradeService;
 
     @Inject
-    private UpgradeRecoveryService recoveryService;
+    private ClusterRecoveryService recoveryService;
 
     @Inject
     private ClusterUpgradeAvailabilityService clusterUpgradeAvailabilityService;
@@ -468,5 +469,9 @@ public class StackOperations implements ResourcePropertyProvider {
     public void detachRecipe(@NotNull NameOrCrn nameOrCrn, Long workspaceId, DetachRecipeV4Request request) {
         LOGGER.debug("Detach recipe operation for {}", nameOrCrn);
         clusterCommonService.detachRecipe(nameOrCrn, workspaceId, request);
+    }
+
+    public RecoveryValidationV4Response validateClusterRecovery(@NotNull NameOrCrn nameOrCrn, Long workspaceId) {
+        return recoveryService.validateRecovery(workspaceId, nameOrCrn);
     }
 }

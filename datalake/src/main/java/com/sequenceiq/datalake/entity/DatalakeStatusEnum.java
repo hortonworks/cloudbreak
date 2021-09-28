@@ -90,6 +90,8 @@ public enum DatalakeStatusEnum {
                 return DATALAKE_UPGRADE_FAILED;
             case CERT_ROTATION_IN_PROGRESS:
                 return CERT_ROTATION_FAILED;
+            case DATALAKE_RECOVERY_IN_PROGRESS:
+                return DATALAKE_RECOVERY_FAILED;
             default:
                 return this;
         }

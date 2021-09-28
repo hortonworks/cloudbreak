@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import javax.transaction.Transactional;
@@ -15,5 +16,7 @@ import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 public interface StackStatusRepository extends CrudRepository<StackStatus, Long> {
 
     Optional<StackStatus> findFirstByStackIdOrderByCreatedDesc(long stackId);
+
+    List<StackStatus> findAllByStackIdOrderByCreatedDesc(long stackId);
 
 }

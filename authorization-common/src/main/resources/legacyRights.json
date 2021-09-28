@@ -55,6 +55,7 @@
   "datahub/rotateAutoTlsCertDatahub": "datahub/write",
   "datahub/refreshRecipes": "datahub/write",
   "datahub/upgradeDatahub": "datahub/write",
+  "datahub/recoverDatahub": "datahub/write",
   "datahub/syncComponentVersionsFromCm": "datahub/write",
   "environments/describeDatabase": "datalake/read",
   "environments/describeDatabaseServer": "datalake/read",

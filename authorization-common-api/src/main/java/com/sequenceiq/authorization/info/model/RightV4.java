@@ -34,6 +34,7 @@ public enum RightV4 {
     DH_RESIZE(AuthorizationResourceAction.SCALE_DATAHUB),
     DH_RETRY(AuthorizationResourceAction.RETRY_DATAHUB_OPERATION),
     DH_DESCRIBE(AuthorizationResourceAction.DESCRIBE_DATAHUB),
+    DH_RECOVER(AuthorizationResourceAction.RECOVER_DATAHUB),
     DH_UPGRADE(AuthorizationResourceAction.UPGRADE_DATAHUB),
     // sdx level
     SDX_UPGRADE(AuthorizationResourceAction.UPGRADE_DATALAKE),

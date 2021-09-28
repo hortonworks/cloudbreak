@@ -59,10 +59,6 @@ sdx:
         backupretentionperiod: 30
       nonha:
         backupretentionperiod: 7
-  recovery:
-    recoverable.status.list: >
-      DATALAKE_UPGRADE_FAILED,
-      RUNNING
 
   gateway:
     topology:

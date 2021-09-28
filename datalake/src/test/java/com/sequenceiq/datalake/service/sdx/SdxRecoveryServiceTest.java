@@ -1,5 +1,6 @@
 package com.sequenceiq.datalake.service.sdx;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_RECOVERY_REQUESTED;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
@@ -64,8 +65,7 @@ public class SdxRecoveryServiceTest {
         Long clusterId = cluster.getId();
         doNothing().when(cloudbreakFlowService).saveLastCloudbreakFlowChainId(any(), any());
         FlowIdentifier flowId = new FlowIdentifier(FlowType.FLOW, "FLOW_ID_1");
-        RecoveryV4Response recoveryV4Response = new RecoveryV4Response();
-        recoveryV4Response.setFlowIdentifier(flowId);
+        RecoveryV4Response recoveryV4Response = new RecoveryV4Response(flowId);
 
         when(sdxService.getById(clusterId)).thenReturn(cluster);
         when(ThreadBasedUserCrnProvider.doAsInternalActor(() ->
@@ -76,7 +76,8 @@ public class SdxRecoveryServiceTest {
 
         verify(stackV4Endpoint).recoverClusterByNameInternal(eq(0L), eq(CLUSTER_NAME), nullable(String.class));
         verify(sdxStatusService, times(1))
-                .setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_RECOVERY_IN_PROGRESS, "Recovering datalake stack", cluster);
+                .setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_RECOVERY_IN_PROGRESS, DATALAKE_RECOVERY_REQUESTED,
+                        "Recovering datalake stack", cluster);
     }
 
     private SdxCluster getValidSdxCluster() {

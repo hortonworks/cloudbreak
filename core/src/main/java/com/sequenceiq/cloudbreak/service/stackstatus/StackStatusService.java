@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stackstatus;
 
+import java.util.List;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -17,6 +18,10 @@ public class StackStatusService {
 
     public Optional<StackStatus> findFirstByStackIdOrderByCreatedDesc(long stackId) {
         return repository.findFirstByStackIdOrderByCreatedDesc(stackId);
+    }
+
+    public List<StackStatus> findAllStackStatusesById(long stackId) {
+        return repository.findAllByStackIdOrderByCreatedDesc(stackId);
     }
 
 }
