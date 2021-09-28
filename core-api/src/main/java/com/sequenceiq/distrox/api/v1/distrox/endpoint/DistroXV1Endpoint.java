@@ -58,8 +58,8 @@ import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.CertificatesRotationV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.DistroXSyncCmV1Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBlueprintV4Response;
-import com.sequenceiq.flow.api.model.RetryableFlowResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
@@ -79,6 +79,7 @@ import com.sequenceiq.distrox.api.v1.distrox.model.diagnostics.model.CmDiagnosti
 import com.sequenceiq.distrox.api.v1.distrox.model.diagnostics.model.DiagnosticsCollectionV1Request;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowProgressResponse;
+import com.sequenceiq.flow.api.model.RetryableFlowResponse;
 import com.sequenceiq.flow.api.model.operation.OperationView;
 
 import io.swagger.annotations.Api;
@@ -437,4 +438,16 @@ public interface DistroXV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ROTATE_CERTIFICATES, nickname = "rotateAutoTlsCertificatesByCrn")
     CertificatesRotationV4Response rotateAutoTlsCertificatesByCrn(@PathParam("crn") String crn, @Valid CertificatesRotationV4Request rotateCertificateRequest);
+
+    @POST
+    @Path("{name}/sync_component_versions_from_cm")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "syncs from distrox cluster CM the CM and parcel versions", produces = MediaType.APPLICATION_JSON, nickname = "syncDistroxCm")
+    DistroXSyncCmV1Response syncComponentVersionsFromCmByName(@PathParam("name") String name);
+
+    @POST
+    @Path("crn/{crn}/sync_component_versions_from_cm")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "syncs from distrox cluster CM the CM and parcel versions", produces = MediaType.APPLICATION_JSON, nickname = "syncDistroxCmByCrn")
+    DistroXSyncCmV1Response syncComponentVersionsFromCmByCrn(@PathParam("crn") String crn);
 }

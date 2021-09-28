@@ -229,7 +229,7 @@ public class ReactorFlowManager {
         return reactorNotifier.notify(stackId, selector, new StackEvent(selector, stackId));
     }
 
-    public FlowIdentifier triggerCmSync(Long stackId, Set<String> candidateImageUuids) {
+    public FlowIdentifier triggerSyncComponentVersionsFromCm(Long stackId, Set<String> candidateImageUuids) {
         String selector = CM_SYNC_TRIGGER_EVENT.event();
         return reactorNotifier.notify(stackId, selector, new CmSyncTriggerEvent(stackId, candidateImageUuids));
     }
