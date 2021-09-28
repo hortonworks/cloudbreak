@@ -299,6 +299,7 @@ public class DatalakeUpgradeActions {
             @Override
             protected void doExecute(SdxContext context, DatalakeUpgradeFailedEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Sdx upgrade failed for sdxId: {}", payload.getResourceId());
+                sdxUpgradeService.updateRuntimeVersionFromCloudbreak(payload.getResourceId());
                 sdxStatusService.setStatusForDatalakeAndNotify(
                         DatalakeStatusEnum.DATALAKE_UPGRADE_FAILED,
                         "Upgrade failed: " + payload.getException().getMessage(),
