@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.recipe;
 
+import java.util.Set;
+
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
@@ -17,4 +19,11 @@ public class GeneratedRecipeService {
         return generatedRecipeRepository.save(generatedRecipe);
     }
 
+    public void deleteAll(Set<GeneratedRecipe> generatedRecipeSet) {
+        generatedRecipeRepository.deleteAll(generatedRecipeSet);
+    }
+
+    public void saveAll(Set<GeneratedRecipe> generatedRecipeSet) {
+        generatedRecipeRepository.saveAll(generatedRecipeSet);
+    }
 }

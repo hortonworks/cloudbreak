@@ -100,7 +100,7 @@ public class ClusterUpscaleService {
         HostGroup hostGroup = Optional.ofNullable(hostGroupService.getByClusterIdAndNameWithRecipes(stack.getCluster().getId(), hostGroupName))
                 .orElseThrow(NotFoundException.notFound("hostgroup", hostGroupName));
         Set<InstanceMetaData> runningInstanceMetaDataSet = hostGroup.getInstanceGroup().getRunningInstanceMetaDataSet();
-        recipeEngine.executePostAmbariStartRecipes(stack, hostGroup.getRecipes());
+        recipeEngine.executePostAmbariStartRecipes(stack, Set.of(hostGroup));
         ClusterApi connector = clusterApiConnectors.getConnector(stack);
         List<String> upscaledHosts = connector.upscaleCluster(hostGroup, runningInstanceMetaDataSet);
         if (shouldRestartServices(repair, restartServices, stack)) {
@@ -126,7 +126,7 @@ public class ClusterUpscaleService {
     public void executePostRecipesOnNewHosts(Long stackId) throws CloudbreakException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         LOGGER.debug("Start executing post recipes");
-        recipeEngine.executePostInstallRecipes(stack);
+        recipeEngine.executePostInstallRecipes(stack, hostGroupService.getByClusterWithRecipes(stack.getCluster().getId()));
     }
 
     public Map<String, String> gatherInstalledComponents(Long stackId, String hostname) {

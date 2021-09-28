@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
+import com.sequenceiq.it.cloudbreak.action.v4.stack.StackAttachRecipeAction;
 import com.sequenceiq.it.cloudbreak.action.v4.stack.StackBlueprintRequestAction;
 import com.sequenceiq.it.cloudbreak.action.v4.stack.StackCreateAction;
 import com.sequenceiq.it.cloudbreak.action.v4.stack.StackDeleteAction;
@@ -64,4 +65,7 @@ public class StackTestClient {
         return new StackDeleteInstanceAction();
     }
 
+    public Action<StackTestDto, CloudbreakClient> attachRecipeV4() {
+        return new StackAttachRecipeAction();
+    }
 }

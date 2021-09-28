@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.service.cluster.flow.recipe;
 
 import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_UPLOAD_RECIPES;
-import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -16,7 +15,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -25,11 +23,8 @@ import com.google.api.client.util.Joiner;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
-import com.sequenceiq.cloudbreak.converter.StackToTemplatePreparationObjectConverter;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
-import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.GeneratedRecipe;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -40,16 +35,12 @@ import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.RecipeModel;
-import com.sequenceiq.cloudbreak.recipe.CentralRecipeUpdater;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeExecutionFailureCollector.RecipeFailure;
-import com.sequenceiq.cloudbreak.service.recipe.GeneratedRecipeService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
-import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.util.StackUtil;
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @Component
 class OrchestratorRecipeExecutor {
@@ -72,20 +63,10 @@ class OrchestratorRecipeExecutor {
     private InstanceMetaDataService instanceMetaDataService;
 
     @Inject
-    private GeneratedRecipeService generatedRecipeService;
-
-    @Inject
     private RecipeExecutionFailureCollector recipeExecutionFailureCollector;
 
-    @Inject
-    private CentralRecipeUpdater centralRecipeUpdater;
-
-    @Inject
-    private StackToTemplatePreparationObjectConverter stackToTemplatePreparationObjectConverter;
-
-    public void uploadRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
-        Map<HostGroup, List<RecipeModel>> recipeMap = getHostgroupToRecipeMap(stack, hostGroups);
-        Map<String, List<RecipeModel>> hostnameToRecipeMap = recipeMap.entrySet().stream()
+    public void uploadRecipes(Stack stack, Map<HostGroup, List<RecipeModel>> recipeModels) throws CloudbreakException {
+        Map<String, List<RecipeModel>> hostnameToRecipeMap = recipeModels.entrySet().stream()
                 .collect(Collectors.toMap(e -> e.getKey().getName(), Entry::getValue));
         List<GatewayConfig> allGatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
         recipesEvent(stack.getId(), stack.getStatus(), hostnameToRecipeMap);
@@ -209,43 +190,6 @@ class OrchestratorRecipeExecutor {
                 .append(host)
                 .append(']')
                 .toString();
-    }
-
-    private Map<HostGroup, List<RecipeModel>> getHostgroupToRecipeMap(Stack stack, Set<HostGroup> hostGroups) {
-        TemplatePreparationObject templatePreparationObject = measure(() -> stackToTemplatePreparationObjectConverter.convert(stack),
-            LOGGER, "Template prepartion object generation took {} ms for recipes generation.");
-        Map<HostGroup, List<RecipeModel>> recipeModels = hostGroups.stream().filter(hg -> !hg.getRecipes().isEmpty())
-                .collect(Collectors.toMap(h -> h, h -> convert(stack, h.getRecipes(), templatePreparationObject)));
-        measure(() -> prepareGeneratedRecipes(recipeModels, stack.getWorkspace()),
-                LOGGER,
-                "Persisting all the generated recipes took {} ms");
-        return recipeModels;
-    }
-
-    private void prepareGeneratedRecipes(Map<HostGroup, List<RecipeModel>> recipeModels, Workspace workspace) {
-        for (Entry<HostGroup, List<RecipeModel>> hostGroupListEntry : recipeModels.entrySet()) {
-            for (RecipeModel recipeModel : hostGroupListEntry.getValue()) {
-                GeneratedRecipe generatedRecipe = new GeneratedRecipe();
-                generatedRecipe.setWorkspace(workspace);
-                generatedRecipe.setHostGroup(hostGroupListEntry.getKey());
-                generatedRecipe.setExtendedRecipeText(recipeModel.getGeneratedScript());
-                generatedRecipeService.save(generatedRecipe);
-            }
-        }
-    }
-
-    private List<RecipeModel> convert(Stack stack, Set<Recipe> recipes, TemplatePreparationObject templatePreparationObject) {
-        List<RecipeModel> result = new ArrayList<>();
-        for (Recipe recipe : recipes) {
-            String decodedContent = new String(Base64.decodeBase64(recipe.getContent()));
-            String generatedRecipeText = measure(() -> centralRecipeUpdater.getRecipeText(templatePreparationObject, decodedContent),
-                    LOGGER,
-                    "Recipe generation took {} ms");
-            LOGGER.info("Generated recipe is: {}", generatedRecipeText);
-            RecipeModel recipeModel = new RecipeModel(recipe.getName(), recipe.getRecipeType(), generatedRecipeText);
-            result.add(recipeModel);
-        }
-        return result;
     }
 
     private Set<Node> collectNodes(Stack stack, Set<String> hostNames) {

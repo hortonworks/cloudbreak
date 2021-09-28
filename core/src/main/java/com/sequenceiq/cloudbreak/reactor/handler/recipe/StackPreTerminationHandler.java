@@ -9,9 +9,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.StackPreTerminationRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.StackPreTerminationSuccess;
 import com.sequenceiq.cloudbreak.service.cluster.flow.PreTerminationStateExecutor;
@@ -55,9 +55,9 @@ public class StackPreTerminationHandler implements EventHandler<StackPreTerminat
         try {
             Cluster cluster = stack.getCluster();
             if (cluster != null) {
-                Set<Recipe> recipesByCluster = hostGroupService.getRecipesByCluster(cluster.getId());
+                Set<HostGroup> hostGroupsWithRecipes = hostGroupService.getByClusterWithRecipes(cluster.getId());
                 telemetryAgentService.stopTelemetryAgent(stack);
-                recipeEngine.executePreTerminationRecipes(stack, recipesByCluster, request.getForced());
+                recipeEngine.executePreTerminationRecipes(stack, hostGroupsWithRecipes, request.getForced());
                 preTerminationStateExecutor.runPreTerminationTasks(stack);
             }
         } catch (Exception ex) {
