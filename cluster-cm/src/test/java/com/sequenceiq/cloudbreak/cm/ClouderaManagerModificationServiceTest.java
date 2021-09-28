@@ -405,7 +405,7 @@ class ClouderaManagerModificationServiceTest {
 
         ArgumentCaptor<ApiHostRefList> bodyCatcher = ArgumentCaptor.forClass(ApiHostRefList.class);
         verify(clustersResourceApi, times(1)).addHosts(eq(STACK_NAME), bodyCatcher.capture());
-        verify(clouderaManagerRoleRefreshService, never()).refreshClusterRoles(any(ApiClient.class), any(Stack.class));
+        verify(clouderaManagerRoleRefreshService).refreshClusterRoles(any(ApiClient.class), any(Stack.class));
 
         assertEquals(1, bodyCatcher.getValue().getItems().size());
         assertEquals("upscaled", bodyCatcher.getValue().getItems().get(0).getHostname());
@@ -522,7 +522,7 @@ class ClouderaManagerModificationServiceTest {
 
         ArgumentCaptor<ApiHostRefList> bodyCatcher = ArgumentCaptor.forClass(ApiHostRefList.class);
         verify(clustersResourceApi, times(1)).addHosts(eq(STACK_NAME), bodyCatcher.capture());
-        verify(clouderaManagerRoleRefreshService, never()).refreshClusterRoles(any(ApiClient.class), any(Stack.class));
+        verify(clouderaManagerRoleRefreshService).refreshClusterRoles(any(ApiClient.class), any(Stack.class));
 
         assertEquals(1, bodyCatcher.getValue().getItems().size());
         assertEquals("upscaled", bodyCatcher.getValue().getItems().get(0).getHostname());
@@ -568,7 +568,7 @@ class ClouderaManagerModificationServiceTest {
 
         ArgumentCaptor<ApiHostRefList> bodyCatcher = ArgumentCaptor.forClass(ApiHostRefList.class);
         verify(clustersResourceApi, times(1)).addHosts(eq(STACK_NAME), bodyCatcher.capture());
-        verify(clouderaManagerRoleRefreshService, never()).refreshClusterRoles(any(ApiClient.class), any(Stack.class));
+        verify(clouderaManagerRoleRefreshService).refreshClusterRoles(any(ApiClient.class), any(Stack.class));
 
         assertEquals(1, bodyCatcher.getValue().getItems().size());
         assertEquals("upscaled", bodyCatcher.getValue().getItems().get(0).getHostname());
@@ -620,7 +620,7 @@ class ClouderaManagerModificationServiceTest {
 
         ArgumentCaptor<ApiHostRefList> bodyCatcher = ArgumentCaptor.forClass(ApiHostRefList.class);
         verify(clustersResourceApi, times(1)).addHosts(eq(STACK_NAME), bodyCatcher.capture());
-        verify(clouderaManagerRoleRefreshService, never()).refreshClusterRoles(any(ApiClient.class), any(Stack.class));
+        verify(clouderaManagerRoleRefreshService).refreshClusterRoles(any(ApiClient.class), any(Stack.class));
 
         assertEquals(1, bodyCatcher.getValue().getItems().size());
         assertEquals("upscaled", bodyCatcher.getValue().getItems().get(0).getHostname());
