@@ -10,6 +10,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
+import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
@@ -34,6 +35,9 @@ public class GeneratedRecipe implements ProvisionEntity, WorkspaceAwareResource 
 
     @ManyToOne
     private Workspace workspace;
+
+    @ManyToOne
+    private Recipe recipe;
 
     public String getExtendedRecipeText() {
         return extendedRecipeText.getRaw();
@@ -72,5 +76,13 @@ public class GeneratedRecipe implements ProvisionEntity, WorkspaceAwareResource 
 
     public void setHostGroup(HostGroup hostGroup) {
         this.hostGroup = hostGroup;
+    }
+
+    public Recipe getRecipe() {
+        return recipe;
+    }
+
+    public void setRecipe(Recipe recipe) {
+        this.recipe = recipe;
     }
 }

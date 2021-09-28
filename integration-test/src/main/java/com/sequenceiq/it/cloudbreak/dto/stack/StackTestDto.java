@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.AttachRecipeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
@@ -45,6 +46,8 @@ public class StackTestDto extends StackTestDtoBase<StackTestDto> implements Purg
     private static final Logger LOGGER = LoggerFactory.getLogger(StackTestDto.class);
 
     private GeneratedBlueprintV4Response generatedBlueprint;
+
+    private AttachRecipeV4Request attachRecipeV4Request;
 
     @Inject
     private StackTestClient stackTestClient;
@@ -132,6 +135,17 @@ public class StackTestDto extends StackTestDtoBase<StackTestDto> implements Purg
 
     public GeneratedBlueprintV4Response getGeneratedBlueprint() {
         return generatedBlueprint;
+    }
+
+    public StackTestDto withAttachedRecipe(String hostGroup, String recipeName) {
+        attachRecipeV4Request = new AttachRecipeV4Request();
+        attachRecipeV4Request.setHostGroupName(hostGroup);
+        attachRecipeV4Request.setRecipeName(recipeName);
+        return this;
+    }
+
+    public AttachRecipeV4Request getAttachRecipeV4Request() {
+        return attachRecipeV4Request;
     }
 
     @Override

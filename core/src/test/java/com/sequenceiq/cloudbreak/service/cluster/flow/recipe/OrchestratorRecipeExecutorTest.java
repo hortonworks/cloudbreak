@@ -31,7 +31,6 @@ import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
-import com.sequenceiq.cloudbreak.recipe.CentralRecipeUpdater;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.recipe.GeneratedRecipeService;
@@ -59,9 +58,6 @@ public class OrchestratorRecipeExecutorTest {
 
     @Mock
     private RecipeExecutionFailureCollector recipeExecutionFailureCollector;
-
-    @Mock
-    private CentralRecipeUpdater centralRecipeUpdater;
 
     @InjectMocks
     private OrchestratorRecipeExecutor underTest;

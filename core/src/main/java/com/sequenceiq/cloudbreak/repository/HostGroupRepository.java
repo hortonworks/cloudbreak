@@ -36,11 +36,11 @@ public interface HostGroupRepository extends CrudRepository<HostGroup, Long> {
     @Query("SELECT h FROM HostGroup h JOIN h.recipes r WHERE r.id= :recipeId")
     Set<HostGroup> findAllHostGroupsByRecipe(@Param("recipeId") Long recipeId);
 
-    @Query("SELECT h FROM HostGroup h LEFT JOIN FETCH h.recipes WHERE h.cluster.id= :clusterId")
+    @Query("SELECT h FROM HostGroup h LEFT JOIN FETCH h.recipes LEFT JOIN FETCH h.generatedRecipes WHERE h.cluster.id= :clusterId")
     Set<HostGroup> findHostGroupsInClusterWithRecipes(@Param("clusterId") Long clusterId);
 
     @EntityGraph(value = "HostGroup.instanceGroup.instanceMetaData", type = EntityGraphType.LOAD)
-    @Query("SELECT h FROM HostGroup h LEFT JOIN FETCH h.recipes WHERE h.cluster.id= :clusterId AND h.name= :hostGroupName")
+    @Query("SELECT h FROM HostGroup h LEFT JOIN FETCH h.recipes LEFT JOIN FETCH h.generatedRecipes WHERE h.cluster.id= :clusterId AND h.name= :hostGroupName")
     HostGroup findHostGroupInClusterByNameWithRecipes(@Param("clusterId") Long clusterId, @Param("hostGroupName") String hostGroupName);
 
 }

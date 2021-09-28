@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
@@ -183,7 +184,7 @@ public class ClusterBuilderService {
     public void executePostClusterManagerStartRecipes(Long stackId) throws CloudbreakException {
         recipeEngine.executePostAmbariStartRecipes(
                 stackService.getByIdWithListsInTransaction(stackId),
-                hostGroupService.getRecipesByCluster(
+                hostGroupService.getByClusterWithRecipes(
                         stackService.getByIdWithListsInTransaction(stackId).getCluster().getId()));
     }
 
@@ -243,8 +244,11 @@ public class ClusterBuilderService {
     }
 
     public void executePostInstallRecipes(Long stackId) throws CloudbreakException {
-        recipeEngine.executePostInstallRecipes(
-                stackService.getByIdWithListsInTransaction(stackId));
+        StackView stackView = stackService.getViewByIdWithoutAuth(stackId);
+        if (stackView.getClusterView() != null) {
+            recipeEngine.executePostInstallRecipes(
+                    stackService.getByIdWithListsInTransaction(stackId), hostGroupService.getByClusterWithRecipes(stackView.getClusterView().getId()));
+        }
     }
 
     private String getSdxStackCrn(Stack stack) {

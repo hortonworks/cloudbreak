@@ -1,5 +1,9 @@
 package com.sequenceiq.cloudbreak.domain;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
@@ -7,6 +11,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
@@ -16,6 +21,7 @@ import org.hibernate.annotations.Where;
 import com.sequenceiq.cloudbreak.common.model.recipe.RecipeType;
 import com.sequenceiq.cloudbreak.domain.converter.CreationTypeConverter;
 import com.sequenceiq.cloudbreak.domain.converter.RecipeTypeConverter;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.GeneratedRecipe;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
@@ -49,6 +55,9 @@ public class Recipe implements ProvisionEntity, WorkspaceAwareResource, Archivab
 
     @ManyToOne
     private Workspace workspace;
+
+    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<GeneratedRecipe> generatedRecipes = new HashSet<>();
 
     private String creator;
 
@@ -161,5 +170,13 @@ public class Recipe implements ProvisionEntity, WorkspaceAwareResource, Archivab
 
     public void setCreationType(CreationType creationType) {
         this.creationType = creationType;
+    }
+
+    public Set<GeneratedRecipe> getGeneratedRecipes() {
+        return generatedRecipes;
+    }
+
+    public void setGeneratedRecipes(Set<GeneratedRecipe> generatedRecipes) {
+        this.generatedRecipes = generatedRecipes;
     }
 }

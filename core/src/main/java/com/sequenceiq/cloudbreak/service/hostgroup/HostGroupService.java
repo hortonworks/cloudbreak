@@ -55,6 +55,10 @@ public class HostGroupService {
         return getByClusterWithRecipes(clusterId).stream().flatMap(hostGroup -> hostGroup.getRecipes().stream()).collect(Collectors.toSet());
     }
 
+    public Set<Recipe> getRecipesByHostGroups(Set<HostGroup> hostGroups) {
+        return hostGroups.stream().flatMap(hostGroup -> hostGroup.getRecipes().stream()).collect(Collectors.toSet());
+    }
+
     public Set<HostGroup> getByClusterWithRecipes(Long clusterId) {
         return hostGroupRepository.findHostGroupsInClusterWithRecipes(clusterId);
     }

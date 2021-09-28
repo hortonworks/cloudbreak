@@ -62,6 +62,7 @@ public enum AuthorizationResourceAction {
     DELETE_DATAHUB_INSTANCE("datahub/deleteDatahubInstance", AuthorizationResourceType.DATAHUB),
     SET_DATAHUB_MAINTENANCE_MODE("datahub/setDatahubMaintenanceMode", AuthorizationResourceType.DATAHUB),
     ROTATE_AUTOTLS_CERT_DATAHUB("datahub/rotateAutoTlsCertDatahub", AuthorizationResourceType.DATAHUB),
+    REFRESH_RECIPES_DATAHUB("datahub/refreshRecipes", AuthorizationResourceType.DATAHUB),
     UPGRADE_DATAHUB("datahub/upgradeDatahub", AuthorizationResourceType.DATAHUB),
     SYNC_COMPONENT_VERSIONS_FROM_CM_DATAHUB("datahub/syncComponentVersionsFromCm", AuthorizationResourceType.DATAHUB),
     DESCRIBE_DATABASE("environments/describeDatabase", AuthorizationResourceType.DATABASE),
