@@ -123,16 +123,18 @@ limit_incomming_connection() {
 
 backup_database_for_service() {
   SERVICE="$1"
-  limit_incomming_connection $SERVICE 0
 
   if [[ "$CLOSECONNECTIONS" == "true" ]]; then
+    limit_incomming_connection $SERVICE 0
     close_existing_connections $SERVICE
   fi
 
   doLog "INFO Dumping ${SERVICE}"
   LOCAL_BACKUP=${DATE_DIR}/${SERVICE}_backup
   pg_dump --host="$HOST" --port="$PORT" --username="$USERNAME" --dbname="$SERVICE" --format=plain --file="$LOCAL_BACKUP" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || errorExit "Unable to dump ${SERVICE}"
-  limit_incomming_connection $SERVICE -1
+  if [[ "$CLOSECONNECTIONS" == "true" ]]; then
+    limit_incomming_connection $SERVICE -1
+  fi
 
   if [[ "$SERVICE" == "ranger" ]]; then
     replace_ranger_group_before_export $RANGERGROUP $LOCAL_BACKUP
