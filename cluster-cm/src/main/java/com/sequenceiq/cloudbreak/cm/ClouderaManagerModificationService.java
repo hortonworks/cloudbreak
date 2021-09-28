@@ -184,14 +184,22 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             } else {
                 redistributeParcelsForRecovery();
                 activateParcels(clustersResourceApi);
-                clouderaManagerRoleRefreshService.refreshClusterRoles(apiClient, stack);
             }
+            clouderaManagerRoleRefreshService.refreshClusterRoles(apiClient, stack);
+            deployClientConfig(stack, clustersResourceApi);
+            restartStaleServices(clustersResourceApi, false);
             LOGGER.debug("Cluster upscale completed. Host group: [{}].", hostGroupName);
             return instanceMetaDatas.stream().map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.toList());
         } catch (ApiException e) {
             LOGGER.error(String.format("Failed to upscale. Host group: [%s]. Response: %s", hostGroupName, e.getResponseBody()), e);
             throw new CloudbreakException("Failed to upscale", e);
         }
+    }
+
+    private void deployClientConfig(Stack stack, ClustersResourceApi clustersResourceApi) throws ApiException, CloudbreakException {
+        List<ApiCommand> commands = clustersResourceApi.listActiveCommands(stack.getName(), SUMMARY).getItems();
+        BigDecimal deployCommandId = clouderaManagerCommonCommandService.getDeployClientConfigCommandId(stack, clustersResourceApi, commands);
+        pollDeployConfig(deployCommandId);
     }
 
     @Override
