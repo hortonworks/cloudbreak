@@ -8,10 +8,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.requests.CustomConfigurationsV4
 import com.sequenceiq.cloudbreak.domain.CustomConfigurations;
 
 @Component
-public class CustomConfigurationsV4RequestToCustomConfigurationsConverter
-        extends AbstractConversionServiceAwareConverter<CustomConfigurationsV4Request, CustomConfigurations> {
+public class CustomConfigurationsV4RequestToCustomConfigurationsConverter {
 
-    @Override
     public CustomConfigurations convert(CustomConfigurationsV4Request source) {
         CustomConfigurations customConfigurations = new CustomConfigurations();
         customConfigurations.setName(source.getName());
