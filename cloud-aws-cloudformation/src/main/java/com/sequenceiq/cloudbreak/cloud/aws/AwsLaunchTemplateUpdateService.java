@@ -96,9 +96,10 @@ public class AwsLaunchTemplateUpdateService {
         CreateLaunchTemplateVersionRequest createLaunchTemplateVersionRequest = new CreateLaunchTemplateVersionRequest()
                 .withLaunchTemplateId(launchTemplateSpecification.getLaunchTemplateId())
                 .withSourceVersion(launchTemplateSpecification.getVersion())
-                .withLaunchTemplateData(new RequestLaunchTemplateData().withImageId(updatableFields.getOrDefault(LaunchTemplateField.IMAGE_ID, null)))
                 .withVersionDescription(updatableFields.getOrDefault(LaunchTemplateField.DESCRIPTION, null))
-                .withLaunchTemplateData(new RequestLaunchTemplateData().withUserData(updatableFields.getOrDefault(LaunchTemplateField.USER_DATA, null)));
+                .withLaunchTemplateData(new RequestLaunchTemplateData()
+                        .withImageId(updatableFields.getOrDefault(LaunchTemplateField.IMAGE_ID, null))
+                        .withUserData(updatableFields.getOrDefault(LaunchTemplateField.USER_DATA, null)));
         CreateLaunchTemplateVersionResult createLaunchTemplateVersionResult = ec2Client.createLaunchTemplateVersion(createLaunchTemplateVersionRequest);
         validateCreatedLaunchTemplateVersionResult(createLaunchTemplateVersionResult);
         LOGGER.debug("Updated field in new launch template version: {}", updatableFields);
