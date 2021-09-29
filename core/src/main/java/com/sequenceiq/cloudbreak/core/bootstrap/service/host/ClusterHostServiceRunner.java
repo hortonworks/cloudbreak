@@ -23,7 +23,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
@@ -102,7 +101,7 @@ import com.sequenceiq.cloudbreak.service.blueprint.ComponentLocatorService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentConfigProvider;
-import com.sequenceiq.cloudbreak.service.freeipa.FreeipaClientService;
+import com.sequenceiq.cloudbreak.service.freeipa.FreeIpaConfigProvider;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.idbroker.IdBrokerService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigProvider;
@@ -119,9 +118,6 @@ import com.sequenceiq.cloudbreak.util.NodesUnreachableException;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.common.api.telemetry.model.DataBusCredential;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetaDataResponse;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 
 @Component
 public class ClusterHostServiceRunner {
@@ -244,7 +240,7 @@ public class ClusterHostServiceRunner {
     private DatalakeService datalakeService;
 
     @Inject
-    private FreeipaClientService freeipaClient;
+    private FreeIpaConfigProvider freeIpaConfigProvider;
 
     public void runClusterServices(@Nonnull Stack stack, @Nonnull Cluster cluster, Map<String, String> candidateAddresses) {
         try {
@@ -369,11 +365,11 @@ public class ClusterHostServiceRunner {
         saveDockerPillar(cluster.getExecutorType(), servicePillar);
 
         Map<String, Map<String, String>> mountPathMap = stack.getInstanceGroups().stream().flatMap(group -> group.getInstanceMetaDataSet().stream()
-                .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null)
-                .collect(Collectors.toMap(
-                        InstanceMetaData::getDiscoveryFQDN,
-                        node -> singletonMap("mount_path", getMountPath(group)),
-                        (l, r) -> singletonMap("mount_path", getMountPath(group)))).entrySet().stream())
+                        .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null)
+                        .collect(Collectors.toMap(
+                                InstanceMetaData::getDiscoveryFQDN,
+                                node -> singletonMap("mount_path", getMountPath(group)),
+                                (l, r) -> singletonMap("mount_path", getMountPath(group)))).entrySet().stream())
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         servicePillar.put("startup", new SaltPillarProperties("/mount/startup.sls", singletonMap("mount", mountPathMap)));
 
@@ -417,8 +413,8 @@ public class ClusterHostServiceRunner {
     }
 
     private void addClouderaManagerConfig(Stack stack, Cluster cluster,
-        Map<String, SaltPillarProperties> servicePillar, ClouderaManagerRepo clouderaManagerRepo,
-        GatewayConfig primaryGatewayConfig)
+            Map<String, SaltPillarProperties> servicePillar, ClouderaManagerRepo clouderaManagerRepo,
+            GatewayConfig primaryGatewayConfig)
             throws CloudbreakOrchestratorFailedException {
         Telemetry telemetry = componentConfigProviderService.getTelemetry(stack.getId());
         DataBusCredential dataBusCredential = null;
@@ -473,35 +469,10 @@ public class ClusterHostServiceRunner {
                     || !CollectionUtils.isEmpty(serviceLocations.get("NIFI_REGISTRY_SERVER"))
                     || !CollectionUtils.isEmpty(serviceLocations.get("NIFI_NODE"));
             sssdConfig.put("enumerate", enumerate);
-            Map<String, Object> freeIpaConfig = createFreeIpaConfig(environmentCrn);
+            Map<String, Object> freeIpaConfig = freeIpaConfigProvider.createFreeIpaConfig(environmentCrn);
             return Map.of("sssd-ipa", new SaltPillarProperties("/sssd/ipa.sls",
                     Map.of("sssd-ipa", sssdConfig, "freeipa", freeIpaConfig)));
         } else {
-            return Map.of();
-        }
-    }
-
-    private Map<String, Object> createFreeIpaConfig(String environmentCrn) {
-        Optional<DescribeFreeIpaResponse> freeIpaResponse = freeipaClient.findByEnvironmentCrn(environmentCrn);
-        if (freeIpaResponse.isPresent()) {
-            Stream<InstanceMetaDataResponse> instanceMetaDataStream = freeIpaResponse.get().getInstanceGroups().stream()
-                    .flatMap(ig -> ig.getMetaData().stream());
-            InstanceMetaDataResponse instanceMetaDataResponse = instanceMetaDataStream
-                    .filter(im -> InstanceStatus.CREATED == im.getInstanceStatus())
-                    .min(Comparator.comparing(InstanceMetaDataResponse::getDiscoveryFQDN))
-                    .orElseGet(() -> instanceMetaDataStream
-                            .min(Comparator.comparing(InstanceMetaDataResponse::getDiscoveryFQDN))
-                            .orElse(null));
-            LOGGER.info("Chosen instance for default FreeIPA server: {}", instanceMetaDataResponse);
-            if (instanceMetaDataResponse == null) {
-                LOGGER.debug("No FreeIPA instance available");
-                return Map.of();
-            } else {
-                LOGGER.debug("Setting [{}] FreeIPA FQDN as default FreeIPA server", instanceMetaDataResponse.getDiscoveryFQDN());
-                return Map.of("host", instanceMetaDataResponse.getDiscoveryFQDN());
-            }
-        } else {
-            LOGGER.info("FreeIPA describe didn't return result");
             return Map.of();
         }
     }
@@ -527,10 +498,10 @@ public class ClusterHostServiceRunner {
     }
 
     private void decoratePillarWithClouderaManagerCommunicationSettings(Stack stack,
-        Cluster cluster,
-        Map<String, SaltPillarProperties> servicePillar,
-        GatewayConfig primaryGatewayConfig,
-        ClouderaManagerRepo clouderaManagerRepo) {
+            Cluster cluster,
+            Map<String, SaltPillarProperties> servicePillar,
+            GatewayConfig primaryGatewayConfig,
+            ClouderaManagerRepo clouderaManagerRepo) {
         Boolean autoTls = cluster.getAutoTlsEnabled();
         Map<String, Object> communication = new HashMap<>();
         Optional<String> san = loadBalancerSANProvider.getLoadBalancerSAN(stack);
@@ -541,8 +512,8 @@ public class ClusterHostServiceRunner {
         communication.put("protocol", autoTls ? "https" : "http");
         communication.put("autotls_enabled", autoTls);
         servicePillar.put("cloudera-manager-communication",
-            new SaltPillarProperties("/cloudera-manager/communication.sls",
-                singletonMap("cloudera-manager", singletonMap("communication", communication))));
+                new SaltPillarProperties("/cloudera-manager/communication.sls",
+                        singletonMap("cloudera-manager", singletonMap("communication", communication))));
     }
 
     private void decoratePillarWithClouderaManagerAutoTls(Cluster cluster, Map<String, SaltPillarProperties> servicePillar) {
@@ -764,7 +735,7 @@ public class ClusterHostServiceRunner {
     private List<String> getRangerFqdn(Cluster cluster, String primaryGatewayFqdn, List<String> rangerLocations) {
         if (rangerLocations.size() > 1) {
             // SDX HA has multiple ranger instances in different groups, in Knox we only want to expose the ones on the gateway.
-            InstanceGroup gatewayInstanceGroup =  instanceGroupService.getPrimaryGatewayInstanceGroupByStackId(cluster.getStack().getId());
+            InstanceGroup gatewayInstanceGroup = instanceGroupService.getPrimaryGatewayInstanceGroupByStackId(cluster.getStack().getId());
             String gatewayGroupName = gatewayInstanceGroup.getGroupName();
             List<String> hosts = rangerLocations.stream()
                     .filter(s -> s.contains(gatewayGroupName))
