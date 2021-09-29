@@ -11,3 +11,18 @@ auth-internal/   @hortonworks/cloudbreak-raven
 auth-internal-api/   @hortonworks/cloudbreak-raven
 authorization-common/   @hortonworks/cloudbreak-raven
 authorization-common-api/   @hortonworks/cloudbreak-raven
+grpc-common/   @hortonworks/cloudbreak-raven
+
+# Raven team should review datalake and datalake-api modules
+datalake/ @hortonworks/cloudbreak-raven
+datalake-api/ @hortonworks/cloudbreak-raven
+
+# Raven team should review datalake blueprint changes
+core/src/main/resources/defaults/blueprints/*/cdp-sdx*.bp @hortonworks/cloudbreak-raven
+
+# Raven team should review quartz and sync job related PRs
+common/src/java/com/sequenceiq/cloudbreak/quartz/
+*StatusCheckerJob.java
+
+# Raven team should review how Controllers are authorized
+*Controller.java @hortonworks/cloudbreak-raven
