@@ -26,6 +26,8 @@ import com.sequenceiq.environment.parameter.dto.AwsParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureResourceEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureResourceGroupDto;
+import com.sequenceiq.environment.parameter.dto.GcpParametersDto;
+import com.sequenceiq.environment.parameter.dto.GcpResourceEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
 import com.sequenceiq.environment.parameter.dto.ResourceGroupUsagePattern;
 
@@ -140,6 +142,34 @@ public class EnvironmentDetailsToCDPEnvironmentDetailsConverterTest {
         UsageProto.CDPEnvironmentDetails cdpEnvironmentDetails = underTest.convert(environmentDetails);
 
         Assertions.assertFalse(cdpEnvironmentDetails.getAzureDetails().getResourceEncryptionEnabled());
+    }
+
+    @Test
+    public void testConversionResourceEncryptionEnabledWhenGcpUsingResourceEncryptionEnabledShouldReturnResourceEncryptionEnabledTrue() {
+        ParametersDto parametersDto = ParametersDto.builder()
+                .withGcpParameters(GcpParametersDto.builder()
+                        .withEncryptionParameters(GcpResourceEncryptionParametersDto.builder()
+                                .withEncryptionKey("dummyEncryptionKeyUrl")
+                                .build())
+                        .build())
+                .build();
+
+        when(environmentDetails.getParameters()).thenReturn(parametersDto);
+
+        UsageProto.CDPEnvironmentDetails cdpEnvironmentDetails = underTest.convert(environmentDetails);
+
+        Assertions.assertTrue(cdpEnvironmentDetails.getGcpDetails().getResourceEncryptionEnabled());
+    }
+
+    @Test
+    public void testConversionResourceEncryptionEnabledWhenGcpNOTResourceEncryptionEnabledShouldReturnResourceEncryptionEnabledFalse() {
+        ParametersDto parametersDto = ParametersDto.builder().build();
+
+        when(environmentDetails.getParameters()).thenReturn(parametersDto);
+
+        UsageProto.CDPEnvironmentDetails cdpEnvironmentDetails = underTest.convert(environmentDetails);
+
+        Assertions.assertFalse(cdpEnvironmentDetails.getGcpDetails().getResourceEncryptionEnabled());
     }
 
     @Test

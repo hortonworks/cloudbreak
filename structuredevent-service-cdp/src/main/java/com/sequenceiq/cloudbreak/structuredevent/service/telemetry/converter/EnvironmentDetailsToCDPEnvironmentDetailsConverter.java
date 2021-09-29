@@ -20,6 +20,8 @@ import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.parameter.dto.AzureParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureResourceEncryptionParametersDto;
+import com.sequenceiq.environment.parameter.dto.GcpParametersDto;
+import com.sequenceiq.environment.parameter.dto.GcpResourceEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
 
 @Component
@@ -74,6 +76,7 @@ public class EnvironmentDetailsToCDPEnvironmentDetailsConverter {
 
             cdpEnvironmentDetails.setAwsDetails(convertAwsDetails(srcEnvironmentDetails.getParameters()));
             cdpEnvironmentDetails.setAzureDetails(convertAzureDetails(srcEnvironmentDetails.getParameters()));
+            cdpEnvironmentDetails.setGcpDetails(convertGcpDetails(srcEnvironmentDetails.getParameters()));
 
             Map<String, String> userTags = srcEnvironmentDetails.getUserDefinedTags();
             if (userTags != null && !userTags.isEmpty()) {
@@ -102,6 +105,20 @@ public class EnvironmentDetailsToCDPEnvironmentDetailsConverter {
                         .map(AzureParametersDto::getAzureResourceEncryptionParametersDto)
                         .map(AzureResourceEncryptionParametersDto::getEncryptionKeyUrl);
                 builder.setResourceEncryptionEnabled(encryptionKeyUrl.isPresent());
+            }
+        }
+        return builder.build();
+    }
+
+    private UsageProto.CDPEnvironmentGcpDetails convertGcpDetails(ParametersDto parametersDto) {
+        UsageProto.CDPEnvironmentGcpDetails.Builder builder = UsageProto.CDPEnvironmentGcpDetails.newBuilder();
+        if (parametersDto != null) {
+            GcpParametersDto gcpParametersDto = parametersDto.getGcpParametersDto();
+            if (gcpParametersDto != null) {
+                Optional<String> encryptionKey = Optional.of(gcpParametersDto)
+                        .map(GcpParametersDto::getGcpResourceEncryptionParametersDto)
+                        .map(GcpResourceEncryptionParametersDto::getEncryptionKey);
+                builder.setResourceEncryptionEnabled(encryptionKey.isPresent());
             }
         }
         return builder.build();
