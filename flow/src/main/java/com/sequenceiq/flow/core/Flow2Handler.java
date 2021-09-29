@@ -203,7 +203,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
 
     private AcceptResult handleNewFlowRequest(String key, Payload payload, FlowParameters flowParameters, String flowChainId, String flowChainType,
             Map<Object, Object> contextParams) throws TransactionExecutionException {
-        LOGGER.debug("{}, payload: {}", key, payload);
+        LOGGER.debug("Flow trigger arrived: key: {}, payload: {}", key, payload);
         FlowConfiguration<?> flowConfig = getFlowConfiguration(key);
         FlowTriggerConditionResult flowTriggerConditionResult = flowConfig.getFlowTriggerCondition().isFlowTriggerable(payload.getResourceId());
         if (!flowTriggerConditionResult.isTriggerable()) {
