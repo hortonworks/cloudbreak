@@ -60,4 +60,10 @@ public class FreeIpaOperationWaitObject extends FreeIpaWaitObject {
         return super.getEnvironmentCrn() + " - operationID: " + operationId;
     }
 
+    @Override
+    public boolean isFailed() {
+        return operationStatus != null && (OperationState.FAILED == operationStatus.getStatus()
+                || OperationState.REJECTED == operationStatus.getStatus()
+                || OperationState.TIMEDOUT == operationStatus.getStatus());
+    }
 }

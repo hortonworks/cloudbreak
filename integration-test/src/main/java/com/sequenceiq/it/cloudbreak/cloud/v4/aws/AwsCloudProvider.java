@@ -494,4 +494,14 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     private int getSpotPercentage() {
         return spotUtil.isUseSpotInstances() ? 100 : 0;
     }
+
+    @Override
+    public String getFreeIpaUpgradeImageId() {
+        return awsProperties.getFreeipa().getUpgrade().getImageId();
+    }
+
+    @Override
+    public String getFreeIpaUpgradeImageCatalog() {
+        return awsProperties.getFreeipa().getUpgrade().getCatalog();
+    }
 }

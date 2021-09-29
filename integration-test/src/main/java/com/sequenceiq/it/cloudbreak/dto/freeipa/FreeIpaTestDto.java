@@ -37,6 +37,8 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.VolumeR
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.aws.AwsInstanceTemplateParameters;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.aws.AwsInstanceTemplateSpotParameters;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.AwsNetworkParameters;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.AzureNetworkParameters;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.GcpNetworkParameters;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.MockNetworkParameters;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.NetworkRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.region.PlacementRequest;
@@ -252,6 +254,21 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
             parameters.setVpcId(request.getMock().getVpcId());
             parameters.setInternetGatewayId(request.getMock().getInternetGatewayId());
             networkRequest.setMock(parameters);
+        } else if (request.getGcp() != null) {
+            GcpNetworkParameters gcp = new GcpNetworkParameters();
+            gcp.setNetworkId(request.getGcp().getNetworkId());
+            gcp.setSubnetId(request.getGcp().getSubnetId());
+            gcp.setNoFirewallRules(request.getGcp().getNoFirewallRules());
+            gcp.setNoPublicIp(request.getGcp().getNoPublicIp());
+            gcp.setSharedProjectId(request.getGcp().getSharedProjectId());
+            networkRequest.setGcp(gcp);
+        } else if (request.getAzure() != null) {
+            AzureNetworkParameters azure = new AzureNetworkParameters();
+            azure.setNetworkId(request.getAzure().getNetworkId());
+            azure.setNoPublicIp(request.getAzure().getNoPublicIp());
+            azure.setSubnetId(request.getAzure().getSubnetId());
+            azure.setResourceGroupName(request.getAzure().getResourceGroupName());
+            networkRequest.setAzure(azure);
         }
         getRequest().setNetwork(networkRequest);
         return this;
@@ -291,11 +308,14 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
 
     public FreeIpaTestDto withCatalog(String imageCatalog, String imageUuid) {
         if (!Strings.isNullOrEmpty(imageCatalog) && !Strings.isNullOrEmpty(imageUuid)) {
+            LOGGER.info("Using catalog [{}] and image [{}] for creating FreeIPA", imageCatalog, imageUuid);
             ImageSettingsRequest imageSettingsRequest = new ImageSettingsRequest();
             imageSettingsRequest.setCatalog(imageCatalog);
             imageSettingsRequest.setId(imageUuid);
 
             getRequest().setImage(imageSettingsRequest);
+        } else {
+            LOGGER.warn("Catalog [{}] or image [{}] is null or empty", imageCatalog, imageUuid);
         }
         return this;
     }
@@ -343,6 +363,10 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
     public FreeIpaTestDto awaitForFreeIpaInstance(Map<List<String>, com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus> statuses,
             Duration pollingInterval) {
         return awaitForFreeIpaInstance(statuses, emptyRunningParameter(), pollingInterval);
+    }
+
+    public FreeIpaTestDto withUpgradeCatalogAndImage() {
+        return withCatalog(getCloudProvider().getFreeIpaUpgradeImageCatalog(), getCloudProvider().getFreeIpaUpgradeImageId());
     }
 
     public FreeIpaTestDto await(Status status) {

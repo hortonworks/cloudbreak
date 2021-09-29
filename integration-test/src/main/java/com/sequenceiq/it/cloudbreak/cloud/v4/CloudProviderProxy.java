@@ -390,4 +390,14 @@ public class CloudProviderProxy implements CloudProvider {
     private CloudProvider getDelegate(CloudbreakTestDto cloudbreakTestDto) {
         return getDelegate(cloudbreakTestDto.getCloudPlatform());
     }
+
+    @Override
+    public String getFreeIpaUpgradeImageId() {
+        return delegate.getFreeIpaUpgradeImageId();
+    }
+
+    @Override
+    public String getFreeIpaUpgradeImageCatalog() {
+        return delegate.getFreeIpaUpgradeImageCatalog();
+    }
 }

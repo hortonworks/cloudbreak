@@ -169,4 +169,8 @@ public interface CloudProvider {
     String getFreeIpaImageCatalogUrl();
 
     String getVariant();
+
+    String getFreeIpaUpgradeImageId();
+
+    String getFreeIpaUpgradeImageCatalog();
 }

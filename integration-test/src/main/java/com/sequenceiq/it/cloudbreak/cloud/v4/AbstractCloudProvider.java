@@ -287,4 +287,16 @@ public abstract class AbstractCloudProvider implements CloudProvider {
             throw new TestFailException(" Cannot fetch base images of " + imageCatalogTestDto.getRequest().getName() + " image catalog", e);
         }
     }
+
+    @Override
+    public String getFreeIpaUpgradeImageId() {
+        LOGGER.warn("'freeIpaUpgradeImageId' is not implemented");
+        return null;
+    }
+
+    @Override
+    public String getFreeIpaUpgradeImageCatalog() {
+        LOGGER.warn("'freeIpaUpgradeImageCatalog' is not implemented");
+        return null;
+    }
 }

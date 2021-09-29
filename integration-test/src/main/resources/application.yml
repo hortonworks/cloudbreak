@@ -121,6 +121,10 @@ integrationtest:
       baseLocation:
       fileSystemType: S3
     hybridCloudSecurityGroupID: sg-0c73a7f815c452e9d
+    freeipa:
+      upgrade:
+        imageId: 9c1c8959-86a7-4b7d-af5a-be252f8b395d
+        catalog: https://cloudbreak-imagecatalog.s3.us-west-1.amazonaws.com/freeipa-upgrade-test-catalog.json
 
   # azure parameters
   azure:
@@ -165,6 +169,10 @@ integrationtest:
           uuid: 4c9de617-26b6-404c-990d-a8b6578f74e4
         catalog:
           url: https://cloudbreak-imagecatalog.s3.amazonaws.com/v3-marketplace-freeipa-image-catalog.json
+    freeipa:
+      upgrade:
+        imageId: dc277098-ea7c-48b7-b1a2-89950b989b6a
+        catalog: https://cloudbreak-imagecatalog.s3.us-west-1.amazonaws.com/freeipa-upgrade-test-catalog.json
 
   # gcp parameters
   gcp:
@@ -202,6 +210,10 @@ integrationtest:
       fileSystemType: GCS
       gcs:
         serviceAccountEmail:
+    freeipa:
+      upgrade:
+        imageId: bbc059cd-d7c7-4938-bb34-5c7fc09f1204
+        catalog: https://cloudbreak-imagecatalog.s3.us-west-1.amazonaws.com/freeipa-upgrade-test-catalog.json
 
   # openstack parameters
   openstack:
