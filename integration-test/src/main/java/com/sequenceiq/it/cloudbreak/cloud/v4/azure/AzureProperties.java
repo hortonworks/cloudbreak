@@ -5,6 +5,8 @@ import java.util.Set;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
+import com.sequenceiq.it.cloudbreak.cloud.v4.FreeIpaProperties;
+
 @Configuration
 @ConfigurationProperties(prefix = "integrationtest.azure")
 public class AzureProperties {
@@ -24,6 +26,16 @@ public class AzureProperties {
     private final Cloudstorage cloudstorage = new Cloudstorage();
 
     private final Network network = new Network();
+
+    private FreeIpaProperties freeipa = new FreeIpaProperties();
+
+    public FreeIpaProperties getFreeipa() {
+        return freeipa;
+    }
+
+    public void setFreeipa(FreeIpaProperties freeipa) {
+        this.freeipa = freeipa;
+    }
 
     public String getAvailabilityZone() {
         return availabilityZone;

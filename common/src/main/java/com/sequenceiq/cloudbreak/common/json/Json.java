@@ -186,7 +186,7 @@ public class Json implements Serializable {
             JSONObject.fromObject(value);
             return true;
         } catch (JSONException e) {
-            LOGGER.debug("This json is not an Object: {}", e.getMessage());
+            LOGGER.trace("This json is not an Object: {}", e.getMessage());
             return false;
         }
     }
@@ -196,7 +196,7 @@ public class Json implements Serializable {
             JSONArray.fromObject(value);
             return true;
         } catch (JSONException e) {
-            LOGGER.debug("This json is not an Array: {}", anonymize(e.getMessage()));
+            LOGGER.trace("This json is not an Array: {}", anonymize(e.getMessage()));
             return false;
         }
     }

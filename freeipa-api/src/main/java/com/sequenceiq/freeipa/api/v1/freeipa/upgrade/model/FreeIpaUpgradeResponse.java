@@ -26,6 +26,9 @@ public class FreeIpaUpgradeResponse {
         this.operationId = operationId;
     }
 
+    public FreeIpaUpgradeResponse() {
+    }
+
     public FlowIdentifier getFlowIdentifier() {
         return flowIdentifier;
     }

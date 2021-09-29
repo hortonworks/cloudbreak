@@ -5,6 +5,8 @@ import java.util.List;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
+import com.sequenceiq.it.cloudbreak.cloud.v4.FreeIpaProperties;
+
 @Configuration
 @ConfigurationProperties(prefix = "integrationtest.gcp")
 public class GcpProperties {
@@ -28,6 +30,16 @@ public class GcpProperties {
     private final CloudStorage cloudStorage = new CloudStorage();
 
     private final Network network = new Network();
+
+    private FreeIpaProperties freeipa = new FreeIpaProperties();
+
+    public FreeIpaProperties getFreeipa() {
+        return freeipa;
+    }
+
+    public void setFreeipa(FreeIpaProperties freeipa) {
+        this.freeipa = freeipa;
+    }
 
     public Boolean getMultiaz() {
         if (multiaz == null) {

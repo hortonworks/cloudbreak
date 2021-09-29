@@ -24,6 +24,7 @@ import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaStartAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaStopAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaSynchronizeAllUsersAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaSynchronizeAllUsersInternalAction;
+import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaUpgradeAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeipaUsedImagesAction;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaChildEnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaDiagnosticsTestDto;
@@ -50,11 +51,11 @@ public class FreeIpaTestClient {
         return new FreeIpaDetachChildEnvironmentAction();
     }
 
-    public Action<FreeIpaTestDto, FreeIpaClient>  describe() {
+    public Action<FreeIpaTestDto, FreeIpaClient> describe() {
         return new FreeIpaDescribeAction();
     }
 
-    public Action<FreeIpaTestDto, FreeIpaClient>  refresh() {
+    public Action<FreeIpaTestDto, FreeIpaClient> refresh() {
         return new FreeIpaRefreshAction();
     }
 
@@ -104,5 +105,9 @@ public class FreeIpaTestClient {
 
     public Action<FreeIpaTestDto, FreeIpaClient> findUsersInGroup(Set<String> users, String group, boolean expectedPresence) {
         return new FreeIpaFindUsersInGroupAction(users, group, expectedPresence);
+    }
+
+    public Action<FreeIpaTestDto, FreeIpaClient> upgrade() {
+        return new FreeIpaUpgradeAction();
     }
 }

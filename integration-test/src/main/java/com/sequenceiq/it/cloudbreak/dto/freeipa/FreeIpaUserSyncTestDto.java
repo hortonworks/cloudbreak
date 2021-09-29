@@ -20,8 +20,6 @@ import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 @Prototype
 public class FreeIpaUserSyncTestDto extends AbstractFreeIpaTestDto<SynchronizeAllUsersRequest, SyncOperationStatus, FreeIpaUserSyncTestDto> {
 
-    private String operationId;
-
     public FreeIpaUserSyncTestDto(TestContext testContext) {
         super(new SynchronizeAllUsersRequest(), testContext);
     }
@@ -40,14 +38,6 @@ public class FreeIpaUserSyncTestDto extends AbstractFreeIpaTestDto<SynchronizeAl
 
     public String getEnvironmentCrn() {
         return getTestContext().get(EnvironmentTestDto.class).getResponse().getCrn();
-    }
-
-    public String getOperationId() {
-        return operationId;
-    }
-
-    public void setOperationId(String operationId) {
-        this.operationId = operationId;
     }
 
     public SetPasswordRequest setPassword(Set<String> environmentCrns, String newPassword) {

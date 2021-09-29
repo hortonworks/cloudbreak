@@ -93,6 +93,7 @@ public class ImageService {
         imageEntity.setImageId(imageWrapper.getImage().getUuid());
         imageEntity.setImageCatalogUrl(imageWrapper.getCatalogUrl());
         imageEntity.setImageCatalogName(imageWrapper.getCatalogName());
+        imageEntity.setDate(imageWrapper.getImage().getDate());
         return imageEntity;
     }
 

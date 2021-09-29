@@ -8,8 +8,6 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 
-import org.apache.commons.lang3.NotImplementedException;
-
 import com.sequenceiq.it.cloudbreak.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
@@ -18,6 +16,8 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.util.wait.FlowUtil;
 
 public abstract class AbstractFreeIpaTestDto<R, S, T extends CloudbreakTestDto> extends AbstractTestDto<R, S, T, FreeIpaClient> {
+
+    private String operationId;
 
     @Inject
     private FlowUtil flowUtil;
@@ -28,11 +28,6 @@ public abstract class AbstractFreeIpaTestDto<R, S, T extends CloudbreakTestDto> 
 
     protected AbstractFreeIpaTestDto(R request, TestContext testContext) {
         super(request, testContext);
-    }
-
-    @Override
-    public CloudbreakTestDto valid() {
-        throw new NotImplementedException(String.format("The entity(%s) must be implement the valid() method.", getClass()));
     }
 
     @Override
@@ -111,5 +106,13 @@ public abstract class AbstractFreeIpaTestDto<R, S, T extends CloudbreakTestDto> 
 
     public FlowUtil getFlowUtil() {
         return flowUtil;
+    }
+
+    public String getOperationId() {
+        return operationId;
+    }
+
+    public void setOperationId(String operationId) {
+        this.operationId = operationId;
     }
 }

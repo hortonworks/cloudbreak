@@ -469,4 +469,13 @@ public class GcpCloudProvider extends AbstractCloudProvider {
         throw new NotImplementedException(String.format("Not implemented on %s", getCloudPlatform()));
     }
 
+    @Override
+    public String getFreeIpaUpgradeImageId() {
+        return gcpProperties.getFreeipa().getUpgrade().getImageId();
+    }
+
+    @Override
+    public String getFreeIpaUpgradeImageCatalog() {
+        return gcpProperties.getFreeipa().getUpgrade().getCatalog();
+    }
 }
