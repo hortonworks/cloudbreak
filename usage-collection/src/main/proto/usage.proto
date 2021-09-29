@@ -975,6 +975,8 @@ message CDPEnvironmentDetails {
   // added tags that are product-specific. The format of this is a map serialized
   // into a string as json. e.g.:   "tags": "{\"key1\":\"value1\",\"key2\":\"value2\"}"
   string userTags = 8;
+  // GCP specific details of the environment
+  CDPEnvironmentGcpDetails gcpDetails = 9;
 }
 
 message CDPFreeIPADetails {
@@ -992,6 +994,12 @@ message CDPEnvironmentAzureDetails {
   bool singleResourceGroup = 1;
   // True if user provides encryption key URL to encrypt Azure managed disks with CMK
   bool resourceEncryptionEnabled = 2;
+}
+
+// GCP specific environment details
+message CDPEnvironmentGcpDetails {
+  // True if user provides encryption key URL to encrypt GCP managed disks with CMEK
+  bool resourceEncryptionEnabled = 1;
 }
 
 // AWS specific environment details
