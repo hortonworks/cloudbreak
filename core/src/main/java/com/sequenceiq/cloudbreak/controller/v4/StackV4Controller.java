@@ -31,8 +31,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.Cloud
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.CertificatesRotationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBlueprintV4Response;
-import com.sequenceiq.flow.api.model.RetryableFlowResponse;
-import com.sequenceiq.flow.api.model.RetryableFlowResponse.Builder;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
@@ -51,6 +49,8 @@ import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLoca
 import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
 import com.sequenceiq.distrox.v1.distrox.StackOperations;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.api.model.RetryableFlowResponse;
+import com.sequenceiq.flow.api.model.RetryableFlowResponse.Builder;
 
 @Controller
 @WorkspaceEntityType(Stack.class)
@@ -125,7 +125,8 @@ public class StackV4Controller extends NotificationController implements StackV4
     @InternalOnly
     public FlowIdentifier syncCm(Long workspaceId, String name, @InitiatorUserCrn String initiatorUserCrn, ClouderaManagerSyncV4Request syncRequest) {
         return stackOperations.syncComponentVersionsFromCm(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId(),
-                syncRequest.getCandidateImageUuids());    }
+                syncRequest.getCandidateImageUuids());
+    }
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
