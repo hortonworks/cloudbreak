@@ -92,7 +92,7 @@ public class UpgradePreconditionServiceTest {
         dataHubStack2.setCluster(createClusterResponse(Status.DELETE_COMPLETED));
         StackViewV4Response dataHubStack3 = createStackResponse(Status.STOPPED, "stack-3", "stack-crn-3");
         StackViewV4Responses stackViewV4Responses = new StackViewV4Responses(Set.of(dataHubStack1, dataHubStack2, dataHubStack3));
-        when(stackStopRestrictionService.isInfrastructureStoppable(any(), any())).thenReturn(StopRestrictionReason.EPHEMERAL_VOLUMES);
+        when(stackStopRestrictionService.isInfrastructureStoppable(any())).thenReturn(StopRestrictionReason.EPHEMERAL_VOLUMES);
         when(stackService.getByCrn(dataHubStack1.getCrn())).thenReturn(new Stack());
 
         UpgradeV4Response actual = underTest.checkForRunningAttachedClusters(stackViewV4Responses, new UpgradeV4Response());
@@ -112,7 +112,7 @@ public class UpgradePreconditionServiceTest {
         StackViewV4Response dataHubStack3 = createStackResponse(Status.STOPPED, "stack-3", "stack-crn-3");
         StackViewV4Responses stackViewV4Responses = new StackViewV4Responses(Set.of(dataHubStack1, dataHubStack2, dataHubStack3));
         Stack stack = new Stack();
-        when(stackStopRestrictionService.isInfrastructureStoppable(any(), any())).thenReturn(StopRestrictionReason.NONE);
+        when(stackStopRestrictionService.isInfrastructureStoppable(any())).thenReturn(StopRestrictionReason.NONE);
         when(stackService.getByCrn(dataHubStack1.getCrn())).thenReturn(stack);
         when(spotInstanceUsageCondition.isStackRunsOnSpotInstances(stack)).thenReturn(true);
 

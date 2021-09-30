@@ -95,5 +95,4 @@ public class AuditEventService extends AbstractWorkspaceAwareResourceService<Str
     protected void prepareCreation(StructuredEventEntity resource) {
 
     }
-
 }
