@@ -82,7 +82,7 @@ public class StackUpscaleService {
         validateResourceResults(context, payload.getErrorDetails(), results);
         Set<Resource> resourceSet = transformResults(results, context.getStack());
         if (resourceSet.isEmpty()) {
-            metadataSetupService.cleanupRequestedInstancesWithoutFQDN(context.getStack(), context.getInstanceGroupName());
+            metadataSetupService.cleanupRequestedInstancesWithoutFQDN(context.getStack().getId(), context.getInstanceGroupName());
             throw new OperationException("Failed to upscale the cluster since all create request failed. Resource set is empty");
         }
         LOGGER.debug("Adding new instances to the stack is DONE");
@@ -138,11 +138,12 @@ public class StackUpscaleService {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.UPSCALE_COMPLETED, "Stack upscale has been finished successfully.");
     }
 
-    public void handleStackUpscaleFailure(Boolean upscaleForRepair, Set<String> hostNames, Exception exception, Long stackId) {
+    public void handleStackUpscaleFailure(Boolean upscaleForRepair, Set<String> hostNames, Exception exception, Long stackId, String instanceGroupName) {
         LOGGER.info("Exception during the upscale of stack", exception);
         try {
             String errorReason = exception.getMessage();
             if (!upscaleForRepair) {
+                metadataSetupService.cleanupRequestedInstancesWithoutFQDN(stackId, instanceGroupName);
                 stackUpdater.updateStackStatus(stackId, DetailedStackStatus.UPSCALE_FAILED, "Stack update failed. " + errorReason);
                 flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), STACK_INFRASTRUCTURE_UPDATE_FAILED, errorReason);
             } else {

@@ -1,7 +1,10 @@
 package com.sequenceiq.cloudbreak.cloud.azure.upscale;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
@@ -20,6 +23,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import com.microsoft.azure.CloudError;
+import com.microsoft.azure.CloudException;
 import com.microsoft.azure.management.resources.Deployment;
 import com.microsoft.azure.management.resources.DeploymentExportResult;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureCloudResourceService;
@@ -32,6 +37,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.template.AzureTemplateDeploymentSer
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStackView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
@@ -42,6 +48,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.notification.ResourceNotifier;
 import com.sequenceiq.cloudbreak.cloud.transform.CloudResourceHelper;
+import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -168,6 +175,29 @@ public class AzureUpscaleServiceTest {
         assertEquals(2, reattachableVolumeSets.size());
         assertEquals(detachedVolumeSet, reattachableVolumeSets.get(0));
         assertEquals(alreadyCreatedVolumeSet, reattachableVolumeSets.get(1));
+    }
+
+    @Test
+    public void testUpscaleWhenVmsNotStartedInTime() {
+        CloudContext cloudContext = createCloudContext();
+        AuthenticatedContext ac = new AuthenticatedContext(cloudContext, null);
+        CloudResource template = createCloudResource(TEMPLATE, ResourceType.ARM_TEMPLATE);
+        List<CloudResource> resources = List.of(createCloudResource("volumes", ResourceType.AZURE_VOLUMESET), template);
+        List<Group> scaledGroups = createScaledGroups();
+
+        when(cloudResourceHelper.getScaledGroups(stack)).thenReturn(scaledGroups);
+        CloudError cloudError = new CloudError().withMessage("Error happened");
+        cloudError.details().add(new CloudError().withMessage("Please check the power state later"));
+        when(azureTemplateDeploymentService.getTemplateDeployment(client, stack, ac, azureStackView, AzureInstanceTemplateOperation.UPSCALE))
+                .thenThrow(new Retry.ActionFailedException("VMs not started in time.", new CloudException("Error", null, cloudError)));
+        when(azureUtils.convertToCloudConnectorException(any(CloudException.class), anyString())).thenCallRealMethod();
+        when(azureUtils.convertToCloudConnectorException(any(Throwable.class), anyString())).thenCallRealMethod();
+        CloudConnectorException cloudConnectorException = assertThrows(CloudConnectorException.class, () ->
+                underTest.upscale(ac, stack, resources, azureStackView, client)
+        );
+
+        assertThat(cloudConnectorException.getMessage())
+                .contains("Stack upscale failed, status code null, error message: Error happened, details: Please check the power state later");
     }
 
     private List<Group> createScaledGroups() {
