@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.azure.validator;
+package com.sequenceiq.cloudbreak.cloud.aws.common;
 
 import static org.mockito.Mockito.when;
 
@@ -20,19 +20,21 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
-import com.sequenceiq.cloudbreak.cloud.azure.AzurePlatformParameters;
-import com.sequenceiq.cloudbreak.cloud.azure.conf.AzureConfig;
+import com.sequenceiq.cloudbreak.cloud.aws.common.config.AwsConfig;
+import com.sequenceiq.cloudbreak.cloud.aws.common.subnetselector.SubnetFilterStrategyMultiplePreferPrivate;
+import com.sequenceiq.cloudbreak.cloud.aws.common.subnetselector.SubnetSelectorService;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
+import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 
 @ExtendWith(SpringExtension.class)
-class AzureTagValidatorTest {
+class AwsTagValidatorTest {
 
     @Inject
-    private AzureTagValidator tagValidatorUnderTest;
+    private AwsTagValidator tagValidatorUnderTest;
 
     @TestFactory
     Collection<DynamicTest> testFactoryOnTagValidator() {
@@ -40,18 +42,14 @@ class AzureTagValidatorTest {
                 // TAG KEY
                 // min.length
                 DynamicTest.dynamicTest("tag key is too short",
-                        () -> testNegative("", "azure@cloudera.com prx:pfx:^!=-", "too short")),
+                        () -> testEmptyTagKey("", "test")),
                 // max.length
                 DynamicTest.dynamicTest("tag key is too long",
-                        () -> testNegative(generateLongString(513), "azure@cloudera.com prx:pfx:^!=-", "too long")),
+                        () -> testNegative(generateLongString(128), "test", "too long")),
                 // key.validator
                 //    prefix
                 DynamicTest.dynamicTest("tag key starts with restricted prefix, regular expression is printed",
-                        () -> testNegative("azureprefix", "azure@cloudera.com prx:pfx:^!=-", "regular expression")),
-                DynamicTest.dynamicTest("tag key starts with restricted prefix, regular expression is printed",
-                        () -> testNegative("microsoftprefix", "azure@cloudera.com prx:pfx:^!=-", "regular expression")),
-                DynamicTest.dynamicTest("tag key starts with restricted prefix, regular expression is printed",
-                        () -> testNegative("windowsprefix", "azure@cloudera.com prx:pfx:^!=-", "regular expression")),
+                        () -> testNegative("awsprefix", "test", "regular expression")),
                 //   spaces
                 DynamicTest.dynamicTest("tag key starts with space, regular expression is printed",
                         () -> testNegative(" startswithspace", "test", "regular expression")),
@@ -68,15 +66,13 @@ class AzureTagValidatorTest {
                         () -> testNegative("test%", "test", "regular expression")),
                 DynamicTest.dynamicTest("tag key contains '&', regular expression is printed",
                         () -> testNegative("test&", "test", "regular expression")),
-                DynamicTest.dynamicTest("tag key contains '/', regular expression is printed",
-                        () -> testNegative("test/", "test", "regular expression")),
                 DynamicTest.dynamicTest("tag key contains '\\', regular expression is printed",
                         () -> testNegative("test\\", "test", "regular expression")),
                 DynamicTest.dynamicTest("tag key contains '?', regular expression is printed",
                         () -> testNegative("test?", "test", "regular expression")),
                 //    valid
                 DynamicTest.dynamicTest("tag key is valid ",
-                        () -> testPositive("azprefix prx:pfx:^!=-", "azure@cloudera.com prx:pfx:^!=-")),
+                        () -> testPositive("test + - = . _ : / @ 1234", "test")),
                 DynamicTest.dynamicTest("tag key is valid ",
                         () -> testPositive("cod_database_name", "appletree")),
                 DynamicTest.dynamicTest("tag key is valid ",
@@ -85,10 +81,10 @@ class AzureTagValidatorTest {
                 // TAG VALUE
                 // min.length
                 DynamicTest.dynamicTest("tag value is too short ",
-                        () -> testNegative("test", "", "too short")),
+                        () -> testEmptyTagKey("test", "")),
                 // max.length
                 DynamicTest.dynamicTest("tag value is too long",
-                        () -> testNegative("test", generateLongString(257), "too long")),
+                        () -> testNegative("test", generateLongString(256), "too long")),
                 // key.validator
                 //   spaces
                 DynamicTest.dynamicTest("tag value starts with space, regular expression is printed",
@@ -106,17 +102,15 @@ class AzureTagValidatorTest {
                         () -> testNegative("test", "test%", "regular expression")),
                 DynamicTest.dynamicTest("tag value contains '&', regular expression is printed",
                         () -> testNegative("test", "test&", "regular expression")),
-                DynamicTest.dynamicTest("tag value contains '/', regular expression is printed",
-                        () -> testNegative("test", "test/", "regular expression")),
                 DynamicTest.dynamicTest("tag value contains '\\', regular expression is printed",
                         () -> testNegative("test", "test\\", "regular expression")),
                 DynamicTest.dynamicTest("tag value contains '?', regular expression is printed",
                         () -> testNegative("test", "test?", "regular expression")),
                 //    valid
                 DynamicTest.dynamicTest("tag key is valid ",
-                        () -> testPositive("test", "test")),
+                        () -> testPositive("test -=._:/@ 1234", "test")),
                 DynamicTest.dynamicTest("tag key is valid ",
-                        () -> testPositive("test", "azure@cloudera.com prx:pfx:^!=-"))
+                        () -> testPositive("test", "test"))
         );
     }
 
@@ -131,6 +125,14 @@ class AzureTagValidatorTest {
         Assertions.assertTrue(result.getErrors().get(0).contains(messagePortion));
     }
 
+    public void testEmptyTagKey(String tag, String value) {
+        ValidationResult result = tagValidatorUnderTest.validateTags(Map.of(tag, value));
+        Assertions.assertTrue(result.hasError(), "tag validation should fail");
+        Assertions.assertTrue(result.getErrors().size() == 2, "tag validation should have one error only");
+        Assertions.assertTrue(result.getErrors().get(0).contains("not well formatted"));
+        Assertions.assertTrue(result.getErrors().get(1).contains("too short"));
+    }
+
     public void testPositive(String tag, String value) {
         ValidationResult result = tagValidatorUnderTest.validateTags(Map.of(tag, value));
         Assertions.assertFalse(result.hasError(), "tag validation should pass");
@@ -138,30 +140,34 @@ class AzureTagValidatorTest {
 
     @Configuration
     @Import({CloudPlatformConnectors.class,
-            AzureConfig.class,
-            AzureTagValidator.class,
-            AzurePlatformParameters.class
+            AwsConfig.class,
+            AwsTagValidator.class,
+            AwsPlatformParameters.class,
+            CloudbreakResourceReaderService.class,
+            SubnetFilterStrategyMultiplePreferPrivate.class,
+            SubnetSelectorService.class
     })
     static class Config {
 
         @Inject
-        AzureTagValidator azureTagValidator;
+        AwsTagValidator awsTagValidator;
 
         @Bean
         CloudConnector<Object> cloud() {
             PlatformParameters parameter = parameters();
             CloudConnector mock = Mockito.mock(CloudConnector.class);
             when(mock.parameters()).thenReturn(parameter);
-            when(mock.platform()).thenReturn(Platform.platform(CloudConstants.AZURE));
-            when(mock.variant()).thenReturn(Variant.variant(CloudConstants.AZURE));
+            when(mock.platform()).thenReturn(Platform.platform(CloudConstants.AWS));
+            when(mock.variant()).thenReturn(Variant.variant(CloudConstants.AWS));
             return mock;
         }
 
         @Bean
         PlatformParameters parameters() {
             PlatformParameters mock = Mockito.mock(PlatformParameters.class);
-            when(mock.tagValidator()).thenReturn(azureTagValidator);
+            when(mock.tagValidator()).thenReturn(awsTagValidator);
             return mock;
         }
     }
 }
+

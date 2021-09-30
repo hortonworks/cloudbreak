@@ -9,7 +9,7 @@ import com.sequenceiq.cloudbreak.cloud.model.TagSpecification;
 @Configuration
 public class AzureConfig {
 
-    @Value("${cb.azure.tag.amount:15}")
+    @Value("${cb.azure.tag.amount:50}")
     private Integer maxAmount;
 
     @Value("${cb.azure.tag.key.min.length:1}")
@@ -18,7 +18,7 @@ public class AzureConfig {
     @Value("${cb.azure.tag.key.max.length:512}")
     private Integer maxKeyLength;
 
-    @Value("${cb.azure.tag.key.validator:^(?!microsoft|azure|windows|\\s)[^,]*$}")
+    @Value("${cb.azure.tag.key.validator:^(?!microsoft|azure|windows|\\s)[^,<>%&\\\\/\\?]*(?<!\\s)$}")
     private String keyValidator;
 
     @Value("${cb.azure.tag.value.min.length:1}")
@@ -27,7 +27,7 @@ public class AzureConfig {
     @Value("${cb.azure.tag.value.max.length:256}")
     private Integer maxValueLength;
 
-    @Value("${cb.azure.tag.value.validator:.*$}")
+    @Value("${cb.azure.tag.value.validator:^(?!\\s)[^,<>%&\\\\/\\?]*(?<!\\s)$}")
     private String valueValidator;
 
     @Bean(name = "AzureTagSpecification")

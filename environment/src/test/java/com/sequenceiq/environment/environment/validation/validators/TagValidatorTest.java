@@ -26,18 +26,11 @@ import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureTagValidator;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
+import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 
 @ExtendWith(SpringExtension.class)
 class TagValidatorTest {
-
-    public static final String AZURE = "AZURE";
-
-    public static final String BAD_KEY = "azureprefix";
-
-    public static final String GOOD_VALUE = "azure@cloudera.com prx:pfx:<>&^%";
-
-    public static final String GOOD_KEY = "azprefix";
 
     @Inject
     private TagValidator tagValidatorUnderTest;
@@ -46,11 +39,11 @@ class TagValidatorTest {
     Collection<DynamicTest> testFactoryOnTagValidator() {
         return Arrays.asList(
                 DynamicTest.dynamicTest("tag key is invalid",
-                        () -> testNegative(BAD_KEY, GOOD_VALUE, "tag names are not well")),
+                        () -> testNegative("", "azure@cloudera.com prx:pfx:^!=-", "too short")),
                 DynamicTest.dynamicTest("tag key is invalid, regular expression is printed",
-                        () -> testNegative(BAD_KEY, GOOD_VALUE, "regular expression")),
+                        () -> testNegative("azureprefix", "azure@cloudera.com prx:pfx:^!=-", "regular expression")),
                 DynamicTest.dynamicTest("tag value is valid ",
-                        () -> testPositive(GOOD_KEY, GOOD_VALUE)),
+                        () -> testPositive("azprefix", "azure@cloudera.com prx:pfx:^!=-")),
                 DynamicTest.dynamicTest("tag value is valid ",
                         () -> testPositive("cod_database_name", "appletree")),
                 DynamicTest.dynamicTest("tag value is valid ",
@@ -59,14 +52,14 @@ class TagValidatorTest {
     }
 
     public void testNegative(String tag, String value, String messagePortion) {
-        ValidationResult result = tagValidatorUnderTest.validateTags(AZURE, Map.of(tag, value));
+        ValidationResult result = tagValidatorUnderTest.validateTags(CloudConstants.AZURE, Map.of(tag, value));
         Assertions.assertTrue(result.hasError(), "tag validation should fail");
         Assertions.assertTrue(result.getErrors().size() == 1, "tag validation should have one error only");
         Assertions.assertTrue(result.getErrors().get(0).contains(messagePortion));
     }
 
     public void testPositive(String tag, String value) {
-        ValidationResult result = tagValidatorUnderTest.validateTags(AZURE, Map.of(tag, value));
+        ValidationResult result = tagValidatorUnderTest.validateTags(CloudConstants.AZURE, Map.of(tag, value));
         Assertions.assertFalse(result.hasError(), "tag validation should pass");
     }
 
@@ -87,8 +80,8 @@ class TagValidatorTest {
             PlatformParameters parameter = parameters();
             CloudConnector mock = Mockito.mock(CloudConnector.class);
             when(mock.parameters()).thenReturn(parameter);
-            when(mock.platform()).thenReturn(Platform.platform(AZURE));
-            when(mock.variant()).thenReturn(Variant.variant(AZURE));
+            when(mock.platform()).thenReturn(Platform.platform(CloudConstants.AZURE));
+            when(mock.variant()).thenReturn(Variant.variant(CloudConstants.AZURE));
             return mock;
         }
 

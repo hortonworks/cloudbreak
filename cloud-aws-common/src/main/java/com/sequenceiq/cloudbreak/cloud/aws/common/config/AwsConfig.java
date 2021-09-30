@@ -26,7 +26,7 @@ public class AwsConfig {
     @Value("${cb.aws.tag.key.max.length:127}")
     private Integer maxKeyLength;
 
-    @Value("${cb.aws.tag.key.validator:^(?!aws|\\s)([\\w\\d+-=._:/@\\s]+)(?<!\\s+)$}")
+    @Value("${cb.aws.tag.key.validator:^(?!aws|\\s)([\\w\\d+=._:/@\\s-]+)(?<!\\s)$}")
     private String keyValidator;
 
     @Value("${cb.aws.tag.value.min.length:1}")
@@ -35,7 +35,7 @@ public class AwsConfig {
     @Value("${cb.aws.tag.value.max.length:255}")
     private Integer maxValueLength;
 
-    @Value("${cb.aws.tag.value.validator:^(?!\\s)([\\w\\d+-=._:/@\\s]+)(?<!\\s+)$}")
+    @Value("${cb.aws.tag.value.validator:^(?!\\s)([\\w\\d+\\-=._:/@\\s]+)(?<!\\s)$}")
     private String valueValidator;
 
     @Inject
