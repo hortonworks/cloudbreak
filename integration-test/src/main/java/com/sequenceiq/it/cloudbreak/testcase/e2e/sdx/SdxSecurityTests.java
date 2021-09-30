@@ -42,7 +42,7 @@ public class SdxSecurityTests extends PreconditionSdxE2ETest {
     @Inject
     private DatalakeAuditGrpcServiceAssertion datalakeAuditGrpcServiceAssertion;
 
-    @Test(dataProvider = TEST_CONTEXT)
+    @Test(dataProvider = TEST_CONTEXT, enabled = false)
     @UseSpotInstances
     @Description(
             given = "there is a running Cloudbreak, and an SDX cluster in available state",
