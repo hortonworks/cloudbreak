@@ -143,6 +143,14 @@
                  <name>{{ aclsauthz_prefix ~ "hbasejars.acl" }}</name>
                  <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
             </param>
+            <param>
+                 <name>{{ aclsauthz_prefix ~ "sparkhistoryui.acl" }}</name>
+                 <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
+            </param>
+            <param>
+                 <name>{{ aclsauthz_prefix ~ "spark3historyui.acl" }}</name>
+                 <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
+            </param>
         </provider>
 {%- endif %}
 
@@ -267,6 +275,18 @@
             {% if 'SSB-MVE-API' in exposed and 'MATERIALIZED_VIEW_ENGINE' in salt['pillar.get']('gateway:location') -%}
             <param>
               <name>SSB-MVE-API</name>
+              <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000</value>
+            </param>
+            {%- endif %}
+            {% if 'SPARKHISTORYUI' in exposed and 'SPARK_YARN_HISTORY_SERVER' in salt['pillar.get']('gateway:location') -%}
+            <param>
+              <name>SPARKHISTORYUI</name>
+              <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000</value>
+            </param>
+            {%- endif %}
+            {% if 'SPARK3HISTORYUI' in exposed and 'SPARK3_YARN_HISTORY_SERVER' in salt['pillar.get']('gateway:location') -%}
+            <param>
+              <name>SPARK3HISTORYUI</name>
               <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000</value>
             </param>
             {%- endif %}
@@ -586,6 +606,28 @@
         <role>SSB-MVE-API</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['MATERIALIZED_VIEW_ENGINE'] -%}
         <url>{{ protocol }}://{{ hostloc }}:{{ ports['SSB-MVE-API'] }}</url>
+        {%- endfor %}
+    </service>
+    {%- endif %}
+    {%- endif %}
+
+    {% if 'SPARK_YARN_HISTORY_SERVER' in salt['pillar.get']('gateway:location') -%}
+    {% if 'SPARKHISTORYUI' in exposed -%}
+    <service>
+        <role>SPARKHISTORYUI</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['SPARK_YARN_HISTORY_SERVER'] -%}
+        <url>{{ protocol }}://{{ hostloc }}:{{ ports['SPARKHISTORYUI'] }}/</url>
+        {%- endfor %}
+    </service>
+    {%- endif %}
+    {%- endif %}
+
+    {% if 'SPARK3_YARN_HISTORY_SERVER' in salt['pillar.get']('gateway:location') -%}
+    {% if 'SPARK3HISTORYUI' in exposed -%}
+    <service>
+        <role>SPARK3HISTORYUI</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['SPARK3_YARN_HISTORY_SERVER'] -%}
+        <url>{{ protocol }}://{{ hostloc }}:{{ ports['SPARK3HISTORYUI'] }}/</url>
         {%- endfor %}
     </service>
     {%- endif %}
