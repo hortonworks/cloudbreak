@@ -34,8 +34,8 @@ import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
-import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterComponentUpdater;
 import com.sequenceiq.cloudbreak.util.NodesUnreachableException;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
@@ -65,15 +65,15 @@ public class ClusterManagerUpgradeService {
     private ClusterHostServiceRunner clusterHostServiceRunner;
 
     @Inject
-    private ParcelService parcelService;
+    private ClusterComponentUpdater clusterComponentUpdater;
 
     @Inject
     private CsdParcelDecorator csdParcelDecorator;
 
-    public void removeUnusedComponents(Long stackId) throws CloudbreakException {
+    public void removeUnusedComponents(Long stackId, Set<ClusterComponent> clusterComponentsByBlueprint) throws CloudbreakException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-        Set<ClusterComponent> blueprintProducts = parcelService.getParcelComponentsByBlueprint(stack);
-        clusterApiConnectors.getConnector(stack).removeUnusedParcels(blueprintProducts);
+        clusterApiConnectors.getConnector(stack).removeUnusedParcels(clusterComponentsByBlueprint);
+        clusterComponentUpdater.removeUnusedCdhProductsFromClusterComponents(stack.getCluster().getId(), clusterComponentsByBlueprint);
     }
 
     public void upgradeClusterManager(Long stackId, boolean runtimeServicesStartNeeded) throws CloudbreakOrchestratorException, CloudbreakException {

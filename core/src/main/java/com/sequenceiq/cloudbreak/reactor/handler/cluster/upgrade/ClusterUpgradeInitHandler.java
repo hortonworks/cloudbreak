@@ -58,12 +58,12 @@ public class ClusterUpgradeInitHandler extends ExceptionCatcherEventHandler<Clus
         ClusterUpgradeInitRequest request = event.getData();
         Selectable result;
         try {
-            clusterManagerUpgradeService.removeUnusedComponents(request.getResourceId());
-            Set<ClusterComponent> components = parcelService.getParcelComponentsByBlueprint(stack);
-            clusterApiConnectors.getConnector(stack).downloadAndDistributeParcels(components, request.isPatchUpgrade());
+            Set<ClusterComponent> componentsByBlueprint = parcelService.getParcelComponentsByBlueprint(stack);
+            clusterManagerUpgradeService.removeUnusedComponents(request.getResourceId(), componentsByBlueprint);
+            clusterApiConnectors.getConnector(stack).downloadAndDistributeParcels(componentsByBlueprint, request.isPatchUpgrade());
             result = new ClusterUpgradeInitSuccess(request.getResourceId());
         } catch (Exception e) {
-            LOGGER.info("Cluster Manager parcel deactivaton failed", e);
+            LOGGER.error("Cluster Manager parcel deactivation failed", e);
             result = new ClusterUpgradeFailedEvent(request.getResourceId(), e, DetailedStackStatus.CLUSTER_UPGRADE_INIT_FAILED);
         }
         return result;

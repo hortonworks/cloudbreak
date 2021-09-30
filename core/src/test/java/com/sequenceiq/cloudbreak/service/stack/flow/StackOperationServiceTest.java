@@ -155,7 +155,7 @@ public class StackOperationServiceTest {
         stack.setId(9876L);
         stack.setStackStatus(new StackStatus(stack, AVAILABLE));
 
-        when(stackStopRestrictionService.isInfrastructureStoppable(any(), any())).thenReturn(StopRestrictionReason.NONE);
+        when(stackStopRestrictionService.isInfrastructureStoppable(any())).thenReturn(StopRestrictionReason.NONE);
         when(spotInstanceUsageCondition.isStackRunsOnSpotInstances(stack)).thenReturn(true);
         when(stackService.getByIdWithLists(stack.getId())).thenReturn(stack);
 
@@ -171,7 +171,7 @@ public class StackOperationServiceTest {
         stack.setId(9876L);
         stack.setStackStatus(new StackStatus(stack, AVAILABLE));
 
-        when(stackStopRestrictionService.isInfrastructureStoppable(any(), any())).thenReturn(StopRestrictionReason.NONE);
+        when(stackStopRestrictionService.isInfrastructureStoppable(any())).thenReturn(StopRestrictionReason.NONE);
         when(spotInstanceUsageCondition.isStackRunsOnSpotInstances(stack)).thenReturn(false);
         when(stackService.getByIdWithLists(stack.getId())).thenReturn(stack);
 
@@ -201,7 +201,7 @@ public class StackOperationServiceTest {
         stack.setCluster(cluster);
         cluster.setStatus(Status.STOPPED);
         when(spotInstanceUsageCondition.isStackRunsOnSpotInstances(stack)).thenReturn(false);
-        when(stackStopRestrictionService.isInfrastructureStoppable(any(), any())).thenReturn(StopRestrictionReason.NONE);
+        when(stackStopRestrictionService.isInfrastructureStoppable(any())).thenReturn(StopRestrictionReason.NONE);
         underTest.triggerStackStopIfNeeded(stack, cluster, false);
         verify(environmentService).checkEnvironmentStatus(stack, EnvironmentStatus.stoppable());
     }
