@@ -17,10 +17,10 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmConnectivityParameters;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmParameterSupplier;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmParameters;
-import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmV2JumpgateParameterSupplier;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmV2JumpgateParameters;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmV2ParameterSupplier;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmV2Parameters;
+import com.sequenceiq.cloudbreak.ccm.cloudinit.DefaultCcmV2JumpgateParameters;
 import com.sequenceiq.cloudbreak.ccm.endpoint.KnownServiceIdentifier;
 import com.sequenceiq.cloudbreak.ccm.endpoint.ServiceFamilies;
 import com.sequenceiq.cloudbreak.ccm.key.CcmResourceUtil;
@@ -47,10 +47,6 @@ public class CcmUserDataService {
     @Qualifier("DefaultCcmV2ParameterSupplier")
     private CcmV2ParameterSupplier ccmV2ParameterSupplier;
 
-    @Inject
-    @Qualifier("DefaultCcmV2JumpgateParameterSupplier")
-    private CcmV2JumpgateParameterSupplier ccmV2JumpgateParameterSupplier;
-
     public CcmConnectivityParameters fetchAndSaveCcmParameters(Stack stack) {
         CcmConnectivityParameters ccmConnectivityParameters = new CcmConnectivityParameters();
         if (stack.getTunnel().useCcmV1()) {
@@ -58,7 +54,7 @@ public class CcmUserDataService {
         } else if (stack.getTunnel().useCcmV2()) {
             ccmConnectivityParameters = getCcmV2ConnectivityParameters(stack);
         } else if (stack.getTunnel().useCcmV2Jumpgate()) {
-            ccmConnectivityParameters = getCcmV2JumpgateConnectivityParameters(stack);
+            ccmConnectivityParameters = getCcmV2JumpgateConnectivityParameters();
         } else {
             LOGGER.debug("CCM not enabled for stack.");
         }
@@ -127,14 +123,8 @@ public class CcmUserDataService {
         }
     }
 
-    private CcmConnectivityParameters getCcmV2JumpgateConnectivityParameters(Stack stack) {
-        String generatedGatewayFqdn = getGatewayFqdn(stack);
-
-        CcmV2JumpgateParameters ccmV2JumpgateParameters = ccmV2JumpgateParameterSupplier.getCcmV2JumpgateParameters(ThreadBasedUserCrnProvider.getAccountId(),
-                Optional.empty(), generatedGatewayFqdn, CcmResourceUtil.getKeyId(stack.getResourceCrn()));
-        CcmConnectivityParameters ccmConnectivityParameters = new CcmConnectivityParameters(ccmV2JumpgateParameters);
-
-        saveCcmV2Config(stack.getId(), ccmV2JumpgateParameters);
-        return ccmConnectivityParameters;
+    private CcmConnectivityParameters getCcmV2JumpgateConnectivityParameters() {
+        CcmV2JumpgateParameters ccmV2JumpgateParameters = new DefaultCcmV2JumpgateParameters();
+        return new CcmConnectivityParameters(ccmV2JumpgateParameters);
     }
 }

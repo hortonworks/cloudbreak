@@ -123,9 +123,7 @@ public class UserDataBuilderTest {
 
     @Test
     public void testBuildUserDataWithCCMV2Jumpgate() throws IOException {
-        CcmV2JumpgateParameters ccmV2JumpgateParameters = new DefaultCcmV2JumpgateParameters("invertingProxyHost", "invertingProxyCertificate",
-                "agentCrn", "agentKeyId", "agentEncipheredPrivateKey", "agentCertificate",
-                "agentMachineUserAccessKey", "agentMachineUserEncipheredAccessKey");
+        CcmV2JumpgateParameters ccmV2JumpgateParameters = new DefaultCcmV2JumpgateParameters();
         CcmConnectivityParameters ccmConnectivityParameters = new CcmConnectivityParameters(ccmV2JumpgateParameters);
 
         Map<InstanceGroupType, String> userdata = underTest.buildUserData(Platform.platform("AZURE"), "priv-key".getBytes(),
