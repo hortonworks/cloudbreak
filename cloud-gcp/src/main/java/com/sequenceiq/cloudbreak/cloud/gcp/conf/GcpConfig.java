@@ -22,16 +22,16 @@ public class GcpConfig {
     @Value("${cb.gcp.tag.key.max.length:63}")
     private Integer maxKeyLength;
 
-    @Value("${cb.gcp.tag.key.validator:^([a-z]+)([a-z\\d-_]+)$}")
+    @Value("${cb.gcp.tag.key.validator:^(?!\\s)([a-z]+)([\\w\\d_\\-]+)(?<!\\s)$}")
     private String keyValidator;
 
-    @Value("${cb.gcp.tag.value.min.length:1}")
+    @Value("${cb.gcp.tag.value.min.length:0}")
     private Integer minValueLength;
 
     @Value("${cb.gcp.tag.value.max.length:63}")
     private Integer maxValueLength;
 
-    @Value("${cb.gcp.tag.value.validator:^([a-z0-9]+)([a-z\\d-_]+)$}")
+    @Value("${cb.gcp.tag.value.validator:^(?!\\s)([a-z\\d_\\-]*)(?<!\\s)$}")
     private String valueValidator;
 
     @Bean(name = "GcpTagSpecification")

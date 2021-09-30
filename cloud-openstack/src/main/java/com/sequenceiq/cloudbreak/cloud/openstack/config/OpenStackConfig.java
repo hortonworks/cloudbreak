@@ -18,7 +18,7 @@ public class OpenStackConfig {
     @Value("${cb.openstack.tag.key.max.length:127}")
     private Integer maxKeyLength;
 
-    @Value("${cb.openstack.tag.key.validator:^(?!\\s+)([\\w\\d+-=._:/@\\s]+)$}")
+    @Value("${cb.openstack.tag.key.validator:^(?!\\s)([\\w\\d\\-=._:/@\\s]+)(?<!\\s)$}")
     private String keyValidator;
 
     @Value("${cb.openstack.tag.value.min.length:1}")
@@ -27,7 +27,7 @@ public class OpenStackConfig {
     @Value("${cb.openstack.tag.value.max.length:255}")
     private Integer maxValueLength;
 
-    @Value("${cb.openstack.tag.value.validator:^([\\w\\d+-=._:/@\\s]+)$}")
+    @Value("${cb.openstack.tag.value.validator:^(?!\\s)([\\w\\d\\-=._:/@\\s]+)(?<!\\s)$}")
     private String valueValidator;
 
     @Bean(name = "OpenStackTagSpecification")

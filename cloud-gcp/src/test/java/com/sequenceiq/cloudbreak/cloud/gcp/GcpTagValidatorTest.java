@@ -2,66 +2,185 @@ package com.sequenceiq.cloudbreak.cloud.gcp;
 
 import static org.mockito.Mockito.when;
 
-import java.util.regex.Pattern;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Map;
 
-import org.junit.Assert;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import javax.inject.Inject;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.Mockito;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import com.sequenceiq.cloudbreak.cloud.CloudConnector;
+import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
+import com.sequenceiq.cloudbreak.cloud.gcp.conf.GcpConfig;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpLabelUtil;
-import com.sequenceiq.cloudbreak.cloud.model.TagSpecification;
+import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
+import com.sequenceiq.cloudbreak.cloud.model.Platform;
+import com.sequenceiq.cloudbreak.cloud.model.Variant;
+import com.sequenceiq.cloudbreak.common.type.CloudConstants;
+import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
 
-@ExtendWith(MockitoExtension.class)
-public class GcpTagValidatorTest {
+@ExtendWith(SpringExtension.class)
+class GcpTagValidatorTest {
 
-    @Mock
-    private GcpLabelUtil gcpLabelUtil;
+    @Inject
+    private GcpTagValidator tagValidatorUnderTest;
 
-    @Mock
-    private GcpPlatformParameters platformParameters;
+    @TestFactory
+    Collection<DynamicTest> testFactoryOnTagValidator() {
+        return Arrays.asList(
+                // TAG KEY
+                // min.length
+                DynamicTest.dynamicTest("tag key is too short",
+                        () -> testEmptyTagKey("", "test")),
+                // max.length
+                // NOTE: anything above 63 is truncated by GcpLabelUtil
+                DynamicTest.dynamicTest("tag key is too long",
+                        () -> testPositive(generateLongString(64), "test")),
+                // key.validator
+                //    prefix
+                // NOTE: GcpLabelUtil converts it to lower-case
+                DynamicTest.dynamicTest("tag key starts with upper-case, regular expression is printed",
+                        () -> testPositive("Atest", "test")),
+                DynamicTest.dynamicTest("tag key starts with number, regular expression is printed",
+                        () -> testNegative("1test", "test", "regular expression")),
+                DynamicTest.dynamicTest("tag key starts with special char, regular expression is printed",
+                        () -> testNegative("-test", "test", "regular expression")),
+                //   spaces
+                DynamicTest.dynamicTest("tag key starts with space, regular expression is printed",
+                        () -> testNegative(" startswithspace", "test", "regular expression")),
+                // NOTE: GcpLabelUtil converts spaces to hyphens
+                DynamicTest.dynamicTest("tag key ends with space, regular expression is printed",
+                        () -> testPositive("endswithspace ", "test")),
+                //    non-word characters
+                // NOTE: GcpLabelUtil removes any non-word characters (\w)
+                DynamicTest.dynamicTest("tag key contains ',', it gets removed",
+                        () -> testPositive("test,", "test")),
+                DynamicTest.dynamicTest("tag key contains '<', it gets removed",
+                        () -> testPositive("test<", "test")),
+                DynamicTest.dynamicTest("tag key contains '>', it gets removed",
+                        () -> testPositive("test>", "test")),
+                DynamicTest.dynamicTest("tag key contains '%', it gets removed",
+                        () -> testPositive("test%", "test")),
+                DynamicTest.dynamicTest("tag key contains '&', it gets removed",
+                        () -> testPositive("test&", "test")),
+                DynamicTest.dynamicTest("tag key contains '/', it gets removed",
+                        () -> testPositive("test/", "test")),
+                DynamicTest.dynamicTest("tag key contains '\\', it gets removed",
+                        () -> testPositive("test\\", "test")),
+                DynamicTest.dynamicTest("tag key contains '?', it gets removed",
+                        () -> testPositive("test?", "test")),
+                //    valid
+                DynamicTest.dynamicTest("tag key is valid",
+                        () -> testPositive("gcp prefix-_", "test")),
+                DynamicTest.dynamicTest("tag key is valid",
+                        () -> testPositive("cod_database_name", "appletree")),
+                DynamicTest.dynamicTest("tag key is valid",
+                        () -> testPositive("cod_database_crn", "appletree")),
 
-    @InjectMocks
-    private GcpTagValidator underTest;
-
-    private TagSpecification tagSpecification = new TagSpecification(
-            1,
-            2,
-            3,
-            "apple0",
-            4,
-            5,
-            "apple1");
-
-    @BeforeEach
-    public void before() {
-        when(platformParameters.tagSpecification()).thenReturn(tagSpecification);
-        underTest.init();
+                // TAG VALUE
+                // min.length
+                DynamicTest.dynamicTest("empty tag value is allowed",
+                        () -> testPositive("test", "")),
+                // max.length
+                // NOTE: anything above 63 is truncated by GcpLabelUtil
+                DynamicTest.dynamicTest("tag value is too long, gets truncated",
+                        () -> testPositive("test", generateLongString(64))),
+                // key.validator
+                //   spaces
+                // NOTE: GcpLabelUtil converts spaces to hyphens
+                DynamicTest.dynamicTest("tag value starts with space, gets repaced",
+                        () -> testPositive("test", " startswithspace")),
+                // NOTE: GcpLabelUtil converts spaces to hyphens
+                DynamicTest.dynamicTest("tag value ends with space, gets replaced",
+                        () -> testPositive("test", "endswithspace ")),
+                //   non-allowed: , < > % & \ / ?
+                DynamicTest.dynamicTest("tag value contains ',', it gets removed",
+                        () -> testPositive("test", "test,")),
+                DynamicTest.dynamicTest("tag value contains '<', it gets removed",
+                        () -> testPositive("test", "test<")),
+                DynamicTest.dynamicTest("tag value contains '>', it gets removed",
+                        () -> testPositive("test", "test>")),
+                DynamicTest.dynamicTest("tag value contains '%', it gets removed",
+                        () -> testPositive("test", "test%")),
+                DynamicTest.dynamicTest("tag value contains '&', it gets removed",
+                        () -> testPositive("test", "test&")),
+                DynamicTest.dynamicTest("tag value contains '/', it gets removed",
+                        () -> testPositive("test", "test/")),
+                DynamicTest.dynamicTest("tag value contains '\\', it gets removed",
+                        () -> testPositive("test", "test\\")),
+                DynamicTest.dynamicTest("tag value contains '?', it gets removed",
+                        () -> testPositive("test", "test?")),
+                //    valid
+                DynamicTest.dynamicTest("tag key is valid",
+                        () -> testPositive("test", "test-_")),
+                DynamicTest.dynamicTest("tag key is valid",
+                        () -> testPositive("test", "test"))
+        );
     }
 
-    @Test
-    public void testGetKeyValidatorShouldReturnValuePattern() {
-        Pattern expected = Pattern.compile("apple0");
-        Assert.assertEquals(underTest.getKeyValidator().pattern(), expected.pattern());
+    public String generateLongString(int length) {
+        return "a".repeat(length);
     }
 
-    @Test
-    public void testGetValueValidatorShouldReturnValuePattern() {
-        Pattern expected = Pattern.compile("apple1");
-        Assert.assertEquals(underTest.getValueValidator().pattern(), expected.pattern());
+    public void testNegative(String tag, String value, String messagePortion) {
+        ValidationResult result = tagValidatorUnderTest.validateTags(Map.of(tag, value));
+        Assertions.assertTrue(result.hasError(), "tag validation should fail");
+        Assertions.assertTrue(result.getErrors().size() == 1, "tag validation should have one error only");
+        Assertions.assertTrue(result.getErrors().get(0).contains(messagePortion));
     }
 
-    @Test
-    public void testGetTagSpecificationShouldReturnTagSpecification() {
-        Assert.assertEquals(underTest.getTagSpecification(), tagSpecification);
+    public void testPositive(String tag, String value) {
+        ValidationResult result = tagValidatorUnderTest.validateTags(Map.of(tag, value));
+        Assertions.assertFalse(result.hasError(), "tag validation should pass");
     }
 
-    @Test
-    public void testTransformGoogleLabel() {
-        when(gcpLabelUtil.transformLabelKeyOrValue("apple")).thenReturn("apple1");
-        Assert.assertEquals(underTest.transform("apple"), "apple1");
+    public void testEmptyTagKey(String tag, String value) {
+        ValidationResult result = tagValidatorUnderTest.validateTags(Map.of(tag, value));
+        Assertions.assertTrue(result.hasError(), "tag validation should fail");
+        Assertions.assertTrue(result.getErrors().size() == 2, "tag validation should have one error only");
+        Assertions.assertTrue(result.getErrors().get(0).contains("not well formatted"));
+        Assertions.assertTrue(result.getErrors().get(1).contains("too short"));
     }
+
+    @Configuration
+    @Import({CloudPlatformConnectors.class,
+            GcpConfig.class,
+            GcpTagValidator.class,
+            GcpPlatformParameters.class,
+            CloudbreakResourceReaderService.class,
+            GcpLabelUtil.class
+    })
+    static class Config {
+
+        @Inject
+        GcpTagValidator gcpTagValidator;
+
+        @Bean
+        CloudConnector<Object> cloud() {
+            PlatformParameters parameter = parameters();
+            CloudConnector mock = Mockito.mock(CloudConnector.class);
+            when(mock.parameters()).thenReturn(parameter);
+            when(mock.platform()).thenReturn(Platform.platform(CloudConstants.GCP));
+            when(mock.variant()).thenReturn(Variant.variant(CloudConstants.GCP));
+            return mock;
+        }
+
+        @Bean
+        PlatformParameters parameters() {
+            PlatformParameters mock = Mockito.mock(PlatformParameters.class);
+            when(mock.tagValidator()).thenReturn(gcpTagValidator);
+            return mock;
+        }
+    }
+
 }
