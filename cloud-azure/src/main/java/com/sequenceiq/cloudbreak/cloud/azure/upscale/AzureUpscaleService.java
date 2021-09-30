@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.ListUtils;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -36,6 +37,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.notification.ResourceNotifier;
 import com.sequenceiq.cloudbreak.cloud.transform.CloudResourceHelper;
+import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -78,10 +80,12 @@ public class AzureUpscaleService {
         List<CloudResource> templateResources = new ArrayList<>();
         List<CloudResource> osDiskResources = new ArrayList<>();
 
+        DateTime preDeploymentTime = DateTime.now();
+        filterExistingInstances(azureStackView);
         try {
             List<Group> scaledGroups = cloudResourceHelper.getScaledGroups(stack);
             CloudResource armTemplate = getArmTemplate(resources, stackName);
-            purgeExistingInstances(azureStackView);
+
             Deployment templateDeployment =
                     azureTemplateDeploymentService.getTemplateDeployment(client, stack, ac, azureStackView, AzureInstanceTemplateOperation.UPSCALE);
             LOGGER.info("Created template deployment for upscale: {}", templateDeployment.exportTemplate().template());
@@ -102,26 +106,61 @@ public class AzureUpscaleService {
             azureComputeResourceService.buildComputeResourcesForUpscale(ac, stack, scaledGroups, newInstances, reattachableVolumeSets, networkResources);
 
             return Collections.singletonList(new CloudResourceStatus(armTemplate, ResourceStatus.IN_PROGRESS));
+        } catch (Retry.ActionFailedException e) {
+            rollbackResources(ac, client, stack, cloudContext, resources, preDeploymentTime);
+            throw azureUtils.convertToCloudConnectorException(e.getCause(), "Stack upscale");
         } catch (CloudException e) {
+            rollbackResources(ac, client, stack, cloudContext, resources, preDeploymentTime);
             throw azureUtils.convertToCloudConnectorException(e, "Stack upscale");
         } catch (RolledbackResourcesException e) {
-            rollbackInstances(ac, stack, resources, newInstances, templateResources, osDiskResources);
+            rollbackResources(ac, client, stack, cloudContext, resources, preDeploymentTime);
             throw new CloudConnectorException(String.format("Could not upscale Azure infrastructure, infrastructure was rolled back with resources: %s, %s",
                     stackName, e.getMessage()), e);
         } catch (Exception e) {
-            rollbackInstances(ac, stack, resources, newInstances, templateResources, osDiskResources);
+            rollbackResources(ac, client, stack, cloudContext, resources, preDeploymentTime);
             throw new CloudConnectorException(String.format("Could not upscale Azure infrastructure, infrastructure was rolled back: %s, %s", stackName,
                     e.getMessage()), e);
         }
     }
 
-    public void rollbackInstances(AuthenticatedContext ac, CloudStack stack, List<CloudResource> resources, List<CloudResource> newInstances,
-            List<CloudResource> templateResources, List<CloudResource> osDiskResources) {
+    public void rollbackResources(AuthenticatedContext ac, AzureClient client, CloudStack stack, CloudContext cloudContext,
+            List<CloudResource> resources, DateTime preDeploymentTime) {
+        String stackName = azureUtils.getStackName(cloudContext);
+        String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, stack);
+
+        Deployment templateDeployment = client.getTemplateDeployment(resourceGroupName, stackName);
+        if (templateDeployment == null) {
+            LOGGER.info("TemplateDeployment with resourceGroupName {} and deploymentName {} not found. Rollback cancelled.", resourceGroupName, stackName);
+            return;
+        }
+        if (isTemplateDeploymentObsolete(preDeploymentTime, templateDeployment)) {
+            LOGGER.info("TemplateDeployment with resourceGroupName {} and deploymentName {} is obsolete. Rollback cancelled.", resourceGroupName, stackName);
+            return;
+        }
+        List<CloudResource> templateResources = new ArrayList<>();
+        List<CloudResource> newInstances = new ArrayList<>();
+        List<CloudResource> osDiskResources = new ArrayList<>();
+
+        templateResources.addAll(azureCloudResourceService.getDeploymentCloudResources(templateDeployment));
+        List<Group> scaledGroups = cloudResourceHelper.getScaledGroups(stack);
+        newInstances.addAll(azureCloudResourceService.getInstanceCloudResources(stackName, templateResources, scaledGroups, resourceGroupName));
+        if (!newInstances.isEmpty()) {
+            osDiskResources.addAll(azureCloudResourceService.getAttachedOsDiskResources(newInstances, resourceGroupName, client));
+        } else {
+            LOGGER.warn("Skipping OS disk collection as there was no VM instance found amongst cloud resources for {}!", stackName);
+        }
+
         List<CloudInstance> newCloudInstances = getNewInstances(newInstances);
         List<CloudResource> allRemovableResource = new ArrayList<>();
         allRemovableResource.addAll(templateResources);
         allRemovableResource.addAll(osDiskResources);
+
         azureTerminationHelperService.downscale(ac, stack, newCloudInstances, resources, allRemovableResource);
+    }
+
+    private boolean isTemplateDeploymentObsolete(DateTime preDeploymentTime, Deployment templateDeployment) {
+        DateTime deploymentTimestamp = templateDeployment.timestamp();
+        return deploymentTimestamp == null || deploymentTimestamp.isBefore(preDeploymentTime);
     }
 
     private List<CloudInstance> getNewInstances(List<CloudResource> newInstances) {
@@ -138,7 +177,7 @@ public class AzureUpscaleService {
         return newCloudInstances;
     }
 
-    private void purgeExistingInstances(AzureStackView azureStackView) {
+    private void filterExistingInstances(AzureStackView azureStackView) {
         azureStackView.getGroups().forEach((key, value) -> value.removeIf(AzureInstanceView::hasRealInstanceId));
         azureStackView.getGroups().entrySet().removeIf(group -> group.getValue() == null || group.getValue().isEmpty());
     }

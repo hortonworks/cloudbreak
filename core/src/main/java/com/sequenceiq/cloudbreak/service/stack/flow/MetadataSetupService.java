@@ -123,10 +123,10 @@ public class MetadataSetupService {
         });
     }
 
-    public void cleanupRequestedInstancesWithoutFQDN(Stack stack, String instanceGroupName) {
+    public void cleanupRequestedInstancesWithoutFQDN(Long stackId, String instanceGroupName) {
         try {
             transactionService.required(() -> {
-                Optional<InstanceGroup> ig = instanceGroupService.findOneWithInstanceMetadataByGroupNameInStack(stack.getId(), instanceGroupName);
+                Optional<InstanceGroup> ig = instanceGroupService.findOneWithInstanceMetadataByGroupNameInStack(stackId, instanceGroupName);
                 if (ig.isPresent()) {
                     List<InstanceMetaData> requestedInstances = instanceMetaDataService.findAllByInstanceGroupAndInstanceStatus(ig.get(),
                             InstanceStatus.REQUESTED);
