@@ -43,7 +43,6 @@ import reactor.bus.selector.Selectors;
 @Service
 @Transactional
 public class DefaultCloudbreakEventService implements CloudbreakEventService {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultCloudbreakEventService.class);
 
     private static final String CLOUDBREAK_EVENT = "CLOUDBREAK_EVENT";
@@ -171,5 +170,4 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
     private boolean stackTypeIsDistroX(StackType stackType) {
         return stackType == null || StackType.WORKLOAD.equals(stackType);
     }
-
 }
