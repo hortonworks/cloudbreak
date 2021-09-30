@@ -18,13 +18,6 @@ export CB_CERT=cert
 export IS_PROXY_ENABLED=false
 export IS_CCM_ENABLED=false
 export IS_CCM_V2_ENABLED=true
-export CCM_V2_INVERTING_PROXY_CERTIFICATE="invertingProxyCertificate"
-export CCM_V2_INVERTING_PROXY_HOST="invertingProxyHost"
-export CCM_V2_AGENT_CERTIFICATE="agentCertificate"
-export CCM_V2_AGENT_ENCIPHERED_KEY="agentEncipheredPrivateKey"
-export CCM_V2_AGENT_KEY_ID="agentKeyId"
-export CCM_V2_AGENT_CRN="agentCrn"
-export CCM_V2_AGENT_BACKEND_ID_PREFIX="agentCrn-"
 export IS_CCM_V2_JUMPGATE_ENABLED=true
 
 date >> /tmp/time.txt

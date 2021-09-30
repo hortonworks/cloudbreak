@@ -52,13 +52,27 @@ export IS_CCM_ENABLED=false
 </#if>
 <#if ccmV2Enabled!false>
 export IS_CCM_V2_ENABLED=true
+<#if ccmV2InvertingProxyCertificate?has_content>
 export CCM_V2_INVERTING_PROXY_CERTIFICATE="${ccmV2InvertingProxyCertificate}"
+</#if>
+<#if ccmV2InvertingProxyHost?has_content>
 export CCM_V2_INVERTING_PROXY_HOST="${ccmV2InvertingProxyHost}"
+</#if>
+<#if ccmV2AgentCertificate?has_content>
 export CCM_V2_AGENT_CERTIFICATE="${ccmV2AgentCertificate}"
+</#if>
+<#if ccmV2AgentEncipheredKey?has_content>
 export CCM_V2_AGENT_ENCIPHERED_KEY="${ccmV2AgentEncipheredKey}"
+</#if>
+<#if ccmV2AgentKeyId?has_content>
 export CCM_V2_AGENT_KEY_ID="${ccmV2AgentKeyId}"
+</#if>
+<#if ccmV2AgentCrn?has_content>
 export CCM_V2_AGENT_CRN="${ccmV2AgentCrn}"
+</#if>
+<#if ccmV2AgentBackendIdPrefix?has_content>
 export CCM_V2_AGENT_BACKEND_ID_PREFIX="${ccmV2AgentBackendIdPrefix}"
+</#if>
 <#else>
 export IS_CCM_V2_ENABLED=false
 </#if>

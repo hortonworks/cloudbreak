@@ -1,10 +1,13 @@
 package com.sequenceiq.cloudbreak.reactor.handler.recipe;
 
+import static com.sequenceiq.common.api.type.Tunnel.CCMV2_JUMPGATE;
+import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -113,12 +116,28 @@ class CcmKeyDeregisterHandlerTest {
     }
 
     @Test
+    void testWhenTunnelIsCcmV2JumpgateAndNoAgentRegisteredThenCcmV2AgentDeregistrationIsNeverCalled() {
+        Stack stack = setupBasicStack();
+        stack.setCcmV2AgentCrn(EMPTY);
+
+        CcmKeyDeregisterRequest request =
+                new CcmKeyDeregisterRequest(STACK_ID, ACTOR_CRN, ACCOUNT, KEY_ID, CCMV2_JUMPGATE);
+        Event<CcmKeyDeregisterRequest> event = new Event<>(request);
+
+        underTest.accept(event);
+
+        verify(ccmV2AgentTerminationListener, never()).deregisterInvertingProxyAgent(AGENT_CRN);
+        verifyNoMoreInteractions(ccmResourceTerminationListener);
+        checkSuccess();
+    }
+
+    @Test
     void testWhenErrorHappensDuringDeregistrationStillSuccess() {
         Stack stack = setupBasicStack();
         stack.setCcmV2AgentCrn(AGENT_CRN);
 
         CcmKeyDeregisterRequest request =
-                new CcmKeyDeregisterRequest(STACK_ID, ACTOR_CRN, ACCOUNT, KEY_ID, Tunnel.CCMV2_JUMPGATE);
+                new CcmKeyDeregisterRequest(STACK_ID, ACTOR_CRN, ACCOUNT, KEY_ID, CCMV2_JUMPGATE);
         Event<CcmKeyDeregisterRequest> event = new Event<>(request);
 
         doAnswer(a -> {
@@ -134,7 +153,7 @@ class CcmKeyDeregisterHandlerTest {
     @Test
     void testWhenErrorHappensDuringStackRetrieval() {
         CcmKeyDeregisterRequest request =
-                new CcmKeyDeregisterRequest(STACK_ID, ACTOR_CRN, ACCOUNT, KEY_ID, Tunnel.CCMV2_JUMPGATE);
+                new CcmKeyDeregisterRequest(STACK_ID, ACTOR_CRN, ACCOUNT, KEY_ID, CCMV2_JUMPGATE);
         Event<CcmKeyDeregisterRequest> event = new Event<>(request);
 
         doAnswer(a -> {

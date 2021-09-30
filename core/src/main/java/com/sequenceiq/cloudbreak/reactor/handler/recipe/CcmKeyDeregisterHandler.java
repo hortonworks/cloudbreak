@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.reactor.handler.recipe;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -50,7 +51,7 @@ public class CcmKeyDeregisterHandler implements EventHandler<CcmKeyDeregisterReq
                     ccmResourceTerminationListener.deregisterCcmSshTunnelingKey(request.getActorCrn(), request.getAccountId(), request.getKeyId(),
                             stack.getMinaSshdServiceId());
                     LOGGER.debug("De-registered MinaSshdServiceId '{}' from CCM. Cluster CRN: {}", stack.getMinaSshdServiceId(), stack.getResourceCrn());
-                } else if (request.getTunnel().useCcmV2OrJumpgate()) {
+                } else if (request.getTunnel().useCcmV2OrJumpgate() && StringUtils.isNotBlank(stack.getCcmV2AgentCrn())) {
                     LOGGER.debug("De-registering CcmV2AgentCrn '{}' from CCM. Cluster CRN: {}", stack.getCcmV2AgentCrn(), stack.getResourceCrn());
                     ccmV2AgentTerminationListener.deregisterInvertingProxyAgent(stack.getCcmV2AgentCrn());
                     LOGGER.debug("De-registered CcmV2AgentCrn '{}' from CCM. Cluster CRN: {}", stack.getCcmV2AgentCrn(), stack.getResourceCrn());

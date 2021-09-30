@@ -1,11 +1,14 @@
 package com.sequenceiq.cloudbreak.ccm.cloudinit;
 
 import static com.sequenceiq.cloudbreak.ccm.cloudinit.CcmV2ParameterConstants.CCMV2_BACKEND_ID_FORMAT;
+import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 import java.io.Serializable;
 import java.util.Map;
 
 import javax.annotation.Nonnull;
+
+import org.apache.commons.lang3.StringUtils;
 
 public class DefaultCcmV2Parameters implements CcmV2Parameters, Serializable {
 
@@ -72,7 +75,8 @@ public class DefaultCcmV2Parameters implements CcmV2Parameters, Serializable {
         model.put(CcmV2ParameterConstants.CCMV2_AGENT_CRN, getAgentCrn());
         model.put(CcmV2ParameterConstants.CCMV2_AGENT_ENCIPHERED_KEY, getAgentEncipheredPrivateKey());
         model.put(CcmV2ParameterConstants.CCMV2_AGENT_CERTIFICATE, getAgentCertificate());
-        model.put(CcmV2ParameterConstants.CCMV2_AGENT_BACKEND_ID_PREFIX,
-                String.format(CCMV2_BACKEND_ID_FORMAT, getAgentCrn(), ""));
+        model.put(CcmV2ParameterConstants.CCMV2_AGENT_BACKEND_ID_PREFIX, StringUtils.isNotBlank(getAgentCrn())
+                ? String.format(CCMV2_BACKEND_ID_FORMAT, getAgentCrn(), EMPTY)
+                : EMPTY);
     }
 }

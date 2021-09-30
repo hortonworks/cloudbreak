@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.ccm.cloudinit;
 
+import static org.apache.commons.lang3.StringUtils.EMPTY;
+
 import java.util.Map;
 
 import javax.annotation.Nonnull;
@@ -16,6 +18,10 @@ public class DefaultCcmV2JumpgateParameters extends DefaultCcmV2Parameters imple
         super(invertingProxyHost, invertingProxyCertificate, agentCrn, agentKeyId, agentEncipheredPrivateKey, agentCertificate);
         this.agentMachineUserAccessKey = agentMachineUserAccessKey;
         this.agentMachineUserEncipheredAccessKey = agentMachineUserEncipheredAccessKey;
+    }
+
+    public DefaultCcmV2JumpgateParameters() {
+        this(EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
     }
 
     @Override
