@@ -52,6 +52,7 @@ import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterConfig;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
@@ -288,7 +289,9 @@ public class StackCreationService {
         for (InstanceGroup ig : stack.getInstanceGroups()) {
             Template template = ig.getTemplate();
             if (template != null) {
-                addInstanceStorageVolumeTemplateToTemplate(instanceStoreMetadata, ig, template);
+                if (stack.cloudPlatform() != null && stack.getCloudPlatform().equals(CloudPlatform.AWS.name())) {
+                    addInstanceStorageVolumeTemplateToTemplate(instanceStoreMetadata, ig, template);
+                }
                 Integer instanceStorageCount = instanceStoreMetadata.mapInstanceTypeToInstanceStoreCountNullHandled(template.getInstanceType());
                 LOGGER.debug("Setting instance storage count in template. " +
                         "Group name: {}, Template id: {}, instance type: {}", ig.getGroupName(), template.getId(), template.getInstanceType());

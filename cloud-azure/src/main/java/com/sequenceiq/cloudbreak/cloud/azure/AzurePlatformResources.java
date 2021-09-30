@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
+import static com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType.EPHEMERAL;
 import static com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType.MAGNETIC;
 import static com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType.SSD;
 
@@ -37,7 +38,8 @@ import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClientService;
 import com.sequenceiq.cloudbreak.cloud.azure.resource.AzureRegionProvider;
-import com.sequenceiq.cloudbreak.filter.MinimalHardwareFilter;
+import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfig;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -52,14 +54,17 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSecurityGroups;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSshKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceStoreMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta.VmTypeMetaBuilder;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterConfig;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTables;
 import com.sequenceiq.cloudbreak.cloud.model.resourcegroup.CloudResourceGroup;
 import com.sequenceiq.cloudbreak.cloud.model.resourcegroup.CloudResourceGroups;
 import com.sequenceiq.cloudbreak.cloud.model.view.PlatformResourceSecurityGroupFilterView;
+import com.sequenceiq.cloudbreak.filter.MinimalHardwareFilter;
 import com.sequenceiq.cloudbreak.util.PermanentlyFailedException;
 
 @Service
@@ -335,5 +340,25 @@ public class AzurePlatformResources implements PlatformResources {
         resourceGroupPagedList.loadAll();
         List<CloudResourceGroup> resourceGroups = resourceGroupPagedList.stream().map(rg -> new CloudResourceGroup(rg.name())).collect(Collectors.toList());
         return new CloudResourceGroups(resourceGroups);
+    }
+
+    public InstanceStoreMetadata collectInstanceStorageCount(AuthenticatedContext ac, List<String> instanceTypes) {
+        try {
+            AzureClient client = azureClientService.getClient(ac.getCloudCredential());
+            Set<VirtualMachineSize> vmTypes = client.getVmTypes(ac.getCloudContext().getLocation().getRegion().value());
+
+            Map<String, VolumeParameterConfig> instanceTypeToInstanceStorageMap = vmTypes.stream()
+                    .filter(vmType -> instanceTypes.contains(vmType.name()))
+                    .filter(vmType -> vmType.resourceDiskSizeInMB() != NO_RESOURCE_DISK_ATTACHED_TO_INSTANCE)
+                    .collect(Collectors.toMap(VirtualMachineSize::name, vmType -> new VolumeParameterConfig(EPHEMERAL,
+                            (int) (vmType.resourceDiskSizeInMB() / NO_MB_PER_GB),
+                            (int) (vmType.resourceDiskSizeInMB() / NO_MB_PER_GB),
+                            1,
+                            1)));
+            return new InstanceStoreMetadata(instanceTypeToInstanceStorageMap);
+        } catch (Exception e) {
+            LOGGER.warn("Failed to get vm type data: {}", instanceTypes, e);
+            throw new CloudConnectorException(e.getMessage(), e);
+        }
     }
 }
