@@ -25,7 +25,7 @@
           },
           {
             "name": "core_site_safety_valve",
-            "value": "<property><name>fs.s3a.buffer.dir</name><value>${env.LOCAL_DIRS:-${hadoop.tmp.dir}}/s3a</value></property><property><name>fs.s3a.committer.name</name><value>directory</value></property>property><name>fs.azure.buffer.dir</name><value>${env.LOCAL_DIRS:-${hadoop.tmp.dir}}/abfs</value></property>"
+            "value": "<property><name>fs.s3a.buffer.dir</name><value>${env.LOCAL_DIRS:-${hadoop.tmp.dir}}/s3a</value></property><property><name>fs.s3a.committer.name</name><value>directory</value></property><property><name>fs.azure.buffer.dir</name><value>${env.LOCAL_DIRS:-${hadoop.tmp.dir}}/abfs</value></property>"
           }
         ],
         "roleConfigGroups": [
