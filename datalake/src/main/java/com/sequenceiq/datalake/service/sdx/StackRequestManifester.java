@@ -153,9 +153,7 @@ public class StackRequestManifester {
             setupCloudStorageAccountMapping(stackRequest, environment.getCrn(), environment.getIdBrokerMappingSource(), environment.getCloudPlatform());
             validateCloudStorage(sdxCluster, environment, stackRequest);
             setupInstanceVolumeEncryption(stackRequest, environment);
-            if (entitlementService.awsNativeDataLakeEnabled(ThreadBasedUserCrnProvider.getAccountId()) && sdxCluster.isEnableMultiAz()) {
-                multiAzDecorator.decorateStackRequestWithMultiAz(stackRequest, environment);
-            }
+            setupMultiAz(sdxCluster, environment, stackRequest);
             return stackRequest;
         } catch (IOException e) {
             LOGGER.error("Can not parse JSON to stack request");
@@ -402,4 +400,10 @@ public class StackRequestManifester {
         }
     }
 
+    private void setupMultiAz(SdxCluster sdxCluster, DetailedEnvironmentResponse environment, StackV4Request stackRequest) {
+        if (entitlementService.awsNativeDataLakeEnabled(ThreadBasedUserCrnProvider.getAccountId()) && sdxCluster.isEnableMultiAz()) {
+            multiAzDecorator.decorateStackRequestWithAwsNative(stackRequest);
+            multiAzDecorator.decorateStackRequestWithMultiAz(stackRequest, environment, sdxCluster.getClusterShape());
+        }
+    }
 }
