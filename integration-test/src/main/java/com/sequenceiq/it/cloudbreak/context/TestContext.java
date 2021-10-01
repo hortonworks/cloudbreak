@@ -47,6 +47,7 @@ import com.sequenceiq.it.cloudbreak.cloud.v4.CloudProviderProxy;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.finder.Attribute;
 import com.sequenceiq.it.cloudbreak.finder.Capture;
@@ -56,6 +57,7 @@ import com.sequenceiq.it.cloudbreak.util.ErrorLogMessageProvider;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
 import com.sequenceiq.it.cloudbreak.util.wait.FlowUtil;
 import com.sequenceiq.it.cloudbreak.util.wait.service.ResourceAwait;
+import com.sequenceiq.it.cloudbreak.util.wait.service.freeipa.instance.FreeIpaInstanceAwait;
 import com.sequenceiq.it.cloudbreak.util.wait.service.instance.InstanceAwait;
 
 import io.opentracing.Tracer;
@@ -131,6 +133,9 @@ public abstract class TestContext implements ApplicationContextAware {
 
     @Inject
     private InstanceAwait instanceAwait;
+
+    @Inject
+    private FreeIpaInstanceAwait freeIpaInstanceAwait;
 
     @Inject
     private ErrorLogMessageProvider errorLogMessageProvider;
@@ -982,6 +987,27 @@ public abstract class TestContext implements ApplicationContextAware {
         String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
         CloudbreakTestDto awaitEntity = get(key);
         instanceAwait.await(awaitEntity, desiredStatuses, getTestContext(), runningParameter, pollingInterval, maxRetry);
+        return entity;
+    }
+
+    public <T extends CloudbreakTestDto> T awaitForFreeIpaInstance(T entity, Map<List<String>,
+            com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus> desiredStatuses,
+            RunningParameter runningParameter) {
+        return awaitForFreeIpaInstance(entity, desiredStatuses, runningParameter, getPollingDurationInMills());
+    }
+
+    public <T extends CloudbreakTestDto> T awaitForFreeIpaInstance(T entity,
+            Map<List<String>, com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus> desiredStatuses,
+            RunningParameter runningParameter, Duration pollingInterval) {
+        checkShutdown();
+        if (!getExceptionMap().isEmpty() && runningParameter.isSkipOnFail()) {
+            Log.await(LOGGER, String.format("Cloudbreak await for instance should be skipped because of previous error. awaitforinstance [%s]",
+                    desiredStatuses));
+            return entity;
+        }
+        String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
+        FreeIpaTestDto awaitEntity = get(key);
+        freeIpaInstanceAwait.await(awaitEntity, desiredStatuses, getTestContext(), runningParameter, pollingInterval, maxRetry);
         return entity;
     }
 
