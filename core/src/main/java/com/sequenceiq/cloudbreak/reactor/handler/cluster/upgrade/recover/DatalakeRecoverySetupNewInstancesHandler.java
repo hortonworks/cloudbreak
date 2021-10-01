@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.controller.StackCreatorService;
+import com.sequenceiq.cloudbreak.core.flow2.dto.NetworkScaleDetails;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.recovery.bringup.DatalakeRecoverySetupNewInstancesFailedEvent;
@@ -75,7 +76,7 @@ public class DatalakeRecoverySetupNewInstancesHandler extends ExceptionCatcherEv
         List<InstanceGroup> instanceGroups = stackCreatorService.sortInstanceGroups(stack);
         for (InstanceGroup instanceGroup : instanceGroups) {
             instanceMetaDataService.saveInstanceAndGetUpdatedStack(stack, instanceGroup.getInitialNodeCount(), instanceGroup.getGroupName(), true,
-                    Collections.emptySet(), false);
+                    Collections.emptySet(), false, NetworkScaleDetails.getEmpty());
         }
     }
 }

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
+import com.sequenceiq.cloudbreak.core.flow2.dto.NetworkScaleDetails;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StackRepairTriggerEvent;
@@ -33,7 +34,7 @@ public class StackRepairFlowEventChainFactory implements FlowEventChainFactory<S
             List<String> instances = unhealthyInstances.getInstancesForGroup(hostGroupName);
             flowEventChain.add(
                     new StackAndClusterUpscaleTriggerEvent(fullUpscaleTriggerEvent, event.getResourceId(), hostGroupName,
-                            instances.size(), ScalingType.UPSCALE_TOGETHER));
+                            instances.size(), ScalingType.UPSCALE_TOGETHER, NetworkScaleDetails.getEmpty()));
         }
         return new FlowTriggerEventQueue(getName(), event, flowEventChain);
     }

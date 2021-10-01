@@ -111,6 +111,7 @@ public class StackUpscaleActions {
                 variables.put(ADJUSTMENT, payload.getAdjustment());
                 variables.put(HOSTNAMES, payload.getHostNames());
                 variables.put(REPAIR, payload.isRepair());
+                variables.put(NETWORK_SCALE_DETAILS, payload.getNetworkScaleDetails());
             }
 
             @Override
@@ -132,7 +133,7 @@ public class StackUpscaleActions {
                 LOGGER.debug("Assembling upscale stack event for stack: {}", context.getStack());
                 int instanceCountToCreate = getInstanceCountToCreate(context.getStack(), context.getInstanceGroupName(), context.getAdjustment());
                 Stack updatedStack = instanceMetaDataService.saveInstanceAndGetUpdatedStack(context.getStack(), instanceCountToCreate,
-                        context.getInstanceGroupName(), false, context.getHostNames(), context.isRepair());
+                        context.getInstanceGroupName(), false, context.getHostNames(), context.isRepair(), context.getStackNetworkScaleDetails());
                 CloudStack cloudStack = cloudStackConverter.convert(updatedStack);
                 return new UpscaleStackValidationRequest<UpscaleStackValidationResult>(context.getCloudContext(), context.getCloudCredential(), cloudStack);
             }
@@ -152,7 +153,7 @@ public class StackUpscaleActions {
                 LOGGER.debug("Assembling upscale stack event for stack: {}", context.getStack());
                 int instanceCountToCreate = getInstanceCountToCreate(context.getStack(), context.getInstanceGroupName(), context.getAdjustment());
                 Stack updatedStack = instanceMetaDataService.saveInstanceAndGetUpdatedStack(context.getStack(), instanceCountToCreate,
-                        context.getInstanceGroupName(), true, context.getHostNames(), context.isRepair());
+                        context.getInstanceGroupName(), true, context.getHostNames(), context.isRepair(), context.getStackNetworkScaleDetails());
                 List<CloudResource> resources = context.getStack().getResources().stream()
                         .map(r -> cloudResourceConverter.convert(r))
                         .collect(Collectors.toList());
@@ -200,7 +201,7 @@ public class StackUpscaleActions {
                 List<CloudInstance> allKnownInstances = cloudStackConverter.buildInstances(context.getStack());
                 LOGGER.info("All known instances: {}", allKnownInstances);
                 Set<String> unusedInstancesForGroup = instanceMetaDataService.unusedInstancesInInstanceGroupByName(context.getStack().getId(),
-                        context.getInstanceGroupName()).stream()
+                                context.getInstanceGroupName()).stream()
                         .map(InstanceMetaData::getInstanceId)
                         .collect(Collectors.toSet());
                 LOGGER.info("Unused instances for group: {}", unusedInstancesForGroup);

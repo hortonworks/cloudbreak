@@ -4,9 +4,11 @@ import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sequenceiq.common.model.JsonEntity;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkScaleV4Request;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.InstanceGroupAdjustmentModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.InstanceGroupModelDescription;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.InstanceGroupNetworkScaleModelDescription;
+import com.sequenceiq.common.model.JsonEntity;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -27,6 +29,9 @@ public class StackScaleV4Request implements JsonEntity {
 
     @ApiModelProperty(InstanceGroupAdjustmentModelDescription.FORCE)
     private Boolean forced;
+
+    @ApiModelProperty(value = InstanceGroupNetworkScaleModelDescription.NETWORK_SCALE_REQUEST)
+    private NetworkScaleV4Request networkScaleV4Request;
 
     public String getGroup() {
         return group;
@@ -60,5 +65,13 @@ public class StackScaleV4Request implements JsonEntity {
 
     public void setForced(Boolean forced) {
         this.forced = forced;
+    }
+
+    public NetworkScaleV4Request getStackNetworkScaleV4Request() {
+        return networkScaleV4Request;
+    }
+
+    public void setStackNetworkScaleV4Request(NetworkScaleV4Request networkScaleV4Request) {
+        this.networkScaleV4Request = networkScaleV4Request;
     }
 }

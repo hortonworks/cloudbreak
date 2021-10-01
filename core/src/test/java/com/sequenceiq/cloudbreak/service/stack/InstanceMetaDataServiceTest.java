@@ -39,6 +39,7 @@ import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.core.flow2.dto.NetworkScaleDetails;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
@@ -122,13 +123,13 @@ class InstanceMetaDataServiceTest {
             instanceMetaData.setSubnetId(subnetId);
             instanceMetaData.setAvailabilityZone(availabilityZone);
             return null;
-        }).when(multiAzCalculatorService).calculateByRoundRobin(eq(subnetAzPairs), any(InstanceGroup.class), any(InstanceMetaData.class));
+        }).when(multiAzCalculatorService).calculateByRoundRobin(eq(subnetAzPairs), any(InstanceGroup.class), any(InstanceMetaData.class), any());
         when(multiAzCalculatorService.determineRackId(subnetId, availabilityZone)).thenReturn(rackId);
 
-        Stack result = underTest.saveInstanceAndGetUpdatedStack(stack, 1, groupName(0), save, new LinkedHashSet<>(hostnames), false);
+        Stack result = underTest.saveInstanceAndGetUpdatedStack(stack, 1, groupName(0), save, new LinkedHashSet<>(hostnames), false,
+                NetworkScaleDetails.getEmpty());
 
         assertThat(result).isSameAs(stack);
-
         Set<InstanceGroup> resultInstanceGroups = result.getInstanceGroups();
         assertThat(resultInstanceGroups).isNotNull();
         assertThat(resultInstanceGroups).hasSize(INSTANCE_GROUP_COUNT);
@@ -209,14 +210,13 @@ class InstanceMetaDataServiceTest {
             instanceMetaData.setSubnetId(subnetId);
             instanceMetaData.setAvailabilityZone(availabilityZone);
             return null;
-        }).when(multiAzCalculatorService).calculateByRoundRobin(eq(subnetAzPairs), any(InstanceGroup.class), any(InstanceMetaData.class));
+        }).when(multiAzCalculatorService).calculateByRoundRobin(eq(subnetAzPairs), any(InstanceGroup.class), any(InstanceMetaData.class), any());
         when(multiAzCalculatorService.determineRackId(subnetId, availabilityZone)).thenReturn(rackId);
 
         Stack result = underTest.saveInstanceAndGetUpdatedStack(stack, INSTANCE_GROUP_COUNT, groupName(INSTANCE_GROUP_COUNT - 1), save,
-                new LinkedHashSet<>(hostnames), false);
+                new LinkedHashSet<>(hostnames), false, NetworkScaleDetails.getEmpty());
 
         assertThat(result).isSameAs(stack);
-
         Set<InstanceGroup> resultInstanceGroups = result.getInstanceGroups();
         assertThat(resultInstanceGroups).isNotNull();
         assertThat(resultInstanceGroups).hasSize(INSTANCE_GROUP_COUNT);
@@ -245,10 +245,10 @@ class InstanceMetaDataServiceTest {
         Map<String, String> subnetAzPairs = Map.of();
         when(multiAzCalculatorService.prepareSubnetAzMap(environment, null)).thenReturn(subnetAzPairs);
 
-        Stack result = underTest.saveInstanceAndGetUpdatedStack(stack, 1, groupName(3), save, new LinkedHashSet<>(hostnames), false);
+        Stack result = underTest.saveInstanceAndGetUpdatedStack(stack, 1, groupName(3), save, new LinkedHashSet<>(hostnames), false,
+                NetworkScaleDetails.getEmpty());
 
         assertThat(result).isSameAs(stack);
-
         Set<InstanceGroup> resultInstanceGroups = result.getInstanceGroups();
         assertThat(resultInstanceGroups).isNotNull();
         assertThat(resultInstanceGroups).hasSize(INSTANCE_GROUP_COUNT);
@@ -268,14 +268,13 @@ class InstanceMetaDataServiceTest {
         when(environmentClientService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environment);
         Map<String, String> subnetAzPairs = subnetId == null || availabilityZone == null ? Map.of() : Map.of(subnetId, availabilityZone);
         when(multiAzCalculatorService.prepareSubnetAzMap(environment, null)).thenReturn(subnetAzPairs);
-        doNothing().when(multiAzCalculatorService).calculateByRoundRobin(eq(subnetAzPairs), any(InstanceGroup.class), any(InstanceMetaData.class));
+        doNothing().when(multiAzCalculatorService).calculateByRoundRobin(eq(subnetAzPairs), any(InstanceGroup.class), any(InstanceMetaData.class), any());
         when(multiAzCalculatorService.determineRackId(subnetId, availabilityZone)).thenReturn(rackId);
 
         Stack result = underTest.saveInstanceAndGetUpdatedStack(stack, INSTANCE_GROUP_COUNT, groupName(INSTANCE_GROUP_COUNT - 1), save,
-                new LinkedHashSet<>(hostnames), false);
+                new LinkedHashSet<>(hostnames), false, NetworkScaleDetails.getEmpty());
 
         assertThat(result).isSameAs(stack);
-
         Set<InstanceGroup> resultInstanceGroups = result.getInstanceGroups();
         assertThat(resultInstanceGroups).isNotNull();
         assertThat(resultInstanceGroups).hasSize(INSTANCE_GROUP_COUNT);
@@ -290,7 +289,8 @@ class InstanceMetaDataServiceTest {
         when(environmentClientService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environment);
         when(multiAzCalculatorService.prepareSubnetAzMap(environment, null)).thenReturn(Map.of());
 
-        Stack result = underTest.saveInstanceAndGetUpdatedStack(stack, 0, groupName(INSTANCE_GROUP_COUNT - 1), true, Set.of(), false);
+        Stack result = underTest.saveInstanceAndGetUpdatedStack(stack, 0, groupName(INSTANCE_GROUP_COUNT - 1), true, Set.of(), false,
+                NetworkScaleDetails.getEmpty());
 
         assertThat(result).isSameAs(stack);
 
@@ -300,7 +300,7 @@ class InstanceMetaDataServiceTest {
         verifyInstances(resultInstanceGroups, List.of(), null, null, null, null, 0);
         verifyRepositorySave(resultInstanceGroups, false);
 
-        verify(multiAzCalculatorService, never()).calculateByRoundRobin(anyMap(), any(InstanceGroup.class), any(InstanceMetaData.class));
+        verify(multiAzCalculatorService, never()).calculateByRoundRobin(anyMap(), any(InstanceGroup.class), any(InstanceMetaData.class), any());
         verify(multiAzCalculatorService, never()).determineRackId(anyString(), anyString());
     }
 

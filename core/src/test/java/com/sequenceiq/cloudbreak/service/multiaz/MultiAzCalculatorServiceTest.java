@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.cloudbreak.controller.validation.network.MultiAzValidator;
+import com.sequenceiq.cloudbreak.core.flow2.dto.NetworkScaleDetails;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.stack.instance.network.InstanceGroupNetwork;
@@ -408,7 +409,8 @@ public class MultiAzCalculatorServiceTest {
         underTest.calculateByRoundRobin(
                 subnetAzPairs(subnetCount),
                 instanceGroup,
-                instanceMetaData);
+                instanceMetaData,
+                NetworkScaleDetails.getEmpty());
 
         verifyCloudInstance(expectedPermissibleSubnetIdIndexes, instanceMetaData);
         verifySubnetIdAndAvailabilityZoneForInstancesAreUnchanged(existingCounts, instanceGroup, Set.of());
@@ -432,7 +434,8 @@ public class MultiAzCalculatorServiceTest {
         underTest.calculateByRoundRobin(
                 subnetAzPairs(subnetCount),
                 instanceGroup,
-                instanceMetaData);
+                instanceMetaData,
+                NetworkScaleDetails.getEmpty());
 
         verifyCloudInstance(expectedPermissibleSubnetIdIndexes, instanceMetaData);
         verifySubnetIdAndAvailabilityZoneForInstancesAreUnchanged(existingCounts, instanceGroup, Set.of(instanceWithPrepopulatedForeignSubnetId));
@@ -474,7 +477,8 @@ public class MultiAzCalculatorServiceTest {
         underTest.calculateByRoundRobin(
                 subnetAzPairs(subnetCount),
                 instanceGroup,
-                instanceMetaData);
+                instanceMetaData,
+                NetworkScaleDetails.getEmpty());
 
         verifyCloudInstance(expectedPermissibleSubnetIdIndexes, instanceMetaData);
         verifySubnetIdAndAvailabilityZoneForInstancesAreUnchanged(existingCounts, instanceGroup, deletedInstancesWithPrepopulatedSubnetId);
@@ -521,7 +525,8 @@ public class MultiAzCalculatorServiceTest {
         underTest.calculateByRoundRobin(
                 subnetAzPairs(NO_SUBNETS),
                 instanceGroup,
-                instanceMetaData);
+                instanceMetaData,
+                NetworkScaleDetails.getEmpty());
 
         verifyCloudInstance(cloudInstanceSubnetId == null ? Set.of() : Set.of(cloudInstanceSubnetId),
                 cloudInstanceAvailabilityZone == null ? Set.of() : Set.of(cloudInstanceAvailabilityZone),
@@ -548,7 +553,8 @@ public class MultiAzCalculatorServiceTest {
         underTest.calculateByRoundRobin(
                 subnetAzPairs(SINGLE_SUBNET),
                 instanceGroup,
-                instanceMetaData);
+                instanceMetaData,
+                NetworkScaleDetails.getEmpty());
 
         verifyCloudInstance(Set.of(SUBNET_ID), Set.of(AVAILABILITY_ZONE), instanceMetaData);
         verifySubnetIdAndAvailabilityZoneForInstancesAreUnchanged(existingCounts, instanceGroup, Set.of());
@@ -589,7 +595,8 @@ public class MultiAzCalculatorServiceTest {
         underTest.calculateByRoundRobin(
                 subnetAzPairs(subnetCount),
                 instanceGroup,
-                instanceMetaData);
+                instanceMetaData,
+                NetworkScaleDetails.getEmpty());
 
         verifyCloudInstance(expectedPermissibleSubnetIdIndexes, instanceMetaData);
 
@@ -620,6 +627,57 @@ public class MultiAzCalculatorServiceTest {
         String rackId = underTest.determineRackId(subnetId, availabilityZone);
 
         assertThat(rackId).isEqualTo(rackIdExpected);
+    }
+
+    static Object[][] calculateByRoundRobinTestWhenCloudInstanceDataAndPreferredAvailabilityZones() {
+        return new Object[][]{
+                // cloudPlatform, subnetCount, instanceCount, existingCounts, supported, expectedPermissibleSubnetIdIndexes, PreferredSubnetIdIndexes
+                {CloudPlatform.AWS, 1, 0, List.of(), true, Set.of(0), Set.of()},
+                {CloudPlatform.AWS, 1, 1, List.of(1), true, Set.of(0), Set.of(0)},
+                {CloudPlatform.AWS, 1, 2, List.of(2), true, Set.of(0), Set.of(0)},
+                {CloudPlatform.AWS, 2, 2, List.of(1, 1), true, Set.of(0, 1), Set.of()},
+                {CloudPlatform.AWS, 2, 2, List.of(1, 1), true, Set.of(1), Set.of(1)},
+                {CloudPlatform.AWS, 3, 0, List.of(), true, Set.of(0, 2), Set.of(0, 2)},
+                {CloudPlatform.AWS, 3, 1, List.of(1, 0, 0), true, Set.of(1, 2), Set.of(1, 2)},
+                {CloudPlatform.AWS, 3, 1, List.of(0, 1, 0), true, Set.of(2), Set.of(2)},
+                {CloudPlatform.AWS, 3, 1, List.of(0, 0, 1), true, Set.of(0), Set.of(0)},
+                {CloudPlatform.AWS, 3, 2, List.of(2, 0, 0), true, Set.of(1, 2), Set.of()},
+                {CloudPlatform.AWS, 3, 4, List.of(4, 0, 0), true, Set.of(0), Set.of(0)},
+                {CloudPlatform.AWS, 3, 4, List.of(0, 4, 0), true, Set.of(2), Set.of(1, 2)},
+                {CloudPlatform.AWS, 3, 4, List.of(0, 0, 4), true, Set.of(0), Set.of(0, 2)},
+                {CloudPlatform.AWS, 3, 4, List.of(2, 1, 1), true, Set.of(1, 2), Set.of(1, 2)},
+                {CloudPlatform.AWS, 3, 4, List.of(1, 2, 1), true, Set.of(2), Set.of(2)},
+                {CloudPlatform.AWS, 3, 4, List.of(1, 1, 2), true, Set.of(2), Set.of(2)},
+        };
+    }
+
+    @ParameterizedTest(name = "calculateByRoundRobinTestWhenCloudInstance " +
+            "with {0} platform when {1} subnets, {2} instances, {3} subnet counts and preferred subnets {6} should result in {5} subnet / AZ")
+    @MethodSource("calculateByRoundRobinTestWhenCloudInstanceDataAndPreferredAvailabilityZones")
+    public void calculateByRoundRobinTestWhenCloudInstanceAndPreferredAvailabilityZones(CloudPlatform cloudPlatform, int subnetCount, int instanceCount,
+            List<Integer> existingCounts, boolean supported, Set<Integer> expectedPermissibleSubnetIdIndexes, Set<Integer> preferredSubnetIdIndexes) {
+        if (supported) {
+            when(multiAzValidator.supportedForInstanceMetadataGeneration(any(InstanceGroup.class))).thenReturn(true);
+        }
+
+        InstanceGroup instanceGroup = instanceGroup(cloudPlatform, instanceCount, subnetCount);
+        initSubnetIdAndAvailabilityZoneForInstances(existingCounts, instanceGroup);
+
+        InstanceMetaData instanceMetaData = new InstanceMetaData();
+
+        List<String> preferredSubnetIds = preferredSubnetIdIndexes.stream()
+                .map(index -> cloudSubnet(index).getName())
+                .collect(Collectors.toList());
+        NetworkScaleDetails networkScaleDetails = new NetworkScaleDetails(preferredSubnetIds);
+
+        underTest.calculateByRoundRobin(
+                subnetAzPairs(subnetCount),
+                instanceGroup,
+                instanceMetaData,
+                networkScaleDetails);
+
+        verifyCloudInstance(expectedPermissibleSubnetIdIndexes, instanceMetaData);
+        verifySubnetIdAndAvailabilityZoneForInstancesAreUnchanged(existingCounts, instanceGroup, Set.of());
     }
 
     private InstanceGroup instanceGroup(CloudPlatform cloudPlatform, int instanceNumber, int subnetCount) {

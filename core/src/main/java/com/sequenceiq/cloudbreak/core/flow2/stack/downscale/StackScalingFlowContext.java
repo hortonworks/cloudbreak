@@ -7,6 +7,7 @@ import java.util.Set;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.core.flow2.dto.NetworkScaleDetails;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.flow.core.FlowParameters;
@@ -22,19 +23,24 @@ public class StackScalingFlowContext extends StackContext {
 
     private final boolean repair;
 
+    private final NetworkScaleDetails networkScaleDetails;
+
     public StackScalingFlowContext(FlowParameters flowParameters, Stack stack, CloudContext cloudContext, CloudCredential cloudCredential,
             CloudStack cloudStack, String instanceGroupName, Set<String> instanceIds, Integer adjustment, boolean repair) {
-        this(flowParameters, stack, cloudContext, cloudCredential, cloudStack, instanceGroupName, instanceIds, adjustment, Collections.emptySet(), repair);
+        this(flowParameters, stack, cloudContext, cloudCredential, cloudStack, instanceGroupName, instanceIds, adjustment, Collections.emptySet(), repair,
+                NetworkScaleDetails.getEmpty());
     }
 
     public StackScalingFlowContext(FlowParameters flowParameters, Stack stack, CloudContext cloudContext, CloudCredential cloudCredential,
-            CloudStack cloudStack, String instanceGroupName, Set<String> instanceIds, Integer adjustment, Set<String> hostNames, boolean repair) {
+            CloudStack cloudStack, String instanceGroupName, Set<String> instanceIds, Integer adjustment, Set<String> hostNames, boolean repair,
+            NetworkScaleDetails networkScaleDetails) {
         super(flowParameters, stack, cloudContext, cloudCredential, cloudStack);
         this.instanceGroupName = instanceGroupName;
         this.instanceIds = instanceIds;
         this.adjustment = adjustment;
         this.hostNames = hostNames;
         this.repair = repair;
+        this.networkScaleDetails = networkScaleDetails;
     }
 
     public Collection<String> getInstanceIds() {
@@ -57,4 +63,7 @@ public class StackScalingFlowContext extends StackContext {
         return repair;
     }
 
+    public NetworkScaleDetails getStackNetworkScaleDetails() {
+        return networkScaleDetails;
+    }
 }

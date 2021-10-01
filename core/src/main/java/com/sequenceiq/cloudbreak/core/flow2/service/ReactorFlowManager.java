@@ -16,6 +16,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.stop.StackStopEvent.STA
 import static com.sequenceiq.cloudbreak.core.flow2.stack.sync.StackSyncEvent.STACK_SYNC_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.update.loadbalancer.StackLoadBalancerUpdateEvent.STACK_LOAD_BALANCER_UPDATE_EVENT;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +24,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.task.AsyncTaskExecutor;
@@ -35,6 +37,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers;
+import com.sequenceiq.cloudbreak.core.flow2.dto.NetworkScaleDetails;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterAndStackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterCertificatesRotationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterCredentialChangeTriggerEvent;
@@ -110,7 +113,8 @@ public class ReactorFlowManager {
         String selector = FlowChainTriggers.FULL_UPSCALE_TRIGGER_EVENT;
         Acceptable stackAndClusterUpscaleTriggerEvent = new StackAndClusterUpscaleTriggerEvent(selector,
                 stackId, instanceGroupAdjustment.getInstanceGroup(), instanceGroupAdjustment.getScalingAdjustment(),
-                withClusterEvent ? ScalingType.UPSCALE_TOGETHER : ScalingType.UPSCALE_ONLY_STACK);
+                withClusterEvent ? ScalingType.UPSCALE_TOGETHER : ScalingType.UPSCALE_ONLY_STACK,
+                getStackNetworkScaleDetails(instanceGroupAdjustment));
         return reactorNotifier.notify(stackId, selector, stackAndClusterUpscaleTriggerEvent);
     }
 
@@ -313,5 +317,16 @@ public class ReactorFlowManager {
         String selector = STACK_LOAD_BALANCER_UPDATE_EVENT.event();
         StackLoadBalancerUpdateTriggerEvent stackLoadBalancerUpdateTriggerEvent = new StackLoadBalancerUpdateTriggerEvent(selector, stackId);
         return reactorNotifier.notify(stackId, selector, stackLoadBalancerUpdateTriggerEvent);
+    }
+
+    private NetworkScaleDetails getStackNetworkScaleDetails(InstanceGroupAdjustmentV4Request instanceGroupAdjustment) {
+        List<String> preferredSubnetIds = new ArrayList<>();
+        if (instanceGroupAdjustment.getNetworkScaleRequest() != null) {
+            List<String> preferredSubnetIdsFromRequest = instanceGroupAdjustment.getNetworkScaleRequest().getPreferredSubnetIds();
+            if (CollectionUtils.isNotEmpty(preferredSubnetIdsFromRequest)) {
+                preferredSubnetIds.addAll(preferredSubnetIdsFromRequest);
+            }
+        }
+        return new NetworkScaleDetails(preferredSubnetIds);
     }
 }

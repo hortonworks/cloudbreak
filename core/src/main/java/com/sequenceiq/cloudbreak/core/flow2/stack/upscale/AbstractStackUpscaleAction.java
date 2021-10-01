@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractStackAction;
+import com.sequenceiq.cloudbreak.core.flow2.dto.NetworkScaleDetails;
 import com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackScalingFlowContext;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -40,6 +41,8 @@ abstract class AbstractStackUpscaleAction<P extends Payload> extends AbstractSta
     static final String HOSTNAMES = "HOSTNAMES";
 
     static final String REPAIR = "REPAIR";
+
+    static final String NETWORK_SCALE_DETAILS = "NETWORK_SCALE_DETAILS";
 
     @Inject
     private StackService stackService;
@@ -78,7 +81,7 @@ abstract class AbstractStackUpscaleAction<P extends Payload> extends AbstractSta
         CloudCredential cloudCredential = stackUtil.getCloudCredential(stack);
         CloudStack cloudStack = cloudStackConverter.convert(stack);
         return new StackScalingFlowContext(flowParameters, stack, cloudContext, cloudCredential, cloudStack, getInstanceGroupName(variables),
-                Collections.emptySet(), getAdjustment(variables), getHostNames(variables), isRepair(variables));
+                Collections.emptySet(), getAdjustment(variables), getHostNames(variables), isRepair(variables), getStackNetworkScaleDetails(variables));
     }
 
     @Override
@@ -100,5 +103,9 @@ abstract class AbstractStackUpscaleAction<P extends Payload> extends AbstractSta
 
     private Set<String> getHostNames(Map<Object, Object> variables) {
         return (Set<String>) variables.get(HOSTNAMES);
+    }
+
+    private NetworkScaleDetails getStackNetworkScaleDetails(Map<Object, Object> variables) {
+        return (NetworkScaleDetails) variables.get(NETWORK_SCALE_DETAILS);
     }
 }

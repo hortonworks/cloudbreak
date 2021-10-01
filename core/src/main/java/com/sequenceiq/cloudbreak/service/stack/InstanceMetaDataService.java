@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.core.flow2.dto.NetworkScaleDetails;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.projection.StackInstanceCount;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -83,7 +84,8 @@ public class InstanceMetaDataService {
         }
     }
 
-    public Stack saveInstanceAndGetUpdatedStack(Stack stack, int instanceToCreate, String groupName, boolean save, Set<String> hostNames, boolean repair) {
+    public Stack saveInstanceAndGetUpdatedStack(Stack stack, int instanceToCreate, String groupName, boolean save, Set<String> hostNames, boolean repair,
+            NetworkScaleDetails networkScaleDetails) {
         LOGGER.info("Get updated stack with instance count ({}) to instance group: {} and hostnames: {} and save: ({})", instanceToCreate, groupName, hostNames,
                 save);
         DetailedEnvironmentResponse environment = getDetailedEnvironmentResponse(stack.getEnvironmentCrn());
@@ -110,7 +112,8 @@ public class InstanceMetaDataService {
                     instanceMetaData.setDiscoveryFQDN(hostName);
                     subnetAzPairs = getSubnetAzPairsFilteredByHostNameIfRepair(environment, stack, repair, instanceGroup.getGroupName(), hostName);
                 }
-                prepareInstanceMetaDataSubnetAndAvailabilityZoneAndRackId(instanceGroup, instanceMetaData, subnetAzPairs, stackSubnetId, stackAz);
+                prepareInstanceMetaDataSubnetAndAvailabilityZoneAndRackId(instanceGroup, instanceMetaData, subnetAzPairs, stackSubnetId, stackAz,
+                        networkScaleDetails);
                 if (save) {
                     repository.save(instanceMetaData);
                 }
@@ -193,8 +196,8 @@ public class InstanceMetaDataService {
     }
 
     private void prepareInstanceMetaDataSubnetAndAvailabilityZoneAndRackId(InstanceGroup instanceGroup, InstanceMetaData instanceMetaData,
-            Map<String, String> subnetAzPairs, String stackSubnetId, String stackAz) {
-        multiAzCalculatorService.calculateByRoundRobin(subnetAzPairs, instanceGroup, instanceMetaData);
+            Map<String, String> subnetAzPairs, String stackSubnetId, String stackAz, NetworkScaleDetails networkScaleDetails) {
+        multiAzCalculatorService.calculateByRoundRobin(subnetAzPairs, instanceGroup, instanceMetaData, networkScaleDetails);
         if (Strings.isNullOrEmpty(instanceMetaData.getSubnetId()) && Strings.isNullOrEmpty(instanceMetaData.getAvailabilityZone())) {
             instanceMetaData.setSubnetId(stackSubnetId);
             instanceMetaData.setAvailabilityZone(stackAz);
