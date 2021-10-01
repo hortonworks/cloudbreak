@@ -336,6 +336,18 @@ public class SdxController implements SdxEndpoint {
     }
 
     @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.START_DATALAKE)
+    public void enableRangerRazByCrn(@ResourceCrn String crn) {
+        sdxService.updateRangerRazEnabled(getSdxClusterByCrn(crn));
+    }
+
+    @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.START_DATALAKE)
+    public void enableRangerRazByName(@ResourceName String name) {
+        sdxService.updateRangerRazEnabled(getSdxClusterByName(name));
+    }
+
+    @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.ROTATE_CERT_DATALAKE)
     public FlowIdentifier rotateAutoTlsCertificatesByName(@ResourceName String name, @Valid CertificatesRotationV4Request rotateCertificateRequest) {
         SdxCluster sdxCluster = getSdxClusterByName(name);

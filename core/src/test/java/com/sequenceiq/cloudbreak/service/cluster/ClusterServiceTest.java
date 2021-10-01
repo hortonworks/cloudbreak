@@ -5,8 +5,14 @@ import static com.sequenceiq.cloudbreak.common.type.HealthCheckResult.UNHEALTHY;
 import static com.sequenceiq.common.api.type.CertExpirationState.HOST_CERT_EXPIRING;
 import static com.sequenceiq.common.api.type.CertExpirationState.VALID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -19,6 +25,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -32,8 +39,10 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.HostName;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
+import com.sequenceiq.cloudbreak.cluster.api.ClusterModificationService;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterStatusService;
 import com.sequenceiq.cloudbreak.cluster.status.ExtendedHostStatuses;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.type.HealthCheck;
 import com.sequenceiq.cloudbreak.common.type.HealthCheckResult;
@@ -58,6 +67,10 @@ class ClusterServiceTest {
     private static final String STATUS_REASON_ORIGINAL = "statusReasonOriginal";
 
     private static final String FQDN1 = "hostname1";
+
+    private static final String CLUSTER_NAME = "test-cluster-name";
+
+    private static final String RANGER_RAZ = "RANGER_RAZ";
 
     @Mock
     private StackService stackService;
@@ -142,13 +155,57 @@ class ClusterServiceTest {
         });
     }
 
+    @Test
+    void testIsRangerRazEnabledOnClusterReturnsTrueWhenCmIsRunning() {
+        Stack stack = setupStack(STACK_ID);
+        ClusterApi clusterApi = mock(ClusterApi.class);
+        ClusterStatusService clusterStatusService = mock(ClusterStatusService.class);
+        ClusterModificationService clusterModificationService = mock(ClusterModificationService.class);
+        when(clusterApiConnectors.getConnector(stack)).thenReturn(clusterApi);
+        when(clusterApi.clusterStatusService()).thenReturn(clusterStatusService);
+        when(clusterApi.clusterModificationService()).thenReturn(clusterModificationService);
+        when(clusterStatusService.isClusterManagerRunning()).thenReturn(true);
+        when(clusterModificationService.isServicePresent(anyString(), eq(RANGER_RAZ))).thenReturn(true);
+
+        assertTrue(underTest.isRangerRazEnabledOnCluster(stack));
+    }
+
+    @Test
+    void testIsRangerRazEnabledOnClusterThrowsExceptionIfCmIsNotRunning() {
+        Stack stack = setupStack(STACK_ID);
+        ClusterApi clusterApi = mock(ClusterApi.class);
+        ClusterStatusService clusterStatusService = mock(ClusterStatusService.class);
+        when(clusterApiConnectors.getConnector(stack)).thenReturn(clusterApi);
+        when(clusterApi.clusterStatusService()).thenReturn(clusterStatusService);
+        when(clusterStatusService.isClusterManagerRunning()).thenReturn(false);
+
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> underTest.isRangerRazEnabledOnCluster(stack));
+        assertEquals(String.format("Cloudera Manager is not running for cluster: %s", CLUSTER_NAME), exception.getMessage());
+    }
+
+    @Test
+    void testIsRangerRazEnabledOnClusterReturnsFalseIfCmIsRunning() {
+        Stack stack = setupStack(STACK_ID);
+        ClusterApi clusterApi = mock(ClusterApi.class);
+        ClusterStatusService clusterStatusService = mock(ClusterStatusService.class);
+        ClusterModificationService clusterModificationService = mock(ClusterModificationService.class);
+        when(clusterApiConnectors.getConnector(stack)).thenReturn(clusterApi);
+        when(clusterApi.clusterStatusService()).thenReturn(clusterStatusService);
+        when(clusterApi.clusterModificationService()).thenReturn(clusterModificationService);
+        when(clusterStatusService.isClusterManagerRunning()).thenReturn(true);
+        when(clusterModificationService.isServicePresent(anyString(), eq(RANGER_RAZ))).thenReturn(false);
+
+        assertFalse(underTest.isRangerRazEnabledOnCluster(stack));
+    }
+
     private Stack setupStack(long stackId) {
         Stack stack = new Stack();
         stack.setId(stackId);
         Cluster cluster = new Cluster();
         cluster.setId(2L);
+        cluster.setName(CLUSTER_NAME);
         stack.setCluster(cluster);
-        when(stackService.getById(anyLong())).thenReturn(stack);
+        lenient().when(stackService.getById(anyLong())).thenReturn(stack);
         return stack;
     }
 

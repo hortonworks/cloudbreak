@@ -25,6 +25,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -74,6 +75,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.RangerRazEnabledV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
@@ -369,6 +371,66 @@ class SdxServiceTest {
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(Optional.empty());
         NotFoundException notFoundException = assertThrows(NotFoundException.class, () -> underTest.getByNameInAccount(USER_CRN, "sdxcluster"));
         assertEquals("SDX cluster 'sdxcluster' not found.", notFoundException.getMessage());
+    }
+
+    @Test
+    void testUpdateRangerRazEnabledForSdxClusterWhenRangerRazIsPresent() {
+        SdxCluster sdxCluster = new SdxCluster();
+        sdxCluster.setEnvName("env");
+        sdxCluster.setClusterName(CLUSTER_NAME);
+        sdxCluster.setCrn("test-crn");
+        sdxCluster.setRuntime("7.2.11");
+
+        DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
+        environmentResponse.setCreator(USER_CRN);
+        environmentResponse.setCloudPlatform("AWS");
+
+        RangerRazEnabledV4Response response = mock(RangerRazEnabledV4Response.class);
+        when(stackV4Endpoint.rangerRazEnabledInternal(anyLong(), anyString(), anyString())).thenReturn(response);
+        when(response.isRangerRazEnabled()).thenReturn(true);
+        when(entitlementService.razEnabled(anyString())).thenReturn(true);
+        when(environmentClientService.getByName(anyString())).thenReturn(environmentResponse);
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.updateRangerRazEnabled(sdxCluster));
+
+        assertTrue(sdxCluster.isRangerRazEnabled());
+        verify(sdxClusterRepository, times(1)).save(sdxCluster);
+    }
+
+    @Test
+    void testUpdateRangerRazThrowsExceptionForSdxClusterWhenRangerRazIsNotPresent() {
+        SdxCluster sdxCluster = new SdxCluster();
+        sdxCluster.setEnvName("env");
+        sdxCluster.setClusterName(CLUSTER_NAME);
+        sdxCluster.setCrn("test-crn");
+        sdxCluster.setRuntime("7.2.11");
+
+        RangerRazEnabledV4Response response = mock(RangerRazEnabledV4Response.class);
+        when(stackV4Endpoint.rangerRazEnabledInternal(anyLong(), anyString(), anyString())).thenReturn(response);
+        when(response.isRangerRazEnabled()).thenReturn(false);
+
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.updateRangerRazEnabled(sdxCluster)));
+        assertEquals(String.format("Ranger raz is not installed on the datalake: %s!", CLUSTER_NAME), exception.getMessage());
+        verify(sdxClusterRepository, times(0)).save(sdxCluster);
+    }
+
+    @Test
+    void testUpdateRangerRazIsIgnoredIfRangerRazIsInstalledAndFlagAlreadySet() {
+        SdxCluster sdxCluster = new SdxCluster();
+        sdxCluster.setEnvName("env");
+        sdxCluster.setClusterName(CLUSTER_NAME);
+        sdxCluster.setRangerRazEnabled(true);
+        sdxCluster.setCrn("test-crn");
+        sdxCluster.setRuntime("7.2.11");
+
+        RangerRazEnabledV4Response response = mock(RangerRazEnabledV4Response.class);
+        when(stackV4Endpoint.rangerRazEnabledInternal(anyLong(), anyString(), anyString())).thenReturn(response);
+        when(response.isRangerRazEnabled()).thenReturn(true);
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.updateRangerRazEnabled(sdxCluster));
+
+        verify(sdxClusterRepository, times(0)).save(sdxCluster);
     }
 
     @Test

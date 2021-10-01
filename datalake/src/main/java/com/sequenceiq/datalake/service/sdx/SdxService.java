@@ -62,6 +62,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.se
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.AttachRecipeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.DetachRecipeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.UpdateRecipesV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.RangerRazEnabledV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
@@ -362,6 +363,22 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
         return createSdx(userCrn, name, sdxClusterRequest, internalStackV4Request, null);
     }
 
+    public void updateRangerRazEnabled(SdxCluster sdxCluster) {
+        String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        ThreadBasedUserCrnProvider.doAsInternalActor(() -> {
+            RangerRazEnabledV4Response response = stackV4Endpoint.rangerRazEnabledInternal(WORKSPACE_ID_DEFAULT, sdxCluster.getCrn(), initiatorUserCrn);
+            if (response.isRangerRazEnabled()) {
+                if (!sdxCluster.isRangerRazEnabled()) {
+                    validateRazEnablement(sdxCluster.getRuntime(), response.isRangerRazEnabled(), environmentClientService.getByName(sdxCluster.getEnvName()));
+                    sdxCluster.setRangerRazEnabled(true);
+                    save(sdxCluster);
+                }
+            } else {
+                throw new BadRequestException(String.format("Ranger raz is not installed on the datalake: %s!", sdxCluster.getClusterName()));
+            }
+        });
+    }
+
     private Pair<SdxCluster, FlowIdentifier> createSdx(final String userCrn, final String name, final SdxClusterRequest sdxClusterRequest,
             final StackV4Request internalStackV4Request, final ImageSettingsV4Request imageSettingsV4Request) {
         LOGGER.info("Creating SDX cluster with name {}", name);
@@ -371,7 +388,6 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
         ImageV4Response imageV4Response = getImageResponseFromImageRequest(imageSettingsV4Request, cloudPlatform);
         validateInternalSdxRequest(internalStackV4Request, sdxClusterRequest.getClusterShape());
         validateRuntimeAndImage(sdxClusterRequest, environment, imageSettingsV4Request, imageV4Response);
-        validateRazEnablement(sdxClusterRequest, environment);
         String runtimeVersion = getRuntime(sdxClusterRequest, internalStackV4Request, imageV4Response);
         validateCcmV2Requirement(environment, runtimeVersion);
 
@@ -533,6 +549,7 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
             DetailedEnvironmentResponse environmentResponse) {
         validateMicroDutySdxEnablement(shape, runtime, environmentResponse);
         validateMediumDutySdxEnablement(shape, runtime, environmentResponse);
+        validateRazEnablement(runtime, razEnabled, environmentResponse);
         validateMultiAz(enableMultiAz, environmentResponse);
         SdxCluster newSdxCluster = new SdxCluster();
         newSdxCluster.setInitiatorUserCrn(userCrn);
@@ -824,9 +841,9 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
         return resultBuilder.build();
     }
 
-    private void validateRazEnablement(SdxClusterRequest sdxClusterRequest, DetailedEnvironmentResponse environment) {
+    private void validateRazEnablement(String runtime, boolean razEnabled, DetailedEnvironmentResponse environment) {
         ValidationResultBuilder validationBuilder = new ValidationResultBuilder();
-        if (sdxClusterRequest.isEnableRangerRaz()) {
+        if (razEnabled) {
             boolean razEntitlementEnabled = entitlementService.razEnabled(Crn.safeFromString(environment.getCreator()).getAccountId());
             if (!razEntitlementEnabled) {
                 validationBuilder.error("Provisioning Ranger Raz is not enabled for this account.");
@@ -835,10 +852,10 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
             if (!(AWS.equals(cloudPlatform) || AZURE.equals(cloudPlatform))) {
                 validationBuilder.error("Provisioning Ranger Raz is only valid for Amazon Web Services and Microsoft Azure.");
             }
-            if (!isRazSupported(sdxClusterRequest.getRuntime(), cloudPlatform)) {
+            if (!isRazSupported(runtime, cloudPlatform)) {
                 String errorMsg = AWS.equals(cloudPlatform) ? "Provisioning Ranger Raz on Amazon Web Services is only valid for CM version >= 7.2.2 and not " :
                         "Provisioning Ranger Raz on Microsoft Azure is only valid for CM version >= 7.2.1 and not ";
-                validationBuilder.error(errorMsg + sdxClusterRequest.getRuntime());
+                validationBuilder.error(errorMsg + runtime);
             }
         }
         ValidationResult validationResult = validationBuilder.build();

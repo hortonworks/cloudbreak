@@ -84,6 +84,8 @@ public class ClusterService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterService.class);
 
+    private static final String RANGER_RAZ = "RANGER_RAZ";
+
     @Inject
     private StackService stackService;
 
@@ -396,6 +398,15 @@ public class ClusterService {
             LOGGER.info("Update cert expiration state from {} to {}", cluster.getCertExpirationState(), VALID);
             repository.updateCertExpirationState(cluster.getId(), VALID);
         }
+    }
+
+    public boolean isRangerRazEnabledOnCluster(Stack stack) {
+        Cluster cluster = stack.getCluster();
+        ClusterApi clusterApi = clusterApiConnectors.getConnector(stack);
+        if (!clusterApi.clusterStatusService().isClusterManagerRunning()) {
+            throw new BadRequestException(String.format("Cloudera Manager is not running for cluster: %s", cluster.getName()));
+        }
+        return clusterApi.clusterModificationService().isServicePresent(cluster.getName(), RANGER_RAZ);
     }
 
     public Cluster prepareCluster(Collection<HostGroup> hostGroups, Blueprint blueprint, Stack stack, Cluster cluster) {

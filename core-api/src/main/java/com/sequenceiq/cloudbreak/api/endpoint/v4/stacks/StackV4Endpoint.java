@@ -24,6 +24,7 @@ import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescrip
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.DELETE_WITH_KERBEROS_IN_WORKSPACE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.DETACH_RECIPE_IN_WORKSPACE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.DETACH_RECIPE_IN_WORKSPACE_INTERNAL;
+import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.RANGER_RAZ_ENABLED;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.GENERATE_HOSTS_INVENTORY;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.GET_BY_CRN_IN_WORKSPACE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.GET_BY_NAME_IN_WORKSPACE;
@@ -86,6 +87,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.UpdateRec
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.CertificatesRotationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBlueprintV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.RangerRazEnabledV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
@@ -536,4 +538,11 @@ public interface StackV4Endpoint {
     @ApiOperation(value = CHANGE_IMAGE_CATALOG, nickname = "changeImageCatalogInternal")
     void changeImageCatalogInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @QueryParam("initiatorUserCrn") String initiatorUserCrn, @Valid @NotNull ChangeImageCatalogV4Request changeImageCatalogRequest);
+
+    @GET
+    @Path("internal/{crn}/ranger_raz_enabled")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = RANGER_RAZ_ENABLED, produces = MediaType.APPLICATION_JSON, nickname = "rangerRazEnabled")
+    RangerRazEnabledV4Response rangerRazEnabledInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("crn") String crn,
+            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 }

@@ -91,6 +91,7 @@ public class OperationDescriptions {
         public static final String UPDATE_LOAD_BALANCERS = "Updates an existing cluster with load balancers, including adding the Endpoint Gateway " +
             "if it's enabled.";
         public static final String CHANGE_IMAGE_CATALOG = "Changes image catalog of the cluster";
+        public static final String RANGER_RAZ_ENABLED = "Determines if Ranger Raz is present in the cluster.";
     }
 
     public static class ClusterOpDescription {

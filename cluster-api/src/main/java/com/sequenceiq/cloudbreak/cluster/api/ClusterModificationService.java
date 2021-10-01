@@ -47,6 +47,8 @@ public interface ClusterModificationService {
 
     ParcelOperationStatus removeUnusedParcels(Set<ClusterComponent> usedParcelComponents) throws CloudbreakException;
 
+    boolean isServicePresent(String clusterName, String serviceType);
+
     default void stopComponents(Map<String, String> components, String hostname) {
         throw new UnsupportedOperationException("Interface not implemented.");
     }
