@@ -1,11 +1,15 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
+import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -20,12 +24,16 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.microsoft.azure.management.compute.VirtualMachineSize;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClientService;
+import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceStoreMetadata;
+import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 
 @ExtendWith(MockitoExtension.class)
-class AzurePlatformResourcesVirtualMachineFilteringTest {
+class AzurePlatformResourcesTest {
 
     @Mock
     private AzureClient azureClient;
@@ -94,6 +102,48 @@ class AzurePlatformResourcesVirtualMachineFilteringTest {
                 .stream()
                 .anyMatch(cloudVMResponse -> vmTypeWithoutResourceDisk.stream().anyMatch(vmSize -> vmSize.name().equals(cloudVMResponse.value())));
         assertFalse(resultContainsVmTypesWithoutResourceDisk);
+    }
+
+    @Test
+    void collectInstanceStorageCountTest() {
+        Region region = Region.region("us-west-1");
+        CloudContext cloudContext = new CloudContext.Builder()
+                .withLocation(Location.location(region, availabilityZone("us-west-1")))
+                .build();
+        AuthenticatedContext ac = new AuthenticatedContext(cloudContext, cloudCredential);
+        Set<VirtualMachineSize> virtualMachineSizes = new HashSet<>();
+        virtualMachineSizes.add(createVirtualMachineSize("Standard_D8_v3", 20000));
+        when(azureClient.getVmTypes(region.value())).thenReturn(virtualMachineSizes);
+
+        InstanceStoreMetadata instanceStoreMetadata = underTest.collectInstanceStorageCount(ac, Collections.singletonList("Standard_D8_v3"));
+
+        assertEquals(1, instanceStoreMetadata.mapInstanceTypeToInstanceStoreCount("Standard_D8_v3"));
+        assertEquals(0, instanceStoreMetadata.mapInstanceTypeToInstanceStoreCountNullHandled("unsupported"));
+    }
+
+    @Test
+    void collectInstanceStorageCountWhenInstanceTypeIsNotFoundTest() {
+        Region region = Region.region("us-west-1");
+        CloudContext cloudContext = new CloudContext.Builder()
+                .withLocation(Location.location(region, availabilityZone("us-west-1")))
+                .build();
+        AuthenticatedContext ac = new AuthenticatedContext(cloudContext, cloudCredential);
+        Set<VirtualMachineSize> virtualMachineSizes = new HashSet<>();
+        when(azureClient.getVmTypes(region.value())).thenReturn(virtualMachineSizes);
+
+        InstanceStoreMetadata instanceStoreMetadata = underTest.collectInstanceStorageCount(ac, Collections.singletonList("unsupported"));
+
+        assertNull(instanceStoreMetadata.mapInstanceTypeToInstanceStoreCount("unsupported"));
+        assertEquals(0, instanceStoreMetadata.mapInstanceTypeToInstanceStoreCountNullHandled("unsupported"));
+        assertNull(instanceStoreMetadata.mapInstanceTypeToInstanceStoreCount("Standard_D8_v3"));
+        assertEquals(0, instanceStoreMetadata.mapInstanceTypeToInstanceStoreCountNullHandled("Standard_D8_v3"));
+
+        when(azureClient.getVmTypes(region.value())).thenReturn(virtualMachineSizes);
+
+        instanceStoreMetadata = underTest.collectInstanceStorageCount(ac, new ArrayList<>());
+
+        assertNull(instanceStoreMetadata.mapInstanceTypeToInstanceStoreCount("Standard_D8_v3"));
+        assertEquals(0, instanceStoreMetadata.mapInstanceTypeToInstanceStoreCountNullHandled("Standard_D8_v3"));
     }
 
     private VirtualMachineSize createVirtualMachineSize(String name, int resourceDiskSizeInMB) {

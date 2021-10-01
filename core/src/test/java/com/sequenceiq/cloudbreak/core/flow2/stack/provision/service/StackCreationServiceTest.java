@@ -21,6 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStoreMetadata;
@@ -61,8 +62,8 @@ class StackCreationServiceTest {
     }
 
     @Test
-    void setInstanceStoreCount() {
-        StackContext context = getStackContext(AwsDiskType.Standard.value());
+    void setInstanceStoreCountOnAWS() {
+        StackContext context = getStackContext(AwsDiskType.Standard.value(), CloudPlatform.AWS.name());
         underTest.setInstanceStoreCount(context);
 
         ArgumentCaptor<Template> savedTemplate = ArgumentCaptor.forClass(Template.class);
@@ -72,6 +73,7 @@ class StackCreationServiceTest {
         assertEquals(2, savedVolumeTemplates.size());
 
         assertEquals(TemporaryStorage.EPHEMERAL_VOLUMES, savedTemplate.getValue().getTemporaryStorage());
+        assertEquals(2, savedTemplate.getValue().getInstanceStorageCount());
 
         Set<String> expectedTypes = new HashSet<>(Set.of(AwsDiskType.Standard.value(), AwsDiskType.Ephemeral.value()));
         savedVolumeTemplates.stream().map(VolumeTemplate::getVolumeType).forEach(expectedTypes::remove);
@@ -79,8 +81,8 @@ class StackCreationServiceTest {
     }
 
     @Test
-    void setInstanceStoreCountOnClusterWithEphemeralDisksOnly() {
-        StackContext context = getStackContext(AwsDiskType.Ephemeral.value());
+    void setInstanceStoreCountOnClusterWithEphemeralDisksOnlyOnAWS() {
+        StackContext context = getStackContext(AwsDiskType.Ephemeral.value(), CloudPlatform.AWS.name());
         underTest.setInstanceStoreCount(context);
 
         ArgumentCaptor<Template> savedTemplate = ArgumentCaptor.forClass(Template.class);
@@ -90,20 +92,41 @@ class StackCreationServiceTest {
         assertEquals(1, savedVolumeTemplates.size());
 
         assertEquals(TemporaryStorage.EPHEMERAL_VOLUMES_ONLY, savedTemplate.getValue().getTemporaryStorage());
+        assertEquals(2, savedTemplate.getValue().getInstanceStorageCount());
 
         Set<String> expectedTypes = new HashSet<>(Set.of(AwsDiskType.Ephemeral.value()));
         savedVolumeTemplates.stream().map(VolumeTemplate::getVolumeType).forEach(expectedTypes::remove);
         assertTrue(expectedTypes.isEmpty());
     }
 
+    @Test
+    void setInstanceStoreCountOnAzure() {
+        StackContext context = getStackContext(AzureDiskType.STANDARD_SSD_LRS.value(), CloudPlatform.AZURE.name());
+        underTest.setInstanceStoreCount(context);
+
+        ArgumentCaptor<Template> savedTemplate = ArgumentCaptor.forClass(Template.class);
+        verify(templateService).savePure(savedTemplate.capture());
+
+        Set<VolumeTemplate> savedVolumeTemplates = savedTemplate.getValue().getVolumeTemplates();
+        assertEquals(1, savedVolumeTemplates.size());
+
+        assertEquals(TemporaryStorage.EPHEMERAL_VOLUMES, savedTemplate.getValue().getTemporaryStorage());
+        assertEquals(2, savedTemplate.getValue().getInstanceStorageCount());
+
+        Set<String> expectedTypes = new HashSet<>(Set.of(AzureDiskType.STANDARD_SSD_LRS.value()));
+        savedVolumeTemplates.stream().map(VolumeTemplate::getVolumeType).forEach(expectedTypes::remove);
+        assertTrue(expectedTypes.isEmpty());
+    }
+
     private InstanceStoreMetadata getInstanceStoreMetadata() {
         InstanceStoreMetadata instanceStoreMetadata = new InstanceStoreMetadata();
-        VolumeParameterConfig instanceStorageConfig = new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 100, 100, 100, 100);
+        VolumeParameterConfig instanceStorageConfig = new VolumeParameterConfig(
+                VolumeParameterType.EPHEMERAL, 100, 100, 2, 2);
         instanceStoreMetadata.getInstaceStoreConfigMap().put("vm.type", instanceStorageConfig);
         return instanceStoreMetadata;
     }
 
-    private StackContext getStackContext(String volumeType) {
+    private StackContext getStackContext(String volumeType, String cloudPlatform) {
         Stack stack = new Stack();
         InstanceGroup group = new InstanceGroup();
         Template template = new Template();
@@ -114,8 +137,9 @@ class StackCreationServiceTest {
         template.setVolumeTemplates(new HashSet<>(Set.of(volumeTemplate)));
         group.setTemplate(template);
         stack.setInstanceGroups(Set.of(group));
+        stack.setCloudPlatform(cloudPlatform);
 
-        CloudContext cloudContext = CloudContext.Builder.builder().withPlatform(CloudPlatform.AWS.name()).build();
+        CloudContext cloudContext = CloudContext.Builder.builder().withPlatform(cloudPlatform).build();
         return new StackContext(null, stack, cloudContext, null, null);
     }
 }

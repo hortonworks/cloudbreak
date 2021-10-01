@@ -56,6 +56,9 @@ public class AzureMetadataCollector implements MetadataCollector {
     @Inject
     private AzureLoadBalancerMetadataCollector azureLbMetadataCollector;
 
+    @Inject
+    private AzurePlatformResources azurePlatformResources;
+
     @Override
     @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
     public List<CloudVmMetaDataStatus> collect(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<CloudInstance> vms,
@@ -180,7 +183,7 @@ public class AzureMetadataCollector implements MetadataCollector {
 
     @Override
     public InstanceStoreMetadata collectInstanceStorageCount(AuthenticatedContext ac, List<String> instanceTypes) {
-        return new InstanceStoreMetadata();
+        return azurePlatformResources.collectInstanceStorageCount(ac, instanceTypes);
     }
 
     private Optional<String> lookupPrivateIp(String resourceGroup, AzureClient azureClient, String loadBalancerName) {
