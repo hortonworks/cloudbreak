@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.san;
 
-import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_4_2;
-import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_4_3;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
@@ -19,12 +17,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
-import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
 import com.sequenceiq.cloudbreak.service.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
+import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 
 @ExtendWith(MockitoExtension.class)
@@ -36,13 +35,13 @@ class LoadBalancerSANProviderTest {
     private LoadBalancerSANProvider loadBalancerSANProvider;
 
     @Mock
+    private Blueprint blueprint;
+
+    @Mock
     private LoadBalancerConfigService loadBalancerConfigService;
 
     @Mock
     private LoadBalancerPersistenceService loadBalancerPersistenceService;
-
-    @Mock
-    private ClusterComponentConfigProvider clusterComponentConfigProvider;
 
     @Mock
     private ClouderaManagerRepo clouderaManagerRepo;
@@ -56,14 +55,13 @@ class LoadBalancerSANProviderTest {
         stack.setId(ID);
         Cluster cluster = new Cluster();
         cluster.setId(ID);
+        cluster.setBlueprint(blueprint);
         stack.setCluster(cluster);
 
         ReflectionTestUtils.setField(loadBalancerSANProvider, "loadBalancerConfigService", loadBalancerConfigService);
         ReflectionTestUtils.setField(loadBalancerSANProvider, "loadBalancerPersistenceService", loadBalancerPersistenceService);
-        ReflectionTestUtils.setField(loadBalancerSANProvider, "clusterComponentConfigProvider", clusterComponentConfigProvider);
 
-        when(clusterComponentConfigProvider.getClouderaManagerRepoDetails(ID)).thenReturn(clouderaManagerRepo);
-        when(clouderaManagerRepo.getVersion()).thenReturn(CLOUDERAMANAGER_VERSION_7_4_3.getVersion());
+        when(blueprint.getBlueprintText()).thenReturn(getBlueprintText("input/de-ha.bp"));
     }
 
     @Test
@@ -73,7 +71,7 @@ class LoadBalancerSANProviderTest {
 
     @Test
     void olderVersionHasNoLoadBalancer() {
-        when(clouderaManagerRepo.getVersion()).thenReturn(CLOUDERAMANAGER_VERSION_7_4_2.getVersion());
+        when(blueprint.getBlueprintText()).thenReturn(getBlueprintText("input/clouderamanager-knox.bp"));
         assertTrue(loadBalancerSANProvider.getLoadBalancerSAN(stack).isEmpty());
     }
 
@@ -99,5 +97,9 @@ class LoadBalancerSANProviderTest {
         loadBalancers.add(loadBalancer);
         when(loadBalancerPersistenceService.findByStackId(ID)).thenReturn(loadBalancers);
         when(loadBalancerConfigService.selectLoadBalancer(loadBalancers, LoadBalancerType.PUBLIC)).thenReturn(Optional.of(loadBalancer));
+    }
+
+    private String getBlueprintText(String path) {
+        return FileReaderUtils.readFileFromClasspathQuietly(path);
     }
 }
