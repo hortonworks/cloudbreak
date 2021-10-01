@@ -331,6 +331,11 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
         return createSdx(userCrn, name, sdxClusterRequest, internalStackV4Request, null);
     }
 
+    public SdxCluster updateRangerRazEnabled(SdxCluster sdxCluster) {
+        sdxCluster.setRangerRazEnabled(true);
+        return save(sdxCluster);
+    }
+
     private Pair<SdxCluster, FlowIdentifier> createSdx(final String userCrn, final String name, final SdxClusterRequest sdxClusterRequest,
             final StackV4Request internalStackV4Request, final ImageSettingsV4Request imageSettingsV4Request) {
         LOGGER.info("Creating SDX cluster with name {}", name);

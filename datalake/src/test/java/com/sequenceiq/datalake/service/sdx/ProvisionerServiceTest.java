@@ -99,12 +99,11 @@ class ProvisionerServiceTest {
         SdxCluster sdxCluster = generateValidSdxCluster(clusterId);
         StackV4Response stackV4Response = new StackV4Response();
         stackV4Response.setId(1L);
-        ThreadBasedUserCrnProvider.setUserCrn(USER_CRN);
         when(stackV4Endpoint.getByCrn(anyLong(), nullable(String.class), nullable(Set.class))).thenThrow(new NotFoundException());
         when(stackV4Endpoint.postInternal(anyLong(), any(StackV4Request.class), nullable(String.class))).thenReturn(stackV4Response);
         when(sdxService.getById(clusterId)).thenReturn(sdxCluster);
 
-        underTest.startStackProvisioning(clusterId, getEnvironmentResponse());
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.startStackProvisioning(clusterId, getEnvironmentResponse()));
 
         verify(cloudbreakFlowService).saveLastCloudbreakFlowChainId(sdxCluster, stackV4Response.getFlowIdentifier());
         verify(sdxClusterRepository, times(1)).save(any(SdxCluster.class));

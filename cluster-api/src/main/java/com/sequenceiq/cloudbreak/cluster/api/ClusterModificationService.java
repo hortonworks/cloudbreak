@@ -38,6 +38,8 @@ public interface ClusterModificationService {
 
     Optional<String> getRoleConfigValueByServiceType(String clusterName, String roleConfigGroup, String serviceType, String configName);
 
+    boolean isServicePresent(String clusterName, String serviceType);
+
     default void removeUnusedParcels(Set<ClusterComponent> usedParcelComponents) throws CloudbreakException {
         throw new UnsupportedOperationException("Interface not implemented.");
     }
