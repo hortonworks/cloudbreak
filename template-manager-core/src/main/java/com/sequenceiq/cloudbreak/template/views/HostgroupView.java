@@ -2,9 +2,13 @@ package com.sequenceiq.cloudbreak.template.views;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
 
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
@@ -31,42 +35,12 @@ public class HostgroupView {
     private final Integer temporaryStorageVolumeCount;
 
     public HostgroupView(String name, int volumeCount, InstanceGroupType instanceGroupType, Collection<String> hosts) {
-        this.name = name;
-        this.volumeCount = volumeCount;
-        instanceGroupConfigured = true;
-        this.instanceGroupType = instanceGroupType;
-        this.hosts = hosts != null
-            ? Collections.unmodifiableSortedSet(new TreeSet<>(hosts) {
-                    @Override
-                    public String toString() {
-                        return String.join(",", this);
-                    }
-                })
-            : Collections.emptySortedSet();
-        nodeCount = this.hosts.size();
-        volumeTemplates = Collections.emptySet();
-        temporaryStorage = null;
-        temporaryStorageVolumeCount = null;
+        this(name, volumeCount, instanceGroupType, hosts, Collections.emptySet());
     }
 
     public HostgroupView(String name, int volumeCount, InstanceGroupType instanceGroupType,
             Collection<String> hosts, Set<VolumeTemplate> volumeTemplates) {
-        this.name = name;
-        this.volumeCount = volumeCount;
-        instanceGroupConfigured = true;
-        this.instanceGroupType = instanceGroupType;
-        this.hosts = hosts != null
-                ? Collections.unmodifiableSortedSet(new TreeSet<>(hosts) {
-            @Override
-            public String toString() {
-                return String.join(",", this);
-            }
-        })
-                : Collections.emptySortedSet();
-        nodeCount = this.hosts.size();
-        this.volumeTemplates = Collections.unmodifiableSet(volumeTemplates);
-        temporaryStorage = null;
-        temporaryStorageVolumeCount = null;
+        this(name, volumeCount, instanceGroupType, hosts, volumeTemplates, null, null);
     }
 
     public HostgroupView(String name, int volumeCount, InstanceGroupType instanceGroupType,
@@ -76,7 +50,7 @@ public class HostgroupView {
         instanceGroupConfigured = true;
         this.instanceGroupType = instanceGroupType;
         this.hosts = hosts != null
-                ? Collections.unmodifiableSortedSet(new TreeSet<>(hosts) {
+                ? Collections.unmodifiableSortedSet(new TreeSet<>(filterNullOrEmpty(hosts)) {
             @Override
             public String toString() {
                 return String.join(",", this);
@@ -147,5 +121,9 @@ public class HostgroupView {
 
     public Integer getTemporaryStorageVolumeCount() {
         return temporaryStorageVolumeCount;
+    }
+
+    private List<String> filterNullOrEmpty(Collection<String> hosts) {
+        return hosts.stream().filter(StringUtils::isNotEmpty).collect(Collectors.toList());
     }
 }
