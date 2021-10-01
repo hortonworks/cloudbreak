@@ -4,13 +4,16 @@ import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.DE
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunningParameter;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
+import java.time.Duration;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -61,6 +64,7 @@ import com.sequenceiq.it.cloudbreak.dto.StackAuthenticationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.search.Searchable;
+import com.sequenceiq.it.cloudbreak.util.FreeIpaInstanceUtil;
 
 @Prototype
 public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest, DescribeFreeIpaResponse, FreeIpaTestDto>
@@ -294,6 +298,51 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
             getRequest().setImage(imageSettingsRequest);
         }
         return this;
+    }
+
+    private boolean checkResponseHasInstanceGroups() {
+        return getResponse() != null && getResponse().getInstanceGroups() != null;
+    }
+
+    private Map<List<String>, com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus> getInstanceStatusMapIfAvailableInResponse(
+            Supplier<Map<List<String>, com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus>> instanceStatusMapSupplier) {
+        if (checkResponseHasInstanceGroups()) {
+            return instanceStatusMapSupplier.get();
+        } else {
+            LOGGER.info("Response doesn't has instance groups");
+            return Collections.emptyMap();
+        }
+    }
+
+    public FreeIpaTestDto awaitForHealthyInstances() {
+        Map<List<String>, com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus> instanceStatusMap =
+                getInstanceStatusMapIfAvailableInResponse(() -> FreeIpaInstanceUtil.getInstanceStatusMap(getResponse()));
+        return awaitForFreeIpaInstance(instanceStatusMap);
+    }
+
+    public FreeIpaTestDto awaitForFreeIpaInstance(Map<List<String>,
+            com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus> statuses) {
+        return awaitForFreeIpaInstance(statuses, emptyRunningParameter());
+    }
+
+    public FreeIpaTestDto awaitForFreeIpaInstance(FreeIpaTestDto entity, Map<List<String>,
+            com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus> statuses, RunningParameter runningParameter) {
+        return getTestContext().awaitForFreeIpaInstance(entity, statuses, runningParameter);
+    }
+
+    public FreeIpaTestDto awaitForFreeIpaInstance(Map<List<String>, com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus> statuses,
+            RunningParameter runningParameter) {
+        return getTestContext().awaitForFreeIpaInstance(this, statuses, runningParameter);
+    }
+
+    public FreeIpaTestDto awaitForFreeIpaInstance(Map<List<String>, com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus> statuses,
+            RunningParameter runningParameter, Duration pollingInterval) {
+        return getTestContext().awaitForFreeIpaInstance(this, statuses, runningParameter, pollingInterval);
+    }
+
+    public FreeIpaTestDto awaitForFreeIpaInstance(Map<List<String>, com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus> statuses,
+            Duration pollingInterval) {
+        return awaitForFreeIpaInstance(statuses, emptyRunningParameter(), pollingInterval);
     }
 
     public FreeIpaTestDto await(Status status) {
