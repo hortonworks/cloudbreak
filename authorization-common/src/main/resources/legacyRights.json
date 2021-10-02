@@ -85,5 +85,6 @@
   "datahub/read": "datahub/read",
   "datahub/write": "datahub/write",
   "structured_events/read": "structured_events/read",
-  "iam/listAssignedResourceRoles": "iam/listAssignedResourceRoles"
+  "iam/listAssignedResourceRoles": "iam/listAssignedResourceRoles",
+  "environments/updateAzureEncryptionResources": "environments/write"
 }

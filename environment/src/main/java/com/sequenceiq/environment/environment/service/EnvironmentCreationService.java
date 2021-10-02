@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.environment.service;
 
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
@@ -179,9 +180,21 @@ public class EnvironmentCreationService {
         ValidationResultBuilder validationBuilder = validatorService.validateNetworkCreation(environment, creationDto.getNetwork());
         validationBuilder.merge(validatorService.validatePublicKey(creationDto.getAuthentication().getPublicKey()));
         validationBuilder.merge(validatorService.validateTags(creationDto));
-        validationBuilder.merge(validatorService.validateEncryptionKeyUrl(creationDto));
-        validationBuilder.merge(validatorService.validateEncryptionKey(creationDto));
-        validationBuilder.merge(validatorService.validateEncryptionKeyArn(creationDto));
+        if (AZURE.name().equalsIgnoreCase(creationDto.getCloudPlatform())) {
+            String encryptionKeyUrl = Optional.ofNullable(creationDto.getParameters())
+                    .map(paramsDto -> paramsDto.getAzureParametersDto())
+                    .map(azureParamsDto -> azureParamsDto.getAzureResourceEncryptionParametersDto())
+                    .map(azureREParamsDto -> azureREParamsDto.getEncryptionKeyUrl()).orElse(null);
+            if (encryptionKeyUrl != null) {
+                validationBuilder.merge(validatorService.validateEncryptionKeyUrl(encryptionKeyUrl, creationDto.getAccountId()));
+            }
+        }
+        if (GCP.name().equalsIgnoreCase(creationDto.getCloudPlatform())) {
+            validationBuilder.merge(validatorService.validateEncryptionKey(creationDto));
+        }
+        if (AWS.name().equalsIgnoreCase(creationDto.getCloudPlatform())) {
+            validationBuilder.merge(validatorService.validateEncryptionKeyArn(creationDto));
+        }
         ValidationResult parentChildValidation = validatorService.validateParentChildRelation(environment, creationDto.getParentEnvironmentName());
         validationBuilder.merge(parentChildValidation);
         EnvironmentTelemetry environmentTelemetry = creationDto.getTelemetry();
