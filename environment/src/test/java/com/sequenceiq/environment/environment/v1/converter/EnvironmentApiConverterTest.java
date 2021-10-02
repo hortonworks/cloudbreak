@@ -25,9 +25,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.common.api.telemetry.model.Features;
@@ -54,6 +54,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEn
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.ResourceGroupUsage;
+import com.sequenceiq.environment.api.v1.environment.model.request.azure.UpdateAzureResourceEncryptionParametersRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpResourceEncryptionParameters;
 import com.sequenceiq.environment.credential.service.CredentialService;
@@ -67,6 +68,7 @@ import com.sequenceiq.environment.environment.dto.EnvironmentLoadBalancerDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
 import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
+import com.sequenceiq.environment.environment.dto.UpdateAzureResourceEncryptionDto;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
@@ -82,6 +84,10 @@ public class EnvironmentApiConverterTest {
     private static final String REGION_DISPLAY_NAME = "US WEST";
 
     private static final String USER_CRN = "crn:altus:iam:us-west-1:test-aws:user:cloudbreak@hortonworks.com";
+
+    private static final String KEY_URL = "dummy-key-url";
+
+    private static final String KEY_URL_RESOURCE_GROUP = "dummy-key-url";
 
     @InjectMocks
     private EnvironmentApiConverter underTest;
@@ -325,8 +331,8 @@ public class EnvironmentApiConverterTest {
         request.setAzure(AzureEnvironmentParameters.builder()
                 .withResourceEncryptionParameters(
                         AzureResourceEncryptionParameters.builder()
-                                .withEncryptionKeyUrl("dummy-key-url")
-                                .withEncryptionKeyResourceGroupName("dummyResourceGroupName")
+                                .withEncryptionKeyUrl(KEY_URL)
+                                .withEncryptionKeyResourceGroupName(KEY_URL_RESOURCE_GROUP)
                                 .build())
                 .build());
         FreeIpaCreationDto freeIpaCreationDto = mock(FreeIpaCreationDto.class);
@@ -346,9 +352,9 @@ public class EnvironmentApiConverterTest {
 
         EnvironmentCreationDto actual = underTest.initCreationDto(request);
 
-        assertEquals("dummy-key-url",
+        assertEquals(KEY_URL,
                 actual.getParameters().getAzureParametersDto().getAzureResourceEncryptionParametersDto().getEncryptionKeyUrl());
-        assertEquals("dummyResourceGroupName",
+        assertEquals(KEY_URL_RESOURCE_GROUP,
                 actual.getParameters().getAzureParametersDto().getAzureResourceEncryptionParametersDto().getEncryptionKeyResourceGroupName());
     }
 
@@ -380,6 +386,21 @@ public class EnvironmentApiConverterTest {
 
         assertEquals("dummy-encryption-key",
                 actual.getParameters().getGcpParametersDto().getGcpResourceEncryptionParametersDto().getEncryptionKey());
+    }
+
+    @Test
+    void testConvertUpdateAzureResourceEncryptionDto() {
+        UpdateAzureResourceEncryptionParametersRequest request = UpdateAzureResourceEncryptionParametersRequest.builder()
+                .withAzureResourceEncryptionParameters(AzureResourceEncryptionParameters.builder()
+                        .withEncryptionKeyUrl(KEY_URL)
+                        .withEncryptionKeyResourceGroupName(KEY_URL_RESOURCE_GROUP)
+                        .build())
+                .build();
+
+        UpdateAzureResourceEncryptionDto actual = underTest.convertUpdateAzureResourceEncryptionDto(request);
+
+        assertEquals(KEY_URL, actual.getAzureResourceEncryptionParametersDto().getEncryptionKeyUrl());
+        assertEquals(KEY_URL_RESOURCE_GROUP, actual.getAzureResourceEncryptionParametersDto().getEncryptionKeyResourceGroupName());
     }
 
     private void assertLocation(LocationRequest request, LocationDto actual) {
@@ -512,8 +533,8 @@ public class EnvironmentApiConverterTest {
         );
         azureEnvironmentParameters.setResourceEncryptionParameters(
                 AzureResourceEncryptionParameters.builder()
-                        .withEncryptionKeyUrl("dummy-key-url")
-                        .withEncryptionKeyResourceGroupName("dummyResourceGroupName")
+                        .withEncryptionKeyUrl(KEY_URL)
+                        .withEncryptionKeyResourceGroupName(KEY_URL_RESOURCE_GROUP)
                         .build()
         );
         return azureEnvironmentParameters;
@@ -524,8 +545,8 @@ public class EnvironmentApiConverterTest {
 
         gcpEnvironmentParameters.setGcpResourceEncryptionParameters(
                 GcpResourceEncryptionParameters.builder()
-                    .withEncryptionKey("dummy-encryption-key")
-                    .build()
+                        .withEncryptionKey("dummy-encryption-key")
+                        .build()
         );
         return gcpEnvironmentParameters;
     }

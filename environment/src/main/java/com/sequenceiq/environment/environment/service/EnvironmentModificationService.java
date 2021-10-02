@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.sequenceiq.cloudbreak.cloud.model.encryption.CreatedDiskEncryptionSet;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.environment.api.v1.environment.model.base.CloudStorageValidation;
@@ -29,16 +30,20 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentValidationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
+import com.sequenceiq.environment.environment.dto.UpdateAzureResourceEncryptionDto;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentFeatures;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
+import com.sequenceiq.environment.environment.encryption.EnvironmentEncryptionService;
 import com.sequenceiq.environment.environment.validation.EnvironmentFlowValidatorService;
 import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
 import com.sequenceiq.environment.environment.validation.ValidationType;
 import com.sequenceiq.environment.network.NetworkService;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
-import com.sequenceiq.environment.parameters.dao.domain.AwsParameters;
-import com.sequenceiq.environment.parameters.dao.domain.BaseParameters;
+import com.sequenceiq.environment.parameter.dto.AzureResourceEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
+import com.sequenceiq.environment.parameters.dao.domain.AwsParameters;
+import com.sequenceiq.environment.parameters.dao.domain.AzureParameters;
+import com.sequenceiq.environment.parameters.dao.domain.BaseParameters;
 import com.sequenceiq.environment.parameters.service.ParametersService;
 
 @Service
@@ -62,10 +67,12 @@ public class EnvironmentModificationService {
 
     private final EnvironmentResourceService environmentResourceService;
 
+    private final EnvironmentEncryptionService environmentEncryptionService;
+
     public EnvironmentModificationService(EnvironmentDtoConverter environmentDtoConverter, EnvironmentService environmentService,
             CredentialService credentialService, NetworkService networkService, AuthenticationDtoConverter authenticationDtoConverter,
             ParametersService parametersService, EnvironmentFlowValidatorService environmentFlowValidatorService,
-            EnvironmentResourceService environmentResourceService) {
+            EnvironmentResourceService environmentResourceService, EnvironmentEncryptionService environmentEncryptionService) {
         this.environmentDtoConverter = environmentDtoConverter;
         this.environmentService = environmentService;
         this.credentialService = credentialService;
@@ -74,6 +81,7 @@ public class EnvironmentModificationService {
         this.parametersService = parametersService;
         this.environmentFlowValidatorService = environmentFlowValidatorService;
         this.environmentResourceService = environmentResourceService;
+        this.environmentEncryptionService = environmentEncryptionService;
     }
 
     public EnvironmentDto editByName(String environmentName, EnvironmentEditDto editDto) {
@@ -102,6 +110,21 @@ public class EnvironmentModificationService {
                 .findByResourceCrnAndAccountIdAndArchivedIsFalse(crn, accountId)
                 .orElseThrow(() -> new NotFoundException(String.format("No environment found with CRN '%s'", crn)));
         return changeCredential(accountId, crn, dto, environment);
+    }
+
+    public EnvironmentDto updateAzureResourceEncryptionParametersByEnvironmentName(String accountId, String environmentName,
+            UpdateAzureResourceEncryptionDto dto) {
+        Environment environment = environmentService
+                .findByNameAndAccountIdAndArchivedIsFalse(environmentName, accountId)
+                .orElseThrow(() -> new NotFoundException(String.format("No environment found with name '%s'", environmentName)));
+        return updateAzureResourceEncryptionParameters(accountId, environmentName, dto.getAzureResourceEncryptionParametersDto(), environment);
+    }
+
+    public EnvironmentDto updateAzureResourceEncryptionParametersByEnvironmentCrn(String accountId, String crn, UpdateAzureResourceEncryptionDto dto) {
+        Environment environment = environmentService
+                .findByResourceCrnAndAccountIdAndArchivedIsFalse(crn, accountId)
+                .orElseThrow(() -> new NotFoundException(String.format("No environment found with CRN '%s'", crn)));
+        return updateAzureResourceEncryptionParameters(accountId, crn, dto.getAzureResourceEncryptionParametersDto(), environment);
     }
 
     public EnvironmentDto changeTelemetryFeaturesByEnvironmentName(String accountId, String environmentName,
@@ -137,11 +160,36 @@ public class EnvironmentModificationService {
 
     private EnvironmentDto changeCredential(String accountId, String environmentName, EnvironmentChangeCredentialDto dto, Environment environment) {
         //CHECKSTYLE:OFF
-        // TODO: 2019. 06. 03. also we have to check for SDXs and DistroXs what uses the given credential. If there is at least one, we have to update the crn reference through the other services
+        // TODO: 2019. 06. 03. also we have to check for SDXs and DistroXs what uses the given credential. If there is at least one, we have to update the crn reference
+        //  through the other services
         //CHECKSTYLE:ON
         Credential credential = credentialService.getByNameForAccountId(dto.getCredentialName(), accountId, ENVIRONMENT);
         environment.setCredential(credential);
         LOGGER.debug("About to change credential on environment \"{}\"", environmentName);
+        Environment saved = environmentService.save(environment);
+        return environmentDtoConverter.environmentToDto(saved);
+    }
+
+    private EnvironmentDto updateAzureResourceEncryptionParameters(String accountId, String environmentName, AzureResourceEncryptionParametersDto dto,
+            Environment environment) {
+        ValidationResult validateKey = environmentService.getValidatorService().validateEncryptionKeyUrl(dto.getEncryptionKeyUrl(),
+                accountId);
+        if (!validateKey.hasError()) {
+            AzureParameters azureParameters = (AzureParameters) environment.getParameters();
+            azureParameters.setEncryptionKeyUrl(dto.getEncryptionKeyUrl());
+            azureParameters.setEncryptionKeyResourceGroupName(dto.getEncryptionKeyResourceGroupName());
+            //creating the DES
+            try {
+                CreatedDiskEncryptionSet createdDiskEncryptionSet = environmentEncryptionService.createEncryptionResources(
+                        environmentDtoConverter.environmentToDto(environment));
+                azureParameters.setDiskEncryptionSetId(createdDiskEncryptionSet.getDiskEncryptionSetId());
+            } catch (Exception e) {
+                throw new BadRequestException(e);
+            }
+            LOGGER.debug("Successfully created the Disk encryption set for the environment {}.", environmentName);
+        } else {
+            throw new BadRequestException(validateKey.getFormattedErrors());
+        }
         Environment saved = environmentService.save(environment);
         return environmentDtoConverter.environmentToDto(saved);
     }

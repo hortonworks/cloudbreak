@@ -30,6 +30,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import com.sequenceiq.cloudbreak.cloud.model.encryption.CreatedDiskEncryptionSet;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.service.CredentialService;
@@ -42,18 +43,22 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
+import com.sequenceiq.environment.environment.dto.UpdateAzureResourceEncryptionDto;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentFeatures;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
+import com.sequenceiq.environment.environment.encryption.EnvironmentEncryptionService;
 import com.sequenceiq.environment.environment.repository.EnvironmentRepository;
 import com.sequenceiq.environment.environment.validation.EnvironmentFlowValidatorService;
 import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
 import com.sequenceiq.environment.network.NetworkService;
 import com.sequenceiq.environment.network.dao.domain.AwsNetwork;
 import com.sequenceiq.environment.network.dto.NetworkDto;
-import com.sequenceiq.environment.parameters.dao.domain.AwsParameters;
-import com.sequenceiq.environment.parameters.dao.domain.BaseParameters;
 import com.sequenceiq.environment.parameter.dto.AwsParametersDto;
+import com.sequenceiq.environment.parameter.dto.AzureResourceEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
+import com.sequenceiq.environment.parameters.dao.domain.AwsParameters;
+import com.sequenceiq.environment.parameters.dao.domain.AzureParameters;
+import com.sequenceiq.environment.parameters.dao.domain.BaseParameters;
 import com.sequenceiq.environment.parameters.service.ParametersService;
 
 @ExtendWith(SpringExtension.class)
@@ -88,6 +93,9 @@ class EnvironmentModificationServiceTest {
 
     @MockBean
     private EnvironmentResourceService environmentResourceService;
+
+    @MockBean
+    private EnvironmentEncryptionService environmentEncryptionService;
 
     @Mock
     private EnvironmentValidatorService validatorService;
@@ -619,6 +627,65 @@ class EnvironmentModificationServiceTest {
         verify(environmentService).save(any());
         assertFalse(environment.getTelemetry().getFeatures().getCloudStorageLogging().isEnabled());
         assertTrue(environment.getTelemetry().getFeatures().getClusterLogsCollection().isEnabled());
+    }
+
+    @Test
+    void testUpdateAzureResourceEncryptionParametersByEnvironmentName() {
+        UpdateAzureResourceEncryptionDto updateAzureResourceEncryptionDto = UpdateAzureResourceEncryptionDto.builder()
+                .withAzureResourceEncryptionParametersDto(AzureResourceEncryptionParametersDto.builder()
+                        .withEncryptionKeyUrl("dummyKeyUrl")
+                        .withEncryptionKeyResourceGroupName("dummyResourceGroupName")
+                        .build())
+                .build();
+        CreatedDiskEncryptionSet createdDiskEncryptionSet = new CreatedDiskEncryptionSet.Builder()
+                .withDiskEncryptionSetId("dummyId")
+                .build();
+        Environment env = new Environment();
+        env.setParameters(new AzureParameters());
+        when(environmentService.getValidatorService()).thenReturn(validatorService);
+        when(environmentService
+                .findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(env));
+        when(validatorService.validateEncryptionKeyUrl(any(String.class), any(String.class))).thenReturn(ValidationResult.builder().build());
+        when(environmentDtoConverter.environmentToDto(env)).thenReturn(new EnvironmentDto());
+        when(environmentEncryptionService.createEncryptionResources(any(EnvironmentDto.class))).thenReturn(createdDiskEncryptionSet);
+
+        environmentModificationServiceUnderTest.updateAzureResourceEncryptionParametersByEnvironmentName(ACCOUNT_ID,
+                ENVIRONMENT_NAME, updateAzureResourceEncryptionDto);
+
+        ArgumentCaptor<Environment> environmentArgumentCaptor = ArgumentCaptor.forClass(Environment.class);
+        verify(environmentService).save(environmentArgumentCaptor.capture());
+        assertEquals("dummyKeyUrl", ((AzureParameters) environmentArgumentCaptor.getValue().getParameters()).getEncryptionKeyUrl());
+        assertEquals("dummyResourceGroupName", ((AzureParameters) environmentArgumentCaptor.getValue().getParameters()).getEncryptionKeyResourceGroupName());
+    }
+
+    @Test
+    void testUpdateAzureResourceEncryptionParametersByEnvironmentCrn() {
+        UpdateAzureResourceEncryptionDto updateAzureResourceEncryptionDto = UpdateAzureResourceEncryptionDto.builder()
+                .withAzureResourceEncryptionParametersDto(AzureResourceEncryptionParametersDto.builder()
+                        .withEncryptionKeyUrl("dummyKeyUrl")
+                        .withEncryptionKeyResourceGroupName("dummyResourceGroupName")
+                        .build())
+                .build();
+        CreatedDiskEncryptionSet createdDiskEncryptionSet = new CreatedDiskEncryptionSet.Builder()
+                .withDiskEncryptionSetId("dummyId")
+                .build();
+        Environment env = new Environment();
+        env.setParameters(new AzureParameters());
+        when(environmentService.getValidatorService()).thenReturn(validatorService);
+        when(environmentService
+                .findByResourceCrnAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(env));
+        when(validatorService.validateEncryptionKeyUrl(any(String.class), any(String.class))).thenReturn(ValidationResult.builder().build());
+        when(environmentDtoConverter.environmentToDto(env)).thenReturn(new EnvironmentDto());
+        when(environmentEncryptionService.createEncryptionResources(any(EnvironmentDto.class))).thenReturn(createdDiskEncryptionSet);
+
+        environmentModificationServiceUnderTest.updateAzureResourceEncryptionParametersByEnvironmentCrn(ACCOUNT_ID,
+                ENVIRONMENT_NAME, updateAzureResourceEncryptionDto);
+
+        ArgumentCaptor<Environment> environmentArgumentCaptor = ArgumentCaptor.forClass(Environment.class);
+        verify(environmentService).save(environmentArgumentCaptor.capture());
+        assertEquals("dummyKeyUrl", ((AzureParameters) environmentArgumentCaptor.getValue().getParameters()).getEncryptionKeyUrl());
+        assertEquals("dummyResourceGroupName", ((AzureParameters) environmentArgumentCaptor.getValue().getParameters()).getEncryptionKeyResourceGroupName());
+
     }
 
     @Configuration

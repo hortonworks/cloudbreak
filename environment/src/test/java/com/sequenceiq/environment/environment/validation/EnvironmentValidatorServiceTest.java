@@ -49,8 +49,6 @@ import com.sequenceiq.environment.environment.validation.validators.PublicKeyVal
 import com.sequenceiq.environment.environment.validation.validators.TagValidator;
 import com.sequenceiq.environment.parameter.dto.AwsDiskEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.AwsParametersDto;
-import com.sequenceiq.environment.parameter.dto.AzureParametersDto;
-import com.sequenceiq.environment.parameter.dto.AzureResourceEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.GcpParametersDto;
 import com.sequenceiq.environment.parameter.dto.GcpResourceEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
@@ -375,23 +373,12 @@ class EnvironmentValidatorServiceTest {
 
     @Test
     void shouldFailIfEncryptionKeyUrlSpecifiedAndEntitlementAndWrongFormat() {
-        EnvironmentCreationDto creationDto = EnvironmentCreationDto.builder()
-                .withAccountId(ACCOUNT_ID)
-                .withCloudPlatform("AZURE")
-                .withParameters(ParametersDto.builder()
-                        .withAzureParameters(AzureParametersDto.builder()
-                                .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder()
-                                        .withEncryptionKeyUrl("Dummy-key-url")
-                                        .build())
-                                .build())
-                        .build())
-                .build();
-
+        String encryptionKeyUrl = "Dummy-key-url";
         ValidationResult.ValidationResultBuilder validationResultBuilder = new ValidationResult.ValidationResultBuilder();
         validationResultBuilder.error("error");
         when(encryptionKeyUrlValidator.validateEncryptionKeyUrl(any())).thenReturn(validationResultBuilder.build());
         when(entitlementService.isAzureDiskSSEWithCMKEnabled(any())).thenReturn(true);
-        ValidationResult validationResult = underTest.validateEncryptionKeyUrl(creationDto);
+        ValidationResult validationResult = underTest.validateEncryptionKeyUrl(encryptionKeyUrl, ACCOUNT_ID);
         assertTrue(validationResult.hasError());
     }
 
@@ -446,49 +433,19 @@ class EnvironmentValidatorServiceTest {
 
     @Test
     void shouldFailIfEncryptionKeyUrlSpecifiedAndNotEntitlement() {
-        EnvironmentCreationDto creationDto = EnvironmentCreationDto.builder()
-                .withAccountId(ACCOUNT_ID)
-                .withCloudPlatform("AZURE")
-                .withParameters(ParametersDto.builder()
-                        .withAzureParameters(AzureParametersDto.builder()
-                                .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder()
-                                        .withEncryptionKeyUrl("Dummy-key-url")
-                                        .build())
-                                .build())
-                        .build())
-                .build();
+        String encryptionKeyUrl = "Dummy-key-url";
         when(entitlementService.isAzureDiskSSEWithCMKEnabled(any())).thenReturn(false);
-        ValidationResult validationResult = underTest.validateEncryptionKeyUrl(creationDto);
+        ValidationResult validationResult = underTest.validateEncryptionKeyUrl(encryptionKeyUrl, ACCOUNT_ID);
         assertTrue(validationResult.hasError());
     }
 
     @Test
-    void testValidateEncryptionKeyUrlNotSpecified() {
-        EnvironmentCreationDto creationDto = EnvironmentCreationDto.builder()
-                .withAccountId(ACCOUNT_ID)
-                .withCloudPlatform("AZURE")
-                .build();
-        ValidationResult validationResult = underTest.validateEncryptionKeyUrl(creationDto);
-        assertFalse(validationResult.hasError());
-    }
-
-    @Test
     void testValidateEncryptionKeyUrlSpecifiedAndEntitlement() {
-        EnvironmentCreationDto creationDto = EnvironmentCreationDto.builder()
-                .withAccountId(ACCOUNT_ID)
-                .withCloudPlatform("AZURE")
-                .withParameters(ParametersDto.builder()
-                        .withAzureParameters(AzureParametersDto.builder()
-                                .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder()
-                                        .withEncryptionKeyUrl("https://someVault.vault.azure.net/keys/someKey/someKeyVersion")
-                                        .build())
-                                .build())
-                        .build())
-                .build();
+        String encryptionKeyUrl = "https://someVault.vault.azure.net/keys/someKey/someKeyVersion";
         ValidationResult.ValidationResultBuilder validationResultBuilder = new ValidationResult.ValidationResultBuilder();
         when(encryptionKeyUrlValidator.validateEncryptionKeyUrl(any())).thenReturn(validationResultBuilder.build());
         when(entitlementService.isAzureDiskSSEWithCMKEnabled(any())).thenReturn(true);
-        ValidationResult validationResult = underTest.validateEncryptionKeyUrl(creationDto);
+        ValidationResult validationResult = underTest.validateEncryptionKeyUrl(encryptionKeyUrl, ACCOUNT_ID);
         assertFalse(validationResult.hasError());
     }
 
