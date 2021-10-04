@@ -26,7 +26,7 @@ public final class FreeIpaOperationDescriptions {
     public static final String UPGRADE_OPTIONS = "Get available images for FreeIPA upgrade. If catalog is defined use the catalog as image source.";
     public static final String RETRY = "Retries the latest failed operation";
     public static final String LIST_RETRYABLE_FLOWS = "List retryable failed flows";
-
+    public static final String CHANGE_IMAGE_CATALOG = "Changes the image catalog used for creating instances";
 
     private FreeIpaOperationDescriptions() {
     }

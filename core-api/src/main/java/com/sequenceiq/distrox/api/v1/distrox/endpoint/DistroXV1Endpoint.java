@@ -2,6 +2,7 @@ package com.sequenceiq.distrox.api.v1.distrox.endpoint;
 
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.ClusterOpDescription.SET_MAINTENANCE_MODE_BY_CRN;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.ClusterOpDescription.SET_MAINTENANCE_MODE_BY_NAME;
+import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.CHANGE_IMAGE_CATALOG;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.DELETE_MULTIPLE_INSTANCES_BY_ID_IN_WORKSPACE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.ROTATE_CERTIFICATES;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.CLI_COMMAND;
@@ -57,6 +58,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ChangeImageCatalogV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.CertificatesRotationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.DistroXSyncCmV1Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBlueprintV4Response;
@@ -450,4 +452,10 @@ public interface DistroXV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "syncs from distrox cluster CM the CM and parcel versions", produces = MediaType.APPLICATION_JSON, nickname = "syncDistroxCmByCrn")
     DistroXSyncCmV1Response syncComponentVersionsFromCmByCrn(@PathParam("crn") String crn);
+
+    @PUT
+    @Path("name/{name}/change_image_catalog")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = CHANGE_IMAGE_CATALOG, nickname = "changeImageCatalog")
+    void changeImageCatalog(@PathParam("name") String name, @Valid @NotNull ChangeImageCatalogV4Request changeImageCatalogRequest);
 }

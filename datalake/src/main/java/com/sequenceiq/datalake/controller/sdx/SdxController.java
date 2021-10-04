@@ -54,6 +54,7 @@ import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 import com.sequenceiq.sdx.api.model.AdvertisedRuntime;
 import com.sequenceiq.sdx.api.model.RangerCloudIdentitySyncStatus;
+import com.sequenceiq.sdx.api.model.SdxChangeImageCatalogRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResizeRequest;
@@ -341,6 +342,14 @@ public class SdxController implements SdxEndpoint {
             @Valid CertificatesRotationV4Request rotateCertificateRequest) {
         SdxCluster sdxCluster = getSdxClusterByCrn(crn);
         return certRotationService.rotateAutoTlsCertificates(sdxCluster, rotateCertificateRequest);
+    }
+
+    @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.POWERUSER_ONLY)
+    public void changeImageCatalog(@ResourceName String name, SdxChangeImageCatalogRequest changeImageCatalogRequest) {
+        // FIXME: Implement this!
+        // API first approach so we can work in parallel on the CLI.
+        // It is going to be implemented as a part of CB-14309
     }
 
     private SdxCluster getSdxClusterByName(String name) {

@@ -1,5 +1,6 @@
 package com.sequenceiq.sdx.api.endpoint;
 
+import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.CHANGE_IMAGE_CATALOG;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.ROTATE_CERTIFICATES;
 
 import java.util.List;
@@ -32,6 +33,7 @@ import com.sequenceiq.cloudbreak.validation.ValidStackNameLength;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.sdx.api.model.AdvertisedRuntime;
 import com.sequenceiq.sdx.api.model.RangerCloudIdentitySyncStatus;
+import com.sequenceiq.sdx.api.model.SdxChangeImageCatalogRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResizeRequest;
@@ -240,4 +242,10 @@ public interface SdxEndpoint {
     @ApiOperation(value = "validate cloud storage", produces = MediaType.APPLICATION_JSON, nickname = "validateCloudStorage")
     ObjectStorageValidateResponse validateCloudStorage(@ValidStackNameFormat @ValidStackNameLength @PathParam("name") String clusterName,
             @Valid SdxValidateCloudStorageRequest sdxValidateCloudStorageRequest);
+
+    @PUT
+    @Path("{name}/change_image_catalog")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = CHANGE_IMAGE_CATALOG, nickname = "changeImageCatalog")
+    void changeImageCatalog(@PathParam("name") String name, @Valid @NotNull SdxChangeImageCatalogRequest changeImageCatalogRequest);
 }

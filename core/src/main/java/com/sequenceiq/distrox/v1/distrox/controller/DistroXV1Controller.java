@@ -47,6 +47,7 @@ import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ChangeImageCatalogV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.CertificatesRotationV4Response;
@@ -585,6 +586,14 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.SYNC_COMPONENT_VERSIONS_FROM_CM_DATAHUB)
     public DistroXSyncCmV1Response syncComponentVersionsFromCmByCrn(@ResourceCrn String crn) {
         return launchSyncComponentVersionsFromCm(NameOrCrn.ofCrn(crn));
+    }
+
+    @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.POWERUSER_ONLY)
+    public void changeImageCatalog(@ResourceName String name, ChangeImageCatalogV4Request changeImageCatalogRequest) {
+        // FIXME: Implement this!
+        // API first approach so we can work in parallel on the CLI.
+        // It is going to be implemented as a part of CB-14308
     }
 
     private DistroXSyncCmV1Response launchSyncComponentVersionsFromCm(NameOrCrn nameOrCrn) {

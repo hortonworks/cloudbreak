@@ -42,6 +42,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaReq
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.detachchildenv.DetachChildEnvironmentRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.HealthDetailsFreeIpaResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.imagecatalog.ChangeImageCatalogRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.list.ListFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.reboot.RebootInstancesRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.repair.RepairInstancesRequest;
@@ -307,5 +308,13 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
     public List<RetryableFlowResponse> listRetryableFlows(@ResourceCrn @NotEmpty String environmentCrn) {
         String accountId = crnService.getCurrentAccountId();
         return retryService.getRetryableFlows(environmentCrn, accountId);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = EDIT_ENVIRONMENT)
+    public void changeImageCatalog(@ResourceCrn String environmentCrn, ChangeImageCatalogRequest changeImageCatalogRequest) {
+        // FIXME: Implement this!
+        // API first approach so we can work in parallel on the CLI.
+        // It is going to be implemented as a part of CB-14310
     }
 }
