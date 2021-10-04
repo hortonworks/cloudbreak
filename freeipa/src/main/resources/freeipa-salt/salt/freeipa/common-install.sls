@@ -109,3 +109,21 @@ restart_sssd_if_reconfigured:
     - failhard: True
     - watch:
       - file: /etc/sssd/sssd.conf
+
+/opt/salt/scripts/disable_anon_ldap.sh:
+  file.managed:
+    - makedirs: True
+    - user: root
+    - group: root
+    - mode: 700
+    - source: salt://freeipa/scripts/disable_anon_ldap.sh
+
+disable-anonymous-ldap-access:
+  cmd.run:
+    - name: /opt/salt/scripts/disable_anon_ldap.sh && echo $(date +%Y-%m-%d:%H:%M:%S) >> /var/log/freeipa_ldap_anon-executed
+    - env:
+        - FPW: {{salt['pillar.get']('freeipa:password')}}
+    - failhard: True
+    - require:
+        - file: /opt/salt/scripts/disable_anon_ldap.sh
+    - unless: test -f /var/log/freeipa_ldap_anon-executed
