@@ -12,8 +12,8 @@ CREATE TABLE IF NOT EXISTS cdp_structured_event (
                                                     CONSTRAINT              pk_cdp_structured_event_id              PRIMARY KEY (id)
 );
 
-CREATE INDEX idx_cdp_structured_event_resourcecrn_eventtype ON cdp_structured_event (resourcecrn, eventtype);
-CREATE INDEX idx_cdp_structured_event_resourcecrn_eventtype_timestamp ON cdp_structured_event (resourcecrn, eventtype, timestamp);
+CREATE INDEX IF NOT EXISTS idx_cdp_structured_event_resourcecrn_eventtype ON cdp_structured_event (resourcecrn, eventtype);
+CREATE INDEX IF NOT EXISTS idx_cdp_structured_event_resourcecrn_eventtype_timestamp ON cdp_structured_event (resourcecrn, eventtype, timestamp);
 
 
 -- //@UNDO
