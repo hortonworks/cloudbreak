@@ -59,7 +59,7 @@ public class TemplateDecorator {
             try {
                 config = resolveVolumeParameterConfig(template, volumeTemplate, platformDisks, vmTypesV2, locationString);
             } catch (NoSuchElementException ignored) {
-                LOGGER.debug("No VolumeParameterConfig found, which might be normal for platforms like OpenStack");
+                LOGGER.debug("No VolumeParameterConfig found, which might be normal for platforms like YARN");
                 config = VolumeParameterConfig.EMPTY;
             }
 

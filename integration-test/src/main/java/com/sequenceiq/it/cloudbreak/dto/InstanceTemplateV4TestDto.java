@@ -7,7 +7,6 @@ import java.util.stream.Stream;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AzureInstanceTemplateV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.GcpInstanceTemplateV4Parameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.OpenStackInstanceTemplateV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.YarnInstanceTemplateV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.VolumeV4Request;
@@ -55,11 +54,6 @@ public class InstanceTemplateV4TestDto extends AbstractCloudbreakTestDto<Instanc
         return this;
     }
 
-    public InstanceTemplateV4TestDto withOpenStackParameters(OpenStackInstanceTemplateV4Parameters openStackParameters) {
-        getRequest().setOpenstack(openStackParameters);
-        return this;
-    }
-
     public InstanceTemplateV4TestDto withYarnParameters(YarnInstanceTemplateV4Parameters yarnParameters) {
         getRequest().setYarn(yarnParameters);
         return this;
@@ -100,11 +94,6 @@ public class InstanceTemplateV4TestDto extends AbstractCloudbreakTestDto<Instanc
 
     public InstanceTemplateV4TestDto withAws(AwsInstanceTemplateV4Parameters aws) {
         getRequest().setAws(aws);
-        return this;
-    }
-
-    public InstanceTemplateV4TestDto withOpenstack(OpenStackInstanceTemplateV4Parameters openstack) {
-        getRequest().setOpenstack(openstack);
         return this;
     }
 

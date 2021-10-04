@@ -24,8 +24,6 @@ public abstract class ProviderParametersBase {
 
     public abstract Mappable createAzure();
 
-    public abstract Mappable createOpenstack();
-
     public abstract Mappable createYarn();
 
     public abstract Mappable createMock();

@@ -28,7 +28,7 @@ public class EnvironmentRegionValidator {
         ValidationResultBuilder resultBuilder = ValidationResult.builder();
         Set<String> requestedRegionNames = new HashSet<>(requestedRegions);
         if (!requestedRegionNames.isEmpty() && !requestedRegionNames.contains(requestedLocation) && cloudRegions.areRegionsSupported()) {
-            if (!CloudPlatform.OPENSTACK.equalsIgnoreCase(cloudPlatform) && !CloudPlatform.MOCK.equalsIgnoreCase(cloudPlatform)) {
+            if (!CloudPlatform.MOCK.equalsIgnoreCase(cloudPlatform)) {
                 resultBuilder.error(String.format("Location [%s] is not one of the regions: [%s].", requestedLocation,
                         String.join(", ", requestedRegionNames)));
             }

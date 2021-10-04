@@ -1,8 +1,0 @@
-{
-  "name" : "openstack-network",
-  "cloudPlatform" : "OPENSTACK",
-  "subnetCIDR" : "10.0.0.0/16",
-  "description" : "default description",
-  "parameters" : {
-  }
-}

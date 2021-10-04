@@ -41,7 +41,7 @@ UPDATE instancegroupnetwork SET attributes=network.attributes
 -- Search subnet-id
 UPDATE instancegroupnetwork SET subnetid=instancegroupnetwork.attributes::json->>'subnetId';
 
--- If AWS, AZURE, GCP, OPENSTACK, MOCK
+-- If AWS, AZURE, GCP, MOCK
 UPDATE instancegroupnetwork SET attributes = json_build_object('subnetIds', json_build_array(subnetid), 'cloudPlatform', cloudPlatform)
     WHERE subnetid IS NOT NULL;
 

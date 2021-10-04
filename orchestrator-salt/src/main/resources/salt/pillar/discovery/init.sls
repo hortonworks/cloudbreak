@@ -1,1 +1,1 @@
-platform: OPENSTACK
+platform: MOCK

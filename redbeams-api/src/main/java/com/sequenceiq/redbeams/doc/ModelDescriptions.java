@@ -96,7 +96,6 @@ public final class ModelDescriptions {
         public static final String AWS_PARAMETERS = "AWS-specific parameters for the network";
         public static final String GCP_PARAMETERS = "GCP-specific parameters for the network";
         public static final String AZURE_PARAMETERS = "Azure-specific parameters for the network";
-        public static final String OPEN_STACK_PARAMETERS = "OpenStack-specific parameters for the network";
     }
 
     public static class AwsNetworkModelDescriptions {
@@ -114,7 +113,6 @@ public final class ModelDescriptions {
         public static final String AWS_PARAMETERS = "AWS-specific parameters for the database server";
         public static final String GCP_PARAMETERS = "GCP-specific parameters for the database server";
         public static final String AZURE_PARAMETERS = "Azure-specific parameters for the database server";
-        public static final String OPEN_STACK_PARAMETERS = "OpenStack-specific parameters for the database server";
         public static final String SECURITY_GROUP = "Security group of the database server";
     }
 

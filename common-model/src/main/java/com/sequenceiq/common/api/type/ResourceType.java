@@ -29,17 +29,6 @@ public enum ResourceType {
     ELASTIC_LOAD_BALANCER_TARGET_GROUP,
     AWS_SECURITY_GROUP,
 
-    // OPENSTACK
-    HEAT_STACK(CommonResourceType.TEMPLATE),
-    OPENSTACK_ATTACHED_DISK,
-    OPENSTACK_NETWORK,
-    OPENSTACK_SUBNET,
-    OPENSTACK_ROUTER,
-    OPENSTACK_SECURITY_GROUP,
-    OPENSTACK_PORT,
-    OPENSTACK_INSTANCE,
-    OPENSTACK_FLOATING_IP,
-
     // GCP
     GCP_DISK,
     GCP_ATTACHED_DISK,
@@ -90,7 +79,7 @@ public enum ResourceType {
     MOCK_TEMPLATE,
     MOCK_VOLUME;
 
-    private static final List<ResourceType> INSTANCE_TYPES = List.of(GCP_INSTANCE, OPENSTACK_INSTANCE, MOCK_INSTANCE);
+    private static final List<ResourceType> INSTANCE_TYPES = List.of(GCP_INSTANCE, MOCK_INSTANCE);
 
     private final CommonResourceType commonResourceType;
 

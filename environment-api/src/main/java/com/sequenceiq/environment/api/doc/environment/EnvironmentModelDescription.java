@@ -106,7 +106,6 @@ public class EnvironmentModelDescription {
     public static final String AZURE_PARAMETERS = "AZURE Specific parameters.";
     public static final String GCP_PARAMETERS = "GCP Specific parameters.";
     public static final String YARN_PARAMETERS = "YARN Specific parameters.";
-    public static final String OPENSTACK_PARAMETERS = "OPENSTACK Specific parameters.";
 
     public static final String RESOURCE_GROUP_PARAMETERS = "Azure resource group parameters.";
     public static final String EXISTING_RESOURCE_GROUP_NAME = "Name of an existing azure resource group.";
@@ -127,7 +126,6 @@ public class EnvironmentModelDescription {
 
     public static final String FREEIPA_AWS_PARAMETERS = "Aws specific FreeIpa parameters";
     public static final String FREEIPA_AZURE_PARAMETERS = "Azure specific FreeIpa parameters";
-    public static final String FREEIPA_OPENSTACK_PARAMETERS = "Openstack specific FreeIpa parameters";
     public static final String FREEIPA_GCP_PARAMETERS = "Gcp specific FreeIpa parameters";
     public static final String FREEIPA_AWS_SPOT_PARAMETERS = "Aws spot instance related parameters.";
     public static final String FREEIPA_AWS_SPOT_PERCENTAGE = "Percentage of spot instances launched in FreeIpa instance group";

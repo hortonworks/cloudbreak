@@ -53,7 +53,7 @@ public class JidInfoResponseTransformerTest {
     @Test
     public void testResultSummaryWithStderr() {
         Map<String, List<RunnerInfo>> res = JidInfoResponseTransformer.getHighStates(saltResponseData);
-        RunnerInfo extraInfo = res.get("host-10-0-0-6.openstacklocal").get(18);
+        RunnerInfo extraInfo = res.get("host-10-0-0-6.aws").get(18);
         Map<String, String> expectedErrorResultSummary = Map.of(
             "Comment", "Command \"/opt/ambari-server/install-mpack-1.sh\" run",
             "Stderr", "+ ARGS= + echo yes + ambari-server install-mpack --"
@@ -67,7 +67,7 @@ public class JidInfoResponseTransformerTest {
     @Test
     public void testResultSummary() {
         Map<String, List<RunnerInfo>> res = JidInfoResponseTransformer.getHighStates(saltResponseData);
-        RunnerInfo noExtraInfo = res.get("host-10-0-0-6.openstacklocal").get(0);
+        RunnerInfo noExtraInfo = res.get("host-10-0-0-6.aws").get(0);
         Map<String, String> expectedErrorResultSummary = Map.of(
             "Name", "/etc/hosts",
             "Comment", "No changes needed to be made"

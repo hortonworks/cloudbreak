@@ -3,7 +3,7 @@
     {
       "outputter": "highstate",
       "data": {
-        "host-10-0-0-6.openstacklocal": {
+        "host-10-0-0-6.aws": {
           "file_|-/etc/ambari-agent/conf/internal_hostname.sh_|-/etc/ambari-agent/conf/internal_hostname.sh_|-managed": {
             "comment": "File /etc/ambari-agent/conf/internal_hostname.sh updated",
             "name": "/etc/ambari-agent/conf/internal_hostname.sh",
@@ -17,7 +17,7 @@
             }
           }
         },
-        "host-10-0-0-7.openstacklocal": "Minion did not return"
+        "host-10-0-0-7.aws": "Minion did not return"
       }
     }
   ]

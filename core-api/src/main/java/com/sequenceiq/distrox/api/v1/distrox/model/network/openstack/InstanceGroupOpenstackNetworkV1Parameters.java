@@ -19,6 +19,7 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
+@Deprecated
 public class InstanceGroupOpenstackNetworkV1Parameters extends MappableBase implements Serializable {
 
     @ApiModelProperty
@@ -36,7 +37,7 @@ public class InstanceGroupOpenstackNetworkV1Parameters extends MappableBase impl
     @JsonIgnore
     @ApiModelProperty(hidden = true)
     public CloudPlatform getCloudPlatform() {
-        return CloudPlatform.OPENSTACK;
+        throw new IllegalStateException("OPENSTACK is deprecated");
     }
 
     @Override

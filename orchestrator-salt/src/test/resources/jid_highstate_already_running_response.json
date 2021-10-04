@@ -1,7 +1,7 @@
 {
   "return": [
     {"data": {
-      "host-10-0-0-6.openstacklocal": [
+      "host-10-0-0-6.aws": [
         "The function \"state.highstate\" is running as PID 4417 and was started at 2021, Jun 02 13:35:59.917341 with jid 123456"
       ]}
     }

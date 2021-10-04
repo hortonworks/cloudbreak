@@ -123,7 +123,6 @@ dependencies {
   compile group:  'javax.el',                     name: 'javax.el-api',                   version: '3.0.0'
   compile group:  'org.apache.commons',           name: 'commons-lang3',                  version: '3.4'
   compile group:  'org.opentest4j',               name: 'opentest4j',                     version: '1.2.0'
-  compile group: 'org.pacesys.openstack4j.connectors', name: 'openstack4j-jersey2',       version: '3.1.0-jersey26_v4fix'
   compile(group:  'org.apache.sshd',              name: 'sshd-core',                      version: '1.2.0') {
     exclude group: 'ch.qos.logback'
   }

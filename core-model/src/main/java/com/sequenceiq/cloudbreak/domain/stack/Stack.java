@@ -458,8 +458,6 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
                 return ResourceType.GCP_ATTACHED_DISKSET;
             case CloudConstants.AZURE:
                 return ResourceType.AZURE_VOLUMESET;
-            case CloudConstants.OPENSTACK:
-                return ResourceType.OPENSTACK_ATTACHED_DISK;
             case CloudConstants.MOCK:
                 return ResourceType.MOCK_VOLUME;
             default:

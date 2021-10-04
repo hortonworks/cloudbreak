@@ -7,8 +7,6 @@ public class CloudConstants {
 
     public static final String GCP = "GCP";
 
-    public static final String OPENSTACK = "OPENSTACK";
-
     public static final String AZURE = "AZURE";
 
     public static final String YARN = "YARN";

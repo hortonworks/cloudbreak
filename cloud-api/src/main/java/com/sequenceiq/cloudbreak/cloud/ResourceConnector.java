@@ -19,17 +19,13 @@ import com.sequenceiq.common.api.type.AdjustmentType;
  * Cloudbreak handles the entities on the Cloud provider side as generic resources and supports CRUD operations on them.
  * <br>
  * For example a resource from Cloudbreak point could one or more from the followings:
- * - HEAT_STACK,
- * - OPENSTACK_ATTACHED_DISK,
- * - OPENSTACK_NETWORK,
- * - OPENSTACK_SUBNET,
  * - GCP_DISK
  * - GCP_ATTACHED_DISK
  * - GCP_INSTANCE
  * <br>
  * Take a look at {@link com.sequenceiq.common.api.type.ResourceType} for more resource types.
  * <br>
- * Cloud providers which support template based deployments (like AWS Cloudformation, Azure ARM or OpenStack Heat) usually use only one {@link
+ * Cloud providers which support template based deployments (like AWS Cloudformation, Azure ARM) usually use only one {@link
  * CloudResource} which is  CLOUDFORMATION_STACK, HEAT_STACK or ARM_TEMPLATE and all the infrastructure related changes are done through that resource.
  * In other words when a new VM is removed from stack (cluster) then the CLoudbreak is not addressing that VM resource to be removed from stack, but uses the
  * the template resource reference e.g HEAT_STACK to inform the Cloud provider to remove the VM instance from stack.

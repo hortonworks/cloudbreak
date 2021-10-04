@@ -94,7 +94,6 @@ cb:
     gcp.resource.name.length: 63
     aws.resource.name.length: 50
     aws.loadbalancer.resource.name.length: 32
-    openstack.resource.name.length: 120
     yarn.resource.name.length: 63
   etc.config.dir: /etc/cloudbreak
   yarn:
@@ -108,9 +107,6 @@ cb:
       from.format: qcow2
       disk.format: qcow2
       container.format: bare
-  openstack:
-    api.debug: false
-    hostkey.verify: false
   gcp:
     hostkey.verify: false
     disk.encryption.url: https://cloud-certs.storage.googleapis.com/google-cloud-csek-ingress.pem

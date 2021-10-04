@@ -12,6 +12,7 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel(parent = KeystoneV3Base.class)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
+@Deprecated
 public class DomainKeystoneV3Parameters extends KeystoneV3Base {
 
     @NotNull

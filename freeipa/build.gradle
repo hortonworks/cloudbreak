@@ -134,7 +134,6 @@ dependencies {
   testCompile project(path: ':secret-engine', configuration: 'tests')
   testCompile project(path: ':common', configuration: 'tests')
   runtime project(':orchestrator-salt')
-  runtime project(':cloud-openstack')
   runtime project(':cloud-mock')
   runtime project(':cloud-azure')
   runtime project(':cloud-gcp')

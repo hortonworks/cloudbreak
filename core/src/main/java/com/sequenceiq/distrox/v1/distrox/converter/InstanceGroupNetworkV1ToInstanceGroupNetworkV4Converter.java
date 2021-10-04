@@ -45,8 +45,6 @@ public class InstanceGroupNetworkV1ToInstanceGroupNetworkV4Converter {
                     instanceGroupNetworkParameterConverter.convert(key.getYarn(), environmentNetworkResponse, cloudPlatform));
             request.setMock(
                     instanceGroupNetworkParameterConverter.convert(key.getMock(), environmentNetworkResponse, cloudPlatform));
-            request.setOpenstack(
-                    instanceGroupNetworkParameterConverter.convert(key.getOpenstack(), environmentNetworkResponse, cloudPlatform));
         }
         return request;
     }

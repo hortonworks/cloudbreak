@@ -25,8 +25,6 @@ public class SimpleEnabledCloudPlatformServiceTest {
 
     public static final String AWS = "AWS";
 
-    private static final String OPENSTACK = "OPENSTACK";
-
     @InjectMocks
     private final PreferencesService underTest = new PreferencesService();
 
@@ -35,7 +33,7 @@ public class SimpleEnabledCloudPlatformServiceTest {
 
     @Before
     public void setup() {
-        cloudConstants.addAll(Sets.newHashSet(createCloudConstant(AWS), createCloudConstant(OPENSTACK)));
+        cloudConstants.addAll(Sets.newHashSet(createCloudConstant(AWS)));
     }
 
     private CloudConstant createCloudConstant(String name) {
@@ -47,7 +45,7 @@ public class SimpleEnabledCloudPlatformServiceTest {
         ReflectionTestUtils.setField(underTest, PreferencesService.class, "enabledPlatforms", "", null);
         Set<String> actual = underTest.enabledPlatforms();
 
-        assertThat(actual, containsInAnyOrder(AWS, OPENSTACK));
+        assertThat(actual, containsInAnyOrder(AWS));
     }
 
     @Test

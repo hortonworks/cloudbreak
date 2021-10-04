@@ -14,6 +14,7 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
+@Deprecated
 public class OpenStackInstanceGroupV4Parameters extends InstanceGroupV4ParametersBase {
 
     @ApiModelProperty
@@ -38,7 +39,7 @@ public class OpenStackInstanceGroupV4Parameters extends InstanceGroupV4Parameter
     @JsonIgnore
     @ApiModelProperty(hidden = true)
     public CloudPlatform getCloudPlatform() {
-        return CloudPlatform.OPENSTACK;
+        throw new IllegalStateException("OPENSTACK is deprecated");
     }
 
     @Override

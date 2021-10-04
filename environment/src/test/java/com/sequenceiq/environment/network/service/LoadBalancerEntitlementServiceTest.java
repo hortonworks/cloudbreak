@@ -100,20 +100,6 @@ public class LoadBalancerEntitlementServiceTest {
     }
 
     @Test
-    public void testOpenStackEndpointGatewayEnabled() {
-        assertThrows(BadRequestException.class, () ->
-            ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
-                underTest.validateNetworkForEndpointGateway(CloudConstants.OPENSTACK, ENV_NAME, PublicEndpointAccessGateway.ENABLED);
-            })
-        );
-    }
-
-    @Test
-    public void testOpenStackEndpointGatewayDisabled() throws BadRequestException {
-        underTest.validateNetworkForEndpointGateway(CloudConstants.OPENSTACK, ENV_NAME, PublicEndpointAccessGateway.DISABLED);
-    }
-
-    @Test
     public void testYarnEndpointGatewayEnabled() {
         assertThrows(BadRequestException.class, () ->
             ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {

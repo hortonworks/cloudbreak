@@ -593,7 +593,6 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
                 break;
             case GCP:
             case AZURE:
-            case OPENSTACK:
             case YARN:
             case MOCK:
             default:

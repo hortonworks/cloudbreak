@@ -140,11 +140,6 @@ public class DatabaseServerV4StackBase extends ProviderParametersBase {
     }
 
     @Override
-    public Mappable createOpenstack() {
-        return null;
-    }
-
-    @Override
     public Mappable createYarn() {
         return null;
     }

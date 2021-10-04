@@ -94,12 +94,12 @@ public class RecipeExecutionFailureCollectorTest {
         assertEquals(1, recipe2Failures);
 
         long workerInstanceFailures = recipeExecutionFailures.stream()
-                .filter(failure -> "host-10-0-0-4.openstacklocal".equals(failure.getHost()))
+                .filter(failure -> "host-10-0-0-4.aws".equals(failure.getHost()))
                 .count();
         assertEquals(2, workerInstanceFailures);
 
         long masterInstanceFailures = recipeExecutionFailures.stream()
-                .filter(failure -> "host-10-0-0-3.openstacklocal".equals(failure.getHost()))
+                .filter(failure -> "host-10-0-0-3.aws".equals(failure.getHost()))
                 .peek(failure -> assertEquals("failingRecipe1", failure.getRecipeName()))
                 .count();
         assertEquals(1, masterInstanceFailures);
@@ -123,8 +123,8 @@ public class RecipeExecutionFailureCollectorTest {
 
     private ArrayListMultimap<String, String> getNodesWithErrors() {
         ArrayListMultimap<String, String> nodesWithErrors = ArrayListMultimap.create();
-        nodesWithErrors.putAll("host-10-0-0-4.openstacklocal", getMultiLineError());
-        nodesWithErrors.put("host-10-0-0-3.openstacklocal", getSingleLineError());
+        nodesWithErrors.putAll("host-10-0-0-4.aws", getMultiLineError());
+        nodesWithErrors.put("host-10-0-0-3.aws", getSingleLineError());
         return nodesWithErrors;
     }
 

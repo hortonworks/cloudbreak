@@ -505,7 +505,6 @@ class DatabaseServerSslCertificateConfigTest {
                 {"aZure", "aZure", 1},
                 {"GCP", CloudPlatform.GCP.name(), DUMMY_VERSION},
                 {"MOCK", CloudPlatform.MOCK.name(), DUMMY_VERSION},
-                {"OPENSTACK", CloudPlatform.OPENSTACK.name(), DUMMY_VERSION},
                 {"YARN", CloudPlatform.YARN.name(), DUMMY_VERSION},
         };
     }
@@ -529,7 +528,6 @@ class DatabaseServerSslCertificateConfigTest {
                 {"aZure", "aZure", DIGI_CERT_GLOBAL_ROOT_G_2},
                 {"GCP", CloudPlatform.GCP.name(), null},
                 {"MOCK", CloudPlatform.MOCK.name(), null},
-                {"OPENSTACK", CloudPlatform.OPENSTACK.name(), null},
                 {"YARN", CloudPlatform.YARN.name(), null},
         };
     }

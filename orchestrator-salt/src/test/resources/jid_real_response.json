@@ -3,7 +3,7 @@
     {
       "outputter": "highstate",
       "data": {
-        "host-10-0-0-6.openstacklocal": {
+        "host-10-0-0-6.aws": {
           "file_|-/etc/ambari-agent/conf/internal_hostname.sh_|-/etc/ambari-agent/conf/internal_hostname.sh_|-managed": {
             "comment": "File /etc/ambari-agent/conf/internal_hostname.sh updated",
             "name": "/etc/ambari-agent/conf/internal_hostname.sh",
@@ -209,7 +209,7 @@
             }
           }
         },
-        "host-10-0-0-5.openstacklocal": {
+        "host-10-0-0-5.aws": {
           "file_|-/etc/ambari-agent/conf/internal_hostname.sh_|-/etc/ambari-agent/conf/internal_hostname.sh_|-managed": {
             "comment": "File /etc/ambari-agent/conf/internal_hostname.sh updated",
             "name": "/etc/ambari-agent/conf/internal_hostname.sh",
@@ -406,7 +406,7 @@
             }
           }
         },
-        "host-10-0-0-4.openstacklocal": {
+        "host-10-0-0-4.aws": {
           "file_|-/etc/ambari-agent/conf/internal_hostname.sh_|-/etc/ambari-agent/conf/internal_hostname.sh_|-managed": {
             "comment": "File /etc/ambari-agent/conf/internal_hostname.sh updated",
             "name": "/etc/ambari-agent/conf/internal_hostname.sh",
@@ -603,7 +603,7 @@
             }
           }
         },
-        "host-10-0-0-3.openstacklocal": {
+        "host-10-0-0-3.aws": {
           "pkg_|-haveged_|-haveged_|-installed": {
             "comment": "Package haveged is already installed.",
             "name": "haveged",

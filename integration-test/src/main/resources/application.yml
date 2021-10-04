@@ -215,25 +215,6 @@ integrationtest:
         imageId: bbc059cd-d7c7-4938-bb34-5c7fc09f1204
         catalog: https://cloudbreak-imagecatalog.s3.us-west-1.amazonaws.com/freeipa-upgrade-test-catalog.json
 
-  # openstack parameters
-  openstack:
-    availabilityZone: nova
-    region: RegionOne
-    location: Texas
-    publicNetId: 999e09bc-cf75-4a19-98fb-c0b4ddee6d93
-    networkingOption: self-service
-    instance:
-      type: m1.xlarge
-      rootVolumeSize: 100
-      volumeSize: 100
-      volumeCount: 0
-      volumeType: HDD
-    credential:
-      endpoint:
-      tenant:
-      userName:
-      password:
-
   # yarn parameters
   yarn:
     defaultBlueprintName: "%s - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas"

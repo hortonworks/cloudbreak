@@ -5,7 +5,6 @@ Cloudbreak already supports multiple cloud platforms and provides an easy way to
  * The [cloud-aws-cloudformation](https://github.com/hortonworks/cloudbreak/tree/master/cloud-aws-cloudformation) module integrates Amazon Web Services
  * The [cloud-gcp](https://github.com/hortonworks/cloudbreak/tree/master/cloud-gcp) module integrates Google Cloud Platform
  * The [cloud-azure](https://github.com/hortonworks/cloudbreak/tree/master/cloud-azure) module integrates Microsoft Azure
- * The [cloud-openstack](https://github.com/hortonworks/cloudbreak/tree/master/cloud-openstack) module integrates OpenStack
 
 The SPI interface is event-based, it scales well, and is decoupled from Cloudbreak. The core of Cloudbreak uses [EventBus](http://projectreactor.io/) to communicate with the providers, but the complexity of event handling is hidden from the provider implementation.
 
@@ -20,7 +19,7 @@ Cloudbreak's SPI supports both of these methods. It provides a well-defined inte
 
 ### Template Based Deployments
 
-Providers with template-based deployments like [AWS CloudFormation](https://aws.amazon.com/cloudformation/), [Azure ARM](https://azure.microsoft.com/en-us/documentation/articles/resource-group-overview/#) or [OpenStack Heat](https://wiki.openstack.org/wiki/Heat) have the ability to create and manage a collection of related cloud resources, provisioning and updating them in an orderly and predictable fashion. 
+Providers with template-based deployments like [AWS CloudFormation](https://aws.amazon.com/cloudformation/), [Azure ARM](https://azure.microsoft.com/en-us/documentation/articles/resource-group-overview/#) have the ability to create and manage a collection of related cloud resources, provisioning and updating them in an orderly and predictable fashion. 
 
 In such scenario, Cloudbreak needs a reference to the template itself because every change in the infrastructure (for example, creating new instance or deleting one) is managed through this templating mechanism.
 
@@ -50,7 +49,7 @@ The entry point for the provider is the  [CloudConnector](https://github.com/hor
 
 ### Individual Resource Based Deployments
 
-There are providers such as GCP that do not support suitable templating mechanism, and customisable providers such as OpenStack where the Heat Orchestration (templating) component is optional and individual resources need to be handled separately. 
+There are providers such as GCP that do not support suitable templating mechanism, and customisable providers such as AWS where the Heat Orchestration (templating) component is optional and individual resources need to be handled separately. 
 
 In such scenarios, resources such as networks, discs, and compute instances need to be created and managed with an ordered sequence of API calls, and Cloudbreak needs to provide a solution to manage the collection of related cloud resources as a whole.
 
@@ -78,8 +77,4 @@ dependencies {
 
 ## Variants
 
-OpenStack is highly modular. It allows you to install different components, for example for volume storage or networking (Nova networking, Neutron, etc.). Or, in some scenarios, some components such as Heat may not installed at all.
-
-Cloudbreak's SPI interface reflects this flexibility using so called variants. This means that if some part of cloud provider (typically OpenStack) is using different component, you don't need re-implement the complete stack but just use a different variant and re-implement the part that is different.
-
-The reference implementation for this feature can be found in  [cloud-openstack](https://github.com/hortonworks/cloudbreak/tree/master/cloud-openstack) module which support a HEAT and NATIVE variants. The HEAT variant utilizes the Heat templating to launch a stack, but the NATIVE variant starts the cluster by using a sequence of API calls without Heat to achieve the same result, although both of them are using the same authentication and credential management.
+Cloudbreak's SPI interface reflects this flexibility using so called variants. This means that if some part of cloud provider (typically AWS) is using different component, you don't need re-implement the complete stack but just use a different variant and re-implement the part that is different.

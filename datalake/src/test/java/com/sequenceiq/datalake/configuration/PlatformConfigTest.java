@@ -28,7 +28,6 @@ class PlatformConfigTest {
                 {CloudPlatform.AZURE, true},
                 {CloudPlatform.GCP, false},
                 {CloudPlatform.MOCK, false},
-                {CloudPlatform.OPENSTACK, false},
                 {CloudPlatform.YARN, false},
         };
     }

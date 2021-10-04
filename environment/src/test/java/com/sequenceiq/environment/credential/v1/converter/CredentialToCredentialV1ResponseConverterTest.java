@@ -17,7 +17,6 @@ import com.sequenceiq.environment.credential.v1.converter.aws.AwsCredentialV1Par
 import com.sequenceiq.environment.credential.v1.converter.azure.AzureCredentialV1ParametersToAzureCredentialAttributesConverter;
 import com.sequenceiq.environment.credential.v1.converter.gcp.GcpCredentialV1ParametersToGcpCredentialAttributesConverter;
 import com.sequenceiq.environment.credential.v1.converter.mock.MockCredentialV1ParametersToMockCredentialAttributesConverter;
-import com.sequenceiq.environment.credential.v1.converter.openstack.OpenStackCredentialV1ParametersToOpenStackCredentialAttributesConverter;
 import com.sequenceiq.environment.credential.v1.converter.yarn.YarnCredentialV1ParametersToAwsYarnAttributesConverter;
 import com.sequenceiq.environment.credential.validation.CredentialValidator;
 import com.sequenceiq.environment.credential.validation.definition.CredentialDefinitionService;
@@ -48,9 +47,6 @@ public class CredentialToCredentialV1ResponseConverterTest {
 
     @MockBean
     private MockCredentialV1ParametersToMockCredentialAttributesConverter mockConverter;
-
-    @MockBean
-    private OpenStackCredentialV1ParametersToOpenStackCredentialAttributesConverter openstackConverter;
 
     @MockBean
     private YarnCredentialV1ParametersToAwsYarnAttributesConverter yarnConverter;
