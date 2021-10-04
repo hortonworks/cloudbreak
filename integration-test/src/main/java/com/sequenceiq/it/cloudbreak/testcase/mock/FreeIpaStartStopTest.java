@@ -46,6 +46,7 @@ public class FreeIpaStartStopTest extends AbstractMockTest {
                 .when(freeIpaTestClient.stop())
                 .await(Status.STOPPED)
                 .when(freeIpaTestClient.start())
+                .awaitForHealthyInstances()
                 .await(Status.AVAILABLE)
                 .when(freeIpaTestClient.delete())
                 .await(Status.DELETE_COMPLETED)
