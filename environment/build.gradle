@@ -63,7 +63,6 @@ dependencies {
     implementation     project(":cloud-mock")
     implementation     project(":cloud-yarn")
     implementation     project(":cloud-gcp")
-    implementation     project(":cloud-openstack")
     implementation     project(":core-api")
     implementation     project(":idbmms-connector")
     implementation     project(":redbeams-api")

@@ -234,7 +234,7 @@ public class ImageCatalogServiceTest {
     public void beforeTest() throws Exception {
         setupImageCatalogProvider(DEFAULT_CATALOG_URL, V2_CB_CATALOG_FILE);
 
-        when(preferencesService.enabledPlatforms()).thenReturn(new HashSet<>(Arrays.asList("AZURE", "AWS", "GCP", "OPENSTACK")));
+        when(preferencesService.enabledPlatforms()).thenReturn(new HashSet<>(Arrays.asList("AZURE", "AWS", "GCP")));
         lenient().when(user.getUserCrn()).thenReturn(TestConstants.CRN);
         when(userService.getOrCreate(any())).thenReturn(user);
         when(entitlementService.baseImageEnabled(anyString())).thenReturn(true);

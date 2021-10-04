@@ -5,7 +5,7 @@ public class CredentialModelDescription {
     public static final String AWS_PARAMETERS = "custom parameters for AWS credential";
     public static final String GCP_PARAMETERS = "custom parameters for GCP credential";
     public static final String AZURE_PARAMETERS = "custom parameters for Azure credential";
-    public static final String OPENSTACK_PARAMETERS = "custom parameters for Openstack credential";
+    public static final String OPENSTACK_PARAMETERS_DEPRECATED = "custom parameters for Openstack credential [DEPRECATED]";
     public static final String YARN_PARAMETERS = "custom parameters for Yarn credential";
     public static final String ACCOUNT_IDENTIFIER = "provider specific identifier of the account/subscription/project that is used by Cloudbreak";
     public static final String AWS_CREDENTIAL_PREREQUISITES = "AWS specific credential prerequisites.";

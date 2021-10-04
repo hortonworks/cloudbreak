@@ -90,8 +90,7 @@ public class FreeIpaModelDescriptions {
         public static final String AWS_PARAMETERS = "provider specific parameters of the specified network";
         public static final String AZURE_PARAMETERS = "provider specific parameters of the specified network";
         public static final String GCP_PARAMETERS = "provider specific parameters of the specified network";
-        public static final String OPEN_STACK_PARAMETERS = "provider specific parameters of the specified network";
-        public static final String SUBNET_CIDR = "the subnet definition of the network in CIDR format";
+        public static final String OPENSTACK_PARAMETERS_DEPRECATED = "provider specific parameters of the specified network";
         public static final String OUTBOUND_INTERNET_TRAFFIC = "A flag to enable or disable the outbound internet traffic from the instances.";
         public static final String NETWORK_CIDRS = "the network cidrs which have to be reacheable from the instances";
     }

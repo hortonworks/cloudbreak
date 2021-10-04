@@ -33,10 +33,11 @@ public abstract class StackV4Base extends ProviderParametersBase implements Json
     @ApiModelProperty(StackModelDescription.AZURE_PARAMETERS)
     private AzureStackV4Parameters azure;
 
-    @ApiModelProperty(StackModelDescription.OPENSTACK_PARAMETERS)
+    @ApiModelProperty(StackModelDescription.OPENSTACK_PARAMETERS_DEPRECATED)
+    @Deprecated
     private OpenStackStackV4Parameters openstack;
 
-    @ApiModelProperty(StackModelDescription.OPENSTACK_PARAMETERS)
+    @ApiModelProperty(StackModelDescription.YARN_PARAMETERS)
     private YarnStackV4Parameters yarn;
 
     @ApiModelProperty(hidden = false)
@@ -86,17 +87,6 @@ public abstract class StackV4Base extends ProviderParametersBase implements Json
         this.azure = azure;
     }
 
-    public OpenStackStackV4Parameters createOpenstack() {
-        if (openstack == null) {
-            openstack = new OpenStackStackV4Parameters();
-        }
-        return openstack;
-    }
-
-    public void setOpenstack(OpenStackStackV4Parameters openstack) {
-        this.openstack = openstack;
-    }
-
     @Override
     public YarnStackV4Parameters createYarn() {
         if (yarn == null) {
@@ -129,10 +119,6 @@ public abstract class StackV4Base extends ProviderParametersBase implements Json
         return azure;
     }
 
-    public OpenStackStackV4Parameters getOpenstack() {
-        return openstack;
-    }
-
     public YarnStackV4Parameters getYarn() {
         return yarn;
     }
@@ -160,7 +146,6 @@ public abstract class StackV4Base extends ProviderParametersBase implements Json
                 ", aws=" + aws +
                 ", gcp=" + gcp +
                 ", azure=" + azure +
-                ", openstack=" + openstack +
                 ", yarn=" + yarn +
                 ", mock=" + mock +
                 ", timeToLive=" + timeToLive +

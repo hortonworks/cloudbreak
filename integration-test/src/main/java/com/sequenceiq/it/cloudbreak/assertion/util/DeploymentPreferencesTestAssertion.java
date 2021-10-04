@@ -29,8 +29,10 @@ public class DeploymentPreferencesTestAssertion {
         return (testContext, entity, cloudbreakClient) -> {
             assertNotNull(entity.getResponse().getPlatformEnablement());
             assertFalse(entity.getResponse().getPlatformEnablement().isEmpty());
-            var cloudPlatforms = Set.of(CloudPlatform.values());
-            assertEquals(cloudPlatforms.size(), entity.getResponse().getPlatformEnablement().size());
+            Set<CloudPlatform> cloudPlatforms = Set.of(CloudPlatform.values());
+            // OPENSTACK is deprecated now but we can not remove that for API compatibility reasons
+            int platformSize = cloudPlatforms.size() - CloudPlatform.deprecated().size();
+            assertEquals(platformSize, entity.getResponse().getPlatformEnablement().size());
             entity.getResponse().getPlatformEnablement().keySet().forEach(platform -> assertTrue(cloudPlatforms.contains(CloudPlatform.valueOf(platform))));
             return entity;
         };

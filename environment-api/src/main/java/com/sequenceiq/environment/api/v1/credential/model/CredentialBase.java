@@ -35,7 +35,8 @@ public abstract class CredentialBase implements Serializable {
     private GcpCredentialParameters gcp;
 
     @Valid
-    @ApiModelProperty(CredentialModelDescription.OPENSTACK_PARAMETERS)
+    @ApiModelProperty(CredentialModelDescription.OPENSTACK_PARAMETERS_DEPRECATED)
+    @Deprecated
     private OpenstackParameters openstack;
 
     @Valid
@@ -96,14 +97,6 @@ public abstract class CredentialBase implements Serializable {
         this.gcp = gcp;
     }
 
-    public OpenstackParameters getOpenstack() {
-        return openstack;
-    }
-
-    public void setOpenstack(OpenstackParameters openstack) {
-        this.openstack = openstack;
-    }
-
     public YarnParameters getYarn() {
         return yarn;
     }
@@ -134,7 +127,6 @@ public abstract class CredentialBase implements Serializable {
                 "cloudPlatform='" + cloudPlatform + '\'' +
                 ", aws=" + aws +
                 ", gcp=" + gcp +
-                ", openstack=" + openstack +
                 ", yarn=" + yarn +
                 ", mock=" + mock +
                 ", description='" + description + '\'' +

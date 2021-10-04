@@ -31,7 +31,8 @@ public class NetworkV4Base extends ProviderParametersBase implements JsonEntity 
     @ApiModelProperty(NetworkModelDescription.AZURE_PARAMETERS)
     private AzureNetworkV4Parameters azure;
 
-    @ApiModelProperty(NetworkModelDescription.OPEN_STACK_PARAMETERS)
+    @ApiModelProperty(NetworkModelDescription.OPENSTACK_PARAMETERS_DEPRECATED)
+    @Deprecated
     private OpenStackNetworkV4Parameters openstack;
 
     @ApiModelProperty(hidden = false)
@@ -103,17 +104,6 @@ public class NetworkV4Base extends ProviderParametersBase implements JsonEntity 
         this.azure = azure;
     }
 
-    public OpenStackNetworkV4Parameters createOpenstack() {
-        if (openstack == null) {
-            openstack = new OpenStackNetworkV4Parameters();
-        }
-        return openstack;
-    }
-
-    public void setOpenstack(OpenStackNetworkV4Parameters openstack) {
-        this.openstack = openstack;
-    }
-
     @Override
     public YarnNetworkV4Parameters createYarn() {
         if (yarn == null) {
@@ -136,10 +126,6 @@ public class NetworkV4Base extends ProviderParametersBase implements JsonEntity 
 
     public AzureNetworkV4Parameters getAzure() {
         return azure;
-    }
-
-    public OpenStackNetworkV4Parameters getOpenstack() {
-        return openstack;
     }
 
     public MockNetworkV4Parameters getMock() {

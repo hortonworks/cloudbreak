@@ -12,6 +12,7 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel("OpenstackV1Parameters")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
+@Deprecated
 public class OpenstackParameters implements Serializable {
 
     @ApiModelProperty(required = true)

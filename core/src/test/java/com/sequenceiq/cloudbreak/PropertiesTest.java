@@ -26,7 +26,7 @@ public class PropertiesTest {
     public void testEnabledPlatforms() {
         String[] platforms = enabledPlatforms.split(",");
 
-        assertThat(platforms, Matchers.arrayContainingInAnyOrder("AWS", "GCP", "OPENSTACK", "AZURE"));
+        assertThat(platforms, Matchers.arrayContainingInAnyOrder("AWS", "GCP", "AZURE"));
     }
 
     @Configuration

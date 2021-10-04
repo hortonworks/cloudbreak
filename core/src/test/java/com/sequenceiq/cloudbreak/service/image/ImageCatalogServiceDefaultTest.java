@@ -48,7 +48,7 @@ import com.sequenceiq.cloudbreak.workspace.model.User;
 @RunWith(Parameterized.class)
 public class ImageCatalogServiceDefaultTest {
 
-    private static final String[] PROVIDERS = { "aws", "azure", "openstack", "gcp" };
+    private static final String[] PROVIDERS = { "aws", "azure", "gcp" };
 
     private static final String DEFAULT_CDH_IMAGE_CATALOG = "com/sequenceiq/cloudbreak/service/image/default-cdh-imagecatalog.json";
 

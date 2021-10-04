@@ -266,8 +266,8 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         orchestrator.setType("type");
         stack.setOrchestrator(orchestrator);
         stack.setParameters(new HashMap<>());
-        stack.setCloudPlatform("OPENSTACK");
-        stack.setPlatformVariant(CloudConstants.OPENSTACK);
+        stack.setCloudPlatform("AWS");
+        stack.setPlatformVariant(CloudConstants.AWS);
         stack.setGatewayPort(9443);
         stack.setCustomDomain("custom.domain");
         stack.setCustomHostname("hostname");

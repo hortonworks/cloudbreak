@@ -261,7 +261,6 @@ dependencies {
   runtime project(':orchestrator-salt')
   runtime project(':orchestrator-yarn')
   runtime project(':cloud-reactor')
-  runtime project(':cloud-openstack')
   runtime project(':cloud-gcp')
   implementation project(':cloud-aws-cloudformation')
   implementation project(':cloud-aws-native')

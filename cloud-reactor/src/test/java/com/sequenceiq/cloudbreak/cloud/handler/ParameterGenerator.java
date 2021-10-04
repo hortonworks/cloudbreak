@@ -115,7 +115,7 @@ public class ParameterGenerator {
     }
 
     public List<CloudResource> createCloudResourceList() {
-        CloudResource cr = new Builder().type(ResourceType.HEAT_STACK).name("testref").build();
+        CloudResource cr = new Builder().type(ResourceType.CLOUDFORMATION_STACK).name("testref").build();
         return Lists.newArrayList(cr);
     }
 

@@ -15,6 +15,7 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
+@Deprecated
 public class OpenstackNetworkV1Parameters implements Serializable {
 
     /**

@@ -169,7 +169,7 @@ public class TestApplicationContext {
 
     @Bean
     public CloudConnector cloudConnectors() throws Exception {
-        CloudResource resource = new Builder().type(ResourceType.HEAT_STACK).name("ref").build();
+        CloudResource resource = new Builder().type(ResourceType.CLOUDFORMATION_STACK).name("ref").build();
         when(cloudConnector.authentication()).thenReturn(authenticator);
         when(cloudConnector.credentials()).thenReturn(credentialConnector);
         when(credentialConnector.create(any(AuthenticatedContext.class))).thenReturn(new CloudCredentialStatus(null, CredentialStatus.CREATED));

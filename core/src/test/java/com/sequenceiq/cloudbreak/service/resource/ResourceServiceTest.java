@@ -49,7 +49,7 @@ public class ResourceServiceTest {
         List<Resource> resources = Collections.singletonList(resource);
 
         CloudResource cloudResource = CloudResource.builder()
-                .type(ResourceType.HEAT_STACK)
+                .type(ResourceType.CLOUDFORMATION_STACK)
                 .status(CommonStatus.CREATED)
                 .name("name")
                 .params(Collections.emptyMap())

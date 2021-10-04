@@ -44,9 +44,6 @@ public class ModelDescriptions {
         public static final String AWS_PARAMETERS = "custom parameters for AWS credential";
         public static final String GCP_PARAMETERS = "custom parameters for GCP credential";
         public static final String AZURE_PARAMETERS = "custom parameters for Azure credential";
-        public static final String OPENSTACK_PARAMETERS = "custom parameters for Openstack credential";
-        public static final String YARN_PARAMETERS = "custom parameters for Yarn credential";
-        public static final String CODE_GRANT_FLOW_LOGIN_URL = "Login URL for code grant flow";
     }
 
     public static class CustomConfigurationsModelDescription {
@@ -76,7 +73,7 @@ public class ModelDescriptions {
         public static final String PARAMETERS = "cloud specific parameters for template";
         public static final String AWS_PARAMETERS = "aws specific parameters for template";
         public static final String GCP_PARAMETERS = "gcp specific parameters for template";
-        public static final String OPENSTACK_PARAMETERS = "openstack specific parameters for template";
+        public static final String OPENSTACK_PARAMETERS_DEPRECATED = "openstack specific parameters for template [DEPRECATED]";
         public static final String YARN_PARAMETERS = "yarn specific parameters for template";
         public static final String AZURE_PARAMETERS = "azure specific parameters for template";
         public static final String AWS_SPOT_PARAMETERS = "aws specific spot instance parameters for template";
@@ -260,7 +257,8 @@ public class ModelDescriptions {
         public static final String AWS_PARAMETERS = "aws specific parameters for stack";
         public static final String AZURE_PARAMETERS = "azure specific parameters for stack";
         public static final String GCP_PARAMETERS = "gcp specific parameters for stack";
-        public static final String OPENSTACK_PARAMETERS = "openstack specific parameters for stack";
+        public static final String YARN_PARAMETERS = "yarn specific parameters for stack";
+        public static final String OPENSTACK_PARAMETERS_DEPRECATED = "openstack specific parameters for stack [DEPRECATED]";
         public static final String CLOUD_PLATFORM = "Cloudplatform of the stack";
         public static final String VARIANT = "Variant of the stack";
         public static final String TUNNEL = "Configuration that the connection going directly or with cluster proxy or with ccm and cluster proxy.";
@@ -355,7 +353,6 @@ public class ModelDescriptions {
         public static final String AWS_PARAMETERS = "aws specific parameters for cloud storage";
         public static final String AZURE_PARAMETERS = "azure specific parameters for cloud storage";
         public static final String GCP_PARAMETERS = "gcp specific parameters for cloud storage";
-        public static final String OPENSTACK_PARAMETERS = "openstack specific parameters for cloud storage";
         public static final String VARIANT = "Cluster manager variant";
         public static final String CLOUD_STORAGE_LOCATIONS = "storage locations by CDP services";
         public static final String ENABLE_RANGER_RAZ = "Enables Ranger Raz for the cluster on S3 and ADLSv2.";
@@ -549,7 +546,7 @@ public class ModelDescriptions {
         public static final String AWS_PARAMETERS = "aws specific parameters for instance group";
         public static final String AZURE_PARAMETERS = "azure specific parameters for instance group";
         public static final String GCP_PARAMETERS = "gcp specific parameters for instance group";
-        public static final String OPENSTACK_PARAMETERS = "openstack specific parameters for instance group";
+        public static final String OPENSTACK_PARAMETERS_DEPRECATED = "openstack specific parameters for instance group [DEPRECATED]";
     }
 
     public static class InstanceGroupAdjustmentModelDescription {
@@ -624,13 +621,12 @@ public class ModelDescriptions {
         public static final String AZURE_PARAMETERS = "provider specific parameters of the specified network";
         public static final String MOCK_PARAMETERS = "mock network parameters";
         public static final String YARN_PARAMETERS = "provider specific parameters of the specified network";
-        public static final String OPEN_STACK_PARAMETERS = "provider specific parameters of the specified network";
+        public static final String OPENSTACK_PARAMETERS_DEPRECATED = "provider specific parameters of the specified network";
         public static final String SUBNET_CIDR = "the subnet definition of the network in CIDR format";
     }
 
     public static class SecurityGroupModelDescription {
         public static final String SECURITY_RULES = "list of security rules that relates to the security group";
-        public static final String SECURITY_GROUP_ID = "Exisiting security group id";
         public static final String SECURITY_GROUP_IDS = "Exisiting security group ids";
     }
 

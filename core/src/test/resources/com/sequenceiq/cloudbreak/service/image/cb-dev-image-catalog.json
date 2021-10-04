@@ -57,7 +57,7 @@
           "gcp": {
             "default": "sequenceiqimage/hdc-hdp--1710161226.tar.gz"
           },
-          "openstack": {
+          "mock": {
             "default": "hdc-hdp--1710161226"
           }
         },
@@ -69,7 +69,7 @@
         "date": "2017-11-10",
         "description": "Official Cloudbreak image",
         "images": {
-          "openstack": {
+          "mock": {
             "default": "hdc-hdp--1711101841"
           }
         },
@@ -180,7 +180,7 @@
         "date": "2018-01-26",
         "description": "Official Cloudbreak image",
         "images": {
-          "openstack": {
+          "mock": {
             "default": "cb-hdp--1801261636"
           }
         },
@@ -364,7 +364,7 @@
         "date": "2018-02-28",
         "description": "Official Cloudbreak image",
         "images": {
-          "openstack": {
+          "mock": {
             "default": "cb-hdp--1802281721"
           }
         },
@@ -402,7 +402,7 @@
         "date": "2018-03-01",
         "description": "Official Cloudbreak image",
         "images": {
-          "openstack": {
+          "mock": {
             "default": "cb-hdp--1803010958"
           }
         },
@@ -463,7 +463,7 @@
         "date": "2018-03-21",
         "description": "Official Cloudbreak image",
         "images": {
-          "openstack": {
+          "mock": {
             "default": "cb-hdp--1803211203"
           }
         },
@@ -550,7 +550,7 @@
         "date": "2018-03-22",
         "description": "Official Cloudbreak image",
         "images": {
-          "openstack": {
+          "mock": {
             "default": "cb-hdp--1803221046"
           }
         },
@@ -701,7 +701,7 @@
         "date": "2018-05-25",
         "description": "Official Cloudbreak image",
         "images": {
-          "openstack": {
+          "mock": {
             "default": "cb-hdp--1805252042"
           }
         },

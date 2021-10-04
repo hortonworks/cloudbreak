@@ -19,7 +19,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.A
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AzureNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.GcpNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.MockNetworkV4Parameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.OpenStackNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.YarnNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
@@ -33,7 +32,6 @@ import com.sequenceiq.distrox.api.v1.distrox.model.network.aws.AwsNetworkV1Param
 import com.sequenceiq.distrox.api.v1.distrox.model.network.azure.AzureNetworkV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.gcp.GcpNetworkV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.mock.MockNetworkV1Parameters;
-import com.sequenceiq.distrox.api.v1.distrox.model.network.openstack.OpenstackNetworkV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.yarn.YarnNetworkV1Parameters;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
@@ -207,18 +205,11 @@ public class NetworkV1ToNetworkV4Converter {
         response.setGcp(getIfNotNull(network.getGcp(), this::convertToGcpNetworkV1Parameters));
         response.setYarn(getIfNotNull(network.getYarn(), this::convertToYarnNetworkV1Parameters));
         response.setMock(getIfNotNull(network.getMock(), this::convertToMockNetworkV1Parameters));
-        response.setOpenstack(getIfNotNull(network.getOpenstack(), this::convertToOpenstackNetworkV1Parameters));
         return response;
     }
 
     private YarnNetworkV1Parameters convertToYarnNetworkV1Parameters(YarnNetworkV4Parameters source) {
         return new YarnNetworkV1Parameters();
-    }
-
-    private OpenstackNetworkV1Parameters convertToOpenstackNetworkV1Parameters(OpenStackNetworkV4Parameters source) {
-        OpenstackNetworkV1Parameters response = new OpenstackNetworkV1Parameters();
-        response.setSubnetId(source.getSubnetId());
-        return response;
     }
 
     private MockNetworkV1Parameters convertToMockNetworkV1Parameters(MockNetworkV4Parameters source) {

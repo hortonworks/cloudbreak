@@ -16,6 +16,7 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
+@Deprecated
 public class OpenStackNetworkV4Parameters extends MappableBase implements JsonEntity {
 
     @ApiModelProperty
@@ -88,7 +89,7 @@ public class OpenStackNetworkV4Parameters extends MappableBase implements JsonEn
     @JsonIgnore
     @ApiModelProperty(hidden = true)
     public CloudPlatform getCloudPlatform() {
-        return CloudPlatform.OPENSTACK;
+        throw new IllegalStateException("OPENSTACK is deprecated");
     }
 
     @Override

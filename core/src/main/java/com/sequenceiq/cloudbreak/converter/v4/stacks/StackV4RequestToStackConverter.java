@@ -33,7 +33,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instanceg
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.network.azure.InstanceGroupAzureNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.network.gcp.InstanceGroupGcpNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.network.mock.InstanceGroupMockNetworkV4Parameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.network.openstack.InstanceGroupOpenstackNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.network.yarn.InstanceGroupYarnNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseRequest;
@@ -444,9 +443,6 @@ public class StackV4RequestToStackConverter {
             case YARN:
                 setUpYarn(instanceGroup, instanceGroupNetworkV4Request);
                 break;
-            case OPENSTACK:
-                setUpOpenstack(instanceGroup, instanceGroupNetworkV4Request, subnetId);
-                break;
             case MOCK:
                 setUpMock(instanceGroup, instanceGroupNetworkV4Request, subnetId);
                 break;
@@ -460,15 +456,6 @@ public class StackV4RequestToStackConverter {
             InstanceGroupMockNetworkV4Parameters mock = new InstanceGroupMockNetworkV4Parameters();
             mock.setSubnetIds(List.of(subnetId));
             instanceGroupNetworkV4Request.setMock(mock);
-            instanceGroup.setNetwork(instanceGroupNetworkV4Request);
-        }
-    }
-
-    private void setUpOpenstack(InstanceGroupV4Request instanceGroup, InstanceGroupNetworkV4Request instanceGroupNetworkV4Request, String subnetId) {
-        if (!Strings.isNullOrEmpty(subnetId)) {
-            InstanceGroupOpenstackNetworkV4Parameters openstack = new InstanceGroupOpenstackNetworkV4Parameters();
-            openstack.setSubnetIds(List.of(subnetId));
-            instanceGroupNetworkV4Request.setOpenstack(openstack);
             instanceGroup.setNetwork(instanceGroupNetworkV4Request);
         }
     }

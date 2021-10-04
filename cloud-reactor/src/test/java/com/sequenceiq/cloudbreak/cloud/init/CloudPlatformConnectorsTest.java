@@ -51,21 +51,9 @@ public class CloudPlatformConnectorsTest {
     }
 
     @Test
-    public void getDefaultForOpenstack() {
-        CloudConnector conn = c.getDefault(platform("MULTIWITHDEFAULT"));
-        assertEquals("ONE", conn.variant().value());
-    }
-
-    @Test
     public void getDefaultForGcp() {
         CloudConnector conn = c.getDefault(platform("SINGLE"));
         assertEquals("SINGLE", conn.variant().value());
-    }
-
-    @Test
-    public void getOpenstackNative() {
-        CloudConnector conn = c.get(platform("MULTIWITHDEFAULT"), variant("TWO"));
-        assertEquals("TWO", conn.variant().value());
     }
 
     @Test

@@ -28,11 +28,11 @@ public class FingerprintParserUtilTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void parseFingerprintOpenstack() throws IOException {
+    public void parseFingerprintMock() throws IOException {
         Set<String> expected = new HashSet<>();
         expected.add("0d:0f:d8:85:33:f5:e0:73:25:8f:d4:b3:52:ed:89:94");
         expected.add("19:ff:09:ba:e1:72:7c:39:6f:82:0d:f5:21:01:4a:b4");
-        String consoleLog = FileReaderUtils.readFileFromClasspath("com/sequenceiq/cloudbreak/service/stack/flow/openstack-console.txt");
+        String consoleLog = FileReaderUtils.readFileFromClasspath("com/sequenceiq/cloudbreak/service/stack/flow/mock-console.txt");
         Set<String> fingerprints = FingerprintParserUtil.parseFingerprints(consoleLog);
         assertEquals(expected, fingerprints);
     }

@@ -119,7 +119,6 @@ dependencies {
   implementation project(':core-api')
   implementation project(':redbeams-api')
   implementation project(':template-manager-tag')
-  runtime project(':cloud-openstack')
   runtime project(':cloud-gcp')
   runtime project(':cloud-aws-cloudformation')
   runtime project(':cloud-mock')

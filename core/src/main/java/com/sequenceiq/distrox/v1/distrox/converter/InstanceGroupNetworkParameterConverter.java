@@ -10,14 +10,12 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instanceg
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.network.azure.InstanceGroupAzureNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.network.gcp.InstanceGroupGcpNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.network.mock.InstanceGroupMockNetworkV4Parameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.network.openstack.InstanceGroupOpenstackNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.network.yarn.InstanceGroupYarnNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.aws.InstanceGroupAwsNetworkV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.azure.InstanceGroupAzureNetworkV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.gcp.InstanceGroupGcpNetworkV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.mock.InstanceGroupMockNetworkV1Parameters;
-import com.sequenceiq.distrox.api.v1.distrox.model.network.openstack.InstanceGroupOpenstackNetworkV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.yarn.InstanceGroupYarnNetworkV1Parameters;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 
@@ -31,17 +29,6 @@ public class InstanceGroupNetworkParameterConverter {
             InstanceGroupMockNetworkV1Parameters params = mock == null
                     ? new InstanceGroupMockNetworkV1Parameters() : mock;
             response = convertToMockNetworkParams(new ImmutablePair<>(params, value));
-        }
-        return response;
-    }
-
-    public InstanceGroupOpenstackNetworkV4Parameters convert(InstanceGroupOpenstackNetworkV1Parameters openstack,
-        EnvironmentNetworkResponse value, CloudPlatform cloudPlatform) {
-        InstanceGroupOpenstackNetworkV4Parameters response = null;
-        if (CloudPlatform.OPENSTACK == cloudPlatform) {
-            InstanceGroupOpenstackNetworkV1Parameters params = openstack == null
-                    ? new InstanceGroupOpenstackNetworkV1Parameters() : openstack;
-            response = convertToOpenstackNetworkParams(new ImmutablePair<>(params, value));
         }
         return response;
     }
@@ -170,24 +157,6 @@ public class InstanceGroupNetworkParameterConverter {
                 response.setEndpointGatewaySubnetIds(endpointGatewaySubnetIds);
             } else if (source.getValue() != null) {
                 response.setEndpointGatewaySubnetIds(List.copyOf(source.getValue().getEndpointGatewaySubnetIds()));
-            }
-        }
-
-        return response;
-    }
-
-    private InstanceGroupOpenstackNetworkV4Parameters convertToOpenstackNetworkParams(Pair<InstanceGroupOpenstackNetworkV1Parameters,
-            EnvironmentNetworkResponse> source) {
-        InstanceGroupOpenstackNetworkV1Parameters key = source.getKey();
-
-        InstanceGroupOpenstackNetworkV4Parameters response = new InstanceGroupOpenstackNetworkV4Parameters();
-
-        if (key != null) {
-            List<String> subnetIds = key.getSubnetIds();
-            if (subnetIdsDefined(subnetIds)) {
-                response.setSubnetIds(subnetIds);
-            } else if (source.getValue() != null) {
-                response.setSubnetIds(List.of(source.getValue().getPreferedSubnetId()));
             }
         }
 

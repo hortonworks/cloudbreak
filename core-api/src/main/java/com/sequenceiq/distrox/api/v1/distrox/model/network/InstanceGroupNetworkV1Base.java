@@ -31,7 +31,8 @@ public class InstanceGroupNetworkV1Base extends ProviderParametersBase implement
     @ApiModelProperty(NetworkModelDescription.YARN_PARAMETERS)
     private InstanceGroupYarnNetworkV1Parameters yarn;
 
-    @ApiModelProperty(NetworkModelDescription.OPEN_STACK_PARAMETERS)
+    @ApiModelProperty(NetworkModelDescription.OPENSTACK_PARAMETERS_DEPRECATED)
+    @Deprecated
     private InstanceGroupOpenstackNetworkV1Parameters openstack;
 
     public void setAws(InstanceGroupAwsNetworkV1Parameters aws) {
@@ -74,14 +75,6 @@ public class InstanceGroupNetworkV1Base extends ProviderParametersBase implement
         this.yarn = yarn;
     }
 
-    public InstanceGroupOpenstackNetworkV1Parameters getOpenstack() {
-        return openstack;
-    }
-
-    public void setOpenstack(InstanceGroupOpenstackNetworkV1Parameters openstack) {
-        this.openstack = openstack;
-    }
-
     @Override
     public Mappable createAws() {
         if (aws == null) {
@@ -104,14 +97,6 @@ public class InstanceGroupNetworkV1Base extends ProviderParametersBase implement
             azure = new InstanceGroupAzureNetworkV1Parameters();
         }
         return azure;
-    }
-
-    @Override
-    public Mappable createOpenstack() {
-        if (openstack == null) {
-            openstack = new InstanceGroupOpenstackNetworkV1Parameters();
-        }
-        return openstack;
     }
 
     @Override

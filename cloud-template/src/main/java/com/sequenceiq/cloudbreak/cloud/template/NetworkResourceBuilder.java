@@ -10,7 +10,7 @@ import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 import com.sequenceiq.common.api.type.ResourceType;
 
 /**
- * Cloud providers which do not support template based deployments (like AWS Cloudformation, Azure ARM or OpenStack Heat)
+ * Cloud providers which do not support template based deployments (like AWS Cloudformation, Azure ARM)
  * this interface is used to create the network resources <b>individually</b>. Network resources are grouped by the {@link ResourceType}.
  * For example to create the necessary network infrastructure for GCP, it is required to have the following network builders:
  * GCP_NETWORK

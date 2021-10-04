@@ -39,7 +39,7 @@
           "gcp": {
             "default": "sequenceiqimage/hdc-hdp--1710161226.tar.gz"
           },
-          "openstack": {
+          "mock": {
             "default": "hdc-hdp--1710161226"
           }
         },
@@ -83,7 +83,7 @@
           "gcp": {
             "default": "sequenceiqimage/hdc-hdp--1710161226.tar.gz"
           },
-          "openstack": {
+          "mock": {
             "default": "hdc-hdp--1710161226"
           }
         },
@@ -127,7 +127,7 @@
           "gcp": {
             "default": "sequenceiqimage/hdc-hdp--1710161226.tar.gz"
           },
-          "openstack": {
+          "mock": {
             "default": "hdc-hdp--1710161226"
           }
         },
@@ -171,7 +171,7 @@
           "gcp": {
             "default": "sequenceiqimage/hdc-hdp--1710161226.tar.gz"
           },
-          "openstack": {
+          "mock": {
             "default": "hdc-hdp--1710161226"
           }
         },

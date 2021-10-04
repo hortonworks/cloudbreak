@@ -53,7 +53,8 @@ public class InstanceGroupV4Base extends ProviderParametersBase implements JsonE
     @ApiModelProperty(InstanceGroupModelDescription.AWS_PARAMETERS)
     private AwsInstanceGroupV4Parameters aws;
 
-    @ApiModelProperty(InstanceGroupModelDescription.OPENSTACK_PARAMETERS)
+    @ApiModelProperty(InstanceGroupModelDescription.OPENSTACK_PARAMETERS_DEPRECATED)
+    @Deprecated
     private OpenStackInstanceGroupV4Parameters openstack;
 
     @ApiModelProperty(hidden = true)
@@ -130,17 +131,6 @@ public class InstanceGroupV4Base extends ProviderParametersBase implements JsonE
         this.aws = aws;
     }
 
-    public OpenStackInstanceGroupV4Parameters createOpenstack() {
-        if (openstack == null) {
-            openstack = new OpenStackInstanceGroupV4Parameters();
-        }
-        return openstack;
-    }
-
-    public void setOpenstack(OpenStackInstanceGroupV4Parameters openstack) {
-        this.openstack = openstack;
-    }
-
     @Override
     public YarnInstanceGroupV4Parameters createYarn() {
         if (yarn == null) {
@@ -175,10 +165,6 @@ public class InstanceGroupV4Base extends ProviderParametersBase implements JsonE
 
     public AwsInstanceGroupV4Parameters getAws() {
         return aws;
-    }
-
-    public OpenStackInstanceGroupV4Parameters getOpenstack() {
-        return openstack;
     }
 
     public YarnInstanceGroupV4Parameters getYarn() {

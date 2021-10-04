@@ -28,14 +28,12 @@ public class NetworkToNetworkV4ResponseConverter {
 
     private static final List<ResourceType> NETWORK_RESOURCE_TYPES = Arrays.asList(
             ResourceType.AZURE_NETWORK,
-            ResourceType.GCP_NETWORK,
-            ResourceType.OPENSTACK_NETWORK);
+            ResourceType.GCP_NETWORK);
 
     private static final List<ResourceType> SUBNET_RESOURCE_TYPES = Arrays.asList(
             ResourceType.AWS_SUBNET,
             ResourceType.AZURE_SUBNET,
-            ResourceType.GCP_SUBNET,
-            ResourceType.OPENSTACK_SUBNET);
+            ResourceType.GCP_SUBNET);
 
     @Inject
     private ProviderParameterCalculator providerParameterCalculator;

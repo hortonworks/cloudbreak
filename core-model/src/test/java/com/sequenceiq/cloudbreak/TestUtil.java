@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AWS;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.GCP;
-import static com.sequenceiq.cloudbreak.common.type.CloudConstants.OPENSTACK;
 
 import java.lang.reflect.Field;
 import java.net.URL;
@@ -191,9 +190,6 @@ public class TestUtil {
             case GCP:
                 stack.setInstanceGroups(generateGcpInstanceGroups(3));
                 break;
-            case OPENSTACK:
-                stack.setInstanceGroups(generateOpenStackInstanceGroups(3));
-                break;
             default:
                 break;
         }
@@ -251,20 +247,11 @@ public class TestUtil {
         return instanceGroups;
     }
 
-    public static Set<InstanceGroup> generateOpenStackInstanceGroups(int count) {
-        Set<InstanceGroup> instanceGroups = new HashSet<>();
-        instanceGroups.add(instanceGroup(1L, InstanceGroupType.GATEWAY, gcpTemplate(1L)));
-        for (int i = 0; i < count - 1; i++) {
-            instanceGroups.add(instanceGroup(1L, InstanceGroupType.CORE, gcpTemplate(1L)));
-        }
-        return instanceGroups;
-    }
-
     public static Set<InstanceGroup> generateGcpInstanceGroups(int count) {
         Set<InstanceGroup> instanceGroups = new HashSet<>();
-        instanceGroups.add(instanceGroup(1L, InstanceGroupType.GATEWAY, openstackTemplate(1L)));
+        instanceGroups.add(instanceGroup(1L, InstanceGroupType.GATEWAY, gcpTemplate(1L)));
         for (int i = 2; i < count + 1; i++) {
-            instanceGroups.add(instanceGroup(Integer.toUnsignedLong(i), InstanceGroupType.CORE, openstackTemplate(1L)));
+            instanceGroups.add(instanceGroup(Integer.toUnsignedLong(i), InstanceGroupType.CORE, gcpTemplate(1L)));
         }
         return instanceGroups;
     }
@@ -355,19 +342,6 @@ public class TestUtil {
         awsTemplate.setVolumeTemplates(
                 Sets.newHashSet(volumeTemplate(1, 100, "standard")));
         return awsTemplate;
-    }
-
-    public static Template openstackTemplate(Long id) {
-        Template openStackTemplate = new Template();
-        openStackTemplate.setInstanceType("Big");
-        openStackTemplate.setCloudPlatform(OPENSTACK);
-        openStackTemplate.setId(id);
-        openStackTemplate.setName(DUMMY_NAME);
-        openStackTemplate.setStatus(ResourceStatus.DEFAULT);
-        openStackTemplate.setDescription(DUMMY_DESCRIPTION);
-        openStackTemplate.setVolumeTemplates(
-                Sets.newHashSet(volumeTemplate(1, 100, "HDD")));
-        return openStackTemplate;
     }
 
     public static Template gcpTemplate(Long id) {

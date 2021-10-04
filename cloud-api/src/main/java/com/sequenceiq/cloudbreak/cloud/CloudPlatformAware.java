@@ -16,7 +16,7 @@ public interface CloudPlatformAware {
     Platform platform();
 
     /**
-     * Platform variant, some Cloud provider like OpenStack supports multiple Variants
+     * Platform variant, some Cloud provider like AWS supports multiple Variants
      *
      * @return variant
      */

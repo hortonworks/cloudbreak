@@ -12,6 +12,7 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
+@Deprecated
 public class KeystoneV3Parameters implements Serializable {
 
     @ApiModelProperty
