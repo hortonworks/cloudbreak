@@ -242,7 +242,7 @@ public class StackToCloudStackConverter {
             }
         });
         return new InstanceTemplate(template.getInstanceType(), name, privateId, volumes, status, fields, template.getId(), instanceImageId,
-                template.getTemporaryStorage());
+                template.getTemporaryStorage(), Optional.ofNullable(template.getInstanceStorageCount()).orElse(0).longValue());
     }
 
     private CloudVolumeUsageType getVolumeUsageType(VolumeUsageType volumeUsageType) {

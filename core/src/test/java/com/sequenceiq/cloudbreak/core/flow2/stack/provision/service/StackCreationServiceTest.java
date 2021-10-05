@@ -70,12 +70,12 @@ class StackCreationServiceTest {
         verify(templateService).savePure(savedTemplate.capture());
 
         Set<VolumeTemplate> savedVolumeTemplates = savedTemplate.getValue().getVolumeTemplates();
-        assertEquals(2, savedVolumeTemplates.size());
+        assertEquals(1, savedVolumeTemplates.size());
 
         assertEquals(TemporaryStorage.EPHEMERAL_VOLUMES, savedTemplate.getValue().getTemporaryStorage());
         assertEquals(2, savedTemplate.getValue().getInstanceStorageCount());
 
-        Set<String> expectedTypes = new HashSet<>(Set.of(AwsDiskType.Standard.value(), AwsDiskType.Ephemeral.value()));
+        Set<String> expectedTypes = new HashSet<>(Set.of(AwsDiskType.Standard.value()));
         savedVolumeTemplates.stream().map(VolumeTemplate::getVolumeType).forEach(expectedTypes::remove);
         assertTrue(expectedTypes.isEmpty());
     }

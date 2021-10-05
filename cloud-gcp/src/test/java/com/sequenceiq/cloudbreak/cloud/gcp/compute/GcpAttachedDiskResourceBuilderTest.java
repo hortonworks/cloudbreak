@@ -141,7 +141,7 @@ public class GcpAttachedDiskResourceBuilderTest {
 
         cloudInstance = new CloudInstance(instanceId,
                 new InstanceTemplate("flavor", "group", 1L, new ArrayList<>(), InstanceStatus.CREATE_REQUESTED,
-                        new HashMap<>(), 1L, "img", TemporaryStorage.ATTACHED_VOLUMES),
+                        new HashMap<>(), 1L, "img", TemporaryStorage.ATTACHED_VOLUMES, 0L),
                 new InstanceAuthentication("pub", "pub", "cb"),
                 "subnet1", "az1");
         Location location = Location.location(Region.region("region"), AvailabilityZone.availabilityZone("az"));
@@ -167,7 +167,7 @@ public class GcpAttachedDiskResourceBuilderTest {
 
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         InstanceTemplate instanceTemplate = new InstanceTemplate(flavor, name, privateId, volumes, InstanceStatus.CREATE_REQUESTED, params,
-                0L, "cb-centos66-amb200-2015-05-25", TemporaryStorage.ATTACHED_VOLUMES);
+                0L, "cb-centos66-amb200-2015-05-25", TemporaryStorage.ATTACHED_VOLUMES, 0L);
         CloudInstance cloudInstance =  new CloudInstance(instanceId, instanceTemplate, instanceAuthentication, "subnet-1", "az1");
         group = new Group(name, InstanceGroupType.CORE, Collections.singletonList(cloudInstance), security, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(),
