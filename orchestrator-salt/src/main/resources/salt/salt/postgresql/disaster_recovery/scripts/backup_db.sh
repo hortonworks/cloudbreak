@@ -10,7 +10,7 @@ set -o xtrace
 
 if [[ $# -lt 6 || $# -gt 7 || "$1" == "None" ]]; then
   echo "Invalid inputs provided"
-  echo "Script accepts at least 5 and at most 7 inputs:"
+  echo "Script accepts at least 6 and at most 7 inputs:"
   echo "  1. Object Storage Service url to place backups."
   echo "  2. PostgreSQL host name."
   echo "  3. PostgreSQL port."
@@ -81,8 +81,6 @@ run_kinit() {
     doLog "Successful kinit using solr principal"
   elif kinit_as atlas "$ATLAS_KEYTAB"; then
     doLog "Successful kinit using atlas principal"
-  else
-    errorExit "Couldn't get kerberos ticket to access cloud storage."
   fi
 }
 
