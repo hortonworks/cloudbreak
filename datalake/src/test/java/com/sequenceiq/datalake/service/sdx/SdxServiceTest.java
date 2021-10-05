@@ -66,6 +66,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.ImageCatalogV4Endp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.BaseStackDetailsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.RecipeV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeViewV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeViewV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
@@ -118,6 +121,7 @@ import com.sequenceiq.sdx.api.model.SdxClusterResizeRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxCustomClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
+import com.sequenceiq.sdx.api.model.SdxRecipe;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("SDX service tests")
@@ -167,6 +171,9 @@ class SdxServiceTest {
 
     @Mock
     private StackV4Endpoint stackV4Endpoint;
+
+    @Mock
+    private RecipeV4Endpoint recipeV4Endpoint;
 
     @Mock
     private ImageCatalogV4Endpoint imageCatalogV4Endpoint;
@@ -1121,6 +1128,13 @@ class SdxServiceTest {
         return sdxClusterRequest;
     }
 
+    private void withRecipe(SdxClusterRequest sdxClusterRequest) {
+        SdxRecipe recipe = new SdxRecipe();
+        recipe.setHostGroup("master");
+        recipe.setName("post-install");
+        sdxClusterRequest.setRecipes(Set.of(recipe));
+    }
+
     private void withCloudStorage(SdxClusterRequestBase sdxClusterRequest) {
         SdxCloudStorageRequest cloudStorage = new SdxCloudStorageRequest();
         cloudStorage.setFileSystemType(FileSystemType.S3);
@@ -1497,6 +1511,12 @@ class SdxServiceTest {
         SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(runtime, MICRO_DUTY);
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(new ArrayList<>());
         withCloudStorage(sdxClusterRequest);
+        withRecipe(sdxClusterRequest);
+        RecipeViewV4Responses recipeViewV4Responses = new RecipeViewV4Responses();
+        RecipeViewV4Response recipeViewV4Response = new RecipeViewV4Response();
+        recipeViewV4Response.setName("post-install");
+        recipeViewV4Responses.setResponses(List.of(recipeViewV4Response));
+        when(recipeV4Endpoint.listInternal(anyLong(), anyString())).thenReturn(recipeViewV4Responses);
         long id = 10L;
         when(sdxClusterRepository.save(any(SdxCluster.class))).thenAnswer(invocation -> {
             SdxCluster sdxWithId = invocation.getArgument(0, SdxCluster.class);
@@ -1512,6 +1532,7 @@ class SdxServiceTest {
         Assertions.assertEquals(id, createdSdxCluster.getId());
         final ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
         verify(sdxClusterRepository, times(1)).save(captor.capture());
+        verify(recipeV4Endpoint, times(1)).listInternal(anyLong(), anyString());
         SdxCluster capturedSdx = captor.getValue();
         assertTrue(capturedSdx.getClusterShape().equals(MICRO_DUTY));
     }

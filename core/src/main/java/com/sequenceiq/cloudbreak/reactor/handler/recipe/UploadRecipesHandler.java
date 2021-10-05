@@ -39,7 +39,7 @@ public class UploadRecipesHandler implements EventHandler<UploadRecipesRequest> 
         Selectable result;
         Long stackId = request.getResourceId();
         try {
-            recipeEngine.uploadRecipes(stackId, getClass().getSimpleName());
+            recipeEngine.uploadRecipes(stackId);
             result = new UploadRecipesSuccess(stackId);
         } catch (Exception e) {
             LOGGER.info("Failed to upload recipes", e);

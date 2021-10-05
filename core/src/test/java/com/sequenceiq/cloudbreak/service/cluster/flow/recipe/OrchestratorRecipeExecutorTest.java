@@ -133,9 +133,6 @@ public class OrchestratorRecipeExecutorTest {
 
     @Test
     public void testPreTerminationRecipes() throws CloudbreakException, CloudbreakOrchestratorFailedException, CloudbreakOrchestratorTimeoutException {
-        Cluster cluster = new Cluster();
-        cluster.setId(2L);
-        when(stack.getCluster()).thenReturn(cluster);
         when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
         Set<Node> nodes = Set.of(node);
         when(stackUtil.collectReachableNodes(any())).thenReturn(nodes);

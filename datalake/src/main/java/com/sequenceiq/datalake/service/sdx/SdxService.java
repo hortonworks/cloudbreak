@@ -27,6 +27,7 @@ import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -40,10 +41,13 @@ import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.authorization.service.ResourcePropertyProvider;
 import com.sequenceiq.authorization.service.list.ResourceWithId;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.CompactViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.ImageCatalogV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.RecipeV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeViewV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceTemplateV4Base;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StackResponseEntries;
@@ -55,11 +59,17 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.customdomain.Cus
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.securitygroup.SecurityGroupV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.AttachRecipeV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.DetachRecipeV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.UpdateRecipesV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerProductV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.AttachRecipeV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.DetachRecipeV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.UpdateRecipesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.SecurityRuleV4Request;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -108,6 +118,7 @@ import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResizeRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxCustomClusterRequest;
+import com.sequenceiq.sdx.api.model.SdxRecipe;
 import com.sequenceiq.sdx.api.model.SdxSyncComponentVersionsFromCmResponse;
 
 @Service
@@ -138,6 +149,9 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
 
     @Inject
     private StackV4Endpoint stackV4Endpoint;
+
+    @Inject
+    private RecipeV4Endpoint recipeV4Endpoint;
 
     @Inject
     private CloudbreakInternalCrnClient cloudbreakInternalCrnClient;
@@ -323,6 +337,21 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
         }
     }
 
+    public UpdateRecipesV4Response refreshRecipes(SdxCluster sdxCluster, UpdateRecipesV4Request request) {
+        return ThreadBasedUserCrnProvider.doAsInternalActor(() -> stackV4Endpoint.refreshRecipesInternal(WORKSPACE_ID_DEFAULT, request, sdxCluster.getName(),
+                sdxCluster.getInitiatorUserCrn()));
+    }
+
+    public AttachRecipeV4Response attachRecipe(SdxCluster sdxCluster, AttachRecipeV4Request request) {
+        return ThreadBasedUserCrnProvider.doAsInternalActor(() -> stackV4Endpoint.attachRecipeInternal(WORKSPACE_ID_DEFAULT, request, sdxCluster.getName(),
+                sdxCluster.getInitiatorUserCrn()));
+    }
+
+    public DetachRecipeV4Response detachRecipe(SdxCluster sdxCluster, DetachRecipeV4Request request) {
+        return ThreadBasedUserCrnProvider.doAsInternalActor(() -> stackV4Endpoint.detachRecipeInternal(WORKSPACE_ID_DEFAULT, request, sdxCluster.getName(),
+                sdxCluster.getInitiatorUserCrn()));
+    }
+
     public Pair<SdxCluster, FlowIdentifier> createSdx(final String userCrn, final String name, final SdxCustomClusterRequest sdxCustomClusterRequest) {
         final Pair<SdxClusterRequest, ImageSettingsV4Request> convertedRequest = sdxCustomClusterRequest.convertToPair();
 
@@ -373,9 +402,11 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
         updateStackV4RequestWithEnvironmentCrnIfNotExistsOnIt(internalStackV4Request, environment.getCrn());
         StackV4Request stackRequest = getStackRequest(sdxClusterRequest.getClusterShape(), sdxClusterRequest.isEnableRangerRaz(),
                 internalStackV4Request, cloudPlatform, runtimeVersion, imageSettingsV4Request);
+        validateRecipes(sdxClusterRequest, stackRequest, userCrn);
         prepareCloudStorageForStack(sdxClusterRequest, stackRequest, sdxCluster, environment);
         prepareDefaultSecurityConfigs(internalStackV4Request, stackRequest, cloudPlatform);
         prepareProviderSpecificParameters(stackRequest, sdxClusterRequest, cloudPlatform);
+        updateStackV4RequestWithRecipes(sdxClusterRequest, stackRequest);
         stackRequest.setResourceCrn(sdxCluster.getCrn());
         sdxCluster.setStackRequest(stackRequest);
 
@@ -394,6 +425,43 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
         }
         FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerSdxCreation(savedSdxCluster);
         return Pair.of(savedSdxCluster, flowIdentifier);
+    }
+
+    private void validateRecipes(SdxClusterRequest sdxClusterRequest, StackV4Request stackV4Request, String userCrn) {
+        Set<SdxRecipe> recipes = sdxClusterRequest.getRecipes();
+        if (CollectionUtils.isNotEmpty(recipes)) {
+            List<InstanceGroupV4Request> igs = stackV4Request.getInstanceGroups();
+            Set<String> recipeNames = fetchRecipesFromCore();
+            recipes.forEach(recipe -> {
+                validateRecipeExists(recipeNames, recipe);
+                validateInstanceGroupExistsForRecipe(igs, recipe);
+            });
+        }
+    }
+
+    private Set<String> fetchRecipesFromCore() {
+        String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        RecipeViewV4Responses recipeResponses = ThreadBasedUserCrnProvider.doAsInternalActor(() -> recipeV4Endpoint.listInternal(
+                WORKSPACE_ID_DEFAULT, initiatorUserCrn));
+        Set<String> recipeNames = recipeResponses.getResponses()
+                .stream()
+                .map(CompactViewV4Response::getName).collect(Collectors.toSet());
+        return recipeNames;
+    }
+
+    private void validateRecipeExists(Set<String> recipeNames, SdxRecipe recipe) {
+        if (!recipeNames.contains(recipe.getName())) {
+            throw new NotFoundException(String.format("Not found recipe with name %s", recipe.getName()));
+        }
+        LOGGER.debug("Found recipe with name {}", recipe.getName());
+    }
+
+    private void validateInstanceGroupExistsForRecipe(List<InstanceGroupV4Request> igs, SdxRecipe recipe) {
+        boolean foundIg = igs.stream().anyMatch(ig -> recipe.getHostGroup().equals(ig.getName()));
+        if (!foundIg) {
+            throw new NotFoundException(String.format("Not found instance group with name %s for recipe %s",
+                    recipe.getHostGroup(), recipe.getName()));
+        }
     }
 
     public Pair<SdxCluster, FlowIdentifier> resizeSdx(final String userCrn, final String clusterName, final SdxClusterResizeRequest sdxClusterResizeRequest) {
@@ -544,6 +612,19 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
             return null;
         } else {
             return cdpConfigService.getDefaultRuntime();
+        }
+    }
+
+    private void updateStackV4RequestWithRecipes(SdxClusterRequest clusterRequest, StackV4Request stackV4Request) {
+        Set<SdxRecipe> recipes = clusterRequest.getRecipes();
+        if (CollectionUtils.isNotEmpty(recipes)) {
+            List<InstanceGroupV4Request> instanceGroups = stackV4Request.getInstanceGroups();
+            instanceGroups.forEach(ig -> {
+                Set<String> recipeNamesForIg = recipes.stream()
+                        .filter(r -> r.getHostGroup().equals(ig.getName()))
+                        .map(SdxRecipe::getName).collect(Collectors.toSet());
+                ig.setRecipeNames(recipeNamesForIg);
+            });
         }
     }
 

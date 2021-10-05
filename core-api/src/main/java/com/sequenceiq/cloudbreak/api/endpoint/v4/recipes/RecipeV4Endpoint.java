@@ -43,6 +43,13 @@ public interface RecipeV4Endpoint {
     RecipeViewV4Responses list(@PathParam("workspaceId") Long workspaceId);
 
     @GET
+    @Path("internal")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = RecipeOpDescription.LIST_BY_WORKSPACE_INTERNAL, produces = MediaType.APPLICATION_JSON, notes = Notes.RECIPE_NOTES,
+            nickname = "listRecipesByWorkspaceInternal")
+    RecipeViewV4Responses listInternal(@PathParam("workspaceId") Long workspaceId, @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+
+    @GET
     @Path("name/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = RecipeOpDescription.GET_BY_NAME_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = Notes.RECIPE_NOTES,

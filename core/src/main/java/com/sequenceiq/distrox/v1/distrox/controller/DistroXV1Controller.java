@@ -585,37 +585,37 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_DATAHUB)
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.REFRESH_RECIPES_DATAHUB)
     public UpdateRecipesV4Response refreshRecipesByName(@ResourceName String name, @Valid UpdateRecipesV4Request request) {
         return stackOperations.refreshRecipes(NameOrCrn.ofName(name), workspaceService.getForCurrentUser().getId(), request);
     }
 
     @Override
-    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_DATAHUB)
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.REFRESH_RECIPES_DATAHUB)
     public UpdateRecipesV4Response refreshRecipesByCrn(@TenantAwareParam @ResourceCrn String crn, @Valid UpdateRecipesV4Request request) {
         return stackOperations.refreshRecipes(NameOrCrn.ofCrn(crn), workspaceService.getForCurrentUser().getId(), request);
     }
 
     @Override
-    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_DATAHUB)
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.REFRESH_RECIPES_DATAHUB)
     public AttachRecipeV4Response attachRecipeByCrn(@TenantAwareParam @ResourceCrn String crn, @Valid AttachRecipeV4Request request) {
         return stackOperations.attachRecipe(NameOrCrn.ofName(crn), workspaceService.getForCurrentUser().getId(), request);
     }
 
     @Override
-    @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_DATAHUB)
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.REFRESH_RECIPES_DATAHUB)
     public AttachRecipeV4Response attachRecipeByName(@ResourceName String name, @Valid AttachRecipeV4Request request) {
         return stackOperations.attachRecipe(NameOrCrn.ofName(name), workspaceService.getForCurrentUser().getId(), request);
     }
 
     @Override
-    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_DATAHUB)
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.REFRESH_RECIPES_DATAHUB)
     public DetachRecipeV4Response detachRecipeByCrn(@TenantAwareParam @ResourceCrn String crn, @Valid DetachRecipeV4Request request) {
         return stackOperations.detachRecipe(NameOrCrn.ofName(crn), workspaceService.getForCurrentUser().getId(), request);
     }
 
     @Override
-    @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_DATAHUB)
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.REFRESH_RECIPES_DATAHUB)
     public DetachRecipeV4Response detachRecipeByName(@ResourceName String name, @Valid DetachRecipeV4Request request) {
         return stackOperations.detachRecipe(NameOrCrn.ofName(name), workspaceService.getForCurrentUser().getId(), request);
     }

@@ -7,15 +7,18 @@ import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.DELETED;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,6 +55,7 @@ import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
+import com.sequenceiq.sdx.api.model.SdxRecipe;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
 import com.sequenceiq.sdx.api.model.SdxUpgradeRequest;
 
@@ -299,6 +303,18 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
 
     public SdxTestDto withName(String name) {
         setName(name);
+        return this;
+    }
+
+    public SdxTestDto withRecipe(String recipeName, String hostGroup) {
+        if (CollectionUtils.isEmpty(getRequest().getRecipes())) {
+            getRequest().setRecipes(new HashSet<>());
+        }
+        Set<SdxRecipe> recipes = getRequest().getRecipes();
+        SdxRecipe sdxRecipe = new SdxRecipe();
+        sdxRecipe.setName(recipeName);
+        sdxRecipe.setHostGroup(hostGroup);
+        recipes.add(sdxRecipe);
         return this;
     }
 
