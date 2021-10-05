@@ -177,7 +177,6 @@
         "InstanceTenancy": "dedicated",
         </#if>
         "Tags" : [
-          { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } },
           { "Key" : "Network", "Value" : "Public" }
         ]
       }
@@ -200,7 +199,6 @@
         "CidrBlock" : { "Fn::FindInMap" : [ "SubnetConfig", "Public", "CIDR" ]},
         </#if>
         "Tags" : [
-          { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } },
           { "Key" : "Network", "Value" : "Public" }
         ]
       }
@@ -212,7 +210,6 @@
       "Type" : "AWS::EC2::InternetGateway",
       "Properties" : {
         "Tags" : [
-          { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } },
           { "Key" : "Network", "Value" : "Public" }
         ]
       }
@@ -240,7 +237,6 @@
         "VpcId" : { "Ref" : "VPC" },
         </#if>
         "Tags" : [
-          { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } },
           { "Key" : "Network", "Value" : "Public" }
         ]
       }

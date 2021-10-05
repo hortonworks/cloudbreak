@@ -156,9 +156,6 @@
                     }<#if cidr_has_next>,</#if>
                     </#list>
               ],
-              "Tags" : [
-                    { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } }
-              ],
               "VpcId" : { "Ref": "VPCIdParameter" }
             }
         },
@@ -171,7 +168,6 @@
                 "Family": { "Ref": "DBParameterGroupFamilyParameter" },
                 "Parameters": { "rds.force_ssl": "1" },
                 "Tags": [
-                    { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } },
                     { "Key" : "Name", "Value" : { "Ref" : "DBParameterGroupNameParameter" } }
                 ]
             }
@@ -182,10 +178,7 @@
             "Properties": {
                 "DBSubnetGroupDescription": { "Fn::Sub": "DB subnet group for ${r"${DBInstanceIdentifierParameter}"}" },
                 "DBSubnetGroupName": { "Ref": "DBSubnetGroupNameParameter" },
-                "SubnetIds": { "Ref": "DBSubnetGroupSubnetIdsParameter" },
-                "Tags": [
-                    { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } }
-                ]
+                "SubnetIds": { "Ref": "DBSubnetGroupSubnetIdsParameter" }
             }
         },
         "DBInstance": {
@@ -214,9 +207,6 @@
                 </#if>
                 "StorageEncrypted": true,
                 "StorageType": { "Ref": "StorageTypeParameter" },
-                "Tags": [
-                    { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } }
-                ],
                 <#if hasSecurityGroup>
                 "VPCSecurityGroups": { "Ref": "VPCSecurityGroupsParameter" }
                 <#else>

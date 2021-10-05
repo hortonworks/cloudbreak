@@ -10,12 +10,6 @@
         "EnableDnsHostnames": "true",
         "Tags": [
           {
-            "Key": "Application",
-            "Value": {
-              "Ref": "AWS::StackId"
-            }
-          },
-          {
             "Key": "Name",
             "Value": "VPC-1"
           }
@@ -26,12 +20,6 @@
       "Type": "AWS::EC2::InternetGateway",
       "Properties": {
         "Tags": [
-          {
-            "Key": "Application",
-            "Value": {
-              "Ref": "AWS::StackId"
-            }
-          },
           {
             "Key": "Name",
             "Value": "ig-1"
@@ -65,12 +53,6 @@
         },
         "Tags": [
           {
-            "Key": "Application",
-            "Value": {
-              "Ref": "AWS::StackId"
-            }
-          },
-          {
             "Key": "Name",
             "Value": "vpcep-sg-1"
           }
@@ -87,12 +69,6 @@
         },
         "AvailabilityZone": "az1",
         "Tags": [
-          {
-            "Key": "Application",
-            "Value": {
-              "Ref": "AWS::StackId"
-            }
-          },
           {
             "Key": "kubernetes.io/role/elb",
             "Value": "1"
@@ -149,12 +125,6 @@
         "AvailabilityZone": "az2",
         "Tags": [
           {
-            "Key": "Application",
-            "Value": {
-              "Ref": "AWS::StackId"
-            }
-          },
-          {
             "Key": "kubernetes.io/role/elb",
             "Value": "1"
           },
@@ -210,12 +180,6 @@
         "AvailabilityZone": "az1",
         "Tags": [
           {
-            "Key": "Application",
-            "Value": {
-              "Ref": "AWS::StackId"
-            }
-          },
-          {
             "Key": "kubernetes.io/role/internal-elb",
             "Value": "1"
           },
@@ -233,12 +197,6 @@
           "Ref": "VPC"
         },
         "Tags": [
-          {
-            "Key": "Application",
-            "Value": {
-              "Ref": "AWS::StackId"
-            }
-          },
           {
             "Key": "Name",
             "Value": "prt2-1"
@@ -284,12 +242,6 @@
         "AvailabilityZone": "az2",
         "Tags": [
           {
-            "Key": "Application",
-            "Value": {
-              "Ref": "AWS::StackId"
-            }
-          },
-          {
             "Key": "kubernetes.io/role/internal-elb",
             "Value": "1"
           },
@@ -307,12 +259,6 @@
           "Ref": "VPC"
         },
         "Tags": [
-          {
-            "Key": "Application",
-            "Value": {
-              "Ref": "AWS::StackId"
-            }
-          },
           {
             "Key": "Name",
             "Value": "prt3-1"
@@ -424,12 +370,6 @@
           "Ref": "VPC"
         },
         "Tags": [
-          {
-            "Key": "Application",
-            "Value": {
-              "Ref": "AWS::StackId"
-            }
-          },
           {
             "Key": "Name",
             "Value": "prt-envName-1"
