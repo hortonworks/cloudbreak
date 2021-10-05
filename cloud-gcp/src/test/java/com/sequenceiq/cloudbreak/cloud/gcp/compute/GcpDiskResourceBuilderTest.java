@@ -146,7 +146,7 @@ class GcpDiskResourceBuilderTest {
 
         cloudInstance = new CloudInstance(instanceId,
                 new InstanceTemplate("flavor", "group", 1L, new ArrayList<>(), InstanceStatus.CREATE_REQUESTED,
-                        new HashMap<>(), 1L, "img", TemporaryStorage.ATTACHED_VOLUMES),
+                        new HashMap<>(), 1L, "img", TemporaryStorage.ATTACHED_VOLUMES, 0L),
                 new InstanceAuthentication("pub", "pub", "cb"),
                 "subnet1", "az1");
 
@@ -162,7 +162,7 @@ class GcpDiskResourceBuilderTest {
 
         instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         instanceTemplate = new InstanceTemplate(flavor, name, privateId, volumes, InstanceStatus.CREATE_REQUESTED, params,
-                0L, "cb-centos66-amb200-2015-05-25", TemporaryStorage.ATTACHED_VOLUMES);
+                0L, "cb-centos66-amb200-2015-05-25", TemporaryStorage.ATTACHED_VOLUMES, 0L);
         group = createGroup(50);
 
         buildableResource = List.of(CloudResource.builder()

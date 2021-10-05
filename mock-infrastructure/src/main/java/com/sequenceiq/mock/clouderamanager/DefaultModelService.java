@@ -93,6 +93,6 @@ public class DefaultModelService {
     private InstanceTemplate getTemplateCreated(CloudInstance cloudInstance) {
         InstanceTemplate template = cloudInstance.getTemplate();
         return new InstanceTemplate(template.getFlavor(), template.getGroupName(), template.getPrivateId(), template.getVolumes(), InstanceStatus.CREATED,
-                template.getParameters(), template.getTemplateId(), template.getImageId(), template.getTemporaryStorage());
+                template.getParameters(), template.getTemplateId(), template.getImageId(), template.getTemporaryStorage(), template.getTemporaryStorageCount());
     }
 }

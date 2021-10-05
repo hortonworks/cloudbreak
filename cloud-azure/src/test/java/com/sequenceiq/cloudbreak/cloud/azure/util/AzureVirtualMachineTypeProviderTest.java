@@ -89,7 +89,7 @@ public class AzureVirtualMachineTypeProviderTest {
 
     private AzureInstanceView createAzureInstanceView(String groupName, String flavour) {
         InstanceTemplate instanceTemplate = new InstanceTemplate(flavour, groupName, null,
-                Collections.emptyList(), null, Collections.emptyMap(), null, null, TemporaryStorage.ATTACHED_VOLUMES);
+                Collections.emptyList(), null, Collections.emptyMap(), null, null, TemporaryStorage.ATTACHED_VOLUMES, 0L);
         CloudInstance cloudInstance = new CloudInstance(null, instanceTemplate, null, "subnet-1", "az1");
         return AzureInstanceView.builder(cloudInstance).build();
     }

@@ -119,9 +119,9 @@ class AwsNativeMetadataCollectorTest {
         CloudResource secondCloudResource = getCloudResource(String.valueOf(2L), "secondInstanceName", secondInstanceId, AWS_INSTANCE);
         List<CloudResource> resources = List.of(cloudResource, secondCloudResource);
         InstanceTemplate instanceTemplate =
-                new InstanceTemplate("flavor", "alma", 1L, Set.of(), CREATED, Map.of(), 1L, "imageid", TemporaryStorage.ATTACHED_VOLUMES);
+                new InstanceTemplate("flavor", "alma", 1L, Set.of(), CREATED, Map.of(), 1L, "imageid", TemporaryStorage.ATTACHED_VOLUMES, 0L);
         InstanceTemplate otherInstanceTemplate =
-                new InstanceTemplate("flavor", "alma", 2L, Set.of(), CREATED, Map.of(), 1L, "imageid", TemporaryStorage.ATTACHED_VOLUMES);
+                new InstanceTemplate("flavor", "alma", 2L, Set.of(), CREATED, Map.of(), 1L, "imageid", TemporaryStorage.ATTACHED_VOLUMES, 0L);
         CloudInstance cloudInstance = new CloudInstance(anInstanceId, instanceTemplate, null, "subnet-123", "az1");
         CloudInstance secondCloudInstance = new CloudInstance(secondInstanceId, otherInstanceTemplate, null, "subnet-123", "az1");
         List<CloudInstance> cloudInstances = List.of(cloudInstance, secondCloudInstance);
@@ -155,10 +155,10 @@ class AwsNativeMetadataCollectorTest {
         CloudResource secondCloudResource = getCloudResource(String.valueOf(2L), "secondInstanceName", secondInstanceId, AWS_INSTANCE);
         List<CloudResource> resources = List.of(cloudResource, secondCloudResource);
         InstanceTemplate instanceTemplate =
-                new InstanceTemplate("flavor", "alma", 1L, Set.of(), CREATED, Map.of(), 1L, "imageid", TemporaryStorage.ATTACHED_VOLUMES);
+                new InstanceTemplate("flavor", "alma", 1L, Set.of(), CREATED, Map.of(), 1L, "imageid", TemporaryStorage.ATTACHED_VOLUMES, 0L);
         CloudInstance cloudInstance = new CloudInstance(anInstanceId, instanceTemplate, null, "subnet-123", "az1");
         InstanceTemplate secondInstanceTemplate =
-                new InstanceTemplate("flavor", "alma", 2L, Set.of(), CREATED, Map.of(), 1L, "imageid", TemporaryStorage.ATTACHED_VOLUMES);
+                new InstanceTemplate("flavor", "alma", 2L, Set.of(), CREATED, Map.of(), 1L, "imageid", TemporaryStorage.ATTACHED_VOLUMES, 0L);
         CloudInstance secondCloudInstance = new CloudInstance(secondInstanceId, secondInstanceTemplate, null, "subnet-123", "az1");
         List<CloudInstance> cloudInstances = List.of(cloudInstance, secondCloudInstance);
         when(awsClient.createEc2Client(any(), anyString())).thenReturn(ec2Client);
@@ -186,10 +186,10 @@ class AwsNativeMetadataCollectorTest {
         CloudResource secondCloudResource = getCloudResource(String.valueOf(2L), "secondInstanceName", secondInstanceId, AWS_INSTANCE);
         List<CloudResource> resources = List.of(cloudResource, secondCloudResource);
         InstanceTemplate instanceTemplate =
-                new InstanceTemplate("flavor", "alma", 1L, Set.of(), CREATED, Map.of(), 1L, "imageid", TemporaryStorage.ATTACHED_VOLUMES);
+                new InstanceTemplate("flavor", "alma", 1L, Set.of(), CREATED, Map.of(), 1L, "imageid", TemporaryStorage.ATTACHED_VOLUMES, 0L);
         CloudInstance cloudInstance = new CloudInstance(anInstanceId, instanceTemplate, null, "subnet-123", "az1");
         InstanceTemplate secondInstanceTemplate =
-                new InstanceTemplate("flavor", "alma", 2L, Set.of(), CREATED, Map.of(), 1L, "imageid", TemporaryStorage.ATTACHED_VOLUMES);
+                new InstanceTemplate("flavor", "alma", 2L, Set.of(), CREATED, Map.of(), 1L, "imageid", TemporaryStorage.ATTACHED_VOLUMES, 0L);
         CloudInstance secondCloudInstance = new CloudInstance(secondInstanceId, secondInstanceTemplate, null, "subnet-123", "az1");
         List<CloudInstance> cloudInstances = List.of(cloudInstance, secondCloudInstance);
         when(awsClient.createEc2Client(any(), anyString())).thenReturn(ec2Client);
@@ -225,7 +225,7 @@ class AwsNativeMetadataCollectorTest {
         for (int i = 0; i < 15; i++) {
             String anInstanceId = "anInstanceId" + i;
             InstanceTemplate instanceTemplate =
-                    new InstanceTemplate("flavor", "alma", (long) i, Set.of(), CREATED, Map.of(), 1L, "imageid", TemporaryStorage.ATTACHED_VOLUMES);
+                    new InstanceTemplate("flavor", "alma", (long) i, Set.of(), CREATED, Map.of(), 1L, "imageid", TemporaryStorage.ATTACHED_VOLUMES, 0L);
             resources.add(getCloudResource(String.valueOf(i), "instanceName" + i, anInstanceId, AWS_INSTANCE));
             cloudInstances.add(new CloudInstance(anInstanceId, instanceTemplate, null, "subnet-123", "az1"));
             ec2Instances.add(getAnInstance(anInstanceId));
@@ -264,7 +264,7 @@ class AwsNativeMetadataCollectorTest {
         for (int i = 0; i < 15; i++) {
             String anInstanceId = "anInstanceId" + i;
             InstanceTemplate instanceTemplate =
-                    new InstanceTemplate("flavor", "alma", (long) i, Set.of(), CREATED, Map.of(), 1L, "imageid", TemporaryStorage.ATTACHED_VOLUMES);
+                    new InstanceTemplate("flavor", "alma", (long) i, Set.of(), CREATED, Map.of(), 1L, "imageid", TemporaryStorage.ATTACHED_VOLUMES, 0L);
             resources.add(getCloudResource(String.valueOf(i), "instanceName" + i, anInstanceId, AWS_INSTANCE));
             cloudInstances.add(new CloudInstance(anInstanceId, instanceTemplate, null, "subnet-123", "az1"));
             ec2Instances.add(getAnInstance(anInstanceId));
@@ -308,7 +308,7 @@ class AwsNativeMetadataCollectorTest {
         List<CloudResource> resources = List.of(cloudResource);
 
         InstanceTemplate instanceTemplate =
-                new InstanceTemplate("flavor", "alma", 1L, Set.of(), CREATED, Map.of(), 1L, "imageid", TemporaryStorage.ATTACHED_VOLUMES);
+                new InstanceTemplate("flavor", "alma", 1L, Set.of(), CREATED, Map.of(), 1L, "imageid", TemporaryStorage.ATTACHED_VOLUMES, 0L);
         CloudInstance cloudInstance = new CloudInstance(anInstanceId, instanceTemplate, null, "subnet-123", "az1");
         List<CloudInstance> cloudInstances = List.of(cloudInstance);
         when(awsClient.createEc2Client(any(), anyString())).thenReturn(ec2Client);
@@ -332,7 +332,7 @@ class AwsNativeMetadataCollectorTest {
         List<CloudResource> resources = List.of(cloudResource);
 
         InstanceTemplate instanceTemplate =
-                new InstanceTemplate("flavor", "alma", 1L, Set.of(), CREATED, Map.of(), 1L, "imageid", TemporaryStorage.ATTACHED_VOLUMES);
+                new InstanceTemplate("flavor", "alma", 1L, Set.of(), CREATED, Map.of(), 1L, "imageid", TemporaryStorage.ATTACHED_VOLUMES, 0L);
         CloudInstance cloudInstance = new CloudInstance(anInstanceId, instanceTemplate, null, "subnet-123", "az1");
         List<CloudInstance> cloudInstances = List.of(cloudInstance);
         when(awsClient.createEc2Client(any(), anyString())).thenReturn(ec2Client);

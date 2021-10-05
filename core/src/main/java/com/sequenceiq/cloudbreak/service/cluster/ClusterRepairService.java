@@ -338,7 +338,7 @@ public class ClusterRepairService {
         if (reattach) {
             for (InstanceMetaData instanceMetaData : instances) {
                 validationResult.addAll(validateOnGateway(stack, instanceMetaData));
-                if (ephemeralStorageOnly(stack, hostGroupName.value())) {
+                if (hasEphemeralStorage(stack, hostGroupName.value())) {
                     validationResult.add("Reattach not supported for this disk type.");
                 }
             }
@@ -369,13 +369,13 @@ public class ClusterRepairService {
         }
     }
 
-    private boolean ephemeralStorageOnly(Stack stack, String hostGroupName) {
+    private boolean hasEphemeralStorage(Stack stack, String hostGroupName) {
         return stack.getInstanceGroupsAsList().stream()
                 .filter(instanceGroup -> hostGroupName.equalsIgnoreCase(instanceGroup.getGroupName()))
                 .map(InstanceGroup::getTemplate)
                 .map(Template::getVolumeTemplates)
                 .anyMatch(volumes -> volumes.stream()
-                        .map(VolumeTemplate::getVolumeType).allMatch(REATTACH_NOT_SUPPORTED_VOLUME_TYPES::contains));
+                        .map(VolumeTemplate::getVolumeType).anyMatch(REATTACH_NOT_SUPPORTED_VOLUME_TYPES::contains));
     }
 
     private void updateVolumesDeleteFlag(Stack stack, Predicate<Resource> resourceFilter, boolean deleteVolumes) {

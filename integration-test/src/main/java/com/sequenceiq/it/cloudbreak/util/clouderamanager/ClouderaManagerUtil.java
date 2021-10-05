@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.util.clouderamanager;
 
+import java.util.Set;
+
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
@@ -23,5 +25,13 @@ public class ClouderaManagerUtil {
 
     public DistroXTestDto checkClouderaManagerYarnNodemanagerRoleConfigGroups(DistroXTestDto testDto, String user, String password) {
         return clouderaManagerClientActions.checkCmYarnNodemanagerRoleConfigGroups(testDto, user, password);
+    }
+
+    public DistroXTestDto checkClouderaManagerHdfsNamenodeRoleConfigGroups(DistroXTestDto testDto, String user, String password, Set<String> mountPoints) {
+        return clouderaManagerClientActions.checkCmHdfsNamenodeRoleConfigGroups(testDto, user, password, mountPoints);
+    }
+
+    public DistroXTestDto checkClouderaManagerHdfsDatanodeRoleConfigGroups(DistroXTestDto testDto, String user, String password, Set<String> mountPoints) {
+        return clouderaManagerClientActions.checkCmHdfsDatanodeRoleConfigGroups(testDto, user, password, mountPoints);
     }
 }

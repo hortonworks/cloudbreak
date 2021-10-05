@@ -18,8 +18,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -49,7 +47,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStoreMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
-import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterConfig;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
@@ -59,8 +56,6 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.Template;
-import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
-import com.sequenceiq.cloudbreak.domain.VolumeUsageType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -288,7 +283,14 @@ public class StackCreationService {
         for (InstanceGroup ig : stack.getInstanceGroups()) {
             Template template = ig.getTemplate();
             if (template != null) {
-                addInstanceStorageVolumeTemplateToTemplate(instanceStoreMetadata, ig, template);
+                boolean ephemeralVolumesOnly = template.getVolumeTemplates().stream()
+                        .allMatch(volumeTemplate -> AwsDiskType.Ephemeral.value().equalsIgnoreCase(volumeTemplate.getVolumeType()));
+                if (ephemeralVolumesOnly) {
+                    LOGGER.debug("Instance storage was already requested. Setting temporary storage in template to: {}. " +
+                            "Group name: {}, Template id: {}, instance type: {}",
+                            TemporaryStorage.EPHEMERAL_VOLUMES_ONLY.name(), ig.getGroupName(), template.getId(), template.getInstanceType());
+                    template.setTemporaryStorage(TemporaryStorage.EPHEMERAL_VOLUMES_ONLY);
+                }
                 Integer instanceStorageCount = instanceStoreMetadata.mapInstanceTypeToInstanceStoreCountNullHandled(template.getInstanceType());
                 LOGGER.debug("Setting instance storage count in template. " +
                         "Group name: {}, Template id: {}, instance type: {}", ig.getGroupName(), template.getId(), template.getInstanceType());
@@ -296,39 +298,6 @@ public class StackCreationService {
                 templateService.savePure(template);
             }
         }
-    }
-
-    private void addInstanceStorageVolumeTemplateToTemplate(InstanceStoreMetadata instanceStoreMetadata, InstanceGroup ig, Template template) {
-        if (!isTemplateSetUpForInstanceStorage(template)) {
-            LOGGER.debug("Instance storage was not requested. Attempting to add them implicitly. " +
-                    "Group name: {}, instance type: {}", ig.getGroupName(), template.getInstanceType());
-            Optional.ofNullable(instanceStoreMetadata.getInstaceStoreConfigMap())
-                    .map(instCfgMap -> instCfgMap.get(template.getInstanceType()))
-                    .map(toVolumeTemplate(template))
-                    .ifPresent(volumeTemplate -> template.getVolumeTemplates().add(volumeTemplate));
-        } else {
-            LOGGER.debug("Instance storage was already requested. Setting temporary storage in template to: {}. " +
-                    "Group name: {}, Template id: {}, instance type: {}",
-                    TemporaryStorage.EPHEMERAL_VOLUMES_ONLY.name(), ig.getGroupName(), template.getId(), template.getInstanceType());
-            template.setTemporaryStorage(TemporaryStorage.EPHEMERAL_VOLUMES_ONLY);
-        }
-    }
-
-    private Function<VolumeParameterConfig, VolumeTemplate> toVolumeTemplate(Template template) {
-        return config -> {
-            LOGGER.info("Adding instance storage to template. Template id: {}, instane type: {}", template.getId(), template.getInstanceType());
-            VolumeTemplate volumeTemplate = new VolumeTemplate();
-            volumeTemplate.setVolumeType(AwsDiskType.Ephemeral.value());
-            volumeTemplate.setVolumeCount(config.maximumNumber());
-            volumeTemplate.setVolumeSize(config.maximumSize());
-            volumeTemplate.setUsageType(VolumeUsageType.GENERAL);
-            volumeTemplate.setTemplate(template);
-            return volumeTemplate;
-        };
-    }
-
-    private boolean isTemplateSetUpForInstanceStorage(Template template) {
-        return template.getVolumeTemplates().stream().anyMatch(volumeTemplate -> AwsDiskType.Ephemeral.value().equalsIgnoreCase(volumeTemplate.getVolumeType()));
     }
 
     private void sendNotificationIfNecessary(CheckImageResult result, Stack stack) {
