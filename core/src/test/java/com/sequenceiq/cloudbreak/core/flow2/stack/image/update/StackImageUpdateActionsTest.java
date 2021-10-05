@@ -57,6 +57,7 @@ import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
+import com.sequenceiq.cloudbreak.service.stack.StackImageService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
@@ -101,6 +102,9 @@ public class StackImageUpdateActionsTest {
 
     @Mock
     private StackImageUpdateService stackImageUpdateService;
+
+    @Mock
+    private StackImageService stackImageService;
 
     @Mock
     private FlowRegister runningFlows;
@@ -313,7 +317,7 @@ public class StackImageUpdateActionsTest {
 
         updateImageAction.execute(stateContext);
 
-        verify(stackImageUpdateService, times(1)).storeNewImageComponent(any(Stack.class), any(StatedImage.class));
+        verify(stackImageService, times(1)).storeNewImageComponent(any(Stack.class), any(StatedImage.class));
         verify(eventBus, times(1)).notify(eq(StackImageUpdateEvent.UPDATE_IMAGE_FINESHED_EVENT.event()), any(Event.class));
         assertTrue(variables.containsKey(AbstractStackImageUpdateAction.ORIGINAL_IMAGE));
     }

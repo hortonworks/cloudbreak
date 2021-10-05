@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
+import com.sequenceiq.cloudbreak.service.stack.StackImageService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.flow.core.FlowParameters;
@@ -41,6 +42,9 @@ abstract class AbstractStackImageUpdateAction<P extends Payload> extends Abstrac
 
     @Inject
     private StackImageUpdateService stackImageUpdateService;
+
+    @Inject
+    private StackImageService stackImageService;
 
     @Inject
     private StackService stackService;
@@ -102,6 +106,10 @@ abstract class AbstractStackImageUpdateAction<P extends Payload> extends Abstrac
 
     protected StackImageUpdateService getStackImageUpdateService() {
         return stackImageUpdateService;
+    }
+
+    protected StackImageService getStackImageService() {
+        return stackImageService;
     }
 
     protected StackService getStackService() {

@@ -8,12 +8,20 @@ import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ChangeImageCatalogV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.distrox.v1.distrox.StackOperations;
 import com.sequenceiq.distrox.v1.distrox.authorization.DataHubFiltering;
 
 @ExtendWith(MockitoExtension.class)
@@ -23,8 +31,24 @@ class DistroXV1ControllerTest {
 
     private static final String NAME = "name";
 
+    private static final String IMAGE_CATALOG = "image catalog";
+
+    private static final Long WORKSPACE_ID = 1L;
+
     @Mock
     private DataHubFiltering datahubFiltering;
+
+    @Mock
+    private StackOperations stackOperations;
+
+    @Mock
+    private WorkspaceService workspaceService;
+
+    @Mock
+    private Workspace workspace;
+
+    @Captor
+    private ArgumentCaptor<NameOrCrn> nameOrCrnArgumentCaptor;
 
     @InjectMocks
     private DistroXV1Controller distroXV1Controller;
@@ -38,5 +62,18 @@ class DistroXV1ControllerTest {
 
         assertEquals(expected, actual);
         verify(datahubFiltering).filterDataHubs(AuthorizationResourceAction.DESCRIBE_DATAHUB, NAME, CRN);
+    }
+
+    @Test
+    void testChangeImageCatalog() {
+        ChangeImageCatalogV4Request request = new ChangeImageCatalogV4Request();
+        request.setImageCatalog(IMAGE_CATALOG);
+        when(workspaceService.getForCurrentUser()).thenReturn(workspace);
+        when(workspace.getId()).thenReturn(WORKSPACE_ID);
+
+        distroXV1Controller.changeImageCatalog(NAME, request);
+
+        verify(stackOperations).changeImageCatalog(nameOrCrnArgumentCaptor.capture(), Mockito.eq(WORKSPACE_ID), Mockito.eq(IMAGE_CATALOG));
+        assertEquals(NAME, nameOrCrnArgumentCaptor.getValue().getName());
     }
 }
