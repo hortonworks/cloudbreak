@@ -147,7 +147,7 @@ class VolumeMatcherTest {
 
     private InstanceTemplate getInstanceTemplate(long privateId, String group) {
         return new InstanceTemplate("large", group, privateId, new ArrayList<>(), InstanceStatus.CREATED, null, 1L, "image",
-                TemporaryStorage.ATTACHED_VOLUMES);
+                TemporaryStorage.ATTACHED_VOLUMES, 0L);
     }
 
 }

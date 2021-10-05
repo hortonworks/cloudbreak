@@ -35,7 +35,6 @@ public class StackStopRestrictionServiceTest {
     public void infrastructureShouldBeStoppableForMixedStorage() {
         Set<InstanceGroup> groups = new HashSet<>();
         groups.add(createGroup(List.of("ebs")));
-        groups.add(createGroup(List.of(AwsDiskType.Ephemeral.value(), AwsDiskType.Gp2.value())));
 
         StopRestrictionReason actual = underTest.isInfrastructureStoppable("AWS", groups);
 

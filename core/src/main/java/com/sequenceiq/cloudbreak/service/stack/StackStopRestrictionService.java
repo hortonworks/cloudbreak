@@ -22,9 +22,9 @@ public class StackStopRestrictionService {
         if (SUPPORTED_CLOUD_PLATFORM.equals(cloudPlatform)) {
             for (InstanceGroup instanceGroup : instanceGroups) {
                 if (instanceGroup.getTemplate().getVolumeTemplates().stream()
-                        .allMatch(volume -> AwsDiskType.Ephemeral.value().equals(volume.getVolumeType()))) {
+                        .anyMatch(volume -> AwsDiskType.Ephemeral.value().equals(volume.getVolumeType()))) {
                     reason = StopRestrictionReason.EPHEMERAL_VOLUMES;
-                    LOGGER.info("Infrastructure cannot be stopped. Instances in group [{}] have ephemeral storage only.", instanceGroup.getGroupName());
+                    LOGGER.info("Infrastructure cannot be stopped. Instances in group [{}] have ephemeral storage.", instanceGroup.getGroupName());
                     break;
                 }
             }
