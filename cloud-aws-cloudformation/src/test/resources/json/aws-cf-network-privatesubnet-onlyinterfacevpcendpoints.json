@@ -50,12 +50,7 @@
           }
         ],
         "Tags": [
-          {
-            "Key": "Application",
-            "Value": {
-              "Ref": "AWS::StackId"
-            }
-          },
+          
           {
             "Key": "Name",
             "Value": "vpcep-sg-1"
@@ -122,12 +117,7 @@
     "InternetGateway": {
       "Properties": {
         "Tags": [
-          {
-            "Key": "Application",
-            "Value": {
-              "Ref": "AWS::StackId"
-            }
-          },
+          
           {
             "Key": "Name",
             "Value": "ig-1"
@@ -201,12 +191,7 @@
     "PRT2": {
       "Properties": {
         "Tags": [
-          {
-            "Key": "Application",
-            "Value": {
-              "Ref": "AWS::StackId"
-            }
-          },
+          
           {
             "Key": "Name",
             "Value": "prt2-1"
@@ -237,12 +222,7 @@
     "PRT3": {
       "Properties": {
         "Tags": [
-          {
-            "Key": "Application",
-            "Value": {
-              "Ref": "AWS::StackId"
-            }
-          },
+          
           {
             "Key": "Name",
             "Value": "prt3-1"
@@ -260,12 +240,7 @@
         "CidrBlock": "2.2.2.2/24",
         "MapPublicIpOnLaunch": "false",
         "Tags": [
-          {
-            "Key": "Application",
-            "Value": {
-              "Ref": "AWS::StackId"
-            }
-          },
+          
           {
             "Key": "kubernetes.io/role/internal-elb",
             "Value": "1"
@@ -287,12 +262,7 @@
         "CidrBlock": "2.2.2.2/24",
         "MapPublicIpOnLaunch": "false",
         "Tags": [
-          {
-            "Key": "Application",
-            "Value": {
-              "Ref": "AWS::StackId"
-            }
-          },
+          
           {
             "Key": "kubernetes.io/role/internal-elb",
             "Value": "1"
@@ -349,12 +319,7 @@
     "PublicRouteTable": {
       "Properties": {
         "Tags": [
-          {
-            "Key": "Application",
-            "Value": {
-              "Ref": "AWS::StackId"
-            }
-          },
+          
           {
             "Key": "Name",
             "Value": "prt-envName-1"
@@ -372,12 +337,7 @@
         "CidrBlock": "2.2.2.2/24",
         "MapPublicIpOnLaunch": "true",
         "Tags": [
-          {
-            "Key": "Application",
-            "Value": {
-              "Ref": "AWS::StackId"
-            }
-          },
+          
           {
             "Key": "kubernetes.io/role/elb",
             "Value": "1"
@@ -399,12 +359,7 @@
         "CidrBlock": "2.2.2.2/24",
         "MapPublicIpOnLaunch": "true",
         "Tags": [
-          {
-            "Key": "Application",
-            "Value": {
-              "Ref": "AWS::StackId"
-            }
-          },
+          
           {
             "Key": "kubernetes.io/role/elb",
             "Value": "1"
@@ -448,12 +403,7 @@
         "EnableDnsHostnames": "true",
         "EnableDnsSupport": "true",
         "Tags": [
-          {
-            "Key": "Application",
-            "Value": {
-              "Ref": "AWS::StackId"
-            }
-          },
+          
           {
             "Key": "Name",
             "Value": "VPC-1"

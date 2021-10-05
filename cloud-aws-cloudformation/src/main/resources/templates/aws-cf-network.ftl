@@ -11,7 +11,6 @@
         "EnableDnsSupport" : "true",
         "EnableDnsHostnames" : "true",
         "Tags" : [
-          { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } },
           { "Key" : "Name", "Value" : "VPC-${environmentId}" }
         ]
       }
@@ -20,7 +19,6 @@
       "Type" : "AWS::EC2::InternetGateway",
       "Properties" : {
         "Tags" : [
-          { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } },
           { "Key" : "Name", "Value" : "ig-${environmentId}" }
         ]
       }
@@ -43,7 +41,6 @@
         }],
         "VpcId" : { "Ref" : "VPC" },
         "Tags" : [
-          { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } },
           { "Key" : "Name", "Value" : "vpcep-sg-${environmentId}" }
         ]
       }
@@ -60,7 +57,6 @@
         "VpcId" : { "Ref" : "VPC" },
         "AvailabilityZone" : "${subnet.availabilityZone}",
         "Tags" : [
-          { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } },
           { "Key" : "kubernetes.io/role/elb", "Value" : "1" },
           { "Key" : "Name", "Value" : "ps${subnet.index}-${environmentId}" }
         ]
@@ -100,7 +96,6 @@
             "VpcId" : { "Ref" : "VPC" },
             "AvailabilityZone" : "${subnet.availabilityZone}",
             "Tags" : [
-              { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } },
               { "Key" : "kubernetes.io/role/internal-elb", "Value" : "1" },
               { "Key" : "Name", "Value" : "ps${subnet.index}-${environmentId}" }
             ]
@@ -111,7 +106,6 @@
         "Properties" : {
             "VpcId" : { "Ref" : "VPC" },
             "Tags" : [
-              { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } },
               { "Key" : "Name", "Value" : "prt${subnet.index}-${environmentId}" }
             ]
         }
@@ -178,7 +172,6 @@
       "Properties" : {
         "VpcId" : { "Ref" : "VPC" },
         "Tags" : [
-          { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } },
           { "Key" : "Name", "Value" : "prt-${environmentName}-${environmentId}" }
         ]
       }
