@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -18,6 +19,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudS3View;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.common.model.AwsDiskType;
 
 @Service
 public class AwsNativeModelBuilder {
@@ -30,6 +32,8 @@ public class AwsNativeModelBuilder {
         for (Group group : context.getStack().getGroups()) {
             AwsInstanceView awsInstanceView = new AwsInstanceView(group.getReferenceInstanceTemplate());
             String encryptedAMI = context.getEncryptedAMIByGroupName().get(group.getName());
+            Map<String, Long> volumeCounts = awsInstanceView.getVolumes().stream().collect(Collectors.groupingBy(Volume::getType, Collectors.counting()));
+            volumeCounts.putIfAbsent(AwsDiskType.Ephemeral.value(), group.getReferenceInstanceTemplate().getTemporaryStorageCount());
             AwsGroupView groupView = new AwsGroupView(
                     group.getInstancesSize(),
                     group.getType().name(),
@@ -37,7 +41,7 @@ public class AwsNativeModelBuilder {
                     group.getName(),
                     awsInstanceView.isEncryptedVolumes(),
                     group.getRootVolumeSize(),
-                    awsInstanceView.getVolumes().stream().collect(Collectors.groupingBy(Volume::getType, Collectors.counting())),
+                    volumeCounts,
                     group.getSecurity().getRules(),
                     group.getSecurity().getCloudSecurityIds(),
                     getSubnetIds(context.getExistingSubnetIds(), subnetCounter, group, multigw),

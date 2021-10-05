@@ -30,7 +30,7 @@ public class AwsInstanceViewTest {
         map.put(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.DEFAULT.name());
 
         InstanceTemplate instanceTemplate = new InstanceTemplate("", "", 0L, Collections.emptyList(), InstanceStatus.STARTED,
-                map, 0L, IMAGE_ID, TemporaryStorage.ATTACHED_VOLUMES);
+                map, 0L, IMAGE_ID, TemporaryStorage.ATTACHED_VOLUMES, 0L);
 
         AwsInstanceView actual = new AwsInstanceView(instanceTemplate);
 
@@ -48,7 +48,7 @@ public class AwsInstanceViewTest {
         map.put(AwsInstanceTemplate.VOLUME_ENCRYPTION_KEY_ID, ENCRYPTION_KEY_ARN);
 
         InstanceTemplate instanceTemplate = new InstanceTemplate("", "", 0L, Collections.emptyList(), InstanceStatus.STARTED,
-                map, 0L, IMAGE_ID, TemporaryStorage.ATTACHED_VOLUMES);
+                map, 0L, IMAGE_ID, TemporaryStorage.ATTACHED_VOLUMES, 0L);
 
         AwsInstanceView actual = new AwsInstanceView(instanceTemplate);
 
@@ -63,7 +63,7 @@ public class AwsInstanceViewTest {
         Map<String, Object> map = new HashMap<>();
         map.put(AwsInstanceTemplate.EC2_SPOT_PERCENTAGE, 30);
         InstanceTemplate instanceTemplate = new InstanceTemplate("", "", 0L, Collections.emptyList(), InstanceStatus.STARTED,
-                map, 0L, IMAGE_ID, TemporaryStorage.ATTACHED_VOLUMES);
+                map, 0L, IMAGE_ID, TemporaryStorage.ATTACHED_VOLUMES, 0L);
         AwsInstanceView actual = new AwsInstanceView(instanceTemplate);
         assertThat(actual.getOnDemandPercentage()).isEqualTo(70);
     }
@@ -71,7 +71,7 @@ public class AwsInstanceViewTest {
     @Test
     public void testOnDemandMissingPercentage() {
         InstanceTemplate instanceTemplate = new InstanceTemplate("", "", 0L, Collections.emptyList(), InstanceStatus.STARTED,
-                Map.of(), 0L, IMAGE_ID, TemporaryStorage.ATTACHED_VOLUMES);
+                Map.of(), 0L, IMAGE_ID, TemporaryStorage.ATTACHED_VOLUMES, 0L);
         AwsInstanceView actual = new AwsInstanceView(instanceTemplate);
         assertThat(actual.getOnDemandPercentage()).isEqualTo(100);
     }
@@ -82,7 +82,7 @@ public class AwsInstanceViewTest {
         Double spotMaxPrice = 0.9;
         map.put(AwsInstanceTemplate.EC2_SPOT_MAX_PRICE, spotMaxPrice);
         InstanceTemplate instanceTemplate = new InstanceTemplate("", "", 0L, Collections.emptyList(), InstanceStatus.STARTED,
-                map, 0L, "imageId", TemporaryStorage.ATTACHED_VOLUMES);
+                map, 0L, "imageId", TemporaryStorage.ATTACHED_VOLUMES, 0L);
         AwsInstanceView actual = new AwsInstanceView(instanceTemplate);
         assertEquals(spotMaxPrice, actual.getSpotMaxPrice());
     }
@@ -90,7 +90,7 @@ public class AwsInstanceViewTest {
     @Test
     public void testMissingSpotMaxPrice() {
         InstanceTemplate instanceTemplate = new InstanceTemplate("", "", 0L, Collections.emptyList(), InstanceStatus.STARTED,
-                Map.of(), 0L, "imageId", TemporaryStorage.ATTACHED_VOLUMES);
+                Map.of(), 0L, "imageId", TemporaryStorage.ATTACHED_VOLUMES, 0L);
         AwsInstanceView actual = new AwsInstanceView(instanceTemplate);
         assertNull(actual.getSpotMaxPrice());
     }
@@ -99,7 +99,7 @@ public class AwsInstanceViewTest {
     public void testPlacementGroupWhenPartition() {
         InstanceTemplate instanceTemplate = new InstanceTemplate("", "", 0L, Collections.emptyList(), InstanceStatus.STARTED,
                 Map.of(AwsInstanceTemplate.PLACEMENT_GROUP_STRATEGY, AwsPlacementGroupStrategy.PARTITION.name()),
-                0L, "imageId", TemporaryStorage.ATTACHED_VOLUMES);
+                0L, "imageId", TemporaryStorage.ATTACHED_VOLUMES, 0L);
         AwsInstanceView actual = new AwsInstanceView(instanceTemplate);
         assertEquals("Placement Group Strategy should be partition.", actual.getPlacementGroupStrategy(), AwsPlacementGroupStrategy.PARTITION);
     }
@@ -108,7 +108,7 @@ public class AwsInstanceViewTest {
     public void testPlacementGroupWhenSpread() {
         InstanceTemplate instanceTemplate = new InstanceTemplate("", "", 0L, Collections.emptyList(), InstanceStatus.STARTED,
                 Map.of(AwsInstanceTemplate.PLACEMENT_GROUP_STRATEGY, AwsPlacementGroupStrategy.SPREAD.name()),
-                0L, "imageId", TemporaryStorage.ATTACHED_VOLUMES);
+                0L, "imageId", TemporaryStorage.ATTACHED_VOLUMES, 0L);
         AwsInstanceView actual = new AwsInstanceView(instanceTemplate);
         assertEquals("Placement Group Strategy should be spread.", actual.getPlacementGroupStrategy(), AwsPlacementGroupStrategy.SPREAD);
     }
@@ -117,7 +117,7 @@ public class AwsInstanceViewTest {
     public void testPlacementGroupWhenCluster() {
         InstanceTemplate instanceTemplate = new InstanceTemplate("", "", 0L, Collections.emptyList(), InstanceStatus.STARTED,
                 Map.of(AwsInstanceTemplate.PLACEMENT_GROUP_STRATEGY, AwsPlacementGroupStrategy.CLUSTER.name()),
-                0L, "imageId", TemporaryStorage.ATTACHED_VOLUMES);
+                0L, "imageId", TemporaryStorage.ATTACHED_VOLUMES, 0L);
         AwsInstanceView actual = new AwsInstanceView(instanceTemplate);
         assertEquals("Placement Group Strategy should be cluster.", actual.getPlacementGroupStrategy(), AwsPlacementGroupStrategy.CLUSTER);
     }
@@ -125,7 +125,7 @@ public class AwsInstanceViewTest {
     @Test
     public void testPlacementGroupWhenMissing() {
         InstanceTemplate instanceTemplate = new InstanceTemplate("", "", 0L, Collections.emptyList(), InstanceStatus.STARTED,
-                Map.of(), 0L, "imageId", TemporaryStorage.ATTACHED_VOLUMES);
+                Map.of(), 0L, "imageId", TemporaryStorage.ATTACHED_VOLUMES, 0L);
         AwsInstanceView actual = new AwsInstanceView(instanceTemplate);
         assertEquals("Placement Group Strategy should be none.", actual.getPlacementGroupStrategy(), AwsPlacementGroupStrategy.NONE);
     }
@@ -134,7 +134,7 @@ public class AwsInstanceViewTest {
     public void testPlacementGroupWhenNone() {
         InstanceTemplate instanceTemplate = new InstanceTemplate("", "", 0L, Collections.emptyList(), InstanceStatus.STARTED,
                 Map.of(AwsInstanceTemplate.PLACEMENT_GROUP_STRATEGY, AwsPlacementGroupStrategy.NONE.name()),
-                0L, "imageId", TemporaryStorage.ATTACHED_VOLUMES);
+                0L, "imageId", TemporaryStorage.ATTACHED_VOLUMES, 0L);
         AwsInstanceView actual = new AwsInstanceView(instanceTemplate);
         assertEquals("Placement Group Strategy should be none.", actual.getPlacementGroupStrategy(), AwsPlacementGroupStrategy.NONE);
     }

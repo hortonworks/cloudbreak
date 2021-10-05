@@ -75,14 +75,14 @@ public class TestApplicationContext {
 
     private final CloudInstance cloudInstance = new CloudInstance("instanceId",
             new InstanceTemplate("flavor", "groupName", 1L, Collections.emptyList(),
-                    InstanceStatus.CREATE_REQUESTED, new HashMap<>(), 0L, "imageId", TemporaryStorage.ATTACHED_VOLUMES),
+                    InstanceStatus.CREATE_REQUESTED, new HashMap<>(), 0L, "imageId", TemporaryStorage.ATTACHED_VOLUMES, 0L),
             instanceAuthentication,
             "subnet-123",
             "az1");
 
     private final CloudInstance cloudInstanceBad = new CloudInstance("instanceIdBad",
             new InstanceTemplate("flavor", "groupName", 1L, Collections.emptyList(),
-                    InstanceStatus.CREATE_REQUESTED, new HashMap<>(), 1L, "imageId", TemporaryStorage.ATTACHED_VOLUMES),
+                    InstanceStatus.CREATE_REQUESTED, new HashMap<>(), 1L, "imageId", TemporaryStorage.ATTACHED_VOLUMES, 0L),
             instanceAuthentication,
             "subnet-123",
             "az1");
