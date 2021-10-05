@@ -87,7 +87,7 @@ public class NetworkDtoToResponseConverter {
                     network,
                     tunnel,
                     network.getCloudPlatform(),
-                    false);
+                    true);
         }
         return providedSubnetIds;
     }

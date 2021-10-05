@@ -46,7 +46,7 @@ public class NetworkDtoToResponseConverterTest {
     void testConvertWithAwsParams() {
         NetworkDto network = createNetworkDto().withAws(createAwsParams()).build();
         ProvidedSubnetIds providedSubnetIds = new ProvidedSubnetIds(PREFERRED_SUBNET_ID, Set.of(PREFERRED_SUBNET_ID));
-        when(subnetIdProvider.subnets(network, TUNNEL, network.getCloudPlatform(), false)).thenReturn(providedSubnetIds);
+        when(subnetIdProvider.subnets(network, TUNNEL, network.getCloudPlatform(), true)).thenReturn(providedSubnetIds);
 
         EnvironmentNetworkResponse actual = underTest.convert(network, TUNNEL, true);
 
@@ -61,7 +61,7 @@ public class NetworkDtoToResponseConverterTest {
     void testConvertWithAzureParams() {
         NetworkDto network = createNetworkDto().withAzure(createAzureParams()).build();
         ProvidedSubnetIds providedSubnetIds = new ProvidedSubnetIds(PREFERRED_SUBNET_ID, Set.of(PREFERRED_SUBNET_ID));
-        when(subnetIdProvider.subnets(network, TUNNEL, network.getCloudPlatform(), false)).thenReturn(providedSubnetIds);
+        when(subnetIdProvider.subnets(network, TUNNEL, network.getCloudPlatform(), true)).thenReturn(providedSubnetIds);
 
         EnvironmentNetworkResponse actual = underTest.convert(network, TUNNEL, true);
 
@@ -78,7 +78,7 @@ public class NetworkDtoToResponseConverterTest {
     void testConvertWithMockParams() {
         NetworkDto network = createNetworkDto().withMock(createMockParams()).build();
         ProvidedSubnetIds providedSubnetIds = new ProvidedSubnetIds(PREFERRED_SUBNET_ID, Set.of(PREFERRED_SUBNET_ID));
-        when(subnetIdProvider.subnets(network, TUNNEL, network.getCloudPlatform(), false)).thenReturn(providedSubnetIds);
+        when(subnetIdProvider.subnets(network, TUNNEL, network.getCloudPlatform(), true)).thenReturn(providedSubnetIds);
 
         EnvironmentNetworkResponse actual = underTest.convert(network, TUNNEL, true);
 
@@ -95,7 +95,7 @@ public class NetworkDtoToResponseConverterTest {
         NetworkDto network = createNetworkDto().withYarn(createYarnParams()).build();
 
         ProvidedSubnetIds providedSubnetIds = new ProvidedSubnetIds(PREFERRED_SUBNET_ID, Set.of(PREFERRED_SUBNET_ID));
-        when(subnetIdProvider.subnets(network, TUNNEL, network.getCloudPlatform(), false)).thenReturn(providedSubnetIds);
+        when(subnetIdProvider.subnets(network, TUNNEL, network.getCloudPlatform(), true)).thenReturn(providedSubnetIds);
 
         EnvironmentNetworkResponse actual = underTest.convert(network, TUNNEL, true);
 
@@ -108,7 +108,7 @@ public class NetworkDtoToResponseConverterTest {
     }
 
     private void assertCommonFields(NetworkDto network, EnvironmentNetworkResponse actual) {
-        verify(subnetIdProvider).subnets(network, TUNNEL, network.getCloudPlatform(), false);
+        verify(subnetIdProvider).subnets(network, TUNNEL, network.getCloudPlatform(), true);
         assertEquals(network.getResourceCrn(), actual.getCrn());
         assertEquals(network.getSubnetIds(), actual.getSubnetIds());
         assertEquals(network.getNetworkCidr(), actual.getNetworkCidr());
