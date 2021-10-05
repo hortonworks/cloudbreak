@@ -18,14 +18,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup;
 import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsRequest;
 import com.amazonaws.services.autoscaling.model.Instance;
+import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsMetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
-import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.connector.resource.AwsElasticIpService;
@@ -134,7 +135,8 @@ public class AwsUpscaleService {
                 cfStackUtil.addLoadBalancerTargets(ac, loadBalancer, newInstances);
             }
         } catch (RuntimeException runtimeException) {
-            recoverOriginalState(ac, stack, amazonASClient, desiredAutoscalingGroupsByName, originalAutoScalingGroupsBySize, runtimeException);
+            recoverOriginalState(ac, stack, amazonASClient, desiredAutoscalingGroupsByName,
+                    originalAutoScalingGroupsBySize, runtimeException);
             throw new CloudConnectorException(String.format("Failed to create some resource on AWS for upscaled nodes, please check your quotas on AWS. " +
                     "Original autoscaling group state has been recovered. Exception: %s", runtimeException.getMessage()), runtimeException);
         }
@@ -186,7 +188,15 @@ public class AwsUpscaleService {
             if (!unknownInstancesByCloudbreak.isEmpty()) {
                 for (String unknownInstance : unknownInstancesByCloudbreak) {
                     LOGGER.info("Terminate unknown instance: {}", unknownInstance);
-                    awsAutoScalingService.terminateInstance(amazonASClient, unknownInstance);
+                    try {
+                        awsAutoScalingService.terminateInstance(amazonASClient, unknownInstance);
+                    } catch (AmazonServiceException e) {
+                        if (e.getMessage().contains("Instance Id not found")) {
+                            LOGGER.info("{} was not found on AWS, it was terminated previously", unknownInstance, e);
+                        } else {
+                            throw e;
+                        }
+                    }
                 }
             }
             for (Entry<String, Group> desiredAutoscalingGroup : desiredAutoscalingGroupsByName.entrySet()) {
@@ -199,7 +209,7 @@ public class AwsUpscaleService {
                     awsAutoScalingService.updateAutoscalingGroup(amazonASClient, autoscalingGroupName, originalInstanceSizeForTheGroup);
                 }
             }
-        } catch (Exception recoverFailedException) {
+        } catch (RuntimeException recoverFailedException) {
             recoverFailedException.addSuppressed(originalException);
             LOGGER.info("Original autoscaling group state recover is failed", recoverFailedException);
             throw new CloudConnectorException("Upscale failed: " + originalException.getMessage() + ", We tried to recover to the original state, " +
