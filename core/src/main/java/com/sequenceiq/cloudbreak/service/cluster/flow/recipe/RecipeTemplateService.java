@@ -2,9 +2,6 @@ package com.sequenceiq.cloudbreak.service.cluster.flow.recipe;
 
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -15,7 +12,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.converter.StackToTemplatePreparationObjectConverter;
@@ -31,7 +28,7 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 import io.micrometer.core.instrument.util.StringUtils;
 
-@Component
+@Service
 public class RecipeTemplateService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RecipeTemplateService.class);
@@ -56,7 +53,7 @@ public class RecipeTemplateService {
      * Compare generated recipes from the database against on-the-fly generated recipes for every host groups
      * If any of those will differ from the source (in database) or no recipe relation found for generated recipe, the result will be false.
      */
-    public boolean compareGeneratedRecipes(Set<HostGroup> hostGroups, Map<HostGroup, List<RecipeModel>> generatedModels) {
+    public boolean isGeneratedRecipesInDbStale(Set<HostGroup> hostGroups, Map<HostGroup, List<RecipeModel>> generatedModels) {
         for (HostGroup hostGroup : hostGroups) {
             Set<GeneratedRecipe> generatedRecipes = hostGroup.getGeneratedRecipes();
             boolean hasRecipes = CollectionUtils.isNotEmpty(hostGroup.getRecipes());
@@ -88,7 +85,7 @@ public class RecipeTemplateService {
                         hostGroup.getName());
                 return false;
             }
-            if (compareHostGroupGeneratedRecipes(hostGroup, generatedRecipeNameMap, recipeModelList)) {
+            if (isRecipeUpToDateInHostGroup(hostGroup, generatedRecipeNameMap, recipeModelList)) {
                 LOGGER.debug("Recipes matches for host group '{}'", hostGroup.getName());
             } else {
                 return false;
@@ -126,20 +123,22 @@ public class RecipeTemplateService {
      */
     public Map<HostGroup, Set<GeneratedRecipe>> createGeneratedRecipes(Map<HostGroup, List<RecipeModel>> recipeModels, Map<String, Recipe> recipesNameMap,
             Workspace workspace) {
-        Map<HostGroup, Set<GeneratedRecipe>> result = new HashMap<>();
-        for (Map.Entry<HostGroup, List<RecipeModel>> hostGroupListEntry : recipeModels.entrySet()) {
-            Set<GeneratedRecipe> generatedRecipes = new HashSet<>();
-            for (RecipeModel recipeModel : hostGroupListEntry.getValue()) {
-                GeneratedRecipe generatedRecipe = new GeneratedRecipe();
-                generatedRecipe.setWorkspace(workspace);
-                generatedRecipe.setHostGroup(hostGroupListEntry.getKey());
-                generatedRecipe.setExtendedRecipeText(recipeModel.getGeneratedScript());
-                generatedRecipe.setRecipe(recipesNameMap.get(recipeModel.getName()));
-                generatedRecipes.add(generatedRecipe);
-            }
-            result.put(hostGroupListEntry.getKey(), generatedRecipes);
-        }
-        return result;
+        return recipeModels.entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, entry -> creteGeneratedRecipes(recipesNameMap, workspace, entry)));
+    }
+
+    private Set<GeneratedRecipe> creteGeneratedRecipes(Map<String, Recipe> recipesNameMap, Workspace workspace, Map.Entry<HostGroup,
+            List<RecipeModel>> hostGroupListEntry) {
+        return hostGroupListEntry.getValue().stream()
+                .map(recipeModel -> {
+                    GeneratedRecipe generatedRecipe = new GeneratedRecipe();
+                    generatedRecipe.setWorkspace(workspace);
+                    generatedRecipe.setHostGroup(hostGroupListEntry.getKey());
+                    generatedRecipe.setExtendedRecipeText(recipeModel.getGeneratedScript());
+                    generatedRecipe.setRecipe(recipesNameMap.get(recipeModel.getName()));
+                    return generatedRecipe;
+                })
+                .collect(Collectors.toSet());
     }
 
     public void updateAllGeneratedRecipes(Set<HostGroup> hostGroups, Map<HostGroup, Set<GeneratedRecipe>> generatedRecipeTemplates) {
@@ -171,7 +170,7 @@ public class RecipeTemplateService {
         }
     }
 
-    private boolean compareHostGroupGeneratedRecipes(HostGroup hostGroup, Map<String, GeneratedRecipe> generatedRecipeNameMap,
+    private boolean isRecipeUpToDateInHostGroup(HostGroup hostGroup, Map<String, GeneratedRecipe> generatedRecipeNameMap,
             List<RecipeModel> recipeModelList) {
         for (RecipeModel recipeModel : recipeModelList) {
             String recipeName = recipeModel.getName();
@@ -191,22 +190,28 @@ public class RecipeTemplateService {
     }
 
     private List<RecipeModel> convert(Set<Recipe> recipes, TemplatePreparationObject templatePreparationObject) {
-        List<RecipeModel> result = new ArrayList<>();
-        for (Recipe recipe : recipes) {
-            String decodedContent = new String(Base64.decodeBase64(recipe.getContent()));
-            final String generatedRecipeText;
-            if (templatePreparationObject != null) {
-                generatedRecipeText = measure(() -> centralRecipeUpdater.getRecipeText(templatePreparationObject, decodedContent),
-                        LOGGER,
-                        "Recipe generation took {} ms");
-                LOGGER.info("Generated recipe is: {}", generatedRecipeText);
-            } else {
-                generatedRecipeText = decodedContent;
-            }
-            RecipeModel recipeModel = new RecipeModel(recipe.getName(), recipe.getRecipeType(), generatedRecipeText);
-            result.add(recipeModel);
+        return recipes.stream()
+                .map(recipe -> convertRecipeToModel(templatePreparationObject, recipe))
+                .collect(Collectors.toList());
+    }
+
+    private RecipeModel convertRecipeToModel(TemplatePreparationObject templatePreparationObject, Recipe recipe) {
+        String decodedContent = new String(Base64.decodeBase64(recipe.getContent()));
+        String generatedRecipeText = createGeneratedRecipe(templatePreparationObject, decodedContent);
+        return new RecipeModel(recipe.getName(), recipe.getRecipeType(), generatedRecipeText);
+    }
+
+    private String createGeneratedRecipe(TemplatePreparationObject templatePreparationObject, String decodedContent) {
+        if (templatePreparationObject != null) {
+            String generatedRecipeText = measure(() -> centralRecipeUpdater.getRecipeText(templatePreparationObject, decodedContent),
+                    LOGGER,
+                    "Recipe generation took {} ms");
+            LOGGER.info("Generated recipe is: {}", generatedRecipeText);
+            return generatedRecipeText;
+        } else {
+            LOGGER.info("TemplatePreparationObject is empty, using recipe as-is");
+            return decodedContent;
         }
-        return result;
     }
 
     private List<RecipeModel> convert(Set<Recipe> recipes) {

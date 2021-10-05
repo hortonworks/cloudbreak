@@ -23,8 +23,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.i
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetaDataResponse;
 import com.sequenceiq.it.cloudbreak.FreeIpaClient;
+import com.sequenceiq.it.cloudbreak.dto.AbstractSdxTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
-import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
@@ -91,7 +91,7 @@ public class SshJClientActions extends SshJClient {
         return instanceIPs;
     }
 
-    public SdxInternalTestDto checkFilesByNameAndPath(SdxInternalTestDto testDto, List<InstanceGroupV4Response> instanceGroups,
+    public <T extends AbstractSdxTestDto> T checkFilesByNameAndPath(T testDto, List<InstanceGroupV4Response> instanceGroups,
             List<String> hostGroupNames, String filePath, String fileName, long requiredNumberOfFiles, String user, String password) {
         String fileListCommand = String.format("find %s -type f -name %s", filePath, fileName);
         AtomicLong quantity = new AtomicLong(0);

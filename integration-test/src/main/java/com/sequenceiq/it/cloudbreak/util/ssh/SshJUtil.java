@@ -7,7 +7,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
-import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
+import com.sequenceiq.it.cloudbreak.dto.AbstractSdxTestDto;
 import com.sequenceiq.it.cloudbreak.util.ssh.action.SshJClientActions;
 
 @Component
@@ -18,7 +18,7 @@ public class SshJUtil {
     private SshJUtil() {
     }
 
-    public SdxInternalTestDto checkFilesOnHostByNameAndPath(SdxInternalTestDto testDto, List<InstanceGroupV4Response> instanceGroups,
+    public <T extends AbstractSdxTestDto> T checkFilesOnHostByNameAndPath(T testDto, List<InstanceGroupV4Response> instanceGroups,
             List<String> hostGroupNames, String filePath, String fileName, long requiredNumberOfFiles, String user, String password) {
         return sshJClientActions.checkFilesByNameAndPath(testDto, instanceGroups, hostGroupNames, filePath, fileName, requiredNumberOfFiles, user,
                 password);

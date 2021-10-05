@@ -301,31 +301,20 @@ public class ClusterCommonService {
     public UpdateRecipesV4Response refreshRecipes(NameOrCrn nameOrCrn, Long workspaceId, UpdateRecipesV4Request request) {
         Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
         MDCBuilder.buildMdcContext(stack);
-        try {
-            return updateRecipeService.refreshRecipesForCluster(workspaceId, stack, request.getHostGroupRecipes());
-        } catch (TransactionExecutionException e) {
-            throw new TransactionRuntimeExecutionException(e);
-        }
+        return updateRecipeService.refreshRecipesForCluster(workspaceId, stack, request.getHostGroupRecipes());
+
     }
 
     public AttachRecipeV4Response attachRecipe(NameOrCrn nameOrCrn, Long workspaceId, AttachRecipeV4Request request) {
         Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
         MDCBuilder.buildMdcContext(stack);
-        try {
-            return updateRecipeService.attachRecipeToCluster(workspaceId, stack, request.getRecipeName(), request.getHostGroupName());
-        } catch (TransactionExecutionException e) {
-            throw new TransactionRuntimeExecutionException(e);
-        }
+        return updateRecipeService.attachRecipeToCluster(workspaceId, stack, request.getRecipeName(), request.getHostGroupName());
     }
 
     public DetachRecipeV4Response detachRecipe(NameOrCrn nameOrCrn, Long workspaceId, DetachRecipeV4Request request) {
         Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
         MDCBuilder.buildMdcContext(stack);
-        try {
-            return updateRecipeService.detachRecipeFromCluster(workspaceId, stack, request.getRecipeName(), request.getHostGroupName());
-        } catch (TransactionExecutionException e) {
-            throw new TransactionRuntimeExecutionException(e);
-        }
+        return updateRecipeService.detachRecipeFromCluster(workspaceId, stack, request.getRecipeName(), request.getHostGroupName());
     }
 
     private void validateOperationOnStack(Stack stack, String operationDescription) {

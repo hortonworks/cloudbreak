@@ -25,6 +25,7 @@ public class V4ExistingResourceRestUrlParser extends LegacyRestUrlParser {
             + "|blueprints_util/.*"
             + "|image_catalogs/image(s\\b|\\b)"
             + "|connectors/[a-z_]+"
+            + "|recipes/internal"
             + "|file_systems/[a-z_]+)");
 
     private static final Pattern PATTERN = Pattern.compile("v4/(\\d+)/([a-z_]+)(/internal)?/([^/]+)");

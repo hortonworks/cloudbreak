@@ -1,8 +1,5 @@
 package com.sequenceiq.cloudbreak.service.recipe;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -20,11 +17,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.DetachRe
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.UpdateRecipesV4Response;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
-import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.cloudbreak.repository.RecipeRepository;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 
 @Service
@@ -32,16 +27,13 @@ public class UpdateRecipeService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UpdateRecipeService.class);
 
-    private final RecipeRepository recipeRepository;
+    private final RecipeService recipeService;
 
     private final HostGroupService hostGroupService;
 
-    private final TransactionService transactionService;
-
-    public UpdateRecipeService(RecipeRepository recipeRepository, HostGroupService hostGroupService, TransactionService transactionService) {
-        this.recipeRepository = recipeRepository;
+    public UpdateRecipeService(RecipeService recipeService, HostGroupService hostGroupService) {
+        this.recipeService = recipeService;
         this.hostGroupService = hostGroupService;
-        this.transactionService = transactionService;
     }
 
     /**
@@ -49,49 +41,34 @@ public class UpdateRecipeService {
      * If a host group key from the mappings is missing from the input, that is not going to be updated.
      * (or both - that is the default). Output is the newly attached/detached recipes in db.
      */
-    public UpdateRecipesV4Response refreshRecipesForCluster(Long workspaceId, Stack stack, List<UpdateHostGroupRecipes> recipesPerHostGroup)
-            throws TransactionService.TransactionExecutionException {
-        List<UpdateHostGroupRecipes> attachRecipesList = new ArrayList<>();
-        List<UpdateHostGroupRecipes> detachRecipesList = new ArrayList<>();
-        Set<String> recipesToFind = new HashSet<>();
-        Map<String, Set<String>> recipesToUpdate = new HashMap<>();
-        recipesPerHostGroup.forEach(r -> recipesToFind.addAll(r.getRecipeNames()));
-        recipesPerHostGroup.forEach(r -> recipesToUpdate.put(r.getHostGroupName(), r.getRecipeNames()));
-        LOGGER.debug("Update recipes {}", recipesToUpdate);
-        Set<Recipe> recipes = transactionService.required(() -> recipeRepository.findByNameInAndWorkspaceId(recipesToFind, workspaceId));
-        Set<String> existingRecipesNames = recipes
-                .stream().map(Recipe::getName).collect(Collectors.toSet());
-        LOGGER.debug("Recipes found in database: {}, expected update related recipes: {}", existingRecipesNames, recipesToFind);
-        Set<String> invalidRecipes = recipesToFind.stream().filter(r -> !existingRecipesNames.contains(r))
+    public UpdateRecipesV4Response refreshRecipesForCluster(Long workspaceId, Stack stack, List<UpdateHostGroupRecipes> recipesPerHostGroup) {
+        Set<String> recipesToFind = recipesPerHostGroup.stream().flatMap(rphg -> rphg.getRecipeNames().stream())
                 .collect(Collectors.toSet());
-        if (!invalidRecipes.isEmpty()) {
-            throw new BadRequestException(String.format("Following recipes do not exist in workspace: %s", Joiner.on(",").join(invalidRecipes)));
-        }
-        Set<HostGroup> hostGroups = transactionService.required(() -> hostGroupService.getByClusterWithRecipes(stack.getCluster().getId()));
-        updateRecipesForHostGroups(recipesToUpdate, recipes, hostGroups, attachRecipesList, detachRecipesList);
+        Map<String, Set<String>> recipesToUpdate = recipesPerHostGroup.stream()
+                .collect(Collectors.toMap(UpdateHostGroupRecipes::getHostGroupName, UpdateHostGroupRecipes::getRecipeNames));
+        LOGGER.debug("Update recipes {}", recipesToUpdate);
+        Set<Recipe> recipes = recipeService.getByNamesForWorkspaceId(recipesToFind, workspaceId);
+        validate(recipesToFind, recipes);
+        Set<HostGroup> hostGroups = hostGroupService.getByClusterWithRecipes(stack.getCluster().getId());
+        UpdateRecipesV4Response result = updateRecipesForHostGroups(recipesToUpdate, recipes, hostGroups);
+        LOGGER.debug("Update recipes result: {}", result);
+        return result;
+    }
+
+    private UpdateRecipesV4Response updateRecipesForHostGroups(Map<String, Set<String>> recipesToUpdate, Set<Recipe> recipes, Set<HostGroup> hostGroups) {
         UpdateRecipesV4Response result = new UpdateRecipesV4Response();
-        if (!attachRecipesList.isEmpty()) {
-            result.setRecipesAttached(attachRecipesList);
-            LOGGER.debug("Attached recipes per host group: {}", attachRecipesList);
-        }
-        if (!detachRecipesList.isEmpty()) {
-            result.setRecipesDetached(detachRecipesList);
-            LOGGER.debug("Detaches recipes per host group: {}", detachRecipesList);
+        for (HostGroup hostGroup : hostGroups) {
+            UpdateHostGroupRecipesPair updatePairs = doHostGroupRecipeUpdate(recipesToUpdate, recipes, hostGroup);
+            updatePairs.getRecipesToAttach().ifPresent(a -> result.getRecipesAttached().add(a));
+            updatePairs.getRecipesToDetach().ifPresent(d -> result.getRecipesDetached().add(d));
         }
         return result;
     }
 
-    private void updateRecipesForHostGroups(Map<String, Set<String>> recipesToUpdate, Set<Recipe> recipes, Set<HostGroup> hostGroups,
-            List<UpdateHostGroupRecipes> attachRecipesList, List<UpdateHostGroupRecipes> detachRecipesList)
-            throws TransactionService.TransactionExecutionException {
-        for (HostGroup hostGroup : hostGroups) {
-            doHostGroupRecipeUpdate(recipesToUpdate, recipes, attachRecipesList, detachRecipesList, hostGroup);
-        }
-    }
-
-    private void doHostGroupRecipeUpdate(Map<String, Set<String>> recipesToUpdate, Set<Recipe> recipes, List<UpdateHostGroupRecipes> attachRecipesList,
-            List<UpdateHostGroupRecipes> detachRecipesList, HostGroup hostGroup) throws TransactionService.TransactionExecutionException {
+    private UpdateHostGroupRecipesPair doHostGroupRecipeUpdate(Map<String, Set<String>> recipesToUpdate, Set<Recipe> recipes, HostGroup hostGroup) {
         String hostGroupName = hostGroup.getName();
+        Optional<UpdateHostGroupRecipes> attachHostGroupRecipesOpt = Optional.empty();
+        Optional<UpdateHostGroupRecipes> detachHostGroupRecipesOpt = Optional.empty();
         if (recipesToUpdate.containsKey(hostGroupName)) {
             LOGGER.debug("Checking host group '{}' needs any refresh.", hostGroupName);
             Set<String> recipesForHostGroup = recipesToUpdate.get(hostGroupName);
@@ -107,22 +84,13 @@ public class UpdateRecipeService {
                 Set<Recipe> updateRecipes = recipes.stream()
                         .filter(r -> recipesForHostGroup.contains(r.getName()))
                         .collect(Collectors.toSet());
-                Optional<UpdateHostGroupRecipes> attachHostGroupRecipesOpt = collectAttachHostGroupRecipes(hostGroupName, existingRecipeNames, updateRecipes);
-                if (attachHostGroupRecipesOpt.isPresent()) {
-                    UpdateHostGroupRecipes attachHostGroupRecipes = attachHostGroupRecipesOpt.get();
-                    attachRecipesList.add(attachHostGroupRecipes);
-                    LOGGER.debug("Recipes attached to '{}' host group: {}", hostGroupName, attachHostGroupRecipes);
-                }
-                Optional<UpdateHostGroupRecipes> detachHostGroupRecipesOpt = collectDetachHostGroupRecipes(hostGroupName, recipesForHostGroup, existingRecipes);
-                if (detachHostGroupRecipesOpt.isPresent()) {
-                    UpdateHostGroupRecipes detachHostGroupRecipes = detachHostGroupRecipesOpt.get();
-                    detachRecipesList.add(detachHostGroupRecipes);
-                    LOGGER.debug("Recipes detached from '{}' host group: {}", hostGroupName, detachHostGroupRecipes);
-                }
+                attachHostGroupRecipesOpt = collectAttachHostGroupRecipes(hostGroupName, existingRecipeNames, updateRecipes);
+                detachHostGroupRecipesOpt = collectDetachHostGroupRecipes(hostGroupName, recipesForHostGroup, existingRecipes);
                 hostGroup.setRecipes(updateRecipes);
-                transactionService.required(() -> hostGroupService.save(hostGroup));
+                hostGroupService.save(hostGroup);
             }
         }
+        return new UpdateHostGroupRecipesPair(attachHostGroupRecipesOpt.orElse(null), detachHostGroupRecipesOpt.orElse(null));
     }
 
     private Optional<UpdateHostGroupRecipes> collectAttachHostGroupRecipes(String hostGroupName, Set<String> existingRecipeNames, Set<Recipe> updateRecipes) {
@@ -155,8 +123,7 @@ public class UpdateRecipeService {
         return result;
     }
 
-    public AttachRecipeV4Response attachRecipeToCluster(Long workspaceId, Stack stack, String recipeName, String hostGroupName)
-            throws TransactionService.TransactionExecutionException {
+    public AttachRecipeV4Response attachRecipeToCluster(Long workspaceId, Stack stack, String recipeName, String hostGroupName) {
         updateRecipeForCluster(workspaceId, stack, recipeName, hostGroupName, false);
         AttachRecipeV4Response response = new AttachRecipeV4Response();
         response.setRecipeName(recipeName);
@@ -164,8 +131,7 @@ public class UpdateRecipeService {
         return response;
     }
 
-    public DetachRecipeV4Response detachRecipeFromCluster(Long workspaceId, Stack stack, String recipeName, String hostGroupName)
-            throws TransactionService.TransactionExecutionException {
+    public DetachRecipeV4Response detachRecipeFromCluster(Long workspaceId, Stack stack, String recipeName, String hostGroupName) {
         updateRecipeForCluster(workspaceId, stack, recipeName, hostGroupName, true);
         DetachRecipeV4Response response = new DetachRecipeV4Response();
         response.setRecipeName(recipeName);
@@ -173,14 +139,9 @@ public class UpdateRecipeService {
         return response;
     }
 
-    private void updateRecipeForCluster(Long workspaceId, Stack stack, String recipeName, String hostGroupName, boolean detach)
-            throws TransactionService.TransactionExecutionException {
-        Optional<Recipe> recipe = transactionService.required(() -> recipeRepository.findByNameAndWorkspaceId(recipeName, workspaceId));
-        if (recipe.isEmpty()) {
-            throw new NotFoundException(String.format("Recipe '%s' not found for workspace", recipeName));
-        }
-        HostGroup hostGroup = transactionService.required(() ->
-                hostGroupService.getByClusterIdAndNameWithRecipes(stack.getCluster().getId(), hostGroupName));
+    private void updateRecipeForCluster(Long workspaceId, Stack stack, String recipeName, String hostGroupName, boolean detach) {
+        Recipe recipe = recipeService.getByNameForWorkspaceId(recipeName, workspaceId);
+        HostGroup hostGroup = hostGroupService.getByClusterIdAndNameWithRecipes(stack.getCluster().getId(), hostGroupName);
         if (hostGroup == null) {
             throw new NotFoundException(String.format("Host group '%s' not found for workspace", hostGroupName));
         }
@@ -189,24 +150,24 @@ public class UpdateRecipeService {
                 .stream().map(Recipe::getName)
                 .collect(Collectors.toSet());
         if (detach) {
-            detachRecipeFromHostGroup(recipe.get(), hostGroup, existingRecipeNames);
+            detachRecipeFromHostGroup(recipe, hostGroup, existingRecipeNames);
         } else {
-            attachRecipeToHostGroup(recipe.get(), hostGroup, existingRecipeNames);
+            attachRecipeToHostGroup(recipe, hostGroup, existingRecipeNames);
         }
     }
 
-    private void attachRecipeToHostGroup(Recipe recipe, HostGroup hostGroup, Set<String> recipeNames) throws TransactionService.TransactionExecutionException {
+    private void attachRecipeToHostGroup(Recipe recipe, HostGroup hostGroup, Set<String> recipeNames) {
         String recipeName = recipe.getName();
         String hostGroupName = hostGroup.getName();
         if (recipeNames.contains(recipeName)) {
             LOGGER.debug("Recipe {} already attached to host group {}. ", recipeName, hostGroupName);
         } else {
             hostGroup.getRecipes().add(recipe);
-            transactionService.required(() -> hostGroupService.save(hostGroup));
+            hostGroupService.save(hostGroup);
         }
     }
 
-    private void detachRecipeFromHostGroup(Recipe recipe, HostGroup hostGroup, Set<String> recipeNames) throws TransactionService.TransactionExecutionException {
+    private void detachRecipeFromHostGroup(Recipe recipe, HostGroup hostGroup, Set<String> recipeNames) {
         String recipeName = recipe.getName();
         String hostGroupName = hostGroup.getName();
         if (recipeNames.contains(recipeName)) {
@@ -215,9 +176,20 @@ public class UpdateRecipeService {
                             .filter(r -> !r.getName().equals(recipeName))
                             .collect(Collectors.toSet())
             );
-            transactionService.required(() -> hostGroupService.save(hostGroup));
+            hostGroupService.save(hostGroup);
         } else {
             LOGGER.debug("Recipe {} already detached from host group {}. ", recipeName, hostGroupName);
+        }
+    }
+
+    private void validate(Set<String> recipesToFind, Set<Recipe> recipes) {
+        Set<String> existingRecipesNames = recipes
+                .stream().map(Recipe::getName).collect(Collectors.toSet());
+        LOGGER.debug("Recipes found in database: {}, expected update related recipes: {}", existingRecipesNames, recipesToFind);
+        Set<String> invalidRecipes = recipesToFind.stream().filter(r -> !existingRecipesNames.contains(r))
+                .collect(Collectors.toSet());
+        if (!invalidRecipes.isEmpty()) {
+            throw new BadRequestException(String.format("Following recipes do not exist in workspace: %s", Joiner.on(",").join(invalidRecipes)));
         }
     }
 }

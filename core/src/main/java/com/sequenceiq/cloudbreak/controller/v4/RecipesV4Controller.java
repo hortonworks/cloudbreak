@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4Respo
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeViewV4Responses;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
+import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.authorization.RecipeFiltering;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
@@ -81,6 +82,17 @@ public class RecipesV4Controller extends NotificationController implements Recip
                 allViewByWorkspaceId.stream()
                 .map(r -> recipeViewToRecipeV4ViewResponseConverter.convert(r))
                 .collect(Collectors.toSet())
+        );
+    }
+
+    @Override
+    @InternalOnly
+    public RecipeViewV4Responses listInternal(Long workspaceId, @InitiatorUserCrn String initiatorUserCrn) {
+        Set<RecipeView> allViewByWorkspaceId = recipeService.findAllViewByWorkspaceId(restRequestThreadLocalService.getRequestedWorkspaceId());
+        return new RecipeViewV4Responses(
+                allViewByWorkspaceId.stream()
+                        .map(r -> recipeViewToRecipeV4ViewResponseConverter.convert(r))
+                        .collect(Collectors.toSet())
         );
     }
 

@@ -63,7 +63,7 @@ public class RecipeTemplateServiceTest {
         Map<HostGroup, List<RecipeModel>> recipeModels = new HashMap<>();
         recipeModels.put(hgMaster, List.of(new RecipeModel("r1", RecipeType.PRE_CLOUDERA_MANAGER_START, DUMMY_CONTENT_1)));
         // WHEN
-        boolean result = recipeTemplateService.compareGeneratedRecipes(hgs, recipeModels);
+        boolean result = recipeTemplateService.isGeneratedRecipesInDbStale(hgs, recipeModels);
         // THEN
         assertTrue(result);
     }
@@ -83,7 +83,7 @@ public class RecipeTemplateServiceTest {
         Map<HostGroup, List<RecipeModel>> recipeModels = new HashMap<>();
         recipeModels.put(hgMaster, List.of(new RecipeModel("r1", RecipeType.PRE_CLOUDERA_MANAGER_START, DUMMY_CONTENT_2)));
         // WHEN
-        boolean result = recipeTemplateService.compareGeneratedRecipes(hgs, recipeModels);
+        boolean result = recipeTemplateService.isGeneratedRecipesInDbStale(hgs, recipeModels);
         // THEN
         assertFalse(result);
     }
@@ -102,7 +102,7 @@ public class RecipeTemplateServiceTest {
         hgs.add(hgMaster);
         Map<HostGroup, List<RecipeModel>> recipeModels = new HashMap<>();
         // WHEN
-        boolean result = recipeTemplateService.compareGeneratedRecipes(hgs, recipeModels);
+        boolean result = recipeTemplateService.isGeneratedRecipesInDbStale(hgs, recipeModels);
         // THEN
         assertFalse(result);
     }
@@ -116,7 +116,7 @@ public class RecipeTemplateServiceTest {
         Map<HostGroup, List<RecipeModel>> recipeModels = new HashMap<>();
         recipeModels.put(hgMaster, List.of(new RecipeModel("r1", RecipeType.PRE_CLOUDERA_MANAGER_START, DUMMY_CONTENT_2)));
         // WHEN
-        boolean result = recipeTemplateService.compareGeneratedRecipes(hgs, recipeModels);
+        boolean result = recipeTemplateService.isGeneratedRecipesInDbStale(hgs, recipeModels);
         // THEN
         assertFalse(result);
     }
@@ -130,7 +130,7 @@ public class RecipeTemplateServiceTest {
         Map<HostGroup, List<RecipeModel>> recipeModels = new HashMap<>();
         recipeModels.put(hgMaster, List.of(new RecipeModel("r1", RecipeType.PRE_CLOUDERA_MANAGER_START, DUMMY_CONTENT_1)));
         // WHEN
-        boolean result = recipeTemplateService.compareGeneratedRecipes(hgs, recipeModels);
+        boolean result = recipeTemplateService.isGeneratedRecipesInDbStale(hgs, recipeModels);
         // THEN
         assertFalse(result);
     }
@@ -144,7 +144,7 @@ public class RecipeTemplateServiceTest {
         Map<HostGroup, List<RecipeModel>> recipeModels = new HashMap<>();
         recipeModels.put(hgMaster, List.of(new RecipeModel("r1", RecipeType.PRE_CLOUDERA_MANAGER_START, DUMMY_CONTENT_1)));
         // WHEN
-        boolean result = recipeTemplateService.compareGeneratedRecipes(hgs, recipeModels);
+        boolean result = recipeTemplateService.isGeneratedRecipesInDbStale(hgs, recipeModels);
         // THEN
         assertFalse(result);
     }
@@ -156,7 +156,7 @@ public class RecipeTemplateServiceTest {
         HostGroup hgMaster = hostGroup("master", new HashSet<>(), new HashSet<>());
         hgs.add(hgMaster);
         // WHEN
-        boolean result = recipeTemplateService.compareGeneratedRecipes(hgs, new HashMap<>());
+        boolean result = recipeTemplateService.isGeneratedRecipesInDbStale(hgs, new HashMap<>());
         // THEN
         assertTrue(result);
     }
@@ -165,7 +165,7 @@ public class RecipeTemplateServiceTest {
     public void testCompareGenerateRecipesWithoutHostGroups() {
         // GIVEN
         // WHEN
-        boolean result = recipeTemplateService.compareGeneratedRecipes(new HashSet<>(), new HashMap<>());
+        boolean result = recipeTemplateService.isGeneratedRecipesInDbStale(new HashSet<>(), new HashMap<>());
         // THEN
         assertTrue(result);
     }
@@ -186,7 +186,7 @@ public class RecipeTemplateServiceTest {
                 new RecipeModel("r2", RecipeType.PRE_CLOUDERA_MANAGER_START, DUMMY_CONTENT_2)));
         recipeModels.put(hgWorker, List.of(new RecipeModel("r2", RecipeType.PRE_CLOUDERA_MANAGER_START, DUMMY_CONTENT_2)));
         // WHEN
-        boolean result = recipeTemplateService.compareGeneratedRecipes(hgs, recipeModels);
+        boolean result = recipeTemplateService.isGeneratedRecipesInDbStale(hgs, recipeModels);
         // THEN
         assertTrue(result);
     }

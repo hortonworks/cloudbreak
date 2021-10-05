@@ -9,7 +9,6 @@ import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -21,12 +20,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.model.recipe.RecipeType;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.GeneratedRecipe;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.orchestrator.model.RecipeModel;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
@@ -57,17 +58,18 @@ public class RecipeEngine {
     @Inject
     private RecipeTemplateService recipeTemplateService;
 
-    public void uploadRecipes(Long stackId, String caller) throws CloudbreakException {
-        LOGGER.info("Upload recipes started for {} stack", stackId);
+    public void uploadRecipes(Long stackId) throws CloudbreakException {
         Stack stack = measure(() -> stackService.getByIdWithListsInTransaction(stackId), LOGGER,
-                "stackService.getByIdWithListsInTransaction() took {} ms in {}", caller);
+                "stackService.getByIdWithListsInTransaction() took {} ms");
+        MDCBuilder.buildMdcContext(stack);
+        LOGGER.info("Upload recipes started for stack with name {}", stack.getName());
         stack.setResources(measure(() -> resourceService.getNotInstanceRelatedByStackId(stackId), LOGGER,
-                "resourceService.getNotInstanceRelatedByStackId() took {} ms in {}", caller));
+                "resourceService.getNotInstanceRelatedByStackId() took {} ms"));
         Set<HostGroup> hostGroups = measure(() -> hostGroupService.getByClusterWithRecipes(stack.getCluster().getId()), LOGGER,
-                "hostGroupService.getByClusterWithRecipes() took {} ms in {}", caller);
+                "hostGroupService.getByClusterWithRecipes() took {} ms");
         Map<HostGroup, List<RecipeModel>> recipeModels = recipeTemplateService.createRecipeModels(stack, hostGroups);
         uploadRecipesOnHostGroups(stack, hostGroups, recipeModels);
-        LOGGER.info("Upload recipes finished successfully for {} stack by {}", stackId, caller);
+        LOGGER.info("Upload recipes finished successfully for stack with name {}", stack.getName());
     }
 
     public void uploadUpscaleRecipes(Stack stack, HostGroup hostGroup, Set<HostGroup> hostGroups)
@@ -80,9 +82,10 @@ public class RecipeEngine {
             if (hostGroup.getInstanceGroup().getInstanceGroupType() == InstanceGroupType.GATEWAY) {
                 orchestratorRecipeExecutor.uploadRecipes(stack, recipeModels);
             }
-
             measure(() -> recipeTemplateService.updateAllGeneratedRecipes(Set.of(hostGroup), generatedRecipeTemplates), LOGGER,
                     "Updating all the generated recipes took {} ms");
+        } else {
+            LOGGER.debug("Not found any recipes for host group '{}'. No recipe uploaad will happen during upscale.", hostGroup.getName());
         }
     }
 
@@ -113,32 +116,36 @@ public class RecipeEngine {
     }
 
     public void executePreTerminationRecipes(Stack stack, Set<HostGroup> hostGroups, boolean forced) throws CloudbreakException {
-        Collection<Recipe> recipes = hostGroupService.getRecipesByHostGroups(hostGroups);
-        if (shouldExecuteRecipeOnStack(recipes, PRE_TERMINATION)) {
-            if (recipeTemplateService.hasAnyTemplateInRecipes(hostGroups)) {
-                LOGGER.warn("No any update of pre termination recipes has been implemented with using templates. Skip updating recipes.");
-            } else {
-                uploadRecipesIfNeeded(stack, hostGroups);
-            }
+        if (shouldExecutePreTerminationWithUploadRecipes(stack, hostGroups)) {
             orchestratorRecipeExecutor.preTerminationRecipes(stack, forced);
         }
     }
 
     public void executePreTerminationRecipes(Stack stack, Set<HostGroup> hostGroups, Set<String> hostNames) throws CloudbreakException {
+        if (shouldExecutePreTerminationWithUploadRecipes(stack, hostGroups)) {
+            orchestratorRecipeExecutor.preTerminationRecipes(stack, hostNames);
+        }
+    }
+
+    private boolean shouldExecutePreTerminationWithUploadRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
         Collection<Recipe> recipes = hostGroupService.getRecipesByHostGroups(hostGroups);
-        if (shouldExecuteRecipeOnStack(recipes, PRE_TERMINATION)) {
+        boolean shouldExecutePreTermination = shouldExecuteRecipeOnStack(recipes, PRE_TERMINATION);
+        if (shouldExecutePreTermination) {
+            if (stack.getCluster() == null) {
+                throw new NotFoundException("Cluster does not found, pre-termination will not be run.");
+            }
             if (recipeTemplateService.hasAnyTemplateInRecipes(hostGroups)) {
                 LOGGER.warn("No any update of pre termination recipes has been implemented with using templates. Skip updating recipes.");
             } else {
                 uploadRecipesIfNeeded(stack, hostGroups);
             }
-            orchestratorRecipeExecutor.preTerminationRecipes(stack, hostNames);
         }
+        return shouldExecutePreTermination;
     }
 
     private void uploadRecipesIfNeeded(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
         Map<HostGroup, List<RecipeModel>> recipeModels = recipeTemplateService.createRecipeModels(stack, hostGroups);
-        boolean generatedRecipesMatch = recipeTemplateService.compareGeneratedRecipes(hostGroups, recipeModels);
+        boolean generatedRecipesMatch = recipeTemplateService.isGeneratedRecipesInDbStale(hostGroups, recipeModels);
         if (generatedRecipesMatch) {
             LOGGER.debug("Generated recipes are matched for host group recipes, no need to upload them.");
         } else {
@@ -154,6 +161,8 @@ public class RecipeEngine {
             checkedMeasure(() -> orchestratorRecipeExecutor.uploadRecipes(stack, recipeModels), LOGGER, "Upload recipes took {} ms");
             measure(() -> recipeTemplateService.updateAllGeneratedRecipes(hostGroups, generatedRecipeTemplates), LOGGER,
                     "Updating all the generated recipes took {} ms");
+        } else {
+            LOGGER.debug("Not found any recipes for host groups in stack '{}'", stack.getName());
         }
     }
 
@@ -175,13 +184,8 @@ public class RecipeEngine {
     }
 
     private Map<String, Recipe> getRecipeNameMap(Set<HostGroup> hostGroups) {
-        Set<HostGroup> hostGroupsWithRecipes = hostGroups.stream().filter(hg -> !hg.getRecipes().isEmpty()).collect(Collectors.toSet());
-        Map<String, Recipe> recipesNameMap = new HashMap<>();
-        for (HostGroup hg : hostGroupsWithRecipes) {
-            for (Recipe recipe : hg.getRecipes()) {
-                recipesNameMap.put(recipe.getName(), recipe);
-            }
-        }
-        return recipesNameMap;
+        return hostGroups.stream()
+                .flatMap(hg -> hg.getRecipes().stream())
+                .collect(Collectors.toMap(Recipe::getName, recipe -> recipe));
     }
 }
