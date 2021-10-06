@@ -116,10 +116,11 @@ public class EnvClustersDeleteActions {
             @Override
             protected void doExecute(CommonContext context, EnvClusterDeleteFailedEvent payload, Map<Object, Object> variables) {
                 LOGGER.warn("Failed to delete environment", payload.getException());
+                Exception e = payload.getException();
                 environmentService
                         .findEnvironmentById(payload.getResourceId())
                         .ifPresentOrElse(environment -> {
-                            environment.setStatusReason(payload.getException().getMessage());
+                            environment.setStatusReason(payload.getMessage() == null ? e.getMessage() : payload.getMessage());
                             environment.setStatus(EnvironmentStatus.DELETE_FAILED);
                             Environment result = environmentService.save(environment);
                             EnvironmentDto environmentDto = environmentService.getEnvironmentDto(result);

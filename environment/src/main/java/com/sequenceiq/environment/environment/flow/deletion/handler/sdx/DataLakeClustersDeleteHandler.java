@@ -5,10 +5,13 @@ import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDele
 
 import java.util.concurrent.TimeUnit;
 
+import javax.ws.rs.ClientErrorException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.common.exception.ExceptionResponse;
 import com.sequenceiq.environment.environment.dto.EnvironmentDeletionDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvClusterDeleteFailedEvent;
@@ -54,6 +57,21 @@ public class DataLakeClustersDeleteHandler extends EventSenderAwareHandler<Envir
                             environment,
                             environmentDeletionDto.isForceDelete()));
             eventSender().sendEvent(envDeleteEvent, environmentDtoEvent.getHeaders());
+        } catch (ClientErrorException e) {
+            String message;
+            try {
+                message = e.getResponse().readEntity(ExceptionResponse.class).getMessage();
+            } catch (Exception exception) {
+                message = null;
+            }
+            EnvClusterDeleteFailedEvent failedEvent = EnvClusterDeleteFailedEvent.builder()
+                    .withEnvironmentID(environmentDto.getId())
+                    .withException(e)
+                    .withResourceCrn(environmentDto.getResourceCrn())
+                    .withResourceName(environmentDto.getName())
+                    .withMessage(message)
+                    .build();
+            eventSender().sendEvent(failedEvent, environmentDtoEvent.getHeaders());
         } catch (Exception e) {
             EnvClusterDeleteFailedEvent failedEvent = EnvClusterDeleteFailedEvent.builder()
                     .withEnvironmentID(environmentDto.getId())
