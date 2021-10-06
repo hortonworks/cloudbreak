@@ -15,11 +15,8 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
-import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
-import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
-import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
 
@@ -29,21 +26,9 @@ class ParcelUrlProvider {
     @Inject
     private ParcelService parcelService;
 
-    @Inject
-    private ImageCatalogService imageCatalogService;
-
-    Set<String> getRequiredParcelsFromImage(String imageCatalogUrl, String imageCatalogName, String imageId, Stack stack) {
-        StatedImage targetImage = getTargetImage(imageCatalogUrl, imageCatalogName, imageId);
+    Set<String> getRequiredParcelsFromImage(StatedImage targetImage, Stack stack) {
         String cdhParcelUrl = getCdhParcelUrl(targetImage);
         return StackType.DATALAKE.equals(stack.getType()) ? Collections.singleton(cdhParcelUrl) : getAllParcel(cdhParcelUrl, targetImage, stack);
-    }
-
-    private StatedImage getTargetImage(String imageCatalogUrl, String imageCatalogName, String imageId) {
-        try {
-            return imageCatalogService.getImage(imageCatalogUrl, imageCatalogName, imageId);
-        } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {
-            throw new CloudbreakServiceException(e.getMessage(), e);
-        }
     }
 
     private String getCdhParcelUrl(StatedImage targetImage) {
