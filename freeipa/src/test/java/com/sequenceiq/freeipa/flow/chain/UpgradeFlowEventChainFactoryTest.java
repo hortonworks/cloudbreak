@@ -27,8 +27,6 @@ import com.sequenceiq.freeipa.flow.freeipa.upgrade.UpgradeEvent;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleEvent;
 import com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEvent;
-import com.sequenceiq.freeipa.flow.stack.update.UpdateUserDataEvents;
-import com.sequenceiq.freeipa.flow.stack.update.event.UserDataUpdateRequest;
 
 class UpgradeFlowEventChainFactoryTest {
 
@@ -47,7 +45,7 @@ class UpgradeFlowEventChainFactoryTest {
 
         assertEquals("FreeIPA upgrade flow", eventQueue.getFlowChainName());
         Queue<Selectable> queue = eventQueue.getQueue();
-        assertEquals(11, queue.size());
+        assertEquals(10, queue.size());
 
         SaltUpdateTriggerEvent saltUpdateTriggerEvent = (SaltUpdateTriggerEvent) queue.poll();
         assertEquals(OPERATION_ID, saltUpdateTriggerEvent.getOperationId());
@@ -60,11 +58,6 @@ class UpgradeFlowEventChainFactoryTest {
         assertEquals(STACK_ID, imageChangeEvent.getResourceId());
         assertEquals(IMAGE_CHANGE_EVENT.event(), imageChangeEvent.selector());
         assertEquals(imageSettingsRequest, imageChangeEvent.getRequest());
-
-        UserDataUpdateRequest userDataUpdateRequest = (UserDataUpdateRequest) queue.poll();
-        assertEquals(OPERATION_ID, userDataUpdateRequest.getOperationId());
-        assertEquals(STACK_ID, userDataUpdateRequest.getResourceId());
-        assertEquals(UpdateUserDataEvents.UPDATE_USERDATA_TRIGGER_EVENT.event(), userDataUpdateRequest.selector());
 
         UpscaleEvent upscaleEvent1 = (UpscaleEvent) queue.poll();
         assertEquals(OPERATION_ID, upscaleEvent1.getOperationId());
@@ -155,7 +148,7 @@ class UpgradeFlowEventChainFactoryTest {
 
         assertEquals("FreeIPA upgrade flow", eventQueue.getFlowChainName());
         Queue<Selectable> queue = eventQueue.getQueue();
-        assertEquals(12, queue.size());
+        assertEquals(11, queue.size());
 
         SaltUpdateTriggerEvent saltUpdateTriggerEvent = (SaltUpdateTriggerEvent) queue.poll();
         assertEquals(OPERATION_ID, saltUpdateTriggerEvent.getOperationId());
@@ -174,11 +167,6 @@ class UpgradeFlowEventChainFactoryTest {
         assertEquals(STACK_ID, imageChangeEvent.getResourceId());
         assertEquals(IMAGE_CHANGE_EVENT.event(), imageChangeEvent.selector());
         assertEquals(imageSettingsRequest, imageChangeEvent.getRequest());
-
-        UserDataUpdateRequest userDataUpdateRequest = (UserDataUpdateRequest) queue.poll();
-        assertEquals(OPERATION_ID, userDataUpdateRequest.getOperationId());
-        assertEquals(STACK_ID, userDataUpdateRequest.getResourceId());
-        assertEquals(UpdateUserDataEvents.UPDATE_USERDATA_TRIGGER_EVENT.event(), userDataUpdateRequest.selector());
 
         UpscaleEvent upscaleEvent1 = (UpscaleEvent) queue.poll();
         assertEquals(OPERATION_ID, upscaleEvent1.getOperationId());
