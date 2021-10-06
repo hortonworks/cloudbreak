@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_SELECT_FOR_DOWNSCALE;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -11,14 +12,14 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
-import com.sequenceiq.cloudbreak.common.service.TransactionService;
-import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
+import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -27,6 +28,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.resource.CollectDownscaleCand
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
+import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
@@ -59,7 +61,7 @@ public class CollectDownscaleCandidatesHandler implements EventHandler<CollectDo
     private InstanceMetaDataService instanceMetaDataService;
 
     @Inject
-    private TransactionService transactionService;
+    private ResourceService resourceService;
 
     @Override
     public String selector() {
@@ -71,44 +73,40 @@ public class CollectDownscaleCandidatesHandler implements EventHandler<CollectDo
         CollectDownscaleCandidatesRequest request = event.getData();
         CollectDownscaleCandidatesResult result;
         try {
-            result = transactionService.required(() -> {
-                try {
-                    Stack stack = stackService.getByIdWithListsInTransaction(request.getResourceId());
-                    Set<Long> privateIds = request.getPrivateIds();
-                    if (noSelectedInstancesForDownscale(privateIds)) {
-                        LOGGER.info("No private id(s) has been provided for downscale!");
-                        privateIds = collectCandidates(request, stack);
-                    } else {
-                        List<InstanceMetaData> removableInstances =
-                                stackService.getInstanceMetaDataForPrivateIdsWithoutTerminatedInstances(stack.getInstanceMetaDataAsList(), privateIds);
-                        List<InstanceMetaData> removableAndNotDeletedInstances = removableInstances.stream()
-                                .filter(instanceMetaData -> !instanceMetaData.isTerminated() && !instanceMetaData.isDeletedOnProvider())
-                                .collect(Collectors.toList());
-                        LOGGER.info("The following instance(s) can be removed: [{}]", removableInstances
-                                .stream()
-                                .map(imd -> "InstanceID: " + imd.getInstanceId())
-                                .collect(Collectors.joining(", ")));
-                        if (!request.getDetails().isForced()) {
-                            clusterApiConnectors.getConnector(stack).clusterDecomissionService()
-                                    .verifyNodesAreRemovable(stack, removableAndNotDeletedInstances);
-                        }
-                    }
-                    LOGGER.info("Moving ahead with " + CollectDownscaleCandidatesResult.class.getSimpleName() + " with the following request [{}] " +
-                            "and private IDs: [{}]", request.toString(),
-                            privateIds.stream().map(id -> String.valueOf(id)).collect(Collectors.joining(", ")));
-                    if (isEmpty(privateIds)) {
-                        String msgFmt = "Unable to collect instances [stackId: {}, hostGroup: {}] to downscale since none of them has meet the criteria " +
-                                "for downscaling!";
-                        LOGGER.info(msgFmt, stack.getId(), request.getHostGroupName());
-                    }
-                    return new CollectDownscaleCandidatesResult(request, privateIds);
-                } catch (Exception e) {
-                    LOGGER.warn("Something has happened while CB wanted to collect candidates for downscale!", e);
-                    return new CollectDownscaleCandidatesResult(e.getMessage(), e, request);
+            Stack stack = stackService.getByIdWithListsInTransaction(request.getResourceId());
+            Collection<Resource> resources = resourceService.getAllByStackId(stack.getId());
+            stack.setResources(new HashSet<>(resources));
+            Set<Long> privateIds = request.getPrivateIds();
+            if (CollectionUtils.isEmpty(privateIds)) {
+                LOGGER.info("No private id(s) has been provided for downscale!");
+                privateIds = collectCandidates(request, stack);
+            } else {
+                List<InstanceMetaData> removableInstances =
+                        stackService.getInstanceMetaDataForPrivateIdsWithoutTerminatedInstances(stack.getInstanceMetaDataAsList(), privateIds);
+                List<InstanceMetaData> removableAndNotDeletedInstances = removableInstances.stream()
+                        .filter(instanceMetaData -> !instanceMetaData.isTerminated() && !instanceMetaData.isDeletedOnProvider())
+                        .collect(Collectors.toList());
+                LOGGER.info("The following instance(s) can be removed: [{}]", removableInstances
+                        .stream()
+                        .map(imd -> "InstanceID: " + imd.getInstanceId())
+                        .collect(Collectors.joining(", ")));
+                if (!request.getDetails().isForced()) {
+                    clusterApiConnectors.getConnector(stack).clusterDecomissionService()
+                            .verifyNodesAreRemovable(stack, removableAndNotDeletedInstances);
                 }
-            });
-        } catch (TransactionExecutionException e) {
-            throw e.getCause();
+            }
+            LOGGER.info("Moving ahead with " + CollectDownscaleCandidatesResult.class.getSimpleName() + " with the following request [{}] " +
+                            "and private IDs: [{}]", request,
+                    privateIds.stream().map(id -> String.valueOf(id)).collect(Collectors.joining(", ")));
+            if (isEmpty(privateIds)) {
+                LOGGER.info("No instances met downscale criteria in host group: {}", request.getHostGroupName());
+            } else {
+                LOGGER.info("Selected {} instances based on downscale request {}.", privateIds, request);
+            }
+            result = new CollectDownscaleCandidatesResult(request, privateIds);
+        } catch (Exception e) {
+            LOGGER.warn("Something has happened while CB wanted to collect candidates for downscale!", e);
+            result = new CollectDownscaleCandidatesResult(e.getMessage(), e, request);
         }
         eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
     }
@@ -128,10 +126,6 @@ public class CollectDownscaleCandidatesHandler implements EventHandler<CollectDo
         LOGGER.debug("The following hosts has been collected as candidates for downscale: [{}]", collectedHostsAsString);
         flowMessageService.fireEventAndLog(stack.getId(), AVAILABLE.name(), STACK_SELECT_FOR_DOWNSCALE, collectedHostsAsString);
         return collectedCandidates.stream().map(InstanceMetaData::getPrivateId).collect(Collectors.toSet());
-    }
-
-    private boolean noSelectedInstancesForDownscale(Set<Long> privateIds) {
-        return privateIds == null || privateIds.isEmpty();
     }
 
 }

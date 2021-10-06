@@ -9,9 +9,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.Set;
-import java.util.function.Supplier;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -50,11 +48,6 @@ public class CollectDownscaleCandidatesHandlerTest {
 
     @InjectMocks
     private CollectDownscaleCandidatesHandler testedClass;
-
-    @Before
-    public void setUp() throws Exception {
-        when(transactionService.required(any(Supplier.class))).then(invocationOnMock -> ((Supplier) invocationOnMock.getArgument(0)).get());
-    }
 
     @Test
     public void testFlowWithPrivateIds() {
