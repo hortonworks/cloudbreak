@@ -9,9 +9,12 @@ public class EnvClusterDeleteFailedEvent extends BaseNamedFlowEvent implements S
 
     private final Exception exception;
 
-    public EnvClusterDeleteFailedEvent(Long environmentId, String resourceName, Exception exception, String resourceCrn) {
+    private final String message;
+
+    public EnvClusterDeleteFailedEvent(Long environmentId, String resourceName, Exception exception, String message, String resourceCrn) {
         super(FAILED_ENV_CLUSTERS_DELETE_EVENT.name(), environmentId, null, resourceName, resourceCrn);
         this.exception = exception;
+        this.message = message;
     }
 
     @Override
@@ -21,6 +24,10 @@ public class EnvClusterDeleteFailedEvent extends BaseNamedFlowEvent implements S
 
     public Exception getException() {
         return exception;
+    }
+
+    public String getMessage() {
+        return message;
     }
 
     public static EnvClusterDeleteFailedEventBuilder builder() {
@@ -35,6 +42,8 @@ public class EnvClusterDeleteFailedEvent extends BaseNamedFlowEvent implements S
         private String resourceCrn;
 
         private Exception exception;
+
+        private String message;
 
         private EnvClusterDeleteFailedEventBuilder() {
         }
@@ -59,8 +68,13 @@ public class EnvClusterDeleteFailedEvent extends BaseNamedFlowEvent implements S
             return this;
         }
 
+        public EnvClusterDeleteFailedEventBuilder withMessage(String message) {
+            this.message = message;
+            return this;
+        }
+
         public EnvClusterDeleteFailedEvent build() {
-            return new EnvClusterDeleteFailedEvent(environmentId, resourceName, exception, resourceCrn);
+            return new EnvClusterDeleteFailedEvent(environmentId, resourceName, exception, message, resourceCrn);
         }
     }
 }
