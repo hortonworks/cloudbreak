@@ -40,6 +40,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Assert;
@@ -49,6 +50,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
@@ -89,6 +91,7 @@ import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.common.model.FileSystemType;
@@ -203,6 +206,109 @@ class SdxServiceTest {
 
     @InjectMocks
     private SdxService underTest;
+
+    static Object[][] startParamProvider() {
+        return new Object[][]{
+                {EnvironmentStatus.ENV_STOPPED, "The environment is stopped. Please start the environment first!"},
+                {EnvironmentStatus.STOP_FREEIPA_STARTED, "The environment is stopped. Please start the environment first!"},
+                {EnvironmentStatus.START_FREEIPA_STARTED, "The environment is starting. Please wait until finished!"}
+        };
+    }
+
+    static Object[][] deleteInProgressParamProvider() {
+        return new Object[][]{
+                {EnvironmentStatus.DELETE_INITIATED},
+                {EnvironmentStatus.NETWORK_DELETE_IN_PROGRESS},
+                {EnvironmentStatus.RDBMS_DELETE_IN_PROGRESS},
+                {EnvironmentStatus.FREEIPA_DELETE_IN_PROGRESS},
+                {EnvironmentStatus.CLUSTER_DEFINITION_CLEANUP_PROGRESS},
+                {EnvironmentStatus.UMS_RESOURCE_DELETE_IN_PROGRESS},
+                {EnvironmentStatus.IDBROKER_MAPPINGS_DELETE_IN_PROGRESS},
+                {EnvironmentStatus.S3GUARD_TABLE_DELETE_IN_PROGRESS},
+                {EnvironmentStatus.DATAHUB_CLUSTERS_DELETE_IN_PROGRESS},
+                {EnvironmentStatus.DATALAKE_CLUSTERS_DELETE_IN_PROGRESS},
+                {EnvironmentStatus.PUBLICKEY_DELETE_IN_PROGRESS}
+        };
+    }
+
+    static Object[][] failedParamProvider() {
+        return new Object[][]{
+                {EnvironmentStatus.CREATE_FAILED},
+                {EnvironmentStatus.DELETE_FAILED},
+                {EnvironmentStatus.UPDATE_FAILED},
+                {EnvironmentStatus.FREEIPA_DELETED_ON_PROVIDER_SIDE}
+        };
+    }
+
+    static Object[][] razCloudPlatformDataProvider() {
+        return new Object[][]{
+                // testCaseName cloudPlatform
+                {"CloudPlatform.AWS multiaz=true", CloudPlatform.AWS, true},
+                {"CloudPlatform.AWS multiaz=false", CloudPlatform.AWS, false},
+                {"CloudPlatform.AZURE multiaz=false", CloudPlatform.AZURE, false}
+        };
+    }
+
+    static Object[][] razCloudPlatformAndRuntimeDataProvider() {
+        return new Object[][]{
+                // testCaseName cloudPlatform runtime
+                {"CloudPlatform.AWS", CloudPlatform.AWS, "7.2.2"},
+                {"CloudPlatform.AZURE", CloudPlatform.AZURE, "7.2.1"}
+        };
+    }
+
+    static Object[][] razCloudPlatform710DataProvider() {
+        return new Object[][]{
+                // testCaseName cloudPlatform expectedErrorMsg
+                {"CloudPlatform.AWS", CloudPlatform.AWS,
+                        "Provisioning Ranger Raz on Amazon Web Services is only valid for CM version >= 7.2.2 and not 7.1.0"},
+                {"CloudPlatform.AZURE", CloudPlatform.AZURE,
+                        "Provisioning Ranger Raz on Microsoft Azure is only valid for CM version >= 7.2.1 and not 7.1.0"}
+        };
+    }
+
+    static Object[][] razCloudPlatform720DataProvider() {
+        return new Object[][]{
+                // testCaseName cloudPlatform expectedErrorMsg
+                {"CloudPlatform.AWS", CloudPlatform.AWS,
+                        "Provisioning Ranger Raz on Amazon Web Services is only valid for CM version >= 7.2.2 and not 7.2.0"},
+                {"CloudPlatform.AZURE", CloudPlatform.AZURE,
+                        "Provisioning Ranger Raz on Microsoft Azure is only valid for CM version >= 7.2.1 and not 7.2.0"}
+        };
+    }
+
+    static Object[][] ccmV2Scenarios() {
+        return new Object[][]{
+                // runtime  compatible
+                {null, true},
+                {"7.2.0", false},
+                {"7.2.1", true},
+                {"7.2.5", true},
+                {"7.2.6", true},
+                {"7.2.7", true},
+        };
+    }
+
+    static Object[][] ccmV2JumpgateScenarios() {
+        return new Object[][]{
+                // runtime  compatible
+                {null, true},
+                {"7.2.0", false},
+                {"7.2.1", false},
+                {"7.2.5", false},
+                {"7.2.6", true},
+                {"7.2.7", true},
+        };
+    }
+
+    public static Stream<Arguments> storageBaseLocationsWhiteSpaceValidation() {
+        return Stream.of(
+                Arguments.of(" abfs://myscontainer@mystorage", ValidationResult.State.VALID),
+                Arguments.of("abfs://myscontainer @mystorage ", ValidationResult.State.ERROR),
+                Arguments.of("a bfs://myscontainer@mystorage ", ValidationResult.State.ERROR),
+                Arguments.of("s3a://mybucket/mylocation      ", ValidationResult.State.VALID),
+                Arguments.of("abfs://myscontainer@mystorage ", ValidationResult.State.VALID));
+    }
 
     @BeforeEach
     void initMocks() {
@@ -414,15 +520,13 @@ class SdxServiceTest {
         assertEquals("s3a://some/dir", createdSdxCluster.getCloudStorageBaseLocation());
     }
 
-    static Object[][] startParamProvider() {
-        return new Object[][]{
-                {EnvironmentStatus.ENV_STOPPED, "The environment is stopped. Please start the environment first!"},
-                {EnvironmentStatus.STOP_FREEIPA_STARTED, "The environment is stopped. Please start the environment first!"},
-                {EnvironmentStatus.START_FREEIPA_STARTED, "The environment is starting. Please wait until finished!"}
-        };
+    @ParameterizedTest
+    @MethodSource("storageBaseLocationsWhiteSpaceValidation")
+    void testValidateBaseLocationWhenWhiteSpaceIsPresent(String input, ValidationResult.State expected) {
+        ValidationResult result = underTest.validateBaseLocation(input);
+        assertEquals(expected, result.getState());
     }
 
-    @ParameterizedTest
     @MethodSource("startParamProvider")
     void testCreateButEnvInStoppedStatus(EnvironmentStatus environmentStatus, String exceptionMessage) {
         SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(null, MEDIUM_DUTY_HA);
@@ -440,22 +544,6 @@ class SdxServiceTest {
         assertEquals(exceptionMessage, badRequestException.getMessage());
     }
 
-    static Object[][] deleteInProgressParamProvider() {
-        return new Object[][]{
-                {EnvironmentStatus.DELETE_INITIATED},
-                {EnvironmentStatus.NETWORK_DELETE_IN_PROGRESS},
-                {EnvironmentStatus.RDBMS_DELETE_IN_PROGRESS},
-                {EnvironmentStatus.FREEIPA_DELETE_IN_PROGRESS},
-                {EnvironmentStatus.CLUSTER_DEFINITION_CLEANUP_PROGRESS},
-                {EnvironmentStatus.UMS_RESOURCE_DELETE_IN_PROGRESS},
-                {EnvironmentStatus.IDBROKER_MAPPINGS_DELETE_IN_PROGRESS},
-                {EnvironmentStatus.S3GUARD_TABLE_DELETE_IN_PROGRESS},
-                {EnvironmentStatus.DATAHUB_CLUSTERS_DELETE_IN_PROGRESS},
-                {EnvironmentStatus.DATALAKE_CLUSTERS_DELETE_IN_PROGRESS},
-                {EnvironmentStatus.PUBLICKEY_DELETE_IN_PROGRESS}
-        };
-    }
-
     @ParameterizedTest
     @MethodSource("deleteInProgressParamProvider")
     void testCreateButEnvInDeleteInProgressPhase(EnvironmentStatus environmentStatus) {
@@ -471,15 +559,6 @@ class SdxServiceTest {
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null)),
                 "BadRequestException should thrown");
         assertEquals("The environment is in delete in progress phase. Please create a new environment first!", badRequestException.getMessage());
-    }
-
-    static Object[][] failedParamProvider() {
-        return new Object[][]{
-                {EnvironmentStatus.CREATE_FAILED},
-                {EnvironmentStatus.DELETE_FAILED},
-                {EnvironmentStatus.UPDATE_FAILED},
-                {EnvironmentStatus.FREEIPA_DELETED_ON_PROVIDER_SIDE}
-        };
     }
 
     @ParameterizedTest
@@ -635,15 +714,6 @@ class SdxServiceTest {
         verify(stackV4Endpoint, times(1)).sync(eq(0L), eq(CLUSTER_NAME), anyString());
     }
 
-    static Object[][] razCloudPlatformDataProvider() {
-        return new Object[][]{
-                // testCaseName cloudPlatform
-                {"CloudPlatform.AWS multiaz=true", CloudPlatform.AWS, true},
-                {"CloudPlatform.AWS multiaz=false", CloudPlatform.AWS, false},
-                {"CloudPlatform.AZURE multiaz=false", CloudPlatform.AZURE, false}
-        };
-    }
-
     @ParameterizedTest(name = "{0}")
     @MethodSource("razCloudPlatformDataProvider")
     void testSdxCreateRazNotRequestedAndMultiAzRequested(String testCaseName, CloudPlatform cloudPlatform, boolean multiAz)
@@ -674,14 +744,6 @@ class SdxServiceTest {
         SdxCluster capturedSdx = captor.getValue();
         assertFalse(capturedSdx.isRangerRazEnabled());
         assertEquals(multiAz, capturedSdx.isEnableMultiAz());
-    }
-
-    static Object[][] razCloudPlatformAndRuntimeDataProvider() {
-        return new Object[][]{
-                // testCaseName cloudPlatform runtime
-                {"CloudPlatform.AWS", CloudPlatform.AWS, "7.2.2"},
-                {"CloudPlatform.AZURE", CloudPlatform.AZURE, "7.2.1"}
-        };
     }
 
     @ParameterizedTest(name = "{0}")
@@ -753,16 +815,6 @@ class SdxServiceTest {
                 "2. Provisioning Ranger Raz is only valid for Amazon Web Services and Microsoft Azure.", badRequestException.getMessage());
     }
 
-    static Object[][] razCloudPlatform710DataProvider() {
-        return new Object[][]{
-                // testCaseName cloudPlatform expectedErrorMsg
-                {"CloudPlatform.AWS", CloudPlatform.AWS,
-                        "Provisioning Ranger Raz on Amazon Web Services is only valid for CM version >= 7.2.2 and not 7.1.0"},
-                {"CloudPlatform.AZURE", CloudPlatform.AZURE,
-                        "Provisioning Ranger Raz on Microsoft Azure is only valid for CM version >= 7.2.1 and not 7.1.0"}
-        };
-    }
-
     @ParameterizedTest(name = "{0}")
     @MethodSource("razCloudPlatform710DataProvider")
     void testSdxCreateRazEnabled710Runtime(String testCaseName, CloudPlatform cloudPlatform, String expectedErrorMsg) {
@@ -774,16 +826,6 @@ class SdxServiceTest {
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null)));
         assertEquals(expectedErrorMsg, badRequestException.getMessage());
-    }
-
-    static Object[][] razCloudPlatform720DataProvider() {
-        return new Object[][]{
-                // testCaseName cloudPlatform expectedErrorMsg
-                {"CloudPlatform.AWS", CloudPlatform.AWS,
-                        "Provisioning Ranger Raz on Amazon Web Services is only valid for CM version >= 7.2.2 and not 7.2.0"},
-                {"CloudPlatform.AZURE", CloudPlatform.AZURE,
-                        "Provisioning Ranger Raz on Microsoft Azure is only valid for CM version >= 7.2.1 and not 7.2.0"}
-        };
     }
 
     @ParameterizedTest(name = "{0}")
@@ -1383,7 +1425,7 @@ class SdxServiceTest {
                 underTest.resizeSdx(USER_CRN, sdxCluster.getClusterName(), sdxClusterResizeRequest));
         SdxCluster createdSdxCluster = result.getLeft();
         Assert.assertEquals(sdxCluster.getClusterName(), createdSdxCluster.getClusterName());
-        Assert.assertEquals(runtime,  createdSdxCluster.getRuntime());
+        Assert.assertEquals(runtime, createdSdxCluster.getRuntime());
         Assert.assertEquals("s3a://some/dir/", createdSdxCluster.getCloudStorageBaseLocation());
         Assert.assertEquals("envir", createdSdxCluster.getEnvName());
     }
@@ -1409,18 +1451,6 @@ class SdxServiceTest {
         assertEquals(String.format("Resizing of the data lake is not supported"), badRequestException.getMessage());
     }
 
-    static Object[][] ccmV2Scenarios() {
-        return new Object[][]{
-                // runtime  compatible
-                {null,      true  },
-                {"7.2.0",   false },
-                {"7.2.1",   true  },
-                {"7.2.5",   true  },
-                {"7.2.6",   true  },
-                {"7.2.7",   true  },
-        };
-    }
-
     @ParameterizedTest(name = "Runtime {0} is compatible with CCMv2 = {1}")
     @MethodSource("ccmV2Scenarios")
     void testCcmV2VersionChecker(String runtime, boolean compatible) throws IOException {
@@ -1437,18 +1467,6 @@ class SdxServiceTest {
         } else {
             ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
         }
-    }
-
-    static Object[][] ccmV2JumpgateScenarios() {
-        return new Object[][]{
-                // runtime  compatible
-                {null,      true  },
-                {"7.2.0",   false },
-                {"7.2.1",   false },
-                {"7.2.5",   false },
-                {"7.2.6",   true  },
-                {"7.2.7",   true  },
-        };
     }
 
     @ParameterizedTest(name = "Runtime {0} is compatible with CCMv2JumpGate = {1}")

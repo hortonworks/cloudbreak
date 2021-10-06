@@ -683,10 +683,10 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
         }
     }
 
-    private ValidationResult validateBaseLocation(String baseLocation) {
+    ValidationResult validateBaseLocation(String baseLocation) {
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
         if (baseLocation != null) {
-            Pattern pattern = Pattern.compile(".*\\s.*");
+            Pattern pattern = Pattern.compile("\\s");
             Matcher matcher = pattern.matcher(baseLocation.trim());
             if (matcher.find()) {
                 resultBuilder.error("You have added some whitespace to the base location: " + baseLocation);
