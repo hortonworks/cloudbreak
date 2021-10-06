@@ -25,6 +25,7 @@ import com.sequenceiq.datalake.controller.sdx.DatabaseServerController;
 import com.sequenceiq.datalake.controller.sdx.SdxBackupController;
 import com.sequenceiq.datalake.controller.sdx.SdxController;
 import com.sequenceiq.datalake.controller.sdx.SdxInternalController;
+import com.sequenceiq.datalake.controller.sdx.SdxRecoveryController;
 import com.sequenceiq.datalake.controller.sdx.SdxRestoreController;
 import com.sequenceiq.datalake.controller.sdx.SdxUpgradeController;
 import com.sequenceiq.datalake.controller.util.UtilController;
@@ -58,7 +59,8 @@ public class EndpointConfig extends ResourceConfig {
             DatabaseServerController.class,
             SdxBackupController.class,
             SdxRestoreController.class,
-            CDPStructuredEventV1Controller.class
+            CDPStructuredEventV1Controller.class,
+            SdxRecoveryController.class
     );
 
     @Value("${info.app.version:unspecified}")
