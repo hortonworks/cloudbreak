@@ -29,8 +29,6 @@ import com.sequenceiq.freeipa.flow.freeipa.upgrade.UpgradeEvent;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleEvent;
 import com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEvent;
-import com.sequenceiq.freeipa.flow.stack.update.UpdateUserDataEvents;
-import com.sequenceiq.freeipa.flow.stack.update.event.UserDataUpdateRequest;
 
 @Component
 public class UpgradeFlowEventChainFactory implements FlowEventChainFactory<UpgradeEvent> {
@@ -53,8 +51,6 @@ public class UpgradeFlowEventChainFactory implements FlowEventChainFactory<Upgra
                 .withOperationId(event.getOperationId()));
         createBackupTriggerEvent(event).ifPresent(flowEventChain::add);
         flowEventChain.add(new ImageChangeEvent(IMAGE_CHANGE_EVENT.event(), event.getResourceId(), event.getImageSettingsRequest())
-                .withOperationId(event.getOperationId()));
-        flowEventChain.add(new UserDataUpdateRequest(UpdateUserDataEvents.UPDATE_USERDATA_TRIGGER_EVENT.event(), event.getResourceId())
                 .withOperationId(event.getOperationId()));
 
         int nonPrimaryGwInstanceCount = event.getInstanceIds().size();
