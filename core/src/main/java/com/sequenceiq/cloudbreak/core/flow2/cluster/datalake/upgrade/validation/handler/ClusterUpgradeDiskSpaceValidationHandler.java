@@ -14,7 +14,7 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationFailureEvent;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
+import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.upgrade.validation.DiskSpaceValidationService;
@@ -32,7 +32,7 @@ public class ClusterUpgradeDiskSpaceValidationHandler extends ExceptionCatcherEv
     private DiskSpaceValidationService diskSpaceValidationService;
 
     @Inject
-    private ImageCatalogService imageCatalogService;
+    private ImageService imageService;
 
     @Inject
     private StackService stackService;
@@ -43,9 +43,8 @@ public class ClusterUpgradeDiskSpaceValidationHandler extends ExceptionCatcherEv
         ClusterUpgradeValidationEvent request = event.getData();
         Long stackId = request.getResourceId();
         try {
-            StatedImage image = imageCatalogService.getImage(request.getImageId());
-            diskSpaceValidationService.validateFreeSpaceForUpgrade(getStack(stackId), image.getImageCatalogUrl(), image.getImageCatalogName(),
-                    request.getImageId());
+            StatedImage targetImage = imageService.getCurrentImage(stackId);
+            diskSpaceValidationService.validateFreeSpaceForUpgrade(getStack(stackId), targetImage);
             return new ClusterUpgradeDiskSpaceValidationFinishedEvent(request.getResourceId());
         } catch (UpgradeValidationFailedException e) {
             LOGGER.warn("Cluster upgrade validation failed", e);

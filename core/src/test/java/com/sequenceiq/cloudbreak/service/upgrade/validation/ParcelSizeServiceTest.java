@@ -26,15 +26,11 @@ import com.sequenceiq.cloudbreak.auth.PaywallCredentialPopulator;
 import com.sequenceiq.cloudbreak.client.RestClientFactory;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import com.sequenceiq.cloudbreak.service.image.ImageTestUtil;
+import com.sequenceiq.cloudbreak.service.image.StatedImage;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ParcelSizeServiceTest {
-
-    private static final String IMAGE_CATALOG_URL = "image-catalog-url";
-
-    private static final String IMAGE_CATALOG_NAME = "image-catalog-name";
-
-    private static final String IMAGE_ID = "image-id";
 
     private static final long CM_PACKAGE_SIZE = 3145728L;
 
@@ -59,11 +55,14 @@ public class ParcelSizeServiceTest {
     @Mock
     private Response response;
 
+    private StatedImage targetImage;
+
     @InjectMocks
     private ParcelSizeService underTest;
 
     @Before
     public void before() {
+        targetImage = createTargetImage();
         when(restClientFactory.getOrCreateDefault()).thenReturn(client);
         when(client.target(any(String.class))).thenReturn(webTarget);
         when(webTarget.request()).thenReturn(request);
@@ -74,15 +73,15 @@ public class ParcelSizeServiceTest {
         Stack stack = new Stack();
         Set<String> parcelUrls = createParcelUrls();
 
-        when(parcelUrlProvider.getRequiredParcelsFromImage(IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID, stack)).thenReturn(parcelUrls);
+        when(parcelUrlProvider.getRequiredParcelsFromImage(targetImage, stack)).thenReturn(parcelUrls);
         when(request.head()).thenReturn(response);
         when(response.getHeaderString("Content-Length")).thenReturn("1000000000");
 
-        long actual = underTest.getRequiredFreeSpace(IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID, stack);
+        long actual = underTest.getRequiredFreeSpace(targetImage, stack);
 
         assertEquals(2929687L + CM_PACKAGE_SIZE, actual);
         verify(restClientFactory).getOrCreateDefault();
-        verify(parcelUrlProvider).getRequiredParcelsFromImage(IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID, stack);
+        verify(parcelUrlProvider).getRequiredParcelsFromImage(targetImage, stack);
         verify(paywallCredentialPopulator, times(3)).populateWebTarget(any(), eq(webTarget));
     }
 
@@ -91,12 +90,12 @@ public class ParcelSizeServiceTest {
         Stack stack = new Stack();
         Set<String> parcelUrls = createParcelUrls();
 
-        when(parcelUrlProvider.getRequiredParcelsFromImage(IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID, stack)).thenReturn(parcelUrls);
+        when(parcelUrlProvider.getRequiredParcelsFromImage(targetImage, stack)).thenReturn(parcelUrls);
         when(request.head()).thenThrow(new ProcessingException("Error"));
 
-        underTest.getRequiredFreeSpace(IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID, stack);
+        underTest.getRequiredFreeSpace(targetImage, stack);
         verify(restClientFactory).getOrCreateDefault();
-        verify(parcelUrlProvider).getRequiredParcelsFromImage(IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID, stack);
+        verify(parcelUrlProvider).getRequiredParcelsFromImage(targetImage, stack);
         verify(paywallCredentialPopulator).populateWebTarget(any(), eq(webTarget));
     }
 
@@ -105,18 +104,22 @@ public class ParcelSizeServiceTest {
         Stack stack = new Stack();
         Set<String> parcelUrls = createParcelUrls();
 
-        when(parcelUrlProvider.getRequiredParcelsFromImage(IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID, stack)).thenReturn(parcelUrls);
+        when(parcelUrlProvider.getRequiredParcelsFromImage(targetImage, stack)).thenReturn(parcelUrls);
         when(request.head()).thenReturn(response);
         when(response.getHeaderString("Content-Length")).thenReturn("0");
 
-        underTest.getRequiredFreeSpace(IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID, stack);
+        underTest.getRequiredFreeSpace(targetImage, stack);
         verify(restClientFactory).getOrCreateDefault();
-        verify(parcelUrlProvider).getRequiredParcelsFromImage(IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID, stack);
+        verify(parcelUrlProvider).getRequiredParcelsFromImage(targetImage, stack);
         verify(paywallCredentialPopulator).populateWebTarget(any(), eq(webTarget));
     }
 
     private Set<String> createParcelUrls() {
         return Set.of("http://parcel1", "http://parcel2", "http://parcel3");
+    }
+
+    private StatedImage createTargetImage() {
+        return StatedImage.statedImage(ImageTestUtil.getImage(false, "IMAGE_ID", null), "IMAGE_CATALOG_URL", "IMAGE_CATALOG_NAME");
     }
 
 }

@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.auth.PaywallCredentialPopulator;
 import com.sequenceiq.cloudbreak.client.RestClientFactory;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import com.sequenceiq.cloudbreak.service.image.StatedImage;
 
 @Service
 class ParcelSizeService {
@@ -36,15 +37,15 @@ class ParcelSizeService {
     @Inject
     private ParcelUrlProvider parcelUrlProvider;
 
-    long getRequiredFreeSpace(String imageCatalogUrl, String imageCatalogName, String imageId, Stack stack) throws CloudbreakException {
-        Map<String, Long> parcelsBySize = getParcelsBySize(imageCatalogUrl, imageCatalogName, imageId, stack);
+    long getRequiredFreeSpace(StatedImage targetImage, Stack stack) throws CloudbreakException {
+        Map<String, Long> parcelsBySize = getParcelsBySize(targetImage, stack);
         return getAllParcelSize(parcelsBySize) + CM_PACKAGE_SIZE_IN_KB;
     }
 
-    private Map<String, Long> getParcelsBySize(String imageCatalogUrl, String imageCatalogName, String imageId, Stack stack) throws CloudbreakException {
+    private Map<String, Long> getParcelsBySize(StatedImage targetImage, Stack stack) throws CloudbreakException {
         Map<String, Long> result = new HashMap<>();
         Client client = restClientFactory.getOrCreateDefault();
-        for (String parcelUrl : getParcelUrls(imageCatalogUrl, imageCatalogName, imageId, stack)) {
+        for (String parcelUrl : getParcelUrls(targetImage, stack)) {
             try {
                 WebTarget target = client.target(parcelUrl);
                 paywallCredentialPopulator.populateWebTarget(parcelUrl, target);
@@ -59,8 +60,10 @@ class ParcelSizeService {
         return result;
     }
 
-    private Set<String> getParcelUrls(String imageCatalogUrl, String imageCatalogName, String imageId, Stack stack) {
-        return parcelUrlProvider.getRequiredParcelsFromImage(imageCatalogUrl, imageCatalogName, imageId, stack);
+    private Set<String> getParcelUrls(StatedImage targetImage, Stack stack) {
+        Set<String> requiredParcelsFromImage = parcelUrlProvider.getRequiredParcelsFromImage(targetImage, stack);
+        LOGGER.debug("The required parcel URLs {} from image {}", requiredParcelsFromImage, targetImage.getImage().getUuid());
+        return requiredParcelsFromImage;
     }
 
     private void validateParcelSizes(Map<String, Long> parcelsBySize) throws CloudbreakException {

@@ -28,18 +28,13 @@ import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
+import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DiskSpaceValidationServiceTest {
-
-    private static final String IMAGE_CATALOG_URL = "image-catalog-url";
-
-    private static final String IMAGE_CATALOG_NAME = "image-catalog-name";
-
-    private static final String IMAGE_ID = "image-id";
 
     private static final long STACK_ID = 1L;
 
@@ -57,6 +52,9 @@ public class DiskSpaceValidationServiceTest {
 
     @Mock
     private ParcelSizeService parcelSizeService;
+
+    @Mock
+    private StatedImage targetImage;
 
     @InjectMocks
     private DiskSpaceValidationService underTest;
@@ -84,19 +82,19 @@ public class DiskSpaceValidationServiceTest {
 
     @Test
     public void testValidateFreeSpaceForUpgradeShouldNotThrowExceptionWhenThereAreEnoughFreeSpaceForUpgrade() throws CloudbreakException {
-        when(parcelSizeService.getRequiredFreeSpace(IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID, stack)).thenReturn(9000L);
+        when(parcelSizeService.getRequiredFreeSpace(targetImage, stack)).thenReturn(9000L);
 
-        underTest.validateFreeSpaceForUpgrade(stack, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID);
+        underTest.validateFreeSpaceForUpgrade(stack, targetImage);
 
         verifyMocks();
     }
 
     @Test
     public void testValidateFreeSpaceForUpgradeShouldThrowExceptionWhenThereAreNoEnoughFreeSpaceAndTheRequiredSpaceIsReturnedInMb() throws CloudbreakException {
-        when(parcelSizeService.getRequiredFreeSpace(IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID, stack)).thenReturn(920000L);
+        when(parcelSizeService.getRequiredFreeSpace(targetImage, stack)).thenReturn(920000L);
 
         Exception exception = assertThrows(UpgradeValidationFailedException.class, () -> {
-            underTest.validateFreeSpaceForUpgrade(stack, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID);
+            underTest.validateFreeSpaceForUpgrade(stack, targetImage);
         });
         assertEquals("There is not enough free space on the nodes to perform upgrade operation. The required free space by nodes: host1: 2.2 GB, host2: 3.1 GB",
                 exception.getMessage());
@@ -106,10 +104,10 @@ public class DiskSpaceValidationServiceTest {
 
     @Test
     public void testValidateFreeSpaceForUpgradeShouldThrowExceptionWhenThereAreNoEnoughFreeSpaceAndTheRequiredSpaceIsReturnedInGb() throws CloudbreakException {
-        when(parcelSizeService.getRequiredFreeSpace(IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID, stack)).thenReturn(1750000L);
+        when(parcelSizeService.getRequiredFreeSpace(targetImage, stack)).thenReturn(1750000L);
 
         Exception exception = assertThrows(UpgradeValidationFailedException.class, () -> {
-            underTest.validateFreeSpaceForUpgrade(stack, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID);
+            underTest.validateFreeSpaceForUpgrade(stack, targetImage);
         });
         assertEquals("There is not enough free space on the nodes to perform upgrade operation. The required free space by nodes: host1: 4.2 GB, host2: 5.8 GB",
                 exception.getMessage());
@@ -118,7 +116,7 @@ public class DiskSpaceValidationServiceTest {
     }
 
     private void verifyMocks() throws CloudbreakException {
-        verify(parcelSizeService).getRequiredFreeSpace(IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID, stack);
+        verify(parcelSizeService).getRequiredFreeSpace(targetImage, stack);
         verify(resourceService).getAllByStackId(STACK_ID);
         verify(stackUtil).collectNodesWithDiskData(stack);
         verify(gatewayConfigService).getAllGatewayConfigs(stack);
