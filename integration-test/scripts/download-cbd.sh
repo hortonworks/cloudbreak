@@ -5,7 +5,7 @@
 : ${CB_VERSION?"version of the latest build"}
 
 cd $INTEGCB_LOCATION
-
+CB_TARGET_BRANCH=CB-14337-again
 os=$(uname)
 echo -e "\n\033[1;96m--- build latest cbd: $CB_TARGET_BRANCH for $os\033[0m\n"
 rm_flag=""
