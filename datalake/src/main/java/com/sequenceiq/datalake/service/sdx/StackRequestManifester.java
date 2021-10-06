@@ -63,6 +63,8 @@ import com.sequenceiq.datalake.service.validation.cloudstorage.CloudStorageLocat
 import com.sequenceiq.datalake.service.validation.cloudstorage.CloudStorageValidator;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkYarnParams;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
+import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsDiskEncryptionParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpEnvironmentParameters;
@@ -349,54 +351,78 @@ public class StackRequestManifester {
     @VisibleForTesting
     void setupInstanceVolumeEncryption(StackV4Request stackRequest, DetailedEnvironmentResponse environmentResponse) {
         if (CloudPlatform.AWS.name().equals(environmentResponse.getCloudPlatform())) {
-            stackRequest.getInstanceGroups().forEach(ig -> {
-                AwsInstanceTemplateV4Parameters aws = ig.getTemplate().createAws();
-                AwsEncryptionV4Parameters encryption = aws.getEncryption();
-                if (encryption == null) {
-                    encryption = new AwsEncryptionV4Parameters();
-                    aws.setEncryption(encryption);
-                }
-                if (encryption.getType() == null) {
-                    // FIXME Enable EBS encryption with appropriate KMS key
-                    encryption.setType(EncryptionType.DEFAULT);
-                }
-            });
+            setupInstanceVolumeEncryptionForAws(stackRequest, environmentResponse);
         } else if (CloudPlatform.AZURE.name().equals(environmentResponse.getCloudPlatform())) {
-            Optional<String> diskEncryptionSetId = Optional.of(environmentResponse)
-                    .map(DetailedEnvironmentResponse::getAzure)
-                    .map(AzureEnvironmentParameters::getResourceEncryptionParameters)
-                    .map(AzureResourceEncryptionParameters::getDiskEncryptionSetId);
-            if (diskEncryptionSetId.isPresent()) {
-                stackRequest.getInstanceGroups().forEach(ig -> {
-                    AzureInstanceTemplateV4Parameters azure = ig.getTemplate().createAzure();
-                    AzureEncryptionV4Parameters encryption = azure.getEncryption();
-                    if (encryption == null) {
-                        encryption = new AzureEncryptionV4Parameters();
-                        azure.setEncryption(encryption);
-                    }
-                    azure.getEncryption().setType(EncryptionType.CUSTOM);
-                    azure.getEncryption().setDiskEncryptionSetId(diskEncryptionSetId.get());
-                });
-            }
+            setupInstanceVolumeEncryptionForAzure(stackRequest, environmentResponse);
         } else if (CloudPlatform.GCP.name().equals(environmentResponse.getCloudPlatform())) {
-            String encryptionKey = Optional.of(environmentResponse)
-                    .map(DetailedEnvironmentResponse::getGcp)
-                    .map(GcpEnvironmentParameters::getGcpResourceEncryptionParameters)
-                    .map(GcpResourceEncryptionParameters::getEncryptionKey)
-                    .orElse(null);
-            if (encryptionKey != null) {
-                stackRequest.getInstanceGroups().forEach(ig -> {
-                    GcpInstanceTemplateV4Parameters gcp = ig.getTemplate().createGcp();
-                    GcpEncryptionV4Parameters encryption = gcp.getEncryption();
-                    if (encryption == null) {
-                        encryption = new GcpEncryptionV4Parameters();
-                        gcp.setEncryption(encryption);
-                    }
-                    gcp.getEncryption().setType(EncryptionType.CUSTOM);
-                    gcp.getEncryption().setKey(encryptionKey);
-                    gcp.getEncryption().setKeyEncryptionMethod(KeyEncryptionMethod.KMS);
-                });
+            setupInstanceVolumeEncryptionForGcp(stackRequest, environmentResponse);
+        }
+    }
+
+    @VisibleForTesting
+    void setupInstanceVolumeEncryptionForAws(StackV4Request stackRequest, DetailedEnvironmentResponse environmentResponse) {
+        String encryptionKeyArn = Optional.of(environmentResponse)
+                .map(DetailedEnvironmentResponse::getAws)
+                .map(AwsEnvironmentParameters::getAwsDiskEncryptionParameters)
+                .map(AwsDiskEncryptionParameters::getEncryptionKeyArn)
+                .orElse(null);
+        stackRequest.getInstanceGroups().forEach(ig -> {
+            AwsInstanceTemplateV4Parameters aws = ig.getTemplate().createAws();
+            AwsEncryptionV4Parameters encryption = aws.getEncryption();
+            if (encryption == null) {
+                encryption = new AwsEncryptionV4Parameters();
+                aws.setEncryption(encryption);
             }
+            if (encryption.getType() == null) {
+                aws.getEncryption().setType(EncryptionType.DEFAULT);
+            }
+            if (encryptionKeyArn != null) {
+                aws.getEncryption().setType(EncryptionType.CUSTOM);
+                aws.getEncryption().setKey(encryptionKeyArn);
+            }
+
+        });
+    }
+
+    @VisibleForTesting
+    void setupInstanceVolumeEncryptionForAzure(StackV4Request stackRequest, DetailedEnvironmentResponse environmentResponse) {
+        Optional<String> diskEncryptionSetId = Optional.of(environmentResponse)
+                .map(DetailedEnvironmentResponse::getAzure)
+                .map(AzureEnvironmentParameters::getResourceEncryptionParameters)
+                .map(AzureResourceEncryptionParameters::getDiskEncryptionSetId);
+        if (diskEncryptionSetId.isPresent()) {
+            stackRequest.getInstanceGroups().forEach(ig -> {
+                AzureInstanceTemplateV4Parameters azure = ig.getTemplate().createAzure();
+                AzureEncryptionV4Parameters encryption = azure.getEncryption();
+                if (encryption == null) {
+                    encryption = new AzureEncryptionV4Parameters();
+                    azure.setEncryption(encryption);
+                }
+                azure.getEncryption().setType(EncryptionType.CUSTOM);
+                azure.getEncryption().setDiskEncryptionSetId(diskEncryptionSetId.get());
+            });
+        }
+    }
+
+    @VisibleForTesting
+    void setupInstanceVolumeEncryptionForGcp(StackV4Request stackRequest, DetailedEnvironmentResponse environmentResponse) {
+        String encryptionKey = Optional.of(environmentResponse)
+                .map(DetailedEnvironmentResponse::getGcp)
+                .map(GcpEnvironmentParameters::getGcpResourceEncryptionParameters)
+                .map(GcpResourceEncryptionParameters::getEncryptionKey)
+                .orElse(null);
+        if (encryptionKey != null) {
+            stackRequest.getInstanceGroups().forEach(ig -> {
+                GcpInstanceTemplateV4Parameters gcp = ig.getTemplate().createGcp();
+                GcpEncryptionV4Parameters encryption = gcp.getEncryption();
+                if (encryption == null) {
+                    encryption = new GcpEncryptionV4Parameters();
+                    gcp.setEncryption(encryption);
+                }
+                gcp.getEncryption().setType(EncryptionType.CUSTOM);
+                gcp.getEncryption().setKey(encryptionKey);
+                gcp.getEncryption().setKeyEncryptionMethod(KeyEncryptionMethod.KMS);
+            });
         }
     }
 
@@ -407,3 +433,4 @@ public class StackRequestManifester {
         }
     }
 }
+

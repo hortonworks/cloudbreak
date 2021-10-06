@@ -1,7 +1,6 @@
 package com.sequenceiq.freeipa.converter.instance.template;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.Test;
@@ -63,7 +62,7 @@ class InstanceTemplateRequestToTemplateConverterTest {
         InstanceTemplateRequest source = new InstanceTemplateRequest();
         source.setInstanceType(INSTANCE_TYPE);
 
-        Template result = underTest.convert(source, CLOUD_PLATFORM, ACCOUNT_ID, null, null);
+        Template result = underTest.convert(source, CLOUD_PLATFORM, ACCOUNT_ID, null, null, null);
 
         assertThat(result.getInstanceType()).isEqualTo(source.getInstanceType());
     }
@@ -75,7 +74,7 @@ class InstanceTemplateRequestToTemplateConverterTest {
         InstanceTemplateRequest source = new InstanceTemplateRequest();
         when(defaultInstanceTypeProvider.getForPlatform(CLOUD_PLATFORM.name())).thenReturn(defaultInstanceType);
 
-        Template result = underTest.convert(source, CLOUD_PLATFORM, ACCOUNT_ID, null, null);
+        Template result = underTest.convert(source, CLOUD_PLATFORM, ACCOUNT_ID, null, null, null);
 
         assertThat(result.getInstanceType()).isEqualTo(defaultInstanceType);
     }
@@ -86,7 +85,7 @@ class InstanceTemplateRequestToTemplateConverterTest {
         source.setInstanceType(INSTANCE_TYPE);
         source.setAws(createAwsInstanceTemplateParameters(SPOT_PERCENTAGE, SPOT_MAX_PRICE));
 
-        Template result = underTest.convert(source, CLOUD_PLATFORM, ACCOUNT_ID, null, null);
+        Template result = underTest.convert(source, CLOUD_PLATFORM, ACCOUNT_ID, null, null, null);
 
         Json attributes = result.getAttributes();
         assertThat(attributes).isNotNull();
@@ -99,7 +98,7 @@ class InstanceTemplateRequestToTemplateConverterTest {
         InstanceTemplateRequest source = new InstanceTemplateRequest();
         source.setInstanceType(INSTANCE_TYPE);
 
-        Template result = underTest.convert(source, CloudPlatform.AZURE, ACCOUNT_ID, null, null);
+        Template result = underTest.convert(source, CloudPlatform.AZURE, ACCOUNT_ID, null, null, null);
 
         Json attributes = result.getAttributes();
         assertThat(attributes).isNotNull();
@@ -108,11 +107,11 @@ class InstanceTemplateRequestToTemplateConverterTest {
     }
 
     @Test
-    void shouldSetVolumeEncryptionWhenAws() {
+    void shouldSetAwsDefaultVolumeEncryptionWhenCustomEncryptionKeyArnIsAbsent() {
         InstanceTemplateRequest source = new InstanceTemplateRequest();
         source.setInstanceType(INSTANCE_TYPE);
 
-        Template result = underTest.convert(source, CLOUD_PLATFORM, ACCOUNT_ID, null, null);
+        Template result = underTest.convert(source, CLOUD_PLATFORM, ACCOUNT_ID, null, null, null);
 
         Json attributes = result.getAttributes();
         assertThat(attributes).isNotNull();
@@ -126,7 +125,7 @@ class InstanceTemplateRequestToTemplateConverterTest {
         source.setInstanceType(INSTANCE_TYPE);
         source.setAws(createAwsInstanceTemplateParameters(SPOT_PERCENTAGE, SPOT_MAX_PRICE));
 
-        Template result = underTest.convert(source, CLOUD_PLATFORM, ACCOUNT_ID, null, null);
+        Template result = underTest.convert(source, CLOUD_PLATFORM, ACCOUNT_ID, null, null, null);
 
         Json attributes = result.getAttributes();
         assertThat(attributes).isNotNull();
@@ -141,7 +140,7 @@ class InstanceTemplateRequestToTemplateConverterTest {
         InstanceTemplateRequest source = new InstanceTemplateRequest();
         source.setInstanceType(INSTANCE_TYPE);
 
-        Template result = underTest.convert(source, CloudPlatform.AZURE, ACCOUNT_ID, "dummyDiskEncryptionSet", "");
+        Template result = underTest.convert(source, CloudPlatform.AZURE, ACCOUNT_ID, "dummyDiskEncryptionSet", "", "");
 
         Json attributes = result.getAttributes();
         assertThat(attributes).isNotNull();
@@ -154,7 +153,7 @@ class InstanceTemplateRequestToTemplateConverterTest {
         InstanceTemplateRequest source = new InstanceTemplateRequest();
         source.setInstanceType(INSTANCE_TYPE);
 
-        Template result = underTest.convert(source, CloudPlatform.AZURE, ACCOUNT_ID, null, null);
+        Template result = underTest.convert(source, CloudPlatform.AZURE, ACCOUNT_ID, null, null, null);
 
         Json attributes = result.getAttributes();
         assertThat(attributes).isNotNull();
@@ -167,7 +166,7 @@ class InstanceTemplateRequestToTemplateConverterTest {
         InstanceTemplateRequest source = new InstanceTemplateRequest();
         source.setInstanceType(INSTANCE_TYPE);
 
-        Template result = underTest.convert(source, CloudPlatform.GCP, ACCOUNT_ID, anyString(), "dummyEncryptionKey");
+        Template result = underTest.convert(source, CloudPlatform.GCP, ACCOUNT_ID, null, "dummyEncryptionKey", null);
 
         Json attributes = result.getAttributes();
         assertThat(attributes).isNotNull();
@@ -180,12 +179,25 @@ class InstanceTemplateRequestToTemplateConverterTest {
         InstanceTemplateRequest source = new InstanceTemplateRequest();
         source.setInstanceType(INSTANCE_TYPE);
 
-        Template result = underTest.convert(source, CloudPlatform.GCP, ACCOUNT_ID, null, null);
+        Template result = underTest.convert(source, CloudPlatform.GCP, ACCOUNT_ID, null, null, null);
 
         Json attributes = result.getAttributes();
         assertThat(attributes).isNotNull();
         assertThat(attributes.<Object>getValue(GcpInstanceTemplate.VOLUME_ENCRYPTION_KEY_ID)).isNull();
         assertThat(attributes.<Object>getValue("keyEncryptionMethod")).isNull();
+    }
+
+    @Test
+    void shouldSetEncryptionKeyAndEncryptionMethodPropertyWhenCustomAwsEncryptionKeyPresent() {
+        InstanceTemplateRequest source = new InstanceTemplateRequest();
+        source.setInstanceType(INSTANCE_TYPE);
+
+        Template result = underTest.convert(source, CloudPlatform.AWS, ACCOUNT_ID, null,  null, "dummyAwsEncryptionKeyArn");
+
+        Json attributes = result.getAttributes();
+        assertThat(attributes).isNotNull();
+        assertThat(attributes.<Object>getValue(GcpInstanceTemplate.VOLUME_ENCRYPTION_KEY_ID)).isEqualTo("dummyAwsEncryptionKeyArn");
+        assertThat(attributes.<Object>getValue(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE)).isEqualTo(EncryptionType.CUSTOM.name());
     }
 
     private AwsInstanceTemplateParameters createAwsInstanceTemplateParameters(int spotPercentage, Double spotMaxPrice) {

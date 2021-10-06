@@ -53,7 +53,8 @@ public class DefaultInstanceGroupProvider {
     @Inject
     private ProviderParameterCalculator providerParameterCalculator;
 
-    public Template createDefaultTemplate(CloudPlatform cloudPlatform, String accountId, String diskEncryptionSetId, String gcpKmsEncryptionKey) {
+    public Template createDefaultTemplate(CloudPlatform cloudPlatform, String accountId, String diskEncryptionSetId, String gcpKmsEncryptionKey,
+            String awsKmsEncryptionKey) {
         Template template = new Template();
         template.setName(missingResourceNameGenerator.generateName(APIResourceType.TEMPLATE));
         template.setStatus(ResourceStatus.DEFAULT);
@@ -63,10 +64,16 @@ public class DefaultInstanceGroupProvider {
         template.setInstanceType(defaultInstanceTypeProvider.getForPlatform(cloudPlatform.name()));
         template.setAccountId(accountId);
         if (cloudPlatform == AWS) {
-            // FIXME Enable EBS encryption with appropriate KMS key
-            template.setAttributes(new Json(Map.<String, Object>ofEntries(
-                    entry(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, Boolean.TRUE),
-                    entry(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.DEFAULT.name()))));
+            if (awsKmsEncryptionKey != null) {
+                template.setAttributes(new Json(Map.<String, Object>ofEntries(
+                        entry(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, Boolean.TRUE),
+                        entry(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.CUSTOM.name()),
+                        entry(InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID, awsKmsEncryptionKey))));
+            } else {
+                template.setAttributes(new Json(Map.<String, Object>ofEntries(
+                        entry(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, Boolean.TRUE),
+                        entry(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.DEFAULT.name()))));
+            }
         }
         if (cloudPlatform == AZURE && diskEncryptionSetId != null) {
             template.setAttributes(new Json(Map.<String, Object>ofEntries(
