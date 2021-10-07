@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -654,7 +655,8 @@ class ClouderaManagerModificationServiceTest {
                 .collect(Collectors.toSet());
 
         cluster.setComponents(clusterComponentsNoCDH);
-        NotFoundException exception = assertThrows(NotFoundException.class, () -> underTest.upgradeClusterRuntime(clusterComponentsNoCDH, false));
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> underTest.upgradeClusterRuntime(clusterComponentsNoCDH, false,
+                Optional.empty()));
         Assertions.assertEquals("Runtime component not found!", exception.getMessage());
     }
 
@@ -686,7 +688,7 @@ class ClouderaManagerModificationServiceTest {
         when(clustersResourceApi.restartCommand(eq(stack.getName()), any(ApiRestartClusterArgs.class))).thenReturn(new ApiCommand().id(apiCommandId));
         when(clouderaManagerPollingServiceProvider.startPollingCmServicesRestart(stack, apiClientMock, apiCommandId)).thenReturn(successPollingResult);
 
-        underTest.upgradeClusterRuntime(cluster.getComponents(), true);
+        underTest.upgradeClusterRuntime(cluster.getComponents(), true, Optional.empty());
 
         verify(clouderaManagerPollingServiceProvider, times(1)).startPollingCmStartup(stack, apiClientMock);
         verify(clouderaManagerPollingServiceProvider, times(1)).startPollingCmHostStatus(stack, apiClientMock);
@@ -745,7 +747,7 @@ class ClouderaManagerModificationServiceTest {
 
         when(clouderaManagerApiClientProvider.getV45Client(any(), any(), any(), any())).thenReturn(apiClientMock);
 
-        underTest.upgradeClusterRuntime(cluster.getComponents(), true);
+        underTest.upgradeClusterRuntime(cluster.getComponents(), true, Optional.empty());
 
         verify(clouderaManagerPollingServiceProvider, times(1)).startPollingCmStartup(stack, apiClientMock);
         verify(clouderaManagerPollingServiceProvider, times(1)).startPollingCmHostStatus(stack, apiClientMock);
@@ -811,7 +813,7 @@ class ClouderaManagerModificationServiceTest {
 
         when(clouderaManagerApiClientProvider.getV45Client(any(), any(), any(), any())).thenReturn(apiClientMock);
 
-        underTest.upgradeClusterRuntime(cluster.getComponents(), true);
+        underTest.upgradeClusterRuntime(cluster.getComponents(), true, Optional.empty());
 
         verify(clouderaManagerPollingServiceProvider, times(1)).startPollingCmStartup(stack, apiClientMock);
         verify(clouderaManagerPollingServiceProvider, times(1)).startPollingCmHostStatus(stack, apiClientMock);
@@ -884,7 +886,7 @@ class ClouderaManagerModificationServiceTest {
         when(clouderaManagerPollingServiceProvider.startPollingCmConfigurationRefresh(stack, apiClientMock, apiCommandId))
                 .thenReturn(successPollingResult);
 
-        underTest.upgradeClusterRuntime(cluster.getComponents(), false);
+        underTest.upgradeClusterRuntime(cluster.getComponents(), false, Optional.empty());
 
         verify(clouderaManagerPollingServiceProvider, times(1)).startPollingCmStartup(stack, apiClientMock);
         verify(clouderaManagerPollingServiceProvider, times(1)).startPollingCmHostStatus(stack, apiClientMock);

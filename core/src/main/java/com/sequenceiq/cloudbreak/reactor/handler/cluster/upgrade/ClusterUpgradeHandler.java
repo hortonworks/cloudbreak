@@ -1,9 +1,11 @@
 package com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade;
 
+import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -57,9 +59,10 @@ public class ClusterUpgradeHandler extends ExceptionCatcherEventHandler<ClusterU
         Selectable result;
         try {
             Stack stack = stackService.getByIdWithClusterInTransaction(stackId);
+            Optional<String> remoteDataContext = getRemoteDataContext(stack);
             ClusterApi connector = clusterApiConnectors.getConnector(stack);
             Set<ClusterComponent> components = parcelService.getParcelComponentsByBlueprint(stack);
-            connector.upgradeClusterRuntime(components, request.isPatchUpgrade());
+            connector.upgradeClusterRuntime(components, request.isPatchUpgrade(), remoteDataContext);
 
             result = new ClusterUpgradeSuccess(request.getResourceId());
         } catch (Exception e) {
@@ -67,5 +70,16 @@ public class ClusterUpgradeHandler extends ExceptionCatcherEventHandler<ClusterU
             result = new ClusterUpgradeFailedEvent(request.getResourceId(), e, DetailedStackStatus.CLUSTER_UPGRADE_FAILED);
         }
         return result;
+    }
+
+    private Optional<String> getRemoteDataContext(Stack stack) {
+        Optional<String> remoteDataContext = Optional.empty();
+        if (!stack.isDatalake() && StringUtils.isNotEmpty(stack.getDatalakeCrn())) {
+            Stack datalake = stackService.getByCrn(stack.getDatalakeCrn());
+            LOGGER.info("Fetch the Remote Data Context from {} to update the Data Hub", stack.getName());
+            ClusterApi datalakeConnector = clusterApiConnectors.getConnector(datalake);
+            remoteDataContext = Optional.of(datalakeConnector.getSdxContext());
+        }
+        return remoteDataContext;
     }
 }
