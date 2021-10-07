@@ -57,4 +57,6 @@ public interface ClusterSetupService {
     String getSdxContext();
 
     void setupProxy(ProxyConfig proxyConfig);
+
+    String setupRemoteDataContext(String sdxContext);
 }

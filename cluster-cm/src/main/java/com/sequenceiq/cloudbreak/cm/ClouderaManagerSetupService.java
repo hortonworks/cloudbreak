@@ -177,7 +177,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
         try {
             Set<InstanceMetaData> instances = instanceMetaDataByHostGroup.values().stream().flatMap(Collection::stream).collect(Collectors.toSet());
             waitForHosts(instances);
-            String sdxContextName = Optional.ofNullable(sdxContext).map(this::createDataContext).orElse(null);
+            String sdxContextName = Optional.ofNullable(sdxContext).map(this::setupRemoteDataContext).orElse(null);
             ClouderaManagerRepo clouderaManagerRepoDetails = clusterComponentProvider.getClouderaManagerRepoDetails(clusterId);
             ApiClusterTemplate apiClusterTemplate = getCmTemplate(templatePreparationObject, sdxContextName, instanceMetaDataByHostGroup,
                     clouderaManagerRepoDetails, clusterId);
@@ -205,7 +205,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
             String sdxStackCrn,
             Telemetry telemetry,
             ProxyConfig proxyConfig) {
-        String sdxContextName = Optional.ofNullable(sdxContext).map(this::createDataContext).orElse(null);
+        String sdxContextName = Optional.ofNullable(sdxContext).map(this::setupRemoteDataContext).orElse(null);
         try {
             configureCmMgmtServices(templatePreparationObject, sdxStackCrn, telemetry, sdxContextName, proxyConfig);
         } catch (ApiException e) {
@@ -394,6 +394,26 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
         }
     }
 
+    @Override
+    public String setupRemoteDataContext(String sdxContext) {
+        Cluster cluster = stack.getCluster();
+        String user = cluster.getCloudbreakAmbariUser();
+        String password = cluster.getCloudbreakAmbariPassword();
+        try {
+            ApiClient rootClient = clouderaManagerApiClientProvider.getRootClient(stack.getGatewayPort(), user, password, clientConfig);
+            CdpResourceApi cdpResourceApi = clouderaManagerApiFactory.getCdpResourceApi(rootClient);
+            ApiRemoteDataContext apiRemoteDataContext = JsonUtil.readValue(sdxContext, ApiRemoteDataContext.class);
+            LOGGER.debug("Posting remote context to workload. EndpointId: {}", apiRemoteDataContext.getEndPointId());
+            return cdpResourceApi.postRemoteContext(apiRemoteDataContext).getEndPointId();
+        } catch (ApiException | ClouderaManagerClientInitException e) {
+            LOGGER.info("Error while creating data context using: {}", sdxContext, e);
+            throw new ClouderaManagerOperationFailedException(String.format("Error while creating data context: %s", e.getMessage()), e);
+        } catch (IOException e) {
+            LOGGER.info("Failed to parse SDX context to CM API object.", e);
+            throw new ClouderaManagerOperationFailedException(String.format("Failed to parse SDX context to CM API object: %s", e.getMessage()), e);
+        }
+    }
+
     private ClouderaManagerOperationFailedException mapApiException(ApiException e) {
         LOGGER.info("Error while building the cluster. Message: {}; Response: {}", e.getMessage(), e.getResponseBody(), e);
         String msg = extractMessage(e);
@@ -468,25 +488,6 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
                 .stream()
                 .filter(host -> host.getHostname().equals(templatePreparationObject.getGeneralClusterConfigs().getPrimaryGatewayInstanceDiscoveryFQDN().get()))
                 .findFirst();
-    }
-
-    private String createDataContext(String sdxContext) {
-        Cluster cluster = stack.getCluster();
-        String user = cluster.getCloudbreakAmbariUser();
-        String password = cluster.getCloudbreakAmbariPassword();
-        try {
-            ApiClient rootClient = clouderaManagerApiClientProvider.getRootClient(stack.getGatewayPort(), user, password, clientConfig);
-            CdpResourceApi cdpResourceApi = clouderaManagerApiFactory.getCdpResourceApi(rootClient);
-            ApiRemoteDataContext apiRemoteDataContext = JsonUtil.readValue(sdxContext, ApiRemoteDataContext.class);
-            LOGGER.debug("Posting remote context to workload. EndpointId: {}", apiRemoteDataContext.getEndPointId());
-            return cdpResourceApi.postRemoteContext(apiRemoteDataContext).getEndPointId();
-        } catch (ApiException | ClouderaManagerClientInitException e) {
-            LOGGER.info("Error while creating data context using: {}", sdxContext, e);
-            throw new ClouderaManagerOperationFailedException(String.format("Error while creating data context: %s", e.getMessage()), e);
-        } catch (IOException e) {
-            LOGGER.info("Failed to parse SDX context to CM API object.", e);
-            throw new ClouderaManagerOperationFailedException(String.format("Failed to parse SDX context to CM API object: %s", e.getMessage()), e);
-        }
     }
 
     private boolean calculateAddRepositories(ApiClusterTemplate apiClusterTemplate, boolean prewarmed) {
