@@ -139,8 +139,6 @@ public class GcpBackendServiceResourceBuilderTest {
                 .persistent(true)
                 .build();
 
-
-
         when(group.getName()).thenReturn("master");
 
         Compute.RegionBackendServices.Insert insert = mock(Compute.RegionBackendServices.Insert.class);
@@ -173,6 +171,67 @@ public class GcpBackendServiceResourceBuilderTest {
 
         Assertions.assertEquals(8080, cloudResources.get(0).getParameter("hcport", Integer.class));
         Assertions.assertEquals(80, cloudResources.get(0).getParameter("trafficport", Integer.class));
+    }
+
+    @Test
+    public void testBuildWithMultipleTrafficPorts() throws Exception {
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("hcport", 8443);
+        parameters.put("trafficports", List.of(443, 11443));
+
+        CloudResource hcResource = new CloudResource.Builder()
+                .type(ResourceType.GCP_HEALTH_CHECK)
+                .status(CommonStatus.CREATED)
+                .group("master")
+                .name("hcsuper")
+                .params(parameters)
+                .persistent(true)
+                .build();
+
+        CloudResource resource = new CloudResource.Builder()
+                .type(ResourceType.GCP_BACKEND_SERVICE)
+                .status(CommonStatus.CREATED)
+                .group("master")
+                .name("super")
+                .params(parameters)
+                .persistent(true)
+                .build();
+
+        when(group.getName()).thenReturn("master");
+
+        Compute.RegionBackendServices.Insert insert = mock(Compute.RegionBackendServices.Insert.class);
+
+        Map<TargetGroupPortPair, Set<Group>> targetGroupPortPairSetHashMap = new HashMap<>();
+        targetGroupPortPairSetHashMap.put(new TargetGroupPortPair(443, 8443), Set.of(group));
+        targetGroupPortPairSetHashMap.put(new TargetGroupPortPair(11443, 8443), Set.of(group));
+        when(cloudLoadBalancer.getPortToTargetGroupMapping()).thenReturn(targetGroupPortPairSetHashMap);
+        when(cloudLoadBalancer.getType()).thenReturn(LoadBalancerType.PRIVATE);
+
+        when(gcpContext.getCompute()).thenReturn(compute);
+        when(gcpContext.getProjectId()).thenReturn("id");
+        when(gcpContext.getLoadBalancerResources(any())).thenReturn(List.of(hcResource));
+        when(gcpContext.getLocation()).thenReturn(location);
+        when(location.getAvailabilityZone()).thenReturn(availabilityZone);
+        when(availabilityZone.value()).thenReturn("us-west2");
+        when(location.getRegion()).thenReturn(region);
+        when(region.getRegionName()).thenReturn("us-west2");
+
+        when(compute.regionBackendServices()).thenReturn(regionBackendServices);
+        when(regionBackendServices.insert(anyString(), anyString(), any())).thenReturn(insert);
+        when(insert.execute()).thenReturn(operation);
+        when(operation.getName()).thenReturn("name");
+        when(operation.getHttpErrorStatusCode()).thenReturn(null);
+        when(gcpLoadBalancerTypeConverter.getScheme(any(CloudLoadBalancer.class))).thenCallRealMethod();
+
+        List<CloudResource> cloudResources = underTest.build(gcpContext, authenticatedContext,
+                Collections.singletonList(resource), cloudLoadBalancer, cloudStack);
+
+        Assert.assertEquals("super", cloudResources.get(0).getName());
+
+        Assertions.assertEquals(8443, cloudResources.get(0).getParameter("hcport", Integer.class));
+        List<Integer> ports = (List<Integer>) cloudResources.get(0).getParameters().get("trafficports");
+        Assertions.assertTrue(ports.contains(443));
+        Assertions.assertTrue(ports.contains(11443));
     }
 
     @Test

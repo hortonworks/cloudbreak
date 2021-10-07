@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.gcp.loadbalancer;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -52,17 +53,7 @@ public class GcpBackendServiceResourceBuilder extends AbstractGcpLoadBalancerBui
 
     @Override
     public List<CloudResource> create(GcpContext context, AuthenticatedContext auth, CloudLoadBalancer loadBalancer) {
-        List<CloudResource> resources = new ArrayList<>();
-        for (TargetGroupPortPair targetGroupPortPair : loadBalancer.getPortToTargetGroupMapping().keySet()) {
-            Integer healthCheckPort = targetGroupPortPair.getHealthCheckPort();
-            String resourceName = getResourceNameService().resourceName(resourceType(), context.getName(), loadBalancer.getType(), healthCheckPort);
-            Map<String, Object> parameters = Map.of(TRAFFICPORT, targetGroupPortPair.getTrafficPort(), HCPORT, targetGroupPortPair.getHealthCheckPort());
-            resources.add(new CloudResource.Builder().type(resourceType())
-                    .name(resourceName)
-                    .params(parameters)
-                    .build());
-        }
-        return resources;
+        return getCloudResourcesForFrontendAndBackendCreate(context, loadBalancer);
     }
 
     @Override
@@ -89,17 +80,20 @@ public class GcpBackendServiceResourceBuilder extends AbstractGcpLoadBalancerBui
                         projectId, context.getLocation().getRegion().getRegionName(), name.get())));
 
             List<Backend> backends = new ArrayList<>();
-            TargetGroupPortPair targetGroupPortPair = new TargetGroupPortPair(buildableResource.getParameter(TRAFFICPORT, Integer.class),
-                    buildableResource.getParameter(HCPORT, Integer.class));
-            Set<Group> groups = loadBalancer.getPortToTargetGroupMapping().get(targetGroupPortPair);
-            for (Group group : groups) {
-                Backend backend = new Backend();
-                String groupname = getResourceNameService().resourceName(ResourceType.GCP_INSTANCE_GROUP, context.getName(), group.getName());
-                backend.setGroup(String.format(GCP_INSTANCEGROUP_REFERENCE_FORMAT,
-                        projectId, zone, groupname));
-                backend.setBalancingMode(CONNECTION);
-                backends.add(backend);
+            Map<String, Object> portMap = buildableResource.getParameters();
+            Integer hcPort = buildableResource.getParameter(HCPORT, Integer.class);
+            Set<Group> groups = new HashSet<>();
+            if (portMap.containsKey(TRAFFICPORTS)) {
+                for (Integer trafficPort : (List<Integer>) portMap.get(TRAFFICPORTS)) {
+                    TargetGroupPortPair targetGroupPortPair = new TargetGroupPortPair(trafficPort, hcPort);
+                    groups.addAll(loadBalancer.getPortToTargetGroupMapping().get(targetGroupPortPair));
+                }
+            } else {
+                Integer trafficPort = buildableResource.getParameter(TRAFFICPORT, Integer.class);
+                TargetGroupPortPair targetGroupPortPair = new TargetGroupPortPair(trafficPort, hcPort);
+                groups.addAll(loadBalancer.getPortToTargetGroupMapping().get(targetGroupPortPair));
             }
+            makeBackendForTargetGroup(context, loadBalancer, projectId, zone, groups, backends);
 
             backendService.setBackends(backends);
             backendService.setName(buildableResource.getName());
@@ -130,6 +124,18 @@ public class GcpBackendServiceResourceBuilder extends AbstractGcpLoadBalancerBui
         return Optional.ofNullable(resources).orElseGet(List::of).stream()
                 .filter(resource -> resourceType.equals(resource.getType()))
                 .collect(Collectors.toList());
+    }
+
+    private void makeBackendForTargetGroup(GcpContext context, CloudLoadBalancer loadBalancer, String projectId, String zone,
+            Set<Group> groups, List<Backend> backends) {
+        for (Group group : groups) {
+            Backend backend = new Backend();
+            String groupname = getResourceNameService().resourceName(ResourceType.GCP_INSTANCE_GROUP, context.getName(), group.getName());
+            backend.setGroup(String.format(GCP_INSTANCEGROUP_REFERENCE_FORMAT,
+                    projectId, zone, groupname));
+            backend.setBalancingMode(CONNECTION);
+            backends.add(backend);
+        }
     }
 
     @Override

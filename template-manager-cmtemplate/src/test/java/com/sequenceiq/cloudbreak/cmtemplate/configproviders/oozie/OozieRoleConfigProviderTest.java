@@ -64,7 +64,7 @@ public class OozieRoleConfigProviderTest {
         Map<String, List<ApiClusterTemplateConfig>> roleConfigs = underTest.getRoleConfigs(cmTemplateProcessor, preparationObject);
         List<ApiClusterTemplateConfig> oozieServer = roleConfigs.get("oozie-OOZIE_SERVER-BASE");
 
-        assertEquals(6, oozieServer.size());
+        assertEquals(5, oozieServer.size());
         assertEquals("oozie_database_host", oozieServer.get(0).getName());
         assertEquals("testhost", oozieServer.get(0).getValue());
 
@@ -79,12 +79,6 @@ public class OozieRoleConfigProviderTest {
 
         assertEquals("oozie_database_password", oozieServer.get(4).getName());
         assertEquals("testpassword", oozieServer.get(4).getValue());
-
-        assertEquals("oozie_config_safety_valve", oozieServer.get(5).getName());
-        assertEquals("<property><name>oozie.base.url</name>"
-            + "<value>https://${oozie.http.hostname}:${oozie.https.port}/oozie</value></property>"
-            + "<property><name>oozie.service.CallbackService.base.url</name>"
-            + "<value>https://${oozie.http.hostname}:${oozie.https.port}/oozie/callback</value></property>", oozieServer.get(5).getValue());
     }
 
     @Test
