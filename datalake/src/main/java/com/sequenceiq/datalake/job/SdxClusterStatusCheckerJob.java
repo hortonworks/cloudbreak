@@ -1,5 +1,7 @@
 package com.sequenceiq.datalake.job;
 
+import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.CLUSTER_AMBIGUOUS;
+
 import java.util.Collections;
 import java.util.Optional;
 
@@ -80,6 +82,8 @@ public class SdxClusterStatusCheckerJob extends StatusCheckerJob {
                     handleStoppedSdx(stack, sdx);
                     break;
                 case CLUSTER_AMBIGUOUS:
+                    setAmbigousToUnreachableOrNodeFailure(stack, sdx);
+                    break;
                 case CLUSTER_UNREACHABLE:
                 case NODE_FAILURE:
                     switchBackToAvailableIfClusterIsAvailable(stack, sdx, status.getStatus());
@@ -187,6 +191,20 @@ public class SdxClusterStatusCheckerJob extends StatusCheckerJob {
             sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.NODE_FAILURE, ResourceEvent.CLUSTER_AMBARI_CLUSTER_SYNCHRONIZED,
                     Collections.singleton(sdx.getClusterName()), statusReason, sdx);
             logStateChange(DatalakeStatusEnum.RUNNING, DatalakeStatusEnum.NODE_FAILURE);
+        }
+    }
+
+    private void setAmbigousToUnreachableOrNodeFailure(StackStatusV4Response stack, SdxCluster sdx) {
+        if (isNodeFailure(stack.getStatus(), stack.getClusterStatus())) {
+            String statusReason = stack.getStatus() == Status.NODE_FAILURE ? stack.getStatusReason() : stack.getClusterStatusReason();
+            sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.NODE_FAILURE, ResourceEvent.CLUSTER_AMBARI_CLUSTER_SYNCHRONIZED,
+                    Collections.singleton(sdx.getClusterName()), statusReason, sdx);
+            logStateChange(CLUSTER_AMBIGUOUS, DatalakeStatusEnum.NODE_FAILURE);
+        } else {
+            String statusReason = stack.getStatus() == Status.UNREACHABLE ? stack.getStatusReason() : stack.getClusterStatusReason();
+            sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.CLUSTER_UNREACHABLE, ResourceEvent.CLUSTER_AMBARI_CLUSTER_SYNCHRONIZED,
+                    Collections.singleton(sdx.getClusterName()), statusReason, sdx);
+            logStateChange(CLUSTER_AMBIGUOUS, DatalakeStatusEnum.CLUSTER_UNREACHABLE);
         }
     }
 

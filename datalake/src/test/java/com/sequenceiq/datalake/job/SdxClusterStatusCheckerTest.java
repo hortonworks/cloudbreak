@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -29,18 +30,19 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
 import com.sequenceiq.cloudbreak.client.CloudbreakServiceCrnEndpoints;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
+import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxStatusEntity;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
-import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 
 import io.opentracing.Tracer;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = SdxClusterStatusTest.TestAppContext.class)
-class SdxClusterStatusTest {
+@SpringBootTest(classes = SdxClusterStatusCheckerTest.TestAppContext.class)
+class SdxClusterStatusCheckerTest {
 
     private static final Long SDX_ID = 456L;
 
@@ -102,6 +104,36 @@ class SdxClusterStatusTest {
         underTest.executeTracedJob(jobExecutionContext);
 
         verify(sdxStatusService, never()).setStatusForDatalakeAndNotify(any(), any(), anyString(), eq(sdxCluster));
+    }
+
+    @Test
+    void ambiguousToClusterUnreachable() throws JobExecutionException {
+        setUpSdxStatus(DatalakeStatusEnum.CLUSTER_AMBIGUOUS);
+        stack.setStatus(Status.UNREACHABLE);
+        stack.setStatusReason("connection failure");
+
+        underTest.executeTracedJob(jobExecutionContext);
+
+        verify(sdxStatusService, times(1)).setStatusForDatalakeAndNotify(eq(DatalakeStatusEnum.CLUSTER_UNREACHABLE),
+                eq(ResourceEvent.CLUSTER_AMBARI_CLUSTER_SYNCHRONIZED),
+                any(),
+                eq("connection failure"),
+                eq(sdxCluster));
+    }
+
+    @Test
+    void ambiguousToNodeFailure() throws JobExecutionException {
+        setUpSdxStatus(DatalakeStatusEnum.CLUSTER_AMBIGUOUS);
+        stack.setStatus(Status.NODE_FAILURE);
+        stack.setStatusReason("cm agent down");
+
+        underTest.executeTracedJob(jobExecutionContext);
+
+        verify(sdxStatusService, times(1)).setStatusForDatalakeAndNotify(eq(DatalakeStatusEnum.NODE_FAILURE),
+                eq(ResourceEvent.CLUSTER_AMBARI_CLUSTER_SYNCHRONIZED),
+                any(),
+                eq("cm agent down"),
+                eq(sdxCluster));
     }
 
     private void setUpSdxStatus(DatalakeStatusEnum status) {
