@@ -57,6 +57,7 @@ import com.sequenceiq.freeipa.orchestrator.SaltUpdateService;
 import com.sequenceiq.freeipa.service.binduser.BindUserCreateService;
 import com.sequenceiq.freeipa.service.freeipa.cert.root.FreeIpaRootCertificateService;
 import com.sequenceiq.freeipa.service.freeipa.cleanup.CleanupService;
+import com.sequenceiq.freeipa.service.image.ImageCatalogChangeService;
 import com.sequenceiq.freeipa.service.image.ImageChangeService;
 import com.sequenceiq.freeipa.service.operation.FreeIpaRetryService;
 import com.sequenceiq.freeipa.service.stack.ChildEnvironmentService;
@@ -136,6 +137,9 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
 
     @Inject
     private FreeIpaRetryService retryService;
+
+    @Inject
+    private ImageCatalogChangeService imageCatalogChangeService;
 
     @Override
     @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = EDIT_ENVIRONMENT)
@@ -313,8 +317,7 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
     @Override
     @CheckPermissionByResourceCrn(action = EDIT_ENVIRONMENT)
     public void changeImageCatalog(@ResourceCrn String environmentCrn, ChangeImageCatalogRequest changeImageCatalogRequest) {
-        // FIXME: Implement this!
-        // API first approach so we can work in parallel on the CLI.
-        // It is going to be implemented as a part of CB-14310
+        String accountId = crnService.getCurrentAccountId();
+        imageCatalogChangeService.changeImageCatalog(environmentCrn, accountId, changeImageCatalogRequest.getImageCatalog());
     }
 }
