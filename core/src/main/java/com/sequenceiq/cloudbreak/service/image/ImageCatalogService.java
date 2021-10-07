@@ -750,7 +750,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         Optional<CustomImage> optionalCustomImage = getCustomImage(imageCatalog, imageId);
         if (optionalCustomImage.isPresent()) {
             CustomImage customImage = optionalCustomImage.get();
-            LOGGER.info("Custom image is available with id '{}'. Searching for source image '{}',", imageId);
+            LOGGER.info("Custom image is available with id '{}'. Searching for source image '{}'.", imageId, customImage.getCustomizedImageId());
             StatedImage sourceImage = getSourceImageByImageType(customImage);
             LOGGER.info("Custom image '{}' is a {} image '{}' customization.", imageId, customImage.getImageType(), customImage.getCustomizedImageId());
             return customImageProvider.mergeSourceImageAndCustomImageProperties(
@@ -788,7 +788,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
             image = getImage(imageId, images);
         }
         if (image.isEmpty()) {
-            throw new CloudbreakImageNotFoundException(String.format("Could not find any image with id: '%s' in catalog:. '%s'", imageId, catalogName));
+            throw new CloudbreakImageNotFoundException(String.format("Could not find any image with id: '%s' in catalog: '%s'", imageId, catalogName));
         }
         return statedImage(image.get(), catalogUrl, catalogName);
     }
