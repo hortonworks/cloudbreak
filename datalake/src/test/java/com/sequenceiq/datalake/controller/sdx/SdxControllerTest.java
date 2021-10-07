@@ -27,11 +27,12 @@ import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxStatusEntity;
 import com.sequenceiq.datalake.metric.SdxMetricService;
+import com.sequenceiq.datalake.service.sdx.SdxImageCatalogChangeService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
-import com.sequenceiq.notification.NotificationService;
+import com.sequenceiq.sdx.api.model.SdxChangeImageCatalogRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
@@ -52,10 +53,10 @@ class SdxControllerTest {
     private SdxService sdxService;
 
     @Mock
-    private NotificationService notificationService;
+    private SdxMetricService metricService;
 
     @Mock
-    private SdxMetricService metricService;
+    private SdxImageCatalogChangeService sdxImageCatalogChangeService;
 
     @InjectMocks
     private SdxController sdxController;
@@ -107,6 +108,19 @@ class SdxControllerTest {
         assertEquals("crn:sdxcluster", sdxClusterResponse.getCrn());
         assertEquals(SdxClusterStatusResponse.REQUESTED, sdxClusterResponse.getStatus());
         assertEquals("statusreason", sdxClusterResponse.getStatusReason());
+    }
+
+    @Test
+    void changeImageCatalogTest() {
+        SdxCluster sdxCluster = getValidSdxCluster();
+        when(sdxService.getByNameInAccount(anyString(), anyString())).thenReturn(sdxCluster);
+
+        SdxChangeImageCatalogRequest request = new SdxChangeImageCatalogRequest();
+        request.setImageCatalog("image-catalog");
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> sdxController.changeImageCatalog(sdxCluster.getName(), request));
+
+        verify(sdxImageCatalogChangeService).changeImageCatalog(sdxCluster, request.getImageCatalog());
     }
 
     private SdxCluster getValidSdxCluster() {

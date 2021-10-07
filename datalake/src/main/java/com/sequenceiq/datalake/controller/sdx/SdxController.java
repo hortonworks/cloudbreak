@@ -43,6 +43,7 @@ import com.sequenceiq.datalake.configuration.CDPConfigService;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.metric.MetricType;
 import com.sequenceiq.datalake.metric.SdxMetricService;
+import com.sequenceiq.datalake.service.sdx.SdxImageCatalogChangeService;
 import com.sequenceiq.datalake.service.sdx.SdxRepairService;
 import com.sequenceiq.datalake.service.sdx.SdxRetryService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
@@ -108,6 +109,9 @@ public class SdxController implements SdxEndpoint {
 
     @Inject
     private StorageValidationService storageValidationService;
+
+    @Inject
+    private SdxImageCatalogChangeService sdxImageCatalogChangeService;
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_DATALAKE)
@@ -347,11 +351,10 @@ public class SdxController implements SdxEndpoint {
     }
 
     @Override
-    @CheckPermissionByResourceName(action = AuthorizationResourceAction.POWERUSER_ONLY)
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.START_DATALAKE)
     public void changeImageCatalog(@ResourceName String name, SdxChangeImageCatalogRequest changeImageCatalogRequest) {
-        // FIXME: Implement this!
-        // API first approach so we can work in parallel on the CLI.
-        // It is going to be implemented as a part of CB-14309
+        SdxCluster sdxCluster = getSdxClusterByName(name);
+        sdxImageCatalogChangeService.changeImageCatalog(sdxCluster, changeImageCatalogRequest.getImageCatalog());
     }
 
     @Override

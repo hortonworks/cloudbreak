@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ChangeImageCatalogV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ClusterRepairV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.MaintenanceModeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackImageChangeV4Request;
@@ -439,5 +440,13 @@ public class StackV4Controller extends NotificationController implements StackV4
     @InternalOnly
     public FlowIdentifier updateLoadBalancersInternal(Long workspaceId, String name, @InitiatorUserCrn String initiatorUserCrn) {
         return stackOperations.updateLoadBalancers(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId());
+    }
+
+    @Override
+    @InternalOnly
+    public void changeImageCatalogInternal(Long workspaceId, String name, @InitiatorUserCrn String initiatorUserCrn,
+            ChangeImageCatalogV4Request changeImageCatalogRequest) {
+        stackOperations.changeImageCatalog(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId(),
+                changeImageCatalogRequest.getImageCatalog());
     }
 }
