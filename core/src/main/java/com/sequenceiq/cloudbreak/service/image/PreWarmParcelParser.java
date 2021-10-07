@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -18,6 +20,9 @@ import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 public class PreWarmParcelParser {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PreWarmParcelParser.class);
+
+    @Inject
+    private CsdParcelNameMatcher csdParcelNameMatcher;
 
     public Optional<ClouderaManagerProduct> parseProductFromParcel(List<String> parcel, List<String> csdList) {
         Optional<String> url = parcel.stream().filter(parcelPart -> parcelPart.startsWith("http://") || parcelPart.startsWith("https://"))
@@ -46,7 +51,7 @@ public class PreWarmParcelParser {
 
     private List<String> collectCsdParcels(List<String> csdList, String name) {
         return csdList.stream()
-                .filter(csd -> csd.toLowerCase().contains(name.toLowerCase()))
+                .filter(csd -> csdParcelNameMatcher.matching(csd, name))
                 .collect(Collectors.toList());
     }
 }
