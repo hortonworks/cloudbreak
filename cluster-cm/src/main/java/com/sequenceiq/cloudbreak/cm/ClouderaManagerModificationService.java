@@ -26,6 +26,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
@@ -136,6 +137,9 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     @Inject
     private ClouderaManagerCommonCommandService clouderaManagerCommonCommandService;
 
+    @Inject
+    private ApplicationContext applicationContext;
+
     private final Stack stack;
 
     private final HttpClientConfig clientConfig;
@@ -205,8 +209,17 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         }
     }
 
+    private void refreshRemoteDataContextFromDatalakeInCaseOfDatahub(Optional<String> remoteDataContext) {
+        if (remoteDataContext.isPresent()) {
+            ClouderaManagerSetupService clouderaManagerSetupService = applicationContext.getBean(ClouderaManagerSetupService.class, stack, clientConfig);
+            clouderaManagerSetupService.setupRemoteDataContext(remoteDataContext.get());
+        } else {
+            LOGGER.warn("Remote Data Context update is not needed");
+        }
+    }
+
     @Override
-    public void upgradeClusterRuntime(Set<ClusterComponent> components, boolean patchUpgrade) throws CloudbreakException {
+    public void upgradeClusterRuntime(Set<ClusterComponent> components, boolean patchUpgrade, Optional<String> remoteDataContext) throws CloudbreakException {
         try {
             LOGGER.info("Starting to upgrade cluster runtimes. Patch upgrade: {}", patchUpgrade);
             ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(apiClient);
@@ -216,6 +229,8 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             startClouderaManager();
             startAgents();
             checkParcelApiAvailability();
+
+            refreshRemoteDataContextFromDatalakeInCaseOfDatahub(remoteDataContext);
 
             Set<ClouderaManagerProduct> products = getProducts(components);
             setParcelRepo(products, clouderaManagerResourceApi);
