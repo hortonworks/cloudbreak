@@ -1039,6 +1039,8 @@ message CDPNetworkDetails {
   string publicEndpointAccessGateway = 7;
   // Whether the security groups are created by CDP CP or by the customer
   string securityAccessType = 8;
+  // How CDP using tls
+  string controlPlaneAndCCMAgentConnectionSecurity = 9;
 }
 
 // Generated when Environment creation has been requested or finished

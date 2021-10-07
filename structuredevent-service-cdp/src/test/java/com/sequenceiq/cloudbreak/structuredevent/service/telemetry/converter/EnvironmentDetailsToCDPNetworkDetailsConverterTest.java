@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetType;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.EnvironmentDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.proxy.ProxyDetails;
+import com.sequenceiq.common.api.type.CcmV2TlsType;
 import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.common.api.type.Tunnel;
@@ -70,6 +71,7 @@ class EnvironmentDetailsToCDPNetworkDetailsConverterTest {
         when(environmentDetails.getNetwork()).thenReturn(networkDto);
         when(environmentDetails.getSecurityAccessType()).thenReturn("CIDR_WIDE_OPEN");
         when(environmentDetails.getTunnel()).thenReturn(Tunnel.CCM);
+        when(environmentDetails.getTlsType()).thenReturn(CcmV2TlsType.ONE_WAY_TLS);
 
         UsageProto.CDPNetworkDetails networkDetails = underTest.convert(environmentDetails);
 
@@ -89,6 +91,8 @@ class EnvironmentDetailsToCDPNetworkDetailsConverterTest {
                 networkDetails.getSecurityAccessType());
         Assert.assertEquals("CCM",
                 networkDetails.getConnectivity());
+        Assert.assertEquals("ONE_WAY_TLS",
+                networkDetails.getControlPlaneAndCCMAgentConnectionSecurity());
     }
 
     @Test
