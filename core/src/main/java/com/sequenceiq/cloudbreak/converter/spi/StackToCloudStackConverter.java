@@ -324,7 +324,7 @@ public class StackToCloudStackConverter {
     private List<CloudLoadBalancer> buildLoadBalancers(Stack stack, List<Group> instanceGroups) {
         List<CloudLoadBalancer> cloudLoadBalancers = new ArrayList<>();
         for (LoadBalancer loadBalancer : loadBalancerPersistenceService.findByStackId(stack.getId())) {
-            CloudLoadBalancer cloudLoadBalancer = new CloudLoadBalancer(loadBalancer.getType());
+            CloudLoadBalancer cloudLoadBalancer = new CloudLoadBalancer(loadBalancer.getType(), loadBalancer.getSku());
             for (TargetGroup targetGroup : targetGroupPersistenceService.findByLoadBalancerId(loadBalancer.getId())) {
                 Set<TargetGroupPortPair> portPairs = loadBalancerConfigService.getTargetGroupPortPairs(targetGroup);
                 Set<String> targetInstanceGroupName = instanceGroupService.findByTargetGroupId(targetGroup.getId()).stream()

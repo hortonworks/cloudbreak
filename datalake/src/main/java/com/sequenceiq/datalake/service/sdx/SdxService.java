@@ -46,6 +46,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceTemplateV4Base;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StackResponseEntries;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AzureStackV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateV4SpotParameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
@@ -98,6 +99,7 @@ import com.sequenceiq.flow.core.ResourceIdProvider;
 import com.sequenceiq.flow.service.FlowCancelService;
 import com.sequenceiq.sdx.api.model.SdxAwsBase;
 import com.sequenceiq.sdx.api.model.SdxAwsSpotParameters;
+import com.sequenceiq.sdx.api.model.SdxAzureBase;
 import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResizeRequest;
@@ -607,8 +609,10 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
             case AWS:
                 useAwsSpotPercentageIfPresent(stackRequest, sdxClusterRequest);
                 break;
-            case GCP:
             case AZURE:
+                updateAzureLoadBalancerSkuIfPresent(stackRequest, sdxClusterRequest);
+                break;
+            case GCP:
             case YARN:
             case MOCK:
             default:
@@ -640,6 +644,16 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
                 .forEach(spot -> {
                     spot.setPercentage(sdxSpotParameters.getPercentage());
                     spot.setMaxPrice(sdxSpotParameters.getMaxPrice());
+                });
+    }
+
+    private void updateAzureLoadBalancerSkuIfPresent(StackV4Request stackRequest, SdxClusterRequest sdxClusterRequest) {
+        Optional.ofNullable(sdxClusterRequest.getAzure())
+                .map(SdxAzureBase::getLoadBalancerSku)
+                .ifPresent(sku -> {
+                    AzureStackV4Parameters azureParameters = stackRequest.createAzure();
+                    azureParameters.setLoadBalancerSku(sku);
+                    stackRequest.setAzure(azureParameters);
                 });
     }
 

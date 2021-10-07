@@ -83,6 +83,7 @@ import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
 import com.sequenceiq.cloudbreak.service.stack.TargetGroupPersistenceService;
 import com.sequenceiq.common.api.type.EncryptionType;
+import com.sequenceiq.common.api.type.LoadBalancerSku;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.api.type.TargetGroupType;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
@@ -1075,6 +1076,38 @@ public class StackToCloudStackConverterTest {
                 .filter(lb -> lb.getType() == LoadBalancerType.PUBLIC)
                 .findFirst();
         assertTrue(externalCloudLoadBalancer.isPresent());
+    }
+
+    @Test
+    public void testConvertWithLoadBalancerSkuSet() {
+        Set<InstanceGroup> instanceGroups = new LinkedHashSet<>();
+        InstanceGroup instanceGroup1 = mock(InstanceGroup.class);
+        instanceGroups.add(instanceGroup1);
+        Template template = new Template();
+        template.setVolumeTemplates(Sets.newHashSet());
+        TargetGroup targetGroup = mock(TargetGroup.class);
+        LoadBalancer loadBalancer = mock(LoadBalancer.class);
+        TargetGroupPortPair targetGroupPortPair = new TargetGroupPortPair(443, 8443);
+
+        when(instanceGroup1.getGroupName()).thenReturn("group1");
+        when(stack.getInstanceGroupsAsList()).thenReturn(new ArrayList<>(instanceGroups));
+        when(instanceGroup1.getTemplate()).thenReturn(template);
+        when(instanceGroup1.getNotDeletedInstanceMetaDataSet()).thenReturn(Collections.emptySet());
+        when(instanceGroup1.getStack()).thenReturn(stack);
+        when(targetGroup.getType()).thenReturn(TargetGroupType.KNOX);
+        when(loadBalancer.getType()).thenReturn(LoadBalancerType.PRIVATE);
+        when(loadBalancer.getId()).thenReturn(1L);
+        when(loadBalancer.getSku()).thenReturn(LoadBalancerSku.STANDARD);
+        when(loadBalancerPersistenceService.findByStackId(anyLong())).thenReturn(Set.of(loadBalancer));
+        when(targetGroupPersistenceService.findByLoadBalancerId(anyLong())).thenReturn(Set.of(targetGroup));
+        when(instanceGroupService.findByTargetGroupId(anyLong())).thenReturn(Set.of(instanceGroup1));
+        when(loadBalancerConfigService.getTargetGroupPortPairs(any(TargetGroup.class))).thenReturn(Set.of(targetGroupPortPair));
+
+        CloudStack result = underTest.convert(stack);
+
+        assertEquals(1, result.getLoadBalancers().size());
+        CloudLoadBalancer cloudLoadBalancer = result.getLoadBalancers().iterator().next();
+        assertEquals(LoadBalancerSku.STANDARD, cloudLoadBalancer.getSku());
     }
 
     @Test

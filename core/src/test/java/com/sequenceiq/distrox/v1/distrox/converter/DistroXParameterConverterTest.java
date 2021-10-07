@@ -10,6 +10,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.Aws
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AzureStackV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.GcpStackV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.YarnStackV4Parameters;
+import com.sequenceiq.common.api.type.LoadBalancerSku;
 import com.sequenceiq.distrox.api.v1.distrox.model.AwsDistroXV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.AzureDistroXV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.GcpDistroXV1Parameters;
@@ -30,12 +31,14 @@ class DistroXParameterConverterTest {
         AzureStackV4Parameters input = new AzureStackV4Parameters();
         input.setEncryptStorage(true);
         input.setResourceGroupName("resourceGroupName");
+        input.setLoadBalancerSku(LoadBalancerSku.STANDARD);
 
         AzureDistroXV1Parameters result = underTest.convert(input);
 
         assertNotNull(result);
         assertEquals(input.isEncryptStorage(), result.isEncryptStorage());
         assertEquals(input.getResourceGroupName(), result.getResourceGroupName());
+        assertEquals(input.getLoadBalancerSku(), result.getLoadBalancerSku());
     }
 
     @Test
@@ -43,12 +46,14 @@ class DistroXParameterConverterTest {
         AzureDistroXV1Parameters input = new AzureDistroXV1Parameters();
         input.setEncryptStorage(true);
         input.setResourceGroupName("resourceGroupName");
+        input.setLoadBalancerSku(LoadBalancerSku.STANDARD);
 
         AzureStackV4Parameters result = underTest.convert(input);
 
         assertNotNull(result);
         assertEquals(input.isEncryptStorage(), result.isEncryptStorage());
         assertEquals(input.getResourceGroupName(), result.getResourceGroupName());
+        assertEquals(input.getLoadBalancerSku(), result.getLoadBalancerSku());
     }
 
     @Test

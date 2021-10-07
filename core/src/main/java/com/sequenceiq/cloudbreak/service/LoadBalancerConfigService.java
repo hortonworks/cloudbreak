@@ -25,8 +25,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Preconditions;
+import com.sequenceiq.common.api.type.LoadBalancerSku;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.NetworkV4Base;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AzureStackV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
@@ -200,11 +203,13 @@ public class LoadBalancerConfigService {
         return !setupLoadBalancers(stack, environment, true, false).isEmpty();
     }
 
-    public Set<LoadBalancer> createLoadBalancers(Stack stack, DetailedEnvironmentResponse environment, boolean loadBalancerFlagEnabled) {
+    public Set<LoadBalancer> createLoadBalancers(Stack stack, DetailedEnvironmentResponse environment, StackV4Request source) {
+        boolean loadBalancerFlagEnabled = source != null && source.isEnableLoadBalancer();
         Set<LoadBalancer> loadBalancers = setupLoadBalancers(stack, environment, false, loadBalancerFlagEnabled);
 
         if (stack.getCloudPlatform().equalsIgnoreCase(CloudPlatform.AZURE.toString())) {
             configureLoadBalancerAvailabilitySets(stack.getName(), loadBalancers);
+            configureLoadBalancerSku(source, loadBalancers);
         }
         return loadBalancers;
     }
@@ -246,6 +251,21 @@ public class LoadBalancerConfigService {
             .filter(targetGroup -> type.equals(targetGroup.getType()))
             .flatMap(targetGroup -> targetGroup.getInstanceGroups().stream())
             .collect(Collectors.toSet());
+    }
+
+    /**
+     * Sets the SKU of each load balancer to either the SKU provided in the Azure stack request, or
+     * to the default SKU value.
+     * @param source The original StackV4Request for this stack.
+     * @param loadBalancers The list of load balancers to update.
+     */
+    public void configureLoadBalancerSku(StackV4Request source, Set<LoadBalancer> loadBalancers) {
+        LoadBalancerSku sku = Optional.ofNullable(source)
+                .map(StackV4Request::getAzure)
+                .map(AzureStackV4Parameters::getLoadBalancerSku)
+                .map(LoadBalancerSku::getValueOrDefault)
+                .orElse(LoadBalancerSku.getDefault());
+        loadBalancers.forEach(lb -> lb.setSku(sku));
     }
 
     public Set<LoadBalancer> setupLoadBalancers(Stack stack, DetailedEnvironmentResponse environment, boolean dryRun, boolean loadBalancerFlagEnabled) {

@@ -19,9 +19,11 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
+import com.sequenceiq.cloudbreak.converter.LoadBalancerSkuConverter;
 import com.sequenceiq.cloudbreak.domain.converter.LoadBalancerTypeConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.common.api.type.LoadBalancerSku;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 
 @Entity
@@ -53,6 +55,9 @@ public class LoadBalancer implements ProvisionEntity  {
     @Convert(converter = JsonToString.class)
     @Column(columnDefinition = "TEXT")
     private Json providerConfig;
+
+    @Convert(converter = LoadBalancerSkuConverter.class)
+    private LoadBalancerSku sku = LoadBalancerSku.getDefault();
 
     public Long getId() {
         return id;
@@ -145,6 +150,14 @@ public class LoadBalancer implements ProvisionEntity  {
         }
     }
 
+    public LoadBalancerSku getSku() {
+        return sku;
+    }
+
+    public void setSku(LoadBalancerSku sku) {
+        this.sku = sku;
+    }
+
     @Override
     public String toString() {
         return "LoadBalancer{" +
@@ -154,6 +167,8 @@ public class LoadBalancer implements ProvisionEntity  {
             ", type='" + type + '\'' +
             ", endpoint='" + endpoint + '\'' +
             ", fqdn='" + fqdn + '\'' +
+            ", sku='" + sku + '\'' +
+            ", providerConfig='" + providerConfig + '\'' +
             '}';
     }
 }

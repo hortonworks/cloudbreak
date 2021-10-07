@@ -27,6 +27,7 @@ public class DistroXParameterConverter {
         AzureDistroXV1Parameters response = new AzureDistroXV1Parameters();
         response.setEncryptStorage(source.isEncryptStorage());
         response.setResourceGroupName(source.getResourceGroupName());
+        response.setLoadBalancerSku(source.getLoadBalancerSku());
         return response;
     }
 
@@ -34,6 +35,7 @@ public class DistroXParameterConverter {
         AzureStackV4Parameters response = new AzureStackV4Parameters();
         response.setEncryptStorage(source.isEncryptStorage());
         response.setResourceGroupName(source.getResourceGroupName());
+        response.setLoadBalancerSku(source.getLoadBalancerSku());
         return response;
     }
 

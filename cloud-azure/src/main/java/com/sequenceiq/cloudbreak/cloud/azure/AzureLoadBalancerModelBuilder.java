@@ -8,6 +8,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
+import com.sequenceiq.common.api.type.LoadBalancerSku;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,7 +63,7 @@ public class AzureLoadBalancerModelBuilder {
     private AzureLoadBalancer convertCloudLoadBalancerToAzureLoadBalancer(CloudLoadBalancer cloudLoadBalancer, String stackName) {
         Set<String> instanceGroupNames = collectInstanceGroupNames(cloudLoadBalancer);
         List<AzureLoadBalancingRule> rules = collectLoadBalancingRules(cloudLoadBalancer);
-        return buildAzureLb(cloudLoadBalancer.getType(), instanceGroupNames, rules, stackName);
+        return buildAzureLb(cloudLoadBalancer.getType(), cloudLoadBalancer.getSku(), instanceGroupNames, rules, stackName);
     }
 
     private Set<String> collectInstanceGroupNames(CloudLoadBalancer cloudLoadBalancer) {
@@ -83,9 +84,11 @@ public class AzureLoadBalancerModelBuilder {
             .collect(toList());
     }
 
-    private AzureLoadBalancer buildAzureLb(LoadBalancerType type, Set<String> instanceGroupNames, List<AzureLoadBalancingRule> rules, String stackName) {
+    private AzureLoadBalancer buildAzureLb(LoadBalancerType type, LoadBalancerSku sku, Set<String> instanceGroupNames,
+            List<AzureLoadBalancingRule> rules, String stackName) {
         return new AzureLoadBalancer.Builder()
                 .setType(type)
+                .setLoadBalancerSku(sku)
                 .setInstanceGroupNames(instanceGroupNames)
                 .setRules(rules)
                 .setStackName(stackName)
