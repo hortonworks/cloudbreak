@@ -6,7 +6,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.sequenceiq.common.api.type.LoadBalancerSku;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -21,6 +23,9 @@ public class AzureStackV4Parameters extends StackV4ParameterBase {
 
     @ApiModelProperty
     private boolean encryptStorage;
+
+    @ApiModelProperty(StackModelDescription.LOAD_BALANCER_SKU)
+    private LoadBalancerSku loadBalancerSku = LoadBalancerSku.getDefault();
 
     public String getResourceGroupName() {
         return resourceGroupName;
@@ -38,11 +43,20 @@ public class AzureStackV4Parameters extends StackV4ParameterBase {
         this.encryptStorage = encryptStorage;
     }
 
+    public LoadBalancerSku getLoadBalancerSku() {
+        return loadBalancerSku;
+    }
+
+    public void setLoadBalancerSku(LoadBalancerSku loadBalancerSku) {
+        this.loadBalancerSku = loadBalancerSku;
+    }
+
     @Override
     public Map<String, Object> asMap() {
         Map<String, Object> map = super.asMap();
         putIfValueNotNull(map, "resourceGroupName", resourceGroupName);
         putIfValueNotNull(map, "encryptStorage", encryptStorage);
+        putIfValueNotNull(map, "loadBalancerSku", loadBalancerSku.name());
         return map;
     }
 
@@ -58,5 +72,6 @@ public class AzureStackV4Parameters extends StackV4ParameterBase {
         super.parse(parameters);
         resourceGroupName = getParameterOrNull(parameters, "resourceGroupName");
         encryptStorage = getBoolean(parameters, "encryptStorage");
+        loadBalancerSku = LoadBalancerSku.getValueOrDefault(getParameterOrNull(parameters, "loadBalancerSku"));
     }
 }

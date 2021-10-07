@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure.loadbalancer;
 
+import com.sequenceiq.common.api.type.LoadBalancerSku;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 
 import java.util.Collection;
@@ -21,12 +22,15 @@ public class AzureLoadBalancer {
 
     private final Set<String> instanceGroupNames;
 
+    private final LoadBalancerSku sku;
+
     private AzureLoadBalancer(Builder builder) {
         this.rules = List.copyOf(builder.rules);
         this.probes = Set.copyOf(builder.probes);
         this.name = getLoadBalancerName(builder.type, builder.stackName);
         this.type = builder.type;
         this.instanceGroupNames = Set.copyOf(builder.instanceGroupNames);
+        this.sku = LoadBalancerSku.getValueOrDefault(builder.sku);
     }
 
     public static String getLoadBalancerName(LoadBalancerType type, String stackName) {
@@ -53,6 +57,10 @@ public class AzureLoadBalancer {
         return instanceGroupNames;
     }
 
+    public LoadBalancerSku getSku() {
+        return sku;
+    }
+
     @Override
     public String toString() {
         return "AzureLoadBalancer{" +
@@ -61,6 +69,7 @@ public class AzureLoadBalancer {
                 ", name='" + name + '\'' +
                 ", type=" + type +
                 ", instanceGroupNames=" + instanceGroupNames +
+                ", sku=" + sku +
                 '}';
     }
 
@@ -74,6 +83,8 @@ public class AzureLoadBalancer {
         private LoadBalancerType type;
 
         private Set<String> instanceGroupNames;
+
+        private LoadBalancerSku sku;
 
         public Builder setRules(List<AzureLoadBalancingRule> rules) {
             this.rules = rules;
@@ -92,6 +103,11 @@ public class AzureLoadBalancer {
 
         public Builder setInstanceGroupNames(Set<String> instanceGroupNames) {
             this.instanceGroupNames = instanceGroupNames;
+            return this;
+        }
+
+        public Builder setLoadBalancerSku(LoadBalancerSku sku) {
+            this.sku = sku;
             return this;
         }
 

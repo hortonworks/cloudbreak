@@ -208,7 +208,7 @@ public class StackV4RequestToStackConverter {
         determineServiceTypeTag(stack, source.getTags());
         determineServiceFeatureTag(stack, source.getTags());
 
-        Set<LoadBalancer> loadBalancers = loadBalancerConfigService.createLoadBalancers(stack, environment, source.isEnableLoadBalancer());
+        Set<LoadBalancer> loadBalancers = loadBalancerConfigService.createLoadBalancers(stack, environment, source);
         stack.setLoadBalancers(loadBalancers);
         return stack;
     }

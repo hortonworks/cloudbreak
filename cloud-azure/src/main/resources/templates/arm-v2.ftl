@@ -212,8 +212,14 @@
                         </#list>
                      </#if>
                      },
+                   <#if loadBalancers?? && (loadBalancers?filter(loadBalancer -> loadBalancer.sku == "STANDARD")?size > 0)>
+                     "sku": {
+                         "name": "Standard",
+                         "tier": "Regional"
+                     },
+                   </#if>
                    "properties": {
-                       <#if instanceGroup == "GATEWAY">
+                       <#if instanceGroup == "GATEWAY" || (instance.availabilitySetName?? && instance.availabilitySetName?has_content)>
                        "publicIPAllocationMethod": "Static"
                        <#else>
                        "publicIPAllocationMethod": "Dynamic"
@@ -524,7 +530,7 @@
                     ]
                   },
                   "sku": {
-                      "name": "Basic"
+                      "name": "${loadBalancer.sku.templateName}"
                   }
                 }
                 <#if loadBalancer.type == "PUBLIC">
@@ -534,7 +540,7 @@
                     "name": "${loadBalancer.name}-publicIp",
                     "location": "[parameters('region')]",
                     "sku": {
-                        "name": "Basic"
+                        "name": "${loadBalancer.sku.templateName}"
                     },
                     "properties": {
                         "publicIPAddressVersion": "IPv4",

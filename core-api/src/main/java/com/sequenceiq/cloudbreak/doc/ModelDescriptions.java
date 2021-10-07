@@ -273,6 +273,7 @@ public class ModelDescriptions {
         public static final String LOAD_BALANCER_TARGETS = "The list of target instances the load balancer routes traffic to.";
         public static final String LOAD_BALANCER_TYPE = "Whether the load balancer is internet-facing (public), or only accessible over private endpoints.";
         public static final String LOAD_BALANCER_AWS = "The AWS resource id for the load balancer.";
+        public static final String LOAD_BALANCER_SKU = "The SKU to be used for the Azure load balancer.";
         public static final String TARGET_GROUP_PORT = "The port where the load balancer receives traffic and forward it to the associated targets.";
         public static final String TARGET_GROUP_INSTANCES = "Ids for the target instances receiving traffic from the load balancer on the defined port.";
         public static final String TARGET_GROUP_AWS = "The AWS listener and target group resource ids.";

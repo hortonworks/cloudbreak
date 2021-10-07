@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import com.sequenceiq.common.api.type.LoadBalancerSku;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 
 public class CloudLoadBalancer {
@@ -12,8 +13,15 @@ public class CloudLoadBalancer {
 
     private final Map<TargetGroupPortPair, Set<Group>> portToTargetGroupMapping;
 
+    private final LoadBalancerSku sku;
+
     public CloudLoadBalancer(LoadBalancerType type) {
+        this(type, LoadBalancerSku.getDefault());
+    }
+
+    public CloudLoadBalancer(LoadBalancerType type, LoadBalancerSku sku) {
         this.type = type;
+        this.sku = sku;
         portToTargetGroupMapping = new HashMap<>();
     }
 
@@ -33,10 +41,15 @@ public class CloudLoadBalancer {
         return type;
     }
 
+    public LoadBalancerSku getSku() {
+        return sku;
+    }
+
     @Override
     public String toString() {
         return "CloudLoadBalancer{" +
             "type=" + type +
+            "sku=" + sku +
             ", portToTargetGroupMapping=" + portToTargetGroupMapping +
             '}';
     }

@@ -23,6 +23,8 @@ public class SdxClusterRequestBase implements TaggableRequest {
     @Valid
     private SdxAwsRequest aws;
 
+    private SdxAzureRequest azure;
+
     private Map<String, String> tags;
 
     private boolean enableRangerRaz;
@@ -107,6 +109,14 @@ public class SdxClusterRequestBase implements TaggableRequest {
 
     public void setEnableMultiAz(boolean enableMultiAz) {
         this.enableMultiAz = enableMultiAz;
+    }
+
+    public SdxAzureRequest getAzure() {
+        return azure;
+    }
+
+    public void setAzure(SdxAzureRequest azure) {
+        this.azure = azure;
     }
 
     public void copyTo(SdxClusterRequestBase toInstance) {

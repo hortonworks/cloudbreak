@@ -352,7 +352,7 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
         given(providerParameterCalculator.get(request)).willReturn(getMappable());
         given(clusterV4RequestToClusterConverter.convert(any(ClusterV4Request.class))).willReturn(new Cluster());
         given(telemetryConverter.convert(null, StackType.DATALAKE)).willReturn(new Telemetry());
-        given(loadBalancerConfigService.createLoadBalancers(any(), any(), eq(false))).willReturn(Set.of(loadBalancer));
+        given(loadBalancerConfigService.createLoadBalancers(any(), any(), eq(request))).willReturn(Set.of(loadBalancer));
         // WHEN
         Stack stack = underTest.convert(request);
         // THEN

@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.GroupNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.common.api.type.LoadBalancerSku;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 
@@ -79,7 +80,83 @@ class AzureLoadBalancerModelBuilderTest {
         assertEquals(LOAD_BALANCER_STACK_NAME, mappingList.get(0).getName());
     }
 
+    @Test
+    void testGetModelWithDefaultSku() {
+        CloudStack mockCloudStack = mock(CloudStack.class);
+        CloudLoadBalancer cloudLoadBalancer = createCloudLoadBalancer();
+        when(mockCloudStack.getLoadBalancers()).thenReturn(List.of(cloudLoadBalancer));
+
+        underTest = new AzureLoadBalancerModelBuilder(mockCloudStack, STACK_NAME);
+
+        Map<String, Object> result = underTest.buildModel();
+
+        assertTrue(result.containsKey(LOAD_BALANCERS_KEY));
+        assertTrue(result.get(LOAD_BALANCERS_KEY) instanceof List);
+        List<AzureLoadBalancer> loadBalancers = (List<AzureLoadBalancer>) result.get(LOAD_BALANCERS_KEY);
+        assertEquals(1, loadBalancers.size());
+        AzureLoadBalancer lb = loadBalancers.get(0);
+        assertEquals(LoadBalancerSku.getDefault(), lb.getSku());
+    }
+
+    @Test
+    void testGetModelWithBasicSku() {
+        CloudStack mockCloudStack = mock(CloudStack.class);
+        CloudLoadBalancer cloudLoadBalancer = createCloudLoadBalancer(LoadBalancerSku.BASIC);
+        when(mockCloudStack.getLoadBalancers()).thenReturn(List.of(cloudLoadBalancer));
+
+        underTest = new AzureLoadBalancerModelBuilder(mockCloudStack, STACK_NAME);
+
+        Map<String, Object> result = underTest.buildModel();
+
+        assertTrue(result.containsKey(LOAD_BALANCERS_KEY));
+        assertTrue(result.get(LOAD_BALANCERS_KEY) instanceof List);
+        List<AzureLoadBalancer> loadBalancers = (List<AzureLoadBalancer>) result.get(LOAD_BALANCERS_KEY);
+        assertEquals(1, loadBalancers.size());
+        AzureLoadBalancer lb = loadBalancers.get(0);
+        assertEquals(LoadBalancerSku.BASIC, lb.getSku());
+    }
+
+    @Test
+    void testGetModelWithStandardSku() {
+        CloudStack mockCloudStack = mock(CloudStack.class);
+        CloudLoadBalancer cloudLoadBalancer = createCloudLoadBalancer(LoadBalancerSku.STANDARD);
+        when(mockCloudStack.getLoadBalancers()).thenReturn(List.of(cloudLoadBalancer));
+
+        underTest = new AzureLoadBalancerModelBuilder(mockCloudStack, STACK_NAME);
+
+        Map<String, Object> result = underTest.buildModel();
+
+        assertTrue(result.containsKey(LOAD_BALANCERS_KEY));
+        assertTrue(result.get(LOAD_BALANCERS_KEY) instanceof List);
+        List<AzureLoadBalancer> loadBalancers = (List<AzureLoadBalancer>) result.get(LOAD_BALANCERS_KEY);
+        assertEquals(1, loadBalancers.size());
+        AzureLoadBalancer lb = loadBalancers.get(0);
+        assertEquals(LoadBalancerSku.STANDARD, lb.getSku());
+    }
+
     private GroupNetwork createGroupNetwork() {
         return new GroupNetwork(OutboundInternetTraffic.DISABLED, new HashSet<>(), new HashMap<>());
+    }
+
+    private CloudLoadBalancer createCloudLoadBalancer() {
+        return createCloudLoadBalancer(null);
+    }
+
+    private CloudLoadBalancer createCloudLoadBalancer(LoadBalancerSku sku) {
+        Group targetGroup = new Group(INSTANCE_GROUP_NAME,
+                InstanceGroupType.GATEWAY,
+                List.of(new CloudInstance(INSTANCE_NAME, null, null, "subnet-1", "az1")),
+                null,
+                null,
+                null,
+                null,
+                null,
+                64,
+                null,
+                createGroupNetwork(),
+                emptyMap());
+        CloudLoadBalancer cloudLoadBalancer = new CloudLoadBalancer(LoadBalancerType.PRIVATE, sku);
+        cloudLoadBalancer.addPortToTargetGroupMapping(new TargetGroupPortPair(443, 443), Set.of(targetGroup));
+        return cloudLoadBalancer;
     }
 }
