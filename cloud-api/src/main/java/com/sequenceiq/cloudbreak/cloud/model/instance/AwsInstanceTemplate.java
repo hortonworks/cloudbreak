@@ -81,8 +81,8 @@ public class AwsInstanceTemplate extends InstanceTemplate {
     public static final String PLACEMENT_GROUP_STRATEGY = "placementGroupStrategy";
 
     public AwsInstanceTemplate(String flavor, String groupName, Long privateId, Collection<Volume> volumes, InstanceStatus status,
-            Map<String, Object> parameters, Long templateId, String imageId, TemporaryStorage temporaryStorage) {
-        super(flavor, groupName, privateId, volumes, status, parameters, templateId, imageId, temporaryStorage);
+            Map<String, Object> parameters, Long templateId, String imageId, TemporaryStorage temporaryStorage, Long temporaryStorageCount) {
+        super(flavor, groupName, privateId, volumes, status, parameters, templateId, imageId, temporaryStorage, temporaryStorageCount);
     }
 
 }

@@ -63,6 +63,8 @@ public class InstanceTemplate extends DynamicModel {
 
     private final TemporaryStorage temporaryStorage;
 
+    private final Long temporaryStorageCount;
+
     @JsonCreator
     public InstanceTemplate(@JsonProperty("flavor") String flavor,
             @JsonProperty("groupName") String groupName,
@@ -72,7 +74,8 @@ public class InstanceTemplate extends DynamicModel {
             @JsonProperty("parameters") Map<String, Object> parameters,
             @JsonProperty("templateId") Long templateId,
             @JsonProperty("imageId") String imageId,
-            @JsonProperty("temporaryStorage") TemporaryStorage temporaryStorage) {
+            @JsonProperty("temporaryStorage") TemporaryStorage temporaryStorage,
+            @JsonProperty("temporaryStorageCount") Long temporaryStorageCount) {
         super(parameters);
         this.flavor = flavor;
         this.templateId = templateId;
@@ -82,6 +85,7 @@ public class InstanceTemplate extends DynamicModel {
         this.status = status;
         this.imageId = imageId;
         this.temporaryStorage = temporaryStorage;
+        this.temporaryStorageCount = temporaryStorageCount;
     }
 
     public String getFlavor() {
@@ -116,6 +120,10 @@ public class InstanceTemplate extends DynamicModel {
         return temporaryStorage;
     }
 
+    public Long getTemporaryStorageCount() {
+        return temporaryStorageCount;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -140,13 +148,16 @@ public class InstanceTemplate extends DynamicModel {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("InstanceTemplate{");
-        sb.append("flavor='").append(flavor).append('\'');
-        sb.append(", groupName='").append(groupName).append('\'');
-        sb.append(", privateId=").append(privateId);
-        sb.append(", volumes=").append(volumes);
-        sb.append(", status=").append(status);
-        sb.append('}');
-        return sb.toString();
+        return "InstanceTemplate{" +
+                "flavor='" + flavor + '\'' +
+                ", groupName='" + groupName + '\'' +
+                ", privateId=" + privateId +
+                ", volumes=" + volumes +
+                ", status=" + status +
+                ", templateId=" + templateId +
+                ", imageId='" + imageId + '\'' +
+                ", temporaryStorage=" + temporaryStorage +
+                ", temporaryStorageCount=" + temporaryStorageCount +
+                '}';
     }
 }

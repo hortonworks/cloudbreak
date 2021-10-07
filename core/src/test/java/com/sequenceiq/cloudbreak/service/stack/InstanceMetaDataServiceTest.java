@@ -397,7 +397,7 @@ class InstanceMetaDataServiceTest {
 
     private InstanceTemplate instanceTemplate(int idx) {
         return new InstanceTemplate(null, groupName(idx), (long) idx, List.of(), com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.CREATED, Map.of(),
-                (long) idx, null, null);
+                (long) idx, null, null, 0L);
     }
 
     private InstanceAuthentication instanceAuthentication() {

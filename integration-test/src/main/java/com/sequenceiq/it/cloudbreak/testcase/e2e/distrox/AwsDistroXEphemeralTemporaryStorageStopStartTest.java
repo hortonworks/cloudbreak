@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.distrox;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -66,18 +67,32 @@ public class AwsDistroXEphemeralTemporaryStorageStopStartTest extends AbstractE2
 
         testContext
                 .given("non_eph_dx", DistroXTestDto.class)
+                .withInstanceGroupsEntity(new DistroXInstanceGroupsBuilder(testContext)
+                        .defaultHostGroup()
+                        .withInstanceType("r5d.xlarge")
+                        .build())
                 .when(distroXTestClient.create(), RunningParameter.key("non_eph_dx"))
                 .given("eph_dx", DistroXTestDto.class)
                 .withInstanceGroupsEntity(new DistroXInstanceGroupsBuilder(testContext)
                         .defaultHostGroup()
                         .withEphemeralTemporaryStorage()
-                        .withInstanceType("m5dn.2xlarge")
+                        .withInstanceType("r5d.xlarge")
                         .build())
                 .when(distroXTestClient.create(), RunningParameter.key("eph_dx"))
                 .given("non_eph_dx", DistroXTestDto.class)
                 .await(STACK_AVAILABLE, RunningParameter.key("non_eph_dx"))
                 .then((tc, testDto, client) -> {
-                    sshJClientActions.checkNoEphemeralDisksMounted(testDto.getResponse().getInstanceGroups(), List.of(HostGroupType.WORKER.getName()));
+                    sshJClientActions.checkEphemeralDisksMounted(testDto.getResponse().getInstanceGroups(), List.of(HostGroupType.WORKER.getName()), "fs");
+                    return testDto;
+                })
+                .then((tc, testDto, client) -> {
+                    Set<String> mountPoints = sshJClientActions.getEphemeralVolumeMountPoints(
+                            testDto.getResponse().getInstanceGroups(), List.of(HostGroupType.MASTER.getName()));
+                    clouderaManagerUtil.checkClouderaManagerHdfsNamenodeRoleConfigGroups(testDto, sanitizedUserName, MOCK_UMS_PASSWORD, mountPoints);
+
+                    mountPoints = sshJClientActions.getEphemeralVolumeMountPoints(
+                            testDto.getResponse().getInstanceGroups(), List.of(HostGroupType.WORKER.getName()));
+                    clouderaManagerUtil.checkClouderaManagerHdfsDatanodeRoleConfigGroups(testDto, sanitizedUserName, MOCK_UMS_PASSWORD, mountPoints);
                     return testDto;
                 })
                 .when(distroXTestClient.stop(), RunningParameter.key("non_eph_dx"))
@@ -91,7 +106,7 @@ public class AwsDistroXEphemeralTemporaryStorageStopStartTest extends AbstractE2
                 .given("eph_dx", DistroXTestDto.class)
                 .await(STACK_AVAILABLE, RunningParameter.key("eph_dx"))
                 .then((tc, testDto, client) -> {
-                    sshJClientActions.checkEphemeralDisksMounted(testDto.getResponse().getInstanceGroups(), List.of(HostGroupType.WORKER.getName()));
+                    sshJClientActions.checkEphemeralDisksMounted(testDto.getResponse().getInstanceGroups(), List.of(HostGroupType.WORKER.getName()), "ephfs");
                     return testDto;
                 })
                 .then((tc, testDto, client) -> clouderaManagerUtil.checkClouderaManagerYarnNodemanagerRoleConfigGroups(testDto, sanitizedUserName,
@@ -101,7 +116,7 @@ public class AwsDistroXEphemeralTemporaryStorageStopStartTest extends AbstractE2
                 .when(distroXTestClient.start(), RunningParameter.key("eph_dx"))
                 .await(STACK_AVAILABLE, RunningParameter.key("eph_dx"))
                 .then((tc, testDto, client) -> {
-                    sshJClientActions.checkEphemeralDisksMounted(testDto.getResponse().getInstanceGroups(), List.of(HostGroupType.WORKER.getName()));
+                    sshJClientActions.checkEphemeralDisksMounted(testDto.getResponse().getInstanceGroups(), List.of(HostGroupType.WORKER.getName()), "ephfs");
                     return testDto;
                 })
                 .then((tc, testDto, client) -> clouderaManagerUtil.checkClouderaManagerYarnNodemanagerRoleConfigGroups(testDto, sanitizedUserName,

@@ -430,7 +430,7 @@ public class AwsRepairTest {
 
         List<Volume> volumes = List.of();
         InstanceTemplate instanceTemplate = new InstanceTemplate("", WORKER_GROUP, 0L, volumes, InstanceStatus.STARTED, Map.of(), 0L,
-                IMAGE_ID, TemporaryStorage.ATTACHED_VOLUMES);
+                IMAGE_ID, TemporaryStorage.ATTACHED_VOLUMES, 0L);
         InstanceAuthentication authentication = new InstanceAuthentication("publicKey", "publicKeyId", "cloudbreak");
         CloudInstance firstCloudInstance = new CloudInstance(INSTANCE_ID_1, instanceTemplate, authentication, "subnet-1", "az1");
         CloudInstance secondCloudInstance = new CloudInstance(INSTANCE_ID_2, instanceTemplate, authentication, "subnet-1", "az1");
