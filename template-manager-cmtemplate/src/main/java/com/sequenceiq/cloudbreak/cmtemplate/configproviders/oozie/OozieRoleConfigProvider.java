@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRdsRoleConfigProvider;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
@@ -44,14 +43,6 @@ public class OozieRoleConfigProvider extends AbstractRdsRoleConfigProvider {
                     config(OOZIE_DATABASE_TYPE, oozieRdsView.getSubprotocol()),
                     config(OOZIE_DATABASE_USER, oozieRdsView.getConnectionUserName()),
                     config(OOZIE_DATABASE_PASSWORD, oozieRdsView.getConnectionPassword())));
-                if (isOozieHA(source) && CloudPlatform.GCP == source.getCloudPlatform()) {
-                    // There is no load-balancer for GCP yet. For base and callback urls use the hostname of the Oozie server.
-                    config.add(config(OOZIE_CONFIG_SAFETY_VALVE,
-                        "<property><name>oozie.base.url</name>"
-                            + "<value>https://${oozie.http.hostname}:${oozie.https.port}/oozie</value></property>"
-                            + "<property><name>oozie.service.CallbackService.base.url</name>"
-                            + "<value>https://${oozie.http.hostname}:${oozie.https.port}/oozie/callback</value></property>"));
-                }
                 return config;
             default:
                 return List.of();

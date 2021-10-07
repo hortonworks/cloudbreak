@@ -194,6 +194,27 @@ public class GcpForwardingRuleResourceBuilderTest {
 
     @Test
     public void buildforSharedVPC() throws Exception {
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("hcport", 8443);
+        parameters.put("trafficports", List.of(443, 11443));
+        resource = new CloudResource.Builder()
+                .type(ResourceType.GCP_FORWARDING_RULE)
+                .status(CommonStatus.CREATED)
+                .group("master")
+                .name("super")
+                .params(parameters)
+                .persistent(true)
+                .build();
+
+        backendResource = new CloudResource.Builder()
+                .type(ResourceType.GCP_BACKEND_SERVICE)
+                .status(CommonStatus.CREATED)
+                .group("master")
+                .name("backendsuper")
+                .params(parameters)
+                .persistent(true)
+                .build();
+
         mockCalls(LoadBalancerType.PRIVATE);
         when(gcpStackUtil.getSharedProjectId(any())).thenReturn("custom-project");
 
@@ -205,7 +226,10 @@ public class GcpForwardingRuleResourceBuilderTest {
         Assert.assertEquals("https://www.googleapis.com/compute/v1/projects/custom-project/regions/us-west2/subnetworks/default-subnet",
                 arg.getSubnetwork());
         Assert.assertEquals("super", cloudResources.get(0).getName());
-        Assertions.assertEquals(8080, cloudResources.get(0).getParameter("hcport", Integer.class));
+        Assertions.assertEquals(8443, cloudResources.get(0).getParameter("hcport", Integer.class));
+        List<Integer> ports = (List<Integer>) cloudResources.get(0).getParameters().get("trafficports");
+        Assertions.assertTrue(ports.contains(443));
+        Assertions.assertTrue(ports.contains(11443));
     }
 
     @Test
@@ -251,6 +275,5 @@ public class GcpForwardingRuleResourceBuilderTest {
         lenient().when(gcpStackUtil.getNetworkUrl(anyString(), anyString())).thenCallRealMethod();
         lenient().when(gcpStackUtil.getSubnetUrl(anyString(), anyString(), anyString())).thenCallRealMethod();
         lenient().when(gcpLoadBalancerTypeConverter.getScheme(any(CloudLoadBalancer.class))).thenCallRealMethod();
-
     }
 }

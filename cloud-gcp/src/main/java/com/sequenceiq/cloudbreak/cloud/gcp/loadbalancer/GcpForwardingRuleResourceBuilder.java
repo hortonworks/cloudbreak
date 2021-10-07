@@ -18,6 +18,8 @@ import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.model.ForwardingRule;
 import com.google.api.services.compute.model.Operation;
+import com.google.common.base.Functions;
+import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpLabelUtil;
@@ -26,7 +28,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
-import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
 import com.sequenceiq.common.api.type.ResourceType;
 
 /**
@@ -61,18 +62,7 @@ public class GcpForwardingRuleResourceBuilder extends AbstractGcpLoadBalancerBui
 
     @Override
     public List<CloudResource> create(GcpContext context, AuthenticatedContext auth, CloudLoadBalancer loadBalancer) {
-        List<CloudResource> resources = new ArrayList<>();
-        for (TargetGroupPortPair targetGroupPortPair : loadBalancer.getPortToTargetGroupMapping().keySet()) {
-            Integer healthCheckPort = targetGroupPortPair.getHealthCheckPort();
-            String resourceName = getResourceNameService().resourceName(resourceType(), context.getName(),
-                    loadBalancer.getType(), targetGroupPortPair.getTrafficPort());
-            Map<String, Object> parameters = Map.of(TRAFFICPORT, targetGroupPortPair.getTrafficPort(), HCPORT, targetGroupPortPair.getHealthCheckPort());
-            resources.add(new CloudResource.Builder().type(resourceType())
-                    .name(resourceName)
-                    .params(parameters)
-                    .build());
-        }
-        return resources;
+        return getCloudResourcesForFrontendAndBackendCreate(context, loadBalancer);
     }
 
     @Override
@@ -89,11 +79,17 @@ public class GcpForwardingRuleResourceBuilder extends AbstractGcpLoadBalancerBui
 
         for (CloudResource buildableResource : buildableResources) {
             LOGGER.debug("Building forwarding rule {} for {}", buildableResource.getName(), projectId);
-            Integer trafficPort = buildableResource.getParameter(TRAFFICPORT, Integer.class);
+            Map<String, Object> portMap = buildableResource.getParameters();
             ForwardingRule forwardingRule = new ForwardingRule().setIPProtocol(TCP)
                     .setName(buildableResource.getName())
-                    .setPorts(List.of(String.valueOf(trafficPort)));
-            forwardingRule.setLoadBalancingScheme(scheme.getGcpType());
+                    .setLoadBalancingScheme(scheme.getGcpType());
+            if (portMap.containsKey(TRAFFICPORTS)) {
+                List<String> ports = Lists.transform((List<Integer>) portMap.get(TRAFFICPORTS), Functions.toStringFunction());
+                forwardingRule.setPorts(ports);
+            } else {
+                Integer trafficPort = buildableResource.getParameter(TRAFFICPORT, Integer.class);
+                forwardingRule.setPorts(List.of(String.valueOf(trafficPort)));
+            }
             if (scheme.equals(GcpLoadBalancerScheme.INTERNAL)) {
                 String sharedProjectId = gcpStackUtil.getSharedProjectId(network);
                 if (StringUtils.isEmpty(sharedProjectId)) {
@@ -105,13 +101,14 @@ public class GcpForwardingRuleResourceBuilder extends AbstractGcpLoadBalancerBui
                 }
             }
 
+            Integer hcPort = buildableResource.getParameter(HCPORT, Integer.class);
             Optional<String> backendName = backendResources.stream()
-                    .filter(backendResource -> trafficPort.equals(backendResource.getParameter(TRAFFICPORT, Integer.class)))
+                    .filter(backendResource -> hcPort.equals(backendResource.getParameter(HCPORT, Integer.class)))
                     .findFirst()
                     .map(CloudResource::getName);
 
             if (!backendName.isPresent()) {
-                LOGGER.warn("backend not found for forwarding rule {}, port {}, project {}", buildableResource.getName(), trafficPort, projectId);
+                LOGGER.warn("backend not found for forwarding rule {}, port {}, project {}", buildableResource.getName(), hcPort, projectId);
                 continue;
             } else {
                 forwardingRule.setBackendService(String.format(GCP_BACKEND_SERVICE_REF_FORMAT, projectId, regionName, backendName.get()));
@@ -121,7 +118,6 @@ public class GcpForwardingRuleResourceBuilder extends AbstractGcpLoadBalancerBui
                 LOGGER.warn("No reserved IP address for loadbalancer {}-{}, using ephemeral", loadBalancer.getType(), projectId);
             } else {
                 forwardingRule.setIPAddress(String.format(GCP_IP_REF_FORMAT, projectId, regionName, ipResources.get(0).getName()));
-
             }
             forwardingRule.setUnknownKeys(new HashMap<>(gcpLabelUtil.createLabelsFromTags(cloudStack)));
             Compute.ForwardingRules.Insert insert = context.getCompute().forwardingRules().insert(projectId, regionName, forwardingRule);

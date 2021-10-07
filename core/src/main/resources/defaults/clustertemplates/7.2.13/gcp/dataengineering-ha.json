@@ -11,6 +11,7 @@
     "externalDatabase": {
       "availabilityType": "HA"
     },
+    "enableLoadBalancer": true,
     "instanceGroups": [
       {
         "name": "manager",
@@ -27,7 +28,7 @@
           },
           "instanceType": "e2-standard-16"
         },
-        "nodeCount": 1,
+        "nodeCount": 2,
         "type": "GATEWAY",
         "recoveryMode": "MANUAL"
       },

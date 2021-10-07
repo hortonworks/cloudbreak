@@ -1,7 +1,10 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.loadbalancer;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,9 +16,11 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.AbstractGcpResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
+import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.template.LoadBalancerResourceBuilder;
+import com.sequenceiq.common.api.type.LoadBalancerType;
 
 /**
  * Abstract class for ResourceBuilders that operate based off of the configuration of the loadbalancers in a given stack
@@ -27,6 +32,8 @@ import com.sequenceiq.cloudbreak.cloud.template.LoadBalancerResourceBuilder;
 public abstract class AbstractGcpLoadBalancerBuilder extends AbstractGcpResourceBuilder implements LoadBalancerResourceBuilder<GcpContext> {
 
     static final String TRAFFICPORT = "trafficport";
+
+    static final String TRAFFICPORTS = "trafficports";
 
     static final String HCPORT = "hcport";
 
@@ -50,5 +57,42 @@ public abstract class AbstractGcpLoadBalancerBuilder extends AbstractGcpResource
             LOGGER.error("Bad Response from GCP for resource {}", resource.getName(), e);
             throw exceptionHandlerWithThrow(e, resource.getName(), resourceType());
         }
+    }
+
+    protected List<CloudResource> getCloudResourcesForFrontendAndBackendCreate(GcpContext context, CloudLoadBalancer loadBalancer) {
+        List<CloudResource> resources = new ArrayList<>();
+        if (loadBalancer.getType() == LoadBalancerType.PRIVATE) {
+            Map<Integer, List<Integer>> hcPortToTrafficPorts = new HashMap<>();
+            loadBalancer.getPortToTargetGroupMapping().keySet().forEach(targetGroupPortPair -> {
+                Integer healthCheckPort = targetGroupPortPair.getHealthCheckPort();
+                Integer trafficPort = targetGroupPortPair.getTrafficPort();
+                if (hcPortToTrafficPorts.containsKey(healthCheckPort)) {
+                    hcPortToTrafficPorts.get(healthCheckPort).add(trafficPort);
+                } else {
+                    List<Integer> arr = new ArrayList<>();
+                    arr.add(trafficPort);
+                    hcPortToTrafficPorts.put(healthCheckPort, arr);
+                }
+            });
+            hcPortToTrafficPorts.forEach((healthCheckPort, trafficPorts) -> {
+                String resourceName = getResourceNameService().resourceName(resourceType(), context.getName(), loadBalancer.getType(), healthCheckPort);
+                Map<String, Object> parameters = Map.of(TRAFFICPORTS, trafficPorts, HCPORT, healthCheckPort);
+                resources.add(new CloudResource.Builder().type(resourceType())
+                        .name(resourceName)
+                        .params(parameters)
+                        .build());
+            });
+        } else {
+            loadBalancer.getPortToTargetGroupMapping().keySet().forEach(targetGroupPortPair -> {
+                Integer healthCheckPort = targetGroupPortPair.getHealthCheckPort();
+                String resourceName = getResourceNameService().resourceName(resourceType(), context.getName(), loadBalancer.getType(), healthCheckPort);
+                Map<String, Object> parameters = Map.of(TRAFFICPORT, targetGroupPortPair.getTrafficPort(), HCPORT, healthCheckPort);
+                resources.add(new CloudResource.Builder().type(resourceType())
+                        .name(resourceName)
+                        .params(parameters)
+                        .build());
+            });
+        }
+        return resources;
     }
 }

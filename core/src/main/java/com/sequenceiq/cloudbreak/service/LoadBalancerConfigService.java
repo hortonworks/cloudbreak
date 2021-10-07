@@ -139,6 +139,8 @@ public class LoadBalancerConfigService {
                 return Set.of(new TargetGroupPortPair(Integer.parseInt(httpsPort), Integer.parseInt(knoxServicePort)));
             case OOZIE:
                 return Set.of(new TargetGroupPortPair(Integer.parseInt(OOZIE_HTTPS_PORT), Integer.parseInt(OOZIE_HTTPS_PORT)));
+            case OOZIE_GCP:
+                return Set.of(new TargetGroupPortPair(Integer.parseInt(OOZIE_HTTPS_PORT), Integer.parseInt(knoxServicePort)));
             default:
                 return Set.of();
         }
@@ -231,7 +233,7 @@ public class LoadBalancerConfigService {
     public void configureLoadBalancerAvailabilitySets(String availabilitySetPrefix, Set<LoadBalancer> loadBalancers) {
         getKnoxInstanceGroups(loadBalancers)
                 .forEach(instanceGroup -> attachAvailabilitySetParameters(availabilitySetPrefix, instanceGroup));
-        getOozieInstanceGroups(loadBalancers)
+        getOozieInstanceGroupsForAzure(loadBalancers)
                 .forEach(instanceGroup -> attachAvailabilitySetParameters(availabilitySetPrefix, instanceGroup));
     }
 
@@ -248,7 +250,7 @@ public class LoadBalancerConfigService {
         return getInstanceGroups(loadBalancers, TargetGroupType.KNOX);
     }
 
-    private Set<InstanceGroup> getOozieInstanceGroups(Set<LoadBalancer> loadBalancers) {
+    private Set<InstanceGroup> getOozieInstanceGroupsForAzure(Set<LoadBalancer> loadBalancers) {
         return getInstanceGroups(loadBalancers, TargetGroupType.OOZIE);
     }
 
@@ -462,7 +464,11 @@ public class LoadBalancerConfigService {
         if (oozieInstanceGroup.isPresent()) {
             LOGGER.info("Oozie HA instance group found; enabling Oozie load balancer configuration.");
             TargetGroup oozieTargetGroup = new TargetGroup();
-            oozieTargetGroup.setType(TargetGroupType.OOZIE);
+            if (CloudPlatform.GCP.equalsIgnoreCase(stack.getCloudPlatform())) {
+                oozieTargetGroup.setType(TargetGroupType.OOZIE_GCP);
+            } else {
+                oozieTargetGroup.setType(TargetGroupType.OOZIE);
+            }
             oozieTargetGroup.setInstanceGroups(Set.of(oozieInstanceGroup.get()));
             if (!dryRun) {
                 LOGGER.debug("Adding target group to Oozie HA instance group.");
