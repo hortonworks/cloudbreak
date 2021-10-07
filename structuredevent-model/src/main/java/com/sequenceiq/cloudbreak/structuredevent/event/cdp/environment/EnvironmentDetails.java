@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.proxy.ProxyDetails;
+import com.sequenceiq.common.api.type.CcmV2TlsType;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
@@ -26,6 +27,8 @@ public interface EnvironmentDetails {
     ParametersDto getParameters();
 
     Tunnel getTunnel();
+
+    CcmV2TlsType getTlsType();
 
     ProxyDetails getProxyDetails();
 

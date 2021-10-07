@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.proxy.Pro
 import com.sequenceiq.cloudbreak.structuredevent.repository.AccountAwareResource;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagMergeRequest;
+import com.sequenceiq.common.api.type.CcmV2TlsType;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.domain.CredentialView;
@@ -323,6 +324,11 @@ public class EnvironmentDto implements Payload, AccountAwareResource, Environmen
     @Override
     public Tunnel getTunnel() {
         return experimentalFeatures == null ? null : experimentalFeatures.getTunnel();
+    }
+
+    @Override
+    public CcmV2TlsType getTlsType() {
+        return experimentalFeatures == null ? null : experimentalFeatures.getCcmV2TlsType();
     }
 
     public ExperimentalFeatures getExperimentalFeatures() {

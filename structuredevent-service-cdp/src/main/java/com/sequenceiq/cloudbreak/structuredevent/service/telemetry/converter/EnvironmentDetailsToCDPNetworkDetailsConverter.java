@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetType;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.EnvironmentDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.proxy.ProxyDetails;
+import com.sequenceiq.common.api.type.CcmV2TlsType;
 import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.network.dto.NetworkDto;
@@ -33,7 +34,12 @@ public class EnvironmentDetailsToCDPNetworkDetailsConverter {
 
         Tunnel tunnel = environmentDetails.getTunnel();
         if (tunnel != null) {
-            cdpNetworkDetails.setConnectivity(environmentDetails.getTunnel().name());
+            cdpNetworkDetails.setConnectivity(tunnel.name());
+        }
+
+        CcmV2TlsType tlsType = environmentDetails.getTlsType();
+        if (tlsType != null) {
+            cdpNetworkDetails.setControlPlaneAndCCMAgentConnectionSecurity(tlsType.name());
         }
 
         NetworkDto network = environmentDetails.getNetwork();
