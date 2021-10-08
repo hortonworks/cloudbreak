@@ -14,10 +14,17 @@ public class CDPConfigKey {
 
     private final String runtimeVersion;
 
+    private final boolean profilerPresent;
+
     public CDPConfigKey(CloudPlatform cloudPlatform, SdxClusterShape clusterShape, String runtimeVersion) {
+        this(cloudPlatform, clusterShape, runtimeVersion, false);
+    }
+
+    public CDPConfigKey(CloudPlatform cloudPlatform, SdxClusterShape clusterShape, String runtimeVersion, boolean profilerPresent) {
         this.cloudPlatform = cloudPlatform;
         this.clusterShape = clusterShape;
         this.runtimeVersion = runtimeVersion;
+        this.profilerPresent = profilerPresent;
     }
 
     public CloudPlatform getCloudPlatform() {
@@ -32,6 +39,10 @@ public class CDPConfigKey {
         return runtimeVersion;
     }
 
+    public boolean isProfilerPresent() {
+        return profilerPresent;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -43,12 +54,13 @@ public class CDPConfigKey {
         CDPConfigKey that = (CDPConfigKey) o;
         return cloudPlatform == that.cloudPlatform &&
                 clusterShape == that.clusterShape &&
-                runtimeVersion.equals(that.runtimeVersion);
+                runtimeVersion.equals(that.runtimeVersion) &&
+                profilerPresent == that.profilerPresent;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(cloudPlatform, clusterShape, runtimeVersion);
+        return Objects.hash(cloudPlatform, clusterShape, runtimeVersion, profilerPresent);
     }
 
     @Override
@@ -57,6 +69,7 @@ public class CDPConfigKey {
                 .add("cloudPlatform=" + cloudPlatform)
                 .add("clusterShape=" + clusterShape)
                 .add("runtimeVersion='" + runtimeVersion + "'")
+                .add("isProfilerPresent=" + profilerPresent)
                 .toString();
     }
 }

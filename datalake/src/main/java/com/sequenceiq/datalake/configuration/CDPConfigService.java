@@ -7,6 +7,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
@@ -14,7 +15,11 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -40,6 +45,8 @@ public class CDPConfigService {
 
     public static final int CLUSTERSHAPE_GROUP = 3;
 
+    public static final int PROFILER_GROUP = 4;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(CDPConfigService.class);
 
     // Defines what is the default runtime version (UI / API)
@@ -56,19 +63,23 @@ public class CDPConfigService {
 
     private Map<CDPConfigKey, String> cdpStackRequests = new HashMap<>();
 
+    @Inject
+    private EntitlementService entitlementService;
+
     @PostConstruct
     public void initCdpStackRequests() {
         PathMatchingResourcePatternResolver pathMatchingResourcePatternResolver = new PathMatchingResourcePatternResolver();
         try {
             Resource[] resources = pathMatchingResourcePatternResolver.getResources("classpath:duties/*/*/*.json");
             for (Resource resource : resources) {
-                Matcher matcher = Pattern.compile(".*/duties/(.*)/(.*)/(.*).json").matcher(resource.getURL().getPath());
+                Matcher matcher = Pattern.compile(".*/duties/(.*)/(.*)/(.*?)(_profiler)?.json").matcher(resource.getURL().getPath());
                 if (matcher.find()) {
                     String runtimeVersion = matcher.group(RUNTIME_GROUP);
                     if (supportedRuntimes.isEmpty() || supportedRuntimes.contains(runtimeVersion)) {
                         CloudPlatform cloudPlatform = CloudPlatform.valueOf(matcher.group(CLOUDPLATFORM_GROUP).toUpperCase());
                         SdxClusterShape sdxClusterShape = SdxClusterShape.valueOf(matcher.group(CLUSTERSHAPE_GROUP).toUpperCase());
-                        CDPConfigKey cdpConfigKey = new CDPConfigKey(cloudPlatform, sdxClusterShape, runtimeVersion);
+                        boolean profilerPresent = matcher.group(PROFILER_GROUP) != null;
+                        CDPConfigKey cdpConfigKey = new CDPConfigKey(cloudPlatform, sdxClusterShape, runtimeVersion, profilerPresent);
                         String templateString = IOUtils.toString(resource.getInputStream(), StandardCharsets.UTF_8.name());
                         cdpStackRequests.put(cdpConfigKey, templateString);
                     }
@@ -81,13 +92,29 @@ public class CDPConfigService {
         }
     }
 
+    @VisibleForTesting
+    String getStackRequestForProfiler(CDPConfigKey cdpConfigKey) {
+        String cdpStackRequest = null;
+        if (cdpConfigKey.getClusterShape() == SdxClusterShape.MEDIUM_DUTY_HA) {
+            String accountId = ThreadBasedUserCrnProvider.getAccountId();
+            boolean datalakeMediumDutyWithProfilerEnabled = entitlementService.isDatalakeMediumDutyWithProfilerEnabled(accountId);
+            if (datalakeMediumDutyWithProfilerEnabled && !cdpConfigKey.isProfilerPresent()) {
+                CDPConfigKey cdpConfigKeyWithProfiler = new CDPConfigKey(cdpConfigKey.getCloudPlatform(),
+                        cdpConfigKey.getClusterShape(), cdpConfigKey.getRuntimeVersion(), true);
+                cdpStackRequest = cdpStackRequests.get(cdpConfigKeyWithProfiler);
+            }
+        }
+        return cdpStackRequest;
+    }
+
     public StackV4Request getConfigForKey(CDPConfigKey cdpConfigKey) {
         try {
             String cdpStackRequest = cdpStackRequests.get(cdpConfigKey);
             if (cdpStackRequest == null) {
                 return null;
             } else {
-                return JsonUtil.readValue(cdpStackRequest, StackV4Request.class);
+                String cdpStackRequestWithProfiler = getStackRequestForProfiler(cdpConfigKey);
+                return JsonUtil.readValue(Objects.requireNonNullElse(cdpStackRequestWithProfiler, cdpStackRequest), StackV4Request.class);
             }
         } catch (IOException e) {
             LOGGER.error("Can't convert json to StackV4Request", e);

@@ -9,9 +9,13 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Set;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -24,6 +28,7 @@ import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
 @ExtendWith(MockitoExtension.class)
 class CDPConfigServiceTest {
+    private static final String USER_CRN = "crn:cdp:iam:us-west-1:hortonworks:user:perdos@hortonworks.com";
 
     @Spy
     private Set<String> advertisedRuntimes;
@@ -33,6 +38,16 @@ class CDPConfigServiceTest {
 
     @InjectMocks
     private CDPConfigService cdpConfigService;
+
+    @Mock
+    private EntitlementService entitlementService;
+
+    @BeforeAll
+    static void setupAll() {
+        if (ThreadBasedUserCrnProvider.getUserCrn() == null) {
+            ThreadBasedUserCrnProvider.setUserCrn(USER_CRN);
+        }
+    }
 
     @Test
     void cdpStackRequests() {
@@ -77,6 +92,46 @@ class CDPConfigServiceTest {
         assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.AZURE, SdxClusterShape.LIGHT_DUTY, "7.1.0")));
         assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.YARN, SdxClusterShape.LIGHT_DUTY, "7.1.0")));
         assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.MOCK, SdxClusterShape.LIGHT_DUTY, "7.1.0")));
+    }
+
+    @Test
+    void cdpStackRequestsForProfilerWithEntitlement() {
+        when(supportedRuntimes.isEmpty()).thenReturn(false);
+        when(supportedRuntimes.contains(Mockito.anyString())).thenReturn(true);
+        cdpConfigService.initCdpStackRequests();
+        when(entitlementService.isDatalakeMediumDutyWithProfilerEnabled(anyString())).thenReturn(true);
+        assertNotNull(cdpConfigService.getStackRequestForProfiler(new CDPConfigKey(CloudPlatform.AWS, SdxClusterShape.MEDIUM_DUTY_HA, "7.2.13")));
+        assertNotNull(cdpConfigService.getStackRequestForProfiler(new CDPConfigKey(CloudPlatform.AZURE, SdxClusterShape.MEDIUM_DUTY_HA, "7.2.13")));
+        assertNotNull(cdpConfigService.getStackRequestForProfiler(new CDPConfigKey(CloudPlatform.YARN, SdxClusterShape.MEDIUM_DUTY_HA, "7.2.13")));
+        assertNotNull(cdpConfigService.getStackRequestForProfiler(new CDPConfigKey(CloudPlatform.GCP, SdxClusterShape.MEDIUM_DUTY_HA, "7.2.13")));
+        assertNull(cdpConfigService.getStackRequestForProfiler(new CDPConfigKey(CloudPlatform.AWS, SdxClusterShape.LIGHT_DUTY, "7.2.13")));
+        assertNull(cdpConfigService.getStackRequestForProfiler(new CDPConfigKey(CloudPlatform.AZURE, SdxClusterShape.LIGHT_DUTY, "7.2.13")));
+        assertNull(cdpConfigService.getStackRequestForProfiler(new CDPConfigKey(CloudPlatform.YARN, SdxClusterShape.LIGHT_DUTY, "7.2.13")));
+        assertNull(cdpConfigService.getStackRequestForProfiler(new CDPConfigKey(CloudPlatform.GCP, SdxClusterShape.LIGHT_DUTY, "7.2.13")));
+        assertNull(cdpConfigService.getStackRequestForProfiler(new CDPConfigKey(CloudPlatform.AWS, SdxClusterShape.MEDIUM_DUTY_HA, "7.2.12")));
+        assertNull(cdpConfigService.getStackRequestForProfiler(new CDPConfigKey(CloudPlatform.AZURE, SdxClusterShape.MEDIUM_DUTY_HA, "7.2.12")));
+        assertNull(cdpConfigService.getStackRequestForProfiler(new CDPConfigKey(CloudPlatform.YARN, SdxClusterShape.MEDIUM_DUTY_HA, "7.2.12")));
+        assertNull(cdpConfigService.getStackRequestForProfiler(new CDPConfigKey(CloudPlatform.GCP, SdxClusterShape.MEDIUM_DUTY_HA, "7.2.12")));
+    }
+
+    @Test
+    void cdpStackRequestsForProfilerWithoutEntitlement() {
+        when(supportedRuntimes.isEmpty()).thenReturn(false);
+        when(supportedRuntimes.contains(Mockito.anyString())).thenReturn(true);
+        cdpConfigService.initCdpStackRequests();
+        when(entitlementService.isDatalakeMediumDutyWithProfilerEnabled(anyString())).thenReturn(false);
+        assertNull(cdpConfigService.getStackRequestForProfiler(new CDPConfigKey(CloudPlatform.AWS, SdxClusterShape.MEDIUM_DUTY_HA, "7.2.13")));
+        assertNull(cdpConfigService.getStackRequestForProfiler(new CDPConfigKey(CloudPlatform.AZURE, SdxClusterShape.MEDIUM_DUTY_HA, "7.2.13")));
+        assertNull(cdpConfigService.getStackRequestForProfiler(new CDPConfigKey(CloudPlatform.YARN, SdxClusterShape.MEDIUM_DUTY_HA, "7.2.13")));
+        assertNull(cdpConfigService.getStackRequestForProfiler(new CDPConfigKey(CloudPlatform.GCP, SdxClusterShape.MEDIUM_DUTY_HA, "7.2.13")));
+        assertNull(cdpConfigService.getStackRequestForProfiler(new CDPConfigKey(CloudPlatform.AWS, SdxClusterShape.LIGHT_DUTY, "7.2.13")));
+        assertNull(cdpConfigService.getStackRequestForProfiler(new CDPConfigKey(CloudPlatform.AZURE, SdxClusterShape.LIGHT_DUTY, "7.2.13")));
+        assertNull(cdpConfigService.getStackRequestForProfiler(new CDPConfigKey(CloudPlatform.YARN, SdxClusterShape.LIGHT_DUTY, "7.2.13")));
+        assertNull(cdpConfigService.getStackRequestForProfiler(new CDPConfigKey(CloudPlatform.GCP, SdxClusterShape.LIGHT_DUTY, "7.2.13")));
+        assertNull(cdpConfigService.getStackRequestForProfiler(new CDPConfigKey(CloudPlatform.AWS, SdxClusterShape.MEDIUM_DUTY_HA, "7.2.12")));
+        assertNull(cdpConfigService.getStackRequestForProfiler(new CDPConfigKey(CloudPlatform.AZURE, SdxClusterShape.MEDIUM_DUTY_HA, "7.2.12")));
+        assertNull(cdpConfigService.getStackRequestForProfiler(new CDPConfigKey(CloudPlatform.YARN, SdxClusterShape.MEDIUM_DUTY_HA, "7.2.12")));
+        assertNull(cdpConfigService.getStackRequestForProfiler(new CDPConfigKey(CloudPlatform.GCP, SdxClusterShape.MEDIUM_DUTY_HA, "7.2.12")));
     }
 
     @Test
