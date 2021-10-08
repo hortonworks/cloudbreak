@@ -26,7 +26,7 @@ public class MeasureAspects {
         long start = System.currentTimeMillis();
         Object resp = proceedingJoinPoint.proceed();
 
-        LoggerFactory.getLogger(measure.value()).debug("{}.{} took {} ms",
+        LoggerFactory.getLogger(measure.value()).debug("Measuring method execution: {}.{} took {} ms",
                 methodSignature.getDeclaringType().getSimpleName(), methodSignature.getName(), System.currentTimeMillis() - start);
 
         return resp;
