@@ -182,7 +182,7 @@ public class GcpMetadataCollectorTest {
     }
 
     private InstanceTemplate createInstanceTemplate(Long privateId) {
-        return new InstanceTemplate(null, null, privateId, Collections.emptyList(), null, null, null, null, TemporaryStorage.ATTACHED_VOLUMES);
+        return new InstanceTemplate(null, null, privateId, Collections.emptyList(), null, null, null, null, TemporaryStorage.ATTACHED_VOLUMES, 0L);
     }
 
     private Map<String, Optional<NetworkInterface>> createNetworkInterfaces() {

@@ -40,7 +40,7 @@ public class StackStopRestrictionService {
                             "created at least with Cloudbreak version [{}]", instanceGroup.getGroupName(), MIN_VERSION);
                     return reason;
                 }
-                if (isInstanceGroupAwsEphemeralStorageOnly(instanceGroup)) {
+                if (hasInstanceGroupAwsEphemeralStorage(instanceGroup)) {
                     reason = StopRestrictionReason.EPHEMERAL_VOLUMES;
                     LOGGER.info("Infrastructure cannot be stopped. Instances in group [{}] have ephemeral storage only." +
                             "Stopping clusters with ephemeral storage only instances are only available in clusters " +
@@ -52,8 +52,8 @@ public class StackStopRestrictionService {
         return reason;
     }
 
-    private boolean isInstanceGroupAwsEphemeralStorageOnly(InstanceGroup instanceGroup) {
-        return instanceGroup.getTemplate().getVolumeTemplates().stream().allMatch(volume -> AwsDiskType.Ephemeral.value().equals(volume.getVolumeType()));
+    private boolean hasInstanceGroupAwsEphemeralStorage(InstanceGroup instanceGroup) {
+        return instanceGroup.getTemplate().getVolumeTemplates().stream().anyMatch(volume -> AwsDiskType.Ephemeral.value().equals(volume.getVolumeType()));
     }
 
     private boolean isCbVersionBeforeStopSupport(Stack stack) {

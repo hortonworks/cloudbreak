@@ -169,7 +169,7 @@ public class ComponentTestUtil {
                 new Volume("/hadoop/fs2", "HDD", SIZE_DISK_2, CloudVolumeUsageType.GENERAL)
         );
         InstanceTemplate instanceTemplate = new InstanceTemplate("m1.medium", groupName, privateId, volumes, instanceStatus,
-                new HashMap<>(), 0L, "cb-centos66-amb200-2015-05-25", TemporaryStorage.ATTACHED_VOLUMES);
+                new HashMap<>(), 0L, "cb-centos66-amb200-2015-05-25", TemporaryStorage.ATTACHED_VOLUMES, 0L);
         Map<String, Object> params = new HashMap<>();
         return new CloudInstance(instanceId, instanceTemplate, instanceAuthentication, "subnet-1", "az1", params);
     }

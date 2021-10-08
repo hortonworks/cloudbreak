@@ -146,7 +146,7 @@ public class AwsValidatorsTest {
         doReturn(amazonCloudFormationClient).when(awsClient).createCloudFormationClient(any(), anyString());
         when(amazonCloudFormationClient.describeStacks(any())).thenThrow(new AmazonServiceException("stackName does not exist"));
         InstanceTemplate template =
-                new InstanceTemplate("noStorage", "worker", 0L, List.of(), InstanceStatus.CREATE_REQUESTED, Map.of(), 0L, "", ATTACHED_VOLUMES);
+                new InstanceTemplate("noStorage", "worker", 0L, List.of(), InstanceStatus.CREATE_REQUESTED, Map.of(), 0L, "", ATTACHED_VOLUMES, 0L);
         CloudInstance instance = new CloudInstance("", template, null, "subnet-1", "az1");
         Group group = new Group("worker", InstanceGroupType.CORE, List.of(instance), null, null, null, "", "", 0, Optional.empty(), createGroupNetwork(),
                 emptyMap());

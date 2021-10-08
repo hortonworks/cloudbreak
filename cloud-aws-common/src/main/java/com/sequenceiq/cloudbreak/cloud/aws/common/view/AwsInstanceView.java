@@ -24,6 +24,10 @@ public class AwsInstanceView {
         return instanceTemplate.getVolumes();
     }
 
+    public Long getTemporaryStorageCount() {
+        return instanceTemplate.getTemporaryStorageCount();
+    }
+
     public String getFlavor() {
         return instanceTemplate.getFlavor();
     }

@@ -136,7 +136,7 @@ public class AwsMetaDataCollectorTest {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         vms.add(new CloudInstance("i-1",
                 new InstanceTemplate("fla", "cbgateway", 5L, volumes, InstanceStatus.CREATED, null, 0L,
-                        "imageId", TemporaryStorage.ATTACHED_VOLUMES),
+                        "imageId", TemporaryStorage.ATTACHED_VOLUMES, 0L),
                 instanceAuthentication,
                 "subnet-1",
                 "az1"));
@@ -225,19 +225,19 @@ public class AwsMetaDataCollectorTest {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         vms.add(new CloudInstance(null,
                 new InstanceTemplate("fla", "cbgateway", 5L, volumes, InstanceStatus.CREATED, null, 0L,
-                        "imageId", TemporaryStorage.ATTACHED_VOLUMES),
+                        "imageId", TemporaryStorage.ATTACHED_VOLUMES, 0L),
                 instanceAuthentication,
                 "subnet-1",
                 "az1"));
         vms.add(new CloudInstance(null,
                 new InstanceTemplate("fla", "cbgateway", 6L, volumes, InstanceStatus.CREATED, null, 0L,
-                        "imageId", TemporaryStorage.ATTACHED_VOLUMES),
+                        "imageId", TemporaryStorage.ATTACHED_VOLUMES, 0L),
                 instanceAuthentication,
                 "subnet-1",
                 "az1"));
         vms.add(new CloudInstance(null,
                 new InstanceTemplate("fla", "cbgateway", 7L, volumes, InstanceStatus.CREATED, null, 0L,
-                        "imageId", TemporaryStorage.ATTACHED_VOLUMES),
+                        "imageId", TemporaryStorage.ATTACHED_VOLUMES, 0L),
                 instanceAuthentication,
                 "subnet-1",
                 "az1"));
@@ -298,13 +298,13 @@ public class AwsMetaDataCollectorTest {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         vms.add(new CloudInstance(null,
                 new InstanceTemplate("fla", "cbgateway", 5L, volumes, InstanceStatus.CREATED, null, 0L,
-                        "imageId", TemporaryStorage.ATTACHED_VOLUMES),
+                        "imageId", TemporaryStorage.ATTACHED_VOLUMES, 0L),
                 instanceAuthentication,
                 "subnet-1",
                 "az1"));
         vms.add(new CloudInstance("i-1",
                 new InstanceTemplate("fla", "cbgateway", 5L, volumes, InstanceStatus.CREATED, null, 0L,
-                        "imageId", TemporaryStorage.ATTACHED_VOLUMES),
+                        "imageId", TemporaryStorage.ATTACHED_VOLUMES, 0L),
                 instanceAuthentication,
                 "subnet-1",
                 "az1"));
@@ -369,7 +369,7 @@ public class AwsMetaDataCollectorTest {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         CloudInstance cloudInstance1 = new CloudInstance(null,
                 new InstanceTemplate("fla", "cbgateway", 5L, volumes, InstanceStatus.CREATED, null, 0L, "imageId",
-                TemporaryStorage.ATTACHED_VOLUMES),
+                TemporaryStorage.ATTACHED_VOLUMES, 0L),
                 instanceAuthentication,
                 "subnet-1",
                 "az1");
@@ -378,7 +378,7 @@ public class AwsMetaDataCollectorTest {
 
         everyVms.add(new CloudInstance("i-1",
                 new InstanceTemplate("fla", "cbgateway", 5L, volumes, InstanceStatus.CREATED, null, 0L,
-                        "imageId", TemporaryStorage.ATTACHED_VOLUMES),
+                        "imageId", TemporaryStorage.ATTACHED_VOLUMES, 0L),
                 instanceAuthentication,
                 "subnet-1",
                 "az1"));
@@ -551,7 +551,7 @@ public class AwsMetaDataCollectorTest {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         vms.add(new CloudInstance("i-1",
                 new InstanceTemplate("fla", "cbgateway", 5L, new ArrayList<>(), InstanceStatus.CREATED, null, 0L, "imageId",
-                        TemporaryStorage.ATTACHED_VOLUMES),
+                        TemporaryStorage.ATTACHED_VOLUMES, 0L),
                 instanceAuthentication,
                 "subnet-1",
                 "az1"));
