@@ -4,6 +4,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -13,6 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import com.sequenceiq.cloudbreak.cluster.model.ParcelOperationStatus;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
@@ -39,7 +41,7 @@ public class ClusterComponentUpdaterTest {
 
         when(clusterComponentConfigProvider.getComponentsByClusterId(CLUSTER_ID)).thenReturn(clusterComponentsFromDb);
 
-        underTest.removeUnusedCdhProductsFromClusterComponents(CLUSTER_ID, clusterComponentsByBlueprint);
+        underTest.removeUnusedCdhProductsFromClusterComponents(CLUSTER_ID, clusterComponentsByBlueprint, new ParcelOperationStatus(Map.of(), Map.of()));
 
         verify(clusterComponentConfigProvider).getComponentsByClusterId(CLUSTER_ID);
         verifyNoMoreInteractions(clusterComponentConfigProvider);
@@ -53,7 +55,7 @@ public class ClusterComponentUpdaterTest {
 
         when(clusterComponentConfigProvider.getComponentsByClusterId(CLUSTER_ID)).thenReturn(clusterComponentsFromDb);
 
-        underTest.removeUnusedCdhProductsFromClusterComponents(CLUSTER_ID, clusterComponentsByBlueprint);
+        underTest.removeUnusedCdhProductsFromClusterComponents(CLUSTER_ID, clusterComponentsByBlueprint, new ParcelOperationStatus(Map.of(), Map.of()));
 
         verify(clusterComponentConfigProvider).getComponentsByClusterId(CLUSTER_ID);
         verifyNoMoreInteractions(clusterComponentConfigProvider);
@@ -68,7 +70,8 @@ public class ClusterComponentUpdaterTest {
 
         when(clusterComponentConfigProvider.getComponentsByClusterId(CLUSTER_ID)).thenReturn(clusterComponentsFromDb);
 
-        underTest.removeUnusedCdhProductsFromClusterComponents(CLUSTER_ID, clusterComponentsByBlueprint);
+        underTest.removeUnusedCdhProductsFromClusterComponents(CLUSTER_ID, clusterComponentsByBlueprint,
+                new ParcelOperationStatus(Map.of("FLINK", "version"), Map.of()));
 
         verify(clusterComponentConfigProvider).getComponentsByClusterId(CLUSTER_ID);
         verify(clusterComponentConfigProvider).deleteClusterComponents(Set.of(flinkComponent));

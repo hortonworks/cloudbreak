@@ -62,6 +62,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterModificationService;
+import com.sequenceiq.cloudbreak.cluster.model.ParcelOperationStatus;
 import com.sequenceiq.cloudbreak.cluster.service.ClouderaManagerProductsProvider;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
@@ -389,8 +390,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         ParcelsResourceApi parcelsResourceApi = clouderaManagerApiFactory.getParcelsResourceApi(apiClient);
         for (ClouderaManagerProduct product : products) {
             LOGGER.info("Removing unused {} parcels.", product.getName());
-            clouderaManagerParcelDecommissionService.removeUnusedParcelVersions(apiClient, parcelsResourceApi, parcelResourceApi, stack, product.getName(),
-                    product.getVersion());
+            clouderaManagerParcelDecommissionService.removeUnusedParcelVersions(apiClient, parcelsResourceApi, parcelResourceApi, stack, product);
         }
     }
 
@@ -741,7 +741,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     @Override
-    public void removeUnusedParcels(Set<ClusterComponent> usedParcelComponents) {
+    public ParcelOperationStatus removeUnusedParcels(Set<ClusterComponent> usedParcelComponents) {
         ParcelsResourceApi parcelsResourceApi = clouderaManagerApiFactory.getParcelsResourceApi(apiClient);
         ParcelResourceApi parcelResourceApi = clouderaManagerApiFactory.getParcelResourceApi(apiClient);
         Map<String, ClouderaManagerProduct> cmProducts = new HashMap<>();
@@ -749,9 +749,15 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             ClouderaManagerProduct product = clusterComponent.getAttributes().getSilent(ClouderaManagerProduct.class);
             cmProducts.put(product.getName(), product);
         }
-        clouderaManagerParcelDecommissionService.deactivateUnusedParcels(parcelsResourceApi, parcelResourceApi, stack.getName(), cmProducts);
-        clouderaManagerParcelDecommissionService.undistributeUnusedParcels(apiClient, parcelsResourceApi, parcelResourceApi, stack, cmProducts);
-        clouderaManagerParcelDecommissionService.removeUnusedParcels(apiClient, parcelsResourceApi, parcelResourceApi, stack, cmProducts);
+        ParcelOperationStatus deactivateStatus = clouderaManagerParcelDecommissionService
+                .deactivateUnusedParcels(parcelsResourceApi, parcelResourceApi, stack.getName(), cmProducts);
+        ParcelOperationStatus undistributeStatus = clouderaManagerParcelDecommissionService
+                .undistributeUnusedParcels(apiClient, parcelsResourceApi, parcelResourceApi, stack, cmProducts);
+        ParcelOperationStatus removalStatus = clouderaManagerParcelDecommissionService
+                .removeUnusedParcels(apiClient, parcelsResourceApi, parcelResourceApi, stack, cmProducts);
+        ParcelOperationStatus result = removalStatus.merge(deactivateStatus).merge(undistributeStatus);
+        LOGGER.info("Result of the parcel removal: {}", result);
+        return result;
     }
 
     private int startServices() throws ApiException, CloudbreakException {
