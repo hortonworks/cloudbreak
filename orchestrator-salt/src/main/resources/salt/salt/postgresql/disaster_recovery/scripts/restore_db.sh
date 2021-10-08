@@ -106,9 +106,25 @@ limit_incomming_connection() {
   psql --host="$HOST" --port="$PORT" --dbname="postgres" --username="$USERNAME" -c "alter user ${SERVICE} connection limit ${COUNT};" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || errorExit "Unable to limit connections to ${SERVICE}"
 }
 
+is_database_exists() {
+  SERVICE=$1
+  doLog "INFO Checking the existence of database ${SERVICE}"
+  database_name=$(psql --host="$HOST" --port="$PORT" --dbname="postgres" --username="$USERNAME" -c "SELECT datname FROM pg_catalog.pg_database WHERE datname = '$SERVICE';" -At > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || errorExit "Unable to check the existence of database $SERVICE")
+  if [[ "$database_name" != "$SERVICE" ]];then
+    return 1
+  fi
+  return 0
+}
+
 restore_db_from_local() {
   SERVICE=$1
   BACKUP="${BACKUPS_DIR}/${SERVICE}_backup"
+
+  is_database_exists $SERVICE
+  if [ "$?" -eq 1 ];then
+    doLog "WARN database for $SERVICE doesn't exists"
+    return 0
+  fi
 
   if [[ "$SERVICE" == "ranger" ]]; then
     replace_ranger_group_before_import $RANGERGROUP $BACKUP
@@ -143,6 +159,8 @@ run_restore() {
     echo "No database name provided. Will restore hive and ranger databases."
     restore_db_from_local "hive"
     restore_db_from_local "ranger"
+    restore_db_from_local "profiler_agent"
+    restore_db_from_local "profiler_metric"
   else
     echo "Restoring ${DATABASENAME}."
     restore_db_from_local "${DATABASENAME}"
