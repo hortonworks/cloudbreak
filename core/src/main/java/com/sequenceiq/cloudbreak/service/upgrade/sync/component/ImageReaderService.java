@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
@@ -35,6 +36,7 @@ public class ImageReaderService {
      * @param datalake true if the stack is a datalake
      * @return a set of ClouderaManagerProducts present on the image
      */
+    @Measure(ImageReaderService.class)
     Set<ClouderaManagerProduct> getParcels(Set<Image> statedImages, boolean datalake) {
         Set<ClouderaManagerProduct> foundParcelProducts = statedImages.stream()
                 .map(im -> clouderaManagerProductTransformer.transform(im, true, !datalake))
@@ -49,6 +51,7 @@ public class ImageReaderService {
      * @param images images to get CM repos
      * @return a set of found CM repos
      */
+    @Measure(ImageReaderService.class)
     Set<ClouderaManagerRepo> getCmRepos(Set<Image> images) {
         Set<ClouderaManagerRepo> foundClouderaManagerRepos = images.stream()
                 .map(this::getCmComponent)

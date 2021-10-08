@@ -1,5 +1,21 @@
 package com.sequenceiq.cloudbreak.service.image.catalog;
 
+import static java.util.stream.Collectors.toList;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import javax.inject.Inject;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakVersion;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
@@ -12,20 +28,6 @@ import com.sequenceiq.cloudbreak.service.image.PrefixMatchImages;
 import com.sequenceiq.cloudbreak.service.image.PrefixMatcherService;
 import com.sequenceiq.cloudbreak.service.image.StatedImages;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterResult;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static java.util.stream.Collectors.toList;
 
 @Component
 public class VersionBasedImageCatalogService implements ImageCatalogService {
@@ -45,11 +47,16 @@ public class VersionBasedImageCatalogService implements ImageCatalogService {
     private VersionBasedImageProvider versionBasedImageProvider;
 
     @Inject
+    private RawImageProvider rawImageProvider;
+
+    @Inject
     private CloudbreakVersionListProvider cloudbreakVersionListProvider;
 
     @Override
     public StatedImages getImages(CloudbreakImageCatalogV3 imageCatalogV3, ImageFilter imageFilter) {
-        return versionBasedImageProvider.getImages(imageCatalogV3, imageFilter);
+        return StringUtils.isNotEmpty(imageFilter.getCbVersion())
+                ? versionBasedImageProvider.getImages(imageCatalogV3, imageFilter)
+                : rawImageProvider.getImages(imageCatalogV3, imageFilter);
     }
 
     @Override

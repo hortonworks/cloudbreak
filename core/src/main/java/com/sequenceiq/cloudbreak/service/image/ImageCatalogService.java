@@ -42,11 +42,11 @@ import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.authorization.service.ResourcePropertyProvider;
 import com.sequenceiq.authorization.service.list.ResourceWithId;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
@@ -322,17 +322,24 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         return getImages(getLoggedInUser().getUserCrn(), workspaceId, imageCatalogName, ImmutableSet.of(provider));
     }
 
-    public List<Image> getCdhImages(String userCrn, Long workspaceId, String imageCatalogName, String provider) throws CloudbreakImageCatalogException {
-        return getImages(userCrn, workspaceId, imageCatalogName, ImmutableSet.of(provider)).getImages().getCdhImages();
+    public List<Image> getAllCdhImages(String userCrn, Long workspaceId, String imageCatalogName, String provider) throws CloudbreakImageCatalogException {
+        return getImages(userCrn, workspaceId, imageCatalogName, ImmutableSet.of(provider), false).getImages().getCdhImages();
     }
 
     public StatedImages getImages(String userCrn, Long workspaceId, String imageCatalogName, Set<String> providers) throws CloudbreakImageCatalogException {
+        return getImages(userCrn, workspaceId, imageCatalogName, providers, true);
+    }
+
+    public StatedImages getImages(String userCrn, Long workspaceId, String imageCatalogName, Set<String> providers, boolean applyVersionBasedFiltering)
+            throws CloudbreakImageCatalogException {
         try {
             ImageCatalog imageCatalog = getImageCatalogByName(workspaceId, imageCatalogName);
             if (isCustomImageCatalog(imageCatalog)) {
                 return getStatedImagesFromCustomImageCatalog(imageCatalog, providers);
             } else {
-                return getImages(new ImageFilter(imageCatalog, providers, cbVersion, baseImageEnabled(userCrn), null, null));
+                return applyVersionBasedFiltering
+                        ? getImages(new ImageFilter(imageCatalog, providers, cbVersion, baseImageEnabled(userCrn), null, null))
+                        : getImages(new ImageFilter(imageCatalog, providers, null, baseImageEnabled(userCrn), null, null));
             }
         } catch (NotFoundException ignore) {
             throw new CloudbreakImageCatalogException(String.format("The %s catalog does not exist or does not belongs to your account.", imageCatalogName));
