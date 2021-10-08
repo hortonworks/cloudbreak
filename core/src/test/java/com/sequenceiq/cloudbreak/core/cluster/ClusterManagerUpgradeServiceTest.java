@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
+import com.sequenceiq.cloudbreak.cluster.model.ParcelOperationStatus;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.CsdParcelDecorator;
@@ -152,12 +153,14 @@ public class ClusterManagerUpgradeServiceTest {
         Set<ClusterComponent> clusterComponentsByBlueprint = Collections.emptySet();
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
         when(clusterApiConnectors.getConnector(stack)).thenReturn(clusterApi);
+        when(clusterApi.removeUnusedParcels(any())).thenReturn(new ParcelOperationStatus());
 
         underTest.removeUnusedComponents(STACK_ID, clusterComponentsByBlueprint);
 
         verify(stackService).getByIdWithListsInTransaction(STACK_ID);
         verify(clusterApiConnectors).getConnector(stack);
         verify(clusterApi).removeUnusedParcels(clusterComponentsByBlueprint);
-        verify(clusterComponentUpdater).removeUnusedCdhProductsFromClusterComponents(stack.getCluster().getId(), clusterComponentsByBlueprint);
+        verify(clusterComponentUpdater).removeUnusedCdhProductsFromClusterComponents(stack.getCluster().getId(), clusterComponentsByBlueprint,
+                new ParcelOperationStatus());
     }
 }

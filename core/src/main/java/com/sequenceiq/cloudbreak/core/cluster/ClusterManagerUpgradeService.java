@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
+import com.sequenceiq.cloudbreak.cluster.model.ParcelOperationStatus;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.CsdParcelDecorator;
@@ -70,10 +71,11 @@ public class ClusterManagerUpgradeService {
     @Inject
     private CsdParcelDecorator csdParcelDecorator;
 
-    public void removeUnusedComponents(Long stackId, Set<ClusterComponent> clusterComponentsByBlueprint) throws CloudbreakException {
+    public ParcelOperationStatus removeUnusedComponents(Long stackId, Set<ClusterComponent> clusterComponentsByBlueprint) throws CloudbreakException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-        clusterApiConnectors.getConnector(stack).removeUnusedParcels(clusterComponentsByBlueprint);
-        clusterComponentUpdater.removeUnusedCdhProductsFromClusterComponents(stack.getCluster().getId(), clusterComponentsByBlueprint);
+        ParcelOperationStatus removalStatus = clusterApiConnectors.getConnector(stack).removeUnusedParcels(clusterComponentsByBlueprint);
+        clusterComponentUpdater.removeUnusedCdhProductsFromClusterComponents(stack.getCluster().getId(), clusterComponentsByBlueprint, removalStatus);
+        return removalStatus;
     }
 
     public void upgradeClusterManager(Long stackId, boolean runtimeServicesStartNeeded) throws CloudbreakOrchestratorException, CloudbreakException {

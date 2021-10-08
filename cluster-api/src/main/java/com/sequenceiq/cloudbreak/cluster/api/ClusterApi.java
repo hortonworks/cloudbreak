@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import com.sequenceiq.cloudbreak.cluster.model.ParcelOperationStatus;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatus;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -80,8 +81,8 @@ public interface ClusterApi {
         clusterModificationService().downloadAndDistributeParcels(components, patchUpgrade);
     }
 
-    default void removeUnusedParcels(Set<ClusterComponent> usedParcelComponents) throws CloudbreakException {
-        clusterModificationService().removeUnusedParcels(usedParcelComponents);
+    default ParcelOperationStatus removeUnusedParcels(Set<ClusterComponent> usedParcelComponents) throws CloudbreakException {
+        return clusterModificationService().removeUnusedParcels(usedParcelComponents);
     }
 
     default void ensureComponentsAreStopped(Map<String, String> components, String hostname) throws CloudbreakException {
