@@ -57,6 +57,9 @@ public class SdxCluster implements AccountAwareResource {
     @Column(name = "crn", insertable = false, updatable = false)
     private String resourceCrn;
 
+    @Column(name = "originalcrn")
+    private String originalCrn;
+
     @NotNull
     private String clusterName;
 
@@ -157,6 +160,14 @@ public class SdxCluster implements AccountAwareResource {
 
     public void setCrn(String crn) {
         this.crn = crn;
+    }
+
+    public String getOriginalCrn() {
+        return originalCrn;
+    }
+
+    public void setOriginalCrn(String originalCrn) {
+        this.originalCrn = originalCrn;
     }
 
     public String getAccountId() {

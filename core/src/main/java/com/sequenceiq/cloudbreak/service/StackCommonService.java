@@ -259,6 +259,7 @@ public class StackCommonService {
     }
 
     public void deleteWithKerberosInWorkspace(NameOrCrn nameOrCrn, Long workspaceId, boolean forced) {
+        LOGGER.info("Trying to delete stack");
         Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
         MDCBuilder.buildMdcContext(stack);
         clusterOperationService.delete(stack.getId(), forced);

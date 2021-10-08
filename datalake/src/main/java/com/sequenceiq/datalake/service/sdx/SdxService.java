@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static com.sequenceiq.sdx.api.model.SdxClusterShape.CUSTOM;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -49,6 +50,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StackResponseEntrie
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateV4SpotParameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.customdomain.CustomDomainSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.securitygroup.SecurityGroupV4Request;
@@ -70,6 +72,7 @@ import com.sequenceiq.cloudbreak.common.event.PayloadContext;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
@@ -408,14 +411,14 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
         DetailedEnvironmentResponse environment = validateAndGetEnvironment(environmentName);
 
         SdxCluster newSdxCluster = validateAndCreateNewSdxCluster(userCrn,
-                clusterName + SDX_RESIZE_NAME_SUFFIX,
+                clusterName,
                 sdxCluster.getRuntime(),
                 shape,
                 sdxCluster.isRangerRazEnabled(),
                 sdxCluster.isEnableMultiAz(),
                 environment);
         newSdxCluster.setTags(sdxCluster.getTags());
-
+        newSdxCluster.setCrn(sdxCluster.getCrn());
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
         if (!Strings.isBlank(sdxCluster.getCloudStorageBaseLocation())) {
             newSdxCluster.setCloudStorageBaseLocation(sdxCluster.getCloudStorageBaseLocation());
@@ -428,8 +431,23 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
 
         newSdxCluster.setDatabaseAvailabilityType(sdxCluster.getDatabaseAvailabilityType());
         StackV4Request stackRequest = getStackRequest(shape, sdxCluster.isRangerRazEnabled(), null, cloudPlatform, sdxCluster.getRuntime(), null);
+        if (shape == SdxClusterShape.MEDIUM_DUTY_HA) {
+            // This is added to make sure the host name used by Light and Medium duty are not the same.
+            CustomDomainSettingsV4Request customDomainSettingsV4Request = new CustomDomainSettingsV4Request();
+            customDomainSettingsV4Request.setHostname(sdxCluster.getClusterName() + SDX_RESIZE_NAME_SUFFIX);
+            stackRequest.setCustomDomain(customDomainSettingsV4Request);
+        }
+
         prepareCloudStorageForStack(stackRequest, stackV4Response, newSdxCluster, environment);
         prepareDefaultSecurityConfigs(null, stackRequest, cloudPlatform);
+        try {
+            if (!Strings.isBlank(sdxCluster.getStackRequestToCloudbreak())) {
+                StackV4Request stackV4RequestOrig = JsonUtil.readValue(sdxCluster.getStackRequestToCloudbreak(), StackV4Request.class);
+                stackRequest.setImage(stackV4RequestOrig.getImage());
+            }
+        } catch (IOException ioException) {
+            LOGGER.error("Failed to re-use the image catalog. Will use default catalog", ioException);
+        }
         stackRequest.setResourceCrn(newSdxCluster.getCrn());
         newSdxCluster.setStackRequest(stackRequest);
         FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerSdxResize(sdxCluster.getId(), newSdxCluster);
@@ -909,6 +927,12 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
         return sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsFalse(accountIdFromCrn, envCrn);
     }
 
+    public List<SdxCluster> listAllSdxByEnvCrn(String userCrn, String envCrn) {
+        LOGGER.info("Listing all the SDX clusters by environment crn {}", envCrn);
+        String accountIdFromCrn = getAccountIdFromCrn(userCrn);
+        return sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNull(accountIdFromCrn, envCrn);
+    }
+
     public List<SdxCluster> listSdxByEnvCrn(String envCrn) {
         LOGGER.debug("Listing SDX clusters by environment crn {}", envCrn);
         String accountIdFromCrn = getAccountIdFromCrn(envCrn);
@@ -922,6 +946,16 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
             return sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(accountIdFromCrn, envName);
         } else {
             return sdxClusterRepository.findByAccountIdAndDeletedIsNullAndDetachedIsFalse(accountIdFromCrn);
+        }
+    }
+
+    public List<SdxCluster> listAllSdx(String userCrn, String envName) {
+        String accountIdFromCrn = getAccountIdFromCrn(userCrn);
+        if (envName != null) {
+            LOGGER.info("Listing all the SDX clusters by environment name {}", envName);
+            return sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(accountIdFromCrn, envName);
+        } else {
+            return sdxClusterRepository.findByAccountIdAndDeletedIsNull(accountIdFromCrn);
         }
     }
 

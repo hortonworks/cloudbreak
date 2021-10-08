@@ -39,7 +39,7 @@ public class SdxService {
 
     public List<SdxClusterResponse> list(String envName) {
         try {
-            return sdxEndpoint.list(envName);
+            return sdxEndpoint.list(envName, false);
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
             LOGGER.error(String.format("Failed to list SDX clusters by environment name '%s' due to '%s'.", envName, errorMessage), e);

@@ -17,4 +17,9 @@ public class SdxUtil {
                 .getStackV4Response().getInstanceGroups();
         return InstanceUtil.getInstanceIds(instanceGroups, hostGroupName);
     }
+
+    public String getShape(AbstractSdxTestDto testDto, SdxClient sdxClient) {
+        return sdxClient.getDefaultClient().sdxEndpoint().getDetail(testDto.getName(), new HashSet<>())
+                .getClusterShape().name();
+    }
 }

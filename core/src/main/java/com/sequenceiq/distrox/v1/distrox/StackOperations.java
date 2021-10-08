@@ -55,6 +55,7 @@ import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackClusterStatusViewToStatusConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.UserNamePasswordV4RequestToUpdateClusterV4RequestConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.view.StackApiViewToStackViewV4ResponseConverter;
+import com.sequenceiq.cloudbreak.core.flow2.stack.detach.StackUpdateService;
 import com.sequenceiq.cloudbreak.domain.projection.StackClusterStatusView;
 import com.sequenceiq.cloudbreak.domain.projection.StackCrnView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -88,6 +89,9 @@ public class StackOperations implements ResourcePropertyProvider {
 
     @Inject
     private StackCommonService stackCommonService;
+
+    @Inject
+    private StackUpdateService stackUpdateService;
 
     @Inject
     private UserService userService;
@@ -341,6 +345,11 @@ public class StackOperations implements ResourcePropertyProvider {
 
     public void delete(@NotNull NameOrCrn nameOrCrn, Long workspaceId, boolean forced) {
         stackCommonService.deleteWithKerberosInWorkspace(nameOrCrn, workspaceId, forced);
+    }
+
+    public void updateNameAndCrn(@NotNull NameOrCrn nameOrCrn, Long workspaceId, String newName, String newCrn) {
+        Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
+        stackUpdateService.updateNameAndCrn(stack, newName, newCrn);
     }
 
     public StackV4Request getRequest(@NotNull NameOrCrn nameOrCrn, Long workspaceId) {

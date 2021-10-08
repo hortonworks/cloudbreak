@@ -232,7 +232,7 @@ public class SdxCustomTestDto extends AbstractSdxTestDto<SdxCustomClusterRequest
     @Override
     public List<SdxClusterResponse> getAll(SdxClient client) {
         SdxEndpoint sdxEndpoint = client.getDefaultClient().sdxEndpoint();
-        return sdxEndpoint.list(null).stream()
+        return sdxEndpoint.list(null, false).stream()
                 .filter(s -> s.getName() != null)
                 .map(s -> {
                     SdxClusterResponse sdxClusterResponse = new SdxClusterResponse();

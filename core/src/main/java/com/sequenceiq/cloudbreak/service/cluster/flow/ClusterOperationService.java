@@ -206,7 +206,7 @@ public class ClusterOperationService {
     public void delete(Long stackId, boolean forced) {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         stack.setResources(new HashSet<>(resourceService.getAllByStackId(stackId)));
-        LOGGER.debug("Cluster delete requested.");
+        LOGGER.info("Cluster delete requested. Name:{} , CRN:{}", stack.getName(), stack.getResourceCrn());
         markVolumesForDeletion(stack);
         flowManager.triggerClusterTermination(stack, forced, ThreadBasedUserCrnProvider.getUserCrn());
     }

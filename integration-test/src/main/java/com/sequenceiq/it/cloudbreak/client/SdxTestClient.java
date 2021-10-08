@@ -27,6 +27,8 @@ import com.sequenceiq.it.cloudbreak.action.sdx.SdxRefreshCustomAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxRefreshInternalAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxRepairAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxRepairInternalAction;
+import com.sequenceiq.it.cloudbreak.action.sdx.SdxResizeAction;
+import com.sequenceiq.it.cloudbreak.action.sdx.SdxStatusAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxRestoreAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxStartAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxStopAction;
@@ -121,8 +123,16 @@ public class SdxTestClient {
         return new SdxCheckForUpgradeAction();
     }
 
+    public Action<SdxTestDto, SdxClient> checkStatus(String sdxName) {
+        return new SdxStatusAction(sdxName);
+    }
+
     public Action<SdxTestDto, SdxClient> upgrade() {
         return new SdxUpgradeAction();
+    }
+
+    public Action<SdxInternalTestDto, SdxClient> resize() {
+        return new SdxResizeAction();
     }
 
     public Action<SdxTestDto, SdxClient> rotateAutotlsCertificates() {

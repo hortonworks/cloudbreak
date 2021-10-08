@@ -51,7 +51,9 @@ public class StackViewService {
     }
 
     public Optional<StackView> findDatalakeViewByEnvironmentCrn(String environmentCrn) {
-        return stackViewRepository.findDatalakeViewByEnvironmentCrn(environmentCrn);
+        List<StackView> result = stackViewRepository.findDatalakeViewByEnvironmentCrnOrderedByCreationTime(environmentCrn);
+        return  result.isEmpty() ? Optional.empty()
+                : Optional.of(stackViewRepository.findDatalakeViewByEnvironmentCrnOrderedByCreationTime(environmentCrn).get(0));
     }
 
 }

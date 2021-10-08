@@ -93,7 +93,7 @@ class EnvironmentResourceDeletionServiceTest {
     @Test
     void getAttachedSdxClusterNames() {
         environmentResourceDeletionServiceUnderTest.getAttachedSdxClusterCrns(environment);
-        verify(sdxEndpoint).list(eq(ENVIRONMENT_NAME));
+        verify(sdxEndpoint).list(eq(ENVIRONMENT_NAME), eq(true));
     }
 
     @Test

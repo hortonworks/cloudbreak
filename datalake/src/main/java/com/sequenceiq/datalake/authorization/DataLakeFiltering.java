@@ -25,12 +25,21 @@ public class DataLakeFiltering extends AbstractAuthorizationFiltering<List<SdxCl
 
     public static final String ENV_CRN = "ENV_CRN";
 
+    public static final String INCLUDE_DETACHED = "INCLUDE_DETACHED";
+
     @Inject
     private SdxService sdxService;
 
     public List<SdxCluster> filterDataLakesByEnvNameOrAll(AuthorizationResourceAction action, String environmentName) {
         Map<String, Object> args = new HashMap<>();
         args.put(ENV_NAME, environmentName);
+        return filterResources(Crn.safeFromString(ThreadBasedUserCrnProvider.getUserCrn()), action, args);
+    }
+
+    public List<SdxCluster> getAllDataLakesByEnvNameOrAll(AuthorizationResourceAction action, String environmentName) {
+        Map<String, Object> args = new HashMap<>();
+        args.put(ENV_NAME, environmentName);
+        args.put(INCLUDE_DETACHED, "yes");
         return filterResources(Crn.safeFromString(ThreadBasedUserCrnProvider.getUserCrn()), action, args);
     }
 
@@ -65,9 +74,17 @@ public class DataLakeFiltering extends AbstractAuthorizationFiltering<List<SdxCl
     public List<SdxCluster> getAll(Map<String, Object> args) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         if (hasParam(ENV_NAME, args)) {
-            return sdxService.listSdx(userCrn, getEnvName(args));
+            if (hasParam(INCLUDE_DETACHED, args)) {
+                return sdxService.listAllSdx(userCrn, getEnvName(args));
+            } else {
+                return sdxService.listSdx(userCrn, getEnvName(args));
+            }
         } else {
-            return sdxService.listSdxByEnvCrn(userCrn, getEnvCrn(args));
+            if (hasParam(INCLUDE_DETACHED, args)) {
+                return sdxService.listAllSdxByEnvCrn(userCrn, getEnvCrn(args));
+            } else {
+                return sdxService.listSdxByEnvCrn(userCrn, getEnvCrn(args));
+            }
         }
     }
 

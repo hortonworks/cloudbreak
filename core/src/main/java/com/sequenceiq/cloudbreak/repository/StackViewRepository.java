@@ -24,8 +24,8 @@ public interface StackViewRepository extends WorkspaceResourceRepository<StackVi
     @Query("SELECT s FROM StackView s WHERE s.workspace.id= :workspaceId AND s.terminated = null AND s.resourceCrn LIKE :crn")
     Optional<StackView> findByWorkspaceIdAndCrn(@Param("workspaceId") Long workspaceId, @Param("crn") String resourceCrn);
 
-    @Query("SELECT s FROM StackView s WHERE s.environmentCrn= :environmentCrn AND s.terminated = null AND s.type LIKE 'DATALAKE'")
-    Optional<StackView> findDatalakeViewByEnvironmentCrn(@Param("environmentCrn") String environmentCrn);
+    @Query("SELECT s FROM StackView s WHERE s.environmentCrn= :environmentCrn AND s.terminated = null AND s.type LIKE 'DATALAKE' ORDER BY s.created DESC")
+    List<StackView> findDatalakeViewByEnvironmentCrnOrderedByCreationTime(@Param("environmentCrn") String environmentCrn);
 
     @Query("SELECT s.resourceCrn FROM StackView s WHERE s.workspace.tenant.name = :tenantName AND s.terminated = null AND s.name LIKE :name")
     Optional<String> findResourceCrnByTenantNameAndName(@Param("tenantName") String tenantName, @Param("name") String name);
