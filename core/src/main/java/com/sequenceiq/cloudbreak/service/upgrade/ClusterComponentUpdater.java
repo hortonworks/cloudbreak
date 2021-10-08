@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
+import com.sequenceiq.cloudbreak.cluster.model.ParcelOperationStatus;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
@@ -83,14 +84,17 @@ public class ClusterComponentUpdater {
         clusterComponentConfigProvider.deleteClusterComponents(unusedCdhProductDetails);
     }
 
-    public void removeUnusedCdhProductsFromClusterComponents(Long clusterId, Set<ClusterComponent> clusterComponentsByBlueprint) {
+    public void removeUnusedCdhProductsFromClusterComponents(Long clusterId, Set<ClusterComponent> clusterComponentsByBlueprint,
+            ParcelOperationStatus removalStatus) {
         Set<ClusterComponent> clusterComponentsFromDb = clusterComponentConfigProvider.getComponentsByClusterId(clusterId);
-        Set<ClusterComponent> componentsToDelete = getUnusedComponents(clusterComponentsByBlueprint, clusterComponentsFromDb);
-        if (componentsToDelete.isEmpty()) {
+        Set<ClusterComponent> unusedComponents = getUnusedComponents(clusterComponentsByBlueprint, clusterComponentsFromDb);
+        if (unusedComponents.isEmpty()) {
             LOGGER.debug("There is no cluster component to be deleted.");
         } else {
-            LOGGER.debug("The following cluster components will be deleted: {}", componentsToDelete);
-            clusterComponentConfigProvider.deleteClusterComponents(componentsToDelete);
+            Set<ClusterComponent> removedComponents = unusedComponents.stream()
+                    .filter(comp -> removalStatus.getSuccessful().containsKey(comp.getName()))
+                    .collect(Collectors.toSet());
+            clusterComponentConfigProvider.deleteClusterComponents(removedComponents);
         }
     }
 
