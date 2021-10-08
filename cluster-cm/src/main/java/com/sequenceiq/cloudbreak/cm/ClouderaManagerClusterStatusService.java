@@ -410,8 +410,8 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
             ApiVersionInfo apiVersionInfo = cmApiRetryTemplate.execute(context -> clouderaManagerApiFactory.getClouderaManagerResourceApi(client).getVersion());
             return Optional.ofNullable(apiVersionInfo.getVersion());
         } catch (ApiException e) {
-            LOGGER.info("Failed to get version from CM", e);
-            return Optional.empty();
+            LOGGER.info("Failed to get version from CM: ", e);
+            throw new ClouderaManagerOperationFailedException("Failed to get CM version from CM", e);
         }
     }
 

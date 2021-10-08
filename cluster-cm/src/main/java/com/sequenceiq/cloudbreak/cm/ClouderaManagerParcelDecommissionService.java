@@ -45,7 +45,7 @@ class ClouderaManagerParcelDecommissionService {
                     .collect(Collectors.toMap(ApiParcel::getProduct, ApiParcel::getVersion));
         } catch (ApiException e) {
             LOGGER.info("Unable to fetch the list of activated parcels", e);
-            throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
+            throw new ClouderaManagerOperationFailedException("Unable to fetch the list of activated parcels", e);
         }
     }
 
