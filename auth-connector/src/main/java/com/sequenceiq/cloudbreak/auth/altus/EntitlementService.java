@@ -70,6 +70,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.FMS_FREEIPA
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.LOCAL_DEV;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.PERSONAL_VIEW_CB_BY_RIGHT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.UI_EDP_PROGRESS_BAR;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_MEDIUM_DUTY_WITH_PROFILER;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -374,6 +375,10 @@ public class EntitlementService {
 
     public boolean isGcpDiskEncryptionWithCMEKEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_CB_GCP_DISK_ENCRYPTION_WITH_CMEK);
+    }
+
+    public boolean isDatalakeMediumDutyWithProfilerEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_DATA_LAKE_MEDIUM_DUTY_WITH_PROFILER);
     }
 
     public List<String> getEntitlements(String accountId) {
