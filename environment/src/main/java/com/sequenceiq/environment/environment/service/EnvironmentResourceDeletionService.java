@@ -66,7 +66,7 @@ public class EnvironmentResourceDeletionService {
         LOGGER.debug("Get SDX clusters of the environment: '{}'", environment.getName());
         try {
             Set<String> sdxClusterCrns = sdxEndpoint
-                    .list(environment.getName())
+                    .list(environment.getName(), true)
                     .stream()
                     .map(SdxClusterResponse::getCrn)
                     .collect(Collectors.toSet());

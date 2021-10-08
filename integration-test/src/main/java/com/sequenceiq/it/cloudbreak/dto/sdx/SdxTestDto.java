@@ -47,6 +47,7 @@ import com.sequenceiq.sdx.api.model.SdxAwsSpotParameters;
 import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
+import com.sequenceiq.sdx.api.model.SdxClusterResizeRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
@@ -98,7 +99,7 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
     @Override
     public List<SdxClusterResponse> getAll(SdxClient client) {
         SdxEndpoint sdxEndpoint = client.getDefaultClient().sdxEndpoint();
-        return sdxEndpoint.list(null).stream()
+        return sdxEndpoint.list(null, false).stream()
                 .filter(s -> s.getName() != null)
                 .map(s -> {
                     SdxClusterResponse sdxClusterResponse = new SdxClusterResponse();
@@ -334,6 +335,14 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
             throw new IllegalArgumentException("SDX Upgrade does not exist!");
         }
         return upgrade.getRequest();
+    }
+
+    public SdxClusterResizeRequest getSdxResizeRequest() {
+        SdxResizeTestDto resize = given(SdxResizeTestDto.class);
+        if (resize == null) {
+            throw new IllegalArgumentException("SDX Resize does not exist!");
+        }
+        return resize.getRequest();
     }
 
     public SdxTestDto withRuntimeVersion(String runtimeVersion) {

@@ -19,15 +19,17 @@ import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.SdxEvent;
+import com.sequenceiq.datalake.flow.detach.event.SdxDetachFailedEvent;
 import com.sequenceiq.datalake.flow.detach.event.SdxDetachSuccessEvent;
 import com.sequenceiq.datalake.flow.detach.event.SdxStartDetachEvent;
-import com.sequenceiq.datalake.flow.detach.event.SdxDetachFailedEvent;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.AbstractSdxAction;
 import com.sequenceiq.datalake.service.sdx.detach.SdxDetachService;
@@ -42,7 +44,11 @@ public class SdxDetachActions {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxDetachActions.class);
 
-    private static final String SDX = "SDX";
+    private static final String NEW_SDX = "NEW_SDX";
+
+    private static final String EXISTING_SDX = "EXISTING_SDX";
+
+    private static final String SDX_NAME = "SDX_NAME";
 
     @Inject
     private SdxStatusService sdxStatusService;
@@ -59,6 +65,9 @@ public class SdxDetachActions {
     @Inject
     private SdxClusterRepository sdxClusterRepository;
 
+    @Inject
+    private StackV4Endpoint stackV4Endpoint;
+
     @Bean(name = "SDX_DETACH_START_STATE")
     public Action<?, ?> sdxDetach() {
         return new AbstractSdxAction<>(SdxStartDetachEvent.class) {
@@ -70,9 +79,9 @@ public class SdxDetachActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxStartDetachEvent payload, Map<Object, Object> variables) throws Exception {
-                LOGGER.info("Execute detach flow for SDX: {}", payload.getResourceId());
-                variables.put(SDX, payload.getSdxCluster());
-                sdxDetachService.detach(payload.getResourceId());
+                variables.put(SDX_NAME, payload.getSdxCluster().getName());
+                variables.put(NEW_SDX, payload.getSdxCluster());
+                variables.put(EXISTING_SDX, sdxDetachService.detach(payload.getResourceId()));
                 sendEvent(context, SDX_DETACH_IN_PROGRESS_EVENT.event(), payload);
             }
 
@@ -95,6 +104,12 @@ public class SdxDetachActions {
             @Override
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) throws Exception {
                 LOGGER.info("SDX detaching in progress: {}", payload.getResourceId());
+                SdxCluster sdxCluster = (SdxCluster) variables.get(EXISTING_SDX);
+                String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
+                LOGGER.info("Execute detach flow for SDX: {} Name: {}", payload.getResourceId(), sdxCluster.getName());
+                ThreadBasedUserCrnProvider.doAsInternalActor(() ->
+                        stackV4Endpoint.updateNameAndCrn(0L,  (String) variables.get(SDX_NAME), initiatorUserCrn,
+                                sdxCluster.getClusterName(), sdxCluster.getCrn()));
                 sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.STOPPED, "Data lake detaching in progress", payload.getResourceId());
                 sendEvent(context, new SdxDetachSuccessEvent(SDX_DETACH_SUCCESS_EVENT.event(), payload.getResourceId(), payload.getUserId()));
             }
@@ -119,8 +134,8 @@ public class SdxDetachActions {
             protected void doExecute(SdxContext context, SdxDetachSuccessEvent payload, Map<Object, Object> variables) throws Exception {
                 LOGGER.info("SDX detach finalized: {}", payload.getResourceId());
                 sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.STOPPED, "Datalake is detached", payload.getResourceId());
-                if (variables.containsKey(SDX)) {
-                    SdxCluster sdxCluster = (SdxCluster) variables.get(SDX);
+                if (variables.containsKey(NEW_SDX)) {
+                    SdxCluster sdxCluster = (SdxCluster) variables.get(NEW_SDX);
                     MDCBuilder.buildMdcContext(sdxCluster);
                     try {
                         transactionService.required(() -> {
@@ -130,6 +145,7 @@ public class SdxDetachActions {
                             context.setSdxId(created.getId());
                             return created;
                         });
+                        LOGGER.info("Detaching Sdx with Name: {} and Crn: {} is complete", sdxCluster.getName(), sdxCluster.getCrn());
                     } catch (TransactionService.TransactionExecutionException e) {
                         throw new TransactionService.TransactionRuntimeExecutionException(e);
                     }
@@ -157,7 +173,7 @@ public class SdxDetachActions {
             protected void doExecute(SdxContext context, SdxDetachFailedEvent payload, Map<Object, Object> variables) throws Exception {
                 Exception exception = payload.getException();
                 DatalakeStatusEnum failedStatus = DatalakeStatusEnum.STOPPED;
-                LOGGER.error("Detaching SDX failed with status {} for resource: {}", failedStatus, payload.getResourceId(), exception);
+                LOGGER.error("Detaching SDX: {} failed with status {}", payload.getSdxName(), failedStatus, exception);
                 String statusReason = "SDX detach failed";
                 if (exception.getMessage() != null) {
                     statusReason = exception.getMessage();

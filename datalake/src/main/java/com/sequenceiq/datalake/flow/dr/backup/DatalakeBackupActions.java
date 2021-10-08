@@ -91,7 +91,7 @@ public class DatalakeBackupActions {
 
             @Override
             protected void doExecute(SdxContext context, DatalakeTriggerBackupEvent payload, Map<Object, Object> variables) {
-                LOGGER.info("Triggering datalake backup for {}", payload.getResourceId());
+                LOGGER.info("Triggering data lake backup for {}", payload.getResourceId());
 
                 SdxCluster sdxCluster = sdxService.getById(payload.getResourceId());
                 eventSenderService.sendEventAndNotification(sdxCluster, context.getFlowTriggerUserCrn(), ResourceEvent.DATALAKE_BACKUP_IN_PROGRESS);

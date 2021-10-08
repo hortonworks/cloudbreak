@@ -40,7 +40,7 @@ auth:
       customimage.enable: true
       loadbalancer.enable: false
       backup.on.upgrade.enable: false
-      light.to.medium.migration.enable: false
+      light.to.medium.migration.enable: true
       multiaz.enable: true
     differentdatahubversionthandatalake.enabled: true
     database.wire.encryption.enable: true

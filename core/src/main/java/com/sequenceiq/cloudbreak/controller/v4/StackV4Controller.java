@@ -123,6 +123,12 @@ public class StackV4Controller extends NotificationController implements StackV4
     }
 
     @Override
+    @InternalOnly
+    public void updateNameAndCrn(Long workspaceId, String name, @InitiatorUserCrn String initiatorUserCrn, String newName, String newCrn) {
+        stackOperations.updateNameAndCrn(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId(), newName, newCrn);
+    }
+
+    @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public FlowIdentifier sync(Long workspaceId, String name, @AccountId String accountId) {
         return stackOperations.sync(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId());

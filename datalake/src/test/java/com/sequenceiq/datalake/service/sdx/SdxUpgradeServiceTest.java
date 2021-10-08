@@ -45,9 +45,12 @@ public class SdxUpgradeServiceTest {
 
     private SdxCluster sdxCluster;
 
+    private SdxCluster detachedSdxCluster;
+
     @BeforeEach
     public void setUp() {
         sdxCluster = getValidSdxCluster();
+        detachedSdxCluster = getDetachedSdxCluster();
     }
 
     @Test
@@ -61,6 +64,14 @@ public class SdxUpgradeServiceTest {
         underTest.updateRuntimeVersionFromCloudbreak(1L);
 
         verify(sdxService, times(1)).updateRuntimeVersionFromStackResponse(eq(sdxCluster), eq(stackV4Response));
+
+        when(sdxService.getById(1L)).thenReturn(detachedSdxCluster);
+        stackV4Response = getStackV4Response();
+        when(stackV4Endpoint.get(eq(0L), eq("test-sdx-cluster"), eq(Set.of()), anyString()))
+                .thenReturn(stackV4Response);
+
+        underTest.updateRuntimeVersionFromCloudbreak(1L);
+        verify(sdxService, times(1)).updateRuntimeVersionFromStackResponse(eq(detachedSdxCluster), eq(stackV4Response));
     }
 
     @Test
@@ -159,6 +170,13 @@ public class SdxUpgradeServiceTest {
         sdxCluster.setRuntime("7.2.0");
         sdxCluster.setId(1L);
         sdxCluster.setAccountId("accountid");
+        sdxCluster.setDetached(false);
+        return sdxCluster;
+    }
+
+    private SdxCluster getDetachedSdxCluster() {
+        SdxCluster sdxCluster = getValidSdxCluster();
+        sdxCluster.setDetached(true);
         return sdxCluster;
     }
 }

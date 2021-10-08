@@ -150,7 +150,7 @@ public class SdxController implements SdxEndpoint {
         SdxClusterResponse sdxClusterResponse = sdxClusterConverter.sdxClusterToResponse(sdxCluster);
         sdxClusterResponse.setName(sdxCluster.getClusterName());
         sdxClusterResponse.setFlowIdentifier(result.getRight());
-        return null;
+        return sdxClusterResponse;
     }
 
     @Override
@@ -193,16 +193,16 @@ public class SdxController implements SdxEndpoint {
 
     @Override
     @FilterListBasedOnPermissions
-    public List<SdxClusterResponse> list(@FilterParam(DataLakeFiltering.ENV_NAME) String envName) {
+    public List<SdxClusterResponse> list(@FilterParam(DataLakeFiltering.ENV_NAME) String envName, boolean includeDetached) {
         List<SdxCluster> sdxClusters = dataLakeFiltering.filterDataLakesByEnvNameOrAll(AuthorizationResourceAction.DESCRIBE_DATALAKE, envName);
-        return convertSdxClusters(sdxClusters);
+        return includeDetached ? convertSdxClusters(sdxClusters) : convertAttachedSdxClusters(sdxClusters);
     }
 
     @Override
     @InternalOnly
     public List<SdxClusterResponse> internalList(@AccountId String accountId) {
         List<SdxCluster> sdxClusters = sdxService.listSdx(ThreadBasedUserCrnProvider.getUserCrn(), null);
-        return convertSdxClusters(sdxClusters);
+        return convertAttachedSdxClusters(sdxClusters);
     }
 
     @Override
@@ -210,7 +210,7 @@ public class SdxController implements SdxEndpoint {
     public List<SdxClusterResponse> getByEnvCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @FilterParam(DataLakeFiltering.ENV_CRN)
     @TenantAwareParam String envCrn) {
         List<SdxCluster> sdxClusters = dataLakeFiltering.filterDataLakesByEnvCrn(AuthorizationResourceAction.DESCRIBE_DATALAKE, envCrn);
-        return convertSdxClusters(sdxClusters);
+        return convertAttachedSdxClusters(sdxClusters);
     }
 
     @Override
@@ -385,9 +385,16 @@ public class SdxController implements SdxEndpoint {
         return sdxCluster;
     }
 
-    private List<SdxClusterResponse> convertSdxClusters(List<SdxCluster> sdxClusters) {
+    private List<SdxClusterResponse> convertAttachedSdxClusters(List<SdxCluster> sdxClusters) {
+        // Filters out detached clusters.
         return sdxClusters.stream()
                 .filter(sdx -> !sdx.isDetached())
+                .map(sdx -> sdxClusterConverter.sdxClusterToResponse(sdx))
+                .collect(Collectors.toList());
+    }
+
+    private List<SdxClusterResponse> convertSdxClusters(List<SdxCluster> sdxClusters) {
+        return sdxClusters.stream()
                 .map(sdx -> sdxClusterConverter.sdxClusterToResponse(sdx))
                 .collect(Collectors.toList());
     }

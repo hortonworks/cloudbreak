@@ -50,6 +50,7 @@ import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescrip
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.SYNC_CM_BY_NAME_IN_WORKSPACE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.UPDATE_LOAD_BALANCERS;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.UPGRADE_CLUSTER_IN_WORKSPACE;
+import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.UPDATE_BY_NAME_IN_WORKSPACE;
 
 import java.util.List;
 import java.util.Set;
@@ -162,6 +163,14 @@ public interface StackV4Endpoint {
             nickname = "deleteStackInWorkspaceV4Internal")
     void deleteInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name, @QueryParam("forced") @DefaultValue("false") boolean forced,
             @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+
+    @PUT
+    @Path("{name}/update_name_crn_type")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = UPDATE_BY_NAME_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
+            nickname = "updateNameCrnAndType")
+    void updateNameAndCrn(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
+            @QueryParam("initiatorUserCrn") String initiatorUserCrn, @QueryParam("newName") String newName, @QueryParam("newCrn") String newCrn);
 
     @POST
     @Path("{name}/sync")

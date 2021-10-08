@@ -82,7 +82,7 @@ public class SdxDeleteService {
     }
 
     private AttemptResult<Object> periodicCheckForDeletion(Environment environment) {
-        List<SdxClusterResponse> actualClusterList = sdxEndpoint.list(environment.getName());
+        List<SdxClusterResponse> actualClusterList = sdxEndpoint.list(environment.getName(), true);
         if (!actualClusterList.isEmpty()) {
             if (actualClusterList.stream().anyMatch(c -> c.getStatus() == SdxClusterStatusResponse.DELETE_FAILED)) {
                 return AttemptResults.breakFor(new IllegalStateException("Found a cluster with delete failed status."));

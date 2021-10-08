@@ -58,6 +58,7 @@ import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
+import com.sequenceiq.sdx.api.model.SdxClusterResizeRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
@@ -401,7 +402,7 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
     @Override
     public List<SdxClusterResponse> getAll(SdxClient client) {
         SdxEndpoint sdxEndpoint = client.getDefaultClient().sdxEndpoint();
-        return sdxEndpoint.list(null).stream()
+        return sdxEndpoint.list(null, false).stream()
                 .filter(s -> s.getName() != null)
                 .map(s -> {
                     SdxClusterResponse sdxClusterResponse = new SdxClusterResponse();
@@ -487,6 +488,14 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
             throw new IllegalArgumentException("SDX Repair does not exist!");
         }
         return repair.getRequest();
+    }
+
+    public SdxClusterResizeRequest getSdxResizeRequest() {
+        SdxResizeTestDto resize = given(SdxResizeTestDto.class);
+        if (resize == null) {
+            throw new IllegalArgumentException("SDX Resize does not exist!");
+        }
+        return resize.getRequest();
     }
 
     @Override

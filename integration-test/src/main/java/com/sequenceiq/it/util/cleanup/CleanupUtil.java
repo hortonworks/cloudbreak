@@ -186,7 +186,7 @@ public class CleanupUtil extends CleanupClientUtil {
 
         getAllEnvironments(environment).forEach((key, value) -> {
             LOG.info("Collecting available sdxes for environment: {}", value);
-            sdxNames.addAll(sdx.sdxEndpoint().list(value).stream()
+            sdxNames.addAll(sdx.sdxEndpoint().list(value, false).stream()
                     .map(SdxClusterResponse::getName)
                     .collect(Collectors.toList()));
         });
