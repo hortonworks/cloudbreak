@@ -62,7 +62,7 @@ public class CmSyncImageCollectorService {
     }
 
     private Set<Image> getAllImagesFromCatalog(String userCrn, Stack stack, String imageCatalogName, Long workspaceId) throws CloudbreakImageCatalogException {
-        List<Image> allCdhImages = imageCatalogService.getCdhImages(userCrn, workspaceId, imageCatalogName, stack.cloudPlatform());
+        List<Image> allCdhImages = imageCatalogService.getAllCdhImages(userCrn, workspaceId, imageCatalogName, stack.cloudPlatform());
         return new HashSet<>(allCdhImages);
     }
 

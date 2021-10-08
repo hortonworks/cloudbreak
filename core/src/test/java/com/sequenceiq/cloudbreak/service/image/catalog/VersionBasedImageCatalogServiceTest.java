@@ -1,15 +1,16 @@
 package com.sequenceiq.cloudbreak.service.image.catalog;
 
-import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakVersion;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.Versions;
-import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
-import com.sequenceiq.cloudbreak.service.image.CloudbreakVersionListProvider;
-import com.sequenceiq.cloudbreak.service.image.ImageCatalogVersionFilter;
-import com.sequenceiq.cloudbreak.service.image.PrefixMatchImages;
-import com.sequenceiq.cloudbreak.service.image.PrefixMatcherService;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.Collections;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,15 +19,18 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.util.Collections;
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakVersion;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.Versions;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
+import com.sequenceiq.cloudbreak.service.image.CloudbreakVersionListProvider;
+import com.sequenceiq.cloudbreak.service.image.ImageCatalogVersionFilter;
+import com.sequenceiq.cloudbreak.service.image.ImageFilter;
+import com.sequenceiq.cloudbreak.service.image.PrefixMatchImages;
+import com.sequenceiq.cloudbreak.service.image.PrefixMatcherService;
+import com.sequenceiq.cloudbreak.service.image.StatedImages;
 
 @ExtendWith(MockitoExtension.class)
 public class VersionBasedImageCatalogServiceTest {
@@ -42,6 +46,12 @@ public class VersionBasedImageCatalogServiceTest {
     private static final String OTHER_IMAGE_ID = "6edcb9d4-4110-44d8-43f7-d4c0008402a3";
 
     @Mock
+    private VersionBasedImageProvider versionBasedImageProvider;
+
+    @Mock
+    private RawImageProvider rawImageProvider;
+
+    @Mock
     private ImageCatalogVersionFilter versionFilter;
 
     @Mock
@@ -49,6 +59,9 @@ public class VersionBasedImageCatalogServiceTest {
 
     @Mock
     private CloudbreakImageCatalogV3 imageCatalogV3;
+
+    @Mock
+    private ImageFilter imageFilter;
 
     @Mock
     private Images images;
@@ -172,7 +185,7 @@ public class VersionBasedImageCatalogServiceTest {
     }
 
     @Test
-    public void testValidateWithNullVersionBlock() throws CloudbreakImageCatalogException {
+    public void testValidateWithNullVersionBlock() {
 
         Exception exception = assertThrows(CloudbreakImageCatalogException.class, () -> {
             victim.validate(createCatalog(null));
@@ -182,7 +195,7 @@ public class VersionBasedImageCatalogServiceTest {
     }
 
     @Test
-    public void testValidateWithEmptyVersionBlock() throws CloudbreakImageCatalogException {
+    public void testValidateWithEmptyVersionBlock() {
 
         CloudbreakImageCatalogV3 catalog = createCatalog(new Versions(Collections.emptyList(), Collections.emptyList()));
         when(cloudbreakVersionListProvider.getVersions(any())).thenReturn(catalog.getVersions().getCloudbreakVersions());
@@ -210,7 +223,7 @@ public class VersionBasedImageCatalogServiceTest {
     }
 
     @Test
-    public void testValidateCbImagesWhichAnyStoredInVersionBlock() throws CloudbreakImageCatalogException {
+    public void testValidateCbImagesWhichAnyStoredInVersionBlock() {
 
         Image properImage1 = createImage(PROPER_IMAGE_ID);
         Image properImage2 = createImage(PROPER_IMAGE_ID_2);
@@ -243,7 +256,7 @@ public class VersionBasedImageCatalogServiceTest {
     }
 
     @Test
-    public void testValidateFreeipaImagesWhichAnyStoredInVersionBlock() throws CloudbreakImageCatalogException {
+    public void testValidateFreeipaImagesWhichAnyStoredInVersionBlock() {
 
         Image properImage1 = createImage(PROPER_IMAGE_ID);
         Image properImage2 = createImage(PROPER_IMAGE_ID_2);
@@ -258,6 +271,29 @@ public class VersionBasedImageCatalogServiceTest {
         });
 
         assertEquals("Images with ids: " + OTHER_IMAGE_ID + " is not present in cdh-images block", exception.getMessage());
+    }
+
+    @Test
+    public void testGetImagesShouldCallVersionBasedImageProviderWhenTheCbVersionIsPresent() {
+        StatedImages statedImages = mock(StatedImages.class);
+        when(imageFilter.getCbVersion()).thenReturn("2.49");
+        when(versionBasedImageProvider.getImages(imageCatalogV3, imageFilter)).thenReturn(statedImages);
+
+        StatedImages actual = victim.getImages(imageCatalogV3, imageFilter);
+
+        assertEquals(statedImages, actual);
+        verify(versionBasedImageProvider).getImages(imageCatalogV3, imageFilter);
+    }
+
+    @Test
+    public void testGetImagesShouldCallRawImageProviderWhenTheCbVersionIsNotPresent() {
+        StatedImages statedImages = mock(StatedImages.class);
+        when(rawImageProvider.getImages(imageCatalogV3, imageFilter)).thenReturn(statedImages);
+
+        StatedImages actual = victim.getImages(imageCatalogV3, imageFilter);
+
+        assertEquals(statedImages, actual);
+        verify(rawImageProvider).getImages(imageCatalogV3, imageFilter);
     }
 
     private Image createImage(String imageId) {
