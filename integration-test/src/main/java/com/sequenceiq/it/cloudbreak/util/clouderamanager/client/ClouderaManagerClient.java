@@ -19,10 +19,10 @@ public class ClouderaManagerClient {
     public ClouderaManagerClient() {
     }
 
-    public ApiClient getCmApiClient(String serverFqdn, String apiVersion, String cmUser, String cmPassword) {
+    public ApiClient getCmApiClient(String serverFqdn, String clusterName, String apiVersion, String cmUser, String cmPassword) {
         LOGGER.info(String.format("Cloudera Manager Server access details: %nserverFqdn: %s %ncmUser: %s %ncmPassword: %s", serverFqdn, cmUser, cmPassword));
         ApiClient cmClient = new ApiClient();
-        cmClient.setBasePath("https://" + serverFqdn + "/clouderamanager" + apiVersion);
+        cmClient.setBasePath("https://" + serverFqdn + "/" + clusterName + "/cdp-proxy-api/cm-api" + apiVersion);
         cmClient.setUsername(cmUser);
         cmClient.setPassword(cmPassword);
         cmClient.setVerifyingSsl(false);
