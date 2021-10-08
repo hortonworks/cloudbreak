@@ -60,3 +60,16 @@ audit-connector/                                                                
 core/src/main/resources/defaults/blueprints/*/cdp-data-engineering*.bp          @hortonworks/cloudbreak-bobcat
 core/src/main/resources/defaults/clustertemplates/*/*/dataengineering*.json     @hortonworks/cloudbreak-bobcat
 
+# Armadillo team should review freeipa changes
+freeipa/                                                                        @hortonworks/cloudbreak-armadillo
+freeipa-api/                                                                    @hortonworks/cloudbreak-armadillo
+freeipa-client/                                                                 @hortonworks/cloudbreak-armadillo
+
+# Armadillo team should review datalakedr
+datalake-dr-connector/                                                          @hortonworks/cloudbreak-armadillo
+datalake/src/main/java/com/sequenceiq/datalake/service/sdx/dr/                  @hortonworks/cloudbreak-armadillo
+datalake/src/main/java/com/sequenceiq/datalake/flow/dr/                         @hortonworks/cloudbreak-armadillo
+
+# Armadillo should review certain networking related changes
+*/flow/loadbalancer/                                                            @hortonworks/cloudbreak-armadillo
+*LoadBalancer*.java                                                             @hortonworks/cloudbreak-armadillo
