@@ -24,16 +24,14 @@ public class ClouderaManagerClientActions extends ClouderaManagerClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerClientActions.class);
 
-    private static final String API_ROOT = "/api";
-
-    private static final String API_V_43 = API_ROOT + "/v43";
+    private static final String V_43 = "/v43";
 
     @Value("${integrationtest.cloudProvider:}")
     private String cloudProvider;
 
     public SdxInternalTestDto checkCmKnoxIDBrokerRoleConfigGroups(SdxInternalTestDto testDto, String user, String password) {
         String serverFqdn = testDto.getResponse().getStackV4Response().getCluster().getServerFqdn();
-        ApiClient apiClient = getCmApiClient(serverFqdn, API_V_43, user, password);
+        ApiClient apiClient = getCmApiClient(serverFqdn, testDto.getName(), V_43, user, password);
         // CHECKSTYLE:OFF
         RoleConfigGroupsResourceApi roleConfigGroupsResourceApi = new RoleConfigGroupsResourceApi(apiClient);
         // CHECKSTYLE:ON
@@ -76,7 +74,7 @@ public class ClouderaManagerClientActions extends ClouderaManagerClient {
 
     public DistroXTestDto checkCmYarnNodemanagerRoleConfigGroups(DistroXTestDto testDto, String user, String password) {
         String serverIp = testDto.getResponse().getCluster().getServerIp();
-        ApiClient apiClient = getCmApiClient(serverIp, API_V_43, user, password);
+        ApiClient apiClient = getCmApiClient(serverIp, testDto.getName(), V_43, user, password);
         // CHECKSTYLE:OFF
         RoleConfigGroupsResourceApi roleConfigGroupsResourceApi = new RoleConfigGroupsResourceApi(apiClient);
         // CHECKSTYLE:ON
@@ -112,7 +110,7 @@ public class ClouderaManagerClientActions extends ClouderaManagerClient {
 
     public DistroXTestDto checkCmHdfsNamenodeRoleConfigGroups(DistroXTestDto testDto, String user, String password, Set<String> mountPoints) {
         String serverIp = testDto.getResponse().getCluster().getServerIp();
-        ApiClient apiClient = getCmApiClient(serverIp, API_V_43, user, password);
+        ApiClient apiClient = getCmApiClient(serverIp, testDto.getName(), V_43, user, password);
         // CHECKSTYLE:OFF
         RoleConfigGroupsResourceApi roleConfigGroupsResourceApi = new RoleConfigGroupsResourceApi(apiClient);
         // CHECKSTYLE:ON
@@ -150,7 +148,7 @@ public class ClouderaManagerClientActions extends ClouderaManagerClient {
 
     public DistroXTestDto checkCmHdfsDatanodeRoleConfigGroups(DistroXTestDto testDto, String user, String password, Set<String> mountPoints) {
         String serverIp = testDto.getResponse().getCluster().getServerIp();
-        ApiClient apiClient = getCmApiClient(serverIp, API_V_43, user, password);
+        ApiClient apiClient = getCmApiClient(serverIp, testDto.getName(), V_43, user, password);
         // CHECKSTYLE:OFF
         RoleConfigGroupsResourceApi roleConfigGroupsResourceApi = new RoleConfigGroupsResourceApi(apiClient);
         // CHECKSTYLE:ON
