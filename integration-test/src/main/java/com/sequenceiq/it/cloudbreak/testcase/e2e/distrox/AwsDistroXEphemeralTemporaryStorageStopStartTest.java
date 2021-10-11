@@ -115,7 +115,7 @@ public class AwsDistroXEphemeralTemporaryStorageStopStartTest extends AbstractE2
                 .when(distroXTestClient.start(), RunningParameter.key("eph_dx"))
                 .await(STACK_AVAILABLE, RunningParameter.key("eph_dx"))
                 .then((tc, testDto, client) -> {
-                    sshJClientActions.checkEphemeralDisksMounted(testDto.getResponse().getInstanceGroups(), List.of(HostGroupType.WORKER.getName()));
+                    sshJClientActions.checkEphemeralDisksMounted(testDto.getResponse().getInstanceGroups(), List.of(HostGroupType.WORKER.getName()), "ephfs");
                     return testDto;
                 })
                 .then((tc, testDto, client) -> clouderaManagerUtil.checkClouderaManagerYarnNodemanagerRoleConfigGroups(testDto, sanitizedUserName,
