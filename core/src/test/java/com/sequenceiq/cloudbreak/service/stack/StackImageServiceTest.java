@@ -1,13 +1,15 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+
 
 import java.io.IOException;
 import java.util.Collections;
@@ -26,6 +28,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
@@ -50,6 +53,8 @@ public class StackImageServiceTest {
     private static final String TARGET_IMAGE_CATALOG = "target image catalog";
 
     private static final String TARGET_IMAGE_CATALOG_URL = "target image catalog url";
+
+    private static final String TARGET_IMAGE = "TARGET_IMAGE";
 
     private Stack stack;
 
@@ -168,6 +173,32 @@ public class StackImageServiceTest {
         when(imageCatalogService.getImage(TARGET_IMAGE_CATALOG_URL, TARGET_IMAGE_CATALOG, IMAGE_ID)).thenThrow(new CloudbreakImageCatalogException(""));
 
         assertThrows(CloudbreakServiceException.class, () -> victim.changeImageCatalog(stack, TARGET_IMAGE_CATALOG));
+    }
+
+    @Test
+    void testRemoveTargetImageShouldRemoveImageWhenTheImagePresent() {
+        Component targetImageComponent = createImageComponent();
+        when(componentConfigProviderService.getComponent(stack.getId(), ComponentType.IMAGE, TARGET_IMAGE)).thenReturn(targetImageComponent);
+
+        victim.removeImageByComponentName(stack.getId(), TARGET_IMAGE);
+
+        verify(componentConfigProviderService).getComponent(stack.getId(), ComponentType.IMAGE, TARGET_IMAGE);
+        verify(componentConfigProviderService).deleteComponents(Collections.singleton(targetImageComponent));
+    }
+
+    @Test
+    void testRemoveTargetImageShouldNotRemoveImageWhenTheImageIsNotPresent() {
+        when(componentConfigProviderService.getComponent(stack.getId(), ComponentType.IMAGE, TARGET_IMAGE)).thenReturn(null);
+
+        victim.removeImageByComponentName(stack.getId(), TARGET_IMAGE);
+
+        verify(componentConfigProviderService).getComponent(stack.getId(), ComponentType.IMAGE, TARGET_IMAGE);
+        verifyNoMoreInteractions(componentConfigProviderService);
+    }
+
+    private Component createImageComponent() {
+        com.sequenceiq.cloudbreak.cloud.model.Image targetModelImage = anImageComponent();
+        return new Component(ComponentType.IMAGE, TARGET_IMAGE, new Json(targetModelImage), stack);
     }
 
     private Image anImage(String imageId) {

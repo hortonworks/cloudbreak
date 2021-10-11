@@ -2,6 +2,9 @@ package com.sequenceiq.cloudbreak.service.stack;
 
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 
+import java.util.Collections;
+import java.util.Optional;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -59,6 +62,16 @@ public class StackImageService {
         }
     }
 
+    public void removeImageByComponentName(Long stackId, String imageComponentName) {
+        Optional<Component> imageComponent = findImageComponentByName(stackId, imageComponentName);
+        if (imageComponent.isPresent()) {
+            LOGGER.debug("Deleting image component {} from stack {}", imageComponentName, stackId);
+            componentConfigProviderService.deleteComponents(Collections.singleton(imageComponent.get()));
+        } else {
+            LOGGER.warn("There is no image component found for stack {} with name {}", stackId, imageComponentName);
+        }
+    }
+
     public Image getCurrentImage(Stack stack) throws CloudbreakImageNotFoundException {
             return componentConfigProviderService.getImage(stack.getId());
     }
@@ -94,5 +107,11 @@ public class StackImageService {
             LOGGER.info("Could not find image", e);
             throw new CloudbreakServiceException("Could not find image", e);
         }
+    }
+
+    public Optional<Component> findImageComponentByName(Long stackId, String componentName) {
+        Component targetImageComponent = componentConfigProviderService.getComponent(stackId, ComponentType.IMAGE, componentName);
+        LOGGER.debug("The following target image found for stack {}, {}", stackId, targetImageComponent);
+        return Optional.ofNullable(targetImageComponent);
     }
 }
