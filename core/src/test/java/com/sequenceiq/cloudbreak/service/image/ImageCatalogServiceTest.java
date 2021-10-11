@@ -779,24 +779,10 @@ public class ImageCatalogServiceTest {
     }
 
     @Test
-    public void testGetImageByCatalogNameWithCustomCatalogNameAndExistingDatahubImage()
+    public void testGetImageByCatalogNameWithCustomCatalogNameAndExistingRuntimeImage()
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException, IOException {
 
-        setupCustomImageCatalog(ImageType.DATAHUB, "949bffa3-17d4-4076-9d5a-bf3d23c1086b", CUSTOM_BASE_PARCEL_URL);
-
-        StatedImage image = underTest.getImageByCatalogName(WORKSPACE_ID, CUSTOM_IMAGE_ID, CUSTOM_CATALOG_NAME);
-        assertEquals("Test uuid", image.getImage().getUuid());
-
-        verify(customImageProvider).mergeSourceImageAndCustomImageProperties(sourceImageCaptor.capture(), any(), any(), any());
-
-        Assertions.assertThat(sourceImageCaptor.getValue().getImage().getUuid()).isEqualTo("949bffa3-17d4-4076-9d5a-bf3d23c1086b");
-    }
-
-    @Test
-    public void testGetImageByCatalogNameWithCustomCatalogNameAndExistingDatalakeImage()
-            throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException, IOException {
-
-        setupCustomImageCatalog(ImageType.DATALAKE, "232fe6b6-aec4-4fa9-bb02-2c295d319a36", CUSTOM_BASE_PARCEL_URL + "/");
+        setupCustomImageCatalog(ImageType.RUNTIME, "232fe6b6-aec4-4fa9-bb02-2c295d319a36", CUSTOM_BASE_PARCEL_URL + "/");
 
         StatedImage image = underTest.getImageByCatalogName(WORKSPACE_ID, CUSTOM_IMAGE_ID, CUSTOM_CATALOG_NAME);
         assertEquals("Test uuid", image.getImage().getUuid());
@@ -834,9 +820,9 @@ public class ImageCatalogServiceTest {
     }
 
     @Test
-    public void testGetDatalakeImagesByFromCustomImageCatalogByImageCatalogName() throws CloudbreakImageCatalogException, IOException {
+    public void testGetRuntimeImagesByFromCustomImageCatalogByImageCatalogName() throws CloudbreakImageCatalogException, IOException {
         ImageCatalog imageCatalog = new ImageCatalog();
-        imageCatalog.setCustomImages(Set.of(getCustomImage(ImageType.DATALAKE, "5b60b723-4beb-40b0-5cba-47ea9c9b6e53", CUSTOM_BASE_PARCEL_URL)));
+        imageCatalog.setCustomImages(Set.of(getCustomImage(ImageType.RUNTIME, "5b60b723-4beb-40b0-5cba-47ea9c9b6e53", CUSTOM_BASE_PARCEL_URL)));
         StatedImage statedImage = StatedImage.statedImage(getImage(), CUSTOM_IMAGE_CATALOG_URL, CUSTOM_CATALOG_NAME);
 
         setupImageCatalogProvider(DEFAULT_CATALOG_URL, DEV_CATALOG_FILE);
@@ -867,7 +853,7 @@ public class ImageCatalogServiceTest {
     public void testGetImageShouldLookupCustomImageInCaseOfNullImageCatalogUrl()
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException, IOException {
         ImageCatalog imageCatalog = new ImageCatalog();
-        CustomImage customImage = getCustomImage(ImageType.DATALAKE, "5b60b723-4beb-40b0-5cba-47ea9c9b6e53", CUSTOM_BASE_PARCEL_URL);
+        CustomImage customImage = getCustomImage(ImageType.RUNTIME, "5b60b723-4beb-40b0-5cba-47ea9c9b6e53", CUSTOM_BASE_PARCEL_URL);
         imageCatalog.setCustomImages(Set.of(customImage));
         StatedImage statedImage = StatedImage.statedImage(getImage(), CUSTOM_IMAGE_CATALOG_URL, CUSTOM_CATALOG_NAME);
 
