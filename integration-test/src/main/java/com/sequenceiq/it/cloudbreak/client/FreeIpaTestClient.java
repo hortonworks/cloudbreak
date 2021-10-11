@@ -8,6 +8,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.Instanc
 import com.sequenceiq.it.cloudbreak.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaAttachChildEnvironmentAction;
+import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaChangeImageCatalogAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaCollectDiagnosticsAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaCreateAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaDeleteAction;
@@ -30,6 +31,7 @@ import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaChildEnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaDiagnosticsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaUserSyncTestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeipaChangeImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeipaUsedImagesTestDto;
 
 @Service
@@ -109,5 +111,9 @@ public class FreeIpaTestClient {
 
     public Action<FreeIpaTestDto, FreeIpaClient> upgrade() {
         return new FreeIpaUpgradeAction();
+    }
+
+    public Action<FreeipaChangeImageCatalogTestDto, FreeIpaClient> changeImageCatalog() {
+        return new FreeIpaChangeImageCatalogAction();
     }
 }
