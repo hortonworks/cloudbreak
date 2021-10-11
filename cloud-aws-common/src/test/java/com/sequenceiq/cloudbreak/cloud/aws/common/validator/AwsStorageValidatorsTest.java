@@ -132,9 +132,9 @@ public class AwsStorageValidatorsTest {
     public void testStackValidatorNoInstanceStorage() {
         Volume volume = new Volume("SSD", "SSD", 100, CloudVolumeUsageType.GENERAL);
         InstanceTemplate noStorageTemplate =
-                new InstanceTemplate("noStorage", "worker", 0L, List.of(volume), InstanceStatus.CREATE_REQUESTED, Map.of(), 0L, "", EPHEMERAL_VOLUMES);
+                new InstanceTemplate("noStorage", "worker", 0L, List.of(volume), InstanceStatus.CREATE_REQUESTED, Map.of(), 0L, "", EPHEMERAL_VOLUMES, 0L);
         InstanceTemplate storageTemplate =
-                new InstanceTemplate("storage", "compute", 0L, List.of(volume), InstanceStatus.CREATE_REQUESTED, Map.of(), 0L, "", EPHEMERAL_VOLUMES);
+                new InstanceTemplate("storage", "compute", 0L, List.of(volume), InstanceStatus.CREATE_REQUESTED, Map.of(), 0L, "", EPHEMERAL_VOLUMES, 0L);
         CloudInstance noStorageInstance = new CloudInstance("", noStorageTemplate, null, "subnet-1", "az1");
         CloudInstance storageInstance = new CloudInstance("", storageTemplate, null, "subnet-1", "az1");
         Group noStoragegroup = new Group("worker", InstanceGroupType.CORE,

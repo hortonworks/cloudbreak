@@ -2,6 +2,8 @@ package com.sequenceiq.it.cloudbreak.util.clouderamanager.action;
 
 import static java.lang.String.format;
 
+import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,16 +24,14 @@ public class ClouderaManagerClientActions extends ClouderaManagerClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerClientActions.class);
 
-    private static final String API_ROOT = "/api";
-
-    private static final String API_V_43 = API_ROOT + "/v43";
+    private static final String V_43 = "/v43";
 
     @Value("${integrationtest.cloudProvider:}")
     private String cloudProvider;
 
     public SdxInternalTestDto checkCmKnoxIDBrokerRoleConfigGroups(SdxInternalTestDto testDto, String user, String password) {
         String serverFqdn = testDto.getResponse().getStackV4Response().getCluster().getServerFqdn();
-        ApiClient apiClient = getCmApiClient(serverFqdn, API_V_43, user, password);
+        ApiClient apiClient = getCmApiClient(serverFqdn, testDto.getName(), V_43, user, password);
         // CHECKSTYLE:OFF
         RoleConfigGroupsResourceApi roleConfigGroupsResourceApi = new RoleConfigGroupsResourceApi(apiClient);
         // CHECKSTYLE:ON
@@ -74,7 +74,7 @@ public class ClouderaManagerClientActions extends ClouderaManagerClient {
 
     public DistroXTestDto checkCmYarnNodemanagerRoleConfigGroups(DistroXTestDto testDto, String user, String password) {
         String serverIp = testDto.getResponse().getCluster().getServerIp();
-        ApiClient apiClient = getCmApiClient(serverIp, API_V_43, user, password);
+        ApiClient apiClient = getCmApiClient(serverIp, testDto.getName(), V_43, user, password);
         // CHECKSTYLE:OFF
         RoleConfigGroupsResourceApi roleConfigGroupsResourceApi = new RoleConfigGroupsResourceApi(apiClient);
         // CHECKSTYLE:ON
@@ -104,6 +104,82 @@ public class ClouderaManagerClientActions extends ClouderaManagerClient {
         } catch (Exception e) {
             LOGGER.error("Can't get users' list at: '{}'!", apiClient.getBasePath());
             throw new TestFailException("Can't get users' list at: " + apiClient.getBasePath(), e);
+        }
+        return testDto;
+    }
+
+    public DistroXTestDto checkCmHdfsNamenodeRoleConfigGroups(DistroXTestDto testDto, String user, String password, Set<String> mountPoints) {
+        String serverIp = testDto.getResponse().getCluster().getServerIp();
+        ApiClient apiClient = getCmApiClient(serverIp, testDto.getName(), V_43, user, password);
+        // CHECKSTYLE:OFF
+        RoleConfigGroupsResourceApi roleConfigGroupsResourceApi = new RoleConfigGroupsResourceApi(apiClient);
+        // CHECKSTYLE:ON
+        try {
+            ApiConfigList hdfsConfigs = roleConfigGroupsResourceApi.readConfig(testDto.getName(), "hdfs-NAMENODE-BASE",
+                    "hdfs", "summary");
+            hdfsConfigs.getItems()
+                    .forEach(config -> {
+                        String hdfsConfigName = config.getName();
+                        String mappingsFromHdfsConfig = config.getValue();
+                        if ("dfs_data_dir_list".equalsIgnoreCase(hdfsConfigName)) {
+                            if (mountPoints.stream().anyMatch(mappingsFromHdfsConfig::startsWith)) {
+                                LOGGER.error("{} contains ephemeral volume mapping '{}'!", hdfsConfigName, mappingsFromHdfsConfig);
+                                throw new TestFailException(String.format("%s contains ephemeral volume mapping '%s'!", hdfsConfigName,
+                                        mappingsFromHdfsConfig));
+                            } else {
+                                Log.log(LOGGER, format(" '%s' does not contain the ephemeral mapping '%s', as expected. ", hdfsConfigName,
+                                        mappingsFromHdfsConfig));
+                            }
+                        }
+                    });
+            if (hdfsConfigs.getItems().isEmpty()) {
+                LOGGER.error("Namenode mappings are NOT exist!");
+                throw new TestFailException("Namenode mappings are NOT exist!");
+            }
+        } catch (ApiException e) {
+            LOGGER.error("Exception when calling RoleConfigGroupsResourceApi#readConfig", e);
+            throw new TestFailException("Exception when calling RoleConfigGroupsResourceApi#readConfig at " + apiClient.getBasePath(), e);
+        } catch (Exception e) {
+            LOGGER.error("Can't read config at: '{}'!", apiClient.getBasePath());
+            throw new TestFailException("Can't read config at: " + apiClient.getBasePath(), e);
+        }
+        return testDto;
+    }
+
+    public DistroXTestDto checkCmHdfsDatanodeRoleConfigGroups(DistroXTestDto testDto, String user, String password, Set<String> mountPoints) {
+        String serverIp = testDto.getResponse().getCluster().getServerIp();
+        ApiClient apiClient = getCmApiClient(serverIp, testDto.getName(), V_43, user, password);
+        // CHECKSTYLE:OFF
+        RoleConfigGroupsResourceApi roleConfigGroupsResourceApi = new RoleConfigGroupsResourceApi(apiClient);
+        // CHECKSTYLE:ON
+        try {
+            ApiConfigList hdfsConfigs = roleConfigGroupsResourceApi.readConfig(testDto.getName(), "hdfs-DATANODE-BASE",
+                    "hdfs", "summary");
+            hdfsConfigs.getItems()
+                    .forEach(config -> {
+                        String hdfsConfigName = config.getName();
+                        String mappingsFromHdfsConfig = config.getValue();
+                        if ("dfs_data_dir_list".equalsIgnoreCase(hdfsConfigName)) {
+                            if (mountPoints.stream().anyMatch(mappingsFromHdfsConfig::startsWith)) {
+                                LOGGER.error("{} contains ephemeral volume mapping '{}'!", hdfsConfigName, mappingsFromHdfsConfig);
+                                throw new TestFailException(String.format("%s contains ephemeral volume mapping '%s'!", hdfsConfigName,
+                                        mappingsFromHdfsConfig));
+                            } else {
+                                Log.log(LOGGER, format(" '%s' does not contain the ephemeral mapping '%s', as expected. ", hdfsConfigName,
+                                        mappingsFromHdfsConfig));
+                            }
+                        }
+                    });
+            if (hdfsConfigs.getItems().isEmpty()) {
+                LOGGER.error("Datanode mappings are NOT exist!");
+                throw new TestFailException("Datanode mappings are NOT exist!");
+            }
+        } catch (ApiException e) {
+            LOGGER.error("Exception when calling RoleConfigGroupsResourceApi#readConfig", e);
+            throw new TestFailException("Exception when calling RoleConfigGroupsResourceApi#readConfig at " + apiClient.getBasePath(), e);
+        } catch (Exception e) {
+            LOGGER.error("Can't read config at: '{}'!", apiClient.getBasePath());
+            throw new TestFailException("Can't read config at: " + apiClient.getBasePath(), e);
         }
         return testDto;
     }

@@ -248,15 +248,15 @@ public class MetadataSetupServiceTest {
         stack.setId(1L);
         List<CloudVmMetaDataStatus> cloudVmMetaDataStatuses = new ArrayList<>();
         cloudVmMetaDataStatuses.add(new CloudVmMetaDataStatus(new CloudVmInstanceStatus(new CloudInstance("id1", new InstanceTemplate("medium", "gateway",
-                10L, Collections.emptyList(), InstanceStatus.CREATED, Map.of(), 40L, "imageid", TemporaryStorage.ATTACHED_VOLUMES), null, "subnet", "az"),
+                10L, Collections.emptyList(), InstanceStatus.CREATED, Map.of(), 40L, "imageid", TemporaryStorage.ATTACHED_VOLUMES, 0L), null, "subnet", "az"),
                 InstanceStatus.CREATED),
                 new CloudInstanceMetaData("1.1.1.1", "1.1.1.1")));
         cloudVmMetaDataStatuses.add(new CloudVmMetaDataStatus(new CloudVmInstanceStatus(new CloudInstance("id2", new InstanceTemplate("medium", "gateway",
-                11L, Collections.emptyList(), InstanceStatus.CREATED, Map.of(), 40L, "imageid", TemporaryStorage.ATTACHED_VOLUMES), null, "subnet", "az"),
+                11L, Collections.emptyList(), InstanceStatus.CREATED, Map.of(), 40L, "imageid", TemporaryStorage.ATTACHED_VOLUMES, 0L), null, "subnet", "az"),
                 InstanceStatus.CREATED),
                 new CloudInstanceMetaData("1.1.1.2", "1.1.1.2")));
         cloudVmMetaDataStatuses.add(new CloudVmMetaDataStatus(new CloudVmInstanceStatus(new CloudInstance("id3", new InstanceTemplate("medium", "worker",
-                12L, Collections.emptyList(), InstanceStatus.CREATED, Map.of(), 41L, "imageid", TemporaryStorage.ATTACHED_VOLUMES), null, "subnet", "az"),
+                12L, Collections.emptyList(), InstanceStatus.CREATED, Map.of(), 41L, "imageid", TemporaryStorage.ATTACHED_VOLUMES, 0L), null, "subnet", "az"),
                 InstanceStatus.CREATED),
                 new CloudInstanceMetaData("1.1.1.2", "1.1.1.2")));
         InstanceMetaData lastTerminatedPGW = new InstanceMetaData();
@@ -311,15 +311,15 @@ public class MetadataSetupServiceTest {
         stack.setId(1L);
         List<CloudVmMetaDataStatus> cloudVmMetaDataStatuses = new ArrayList<>();
         cloudVmMetaDataStatuses.add(new CloudVmMetaDataStatus(new CloudVmInstanceStatus(new CloudInstance("id1", new InstanceTemplate("medium", "gateway",
-                10L, Collections.emptyList(), InstanceStatus.CREATED, Map.of(), 40L, "imageid", TemporaryStorage.ATTACHED_VOLUMES), null, "subnet", "az"),
+                10L, Collections.emptyList(), InstanceStatus.CREATED, Map.of(), 40L, "imageid", TemporaryStorage.ATTACHED_VOLUMES, 0L), null, "subnet", "az"),
                 InstanceStatus.CREATED),
                 new CloudInstanceMetaData("1.1.1.1", "1.1.1.1")));
         cloudVmMetaDataStatuses.add(new CloudVmMetaDataStatus(new CloudVmInstanceStatus(new CloudInstance("id2", new InstanceTemplate("medium", "gateway",
-                11L, Collections.emptyList(), InstanceStatus.CREATED, Map.of(), 40L, "imageid", TemporaryStorage.ATTACHED_VOLUMES), null, "subnet", "az"),
+                11L, Collections.emptyList(), InstanceStatus.CREATED, Map.of(), 40L, "imageid", TemporaryStorage.ATTACHED_VOLUMES, 0L), null, "subnet", "az"),
                 InstanceStatus.CREATED),
                 new CloudInstanceMetaData("1.1.1.2", "1.1.1.2")));
         cloudVmMetaDataStatuses.add(new CloudVmMetaDataStatus(new CloudVmInstanceStatus(new CloudInstance("id3", new InstanceTemplate("medium", "worker",
-                12L, Collections.emptyList(), InstanceStatus.CREATED, Map.of(), 41L, "imageid", TemporaryStorage.ATTACHED_VOLUMES), null, "subnet", "az"),
+                12L, Collections.emptyList(), InstanceStatus.CREATED, Map.of(), 41L, "imageid", TemporaryStorage.ATTACHED_VOLUMES, 0L), null, "subnet", "az"),
                 InstanceStatus.CREATED),
                 new CloudInstanceMetaData("1.1.1.3", "1.1.1.3")));
         InstanceMetaData lastTerminatedPGW = new InstanceMetaData();
@@ -383,7 +383,7 @@ public class MetadataSetupServiceTest {
 
     private Iterable<CloudVmMetaDataStatus> getCloudVmMetaDataStatuses(InstanceStatus instanceStatus) {
         InstanceTemplate instanceTemplate = new InstanceTemplate(null, GROUP_NAME, PRIVATE_ID, List.of(), null, Map.of(), null, null,
-                TemporaryStorage.ATTACHED_VOLUMES);
+                TemporaryStorage.ATTACHED_VOLUMES, 0L);
         Map<String, Object> params = new HashMap<>();
         params.put(CloudInstance.INSTANCE_NAME, INSTANCE_NAME);
         CloudInstance cloudInstance = new CloudInstance(null, instanceTemplate, null, null, null, params);

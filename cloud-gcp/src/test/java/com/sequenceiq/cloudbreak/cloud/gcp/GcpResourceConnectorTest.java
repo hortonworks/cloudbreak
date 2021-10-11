@@ -270,7 +270,7 @@ public class GcpResourceConnectorTest {
 
     private InstanceTemplate instanceTemplate() {
         return new InstanceTemplate("large", "master", 1L, new ArrayList<>(), InstanceStatus.CREATE_REQUESTED, null, 1L,
-                "image", TemporaryStorage.ATTACHED_VOLUMES);
+                "image", TemporaryStorage.ATTACHED_VOLUMES, 0L);
     }
 
     private InstanceAuthentication instanceAuthentication() {

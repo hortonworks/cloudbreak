@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.aws.common.resource;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
@@ -23,8 +24,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Volume;
 public class VolumeBuilderUtil {
 
     public BlockDeviceMapping getEphemeral(AwsInstanceView awsInstanceView) {
-        Map<String, Long> volumes = awsInstanceView.getVolumes().stream().collect(Collectors.groupingBy(Volume::getType, Collectors.counting()));
-        Long ephemeralCount = volumes.getOrDefault("ephemeral", 0L);
+        Long ephemeralCount = getEphemeralCount(awsInstanceView);
         BlockDeviceMapping ephemeral = null;
         if (ephemeralCount != 0) {
             List<String> seq = List.of("b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x",
@@ -42,6 +42,16 @@ public class VolumeBuilderUtil {
             }
         }
         return ephemeral;
+    }
+
+    private Long getEphemeralCount(AwsInstanceView awsInstanceView) {
+        Map<String, Long> volumes = awsInstanceView.getVolumes().stream().collect(Collectors.groupingBy(Volume::getType, Collectors.counting()));
+        Long ephemeralCount = volumes.getOrDefault("ephemeral", 0L);
+        if (ephemeralCount.equals(0L)) {
+            return Optional.ofNullable(awsInstanceView.getTemporaryStorageCount()).orElse(0L);
+        } else {
+            return ephemeralCount;
+        }
     }
 
     public BlockDeviceMapping getRootVolume(AwsInstanceView awsInstanceView, Group group, CloudStack cloudStack, AuthenticatedContext ac) {

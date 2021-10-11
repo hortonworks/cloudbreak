@@ -158,7 +158,7 @@ class AwsVolumeResourceBuilderTest {
 
     @Test
     void buildTestWhenNoVolumesAtAll() throws Exception {
-        Group group = createGroup(emptyList(), Map.of(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, false));
+        Group group = createGroup(emptyList(), Map.of(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, false), 0L);
 
         List<CloudResource> result = underTest.build(awsContext, cloudInstance, PRIVATE_ID, authenticatedContext, group, emptyList(), cloudStack);
 
@@ -167,7 +167,7 @@ class AwsVolumeResourceBuilderTest {
 
     @Test
     void buildTestWhenEphemeralVolumesOnly() throws Exception {
-        Group group = createGroup(List.of(createVolume(TYPE_EPHEMERAL)), Map.of(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, false));
+        Group group = createGroup(List.of(createVolume(TYPE_EPHEMERAL)), Map.of(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, false), 0L);
 
         List<CloudResource> result = underTest.build(awsContext, cloudInstance, PRIVATE_ID, authenticatedContext, group,
                 List.of(createVolumeSet(emptyList())), cloudStack);
@@ -178,7 +178,7 @@ class AwsVolumeResourceBuilderTest {
 
     @Test
     void buildTestWhenAttachedVolumesOnlyAndNoEncryption() throws Exception {
-        Group group = createGroup(List.of(createVolume(TYPE_GP2)), Map.of(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, false));
+        Group group = createGroup(List.of(createVolume(TYPE_GP2)), Map.of(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, false), 0L);
 
         setUpTaskExecutors();
         when(amazonEC2Client.createVolume(isA(CreateVolumeRequest.class))).thenReturn(createCreateVolumeResult());
@@ -193,7 +193,7 @@ class AwsVolumeResourceBuilderTest {
 
     @Test
     void buildTestWhenEphemeralAndAttachedVolumesAndNoEncryption() throws Exception {
-        Group group = createGroup(List.of(createVolume(TYPE_EPHEMERAL), createVolume(TYPE_GP2)), Map.of(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, false));
+        Group group = createGroup(List.of(createVolume(TYPE_EPHEMERAL), createVolume(TYPE_GP2)), Map.of(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, false), 1L);
 
         setUpTaskExecutors();
         when(amazonEC2Client.createVolume(isA(CreateVolumeRequest.class))).thenReturn(createCreateVolumeResult());
@@ -210,7 +210,7 @@ class AwsVolumeResourceBuilderTest {
     void buildTestWhenAttachedVolumesOnlyAndIneffectiveEncryptionWithDefaultKey() throws Exception {
         Group group = createGroup(List.of(createVolume(TYPE_GP2)),
                 Map.ofEntries(entry(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, false),
-                        entry(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.DEFAULT.name())));
+                        entry(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.DEFAULT.name())), 0L);
 
         setUpTaskExecutors();
         when(amazonEC2Client.createVolume(isA(CreateVolumeRequest.class))).thenReturn(createCreateVolumeResult());
@@ -227,7 +227,7 @@ class AwsVolumeResourceBuilderTest {
     void buildTestWhenAttachedVolumesOnlyAndEffectiveEncryptionWithDefaultKey() throws Exception {
         Group group = createGroup(List.of(createVolume(TYPE_GP2)),
                 Map.ofEntries(entry(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, true),
-                        entry(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.DEFAULT.name())));
+                        entry(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.DEFAULT.name())), 0L);
 
         setUpTaskExecutors();
         when(amazonEC2Client.createVolume(isA(CreateVolumeRequest.class))).thenReturn(createCreateVolumeResult());
@@ -245,7 +245,7 @@ class AwsVolumeResourceBuilderTest {
         Group group = createGroup(List.of(createVolume(TYPE_GP2)),
                 Map.ofEntries(entry(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, true),
                         entry(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.DEFAULT.name()),
-                        entry(InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID, ENCRYPTION_KEY_ARN)));
+                        entry(InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID, ENCRYPTION_KEY_ARN)), 0L);
 
         setUpTaskExecutors();
         when(amazonEC2Client.createVolume(isA(CreateVolumeRequest.class))).thenReturn(createCreateVolumeResult());
@@ -263,7 +263,7 @@ class AwsVolumeResourceBuilderTest {
         Group group = createGroup(List.of(createVolume(TYPE_GP2)),
                 Map.ofEntries(entry(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, true),
                         entry(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.CUSTOM.name()),
-                        entry(InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID, ENCRYPTION_KEY_ARN)));
+                        entry(InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID, ENCRYPTION_KEY_ARN)), 0L);
 
         setUpTaskExecutors();
         when(amazonEC2Client.createVolume(isA(CreateVolumeRequest.class))).thenReturn(createCreateVolumeResult());
@@ -289,9 +289,9 @@ class AwsVolumeResourceBuilderTest {
         return new Volume(MOUNT_PREFIX + type, type, VOLUME_SIZE, CloudVolumeUsageType.GENERAL);
     }
 
-    private Group createGroup(List<Volume> volumes, Map<String, Object> templateParameters) {
+    private Group createGroup(List<Volume> volumes, Map<String, Object> templateParameters, long temporaryStorageCount) {
         InstanceTemplate template = new InstanceTemplate(FLAVOR, GROUP_NAME, PRIVATE_ID, volumes, InstanceStatus.CREATE_REQUESTED, templateParameters,
-                TEMPLATE_ID, IMAGE_ID, TemporaryStorage.ATTACHED_VOLUMES);
+                TEMPLATE_ID, IMAGE_ID, TemporaryStorage.ATTACHED_VOLUMES, temporaryStorageCount);
         CloudInstance instance = new CloudInstance(INSTANCE_ID, template, null, "subnet-1", "az1");
         return new Group(GROUP_NAME, InstanceGroupType.GATEWAY, singletonList(instance), null, null, null, null, null,
                 null, ROOT_VOLUME_SIZE, null, createGroupNetwork(), emptyMap());
