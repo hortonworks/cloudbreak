@@ -24,9 +24,10 @@ dependencyManagement {
 }
 
 dependencies {
-  compile project(':secret-engine')
-  compile group: 'org.springframework.boot',              name: 'spring-boot-starter-web'
-  testCompile group: 'org.mockito',                       name: 'mockito-core',                 version: mockitoVersion
+  implementation project(":common")
+  implementation project(':secret-engine')
+  implementation group: 'org.springframework.boot',              name: 'spring-boot-starter-web'
+  testImplementation group: 'org.mockito',                       name: 'mockito-core',                 version: mockitoVersion
   testImplementation(group: "org.springframework.boot",   name: "spring-boot-starter-test",     version: springBootVersion) {
     exclude group: "junit"
   }

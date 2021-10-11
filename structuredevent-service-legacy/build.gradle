@@ -14,13 +14,15 @@ jar {
 }
 
 dependencies {
-    compile group: 'org.springframework.kafka',          name: 'spring-kafka',                version: '2.6.4'
+    implementation group: 'org.springframework.kafka',          name: 'spring-kafka',                version: '2.6.4'
 
-    compile project(':structuredevent-model')
-    compile project(':workspace')
-    compile project(':cloud-reactor')
-    compile project(':audit-connector')
-    compile project(':usage-collection')
+    implementation project(':structuredevent-model')
+    implementation project(':workspace')
+    implementation project(':cloud-reactor')
+    implementation project(':audit-connector')
+    implementation project(':usage-collection')
+    implementation project(':auth-connector')
+    implementation project(':flow')
 
     testImplementation (group: 'org.powermock',             name: 'powermock-api-mockito2',          version: powermockVersion) {
       exclude group: 'org.hamcrest'

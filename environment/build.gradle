@@ -12,11 +12,11 @@ buildscript {
 }
 
 plugins {
-    id "java"
-    id "checkstyle"
-    id "jacoco"
-    id "maven"
-    id "org.springframework.boot" version "2.1.2.RELEASE"
+    id 'java'
+    id 'checkstyle'
+    id 'jacoco'
+    id 'maven-publish'
+    id 'org.springframework.boot' version '2.1.2.RELEASE'
     id "org.sonarqube" version "${sonarVersion}"
 }
 
@@ -62,6 +62,7 @@ dependencies {
     implementation     project(":datalake-api")
     implementation     project(":core-api")
     implementation     project(":cloud-aws-cloudformation")
+    implementation     project(":cloud-aws-common")
     implementation     project(":cloud-azure")
     implementation     project(":cloud-mock")
     implementation     project(":cloud-yarn")
@@ -71,7 +72,8 @@ dependencies {
     implementation     project(":redbeams-api")
     implementation     project(":freeipa-api")
     implementation     project(":structuredevent-service-cdp")
-    implementation     project(':status-checker')
+    implementation     project(":status-checker")
+    implementation     project(":template-manager-tag")
 
     implementation     group: "org.yaml",                  name: "snakeyaml",                                version: snakeYamlVersion
     implementation     group: "io.springfox",              name: "springfox-swagger2",                       version: swagger2Version
@@ -115,7 +117,6 @@ dependencies {
     testImplementation group: "org.mockito",               name: "mockito-core",                             version: mockitoVersion
     testImplementation group: "com.google.guava",          name: "guava",                                    version: guavaVersion
     testImplementation group: 'org.assertj',               name: 'assertj-core',                             version: assertjVersion
-    testImplementation group: 'org.junit.jupiter',         name: 'junit-jupiter',                            version: junitJupiterVersion
 }
 
 bootRun {
@@ -146,13 +147,19 @@ bootJar {
   }
 }
 
-uploadBootArchives {
-  repositories {
-    mavenDeployer {
-      configuration = configurations.deployerJars
-      repository(url: "$System.env.NEXUS_URL") {
-        authentication(userName: "$System.env.NEXUS_USER", password: "$System.env.NEXUS_PASSWORD")
-      }
+publishing {
+    publications {
+        bootJava(MavenPublication) {
+            artifact bootJar
+        }
     }
-  }
+    repositories {
+        maven {
+            url = "$System.env.NEXUS_URL"
+            credentials {
+                username = "$System.env.NEXUS_USER"
+                password = "$System.env.NEXUS_PASSWORD"
+            }
+        }
+    }
 }

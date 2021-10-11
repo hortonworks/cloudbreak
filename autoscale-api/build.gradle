@@ -11,27 +11,27 @@ jar {
 }
 
 dependencies {
-  compile group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
-  compile group: 'org.glassfish.jersey.media',    name: 'jersey-media-multipart',         version: jerseyCoreVersion
-  compile group: 'io.swagger',                    name: 'swagger-annotations',            version: swaggerVersion
-  compile group: 'commons-codec',                 name: 'commons-codec',                  version: commonsCodecVersion
+  implementation group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
+  implementation group: 'org.glassfish.jersey.media',    name: 'jersey-media-multipart',         version: jerseyCoreVersion
+  implementation group: 'io.swagger',                    name: 'swagger-annotations',            version: swaggerVersion
+  implementation group: 'commons-codec',                 name: 'commons-codec',                  version: commonsCodecVersion
 
-  compile group: 'net.jodah',                     name: 'expiringmap',                    version: '0.5.1'
-  compile group: 'org.glassfish.jersey.core',     name: 'jersey-client',                  version: jerseyCoreVersion
-  compile group: 'org.glassfish.jersey.media',    name: 'jersey-media-json-jackson',      version: jerseyCoreVersion
-  compile group: 'org.glassfish.jersey.ext',      name: 'jersey-proxy-client',            version: jerseyCoreVersion
+  implementation group: 'net.jodah',                     name: 'expiringmap',                    version: '0.5.1'
+  implementation group: 'org.glassfish.jersey.core',     name: 'jersey-client',                  version: jerseyCoreVersion
+  implementation group: 'org.glassfish.jersey.media',    name: 'jersey-media-json-jackson',      version: jerseyCoreVersion
+  implementation group: 'org.glassfish.jersey.ext',      name: 'jersey-proxy-client',            version: jerseyCoreVersion
 
-  compile group: 'com.fasterxml.jackson.jaxrs',   name: 'jackson-jaxrs-json-provider',    version: jacksonVersion
-  compile group: 'com.fasterxml.jackson.core',    name: 'jackson-databind',               version: jacksonVersion
-  compile group: 'org.hibernate',                 name: 'hibernate-validator',            version: hibernateValidatorVersion
-  compile group: 'org.apache.httpcomponents',     name: 'httpclient',                     version: httpClientVersion
-  compile group: 'org.glassfish.jersey.connectors',  name: 'jersey-apache-connector',     version: jerseyCoreVersion
+  implementation group: 'com.fasterxml.jackson.jaxrs',   name: 'jackson-jaxrs-json-provider',    version: jacksonVersion
+  implementation group: 'com.fasterxml.jackson.core',    name: 'jackson-databind',               version: jacksonVersion
+  implementation group: 'org.hibernate',                 name: 'hibernate-validator',            version: hibernateValidatorVersion
+  implementation group: 'org.apache.httpcomponents',     name: 'httpclient',                     version: httpClientVersion
+  implementation group: 'org.glassfish.jersey.connectors',  name: 'jersey-apache-connector',     version: jerseyCoreVersion
 
-  testCompile group: 'org.mockito',               name: 'mockito-core',                   version: mockitoVersion
-  testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter',            version: springBootVersion
-  testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
+  testImplementation group: 'org.mockito',               name: 'mockito-core',                   version: mockitoVersion
+  testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter',            version: springBootVersion
+  testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
 
-  compile project(':core-api')
+  implementation project(':core-api')
 }
 
 

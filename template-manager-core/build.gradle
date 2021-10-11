@@ -10,19 +10,27 @@ jar {
 }
 
 dependencies {
-    compile project(':common-handlebar')
-    compile project(':orchestrator-api')
-    compile project(':core-model')
-    compile project(':cloud-api')
+    implementation project(':common')
+    implementation project(':common-model')
+    implementation project(':common-handlebar')
+    implementation project(':orchestrator-api')
+    implementation project(':core-api')
+    implementation project(':core-model')
+    implementation project(':cloud-api')
+    implementation project(':cloud-common')
+    implementation project(':secret-engine')
+    implementation project(':workspace')
 
-    testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter',            version: springBootVersion
-    testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
-    testCompile (group: 'org.mockito',             name: 'mockito-core',          version: mockitoVersion) {
+    implementation group: 'net.sf.json-lib',               name: 'json-lib',                       version: '2.4',  classifier: 'jdk15'
+
+    testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter',            version: springBootVersion
+    testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
+    testImplementation (group: 'org.mockito',              name: 'mockito-core',                   version: mockitoVersion) {
         exclude group: 'org.hamcrest'
     }
-    testCompile (group: 'org.hamcrest', name: 'hamcrest', version: hamcrestVersion)
-    testCompile 'net.javacrumbs.json-unit:json-unit:1.28.2'
-    testCompile project(path: ':core-model', configuration: 'tests')
+    testImplementation (group: 'org.hamcrest', name: 'hamcrest', version: hamcrestVersion)
+    testImplementation 'net.javacrumbs.json-unit:json-unit:1.28.2'
+    testImplementation project(path: ':core-model', configuration: 'tests')
 }
 
 task testJar(type: Jar, dependsOn: testClasses) {

@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.aws.resource.instance.alarm;
 
 import static com.amazonaws.services.cloudwatch.model.Statistic.Maximum;
 import static java.util.stream.Collectors.toList;
-import static org.apache.commons.collections.CollectionUtils.isEmpty;
+import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 
 import java.util.ArrayList;
 import java.util.List;

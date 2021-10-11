@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

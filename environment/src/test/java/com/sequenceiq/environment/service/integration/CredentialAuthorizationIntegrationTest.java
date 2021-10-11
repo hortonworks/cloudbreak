@@ -33,11 +33,11 @@ import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.test.context.ActiveProfiles;
 
 import com.cloudera.thunderhead.service.authorization.AuthorizationProto;
-import com.google.api.client.util.Lists;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
+import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
 import com.sequenceiq.cloudbreak.cloud.event.platform.ResourceDefinitionRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.ResourceDefinitionResult;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;

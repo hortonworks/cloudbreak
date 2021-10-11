@@ -11,17 +11,17 @@ jar {
 }
 
 dependencies {
-  compile project(':orchestrator-api')
-  compile project(':core-api')
-  compile project(':cloud-common')
-  compile group: 'org.glassfish.jersey.core',     name: 'jersey-client',                  version: jerseyCoreVersion
+  implementation project(':orchestrator-api')
+  implementation project(':core-api')
+  implementation project(':cloud-common')
+  implementation group: 'org.glassfish.jersey.core',     name: 'jersey-client',                  version: jerseyCoreVersion
   //this is required by idea, otherwise in some cases the 2.1.2 version will be added to claspath
-  compile group: 'com.fasterxml.jackson.jaxrs',   name: 'jackson-jaxrs-json-provider',    version: jacksonVersion
-  compile group: 'org.springframework.boot',      name: 'spring-boot-starter',            version: springBootVersion
+  implementation group: 'com.fasterxml.jackson.jaxrs',   name: 'jackson-jaxrs-json-provider',    version: jacksonVersion
+  implementation group: 'org.springframework.boot',      name: 'spring-boot-starter',            version: springBootVersion
 
-  testCompile group: 'org.mockito',               name: 'mockito-core',                   version: mockitoVersion
-  compile group: 'com.sun.jersey',                name: 'jersey-core',                    version: '1.19.1'
-  compile group: 'com.sun.jersey',                name: 'jersey-client',                  version: '1.19.1'
+  testImplementation group: 'org.mockito',               name: 'mockito-core',                   version: mockitoVersion
+  implementation group: 'com.sun.jersey',                name: 'jersey-core',                    version: '1.19.1'
+  implementation group: 'com.sun.jersey',                name: 'jersey-client',                  version: '1.19.1'
 
   testImplementation group: 'org.hamcrest',       name: 'hamcrest',                       version: hamcrestVersion
 }

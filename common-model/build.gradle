@@ -1,6 +1,6 @@
 plugins {
   id "java"
-  id 'maven'
+  id "java-library"
 }
 
 repositories {
@@ -16,11 +16,12 @@ jar {
 }
 
 dependencies {
-  compile group: 'com.fasterxml.jackson.core',            name: 'jackson-databind',               version: jacksonVersion
-  compile group: 'io.swagger',                            name: 'swagger-annotations',            version: swaggerVersion
-  compile group: 'javax.validation',                      name: 'validation-api',                 version: javaxValidationVersion
-  compile group: 'org.apache.commons',                    name: 'commons-lang3',                  version: apacheCommonsLangVersion
+  implementation group: 'com.fasterxml.jackson.core',            name: 'jackson-databind',               version: jacksonVersion
+  api group: 'javax.validation',                      name: 'validation-api',                 version: javaxValidationVersion
+  api group: 'org.apache.commons',                    name: 'commons-lang3',                  version: apacheCommonsLangVersion
 
-  testCompile group: 'org.mockito',               name: 'mockito-core',                   version: mockitoVersion
-  testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
+  implementation group: 'io.swagger',                            name: 'swagger-annotations',            version: swaggerVersion
+
+  testImplementation group: 'org.assertj',               name: 'assertj-core',                   version: assertjVersion
+  testImplementation group: 'org.mockito',               name: 'mockito-core',                   version: mockitoVersion
 }

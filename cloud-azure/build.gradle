@@ -13,41 +13,42 @@ jar {
 
 dependencies {
 
-  compile project(':cloud-api')
-  compile project(':cloud-reactor')
-  compile project(':cloud-template')
+  implementation project(':common')
+  implementation project(':cloud-api')
+  implementation project(':cloud-reactor')
+  implementation project(':cloud-template')
+  implementation project(':auth-connector')
 
-  compile (group: 'com.squareup.okhttp3',               name: 'okhttp',                     version: okhttpVersion)
-  compile (group: 'com.squareup.okhttp3',               name: 'okhttp-urlconnection',       version: okhttpVersion)
-  compile (group: 'com.squareup.okhttp3',               name: 'logging-interceptor',        version: okhttpVersion)
+  implementation group: 'com.goldmansachs',              name: 'gs-collections',             version: '5.1.0'
 
-  compile (group: 'com.microsoft.azure',         name: 'azure-client-authentication') {
+  implementation group: 'org.freemarker',                name: 'freemarker',                 version: freemarkerVersion
+
+  implementation group: 'com.squareup.okhttp3',          name: 'okhttp',                     version: okhttpVersion
+  implementation group: 'com.squareup.okhttp3',          name: 'okhttp-urlconnection',       version: okhttpVersion
+  implementation group: 'com.squareup.okhttp3',          name: 'logging-interceptor',        version: okhttpVersion
+
+  implementation (group: 'com.microsoft.azure',         name: 'azure-client-authentication') {
     exclude group: 'org.slf4j'
   }
-  compile (group: 'com.microsoft.azure',         name: 'azure',                      version: azureSdkVersion) {
+  implementation (group: 'com.microsoft.azure',         name: 'azure',                      version: azureSdkVersion) {
     exclude group: 'org.slf4j'
   }
-  compile (group: 'com.microsoft.azure',         name: 'azure-mgmt-datalake-store',  version: '1.22.0') { exclude group: 'org.slf4j' }
-  compile (group: 'com.microsoft.azure',         name: 'azure-mgmt-sql',             version: azureSdkVersion) { exclude group: 'org.slf4j' }
-  compile (group: 'com.microsoft.azure.privatedns.v2018_09_01',         name: 'azure-mgmt-privatedns',             version: '1.0.0-beta') { exclude group: 'org.slf4j' }
-  compile group: 'com.microsoft.azure',         name: 'azure-storage',              version: azureStorageSdkVersion
-  compile group: 'org.apache.commons',                 name: 'commons-collections4', version: commonsCollections4Version
-  compile (group: 'com.fasterxml.jackson.core', name: 'jackson-databind',           version: jacksonVersion) {
+  implementation (group: 'com.microsoft.azure',         name: 'azure-mgmt-datalake-store',  version: '1.22.0') { exclude group: 'org.slf4j' }
+  implementation (group: 'com.microsoft.azure',         name: 'azure-mgmt-sql',             version: azureSdkVersion) { exclude group: 'org.slf4j' }
+  implementation (group: 'com.microsoft.azure.privatedns.v2018_09_01',         name: 'azure-mgmt-privatedns',             version: '1.0.0-beta') { exclude group: 'org.slf4j' }
+  implementation group: 'com.microsoft.azure',         name: 'azure-storage',              version: azureStorageSdkVersion
+  implementation (group: 'com.fasterxml.jackson.core', name: 'jackson-databind',           version: jacksonVersion) {
     force = true
   }
   implementation 'com.microsoft.azure.marketplaceordering.v2015_06_01:azure-mgmt-marketplaceordering:1.0.0-beta'
-  compile group: 'commons-net',                   name: 'commons-net',                      version: '3.6'
 
-  testCompile project(path: ':core-model', configuration: 'tests')
-  testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter',            version: springBootVersion
-  testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
-  testCompile group: 'org.springframework.boot',  name:'spring-boot-starter-freemarker',  version: springBootVersion
-  testCompile (group: 'org.mockito',             name: 'mockito-core',          version: mockitoVersion) {
+  testImplementation project(path: ':core-model', configuration: 'tests')
+  testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter',            version: springBootVersion
+  testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
+  testImplementation group: 'org.springframework.boot',  name:'spring-boot-starter-freemarker',  version: springBootVersion
+  testImplementation (group: 'org.mockito',             name: 'mockito-core',          version: mockitoVersion) {
     exclude group: 'org.hamcrest'
   }
-  testCompile (group: 'org.hamcrest', name: 'hamcrest', version: hamcrestVersion)
-  testCompile project(path: ':cloud-common', configuration: 'tests')
-
-  compile (group: 'org.apache.commons',                 name: 'commons-collections4',        version: '4.2')
-
+  testImplementation (group: 'org.hamcrest', name: 'hamcrest', version: hamcrestVersion)
+  testImplementation project(path: ':cloud-common', configuration: 'tests')
 }

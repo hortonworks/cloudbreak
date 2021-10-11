@@ -6,15 +6,15 @@ buildscript {
         maven { url = "$repoUrl" }
     }
     dependencies {
-        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.8'
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.17'
     }
 }
 
 dependencies {
-    compile project(':grpc-common')
-    compile project(':auth-connector')
-    compile project(':structuredevent-model')
-    compile project(':flow')
+    implementation project(':grpc-common')
+    implementation project(':auth-connector')
+    implementation project(':structuredevent-model')
+    implementation project(':flow')
 
     implementation     group: 'org.springframework.boot',            name: 'spring-boot-starter-jersey',     version: springBootVersion
     implementation     group: 'net.bytebuddy',                       name: 'byte-buddy',                     version: '1.10.11'

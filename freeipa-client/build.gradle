@@ -1,6 +1,6 @@
 plugins {
   id "java"
-  id 'maven'
+  id "maven-publish"
 }
 
 repositories {
@@ -10,18 +10,31 @@ repositories {
   maven { url "https://plugins.gradle.org/m2/" }
 }
 
-uploadArchives {
-  repositories {
-    mavenDeployer {
-      configuration = configurations.deployerJars
-      repository(url: "$System.env.NEXUS_URL") {
-        authentication(userName: "$System.env.NEXUS_USER", password: "$System.env.NEXUS_PASSWORD")
-      }
+jar {
+    baseName = 'freeipa-client'
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifact jar
+        }
     }
-  }
+    repositories {
+        maven {
+            url = "$System.env.NEXUS_URL"
+            credentials {
+                username = "$System.env.NEXUS_USER"
+                password = "$System.env.NEXUS_PASSWORD"
+            }
+        }
+    }
 }
 
 dependencies {
+  implementation project(':common')
+  implementation project(':cluster-proxy')
+
   implementation     group: 'com.github.briandilley.jsonrpc4j', name: 'jsonrpc4j',                   version: '1.6'
   implementation     group: 'com.fasterxml.jackson.core',       name: 'jackson-databind',            version: jacksonVersion
   implementation     group: 'org.slf4j',                        name: 'slf4j-api',                   version: slf4jApiVersion
@@ -29,11 +42,9 @@ dependencies {
   implementation     group: 'org.bouncycastle',                 name: 'bcprov-jdk15on',              version: bouncycastleVersion
   implementation     group: 'org.bouncycastle',                 name: 'bcpkix-jdk15on',              version: bouncycastleVersion
   implementation     group: 'org.springframework',              name: 'spring-web',                  version: springFrameworkVersion
-  compile            group: 'org.glassfish.jersey.core',        name: 'jersey-common',               version: jerseyCoreVersion
+  implementation     group: 'org.glassfish.jersey.core',        name: 'jersey-common',               version: jerseyCoreVersion
+  implementation     group: 'org.springframework.boot',         name: 'spring-boot-starter-web',     version: springBootVersion
+
   testImplementation group: 'org.mockito',                      name: 'mockito-core',                version: mockitoVersion
   testImplementation group: 'org.hamcrest',                     name: 'hamcrest',                    version: hamcrestVersion
-  compile            group: 'org.springframework.boot',         name: 'spring-boot-starter-web',     version: springBootVersion
-
-  implementation project(':common')
-  implementation project(':cluster-proxy')
 }

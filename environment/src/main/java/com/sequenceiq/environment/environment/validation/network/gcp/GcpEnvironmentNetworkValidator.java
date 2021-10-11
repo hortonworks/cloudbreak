@@ -5,7 +5,7 @@ import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.apache.commons.collections.MapUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

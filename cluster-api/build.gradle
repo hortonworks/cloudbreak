@@ -1,6 +1,5 @@
 plugins {
   id "java"
-  id 'maven'
 }
 
 repositories {
@@ -16,13 +15,20 @@ jar {
 }
 
 dependencies {
-  compile project(':core-model')
-  compile project(':environment-common')
-  compile project(':cloud-api')
-  compile project(':template-manager-core')
+  implementation project(':common')
+  implementation project(':core-api')
+  implementation project(':core-model')
+  implementation project(':cloud-common')
+  implementation project(':auth-connector')
+  implementation project(':environment-common')
+  implementation project(':cloud-api')
+  implementation project(':template-manager-core')
+  implementation project(':workspace')
 
-  testCompile(group: 'org.mockito',             name: 'mockito-core',          version: mockitoVersion) {
+  implementation     group: 'org.hibernate',           name: 'hibernate-envers',      version: hibernateCoreVersion
+
+  testImplementation(group: 'org.mockito',             name: 'mockito-core',          version: mockitoVersion) {
     exclude group: 'org.hamcrest'
   }
-  testCompile group: 'org.hamcrest',            name: 'hamcrest',              version: hamcrestVersion
+  testImplementation group: 'org.hamcrest',            name: 'hamcrest',              version: hamcrestVersion
 }

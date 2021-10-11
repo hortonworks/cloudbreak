@@ -6,21 +6,21 @@ buildscript {
     maven { url = "$repoUrl" }
   }
   dependencies {
-    classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.8'
+    classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.17'
   }
 }
 
 dependencies {
-  compile project(':grpc-common')
+  implementation project(':grpc-common')
 
-  compile ("io.grpc:grpc-all:1.19.0") {
+  implementation ("io.grpc:grpc-all:1.19.0") {
     exclude group: 'org.mockito'
   }
-  compile group: 'com.github.rholder',                    name: 'guava-retrying',                 version: '2.0.0'
+  implementation group: 'com.github.rholder',                    name: 'guava-retrying',                 version: '2.0.0'
 
-  testCompile group: 'org.mockito',                       name: 'mockito-core',                   version: mockitoVersion
-  testCompile group: 'org.hamcrest',                      name: 'hamcrest',                       version: hamcrestVersion
-  testCompile group: "org.assertj",                       name: "assertj-core",                   version: assertjVersion
+  testImplementation group: 'org.mockito',                       name: 'mockito-core',                   version: mockitoVersion
+  testImplementation group: 'org.hamcrest',                      name: 'hamcrest',                       version: hamcrestVersion
+  testImplementation group: "org.assertj",                       name: "assertj-core",                   version: assertjVersion
 }
 
 checkstyle {

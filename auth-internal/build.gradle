@@ -8,11 +8,17 @@ buildscript {
   }
 }
 
+plugins {
+    id "java-library"
+}
+
 dependencies {
-  compile project(':auth-internal-api')
+  api project(':auth-internal-api')
 
-  compile             group: 'org.springframework.boot',  name: 'spring-boot-starter-jersey', version: springBootVersion
+  implementation    group: 'org.springframework.boot',  name: 'spring-boot-starter-jersey', version: springBootVersion
+  implementation    group: 'org.springframework',       name: 'spring-aspects',             version: springFrameworkVersion
 
-  testCompile         group: 'org.mockito',               name: 'mockito-core',               version: mockitoVersion
+  testImplementation  group: 'org.mockito',               name: 'mockito-core',               version: mockitoVersion
   testImplementation  group: 'org.assertj',               name: 'assertj-core',               version: assertjVersion
+  testImplementation  group: 'org.springframework.security', name: 'spring-security-core',    version: springSecurityVersion
 }

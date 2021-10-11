@@ -1,4 +1,7 @@
-apply plugin: 'java'
+plugins {
+    id "java"
+    id "java-library"
+}
 
 repositories {
     maven { url = "$repoUrl" }
@@ -10,10 +13,10 @@ jar {
 }
 
 dependencies {
-    compile group: 'com.github.jknack',             name: 'handlebars',                     version: handlebarsVersion
-    compile group: 'org.apache.commons',            name: 'commons-lang3',                  version: apacheCommonsLangVersion
+    api group: 'com.github.jknack',             name: 'handlebars',                     version: handlebarsVersion
+    implementation group: 'org.apache.commons',            name: 'commons-lang3',                  version: apacheCommonsLangVersion
 
-    testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter',            version: springBootVersion
-    testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
-    testCompile group: 'org.junit.jupiter',         name: 'junit-jupiter-api',              version: junitJupiterVersion
+    testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter',            version: springBootVersion
+    testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
+    testImplementation group: 'org.junit.jupiter',         name: 'junit-jupiter-api',              version: junitJupiterVersion
 }

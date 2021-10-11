@@ -1,6 +1,5 @@
 plugins {
   id "java"
-  id 'maven'
 }
 
 repositories {
@@ -16,9 +15,9 @@ jar {
 }
 
 dependencies {
-  compile project(':common')
+  implementation project(':common')
 
   implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-quartz',               version: springBootVersion
 
-  testCompile group: 'org.mockito',               name: 'mockito-core',                   version: mockitoVersion
+  testImplementation group: 'org.mockito',               name: 'mockito-core',                   version: mockitoVersion
 }

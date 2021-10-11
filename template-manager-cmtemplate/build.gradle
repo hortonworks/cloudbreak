@@ -10,11 +10,15 @@ jar {
 }
 
 dependencies {
+  implementation project(":common")
   implementation project(":orchestrator-api")
+  implementation project(":core-api")
   implementation project(":core-model")
   implementation project(":cloud-api")
+  implementation project(":cloud-common")
   implementation project(":cluster-api")
   implementation project(":template-manager-core")
+  implementation project(":workspace")
 
 
   implementation group: "xerces",                        name: "xercesImpl",                     version: xerces

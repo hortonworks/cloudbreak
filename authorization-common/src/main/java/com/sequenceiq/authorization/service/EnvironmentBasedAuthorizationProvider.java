@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.apache.commons.collections.MapUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;

@@ -11,6 +11,6 @@ jar {
 }
 
 dependencies {
-  compile project(':structuredevent-model')
-  compile project(':common-model')
+  implementation project(':structuredevent-model')
+  implementation project(':common-model')
 }

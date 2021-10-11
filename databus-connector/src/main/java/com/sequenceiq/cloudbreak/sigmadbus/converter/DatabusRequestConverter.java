@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.apache.commons.collections.MapUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.cloudera.sigma.service.dbus.DbusProto;

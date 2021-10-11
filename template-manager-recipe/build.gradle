@@ -10,24 +10,32 @@ jar {
 }
 
 dependencies {
-    compile group: 'xerces',              name: 'xercesImpl',            version: xerces
+    implementation group: 'xerces',              name: 'xercesImpl',            version: xerces
 
-    compile group: 'com.github.jknack',             name: 'handlebars',                     version: handlebarsVersion
+    implementation group: 'com.github.jknack',             name: 'handlebars',                     version: handlebarsVersion
 
-    compile project(':orchestrator-api')
-    compile project(':core-model')
-    compile project(':cloud-api')
-    compile project(':template-manager-core')
+    implementation project(':common')
+    implementation project(':orchestrator-api')
+    implementation project(':core-api')
+    implementation project(':core-model')
+    implementation project(':cloud-api')
+    implementation project(':cloud-common')
+    implementation project(':template-manager-core')
+    implementation project(':secret-engine')
 
-    testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter',            version: springBootVersion
-    testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
-    testCompile (group: 'org.mockito',             name: 'mockito-core',          version: mockitoVersion) {
+
+    testImplementation project(':workspace')
+    testImplementation group: 'org.freemarker',            name: 'freemarker',                     version: freemarkerVersion
+
+    testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter',            version: springBootVersion
+    testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
+    testImplementation (group: 'org.mockito',              name: 'mockito-core',                   version: mockitoVersion) {
         exclude group: 'org.hamcrest'
     }
-    testCompile (group: 'org.hamcrest', name: 'hamcrest', version: hamcrestVersion)
-    testCompile 'net.javacrumbs.json-unit:json-unit:1.28.2'
-    testCompile project(path: ':template-manager-core', configuration: 'tests')
-    testCompile project(path: ':core-model', configuration: 'tests')
+    testImplementation (group: 'org.hamcrest', name: 'hamcrest', version: hamcrestVersion)
+    testImplementation 'net.javacrumbs.json-unit:json-unit:1.28.2'
+    testImplementation project(path: ':template-manager-core', configuration: 'tests')
+    testImplementation project(path: ':core-model', configuration: 'tests')
 }
 
 task testJar(type: Jar, dependsOn: testClasses) {

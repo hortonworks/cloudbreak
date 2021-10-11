@@ -11,6 +11,10 @@ buildscript {
   }
 }
 
+plugins {
+    id "maven-publish"
+}
+
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 apply plugin: 'java'
@@ -36,43 +40,49 @@ bootJar {
   }
 }
 
-uploadBootArchives {
-  repositories {
-    mavenDeployer {
-      configuration = configurations.deployerJars
-      repository(url: "$System.env.NEXUS_URL") {
-        authentication(userName: "$System.env.NEXUS_USER", password: "$System.env.NEXUS_PASSWORD")
-      }
+publishing {
+    publications {
+        bootJava(MavenPublication) {
+            artifact bootJar
+        }
     }
-  }
+    repositories {
+        maven {
+            url = "$System.env.NEXUS_URL"
+            credentials {
+                username = "$System.env.NEXUS_USER"
+                password = "$System.env.NEXUS_PASSWORD"
+            }
+        }
+    }
 }
 
 dependencies {
-  compile group:  'org.springframework.boot',     name: 'spring-boot-starter',            version: springBootVersion
-  compile group:  'org.springframework.boot',     name: 'spring-boot-starter-security',   version: springBootVersion
-  compile group:  'org.springframework.boot',     name: 'spring-boot-starter-jersey',     version: springBootVersion
-  compile group:  'org.springframework.boot',     name: 'spring-boot-starter-web',        version: springBootVersion
-  compile group:  'org.springframework.boot',     name: 'spring-boot-starter-actuator',   version: springBootVersion
+  implementation group:  'org.springframework.boot',     name: 'spring-boot-starter',            version: springBootVersion
+  implementation group:  'org.springframework.boot',     name: 'spring-boot-starter-security',   version: springBootVersion
+  implementation group:  'org.springframework.boot',     name: 'spring-boot-starter-jersey',     version: springBootVersion
+  implementation group:  'org.springframework.boot',     name: 'spring-boot-starter-web',        version: springBootVersion
+  implementation group:  'org.springframework.boot',     name: 'spring-boot-starter-actuator',   version: springBootVersion
   implementation group: 'org.springframework',    name: 'spring-aspects',                 version: springFrameworkVersion
-  compile group:  'org.springframework',          name: 'spring-context-support',         version: springFrameworkVersion
-  compile group:  'org.springframework.security', name: 'spring-security-jwt',            version: '1.0.10.RELEASE'
-  compile group:  'com.fasterxml.jackson.core',   name: 'jackson-core',                   version: jacksonVersion
-  compile group:  'com.google.protobuf',          name: 'protobuf-java-util',             version: '3.10.0'
-  compile group:  'io.jsonwebtoken',              name: 'jjwt',                           version: '0.9.1'
-  compile group:  'com.google.code.gson',              name: 'gson',                           version: '2.8.4'
-  testCompile group: 'org.mockito',               name: 'mockito-core',                   version: mockitoVersion
-  testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
+  implementation group:  'org.springframework',          name: 'spring-context-support',         version: springFrameworkVersion
+  implementation group:  'org.springframework.security', name: 'spring-security-jwt',            version: '1.0.10.RELEASE'
+  implementation group:  'com.fasterxml.jackson.core',   name: 'jackson-core',                   version: jacksonVersion
+  implementation group:  'com.google.protobuf',          name: 'protobuf-java-util',             version: '3.10.0'
+  implementation group:  'io.jsonwebtoken',              name: 'jjwt',                           version: '0.9.1'
+  implementation group:  'com.google.code.gson',              name: 'gson',                           version: '2.8.4'
+  testImplementation group: 'org.mockito',               name: 'mockito-core',                   version: mockitoVersion
+  testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
   testImplementation group: 'org.assertj',        name: 'assertj-core',                   version: assertjVersion
 
-  compile project (':cloud-api')
-  compile project (':common')
-  compile (project(':orchestrator-api')) {
+  implementation project (':cloud-api')
+  implementation project (':common')
+  implementation (project(':orchestrator-api')) {
     transitive = false;
   }
-  compile (project(':orchestrator-salt')) {
+  implementation (project(':orchestrator-salt')) {
     transitive = false;
   }
-  compile (project(':freeipa-client')) {
+  implementation (project(':freeipa-client')) {
     transitive = false;
   }
 }

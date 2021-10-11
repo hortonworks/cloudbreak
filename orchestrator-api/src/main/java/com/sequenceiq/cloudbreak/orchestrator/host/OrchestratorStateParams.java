@@ -4,7 +4,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import org.apache.commons.collections.MapUtils;
+import org.apache.commons.collections4.MapUtils;
 
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;

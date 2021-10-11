@@ -1,4 +1,7 @@
-apply plugin: 'java'
+plugins {
+    id 'java'
+    id 'java-library'
+}
 
 repositories {
     mavenCentral()
@@ -11,12 +14,12 @@ jar {
 }
 
 dependencies {
-    compile project(':common')
-    compile project(':cloud-api')
+    api project(':common')
+    implementation project(':cloud-api')
 
-    compile group: 'org.apache.commons',         name: 'commons-collections4', version: commonsCollections4Version
-    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind',    version: jacksonVersion
-    compile group: 'com.google.code.gson',       name: 'gson',                version: '2.6.2'
-    compile group: 'org.springframework.data',   name: 'spring-data-commons', version: springDataJpaFrameworkVersion
+    implementation group: 'org.apache.commons',         name: 'commons-collections4', version: commonsCollections4Version
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind',    version: jacksonVersion
+    implementation group: 'com.google.code.gson',       name: 'gson',                version: '2.6.2'
+    implementation group: 'org.springframework.data',   name: 'spring-data-commons', version: springDataJpaFrameworkVersion
 
 }

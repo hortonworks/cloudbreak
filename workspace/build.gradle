@@ -1,16 +1,20 @@
+buildscript {
+    repositories {
+        maven { url = "$repoUrl" }
+        maven { url = "$springRepoUrl" }
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
+    }
+}
+
+plugins {
+    id "java-library"
+}
+
 apply plugin: 'java'
 apply plugin: 'io.spring.dependency-management'
-
-buildscript {
-  repositories {
-    maven { url = "$repoUrl" }
-    maven { url = "$springRepoUrl" }
-    mavenCentral()
-  }
-  dependencies {
-    classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
-  }
-}
 
 jar {
   baseName = 'workspace'
@@ -18,17 +22,17 @@ jar {
 }
 
 dependencies {
-  compile project(":common")
-  compile project(":auth-connector")
+  api project(":common")
+  implementation project(":auth-connector")
 
-  compile group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
-  compile group: 'org.springframework.boot',      name: 'spring-boot-starter',            version: springBootVersion
-  compile group: 'org.springframework.boot',      name: 'spring-boot-starter-data-jpa',   version: springBootVersion
-  compile group: 'org.apache.commons',            name: 'commons-lang3',                  version: apacheCommonsLangVersion
+  implementation group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
+  implementation group: 'org.springframework.boot',      name: 'spring-boot-starter',            version: springBootVersion
+  implementation group: 'org.springframework.boot',      name: 'spring-boot-starter-data-jpa',   version: springBootVersion
+  implementation group: 'org.apache.commons',            name: 'commons-lang3',                  version: apacheCommonsLangVersion
 
-  testCompile group: 'org.mockito',               name: 'mockito-core',                   version: mockitoVersion
-  testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
-  testCompile group: 'org.awaitility',            name: 'awaitility',                     version: awaitilityVersion
+  testImplementation group: 'org.mockito',               name: 'mockito-core',                   version: mockitoVersion
+  testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
+  testImplementation group: 'org.awaitility',            name: 'awaitility',                     version: awaitilityVersion
 
 }
 

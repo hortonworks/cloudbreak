@@ -6,13 +6,13 @@ buildscript {
         maven { url = "$repoUrl" }
     }
     dependencies {
-        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.8'
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.17'
     }
 }
 
 dependencies {
-    compile project(':common')
-    compile project(':grpc-common')
+    implementation project(':common')
+    implementation project(':grpc-common')
 
     implementation ("io.grpc:grpc-all:1.22.0") {
         exclude group: 'org.mockito'
