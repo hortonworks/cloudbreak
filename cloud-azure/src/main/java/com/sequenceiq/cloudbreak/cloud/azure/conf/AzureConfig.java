@@ -27,7 +27,7 @@ public class AzureConfig {
     @Value("${cb.azure.tag.value.max.length:256}")
     private Integer maxValueLength;
 
-    @Value("${cb.azure.tag.value.validator:^(?!\\s)[^,<>%&\\\\/\\?]*(?<!\\s)$}")
+    @Value("${cb.azure.tag.value.validator:^(?!\\s).*(?<!\\s)$}")
     private String valueValidator;
 
     @Bean(name = "AzureTagSpecification")

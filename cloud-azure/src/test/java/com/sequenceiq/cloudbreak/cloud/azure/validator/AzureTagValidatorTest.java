@@ -95,28 +95,16 @@ class AzureTagValidatorTest {
                         () -> testNegative("test", " startswithspace", "regular expression")),
                 DynamicTest.dynamicTest("tag value ends with space, regular expression is printed",
                         () -> testNegative("test", "endswithspace ", "regular expression")),
-                //   non-allowed: , < > % & \ / ?
-                DynamicTest.dynamicTest("tag value contains ',', regular expression is printed",
-                        () -> testNegative("test", "test,", "regular expression")),
-                DynamicTest.dynamicTest("tag value contains '<', regular expression is printed",
-                        () -> testNegative("test", "test<", "regular expression")),
-                DynamicTest.dynamicTest("tag value contains '>', regular expression is printed",
-                        () -> testNegative("test", "test>", "regular expression")),
-                DynamicTest.dynamicTest("tag value contains '%', regular expression is printed",
-                        () -> testNegative("test", "test%", "regular expression")),
-                DynamicTest.dynamicTest("tag value contains '&', regular expression is printed",
-                        () -> testNegative("test", "test&", "regular expression")),
-                DynamicTest.dynamicTest("tag value contains '/', regular expression is printed",
-                        () -> testNegative("test", "test/", "regular expression")),
-                DynamicTest.dynamicTest("tag value contains '\\', regular expression is printed",
-                        () -> testNegative("test", "test\\", "regular expression")),
-                DynamicTest.dynamicTest("tag value contains '?', regular expression is printed",
-                        () -> testNegative("test", "test?", "regular expression")),
                 //    valid
                 DynamicTest.dynamicTest("tag key is valid ",
                         () -> testPositive("test", "test")),
                 DynamicTest.dynamicTest("tag key is valid ",
-                        () -> testPositive("test", "azure@cloudera.com prx:pfx:^!=-"))
+                        () -> testPositive("test", "azure@cloudera.com prx:pfx:^!=-")),
+                DynamicTest.dynamicTest("tag key is valid ",
+                        () -> testPositive(
+                                "test",
+                                "crn:altus:iam:us-west-1:ab1abcd-abcd-abcd-abcf-abcd1234abcd:machineUser:test/abcd1234-1234-abcd-abcd-abcd1234abcd")
+                )
         );
     }
 
