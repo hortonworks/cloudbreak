@@ -23,6 +23,7 @@ import static java.lang.Math.abs;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -362,6 +363,7 @@ public class ClusterOperationService {
     private void updateFailedNodes(Cluster cluster, Map<InstanceMetaData, Optional<String>> failedHostMetadata) throws TransactionExecutionException {
         if (!failedHostMetadata.isEmpty()) {
             Map<String, Optional<String>> hostNamesWithReason = failedHostMetadata.entrySet().stream()
+                    .filter(e -> e.getKey().getDiscoveryFQDN() != null)
                     .collect(Collectors.toMap(e -> e.getKey().getDiscoveryFQDN(), e -> e.getValue()));
             Set<InstanceStatus> expectedStates = Set.of(SERVICES_HEALTHY, SERVICES_RUNNING);
             InstanceStatus newState = SERVICES_UNHEALTHY;
@@ -402,10 +404,10 @@ public class ClusterOperationService {
     private InstanceMetaData updateHostStatus(Map<String, Optional<String>> hostNamesWithReason, InstanceStatus newState,
             ResourceEvent hostEvent, InstanceMetaData host) {
         host.setInstanceStatus(newState);
-        if (hostNamesWithReason.get(host.getDiscoveryFQDN()).isPresent()) {
+        if (hostNamesWithReason.containsKey(host.getDiscoveryFQDN()) && hostNamesWithReason.get(host.getDiscoveryFQDN()).isPresent()) {
             host.setStatusReason(hostNamesWithReason.get(host.getDiscoveryFQDN()).get());
         } else {
-            String hostMessage = cloudbreakMessagesService.getMessage(hostEvent.getMessage(), List.of(host.getDiscoveryFQDN()));
+            String hostMessage = cloudbreakMessagesService.getMessage(hostEvent.getMessage(), Collections.singletonList(host.getDiscoveryFQDN()));
             host.setStatusReason(hostMessage);
         }
         return host;

@@ -82,6 +82,7 @@ public class ComponentLocatorService {
         List<String> fqdnList = hg.getInstanceGroup()
                 .getReachableInstanceMetaDataSet()
                 .stream()
+                .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null)
                 .map(InstanceMetaData::getDiscoveryFQDN)
                 .collect(toList());
         for (String component : hgComponents) {

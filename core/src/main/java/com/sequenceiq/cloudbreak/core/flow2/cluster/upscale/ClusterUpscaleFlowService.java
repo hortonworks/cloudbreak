@@ -167,7 +167,10 @@ class ClusterUpscaleFlowService {
         return failedHosts;
     }
 
-    private List<String> getHostNames(Collection<InstanceMetaData> instanceMetaData) {
-        return instanceMetaData.stream().map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.toList());
+    private List<String> getHostNames(Collection<InstanceMetaData> instanceMetaDatas) {
+        return instanceMetaDatas.stream()
+                .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null)
+                .map(InstanceMetaData::getDiscoveryFQDN)
+                .collect(Collectors.toList());
     }
 }

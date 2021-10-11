@@ -296,7 +296,8 @@ public class MetadataSetupService {
     }
 
     private boolean restorePrimaryGWIfFQDNMatch(InstanceMetaData terminatedPrimaryGwWhichShouldBeRestored, InstanceMetaData instanceMetaDataEntry) {
-        if (terminatedPrimaryGwWhichShouldBeRestored.getDiscoveryFQDN().equals(instanceMetaDataEntry.getDiscoveryFQDN())) {
+        if (terminatedPrimaryGwWhichShouldBeRestored.getDiscoveryFQDN() != null
+                && terminatedPrimaryGwWhichShouldBeRestored.getDiscoveryFQDN().equals(instanceMetaDataEntry.getDiscoveryFQDN())) {
             instanceMetaDataEntry.setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
             instanceMetaDataEntry.setServer(Boolean.TRUE);
             LOGGER.info("Instance will be a primary GW: {}", instanceMetaDataEntry);

@@ -10,6 +10,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -34,6 +35,7 @@ import com.cloudera.api.swagger.ClustersResourceApi;
 import com.cloudera.api.swagger.CommandsResourceApi;
 import com.cloudera.api.swagger.HostTemplatesResourceApi;
 import com.cloudera.api.swagger.HostsResourceApi;
+import com.cloudera.api.swagger.ServicesResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiCommand;
@@ -41,6 +43,7 @@ import com.cloudera.api.swagger.model.ApiHealthSummary;
 import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostList;
 import com.cloudera.api.swagger.model.ApiHostTemplateList;
+import com.cloudera.api.swagger.model.ApiServiceList;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
@@ -176,6 +179,24 @@ class ClouderaManagerDecomissionerTest {
         assertTrue(removableInstances.contains(failed2));
         assertTrue(removableInstances.contains(healthy2));
         assertTrue(removableInstances.contains(bad1));
+    }
+
+    @Test
+    public void testDeleteHostWithoutFqdn() throws ApiException {
+        Stack stack = getStack();
+        InstanceMetaData instanceMetaData = createInstanceMetadata(InstanceStatus.SERVICES_HEALTHY, null, "compute");
+        ServicesResourceApi servicesResourceApi = mock(ServicesResourceApi.class);
+        when(clouderaManagerApiFactory.getServicesResourceApi(eq(client))).thenReturn(servicesResourceApi);
+        when(servicesResourceApi.readServices(eq(stack.getName()), any())).thenReturn(new ApiServiceList().items(new ArrayList<>()));
+        when(clouderaManagerApiFactory.getHostsResourceApi(client)).thenReturn(hostsResourceApi);
+        ApiHostList apiHostList = new ApiHostList();
+        apiHostList.addItemsItem(createApiHostRef("host1.example.com"));
+        when(hostsResourceApi.readHosts(any(), any(), any())).thenReturn(apiHostList);
+
+        underTest.deleteHost(stack, instanceMetaData, client);
+
+        verify(hostsResourceApi, times(1)).readHosts(any(), any(), any());
+        verify(hostsResourceApi, never()).deleteHost(any());
     }
 
     private HostGroup createHostGroup() {

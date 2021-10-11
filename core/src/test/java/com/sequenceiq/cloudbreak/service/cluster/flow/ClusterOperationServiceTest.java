@@ -287,6 +287,23 @@ public class ClusterOperationServiceTest {
         verify(flowManager, times(1)).triggerClusterUpscale(STACK_ID, upscaleHostGroupAdjustment);
     }
 
+    @Test
+    public void shouldUpdateHostStatusAndNotFailWhenMissingDiscoveryFqdn() {
+        when(stackService.findByCrn(STACK_CRN)).thenReturn(stack);
+
+        InstanceMetaData instanceWithoutFqdn = getHost(null, "master", InstanceStatus.SERVICES_UNHEALTHY, InstanceGroupType.GATEWAY);
+
+        when(instanceMetaDataService.findNotTerminatedForStack(eq(stack.getId()))).thenReturn(new HashSet<>(Arrays.asList(instanceWithoutFqdn)));
+
+        when(cloudbreakMessagesService.getMessage(any(), anyCollection())).thenReturn("recovery detected");
+
+        underTest.reportHealthChange(STACK_CRN, Map.of(), Collections.singleton(null));
+
+        verify(cloudbreakMessagesService, times(1)).getMessage(eq(CLUSTER_RECOVERED_NODES_REPORTED_CLUSTER_EVENT.getMessage()), any());
+        verify(cloudbreakEventService).fireCloudbreakEvent(STACK_ID, "AVAILABLE", CLUSTER_RECOVERED_NODES_REPORTED_CLUSTER_EVENT, List.of("null"));
+        assertEquals(InstanceStatus.SERVICES_HEALTHY, instanceWithoutFqdn.getInstanceStatus());
+    }
+
     private InstanceMetaData getHost(String hostName, String groupName, InstanceStatus instanceStatus, InstanceGroupType instanceGroupType) {
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setInstanceGroupType(instanceGroupType);

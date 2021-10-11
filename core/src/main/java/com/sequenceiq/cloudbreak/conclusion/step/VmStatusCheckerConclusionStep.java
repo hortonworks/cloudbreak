@@ -73,6 +73,7 @@ public class VmStatusCheckerConclusionStep extends ConclusionStep {
                 .filter(hostName -> !extendedHostStatuses.isHostHealthy(hostName))
                 .collect(Collectors.toMap(hostName -> hostName.value(), hostName -> extendedHostStatuses.statusReasonForHost(hostName)));
         Set<String> noReportHosts = runningInstances.stream()
+                .filter(i -> i.getDiscoveryFQDN() != null)
                 .filter(i -> !hostStatuses.containsKey(hostName(i.getDiscoveryFQDN())))
                 .map(InstanceMetaData::getDiscoveryFQDN)
                 .collect(toSet());
@@ -96,6 +97,7 @@ public class VmStatusCheckerConclusionStep extends ConclusionStep {
                 .collect(Collectors.toMap(i -> i.getCloudInstance().getInstanceId(), i -> InstanceSyncState.getInstanceSyncState(i.getStatus())));
         Set<String> notRunningInstances = runningInstances.stream()
                 .filter(i -> !InstanceSyncState.RUNNING.equals(instanceSyncStates.getOrDefault(i.getInstanceId(), InstanceSyncState.UNKNOWN)))
+                .filter(i -> i.getDiscoveryFQDN() != null)
                 .map(i -> i.getDiscoveryFQDN())
                 .collect(toSet());
 
