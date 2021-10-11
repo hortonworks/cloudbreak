@@ -222,7 +222,7 @@ public class CustomImageCatalogServiceTest {
         assertNotEquals(IMAGE_NAME, actual.getName());
         assertEquals(CUSTOMIZED_IMAGE_ID, actual.getCustomizedImageId());
         assertEquals(BASE_PARCEL_URL, actual.getBaseParcelUrl());
-        assertEquals(ImageType.DATALAKE, actual.getImageType());
+        assertEquals(ImageType.RUNTIME, actual.getImageType());
         assertEquals(CREATOR, actual.getCreator());
         assertNotNull(actual.getResourceCrn());
         assertEquals(imageCatalog, actual.getImageCatalog());
@@ -309,7 +309,7 @@ public class CustomImageCatalogServiceTest {
         assertEquals(1, imageCatalog.getCustomImages().size());
         assertEquals(CUSTOMIZED_IMAGE_ID, actual.getCustomizedImageId());
         assertEquals(BASE_PARCEL_URL, actual.getBaseParcelUrl());
-        assertEquals(ImageType.DATALAKE, actual.getImageType());
+        assertEquals(ImageType.RUNTIME, actual.getImageType());
         assertEquals(1, actual.getVmImage().size());
 
         VmImage actualVmImage = actual.getVmImage().stream().findFirst().get();
@@ -338,7 +338,7 @@ public class CustomImageCatalogServiceTest {
         assertEquals(1, imageCatalog.getCustomImages().size());
         assertEquals(CUSTOMIZED_IMAGE_ID, actual.getCustomizedImageId());
         assertEquals(BASE_PARCEL_URL, actual.getBaseParcelUrl());
-        assertEquals(ImageType.DATALAKE, actual.getImageType());
+        assertEquals(ImageType.RUNTIME, actual.getImageType());
         assertEquals(1, actual.getVmImage().size());
 
         VmImage actualVmImage = actual.getVmImage().stream().findFirst().get();
@@ -369,7 +369,7 @@ public class CustomImageCatalogServiceTest {
         assertEquals(1, imageCatalog.getCustomImages().size());
         assertEquals(CUSTOMIZED_IMAGE_ID, actual.getCustomizedImageId());
         assertEquals(BASE_PARCEL_URL, actual.getBaseParcelUrl());
-        assertEquals(ImageType.DATALAKE, actual.getImageType());
+        assertEquals(ImageType.RUNTIME, actual.getImageType());
         assertEquals(0, actual.getVmImage().size());
     }
 
@@ -391,7 +391,7 @@ public class CustomImageCatalogServiceTest {
         assertEquals(1, imageCatalog.getCustomImages().size());
         assertEquals(CUSTOMIZED_IMAGE_ID, actual.getCustomizedImageId());
         assertEquals(BASE_PARCEL_URL, actual.getBaseParcelUrl());
-        assertEquals(ImageType.DATALAKE, actual.getImageType());
+        assertEquals(ImageType.RUNTIME, actual.getImageType());
         assertEquals(1, actual.getVmImage().size());
 
         VmImage actualVmImage = actual.getVmImage().stream().findFirst().get();
@@ -438,7 +438,7 @@ public class CustomImageCatalogServiceTest {
         vmImage.setRegion(REGION);
         customImage.setName(IMAGE_NAME);
         customImage.setCustomizedImageId(CUSTOMIZED_IMAGE_ID);
-        customImage.setImageType(ImageType.DATALAKE);
+        customImage.setImageType(ImageType.RUNTIME);
         customImage.setBaseParcelUrl(BASE_PARCEL_URL);
         customImage.setVmImage(Collections.singleton(vmImage));
 

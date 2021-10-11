@@ -345,7 +345,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
 
     private StatedImages getStatedImagesFromCustomImageCatalog(ImageCatalog imageCatalog, Set<String> providers) throws CloudbreakImageCatalogException {
         try {
-            List<Image> cbImages = getImages(Set.of(ImageType.DATALAKE, ImageType.DATAHUB), imageCatalog, providers);
+            List<Image> cbImages = getImages(Set.of(ImageType.DATALAKE, ImageType.DATAHUB, ImageType.RUNTIME), imageCatalog, providers);
             List<Image> freeIpaImages = getImages(Set.of(ImageType.FREEIPA), imageCatalog, providers);
             return statedImages(new Images(null, cbImages, freeIpaImages,
                     Set.of(cbVersion)), imageCatalog.getImageCatalogUrl(), imageCatalog.getName());
@@ -772,6 +772,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
                 return getImageByUrl(defaultFreeIpaCatalogUrl, FREEIPA_DEFAULT_CATALOG_NAME, customImage.getCustomizedImageId());
             case DATAHUB:
             case DATALAKE:
+            case RUNTIME:
                 return getImage(customImage.getCustomizedImageId());
             default:
                 throw new CloudbreakImageCatalogException("Image type is not supported.");

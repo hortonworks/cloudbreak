@@ -48,10 +48,10 @@ public class CustomImageProviderTest {
     private CustomImageProvider underTest;
 
     @Test
-    public void testMergeSourceImageAndCustomImagePropertiesInCaseOfDatahubImage() throws Exception {
+    public void testMergeSourceImageAndCustomImagePropertiesInCaseOfRuntimeImage() throws Exception {
 
         StatedImage statedImage = getStatedImageFromCatalog(V3_CB_CATALOG_FILE, "949bffa3-17d4-4076-9d5a-bf3d23c1086b");
-        CustomImage customImage = getCustomImage(ImageType.DATAHUB, CUSTOM_IMAGE_ID, CUSTOM_BASE_PARCEL_URL);
+        CustomImage customImage = getCustomImage(ImageType.RUNTIME, CUSTOM_IMAGE_ID, CUSTOM_BASE_PARCEL_URL);
 
         StatedImage image = underTest.mergeSourceImageAndCustomImageProperties(statedImage, customImage, CUSTOM_IMAGE_CATALOG_URL, CUSTOM_CATALOG_NAME);
 
@@ -64,29 +64,6 @@ public class CustomImageProviderTest {
         assertFalse(image.getImage().getPreWarmCsd().contains(CUSTOM_BASE_PARCEL_URL));
         assertTrue(image.getImage().getImageSetsByProvider().containsKey("aws"));
         assertEquals(16, image.getImage().getImageSetsByProvider().get("aws").size());
-    }
-
-    @Test
-    public void testMergeSourceImageAndCustomImagePropertiesInCaseOfDatalakeImage() throws Exception {
-
-        StatedImage statedImage = getStatedImageFromCatalog(V3_CB_CATALOG_FILE, "232fe6b6-aec4-4fa9-bb02-2c295d319a36");
-        CustomImage customImage = getCustomImage(ImageType.DATALAKE, CUSTOM_IMAGE_ID, CUSTOM_BASE_PARCEL_URL + "/");
-
-        StatedImage image = underTest.mergeSourceImageAndCustomImageProperties(statedImage, customImage, CUSTOM_IMAGE_CATALOG_URL, CUSTOM_CATALOG_NAME);
-
-        assertEquals(customImage.getCreated(), image.getImage().getCreated());
-        assertEquals(customImage.getDescription(), image.getImage().getDescription());
-        assertEquals(CUSTOM_IMAGE_ID, image.getImage().getUuid());
-        assertEquals("http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/6458542/cm7/7.2.2/redhat7/yum/",
-                image.getImage().getRepo().get("redhat7"));
-        assertEquals("http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/6575992/cdh/7.x/parcels/",
-                image.getImage().getStackDetails().getRepo().getStack().get("redhat7"));
-        assertEquals("https://myarchive.test.com/dev.hortonworks.com/DSS/centos7/2.x/BUILDS/2.0.3.0-98/tars/dataplane_profilers",
-                image.getImage().getPreWarmParcels().get(0).get(1));
-        assertEquals("https://myarchive.test.com/DSS/centos7/2.x/BUILDS/2.0.3.0-98/tars/dataplane_profilers/PROFILER_MANAGER-2.0.3.2.0.3.0-98.jar",
-                image.getImage().getPreWarmCsd().get(0));
-        assertTrue(image.getImage().getImageSetsByProvider().containsKey("azure"));
-        assertEquals(36, image.getImage().getImageSetsByProvider().get("azure").size());
     }
 
     @Test

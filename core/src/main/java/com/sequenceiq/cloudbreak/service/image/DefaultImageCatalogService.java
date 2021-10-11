@@ -63,6 +63,7 @@ public class DefaultImageCatalogService {
                 break;
             case DATAHUB:
             case DATALAKE:
+            case RUNTIME:
                 throw new BadRequestException(String.format("Runtime is required in case of '%s' image type", imageType));
             default:
                 throw new BadRequestException(String.format("Type '%s' is not supported.", type));
@@ -79,6 +80,7 @@ public class DefaultImageCatalogService {
                 throw new BadRequestException(String.format("Runtime is not supported in case of '%s' image type", imageType));
             case DATAHUB:
             case DATALAKE:
+            case RUNTIME:
                 ImageCatalog imageCatalog = getCloudbreakDefaultImageCatalog();
                 ImageFilter imageFilter = new ImageFilter(imageCatalog, Set.of(provider), null, false, null, runtime);
                 statedImage = imageCatalogService.getImagePrewarmedDefaultPreferred(imageFilter, i -> true);

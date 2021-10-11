@@ -80,7 +80,7 @@ public class DefaultImageCatalogServiceTest {
 
     @Test
     public void testGetImageFromDefaultCatalogWithoutRuntimeThrowsBadRequestInCaseOfNonFreeIpaImageType() {
-        assertThrows(BadRequestException.class, () -> victim.getImageFromDefaultCatalog(ImageType.DATAHUB.name(), "aws"));
+        assertThrows(BadRequestException.class, () -> victim.getImageFromDefaultCatalog(ImageType.RUNTIME.name(), "aws"));
     }
 
     @Test
@@ -154,7 +154,7 @@ public class DefaultImageCatalogServiceTest {
         ArgumentCaptor<ImageFilter> imageFilterArgumentCaptor = ArgumentCaptor.forClass(ImageFilter.class);
         when(imageCatalogService.getImagePrewarmedDefaultPreferred(imageFilterArgumentCaptor.capture(), Mockito.any())).thenReturn(mock(StatedImage.class));
 
-        StatedImage actual = victim.getImageFromDefaultCatalog(ImageType.DATAHUB.name(), "aws", "7.2.10");
+        StatedImage actual = victim.getImageFromDefaultCatalog(ImageType.RUNTIME.name(), "aws", "7.2.10");
 
         assertNotNull(actual);
         assertEquals(imageFilterArgumentCaptor.getValue().getClusterVersion(), "7.2.10");
