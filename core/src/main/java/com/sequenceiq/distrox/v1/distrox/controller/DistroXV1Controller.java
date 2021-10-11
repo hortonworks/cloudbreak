@@ -632,11 +632,13 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByResourceName(action = AuthorizationResourceAction.POWERUSER_ONLY)
-    public void changeImageCatalog(@ResourceName String name, ChangeImageCatalogV4Request changeImageCatalogRequest) {
-        // FIXME: Implement this!
-        // API first approach so we can work in parallel on the CLI.
-        // It is going to be implemented as a part of CB-14308
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.START_DATAHUB)
+    public void changeImageCatalog(@ResourceName String name, @Valid @NotNull ChangeImageCatalogV4Request changeImageCatalogRequest) {
+        stackOperations.changeImageCatalog(
+                NameOrCrn.ofName(name),
+                workspaceService.getForCurrentUser().getId(),
+                changeImageCatalogRequest.getImageCatalog()
+        );
     }
 
     private DistroXSyncCmV1Response launchSyncComponentVersionsFromCm(NameOrCrn nameOrCrn) {

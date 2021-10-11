@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.image.update;
 
-import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
-
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -18,12 +16,9 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
-import com.sequenceiq.cloudbreak.common.json.Json;
-import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.CheckResult;
-import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
@@ -33,6 +28,7 @@ import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
+import com.sequenceiq.cloudbreak.service.stack.StackImageService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 
 @Service
@@ -60,40 +56,14 @@ public class StackImageUpdateService {
     @Inject
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
-    public void storeNewImageComponent(Stack stack, StatedImage targetImage) {
-        Component imageComponent;
-        try {
-            Image newImage = getImageModelFromStatedImage(stack, getCurrentImage(stack), targetImage);
-            imageComponent = new Component(ComponentType.IMAGE, ComponentType.IMAGE.name(), new Json(newImage), stack);
-        } catch (IllegalArgumentException e) {
-            LOGGER.info("Failed to create json", e);
-            throw new CloudbreakServiceException("Failed to create json", e);
-        } catch (CloudbreakImageNotFoundException e) {
-            LOGGER.info("Could not find image", e);
-            throw new CloudbreakServiceException("Could not find image", e);
-        }
-
-        componentConfigProviderService.replaceImageComponentWithNew(imageComponent);
-    }
-
-    public Image getImageModelFromStatedImage(Stack stack, Image currentImage, StatedImage targetImage) {
-        try {
-            String platformString = platform(stack.cloudPlatform()).value().toLowerCase();
-            String newImageName = imageService.determineImageName(platformString, stack.getRegion(), targetImage.getImage());
-            return new Image(newImageName, currentImage.getUserdata(), targetImage.getImage().getOs(), targetImage.getImage().getOsType(),
-                    targetImage.getImageCatalogUrl(), targetImage.getImageCatalogName(), targetImage.getImage().getUuid(),
-                    targetImage.getImage().getPackageVersions());
-        } catch (CloudbreakImageNotFoundException e) {
-            LOGGER.info("Could not find image", e);
-            throw new CloudbreakServiceException("Could not find image", e);
-        }
-    }
+    @Inject
+    private StackImageService stackImageService;
 
     public StatedImage getNewImageIfVersionsMatch(Stack stack, String newImageId, String imageCatalogName, String imageCatalogUrl) {
         try {
             restRequestThreadLocalService.setWorkspace(stack.getWorkspace());
 
-            Image currentImage = getCurrentImage(stack);
+            Image currentImage = stackImageService.getCurrentImage(stack);
 
             StatedImage newImage = getNewImage(newImageId, imageCatalogName, imageCatalogUrl, currentImage);
 
@@ -130,10 +100,6 @@ public class StackImageUpdateService {
 
     private boolean isCloudPlatformMatches(Stack stack, StatedImage newImage) {
         return newImage.getImage().getImageSetsByProvider().keySet().stream().anyMatch(key -> key.equalsIgnoreCase(stack.cloudPlatform()));
-    }
-
-    private Image getCurrentImage(Stack stack) throws CloudbreakImageNotFoundException {
-        return componentConfigProviderService.getImage(stack.getId());
     }
 
     private boolean isOsVersionsMatch(Image currentImage, StatedImage newImage) {
@@ -198,7 +164,7 @@ public class StackImageUpdateService {
     public boolean isValidImage(Stack stack, String newImageId, String imageCatalogName, String imageCatalogUrl) {
         if (isCbVersionOk(stack)) {
             try {
-                Image currentImage = getCurrentImage(stack);
+                Image currentImage = stackImageService.getCurrentImage(stack);
                 StatedImage newImage = getNewImage(newImageId, imageCatalogName, imageCatalogUrl, currentImage);
 
                 boolean cloudPlatformMatches = isCloudPlatformMatches(stack, newImage);

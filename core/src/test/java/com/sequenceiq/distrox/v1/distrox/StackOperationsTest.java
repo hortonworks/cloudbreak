@@ -2,6 +2,7 @@ package com.sequenceiq.distrox.v1.distrox;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -32,6 +33,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackClusterStatusViewToStatusConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.UserNamePasswordV4RequestToUpdateClusterV4RequestConverter;
@@ -43,6 +45,7 @@ import com.sequenceiq.cloudbreak.service.ClusterCommonService;
 import com.sequenceiq.cloudbreak.service.DefaultClouderaManagerRepoService;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
 import com.sequenceiq.cloudbreak.service.stack.StackApiViewService;
+import com.sequenceiq.cloudbreak.service.stack.StackImageService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
@@ -50,12 +53,15 @@ import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLoca
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.distrox.v1.distrox.service.EnvironmentServiceDecorator;
 import com.sequenceiq.distrox.v1.distrox.service.SdxServiceDecorator;
+import com.sequenceiq.flow.core.FlowLogService;
 
 public class StackOperationsTest {
 
     private static final StackType STACK_TYPE = StackType.WORKLOAD;
 
     private static final Set<String> STACK_ENTRIES = Collections.emptySet();
+
+    private static final String IMAGE_CATALOG = "image catalog";
 
     @Rule
     public final ExpectedException exceptionRule = ExpectedException.none();
@@ -104,6 +110,12 @@ public class StackOperationsTest {
 
     @Mock
     private UserNamePasswordV4RequestToUpdateClusterV4RequestConverter userNamePasswordV4RequestToUpdateClusterV4RequestConverter;
+
+    @Mock
+    private StackImageService stackImageService;
+
+    @Mock
+    private FlowLogService flowLogService;
 
     private Stack stack;
 
@@ -198,6 +210,26 @@ public class StackOperationsTest {
         expected.put("crn2", Optional.of("envcrn2"));
         expected.put("crn3", Optional.empty());
         assertEquals(expected, result);
+    }
+
+    @Test
+    public void testChangeImageCatalogFlowNotInProgress() {
+        NameOrCrn nameOrCrn = NameOrCrn.ofName(stack.getName());
+        when(stackService.getByNameOrCrnInWorkspace(nameOrCrn, stack.getWorkspace().getId())).thenReturn(stack);
+        when(flowLogService.isOtherFlowRunning(stack.getId())).thenReturn(false);
+
+        underTest.changeImageCatalog(nameOrCrn, stack.getWorkspace().getId(), IMAGE_CATALOG);
+
+        verify(stackImageService).changeImageCatalog(stack, IMAGE_CATALOG);
+    }
+
+    @Test
+    public void testChangeImageCatalogThrowsExceptionWhenFlowInProgress() {
+        NameOrCrn nameOrCrn = NameOrCrn.ofName(stack.getName());
+        when(stackService.getByNameOrCrnInWorkspace(nameOrCrn, stack.getWorkspace().getId())).thenReturn(stack);
+        when(flowLogService.isOtherFlowRunning(stack.getId())).thenReturn(true);
+
+        assertThrows(CloudbreakServiceException.class, () -> underTest.changeImageCatalog(nameOrCrn, stack.getWorkspace().getId(), IMAGE_CATALOG));
     }
 
     private StackV4Response stackResponse() {

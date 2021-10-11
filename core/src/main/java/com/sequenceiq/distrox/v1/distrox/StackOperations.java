@@ -51,6 +51,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.Upgrade
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackClusterStatusViewToStatusConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.UserNamePasswordV4RequestToUpdateClusterV4RequestConverter;
@@ -66,6 +67,7 @@ import com.sequenceiq.cloudbreak.service.LoadBalancerUpdateService;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterDBValidationService;
 import com.sequenceiq.cloudbreak.service.stack.StackApiViewService;
+import com.sequenceiq.cloudbreak.service.stack.StackImageService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterRecoveryService;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeAvailabilityService;
@@ -79,6 +81,7 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.distrox.v1.distrox.service.EnvironmentServiceDecorator;
 import com.sequenceiq.distrox.v1.distrox.service.SdxServiceDecorator;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.domain.RetryableFlow;
 
 @Service
@@ -145,6 +148,12 @@ public class StackOperations implements ResourcePropertyProvider {
 
     @Inject
     private UserNamePasswordV4RequestToUpdateClusterV4RequestConverter userNamePasswordV4RequestToUpdateClusterV4RequestConverter;
+
+    @Inject
+    private StackImageService stackImageService;
+
+    @Inject
+    private FlowLogService flowLogService;
 
     public StackViewV4Responses listByEnvironmentName(Long workspaceId, String environmentName, List<StackType> stackTypes) {
         Set<StackViewV4Response> stackViewResponses;
@@ -473,5 +482,14 @@ public class StackOperations implements ResourcePropertyProvider {
 
     public RecoveryValidationV4Response validateClusterRecovery(@NotNull NameOrCrn nameOrCrn, Long workspaceId) {
         return recoveryService.validateRecovery(workspaceId, nameOrCrn);
+    }
+
+    public void changeImageCatalog(@NotNull NameOrCrn nameOrCrn, Long workspaceId, String imageCatalog) {
+        LOGGER.info("Updating image catalog of stack '{}' with '{}'", nameOrCrn, imageCatalog);
+        Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
+        if (flowLogService.isOtherFlowRunning(stack.getId())) {
+            throw new CloudbreakServiceException(String.format("Operation is running for stack '%s'. Please try again later.", stack.getName()));
+        }
+        stackImageService.changeImageCatalog(stack, imageCatalog);
     }
 }
