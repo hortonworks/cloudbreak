@@ -83,7 +83,7 @@ public class CustomGcpDiskEncryptionServiceTest {
         parameters.put(InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID, "testurl");
 
         InstanceTemplate instanceTemplate = new InstanceTemplate("large", "master", 1L,
-                new ArrayList<>(), InstanceStatus.CREATE_REQUESTED, parameters, 1L, "image", TemporaryStorage.ATTACHED_VOLUMES);
+                new ArrayList<>(), InstanceStatus.CREATE_REQUESTED, parameters, 1L, "image", TemporaryStorage.ATTACHED_VOLUMES, 0L);
 
         return instanceTemplate;
     }

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
@@ -130,7 +131,7 @@ public class SshJClientActions extends SshJClient {
         return testDto;
     }
 
-    public void checkEphemeralDisksMounted(List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames) {
+    public void checkEphemeralDisksMounted(List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames, String mountDirPrefix) {
         Map<String, Pair<Integer, String>> deviceMountPointMappingsByIp = getDeviceMountPointMappingsByIp(instanceGroups, hostGroupNames);
         Map<String, Pair<Integer, String>> deviceDiskTypeMappingsByIp = getDeviceDiskTypeMappingsByIp(instanceGroups, hostGroupNames);
 
@@ -156,13 +157,34 @@ public class SshJClientActions extends SshJClient {
                 if (mountPoint == null) {
                     LOGGER.error("No mount point found for ephemeral device {} on node with IP {}!", device, node.getKey());
                     throw new TestFailException(String.format("No mount point found for device %s on node with IP %s!", device, node.getKey()));
-                } else if (!mountPoint.contains("ephfs")) {
+                } else if (!mountPoint.contains(mountDirPrefix)) {
                     LOGGER.error("Ephemeral device {} incorrectly mounted to {} on node with IP {}!", device, mountPoint, node.getKey());
                     throw new TestFailException(String.format("Ephemeral device %s incorrectly mounted to %s on node with IP %s!",
                             device, mountPoint, node.getKey()));
                 }
             }
         }
+    }
+
+    public Set<String> getEphemeralVolumeMountPoints(List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames) {
+        Map<String, Pair<Integer, String>> deviceMountPointMappingsByIp = getDeviceMountPointMappingsByIp(instanceGroups, hostGroupNames);
+        Map<String, Pair<Integer, String>> deviceDiskTypeMappingsByIp = getDeviceDiskTypeMappingsByIp(instanceGroups, hostGroupNames);
+
+        Map<String, String> mounPoints = deviceDiskTypeMappingsByIp.entrySet().stream().findFirst()
+                .stream()
+                .map(node -> new Json(deviceMountPointMappingsByIp.get(node.getKey()).getValue()).getMap().entrySet())
+                .flatMap(Set::stream)
+                .collect(Collectors.toMap(Entry::getKey, x -> String.valueOf(x.getValue())));
+
+        return deviceDiskTypeMappingsByIp.entrySet().stream().findFirst()
+                .stream()
+                .map(node -> new Json(node.getValue().getValue()).getMap().entrySet().stream()
+                .filter(e -> String.valueOf(e.getValue()).contains("Amazon EC2 NVMe Instance Storage"))
+                .collect(Collectors.toMap(Entry::getKey, x -> String.valueOf(x.getValue()))))
+                .map(Map::keySet)
+                .flatMap(Set::stream)
+                .map(mounPoints::get)
+                .collect(Collectors.toSet());
     }
 
     public void checkNoEphemeralDisksMounted(List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames) {

@@ -1611,7 +1611,7 @@ public class CloudFormationTemplateBuilderTest {
         List<Volume> volumes = Arrays.asList(new Volume("/hadoop/fs1", "HDD", 1, CloudVolumeUsageType.GENERAL),
                 new Volume("/hadoop/fs2", "HDD", 1, CloudVolumeUsageType.GENERAL));
         return new InstanceTemplate("m1.medium", "master", 0L, volumes, InstanceStatus.CREATE_REQUESTED, new HashMap<>(), 0L,
-                "cb-centos66-amb200-2015-05-25", TemporaryStorage.ATTACHED_VOLUMES);
+                "cb-centos66-amb200-2015-05-25", TemporaryStorage.ATTACHED_VOLUMES, 0L);
     }
 
     private Map<String, String> getDefaultCloudStackParameters() {
