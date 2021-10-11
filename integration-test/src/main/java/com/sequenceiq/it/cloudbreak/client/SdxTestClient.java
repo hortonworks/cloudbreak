@@ -6,6 +6,7 @@ import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxAutotlsCertRotationAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxBackupAction;
+import com.sequenceiq.it.cloudbreak.action.sdx.SdxChangeImageCatalogAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxBackupInternalAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxCheckForUpgradeAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxCollectCMDiagnosticsAction;
@@ -40,6 +41,7 @@ import com.sequenceiq.it.cloudbreak.action.sdx.SdxUpgradeAction;
 import com.sequenceiq.it.cloudbreak.action.v4.util.RenewDatalakeCertificateAction;
 import com.sequenceiq.it.cloudbreak.action.v4.util.SdxRetryAction;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCMDiagnosticsTestDto;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxChangeImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCustomTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxDiagnosticsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
@@ -183,6 +185,10 @@ public class SdxTestClient {
 
     public Action<SdxTestDto, SdxClient> restore(String backupId, String backupLocation) {
         return new SdxRestoreAction(backupId, backupLocation);
+    }
+
+    public Action<SdxChangeImageCatalogTestDto, SdxClient> changeImageCatalog() {
+        return new SdxChangeImageCatalogAction();
     }
 
     public Action<SdxInternalTestDto, SdxClient> restoreInternal(String backupId, String backupLocation) {

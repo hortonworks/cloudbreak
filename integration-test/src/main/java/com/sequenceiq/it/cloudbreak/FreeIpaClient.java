@@ -27,6 +27,7 @@ import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaOperationStatusTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaUserSyncStatusDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaUserSyncTestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeipaChangeImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeipaUsedImagesTestDto;
 import com.sequenceiq.it.cloudbreak.dto.kerberos.KerberosTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ldap.LdapTestDto;
@@ -114,7 +115,8 @@ public class FreeIpaClient extends MicroserviceClient<com.sequenceiq.freeipa.api
                 KerberosTestDto.class.getSimpleName(),
                 FreeIpaUserSyncStatusDto.class.getSimpleName(),
                 FreeipaUsedImagesTestDto.class.getSimpleName(),
-                FreeIpaOperationStatusTestDto.class.getSimpleName());
+                FreeIpaOperationStatusTestDto.class.getSimpleName(),
+                FreeipaChangeImageCatalogTestDto.class.getSimpleName());
     }
 
     @Override

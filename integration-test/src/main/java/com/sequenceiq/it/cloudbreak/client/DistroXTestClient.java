@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXBlueprintRequestAction;
+import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXChangeImageCatalogAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXCreateAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXCreateInternalAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXDeleteAction;
@@ -24,6 +25,7 @@ import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXUpgradeAction;
 import com.sequenceiq.it.cloudbreak.action.v4.util.RenewDistroXCertificateAction;
 import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.image.DistroXChangeImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.util.RenewDistroXCertificateTestDto;
 
 @Service
@@ -91,5 +93,9 @@ public class DistroXTestClient {
 
     public Action<DistroXTestDto, CloudbreakClient> upgrade() {
         return new DistroXUpgradeAction();
+    }
+
+    public Action<DistroXChangeImageCatalogTestDto, CloudbreakClient> changeImageCatalog() {
+        return new DistroXChangeImageCatalogAction();
     }
 }
