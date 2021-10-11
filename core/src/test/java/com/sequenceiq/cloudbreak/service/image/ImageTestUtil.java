@@ -15,6 +15,11 @@ public class ImageTestUtil {
     private ImageTestUtil() {
     }
 
+    public static StatedImage getImageFromCatalog(boolean prewarmed, String uuid, String stackVersion, String imageCatalogUrl, String imageCatalogName) {
+        Image image = getImage(prewarmed, uuid, stackVersion);
+        return StatedImage.statedImage(image, imageCatalogUrl, imageCatalogName);
+    }
+
     public static StatedImage getImageFromCatalog(boolean prewarmed, String uuid, String stackVersion) {
         Image image = getImage(prewarmed, uuid, stackVersion);
         return StatedImage.statedImage(image, "url", "name");

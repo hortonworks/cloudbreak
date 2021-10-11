@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.service.image;
 
 import java.io.IOException;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -47,20 +46,18 @@ public class ImageProvider {
                 .stream()
                 .map(InstanceMetaData::getImage)
                 .filter(json -> !json.getMap().isEmpty())
-                .map(convertJsonToImage())
+                .map(this::convertJsonToImage)
                 .collect(Collectors.toSet());
     }
 
-    private Function<Json, Image> convertJsonToImage() {
-        return imageJson -> {
-            try {
-                return imageJson.get(Image.class);
-            } catch (IOException e) {
-                String message = "Failed to convert Json to Image";
-                LOGGER.error(message, e);
-                throw new CloudbreakRuntimeException(message, e);
-            }
-        };
+    public Image convertJsonToImage(Json imageJson) {
+        try {
+            return imageJson.get(Image.class);
+        } catch (IOException e) {
+            String message = "Failed to convert Json to Image";
+            LOGGER.error(message, e);
+            throw new CloudbreakRuntimeException(message, e);
+        }
     }
 
     private Set<String> getImageIds(Set<Image> imagesFromInstances) {

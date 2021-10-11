@@ -32,7 +32,9 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgrad
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgradeInitSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgradeRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgradeSuccess;
+import com.sequenceiq.cloudbreak.service.image.ClusterUpgradeTargetImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
+import com.sequenceiq.cloudbreak.service.stack.StackImageService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.upgrade.ImageComponentUpdaterService;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradeImageInfo;
@@ -59,12 +61,16 @@ public class ClusterUpgradeActions {
             @Inject
             private ImageComponentUpdaterService imageComponentUpdaterService;
 
+            @Inject
+            private ClusterUpgradeTargetImageService clusterUpgradeTargetImageService;
+
             @Override
             protected void doExecute(ClusterUpgradeContext context, ClusterUpgradeTriggerEvent payload, Map<Object, Object> variables) {
                 try {
                     UpgradeImageInfo images = imageComponentUpdaterService.updateForUpgrade(payload.getImageId(), payload.getResourceId());
                     variables.put(CURRENT_IMAGE, images.getCurrentStatedImage());
                     variables.put(TARGET_IMAGE, images.getTargetStatedImage());
+                    clusterUpgradeTargetImageService.saveImage(context.getStackId(), images.getTargetStatedImage());
                     clusterUpgradeService.initUpgradeCluster(context.getStackId(), getTargetImage(variables));
                     Selectable event = new ClusterUpgradeInitRequest(context.getStackId(), isPatchUpgrade(images.getCurrentStatedImage().getImage(),
                             images.getTargetStatedImage().getImage()));
@@ -152,6 +158,9 @@ public class ClusterUpgradeActions {
     public Action<?, ?> clusterUpgradeFinished() {
         return new AbstractClusterUpgradeAction<>(ClusterUpgradeSuccess.class) {
 
+            @Inject
+            private StackImageService stackImageService;
+
             @Override
             protected ClusterUpgradeContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
                     ClusterUpgradeSuccess payload) {
@@ -163,6 +172,7 @@ public class ClusterUpgradeActions {
                 StatedImage currentImage = getCurrentImage(variables);
                 StatedImage targetImage = getTargetImage(variables);
                 clusterUpgradeService.clusterUpgradeFinished(context.getStackId(), currentImage, targetImage);
+                stackImageService.removeImageByComponentName(context.getStackId(), TARGET_IMAGE);
                 sendEvent(context);
             }
 
