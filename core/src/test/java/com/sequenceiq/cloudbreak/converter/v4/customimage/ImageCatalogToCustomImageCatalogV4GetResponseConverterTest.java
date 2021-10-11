@@ -59,7 +59,7 @@ public class ImageCatalogToCustomImageCatalogV4GetResponseConverterTest {
         CustomImage customImage = getCustomImage(IMAGE_ID);
         ImageCatalog imageCatalog = new ImageCatalog();
         imageCatalog.setName(NAME);
-        customImage.setImageType(ImageType.DATALAKE);
+        customImage.setImageType(ImageType.RUNTIME);
         customImage.setCustomizedImageId(SOURCE_IMAGE_ID);
         imageCatalog.setDescription(DESCRIPTION);
         imageCatalog.setCustomImages(Collections.singleton(customImage));
@@ -83,7 +83,7 @@ public class ImageCatalogToCustomImageCatalogV4GetResponseConverterTest {
         assertEquals(SOURCE_IMAGE_DATE, imageResult.getSourceImageDate());
         assertEquals(CLOUD_PROVIDER, imageResult.getCloudProvider());
         assertNotNull(imageResult.getVersions());
-        assertEquals(ImageType.DATALAKE.name(), imageResult.getImageType());
+        assertEquals(ImageType.RUNTIME.name(), imageResult.getImageType());
     }
 
     private CustomImage getCustomImage(String name) {

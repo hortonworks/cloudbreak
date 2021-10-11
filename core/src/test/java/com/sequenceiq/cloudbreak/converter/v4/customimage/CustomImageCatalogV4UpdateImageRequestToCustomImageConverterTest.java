@@ -20,7 +20,7 @@ public class CustomImageCatalogV4UpdateImageRequestToCustomImageConverterTest {
 
     private static final String BASE_PARCEL_URL = "base parcel url";
 
-    private static final String VALID_IMAGE_TYPE = "DATALAKE";
+    private static final String VALID_IMAGE_TYPE = "RUNTIME";
 
     private static final String INVALID_IMAGE_TYPE = "invalid image type";
 
@@ -46,7 +46,7 @@ public class CustomImageCatalogV4UpdateImageRequestToCustomImageConverterTest {
         CustomImage result = victim.convert(source);
         assertEquals(SOURCE_IMAGE_ID, result.getCustomizedImageId());
         assertEquals(BASE_PARCEL_URL, result.getBaseParcelUrl());
-        assertEquals(ImageType.DATALAKE, result.getImageType());
+        assertEquals(ImageType.RUNTIME, result.getImageType());
         assertEquals(1, result.getVmImage().size());
 
         VmImage vmImage = result.getVmImage().stream().findFirst().get();

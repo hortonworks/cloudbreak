@@ -35,7 +35,7 @@ public class CustomImageToCustomImageCatalogV4UpdateImageResponseConverterTest {
     public void shouldConvert() {
         CustomImage customImage = new CustomImage();
         customImage.setName(IMAGE_ID);
-        customImage.setImageType(ImageType.DATALAKE);
+        customImage.setImageType(ImageType.RUNTIME);
         customImage.setBaseParcelUrl(BASE_PARCEL_URL);
         customImage.setCustomizedImageId(SOURCE_IMAGE_ID);
         customImage.setVmImage(Collections.singleton(getVmImage(REGION, IMAGE_REFERENCE)));
@@ -44,7 +44,7 @@ public class CustomImageToCustomImageCatalogV4UpdateImageResponseConverterTest {
         assertEquals(IMAGE_ID, result.getImageId());
         assertEquals(SOURCE_IMAGE_ID, result.getSourceImageId());
         assertEquals(BASE_PARCEL_URL, result.getBaseParcelUrl());
-        assertEquals(ImageType.DATALAKE.name(), result.getImageType());
+        assertEquals(ImageType.RUNTIME.name(), result.getImageType());
         assertEquals(1, result.getVmImages().size());
 
         CustomImageCatalogV4VmImageResponse vmImage = result.getVmImages().stream().findFirst().get();
