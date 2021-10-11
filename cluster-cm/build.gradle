@@ -1,6 +1,5 @@
 plugins {
   id "java"
-  id 'maven'
 }
 
 repositories {
@@ -22,19 +21,31 @@ configurations.all {
 }
 
 dependencies {
-  compile (group: 'com.cloudera.api.swagger',           name: 'cloudera-manager-api-swagger',version: cmClientVersion) {
+  implementation (group: 'com.cloudera.api.swagger',           name: 'cloudera-manager-api-swagger',version: cmClientVersion) {
     transitive = false
   }
-  compile project(':cluster-api')
-  compile project(':common')
-  compile project(':client-cm')
-  compile project(':template-manager-cmtemplate')
+  implementation project(':auth-connector')
+  implementation project(':cluster-api')
+  implementation project(':common')
+  implementation project(':core-api')
+  implementation project(':core-model')
+  implementation project(':client-cm')
+  implementation project(':cloud-api')
+  implementation project(':cloud-common')
+  implementation project(':environment-common')
+  implementation project(':structuredevent-model')
+  implementation project(':template-manager-cmtemplate')
+  implementation project(':template-manager-core')
+  implementation project(':workspace')
 
-  testCompile project(path: ':common', configuration: 'tests')
+  implementation            group: "joda-time",                 name: "joda-time",                               version: "2.10.8"
+  implementation            group: 'org.hibernate',             name: 'hibernate-envers',                        version: hibernateCoreVersion
 
-  testCompile (group: 'org.mockito',             name: 'mockito-core',          version: mockitoVersion) {
+  testImplementation project(path: ':common', configuration: 'tests')
+
+  testImplementation (group: 'org.mockito',             name: 'mockito-core',          version: mockitoVersion) {
     exclude group: 'org.hamcrest'
   }
-  testCompile        group: 'org.hamcrest',              name: 'hamcrest',                       version: hamcrestVersion
-  testCompile        group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
+  testImplementation        group: 'org.hamcrest',              name: 'hamcrest',                       version: hamcrestVersion
+  testImplementation        group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
 }

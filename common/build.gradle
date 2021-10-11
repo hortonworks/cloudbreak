@@ -1,6 +1,6 @@
 plugins {
   id "java"
-  id 'maven'
+  id "java-library"
 }
 
 repositories {
@@ -16,72 +16,71 @@ jar {
 }
 
 dependencies {
-  compile project(':common-model')
+  api project(':common-model')
 
-  compile group: 'org.slf4j',                             name: 'slf4j-api',                      version: slf4jApiVersion
-  compile group: 'ch.qos.logback.contrib',                name: 'logback-json-classic',           version: logbackJsonClassicVersion
-  compile group: 'io.micrometer',                         name: 'micrometer-core',                version: micrometerVersion
-  compile group: "io.micrometer",                         name: "micrometer-jersey2",             version: micrometerVersion
-  compile group: 'org.apache.commons',                    name: 'commons-lang3',                  version: apacheCommonsLangVersion
-  compile group: 'commons-io',                            name: 'commons-io',                     version: apacheCommonsIoVersion
-  compile group: 'commons-net',                           name: 'commons-net',                    version: '3.6'
-  compile group: 'com.google.guava',                      name: 'guava',                          version: guavaVersion
-  compile group: 'com.google.code.gson',                  name: 'gson',                           version: gsonVersion
-  compile group: 'io.projectreactor',                     name: 'reactor-stream',                 version: eventBusVersion
-  compile group: 'org.mybatis',                           name: 'mybatis-migrations',             version: '3.2.0'
-  compile group: 'com.fasterxml.jackson.core',            name: 'jackson-databind',               version: jacksonVersion
-  compile group: 'net.sf.json-lib',                       name: 'json-lib',                       version: '2.4',  classifier: 'jdk15'
-  compile group: 'net.jcip',                              name: 'jcip-annotations',               version: '1.0'
-  compile group: 'com.github.spotbugs',                   name: 'spotbugs-annotations',           version: '4.2.0'
-  compile group: 'org.reflections',                       name: 'reflections',                    version: '0.9.11'
+  implementation group: 'org.slf4j',                             name: 'slf4j-api',                      version: slf4jApiVersion
+  implementation group: 'ch.qos.logback.contrib',                name: 'logback-json-classic',           version: logbackJsonClassicVersion
+  implementation group: 'io.micrometer',                         name: 'micrometer-core',                version: micrometerVersion
+  api group: "io.micrometer",                         name: "micrometer-jersey2",             version: micrometerVersion
+  api group: 'commons-io',                            name: 'commons-io',                     version: apacheCommonsIoVersion
+  api group: 'commons-net',                           name: 'commons-net',                    version: '3.6'
+  api group: 'org.apache.commons',                    name: 'commons-collections4',           version: commonsCollections4Version
+  api group: 'com.google.guava',                      name: 'guava',                          version: guavaVersion
+  api group: 'com.google.code.gson',                  name: 'gson',                           version: gsonVersion
+  implementation group: 'io.projectreactor',                     name: 'reactor-stream',                 version: eventBusVersion
+  implementation group: 'org.mybatis',                           name: 'mybatis-migrations',             version: '3.2.0'
+  implementation group: 'com.fasterxml.jackson.core',            name: 'jackson-databind',               version: jacksonVersion
+  implementation group: 'net.sf.json-lib',                       name: 'json-lib',                       version: '2.4',  classifier: 'jdk15'
+  api group: 'net.jcip',                              name: 'jcip-annotations',               version: '1.0'
+  api group: 'com.github.spotbugs',                   name: 'spotbugs-annotations',           version: '4.4.2'
+  api group: 'org.reflections',                       name: 'reflections',                    version: '0.9.11'
 
-  compile group: 'com.github.ben-manes.caffeine',         name: 'caffeine',                       version: caffeineVersion
-  compile group: 'org.glassfish.jersey.core',             name: 'jersey-client',                  version: jerseyCoreVersion
-  compile group: 'org.glassfish.jersey.media',            name: 'jersey-media-json-jackson',      version: jerseyCoreVersion
-  compile group: 'org.glassfish.jersey.ext',              name: 'jersey-proxy-client',            version: jerseyCoreVersion
-  compile group: 'org.glassfish.jersey.connectors',       name: 'jersey-apache-connector',        version: jerseyCoreVersion
-  compile group: 'org.glassfish.jersey.media',            name: 'jersey-media-multipart',         version: jerseyCoreVersion
-  compile group: 'org.bouncycastle',                      name: 'bcprov-jdk15on',                 version: bouncycastleVersion
-  compile group: 'org.bouncycastle',                      name: 'bcpkix-jdk15on',                 version: bouncycastleVersion
+  implementation group: 'com.github.ben-manes.caffeine',         name: 'caffeine',                       version: caffeineVersion
+  implementation group: 'org.glassfish.jersey.core',             name: 'jersey-client',                  version: jerseyCoreVersion
+  api group: 'org.glassfish.jersey.media',            name: 'jersey-media-json-jackson',      version: jerseyCoreVersion
+  api group: 'org.glassfish.jersey.ext',              name: 'jersey-proxy-client',            version: jerseyCoreVersion
+  api group: 'org.glassfish.jersey.connectors',       name: 'jersey-apache-connector',        version: jerseyCoreVersion
+  implementation group: 'org.glassfish.jersey.media',            name: 'jersey-media-multipart',         version: jerseyCoreVersion
+  implementation group: 'org.bouncycastle',                      name: 'bcprov-jdk15on',                 version: bouncycastleVersion
+  implementation group: 'org.bouncycastle',                      name: 'bcpkix-jdk15on',                 version: bouncycastleVersion
 
-  compile group: 'org.springframework.boot',              name: 'spring-boot-autoconfigure',      version: springBootVersion
-  compile group: 'org.springframework.boot',              name: 'spring-boot-starter-logging',    version: springBootVersion
-  compile group: 'org.springframework',                   name: 'spring-beans',                   version: springFrameworkVersion
-  compile group: 'org.springframework',                   name: 'spring-context',                 version: springFrameworkVersion
-  compile group: 'org.springframework',                   name: 'spring-context-support',         version: springFrameworkVersion
-  compile group: 'org.springframework.data',              name: 'spring-data-jpa',                version: springDataJpaFrameworkVersion
-  compile group: 'org.springframework',                   name: 'spring-jdbc',                    version: springFrameworkVersion
-  compile group: 'org.hibernate',                         name: 'hibernate-core',                 version: hibernateCoreVersion
-  compile group: 'org.springframework',                   name: 'spring-web',                     version: springFrameworkVersion
-  compile group: 'org.springframework.boot',              name: 'spring-boot-starter-quartz',     version: springBootVersion
-  compile group: 'org.springframework.retry',             name: 'spring-retry',                   version: '1.2.0.RELEASE'
-  compile group: 'javax.servlet',                         name: 'javax.servlet-api',              version: '4.0.1'
-  compile group: 'javax.transaction',                     name: 'javax.transaction-api',          version: '1.3'
-  compile group: 'javax.persistence',                     name: 'javax.persistence-api',          version: '2.2'
-  compile group: 'org.postgresql',                        name: 'postgresql',                     version: postgreSQLVersion
-  compile group: 'org.jasypt',                            name: 'jasypt-hibernate4',              version: jasyptVersion
-  compile group: 'io.swagger',                            name: 'swagger-annotations',            version: swaggerVersion
-  compile group: 'net.sf.json-lib',                       name: 'json-lib',                       version: '2.4',  classifier: 'jdk15'
+  api group: 'org.springframework.boot',              name: 'spring-boot-autoconfigure',      version: springBootVersion
+  api group: 'org.springframework.boot',              name: 'spring-boot-starter-logging',    version: springBootVersion
+  implementation group: 'org.springframework',                   name: 'spring-beans',                   version: springFrameworkVersion
+  implementation group: 'org.springframework',                   name: 'spring-context',                 version: springFrameworkVersion
+  implementation group: 'org.springframework',                   name: 'spring-context-support',         version: springFrameworkVersion
+  api group: 'org.springframework.data',              name: 'spring-data-jpa',                version: springDataJpaFrameworkVersion
+  api group: 'org.springframework',                   name: 'spring-jdbc',                    version: springFrameworkVersion
+  api group: 'org.hibernate',                         name: 'hibernate-core',                 version: hibernateCoreVersion
+  api group: 'org.springframework',                   name: 'spring-web',                     version: springFrameworkVersion
+  api group: 'org.springframework.boot',              name: 'spring-boot-starter-quartz',     version: springBootVersion
+  api group: 'org.springframework.retry',             name: 'spring-retry',                   version: '1.2.0.RELEASE'
+  api group: 'javax.servlet',                         name: 'javax.servlet-api',              version: '4.0.1'
+  api group: 'javax.transaction',                     name: 'javax.transaction-api',          version: '1.3'
+  api group: 'javax.persistence',                     name: 'javax.persistence-api',          version: '2.2'
+  implementation group: 'org.postgresql',                        name: 'postgresql',                     version: postgreSQLVersion
+  api group: 'org.jasypt',                            name: 'jasypt-hibernate4',              version: jasyptVersion
+  api group: 'io.swagger',                            name: 'swagger-annotations',            version: swaggerVersion
+  implementation group: 'net.sf.json-lib',                       name: 'json-lib',                       version: '2.4',  classifier: 'jdk15'
 
-  compile group: 'io.opentracing.contrib',                name: 'opentracing-jaxrs2',                     version: opentracingJaxrs2Version
-  compile group: 'io.opentracing.contrib',                name: 'opentracing-jdbc',                       version: opentracingJdbcVersion
-  compile group: 'io.opentracing.contrib',                name: 'opentracing-spring-web',                 version: opentracingSpringWebVersion
-  implementation group: 'io.opentracing.contrib',         name: 'opentracing-spring-jaeger-starter',      version: opentracingSpringJaegerStarterVersion
+  api group: 'io.opentracing.contrib',                name: 'opentracing-jaxrs2',                     version: opentracingJaxrs2Version
+  implementation group: 'io.opentracing.contrib',                name: 'opentracing-jdbc',                       version: opentracingJdbcVersion
+  api group: 'io.opentracing.contrib',                name: 'opentracing-spring-web',                 version: opentracingSpringWebVersion
+  api group: 'io.opentracing.contrib',         name: 'opentracing-spring-jaeger-starter',      version: opentracingSpringJaegerStarterVersion
   constraints {
     implementation ('io.jaegertracing:jaeger-client:1.6.0') {
       because 'default transitive dependency version (1.3.2) contains security vulnerabilities'
     }
   }
-  compile (group: 'com.fasterxml.jackson.core',   name: 'jackson-databind',               version: jacksonVersion) {
+  implementation (group: 'com.fasterxml.jackson.core',   name: 'jackson-databind',               version: jacksonVersion) {
     force = true
   }
-  compile group: 'javax.validation',                      name: 'validation-api',                 version: javaxValidationVersion
+  api group: 'org.springframework.security',        name: 'spring-security-jwt',              version: '1.0.8.RELEASE'
+  api group: 'org.springframework.security',        name: 'spring-security-core',             version: springSecurityVersion
+  api group: 'org.springframework.security',        name: 'spring-security-config',           version: springSecurityVersion
 
-  compile group: 'org.springframework.security',        name: 'spring-security-jwt',              version: '1.0.8.RELEASE'
-  compile group: 'org.springframework.security',        name: 'spring-security-core',             version: springSecurityVersion
-
-  testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test',       version: springBootVersion
-  testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-validation', version: springBootVersion
+  testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test',       version: springBootVersion
+  testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation', version: springBootVersion
 }
 
 task testJar(type: Jar, dependsOn: testClasses) {

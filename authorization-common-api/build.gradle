@@ -1,16 +1,20 @@
+buildscript {
+    repositories {
+        maven { url = "$repoUrl" }
+        maven { url = "$springRepoUrl" }
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
+    }
+}
+
+plugins {
+    id "java-library"
+}
+
 apply plugin: 'java'
 apply plugin: 'io.spring.dependency-management'
-
-buildscript {
-  repositories {
-    maven { url = "$repoUrl" }
-    maven { url = "$springRepoUrl" }
-    mavenCentral()
-  }
-  dependencies {
-    classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
-  }
-}
 
 jar {
   baseName = 'authorization-common-api'
@@ -18,15 +22,15 @@ jar {
 }
 
 dependencies {
-  compile project(':auth-internal-api')
-  compile group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
-  compile group: 'org.apache.commons',            name: 'commons-lang3',                  version: apacheCommonsLangVersion
-  compile group: 'org.glassfish.jersey.core',     name: 'jersey-client',                  version: jerseyCoreVersion
-  compile group: 'io.swagger',                    name: 'swagger-annotations',            version: swaggerVersion
-  compile group: 'com.google.guava',              name: 'guava',                          version: guavaVersion
+  api project(':auth-internal-api')
+  implementation group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
+  implementation group: 'org.apache.commons',            name: 'commons-lang3',                  version: apacheCommonsLangVersion
+  implementation group: 'org.glassfish.jersey.core',     name: 'jersey-client',                  version: jerseyCoreVersion
+  implementation group: 'io.swagger',                    name: 'swagger-annotations',            version: swaggerVersion
+  implementation group: 'com.google.guava',              name: 'guava',                          version: guavaVersion
 
-  testCompile group: 'org.mockito',               name: 'mockito-core',                   version: mockitoVersion
-  testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
+  testImplementation group: 'org.mockito',               name: 'mockito-core',                   version: mockitoVersion
+  testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
 
   implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter',             version: springBootVersion
   testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',        version: springBootVersion

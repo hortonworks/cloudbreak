@@ -14,7 +14,7 @@ plugins {
   id "java"
   id "checkstyle"
   id "jacoco"
-  id 'maven'
+  id "maven-publish"
   id "org.springframework.boot" version "2.1.2.RELEASE"
   id "org.sonarqube" version "${sonarVersion}"
 }
@@ -71,19 +71,19 @@ dependencies {
   implementation     group: 'io.projectreactor',         name: 'reactor-bus',                          version: eventBusVersion
   implementation     group: 'io.projectreactor',         name: 'reactor-stream',                       version: eventBusVersion
 
-  runtime            group: 'com.sun.xml.bind',          name: 'jaxb-impl'
-  runtime            group: 'org.glassfish.jaxb',        name: 'jaxb-runtime'
+  runtimeOnly            group: 'com.sun.xml.bind',          name: 'jaxb-impl'
+  runtimeOnly            group: 'org.glassfish.jaxb',        name: 'jaxb-runtime'
 
   testImplementation ('org.springframework.boot:spring-boot-starter-test') {
     exclude group: 'junit'
   }
   testImplementation project(path: ':authorization-common', configuration: 'tests')
   testImplementation group: 'org.mockito',               name: 'mockito-core'
-  testCompile project(path: ':common', configuration: 'tests')
+  testImplementation project(path: ':common', configuration: 'tests')
   testImplementation project(path: ':flow', configuration: 'tests')
 
   constraints {
-    compile            group: 'org.yaml',                  name: 'snakeyaml',                      version: '1.23'
+    implementation            group: 'org.yaml',                  name: 'snakeyaml',                      version: '1.23'
     implementation     group: 'com.google.guava',          name: 'guava',                          version: guavaVersion
     implementation     group: 'com.google.code.gson',      name: 'gson',                           version: '2.6.2'
     implementation     group: 'dnsjava',                   name: 'dnsjava',                        version: '2.1.7'
@@ -94,8 +94,8 @@ dependencies {
     implementation     group: 'io.springfox',              name: 'springfox-swagger-ui',           version: swagger2Version
     implementation     group: 'io.swagger',                name: 'swagger-jersey2-jaxrs',          version: swaggerVersion
     implementation     group: 'javax.xml.bind',            name: 'jaxb-api',                       version: '2.3.1'
-    runtime            group: 'com.sun.xml.bind',          name: 'jaxb-impl',                      version: '2.3.0'
-    runtime            group: 'org.glassfish.jaxb',        name: 'jaxb-runtime',                   version: '2.3.0'
+    runtimeOnly            group: 'com.sun.xml.bind',          name: 'jaxb-impl',                      version: '2.3.0'
+    runtimeOnly            group: 'org.glassfish.jaxb',        name: 'jaxb-runtime',                   version: '2.3.0'
     implementation     group: 'org.glassfish.jersey.core', name: 'jersey-server',                  version: '2.28'
     implementation     group: 'org.mybatis',               name: 'mybatis-migrations',             version: '3.2.0'
     implementation     group: 'org.postgresql',            name: 'postgresql',                     version: postgreSQLVersion
@@ -122,10 +122,10 @@ dependencies {
   implementation project(':core-api')
   implementation project(':redbeams-api')
   implementation project(':template-manager-tag')
-  runtime project(':cloud-gcp')
-  runtime project(':cloud-aws-cloudformation')
-  runtime project(':cloud-mock')
-  runtime project(':cloud-azure')
+  runtimeOnly project(':cloud-gcp')
+  runtimeOnly project(':cloud-aws-cloudformation')
+  runtimeOnly project(':cloud-mock')
+  runtimeOnly project(':cloud-azure')
 }
 
 bootRun {
@@ -156,13 +156,20 @@ bootJar {
   }
 }
 
-uploadBootArchives {
-  repositories {
-    mavenDeployer {
-      configuration = configurations.deployerJars
-      repository(url: "$System.env.NEXUS_URL") {
-        authentication(userName: "$System.env.NEXUS_USER", password: "$System.env.NEXUS_PASSWORD")
-      }
+publishing {
+    publications {
+        bootJava(MavenPublication) {
+            artifact bootJar
+        }
     }
-  }
+    repositories {
+        maven {
+            url = "$System.env.NEXUS_URL"
+            credentials {
+                username = "$System.env.NEXUS_USER"
+                password = "$System.env.NEXUS_PASSWORD"
+            }
+        }
+    }
 }
+

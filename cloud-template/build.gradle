@@ -12,13 +12,15 @@ jar {
 }
 
 dependencies {
+    implementation project(':common')
+    implementation project(':auth-connector')
+    implementation project(':cloud-common')
+    implementation project(':cloud-api')
+    implementation project(':cloud-reactor')
 
-    compile project(':cloud-common')
-    compile project(':cloud-reactor')
+    implementation group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
 
-    compile group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
-
-    testCompile (group: 'org.mockito',              name: 'mockito-core',                   version: mockitoVersion) {
+    testImplementation (group: 'org.mockito',              name: 'mockito-core',                   version: mockitoVersion) {
       exclude group: 'org.hamcrest'
     }
 }

@@ -11,30 +11,28 @@ jar {
 }
 
 dependencies {
-  compile project(':common')
-  compile project(':auth-internal-api')
+  implementation project(':common')
+  implementation project(':auth-internal-api')
 
-  compile group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
-  compile group: 'org.glassfish.jersey.media',    name: 'jersey-media-multipart',         version: jerseyCoreVersion
-  compile group: 'io.swagger',                    name: 'swagger-annotations',            version: swaggerVersion
-  compile group: 'commons-codec',                 name: 'commons-codec',                  version: commonsCodecVersion
-  compile group: 'commons-net',                   name: 'commons-net',                    version: '3.6'
+  implementation group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
+  implementation group: 'org.glassfish.jersey.media',    name: 'jersey-media-multipart',         version: jerseyCoreVersion
+  implementation group: 'io.swagger',                    name: 'swagger-annotations',            version: swaggerVersion
+  implementation group: 'commons-codec',                 name: 'commons-codec',                  version: commonsCodecVersion
+  implementation group: 'commons-net',                   name: 'commons-net',                    version: '3.6'
 
-  compile group: 'net.jodah',                     name: 'expiringmap',                    version: '0.5.1'
-  compile group: 'org.glassfish.jersey.core',     name: 'jersey-client',                  version: jerseyCoreVersion
-  compile group: 'org.glassfish.jersey.media',    name: 'jersey-media-json-jackson',      version: jerseyCoreVersion
-  compile group: 'org.glassfish.jersey.ext',      name: 'jersey-proxy-client',            version: jerseyCoreVersion
-  compile group: 'org.bouncycastle',              name: 'bcprov-jdk15on',                 version: bouncycastleVersion
-  compile group: 'org.bouncycastle',              name: 'bcpkix-jdk15on',                 version: bouncycastleVersion
+  implementation group: 'net.jodah',                     name: 'expiringmap',                    version: '0.5.1'
+  implementation group: 'org.glassfish.jersey.core',     name: 'jersey-client',                  version: jerseyCoreVersion
+  implementation group: 'org.glassfish.jersey.media',    name: 'jersey-media-json-jackson',      version: jerseyCoreVersion
+  implementation group: 'org.glassfish.jersey.ext',      name: 'jersey-proxy-client',            version: jerseyCoreVersion
+  implementation group: 'org.bouncycastle',              name: 'bcprov-jdk15on',                 version: bouncycastleVersion
+  implementation group: 'org.bouncycastle',              name: 'bcpkix-jdk15on',                 version: bouncycastleVersion
 
-  compile group: 'com.fasterxml.jackson.jaxrs',   name: 'jackson-jaxrs-json-provider',    version: jacksonVersion
-  compile (group: 'com.fasterxml.jackson.core',   name: 'jackson-databind',               version: jacksonVersion) {
+  implementation group: 'com.fasterxml.jackson.jaxrs',   name: 'jackson-jaxrs-json-provider',    version: jacksonVersion
+  implementation (group: 'com.fasterxml.jackson.core',   name: 'jackson-databind',               version: jacksonVersion) {
     force = true
   }
-  compile group: 'org.glassfish.jersey.connectors',  name: 'jersey-apache-connector',     version: jerseyCoreVersion
-  compile group: 'net.jcip',                      name: 'jcip-annotations',               version: '1.0'
-  compile group: 'com.github.spotbugs',           name: 'spotbugs-annotations',           version: '4.2.0'
-
+  implementation group: 'org.glassfish.jersey.connectors',  name: 'jersey-apache-connector',     version: jerseyCoreVersion
+  implementation group: 'net.jcip',                      name: 'jcip-annotations',               version: '1.0'
 }
 
 task testJar(type: Jar, dependsOn: testClasses) {

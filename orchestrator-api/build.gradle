@@ -11,20 +11,20 @@ jar {
 }
 
 dependencies {
+    implementation project(':common')
+    implementation project(':cloud-common')
 
-    compile project(':cloud-common')
-
-    compile group: 'com.fasterxml.jackson.core',    name: 'jackson-databind',               version: jacksonVersion
-    compile group: 'org.apache.commons',            name: 'commons-lang3',                  version: apacheCommonsLangVersion
+    implementation group: 'com.fasterxml.jackson.core',    name: 'jackson-databind',               version: jacksonVersion
+    implementation group: 'org.apache.commons',            name: 'commons-lang3',                  version: apacheCommonsLangVersion
 
 
-    testCompile (group: 'org.hamcrest',              name: 'hamcrest',                       version: hamcrestVersion)
+    testImplementation (group: 'org.hamcrest',              name: 'hamcrest',                       version: hamcrestVersion)
 
-    testCompile (group: 'org.powermock',             name: 'powermock-module-junit4',        version: powermockVersion)
-    testCompile (group: 'org.powermock',             name: 'powermock-api-mockito2',          version: powermockVersion) {
+    testImplementation (group: 'org.powermock',             name: 'powermock-module-junit4',        version: powermockVersion)
+    testImplementation (group: 'org.powermock',             name: 'powermock-api-mockito2',          version: powermockVersion) {
         exclude group: 'org.hamcrest'
     }
-    testCompile (group: 'org.mockito',               name: 'mockito-core',                    version: mockitoVersion) {
+    testImplementation (group: 'org.mockito',               name: 'mockito-core',                    version: mockitoVersion) {
         exclude group: 'org.hamcrest'
     }
 }

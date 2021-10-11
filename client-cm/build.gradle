@@ -1,6 +1,6 @@
 plugins {
   id "java"
-  id 'maven'
+  id "java-library"
 }
 
 repositories {
@@ -16,16 +16,17 @@ jar {
 }
 
 dependencies {
-  compile project(':common')
+  implementation project(':common')
 
-  compile group: 'com.cloudera.api.swagger',                name: 'cloudera-manager-api-swagger',             version: cmClientVersion
+  api group: 'com.cloudera.api.swagger',                name: 'cloudera-manager-api-swagger',             version: cmClientVersion
+  implementation group: 'org.springframework',                     name: 'spring-aspects',                           version: springFrameworkVersion
 
-  testCompile (group: 'org.mockito', name: 'mockito-core', version: mockitoVersion) {
+  testImplementation (group: 'org.mockito', name: 'mockito-core', version: mockitoVersion) {
     exclude group: 'org.hamcrest'
   }
 
-  testCompile group: 'org.hamcrest',                        name: 'hamcrest',                            version: hamcrestVersion
-  testCompile group: 'org.springframework.boot',            name: 'spring-boot-starter-test',                 version: springBootVersion
-  testCompile group: 'org.mockito',                         name: 'mockito-inline',                           version: mockitoVersion
+  testImplementation group: 'org.hamcrest',                        name: 'hamcrest',                                 version: hamcrestVersion
+  testImplementation group: 'org.springframework.boot',            name: 'spring-boot-starter-test',                 version: springBootVersion
+  testImplementation group: 'org.mockito',                         name: 'mockito-inline',                           version: mockitoVersion
 }
 

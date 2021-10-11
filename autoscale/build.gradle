@@ -13,6 +13,7 @@ buildscript {
 
 plugins {
     id "org.sonarqube" version "${sonarVersion}"
+    id 'maven-publish'
 }
 
 apply plugin: 'org.springframework.boot'
@@ -64,23 +65,33 @@ bootJar {
     }
 }
 
-uploadBootArchives {
-  repositories {
-    mavenDeployer {
-      configuration = configurations.deployerJars
-      repository(url: "$System.env.NEXUS_URL") {
-        authentication(userName: "$System.env.NEXUS_USER", password: "$System.env.NEXUS_PASSWORD")
-      }
+publishing {
+    publications {
+        bootJava(MavenPublication) {
+            artifact bootJar
+        }
     }
-  }
+    repositories {
+        maven {
+            url = "$System.env.NEXUS_URL"
+            credentials {
+                username = "$System.env.NEXUS_USER"
+                password = "$System.env.NEXUS_PASSWORD"
+            }
+        }
+    }
 }
 
 configurations {
-    compile {
+    implementation {
         resolutionStrategy {
             exclude group: 'org.testng'
         }
     }
+}
+
+project.tasks.named("bootJar") {
+    duplicatesStrategy = 'include'
 }
 
 dependencyManagement {
@@ -145,61 +156,61 @@ dependencyManagement {
 }
 
 dependencies {
-    compile group: 'com.squareup.okhttp3',               name: 'okhttp',                     version: okhttpVersion
-    compile group: 'com.fasterxml.jackson.core',         name: 'jackson-databind'
-    compile group: 'org.springframework.boot',           name: 'spring-boot-starter'
-    compile group: 'org.springframework.boot',           name: 'spring-boot-starter-web'
-    compile group: 'org.springframework.boot',           name: 'spring-boot-starter-security'
-    compile group: 'org.springframework.boot',           name: 'spring-boot-starter-data-jpa'
-    compile group: 'org.springframework.boot',           name: 'spring-boot-starter-actuator'
-    compile group: 'org.springframework.boot',           name: 'spring-boot-starter-freemarker'
-    compile group: 'org.springframework.boot',           name: 'spring-boot-starter-jersey'
+    implementation group: 'com.squareup.okhttp3',               name: 'okhttp',                     version: okhttpVersion
+    implementation group: 'com.fasterxml.jackson.core',         name: 'jackson-databind'
+    implementation group: 'org.springframework.boot',           name: 'spring-boot-starter'
+    implementation group: 'org.springframework.boot',           name: 'spring-boot-starter-web'
+    implementation group: 'org.springframework.boot',           name: 'spring-boot-starter-security'
+    implementation group: 'org.springframework.boot',           name: 'spring-boot-starter-data-jpa'
+    implementation group: 'org.springframework.boot',           name: 'spring-boot-starter-actuator'
+    implementation group: 'org.springframework.boot',           name: 'spring-boot-starter-freemarker'
+    implementation group: 'org.springframework.boot',           name: 'spring-boot-starter-jersey'
 
-    compile group: 'com.google.code.gson',          name: 'gson'
-    compile group: 'org.apache.hadoop',             name: 'hadoop-yarn-api'
-    compile group: 'org.freemarker',                name: 'freemarker'
-    compile group: 'org.postgresql',                name: 'postgresql'
-    compile group: 'org.mybatis',                   name: 'mybatis-migrations'
-    compile group: 'org.quartz-scheduler',          name: 'quartz'
-    compile group: 'com.zaxxer',                    name: 'HikariCP'
-    compile group: 'javax.mail',                    name: 'mail'
-    compile group: 'dnsjava',                       name: 'dnsjava'
-    compile group: 'net.sf.ehcache',                name: 'ehcache'
+    implementation group: 'com.google.code.gson',          name: 'gson'
+    implementation group: 'org.apache.hadoop',             name: 'hadoop-yarn-api'
+    implementation group: 'org.freemarker',                name: 'freemarker'
+    implementation group: 'org.postgresql',                name: 'postgresql'
+    implementation group: 'org.mybatis',                   name: 'mybatis-migrations'
+    implementation group: 'org.quartz-scheduler',          name: 'quartz'
+    implementation group: 'com.zaxxer',                    name: 'HikariCP'
+    implementation group: 'javax.mail',                    name: 'mail'
+    implementation group: 'dnsjava',                       name: 'dnsjava'
+    implementation group: 'net.sf.ehcache',                name: 'ehcache'
 
-    compile group: 'io.springfox',                  name: 'springfox-swagger2'
-    compile group: 'io.springfox',                  name: 'springfox-core'
-    compile group: 'io.springfox',                  name: 'springfox-swagger-ui'
+    implementation group: 'io.springfox',                  name: 'springfox-swagger2'
+    implementation group: 'io.springfox',                  name: 'springfox-core'
+    implementation group: 'io.springfox',                  name: 'springfox-swagger-ui'
 
-    compile group: 'io.opentracing.contrib',    name: 'opentracing-spring-jaeger-starter',        version: opentracingSpringJaegerStarterVersion
+    implementation group: 'io.opentracing.contrib',    name: 'opentracing-spring-jaeger-starter',        version: opentracingSpringJaegerStarterVersion
 
     implementation     ('io.swagger:swagger-jersey2-jaxrs') {
       exclude group: 'org.yaml'
     }
 
-    compile group: 'com.sequenceiq',                name: 'consul-api'
+    implementation group: 'com.sequenceiq',                name: 'consul-api'
 
-    runtime group: 'javax.xml.bind',                name: 'jaxb-api'
-    runtime group: 'com.sun.xml.bind',              name: 'jaxb-impl'
-    runtime group: 'org.glassfish.jaxb',            name: 'jaxb-runtime'
+    runtimeOnly group: 'javax.xml.bind',                name: 'jaxb-api'
+    runtimeOnly group: 'com.sun.xml.bind',              name: 'jaxb-impl'
+    runtimeOnly group: 'org.glassfish.jaxb',            name: 'jaxb-runtime'
 
-    testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter-test'
-    testCompile group: 'org.mockito',               name: 'mockito-core'
-    testCompile group: 'org.powermock',             name: 'powermock-module-junit4'
-    testCompile group: 'org.powermock',             name: 'powermock-api-mockito2'
-    testCompile group: 'com.openpojo',              name: 'openpojo'
-    testCompile group: "com.h2database",            name: "h2",     version: h2databaseVersion
-    testCompile project(path: ':common', configuration: 'tests')
-    testCompile project(path: ':authorization-common', configuration: 'tests')
+    testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test'
+    testImplementation group: 'org.mockito',               name: 'mockito-core'
+    testImplementation group: 'org.powermock',             name: 'powermock-module-junit4'
+    testImplementation group: 'org.powermock',             name: 'powermock-api-mockito2'
+    testImplementation group: 'com.openpojo',              name: 'openpojo'
+    testImplementation group: "com.h2database",            name: "h2",     version: h2databaseVersion
+    testImplementation project(path: ':common', configuration: 'tests')
+    testImplementation project(path: ':authorization-common', configuration: 'tests')
 
-    compile project(':core-api')
-    compile project(':autoscale-api')
-    compile project(':common')
-    compile project(':workspace')
-    compile project(':secret-engine')
-    compile project(':client-cm')
-    compile project(':authorization-common')
-    compile project(':usage-collection')
-    compile(project(":audit-connector")) {
+    implementation project(':core-api')
+    implementation project(':autoscale-api')
+    implementation project(':common')
+    implementation project(':workspace')
+    implementation project(':secret-engine')
+    implementation project(':client-cm')
+    implementation project(':authorization-common')
+    implementation project(':usage-collection')
+    implementation(project(":audit-connector")) {
          transitive = false
     }
 }

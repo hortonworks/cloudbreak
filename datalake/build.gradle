@@ -15,7 +15,7 @@ plugins {
   id "java"
   id "checkstyle"
   id "jacoco"
-  id 'maven'
+  id "maven-publish"
   id "org.springframework.boot" version "2.1.2.RELEASE"
   id "org.sonarqube" version "${sonarVersion}"
 }
@@ -43,19 +43,19 @@ sonarqube {
 }
 
 dependencies {
-  compile project(':authorization-common')
-  compile project(':common')
-  compile project(':flow')
-  compile project(':secret-engine')
-  compile project(':notification-sender')
-  compile project(':idbmms-connector')
-  compile project(':datalake-dr-connector')
+  implementation project(':authorization-common')
+  implementation project(':common')
+  implementation project(':flow')
+  implementation project(':secret-engine')
+  implementation project(':notification-sender')
+  implementation project(':idbmms-connector')
+  implementation project(':datalake-dr-connector')
 
-  compile project(':core-api')
-  compile project(':datalake-api')
-  compile project(':environment-api')
-  compile project(':redbeams-api')
-  compile project(':status-checker')
+  implementation project(':core-api')
+  implementation project(':datalake-api')
+  implementation project(':environment-api')
+  implementation project(':redbeams-api')
+  implementation project(':status-checker')
 
   implementation     project(":freeipa-api")
   implementation     project(':client-cm')
@@ -98,7 +98,7 @@ dependencies {
 
   testImplementation project(path: ':authorization-common', configuration: 'tests')
 
-  testCompile project(path: ':common', configuration: 'tests')
+  testImplementation project(path: ':common', configuration: 'tests')
 }
 
 bootRun {
@@ -122,13 +122,19 @@ bootJar {
   }
 }
 
-uploadBootArchives {
-  repositories {
-    mavenDeployer {
-      configuration = configurations.deployerJars
-      repository(url: "$System.env.NEXUS_URL") {
-        authentication(userName: "$System.env.NEXUS_USER", password: "$System.env.NEXUS_PASSWORD")
-      }
+publishing {
+    publications {
+        bootJava(MavenPublication) {
+            artifact bootJar
+        }
     }
-  }
+    repositories {
+        maven {
+            url = "$System.env.NEXUS_URL"
+            credentials {
+                username = "$System.env.NEXUS_USER"
+                password = "$System.env.NEXUS_PASSWORD"
+            }
+        }
+    }
 }

@@ -11,21 +11,23 @@ jar {
 }
 
 dependencies {
-    compile project(':cloud-common')
-    compile project(':secret-engine')
-    compile project(':core-api')
-    compile project(':custom-configurations')
-    compile project(':workspace')
+    implementation project(':cloud-common')
+    implementation project(':secret-engine')
+    implementation project(':core-api')
+    implementation project(':custom-configurations')
+    implementation project(':structuredevent-model')
+    implementation project(':workspace')
 
-    compile group: 'org.hibernate.javax.persistence',   name: 'hibernate-jpa-2.1-api',  version: '1.0.0.Final'
-    compile group: 'org.springframework.data',          name: 'spring-data-envers',     version: springDataJpaFrameworkVersion
-    compile group: 'org.apache.commons',                name: 'commons-lang3',          version: apacheCommonsLangVersion
-    compile group: 'net.jcip',                          name: 'jcip-annotations',       version: '1.0'
-    compile group: 'com.github.spotbugs',               name: 'spotbugs-annotations',   version: '4.2.0'
-    testCompile group: 'org.hamcrest',                  name: 'hamcrest',               version: hamcrestVersion
-    testCompile group: 'org.reflections',               name: 'reflections',            version: '0.9.11'
-    testCompile group: 'org.assertj',                   name: 'assertj-core',           version: assertjVersion
-    testCompile project(path: ':common', configuration: 'tests')
+    implementation group: 'net.sf.json-lib',                   name: 'json-lib',               version: '2.4',  classifier: 'jdk15'
+    implementation group: 'org.hibernate.javax.persistence',   name: 'hibernate-jpa-2.1-api',  version: '1.0.0.Final'
+    implementation group: 'org.springframework.data',          name: 'spring-data-envers',     version: springDataJpaFrameworkVersion
+    implementation group: 'org.apache.commons',                name: 'commons-lang3',          version: apacheCommonsLangVersion
+    implementation group: 'net.jcip',                          name: 'jcip-annotations',       version: '1.0'
+    implementation group: 'com.github.spotbugs',               name: 'spotbugs-annotations',   version: '4.4.2'
+    testImplementation group: 'org.hamcrest',                  name: 'hamcrest',               version: hamcrestVersion
+    testImplementation group: 'org.reflections',               name: 'reflections',            version: '0.9.11'
+    testImplementation group: 'org.assertj',                   name: 'assertj-core',           version: assertjVersion
+    testImplementation project(path: ':common', configuration: 'tests')
 }
 
 task testJar(type: Jar, dependsOn: testClasses) {

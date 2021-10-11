@@ -6,8 +6,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.MockitoAnnotations.initMocks;
 
+import java.security.SecureRandom;
 import java.util.Map;
-import java.util.Random;
 
 import org.hamcrest.core.IsInstanceOf;
 import org.junit.Before;
@@ -67,7 +67,7 @@ public class AzurePlatformParametersTest {
         InstanceGroupParameterRequest rq = new InstanceGroupParameterRequest();
         rq.setGroupName(groupName);
         rq.setStackName(STACK_NAME);
-        rq.setNodeCount(new Random().nextInt(3));
+        rq.setNodeCount(new SecureRandom().nextInt(3));
         rq.setParameters(Maps.newHashMap());
         return rq;
     }

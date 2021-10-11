@@ -1,12 +1,12 @@
 package com.sequenceiq.cloudbreak.cloud;
 
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -88,7 +88,7 @@ public interface DefaultNetworkConnector extends NetworkConnector {
         }
         // We have enough AZ
         for (Map.Entry<String, List<CloudSubnet>> entry : groupedSubnetsByAz.entrySet()) {
-            int random = new Random().nextInt(entry.getValue().size());
+            int random = new SecureRandom().nextInt(entry.getValue().size());
             CloudSubnet cloudSubnet = entry.getValue().get(random);
             LOGGER.debug("The selected subnet is: {} by random id {}.", cloudSubnet, random);
             result.add(cloudSubnet);
@@ -106,7 +106,7 @@ public interface DefaultNetworkConnector extends NetworkConnector {
 
     default SubnetSelectionResult selectForNonHAScenario(List<CloudSubnet> subnets) {
         List<CloudSubnet> result = new ArrayList<>();
-        int random = new Random().nextInt(subnets.size());
+        int random = new SecureRandom().nextInt(subnets.size());
         CloudSubnet cloudSubnet = subnets.get(random);
         LOGGER.info("The selected subnet is: {} by random id {}.", cloudSubnet, random);
         result.add(cloudSubnet);

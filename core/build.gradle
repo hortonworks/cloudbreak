@@ -15,8 +15,8 @@ buildscript {
 
 plugins {
     id "com.github.jk1.dependency-license-report" version "0.3.4"
-    id 'net.ltgt.apt' version '0.21'
     id 'java'
+    id 'maven-publish'
     id "org.sonarqube" version "${sonarVersion}"
 }
 
@@ -74,19 +74,25 @@ bootJar {
     }
 }
 
-uploadBootArchives {
-  repositories {
-    mavenDeployer {
-      configuration = configurations.deployerJars
-      repository(url: "$System.env.NEXUS_URL") {
-        authentication(userName: "$System.env.NEXUS_USER", password: "$System.env.NEXUS_PASSWORD")
-      }
+publishing {
+    publications {
+        bootJava(MavenPublication) {
+            artifact bootJar
+        }
     }
-  }
+    repositories {
+        maven {
+            url = "$System.env.NEXUS_URL"
+            credentials {
+                username = "$System.env.NEXUS_USER"
+                password = "$System.env.NEXUS_PASSWORD"
+            }
+        }
+    }
 }
 
 configurations {
-  compile {
+  implementation {
     resolutionStrategy {
         exclude group: 'org.testng'
     }
@@ -146,7 +152,6 @@ dependencyManagement {
     dependency group: 'com.fasterxml.jackson.core',         name: 'jackson-databind',            version: jacksonVersion
     dependency group: 'activation',                         name: 'activation',                  version: '1.0.2'
     dependency group: 'net.jcip',                           name: 'jcip-annotations',            version: '1.0'
-    dependency group: 'com.github.spotbugs',                name: 'spotbugs-annotations',        version: '4.2.0'
     dependency group: 'com.google.http-client',             name: 'google-http-client-jackson2', version: '1.22.0'
     dependency group: 'com.thoughtworks.xstream',           name: 'xstream',                     version: xStream
     dependency group: 'com.github.fommil',                  name: 'openssh',                     version: '1.0'
@@ -175,53 +180,56 @@ dependencyManagement {
 }
 
 dependencies {
-  compile group: 'com.squareup.okhttp3',               name: 'okhttp',                     version: okhttpVersion
-  compile group: 'com.google.code.gson',               name: 'gson'
-  compile group: 'com.fasterxml.jackson.core',         name: 'jackson-databind'
+  implementation group: 'com.squareup.okhttp3',               name: 'okhttp',                     version: okhttpVersion
+  implementation group: 'com.google.code.gson',               name: 'gson'
+  implementation group: 'com.fasterxml.jackson.core',         name: 'jackson-databind'
 
-  compile group: 'org.springframework.boot',           name: 'spring-boot-starter'
-  compile group: 'org.springframework.boot',           name: 'spring-boot-starter-web'
-  compile group: 'org.springframework.boot',           name: 'spring-boot-starter-actuator'
-  compile group: 'org.springframework.boot',           name: 'spring-boot-starter-data-jpa'
-  compile group: 'org.springframework.boot',           name: 'spring-boot-starter-websocket'
-  compile group: 'org.springframework.boot',           name: 'spring-boot-starter-aop'
-  compile group: 'org.springframework.boot',           name: 'spring-boot-starter-freemarker'
-  compile group: 'org.springframework.boot',           name: 'spring-boot-starter-security'
-  compile group: 'org.springframework.boot',           name: 'spring-boot-starter-jersey'
-  compile group: 'org.springframework.boot',           name: 'spring-boot-starter-quartz'
+  implementation group: 'org.springframework.boot',           name: 'spring-boot-starter'
+  implementation group: 'org.springframework.boot',           name: 'spring-boot-starter-web'
+  implementation group: 'org.springframework.boot',           name: 'spring-boot-starter-actuator'
+  implementation group: 'org.springframework.boot',           name: 'spring-boot-starter-data-jpa'
+  implementation group: 'org.springframework.boot',           name: 'spring-boot-starter-websocket'
+  implementation group: 'org.springframework.boot',           name: 'spring-boot-starter-aop'
+  implementation group: 'org.springframework.boot',           name: 'spring-boot-starter-freemarker'
+  implementation group: 'org.springframework.boot',           name: 'spring-boot-starter-security'
+  implementation group: 'org.springframework.boot',           name: 'spring-boot-starter-jersey'
+  implementation group: 'org.springframework.boot',           name: 'spring-boot-starter-quartz'
 
-  compile group: 'org.springframework.retry',          name: 'spring-retry'
+  implementation group: 'org.springframework.data',           name: 'spring-data-envers',         version: springDataJpaFrameworkVersion
 
-  compile group: 'io.projectreactor',                  name: 'reactor-core'
-  compile group: 'io.projectreactor',                  name: 'reactor-bus'
+  implementation group: 'org.springframework.kafka',          name: 'spring-kafka',               version: '2.6.4'
 
-  compile group: 'org.apache.commons',                 name: 'commons-collections4'
-  compile group: 'org.apache.commons',                 name: 'commons-lang3'
-  compile group: 'org.freemarker',                     name: 'freemarker'
-  compile group: 'org.postgresql',                     name: 'postgresql'
-  compile group: 'org.codehaus.jettison',              name: 'jettison'
-  compile group: 'org.bouncycastle',                   name: 'bcprov-jdk15on'
-  compile group: 'org.bouncycastle',                   name: 'bcpkix-jdk15on'
-  compile group: 'org.glassfish.jersey.media',         name: 'jersey-media-multipart'
-  compile group: 'org.mybatis',                        name: 'mybatis-migrations'
+  implementation group: 'org.springframework.retry',          name: 'spring-retry'
 
-  compile group: 'net.jcip',                           name: 'jcip-annotations'
-  compile group: 'com.github.spotbugs',                name: 'spotbugs-annotations'
-  compile group: 'com.google.http-client',             name: 'google-http-client-jackson2'
-  compile group: 'com.thoughtworks.xstream',           name: 'xstream'
-  compile group: 'com.github.fommil',                  name: 'openssh'
+  implementation group: 'io.projectreactor',                  name: 'reactor-core'
+  implementation group: 'io.projectreactor',                  name: 'reactor-bus'
 
-  compile group: 'javax.mail',                         name: 'mail'
-  compile group: 'javax.xml.bind',                     name: 'jaxb-api'
-  compile group: 'dnsjava',                            name: 'dnsjava'
+  implementation group: 'org.apache.commons',                 name: 'commons-collections4'
+  implementation group: 'org.apache.commons',                 name: 'commons-lang3'
+  implementation group: 'org.freemarker',                     name: 'freemarker'
+  implementation group: 'org.postgresql',                     name: 'postgresql'
+  implementation group: 'org.codehaus.jettison',              name: 'jettison'
+  implementation group: 'org.bouncycastle',                   name: 'bcprov-jdk15on'
+  implementation group: 'org.bouncycastle',                   name: 'bcpkix-jdk15on'
+  implementation group: 'org.glassfish.jersey.media',         name: 'jersey-media-multipart'
+  implementation group: 'org.mybatis',                        name: 'mybatis-migrations'
 
-  compile group: 'io.springfox',                       name: 'springfox-swagger2'
-  compile group: 'io.springfox',                       name: 'springfox-core'
-  compile group: 'io.springfox',                       name: 'springfox-swagger-ui'
+  implementation group: 'net.jcip',                           name: 'jcip-annotations'
+  implementation group: 'com.google.http-client',             name: 'google-http-client-jackson2'
+  implementation group: 'com.thoughtworks.xstream',           name: 'xstream'
+  implementation group: 'com.github.fommil',                  name: 'openssh'
 
-  compile group: 'com.cloudera.cdp',                   name: 'cdp-sdk-java'
+  implementation group: 'javax.mail',                         name: 'mail'
+  implementation group: 'javax.xml.bind',                     name: 'jaxb-api'
+  implementation group: 'dnsjava',                            name: 'dnsjava'
 
-  compile (group: 'com.nimbusds',                      name: 'oauth2-oidc-sdk',                  version: '6.5') {
+  implementation group: 'io.springfox',                       name: 'springfox-swagger2'
+  implementation group: 'io.springfox',                       name: 'springfox-core'
+  implementation group: 'io.springfox',                       name: 'springfox-swagger-ui'
+
+  implementation group: 'com.cloudera.cdp',                   name: 'cdp-sdk-java'
+
+  implementation (group: 'com.nimbusds',                      name: 'oauth2-oidc-sdk',                  version: '6.5') {
     force = true
   }
 
@@ -229,72 +237,79 @@ dependencies {
     exclude group: 'org.yaml'
   }
 
-  implementation      group: 'com.dyngr',              name: 'polling',                                 version: '1.1.3'
+  implementation group: 'com.dyngr',                          name: 'polling',                          version: '1.1.3'
+  implementation group: 'com.cedarsoftware',                  name: 'json-io',                          version: '4.9.12'
 
-  compile project(':core-model')
-  compile project(':orchestrator-api')
-  compile project(':cloud-reactor-api')
-  compile project(':cloud-reactor')
-  compile project(':structuredevent-model')
-  compile project(':structuredevent-service-legacy')
-  compile project(':template-manager-blueprint')
-  compile project(':template-manager-recipe')
-  compile project(':template-manager-cmtemplate')
-  compile project(':template-manager-tag')
-  compile project(':cluster-api')
-  compile project(':databus-connector')
-  compile project(':flow')
-  compile project(':common')
-  compile project(':common-model')
-  compile project(':workspace')
-  compile project(':environment-api')
-  compile project(':environment-common')
-  compile project(':authorization-common')
-  compile project(':freeipa-api')
-  compile project(':redbeams-api')
-  compile project(':datalake-api')
-  compile project(':usage-collection')
-  compile project(':cluster-dns-connector')
-  compile project(':cluster-proxy')
-  compile project(':status-checker')
-  compile project(':node-status-monitor-client')
-
+  implementation project(':core-api')
+  implementation project(':core-model')
+  implementation project(':orchestrator-api')
+  implementation project(':cloud-reactor-api')
+  implementation project(':cloud-reactor')
+  implementation project(':structuredevent-model')
+  implementation project(':structuredevent-service-legacy')
+  implementation project(':template-manager-blueprint')
+  implementation project(':template-manager-recipe')
+  implementation project(':template-manager-cmtemplate')
+  implementation project(':template-manager-tag')
+  implementation project(':cluster-api')
+  implementation project(':databus-connector')
+  implementation project(':flow')
+  implementation project(':common')
+  implementation project(':common-model')
+  implementation project(':workspace')
+  implementation project(':environment-api')
+  implementation project(':environment-common')
+  implementation project(':authorization-common')
+  implementation project(':freeipa-api')
+  implementation project(':redbeams-api')
+  implementation project(':datalake-api')
+  implementation project(':usage-collection')
+  implementation project(':cluster-dns-connector')
+  implementation project(':cluster-proxy')
+  implementation project(':status-checker')
+  implementation project(':node-status-monitor-client')
   implementation project(":notification-sender")
-
-  runtime project(':orchestrator-salt')
-  runtime project(':orchestrator-yarn')
-  runtime project(':cloud-reactor')
-  runtime project(':cloud-gcp')
+  implementation project(":custom-configurations-api")
+  implementation project(":custom-configurations")
+  implementation project(':cloud-aws-common')
   implementation project(':cloud-aws-cloudformation')
   implementation project(':cloud-aws-native')
-  runtime project(':cloud-mock')
-  compile project(':cloud-azure')
-  compile project(':cloud-gcp')
-  runtime project(':cloud-yarn')
-  runtime project(':cluster-cm')
-  runtime project(':auth-connector')
-  runtime project(':audit-connector')
-  runtime group: 'activation',                   name: 'activation'
+  implementation project(':cloud-azure')
+  implementation project(':cloud-gcp')
+  implementation project(':audit-connector')
+  implementation project(':auth-connector')
+  implementation project(':secret-engine')
+  implementation project(':template-manager-core')
 
-  testCompile project(path: ':core-model', configuration: 'tests')
-  testCompile project(path: ':cloud-common', configuration: 'tests')
-  testCompile project(path: ':common', configuration: 'tests')
-  testCompile project(path: ':authorization-common', configuration: 'tests')
-  testCompile project(path: ':flow', configuration: 'tests')
+  runtimeOnly project(':orchestrator-salt')
+  runtimeOnly project(':orchestrator-yarn')
+  runtimeOnly project(':cloud-reactor')
+  runtimeOnly project(':cloud-gcp')
+  runtimeOnly project(':cloud-mock')
+  runtimeOnly project(':cloud-yarn')
+  runtimeOnly project(':cluster-cm')
+  runtimeOnly project(':audit-connector')
+  runtimeOnly group: 'activation',                   name: 'activation'
 
-  testCompile group: 'org.powermock',            name: 'powermock-module-junit4'
-  testCompile group: 'org.powermock',            name: 'powermock-api-mockito2'
-  testCompile (group: 'org.mockito',             name: 'mockito-core') {
+  testImplementation project(path: ':core-model', configuration: 'tests')
+  testImplementation project(path: ':cloud-common', configuration: 'tests')
+  testImplementation project(path: ':common', configuration: 'tests')
+  testImplementation project(path: ':authorization-common', configuration: 'tests')
+  testImplementation project(path: ':flow', configuration: 'tests')
+
+  testImplementation group: 'org.powermock',            name: 'powermock-module-junit4'
+  testImplementation group: 'org.powermock',            name: 'powermock-api-mockito2'
+  testImplementation (group: 'org.mockito',             name: 'mockito-core') {
     exclude group: 'org.hamcrest'
   }
-  testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test'
-  testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-freemarker'
-  testCompile group: 'com.jayway.restassured',   name: 'rest-assured'
-  testCompile group: 'com.jayway.restassured',   name: 'json-path'
-  testCompile group: 'com.h2database',           name: 'h2'
-  testCompile group: 'org.awaitility',           name: 'awaitility',          version: awaitilityVersion
-  testCompile group: 'org.testcontainers',       name: 'postgresql',          version: testContainersVersion
-  testCompile group: 'org.testcontainers',       name: 'junit-jupiter',       version: testContainersVersion
+  testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
+  testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-freemarker'
+  testImplementation group: 'com.jayway.restassured',   name: 'rest-assured'
+  testImplementation group: 'com.jayway.restassured',   name: 'json-path'
+  testImplementation group: 'com.h2database',           name: 'h2'
+  testImplementation group: 'org.awaitility',           name: 'awaitility',          version: awaitilityVersion
+  testImplementation group: 'org.testcontainers',       name: 'postgresql',          version: testContainersVersion
+  testImplementation group: 'org.testcontainers',       name: 'junit-jupiter',       version: testContainersVersion
   testImplementation group: 'org.assertj',       name: 'assertj-core',        version: assertjVersion
   testImplementation group: "org.yaml",          name: "snakeyaml"
   testImplementation group: 'org.hamcrest',      name: 'hamcrest',            version: hamcrestVersion

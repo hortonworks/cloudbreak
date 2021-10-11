@@ -1,13 +1,17 @@
 buildscript {
-  repositories {
-    mavenCentral()
-    maven { url = "$repoUrl" }
-  }
-  dependencies {
-    classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
-  }
+    repositories {
+        mavenCentral()
+        maven { url = "$repoUrl" }
+    }
+    dependencies {
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
+    }
+}
+
+plugins {
+    id "java-library"
 }
 
 dependencies {
-  compile project(':common')
+    api project(':common')
 }

@@ -1,5 +1,3 @@
-apply plugin: 'com.google.protobuf'
-
 buildscript {
   repositories {
     mavenCentral()
@@ -7,18 +5,24 @@ buildscript {
   }
   dependencies {
     classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
-    classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.8'
+    classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.17'
   }
 }
 
-dependencies {
-  compile project(':grpc-common')
+plugins {
+    id "java-library"
+}
 
-  compile group: 'org.springframework.boot',            name: 'spring-boot-starter-jersey',     version: springBootVersion
-  compile group: 'org.springframework.security',        name: 'spring-security-jwt',            version: '1.0.8.RELEASE'
-  compile group: 'org.springframework.security',        name: 'spring-security-core',           version: springSecurityVersion
-  compile group: 'org.bouncycastle',                    name: 'bcprov-jdk15on',                 version: bouncycastleVersion
-  compile group: 'org.bouncycastle',                    name: 'bcpkix-jdk15on',                 version: bouncycastleVersion
+apply plugin: 'com.google.protobuf'
+
+dependencies {
+  api project(':grpc-common')
+
+  implementation group: 'org.springframework.boot',     name: 'spring-boot-starter-jersey',     version: springBootVersion
+  implementation group: 'org.springframework.security', name: 'spring-security-jwt',            version: '1.0.8.RELEASE'
+  implementation group: 'org.springframework.security', name: 'spring-security-core',           version: springSecurityVersion
+  implementation group: 'org.bouncycastle',             name: 'bcprov-jdk15on',                 version: bouncycastleVersion
+  implementation group: 'org.bouncycastle',             name: 'bcpkix-jdk15on',                 version: bouncycastleVersion
 
   implementation group: 'net.i2p.crypto',               name: 'eddsa',                          version: '0.3.0'
 
@@ -26,14 +30,14 @@ dependencies {
   implementation group: 'org.glassfish.jersey.media',   name: 'jersey-media-multipart',         version: jerseyCoreVersion
   implementation group: 'org.apache.httpcomponents',    name: 'httpclient',                     version: httpClientVersion
 
-  compile ("io.grpc:grpc-all:1.22.0") {
+  api ("io.grpc:grpc-all:1.22.0") {
     exclude group: 'org.mockito'
     exclude group: 'junit', module: 'junit'
   }
-  testCompile group: 'org.mockito',                     name: 'mockito-core',                   version: mockitoVersion
+  testImplementation group: 'org.mockito',              name: 'mockito-core',                   version: mockitoVersion
   testImplementation group: 'org.assertj',              name: 'assertj-core',                   version: assertjVersion
   testImplementation group: 'org.hamcrest',             name: 'hamcrest',                       version: hamcrestVersion
-  testCompile project(path: ':common', configuration: 'tests')
+  testImplementation project(path: ':common', configuration: 'tests')
 }
 
 

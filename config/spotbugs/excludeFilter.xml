@@ -4,6 +4,12 @@
         <Bug pattern="DM_DEFAULT_ENCODING" />
     </Match>
     <Match>
+        <Bug pattern="DMI_RANDOM_USED_ONLY_ONCE" />
+    </Match>
+    <Match>
+        <Bug pattern="MS_EXPOSE_REP" />
+    </Match>
+    <Match>
         <Bug pattern="EI_EXPOSE_REP" />
     </Match>
     <Match>
@@ -31,6 +37,9 @@
     </Match>
     <Match>
         <Class name="~com\.sequenceiq\.cloudbreak\.audit\.converter\.AuditEventDetailsProto.*"/>
+    </Match>
+    <Match>
+        <Source name="~.*/generated/.*" />
     </Match>
     <Match>
         <Package name="~org\.apache\.cb\.yarn.*"/>

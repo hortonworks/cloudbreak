@@ -13,29 +13,28 @@ jar {
 dependencies {
     // mockito juniper depends on ByteBuddy 1.9.7, but hibernate use older version
     implementation group: 'net.bytebuddy',          name: 'byte-buddy',                     version: '1.9.12'
-    compile project(':orchestrator-api')
-    compile project(':cloud-common')
+    implementation project(':orchestrator-api')
+    implementation project(':common')
+    implementation project(':cloud-common')
 
-    compile group: 'org.yaml',                      name: 'snakeyaml',                      version: '1.23'
-    compile group: 'org.springframework.boot',      name: 'spring-boot-starter',            version: springBootVersion
-    compile group: 'org.springframework.boot',      name: 'spring-boot-starter-web',        version: springBootVersion
+    implementation group: 'org.yaml',                      name: 'snakeyaml',                      version: '1.23'
+    implementation group: 'org.springframework.boot',      name: 'spring-boot-starter',            version: springBootVersion
+    implementation group: 'org.springframework.boot',      name: 'spring-boot-starter-web',        version: springBootVersion
 
-    compile group: 'org.glassfish.jersey.media',    name: 'jersey-media-multipart',         version: jerseyCoreVersion
-    compile group: 'org.glassfish.jersey.core',     name: 'jersey-common',                  version: jerseyCoreVersion
-    compile group: 'com.fasterxml.jackson.core',    name: 'jackson-databind',               version: jacksonVersion
-    compile group: 'net.jcip',                      name: 'jcip-annotations',               version: '1.0'
-    compile group: 'com.github.spotbugs',           name: 'spotbugs-annotations',           version: '4.2.0'
+    implementation group: 'org.glassfish.jersey.media',    name: 'jersey-media-multipart',         version: jerseyCoreVersion
+    implementation group: 'org.glassfish.jersey.core',     name: 'jersey-common',                  version: jerseyCoreVersion
+    implementation group: 'com.fasterxml.jackson.core',    name: 'jackson-databind',               version: jacksonVersion
+    implementation group: 'net.jcip',                      name: 'jcip-annotations',               version: '1.0'
 
-    testCompile group: 'org.hamcrest',              name: 'hamcrest',                       version: hamcrestVersion
+    testImplementation group: 'org.hamcrest',              name: 'hamcrest',                       version: hamcrestVersion
 
-    testCompile (group: 'org.powermock',             name: 'powermock-module-junit4',        version: powermockVersion)
-    testCompile (group: 'org.powermock',             name: 'powermock-api-mockito2',          version: powermockVersion) {
+    testImplementation (group: 'org.powermock',             name: 'powermock-module-junit4',        version: powermockVersion)
+    testImplementation (group: 'org.powermock',             name: 'powermock-api-mockito2',          version: powermockVersion) {
       exclude group: 'org.hamcrest'
     }
-    testCompile (group: 'org.mockito',               name: 'mockito-core',                    version: mockitoVersion) {
+    testImplementation (group: 'org.mockito',               name: 'mockito-core',                    version: mockitoVersion) {
       exclude group: 'org.hamcrest'
     }
-    testImplementation group: 'org.junit.jupiter',  name: 'junit-jupiter',                  version: junitJupiterVersion
 
-    testCompile group: 'com.hubspot.jinjava', name: 'jinjava', version: jinjavaVersion
+    testImplementation group: 'com.hubspot.jinjava', name: 'jinjava', version: jinjavaVersion
 }

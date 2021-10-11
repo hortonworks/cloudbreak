@@ -1,19 +1,23 @@
-apply plugin: 'com.google.protobuf'
-
 buildscript {
   repositories {
     mavenCentral()
     maven { url = "$repoUrl" }
   }
   dependencies {
-    classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.8'
+    classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.17'
   }
 }
 
-dependencies {
-  compile project(':common')
+plugins {
+    id "java-library"
+}
 
-  compile        group: 'io.opentracing.contrib',       name: 'opentracing-grpc',     version: opentracingGrpcVersion
+apply plugin: 'com.google.protobuf'
+
+dependencies {
+  api project(':common')
+
+  api group: 'io.opentracing.contrib',       name: 'opentracing-grpc',     version: opentracingGrpcVersion
   implementation group: 'com.squareup.okhttp',          name: 'okhttp',               version: '2.7.4'
   implementation group: 'org.slf4j',                    name: 'slf4j-api',            version: slf4jApiVersion
 

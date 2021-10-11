@@ -13,19 +13,19 @@ jar {
 
 dependencies {
 
-  compile project(":common")
-  compile project(':common-model')
+  implementation project(":common")
+  implementation project(':common-model')
 
-  compile            group: 'io.swagger',                 name: 'swagger-annotations',   version: swaggerVersion
+  implementation            group: 'io.swagger',                 name: 'swagger-annotations',   version: swaggerVersion
 
-  testCompile(       group: 'org.mockito',                name: 'mockito-core',          version: mockitoVersion) {
+  testImplementation(group: 'org.mockito',                name: 'mockito-core',          version: mockitoVersion) {
     exclude          group: 'org.hamcrest'
   }
   testImplementation group: 'org.hamcrest',               name: 'hamcrest',              version: hamcrestVersion
   testImplementation group: 'org.assertj',                name: 'assertj-core',          version: assertjVersion
 
-  runtime            group: 'org.glassfish.jersey.core',  name: 'jersey-common',         version: jerseyCoreVersion
-  compile(           group: 'com.fasterxml.jackson.core', name: 'jackson-databind',      version: jacksonVersion) {
+  runtimeOnly            group: 'org.glassfish.jersey.core',  name: 'jersey-common',         version: jerseyCoreVersion
+  implementation(    group: 'com.fasterxml.jackson.core', name: 'jackson-databind',      version: jacksonVersion) {
     force = true
   }
 

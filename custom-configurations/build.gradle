@@ -6,13 +6,14 @@ repositories {
 }
 
 dependencies {
-  compile project(':common')
-  compile project(':authorization-common')
-  compile project(':custom-configurations-api')
+  implementation project(':common')
+  implementation project(':auth-connector')
+  implementation project(':authorization-common')
+  implementation project(':custom-configurations-api')
 
-  compile group: 'org.springframework.data',        name: 'spring-data-jpa',              version: springDataJpaFrameworkVersion
-  compile group: 'org.springframework.boot',        name: 'spring-boot-starter-web',      version: springBootVersion
-  compile group: 'org.springframework.boot',        name: 'spring-boot-starter-security', version: springBootVersion
+  implementation group: 'org.springframework.data',        name: 'spring-data-jpa',              version: springDataJpaFrameworkVersion
+  implementation group: 'org.springframework.boot',        name: 'spring-boot-starter-web',      version: springBootVersion
+  implementation group: 'org.springframework.boot',        name: 'spring-boot-starter-security', version: springBootVersion
 
   runtimeOnly group: 'org.postgresql', name: 'postgresql', version: postgreSQLVersion
 

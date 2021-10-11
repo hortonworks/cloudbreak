@@ -24,43 +24,43 @@ jar {
 }
 
 dependencies {
-    compile project(':common')
+    implementation project(':common')
 
-    compile group: 'org.slf4j', name: 'slf4j-api', version: slf4jApiVersion
-    compile group: 'org.springframework.boot',              name: 'spring-boot-starter',            version: springBootVersion
-    compile group: 'org.springframework.boot',              name: 'spring-boot-starter-web',        version: springBootVersion
-    compile group: 'org.springframework.boot',              name: 'spring-boot-starter-security',   version: springBootVersion
-    compile group: 'org.springframework.boot',              name: 'spring-boot-starter-data-jpa',   version: springBootVersion
-    compile group: 'org.springframework.boot',              name: 'spring-boot-starter-actuator',   version: springBootVersion
-    compile group: 'org.springframework.boot',              name: 'spring-boot-starter-freemarker', version: springBootVersion
-    compile group: 'org.springframework.boot',              name: 'spring-boot-starter-jersey',     version: springBootVersion
-    compile group: 'org.springframework.security',          name: 'spring-security-jwt',            version: '1.0.8.RELEASE'
-    compile group: 'org.springframework',                   name: 'spring-context-support',         version: springFrameworkVersion
-    compile (group: 'org.springframework.vault',            name: 'spring-vault-core',              version: '2.1.0.RELEASE') {
+    implementation group: 'org.slf4j', name: 'slf4j-api', version: slf4jApiVersion
+    implementation group: 'org.springframework.boot',              name: 'spring-boot-starter',            version: springBootVersion
+    implementation group: 'org.springframework.boot',              name: 'spring-boot-starter-web',        version: springBootVersion
+    implementation group: 'org.springframework.boot',              name: 'spring-boot-starter-security',   version: springBootVersion
+    implementation group: 'org.springframework.boot',              name: 'spring-boot-starter-data-jpa',   version: springBootVersion
+    implementation group: 'org.springframework.boot',              name: 'spring-boot-starter-actuator',   version: springBootVersion
+    implementation group: 'org.springframework.boot',              name: 'spring-boot-starter-freemarker', version: springBootVersion
+    implementation group: 'org.springframework.boot',              name: 'spring-boot-starter-jersey',     version: springBootVersion
+    implementation group: 'org.springframework.security',          name: 'spring-security-jwt',            version: '1.0.8.RELEASE'
+    implementation group: 'org.springframework',                   name: 'spring-context-support',         version: springFrameworkVersion
+    implementation (group: 'org.springframework.vault',            name: 'spring-vault-core',              version: '2.1.0.RELEASE') {
         exclude group: 'org.springframework'
     }
-    compile group: 'io.micrometer',                         name: 'micrometer-core',                version: micrometerVersion
-    compile group: 'io.micrometer',                         name: 'micrometer-jersey2',             version: micrometerVersion
-    compile group: 'io.micrometer',                         name: 'micrometer-registry-prometheus', version: micrometerVersion
-    compile group: 'com.fasterxml.jackson.core',            name: 'jackson-databind',               version: jacksonVersion
-    compile group: 'commons-io',                            name: 'commons-io',                     version: '2.4'
-    compile group: 'com.google.guava',                      name: 'guava',                          version: guavaVersion
-    compile group: 'org.freemarker',                        name: 'freemarker',                     version: freemarkerVersion
-    compile group: 'org.bouncycastle',                      name: 'bcprov-jdk15on',                 version: bouncycastleVersion
-    compile group: 'org.bouncycastle',                      name: 'bcpkix-jdk15on',                 version: bouncycastleVersion
-    compile group: 'org.glassfish.jersey.core',             name: 'jersey-client',                  version: jerseyCoreVersion
-    compile group: 'org.apache.httpcomponents',             name: 'httpclient',                     version: httpClientVersion
-    compile group: 'org.glassfish.jersey.media',            name: 'jersey-media-json-jackson',      version: jerseyCoreVersion
-    compile group: 'org.glassfish.jersey.media',            name: 'jersey-media-multipart',         version: jerseyCoreVersion
-    compile group: 'org.glassfish.jersey.ext',              name: 'jersey-proxy-client',            version: jerseyCoreVersion
-    compile group: 'org.glassfish.jersey.connectors',       name: 'jersey-apache-connector',        version: jerseyCoreVersion
-    compile group: 'org.postgresql',                        name: 'postgresql',                     version: postgreSQLVersion
-    compile group: 'org.apache.commons',                    name: 'commons-lang3',                  version: apacheCommonsLangVersion
-    compile group: 'net.sf.json-lib',                       name: 'json-lib',                       version: '2.4',  classifier: 'jdk15'
+    implementation group: 'io.micrometer',                         name: 'micrometer-core',                version: micrometerVersion
+    implementation group: 'io.micrometer',                         name: 'micrometer-jersey2',             version: micrometerVersion
+    implementation group: 'io.micrometer',                         name: 'micrometer-registry-prometheus', version: micrometerVersion
+    implementation group: 'com.fasterxml.jackson.core',            name: 'jackson-databind',               version: jacksonVersion
+    implementation group: 'commons-io',                            name: 'commons-io',                     version: '2.4'
+    implementation group: 'com.google.guava',                      name: 'guava',                          version: guavaVersion
+    implementation group: 'org.freemarker',                        name: 'freemarker',                     version: freemarkerVersion
+    implementation group: 'org.bouncycastle',                      name: 'bcprov-jdk15on',                 version: bouncycastleVersion
+    implementation group: 'org.bouncycastle',                      name: 'bcpkix-jdk15on',                 version: bouncycastleVersion
+    implementation group: 'org.glassfish.jersey.core',             name: 'jersey-client',                  version: jerseyCoreVersion
+    implementation group: 'org.apache.httpcomponents',             name: 'httpclient',                     version: httpClientVersion
+    implementation group: 'org.glassfish.jersey.media',            name: 'jersey-media-json-jackson',      version: jerseyCoreVersion
+    implementation group: 'org.glassfish.jersey.media',            name: 'jersey-media-multipart',         version: jerseyCoreVersion
+    implementation group: 'org.glassfish.jersey.ext',              name: 'jersey-proxy-client',            version: jerseyCoreVersion
+    implementation group: 'org.glassfish.jersey.connectors',       name: 'jersey-apache-connector',        version: jerseyCoreVersion
+    implementation group: 'org.postgresql',                        name: 'postgresql',                     version: postgreSQLVersion
+    implementation group: 'org.apache.commons',                    name: 'commons-lang3',                  version: apacheCommonsLangVersion
+    implementation group: 'net.sf.json-lib',                       name: 'json-lib',                       version: '2.4',  classifier: 'jdk15'
 
-    testCompile group: 'org.mockito',                       name: 'mockito-core',                   version: mockitoVersion
-    testCompile group: 'org.springframework.boot',          name: 'spring-boot-starter-test',       version: springBootVersion
-    testCompile group: 'org.awaitility',                    name: 'awaitility',                     version: awaitilityVersion
+    testImplementation group: 'org.mockito',                       name: 'mockito-core',                   version: mockitoVersion
+    testImplementation group: 'org.springframework.boot',          name: 'spring-boot-starter-test',       version: springBootVersion
+    testImplementation group: 'org.awaitility',                    name: 'awaitility',                     version: awaitilityVersion
 }
 
 task testJar(type: Jar, dependsOn: testClasses) {

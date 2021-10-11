@@ -13,13 +13,13 @@ jar {
 
 dependencies {
 
-    compile project(':cloud-api')
-    compile project(':cloud-reactor')
+    implementation project(':cloud-api')
+    implementation project(':cloud-reactor')
 
-    compile group: 'com.google.code.gson',  name: 'gson',           version: '2.6.2'
-    testCompile (group: 'org.mockito',      name: 'mockito-core',   version: mockitoVersion) {
+    implementation group: 'com.google.code.gson',  name: 'gson',           version: '2.6.2'
+    testImplementation (group: 'org.mockito',      name: 'mockito-core',   version: mockitoVersion) {
       exclude group: 'org.hamcrest'
     }
-    testCompile (group: 'org.hamcrest', name: 'hamcrest', version: hamcrestVersion)
-    testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
+    testImplementation (group: 'org.hamcrest', name: 'hamcrest', version: hamcrestVersion)
+    testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
 }

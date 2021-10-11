@@ -1,3 +1,7 @@
+plugins {
+    id "java-library"
+}
+
 apply plugin: 'java'
 
 repositories {
@@ -11,42 +15,40 @@ jar {
 }
 
 dependencies {
-  compile project(':authorization-common-api')
-  compile project(':cloud-api')
-  compile project(':auth-connector')
-  compile project(':common')
-  compile project(':common-model')
-  compile project(':structuredevent-model')
-  compile project(':environment-api')
-  compile project(':flow-api')
+  implementation project(':authorization-common-api')
+  api project(':cloud-api')
+  api project(':auth-connector')
+  api project(':common')
+  implementation project(':structuredevent-model')
+  implementation project(':environment-api')
+  api project(':flow-api')
 
-  compile group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
-  compile group: 'org.glassfish.jersey.media',    name: 'jersey-media-multipart',         version: jerseyCoreVersion
-  compile group: 'io.swagger',                    name: 'swagger-annotations',            version: swaggerVersion
-  compile group: 'commons-codec',                 name: 'commons-codec',                  version: commonsCodecVersion
-  compile group: 'commons-net',                   name: 'commons-net',                    version: '3.6'
+  implementation group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
+  implementation group: 'org.glassfish.jersey.media',    name: 'jersey-media-multipart',         version: jerseyCoreVersion
+  implementation group: 'io.swagger',                    name: 'swagger-annotations',            version: swaggerVersion
+  implementation group: 'commons-codec',                 name: 'commons-codec',                  version: commonsCodecVersion
+  implementation group: 'commons-net',                   name: 'commons-net',                    version: '3.6'
 
-  compile group: 'net.jodah',                     name: 'expiringmap',                    version: '0.5.1'
-  compile group: 'org.glassfish.jersey.core',     name: 'jersey-client',                  version: jerseyCoreVersion
-  compile group: 'org.glassfish.jersey.media',    name: 'jersey-media-json-jackson',      version: jerseyCoreVersion
-  compile group: 'org.glassfish.jersey.ext',      name: 'jersey-proxy-client',            version: jerseyCoreVersion
-  compile group: 'org.bouncycastle',              name: 'bcprov-jdk15on',                 version: bouncycastleVersion
-  compile group: 'org.bouncycastle',              name: 'bcpkix-jdk15on',                 version: bouncycastleVersion
+  implementation group: 'net.jodah',                     name: 'expiringmap',                    version: '0.5.1'
+  implementation group: 'org.glassfish.jersey.core',     name: 'jersey-client',                  version: jerseyCoreVersion
+  implementation group: 'org.glassfish.jersey.media',    name: 'jersey-media-json-jackson',      version: jerseyCoreVersion
+  implementation group: 'org.glassfish.jersey.ext',      name: 'jersey-proxy-client',            version: jerseyCoreVersion
+  implementation group: 'org.bouncycastle',              name: 'bcprov-jdk15on',                 version: bouncycastleVersion
+  implementation group: 'org.bouncycastle',              name: 'bcpkix-jdk15on',                 version: bouncycastleVersion
 
-  compile group: 'com.fasterxml.jackson.jaxrs',   name: 'jackson-jaxrs-json-provider',    version: jacksonVersion
-  compile (group: 'com.fasterxml.jackson.core',   name: 'jackson-databind',               version: jacksonVersion) {
+  implementation group: 'com.fasterxml.jackson.jaxrs',   name: 'jackson-jaxrs-json-provider',    version: jacksonVersion
+  implementation (group: 'com.fasterxml.jackson.core',   name: 'jackson-databind',               version: jacksonVersion) {
     force = true
   }
-  compile group: 'org.hibernate',                 name: 'hibernate-validator',            version: hibernateValidatorVersion
-  compile group: 'org.apache.httpcomponents',     name: 'httpclient',                     version: httpClientVersion
-  compile group: 'org.glassfish.jersey.connectors',  name: 'jersey-apache-connector',     version: jerseyCoreVersion
-  compile group: 'net.jcip',                      name: 'jcip-annotations',               version: '1.0'
-  compile group: 'com.github.spotbugs',           name: 'spotbugs-annotations',           version: '4.2.0'
-  compile group: 'org.springframework.boot',      name: 'spring-boot-starter-security',   version: springBootVersion
-  compile group: 'com.google.guava',              name: 'guava',                          version: guavaVersion
-  compile group: 'org.springframework',           name: 'spring-aspects',                 version: springFrameworkVersion
-  compile group: 'org.apache.commons',            name: 'commons-lang3',                  version: apacheCommonsLangVersion
-  compile group: 'commons-validator',             name: 'commons-validator',              version: apacheCommonsValidatorVersion
+  implementation group: 'org.hibernate',                 name: 'hibernate-validator',            version: hibernateValidatorVersion
+  implementation group: 'org.apache.httpcomponents',     name: 'httpclient',                     version: httpClientVersion
+  implementation group: 'org.glassfish.jersey.connectors',  name: 'jersey-apache-connector',     version: jerseyCoreVersion
+  implementation group: 'net.jcip',                      name: 'jcip-annotations',               version: '1.0'
+  implementation group: 'org.springframework.boot',      name: 'spring-boot-starter-security',   version: springBootVersion
+  implementation group: 'com.google.guava',              name: 'guava',                          version: guavaVersion
+  implementation group: 'org.springframework',           name: 'spring-aspects',                 version: springFrameworkVersion
+  implementation group: 'org.apache.commons',            name: 'commons-lang3',                  version: apacheCommonsLangVersion
+  implementation group: 'commons-validator',             name: 'commons-validator',              version: apacheCommonsValidatorVersion
   implementation group: 'com.cloudera.cdp',                name: 'cdp-sdk-java',                   version: cdpSdkVersion
 
   testImplementation group: 'org.assertj',                 name: 'assertj-core',                   version: assertjVersion
@@ -56,7 +58,7 @@ dependencies {
   testImplementation group: 'org.springframework.boot',    name: 'spring-boot-starter-test',       version: springBootVersion
   testImplementation group: 'org.apache.tomcat.embed',     name: 'tomcat-embed-el',                version: '9.0.8'
   testImplementation group: 'com.openpojo',                name: 'openpojo',                       version: openPojoVersion
-  testCompile project(path: ':common', configuration: 'tests')
+  testImplementation project(path: ':common', configuration: 'tests')
 }
 
 task testJar(type: Jar, dependsOn: testClasses) {

@@ -1,4 +1,7 @@
-apply plugin: 'java'
+plugins {
+    id "java"
+    id "java-library"
+}
 
 repositories {
     maven { url = "$repoUrl" }
@@ -12,14 +15,14 @@ jar {
 }
 
 dependencies {
-    compile project(':common')
-    compile project(':common-model')
-    compile project(':cloud-api')
-    compile project(':cloud-common')
+    api project(':common')
+    api project(':common-model')
+    api project(':cloud-api')
+    api project(':cloud-common')
 
-    compile group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
-    compile group: 'io.projectreactor',             name: 'reactor-core',                   version: eventBusVersion
-    compile group: 'io.projectreactor',             name: 'reactor-bus',                    version: eventBusVersion
-    compile group: 'io.projectreactor',             name: 'reactor-stream',                 version: eventBusVersion
+    implementation group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
+    api            group: 'io.projectreactor',             name: 'reactor-core',                   version: eventBusVersion
+    api            group: 'io.projectreactor',             name: 'reactor-bus',                    version: eventBusVersion
+    api            group: 'io.projectreactor',             name: 'reactor-stream',                 version: eventBusVersion
 
 }

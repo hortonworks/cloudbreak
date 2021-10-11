@@ -11,6 +11,10 @@ buildscript {
   }
 }
 
+plugins {
+    id "maven-publish"
+}
+
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 apply plugin: 'java'
@@ -36,37 +40,43 @@ bootJar {
   }
 }
 
-uploadBootArchives {
-  repositories {
-    mavenDeployer {
-      configuration = configurations.deployerJars
-      repository(url: "$System.env.NEXUS_URL") {
-        authentication(userName: "$System.env.NEXUS_USER", password: "$System.env.NEXUS_PASSWORD")
-      }
+publishing {
+    publications {
+        bootJava(MavenPublication) {
+            artifact bootJar
+        }
     }
-  }
+    repositories {
+        maven {
+            url = "$System.env.NEXUS_URL"
+            credentials {
+                username = "$System.env.NEXUS_USER"
+                password = "$System.env.NEXUS_PASSWORD"
+            }
+        }
+    }
 }
 
 dependencies {
-  compile group:  'org.springframework.boot',     name: 'spring-boot-starter',            version: springBootVersion
-  compile group:  'org.springframework.boot',     name: 'spring-boot-starter-security',   version: springBootVersion
-  compile group:  'org.springframework.boot',     name: 'spring-boot-starter-jersey',     version: springBootVersion
-  compile group:  'org.springframework.boot',     name: 'spring-boot-starter-web',        version: springBootVersion
-  compile group:  'org.springframework.boot',     name: 'spring-boot-starter-actuator',   version: springBootVersion
-  compile group:  'org.springframework',          name: 'spring-context-support',         version: springFrameworkVersion
-  compile group:  'org.springframework.security', name: 'spring-security-jwt',            version: '1.0.10.RELEASE'
-  compile group:  'com.fasterxml.jackson.core',   name: 'jackson-core',                   version: jacksonVersion
-  compile group:  'com.google.protobuf',          name: 'protobuf-java-util',             version: '3.10.0'
-  compile group:  'io.jsonwebtoken',              name: 'jjwt',                           version: '0.9.1'
-  testCompile group: 'org.mockito',               name: 'mockito-core',                   version: mockitoVersion
-  testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
+  implementation group:  'org.springframework.boot',     name: 'spring-boot-starter',            version: springBootVersion
+  implementation group:  'org.springframework.boot',     name: 'spring-boot-starter-security',   version: springBootVersion
+  implementation group:  'org.springframework.boot',     name: 'spring-boot-starter-jersey',     version: springBootVersion
+  implementation group:  'org.springframework.boot',     name: 'spring-boot-starter-web',        version: springBootVersion
+  implementation group:  'org.springframework.boot',     name: 'spring-boot-starter-actuator',   version: springBootVersion
+  implementation group:  'org.springframework',          name: 'spring-context-support',         version: springFrameworkVersion
+  implementation group:  'org.springframework.security', name: 'spring-security-jwt',            version: '1.0.10.RELEASE'
+  implementation group:  'com.fasterxml.jackson.core',   name: 'jackson-core',                   version: jacksonVersion
+  implementation group:  'com.google.protobuf',          name: 'protobuf-java-util',             version: '3.10.0'
+  implementation group:  'io.jsonwebtoken',              name: 'jjwt',                           version: '0.9.1'
+  testImplementation group: 'org.mockito',               name: 'mockito-core',                   version: mockitoVersion
+  testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
   testImplementation group: 'org.assertj',        name: 'assertj-core',                   version: assertjVersion
   testImplementation group: 'org.junit.jupiter',  name: 'junit-jupiter-migrationsupport', version: junitJupiterVersion
   testImplementation project(path: ':common', configuration: 'tests')
 
-  compile project(':auth-connector')
-  compile (project(':audit-connector')) {
+  implementation project(':auth-connector')
+  implementation (project(':audit-connector')) {
     transitive = false;
   }
-  compile project (':cloud-api')
+  implementation project (':cloud-api')
 }

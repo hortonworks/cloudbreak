@@ -7,9 +7,9 @@ repositories {
 }
 
 dependencies {
-  compile project(":common")
-  compile project(":structuredevent-model")
-  compile project(":auth-connector")
+  implementation project(":common")
+  implementation project(":structuredevent-model")
+  implementation project(":auth-connector")
 
   implementation group: 'org.glassfish.jersey.core',     name: 'jersey-client',                  version: jerseyCoreVersion
   implementation group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion

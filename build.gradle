@@ -15,9 +15,10 @@ buildscript {
 }
 
 plugins {
-  id 'org.ajoberstar.grgit' version '4.1.0'
-  id "com.github.spotbugs" version "4.6.0"
+  id "org.ajoberstar.grgit" version "4.1.0"
+  id "com.github.spotbugs" version "4.7.8"
   id "com.adarshr.test-logger" version "2.1.1"
+//  id 'nebula.lint' version '17.2.3'
 }
 
 def cmPrivateRepoUser = System.getenv("CM_PRIVATE_REPO_USER") ?: "$defaultCmPrivateRepoUser"
@@ -82,7 +83,6 @@ allprojects {
 
 subprojects {
   apply plugin: 'java'
-  apply plugin: 'maven'
   apply plugin: 'checkstyle'
   apply plugin: 'com.github.spotbugs'
   apply plugin: 'jacoco'
@@ -116,13 +116,13 @@ subprojects {
   }
 
   spotbugs {
-    toolVersion = "4.2.0"
+    toolVersion = "4.4.2"
     excludeFilter = file("$rootProject.projectDir/config/spotbugs/excludeFilter.xml")
     effort = "min"
   }
 
   jacoco {
-    toolVersion = "0.8.6"
+    toolVersion = "0.8.7"
     reportsDir = file("$buildDir/reports/jacoco")
   }
 
@@ -175,7 +175,7 @@ subprojects {
   checkstyleMain {
     ignoreFailures = false
     configFile = rootProject.file('config/checkstyle/checkstyle.xml')
-    configProperties = ['config_loc': "$rootDir/config/checkstyle"]
+    configDirectory = rootProject.file("config/checkstyle")
   }
 
   checkstyleTest {
@@ -253,8 +253,13 @@ subprojects {
 }
 
 class BuildInfoTask extends DefaultTask {
+  @Internal
   File destination
+
+  @Internal
   String basename
+
+  @Internal
   String buildVersion
 
   @TaskAction
