@@ -211,8 +211,8 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
         List<CloudResource> requestedResources = buildableResource.stream()
                 .filter(cloudResource -> CommonStatus.REQUESTED.equals(cloudResource.getStatus()))
                 .collect(Collectors.toList());
-        Long ephemeralCount = group.getReferenceInstanceTemplate().getVolumes().stream()
-                .filter(vol -> AwsDiskType.Ephemeral.value().equalsIgnoreCase(vol.getType())).collect(Collectors.counting());
+
+        Long ephemeralCount = getEphemeralCount(group);
 
         LOGGER.debug("Start creating data volumes for stack: '{}' group: '{}'", auth.getCloudContext().getName(), group.getName());
 
@@ -247,6 +247,16 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
                 })
                 .map(copyResourceWithCreatedStatus(availabilityZone))
                 .collect(Collectors.toList());
+    }
+
+    private Long getEphemeralCount(Group group) {
+        Long ephemeralTemplateCount = group.getReferenceInstanceTemplate().getVolumes().stream()
+                .filter(vol -> AwsDiskType.Ephemeral.value().equalsIgnoreCase(vol.getType())).count();
+        if (ephemeralTemplateCount.equals(0L)) {
+            return Optional.ofNullable(group.getReferenceInstanceTemplate()).map(InstanceTemplate::getTemporaryStorageCount).orElse(0L);
+        } else {
+            return ephemeralTemplateCount;
+        }
     }
 
     private Function<CloudResource, CloudResource> copyResourceWithCreatedStatus(String availabilityZone) {

@@ -196,7 +196,7 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
             volumes.add(volume);
         }
         return new InstanceTemplate(template.getInstanceType(), name, privateId, volumes, status, fields, template.getId(), instanceImageId,
-                TemporaryStorage.ATTACHED_VOLUMES);
+                TemporaryStorage.ATTACHED_VOLUMES, 0L);
     }
 
     private Map<String, String> getUserDefinedTags(Stack stack) {
