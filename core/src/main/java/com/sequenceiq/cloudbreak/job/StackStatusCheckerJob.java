@@ -229,6 +229,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                 .stream()
                 .filter(e -> !Set.of(SERVICES_UNHEALTHY, STOPPED)
                         .contains(e.getKey().getInstanceStatus()))
+                .filter(e -> e.getKey().getDiscoveryFQDN() != null)
                 .collect(Collectors.toMap(e -> e.getKey().getDiscoveryFQDN(), Map.Entry::getValue));
         ifFlowNotRunning(() -> updateStates(stack, failedInstances.keySet(), newFailedNodeNamesWithReason, newHealthyHostNames, hostCertExpiring));
         syncInstances(stack, runningInstances, failedInstances.keySet(), InstanceSyncState.RUNNING, true);
@@ -296,6 +297,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                 .collect(toSet());
         Set<String> unhealthyStoredHosts = runningInstances.stream()
                 .filter(i -> i.getInstanceStatus() == SERVICES_UNHEALTHY || i.getInstanceStatus() == SERVICES_RUNNING)
+                .filter(i -> i.getDiscoveryFQDN() != null)
                 .map(InstanceMetaData::getDiscoveryFQDN)
                 .collect(toSet());
         return Sets.intersect(healthyHosts, unhealthyStoredHosts);
@@ -307,6 +309,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                 .filter(e -> !hostStatuses.isHostHealthy(e.getKey()))
                 .collect(Collectors.toMap(e -> e.getKey().value(), e -> Optional.ofNullable(hostStatuses.statusReasonForHost(e.getKey()))));
         Set<String> noReportHosts = runningInstances.stream()
+                .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null)
                 .map(InstanceMetaData::getDiscoveryFQDN)
                 .filter(discoveryFQDN -> hostStatuses.getHostsHealth().get(hostName(discoveryFQDN)) == null)
                 .collect(toSet());

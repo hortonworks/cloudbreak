@@ -65,7 +65,8 @@ public class RdsRecoverySetupService {
         OrchestratorGrainRunnerParams grainRunnerParams = new OrchestratorGrainRunnerParams();
         InstanceMetaData gatewayInstance = stack.getPrimaryGatewayInstance();
         grainRunnerParams.setPrimaryGatewayConfig(gatewayConfigService.getGatewayConfig(stack, gatewayInstance, stack.getCluster().hasGateway()));
-        grainRunnerParams.setTargetHostNames(Set.of(gatewayInstance.getDiscoveryFQDN()));
+        Set<String> targetHostNames = gatewayInstance.getDiscoveryFQDN() != null ? Set.of(gatewayInstance.getDiscoveryFQDN()) : Set.of();
+        grainRunnerParams.setTargetHostNames(targetHostNames);
         grainRunnerParams.setAllNodes(nodes);
         grainRunnerParams.setExitCriteriaModel(ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel(stack.getId(), cluster.getId()));
         grainRunnerParams.setKey(ROLES);

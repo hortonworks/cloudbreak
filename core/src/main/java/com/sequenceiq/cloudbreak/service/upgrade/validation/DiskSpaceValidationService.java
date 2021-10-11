@@ -91,7 +91,8 @@ public class DiskSpaceValidationService {
     }
 
     private boolean isGatewayInstance(String hostname, List<InstanceMetaData> gatewayInstances) {
-        return gatewayInstances.stream().anyMatch(instanceMetaData -> instanceMetaData.getDiscoveryFQDN().equals(hostname));
+        return gatewayInstances.stream()
+                .anyMatch(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null && instanceMetaData.getDiscoveryFQDN().equals(hostname));
     }
 
     private String formatRequiredSpace(double requiredFreeSpace) {

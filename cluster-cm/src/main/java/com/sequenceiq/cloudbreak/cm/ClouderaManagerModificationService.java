@@ -192,7 +192,10 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             deployClientConfig(clustersResourceApi, stack);
             clouderaManagerRoleRefreshService.refreshClusterRoles(apiClient, stack);
             LOGGER.debug("Cluster upscale completed. Host group: [{}].", hostGroupName);
-            return instanceMetaDatas.stream().map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.toList());
+            return instanceMetaDatas.stream()
+                    .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null)
+                    .map(InstanceMetaData::getDiscoveryFQDN)
+                    .collect(Collectors.toList());
         } catch (ApiException e) {
             LOGGER.error(String.format("Failed to upscale. Host group: [%s]. Response: %s", hostGroupName, e.getResponseBody()), e);
             throw new CloudbreakException("Failed to upscale", e);

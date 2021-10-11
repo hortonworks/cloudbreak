@@ -325,7 +325,9 @@ public class StackUpscaleActions {
                 Set<String> ips = payload.getRequest().getUpscaleCandidateAddresses();
                 Set<String> hostNames = instanceMetaData.stream()
                         .filter(im -> ips.contains(im.getPrivateIp()))
-                        .map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.toSet());
+                        .filter(im -> im.getDiscoveryFQDN() != null)
+                        .map(InstanceMetaData::getDiscoveryFQDN)
+                        .collect(Collectors.toSet());
                 CleanupFreeIpaEvent cleanupFreeIpaEvent = new CleanupFreeIpaEvent(context.getStack().getId(), hostNames, ips, isRepair(variables));
                 sendEvent(context, cleanupFreeIpaEvent);
             }
@@ -342,6 +344,7 @@ public class StackUpscaleActions {
                 final Set<String> newAddresses = payload.getIps();
                 final Map<String, String> newAddressesByFqdn = stack.getNotDeletedInstanceMetaDataSet().stream()
                         .filter(instanceMetaData -> newAddresses.contains(instanceMetaData.getPrivateIp()))
+                        .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null)
                         .collect(Collectors.toMap(InstanceMetaData::getDiscoveryFQDN, InstanceMetaData::getPublicIpWrapper));
                 clusterPublicEndpointManagementService.upscale(stack, newAddressesByFqdn);
                 getMetricService().incrementMetricCounter(MetricType.STACK_UPSCALE_SUCCESSFUL, stack);

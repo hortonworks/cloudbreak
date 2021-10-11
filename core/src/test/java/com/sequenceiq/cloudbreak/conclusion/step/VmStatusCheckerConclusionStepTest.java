@@ -148,6 +148,22 @@ class VmStatusCheckerConclusionStepTest {
         assertEquals(VmStatusCheckerConclusionStep.class, conclusion.getConclusionStepClass());
     }
 
+    @Test
+    public void checkShouldHandleMissingFqdns() {
+        when(clusterStatusService.isClusterManagerRunningQuickCheck()).thenReturn(Boolean.FALSE);
+        InstanceMetaData instanceMetaData = new InstanceMetaData();
+        instanceMetaData.setInstanceId("1");
+        when(instanceMetaDataService.findNotTerminatedForStack(anyLong())).thenReturn(Set.of(instanceMetaData));
+        when(stackInstanceStatusChecker.queryInstanceStatuses(any(), anyList()))
+                .thenReturn(List.of(createCloudVmInstanceStatus("1", false)));
+
+        Conclusion conclusion = underTest.check(1L);
+        assertFalse(conclusion.isFailureFound());
+        assertNull(conclusion.getConclusion());
+        assertNull(conclusion.getDetails());
+        assertEquals(VmStatusCheckerConclusionStep.class, conclusion.getConclusionStepClass());
+    }
+
     private ExtendedHostStatuses createExtendedHostStatuses(boolean healthy) {
         Map<HostName, Set<HealthCheck>> hostStatuses = new HashMap<>();
         HealthCheckResult status = healthy ? HealthCheckResult.HEALTHY : HealthCheckResult.UNHEALTHY;

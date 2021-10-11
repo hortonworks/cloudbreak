@@ -248,6 +248,7 @@ public class ClouderaManagerDecomissioner {
 
             return stillAvailableRemovableHosts.stream()
                     .map(hostsToRemove::get)
+                    .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null)
                     .map(InstanceMetaData::getDiscoveryFQDN)
                     .collect(Collectors.toSet());
         } catch (ApiException e) {
@@ -332,7 +333,7 @@ public class ClouderaManagerDecomissioner {
         try {
             ApiHostList hostRefList = hostsResourceApi.readHosts(null, null, SUMMARY_REQUEST_VIEW);
             Optional<ApiHost> hostRefOptional = hostRefList.getItems().stream()
-                    .filter(host -> data.getDiscoveryFQDN().equals(host.getHostname()))
+                    .filter(host -> data.getDiscoveryFQDN() != null && data.getDiscoveryFQDN().equals(host.getHostname()))
                     .findFirst();
             if (hostRefOptional.isPresent()) {
                 ApiHost hostRef = hostRefOptional.get();

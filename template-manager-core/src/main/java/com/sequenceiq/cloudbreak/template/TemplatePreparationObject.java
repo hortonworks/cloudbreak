@@ -312,6 +312,7 @@ public class TemplatePreparationObject {
                     Set<VolumeTemplate> volumeTemplates = template == null ? Collections.EMPTY_SET
                             : template.getVolumeTemplates();
                     Set<String> fqdns = instanceGroup.getAllInstanceMetaData().stream()
+                            .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null)
                             .map(InstanceMetaData::getDiscoveryFQDN)
                             .collect(Collectors.toSet());
                     TemporaryStorage temporaryStorage = template == null ? null : template.getTemporaryStorage();

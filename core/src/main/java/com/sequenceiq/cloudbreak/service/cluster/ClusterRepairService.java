@@ -457,6 +457,7 @@ public class ClusterRepairService {
                 .collect(toMap(entry -> entry.getKey().value(),
                         entry -> entry.getValue()
                                 .stream()
+                                .filter(i -> i.getDiscoveryFQDN() != null)
                                 .map(InstanceMetaData::getDiscoveryFQDN)
                                 .collect(toList())));
     }

@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.chain;
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeEvent.CLUSTER_UPGRADE_INIT_EVENT;
-
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
@@ -92,6 +91,7 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
                 .collect(toMap(entry -> entry.getKey().value(),
                         entry -> entry.getValue()
                                 .stream()
+                                .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null)
                                 .map(InstanceMetaData::getDiscoveryFQDN)
                                 .collect(toList())));
     }
