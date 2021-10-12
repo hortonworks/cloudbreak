@@ -6,14 +6,15 @@ import static com.sequenceiq.cloudbreak.util.SecurityGroupSeparator.getSecurityG
 import java.util.Objects;
 import java.util.Optional;
 
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.util.NullUtil;
 import com.sequenceiq.common.api.type.Tunnel;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsDiskEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.S3GuardRequestParameters;
-import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsDiskEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
@@ -50,6 +51,8 @@ import com.sequenceiq.environment.proxy.v1.converter.ProxyConfigToProxyResponseC
 
 @Component
 public class EnvironmentResponseConverter {
+
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(EnvironmentResponseConverter.class);
 
     private final CredentialToCredentialV1ResponseConverter credentialConverter;
 
@@ -276,6 +279,10 @@ public class EnvironmentResponseConverter {
     }
 
     private EnvironmentDeletionType deletionType(com.sequenceiq.environment.environment.EnvironmentDeletionType deletionType) {
+        if (deletionType == null) {
+            LOGGER.debug("Environment deletion type is not filled, falling back to NONE");
+            return  EnvironmentDeletionType.NONE;
+        }
         switch (deletionType) {
             case NONE:
                 return EnvironmentDeletionType.NONE;
