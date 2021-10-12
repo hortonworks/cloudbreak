@@ -99,7 +99,7 @@ freeipa:
   usersync:
     max-subjects-per-request: 10
     poller:
-      enabled: true
+      enabled: false
       initial-delay-millis: 60000
       fixed-delay-millis: 300000
       cooldown-duration: PT10M
