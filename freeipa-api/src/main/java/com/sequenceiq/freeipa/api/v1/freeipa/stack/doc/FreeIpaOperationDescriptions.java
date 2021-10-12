@@ -27,6 +27,7 @@ public final class FreeIpaOperationDescriptions {
     public static final String RETRY = "Retries the latest failed operation";
     public static final String LIST_RETRYABLE_FLOWS = "List retryable failed flows";
     public static final String CHANGE_IMAGE_CATALOG = "Changes the image catalog used for creating instances";
+    public static final String GENERATE_IMAGE_CATALOG = "Generates an image catalog that only contains the currently used image for creating instances";
 
     private FreeIpaOperationDescriptions() {
     }

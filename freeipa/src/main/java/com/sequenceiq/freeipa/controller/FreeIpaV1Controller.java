@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.controller;
 
+import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_ENVIRONMENT;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.EDIT_ENVIRONMENT;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.REPAIR_FREEIPA;
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CRN;
@@ -43,6 +44,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIp
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.detachchildenv.DetachChildEnvironmentRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.HealthDetailsFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.imagecatalog.ChangeImageCatalogRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.imagecatalog.GenerateImageCatalogResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.list.ListFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.reboot.RebootInstancesRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.repair.RepairInstancesRequest;
@@ -58,6 +60,7 @@ import com.sequenceiq.freeipa.service.binduser.BindUserCreateService;
 import com.sequenceiq.freeipa.service.freeipa.cert.root.FreeIpaRootCertificateService;
 import com.sequenceiq.freeipa.service.freeipa.cleanup.CleanupService;
 import com.sequenceiq.freeipa.service.image.ImageCatalogChangeService;
+import com.sequenceiq.freeipa.service.image.ImageCatalogGeneratorService;
 import com.sequenceiq.freeipa.service.image.ImageChangeService;
 import com.sequenceiq.freeipa.service.operation.FreeIpaRetryService;
 import com.sequenceiq.freeipa.service.stack.ChildEnvironmentService;
@@ -140,6 +143,9 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
 
     @Inject
     private ImageCatalogChangeService imageCatalogChangeService;
+
+    @Inject
+    private ImageCatalogGeneratorService imageCatalogGeneratorService;
 
     @Override
     @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = EDIT_ENVIRONMENT)
@@ -319,5 +325,12 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
     public void changeImageCatalog(@ResourceCrn String environmentCrn, ChangeImageCatalogRequest changeImageCatalogRequest) {
         String accountId = crnService.getCurrentAccountId();
         imageCatalogChangeService.changeImageCatalog(environmentCrn, accountId, changeImageCatalogRequest.getImageCatalog());
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = DESCRIBE_ENVIRONMENT)
+    public GenerateImageCatalogResponse generateImageCatalog(@ResourceCrn @NotEmpty String environmentCrn) {
+        String accountId = crnService.getCurrentAccountId();
+        return imageCatalogGeneratorService.generate(environmentCrn, accountId);
     }
 }

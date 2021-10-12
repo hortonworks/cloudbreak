@@ -22,9 +22,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.freeipa.api.model.image.FreeIpaVersions;
-import com.sequenceiq.freeipa.api.model.image.Image;
-import com.sequenceiq.freeipa.api.model.image.ImageCatalog;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.FreeIpaVersions;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.ImageCatalog;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
 import com.sequenceiq.freeipa.dto.ImageWrapper;
 

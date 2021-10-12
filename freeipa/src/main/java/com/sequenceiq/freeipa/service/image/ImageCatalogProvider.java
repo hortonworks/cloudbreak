@@ -30,11 +30,11 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
-import com.sequenceiq.freeipa.api.model.image.FreeIpaVersions;
-import com.sequenceiq.freeipa.api.model.image.Image;
-import com.sequenceiq.freeipa.api.model.image.ImageCatalog;
-import com.sequenceiq.freeipa.api.model.image.Images;
-import com.sequenceiq.freeipa.api.model.image.Versions;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.FreeIpaVersions;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.ImageCatalog;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Images;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Versions;
 
 @Service
 public class ImageCatalogProvider {

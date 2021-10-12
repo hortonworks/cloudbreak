@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.api.model.image;
+package com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image;
 
 import static java.util.Collections.emptyList;
 
@@ -11,14 +11,17 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Images {
 
+    private static final String FREEIPA_IMAGES_PROPERTY = "freeipa-images";
+
     private final List<Image> images;
 
     @JsonCreator
     public Images(
-            @JsonProperty("freeipa-images") List<Image> images) {
+            @JsonProperty(FREEIPA_IMAGES_PROPERTY) List<Image> images) {
         this.images = (images == null) ? emptyList() : images;
     }
 
+    @JsonProperty(FREEIPA_IMAGES_PROPERTY)
     public List<Image> getFreeipaImages() {
         return images;
     }
