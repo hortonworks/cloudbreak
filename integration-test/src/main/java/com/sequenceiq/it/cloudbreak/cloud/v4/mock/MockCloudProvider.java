@@ -252,11 +252,16 @@ public class MockCloudProvider extends AbstractCloudProvider {
             mockProperties.getBaseimage().getRedhat7().setImageId(imageId);
             return imageId;
         } else {
-            Log.log(LOGGER, format(" Image Catalog Name: %s ", commonCloudProperties().getImageCatalogName()));
-            Log.log(LOGGER, format(" Image Catalog URL: %s ", commonCloudProperties().getImageCatalogUrl()));
-            Log.log(LOGGER, format(" Image ID for SDX create: %s ", mockProperties.getBaseimage().getRedhat7().getImageId()));
-            return mockProperties.getBaseimage().getRedhat7().getImageId();
+            return getLatestBaseImageID();
         }
+    }
+
+    @Override
+    public String getLatestBaseImageID() {
+        Log.log(LOGGER, format(" Image Catalog Name: %s ", commonCloudProperties().getImageCatalogName()));
+        Log.log(LOGGER, format(" Image Catalog URL: %s ", commonCloudProperties().getImageCatalogUrl()));
+        Log.log(LOGGER, format(" Image ID for SDX create: %s ", mockProperties.getBaseimage().getRedhat7().getImageId()));
+        return mockProperties.getBaseimage().getRedhat7().getImageId();
     }
 
     public String getImageCatalogUrl() {

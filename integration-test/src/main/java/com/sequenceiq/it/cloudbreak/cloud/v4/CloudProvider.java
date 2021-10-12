@@ -64,6 +64,8 @@ public interface CloudProvider {
 
     String getLatestBaseImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient);
 
+    String getLatestBaseImageID();
+
     InstanceTemplateV4TestDto template(InstanceTemplateV4TestDto template);
 
     DistroXInstanceTemplateTestDto template(DistroXInstanceTemplateTestDto template);

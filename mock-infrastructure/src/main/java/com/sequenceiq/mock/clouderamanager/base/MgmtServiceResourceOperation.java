@@ -31,6 +31,9 @@ public class MgmtServiceResourceOperation {
     @Inject
     private ClouderaManagerStoreService clouderaManagerStoreService;
 
+    @Inject
+    private ClusterResourceOperation clusterResourceOperation;
+
     public ResponseEntity<Void> autoConfigure(String mockUuid) {
         return responseCreatorComponent.exec();
     }
@@ -50,7 +53,7 @@ public class MgmtServiceResourceOperation {
     }
 
     public ResponseEntity<ApiCommand> restartCommand(String mockUuid) {
-        clouderaManagerStoreService.read(mockUuid).setStatus(ApiServiceState.STARTED);
+        startCommand(mockUuid);
         return responseCreatorComponent.exec(dataProviderService.getSuccessfulApiCommand(CommandId.MGMT_RESTART));
     }
 
@@ -60,6 +63,7 @@ public class MgmtServiceResourceOperation {
 
     public ResponseEntity<ApiCommand> startCommand(String mockUuid) {
         clouderaManagerStoreService.read(mockUuid).setStatus(ApiServiceState.STARTED);
+        clusterResourceOperation.startCommand(mockUuid, "");
         return responseCreatorComponent.exec(dataProviderService.getSuccessfulApiCommand(CommandId.MGMT_START));
     }
 

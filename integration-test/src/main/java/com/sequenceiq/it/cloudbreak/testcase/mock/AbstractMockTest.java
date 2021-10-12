@@ -5,8 +5,11 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
+import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.mock.ExecuteQueryToMockInfrastructure;
 import com.sequenceiq.it.cloudbreak.mock.ImageCatalogMockServerSetup;
@@ -24,6 +27,9 @@ public abstract class AbstractMockTest extends AbstractIntegrationTest {
 
     @Inject
     private FreeIpaTestClient freeIpaTestClient;
+
+    @Inject
+    private EnvironmentTestClient environmentTestClient;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -49,5 +55,20 @@ public abstract class AbstractMockTest extends AbstractIntegrationTest {
 
     public ImageCatalogMockServerSetup getImageCatalogMockServerSetup() {
         return imageCatalogMockServerSetup;
+    }
+
+    @Override
+    /**
+     * This should work, but now, only works at localhost because something missing in the jenkins jobs (maybe the supported freeipa)
+     */
+    protected void createEnvironmentWithFreeIpa(TestContext testContext) {
+        String freeIpaImageCatalogUrl = testContext.getCloudProvider().getFreeIpaImageCatalogUrl();
+        String latestBaseImageID = testContext.getCloudProvider().getLatestBaseImageID();
+        testContext.given(EnvironmentTestDto.class)
+                .withFreeIpaImage(freeIpaImageCatalogUrl, latestBaseImageID)
+                .when(environmentTestClient.create())
+                .await(EnvironmentStatus.AVAILABLE)
+                .when(environmentTestClient.describe())
+                .validate();
     }
 }

@@ -434,11 +434,16 @@ public class AwsCloudProvider extends AbstractCloudProvider {
             awsProperties.getBaseimage().setImageId(imageId);
             return imageId;
         } else {
-            Log.log(LOGGER, format(" Image Catalog Name: %s ", commonCloudProperties().getImageCatalogName()));
-            Log.log(LOGGER, format(" Image Catalog URL: %s ", commonCloudProperties().getImageCatalogUrl()));
-            Log.log(LOGGER, format(" Image ID for SDX create: %s ", awsProperties.getBaseimage().getImageId()));
-            return awsProperties.getBaseimage().getImageId();
+            return getLatestBaseImageID();
         }
+    }
+
+    @Override
+    public String getLatestBaseImageID() {
+        Log.log(LOGGER, format(" Image Catalog Name: %s ", commonCloudProperties().getImageCatalogName()));
+        Log.log(LOGGER, format(" Image Catalog URL: %s ", commonCloudProperties().getImageCatalogUrl()));
+        Log.log(LOGGER, format(" Image ID for SDX create: %s ", awsProperties.getBaseimage().getImageId()));
+        return awsProperties.getBaseimage().getImageId();
     }
 
     public String getImageCatalogUrl() {

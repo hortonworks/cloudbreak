@@ -25,6 +25,14 @@ public class CommandId {
 
     public static final BigDecimal DEPLOY_CLIENT_CONFIG = new BigDecimal(11);
 
+    public static final BigDecimal START_PARCEL_DOWNLOAD = new BigDecimal(12);
+
+    public static final BigDecimal START_DISTRIBUTION_PARCEL = new BigDecimal(13);
+
+    public static final BigDecimal ACTIVATE_PARCEL = new BigDecimal(14);
+
+    public static final BigDecimal UPGRADE_CDH_COMMAND = new BigDecimal(15);
+
     private CommandId() {
     }
 }

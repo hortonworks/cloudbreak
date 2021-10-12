@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.ApplyResponse;
 import com.sequenceiq.mock.salt.SaltResponse;
 import com.sequenceiq.mock.salt.SaltStoreService;
+import com.sequenceiq.mock.service.HostNameService;
 import com.sequenceiq.mock.spi.SpiStoreService;
 
 @Component
@@ -32,6 +33,9 @@ public class GrainGetSaltResponse implements SaltResponse {
     @Inject
     private ObjectMapper objectMapper;
 
+    @Inject
+    private HostNameService hostNameService;
+
     @Override
     public Object run(String mockUuid, Map<String, List<String>> params) throws Exception {
         ApplyResponse applyResponse = new ApplyResponse();
@@ -43,11 +47,15 @@ public class GrainGetSaltResponse implements SaltResponse {
             if (InstanceStatus.STARTED == cloudVmMetaDataStatus.getCloudVmInstanceStatus().getStatus()) {
                 Map<String, Multimap<String, String>> grains = saltStoreService.getGrains(mockUuid);
                 String privateIp = cloudVmMetaDataStatus.getMetaData().getPrivateIp();
-                String hostname = "host-" + privateIp.replace(".", "-") + ".example.com";
+                String hostname = hostNameService.getHostName(mockUuid, privateIp);
                 if (grains.containsKey(hostname)) {
                     List<String> arg = params.get("arg");
                     if (!CollectionUtils.isEmpty(arg)) {
-                        hostMap.put(hostname, objectMapper.valueToTree(grains.get(hostname).get(arg.get(0))));
+                        if (arg.contains("saltversion")) {
+                            hostMap.put(hostname, objectMapper.valueToTree("3000.8"));
+                        } else {
+                            hostMap.put(hostname, objectMapper.valueToTree(grains.get(hostname).get(arg.get(0))));
+                        }
                     }
                 }
             }

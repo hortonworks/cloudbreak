@@ -205,6 +205,12 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
         return this;
     }
 
+    public SdxInternalTestDto withClusterTemplateName(String template) {
+        ClusterTestDto cluster = getTestContext().given(ClusterTestDto.class);
+        cluster.withBlueprintName(template);
+        return this;
+    }
+
     public SdxInternalTestDto withTemplate(JSONObject templateJson) {
         StackTestDto stack = getTestContext().given(StackTestDto.class);
         ClusterTestDto cluster = getTestContext().given(ClusterTestDto.class);

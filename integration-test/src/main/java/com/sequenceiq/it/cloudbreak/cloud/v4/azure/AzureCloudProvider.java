@@ -437,11 +437,16 @@ public class AzureCloudProvider extends AbstractCloudProvider {
             azureProperties.getBaseimage().setImageId(imageId);
             return imageId;
         } else {
-            Log.log(LOGGER, format(" Image Catalog Name: %s ", commonCloudProperties().getImageCatalogName()));
-            Log.log(LOGGER, format(" Image Catalog URL: %s ", commonCloudProperties().getImageCatalogUrl()));
-            Log.log(LOGGER, format(" Image ID for SDX create: %s ", azureProperties.getBaseimage().getImageId()));
-            return azureProperties.getBaseimage().getImageId();
+            return getLatestBaseImageID();
         }
+    }
+
+    @Override
+    public String getLatestBaseImageID() {
+        Log.log(LOGGER, format(" Image Catalog Name: %s ", commonCloudProperties().getImageCatalogName()));
+        Log.log(LOGGER, format(" Image Catalog URL: %s ", commonCloudProperties().getImageCatalogUrl()));
+        Log.log(LOGGER, format(" Image ID for SDX create: %s ", azureProperties.getBaseimage().getImageId()));
+        return azureProperties.getBaseimage().getImageId();
     }
 
     @Override

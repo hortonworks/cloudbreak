@@ -119,7 +119,7 @@ public class EnvironmentTestDto
             FreeIpaImageRequest imageRequest = new FreeIpaImageRequest();
             imageRequest.setCatalog(imageCatalog);
             imageRequest.setId(imageUuid);
-
+            withCreateFreeIpa(true);
             getRequest().getFreeIpa().setImage(imageRequest);
         }
         return this;

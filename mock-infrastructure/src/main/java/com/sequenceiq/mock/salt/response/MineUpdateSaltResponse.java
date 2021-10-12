@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.ApplyResponse;
 import com.sequenceiq.mock.salt.SaltResponse;
+import com.sequenceiq.mock.service.HostNameService;
 import com.sequenceiq.mock.spi.SpiStoreService;
 
 @Component
@@ -22,6 +23,9 @@ public class MineUpdateSaltResponse implements SaltResponse {
 
     @Inject
     private SpiStoreService spiStoreService;
+
+    @Inject
+    private HostNameService hostNameService;
 
     @Override
     public Object run(String mockUuid, Map<String, List<String>> params) throws Exception {
@@ -33,7 +37,8 @@ public class MineUpdateSaltResponse implements SaltResponse {
         for (CloudVmMetaDataStatus cloudVmMetaDataStatus : spiStoreService.getMetadata(mockUuid)) {
             if (InstanceStatus.STARTED == cloudVmMetaDataStatus.getCloudVmInstanceStatus().getStatus()) {
                 String privateIp = cloudVmMetaDataStatus.getMetaData().getPrivateIp();
-                hostMap.put("host-" + privateIp.replace(".", "-") + ".example.com", JsonUtil.readTree("[\"" + privateIp + "\"]"));
+                String hostName = hostNameService.getHostName(mockUuid, privateIp);
+                hostMap.put(hostName, JsonUtil.readTree("[\"" + privateIp + "\"]"));
             }
         }
 

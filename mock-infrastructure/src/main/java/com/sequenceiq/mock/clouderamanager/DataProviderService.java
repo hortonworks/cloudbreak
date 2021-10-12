@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
-import com.sequenceiq.mock.HostNameUtil;
+import com.sequenceiq.mock.service.HostNameService;
 import com.sequenceiq.mock.spi.SpiService;
 import com.sequenceiq.mock.spi.SpiStoreService;
 import com.sequenceiq.mock.swagger.model.ApiCluster;
@@ -43,6 +43,9 @@ public class DataProviderService {
     @Inject
     private ClouderaManagerStoreService clouderaManagerStoreService;
 
+    @Inject
+    private HostNameService hostNameService;
+
     public ApiCommand getSuccessfulApiCommand(BigDecimal id) {
         ApiCommand result = new ApiCommand();
         result.setId(id);
@@ -55,7 +58,7 @@ public class DataProviderService {
         List<CloudVmMetaDataStatus> metadata = spiStoreService.getMetadata(mockUuid);
         ApiHostRefList apiHostList = new ApiHostRefList();
         for (CloudVmMetaDataStatus cloudVmMetaDataStatus : metadata) {
-            ApiHostRef apiHost = getApiHostRef(cloudVmMetaDataStatus);
+            ApiHostRef apiHost = getApiHostRef(mockUuid, cloudVmMetaDataStatus);
             apiHostList.addItemsItem(apiHost);
         }
         return apiHostList;
@@ -63,13 +66,15 @@ public class DataProviderService {
 
     public ApiHostRef getApiHostRef(String mockUuid, String hostId) {
         CloudVmMetaDataStatus cloudVmMetaDataStatus = spiService.getByInstanceId(mockUuid, hostId);
-        return getApiHostRef(cloudVmMetaDataStatus);
+        return getApiHostRef(mockUuid, cloudVmMetaDataStatus);
     }
 
-    public ApiHostRef getApiHostRef(CloudVmMetaDataStatus cloudVmMetaDataStatus) {
+    public ApiHostRef getApiHostRef(String mockUuid, CloudVmMetaDataStatus cloudVmMetaDataStatus) {
+        String privateIp = cloudVmMetaDataStatus.getMetaData().getPrivateIp();
+        String hostname = hostNameService.getHostName(mockUuid, privateIp);
         return new ApiHostRef()
                 .hostId(cloudVmMetaDataStatus.getCloudVmInstanceStatus().getCloudInstance().getInstanceId())
-                .hostname(HostNameUtil.generateHostNameByIp(cloudVmMetaDataStatus.getMetaData().getPrivateIp()));
+                .hostname(hostname);
     }
 
     public ApiHealthSummary instanceStatusToApiHealthSummary(CloudVmMetaDataStatus cloudVmMetaDataStatus) {
@@ -81,25 +86,27 @@ public class DataProviderService {
 
     public ApiHost getApiHost(String mockUuid, String hostId) {
         CloudVmMetaDataStatus cloudVmMetaDataStatus = spiService.getByInstanceId(mockUuid, hostId);
-        return getApiHost(cloudVmMetaDataStatus);
+        return getApiHost(mockUuid, cloudVmMetaDataStatus);
     }
 
     public ApiHostList readHosts(String mockUuid) {
         List<CloudVmMetaDataStatus> metadata = spiStoreService.getMetadata(mockUuid);
         ApiHostList apiHostList = new ApiHostList();
         for (CloudVmMetaDataStatus cloudVmMetaDataStatus : metadata) {
-            ApiHost apiHost = getApiHost(cloudVmMetaDataStatus);
+            ApiHost apiHost = getApiHost(mockUuid, cloudVmMetaDataStatus);
             apiHostList.addItemsItem(apiHost);
         }
         return apiHostList;
     }
 
-    public ApiHost getApiHost(CloudVmMetaDataStatus cloudVmMetaDataStatus) {
+    public ApiHost getApiHost(String mockUuid, CloudVmMetaDataStatus cloudVmMetaDataStatus) {
         ApiHealthSummary healthSummary = instanceStatusToApiHealthSummary(cloudVmMetaDataStatus);
+        String privateIp = cloudVmMetaDataStatus.getMetaData().getPrivateIp();
+        String hostname = hostNameService.getHostName(mockUuid, privateIp);
         return new ApiHost()
                 .hostId(cloudVmMetaDataStatus.getCloudVmInstanceStatus().getCloudInstance().getInstanceId())
-                .hostname(HostNameUtil.generateHostNameByIp(cloudVmMetaDataStatus.getMetaData().getPrivateIp()))
-                .ipAddress(cloudVmMetaDataStatus.getMetaData().getPrivateIp())
+                .hostname(hostname)
+                .ipAddress(privateIp)
                 .lastHeartbeat(Instant.now().plusSeconds(SECONDS_TO_ADD).toString())
                 .healthSummary(healthSummary)
                 .healthChecks(List.of(new ApiHealthCheck()
