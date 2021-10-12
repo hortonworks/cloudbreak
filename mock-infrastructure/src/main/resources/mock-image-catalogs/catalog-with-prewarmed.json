@@ -34,7 +34,7 @@
         "repo": {
           "redhat7": "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1455819/cm7/CM_VERSION/redhat7/yum/"
         },
-        "version": "CDH_RUNTIME",
+        "version": "CM_VERSION",
         "pre_warm_parcels": [
           [
             "SCHEMAREGISTRY-0.8.0.3.0.0.0-21-el7.parcel",
@@ -70,26 +70,26 @@
         "os_type": "redhat7",
         "uuid": "NON_DEFAULT_IMAGE_UUID",
         "package-versions": {
-          "cm": "7.x.0",
+          "cm": "CM_VERSION_NEXT",
           "salt": "2017.7.5",
           "salt-bootstrap": "0.13.0-2018-05-03T07:39:07",
-          "stack": "CDH_RUNTIME"
+          "stack": "CDH_RUNTIME_NEXT"
         },
         "stack-details": {
           "repo": {
             "stack": {
               "redhat7": "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1454941/cdh/7.x/parcels/",
-              "repoid": "CDH-CDH_RUNTIME",
-              "repository-version": "CDH_RUNTIME-1.cdhCDH_RUNTIME.p0.1454941"
+              "repoid": "CDH-CDH_RUNTIME_NEXT",
+              "repository-version": "CDH_RUNTIME-1.cdhCDH_RUNTIME_NEXT.p0.1454941"
             },
             "util": null
           },
-          "version": "CDH_RUNTIME"
+          "version": "CDH_RUNTIME_NEXT"
         },
         "repo": {
-          "redhat7": "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1455819/cm7/CDH_RUNTIME/redhat7/yum/"
+          "redhat7": "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1455819/cm7/CDH_RUNTIME_NEXT/redhat7/yum/"
         },
-        "version": "7.x.0",
+        "version": "CM_VERSION_NEXT",
         "pre_warm_parcels": [
           [
             "SCHEMAREGISTRY-0.8.0.3.0.0.0-21-el7.parcel",

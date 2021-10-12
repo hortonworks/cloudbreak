@@ -1,5 +1,7 @@
 package com.sequenceiq.mock.clouderamanager.base;
 
+import static com.sequenceiq.mock.clouderamanager.CommandId.UPGRADE_CDH_COMMAND;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +17,7 @@ import com.sequenceiq.mock.clouderamanager.ClouderaManagerStoreService;
 import com.sequenceiq.mock.clouderamanager.CommandId;
 import com.sequenceiq.mock.clouderamanager.DataProviderService;
 import com.sequenceiq.mock.clouderamanager.ResponseCreatorComponent;
+import com.sequenceiq.mock.swagger.model.ApiCdhUpgradeArgs;
 import com.sequenceiq.mock.swagger.model.ApiCluster;
 import com.sequenceiq.mock.swagger.model.ApiCommand;
 import com.sequenceiq.mock.swagger.model.ApiCommandList;
@@ -63,6 +66,7 @@ public class ClusterResourceOperation {
     }
 
     public ResponseEntity<ApiCommand> restartCommand(String mockUuid, String clusterName, @Valid ApiRestartClusterArgs body) {
+        startCommand(mockUuid, clusterName);
         return responseCreatorComponent.exec(dataProviderService.getSuccessfulApiCommand(CommandId.CLUSTER_RESTART));
     }
 
@@ -71,6 +75,7 @@ public class ClusterResourceOperation {
         Map<String, ApiServiceState> newStates = new HashMap<>();
         read.getServiceStates().forEach((service, apiServiceState) -> newStates.put(service, ApiServiceState.STARTED));
         read.setServiceStates(newStates);
+        read.setStatus(ApiServiceState.STARTED);
         return responseCreatorComponent.exec(new ApiCommand().id(CommandId.CLUSTER_START).active(Boolean.TRUE).name("Start"));
     }
 
@@ -79,6 +84,12 @@ public class ClusterResourceOperation {
         Map<String, ApiServiceState> newStates = new HashMap<>();
         read.getServiceStates().forEach((service, apiServiceState) -> newStates.put(service, ApiServiceState.STOPPED));
         read.setServiceStates(newStates);
+        read.setStatus(ApiServiceState.STOPPED);
         return responseCreatorComponent.exec(new ApiCommand().id(CommandId.CLUSTER_STOP).active(Boolean.TRUE).name("Stop"));
+    }
+
+    public ResponseEntity<ApiCommand> upgradeCdhCommand(String mockUuid, String clusterName, ApiCdhUpgradeArgs body) {
+        clouderaManagerStoreService.addOrUpdateProduct(mockUuid, "CDH", body.getCdhParcelVersion());
+        return responseCreatorComponent.exec(dataProviderService.getSuccessfulApiCommand(UPGRADE_CDH_COMMAND));
     }
 }

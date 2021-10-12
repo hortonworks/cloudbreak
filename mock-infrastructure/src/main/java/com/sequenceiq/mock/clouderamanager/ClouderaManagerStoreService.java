@@ -34,6 +34,12 @@ public class ClouderaManagerStoreService {
         return read(mockUuid).getClusterTemplate().getProducts();
     }
 
+    public Optional<ApiProductVersion> getClouderaManagerProduct(String mockUuid, String product) {
+        LOGGER.info("get cm products by {}", mockUuid);
+        List<ApiProductVersion> products = read(mockUuid).getClusterTemplate().getProducts();
+        return products.stream().filter(p -> product.equals(p.getProduct())).findFirst();
+    }
+
     public void terminate(String mockUuid) {
         LOGGER.info("terminate cm by {}", mockUuid);
         cmDtos.remove(mockUuid);
@@ -126,5 +132,18 @@ public class ClouderaManagerStoreService {
         return read(mockUuid).getClusterTemplate().getServices().stream()
                 .filter(s -> s.getRefName().equals(serviceName))
                 .findFirst();
+    }
+
+    public void addProduct(String mockUuid, String product, String version) {
+        getClouderaManagerProducts(mockUuid).add(new ApiProductVersion().product(product).version(version));
+    }
+
+    public void addOrUpdateProduct(String mockUuid, String product, String version) {
+        Optional<ApiProductVersion> productOpt = getClouderaManagerProduct(mockUuid, product);
+        if (productOpt.isPresent()) {
+            productOpt.get().setVersion(version);
+        } else {
+            addProduct(mockUuid, product, version);
+        }
     }
 }

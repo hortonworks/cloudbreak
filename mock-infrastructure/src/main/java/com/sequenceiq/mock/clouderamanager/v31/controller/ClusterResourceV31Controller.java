@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.mock.clouderamanager.base.ClusterResourceOperation;
+import com.sequenceiq.mock.swagger.model.ApiCdhUpgradeArgs;
 import com.sequenceiq.mock.swagger.model.ApiCluster;
 import com.sequenceiq.mock.swagger.model.ApiCommand;
 import com.sequenceiq.mock.swagger.model.ApiCommandList;
@@ -64,5 +65,10 @@ public class ClusterResourceV31Controller implements ClustersResourceApi {
     @Override
     public ResponseEntity<ApiCommand> stopCommand(String mockUuid, String clusterName) {
         return clusterResourceOperation.stopCommand(mockUuid, clusterName);
+    }
+
+    @Override
+    public ResponseEntity<ApiCommand> upgradeCdhCommand(String mockUuid, String clusterName, ApiCdhUpgradeArgs body) {
+        return clusterResourceOperation.upgradeCdhCommand(mockUuid, clusterName, body);
     }
 }

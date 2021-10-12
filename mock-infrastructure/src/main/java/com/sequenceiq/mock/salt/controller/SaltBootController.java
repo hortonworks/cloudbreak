@@ -1,12 +1,16 @@
 package com.sequenceiq.mock.salt.controller;
 
+import static org.slf4j.LoggerFactory.getLogger;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,17 +25,23 @@ import org.springframework.web.multipart.MultipartFile;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponse;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponses;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.FingerprintRequest;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Minion;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Pillar;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltAction;
-import com.sequenceiq.mock.HostNameUtil;
 import com.sequenceiq.mock.salt.SaltStoreService;
+import com.sequenceiq.mock.service.HostNameService;
 
 @RestController
 @RequestMapping("/{mock_uuid}/saltboot/")
 public class SaltBootController {
 
+    private static final Logger LOGGER = getLogger(SaltBootController.class);
+
     @Inject
     private SaltStoreService saltStoreService;
+
+    @Inject
+    private HostNameService hostNameService;
 
     @PostMapping(value = "file/distribute", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public GenericResponses fileDistribute(@PathVariable("mock_uuid") String mockUuid, @RequestParam("file") MultipartFile body) {
@@ -82,13 +92,18 @@ public class SaltBootController {
         List<GenericResponse> responses = new ArrayList<>();
 
         List<String> strings = privateIps.get("clients");
-
+        List<Minion> minions = saltStoreService.read(mockUuid).getMinions();
         for (String address : strings) {
-            GenericResponse genericResponse = new GenericResponse();
-            genericResponse.setAddress(address);
-            genericResponse.setStatus(HostNameUtil.generateHostNameByIp(address));
-            genericResponse.setStatusCode(HttpStatus.OK.value());
-            responses.add(genericResponse);
+            Optional<Minion> minion = minions.stream().filter(m -> address.equals(m.getAddress())).findFirst();
+            if (minion.isPresent()) {
+                GenericResponse genericResponse = new GenericResponse();
+                genericResponse.setAddress(address);
+                genericResponse.setStatus(hostNameService.generateHostNameByIp(address, minion.get().getDomain()));
+                genericResponse.setStatusCode(HttpStatus.OK.value());
+                responses.add(genericResponse);
+            } else {
+                LOGGER.info("Cannot find minion with ip: {}", address);
+            }
         }
         genericResponses.setResponses(responses);
         return genericResponses;

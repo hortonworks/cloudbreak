@@ -1,6 +1,9 @@
 package com.sequenceiq.mock.service;
 
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 import org.springframework.stereotype.Service;
@@ -17,11 +20,21 @@ public class ImageCatalogMockService {
     public String getImageCatalogByName(String name, String cbVersion, String runtimeVersion, String cmVersion, String defaultImageUuid,
             String nonDefaultImageUuid) {
         String catalog = FileReaderUtils.readFileFromClasspathQuietly(String.format("mock-image-catalogs/%s.json", name));
+        String nextRuntimeVersion = getNextRuntimeVersion(runtimeVersion);
         return catalog.replace("CB_VERSION", cbVersion)
+                .replace("CDH_RUNTIME_NEXT", nextRuntimeVersion)
                 .replace("CDH_RUNTIME", runtimeVersion)
+                .replace("CM_VERSION_NEXT", Objects.requireNonNullElse(cmVersion, nextRuntimeVersion))
                 .replace("CM_VERSION", Objects.requireNonNullElse(cmVersion, runtimeVersion))
-                .replace("DEFAULT_IMAGE_UUID", Objects.requireNonNullElse(defaultImageUuid, DEFAULT_IMAGE_UUID))
-                .replace("NON_DEFAULT_IMAGE_UUID", Objects.requireNonNullElse(nonDefaultImageUuid, NON_DEFAULT_IMAGE_UUID));
+                .replace("NON_DEFAULT_IMAGE_UUID", Objects.requireNonNullElse(nonDefaultImageUuid, NON_DEFAULT_IMAGE_UUID))
+                .replace("DEFAULT_IMAGE_UUID", Objects.requireNonNullElse(defaultImageUuid, DEFAULT_IMAGE_UUID));
     }
 
+    private String getNextRuntimeVersion(String runtime) {
+        String[] splitted = runtime.split("\\.");
+        int last = Integer.parseInt(splitted[splitted.length - 1]);
+        List<String> elements = new ArrayList<>(Arrays.asList(splitted).subList(0, splitted.length - 1));
+        elements.add(String.valueOf(last + 1));
+        return String.join(".", elements);
+    }
 }

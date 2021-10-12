@@ -66,6 +66,7 @@ auth:
       disk:
         SSEWithCMK.enable: true
     aws:
+      native.variant.migration.enable: true
       disk:
         EncryptionWithCMK.enable: true
     datahub.customconfigs.enable: true

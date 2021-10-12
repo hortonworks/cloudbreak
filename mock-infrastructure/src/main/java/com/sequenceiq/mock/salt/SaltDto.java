@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.common.collect.Multimap;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Minion;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Pillar;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltAction;
 
@@ -22,6 +23,8 @@ public class SaltDto {
     private List<RunResponseDto> runResponsDtos = new ArrayList<>();
 
     private List<Pillar> pillars = new ArrayList<>();
+
+    private List<Minion> minions = new ArrayList<>();
 
     public SaltDto(String mockUuid) {
         this.mockUuid = mockUuid;
@@ -61,5 +64,13 @@ public class SaltDto {
 
     public List<Pillar> getPillars() {
         return pillars;
+    }
+
+    public List<Minion> getMinions() {
+        return minions;
+    }
+
+    public void setMinions(List<Minion> minions) {
+        this.minions = minions;
     }
 }

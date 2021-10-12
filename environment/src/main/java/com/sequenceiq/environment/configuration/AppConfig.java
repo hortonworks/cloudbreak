@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.configuration;
 
+import static org.slf4j.LoggerFactory.getLogger;
 import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
 
 import java.util.List;
@@ -11,6 +12,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.client.Client;
 
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,6 +37,8 @@ import io.opentracing.Tracer;
 @Configuration
 @EnableRetry
 public class AppConfig {
+
+    private static final Logger LOGGER = getLogger(AppConfig.class);
 
     @Inject
     private List<EnvironmentNetworkValidator> environmentNetworkValidators;
@@ -129,6 +133,7 @@ public class AppConfig {
 
     @Bean
     public SupportedPlatforms supportedFreeIpaPlatforms() {
+        LOGGER.info("Supported freeipa platform: {}", supportedFreeIpaPlatforms);
         return new SupportedPlatforms(supportedFreeIpaPlatforms.split(","));
     }
 

@@ -2,6 +2,7 @@ package com.sequenceiq.mock.salt;
 
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +28,7 @@ public class SaltStoreService {
 
     public List<Minion> getMinions(String mockUuid) {
         LOGGER.trace("read salt minions by {}", mockUuid);
-        return read(mockUuid).getSaltAction().getMinions();
+        return read(mockUuid).getMinions();
     }
 
     public Map<String, Multimap<String, String>> getGrains(String mockUuid) {
@@ -69,6 +70,19 @@ public class SaltStoreService {
     public void setSaltAction(String mockUuid, SaltAction saltAction) {
         LOGGER.debug("set salt actions to {}. Salt action: {}", mockUuid, saltAction);
         read(mockUuid).setSaltAction(saltAction);
+        addMinions(mockUuid, saltAction.getMinions());
+    }
+
+    public void addMinions(String mockUuid, List<Minion> minions) {
+        SaltDto saltDto = read(mockUuid);
+        List<Minion> newMinions = new ArrayList<>();
+        for (Minion minion : minions) {
+            boolean exist = saltDto.getMinions().stream().anyMatch(m -> m.getAddress().equals(minion.getAddress()));
+            if (!exist) {
+                newMinions.add(minion);
+            }
+        }
+        saltDto.getMinions().addAll(newMinions);
     }
 
     public void addPillar(String mockUuid, Pillar pillar) {

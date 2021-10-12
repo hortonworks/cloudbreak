@@ -212,11 +212,16 @@ public class YarnCloudProvider extends AbstractCloudProvider {
             yarnProperties.getBaseimage().setImageId(imageId);
             return imageId;
         } else {
-            Log.log(LOGGER, format(" Image Catalog Name: %s ", commonCloudProperties().getImageCatalogName()));
-            Log.log(LOGGER, format(" Image Catalog URL: %s ", commonCloudProperties().getImageCatalogUrl()));
-            Log.log(LOGGER, format(" Image ID for SDX create: %s ", yarnProperties.getBaseimage().getImageId()));
-            return yarnProperties.getBaseimage().getImageId();
+            return getLatestBaseImageID();
         }
+    }
+
+    @Override
+    public String getLatestBaseImageID() {
+        Log.log(LOGGER, format(" Image Catalog Name: %s ", commonCloudProperties().getImageCatalogName()));
+        Log.log(LOGGER, format(" Image Catalog URL: %s ", commonCloudProperties().getImageCatalogUrl()));
+        Log.log(LOGGER, format(" Image ID for SDX create: %s ", yarnProperties.getBaseimage().getImageId()));
+        return yarnProperties.getBaseimage().getImageId();
     }
 
     private <T> T throwNotImplementedException() {

@@ -212,7 +212,7 @@ public class StackCreatorService {
             Blueprint blueprint = measure(() ->
                 determineBlueprint(stackRequest, workspace),
                 LOGGER,
-                "Stack request converted to stack took {} ms for stack {}", stackName);
+                "Blueprint determined in {} ms for stack {}", stackName);
             Future<StatedImage> imgFromCatalogFuture = determineImageCatalog(stackName, platformString, stackRequest, blueprint, user, workspace);
             hueWorkaroundValidatorService.validateForStackRequest(getHueHostGroups(blueprint.getBlueprintText()), stackStub.getName());
 
