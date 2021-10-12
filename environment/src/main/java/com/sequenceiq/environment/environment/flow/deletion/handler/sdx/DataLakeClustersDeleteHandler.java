@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.ExceptionResponse;
 import com.sequenceiq.environment.environment.dto.EnvironmentDeletionDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
@@ -66,7 +67,7 @@ public class DataLakeClustersDeleteHandler extends EventSenderAwareHandler<Envir
             }
             EnvClusterDeleteFailedEvent failedEvent = EnvClusterDeleteFailedEvent.builder()
                     .withEnvironmentID(environmentDto.getId())
-                    .withException(e)
+                    .withException(new BadRequestException(message))
                     .withResourceCrn(environmentDto.getResourceCrn())
                     .withResourceName(environmentDto.getName())
                     .withMessage(message)
