@@ -52,13 +52,13 @@ public class MultiAzValidator {
         Iterable<InstanceGroup> instanceGroups,
         ValidationResult.ValidationResultBuilder validationBuilder) {
         Set<String> allSubnetIds = collectSubnetIds(instanceGroups);
-        if (allSubnetIds.size() > 1 && supportedVariant(variant)) {
+        if (allSubnetIds.size() > 1 && !supportedVariant(variant)) {
                 validationBuilder.error(String.format("Multiple Availability Zone feature is not supported for %s variant", variant));
         }
     }
 
     public boolean supportedVariant(String variant) {
-        return !Strings.isNullOrEmpty(variant) && !supportedMultiAzVariants.contains(variant);
+        return !Strings.isNullOrEmpty(variant) && supportedMultiAzVariants.contains(variant);
     }
 
     public boolean supportedForInstanceMetadataGeneration(InstanceGroup instanceGroup) {

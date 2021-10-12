@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -48,6 +49,18 @@ public class MultiAzValidatorTest {
         );
         underTest.validateMultiAzForStack(variant, instanceGroups, builder);
         Mockito.verify(builder, Mockito.times(0)).error(anyString());
+    }
+
+    @Test
+    public void testSupportedVariantWhenAwsNative() {
+        boolean result = underTest.supportedVariant("AWS_NATIVE");
+        Assertions.assertTrue(result);
+    }
+
+    @Test
+    public void testSupportedVariantWhenAwsLegacy() {
+        boolean result = underTest.supportedVariant("AWS");
+        Assertions.assertFalse(result);
     }
 
     @Test
