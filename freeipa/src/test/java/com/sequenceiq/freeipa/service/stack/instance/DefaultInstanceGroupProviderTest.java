@@ -53,7 +53,7 @@ class DefaultInstanceGroupProviderTest {
 
     @Test
     void createDefaultTemplateTestNoVolumeEncryptionWhenAzure() {
-        Template result = underTest.createDefaultTemplate(CloudPlatform.AZURE, ACCOUNT_ID, null, null);
+        Template result = underTest.createDefaultTemplate(CloudPlatform.AZURE, ACCOUNT_ID, null, null, null);
 
         assertThat(result).isNotNull();
         assertThat(result.getAttributes()).isNull();
@@ -61,7 +61,7 @@ class DefaultInstanceGroupProviderTest {
 
     @Test
     void createDefaultTemplateTestVolumeEncryptionAddedWhenAzure() {
-        Template result = underTest.createDefaultTemplate(CloudPlatform.AZURE, ACCOUNT_ID, "dummyDiskEncryptionSet", null);
+        Template result = underTest.createDefaultTemplate(CloudPlatform.AZURE, ACCOUNT_ID, "dummyDiskEncryptionSet", null, null);
 
         assertThat(result).isNotNull();
         Json attributes = result.getAttributes();
@@ -71,9 +71,9 @@ class DefaultInstanceGroupProviderTest {
     }
 
     @Test
-    void createDefaultTemplateTestVolumeEncryptionAddedWhenAws() {
+    void createDefaultTemplateTestDefaultVolumeEncryptionAddedWhenAwsCustomEncryptionKeyIsAbsent() {
 
-        Template result = underTest.createDefaultTemplate(CloudPlatform.AWS, ACCOUNT_ID, null, null);
+        Template result = underTest.createDefaultTemplate(CloudPlatform.AWS, ACCOUNT_ID, null, null, null);
 
         assertThat(result).isNotNull();
         Json attributes = result.getAttributes();
@@ -83,8 +83,20 @@ class DefaultInstanceGroupProviderTest {
     }
 
     @Test
+    void createDefaultTemplateTestCustomVolumeEncryptionWhenEncryptionIsPresent() {
+
+        Template result = underTest.createDefaultTemplate(CloudPlatform.AWS, ACCOUNT_ID, null, null, "dummyAwsEncryptionKey");
+
+        assertThat(result).isNotNull();
+        Json attributes = result.getAttributes();
+        assertThat(attributes).isNotNull();
+        assertThat(attributes.<Object>getValue(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED)).isEqualTo(Boolean.TRUE);
+        assertThat(attributes.<Object>getValue(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE)).isEqualTo(EncryptionType.CUSTOM.name());
+    }
+
+    @Test
     void createDefaultTemplateTestVolumeEncryptionAddedWhenGcp() {
-        Template result = underTest.createDefaultTemplate(CloudPlatform.GCP, ACCOUNT_ID, null, "dummyEncryptionKey");
+        Template result = underTest.createDefaultTemplate(CloudPlatform.GCP, ACCOUNT_ID, null, "dummyEncryptionKey", null);
 
         assertThat(result).isNotNull();
         Json attributes = result.getAttributes();

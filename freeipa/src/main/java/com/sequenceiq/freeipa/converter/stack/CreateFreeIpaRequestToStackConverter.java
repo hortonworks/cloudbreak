@@ -2,6 +2,7 @@ package com.sequenceiq.freeipa.converter.stack;
 
 import static com.gs.collections.impl.utility.StringIterate.isEmpty;
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
+import static com.sequenceiq.freeipa.util.CloudArgsForIgConverter.AWS_KMS_ENCRYPTION_KEY;
 import static com.sequenceiq.freeipa.util.CloudArgsForIgConverter.DISK_ENCRYPTION_SET_ID;
 import static com.sequenceiq.freeipa.util.CloudArgsForIgConverter.GCP_KMS_ENCRYPTION_KEY;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
@@ -43,6 +44,8 @@ import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagGenerationRequest;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
 import com.sequenceiq.common.api.type.Tunnel;
+import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsDiskEncryptionParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpEnvironmentParameters;
@@ -282,12 +285,19 @@ public class CreateFreeIpaRequestToStackConverter {
                 .map(GcpResourceEncryptionParameters::getEncryptionKey)
                 .orElse(null);
 
+        String awsKmsEncryptionKey = Optional.of(environment)
+                .map(DetailedEnvironmentResponse::getAws)
+                .map(AwsEnvironmentParameters::getAwsDiskEncryptionParameters)
+                .map(AwsDiskEncryptionParameters::getEncryptionKeyArn)
+                .orElse(null);
+
         Set<InstanceGroup> convertedSet = new HashSet<>();
 
         EnumMap<CloudArgsForIgConverter, String> cloudArgsForIgConverterMap = new EnumMap<>(CloudArgsForIgConverter.class);
 
         cloudArgsForIgConverterMap.put(DISK_ENCRYPTION_SET_ID, diskEncryptionSetId);
         cloudArgsForIgConverterMap.put(GCP_KMS_ENCRYPTION_KEY, gcpKmsEncryptionKey);
+        cloudArgsForIgConverterMap.put(AWS_KMS_ENCRYPTION_KEY, awsKmsEncryptionKey);
 
         source.getInstanceGroups().stream()
                 .map(ig -> {

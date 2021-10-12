@@ -8,13 +8,10 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.KeyEncryptionMethod;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AwsInstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AzureInstanceTemplate;
@@ -35,7 +32,6 @@ import com.sequenceiq.freeipa.service.stack.instance.DefaultInstanceTypeProvider
 
 @Component
 public class InstanceTemplateRequestToTemplateConverter {
-    private static final Logger LOGGER = LoggerFactory.getLogger(InstanceTemplateRequestToTemplateConverter.class);
 
     @Inject
     private MissingResourceNameGenerator missingResourceNameGenerator;
@@ -49,11 +45,8 @@ public class InstanceTemplateRequestToTemplateConverter {
     @Inject
     private DefaultInstanceTypeProvider defaultInstanceTypeProvider;
 
-    @Inject
-    private EntitlementService entitlementService;
-
     public Template convert(InstanceTemplateRequest source, CloudPlatform cloudPlatform, String accountId,
-            String diskEncryptionSetId, String gcpKmsEncryptionKey) {
+            String diskEncryptionSetId, String gcpKmsEncryptionKey, String awsKmsEncryptionKey) {
         Template template = new Template();
         template.setName(missingResourceNameGenerator.generateName(APIResourceType.TEMPLATE));
         template.setStatus(ResourceStatus.USER_MANAGED);
@@ -61,9 +54,14 @@ public class InstanceTemplateRequestToTemplateConverter {
         template.setInstanceType(Objects.requireNonNullElse(source.getInstanceType(), defaultInstanceTypeProvider.getForPlatform(cloudPlatform.name())));
         Map<String, Object> attributes = new HashMap<>();
         if (cloudPlatform == CloudPlatform.AWS) {
-            // FIXME Enable EBS encryption with appropriate KMS key
-            attributes.put(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, Boolean.TRUE);
-            attributes.put(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.DEFAULT.name());
+            if (awsKmsEncryptionKey != null) {
+                attributes.put(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, Boolean.TRUE);
+                attributes.put(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.CUSTOM.name());
+                attributes.put(InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID, awsKmsEncryptionKey);
+            } else {
+                attributes.put(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, Boolean.TRUE);
+                attributes.put(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.DEFAULT.name());
+            }
         }
         Optional.ofNullable(source.getAws())
                 .map(AwsInstanceTemplateParameters::getSpot)

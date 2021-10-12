@@ -1,5 +1,5 @@
 package com.sequenceiq.freeipa.util;
 
 public enum CloudArgsForIgConverter {
-    DISK_ENCRYPTION_SET_ID, GCP_KMS_ENCRYPTION_KEY
+    DISK_ENCRYPTION_SET_ID, GCP_KMS_ENCRYPTION_KEY, AWS_KMS_ENCRYPTION_KEY
 }

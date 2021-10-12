@@ -47,6 +47,8 @@ import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Paramete
 import com.sequenceiq.common.api.type.EncryptionType;
 import com.sequenceiq.common.model.CloudIdentityType;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
+import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsDiskEncryptionParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpEnvironmentParameters;
@@ -85,6 +87,8 @@ public class StackRequestManifesterTest {
     private static final String ACCOUNT_ID = UUID.randomUUID().toString();
 
     private static final String ENCRYPTION_KEY = "mykey";
+
+    private static final String AWS_ENCRYPTION_KEY = "dummyAwsKey";
 
     @Mock
     private GrpcIdbmmsClient idbmmsClient;
@@ -497,6 +501,24 @@ public class StackRequestManifesterTest {
         underTest.setupInstanceVolumeEncryption(stackV4Request, envResponse);
 
         verifyAwsEncryption(instanceTemplateV4Request, EncryptionType.DEFAULT);
+    }
+
+    @Test
+    void setupInstanceVolumeEncryptionTestWhenAwsAndCustomEncryptionParameters() {
+        DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
+        envResponse.setCloudPlatform(CloudPlatform.AWS.name());
+        envResponse.setAws(AwsEnvironmentParameters.builder()
+                .withAwsDiskEncryptionParameters(AwsDiskEncryptionParameters.builder()
+                        .withEncryptionKeyArn(AWS_ENCRYPTION_KEY)
+                        .build())
+                .build());
+        InstanceGroupV4Request instanceGroupV4Request = createInstanceGroupV4Request();
+        when(stackV4Request.getInstanceGroups()).thenReturn(List.of(instanceGroupV4Request));
+
+        underTest.setupInstanceVolumeEncryption(stackV4Request, envResponse);
+
+        verifyAwsEncryption(instanceGroupV4Request.getTemplate(), EncryptionType.CUSTOM, AWS_ENCRYPTION_KEY);
+
     }
 
     static Object[][] encryptionTypeDataProvider() {
