@@ -6,14 +6,19 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup;
@@ -49,10 +54,13 @@ import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.common.api.type.ResourceType;
 
 public class AwsLaunchTemplateUpdateServiceTest {
-
     private static final Long WORKSPACE_ID = 1L;
 
     private static final String IMAGE_NAME = "imageName";
+
+    private static final String DESCRIPTION = "description";
+
+    private static final String USER_DATA = Base64.getEncoder().encodeToString("userdata".getBytes());
 
     @Mock
     private AwsCloudFormationClient awsClient;
@@ -77,6 +85,9 @@ public class AwsLaunchTemplateUpdateServiceTest {
 
     @InjectMocks
     private AwsLaunchTemplateUpdateService underTest;
+
+    @Captor
+    private ArgumentCaptor<CreateLaunchTemplateVersionRequest> argumentCaptor;
 
     private AuthenticatedContext ac;
 
@@ -119,7 +130,7 @@ public class AwsLaunchTemplateUpdateServiceTest {
         when(cloudFormationClient.getTemplate(any())).thenReturn(new GetTemplateResult().withTemplateBody(cfTemplateBody));
 
         Map<AutoScalingGroup, String> autoScalingGroupsResult = createAutoScalingGroupHandler();
-        when(autoScalingGroupHandler.getAutoScalingGroups(cloudFormationClient, autoScalingClient, cfResource)).thenReturn(autoScalingGroupsResult);
+        when(autoScalingGroupHandler.getAutoScalingGroups(cloudFormationClient, autoScalingClient, cfResource.getName())).thenReturn(autoScalingGroupsResult);
         when(ec2Client.createLaunchTemplateVersion(any(CreateLaunchTemplateVersionRequest.class))).thenReturn(new CreateLaunchTemplateVersionResult()
                 .withLaunchTemplateVersion(new LaunchTemplateVersion().withVersionNumber(1L)));
         when(ec2Client.modifyLaunchTemplate(any(ModifyLaunchTemplateRequest.class))).thenReturn(new ModifyLaunchTemplateResult());
@@ -128,7 +139,70 @@ public class AwsLaunchTemplateUpdateServiceTest {
         // WHEN
         underTest.updateFields(ac, cfResource.getName(), Map.of(LaunchTemplateField.IMAGE_ID, stack.getImage().getImageName()));
 
-        // THEN no exception
+        // THEN
+        Mockito.verify(ec2Client).createLaunchTemplateVersion(argumentCaptor.capture());
+        CreateLaunchTemplateVersionRequest request = argumentCaptor.getValue();
+        Assertions.assertEquals(stack.getImage().getImageName(), request.getLaunchTemplateData().getImageId());
+    }
+
+    @Test
+    public void testUpdateFieldsUpdatesTheAppropriateParams() throws IOException {
+        // GIVEN
+        String cfStackName = "cf";
+        CloudResource cfResource = CloudResource.builder()
+                .type(ResourceType.CLOUDFORMATION_STACK)
+                .name(cfStackName)
+                .build();
+
+        String template = FileReaderUtils.readFileFromClasspath("json/aws-cf-template.json");
+        String cfTemplateBody = JsonUtil.minify(String.format(template, "{\"Ref\":\"AMI\"}"));
+        when(cloudFormationClient.getTemplate(any())).thenReturn(new GetTemplateResult().withTemplateBody(cfTemplateBody));
+
+        Map<AutoScalingGroup, String> autoScalingGroupsResult = createAutoScalingGroupHandler();
+        when(autoScalingGroupHandler.getAutoScalingGroups(cloudFormationClient, autoScalingClient, cfResource.getName())).thenReturn(autoScalingGroupsResult);
+        Map<LaunchTemplateField, String> updatableFieldMap = Map.of(LaunchTemplateField.IMAGE_ID, stack.getImage().getImageName(),
+                LaunchTemplateField.DESCRIPTION, DESCRIPTION, LaunchTemplateField.USER_DATA, USER_DATA);
+        when(ec2Client.createLaunchTemplateVersion(any(CreateLaunchTemplateVersionRequest.class))).thenReturn(new CreateLaunchTemplateVersionResult()
+                .withLaunchTemplateVersion(new LaunchTemplateVersion().withVersionNumber(1L)));
+        // WHEN
+        underTest.updateFields(ac, cfResource.getName(), updatableFieldMap);
+
+        // THEN
+        Mockito.verify(ec2Client).createLaunchTemplateVersion(argumentCaptor.capture());
+        CreateLaunchTemplateVersionRequest request = argumentCaptor.getValue();
+        Assertions.assertEquals(stack.getImage().getImageName(), request.getLaunchTemplateData().getImageId());
+        Assertions.assertEquals(USER_DATA, request.getLaunchTemplateData().getUserData());
+        Assertions.assertEquals(DESCRIPTION, request.getVersionDescription());
+    }
+
+    @Test
+    public void testUpdateFieldsUpdatesWithMissingParams() throws IOException {
+        // GIVEN
+        String cfStackName = "cf";
+        CloudResource cfResource = CloudResource.builder()
+                .type(ResourceType.CLOUDFORMATION_STACK)
+                .name(cfStackName)
+                .build();
+
+        String template = FileReaderUtils.readFileFromClasspath("json/aws-cf-template.json");
+        String cfTemplateBody = JsonUtil.minify(String.format(template, "{\"Ref\":\"AMI\"}"));
+        when(cloudFormationClient.getTemplate(any())).thenReturn(new GetTemplateResult().withTemplateBody(cfTemplateBody));
+
+        Map<AutoScalingGroup, String> autoScalingGroupsResult = createAutoScalingGroupHandler();
+        when(autoScalingGroupHandler.getAutoScalingGroups(cloudFormationClient, autoScalingClient, cfResource.getName())).thenReturn(autoScalingGroupsResult);
+        Map<LaunchTemplateField, String> updatableFieldMap = Map.of(LaunchTemplateField.IMAGE_ID, stack.getImage().getImageName(),
+                LaunchTemplateField.DESCRIPTION, DESCRIPTION);
+        when(ec2Client.createLaunchTemplateVersion(any(CreateLaunchTemplateVersionRequest.class))).thenReturn(new CreateLaunchTemplateVersionResult()
+                .withLaunchTemplateVersion(new LaunchTemplateVersion().withVersionNumber(1L)));
+        // WHEN
+        underTest.updateFields(ac, cfResource.getName(), updatableFieldMap);
+
+        // THEN
+        Mockito.verify(ec2Client).createLaunchTemplateVersion(argumentCaptor.capture());
+        CreateLaunchTemplateVersionRequest request = argumentCaptor.getValue();
+        Assertions.assertEquals(stack.getImage().getImageName(), request.getLaunchTemplateData().getImageId());
+        Assertions.assertEquals(DESCRIPTION, request.getVersionDescription());
+        Assertions.assertNull(request.getLaunchTemplateData().getUserData());
     }
 
     @Test
