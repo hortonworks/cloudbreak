@@ -2,7 +2,7 @@ package com.sequenceiq.freeipa.converter.image;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.freeipa.api.model.image.Image;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
 import com.sequenceiq.freeipa.entity.ImageEntity;
 
 @Component

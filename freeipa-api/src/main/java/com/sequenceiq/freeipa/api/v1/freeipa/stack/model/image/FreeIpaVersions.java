@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.api.model.image;
+package com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image;
 
 import java.util.List;
 import java.util.Optional;
@@ -10,6 +10,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class FreeIpaVersions {
 
+    private static final String IMAGES_PROPERTY = "images";
+
     private final List<String> versions;
 
     private final List<String> defaults;
@@ -20,7 +22,7 @@ public class FreeIpaVersions {
     public FreeIpaVersions(
             @JsonProperty("versions") List<String> versions,
             @JsonProperty("defaults") List<String> defaults,
-            @JsonProperty("images") List<String> imageIds) {
+            @JsonProperty(IMAGES_PROPERTY) List<String> imageIds) {
         this.versions = Optional.ofNullable(versions).orElse(List.of());
         this.defaults = Optional.ofNullable(defaults).orElse(List.of());
         this.imageIds = Optional.ofNullable(imageIds).orElse(List.of());
@@ -34,6 +36,7 @@ public class FreeIpaVersions {
         return defaults;
     }
 
+    @JsonProperty(IMAGES_PROPERTY)
     public List<String> getImageIds() {
         return imageIds;
     }

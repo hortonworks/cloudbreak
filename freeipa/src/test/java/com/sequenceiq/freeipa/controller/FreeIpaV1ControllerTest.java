@@ -38,6 +38,7 @@ import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.controller.validation.AttachChildEnvironmentRequestValidator;
 import com.sequenceiq.freeipa.controller.validation.CreateFreeIpaRequestValidator;
 import com.sequenceiq.freeipa.service.freeipa.cert.root.FreeIpaRootCertificateService;
+import com.sequenceiq.freeipa.service.image.ImageCatalogGeneratorService;
 import com.sequenceiq.freeipa.service.stack.ChildEnvironmentService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaCreationService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaDeletionService;
@@ -88,6 +89,9 @@ class FreeIpaV1ControllerTest {
 
     @Mock
     private FreeIpaFiltering freeIpaFiltering;
+
+    @Mock
+    private ImageCatalogGeneratorService imageCatalogGeneratorService;
 
     @BeforeEach
     void setUp() {
@@ -223,5 +227,14 @@ class FreeIpaV1ControllerTest {
 
         underTest.repairInstances(request);
         verify(repairInstancesService, times(1)).repairInstances(crnService.getCurrentAccountId(), request);
+    }
+
+    @Test
+    void generateImageCatalog() {
+        when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
+
+        underTest.generateImageCatalog(ENVIRONMENT_CRN);
+
+        verify(imageCatalogGeneratorService).generate(ENVIRONMENT_CRN, ACCOUNT_ID);
     }
 }

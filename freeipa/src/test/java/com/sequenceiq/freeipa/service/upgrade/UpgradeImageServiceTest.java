@@ -17,8 +17,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.freeipa.api.model.image.Image;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
 import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.model.ImageInfoResponse;
 import com.sequenceiq.freeipa.dto.ImageWrapper;
 import com.sequenceiq.freeipa.entity.ImageEntity;
@@ -39,7 +39,7 @@ class UpgradeImageServiceTest {
     public void testSelectImage() {
         Stack stack = new Stack();
         ImageSettingsRequest imageSettingsRequest = new ImageSettingsRequest();
-        Image image = new Image("now", "desc", "linux", "1234-456", Map.of(), "magicOs");
+        Image image = createImage("now");
         ImageWrapper imageWrapper = new ImageWrapper(image, "catalogURL", "catalogName");
         when(imageService.fetchImageWrapperAndName(stack, imageSettingsRequest)).thenReturn(Pair.of(imageWrapper, "imageName"));
 
@@ -77,7 +77,7 @@ class UpgradeImageServiceTest {
     public void testFindTargetImages() {
         Stack stack = new Stack();
         ImageSettingsRequest imageSettingsRequest = new ImageSettingsRequest();
-        Image image = new Image("2021-09-01", "desc", "linux", "1234-456", Map.of(), "magicOs");
+        Image image = createImage("2021-09-01");
         ImageWrapper imageWrapper = new ImageWrapper(image, "catalogURL", "catalogName");
         when(imageService.fetchImagesWrapperAndName(stack, imageSettingsRequest)).thenReturn(List.of(Pair.of(imageWrapper, "imageName")));
 
@@ -100,7 +100,7 @@ class UpgradeImageServiceTest {
     public void testFindTargetImagesNoNewerImage() {
         Stack stack = new Stack();
         ImageSettingsRequest imageSettingsRequest = new ImageSettingsRequest();
-        Image image = new Image("2021-07-01", "desc", "linux", "1234-456", Map.of(), "magicOs");
+        Image image = createImage("2021-07-01");
         ImageWrapper imageWrapper = new ImageWrapper(image, "catalogURL", "catalogName");
         when(imageService.fetchImagesWrapperAndName(stack, imageSettingsRequest)).thenReturn(List.of(Pair.of(imageWrapper, "imageName")));
 
@@ -117,7 +117,7 @@ class UpgradeImageServiceTest {
     public void testFindTargetImagesImageWithSameId() {
         Stack stack = new Stack();
         ImageSettingsRequest imageSettingsRequest = new ImageSettingsRequest();
-        Image image = new Image("2021-09-01", "desc", "linux", "1234-456", Map.of(), "magicOs");
+        Image image = createImage("2021-09-01");
         ImageWrapper imageWrapper = new ImageWrapper(image, "catalogURL", "catalogName");
         when(imageService.fetchImagesWrapperAndName(stack, imageSettingsRequest)).thenReturn(List.of(Pair.of(imageWrapper, "imageName")));
 
@@ -136,11 +136,11 @@ class UpgradeImageServiceTest {
         stack.setCloudPlatform("AWS");
         stack.setRegion("reg");
         ImageSettingsRequest imageSettingsRequest = new ImageSettingsRequest();
-        Image image = new Image("2021-09-01", "desc", "linux", "1234-456", Map.of(), "magicOs");
+        Image image = createImage("2021-09-01");
         ImageWrapper imageWrapper = new ImageWrapper(image, "catalogURL", "catalogName");
         when(imageService.fetchImagesWrapperAndName(stack, imageSettingsRequest)).thenReturn(List.of(Pair.of(imageWrapper, "imageName")));
         ArgumentCaptor<ImageSettingsRequest> captor = ArgumentCaptor.forClass(ImageSettingsRequest.class);
-        Image currentImageFromCatalog = new Image("2021-08-01", "desc", "linux", "222-333", Map.of(), "magicOs");
+        Image currentImageFromCatalog = createImage("2021-08-01");
         ImageWrapper currentImageWrapperFromCatalog = new ImageWrapper(currentImageFromCatalog, "asdf", "Asdf");
         when(imageService.getImage(captor.capture(), eq(stack.getRegion()), eq(stack.getCloudPlatform().toLowerCase())))
                 .thenReturn(currentImageWrapperFromCatalog);
@@ -172,11 +172,11 @@ class UpgradeImageServiceTest {
         stack.setCloudPlatform("AWS");
         stack.setRegion("reg");
         ImageSettingsRequest imageSettingsRequest = new ImageSettingsRequest();
-        Image image = new Image("2021-09-01", "desc", "linux", "1234-456", Map.of(), "magicOs");
+        Image image = createImage("2021-09-01");
         ImageWrapper imageWrapper = new ImageWrapper(image, "catalogURL", "catalogName");
         when(imageService.fetchImagesWrapperAndName(stack, imageSettingsRequest)).thenReturn(List.of(Pair.of(imageWrapper, "imageName")));
         ArgumentCaptor<ImageSettingsRequest> captor = ArgumentCaptor.forClass(ImageSettingsRequest.class);
-        Image currentImageFromCatalog = new Image(null, "desc", "linux", "222-333", Map.of(), "magicOs");
+        Image currentImageFromCatalog = createImage(null);
         ImageWrapper currentImageWrapperFromCatalog = new ImageWrapper(currentImageFromCatalog, "asdf", "Asdf");
         when(imageService.getImage(captor.capture(), eq(stack.getRegion()), eq(stack.getCloudPlatform().toLowerCase())))
                 .thenReturn(currentImageWrapperFromCatalog);
@@ -201,7 +201,7 @@ class UpgradeImageServiceTest {
         stack.setCloudPlatform("AWS");
         stack.setRegion("reg");
         ImageSettingsRequest imageSettingsRequest = new ImageSettingsRequest();
-        Image image = new Image("2021-09-01", "desc", "linux", "1234-456", Map.of(), "magicOs");
+        Image image = createImage("2021-09-01");
         ImageWrapper imageWrapper = new ImageWrapper(image, "catalogURL", "catalogName");
         when(imageService.fetchImagesWrapperAndName(stack, imageSettingsRequest)).thenReturn(List.of(Pair.of(imageWrapper, "imageName")));
         ArgumentCaptor<ImageSettingsRequest> captor = ArgumentCaptor.forClass(ImageSettingsRequest.class);
@@ -226,9 +226,9 @@ class UpgradeImageServiceTest {
     public void testFindTargetImagesImageWithWrongDateFormatIgnored() {
         Stack stack = new Stack();
         ImageSettingsRequest imageSettingsRequest = new ImageSettingsRequest();
-        Image image = new Image("2021-09-01", "desc", "linux", "1234-456", Map.of(), "magicOs");
+        Image image = createImage("2021-09-01");
         ImageWrapper imageWrapper = new ImageWrapper(image, "catalogURL", "catalogName");
-        Image image2 = new Image("20210901", "desc", "linux", "1234-789", Map.of(), "magicOs");
+        Image image2 = createImage("20210901");
         ImageWrapper imageWrapper2 = new ImageWrapper(image2, "catalogURL", "catalogName");
         when(imageService.fetchImagesWrapperAndName(stack, imageSettingsRequest))
                 .thenReturn(List.of(Pair.of(imageWrapper, "imageName"), Pair.of(imageWrapper2, "imageName2")));
@@ -246,5 +246,9 @@ class UpgradeImageServiceTest {
         assertEquals(image.getDate(), imageInfoResponse.getDate());
         assertEquals(image.getUuid(), imageInfoResponse.getId());
         assertEquals(image.getOs(), imageInfoResponse.getOs());
+    }
+
+    private Image createImage(String date) {
+        return new Image(123L, date, "desc", "linux", "1234-456", Map.of(), "magicOs", Map.of());
     }
 }

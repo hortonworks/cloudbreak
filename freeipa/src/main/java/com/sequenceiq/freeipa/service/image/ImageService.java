@@ -2,6 +2,7 @@ package com.sequenceiq.freeipa.service.image;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -14,7 +15,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.freeipa.api.model.image.Image;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.FreeIpaVersions;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.ImageCatalog;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Images;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Versions;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
 import com.sequenceiq.freeipa.converter.image.ImageToImageEntityConverter;
 import com.sequenceiq.freeipa.dto.ImageWrapper;
@@ -43,6 +48,9 @@ public class ImageService {
 
     @Value("${freeipa.image.catalog.default.os}")
     private String defaultOs;
+
+    @Value("${info.app.version:}")
+    private String freeIpaVersion;
 
     public ImageEntity create(Stack stack, ImageSettingsRequest imageRequest) {
         Pair<ImageWrapper, String> imageWrapperAndNamePair = fetchImageWrapperAndName(stack, imageRequest);
@@ -148,7 +156,7 @@ public class ImageService {
                     .or(() -> findStringKeyWithEqualsIgnoreCase(DEFAULT_REGION, imagesByRegion))
                     .orElseThrow(() -> new ImageNotFoundException(
                             String.format("Virtual machine image couldn't be found in image: '%s' for the selected platform: '%s' and region: '%s'.",
-                            imgFromCatalog, platformString, region)));
+                                    imgFromCatalog, platformString, region)));
         } else {
             String msg = String.format("The selected image: '%s' doesn't contain virtual machine image for the selected platform: '%s'.",
                     imgFromCatalog, platformString);
@@ -167,5 +175,28 @@ public class ImageService {
         LOGGER.warn("Image not found in refreshed image catalog, by parameters: imageid: {}, region: {}, imageOs: {}", imageId, region, imageOs);
         String message = String.format("Could not find any image with id: '%s' in region '%s' with OS '%s'.", imageId, region, imageOs);
         return new ImageNotFoundException(message);
+    }
+
+    public ImageCatalog generateImageCatalogForStack(Stack stack) {
+        final Image image = getImageForStack(stack);
+        final Images images = new Images(List.of(image));
+        final FreeIpaVersions freeIpaVersions = new FreeIpaVersions(List.of(freeIpaVersion), List.of(image.getUuid()), List.of(image.getUuid()));
+
+        return new ImageCatalog(images, new Versions(List.of(freeIpaVersions)));
+    }
+
+    private Image getImageForStack(Stack stack) {
+        final ImageEntity imageEntity = getByStack(stack);
+        final ImageSettingsRequest imageSettings = imageEntityToImageSettingsRequest(imageEntity);
+        final ImageWrapper imageWrapper = getImage(imageSettings, stack.getRegion(), stack.getCloudPlatform().toLowerCase());
+
+        return imageWrapper.getImage();
+    }
+
+    private ImageSettingsRequest imageEntityToImageSettingsRequest(ImageEntity imageEntity) {
+        final ImageSettingsRequest imageSettings = new ImageSettingsRequest();
+        imageSettings.setCatalog(Objects.requireNonNullElse(imageEntity.getImageCatalogName(), imageEntity.getImageCatalogUrl()));
+        imageSettings.setId(imageEntity.getImageId());
+        return imageSettings;
     }
 }

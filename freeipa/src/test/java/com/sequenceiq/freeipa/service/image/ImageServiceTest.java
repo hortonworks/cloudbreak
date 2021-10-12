@@ -1,12 +1,16 @@
 package com.sequenceiq.freeipa.service.image;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.hamcrest.CoreMatchers;
@@ -15,12 +19,17 @@ import org.hibernate.envers.AuditReader;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.util.ReflectionUtils;
 
-import com.sequenceiq.freeipa.api.model.image.Image;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsBase;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.FreeIpaVersions;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.ImageCatalog;
 import com.sequenceiq.freeipa.dto.ImageWrapper;
 import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -45,6 +54,8 @@ public class ImageServiceTest {
 
     private static final String IMAGE_UUID = "UUID";
 
+    private static final String FREEIPA_VERSION = "2.49.0";
+
     @Mock
     private ImageProviderFactory imageProviderFactory;
 
@@ -62,6 +73,9 @@ public class ImageServiceTest {
 
     @Mock
     private Image image;
+
+    @Captor
+    private ArgumentCaptor<ImageSettingsRequest> imageSettingsRequestCaptor;
 
     @Test
     public void tesDetermineImageNameFound() {
@@ -141,5 +155,40 @@ public class ImageServiceTest {
         assertEquals(IMAGE_CATALOG, revertedImage.getImageCatalogName());
         assertEquals(IMAGE_CATALOG_URL, revertedImage.getImageCatalogUrl());
         assertEquals(EXISTING_ID, revertedImage.getImageName());
+    }
+
+    @Test
+    void testGenerateForStack() throws NoSuchFieldException {
+        ReflectionUtils.setField(ImageService.class.getDeclaredField("freeIpaVersion"), underTest, FREEIPA_VERSION);
+
+        Stack stack = new Stack();
+        stack.setRegion(DEFAULT_REGION);
+        stack.setCloudPlatform(DEFAULT_PLATFORM);
+        ImageEntity imageEntity = new ImageEntity();
+        imageEntity.setImageId(IMAGE_UUID);
+        imageEntity.setOs(DEFAULT_OS);
+        imageEntity.setImageCatalogName(IMAGE_CATALOG);
+        imageEntity.setImageCatalogUrl(IMAGE_CATALOG_URL);
+        when(imageRepository.getByStack(stack)).thenReturn(imageEntity);
+
+        when(imageProviderFactory.getImageProvider(IMAGE_CATALOG)).thenReturn(imageProvider);
+        Image image = new Image(123L, "now", "desc", DEFAULT_OS, IMAGE_UUID, Map.of(), "os", Map.of());
+        ImageWrapper imageWrapper = new ImageWrapper(image, IMAGE_CATALOG_URL, IMAGE_CATALOG);
+        when(imageProvider.getImage(any(), any(), any())).thenReturn(Optional.of(imageWrapper));
+
+        ImageCatalog result = underTest.generateImageCatalogForStack(stack);
+
+        verify(imageProvider).getImage(imageSettingsRequestCaptor.capture(), eq(DEFAULT_REGION), eq(DEFAULT_PLATFORM));
+        assertThat(imageSettingsRequestCaptor.getValue())
+                .returns(IMAGE_CATALOG, ImageSettingsBase::getCatalog)
+                .returns(IMAGE_UUID, ImageSettingsBase::getId);
+
+        assertThat(result.getImages().getFreeipaImages())
+                .containsExactly(image);
+        assertThat(result.getVersions().getFreeIpaVersions())
+                .singleElement()
+                .returns(List.of(FREEIPA_VERSION), FreeIpaVersions::getVersions)
+                .returns(List.of(IMAGE_UUID), FreeIpaVersions::getImageIds)
+                .returns(List.of(IMAGE_UUID), FreeIpaVersions::getDefaults);
     }
 }

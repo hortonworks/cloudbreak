@@ -1,6 +1,6 @@
 package com.sequenceiq.freeipa.dto;
 
-import com.sequenceiq.freeipa.api.model.image.Image;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
 
 public class ImageWrapper {
 

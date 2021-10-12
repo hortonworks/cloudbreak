@@ -19,9 +19,9 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.freeipa.TestUtil;
-import com.sequenceiq.freeipa.api.model.image.FreeIpaVersions;
-import com.sequenceiq.freeipa.api.model.image.Image;
-import com.sequenceiq.freeipa.api.model.image.ImageCatalog;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.FreeIpaVersions;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.ImageCatalog;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ImageCatalogProviderTest {
@@ -57,7 +57,7 @@ public class ImageCatalogProviderTest {
         ReflectionTestUtils.setField(underTest, "enabledLinuxTypes", Collections.emptyList());
 
         ImageCatalog catalog = underTest.getImageCatalog(IMAGE_CATALOG_JSON);
-        List<com.sequenceiq.freeipa.api.model.image.Image> images = catalog.getImages().getFreeipaImages();
+        List<com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image> images = catalog.getImages().getFreeipaImages();
         assertEquals(4, images.size());
         assertEquals("61851893-8340-411d-afb7-e1b55107fb10", images.get(0).getUuid());
 

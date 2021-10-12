@@ -1,0 +1,63 @@
+{
+  "images": {
+    "freeipa-images": [
+      {
+        "created": 1633952426,
+        "date": "2021-10-11",
+        "description": "Official Cloudbreak image",
+        "os": "centos7",
+        "uuid": "f377c56e-9ad8-47fe-9b53-c3a554500897",
+        "images": {
+          "aws": {
+            "af-south-1": "ami-025b004a8fd7f243a",
+            "ap-northeast-1": "ami-06fe46bb49d304fc1",
+            "ap-northeast-2": "ami-0559ec785867d0bfb",
+            "ap-south-1": "ami-05dde3defc0fd826f",
+            "ap-southeast-1": "ami-0001505ad62ce9faa",
+            "ap-southeast-2": "ami-0b042120ee2be9c7d",
+            "ca-central-1": "ami-02ab8a208cf4f4c51",
+            "eu-central-1": "ami-0e671d06666b4d3f5",
+            "eu-north-1": "ami-0797a196cf7868a6a",
+            "eu-south-1": "ami-0d08585cdf60b9f11",
+            "eu-west-1": "ami-0bdc85d6427edfae4",
+            "eu-west-2": "ami-03e9ec920d203e64d",
+            "eu-west-3": "ami-0142a560c0eb69457",
+            "me-south-1": "ami-03cc53a1e6142d84f",
+            "sa-east-1": "ami-06a17b3e9ee35a780",
+            "us-east-1": "ami-062bc2e3c1f632af6",
+            "us-east-2": "ami-0181d6b939697b36c",
+            "us-west-1": "ami-0d2f8b997a3abea48",
+            "us-west-2": "ami-0da242e152baee137"
+          }
+        },
+        "os_type": "redhat7",
+        "package-versions": {
+          "cdp-logging-agent": "0.2.11",
+          "cdp-telemetry": "0.4.17",
+          "cloudbreak_images": "51b1a82",
+          "freeipa-health-agent": "0.1-20210517150203gitab017e0",
+          "freeipa-plugin": "1.0-20200319002729gitc964030",
+          "inverting-proxy-agent": "2.0.3-b1",
+          "inverting-proxy-agent_gbn": "17606589",
+          "salt": "3000.8",
+          "salt-bootstrap": "0.13.4-2020-09-30T15:03:43"
+        }
+      }
+    ]
+  },
+  "versions": {
+    "freeipa": [
+      {
+        "versions": [
+          "2.49.0-b135-1-gb13840b"
+        ],
+        "defaults": [
+          "f377c56e-9ad8-47fe-9b53-c3a554500897"
+        ],
+        "images": [
+          "f377c56e-9ad8-47fe-9b53-c3a554500897"
+        ]
+      }
+    ]
+  }
+}

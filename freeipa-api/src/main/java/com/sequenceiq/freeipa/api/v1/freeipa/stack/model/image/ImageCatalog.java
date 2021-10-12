@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.api.model.image;
+package com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image;
 
 import java.util.List;
 import java.util.Optional;
