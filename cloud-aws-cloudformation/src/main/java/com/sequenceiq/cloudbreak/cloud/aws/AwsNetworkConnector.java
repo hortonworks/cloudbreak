@@ -162,8 +162,12 @@ public class AwsNetworkConnector implements DefaultNetworkConnector {
 
         SubnetFilterStrategyType subnetSelectorStrategyType = preferPrivate ?
                 SubnetFilterStrategyType.MULTIPLE_PREFER_PRIVATE : SubnetFilterStrategyType.MULTIPLE_PREFER_PUBLIC;
-        int azCount = subnetSelectionParameters.isHa() ? subnetCountInDifferentAzMin() : 1;
-        return subnetFilterStrategyMap.get(subnetSelectorStrategyType).filter(subnetMetas, azCount);
+        int maxAzCount = subnetSelectionParameters.isHa() ?  getAzCount(subnetMetas) : 1;
+        return subnetFilterStrategyMap.get(subnetSelectorStrategyType).filter(subnetMetas, maxAzCount);
+    }
+
+    private int getAzCount(Collection<CloudSubnet> subnetMetas) {
+        return subnetMetas.stream().map(CloudSubnet::getAvailabilityZone).collect(Collectors.toSet()).size();
     }
 
     @Override
