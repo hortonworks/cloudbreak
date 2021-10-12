@@ -31,6 +31,7 @@
         + [Running Thunderhead Mock from the Command Line](#running-thunderhead-mock-from-the-command-line)
     * [Database development](#database-development)
     * [Building](#building)
+    * [How to reach CM UI directly(not through Knox)](#how-to-reach-cm-ui-directly-not-through-knox-)
 - [How to contribute](#how-to-contribute)
     * [Appearance](#appearance)
     * [Coding guidelines](#coding-guidelines)
@@ -568,6 +569,16 @@ Gradle is used for build and dependency management. The Gradle wrapper is added 
 ```
 ./gradlew clean build
 ```
+
+## How to reach CM UI directly(not through Knox)
+With the current design on the cluster's gateway node there is an NGiNX which is responsible for routing requests through Knox by default. 
+But there are cases when the CM UI needs to be reached directly. It is possible on the same port by the same NGiNX on the `clouderamanager/` path of the provisioned cluster.
+Please note that the trailing slash is significant for the routing to work.
+
+For example: `https://tb-nt-local.tb-local.xcu2-8y8x.workload-dev.cloudera.com/clouderamanager/`
+
+> Be aware of that this routing mechanism is based on cookies, so if you have problems to reach the CM UI directly especially when you reached any service through Knox previously then the deletion of cookies could solve your issues.
+
 
 # How to contribute
 
