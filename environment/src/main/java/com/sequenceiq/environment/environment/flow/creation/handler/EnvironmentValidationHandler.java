@@ -140,6 +140,7 @@ public class EnvironmentValidationHandler extends EventSenderAwareHandler<Enviro
         validationBuilder.merge(validatorService.validateParameters(environmentValidationDto, environmentDto.getParameters()));
         validationBuilder.merge(validatorService.validateNetworkWithProvider(environmentValidationDto));
         validationBuilder.merge(validatorService.validateAuthentication(environmentValidationDto));
+        validationBuilder.merge(validatorService.validateAwsKeysPresent(environmentValidationDto));
         ValidationResult validationResult = validationBuilder.build();
         if (validationResult.hasError()) {
             throw new EnvironmentServiceException(validationResult.getFormattedErrors());
