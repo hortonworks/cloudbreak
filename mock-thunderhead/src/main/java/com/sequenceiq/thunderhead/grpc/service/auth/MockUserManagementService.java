@@ -455,6 +455,9 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.datahub.instancetypes.enable}")
     private boolean enableDistroxInstanceTypes;
 
+    @Value("${auth.mock.freeipa.upgrade.enable}")
+    private boolean enableFreeIpaUpgrade;
+
     @PostConstruct
     public void init() {
         cbLicense = getLicense();
@@ -840,6 +843,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         if (enableDistroxInstanceTypes) {
             builder.addEntitlements(createEntitlement(CDP_ENABLE_DISTROX_INSTANCE_TYPES));
         }
+        if (enableFreeIpaUpgrade) {
+            builder.addEntitlements(createEntitlement(CDP_FREEIPA_UPGRADE));
+        }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()
                         .setAccount(builder
@@ -858,7 +864,6 @@ public class MockUserManagementService extends UserManagementImplBase {
                                 .addEntitlements(createEntitlement(CDP_SHOW_CLI))
                                 .addEntitlements(createEntitlement(CDP_CP_CUSTOM_DL_TEMPLATE))
                                 .addEntitlements(createEntitlement(OJDBC_TOKEN_DH))
-                                .addEntitlements(createEntitlement(CDP_FREEIPA_UPGRADE))
                                 .addEntitlements(createEntitlement(DATAHUB_STREAMING_SCALING))
                                 .addEntitlements(createEntitlement(CDP_RAW_S3))
                                 .setGlobalPasswordPolicy(workloadPasswordPolicy)
