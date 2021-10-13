@@ -16,7 +16,7 @@ import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.PreconditionSdxE2ETest;
@@ -53,15 +53,15 @@ public class SdxBackupRestoreTest extends PreconditionSdxE2ETest {
             then = "SDX restore should be done successfully"
     )
     public void testSDXBackupRestoreCanBeSuccessful(TestContext testContext) {
-        SdxTestDto sdxTestDto = testContext.given(SdxTestDto.class);
-        String cloudStorageBaseLocation = sdxTestDto.getResponse().getCloudStorageBaseLocation();
+        SdxInternalTestDto sdxInternalTestDto = testContext.given(SdxInternalTestDto.class);
+        String cloudStorageBaseLocation = sdxInternalTestDto.getResponse().getCloudStorageBaseLocation();
         String backupObject = "backups";
         testContext
-                .given(SdxTestDto.class)
-                .when(sdxTestClient.sync())
+                .given(SdxInternalTestDto.class)
+                .when(sdxTestClient.syncInternal())
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForHealthyInstances()
-                .when(sdxTestClient.backup(StringUtils.join(List.of(cloudStorageBaseLocation, backupObject), "/"), null))
+                .when(sdxTestClient.backupInternal(StringUtils.join(List.of(cloudStorageBaseLocation, backupObject), "/"), null))
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForHealthyInstances()
                 .then(this::validateDatalakeBackupStatus)
@@ -73,8 +73,8 @@ public class SdxBackupRestoreTest extends PreconditionSdxE2ETest {
                 .validate();
 
         testContext
-                .given(SdxTestDto.class)
-                .when(sdxTestClient.restore(backupId, null))
+                .given(SdxInternalTestDto.class)
+                .when(sdxTestClient.restoreInternal(backupId, null))
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForHealthyInstances()
                 .then(this::validateDatalakeRestoreStatus)
@@ -82,7 +82,7 @@ public class SdxBackupRestoreTest extends PreconditionSdxE2ETest {
                 .validate();
     }
 
-    private SdxTestDto validateDatalakeStatus(TestContext testContext, SdxTestDto testDto, SdxClient client) {
+    private SdxInternalTestDto validateDatalakeStatus(TestContext testContext, SdxInternalTestDto testDto, SdxClient client) {
         String statuReason = client.getDefaultClient()
                 .sdxEndpoint()
                 .getDetailByCrn(testDto.getCrn(), Collections.emptySet())
@@ -100,7 +100,7 @@ public class SdxBackupRestoreTest extends PreconditionSdxE2ETest {
         return testDto;
     }
 
-    private SdxTestDto validateDatalakeBackupStatus(TestContext testContext, SdxTestDto testDto, SdxClient client) {
+    private SdxInternalTestDto validateDatalakeBackupStatus(TestContext testContext, SdxInternalTestDto testDto, SdxClient client) {
         String sdxName = testDto.getName();
         backupId = client.getDefaultClient()
                 .sdxBackupEndpoint()
@@ -121,7 +121,7 @@ public class SdxBackupRestoreTest extends PreconditionSdxE2ETest {
         return testDto;
     }
 
-    private SdxTestDto validateDatalakeRestoreStatus(TestContext testContext, SdxTestDto testDto, SdxClient client) {
+    private SdxInternalTestDto validateDatalakeRestoreStatus(TestContext testContext, SdxInternalTestDto testDto, SdxClient client) {
         String sdxName = testDto.getName();
         String status;
         String statusReason;

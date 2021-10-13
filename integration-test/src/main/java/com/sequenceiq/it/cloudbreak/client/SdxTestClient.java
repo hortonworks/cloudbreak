@@ -6,6 +6,7 @@ import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxAutotlsCertRotationAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxBackupAction;
+import com.sequenceiq.it.cloudbreak.action.sdx.SdxBackupInternalAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxCheckForUpgradeAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxCollectCMDiagnosticsAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxCollectDiagnosticsAction;
@@ -30,6 +31,7 @@ import com.sequenceiq.it.cloudbreak.action.sdx.SdxRepairInternalAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxResizeAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxStatusAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxRestoreAction;
+import com.sequenceiq.it.cloudbreak.action.sdx.SdxRestoreInternalAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxStartAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxStopAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxSyncAction;
@@ -175,7 +177,15 @@ public class SdxTestClient {
         return new SdxBackupAction(backupLocation, backupName);
     }
 
+    public Action<SdxInternalTestDto, SdxClient> backupInternal(String backupLocation, String backupName) {
+        return new SdxBackupInternalAction(backupLocation, backupName);
+    }
+
     public Action<SdxTestDto, SdxClient> restore(String backupId, String backupLocation) {
         return new SdxRestoreAction(backupId, backupLocation);
+    }
+
+    public Action<SdxInternalTestDto, SdxClient> restoreInternal(String backupId, String backupLocation) {
+        return new SdxRestoreInternalAction(backupId, backupLocation);
     }
 }
