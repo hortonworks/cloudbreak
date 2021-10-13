@@ -5,12 +5,12 @@ set -x
 
 if [[ "${RUN_SONARQUBE}" == "true" ]]; then
     # removing core modul because that is instable
-    # ./gradlew -Penv=jenkins -Phttp.socketTimeout=300000 -Phttp.connectionTimeout=300000 -b build.gradle core:sonarqube core:jacocoTestReport
-    ./gradlew -Penv=jenkins -Phttp.socketTimeout=300000 -Phttp.connectionTimeout=300000 -b build.gradle freeipa:sonarqube freeipa:jacocoTestReport
-    ./gradlew -Penv=jenkins -Phttp.socketTimeout=300000 -Phttp.connectionTimeout=300000 -b build.gradle autoscale:sonarqube autoscale:jacocoTestReport
-    ./gradlew -Penv=jenkins -Phttp.socketTimeout=300000 -Phttp.connectionTimeout=300000 -b build.gradle datalake:sonarqube datalake:jacocoTestReport
-    ./gradlew -Penv=jenkins -Phttp.socketTimeout=300000 -Phttp.connectionTimeout=300000 -b build.gradle environment:sonarqube environment:jacocoTestReport
-    ./gradlew -Penv=jenkins -Phttp.socketTimeout=300000 -Phttp.connectionTimeout=300000 -b build.gradle redbeams:sonarqube redbeams:jacocoTestReport
+    ./gradlew -Penv=jenkins -Phttp.socketTimeout=300000 -Phttp.connectionTimeout=300000 -b build.gradle core:sonarqube core:jacocoTestReport -Dorg.gradle.internal.http.socketTimeout=600000 -Dorg.gradle.internal.http.connectionTimeout=600000
+    ./gradlew -Penv=jenkins -Phttp.socketTimeout=300000 -Phttp.connectionTimeout=300000 -b build.gradle freeipa:sonarqube freeipa:jacocoTestReport -Dorg.gradle.internal.http.socketTimeout=600000 -Dorg.gradle.internal.http.connectionTimeout=600000
+    ./gradlew -Penv=jenkins -Phttp.socketTimeout=300000 -Phttp.connectionTimeout=300000 -b build.gradle autoscale:sonarqube autoscale:jacocoTestReport -Dorg.gradle.internal.http.socketTimeout=600000 -Dorg.gradle.internal.http.connectionTimeout=600000
+    ./gradlew -Penv=jenkins -Phttp.socketTimeout=300000 -Phttp.connectionTimeout=300000 -b build.gradle datalake:sonarqube datalake:jacocoTestReport -Dorg.gradle.internal.http.socketTimeout=600000 -Dorg.gradle.internal.http.connectionTimeout=600000
+    ./gradlew -Penv=jenkins -Phttp.socketTimeout=300000 -Phttp.connectionTimeout=300000 -b build.gradle environment:sonarqube environment:jacocoTestReport -Dorg.gradle.internal.http.socketTimeout=600000 -Dorg.gradle.internal.http.connectionTimeout=600000
+    ./gradlew -Penv=jenkins -Phttp.socketTimeout=300000 -Phttp.connectionTimeout=300000 -b build.gradle redbeams:sonarqube redbeams:jacocoTestReport -Dorg.gradle.internal.http.socketTimeout=600000 -Dorg.gradle.internal.http.connectionTimeout=600000
 fi
 
 aws s3 cp ./core/build/swagger/cb.json "s3://cloudbreak-swagger/swagger-${VERSION}.json" --acl public-read

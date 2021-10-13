@@ -37,6 +37,8 @@ sonarqube {
     property "sonar.login", "$System.env.SONAR_PASSWORD"
     property "org.gradle.internal.http.socketTimeout", "600000"
     property "org.gradle.internal.http.connectionTimeout", "600000"
+    property "sonar.coverage.exclusions", "**/proto/**,**/generated/**"
+    property "sonar.exclusions", "**/proto/**,**/generated/**"
   }
 }
 
