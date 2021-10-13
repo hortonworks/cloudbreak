@@ -119,7 +119,8 @@
         "acm:GetCertificate",
         "acm:ListCertificates",
         "acm:RenewCertificate",
-        "acm:RequestCertificate"
+        "acm:RequestCertificate",
+        "acm:ListTagsForCertificate"
       ],
       "Effect": "Allow",
       "Resource": [
