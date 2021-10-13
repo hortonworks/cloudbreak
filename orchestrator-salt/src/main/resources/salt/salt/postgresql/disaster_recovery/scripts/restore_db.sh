@@ -156,7 +156,7 @@ run_restore() {
   hdfs dfs -copyToLocal -f "$BACKUP_LOCATION" "$BACKUPS_DIR" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || errorExit "Could not copy backups from ${BACKUP_LOCATION}."
 
   if [[ -z "$DATABASENAME" ]]; then
-    echo "No database name provided. Will restore hive and ranger databases."
+    echo "No database name provided. Will restore hive, ranger, profiler_agent and profiler_metric databases."
     restore_db_from_local "hive"
     restore_db_from_local "ranger"
     restore_db_from_local "profiler_agent"
