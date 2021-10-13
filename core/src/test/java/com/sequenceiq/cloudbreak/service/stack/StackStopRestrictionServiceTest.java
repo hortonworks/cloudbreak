@@ -40,10 +40,7 @@ public class StackStopRestrictionServiceTest {
     @Test
     public void infrastructureShouldNotBeStoppableForEphemeralStorageBefore248CbVersion() {
         Set<InstanceGroup> groups = new HashSet<>();
-        groups.add(createGroup(List.of("ebs"), temporaryStorage));
         groups.add(createGroup(List.of(AwsDiskType.Ephemeral.value()), temporaryStorage));
-
-        when(componentConfigProviderService.getCloudbreakDetails(any())).thenReturn(new CloudbreakDetails("2.47.0-XXb"));
 
         StopRestrictionReason actual = underTest.isInfrastructureStoppable(createStack("AWS", groups));
 
@@ -51,7 +48,7 @@ public class StackStopRestrictionServiceTest {
     }
 
     @Test
-    public void infrastructureShouldBeStoppableForEphemeralStorageAfter248CbVersion() {
+    public void infrastructureShouldBeStoppableForEBSVolumesOnly() {
         Set<InstanceGroup> groups = new HashSet<>();
         groups.add(createGroup(List.of("ebs"), temporaryStorage));
 
