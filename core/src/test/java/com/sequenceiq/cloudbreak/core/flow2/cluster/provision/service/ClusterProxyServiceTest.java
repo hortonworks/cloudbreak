@@ -26,6 +26,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.ccm.endpoint.ServiceFamilies;
@@ -100,15 +101,16 @@ class ClusterProxyServiceTest {
     private ClusterProxyService underTest;
 
     @Test
-    void shouldRegisterProxyConfigurationWithClusterProxy() throws ClusterProxyException {
+    void shouldRegisterProxyConfigurationWithClusterProxy() throws ClusterProxyException, JsonProcessingException {
         ConfigRegistrationResponse response = new ConfigRegistrationResponse();
         response.setX509Unwrapped("X509PublicKey");
 
         when(clusterProxyRegistrationClient.registerConfig(any())).thenReturn(response);
         when(securityConfigService.findOneByStackId(STACK_ID)).thenReturn(Optional.of(gatewaySecurityConfig()));
+        Stack stack = testStackUsingCCM();
 
         ConfigRegistrationResponse registrationResponse =
-                ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.registerCluster(testStackUsingCCM()));
+                ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.registerCluster(stack));
 
         assertEquals("X509PublicKey", registrationResponse.getX509Unwrapped());
         ArgumentCaptor<ConfigRegistrationRequest> configRegistrationRequestArgumentCaptor = ArgumentCaptor.forClass(ConfigRegistrationRequest.class);
@@ -124,7 +126,7 @@ class ClusterProxyServiceTest {
     }
 
     @Test
-    void testRegisterClusterWhenCCMV2() throws ClusterProxyException {
+    void testRegisterClusterWhenCCMV2() throws ClusterProxyException, JsonProcessingException {
         Stack stack = testStack();
         stack.setTunnel(Tunnel.CCMV2);
         stack.setCcmV2AgentCrn("testAgentCrn");
@@ -151,7 +153,7 @@ class ClusterProxyServiceTest {
     }
 
     @Test
-    void testRegisterClusterWhenCCMV2Jumpgate() throws ClusterProxyException {
+    void testRegisterClusterWhenCCMV2Jumpgate() throws ClusterProxyException, JsonProcessingException {
         Stack stack = testStack();
         stack.setTunnel(Tunnel.CCMV2_JUMPGATE);
         stack.setCcmV2AgentCrn("testAgentCrn");
@@ -175,7 +177,7 @@ class ClusterProxyServiceTest {
     }
 
     @Test
-    void testRegisterClusterWhenCCMV1() throws ClusterProxyException {
+    void testRegisterClusterWhenCCMV1() throws ClusterProxyException, JsonProcessingException {
         Stack stack = testStackUsingCCM();
         when(securityConfigService.findOneByStackId(STACK_ID)).thenReturn(Optional.of(gatewaySecurityConfig()));
 
@@ -199,7 +201,7 @@ class ClusterProxyServiceTest {
     }
 
     @Test
-    void testReRegisterClusterWhenCCMV2() throws ClusterProxyException {
+    void testReRegisterClusterWhenCCMV2() throws ClusterProxyException, JsonProcessingException {
         Stack stack = testStack();
         stack.setTunnel(Tunnel.CCMV2);
         stack.setCcmV2AgentCrn("testAgentCrn");
@@ -231,12 +233,13 @@ class ClusterProxyServiceTest {
     }
 
     @Test
-    void testReRegisterClusterWhenCCMV2Jumpgate() throws ClusterProxyException {
+    void testReRegisterClusterWhenCCMV2Jumpgate() throws ClusterProxyException, JsonProcessingException {
         Stack stack = testStack();
         stack.setTunnel(Tunnel.CCMV2_JUMPGATE);
         stack.setCcmV2AgentCrn("testAgentCrn");
         Gateway gateway = new Gateway();
         gateway.setPath("test-cluster");
+        stack.getCluster().setId(1L);
         stack.getCluster().setGateway(gateway);
 
         when(securityConfigService.findOneByStackId(STACK_ID)).thenReturn(Optional.of(gatewaySecurityConfig()));
@@ -263,7 +266,7 @@ class ClusterProxyServiceTest {
     }
 
     @Test
-    void testReRegisterClusterWhenCCMV1() throws ClusterProxyException {
+    void testReRegisterClusterWhenCCMV1() throws ClusterProxyException, JsonProcessingException {
         Stack stack = testStackUsingCCM();
         Gateway gateway = new Gateway();
         gateway.setPath("test-cluster");
@@ -292,7 +295,7 @@ class ClusterProxyServiceTest {
     }
 
     @Test
-    void testRegisterGatewayConfigurationWithoutCcmEnabled() {
+    void testRegisterGatewayConfigurationWithoutCcmEnabled() throws JsonProcessingException {
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(testStackWithKnox());
 
         underTest.registerGatewayConfiguration(STACK_ID);
@@ -305,7 +308,7 @@ class ClusterProxyServiceTest {
     }
 
     @Test
-    void testRegisterGatewayConfigurationWithCcmV1Enabled() {
+    void testRegisterGatewayConfigurationWithCcmV1Enabled() throws JsonProcessingException {
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(testStackUsingCCMAndKnox());
 
         underTest.registerGatewayConfiguration(STACK_ID);
@@ -319,7 +322,7 @@ class ClusterProxyServiceTest {
 
     @ParameterizedTest
     @EnumSource(value = Tunnel.class, names = {"CCMV2", "CCMV2_JUMPGATE"}, mode = EnumSource.Mode.INCLUDE)
-    void testRegisterGatewayConfigurationWithCcmV2Enabled(Tunnel tunnel) {
+    void testRegisterGatewayConfigurationWithCcmV2Enabled(Tunnel tunnel) throws JsonProcessingException {
         Stack testStack = testStackUsingCCMAndKnox();
         testStack.setTunnel(tunnel);
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(testStack);
@@ -334,7 +337,7 @@ class ClusterProxyServiceTest {
     }
 
     @Test
-    void shouldNotRegisterSSHTunnelInfoIfCCMIsDisabled() throws ClusterProxyException {
+    void shouldNotRegisterSSHTunnelInfoIfCCMIsDisabled() throws ClusterProxyException, JsonProcessingException {
         ConfigRegistrationResponse response = new ConfigRegistrationResponse();
         response.setX509Unwrapped("X509PublicKey");
 
@@ -362,7 +365,7 @@ class ClusterProxyServiceTest {
     }
 
     @Test
-    void shouldUpdateKnoxUrlWithClusterProxy() throws ClusterProxyException {
+    void shouldUpdateKnoxUrlWithClusterProxy() throws ClusterProxyException, JsonProcessingException {
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(testStackWithKnox());
 
         ConfigUpdateRequest request = configUpdateRequest(STACK_CRN);
@@ -372,15 +375,17 @@ class ClusterProxyServiceTest {
     }
 
     @Test
-    void shouldNotUpdateProxyConfigIfClusterIsNotConfiguredWithGateway() throws ClusterProxyException {
-        when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(testStack());
+    void shouldNotUpdateProxyConfigIfClusterIsNotConfiguredWithGateway() throws ClusterProxyException, JsonProcessingException {
+        Stack stack = testStack();
+        stack.getCluster().setGateway(null);
+        when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
 
         underTest.registerGatewayConfiguration(STACK_ID);
         verify(clusterProxyRegistrationClient, times(0)).updateConfig(any());
     }
 
     @Test
-    void shouldDeregisterCluster() throws ClusterProxyException {
+    void shouldDeregisterCluster() throws ClusterProxyException, JsonProcessingException {
         underTest.deregisterCluster(testStack());
         verify(clusterProxyRegistrationClient).deregisterConfig(STACK_CRN);
     }
@@ -405,7 +410,7 @@ class ClusterProxyServiceTest {
         ClusterServiceCredential cloudbreakUser = new ClusterServiceCredential("cloudbreak", "/cb/test-data/secret/cbpassword:secret");
         ClusterServiceCredential dpUser = new ClusterServiceCredential("cmmgmt", "/cb/test-data/secret/dppassword:secret", true);
         return new ClusterServiceConfig(CLOUDERA_MANAGER_SERVICE,
-                List.of("https://10.10.10.10/clouderamanager"), null, false, asList(cloudbreakUser, dpUser), null, null);
+                List.of("https://10.10.10.10:9443/knox/test-cluster"), null, false, asList(cloudbreakUser, dpUser), null, null);
     }
 
     private ClusterServiceConfig cmInternalServiceConfig(boolean withPrivateIp) {
@@ -429,13 +434,17 @@ class ClusterProxyServiceTest {
         return securityConfig;
     }
 
-    private Stack testStack() {
+    private Stack testStack() throws JsonProcessingException {
         Stack stack = new Stack();
         stack.setResourceCrn(STACK_CRN);
         stack.setId(STACK_ID);
         stack.setCluster(testCluster());
         stack.setGatewayPort(9443);
         stack.setClusterProxyRegistered(true);
+        Cluster cluster = new Cluster();
+        Gateway gateway = new Gateway();
+        gateway.setPath("test-cluster");
+        cluster.setGateway(gateway);
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setInstanceGroupType(InstanceGroupType.GATEWAY);
         InstanceMetaData primaryInstanceMetaData = new InstanceMetaData();
@@ -449,10 +458,28 @@ class ClusterProxyServiceTest {
         instanceMetaData.setInstanceId(OTHER_INSTANCE_ID);
         instanceGroup.setInstanceMetaData(Set.of(instanceMetaData, primaryInstanceMetaData));
         stack.setInstanceGroups(Set.of(instanceGroup));
+        ReflectionTestUtils.setField(cluster, "cloudbreakClusterManagerPassword",
+                new Secret("cloudbreak", vaultSecretString("cbpassword")));
+        ReflectionTestUtils.setField(cluster, "cloudbreakClusterManagerUser",
+                new Secret("cloudbreak", vaultSecretString("cbuser")));
+        ReflectionTestUtils.setField(cluster, "cloudbreakAmbariPassword",
+                new Secret("cloudbreak", vaultSecretString("cbpassword")));
+        ReflectionTestUtils.setField(cluster, "cloudbreakAmbariUser",
+                new Secret("cloudbreak", vaultSecretString("cbuser")));
+        ReflectionTestUtils.setField(cluster, "dpClusterManagerUser",
+                new Secret("cmmgmt", vaultSecretString("dpuser")));
+        ReflectionTestUtils.setField(cluster, "dpClusterManagerPassword",
+                new Secret("cmmgmt", vaultSecretString("dppassword")));
+        ReflectionTestUtils.setField(cluster, "cloudbreakAmbariPassword",
+                new Secret("cmmgmt", vaultSecretString("cbpassword")));
+        ReflectionTestUtils.setField(cluster, "cloudbreakAmbariUser",
+                new Secret("cmmgmt", vaultSecretString("cbuser")));
+        stack.setCluster(cluster);
+        stack.getCluster().setId(1L);
         return stack;
     }
 
-    private Stack testStackUsingCCM() {
+    private Stack testStackUsingCCM() throws JsonProcessingException {
         Stack stack = testStack();
         stack.setUseCcm(true);
         stack.setTunnel(Tunnel.CCM);
@@ -460,7 +487,7 @@ class ClusterProxyServiceTest {
         return stack;
     }
 
-    private Stack testStackUsingCCMAndKnox() {
+    private Stack testStackUsingCCMAndKnox() throws JsonProcessingException {
         Stack stack = testStackUsingCCM();
         Gateway gateway = new Gateway();
         gateway.setPath("test-cluster");
@@ -468,13 +495,16 @@ class ClusterProxyServiceTest {
         return stack;
     }
 
-    private Stack testStackWithInvalidSecret() {
+    private Stack testStackWithInvalidSecret() throws JsonProcessingException {
         Stack stack = testStack();
         ReflectionTestUtils.setField(stack.getCluster(), "cloudbreakAmbariPassword", new Secret("cbpassword", "invalid-vault-string"));
+        ReflectionTestUtils.setField(stack.getCluster(), "cloudbreakClusterManagerPassword", new Secret("cbpassword", "invalid-vault-string"));
+        ReflectionTestUtils.setField(stack.getCluster(), "dpClusterManagerPassword", new Secret("cbpassword", "invalid-vault-string"));
+        ReflectionTestUtils.setField(stack.getCluster(), "cloudbreakClusterManagerPassword", new Secret("cbpassword", "invalid-vault-string"));
         return stack;
     }
 
-    private Stack testStackWithKnox() {
+    private Stack testStackWithKnox() throws JsonProcessingException {
         Stack stack = testStack();
         Gateway gateway = new Gateway();
         gateway.setPath("test-cluster");

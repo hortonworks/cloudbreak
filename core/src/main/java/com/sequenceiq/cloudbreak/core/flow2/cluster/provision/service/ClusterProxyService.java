@@ -249,9 +249,7 @@ public class ClusterProxyService {
     private String knoxUrlForCcmV2(Stack stack) {
         String gatewayIp = stack.getPrimaryGatewayInstance().getPrivateIp();
         Cluster cluster = stack.getCluster();
-        return String.format("https://%s:%d/%s/%s", gatewayIp, ServiceFamilies.GATEWAY.getDefaultPort(),
-                KnownServiceIdentifier.KNOX.toString().toLowerCase(),
-                cluster.getGateway().getPath());
+        return getKnoxifiedCMUrl(gatewayIp, cluster);
     }
 
     private String clusterId(Cluster cluster) {
@@ -260,7 +258,14 @@ public class ClusterProxyService {
 
     private String clusterManagerUrlForNoCcmAndCcmV1(Stack stack, boolean preferPrivateIp) {
         String gatewayIp = stack.getPrimaryGatewayInstance().getIpWrapper(preferPrivateIp);
-        return String.format("https://%s/clouderamanager", gatewayIp);
+        Cluster cluster = stack.getCluster();
+        return getKnoxifiedCMUrl(gatewayIp, cluster);
+    }
+
+    private String getKnoxifiedCMUrl(String gatewayIp, Cluster cluster) {
+        return String.format("https://%s:%d/%s/%s", gatewayIp, ServiceFamilies.GATEWAY.getDefaultPort(),
+                KnownServiceIdentifier.KNOX.toString().toLowerCase(),
+                cluster.getGateway().getPath());
     }
 
     private String internalAdminUrl(Stack stack, int port, boolean preferPrivateIp) {
