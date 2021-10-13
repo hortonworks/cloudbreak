@@ -242,7 +242,7 @@ public class ClusterProxyService {
         String knoxUrl = String.format("https://%s:%d/%s/%s", gatewayIp, ServiceFamilies.GATEWAY.getDefaultPort(),
                 KnownServiceIdentifier.KNOX.toString().toLowerCase(),
                 cluster.getGateway().getPath());
-        LOGGER.info("The generated URL for Knox: '{}'",knoxUrl);
+        LOGGER.info("The generated URL for Knox: '{}'", knoxUrl);
         return knoxUrl;
     }
 
@@ -290,4 +290,14 @@ public class ClusterProxyService {
                 : com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.ClusterProxyConfiguration.disabled();
     }
 
+    public void reRegisterCluster(Long stackId) {
+        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        if (clusterProxyEnablementService.isClusterProxyApplicable(stack.getCloudPlatform())) {
+            LOGGER.info("Cluster Proxy integration is ENABLED, starting re-registering with Cluster Proxy service");
+            reRegisterCluster(stack);
+            LOGGER.info("Cluster has been re-registered with Cluster Proxy service successfully.");
+        } else {
+            LOGGER.debug("Cluster Proxy integration is DISABLED, skipping re-registering with Cluster Proxy service");
+        }
+    }
 }
