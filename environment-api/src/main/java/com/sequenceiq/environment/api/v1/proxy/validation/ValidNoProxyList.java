@@ -14,7 +14,7 @@ import javax.validation.Payload;
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy = NoProxyListValidator.class)
 public @interface ValidNoProxyList {
-    String message() default "no_proxy can contain comma-separated list of 'host[:port]' and 'IP[:port]' elements";
+    String message() default "no_proxy can contain comma-separated list of 'CIDR', '[.]host[:port]' and 'IP[:port]' elements";
 
     Class<?>[] groups() default {};
 

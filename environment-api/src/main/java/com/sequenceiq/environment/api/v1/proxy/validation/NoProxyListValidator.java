@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.api.v1.proxy.validation;
 
+import static com.sequenceiq.cloudbreak.validation.CidrValidatorHelper.isCidrPatternMatched;
+
 import java.util.Arrays;
 import java.util.regex.Pattern;
 
@@ -17,7 +19,7 @@ public class NoProxyListValidator implements ConstraintValidator<ValidNoProxyLis
                     "(:([0-9]{1,4}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5]))?$");
 
     private static final Pattern HOST_PORT =
-            Pattern.compile("^((([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-])*[A-Za-z0-9])" +
+            Pattern.compile("^(\\.?(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-])*[A-Za-z0-9])" +
                     "(:([0-9]{1,4}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5]))?$");
 
     @Override
@@ -28,10 +30,13 @@ public class NoProxyListValidator implements ConstraintValidator<ValidNoProxyLis
         String[] elements = value.split(",");
         return Arrays.stream(elements)
                 .map(StringUtils::deleteWhitespace)
-                .allMatch(this::validHostOrIpAndOptionalPort);
+                .allMatch(this::validCidrOrHostOrIpAndOptionalPort);
     }
 
-    private boolean validHostOrIpAndOptionalPort(String element) {
+    private boolean validCidrOrHostOrIpAndOptionalPort(String element) {
+        if (isCidrPatternMatched(element)) {
+            return true;
+        }
         if (IP_CHARS.matcher(element).matches()) {
             return IP_PORT.matcher(element).matches();
         }
