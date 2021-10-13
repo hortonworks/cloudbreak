@@ -26,7 +26,6 @@ import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsARecordRequest;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsCnameRecordRequest;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
-import com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil;
 import com.sequenceiq.freeipa.client.RetryableFreeIpaClientException;
 import com.sequenceiq.freeipa.client.model.DnsRecord;
 import com.sequenceiq.freeipa.client.model.DnsZone;
@@ -159,18 +158,9 @@ public class DnsRecordService {
     private void createDnsARecord(FreeIpaClient client, String zone, String hostname, String ip, boolean createReverse) throws FreeIpaClientException {
         LOGGER.info("Creating A record in zone [{}] with hostname [{}] with IP [{}]. Create reverse set to [{}]",
                 zone, hostname, ip, createReverse);
-        try {
-            Optional<DnsRecord> record = ignoreEmptyModExceptionWithValue(() -> client.addDnsARecord(zone, hostname, ip, createReverse),
-                    "Record [{}] pointing to [{}] is already exists, nothing to do.", hostname, ip);
-            LOGGER.info("A record [{}] pointing to [{}] is created successfully. Created record: {}", hostname, ip, record);
-        } catch (FreeIpaClientException e) {
-            if (FreeIpaClientExceptionUtil.isDuplicateEntryException(e)) {
-                LOGGER.warn("Duplicate entry, usually reverse entry already exists.", e);
-                throw new DnsRecordConflictException(e.getMessage());
-            } else {
-                throw e;
-            }
-        }
+        Optional<DnsRecord> record = ignoreEmptyModExceptionWithValue(() -> client.addDnsARecord(zone, hostname, ip, createReverse),
+                "Record [{}] pointing to [{}] is already exists, nothing to do.", hostname, ip);
+        LOGGER.info("A record [{}] pointing to [{}] is created successfully. Created record: {}", hostname, ip, record);
     }
 
     @Retryable(value = RetryableFreeIpaClientException.class,

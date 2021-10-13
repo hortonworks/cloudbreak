@@ -1,7 +1,6 @@
 package com.sequenceiq.freeipa.service.freeipa.dns;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
@@ -296,25 +295,6 @@ public class DnsRecordServiceTest {
         dnsRecord.setArecord(List.of("asdf"));
         dnsRecord.setIdnsname(request.getHostname());
         when(freeIpaClient.showDnsRecord(DOMAIN, request.getHostname())).thenReturn(dnsRecord);
-
-        Assertions.assertThrows(DnsRecordConflictException.class, () -> underTest.addDnsARecord(ACCOUNT_ID, request));
-    }
-
-    @Test
-    public void testARecordCreateReturnDuplicate() throws FreeIpaClientException {
-        AddDnsARecordRequest request = new AddDnsARecordRequest();
-        request.setEnvironmentCrn(ENV_CRN);
-        request.setHostname("Asdf");
-        request.setIp("1.1.1.2");
-        request.setCreateReverse(true);
-
-        Stack stack = createStack();
-        when(stackService.getByEnvironmentCrnAndAccountId(ENV_CRN, ACCOUNT_ID)).thenReturn(stack);
-        FreeIpa freeIpa = createFreeIpa();
-        when(freeIpaService.findByStack(stack)).thenReturn(freeIpa);
-        when(freeIpaClientFactory.getFreeIpaClientForStack(stack)).thenReturn(freeIpaClient);
-        when(freeIpaClient.addDnsARecord(anyString(), eq(request.getHostname()), eq(request.getIp()), eq(true)))
-                .thenThrow(new FreeIpaClientException("Duplicate", new JsonRpcClientException(4002, "Duplicate reverse", null)));
 
         Assertions.assertThrows(DnsRecordConflictException.class, () -> underTest.addDnsARecord(ACCOUNT_ID, request));
     }
