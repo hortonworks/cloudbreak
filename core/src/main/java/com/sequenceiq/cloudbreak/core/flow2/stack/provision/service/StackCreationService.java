@@ -288,7 +288,7 @@ public class StackCreationService {
                         .allMatch(volumeTemplate -> AwsDiskType.Ephemeral.value().equalsIgnoreCase(volumeTemplate.getVolumeType()));
                 if (ephemeralVolumesOnly) {
                     LOGGER.debug("Instance storage was already requested. Setting temporary storage in template to: {}. " +
-                                    "Group name: {}, Template id: {}, instance type: {}",
+                            "Group name: {}, Template id: {}, instance type: {}",
                             TemporaryStorage.EPHEMERAL_VOLUMES_ONLY.name(), ig.getGroupName(), template.getId(), template.getInstanceType());
                     template.setTemporaryStorage(TemporaryStorage.EPHEMERAL_VOLUMES_ONLY);
                 }
