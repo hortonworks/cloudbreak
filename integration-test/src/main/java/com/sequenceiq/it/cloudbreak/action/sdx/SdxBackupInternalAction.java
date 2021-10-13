@@ -13,30 +13,40 @@ import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
+import com.sequenceiq.sdx.api.model.SdxBackupResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
 
-public class SdxSyncInternalAction implements Action<SdxInternalTestDto, SdxClient> {
+public class SdxBackupInternalAction implements Action<SdxInternalTestDto, SdxClient> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SdxSyncInternalAction.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SdxBackupInternalAction.class);
+
+    private final String backupLocation;
+
+    private final String backupName;
+
+    public SdxBackupInternalAction(String backupLocation, String backupName) {
+        this.backupLocation = backupLocation;
+        this.backupName = backupName;
+    }
 
     @Override
     public SdxInternalTestDto action(TestContext testContext, SdxInternalTestDto testDto, SdxClient client) throws Exception {
         String sdxName = testDto.getName();
 
-        sleep(1, sdxName);
+        sleep(2, sdxName);
 
-        Log.when(LOGGER, format(" Internal SDX '%s' sync has been started... ", sdxName));
-        Log.whenJson(LOGGER, " Internal SDX sync request: ", testDto.getRequest());
-        LOGGER.info(format(" Internal SDX '%s' sync has been started... ", sdxName));
-        client.getDefaultClient()
-                .sdxEndpoint()
-                .sync(sdxName);
+        Log.when(LOGGER, format(" Internal SDX '%s' backup has been started to '%s' by name '%s'... ", sdxName, backupLocation, backupName));
+        Log.whenJson(LOGGER, " Internal SDX backup request: ", testDto.getRequest());
+        LOGGER.info(format(" Internal SDX '%s' backup has been started to '%s' by name '%s'... ", sdxName, backupLocation, backupName));
+        SdxBackupResponse sdxBackupResponse = client.getDefaultClient()
+                .sdxBackupEndpoint()
+                .backupDatalakeByName(sdxName, backupLocation, backupName);
+        testDto.setFlow("SDX backup", sdxBackupResponse.getFlowIdentifier());
         SdxClusterDetailResponse detailedResponse = client.getDefaultClient()
                 .sdxEndpoint()
                 .getDetail(sdxName, Collections.emptySet());
         testDto.setResponse(detailedResponse);
-        Log.whenJson(LOGGER, " Internal SDX response after sync: ", client.getDefaultClient().sdxEndpoint().get(sdxName));
-
+        Log.whenJson(LOGGER, " Internal SDX response after backup: ", client.getDefaultClient().sdxEndpoint().get(sdxName));
         return testDto;
     }
 
