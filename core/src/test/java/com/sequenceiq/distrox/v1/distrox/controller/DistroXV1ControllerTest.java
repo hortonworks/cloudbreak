@@ -19,8 +19,10 @@ import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ChangeImageCatalogV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.distrox.api.v1.distrox.model.DistroXGenerateImageCatalogV1Response;
 import com.sequenceiq.distrox.v1.distrox.StackOperations;
 import com.sequenceiq.distrox.v1.distrox.authorization.DataHubFiltering;
 
@@ -75,5 +77,19 @@ class DistroXV1ControllerTest {
 
         verify(stackOperations).changeImageCatalog(nameOrCrnArgumentCaptor.capture(), Mockito.eq(WORKSPACE_ID), Mockito.eq(IMAGE_CATALOG));
         assertEquals(NAME, nameOrCrnArgumentCaptor.getValue().getName());
+    }
+
+    @Test
+    void testGenerateImageCatalog() {
+        CloudbreakImageCatalogV3 imageCatalog = Mockito.mock(CloudbreakImageCatalogV3.class);
+
+        when(workspaceService.getForCurrentUser()).thenReturn(workspace);
+        when(workspace.getId()).thenReturn(WORKSPACE_ID);
+        when(stackOperations.generateImageCatalog(nameOrCrnArgumentCaptor.capture(), Mockito.eq(WORKSPACE_ID))).thenReturn(imageCatalog);
+
+        DistroXGenerateImageCatalogV1Response actual = distroXV1Controller.generateImageCatalog(NAME);
+
+        assertEquals(NAME, nameOrCrnArgumentCaptor.getValue().getName());
+        assertEquals(imageCatalog, actual.getImageCatalog());
     }
 }

@@ -52,6 +52,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.Upgrade
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackClusterStatusViewToStatusConverter;
@@ -68,6 +69,7 @@ import com.sequenceiq.cloudbreak.service.DatabaseBackupRestoreService;
 import com.sequenceiq.cloudbreak.service.LoadBalancerUpdateService;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterDBValidationService;
+import com.sequenceiq.cloudbreak.service.image.GenerateImageCatalogService;
 import com.sequenceiq.cloudbreak.service.stack.StackApiViewService;
 import com.sequenceiq.cloudbreak.service.stack.StackImageService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -156,6 +158,9 @@ public class StackOperations implements ResourcePropertyProvider {
 
     @Inject
     private StackImageService stackImageService;
+
+    @Inject
+    private GenerateImageCatalogService generateImageCatalogService;
 
     @Inject
     private FlowLogService flowLogService;
@@ -501,5 +506,11 @@ public class StackOperations implements ResourcePropertyProvider {
             throw new CloudbreakServiceException(String.format("Operation is running for stack '%s'. Please try again later.", stack.getName()));
         }
         stackImageService.changeImageCatalog(stack, imageCatalog);
+    }
+
+    public CloudbreakImageCatalogV3 generateImageCatalog(@NotNull NameOrCrn nameOrCrn, Long workspaceId) {
+        LOGGER.info("Generate image catalog of stack '{}'", nameOrCrn);
+        Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
+        return generateImageCatalogService.generateImageCatalogForStack(stack);
     }
 }

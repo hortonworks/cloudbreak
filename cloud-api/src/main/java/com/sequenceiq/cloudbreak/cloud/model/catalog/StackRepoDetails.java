@@ -10,22 +10,28 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class StackRepoDetails {
     public static final String REPO_ID_TAG = "repoid";
 
+    private static final String STACK = "stack";
+
+    private static final String UTIL = "util";
+
     private final Map<String, String> stack;
 
     private final Map<String, String> util;
 
     @JsonCreator
     public StackRepoDetails(
-            @JsonProperty(value = "stack", required = true) Map<String, String> stack,
-            @JsonProperty(value = "util") Map<String, String> util) {
+            @JsonProperty(value = STACK, required = true) Map<String, String> stack,
+            @JsonProperty(value = UTIL) Map<String, String> util) {
         this.stack = stack;
         this.util = util;
     }
 
+    @JsonProperty(STACK)
     public Map<String, String> getStack() {
         return stack;
     }
 
+    @JsonProperty(UTIL)
     public Map<String, String> getUtil() {
         return util;
     }
