@@ -236,7 +236,7 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
         List<CloudResourceStatus> removableDisks = cloudResourceStatuses
                 .stream()
                 .filter(cloudResourceStatus -> ResourceStatus.CREATED.equals(cloudResourceStatus.getStatus()) ||
-                        (ResourceStatus.ATTACHED.equals(cloudResourceStatus.getStatus()) && volumeSetAttributes.getDeleteOnTermination()))
+                        ResourceStatus.ATTACHED.equals(cloudResourceStatus.getStatus()) && volumeSetAttributes.getDeleteOnTermination())
                 .collect(toList());
 
         deleteVolumes(client, removableDisks);

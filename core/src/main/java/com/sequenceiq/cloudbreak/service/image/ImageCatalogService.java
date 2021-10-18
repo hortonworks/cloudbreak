@@ -488,7 +488,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
 
     public boolean isEnvDefault(String name) {
         return CDP_DEFAULT_CATALOG_NAME.equals(name)
-                || (legacyCatalogEnabled && CLOUDBREAK_DEFAULT_CATALOG_NAME.equals(name));
+                || legacyCatalogEnabled && CLOUDBREAK_DEFAULT_CATALOG_NAME.equals(name);
     }
 
     private void setImageCatalogAsDefault(ImageCatalog imageCatalog, User user) {
@@ -728,7 +728,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
     public List<String> getResourceCrnListByResourceNameList(List<String> resourceNames) {
         Map<Boolean, List<String>> catalogs = resourceNames.stream()
                 .collect(partitioningBy(name ->
-                        CDP_DEFAULT_CATALOG_NAME.equals(name) || (legacyCatalogEnabled && CLOUDBREAK_DEFAULT_CATALOG_NAME.equals(name))));
+                        CDP_DEFAULT_CATALOG_NAME.equals(name) || legacyCatalogEnabled && CLOUDBREAK_DEFAULT_CATALOG_NAME.equals(name)));
         List<String> result = new ArrayList<>();
 
         List<String> defaultCatalogs = catalogs.get(true);

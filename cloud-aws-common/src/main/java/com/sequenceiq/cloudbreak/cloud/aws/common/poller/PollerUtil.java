@@ -112,7 +112,7 @@ public class PollerUtil {
 
     private boolean completed(List<CloudVmInstanceStatus> instanceStatuses, Set<InstanceStatus> completedStatuses) {
         for (CloudVmInstanceStatus status : instanceStatuses) {
-            if (status.getStatus().isTransient() || (!completedStatuses.isEmpty() && !completedStatuses.contains(status.getStatus()))) {
+            if (status.getStatus().isTransient() || !completedStatuses.isEmpty() && !completedStatuses.contains(status.getStatus())) {
                 return false;
             }
         }

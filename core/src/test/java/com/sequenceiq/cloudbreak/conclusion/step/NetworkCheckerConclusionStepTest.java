@@ -99,7 +99,8 @@ class NetworkCheckerConclusionStepTest {
     @Test
     public void checkShouldFailAndReturnConclusionIfCcmIsNotAccessible() {
         when(cloudbreakMessagesService.getMessageWithArgs(eq(NETWORK_CCM_NOT_ACCESSIBLE), any())).thenReturn("ccm error");
-        when(cloudbreakMessagesService.getMessageWithArgs(eq(NETWORK_CCM_NOT_ACCESSIBLE_DETAILS), any())).thenReturn("ccm error details");
+        when(cloudbreakMessagesService.getMessageWithArgs(eq(NETWORK_CCM_NOT_ACCESSIBLE_DETAILS), any(), any()))
+                .thenReturn("ccm error details");
         NetworkDetails networkDetails = NetworkDetails.newBuilder()
                 .setCcmEnabled(true)
                 .setCcmAccessible(HealthStatus.NOK)
@@ -119,7 +120,8 @@ class NetworkCheckerConclusionStepTest {
     @Test
     public void checkShouldFailAndReturnConclusionIfClouderaComIsNotAccessible() {
         when(cloudbreakMessagesService.getMessageWithArgs(eq(NETWORK_CLOUDERA_COM_NOT_ACCESSIBLE), any())).thenReturn("cloudera.com error");
-        when(cloudbreakMessagesService.getMessageWithArgs(eq(NETWORK_CLOUDERA_COM_NOT_ACCESSIBLE_DETAILS), any())).thenReturn("cloudera.com error details");
+        when(cloudbreakMessagesService.getMessageWithArgs(eq(NETWORK_CLOUDERA_COM_NOT_ACCESSIBLE_DETAILS), any(), any()))
+                .thenReturn("cloudera.com error details");
         NetworkDetails networkDetails = NetworkDetails.newBuilder()
                 .setCcmEnabled(true)
                 .setCcmAccessible(HealthStatus.OK)
@@ -139,7 +141,8 @@ class NetworkCheckerConclusionStepTest {
     @Test
     public void checkShouldFailAndReturnConclusionIfNeighboursAreNotAccessible() {
         when(cloudbreakMessagesService.getMessageWithArgs(eq(NETWORK_NEIGHBOUR_NOT_ACCESSIBLE), any())).thenReturn("neighbour error");
-        when(cloudbreakMessagesService.getMessageWithArgs(eq(NETWORK_NEIGHBOUR_NOT_ACCESSIBLE_DETAILS), any())).thenReturn("neighbour error details");
+        when(cloudbreakMessagesService.getMessageWithArgs(eq(NETWORK_NEIGHBOUR_NOT_ACCESSIBLE_DETAILS), any(), any()))
+                .thenReturn("neighbour error details");
         NetworkDetails networkDetails = NetworkDetails.newBuilder()
                 .setCcmEnabled(true)
                 .setNeighbourScan(true)

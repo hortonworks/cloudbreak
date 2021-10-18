@@ -37,13 +37,13 @@ class ClusterStopFailedHandlerTest {
     @Test
     public void testHandleClusterStopFailedRequest() {
         ClusterStopFailedRequest request = new ClusterStopFailedRequest(STACK_ID);
-        HandlerEvent handlerEvent = new HandlerEvent(Event.wrap(request));
+        HandlerEvent<ClusterStopFailedRequest> handlerEvent = new HandlerEvent<>(Event.wrap(request));
 
         Selectable selectable = underTest.doAccept(handlerEvent);
 
         assertThat(selectable).isInstanceOf(StackEvent.class);
         assertThat(selectable.getSelector()).isEqualTo(ClusterStopEvent.FINALIZED_EVENT.event());
         verify(conclusionCheckerService, times(1)).runConclusionChecker(anyLong(), anyString(), any(),
-                eq(ConclusionCheckerType.DEFAULT), any());
+                eq(ConclusionCheckerType.DEFAULT));
     }
 }

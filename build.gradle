@@ -73,6 +73,7 @@ allprojects {
   ext['spring-framework.version'] = springFrameworkVersion
   ext['spring-security.version'] = springSecurityVersion
   ext['jersey.version'] = jerseyCoreVersion
+  ext['logback.version'] = logbackVersion
 
   // override AWS SDK Depenendencies
   ext['netty.version'] = nettyVersion
@@ -105,9 +106,13 @@ allprojects {
         force "org.springframework:spring-messaging:$springFrameworkVersion"
         force "io.swagger:swagger-jersey2-jaxrs:$swaggerVersion"
         force "io.swagger:swagger-annotations:$swaggerVersion"
+        force "org.ow2.asm:asm:9.2"
         force "com.google.protobuf:protobuf-java:$protobufVersion"
         force "com.google.guava:guava:$guavaVersion"
         force "junit:junit:$junitVersion"
+        force "com.fasterxml.jackson.dataformat:jackson-dataformat-xml:$jacksonVersion"
+        force "ch.qos.logback:logback-classic:$logbackVersion"
+        force "ch.qos.logback:logback-core:$logbackVersion"
       }
     }
   }
@@ -121,8 +126,8 @@ subprojects {
   apply plugin: 'com.adarshr.test-logger'
   //apply plugin: org.sonarqube.gradle.SonarQubePlugin
 
-  sourceCompatibility = 11
-  targetCompatibility = 11
+  sourceCompatibility = 17
+  targetCompatibility = 17
 
   configurations {
     deployerJars
@@ -159,14 +164,14 @@ subprojects {
 
   jacoco {
     toolVersion = "0.8.7"
-    reportsDir = file("$buildDir/reports/jacoco")
+    reportsDirectory = file("$buildDir/reports/jacoco")
   }
 
   jacocoTestReport {
     reports {
-      xml.enabled true
-      csv.enabled true
-      html.enabled true
+      xml.required = true
+      csv.required = true
+      html.required = true
     }
     afterEvaluate {
       classDirectories.from = files(classDirectories.files.collect {
@@ -194,6 +199,9 @@ subprojects {
   test {
     minHeapSize = "512m"
     maxHeapSize = "1g"
+    jvmArgs += ['--add-opens','java.base/java.lang=ALL-UNNAMED',
+                '--add-opens','java.base/java.lang.reflect=ALL-UNNAMED',
+                '--add-opens','java.base/java.util.concurrent=ALL-UNNAMED']
     useJUnitPlatform()
     testlogger {
       showSummary false
@@ -205,7 +213,7 @@ subprojects {
     }
   }
 
-  tasks.withType(com.github.spotbugs.snom.SpotBugsTask) {
+  tasks.withType(com.github.spotbugs.snom.SpotBugsTask).configureEach {
     reports {
       xml.enabled false
       html.enabled true
@@ -213,7 +221,7 @@ subprojects {
   }
 
   checkstyle {
-    toolVersion = "8.38"
+    toolVersion = "10.6.0"
   }
 
   checkstyleMain {
@@ -286,14 +294,14 @@ subprojects {
     if (project.name in ['core', 'autoscale', 'freeipa', 'redbeams', 'environment', 'datalake', 'integration-test', 'cloud-consumption'] && project.plugins.hasPlugin('org.springframework.boot')) {
       buildInfo.configure {
         destination = file("$project.buildDir")
-        basename = project.bootJar.baseName
+        basename = project.bootJar.archiveBaseName.get()
         buildVersion = project.version
       }
     }
     if (project.name in ['freeipa-client']) {
       buildInfo.configure {
         destination = file("$project.buildDir")
-        basename = project.jar.baseName
+        basename = project.jar.archiveBaseName.get()
         buildVersion = project.version
         version = project.version
       }

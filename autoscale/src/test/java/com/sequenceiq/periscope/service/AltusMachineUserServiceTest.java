@@ -39,7 +39,7 @@ import com.sequenceiq.periscope.monitor.handler.FreeIpaCommunicator;
 class AltusMachineUserServiceTest {
 
     @InjectMocks
-    AltusMachineUserService underTest;
+    private AltusMachineUserService underTest;
 
     @Mock
     private GrpcUmsClient grpcUmsClient;
@@ -95,9 +95,8 @@ class AltusMachineUserServiceTest {
     @Test
     void testInitializeMachineUserForEnvironment() {
         Cluster cluster = getACluster();
-        MachineUser machineUser = mock(MachineUser.class);
+        MachineUser machineUser = MachineUser.newBuilder().setCrn(autoscaleMachineUserCrn).build();
 
-        when(machineUser.getCrn()).thenReturn(autoscaleMachineUserCrn);
         when(grpcUmsClient.getOrCreateMachineUserWithoutAccessKey(autoscaleMachineUserName, testAccountId))
                 .thenReturn(machineUser);
         when(grpcUmsClient.listAssignedResourceRoles(anyString(), any(RegionAwareInternalCrnGeneratorFactory.class)))
@@ -125,14 +124,13 @@ class AltusMachineUserServiceTest {
     @Test
     void testinitializeMachineUserForEnvironmentWhenRoleAlreadyAssigned() {
         Cluster cluster = getACluster();
-        MachineUser machineUser = mock(MachineUser.class);
+        MachineUser machineUser = MachineUser.newBuilder().setCrn(autoscaleMachineUserCrn).build();
 
         LinkedHashMultimap rolesMap = LinkedHashMultimap.create();
         rolesMap.put(cluster.getEnvironmentCrn(), environmentRoleCrn);
 
         when(grpcUmsClient.getOrCreateMachineUserWithoutAccessKey(autoscaleMachineUserName, testAccountId))
                 .thenReturn(machineUser);
-        when(machineUser.getCrn()).thenReturn(autoscaleMachineUserCrn);
         when(grpcUmsClient.listAssignedResourceRoles(anyString(), any(RegionAwareInternalCrnGeneratorFactory.class))).thenReturn(rolesMap);
         when(roleCrnGenerator.getBuiltInEnvironmentUserResourceRoleCrn(anyString())).thenReturn(environmentRoleCrn);
         when(cloudbreakVersionService.getCloudbreakSaltStateVersionByStackCrn(anyString())).thenReturn(testCbSaltVersion);
@@ -174,15 +172,13 @@ class AltusMachineUserServiceTest {
 
     @Test
     void testDeleteMachineUserForEnvironment() {
-        MachineUser machineUserMock = mock(MachineUser.class);
+        MachineUser machineUser = MachineUser.newBuilder().setCrn(autoscaleMachineUserCrn).setWorkloadUsername("workloadUserName").build();
         RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator = mock(RegionAwareInternalCrnGenerator.class);
-        when(machineUserMock.getCrn()).thenReturn(autoscaleMachineUserCrn);
-        when(machineUserMock.getWorkloadUsername()).thenReturn("workloadUserName");
         when(roleCrnGenerator.getBuiltInEnvironmentUserResourceRoleCrn(anyString())).thenReturn(environmentRoleCrn);
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn(internalActorCrn);
         when(grpcUmsClient.getOrCreateMachineUserWithoutAccessKey(eq(autoscaleMachineUserName),
-                eq("testTenant"))).thenReturn(machineUserMock);
+                eq("testTenant"))).thenReturn(machineUser);
         when(freeIpaCommunicator.synchronizeAllUsers(any(SynchronizeAllUsersRequest.class))).thenReturn(getSyncOpStatus(SynchronizationStatus.COMPLETED));
 
         underTest.deleteMachineUserForEnvironment(testAccountId, autoscaleMachineUserCrn, testEnvironmentCrn);

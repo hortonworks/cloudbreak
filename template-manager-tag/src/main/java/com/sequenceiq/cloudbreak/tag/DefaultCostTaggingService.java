@@ -83,7 +83,7 @@ public class DefaultCostTaggingService implements CostTagging {
     }
 
     private boolean keyOrValueIsEmpty(String key, String value) {
-        return (key == null || key.isBlank()) || (value == null || value.isBlank());
+        return key == null || key.isBlank() || value == null || value.isBlank();
     }
 
     private void addTagIfNotPresented(Map<String, String> result, CDPTagMergeRequest request, String key) {

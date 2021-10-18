@@ -434,8 +434,8 @@ public class SdxBackupRestoreService {
         if (drStatus == null) {
             throw new NotFoundException(String.format("Status with id: [%s] not found", operationId));
         }
-        if ((!drStatus.getSdxClusterId().equals(sdxCluster.getId()))
-                || (!drStatus.getOperationType().equals(type))) {
+        if (!drStatus.getSdxClusterId().equals(sdxCluster.getId())
+                || !drStatus.getOperationType().equals(type)) {
             String message = String.format("Invalid operation-id: [%s]. provided", operationId);
             throw new CloudbreakApiException(message);
         }

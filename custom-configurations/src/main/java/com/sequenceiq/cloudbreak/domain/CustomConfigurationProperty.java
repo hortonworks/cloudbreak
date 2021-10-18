@@ -33,7 +33,7 @@ public class CustomConfigurationProperty implements Serializable, AccountIdAware
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
+    @Column(name = "\"value\"", nullable = false)
     private String value;
 
     @Column(nullable = false)

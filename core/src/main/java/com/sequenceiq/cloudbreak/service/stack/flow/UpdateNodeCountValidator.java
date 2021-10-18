@@ -111,7 +111,7 @@ public class UpdateNodeCountValidator {
 
     public void validateStackStatus(StackView stack, boolean upscale) {
         if (upscale &&
-                !(stack.isAvailable() || (stack.hasNodeFailure() && targetedUpscaleSupportService.targetedUpscaleEntitlementsEnabled(stack.getResourceCrn())))) {
+                !(stack.isAvailable() || stack.hasNodeFailure() && targetedUpscaleSupportService.targetedUpscaleEntitlementsEnabled(stack.getResourceCrn()))) {
             throwBadRequest(stack);
         } else if (!upscale && !stack.isAvailable()) {
             throwBadRequest(stack);
@@ -121,7 +121,7 @@ public class UpdateNodeCountValidator {
     public void validateClusterStatus(StackView stack, boolean upscale) {
         Long clusterId = stack.getClusterId();
         if (upscale && clusterId != null && !(stack.isAvailable()
-                || (stack.hasNodeFailure() && targetedUpscaleSupportService.targetedUpscaleEntitlementsEnabled(stack.getResourceCrn())))) {
+                || stack.hasNodeFailure() && targetedUpscaleSupportService.targetedUpscaleEntitlementsEnabled(stack.getResourceCrn()))) {
             throwBadRequest(stack);
         } else if (!upscale && clusterId != null && !stack.isAvailable()) {
             throwBadRequest(stack);

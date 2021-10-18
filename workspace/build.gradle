@@ -17,8 +17,8 @@ apply plugin: 'java'
 apply plugin: 'io.spring.dependency-management'
 
 jar {
-  baseName = 'workspace'
-  archiveName = 'workspace.jar'
+  archiveBaseName = 'workspace'
+  archiveFileName= 'workspace.jar'
 }
 
 dependencies {
@@ -37,8 +37,8 @@ dependencies {
 }
 
 task testJar(type: Jar, dependsOn: testClasses) {
-  baseName = "test-${project.archivesBaseName}"
-  classifier 'test'
+  archiveBaseName = "test-${project.archivesBaseName}"
+  archiveClassifier = 'test'
   from sourceSets.test.output
   from sourceSets.main.output
 }

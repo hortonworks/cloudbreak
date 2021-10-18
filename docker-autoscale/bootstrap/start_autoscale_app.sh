@@ -36,6 +36,8 @@ import_certs_from_dir_to_keystore $SERVICE_SPECIFIC_CERT_DIR
 
 echo "Starting the Periscope application..."
 
+CB_JAVA_OPTS="$CB_JAVA_OPTS --add-opens java.base/java.util.concurrent=ALL-UNNAMED"
+
 set -x
 if [ "$SECURE_RANDOM" == "false" ]; then
   CB_JAVA_OPTS="$CB_JAVA_OPTS -Djava.security.egd=file:/dev/./urandom"

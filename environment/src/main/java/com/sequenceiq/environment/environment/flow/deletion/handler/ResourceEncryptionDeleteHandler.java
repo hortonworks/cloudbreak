@@ -65,7 +65,7 @@ public class ResourceEncryptionDeleteHandler extends EventSenderAwareHandler<Env
                             .map(AzureResourceEncryptionParametersDto::getEncryptionKeyUrl)
                             .orElse(null);
                     if (StringUtils.isNotEmpty(encryptionKeyUrl) &&
-                            (environment.getStatus() != EnvironmentStatus.ENVIRONMENT_ENCRYPTION_RESOURCES_DELETED)) {
+                            environment.getStatus() != EnvironmentStatus.ENVIRONMENT_ENCRYPTION_RESOURCES_DELETED) {
                         deleteEncryptionResources(environmentDto, environment);
                     } else {
                         LOGGER.info("No encryption resources found to delete for environment \"{}\".", environment.getName());

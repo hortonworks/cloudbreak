@@ -108,7 +108,7 @@ class AwsMetricPublisherTest {
         metrics.put(CoreMetric.API_CALL_SUCCESSFUL, List.of(new DefaultMetricRecord<>(CoreMetric.API_CALL_SUCCESSFUL, Boolean.FALSE)));
         metrics.put(CoreMetric.API_CALL_DURATION, List.of(new DefaultMetricRecord<>(CoreMetric.API_CALL_DURATION, Duration.ofMinutes(1))));
         underTest.publish(metricCollection(metrics));
-        verify(metricService, times(1)).incrementMetricCounter(eq("aws_api_call_failed_total"), any());
+        verify(metricService, times(1)).incrementMetricCounter(eq("aws_api_call_failed_total"), any(String[].class));
         verifyNoMoreInteractions(metricService);
     }
 
@@ -117,7 +117,7 @@ class AwsMetricPublisherTest {
         Map<SdkMetric<?>, List<MetricRecord<?>>> metrics = defaultMetrics();
         metrics.put(CoreMetric.API_CALL_SUCCESSFUL, List.of(new DefaultMetricRecord<>(CoreMetric.API_CALL_SUCCESSFUL, Boolean.FALSE)));
         underTest.publish(metricCollection(metrics));
-        verify(metricService, only()).incrementMetricCounter(eq("aws_api_call_failed_total"), any());
+        verify(metricService, only()).incrementMetricCounter(eq("aws_api_call_failed_total"), any(String[].class));
     }
 
     @Test
@@ -125,7 +125,7 @@ class AwsMetricPublisherTest {
         Map<SdkMetric<?>, List<MetricRecord<?>>> metrics = defaultMetrics();
         metrics.put(CoreMetric.API_CALL_DURATION, List.of(new DefaultMetricRecord<>(CoreMetric.API_CALL_DURATION, Duration.ofMinutes(1))));
         underTest.publish(metricCollection(metrics));
-        verify(metricService, only()).recordTimerMetric(eq("aws_api_call_duration"), eq(Duration.ofMinutes(1)), any());
+        verify(metricService, only()).recordTimerMetric(eq("aws_api_call_duration"), eq(Duration.ofMinutes(1)), any(String[].class));
     }
 
     @Test
@@ -133,7 +133,7 @@ class AwsMetricPublisherTest {
         Map<SdkMetric<?>, List<MetricRecord<?>>> metrics = defaultMetrics();
         metrics.put(CoreMetric.RETRY_COUNT, List.of(new DefaultMetricRecord<>(CoreMetric.RETRY_COUNT, Integer.valueOf(10))));
         underTest.publish(metricCollection(metrics));
-        verify(metricService, only()).incrementMetricCounter(eq("aws_retry_count"), eq(10.0), any());
+        verify(metricService, only()).incrementMetricCounter(eq("aws_retry_count"), eq(10.0), any(String[].class));
     }
 
     @Test
@@ -141,7 +141,7 @@ class AwsMetricPublisherTest {
         Map<SdkMetric<?>, List<MetricRecord<?>>> metrics = defaultMetrics();
         underTest.publish(metricCollection(metrics,
                 List.of(metricCollection(Map.of(CoreMetric.RETRY_COUNT, List.of(new DefaultMetricRecord<>(CoreMetric.RETRY_COUNT, Integer.valueOf(10))))))));
-        verify(metricService, only()).incrementMetricCounter(eq("aws_retry_count"), eq(10.0), any());
+        verify(metricService, only()).incrementMetricCounter(eq("aws_retry_count"), eq(10.0), any(String[].class));
     }
 
     @Test
@@ -152,9 +152,9 @@ class AwsMetricPublisherTest {
         metrics.put(CoreMetric.MARSHALLING_DURATION, List.of(new DefaultMetricRecord<>(CoreMetric.MARSHALLING_DURATION, Duration.ofMinutes(1))));
         underTest.publish(metricCollection(metrics,
                 List.of(metricCollection(Map.of(CoreMetric.RETRY_COUNT, List.of(new DefaultMetricRecord<>(CoreMetric.RETRY_COUNT, Integer.valueOf(10))))))));
-        verify(metricService, times(1)).recordTimerMetric(eq("aws_api_call_duration"), eq(Duration.ofMinutes(1)), any());
-        verify(metricService, times(1)).incrementMetricCounter(eq("aws_api_call_failed_total"), any());
-        verify(metricService, times(1)).incrementMetricCounter(eq("aws_retry_count"), eq(10.0), any());
+        verify(metricService, times(1)).recordTimerMetric(eq("aws_api_call_duration"), eq(Duration.ofMinutes(1)), any(String[].class));
+        verify(metricService, times(1)).incrementMetricCounter(eq("aws_api_call_failed_total"), any(String[].class));
+        verify(metricService, times(1)).incrementMetricCounter(eq("aws_retry_count"), eq(10.0), any(String[].class));
         verifyNoMoreInteractions(metricService);
     }
 

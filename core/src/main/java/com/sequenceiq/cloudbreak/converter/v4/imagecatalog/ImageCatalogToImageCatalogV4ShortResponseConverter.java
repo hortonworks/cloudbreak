@@ -42,7 +42,7 @@ public class ImageCatalogToImageCatalogV4ShortResponseConverter {
         CloudbreakUser cloudbreakUser = legacyRestRequestThreadLocalService.getCloudbreakUser();
         User user = userService.getOrCreate(cloudbreakUser);
         String defaultImageCatalogName = imageCatalogService.getDefaultImageCatalogName(user);
-        return imageCatalogName.equals(defaultImageCatalogName) || (defaultImageCatalogName == null && imageCatalogService.isEnvDefault(imageCatalogName));
+        return imageCatalogName.equals(defaultImageCatalogName) || defaultImageCatalogName == null && imageCatalogService.isEnvDefault(imageCatalogName);
     }
 
 }

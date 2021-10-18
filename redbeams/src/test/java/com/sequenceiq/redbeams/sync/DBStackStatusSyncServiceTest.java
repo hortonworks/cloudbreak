@@ -2,7 +2,7 @@ package com.sequenceiq.redbeams.sync;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.stream.Stream;
@@ -147,9 +147,9 @@ public class DBStackStatusSyncServiceTest {
         if (newDetailedDBStackStatus != null && newDetailedDBStackStatus.getStatus() != null) {
             verify(dbStackStatusUpdater).updateStatus(DB_STACK_ID, newDetailedDBStackStatus);
         } else {
-            verifyZeroInteractions(dbStackStatusUpdater);
+            verifyNoInteractions(dbStackStatusUpdater);
         }
-        verifyZeroInteractions(dbStackJobService);
+        verifyNoInteractions(dbStackJobService);
     }
 
     @Test

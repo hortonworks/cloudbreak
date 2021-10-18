@@ -99,7 +99,8 @@ public class NifiKnoxRoleConfigProvider extends AbstractRoleConfigProvider {
         return Objects.nonNull(source.getGatewayView())
                 && Objects.nonNull(source.getGatewayView().getExposedServices())
                 && source.getGatewayView().getExposedServices().contains(exposedServiceCollector.getNiFiService().getKnoxService())
-                && (cfm.isPresent() && isVersionOlderThanLimited(cfm.get().getVersion(), CFM_VERSION_2_2_3_0));
+                && cfm.isPresent()
+                && isVersionOlderThanLimited(cfm.get().getVersion(), CFM_VERSION_2_2_3_0);
     }
 
 }

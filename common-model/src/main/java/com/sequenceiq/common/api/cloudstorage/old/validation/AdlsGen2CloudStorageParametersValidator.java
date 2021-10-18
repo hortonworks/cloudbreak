@@ -40,8 +40,8 @@ public class AdlsGen2CloudStorageParametersValidator implements ConstraintValida
 
     private boolean isOnlyOneAuthenticationMethodUsed(AdlsGen2CloudStorageV1Parameters value) {
         boolean result;
-        if ((Objects.isNull(value.getManagedIdentity()) && Objects.nonNull(value.getAccountKey()) && Objects.nonNull(value.getAccountName()))
-            || (Objects.nonNull(value.getManagedIdentity()) && Objects.isNull(value.getAccountKey()) && Objects.isNull(value.getAccountName()))) {
+        if (Objects.isNull(value.getManagedIdentity()) && Objects.nonNull(value.getAccountKey()) && Objects.nonNull(value.getAccountName())
+            || Objects.nonNull(value.getManagedIdentity()) && Objects.isNull(value.getAccountKey()) && Objects.isNull(value.getAccountName())) {
             result = true;
         } else {
             failMessage = "ADLS Gen 2 account should have only one authentication method, either managed identity or account key with account name";

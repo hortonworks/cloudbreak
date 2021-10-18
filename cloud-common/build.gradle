@@ -14,13 +14,13 @@ buildscript {
 
 configurations.all {
     resolutionStrategy {
-        force 'net.bytebuddy:byte-buddy:1.14.4'
+        force "net.bytebuddy:byte-buddy:${byteBuddyVersion}"
     }
 }
 
 jar {
-    baseName = 'cloud-common'
-    archiveName = 'cloud-common.jar'
+    archiveBaseName = 'cloud-common'
+    archiveFileName= 'cloud-common.jar'
 }
 
 dependencies {
@@ -56,14 +56,14 @@ dependencies {
     implementation group: 'net.sf.json-lib',                       name: 'json-lib',                       version: '2.4',  classifier: 'jdk15'
     implementation group: 'com.dyngr',                             name: 'polling',                        version: dyngrPollingVersion
 
-  testImplementation group: 'org.mockito',                       name: 'mockito-core',                   version: mockitoVersion
+    testImplementation group: 'org.mockito',                       name: 'mockito-core',                   version: mockitoVersion
     testImplementation group: 'org.springframework.boot',          name: 'spring-boot-starter-test',       version: springBootVersion
     testImplementation group: 'org.awaitility',                    name: 'awaitility',                     version: awaitilityVersion
 }
 
 task testJar(type: Jar, dependsOn: testClasses) {
-  baseName = "test-${project.archivesBaseName}"
-  classifier 'test'
+  archiveBaseName = "test-${project.archivesBaseName}"
+  archiveClassifier = 'test'
   from sourceSets.test.output
   from sourceSets.main.output
 }

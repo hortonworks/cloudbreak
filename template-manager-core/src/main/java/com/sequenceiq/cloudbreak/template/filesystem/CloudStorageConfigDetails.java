@@ -43,12 +43,7 @@ public class CloudStorageConfigDetails {
                         .stream()
                         .filter(configQueryEntry -> configQueryEntry.getRelatedServices().stream().
                                 anyMatch(relatedService -> relatedService.equalsIgnoreCase(service)))
-                        .filter(configQueryEntry -> {
-                            if ((configQueryEntry.isRequiredForAttachedCluster() && attachedCluster) || !attachedCluster) {
-                                return true;
-                            }
-                            return false;
-                        })
+                        .filter(configQueryEntry -> configQueryEntry.isRequiredForAttachedCluster() || !attachedCluster)
                         .filter(configQueryEntry -> configQueryEntry.getSupportedStorages().contains(request.getFileSystemType().toUpperCase()))
                         .collect(Collectors.toSet());
                 filtered.addAll(collectedEntries);

@@ -184,13 +184,13 @@ public class SdxClusterStatusCheckerJob extends StatusCheckerJob {
     private boolean isUnreachable(StackStatusV4Response stack) {
         Status stackStatus = stack.getStatus();
         Status clusterStatus = stack.getClusterStatus();
-        return stackStatus == Status.UNREACHABLE || (stackStatus == Status.AVAILABLE && clusterStatus == Status.UNREACHABLE);
+        return stackStatus == Status.UNREACHABLE || stackStatus == Status.AVAILABLE && clusterStatus == Status.UNREACHABLE;
     }
 
     private boolean isNodeFailure(StackStatusV4Response stack) {
         Status stackStatus = stack.getStatus();
         Status clusterStatus = stack.getClusterStatus();
-        return stackStatus == Status.NODE_FAILURE || (stackStatus == Status.AVAILABLE && clusterStatus == Status.NODE_FAILURE);
+        return stackStatus == Status.NODE_FAILURE || stackStatus == Status.AVAILABLE && clusterStatus == Status.NODE_FAILURE;
     }
 
     private boolean isDeleteCompleted(StackStatusV4Response stack) {

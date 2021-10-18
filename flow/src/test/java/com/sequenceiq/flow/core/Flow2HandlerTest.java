@@ -196,7 +196,7 @@ class Flow2HandlerTest {
         event.setKey("KEY");
         underTest.accept(event);
         verify(flowConfigurationMap, times(1)).get(anyString());
-        verify(runningFlows, times(1)).put(eq(flow), isNull(String.class));
+        verify(runningFlows, times(1)).put(eq(flow), isNull());
         verify(flowLogService, times(1))
                 .save(any(FlowParameters.class), nullable(String.class), eq("KEY"), any(Payload.class), any(), eq(flowConfig.getClass()), eq(flowState));
         verify(flow, times(1)).sendEvent(anyString(), isNull(), any(), eq(UNKNOWN_OP_TYPE));
@@ -217,7 +217,7 @@ class Flow2HandlerTest {
         assertThrows(CloudbreakServiceException.class,
                 () -> underTest.accept(event));
         verify(flowConfigurationMap, times(1)).get(anyString());
-        verify(runningFlows, times(1)).put(eq(flow), isNull(String.class));
+        verify(runningFlows, times(1)).put(eq(flow), isNull());
         verify(flowLogService, times(1))
                 .save(any(FlowParameters.class), nullable(String.class), eq("KEY"), any(Payload.class), any(), eq(flowConfig.getClass()), eq(flowState));
         verify(runningFlows, times(1)).remove(anyString());
@@ -244,7 +244,7 @@ class Flow2HandlerTest {
         verify(accepted, times(1)).onError(any(FlowNotTriggerableException.class));
 
         verify(flowConfigurationMap, times(1)).get(anyString());
-        verify(runningFlows, times(0)).put(eq(flow), isNull(String.class));
+        verify(runningFlows, times(0)).put(eq(flow), isNull());
         verify(flowLogService, times(0))
                 .save(any(FlowParameters.class), nullable(String.class), eq("KEY"), any(Payload.class), any(), eq(flowConfig.getClass()), eq(flowState));
         verify(runningFlows, times(0)).remove(anyString());
@@ -272,7 +272,7 @@ class Flow2HandlerTest {
 
         verify(accepted, times(0)).onError(any(FlowNotTriggerableException.class));
         verify(flowConfigurationMap, times(1)).get(anyString());
-        verify(runningFlows, times(0)).put(eq(flow), isNull(String.class));
+        verify(runningFlows, times(0)).put(eq(flow), isNull());
         verify(flowLogService, times(0))
                 .save(any(FlowParameters.class), nullable(String.class), eq("KEY"), any(Payload.class), any(), eq(flowConfig.getClass()), eq(flowState));
         verify(runningFlows, times(0)).remove(anyString());
@@ -295,7 +295,7 @@ class Flow2HandlerTest {
         event.setKey("KEY");
         underTest.accept(event);
         verify(flowConfigurationMap, times(1)).get(anyString());
-        verify(runningFlows, times(1)).put(eq(flow), isNull(String.class));
+        verify(runningFlows, times(1)).put(eq(flow), isNull());
         verify(flowLogService, times(1)).save(any(FlowParameters.class), nullable(String.class), eq("KEY"), any(Payload.class), any(),
                 ArgumentMatchers.eq(helloWorldFlowConfig.getClass()), eq(flowState));
         verify(flow, times(1)).sendEvent(anyString(), anyString(), any(), eq(UNKNOWN_OP_TYPE));
@@ -308,7 +308,7 @@ class Flow2HandlerTest {
         CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class, () -> underTest.accept(event));
         assertEquals("Couldn't start process.", exception.getMessage());
         verify(flowConfigurationMap, times(1)).get(anyString());
-        verify(runningFlows, never()).put(any(Flow.class), isNull(String.class));
+        verify(runningFlows, never()).put(any(Flow.class), isNull());
         verify(flowLogService, never()).save(any(FlowParameters.class), anyString(), anyString(), any(Payload.class), anyMap(), any(), any(FlowState.class));
     }
 
@@ -415,7 +415,7 @@ class Flow2HandlerTest {
         verify(flowLogService, times(1)).close(anyLong(), eq(FLOW_ID), eq(false), anyMap());
         verify(runningFlows, times(1)).remove(eq(FLOW_ID));
         verify(runningFlows, never()).get(eq(FLOW_ID));
-        verify(runningFlows, never()).put(any(Flow.class), isNull(String.class));
+        verify(runningFlows, never()).put(any(Flow.class), isNull());
         verify(flowChains, never()).removeFlowChain(anyString(), anyBoolean());
         verify(flowChains, never()).triggerNextFlow(anyString(), anyString(), any(Map.class), any(), any());
     }
@@ -430,7 +430,7 @@ class Flow2HandlerTest {
         verify(flowLogService, times(1)).close(anyLong(), eq(FLOW_ID), eq(false), anyMap());
         verify(runningFlows, times(1)).remove(eq(FLOW_ID));
         verify(runningFlows, never()).get(eq(FLOW_ID));
-        verify(runningFlows, never()).put(any(Flow.class), isNull(String.class));
+        verify(runningFlows, never()).put(any(Flow.class), isNull());
         verify(flowChains, never()).removeFlowChain(anyString(), anyBoolean());
         verify(flowChains, times(1)).triggerNextFlow(eq(FLOW_CHAIN_ID), eq(FLOW_TRIGGER_USERCRN), any(Map.class), any(), any());
     }
@@ -490,7 +490,7 @@ class Flow2HandlerTest {
         verify(flowLogService, times(1)).close(anyLong(), eq(FLOW_ID), eq(false), anyMap());
         verify(runningFlows, times(1)).remove(eq(FLOW_ID));
         verify(runningFlows, never()).get(eq(FLOW_ID));
-        verify(runningFlows, never()).put(any(Flow.class), isNull(String.class));
+        verify(runningFlows, never()).put(any(Flow.class), isNull());
         verify(flowChains, never()).removeFullFlowChain(anyString(), anyBoolean());
         verify(flowChains, never()).triggerNextFlow(anyString(), anyString(), any(Map.class), any(), any());
     }
@@ -506,7 +506,7 @@ class Flow2HandlerTest {
         verify(flowLogService, times(1)).close(anyLong(), eq(FLOW_ID), eq(false), anyMap());
         verify(runningFlows, times(1)).remove(eq(FLOW_ID));
         verify(runningFlows, never()).get(eq(FLOW_ID));
-        verify(runningFlows, never()).put(any(Flow.class), isNull(String.class));
+        verify(runningFlows, never()).put(any(Flow.class), isNull());
         verify(flowChains, times(1)).removeFullFlowChain(anyString(), anyBoolean());
         verify(flowChains, never()).triggerNextFlow(anyString(), anyString(), any(Map.class), any(), any());
     }

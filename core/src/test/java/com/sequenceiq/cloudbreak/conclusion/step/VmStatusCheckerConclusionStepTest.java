@@ -114,7 +114,7 @@ class VmStatusCheckerConclusionStepTest {
     @Test
     public void checkShouldFailIfCMIsRunningAndUnhealthyOrUnknownInstanceExists() {
         when(cloudbreakMessagesService.getMessage(eq(CM_UNHEALTHY_VMS_FOUND))).thenReturn("cm unhealthy vms");
-        when(cloudbreakMessagesService.getMessageWithArgs(eq(CM_UNHEALTHY_VMS_FOUND_DETAILS), any())).thenReturn("cm unhealthy vms details");
+        when(cloudbreakMessagesService.getMessageWithArgs(eq(CM_UNHEALTHY_VMS_FOUND_DETAILS), any(), any())).thenReturn("cm unhealthy vms details");
         when(clusterStatusService.isClusterManagerRunningQuickCheck()).thenReturn(Boolean.TRUE);
         when(instanceMetaDataService.getAllAvailableInstanceMetadataViewsByStackId(anyLong()))
                 .thenReturn(List.of(createInstanceMetadata("host1"), createInstanceMetadata("host2"), createInstanceMetadata("host3")));

@@ -93,6 +93,6 @@ public abstract class AbstractCommonChainAction<S extends FlowState, E extends F
     }
 
     protected boolean shouldCompleteOperation(Map<Object, Object> variables) {
-        return (!isRepair(variables) && !isChainedAction(variables)) || isFinalChain(variables);
+        return !isRepair(variables) && !isChainedAction(variables) || isFinalChain(variables);
     }
 }

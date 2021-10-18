@@ -1,8 +1,8 @@
 apply plugin: 'java'
 
 jar {
-    baseName = 'cloud-aws-gov'
-    archiveName = 'cloud-aws-gov.jar'
+    archiveBaseName = 'cloud-aws-gov'
+    archiveFileName= 'cloud-aws-gov.jar'
 }
 
 repositories {

@@ -6,7 +6,7 @@ repositories {
 }
 
 jar {
-    baseName = 'template-manager-tag'
+    archiveBaseName = 'template-manager-tag'
 }
 
 dependencies {
@@ -20,7 +20,7 @@ dependencies {
 }
 
 task testJar(type: Jar, dependsOn: testClasses) {
-    baseName = "test-${project.archivesBaseName}"
+    archiveBaseName = "test-${project.archivesBaseName}"
     from sourceSets.test.output
     from sourceSets.main.output
 }

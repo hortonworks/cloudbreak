@@ -329,7 +329,7 @@ class FreeIpaRecipeServiceTest {
         recipeAttachDetachRequest.setRecipes(recipes);
         recipeAttachDetachRequest.setEnvironmentCrn("crn");
         freeIpaRecipeService.detachRecipes("accid", recipeAttachDetachRequest);
-        ArgumentCaptor<Set<String>> deletedRecipesArgumentCaptor = ArgumentCaptor.forClass(Set.class);
+        ArgumentCaptor<List<String>> deletedRecipesArgumentCaptor = ArgumentCaptor.forClass(List.class);
         verify(freeIpaStackRecipeRepository).deleteFreeIpaStackRecipeByStackIdAndRecipeIn(eq(1L), deletedRecipesArgumentCaptor.capture());
         assertThat(deletedRecipesArgumentCaptor.getValue()).contains("recipe2");
         verify(recipeUsageService, times(1)).sendDetachedUsageReport(anyString(), any(), any(), anyString(), any());

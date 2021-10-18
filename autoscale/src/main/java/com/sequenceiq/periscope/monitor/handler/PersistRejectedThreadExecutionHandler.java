@@ -34,6 +34,9 @@ public class PersistRejectedThreadExecutionHandler extends AbortPolicy {
     public PersistRejectedThreadExecutionHandler() {
         try {
             callableInFutureTask = FutureTask.class.getDeclaredField("callable");
+            // TODO: rewrite it!!!
+            // It is an ugly and fragile hack and it needs opening Java internal modules with
+            // --add-opens java.base/java.util.concurrent=ALL-UNNAMED
             ReflectionUtils.makeAccessible(callableInFutureTask);
             Callable<Object> adapter = Executors.callable(() -> {
             });

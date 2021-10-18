@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.loadbalancer;
 
 import static java.util.Collections.emptyMap;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -12,8 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Assert;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,7 +46,7 @@ import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @ExtendWith(MockitoExtension.class)
-public class GcpBackendServiceResourceBuilderTest {
+class GcpBackendServiceResourceBuilderTest {
 
     @Mock
     private GcpContext gcpContext;
@@ -84,14 +84,12 @@ public class GcpBackendServiceResourceBuilderTest {
     @Mock
     private GcpLoadBalancerTypeConverter gcpLoadBalancerTypeConverter;
 
-    private Image image;
-
     private CloudStack cloudStack;
 
     @BeforeEach
     void setup() {
         Map<InstanceGroupType, String> userData = ImmutableMap.of(InstanceGroupType.CORE, "CORE", InstanceGroupType.GATEWAY, "GATEWAY");
-        image = new Image("cb-centos66-amb200-2015-05-25", userData, "redhat6", "redhat6", "", "default", "default-id", new HashMap<>());
+        Image image = new Image("cb-centos66-amb200-2015-05-25", userData, "redhat6", "redhat6", "", "default", "default-id", new HashMap<>());
         GcpResourceNameService resourceNameService = new GcpResourceNameService();
         ReflectionTestUtils.setField(resourceNameService, "maxResourceNameLength", 50);
         ReflectionTestUtils.setField(underTest, "resourceNameService", resourceNameService);
@@ -101,7 +99,7 @@ public class GcpBackendServiceResourceBuilderTest {
     }
 
     @Test
-    public void testCreateWhereEverythingGoesFine() {
+    void testCreateWhereEverythingGoesFine() {
         when(gcpContext.getName()).thenReturn("name");
         when(cloudLoadBalancer.getType()).thenReturn(LoadBalancerType.PUBLIC);
         Map<TargetGroupPortPair, Set<Group>> targetGroupPortPairSetHashMap = new HashMap<>();
@@ -110,14 +108,14 @@ public class GcpBackendServiceResourceBuilderTest {
 
         List<CloudResource> cloudResources = underTest.create(gcpContext, authenticatedContext, cloudLoadBalancer);
 
-        Assertions.assertTrue(cloudResources.get(0).getName().startsWith("name-public-8080"));
-        Assertions.assertEquals(1, cloudResources.size());
-        Assertions.assertEquals(8080, cloudResources.get(0).getParameter("hcport", Integer.class));
-        Assertions.assertEquals(80, cloudResources.get(0).getParameter("trafficport", Integer.class));
+        assertTrue(cloudResources.get(0).getName().startsWith("name-public-8080"));
+        assertEquals(1, cloudResources.size());
+        assertEquals(8080, cloudResources.get(0).getParameter("hcport", Integer.class));
+        assertEquals(80, cloudResources.get(0).getParameter("trafficport", Integer.class));
     }
 
     @Test
-    public void testBuildWithSeparateHCPort() throws Exception {
+    void testBuildWithSeparateHCPort() throws Exception {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("hcport", 8080);
         parameters.put("trafficport", 80);
@@ -170,14 +168,14 @@ public class GcpBackendServiceResourceBuilderTest {
         List<CloudResource> cloudResources = underTest.build(gcpContext, authenticatedContext,
                 Collections.singletonList(resource), cloudLoadBalancer, cloudStack);
 
-        Assert.assertEquals("super", cloudResources.get(0).getName());
+        assertEquals("super", cloudResources.get(0).getName());
 
-        Assertions.assertEquals(8080, cloudResources.get(0).getParameter("hcport", Integer.class));
-        Assertions.assertEquals(80, cloudResources.get(0).getParameter("trafficport", Integer.class));
+        assertEquals(8080, cloudResources.get(0).getParameter("hcport", Integer.class));
+        assertEquals(80, cloudResources.get(0).getParameter("trafficport", Integer.class));
     }
 
     @Test
-    public void testBuildWithMultipleTrafficPorts() throws Exception {
+    void testBuildWithMultipleTrafficPorts() throws Exception {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("hcport", 8443);
         parameters.put("trafficports", List.of(443, 11443));
@@ -231,16 +229,16 @@ public class GcpBackendServiceResourceBuilderTest {
         List<CloudResource> cloudResources = underTest.build(gcpContext, authenticatedContext,
                 Collections.singletonList(resource), cloudLoadBalancer, cloudStack);
 
-        Assert.assertEquals("super", cloudResources.get(0).getName());
+        assertEquals("super", cloudResources.get(0).getName());
 
-        Assertions.assertEquals(8443, cloudResources.get(0).getParameter("hcport", Integer.class));
+        assertEquals(8443, cloudResources.get(0).getParameter("hcport", Integer.class));
         List<Integer> ports = (List<Integer>) cloudResources.get(0).getParameters().get("trafficports");
-        Assertions.assertTrue(ports.contains(443));
-        Assertions.assertTrue(ports.contains(11443));
+        assertTrue(ports.contains(443));
+        assertTrue(ports.contains(11443));
     }
 
     @Test
-    public void testDelete() throws Exception {
+    void testDelete() throws Exception {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("hcport", 8080);
         parameters.put("trafficport", 80);
@@ -269,11 +267,11 @@ public class GcpBackendServiceResourceBuilderTest {
 
         CloudResource cloudResource = underTest.delete(gcpContext, authenticatedContext, resource);
 
-        Assert.assertEquals("super", cloudResource.getName());
+        assertEquals("super", cloudResource.getName());
 
-        Assertions.assertEquals(8080, cloudResource.getParameter("hcport", Integer.class));
-        Assertions.assertEquals(80, cloudResource.getParameter("trafficport", Integer.class));
-        Assert.assertEquals(ResourceType.GCP_BACKEND_SERVICE, cloudResource.getType());
-        Assert.assertEquals(CommonStatus.CREATED, cloudResource.getStatus());
+        assertEquals(8080, cloudResource.getParameter("hcport", Integer.class));
+        assertEquals(80, cloudResource.getParameter("trafficport", Integer.class));
+        assertEquals(ResourceType.GCP_BACKEND_SERVICE, cloudResource.getType());
+        assertEquals(CommonStatus.CREATED, cloudResource.getStatus());
     }
 }

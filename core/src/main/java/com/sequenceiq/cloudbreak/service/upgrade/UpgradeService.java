@@ -240,8 +240,8 @@ public class UpgradeService {
         StackViewV4Responses stackViewV4Responses = distroXV1Endpoint.list(null, stack.getEnvironmentCrn());
         for (StackViewV4Response stackViewV4Response : stackViewV4Responses.getResponses()) {
             if (!Status.getAllowedDataHubStatesForSdxUpgrade().contains(stackViewV4Response.getStatus())
-                    || (stackViewV4Response.getCluster() != null
-                    && !Status.getAllowedDataHubStatesForSdxUpgrade().contains(stackViewV4Response.getCluster().getStatus()))) {
+                    || stackViewV4Response.getCluster() != null
+                    && !Status.getAllowedDataHubStatesForSdxUpgrade().contains(stackViewV4Response.getCluster().getStatus())) {
                 return false;
             }
         }

@@ -21,29 +21,29 @@ dependencies {
   implementation project(':cloud-template')
 
   // mockito juniper depends on ByteBuddy 1.9.7, but hibernate use older version
-  implementation group: 'net.bytebuddy',                 name: 'byte-buddy',                     version: '1.14.4'
+  implementation group: 'net.bytebuddy',                 name: 'byte-buddy',                     version: byteBuddyVersion
   implementation group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
   implementation group: 'org.apache.commons',            name: 'commons-lang3',                  version: apacheCommonsLangVersion
   implementation group: 'commons-io',                    name: 'commons-io',                     version: apacheCommonsIoVersion
   implementation group: 'commons-codec',                 name: 'commons-codec',                  version: commonsCodecVersion
 
-  implementation(group: 'software.amazon.awssdk',                 name: 'core',              version: awsSdkVersion) {
+  implementation(group: 'software.amazon.awssdk',        name: 'core',                           version: awsSdkVersion) {
     exclude group: 'commons-logging'
   }
-  implementation group: 'software.amazon.awssdk',                 name: 'ec2',               version: awsSdkVersion
-  implementation group: 'software.amazon.awssdk',                 name: 'autoscaling',       version: awsSdkVersion
-  implementation group: 'software.amazon.awssdk',                 name: 'dynamodb',          version: awsSdkVersion
-  implementation group: 'software.amazon.awssdk',                 name: 's3',                version: awsSdkVersion
-  implementation group: 'software.amazon.awssdk',                 name: 'iam',               version: awsSdkVersion
-  implementation group: 'software.amazon.awssdk',                 name: 'kms',               version: awsSdkVersion
-  implementation group: 'software.amazon.awssdk',                 name: 'rds',               version: awsSdkVersion
-  implementation group: 'software.amazon.awssdk',                 name: 'sts',               version: awsSdkVersion
-  implementation group: 'software.amazon.awssdk',                 name: 'cloudwatch',        version: awsSdkVersion
-  implementation group: 'software.amazon.awssdk',                 name: 'elasticloadbalancingv2',  version: awsSdkVersion
-  implementation group: 'software.amazon.awssdk',                 name: 'efs',               version: awsSdkVersion
-  implementation group: 'software.amazon.awssdk',                 name: 'networkfirewall',   version: awsSdkVersion
+  implementation group: 'software.amazon.awssdk',        name: 'ec2',                            version: awsSdkVersion
+  implementation group: 'software.amazon.awssdk',        name: 'autoscaling',                    version: awsSdkVersion
+  implementation group: 'software.amazon.awssdk',        name: 'dynamodb',                       version: awsSdkVersion
+  implementation group: 'software.amazon.awssdk',        name: 's3',                             version: awsSdkVersion
+  implementation group: 'software.amazon.awssdk',        name: 'iam',                            version: awsSdkVersion
+  implementation group: 'software.amazon.awssdk',        name: 'kms',                            version: awsSdkVersion
+  implementation group: 'software.amazon.awssdk',        name: 'rds',                            version: awsSdkVersion
+  implementation group: 'software.amazon.awssdk',        name: 'sts',                            version: awsSdkVersion
+  implementation group: 'software.amazon.awssdk',        name: 'cloudwatch',                     version: awsSdkVersion
+  implementation group: 'software.amazon.awssdk',        name: 'elasticloadbalancingv2',         version: awsSdkVersion
+  implementation group: 'software.amazon.awssdk',        name: 'efs',                            version: awsSdkVersion
+  implementation group: 'software.amazon.awssdk',        name: 'networkfirewall',                version: awsSdkVersion
 
-  implementation     group: 'com.dyngr',          name: 'polling',                        version: dyngrPollingVersion
+  implementation group: 'com.dyngr',                     name: 'polling',                        version: dyngrPollingVersion
 
   testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
   testImplementation group: 'org.springframework.boot',  name:'spring-boot-starter-freemarker',  version: springBootVersion
@@ -52,7 +52,7 @@ dependencies {
   }
   testImplementation group: 'org.hamcrest',              name: 'hamcrest',                       version: hamcrestVersion
   testImplementation group: 'org.assertj',               name: 'assertj-core',                   version: assertjVersion
-  testImplementation group: 'org.junit.jupiter',  name: 'junit-jupiter-migrationsupport', version: junitJupiterVersion
+  testImplementation group: 'org.junit.jupiter',         name: 'junit-jupiter-migrationsupport', version: junitJupiterVersion
 }
 
 test {

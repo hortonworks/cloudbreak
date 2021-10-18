@@ -23,7 +23,7 @@ import software.amazon.awssdk.core.exception.SdkException;
 import software.amazon.awssdk.services.autoscaling.model.ScalingActivityInProgressException;
 
 @ExtendWith(MockitoExtension.class)
-public class SdkClientExceptionMapperTest {
+class SdkClientExceptionMapperTest {
 
     private static final String REGION = "region";
 
@@ -45,7 +45,7 @@ public class SdkClientExceptionMapperTest {
     }
 
     @Test
-    public void testMapWhenMethodNameAdded() {
+    void testMapWhenMethodNameAdded() {
         SdkException e = AwsServiceException.builder().message("message").awsErrorDetails(AwsErrorDetails.builder().build()).build();
 
         String message = "message (Service: null, Status Code: 0, Request ID: null)";
@@ -69,7 +69,7 @@ public class SdkClientExceptionMapperTest {
     }
 
     @Test
-    public void testMapMessageEncodedAndMethodNameContained() {
+    void testMapMessageEncodedAndMethodNameContained() {
         SdkClientException e = SdkClientException.create("message");
 
         when(awsEncodedAuthorizationFailureMessageDecoder.decodeAuthorizationFailureMessageIfNeeded(ac, REGION, "message")).thenReturn("encoded: methodName");
@@ -81,7 +81,7 @@ public class SdkClientExceptionMapperTest {
     }
 
     @Test
-    public void testMapMessageRateExceededAndMethodNameContained() {
+    void testMapMessageRateExceededAndMethodNameContained() {
         String message = "Rate exceeded: methodName";
         SdkClientException e = SdkClientException.create(message);
 
@@ -94,7 +94,7 @@ public class SdkClientExceptionMapperTest {
     }
 
     @Test
-    public void testMapMessageRateExceeded() {
+    void testMapMessageRateExceeded() {
         String message = "Rate exceeded";
         SdkClientException e = SdkClientException.create(message);
 
@@ -107,7 +107,7 @@ public class SdkClientExceptionMapperTest {
     }
 
     @Test
-    public void testMapMessageRequestLimitExceededAndMethodNameContained() {
+    void testMapMessageRequestLimitExceededAndMethodNameContained() {
         String message = "Request limit exceeded: methodName";
         SdkClientException e = SdkClientException.create(message);
 
@@ -120,7 +120,7 @@ public class SdkClientExceptionMapperTest {
     }
 
     @Test
-    public void testMapMessageRequestLimitExceeded() {
+    void testMapMessageRequestLimitExceeded() {
         String message = "Request limit exceeded";
         SdkClientException e = SdkClientException.create(message);
 
@@ -133,7 +133,7 @@ public class SdkClientExceptionMapperTest {
     }
 
     @Test
-    public void testMapScalingActivityInProgressExceptionToActionFailed() {
+    void testMapScalingActivityInProgressExceptionToActionFailed() {
         String message = "Activity 123 is in progress. (Service: null, Status Code: 0, Request ID: null)";
         ScalingActivityInProgressException e = ScalingActivityInProgressException.builder()
                 .message("Activity 123 is in progress.")

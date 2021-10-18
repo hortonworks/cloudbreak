@@ -1,6 +1,9 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.group;
 
-
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -9,8 +12,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 
-import org.junit.Assert;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,7 +39,7 @@ import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @ExtendWith(MockitoExtension.class)
-public class GcpInstanceGroupResourceBuilderTest {
+class GcpInstanceGroupResourceBuilderTest {
 
     @Mock
     private GcpStackUtil gcpStackUtil;
@@ -87,7 +88,7 @@ public class GcpInstanceGroupResourceBuilderTest {
     }
 
     @Test
-    public void testDeleteWhenEverythingGoesFine() throws Exception {
+    void testDeleteWhenEverythingGoesFine() throws Exception {
         CloudResource resource = CloudResource.builder()
                 .withType(ResourceType.GCP_INSTANCE_GROUP)
                 .withStatus(CommonStatus.CREATED)
@@ -110,15 +111,15 @@ public class GcpInstanceGroupResourceBuilderTest {
 
         CloudResource delete = underTest.delete(gcpContext, authenticatedContext, resource, network);
 
-        Assert.assertEquals(ResourceType.GCP_INSTANCE_GROUP, delete.getType());
-        Assert.assertEquals(CommonStatus.CREATED, delete.getStatus());
-        Assert.assertEquals("super", delete.getName());
-        Assert.assertEquals("master", delete.getGroup());
-        Assert.assertEquals("id-123", delete.getInstanceId());
+        assertEquals(ResourceType.GCP_INSTANCE_GROUP, delete.getType());
+        assertEquals(CommonStatus.CREATED, delete.getStatus());
+        assertEquals("super", delete.getName());
+        assertEquals("master", delete.getGroup());
+        assertEquals("id-123", delete.getInstanceId());
     }
 
     @Test
-    public void testCreateWhenEverythingGoesFine() throws Exception {
+    void testCreateWhenEverythingGoesFine() throws Exception {
 
         when(gcpContext.getName()).thenReturn("name");
         when(group.getName()).thenReturn("group");
@@ -129,12 +130,11 @@ public class GcpInstanceGroupResourceBuilderTest {
 
         CloudResource cloudResource = underTest.create(gcpContext, authenticatedContext, group, network);
 
-        Assertions.assertEquals("name-group-111", cloudResource.getName());
+        assertEquals("name-group-111", cloudResource.getName());
     }
 
     @Test
-    public void testCloudResourceBoundToStack() throws Exception {
-
+    void testCloudResourceBoundToStack() throws Exception {
         when(gcpContext.getName()).thenReturn("name");
         when(group.getName()).thenReturn("group");
         when(gcpContext.getLocation()).thenReturn(location);
@@ -148,11 +148,11 @@ public class GcpInstanceGroupResourceBuilderTest {
         when(authenticatedContext.getCloudContext().getId()).thenReturn(222L);
         CloudResource cloudResource2 = underTest.create(gcpContext, authenticatedContext, group, network);
 
-        Assertions.assertNotEquals(cloudResource1.getName(), cloudResource2.getName());
+        assertNotEquals(cloudResource1.getName(), cloudResource2.getName());
     }
 
     @Test
-    public void testBuildWithItemsInGroup() throws Exception {
+    void testBuildWithItemsInGroup() throws Exception {
         CloudResource resource = CloudResource.builder()
                 .withType(ResourceType.GCP_INSTANCE_GROUP)
                 .withStatus(CommonStatus.CREATED)
@@ -178,12 +178,12 @@ public class GcpInstanceGroupResourceBuilderTest {
 
         CloudResource cloudResource = underTest.build(gcpContext, authenticatedContext, group, network, security, resource);
 
-        Assert.assertEquals("super", cloudResource.getName());
+        assertEquals("super", cloudResource.getName());
 
     }
 
     @Test
-    public void testBuildNoPermission() throws Exception {
+    void testBuildNoPermission() throws Exception {
         CloudResource resource = CloudResource.builder()
                 .withType(ResourceType.GCP_INSTANCE_GROUP)
                 .withStatus(CommonStatus.CREATED)
@@ -207,13 +207,13 @@ public class GcpInstanceGroupResourceBuilderTest {
         when(operation.getHttpErrorStatusCode()).thenReturn(401);
         when(operation.getHttpErrorMessage()).thenReturn("Not Authorized");
 
-        Assert.assertThrows("Not Authorized", GcpResourceException.class,
-                () -> underTest.build(gcpContext, authenticatedContext, group, network, security, resource));
+        assertThrows(GcpResourceException.class,
+                () -> underTest.build(gcpContext, authenticatedContext, group, network, security, resource), "Not Authorized");
     }
 
     @Test
-    public void testResourceType() {
-        Assert.assertTrue(underTest.resourceType().equals(ResourceType.GCP_INSTANCE_GROUP));
+    void testResourceType() {
+        assertTrue(underTest.resourceType().equals(ResourceType.GCP_INSTANCE_GROUP));
     }
 
 }

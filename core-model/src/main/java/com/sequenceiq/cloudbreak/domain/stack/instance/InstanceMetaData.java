@@ -298,7 +298,7 @@ public class InstanceMetaData implements ProvisionEntity, OrchestrationNode, Ins
 
     public boolean isGateway() {
         return InstanceMetadataType.GATEWAY == instanceMetadataType || InstanceMetadataType.GATEWAY_PRIMARY == instanceMetadataType
-                || (instanceMetadataType == null && instanceGroup != null && InstanceGroupType.GATEWAY == instanceGroup.getInstanceGroupType());
+                || instanceMetadataType == null && instanceGroup != null && InstanceGroupType.GATEWAY == instanceGroup.getInstanceGroupType();
     }
 
     public String getLocalityIndicator() {

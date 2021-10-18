@@ -486,7 +486,7 @@ public class StackCreatorService {
     }
 
     private boolean hasCmParcelInfo(ClouderaManagerV4Request cmRequest) {
-        return (cmRequest != null && !CollectionUtils.isEmpty(cmRequest.getProducts())) || (cmRequest != null && cmRequest.getRepository() != null);
+        return cmRequest != null && !CollectionUtils.isEmpty(cmRequest.getProducts()) || cmRequest != null && cmRequest.getRepository() != null;
     }
 
     private StatedImage getImageFromCatalog(Future<StatedImage> imgFromCatalogFuture) {

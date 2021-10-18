@@ -16,7 +16,7 @@ plugins {
     id 'checkstyle'
     id 'jacoco'
     id 'maven-publish'
-    id 'org.springframework.boot' version '2.1.2.RELEASE'
+    id 'org.springframework.boot' version "${springBootVersion}"
     id "org.sonarqube" version "${sonarVersion}"
 }
 
@@ -24,7 +24,7 @@ apply plugin: org.sonarqube.gradle.SonarQubePlugin
 
 configurations.all {
     resolutionStrategy {
-        force "net.bytebuddy:byte-buddy:1.14.4"
+        force "net.bytebuddy:byte-buddy:${byteBuddyVersion}"
     }
 }
 
@@ -49,7 +49,7 @@ sonarqube {
 }
 
 dependencies {
-    implementation     project(':audit-connector')
+    implementation project(':audit-connector')
     implementation     project(":authorization-common")
     implementation     project(":common")
     implementation     project(':core-common')
@@ -129,8 +129,8 @@ dependencies {
     testImplementation group: "com.google.guava",          name: "guava",                                    version: guavaVersion
     testImplementation group: 'org.assertj',               name: 'assertj-core',                             version: assertjVersion
 
-    testRuntimeClasspath group: 'org.testcontainers',      name: 'postgresql',                               version: testContainersVersion
-    testRuntimeClasspath group: 'org.awaitility',          name: 'awaitility',                               version: awaitilityVersion
+    testRuntimeOnly group: 'org.testcontainers',      name: 'postgresql',                               version: testContainersVersion
+    testRuntimeOnly group: 'org.awaitility',          name: 'awaitility',                               version: awaitilityVersion
 }
 
 bootRun {
@@ -152,12 +152,12 @@ bootRun {
 }
 
 bootRun {
-  main = "com.sequenceiq.environment.EnvironmentApplication"
+  mainClass = "com.sequenceiq.environment.EnvironmentApplication"
 }
 
 bootJar {
-  baseName = "environment"
-  archiveName = "environment.jar"
+  archiveBaseName = "environment"
+  archiveFileName= "environment.jar"
   manifest {
     def grgit = Grgit.open(currentDir: project.projectDir)
     attributes "Implementation-Version": grgit.describe()

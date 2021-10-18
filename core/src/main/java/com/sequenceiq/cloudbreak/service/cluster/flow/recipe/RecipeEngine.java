@@ -134,7 +134,7 @@ public class RecipeEngine {
 
     // note: executed when LDAP config is present, because later the LDAP sync is hooked for this salt state in the top.sls.
     private boolean shouldExecutePostClouderaManagerStartRecipeOnStack(StackView stack, Collection<Recipe> recipes) {
-        return (stack.getClusterId() != null && ldapConfigService.isLdapConfigExistsForEnvironment(stack.getEnvironmentCrn(), stack.getName()))
+        return stack.getClusterId() != null && ldapConfigService.isLdapConfigExistsForEnvironment(stack.getEnvironmentCrn(), stack.getName())
                 || recipesFound(recipes, POST_CLOUDERA_MANAGER_START);
     }
 

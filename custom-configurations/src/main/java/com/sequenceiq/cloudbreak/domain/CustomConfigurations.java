@@ -19,6 +19,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(
+        name = "customconfigurations",
         uniqueConstraints = {@UniqueConstraint(columnNames = {"name", "account"}), @UniqueConstraint(columnNames = "crn")}
 )
 public class CustomConfigurations implements Serializable {

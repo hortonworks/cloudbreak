@@ -34,9 +34,14 @@ management:
         "[http.server.requests]": "125ms, 250ms, 500ms, 1s, 2s"
       percentiles:
         "[http.server.requests]": "0.5, 0.95"
+  info:
+    env:
+      enabled: true
+
 cdp.structuredevent:
   rest:
     contentlogging: true
+
 consumption:
   schema.migration.auto: true
   cert.dir: /certs/
@@ -90,6 +95,8 @@ spring:
         order_updates: true
   lifecycle:
     timeout-per-shutdown-phase: 60s
+  main:
+    allow-circular-references: true
 
 rest:
   debug: false

@@ -46,7 +46,7 @@
 # Local Development Setup
 As of now this document focuses on setting up your development environment on macOS. You'll need Homebrew to install certain components in case you don't have them already. To get Homebrew please follow the installation instructions on the Homebrew homepage: https://brew.sh
 
-As a prerequisite, you need to have Java 11 installed. You can choose from many options, including the Oracle JDK, Oracle OpenJDK, or an OpenJDK from any of several providers. For help in choosing your JDK, consult [Java is Still Free](https://medium.com/@javachampions/java-is-still-free-2-0-0-6b9aa8d6d244).
+As a prerequisite, you need to have Java 17 installed. You can choose from many options, including the Oracle JDK, Oracle OpenJDK, or an OpenJDK from any of several providers. For help in choosing your JDK, consult [Java is Still Free](https://medium.com/@javachampions/java-is-still-free-2-0-0-6b9aa8d6d244).
 
 You'll need Docker. For Mac, use [Docker Desktop for Mac](https://docs.docker.com/docker-for-mac/install/). Please allocate at least 6 CPU and 12 GB Memory to the process. (Depends on that how many service running in your IntelliJ and in Docker containers)
 
@@ -236,17 +236,17 @@ In IDEA set your SDK to your Java version under:
 
 Set project SDK
 ```
-File -> Project Structure -> Project Settings -> Project -> Project SDK -> 11
+File -> Project Structure -> Project Settings -> Project -> Project SDK -> 17
 ```
 
 Set project Language level
 ```
-File -> Project Structure -> Project Settings -> Project -> Project Language Level -> 11
+File -> Project Structure -> Project Settings -> Project -> Project Language Level -> 17
 ```
 
 Set Gradle JVM
 ```
-IntelliJ IDEA -> Preferences -> Build, Execution, Deployment -> Gradle -> Gradle JVM -> 11
+IntelliJ IDEA -> Preferences -> Build, Execution, Deployment -> Gradle -> Gradle JVM -> 17
 ```
 
 Set Import Order
@@ -382,6 +382,7 @@ After importing the `cloudbreak` repo root, launch the Periscope application by 
 -Daltus.ums.host=localhost
 -Dvault.root.token=<VAULT_ROOT_TOKEN>
 -Dinstance.node.id=<NODE_ID>
+--add-opens java.base/java.util.concurrent=ALL-UNNAMED
 ```
 
 Replace `<VAULT_ROOT_TOKEN>` and `<NODE_ID>` with the value of `VAULT_ROOT_TOKEN` and `CB_INSTANCE_NODE_ID` respectively from the `Profile` file.
@@ -511,7 +512,11 @@ Please make sure that `thunderhead-api` has also been added to `CB_LOCAL_DEV_LIS
 
 ### Running Mock-Infrastructure in IDEA
 
-After importing the `cloudbreak` repo root, launch the mock-infrastructure application by executing the `com.sequenceiq.mock.MockInfrastructureApplication` class (set `Use classpath of module` to `cloudbreak.mock-infrastructure.main`).
+After importing the `cloudbreak` repo root, launch the mock-infrastructure application by executing the `com.sequenceiq.mock.MockInfrastructureApplication` class (set `Use classpath of module` to `cloudbreak.mock-infrastructure.main`) with the following JVM options:
+```
+--add-opens java.base/java.util=ALL-UNNAMED
+```
+
 
 Please make sure that `mock-infrastructure` has been added to `CB_LOCAL_DEV_LIST` list in the `Profile` file of cbd.
 
@@ -707,6 +712,7 @@ export MOCK_INFRASTRUCTURE_HOST=localhost
 then run the following Gradle command:
 ```
 ./gradlew :mock-infrastructure:bootRun -PjvmArgs="\
+--add-opens java.base/java.util=ALL-UNNAMED \
 -Dspring.config.location=$(pwd)/mock-infrastructure/src/main/resources/application.yml"
 ```
 

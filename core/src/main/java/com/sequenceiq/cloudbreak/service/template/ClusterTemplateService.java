@@ -274,7 +274,7 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
 
     @VisibleForTesting
     boolean isUsableClusterTemplate(ClusterTemplateViewV4Response response) {
-        return (isUserManaged(response) && hasEnvironment(response)) || isDefaultTemplate(response);
+        return isUserManaged(response) && hasEnvironment(response) || isDefaultTemplate(response);
     }
 
     private boolean isUserManaged(ClusterTemplateViewV4Response response) {

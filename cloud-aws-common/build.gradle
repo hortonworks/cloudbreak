@@ -47,6 +47,8 @@ dependencies {
   api group: 'software.amazon.awssdk', name: 'autoscaling', version: awsSdkVersion
   api group: 'software.amazon.awssdk', name: 'cloudformation', version: awsSdkVersion
 
+  implementation group: 'org.springframework', name: 'spring-aspects', version: springFrameworkVersion
+
   testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-migrationsupport', version: junitJupiterVersion
   testImplementation group: 'org.hamcrest', name: 'hamcrest', version: hamcrestVersion
   testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: springBootVersion

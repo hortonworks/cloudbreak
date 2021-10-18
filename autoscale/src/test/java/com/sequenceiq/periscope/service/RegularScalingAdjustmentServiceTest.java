@@ -237,7 +237,7 @@ class RegularScalingAdjustmentServiceTest {
         lenient().doCallRealMethod().when(scalingEventSender).sendStopStartScaleUpEvent(any(BaseAlert.class), anyInt(), anyInt(), anyInt(), anyLong());
         lenient().doCallRealMethod().when(scalingEventSender).sendScaleDownEvent(any(BaseAlert.class), anyInt(), anyList(), anyInt(),
                 any(ScalingAdjustmentType.class), anyLong());
-        lenient().doReturn(TEST_MESSAGE).when(messagesService).getMessageWithArgs(anyString(), any());
+        lenient().doReturn(TEST_MESSAGE).when(messagesService).getMessageWithArgs(anyString(), any(), any(ScalingAdjustmentType.class));
         lenient().doCallRealMethod().when(clock).getCurrentTimeMillis();
         lenient().doReturn(scalingActivity).when(scalingActivityService).create(any(Cluster.class), any(ActivityStatus.class), anyString(), anyLong());
         doCallRealMethod().when(stackResponseUtils).getCloudInstanceIdsForHostGroup(any(StackV4Response.class), anyString());

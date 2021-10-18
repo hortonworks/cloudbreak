@@ -6,8 +6,8 @@ repositories {
 }
 
 jar {
-  baseName = 'core-model'
-  archiveName = 'core-model.jar'
+  archiveBaseName = 'core-model'
+  archiveFileName= 'core-model.jar'
 }
 
 dependencies {
@@ -31,7 +31,7 @@ dependencies {
 }
 
 task testJar(type: Jar, dependsOn: testClasses) {
-  baseName = "test-${project.archivesBaseName}"
+  archiveBaseName = "test-${project.archivesBaseName}"
   from sourceSets.test.output
   from sourceSets.main.output
 }

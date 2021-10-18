@@ -167,7 +167,7 @@ public class StorageValidationService {
     private boolean isAzureAuthenticationConfigured(SdxCloudStorageRequest cloudStorage) {
         return cloudStorage.getAdlsGen2() != null
                 && (!StringUtils.isEmpty(cloudStorage.getAdlsGen2().getManagedIdentity())
-                || (!StringUtils.isEmpty(cloudStorage.getAdlsGen2().getAccountKey()) && !StringUtils.isEmpty(cloudStorage.getAdlsGen2().getAccountName())));
+                || !StringUtils.isEmpty(cloudStorage.getAdlsGen2().getAccountKey()) && !StringUtils.isEmpty(cloudStorage.getAdlsGen2().getAccountName()));
     }
 
     private Map<String, String> getUserMapping(String dataAccessRole, String rangerAuditRole) {

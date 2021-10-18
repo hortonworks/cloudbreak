@@ -102,8 +102,8 @@ public class Telemetry implements Serializable {
 
     @JsonIgnore
     public boolean isMonitoringFeatureEnabled() {
-        return features == null || (features.getMonitoring() != null
-                && features.getMonitoring().getEnabled());
+        return features == null || features.getMonitoring() != null
+                && features.getMonitoring().getEnabled();
     }
 
     @JsonIgnore
@@ -130,8 +130,8 @@ public class Telemetry implements Serializable {
 
     @JsonIgnore
     public boolean isCloudStorageLoggingEnabled() {
-        return features == null || (features.getCloudStorageLogging() != null
-                && features.getCloudStorageLogging().getEnabled());
+        return features == null || features.getCloudStorageLogging() != null
+                && features.getCloudStorageLogging().getEnabled();
     }
 
 }

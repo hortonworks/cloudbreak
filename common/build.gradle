@@ -12,7 +12,7 @@ repositories {
 }
 
 jar {
-  baseName = 'common'
+  archiveBaseName = 'common'
 }
 
 dependencies {
@@ -25,8 +25,9 @@ dependencies {
   implementation group: 'org.slf4j',                        name: 'slf4j-api',                      version: slf4jApiVersion
   implementation group: 'ch.qos.logback.contrib',           name: 'logback-json-classic',           version: logbackJsonClassicVersion
   implementation group: 'io.micrometer',                    name: 'micrometer-core',                version: micrometerVersion
-  implementation (group: 'io.micrometer',                   name: 'micrometer-jersey2',             version: micrometerVersion) {
-    exclude group: 'org.glassfish.jersey.inject'
+  implementation (group: 'io.micrometer',                   name: 'micrometer-jersey2',             version: micrometerJersey2Version) {
+    exclude group: 'io.micrometer'
+    exclude group: 'org.glassfish.jersey.core'
   }
   implementation group: 'io.micrometer',                    name: 'micrometer-registry-prometheus', version: micrometerVersion
   api group: 'commons-io',                                  name: 'commons-io',                     version: apacheCommonsIoVersion
@@ -74,13 +75,12 @@ dependencies {
   implementation group: 'net.sf.json-lib',                  name: 'json-lib',                       version: '2.4',  classifier: 'jdk15'
   api group: 'org.springframework.boot',                    name: 'spring-boot-starter-actuator',   version: springBootVersion
   api group: 'com.zaxxer',                                  name: 'HikariCP',                       version: hikariCPVersion
-  implementation (group: 'com.fasterxml.jackson.core',      name: 'jackson-databind',               version: jacksonDatabindVersion) {
-    force = true
-  }
+  implementation group: 'com.fasterxml.jackson.core',       name: 'jackson-databind',               version: { strictly jacksonDatabindVersion }
   api group: 'org.springframework.security',                name: 'spring-security-jwt',              version: '1.1.1.RELEASE'
   api group: 'org.springframework.security',                name: 'spring-security-core',             version: springSecurityVersion
   api group: 'org.springframework.security',                name: 'spring-security-config',           version: springSecurityVersion
   api group: 'com.cloudera.crypto',                         name: 'openssl-provider',                 version: clouderaCryptoOpenSslProviderVersion
+  implementation     group: 'org.aspectj',                  name: 'aspectjtools',                   version: '1.9.19'
 
   testImplementation group: 'org.springframework.boot',     name: 'spring-boot-starter-test',       version: springBootVersion
   testImplementation group: 'org.springframework.boot',     name: 'spring-boot-starter-validation', version: springBootVersion
@@ -88,8 +88,8 @@ dependencies {
 }
 
 task testJar(type: Jar, dependsOn: testClasses) {
-  baseName = "test-${project.archivesBaseName}"
-  classifier 'test'
+  archiveBaseName = "test-${project.archivesBaseName}"
+  archiveClassifier = 'test'
   from sourceSets.test.output
   from sourceSets.main.output
 }

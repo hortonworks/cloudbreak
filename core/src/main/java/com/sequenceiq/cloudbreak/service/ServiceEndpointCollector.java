@@ -206,8 +206,8 @@ public class ServiceEndpointCollector {
         for (GatewayTopologyV4Response topology : topologies) {
             topology.setExposedServices(topology.getExposedServices()
                     .stream()
-                    .filter(e -> (exposedServiceCollector.getByName(e).isVisibleForDatahub() && stackType.equals(StackType.WORKLOAD))
-                            || (exposedServiceCollector.getByName(e).isVisibleForDatalake() && stackType.equals(StackType.DATALAKE)))
+                    .filter(e -> exposedServiceCollector.getByName(e).isVisibleForDatahub() && stackType.equals(StackType.WORKLOAD)
+                            || exposedServiceCollector.getByName(e).isVisibleForDatalake() && stackType.equals(StackType.DATALAKE))
                     .collect(Collectors.toList()));
         }
         return topologies;

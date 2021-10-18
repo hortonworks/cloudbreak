@@ -165,7 +165,7 @@ public class ClusterStatusSyncHandler implements ApplicationListener<ClusterStat
 
     protected void beforeDeleteCleanup(Cluster cluster) {
         try {
-            if ((cluster.getEnvironmentCrn() != null) && (clusterService.countByEnvironmentCrn(cluster.getEnvironmentCrn()) <= 1)) {
+            if (cluster.getEnvironmentCrn() != null && clusterService.countByEnvironmentCrn(cluster.getEnvironmentCrn()) <= 1) {
                 altusMachineUserService.deleteMachineUserForEnvironment(cluster.getClusterPertain().getTenant(),
                         cluster.getMachineUserCrn(), cluster.getEnvironmentCrn());
             }

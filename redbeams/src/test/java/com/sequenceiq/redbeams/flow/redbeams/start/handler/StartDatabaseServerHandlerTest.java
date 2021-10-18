@@ -3,11 +3,13 @@ package com.sequenceiq.redbeams.flow.redbeams.start.handler;
 import static com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus.STARTED;
 import static com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus.STOPPED;
 import static com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus.UPDATE_IN_PROGRESS;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -15,7 +17,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.Authenticator;
@@ -38,7 +39,7 @@ import com.sequenceiq.redbeams.flow.redbeams.start.event.StartDatabaseServerRequ
 import com.sequenceiq.redbeams.flow.redbeams.start.event.StartDatabaseServerSuccess;
 
 @ExtendWith(MockitoExtension.class)
-public class StartDatabaseServerHandlerTest {
+class StartDatabaseServerHandlerTest {
 
     @Mock
     private DatabaseStack dbStack;
@@ -83,7 +84,7 @@ public class StartDatabaseServerHandlerTest {
     private StartDatabaseServerHandler victim;
 
     @BeforeEach
-    public void initTests() {
+    void initTests() {
         when(cloudContext.getPlatformVariant()).thenReturn(cloudPlatformVariant);
         when(cloudPlatformConnectors.get(cloudPlatformVariant)).thenReturn(cloudConnector);
         when(cloudConnector.authentication()).thenReturn(authenticator);
@@ -92,7 +93,7 @@ public class StartDatabaseServerHandlerTest {
     }
 
     @Test
-    public void shouldCallStartDatabaseFromStoppedAndNotifyEventBusWithWaitingForPermanentStatus() throws Exception {
+    void shouldCallStartDatabaseFromStoppedAndNotifyEventBusWithWaitingForPermanentStatus() throws Exception {
         when(resourceConnector.getDatabaseServerStatus(authenticatedContext, dbStack)).thenReturn(STOPPED, STARTED);
         when(statusCheckFactory.newPollPermanentExternalDatabaseStateTask(authenticatedContext, dbStack))
                 .thenReturn(externalDatabaseStatusPollTask);
@@ -101,11 +102,11 @@ public class StartDatabaseServerHandlerTest {
         victim.accept(anEvent());
 
         verify(resourceConnector, times(1)).startDatabaseServer(authenticatedContext, dbStack);
-        verify(eventBus, times(1)).notify(eq(StartDatabaseServerSuccess.class.getSimpleName().toUpperCase()), Mockito.any(Event.class));
+        verify(eventBus, times(1)).notify(eq(StartDatabaseServerSuccess.class.getSimpleName().toUpperCase()), any(Event.class));
     }
 
     @Test
-    public void shouldCallStartDatabaseAndNotifyEventBusWithWaitingForPermanentStatus() throws Exception {
+    void shouldCallStartDatabaseAndNotifyEventBusWithWaitingForPermanentStatus() throws Exception {
         when(resourceConnector.getDatabaseServerStatus(authenticatedContext, dbStack)).thenReturn(UPDATE_IN_PROGRESS);
         when(statusCheckFactory.newPollPermanentExternalDatabaseStateTask(authenticatedContext, dbStack))
                 .thenReturn(externalDatabaseStatusPollTask);
@@ -113,27 +114,29 @@ public class StartDatabaseServerHandlerTest {
         victim.accept(anEvent());
 
         verify(resourceConnector, times(1)).startDatabaseServer(authenticatedContext, dbStack);
-        verify(eventBus, times(1)).notify(eq(StartDatabaseServerSuccess.class.getSimpleName().toUpperCase()), Mockito.any(Event.class));
+        verify(eventBus, times(1)).notify(eq(StartDatabaseServerSuccess.class.getSimpleName().toUpperCase()), any(Event.class));
     }
 
     @Test
-    public void shouldNotCallStartDatabaseButShouldNotifyEventBus() throws Exception {
+    void shouldNotCallStartDatabaseButShouldNotifyEventBus() throws Exception {
         when(resourceConnector.getDatabaseServerStatus(authenticatedContext, dbStack)).thenReturn(ExternalDatabaseStatus.STARTED);
 
         victim.accept(anEvent());
 
-        verify(eventBus).notify(eq(StartDatabaseServerSuccess.class.getSimpleName().toUpperCase()), Mockito.any(Event.class));
-        verifyZeroInteractions(resourceConnector, statusCheckFactory, externalDatabaseStatusSyncPollingScheduler);
+        verify(eventBus).notify(eq(StartDatabaseServerSuccess.class.getSimpleName().toUpperCase()), any(Event.class));
+        verify(resourceConnector).getDatabaseServerStatus(any(AuthenticatedContext.class), eq(dbStack));
+        verifyNoMoreInteractions(resourceConnector);
+        verifyNoInteractions(statusCheckFactory, externalDatabaseStatusSyncPollingScheduler);
     }
 
     @Test
-    public void shouldCallStartDatabaseAndNotifyEventBusOnFailure() throws Exception {
+    void shouldCallStartDatabaseAndNotifyEventBusOnFailure() throws Exception {
         when(resourceConnector.getDatabaseServerStatus(authenticatedContext, dbStack)).thenReturn(STOPPED);
         doThrow(new Exception()).when(resourceConnector).startDatabaseServer(authenticatedContext, dbStack);
 
         victim.accept(anEvent());
 
-        verify(eventBus).notify(eq(StartDatabaseServerFailed.class.getSimpleName().toUpperCase()), Mockito.any(Event.class));
+        verify(eventBus).notify(eq(StartDatabaseServerFailed.class.getSimpleName().toUpperCase()), any(Event.class));
     }
 
     private Event<StartDatabaseServerRequest> anEvent() {
@@ -144,3 +147,4 @@ public class StartDatabaseServerHandlerTest {
         return new StartDatabaseServerRequest(cloudContext, cloudCredential, dbStack);
     }
 }
+

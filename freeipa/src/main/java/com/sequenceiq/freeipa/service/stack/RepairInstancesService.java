@@ -142,7 +142,7 @@ public class RepairInstancesService {
         Collection<String> validInstanceIds = getValidInstanceIds(allInstances.keySet(), instanceIds);
 
         Map<String, InstanceMetaData> instancesToRepair = validInstanceIds.stream()
-                .filter(instanceId -> force || (healthMap.get(instanceId) != null && !healthMap.get(instanceId).isAvailable()))
+                .filter(instanceId -> force || healthMap.get(instanceId) != null && !healthMap.get(instanceId).isAvailable())
                 .collect(Collectors.toMap(Function.identity(), instanceId -> allInstances.get(instanceId)));
         if (instancesToRepair.keySet().size() != validInstanceIds.size()) {
             LOGGER.info("Not {} instances {} because force was not selected.", reboot ? "repairing" : "rebooting", validInstanceIds.stream()

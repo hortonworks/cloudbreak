@@ -228,7 +228,7 @@ public class FlowService {
         for (FlowLogWithoutPayload flowLog : flowLogs) {
             String currentState = flowLog.getCurrentState();
             if (failHandledEvents.contains(flowLog.getNextEvent())
-                    || (currentState != null && CANCELLED_TERMINATED_STATES.contains(currentState))) {
+                    || currentState != null && CANCELLED_TERMINATED_STATES.contains(currentState)) {
                 LOGGER.info("{} {} marked as completed on {} flow log", marker, flowChainId, flowLog.minimizedString());
                 return true;
             } else if (FlowConstants.INIT_STATE.equals(currentState)) {

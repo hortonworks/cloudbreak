@@ -11,7 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.BeansException;
-import org.springframework.boot.test.context.ConfigFileApplicationContextInitializer;
+import org.springframework.boot.test.context.ConfigDataApplicationContextInitializer;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.ITestResult;
@@ -53,7 +53,7 @@ import com.sequenceiq.it.config.IntegrationTestConfiguration;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 @ContextConfiguration(classes = {IntegrationTestConfiguration.class},
-        initializers = ConfigFileApplicationContextInitializer.class)
+        initializers = ConfigDataApplicationContextInitializer.class)
 public class MultiThreadTenantTest extends AbstractTestNGSpringContextTests {
 
     public static final Map<String, Status> STACK_DELETED = Map.of("status", Status.DELETE_COMPLETED);

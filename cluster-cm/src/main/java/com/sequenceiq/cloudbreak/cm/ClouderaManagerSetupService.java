@@ -339,9 +339,9 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
     private String mapStorageError(CloudStorageConfigurationFailedException exception, String stackCrn, String cloudPlatform, ClusterView cluster) {
         String accountId = Crn.safeFromString(stackCrn).getAccountId();
         String result = exception.getMessage();
-        if ((CloudPlatform.AWS.equalsIgnoreCase(cloudPlatform) && !entitlementService.awsCloudStorageValidationEnabled(accountId)) ||
-                (CloudPlatform.AZURE.equalsIgnoreCase(cloudPlatform) && !entitlementService.azureCloudStorageValidationEnabled(accountId)) ||
-                (CloudPlatform.GCP.equalsIgnoreCase(cloudPlatform) && !entitlementService.gcpCloudStorageValidationEnabled(accountId))) {
+        if (CloudPlatform.AWS.equalsIgnoreCase(cloudPlatform) && !entitlementService.awsCloudStorageValidationEnabled(accountId) ||
+                CloudPlatform.AZURE.equalsIgnoreCase(cloudPlatform) && !entitlementService.azureCloudStorageValidationEnabled(accountId) ||
+                CloudPlatform.GCP.equalsIgnoreCase(cloudPlatform) && !entitlementService.gcpCloudStorageValidationEnabled(accountId)) {
             result = clouderaManagerStorageErrorMapper.map(exception, cloudPlatform, cluster);
         }
         return result;

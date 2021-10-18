@@ -194,13 +194,13 @@ public class AwsStackRequestHelper {
             int offset = 0;
             int limit = CHUNK_SIZE + 1;
             // Add full chunks
-            while ((chunk < chunkCount) && (len > limit)) {
+            while (chunk < chunkCount && len > limit) {
                 char c;
                 char c2;
                 do {
                     c = parameterValue.charAt(--limit);
                     c2 = parameterValue.charAt(limit - 1);
-                } while ((Character.isWhitespace(c) || Character.isWhitespace(c2)) && (offset <= limit - 2));
+                } while ((Character.isWhitespace(c) || Character.isWhitespace(c2)) && offset <= limit - 2);
 
                 String slice = parameterValue.substring(offset, limit);
                 parameters.add(Parameter.builder().parameterKey(parameterKey).parameterValue(slice).build());

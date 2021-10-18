@@ -79,7 +79,7 @@ public class DefaultCcmParameterSupplier implements CcmParameterSupplier {
     public Optional<CcmParameters> getCcmParameters(
             @Nullable CcmParameters baseCcmParameters,
             @Nullable Map<KnownServiceIdentifier, Integer> tunneledServicePorts) {
-        return ((baseCcmParameters == null) || (tunneledServicePorts == null) || tunneledServicePorts.isEmpty()) ? Optional.empty() : Optional.of(
+        return (baseCcmParameters == null || tunneledServicePorts == null || tunneledServicePorts.isEmpty()) ? Optional.empty() : Optional.of(
                 new DefaultCcmParameters(
                         baseCcmParameters.getServerParameters(),
                         baseCcmParameters.getInstanceParameters(),

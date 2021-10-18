@@ -11,12 +11,12 @@ repositories {
 }
 
 jar {
-  baseName = 'cluster-cm'
+  archiveBaseName = 'cluster-cm'
 }
 
 configurations.all {
     resolutionStrategy {
-        force 'net.bytebuddy:byte-buddy:1.14.4'
+        force "net.bytebuddy:byte-buddy:${byteBuddyVersion}"
     }
 }
 

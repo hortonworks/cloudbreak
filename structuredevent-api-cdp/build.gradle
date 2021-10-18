@@ -6,8 +6,8 @@ repositories {
 }
 
 jar {
-    baseName = 'structuredevent-api-cdp'
-    archiveName = 'structuredevent-api-cdp.jar'
+    archiveBaseName = 'structuredevent-api-cdp'
+    archiveFileName= 'structuredevent-api-cdp.jar'
 }
 
 dependencies {

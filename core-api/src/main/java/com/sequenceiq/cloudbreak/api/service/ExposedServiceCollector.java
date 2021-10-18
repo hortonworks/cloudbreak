@@ -148,8 +148,8 @@ public class ExposedServiceCollector {
                                 || getClouderaManagerUIService().getServiceName().equals(exposedService.getServiceName())
                                 || getClouderaManagerService().getServiceName().equals(exposedService.getServiceName())
                                 // IMPALA_DEBUG_UI needs to be exposed under the same service name, but with different purpose
-                                || (getImpalaDebugUIService().getServiceName().equals(exposedService.getServiceName())
-                                && components.contains(getImpalaService().getServiceName())))
+                                || getImpalaDebugUIService().getServiceName().equals(exposedService.getServiceName())
+                                && components.contains(getImpalaService().getServiceName()))
                 .collect(Collectors.toList());
     }
 

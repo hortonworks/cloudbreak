@@ -14,7 +14,7 @@ services:
     - ../mock-thunderhead/build/libs/mock-thunderhead.jar:/mock-thunderhead.jar
     - ./integcb/etc:/etc/auth
     command: java -jar /mock-thunderhead.jar
-    image: docker-private.infra.cloudera.com/cloudera_base/ubi8/cldr-openjdk-11-runtime-cis:1.14-12.1675788327-cis-27022023
+    image: docker-private.infra.cloudera.com/cloudera_base/ubi8/cldr-openjdk-17-runtime-cis:1.15-1.1679485208-cis-25042023
     deploy:
       resources:
         limits:
@@ -95,7 +95,7 @@ services:
       - INTEGRATIONTEST_UMS_JSONSECRET_DESTINATIONPATH
       - INTEGRATIONTEST_UMS_JSONSECRET_NAME
       - INTEGRATIONTEST_RUNTIMEVERSION
-    image: docker-private.infra.cloudera.com/cloudera_base/ubi8/cldr-openjdk-11-runtime-cis:1.14-12.1675788327-cis-27022023
+    image: docker-private.infra.cloudera.com/cloudera_base/ubi8/cldr-openjdk-17-runtime-cis:1.15-1.1679485208-cis-25042023
     deploy:
       resources:
         limits:

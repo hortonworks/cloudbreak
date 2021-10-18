@@ -28,12 +28,12 @@ bootRun {
 }
 
 bootRun {
-  main = 'com.sequenceiq.thunderhead.MockThunderheadApplication'
+  mainClass = 'com.sequenceiq.thunderhead.MockThunderheadApplication'
 }
 
 bootJar {
-  baseName = 'mock-thunderhead'
-  archiveName = 'mock-thunderhead.jar'
+  archiveBaseName = 'mock-thunderhead'
+  archiveFileName= 'mock-thunderhead.jar'
   manifest {
     def grgit = Grgit.open(currentDir: project.projectDir)
     attributes "Implementation-Version": grgit.describe()

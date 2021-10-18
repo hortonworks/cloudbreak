@@ -150,8 +150,8 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
     private String description;
 
     @ElementCollection(fetch = FetchType.EAGER)
-    @MapKeyColumn(name = "key")
-    @Column(name = "value", columnDefinition = "TEXT", length = 100000)
+    @MapKeyColumn(name = "\"key\"")
+    @Column(name = "\"value\"", columnDefinition = "TEXT", length = 100000)
     private Map<String, String> parameters;
 
     @Column(columnDefinition = "TEXT")

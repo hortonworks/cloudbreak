@@ -16,7 +16,7 @@ plugins {
   id "checkstyle"
   id "jacoco"
   id "maven-publish"
-  id "org.springframework.boot" version "2.1.2.RELEASE"
+  id "org.springframework.boot" version "${springBootVersion}"
   id "org.sonarqube" version "${sonarVersion}"
 }
 
@@ -76,13 +76,13 @@ dependencies {
   implementation     group: 'com.github.briandilley.jsonrpc4j', name: 'jsonrpc4j',                     version: '1.6'
   implementation     group: 'com.dyngr',                        name: 'polling',                       version: dyngrPollingVersion
   implementation     group: 'org.freemarker',                   name: 'freemarker',                    version: freemarkerVersion
-  testImplementation group: 'org.mockito',               name: 'mockito-inline',                   version: mockitoVersion
+  testImplementation group: 'org.mockito',                      name: 'mockito-inline',                   version: mockitoVersion
   testImplementation ('org.springframework.boot:spring-boot-starter-test') {
     exclude group: 'junit'
   }
 
   // mockito juniper depends on ByteBuddy 1.9.7, but hibernate use older version
-  implementation group: 'net.bytebuddy', name: 'byte-buddy', version: '1.14.4'
+  implementation group: 'net.bytebuddy', name: 'byte-buddy', version: byteBuddyVersion
 
   implementation(group: 'net.minidev', name: 'json-smart') {
     version {
@@ -112,7 +112,7 @@ dependencies {
     implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-data-jpa',   version: springBootVersion
     implementation     group: 'org.hibernate',             name: 'hibernate-envers',               version: hibernateCoreVersion
     testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
-    testImplementation group: 'org.mockito',               name: 'mockito-inline',                   version: mockitoVersion
+    testImplementation group: 'org.mockito',               name: 'mockito-inline',                 version: mockitoVersion
   }
 
   implementation project(":structuredevent-service-cdp")
@@ -166,8 +166,8 @@ dependencies {
   testImplementation group: 'net.sf.json-lib',             name: 'json-lib',                       version: '2.4',              classifier: 'jdk15'
   testImplementation group: 'com.fasterxml.jackson.core',  name: 'jackson-databind',               version: jacksonDatabindVersion
 
-  testRuntimeClasspath group: 'org.testcontainers',        name: 'postgresql',                     version: testContainersVersion
-  testRuntimeClasspath group: 'org.awaitility',            name: 'awaitility',                     version: awaitilityVersion
+  testRuntimeOnly group: 'org.testcontainers',        name: 'postgresql',                     version: testContainersVersion
+  testRuntimeOnly group: 'org.awaitility',            name: 'awaitility',                     version: awaitilityVersion
 }
 
 bootRun {
@@ -189,12 +189,12 @@ bootRun {
 }
 
 bootRun {
-  main = 'com.sequenceiq.freeipa.FreeIpaApplication'
+  mainClass = 'com.sequenceiq.freeipa.FreeIpaApplication'
 }
 
 bootJar {
-  baseName = 'freeipa'
-  archiveName = 'freeipa.jar'
+  archiveBaseName = 'freeipa'
+  archiveFileName= 'freeipa.jar'
   manifest {
     def grgit = Grgit.open(currentDir: project.projectDir)
     attributes "Implementation-Version": grgit.describe()
