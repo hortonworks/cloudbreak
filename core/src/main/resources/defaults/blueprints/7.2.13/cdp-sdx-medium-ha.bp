@@ -421,6 +421,10 @@
               { 
                 "name": "hive_compactor_initiator_on",
                 "value": "false"
+              },
+              {
+                "name": "hive_service_config_safety_valve",
+                "value": "<property><name>hive.metastore.try.direct.sql.ddl</name><value>true</value></property><property><name>hive.metastore.try.direct.sql</name><value>true</value></property>"
               }
             ]
           }
