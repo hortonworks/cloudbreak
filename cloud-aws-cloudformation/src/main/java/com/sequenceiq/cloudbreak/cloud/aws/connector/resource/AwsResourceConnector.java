@@ -29,7 +29,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCertificate;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
-import com.sequenceiq.common.api.type.AdjustmentType;
+import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 
 import freemarker.template.Configuration;
 
@@ -99,8 +99,8 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
 
     @Override
     public List<CloudResourceStatus> launch(AuthenticatedContext ac, CloudStack stack, PersistenceNotifier resourceNotifier,
-            AdjustmentType adjustmentType, Long threshold) throws Exception {
-        return awsLaunchService.launch(ac, stack, resourceNotifier, adjustmentType, threshold);
+            AdjustmentTypeWithThreshold adjustmentTypeWithThreshold) throws Exception {
+        return awsLaunchService.launch(ac, stack, resourceNotifier, adjustmentTypeWithThreshold);
     }
 
     @Override
@@ -176,8 +176,9 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
     }
 
     @Override
-    public List<CloudResourceStatus> upscale(AuthenticatedContext ac, CloudStack stack, List<CloudResource> resources) {
-        return awsUpscaleService.upscale(ac, stack, resources);
+    public List<CloudResourceStatus> upscale(AuthenticatedContext ac, CloudStack stack, List<CloudResource> resources,
+            AdjustmentTypeWithThreshold adjustmentTypeWithThreshold) {
+        return awsUpscaleService.upscale(ac, stack, resources, adjustmentTypeWithThreshold);
     }
 
     @Override

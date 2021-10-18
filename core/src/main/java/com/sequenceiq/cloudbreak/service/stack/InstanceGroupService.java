@@ -79,6 +79,10 @@ public class InstanceGroupService {
         return repository.findOneWithInstanceMetadataByGroupNameInStack(stackId, groupName);
     }
 
+    public Optional<InstanceGroup> findOneByStackIdAndGroupName(Long stackId, String groupName) {
+        return repository.findOneByStackIdAndGroupName(stackId, groupName);
+    }
+
     public Optional<InstanceGroup> findInstanceGroupInStackByHostName(Long stackId, String hostName) {
         return repository.findInstanceGroupInStackByHostName(stackId, hostName);
     }

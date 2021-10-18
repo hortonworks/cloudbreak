@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.cloud.handler.testcontext;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -180,13 +179,13 @@ public class TestApplicationContext {
         when(cloudConnector.resources()).thenReturn(resourceConnector);
         when(cloudConnector.instances()).thenReturn(instanceConnector);
         when(cloudConnector.metadata()).thenReturn(collector);
-        when(resourceConnector.launch(any(), any(), any(), any(), anyLong()))
+        when(resourceConnector.launch(any(), any(), any(), any()))
                 .thenReturn(Collections.singletonList(new CloudResourceStatus(resource, ResourceStatus.CREATED)));
         when(resourceConnector.terminate(any(), any(), any()))
                 .thenReturn(Collections.singletonList(new CloudResourceStatus(resource, ResourceStatus.DELETED)));
         when(resourceConnector.update(any(), any(), any()))
                 .thenReturn(Collections.singletonList(new CloudResourceStatus(resource, ResourceStatus.UPDATED)));
-        when(resourceConnector.upscale(any(), any(), any()))
+        when(resourceConnector.upscale(any(), any(), any(), any()))
                 .thenReturn(Collections.singletonList(new CloudResourceStatus(resource, ResourceStatus.UPDATED)));
         when(resourceConnector.downscale(any(), any(), any(), anyList(), any()))
                 .thenReturn(Collections.singletonList(new CloudResourceStatus(resource, ResourceStatus.UPDATED)));

@@ -49,6 +49,8 @@ import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.notification.ResourceNotifier;
 import com.sequenceiq.cloudbreak.cloud.transform.CloudResourceHelper;
 import com.sequenceiq.cloudbreak.service.Retry;
+import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
+import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -127,7 +129,9 @@ public class AzureUpscaleServiceTest {
 
         when(azureCloudResourceService.getNetworkResources(resources)).thenReturn(NETWORK_RESOURCES);
 
-        List<CloudResourceStatus> actual = underTest.upscale(ac, stack, resources, azureStackView, client);
+        AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, 0L);
+        List<CloudResourceStatus> actual = underTest.upscale(ac, stack, resources, azureStackView, client,
+                adjustmentTypeWithThreshold);
 
         assertFalse(actual.isEmpty());
         assertEquals(template, actual.get(0).getCloudResource());
@@ -140,7 +144,8 @@ public class AzureUpscaleServiceTest {
         verify(azureCloudResourceService).getNetworkResources(resources);
         verify(azureUtils).getStackName(any(CloudContext.class));
         verify(azureResourceGroupMetadataProvider).getResourceGroupName(any(CloudContext.class), eq(stack));
-        verify(azureComputeResourceService).buildComputeResourcesForUpscale(ac, stack, scaledGroups, newInstances, List.of(), NETWORK_RESOURCES);
+        verify(azureComputeResourceService).buildComputeResourcesForUpscale(ac, stack, scaledGroups, newInstances, List.of(), NETWORK_RESOURCES,
+                adjustmentTypeWithThreshold);
     }
 
     @Test
@@ -166,11 +171,12 @@ public class AzureUpscaleServiceTest {
         when(azureCloudResourceService.getInstanceCloudResources(STACK_NAME, newInstances, scaledGroups, RESOURCE_GROUP)).thenReturn(newInstances);
         when(azureCloudResourceService.getNetworkResources(resources)).thenReturn(NETWORK_RESOURCES);
 
-        underTest.upscale(ac, stack, resources, azureStackView, client);
+        AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, 0L);
+        underTest.upscale(ac, stack, resources, azureStackView, client, adjustmentTypeWithThreshold);
 
         ArgumentCaptor<List<CloudResource>> reattachCaptor = ArgumentCaptor.forClass(List.class);
         verify(azureComputeResourceService).buildComputeResourcesForUpscale(eq(ac), eq(stack), eq(scaledGroups), eq(newInstances), reattachCaptor.capture(),
-                eq(NETWORK_RESOURCES));
+                eq(NETWORK_RESOURCES), eq(adjustmentTypeWithThreshold));
         List<CloudResource> reattachableVolumeSets = reattachCaptor.getValue();
         assertEquals(2, reattachableVolumeSets.size());
         assertEquals(detachedVolumeSet, reattachableVolumeSets.get(0));
@@ -193,7 +199,7 @@ public class AzureUpscaleServiceTest {
         when(azureUtils.convertToCloudConnectorException(any(CloudException.class), anyString())).thenCallRealMethod();
         when(azureUtils.convertToCloudConnectorException(any(Throwable.class), anyString())).thenCallRealMethod();
         CloudConnectorException cloudConnectorException = assertThrows(CloudConnectorException.class, () ->
-                underTest.upscale(ac, stack, resources, azureStackView, client)
+                underTest.upscale(ac, stack, resources, azureStackView, client, new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, 0L))
         );
 
         assertThat(cloudConnectorException.getMessage())

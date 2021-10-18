@@ -10,6 +10,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.core.flow2.dto.NetworkScaleDetails;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.flow.core.FlowParameters;
 
 public class StackScalingFlowContext extends StackContext {
@@ -25,15 +26,18 @@ public class StackScalingFlowContext extends StackContext {
 
     private final NetworkScaleDetails networkScaleDetails;
 
+    private final AdjustmentTypeWithThreshold adjustmentTypeWithThreshold;
+
     public StackScalingFlowContext(FlowParameters flowParameters, Stack stack, CloudContext cloudContext, CloudCredential cloudCredential,
-            CloudStack cloudStack, String instanceGroupName, Set<String> instanceIds, Integer adjustment, boolean repair) {
+            CloudStack cloudStack, String instanceGroupName, Set<String> instanceIds, Integer adjustment, boolean repair,
+            AdjustmentTypeWithThreshold adjustmentTypeWithThreshold) {
         this(flowParameters, stack, cloudContext, cloudCredential, cloudStack, instanceGroupName, instanceIds, adjustment, Collections.emptySet(), repair,
-                NetworkScaleDetails.getEmpty());
+                NetworkScaleDetails.getEmpty(), adjustmentTypeWithThreshold);
     }
 
     public StackScalingFlowContext(FlowParameters flowParameters, Stack stack, CloudContext cloudContext, CloudCredential cloudCredential,
             CloudStack cloudStack, String instanceGroupName, Set<String> instanceIds, Integer adjustment, Set<String> hostNames, boolean repair,
-            NetworkScaleDetails networkScaleDetails) {
+            NetworkScaleDetails networkScaleDetails, AdjustmentTypeWithThreshold adjustmentTypeWithThreshold) {
         super(flowParameters, stack, cloudContext, cloudCredential, cloudStack);
         this.instanceGroupName = instanceGroupName;
         this.instanceIds = instanceIds;
@@ -41,6 +45,7 @@ public class StackScalingFlowContext extends StackContext {
         this.hostNames = hostNames;
         this.repair = repair;
         this.networkScaleDetails = networkScaleDetails;
+        this.adjustmentTypeWithThreshold = adjustmentTypeWithThreshold;
     }
 
     public Collection<String> getInstanceIds() {
@@ -61,6 +66,10 @@ public class StackScalingFlowContext extends StackContext {
 
     public boolean isRepair() {
         return repair;
+    }
+
+    public AdjustmentTypeWithThreshold getAdjustmentTypeWithThreshold() {
+        return adjustmentTypeWithThreshold;
     }
 
     public NetworkScaleDetails getStackNetworkScaleDetails() {

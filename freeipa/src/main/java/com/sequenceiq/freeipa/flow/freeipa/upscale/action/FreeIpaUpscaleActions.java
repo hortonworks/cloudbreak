@@ -52,6 +52,8 @@ import com.sequenceiq.cloudbreak.cloud.transform.ResourceLists;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.service.OperationException;
+import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
+import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.common.api.type.CommonResourceType;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.flow.core.Flow;
@@ -172,7 +174,8 @@ public class FreeIpaUpscaleActions {
             private void skipAddingNewInstances(StackContext context, Stack stack) {
                 List<CloudResourceStatus> list = resourceService.getAllAsCloudResourceStatus(stack.getId());
                 UpscaleStackRequest<UpscaleStackResult> request = new UpscaleStackRequest<>(
-                        context.getCloudContext(), context.getCloudCredential(), context.getCloudStack(), ResourceLists.transform(list));
+                        context.getCloudContext(), context.getCloudCredential(), context.getCloudStack(), ResourceLists.transform(list),
+                        new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, 0L));
                 UpscaleStackResult result = new UpscaleStackResult(request.getResourceId(), ResourceStatus.CREATED, list);
                 sendEvent(context, result.selector(), result);
             }
@@ -184,7 +187,8 @@ public class FreeIpaUpscaleActions {
                         .collect(Collectors.toList());
                 CloudStack updatedCloudStack = cloudStackConverter.convert(updatedStack);
                 UpscaleStackRequest<UpscaleStackResult> request = new UpscaleStackRequest<>(
-                        context.getCloudContext(), context.getCloudCredential(), updatedCloudStack, cloudResources);
+                        context.getCloudContext(), context.getCloudCredential(), updatedCloudStack, cloudResources,
+                        new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, (long) newInstances.size()));
                 sendEvent(context, request.selector(), request);
             }
 
