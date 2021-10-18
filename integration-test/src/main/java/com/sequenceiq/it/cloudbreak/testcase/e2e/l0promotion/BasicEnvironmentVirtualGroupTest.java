@@ -16,6 +16,7 @@ import javax.inject.Inject;
 import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.StringUtils;
 import org.testng.annotations.Test;
 
@@ -46,15 +47,17 @@ public class BasicEnvironmentVirtualGroupTest extends AbstractE2ETest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BasicEnvironmentVirtualGroupTest.class);
 
-    private static final String ADMIN_GROUP_NAME = "testgroupa";
+    @Value("${integrationtest.aws.l0.adminGroupName}")
+    private String adminGroupName;
 
-    private static final String ADMIN_GROUP_CRN = "crn:altus:iam:us-west-1:f8e2f110-fc7e-4e46-ae55-381aacc6718c:group:" +
-            "testgroupa/ebc27aff-7d91-4f76-bf98-e81dbbd615e9";
+    @Value("${integrationtest.aws.l0.adminGroupCrn}")
+    private String adminGroupCrn;
 
-    private static final String USER_GROUP_NAME = "testgroupb";
+    @Value("${integrationtest.aws.l0.userGroupName}")
+    private String userGroupName;
 
-    private static final String USER_GROUP_CRN = "crn:altus:iam:us-west-1:f8e2f110-fc7e-4e46-ae55-381aacc6718c:group:" +
-            "testgroupb/b983b572-9774-4f8f-8377-861b511442de";
+    @Value("${integrationtest.aws.l0.userGroupCrn}")
+    private String userGroupCrn;
 
     @Inject
     private FreeIpaTestClient freeIpaTestClient;
@@ -167,19 +170,19 @@ public class BasicEnvironmentVirtualGroupTest extends AbstractE2ETest {
 
         testContext
                 .given(UmsTestDto.class)
-                .assignTargetByCrn(ADMIN_GROUP_CRN)
+                .assignTargetByCrn(adminGroupCrn)
                 .withGroupAdmin()
                 .when(umsTestClient.assignResourceRole(L0UserKeys.ENV_CREATOR_A))
                 .then((tc, dto, client) -> validateAssignedResourceRole(tc, dto, client, userEnvCreatorA, getIamGroupAdminCrn(), true))
-                .assignTargetByCrn(USER_GROUP_CRN)
+                .assignTargetByCrn(userGroupCrn)
                 .withGroupAdmin()
                 .when(umsTestClient.assignResourceRole(L0UserKeys.ENV_CREATOR_A))
                 .then((tc, dto, client) -> validateAssignedResourceRole(tc, dto, client, userEnvCreatorA, getIamGroupAdminCrn(), true))
                 .given(UmsGroupTestDto.class)
-                .when(umsTestClient.addUserToGroup(ADMIN_GROUP_NAME, userEnvAdminA.getCrn()))
-                .when(umsTestClient.addUserToGroup(USER_GROUP_NAME, userEnvCreatorB.getCrn()))
-                .then((tc, dto, client) -> validateUserGroupMembership(tc, dto, client, userEnvAdminA, ADMIN_GROUP_NAME, true))
-                .then((tc, dto, client) -> validateUserGroupMembership(tc, dto, client, userEnvCreatorB, USER_GROUP_NAME, true))
+                .when(umsTestClient.addUserToGroup(adminGroupName, userEnvAdminA.getCrn()))
+                .when(umsTestClient.addUserToGroup(userGroupName, userEnvCreatorB.getCrn()))
+                .then((tc, dto, client) -> validateUserGroupMembership(tc, dto, client, userEnvAdminA, adminGroupName, true))
+                .then((tc, dto, client) -> validateUserGroupMembership(tc, dto, client, userEnvCreatorB, userGroupName, true))
                 .validate();
 
         testContext
@@ -191,9 +194,9 @@ public class BasicEnvironmentVirtualGroupTest extends AbstractE2ETest {
                 .given(UmsTestDto.class)
                 .assignTarget(EnvironmentTestDto.class.getSimpleName())
                 .withEnvironmentAdmin()
-                .when(umsTestClient.assignResourceRoleWithGroup(ADMIN_GROUP_CRN))
+                .when(umsTestClient.assignResourceRoleWithGroup(adminGroupCrn))
                 .withEnvironmentUser()
-                .when(umsTestClient.assignResourceRoleWithGroup(USER_GROUP_CRN))
+                .when(umsTestClient.assignResourceRoleWithGroup(userGroupCrn))
                 .then((tc, dto, client) -> {
                     environmentVirtualGroups.set(getEnvironmentVirtualGroups(tc, client));
                     return dto;
@@ -202,7 +205,7 @@ public class BasicEnvironmentVirtualGroupTest extends AbstractE2ETest {
                 .when(freeIpaTestClient.syncAll())
                 .await(OperationState.COMPLETED)
                 .given(FreeIpaTestDto.class)
-                .when(freeIpaTestClient.findGroups(Set.of(ADMIN_GROUP_NAME, USER_GROUP_NAME)))
+                .when(freeIpaTestClient.findGroups(Set.of(adminGroupName, userGroupName)))
                 .then((tc, dto, client) -> validateAdminVirtualGroupMembership(tc, dto, environmentVirtualGroups.get(),
                         Set.of(userEnvAdminA.getWorkloadUserName()), true))
                 .then((tc, dto, client) -> validateUserVirtualGroupMembership(tc, dto, environmentVirtualGroups.get(),
@@ -211,19 +214,19 @@ public class BasicEnvironmentVirtualGroupTest extends AbstractE2ETest {
 
         testContext
                 .given(UmsGroupTestDto.class)
-                .when(umsTestClient.removeUserFromGroup(ADMIN_GROUP_NAME, userEnvAdminA.getCrn()))
-                .when(umsTestClient.removeUserFromGroup(USER_GROUP_NAME, userEnvCreatorB.getCrn()))
-                .then((tc, dto, client) -> validateUserGroupMembership(tc, dto, client, userEnvAdminA, ADMIN_GROUP_NAME, false))
-                .then((tc, dto, client) -> validateUserGroupMembership(tc, dto, client, userEnvCreatorB, USER_GROUP_NAME, false))
+                .when(umsTestClient.removeUserFromGroup(adminGroupName, userEnvAdminA.getCrn()))
+                .when(umsTestClient.removeUserFromGroup(userGroupName, userEnvCreatorB.getCrn()))
+                .then((tc, dto, client) -> validateUserGroupMembership(tc, dto, client, userEnvAdminA, adminGroupName, false))
+                .then((tc, dto, client) -> validateUserGroupMembership(tc, dto, client, userEnvCreatorB, userGroupName, false))
                 .validate();
 
         testContext
                 .given(UmsTestDto.class)
-                .assignTargetByCrn(ADMIN_GROUP_CRN)
+                .assignTargetByCrn(adminGroupCrn)
                 .withGroupAdmin()
                 .when(umsTestClient.unAssignResourceRole(L0UserKeys.ENV_CREATOR_A))
                 .then((tc, dto, client) -> validateAssignedResourceRole(tc, dto, client, userEnvCreatorA, getIamGroupAdminCrn(), false))
-                .assignTargetByCrn(USER_GROUP_CRN)
+                .assignTargetByCrn(userGroupCrn)
                 .withGroupAdmin()
                 .when(umsTestClient.unAssignResourceRole(L0UserKeys.ENV_CREATOR_A))
                 .then((tc, dto, client) -> validateAssignedResourceRole(tc, dto, client, userEnvCreatorA, getIamGroupAdminCrn(), false))
