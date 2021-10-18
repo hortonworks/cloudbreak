@@ -838,6 +838,28 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
         });
     }
 
+    @Test
+    public void testAzureLoadBalancerDisabled() {
+        Stack stack = createAzureStack(StackType.DATALAKE, PRIVATE_ID_1, true);
+        CloudSubnet subnet = getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1);
+        DetailedEnvironmentResponse environment = createEnvironment(subnet, false);
+        AzureStackV4Parameters azureParameters = new AzureStackV4Parameters();
+        azureParameters.setLoadBalancerSku(LoadBalancerSku.NONE);
+        StackV4Request request = new StackV4Request();
+        request.setEnableLoadBalancer(true);
+        request.setAzure(azureParameters);
+
+        when(entitlementService.datalakeLoadBalancerEnabled(anyString())).thenReturn(true);
+        when(blueprint.getBlueprintText()).thenReturn(getBlueprintText("input/clouderamanager-knox.bp"));
+        when(subnetSelector.findSubnetById(any(), anyString())).thenReturn(Optional.of(subnet));
+        when(availabilitySetNameService.generateName(any(), any())).thenReturn("");
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            Set<LoadBalancer> loadBalancers = underTest.createLoadBalancers(stack, environment, request);
+            assert loadBalancers.isEmpty();
+        });
+    }
+
     /**
      * Verifies that all instance groups routed to by a set of load balancers include an availability set.
      *
