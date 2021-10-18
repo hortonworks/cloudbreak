@@ -39,7 +39,7 @@ import com.sequenceiq.cloudbreak.cloud.template.group.GroupResourceService;
 import com.sequenceiq.cloudbreak.cloud.template.init.ContextBuilders;
 import com.sequenceiq.cloudbreak.cloud.template.loadbalancer.LoadBalancerResourceService;
 import com.sequenceiq.cloudbreak.cloud.template.network.NetworkResourceService;
-import com.sequenceiq.common.api.type.AdjustmentType;
+import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -85,7 +85,7 @@ public abstract class AbstractResourceConnector implements ResourceConnector<Lis
 
     @Override
     public List<CloudResourceStatus> launch(AuthenticatedContext auth, CloudStack stack, PersistenceNotifier notifier,
-            AdjustmentType adjustmentType, Long threshold) throws Exception {
+            AdjustmentTypeWithThreshold adjustmentTypeWithThreshold) throws Exception {
         CloudContext cloudContext = auth.getCloudContext();
         Platform platform = cloudContext.getPlatform();
 
@@ -102,7 +102,7 @@ public abstract class AbstractResourceConnector implements ResourceConnector<Lis
         cloudResourceStatuses.addAll(groupStatuses);
 
         //compute
-        List<CloudResourceStatus> computeStatuses = computeResourceService.buildResourcesForLaunch(context, auth, stack, adjustmentType, threshold);
+        List<CloudResourceStatus> computeStatuses = computeResourceService.buildResourcesForLaunch(context, auth, stack, adjustmentTypeWithThreshold);
         cloudResourceStatuses.addAll(computeStatuses);
 
         return cloudResourceStatuses;
@@ -168,7 +168,8 @@ public abstract class AbstractResourceConnector implements ResourceConnector<Lis
     }
 
     @Override
-    public List<CloudResourceStatus> upscale(AuthenticatedContext auth, CloudStack stack, List<CloudResource> resources) {
+    public List<CloudResourceStatus> upscale(AuthenticatedContext auth, CloudStack stack, List<CloudResource> resources,
+            AdjustmentTypeWithThreshold adjustmentTypeWithThreshold) {
         CloudContext cloudContext = auth.getCloudContext();
         Platform platform = cloudContext.getPlatform();
         Variant variant = cloudContext.getVariant();
@@ -186,7 +187,7 @@ public abstract class AbstractResourceConnector implements ResourceConnector<Lis
 
         //compute
         diskReattachment(resources, scalingGroup, context);
-        return computeResourceService.buildResourcesForUpscale(context, auth, stack, Collections.singletonList(scalingGroup));
+        return computeResourceService.buildResourcesForUpscale(context, auth, stack, Collections.singletonList(scalingGroup), adjustmentTypeWithThreshold);
     }
 
     protected void diskReattachment(List<CloudResource> resources, Group scalingGroup, ResourceBuilderContext context) {

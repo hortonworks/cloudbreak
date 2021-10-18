@@ -8,6 +8,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkS
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.InstanceGroupAdjustmentModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.InstanceGroupModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.InstanceGroupNetworkScaleModelDescription;
+import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.common.model.JsonEntity;
 
 import io.swagger.annotations.ApiModel;
@@ -29,6 +30,10 @@ public class StackScaleV4Request implements JsonEntity {
 
     @ApiModelProperty(InstanceGroupAdjustmentModelDescription.FORCE)
     private Boolean forced;
+
+    private AdjustmentType adjustmentType = AdjustmentType.EXACT;
+
+    private Long threshold;
 
     @ApiModelProperty(value = InstanceGroupNetworkScaleModelDescription.NETWORK_SCALE_REQUEST)
     private NetworkScaleV4Request networkScaleV4Request;
@@ -73,5 +78,21 @@ public class StackScaleV4Request implements JsonEntity {
 
     public void setStackNetworkScaleV4Request(NetworkScaleV4Request networkScaleV4Request) {
         this.networkScaleV4Request = networkScaleV4Request;
+    }
+
+    public void setAdjustmentType(AdjustmentType adjustmentType) {
+        this.adjustmentType = adjustmentType;
+    }
+
+    public AdjustmentType getAdjustmentType() {
+        return adjustmentType;
+    }
+
+    public void setThreshold(Long threshold) {
+        this.threshold = threshold;
+    }
+
+    public Long getThreshold() {
+        return threshold;
     }
 }

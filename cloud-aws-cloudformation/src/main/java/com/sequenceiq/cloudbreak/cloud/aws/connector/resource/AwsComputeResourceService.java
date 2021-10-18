@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.template.compute.ComputeResourceService;
 import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
-import com.sequenceiq.common.api.type.AdjustmentType;
+import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 
 @Service
 public class AwsComputeResourceService {
@@ -31,18 +31,19 @@ public class AwsComputeResourceService {
     @Inject
     private AwsContextService awsContextService;
 
-    public List<CloudResourceStatus> buildComputeResourcesForLaunch(AuthenticatedContext ac, CloudStack stack, AdjustmentType adjustmentType, Long threshold,
-            List<CloudResource> instances, List<CloudResource> networkResources) {
+    public List<CloudResourceStatus> buildComputeResourcesForLaunch(AuthenticatedContext ac, CloudStack stack,
+            AdjustmentTypeWithThreshold adjustmentTypeAndThreshold, List<CloudResource> instances, List<CloudResource> networkResources) {
         CloudContext cloudContext = ac.getCloudContext();
         ResourceBuilderContext context = contextBuilder.contextInit(cloudContext, ac, stack.getNetwork(), null, true);
         context.addNetworkResources(networkResources);
 
         awsContextService.addInstancesToContext(instances, context, stack.getGroups());
-        return computeResourceService.buildResourcesForLaunch(context, ac, stack, adjustmentType, threshold);
+        return computeResourceService.buildResourcesForLaunch(context, ac, stack, adjustmentTypeAndThreshold);
     }
 
     public List<CloudResourceStatus> buildComputeResourcesForUpscale(AuthenticatedContext ac, CloudStack stack, List<Group> groupsWithNewInstances,
-            List<CloudResource> newInstances, List<CloudResource> reattachableVolumeSets, List<CloudResource> networkResources) {
+            List<CloudResource> newInstances, List<CloudResource> reattachableVolumeSets, List<CloudResource> networkResources,
+            AdjustmentTypeWithThreshold adjustmentTypeAndThreshold) {
         CloudContext cloudContext = ac.getCloudContext();
         ResourceBuilderContext context = contextBuilder.contextInit(cloudContext, ac, stack.getNetwork(), null, true);
         context.addNetworkResources(networkResources);
@@ -55,7 +56,7 @@ public class AwsComputeResourceService {
             awsContextService.addResourcesToContext(contextResources, context, groupsWithNewInstances);
         }
 
-        return computeResourceService.buildResourcesForUpscale(context, ac, stack, groupsWithNewInstances);
+        return computeResourceService.buildResourcesForUpscale(context, ac, stack, groupsWithNewInstances, adjustmentTypeAndThreshold);
     }
 
     public List<CloudResourceStatus> deleteComputeResources(AuthenticatedContext ac, CloudStack stack, List<CloudResource> cloudResources) {

@@ -38,6 +38,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.notification.ResourceNotifier;
 import com.sequenceiq.cloudbreak.cloud.transform.CloudResourceHelper;
 import com.sequenceiq.cloudbreak.service.Retry;
+import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -71,7 +72,7 @@ public class AzureUpscaleService {
     private AzureCloudResourceService azureCloudResourceService;
 
     public List<CloudResourceStatus> upscale(AuthenticatedContext ac, CloudStack stack, List<CloudResource> resources, AzureStackView azureStackView,
-            AzureClient client) {
+            AzureClient client, AdjustmentTypeWithThreshold adjustmentTypeWithThreshold) {
         CloudContext cloudContext = ac.getCloudContext();
         String stackName = azureUtils.getStackName(cloudContext);
         String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, stack);
@@ -103,7 +104,8 @@ public class AzureUpscaleService {
             List<CloudResource> reattachableVolumeSets = getReattachableVolumeSets(resources, newInstances);
             List<CloudResource> networkResources = azureCloudResourceService.getNetworkResources(resources);
 
-            azureComputeResourceService.buildComputeResourcesForUpscale(ac, stack, scaledGroups, newInstances, reattachableVolumeSets, networkResources);
+            azureComputeResourceService.buildComputeResourcesForUpscale(ac, stack, scaledGroups, newInstances, reattachableVolumeSets, networkResources,
+                    adjustmentTypeWithThreshold);
 
             return Collections.singletonList(new CloudResourceStatus(armTemplate, ResourceStatus.IN_PROGRESS));
         } catch (Retry.ActionFailedException e) {

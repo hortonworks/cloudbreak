@@ -52,6 +52,7 @@ import com.sequenceiq.cloudbreak.cloud.yarn.client.model.request.ApplicationDeta
 import com.sequenceiq.cloudbreak.cloud.yarn.client.model.request.CreateApplicationRequest;
 import com.sequenceiq.cloudbreak.cloud.yarn.client.model.response.ApplicationDetailResponse;
 import com.sequenceiq.cloudbreak.cloud.yarn.client.model.response.ResponseContext;
+import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -121,7 +122,7 @@ public class YarnResourceConnectorTest {
         when(yarnApplicationCreationService.initializeRequest(any(), any())).thenReturn(createInitialApplicationRequest("name-1-horton"));
 
         underTest.launch(authenticatedContextMock,
-                stackMock, persistenceNotifierMock, AdjustmentType.EXACT, Long.MAX_VALUE);
+                stackMock, persistenceNotifierMock, new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, Long.MAX_VALUE));
 
         verify(yarnApplicationCreationService).createApplication(any(), createRequestCaptor.capture());
         CreateApplicationRequest capturedCreateRequest = createRequestCaptor.getValue();
@@ -148,7 +149,7 @@ public class YarnResourceConnectorTest {
         when(yarnApplicationCreationService.initializeRequest(any(), any())).thenReturn(createInitialApplicationRequest("n-1"));
 
         List<CloudResourceStatus> cloudResourceStatusList = underTest.launch(authenticatedContextMock,
-                stackMock, persistenceNotifierMock, AdjustmentType.EXACT, Long.MAX_VALUE);
+                stackMock, persistenceNotifierMock, new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, Long.MAX_VALUE));
 
         verify(persistenceNotifierMock, times(1)).notifyAllocation(any(), any());
         verify(yarnApplicationCreationService).createApplication(any(), createRequestCaptor.capture());
@@ -306,7 +307,7 @@ public class YarnResourceConnectorTest {
         when(applicationNameUtilMock.createApplicationName(authenticatedContextMock)).thenReturn("n-1-hort");
 
         List<CloudResourceStatus> cloudResourceStatusList = underTest.launch(authenticatedContextMock,
-                stackMock, persistenceNotifierMock, AdjustmentType.EXACT, Long.MAX_VALUE);
+                stackMock, persistenceNotifierMock, new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, Long.MAX_VALUE));
 
         ApplicationDetailRequest capturedRequest = requestCaptor.getValue();
         String expectedAppName = "n-1-hort";
