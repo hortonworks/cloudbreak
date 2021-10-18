@@ -61,6 +61,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Re
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.AttachRecipeV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.DetachRecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.UpdateRecipesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.RecoveryValidationV4Response;
 import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
@@ -609,14 +610,14 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_DATAHUB)
-    public void detachRecipeByCrn(@TenantAwareParam @ResourceCrn String crn, @Valid DetachRecipeV4Request request) {
-        stackOperations.detachRecipe(NameOrCrn.ofName(crn), workspaceService.getForCurrentUser().getId(), request);
+    public DetachRecipeV4Response detachRecipeByCrn(@TenantAwareParam @ResourceCrn String crn, @Valid DetachRecipeV4Request request) {
+        return stackOperations.detachRecipe(NameOrCrn.ofName(crn), workspaceService.getForCurrentUser().getId(), request);
     }
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_DATAHUB)
-    public void detachRecipeByName(@ResourceName String name, @Valid DetachRecipeV4Request request) {
-        stackOperations.detachRecipe(NameOrCrn.ofName(name), workspaceService.getForCurrentUser().getId(), request);
+    public DetachRecipeV4Response detachRecipeByName(@ResourceName String name, @Valid DetachRecipeV4Request request) {
+        return stackOperations.detachRecipe(NameOrCrn.ofName(name), workspaceService.getForCurrentUser().getId(), request);
     }
 
     @Override

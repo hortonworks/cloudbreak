@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.DetachRec
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.UpdateRecipesV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.CertificatesRotationV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.DetachRecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.RecoveryV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
@@ -418,14 +419,15 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
-    public void detachRecipe(Long workspaceId, @Valid DetachRecipeV4Request request, String name, @AccountId String accountId) {
-        stackOperations.detachRecipe(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId(), request);
+    public DetachRecipeV4Response detachRecipe(Long workspaceId, @Valid DetachRecipeV4Request request, String name, @AccountId String accountId) {
+        return stackOperations.detachRecipe(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId(), request);
     }
 
     @Override
     @InternalOnly
-    public void detachRecipeInternal(Long workspaceId, @Valid DetachRecipeV4Request request, String name, @InitiatorUserCrn String initiatorUserCrn) {
-        stackOperations.detachRecipe(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId(), request);
+    public DetachRecipeV4Response detachRecipeInternal(Long workspaceId, @Valid DetachRecipeV4Request request, String name,
+            @InitiatorUserCrn String initiatorUserCrn) {
+        return stackOperations.detachRecipe(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId(), request);
     }
 
     @Override
