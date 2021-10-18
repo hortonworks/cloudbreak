@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cluster.api;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -24,4 +25,5 @@ public interface ClusterStatusService {
 
     Optional<String> getClusterManagerVersion();
 
+    List<String> getActiveCommandsList();
 }

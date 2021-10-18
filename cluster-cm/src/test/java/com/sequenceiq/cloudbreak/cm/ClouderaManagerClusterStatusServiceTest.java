@@ -13,7 +13,9 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.Before;
@@ -29,6 +31,8 @@ import com.cloudera.api.swagger.RolesResourceApi;
 import com.cloudera.api.swagger.ServicesResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
+import com.cloudera.api.swagger.model.ApiCommand;
+import com.cloudera.api.swagger.model.ApiCommandList;
 import com.cloudera.api.swagger.model.ApiHealthCheck;
 import com.cloudera.api.swagger.model.ApiHealthSummary;
 import com.cloudera.api.swagger.model.ApiHost;
@@ -348,6 +352,49 @@ public class ClouderaManagerClusterStatusServiceTest {
         hostsAre(new ApiHost().hostname("hostY").addHealthChecksItem(new ApiHealthCheck().name("fake_check").summary(ApiHealthSummary.BAD)));
 
         assertFalse(subject.getExtendedHostStatuses(Optional.of("7.2.12")).getHostsHealth().containsKey(hostName("hostY")));
+    }
+
+    @Test
+    public void testGetActiveCommandsListWhenListNotEmpty() throws Exception {
+        //GIVEN
+        when(cmApi.listActiveCommands("SUMMARY"))
+                .thenReturn(new ApiCommandList()
+                        .items(List.of(new ApiCommand().name("cmd").id(BigDecimal.ONE).startTime("starttime"))));
+        // WHEN
+        List<String> actualResult = subject.getActiveCommandsList();
+        // THEN
+        assertEquals(1, actualResult.size());
+        String actualCmd = actualResult.get(0);
+        assertEquals("ApiCommand[id: 1, name: cmd, starttime: starttime]", actualCmd);
+    }
+
+    @Test
+    public void testGetActiveCommandsListWhenListIsEmpty() throws Exception {
+        //GIVEN
+        when(cmApi.listActiveCommands("SUMMARY")).thenReturn(new ApiCommandList().items(List.of()));
+        // WHEN
+        List<String> actualResult = subject.getActiveCommandsList();
+        // THEN
+        assertEquals(0, actualResult.size());
+    }
+
+    @Test
+    public void testGetActiveCommandsListWhenListIsNull() throws Exception {
+        //GIVEN
+        when(cmApi.listActiveCommands("SUMMARY")).thenReturn(new ApiCommandList());
+        // WHEN
+        List<String> actualResult = subject.getActiveCommandsList();
+        // THEN
+        assertEquals(0, actualResult.size());
+    }
+
+    @Test(expected = ClouderaManagerOperationFailedException.class)
+    public void testGetActiveCommandsListWhenApiCallThrowsException() throws Exception {
+        //GIVEN
+        when(cmApi.listActiveCommands("SUMMARY")).thenThrow(new ApiException());
+        // WHEN
+        subject.getActiveCommandsList();
+        // THEN ClouderaManagerOperationFailedException is thrown
     }
 
     private ApiRoleRef roleRef(String serviceName, ApiHealthSummary apiHealthSummary) {
