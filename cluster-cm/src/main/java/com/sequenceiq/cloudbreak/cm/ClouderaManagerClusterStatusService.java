@@ -31,11 +31,13 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Service;
 
+import com.cloudera.api.swagger.ClouderaManagerResourceApi;
 import com.cloudera.api.swagger.HostsResourceApi;
 import com.cloudera.api.swagger.RolesResourceApi;
 import com.cloudera.api.swagger.ServicesResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
+import com.cloudera.api.swagger.model.ApiCommand;
 import com.cloudera.api.swagger.model.ApiHealthCheck;
 import com.cloudera.api.swagger.model.ApiHealthSummary;
 import com.cloudera.api.swagger.model.ApiHost;
@@ -412,6 +414,29 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
         } catch (ApiException e) {
             LOGGER.info("Failed to get version from CM: ", e);
             throw new ClouderaManagerOperationFailedException("Failed to get CM version from CM", e);
+        }
+    }
+
+    @Override
+    public List<String> getActiveCommandsList() {
+        try {
+            ClouderaManagerResourceApi clouderaManagerResourceApi = clouderaManagerApiFactory.getClouderaManagerResourceApi(client);
+            List<ApiCommand> activeCommands = clouderaManagerResourceApi.listActiveCommands("SUMMARY").getItems();
+            LOGGER.debug("Cloudera Manager active commands: {}", activeCommands);
+            return convertCommandsList(activeCommands);
+        } catch (ApiException e) {
+            LOGGER.info("Failed to get active commands from CM: ", e);
+            throw new ClouderaManagerOperationFailedException("Failed to get active commands from CM", e);
+        }
+    }
+
+    private List<String> convertCommandsList(List<ApiCommand> activeCommands) {
+        if (activeCommands == null) {
+            return List.of();
+        } else {
+            return activeCommands.stream()
+                    .map(cmd -> "ApiCommand[id: " + cmd.getId() + ", name: " + cmd.getName() + ", starttime: " + cmd.getStartTime() + "]")
+                    .collect(Collectors.toList());
         }
     }
 
