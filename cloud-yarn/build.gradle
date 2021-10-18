@@ -7,8 +7,8 @@ repositories {
 }
 
 jar {
-    baseName = 'cloud-yarn'
-    archiveName = 'cloud-yarn.jar'
+    archiveBaseName = 'cloud-yarn'
+    archiveFileName= 'cloud-yarn.jar'
 }
 
 dependencies {

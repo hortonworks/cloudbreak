@@ -20,7 +20,7 @@ public class ToStringTest {
         Set<String> missingToStrings = new HashSet<>();
         for (String clazz : reflections.getAllTypes()) {
             if (!clazz.endsWith("Test")
-                    && (requestOrResponse(clazz) && !clazz.contains(".Valid"))
+                    && requestOrResponse(clazz) && !clazz.contains(".Valid")
                     && !Class.forName(clazz).isInterface()) {
                 try {
                     Method toString = ReflectionUtils.findMethod(Class.forName(clazz), "toString");

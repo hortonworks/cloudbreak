@@ -41,7 +41,7 @@ public class RangerRazDatahubConfigProvider extends RangerRazBaseConfigProvider 
             Set<HostgroupView> hostgroupViews = source.getHostgroupViews();
             Map<String, Set<ServiceComponent>> serviceComponentsByHostGroup = cmTemplateProcessor.getServiceComponentsByHostGroup();
             Set<String> zkServerGroups = collectZKServers(serviceComponentsByHostGroup);
-            boolean weHaveMoreThan2ZKServer = getZKHostNumbers(hostgroupViews, zkServerGroups);
+            boolean weHaveMoreThan2ZKServer = isZKHostNumbersGreaterThanMinimum(hostgroupViews, zkServerGroups);
 
             return hostgroupViews.stream()
                     .filter(hg -> isProperHostGroupForRaz(hg, zkServerGroups, weHaveMoreThan2ZKServer))
@@ -59,15 +59,13 @@ public class RangerRazDatahubConfigProvider extends RangerRazBaseConfigProvider 
                 .stream()
                 .filter(hg -> hg.getValue().stream().findFirst().isPresent())
                 .filter(e -> e.getValue().stream()
-                        .filter(services -> services.getService().equals("ZOOKEEPER") && services.getComponent().equals("SERVER"))
-                        .findFirst()
-                        .isPresent()
+                        .anyMatch(services -> "ZOOKEEPER".equals(services.getService()) && "SERVER".equals(services.getComponent()))
                 )
-                .map(e -> e.getKey())
+                .map(Map.Entry::getKey)
                 .collect(Collectors.toSet());
     }
 
-    private boolean getZKHostNumbers(Set<HostgroupView> hostgroupViews, Set<String> zkServerGroups) {
+    private boolean isZKHostNumbersGreaterThanMinimum(Set<HostgroupView> hostgroupViews, Set<String> zkServerGroups) {
         Set<HostgroupView> groupsWhichHasZK = hostgroupViews.stream()
                 .filter(hg -> zkServerGroups.contains(hg.getName()))
                 .collect(Collectors.toSet());
@@ -77,6 +75,6 @@ public class RangerRazDatahubConfigProvider extends RangerRazBaseConfigProvider 
 
     private boolean isProperHostGroupForRaz(HostgroupView hg, Set<String> zookeeperGroups, boolean weHaveMoreThan2ZKServer) {
         return InstanceGroupType.GATEWAY.equals(hg.getInstanceGroupType())
-                || (weHaveMoreThan2ZKServer && zookeeperGroups.contains(hg.getName()));
+                || weHaveMoreThan2ZKServer && zookeeperGroups.contains(hg.getName());
     }
 }

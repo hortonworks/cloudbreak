@@ -134,8 +134,8 @@ public class HueConfigProvider extends AbstractRdsRoleConfigProvider {
 
     private boolean externalFqdnShouldBeConfigured(GatewayView gateway, GeneralClusterConfigs generalClusterConfigs) {
         return gateway != null
-                && ((StringUtils.isNotEmpty(generalClusterConfigs.getExternalFQDN())
-                && generalClusterConfigs.getPrimaryGatewayInstanceDiscoveryFQDN().isPresent())
+                && (StringUtils.isNotEmpty(generalClusterConfigs.getExternalFQDN())
+                && generalClusterConfigs.getPrimaryGatewayInstanceDiscoveryFQDN().isPresent()
                 || generalClusterConfigs.getLoadBalancerGatewayFqdn().isPresent());
     }
 

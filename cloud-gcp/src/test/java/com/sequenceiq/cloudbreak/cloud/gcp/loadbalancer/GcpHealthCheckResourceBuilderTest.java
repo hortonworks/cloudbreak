@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.loadbalancer;
 
 import static java.util.Collections.emptyMap;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -12,8 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Assert;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,7 +44,7 @@ import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @ExtendWith(MockitoExtension.class)
-public class GcpHealthCheckResourceBuilderTest {
+class GcpHealthCheckResourceBuilderTest {
 
     @Mock
     private GcpContext gcpContext;
@@ -90,7 +90,7 @@ public class GcpHealthCheckResourceBuilderTest {
     }
 
     @Test
-    public void testCreateWhenEverythingGoesFine() throws Exception {
+    void testCreateWhenEverythingGoesFine() throws Exception {
         when(gcpContext.getName()).thenReturn("name");
         when(cloudLoadBalancer.getType()).thenReturn(LoadBalancerType.PUBLIC);
         Map<TargetGroupPortPair, Set<Group>> targetGroupPortPairSetHashMap = new HashMap<>();
@@ -99,13 +99,13 @@ public class GcpHealthCheckResourceBuilderTest {
 
         List<CloudResource> cloudResources = underTest.create(gcpContext, authenticatedContext, cloudLoadBalancer);
 
-        Assertions.assertTrue(cloudResources.get(0).getName().startsWith("name-public-8080"));
-        Assertions.assertEquals(1, cloudResources.size());
-        Assertions.assertEquals(8080, cloudResources.get(0).getParameter("hcport", Integer.class));
+        assertTrue(cloudResources.get(0).getName().startsWith("name-public-8080"));
+        assertEquals(1, cloudResources.size());
+        assertEquals(8080, cloudResources.get(0).getParameter("hcport", Integer.class));
     }
 
     @Test
-    public void testBuild() throws Exception {
+    void testBuild() throws Exception {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("hcport", 8080);
         parameters.put("trafficport", 8080);
@@ -134,13 +134,13 @@ public class GcpHealthCheckResourceBuilderTest {
         List<CloudResource> cloudResources = underTest.build(gcpContext, authenticatedContext,
                 Collections.singletonList(resource), cloudLoadBalancer, cloudStack);
 
-        Assert.assertEquals("super", cloudResources.get(0).getName());
-        Assertions.assertEquals(8080, cloudResources.get(0).getParameter("hcport", Integer.class));
+        assertEquals("super", cloudResources.get(0).getName());
+        assertEquals(8080, cloudResources.get(0).getParameter("hcport", Integer.class));
 
     }
 
     @Test
-    public void testDelete() throws Exception {
+    void testDelete() throws Exception {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("hcport", 8080);
         parameters.put("trafficport", 8080);
@@ -168,8 +168,8 @@ public class GcpHealthCheckResourceBuilderTest {
 
         CloudResource delete = underTest.delete(gcpContext, authenticatedContext, resource);
 
-        Assert.assertEquals(ResourceType.GCP_HEALTH_CHECK, delete.getType());
-        Assert.assertEquals(CommonStatus.CREATED, delete.getStatus());
-        Assert.assertEquals("super", delete.getName());
+        assertEquals(ResourceType.GCP_HEALTH_CHECK, delete.getType());
+        assertEquals(CommonStatus.CREATED, delete.getStatus());
+        assertEquals("super", delete.getName());
     }
 }

@@ -20,7 +20,7 @@ public class AwsInstanceProfileView {
 
     public String getInstanceProfile() {
         String instanceProfile = null;
-        if (cloudFileSystem.isPresent() && (cloudFileSystem.get().getCloudFileSystems() instanceof CloudS3View)) {
+        if (cloudFileSystem.isPresent() && cloudFileSystem.get().getCloudFileSystems() instanceof CloudS3View) {
             instanceProfile = ((CloudS3View) cloudFileSystem.get().getCloudFileSystems()).getInstanceProfile();
         }
         return instanceProfile;

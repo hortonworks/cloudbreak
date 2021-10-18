@@ -54,7 +54,7 @@ import com.sequenceiq.periscope.utils.MockStackResponseGenerator;
 import com.sequenceiq.periscope.utils.StackResponseUtils;
 
 @ExtendWith(MockitoExtension.class)
-public class CronTimeEvaluatorTest {
+class CronTimeEvaluatorTest {
 
     private static final long CLUSTER_ID = 1L;
 
@@ -110,7 +110,7 @@ public class CronTimeEvaluatorTest {
     private CronTimeEvaluator underTest;
 
     @Test
-    public void testRunCallsFinished() {
+    void testRunCallsFinished() {
         underTest.setContext(new ClusterIdEvaluatorContext(CLUSTER_ID));
         when(clusterService.findById(anyLong())).thenThrow(new RuntimeException("exception from the test"));
 
@@ -124,7 +124,7 @@ public class CronTimeEvaluatorTest {
         verify(executorServiceWithRegistry).finished(underTest, CLUSTER_ID);
     }
 
-    public static Stream<Arguments> scheduleBasedUpScaling() {
+    static Stream<Arguments> scheduleBasedUpScaling() {
         return Stream.of(
                 //TestCase, CurrentHostGroupCount,DesiredNodeCount, ExpectedNodeCount
                 Arguments.of("SCALE_UP", 2, 7, 7),
@@ -137,7 +137,7 @@ public class CronTimeEvaluatorTest {
 
     @ParameterizedTest(name = "{0}: With currentHostGroupCount={1}, desiredNodeCount ={2}, expectedNodeCount={3} ")
     @MethodSource("scheduleBasedUpScaling")
-    public void testPublishIfNeededForUpscaling(String testType, Integer currentHostGroupCount,
+    void testPublishIfNeededForUpscaling(String testType, Integer currentHostGroupCount,
             Integer desiredNodeCount, Integer expectedScalingCount) throws Exception {
 
         ScalingEvent scalingEvent = validateScheduleBasedScaling("SCALE_UP_MODE", currentHostGroupCount, desiredNodeCount, Optional.empty());
@@ -146,7 +146,7 @@ public class CronTimeEvaluatorTest {
                 "Scheduled-Based Autoscaling Expeced Node Count should match.");
     }
 
-    public static Stream<Arguments> scheduleBasedDownScaling() {
+    static Stream<Arguments> scheduleBasedDownScaling() {
         return Stream.of(
                 //TestCase, CurrentHostGroupCount,DesiredNodeCount,YarnGivenDecommissionCount,ExpectedNodeCount
                 Arguments.of("SCALE_DOWN_YARN_NODE_COUNT_MATCH  ", 10, 6, 4, 6),
@@ -159,7 +159,7 @@ public class CronTimeEvaluatorTest {
 
     @ParameterizedTest(name = "{0}: With currentHostGroupCount={1}, desiredNodeCount ={2}, yarnGivenDecommissionCount={3}, expectedNodeCount={4} ")
     @MethodSource("scheduleBasedDownScaling")
-    public void testPublishIfNeededForDownScaling(String testType, Integer currentHostGroupCount,
+    void testPublishIfNeededForDownScaling(String testType, Integer currentHostGroupCount,
             Integer desiredNodeCount, Integer yarnGivenDecommissionCount, Integer expectedScalingCount) throws Exception {
 
         ScalingEvent scalingEvent = validateScheduleBasedScaling("SCALE_DOWN_MODE", currentHostGroupCount,

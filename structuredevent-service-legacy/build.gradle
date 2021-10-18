@@ -5,12 +5,9 @@ repositories {
     maven { url = "$repoUrl" }
 }
 
-// override Spring Depenendencies
-ext['kafka.version'] = '2.3.1'
-
 jar {
-    baseName = 'structuredevent-service-legacy'
-    archiveName = 'structuredevent-service-legacy.jar'
+    archiveBaseName = 'structuredevent-service-legacy'
+    archiveFileName= 'structuredevent-service-legacy.jar'
 }
 
 dependencies {

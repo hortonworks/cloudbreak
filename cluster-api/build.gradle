@@ -11,7 +11,7 @@ repositories {
 }
 
 jar {
-  baseName = 'cluster-api'
+  archiveBaseName = 'cluster-api'
 }
 
 dependencies {

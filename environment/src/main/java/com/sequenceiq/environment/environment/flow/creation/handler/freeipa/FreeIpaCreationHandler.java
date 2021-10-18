@@ -267,7 +267,7 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
     }
 
     private void setVariant(EnvironmentDto environment, CreateFreeIpaRequest createFreeIpaRequest, boolean multiAzRequired) {
-        if ((environment.getCredential().getGovCloud() != null && environment.getCredential().getGovCloud())
+        if (environment.getCredential().getGovCloud() != null && environment.getCredential().getGovCloud()
                 && CloudPlatform.AWS.name().equals(environment.getCloudPlatform())) {
             createFreeIpaRequest.setVariant(AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT.variant().value());
         } else if ((multiAzRequired || entitlementService.enforceAwsNativeForSingleAzFreeipaEnabled(environment.getAccountId()))

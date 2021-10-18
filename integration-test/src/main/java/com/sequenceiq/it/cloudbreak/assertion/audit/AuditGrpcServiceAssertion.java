@@ -89,7 +89,7 @@ public abstract class AuditGrpcServiceAssertion<T extends CloudbreakTestDto, C e
         String eventName = operationInfo.getEventName();
         Set<String> firstStates = Objects.requireNonNull(operationInfo.getFirstStates(), "You should define the first state for the flow audit log check");
         Set<String> lastStates = Objects.requireNonNull(operationInfo.getLastStates(), "You should define the last state for the flow audit log check");
-        if (flowEvents.isEmpty() || (flowEvents.size() >= 2 && flowEvents.size() % 2 != 0)) {
+        if (flowEvents.isEmpty() || flowEvents.size() >= 2 && flowEvents.size() % 2 != 0) {
             throw new TestFailException(eventName + " flow audit log must contain minimum 2 items but has " + flowEvents.size());
         }
         if (flowEvents.stream().noneMatch(e -> firstStates.contains(getFlowState(e)))) {

@@ -47,14 +47,14 @@ class ClusterCreationFailedHandlerTest {
     public void testHandleClusterCreationFailedRequestBeforeSaltBootstrap() {
         when(stackStatusService.findAllStackStatusesById(STACK_ID)).thenReturn(List.of(createStackStatus(DetailedStackStatus.REGISTERING_TO_CLUSTER_PROXY)));
         ClusterCreationFailedRequest request = new ClusterCreationFailedRequest(STACK_ID);
-        HandlerEvent handlerEvent = new HandlerEvent(Event.wrap(request));
+        HandlerEvent<ClusterCreationFailedRequest> handlerEvent = new HandlerEvent<>(Event.wrap(request));
 
         Selectable selectable = underTest.doAccept(handlerEvent);
 
         assertThat(selectable).isInstanceOf(StackEvent.class);
         assertThat(selectable.getSelector()).isEqualTo(ClusterCreationEvent.CLUSTER_CREATION_FAILURE_HANDLED_EVENT.event());
         verify(conclusionCheckerService, times(1)).runConclusionChecker(eq(STACK_ID), anyString(), any(),
-                eq(ConclusionCheckerType.CLUSTER_PROVISION_BEFORE_SALT_BOOTSTRAP), any());
+                eq(ConclusionCheckerType.CLUSTER_PROVISION_BEFORE_SALT_BOOTSTRAP));
     }
 
     @Test
@@ -62,14 +62,14 @@ class ClusterCreationFailedHandlerTest {
         when(stackStatusService.findAllStackStatusesById(STACK_ID)).thenReturn(
                 List.of(createStackStatus(DetailedStackStatus.REGISTERING_TO_CLUSTER_PROXY), createStackStatus(DetailedStackStatus.COLLECTING_HOST_METADATA)));
         ClusterCreationFailedRequest request = new ClusterCreationFailedRequest(STACK_ID);
-        HandlerEvent handlerEvent = new HandlerEvent(Event.wrap(request));
+        HandlerEvent<ClusterCreationFailedRequest> handlerEvent = new HandlerEvent<>(Event.wrap(request));
 
         Selectable selectable = underTest.doAccept(handlerEvent);
 
         assertThat(selectable).isInstanceOf(StackEvent.class);
         assertThat(selectable.getSelector()).isEqualTo(ClusterCreationEvent.CLUSTER_CREATION_FAILURE_HANDLED_EVENT.event());
         verify(conclusionCheckerService, times(1)).runConclusionChecker(eq(STACK_ID), anyString(), any(),
-                eq(ConclusionCheckerType.CLUSTER_PROVISION_AFTER_SALT_BOOTSTRAP), any());
+                eq(ConclusionCheckerType.CLUSTER_PROVISION_AFTER_SALT_BOOTSTRAP));
     }
 
     @Test
@@ -78,14 +78,14 @@ class ClusterCreationFailedHandlerTest {
                 List.of(createStackStatus(DetailedStackStatus.REGISTERING_TO_CLUSTER_PROXY), createStackStatus(DetailedStackStatus.COLLECTING_HOST_METADATA),
                         createStackStatus(DetailedStackStatus.STARTING_CLUSTER_SERVICES)));
         ClusterCreationFailedRequest request = new ClusterCreationFailedRequest(STACK_ID);
-        HandlerEvent handlerEvent = new HandlerEvent(Event.wrap(request));
+        HandlerEvent<ClusterCreationFailedRequest> handlerEvent = new HandlerEvent<>(Event.wrap(request));
 
         Selectable selectable = underTest.doAccept(handlerEvent);
 
         assertThat(selectable).isInstanceOf(StackEvent.class);
         assertThat(selectable.getSelector()).isEqualTo(ClusterCreationEvent.CLUSTER_CREATION_FAILURE_HANDLED_EVENT.event());
         verify(conclusionCheckerService, times(1)).runConclusionChecker(eq(STACK_ID), anyString(), any(),
-                eq(ConclusionCheckerType.DEFAULT), any());
+                eq(ConclusionCheckerType.DEFAULT));
     }
 
     private static StackStatus createStackStatus(DetailedStackStatus detailedStackStatus) {

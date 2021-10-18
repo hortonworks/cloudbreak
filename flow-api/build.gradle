@@ -6,8 +6,8 @@ repositories {
 }
 
 jar {
-  baseName = 'flow-api'
-  archiveName = 'flow-api.jar'
+  archiveBaseName = 'flow-api'
+  archiveFileName = 'flow-api.jar'
 }
 
 dependencies {
@@ -28,15 +28,13 @@ dependencies {
   implementation group: 'org.bouncycastle',              name: 'bcpkix-jdk15on',                 version: bouncycastleVersion
 
   implementation group: 'com.fasterxml.jackson.jaxrs',   name: 'jackson-jaxrs-json-provider',    version: jacksonVersion
-  implementation (group: 'com.fasterxml.jackson.core',   name: 'jackson-databind',               version: jacksonDatabindVersion) {
-    force = true
-  }
+  implementation group: 'com.fasterxml.jackson.core',    name: 'jackson-databind',               version: { strictly jacksonDatabindVersion }
   implementation group: 'org.glassfish.jersey.connectors',  name: 'jersey-apache-connector',     version: jerseyCoreVersion
   implementation group: 'net.jcip',                      name: 'jcip-annotations',               version: '1.0'
 }
 
 task testJar(type: Jar, dependsOn: testClasses) {
-  baseName = "test-${project.archivesBaseName}"
+  archiveBaseName = "test-${project.archivesBaseName}"
   from sourceSets.test.output
   from sourceSets.main.output
 }

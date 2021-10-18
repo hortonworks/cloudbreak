@@ -47,7 +47,7 @@ public class UpgradeRequestValidator implements ConstraintValidator<ValidUpgrade
 
     private boolean isRuntimeUpgrade(SdxUpgradeRequest request) {
         return !Boolean.TRUE.equals(request.getLockComponents())
-                && ((!StringUtils.isEmpty(request.getRuntime()) && StringUtils.isEmpty(request.getImageId()))
-                || (!StringUtils.isEmpty(request.getImageId()) && StringUtils.isEmpty(request.getRuntime())));
+                && (!StringUtils.isEmpty(request.getRuntime()) && StringUtils.isEmpty(request.getImageId())
+                || !StringUtils.isEmpty(request.getImageId()) && StringUtils.isEmpty(request.getRuntime()));
     }
 }

@@ -50,15 +50,16 @@ bootRun {
     if (project.hasProperty('jvmArgs')) {
         jvmArgs += project.jvmArgs.split("\\s+").toList()
     }
+    jvmArgs += ['--add-opens','java.base/java.util.concurrent=ALL-UNNAMED']
 }
 
 bootRun {
-    main = 'com.sequenceiq.periscope.PeriscopeApplication'
+    mainClass = 'com.sequenceiq.periscope.PeriscopeApplication'
 }
 
 bootJar {
-    baseName = 'periscope'
-    archiveName = 'periscope.jar'
+    archiveBaseName = 'periscope'
+    archiveFileName = 'periscope.jar'
     manifest {
         def grgit = Grgit.open(currentDir: project.projectDir)
         attributes "Implementation-Version": grgit.describe()
@@ -94,6 +95,12 @@ configurations {
 
 project.tasks.named("bootJar") {
     duplicatesStrategy = 'include'
+}
+
+configurations.all {
+    resolutionStrategy {
+        force "net.bytebuddy:byte-buddy:${byteBuddyVersion}"
+    }
 }
 
 dependencyManagement {
@@ -176,6 +183,7 @@ dependencies {
 
     implementation group: 'com.sequenceiq',                name: 'consul-api'
 
+    testImplementation group: 'net.bytebuddy',             name: 'byte-buddy',                           version: byteBuddyVersion
     testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test'
     testImplementation group: 'org.mockito',               name: 'mockito-core'
     testImplementation group: 'com.openpojo',              name: 'openpojo'

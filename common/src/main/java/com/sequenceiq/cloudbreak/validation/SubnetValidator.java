@@ -53,9 +53,9 @@ public class SubnetValidator implements ConstraintValidator<ValidSubnet, String>
         if (addr != lowerAddr) {
             return false;
         }
-        return (new Ip("10.0.0.0").compareTo(ip) <= 0 && new Ip("10.255.255.255").compareTo(ip) >= 0)
-                || (new Ip("172.16.0.0").compareTo(ip) <= 0 && new Ip("172.31.255.255").compareTo(ip) >= 0)
-                || (new Ip("192.168.0.0").compareTo(ip) <= 0 && new Ip("192.168.255.255").compareTo(ip) >= 0);
+        return new Ip("10.0.0.0").compareTo(ip) <= 0 && new Ip("10.255.255.255").compareTo(ip) >= 0
+                || new Ip("172.16.0.0").compareTo(ip) <= 0 && new Ip("172.31.255.255").compareTo(ip) >= 0
+                || new Ip("192.168.0.0").compareTo(ip) <= 0 && new Ip("192.168.255.255").compareTo(ip) >= 0;
     }
 
     private long toLong(String addr) {

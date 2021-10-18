@@ -17,9 +17,10 @@ public class StackParameters implements Serializable {
     private Long stackId;
 
     @Id
+    @Column(name = "\"key\"")
     private String key;
 
-    @Column(columnDefinition = "TEXT", length = 100000)
+    @Column(name = "\"value\"", columnDefinition = "TEXT", length = 100000)
     private String value;
 
     public Long getStackId() {

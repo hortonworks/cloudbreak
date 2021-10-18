@@ -15,7 +15,7 @@ plugins {
   id "checkstyle"
   id "jacoco"
   id "maven-publish"
-  id "org.springframework.boot" version "2.1.2.RELEASE"
+  id "org.springframework.boot" version "${springBootVersion}"
   id "org.sonarqube" version "${sonarVersion}"
 }
 
@@ -46,7 +46,7 @@ dependencies {
 
   implementation            group: 'org.yaml',                  name: 'snakeyaml'
   // mockito juniper depends on ByteBuddy 1.9.7, but hibernate use older version
-  implementation            group: 'net.bytebuddy',             name: 'byte-buddy', version: '1.14.4'
+  implementation            group: 'net.bytebuddy',             name: 'byte-buddy', version: byteBuddyVersion
 
   implementation     group: 'com.google.guava',          name: 'guava'
   implementation     group: 'com.google.code.gson',      name: 'gson'
@@ -124,8 +124,8 @@ dependencies {
   runtimeOnly project(':cloud-mock')
   runtimeOnly project(':cloud-azure')
 
-  testRuntimeClasspath group: 'org.testcontainers',        name: 'postgresql',                     version: testContainersVersion
-  testRuntimeClasspath group: 'org.awaitility',            name: 'awaitility',                     version: awaitilityVersion
+  testRuntimeOnly group: 'org.testcontainers',        name: 'postgresql',                     version: testContainersVersion
+  testRuntimeOnly group: 'org.awaitility',            name: 'awaitility',                     version: awaitilityVersion
 }
 
 bootRun {
@@ -147,12 +147,12 @@ bootRun {
 }
 
 bootRun {
-  main = 'com.sequenceiq.redbeams.RedbeamsApplication'
+  mainClass = 'com.sequenceiq.redbeams.RedbeamsApplication'
 }
 
 bootJar {
-  baseName = 'redbeams'
-  archiveName = 'redbeams.jar'
+  archiveBaseName = 'redbeams'
+  archiveFileName= 'redbeams.jar'
   manifest {
     def grgit = Grgit.open(currentDir: project.projectDir)
     attributes "Implementation-Version": grgit.describe()

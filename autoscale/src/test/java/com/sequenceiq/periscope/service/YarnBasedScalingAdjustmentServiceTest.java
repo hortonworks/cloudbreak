@@ -432,7 +432,7 @@ class YarnBasedScalingAdjustmentServiceTest {
         doCallRealMethod().when(stackResponseUtils).getStoppedCloudInstanceIdsInHostGroup(any(StackV4Response.class), anyString());
         doReturn(yarnResponse).when(yarnMetricsClient).getYarnMetricsForCluster(any(Cluster.class), eq(stackResponse), eq(HOSTGROUP), eq(POLLING_USER_CRN),
                 any(Optional.class));
-        doReturn(TEST_MESSAGE).when(messagesService).getMessageWithArgs(anyString(), any());
+        doReturn(TEST_MESSAGE).when(messagesService).getMessageWithArgs(anyString(), anyInt(), anyList(), anyInt(), anyList());
         lenient().doCallRealMethod().when(clock).getCurrentTimeMillis();
         lenient().doReturn(scalingActivity).when(scalingActivityService).create(any(Cluster.class), any(ActivityStatus.class), anyString(), anyLong());
         lenient().doCallRealMethod().when(scalingEventSender).sendScaleUpEvent(any(BaseAlert.class), anyInt(), anyInt(), anyInt(), anyInt(), anyLong());

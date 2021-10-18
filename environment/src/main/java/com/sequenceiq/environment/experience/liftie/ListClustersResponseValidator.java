@@ -25,7 +25,7 @@ public class ListClustersResponseValidator {
     }
 
     private boolean isPagesAreEmpty(ListClustersResponse response) {
-        boolean pagesAreEmpty = response.getPage() == null || (response.getPage().getTotalPages() == null || response.getPage().getTotalPages() == 0);
+        boolean pagesAreEmpty = response.getPage() == null || response.getPage().getTotalPages() == null || response.getPage().getTotalPages() == 0;
         if (pagesAreEmpty) {
             LOGGER.info(ListClustersResponse.class.getSimpleName() + " has not contained any element!");
         }

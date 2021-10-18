@@ -2,12 +2,14 @@ package com.sequenceiq.datalake.service.sdx;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -37,7 +39,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentS
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
 @ExtendWith(MockitoExtension.class)
-public class EnvironmentServiceTest {
+class EnvironmentServiceTest {
 
     private static final String TEST_USER_CRN = "crn:cdp:iam:us-west-1:1234:user:1";
 
@@ -57,7 +59,7 @@ public class EnvironmentServiceTest {
     private EnvironmentService underTest;
 
     @Test
-    public void testWaitEnvironmentNetworkCreationFinished() {
+    void testWaitEnvironmentNetworkCreationFinished() {
 
         Long sdxId = 42L;
         SdxCluster sdxCluster = new SdxCluster();
@@ -80,12 +82,14 @@ public class EnvironmentServiceTest {
         DetailedEnvironmentResponse environment = underTest.waitAndGetEnvironment(sdxId, pollingConfig, EnvironmentStatus::isNetworkCreationFinished);
 
         assertThat(environment.getEnvironmentStatus(), is(EnvironmentStatus.PUBLICKEY_CREATE_IN_PROGRESS));
-        verifyZeroInteractions(sdxClusterRepository);
-        verifyZeroInteractions(environmentClientService);
+        verify(sdxClusterRepository).findById(sdxId);
+        verifyNoMoreInteractions(sdxClusterRepository);
+        verify(environmentClientService, times(3)).getByCrn("crn");
+        verifyNoMoreInteractions(environmentClientService);
     }
 
     @Test
-    public void testWaitEnvironmentAvailable() {
+    void testWaitEnvironmentAvailable() {
 
         Long sdxId = 42L;
         SdxCluster sdxCluster = new SdxCluster();
@@ -110,12 +114,14 @@ public class EnvironmentServiceTest {
         DetailedEnvironmentResponse environment = underTest.waitAndGetEnvironment(sdxId, pollingConfig, EnvironmentStatus::isAvailable);
 
         assertThat(environment.getEnvironmentStatus(), is(EnvironmentStatus.AVAILABLE));
-        verifyZeroInteractions(sdxClusterRepository);
-        verifyZeroInteractions(environmentClientService);
+        verify(sdxClusterRepository).findById(sdxId);
+        verifyNoMoreInteractions(sdxClusterRepository);
+        verify(environmentClientService, times(5)).getByCrn("crn");
+        verifyNoMoreInteractions(environmentClientService);
     }
 
     @Test
-    public void testGetResourceCrnByResourceName() {
+    void testGetResourceCrnByResourceName() {
         when(sdxClusterRepository.findAuthorizationResourcesByAccountIdAndEnvName(any(), any())).thenReturn(List.of());
         assertThrows(NotFoundException.class, () -> ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () ->
                 underTest.getResourceCrnByResourceName("name")));
@@ -137,7 +143,7 @@ public class EnvironmentServiceTest {
     }
 
     @Test
-    public void testGetResourceCrnListByResourceNameList() {
+    void testGetResourceCrnListByResourceNameList() {
         when(sdxClusterRepository.findAuthorizationResourcesByAccountIdAndEnvNames(any(), any())).thenReturn(List.of());
         assertTrue(ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () ->
                 underTest.getResourceCrnListByResourceNameList(List.of("name"))).isEmpty());
@@ -157,7 +163,7 @@ public class EnvironmentServiceTest {
     }
 
     @Test
-    public void testGetNamesByCrns() {
+    void testGetNamesByCrns() {
         when(sdxClusterViewRepository.findByAccountIdAndEnvCrnIn(any(), any())).thenReturn(Set.of());
         assertTrue(ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.getNamesByCrnsForMessage(List.of("crn"))).isEmpty());
 

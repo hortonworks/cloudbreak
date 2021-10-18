@@ -12,7 +12,7 @@ repositories {
 }
 
 jar {
-  baseName = 'common-model'
+  archiveBaseName = 'common-model'
 }
 
 dependencies {

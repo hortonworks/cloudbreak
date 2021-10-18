@@ -6,8 +6,8 @@ repositories {
 }
 
 jar {
-  baseName = 'orchestrator-yarn'
-  archiveName = 'orchestrator-yarn.jar'
+  archiveBaseName = 'orchestrator-yarn'
+  archiveFileName= 'orchestrator-yarn.jar'
 }
 
 dependencies {

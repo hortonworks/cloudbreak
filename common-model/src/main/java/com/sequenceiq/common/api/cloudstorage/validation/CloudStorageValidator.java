@@ -37,6 +37,6 @@ public class CloudStorageValidator implements ConstraintValidator<ValidCloudStor
                 .filter(nonNullParam -> nonNullParam.get() instanceof S3CloudStorageV1Parameters || nonNullParam.get() instanceof EfsCloudStorageV1Parameters)
                 .count();
 
-        return (awsCount >= 1 && awsCount <= 2) && (nonNullParams.size() == awsCount);
+        return awsCount >= 1 && awsCount <= 2 && nonNullParams.size() == awsCount;
     }
 }

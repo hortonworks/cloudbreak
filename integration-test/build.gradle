@@ -28,12 +28,12 @@ bootRun {
 }
 
 bootRun {
-  main = 'com.sequenceiq.it.IntegrationTestApp'
+  mainClass = 'com.sequenceiq.it.IntegrationTestApp'
 }
 
 bootJar {
-  baseName = 'cloudbreak-integration-test'
-  archiveName = 'cloudbreak-integration-test.jar'
+  archiveBaseName = 'cloudbreak-integration-test'
+  archiveFileName= 'cloudbreak-integration-test.jar'
   manifest {
     def grgit = Grgit.open(currentDir: project.projectDir)
     attributes "Implementation-Version": grgit.describe()

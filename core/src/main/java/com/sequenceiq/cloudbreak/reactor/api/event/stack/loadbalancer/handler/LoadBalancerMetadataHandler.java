@@ -85,6 +85,6 @@ public class LoadBalancerMetadataHandler extends ExceptionCatcherEventHandler<Lo
     private boolean isMissingMetadata(CloudLoadBalancerMetadata metadataStatus) {
         return metadataStatus.getType() == null ||
             !(StringUtils.isNotEmpty(metadataStatus.getIp()) ||
-            (StringUtils.isNotEmpty(metadataStatus.getCloudDns()) && StringUtils.isNotEmpty(metadataStatus.getHostedZoneId())));
+            StringUtils.isNotEmpty(metadataStatus.getCloudDns()) && StringUtils.isNotEmpty(metadataStatus.getHostedZoneId()));
     }
 }

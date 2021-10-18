@@ -70,6 +70,6 @@ public class CompositeUsageProcessingStrategy implements UsageProcessingStrategy
 
     private boolean initLogging() {
         return !useHttpUsage.get() && !useMessageBroker.get() ||
-                (edhHttpConfiguration.isEnabled() && edhHttpConfiguration.isForceLogging());
+                edhHttpConfiguration.isEnabled() && edhHttpConfiguration.isForceLogging();
     }
 }

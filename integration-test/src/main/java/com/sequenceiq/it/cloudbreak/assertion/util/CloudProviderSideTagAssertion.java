@@ -106,7 +106,7 @@ public class CloudProviderSideTagAssertion {
     }
 
     private void verifyTags(List<String> instanceIds, Map<String, String> customTags, TestContext testContext, String resourceName) {
-        if ((instanceIds != null && !instanceIds.isEmpty()) || !instanceIds.contains(null)) {
+        if (instanceIds != null && !instanceIds.isEmpty() || !instanceIds.contains(null)) {
             CloudFunctionality cloudFunctionality = cloudProviderProxy.getCloudFunctionality();
             Map<String, Map<String, String>> tagsByInstanceId = cloudFunctionality.listTagsByInstanceId(resourceName, instanceIds);
             tagsByInstanceId.forEach((id, tags) -> {

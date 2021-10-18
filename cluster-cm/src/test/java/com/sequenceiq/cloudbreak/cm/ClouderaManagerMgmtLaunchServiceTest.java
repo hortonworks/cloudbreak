@@ -2,8 +2,8 @@ package com.sequenceiq.cloudbreak.cm;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
@@ -72,7 +72,7 @@ public class ClouderaManagerMgmtLaunchServiceTest {
 
         verify(mgmtServiceResourceApi).readService(DataView.SUMMARY.name());
         verifyNoMoreInteractions(mgmtServiceResourceApi);
-        verifyZeroInteractions(clouderaManagerPollingServiceProvider);
+        verifyNoInteractions(clouderaManagerPollingServiceProvider);
     }
 
     private ApiCommand getApiCommand() {

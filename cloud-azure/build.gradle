@@ -7,8 +7,8 @@ repositories {
 }
 
 jar {
-  baseName = 'cloud-azure'
-  archiveName = 'cloud-azure.jar'
+  archiveBaseName = 'cloud-azure'
+  archiveFileName= 'cloud-azure.jar'
 }
 
 dependencies {
@@ -38,11 +38,9 @@ dependencies {
   implementation group: 'com.azure.resourcemanager',    name: 'azure-resourcemanager-marketplaceordering',  version: azureSdkResourceManagerMarketplaceVersion
   implementation group: 'com.azure.resourcemanager',    name: 'azure-resourcemanager-datalakestore',        version: azureSdkResourceManagerDataLakeStoreVersion
 
-  implementation group: 'io.micrometer',                 name: 'micrometer-core',                            version: micrometerVersion
+  implementation group: 'io.micrometer',                name: 'micrometer-core',                            version: micrometerVersion
 
-  implementation (group: 'com.fasterxml.jackson.core', name: 'jackson-databind',           version: jacksonDatabindVersion) {
-    force = true
-  }
+  implementation group: 'com.fasterxml.jackson.core',   name: 'jackson-databind',                           version: { strictly jacksonDatabindVersion }
   constraints {
     implementation 'com.nimbusds:nimbus-jose-jwt:9.31'
   }

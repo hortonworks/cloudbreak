@@ -27,15 +27,13 @@ dependencies {
   api (group: 'org.springframework.vault', name: 'spring-vault-core', version: '2.3.3') {
     exclude group: 'org.springframework'
   }
-  implementation(group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: jacksonDatabindVersion) {
-    force = true
-  }
+  implementation group: 'com.fasterxml.jackson.core',   name: 'jackson-databind', version: { strictly jacksonDatabindVersion }
 
   testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: springBootVersion
 }
 
 task testJar(type: Jar, dependsOn: testClasses) {
-  baseName = "test-${project.archivesBaseName}"
+  archiveBaseName = "test-${project.archivesBaseName}"
   from sourceSets.test.output
   from sourceSets.main.output
 }

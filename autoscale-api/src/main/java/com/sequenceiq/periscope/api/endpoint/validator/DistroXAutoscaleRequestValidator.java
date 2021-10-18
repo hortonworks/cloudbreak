@@ -90,11 +90,11 @@ public class DistroXAutoscaleRequestValidator
                 request.getTimeAlertRequests().stream()
                         .filter(timeAlertRequest ->
                                 AdjustmentType.EXACT.equals(timeAlertRequest.getScalingPolicy().getAdjustmentType())
-                                        && (timeAlertRequest.getScalingPolicy().getScalingAdjustment() < 0))
+                                        && timeAlertRequest.getScalingPolicy().getScalingAdjustment() < 0)
                         .map(TimeAlertRequest::getAlertName)
                         .collect(Collectors.toSet());
 
-        if (negativeAdjustmentRequests.size() > 0) {
+        if (!negativeAdjustmentRequests.isEmpty()) {
             ValidatorUtil.addConstraintViolation(context,
                     messagesService.getMessage(VALIDATION_TIME_NEGATIVE_ADJUSTMENT_FOR_EXACT,
                             List.of(negativeAdjustmentRequests)), "nodeCount")

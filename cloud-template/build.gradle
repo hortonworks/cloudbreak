@@ -7,8 +7,8 @@ repositories {
 }
 
 jar {
-    baseName = 'cloud-template'
-    archiveName = 'cloud-template.jar'
+    archiveBaseName = 'cloud-template'
+    archiveFileName= 'cloud-template.jar'
 }
 
 dependencies {

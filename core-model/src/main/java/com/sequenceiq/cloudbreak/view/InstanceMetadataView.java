@@ -134,7 +134,7 @@ public interface InstanceMetadataView {
     default boolean isGatewayOrPrimaryGateway() {
         InstanceMetadataType instanceMetadataType = getInstanceMetadataType();
         return InstanceMetadataType.GATEWAY == instanceMetadataType || InstanceMetadataType.GATEWAY_PRIMARY == instanceMetadataType
-                || (instanceMetadataType == null && InstanceGroupType.GATEWAY == getInstanceGroupType());
+                || instanceMetadataType == null && InstanceGroupType.GATEWAY == getInstanceGroupType();
     }
 
     default String getIpWrapper(boolean preferPrivateIp) {

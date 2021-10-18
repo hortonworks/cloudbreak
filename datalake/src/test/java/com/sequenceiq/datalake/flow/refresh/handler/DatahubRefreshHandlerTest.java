@@ -11,6 +11,7 @@ import static org.mockito.Mockito.verify;
 
 import java.util.concurrent.TimeUnit;
 
+import org.assertj.core.api.recursive.comparison.RecursiveComparisonConfiguration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,9 +38,9 @@ import com.sequenceiq.datalake.service.sdx.refresh.SdxRefreshService;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandlerTestSupport;
 
 @ExtendWith(MockitoExtension.class)
-public class DatahubRefreshHandlerTest {
+class DatahubRefreshHandlerTest {
 
-    public static final long SDX_ID = 1L;
+    private static final long SDX_ID = 1L;
 
     @Mock
     private SdxRefreshService sdxRefreshService;
@@ -100,7 +101,9 @@ public class DatahubRefreshHandlerTest {
 
         DatahubRefreshFailedEvent failedEvent = new DatahubRefreshFailedEvent(SDX_ID, "user", new Exception("error"));
 
-        assertThat(selectable).usingRecursiveComparison().isEqualTo(failedEvent);
+        assertThat(selectable)
+                .usingRecursiveComparison(RecursiveComparisonConfiguration.builder().withIgnoredFields("accepted").build())
+                .isEqualTo(failedEvent);
     }
 
 }

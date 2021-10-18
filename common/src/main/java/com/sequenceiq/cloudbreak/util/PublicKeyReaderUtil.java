@@ -197,7 +197,7 @@ public final class PublicKeyReaderUtil {
 
         private byte[] readByteArray() throws PublicKeyParseException {
             int len = readUInt32();
-            if ((len < 0) || (len > (data.length - pos))) {
+            if (len < 0 || len > (data.length - pos)) {
                 throw new PublicKeyParseException(
                         ErrorCode.CORRUPT_BYTE_ARRAY_ON_READ);
             }

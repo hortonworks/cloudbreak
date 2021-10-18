@@ -5,7 +5,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
@@ -84,7 +84,7 @@ public class RdsStartHandlerTest {
         victim.accept(event);
 
         verify(eventBus).notify(eq(RdsStartSuccessEvent.class.getSimpleName()), any(Event.class));
-        verifyZeroInteractions(databaseService);
+        verifyNoInteractions(databaseService);
         verify(sdxStatusService).setStatusForDatalakeAndNotify(eq(DatalakeStatusEnum.EXTERNAL_DATABASE_STARTED), anyString(), eq(sdxCluster));
     }
 

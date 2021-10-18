@@ -7,8 +7,8 @@ repositories {
 }
 
 jar {
-    baseName = 'cloud-gcp'
-    archiveName = 'cloud-gcp.jar'
+    archiveBaseName = 'cloud-gcp'
+    archiveFileName= 'cloud-gcp.jar'
 }
 
 dependencies {
@@ -28,38 +28,38 @@ dependencies {
     implementation (group: 'com.google.apis',              name: 'google-api-services-compute',                version: 'v1-rev20230418-2.0.0') {
         exclude group: 'com.google.api-client', module:'google-api-client'
     }
-    implementation (group: 'com.google.apis',               name: 'google-api-services-iam',                    version: 'v1-rev20230406-2.0.0') {
+    implementation (group: 'com.google.apis',               name: 'google-api-services-iam',                   version: 'v1-rev20230406-2.0.0') {
         exclude group: 'com.google.api-client', module:'google-api-client'
     }
-    implementation (group: 'com.google.apis',               name: 'google-api-services-storage',                version: 'v1-rev20230301-2.0.0'){
+    implementation (group: 'com.google.apis',               name: 'google-api-services-storage',               version: 'v1-rev20230301-2.0.0'){
         exclude group: 'com.google.api-client', module:'google-api-client'
     }
-    implementation (group: 'com.google.apis',               name: 'google-api-services-dns',                    version: 'v2-rev20220505-1.32.1'){
+    implementation (group: 'com.google.apis',               name: 'google-api-services-dns',                   version: 'v2-rev20220505-1.32.1'){
         exclude group: 'com.google.api-client', module:'google-api-client'
     }
-    implementation (group: 'com.google.apis',               name: 'google-api-services-cloudkms',               version: 'v1-rev20230407-2.0.0'){
+    implementation (group: 'com.google.apis',               name: 'google-api-services-cloudkms',              version: 'v1-rev20230407-2.0.0'){
         exclude group: 'com.google.api-client', module:'google-api-client'
     }
-    implementation (group: 'com.google.apis',               name: 'google-api-services-sqladmin',               version: 'v1-rev20230422-2.0.0'){
+    implementation (group: 'com.google.apis',               name: 'google-api-services-sqladmin',              version: 'v1-rev20230422-2.0.0'){
         exclude group: 'com.google.api-client', module:'google-api-client'
     }
-    implementation (group: 'com.google.auth',               name: 'google-auth-library-oauth2-http',            version: '1.16.1') {
+    implementation (group: 'com.google.auth',               name: 'google-auth-library-oauth2-http',           version: '1.16.1') {
         exclude group: 'com.google.http-client', module:'google-http-client'
     }
-    implementation (group: 'com.google.http-client',        name: 'google-http-client-jackson2',                version: '1.43.0') {
+    implementation (group: 'com.google.http-client',        name: 'google-http-client-jackson2',               version: '1.43.0') {
         exclude group: 'com.google.http-client', module:'google-http-client'
     }
-    implementation (group: 'com.google.api-client',        name: 'google-api-client',                version: '2.2.0') {
+    implementation (group: 'com.google.api-client',        name: 'google-api-client',                          version: '2.2.0') {
         exclude group: 'junit', module: 'junit'
     }
-    implementation     group: 'com.google.guava',          name: 'guava',                                version: guavaVersion
+    implementation     group: 'com.google.guava',          name: 'guava',                                      version: guavaVersion
 
     testImplementation project(path: ':core-model', configuration: 'tests')
     testImplementation project(':cloud-reactor')
     testImplementation        group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
 
     // mockito juniper depends on ByteBuddy 1.9.7, but hibernate use older version
-    implementation group: 'net.bytebuddy',          name: 'byte-buddy',                   version: '1.14.4'
+    implementation group: 'net.bytebuddy',          name: 'byte-buddy',                   version: byteBuddyVersion
 
     //to be able to mock final class(es)
     testImplementation group: 'org.mockito',        name: 'mockito-inline',               version: mockitoVersion

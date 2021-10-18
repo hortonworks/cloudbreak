@@ -9,8 +9,8 @@ repositories {
 }
 
 jar {
-    baseName = 'structuredevent-model'
-    archiveName = 'structuredevent-model.jar'
+    archiveBaseName = 'structuredevent-model'
+    archiveFileName= 'structuredevent-model.jar'
 }
 
 dependencies {

@@ -2,7 +2,7 @@ package com.sequenceiq.datalake.service.pause;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.Test;
@@ -45,7 +45,7 @@ public class DatabasePauseSupportServiceTest {
 
         assertFalse(victim.isDatabasePauseSupported(sdxCluster));
 
-        verifyZeroInteractions(environmentClientService);
+        verifyNoInteractions(environmentClientService);
     }
 
     @Test
@@ -55,7 +55,7 @@ public class DatabasePauseSupportServiceTest {
 
         assertFalse(victim.isDatabasePauseSupported(sdxCluster));
 
-        verifyZeroInteractions(environmentClientService);
+        verifyNoInteractions(environmentClientService);
     }
 
     @Test
@@ -81,3 +81,4 @@ public class DatabasePauseSupportServiceTest {
         assertTrue(victim.isDatabasePauseSupported(sdxCluster));
     }
 }
+

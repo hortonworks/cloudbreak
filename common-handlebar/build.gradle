@@ -9,7 +9,7 @@ repositories {
 }
 
 jar {
-    baseName = 'common-handlebar'
+    archiveBaseName = 'common-handlebar'
 }
 
 dependencies {

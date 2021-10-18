@@ -62,12 +62,12 @@ bootRun {
   if (project.hasProperty("jvmArgs")) {
     jvmArgs += project.jvmArgs.split("\\s+").toList()
   }
-  main = 'com.sequenceiq.cloudbreak.CloudbreakApplication'
+  mainClass = 'com.sequenceiq.cloudbreak.CloudbreakApplication'
 }
 
 bootJar {
-    baseName = 'cloudbreak'
-    archiveName = 'cloudbreak.jar'
+    archiveBaseName = 'cloudbreak'
+    archiveFileName= 'cloudbreak.jar'
     manifest {
       def grgit = Grgit.open(currentDir: project.projectDir)
       attributes "Implementation-Version": grgit.describe()

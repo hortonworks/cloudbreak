@@ -19,7 +19,7 @@ import com.sequenceiq.periscope.domain.TimeAlert;
 import com.sequenceiq.periscope.utils.TimeUtil;
 
 @Service
-public final class DateService {
+public class DateService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DateService.class);
 

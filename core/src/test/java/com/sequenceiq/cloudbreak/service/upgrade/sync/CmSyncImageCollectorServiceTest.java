@@ -7,8 +7,8 @@ import static org.hamcrest.Matchers.emptyCollectionOf;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyObject;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -98,7 +98,7 @@ public class CmSyncImageCollectorServiceTest {
         List<Image> allCdhImages = List.of(getImage(IMAGE_UUID_1));
         when(imageService.getCurrentImageCatalogName(STACK_ID)).thenReturn(CURRENT_IMAGE_CATALOG_NAME);
         when(imageCatalogService.getAllCdhImages(anyString(), anyLong(), anyString(), anySet())).thenReturn(allCdhImages);
-        when(platformStringTransformer.getPlatformStringForImageCatalogSet(anyObject(), anyString()))
+        when(platformStringTransformer.getPlatformStringForImageCatalogSet(any(), anyString()))
                 .thenReturn(Set.of(imageCatalogPlatform));
 
         Set<Image> collectedImages = underTest.collectImages(USER_CRN, stack, candidateImageUuids);
@@ -136,7 +136,7 @@ public class CmSyncImageCollectorServiceTest {
         when(imageCatalogService.getAllCdhImages(USER_CRN, WORKSPCE_ID, CURRENT_IMAGE_CATALOG_NAME, Set.of(imageCatalogPlatform(CURRENT_CLOUD_PLATFORM))))
                 .thenThrow(new CloudbreakImageCatalogException("My custom image catalog exception"));
         when(imageService.getCurrentImageCatalogName(STACK_ID)).thenReturn(CURRENT_IMAGE_CATALOG_NAME);
-        when(platformStringTransformer.getPlatformStringForImageCatalogSet(anyObject(), anyString()))
+        when(platformStringTransformer.getPlatformStringForImageCatalogSet(any(), anyString()))
                 .thenReturn(Set.of(imageCatalogPlatform));
 
         Set<Image> collectedImages = underTest.collectImages(USER_CRN, stack, candidateImageUuids);

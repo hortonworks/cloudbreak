@@ -145,8 +145,8 @@ public class LoggingAgentAutoRestartPatchService extends AbstractTelemetryPatchS
         ImageCatalog imageCatalog = stackImageService.getImageCatalogFromStackAndImage(stack, image);
         if (!imageCatalogService.isCustomImageCatalog(imageCatalog)) {
             Optional<StatedImage> statedImageOpt = stackImageService.getStatedImageInternal(stack, image, imageCatalog);
-            if (statedImageOpt.isEmpty() || statedImageOpt.get().getImage() == null || (dateAfterTimestamp <= statedImageOpt.get().getImage().getCreated()
-                    && statedImageOpt.get().getImage().getCreated() < dateBeforeTimestamp)) {
+            if (statedImageOpt.isEmpty() || statedImageOpt.get().getImage() == null || dateAfterTimestamp <= statedImageOpt.get().getImage().getCreated()
+                    && statedImageOpt.get().getImage().getCreated() < dateBeforeTimestamp) {
                 affected = true;
             }
         }

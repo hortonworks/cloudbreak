@@ -7,8 +7,8 @@ repositories {
 }
 
 jar {
-    baseName = 'cloud-mock'
-    archiveName = 'cloud-mock.jar'
+    archiveBaseName = 'cloud-mock'
+    archiveFileName= 'cloud-mock.jar'
 }
 
 dependencies {

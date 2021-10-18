@@ -22,7 +22,7 @@ public class ConstructorTest {
         Set<String> missingConstructors = new HashSet<>();
         for (String clazz : reflections.getAll(SubTypes)) {
             if (clazz.startsWith("com.sequenceiq.environment") && !isTestClass(clazz)
-                    && (requestOrResponse(clazz) && !clazz.contains(".Valid"))
+                    && requestOrResponse(clazz) && !clazz.contains(".Valid")
                     && !Class.forName(clazz).isInterface()) {
                 try {
                     Constructor<?> declaredConstructor = Class.forName(clazz).getDeclaredConstructor();

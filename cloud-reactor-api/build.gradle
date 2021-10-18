@@ -10,8 +10,8 @@ repositories {
 }
 
 jar {
-    baseName = 'cloud-reactor-api'
-    archiveName = 'cloud-reactor-api.jar'
+    archiveBaseName = 'cloud-reactor-api'
+    archiveFileName= 'cloud-reactor-api.jar'
 }
 
 dependencies {

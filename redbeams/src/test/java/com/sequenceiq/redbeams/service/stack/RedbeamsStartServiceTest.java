@@ -3,7 +3,7 @@ package com.sequenceiq.redbeams.service.stack;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
@@ -76,6 +76,6 @@ public class RedbeamsStartServiceTest {
 
         victim.startDatabaseServer(CRN_STRING);
 
-        verifyZeroInteractions(dbStackStatusUpdater, flowManager);
+        verifyNoInteractions(dbStackStatusUpdater, flowManager);
     }
 }

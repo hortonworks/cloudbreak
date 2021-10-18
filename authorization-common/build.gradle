@@ -17,8 +17,8 @@ apply plugin: 'java'
 apply plugin: 'io.spring.dependency-management'
 
 jar {
-  baseName = 'authorization-common'
-  archiveName = 'authorization-common.jar'
+  archiveBaseName = 'authorization-common'
+  archiveFileName = 'authorization-common.jar'
 }
 
 dependencies {
@@ -49,13 +49,13 @@ dependencies {
   implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-data-jpa',    version: springBootVersion
   testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',        version: springBootVersion
 
-  implementation     group: 'net.bytebuddy',                       name: 'byte-buddy',                     version: '1.14.4'
+  implementation     group: 'net.bytebuddy',                       name: 'byte-buddy',                     version: byteBuddyVersion
 
 }
 
 task testJar(type: Jar, dependsOn: testClasses) {
-  baseName = "test-${project.archivesBaseName}"
-  classifier 'test'
+  archiveBaseName = "test-${project.archivesBaseName}"
+  archiveClassifier = 'test'
   from sourceSets.test.output
   from sourceSets.main.output
 }

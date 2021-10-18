@@ -23,7 +23,7 @@ public class CrnAccountValidator {
     }
 
     public void validateSameAccount(String userCrnValue, Collection<String> resourceCrns) {
-        if ((Crn.isCrn(userCrnValue) && RegionAwareInternalCrnGeneratorUtil.isInternalCrn(userCrnValue))
+        if (Crn.isCrn(userCrnValue) && RegionAwareInternalCrnGeneratorUtil.isInternalCrn(userCrnValue)
                 || CollectionUtils.isEmpty(resourceCrns)) {
             return;
         }

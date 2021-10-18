@@ -11,7 +11,7 @@ repositories {
 }
 
 jar {
-    baseName = 'freeipa-client'
+    archiveBaseName = 'freeipa-client'
 }
 
 publishing {

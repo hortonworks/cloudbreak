@@ -45,7 +45,7 @@ public class DistroXUpgradeRequestValidator implements ConstraintValidator<Valid
 
     private boolean isRuntimeUpgrade(DistroXUpgradeV1Request request) {
         return !Boolean.TRUE.equals(request.getLockComponents())
-                && ((!StringUtils.isEmpty(request.getRuntime()) && StringUtils.isEmpty(request.getImageId()))
-                || (!StringUtils.isEmpty(request.getImageId()) && StringUtils.isEmpty(request.getRuntime())));
+                && (!StringUtils.isEmpty(request.getRuntime()) && StringUtils.isEmpty(request.getImageId())
+                || !StringUtils.isEmpty(request.getImageId()) && StringUtils.isEmpty(request.getRuntime()));
     }
 }

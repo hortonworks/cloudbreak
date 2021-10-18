@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.audit.model;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.List;
 
@@ -47,6 +48,7 @@ public class ResultServiceEventData extends ResultEventData {
         private String resultDetails;
 
         public Builder withResourceCrns(List<String> resourceCrns) {
+            checkNotNull(resourceCrns, "CRNs list must not be null.");
             this.resourceCrns = List.copyOf(resourceCrns);
             return this;
         }
@@ -57,6 +59,7 @@ public class ResultServiceEventData extends ResultEventData {
         }
 
         public ResultServiceEventData build() {
+            checkNotNull(resourceCrns, "CRNs list must not be null.");
             checkArgument(resourceCrns.stream().allMatch(Crn::isCrn), "All CRNs must be valid.");
             checkArgument(StringUtils.isEmpty(resultDetails) || JsonUtil.isValid(resultDetails), "Result Details must be a valid JSON.");
             return new ResultServiceEventData(this);

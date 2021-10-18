@@ -1,7 +1,7 @@
 package com.sequenceiq.redbeams.sync;
 
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -65,7 +65,7 @@ public class DBStackStatusSyncJobTest {
 
         victim.executeTracedJob(jobExecutionContext);
 
-        verifyZeroInteractions(dbStackStatusSyncService);
+        verifyNoInteractions(dbStackStatusSyncService);
     }
 
     @Test

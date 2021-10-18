@@ -19,7 +19,6 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.ws.rs.ForbiddenException;
@@ -150,7 +149,7 @@ public class CredentialAuthorizationIntegrationTest {
         testHappyPaths(secondUserClient, SECOND_CRED_NAME);
 
         assertEquals(0, credentialRepository.findAll().stream()
-                .filter(cred -> !cred.isArchived()).collect(Collectors.toList()).size());
+                .filter(cred -> !cred.isArchived()).toList().size());
     }
 
     private void testHappyPaths(EnvironmentServiceCrnEndpoints client, String credentialName) {

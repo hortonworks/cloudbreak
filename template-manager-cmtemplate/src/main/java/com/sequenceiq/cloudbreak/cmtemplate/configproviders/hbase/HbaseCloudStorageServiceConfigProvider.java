@@ -60,7 +60,7 @@ public class HbaseCloudStorageServiceConfigProvider implements CmTemplateCompone
                 entitlementService.sdxHbaseCloudStorageEnabled(accountId.get());
         return source.getFileSystemConfigurationView().isPresent()
                 && cmTemplateProcessor.isRoleTypePresentInService(getServiceType(), getRoleTypes())
-                && (!datalakeCluster || (is727OrNewer && sdxHbaseCloudStorageEnabled));
+                && (!datalakeCluster || is727OrNewer && sdxHbaseCloudStorageEnabled);
     }
 
     private String getCdhVersion(TemplatePreparationObject source) {

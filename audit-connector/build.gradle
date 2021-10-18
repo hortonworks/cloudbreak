@@ -17,7 +17,7 @@ dependencies {
     implementation project(':flow')
 
     implementation     group: 'org.springframework.boot',            name: 'spring-boot-starter-jersey',     version: springBootVersion
-    implementation     group: 'net.bytebuddy',                       name: 'byte-buddy',                     version: '1.14.4'
+    implementation     group: 'net.bytebuddy',                       name: 'byte-buddy',                     version: byteBuddyVersion
 
     implementation     group: 'com.google.protobuf',                 name: 'protobuf-java',                  version: protobufVersion
 

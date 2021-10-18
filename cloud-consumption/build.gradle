@@ -16,7 +16,7 @@ plugins {
     id "checkstyle"
     id "jacoco"
     id "maven-publish"
-    id "org.springframework.boot" version "2.1.2.RELEASE"
+    id "org.springframework.boot" version "${springBootVersion}"
     id "org.sonarqube" version "${sonarVersion}"
 }
 
@@ -64,8 +64,8 @@ dependencies {
     implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-data-jpa'
     implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-quartz',           version: springBootVersion
 
-    testRuntimeClasspath group: 'org.testcontainers',      name: 'postgresql',                           version: testContainersVersion
-    testRuntimeClasspath group: 'org.awaitility',          name: 'awaitility',                           version: awaitilityVersion
+    testRuntimeOnly    group: 'org.testcontainers',      name: 'postgresql',                           version: testContainersVersion
+    testRuntimeOnly    group: 'org.awaitility',          name: 'awaitility',                           version: awaitilityVersion
 
     implementation(group: 'net.minidev', name: 'json-smart') {
         version {
@@ -151,12 +151,12 @@ bootRun {
 }
 
 bootRun {
-    main = 'com.sequenceiq.consumption.ConsumptionApplication'
+    mainClass = 'com.sequenceiq.consumption.ConsumptionApplication'
 }
 
 bootJar {
-    baseName = 'consumption'
-    archiveName = 'consumption.jar'
+    archiveBaseName = 'consumption'
+    archiveFileName= 'consumption.jar'
     manifest {
         def grgit = Grgit.open(currentDir: project.projectDir)
         attributes "Implementation-Version": grgit.describe()

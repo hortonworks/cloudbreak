@@ -10,6 +10,8 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -52,12 +54,25 @@ public class ImageCatalogV4BaseTest extends ValidatorTestHelper {
     private HttpContentSizeValidator httpContentSizeValidator;
 
     @BeforeEach
-    public void setUp() throws NoSuchFieldException, IllegalAccessException {
+    public void setUp() throws NoSuchFieldException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
+        // TODO: rewrite it!!!
+        // It is an ugly and fragile hack and it needs opening Java internal modules with
+        // --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.lang.reflect=ALL-UNNAMED
+        // --add-opens java.base/java.util.concurrent=ALL-UNNAMED
+        Method getDeclaredFields0 = Class.class.getDeclaredMethod("getDeclaredFields0", boolean.class);
+        getDeclaredFields0.setAccessible(true);
+        Field[] fields = (Field[]) getDeclaredFields0.invoke(Field.class, false);
+        Field modifiersField = null;
+        for (Field each : fields) {
+            if ("modifiers".equals(each.getName())) {
+                modifiersField = each;
+                break;
+            }
+        }
+        modifiersField.setAccessible(true);
         for (Entry<String, HttpHelper> entry : Map.of("HTTP_HELPER", httpHelper).entrySet()) {
             Field field = ReflectionUtils.findField(ImageCatalogValidator.class, entry.getKey());
-            ReflectionUtils.makeAccessible(field);
-            Field modifiersField = Field.class.getDeclaredField("modifiers");
-            ReflectionUtils.makeAccessible(modifiersField);
+            field.setAccessible(true);
             modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
             field.set(null, entry.getValue());
         }

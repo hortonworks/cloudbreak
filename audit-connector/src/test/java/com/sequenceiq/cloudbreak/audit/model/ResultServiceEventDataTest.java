@@ -16,8 +16,8 @@ class ResultServiceEventDataTest {
     static Object[][] scenarios() {
         return new Object[][] {
             // testName              resourceCrns                                                                       resultDetails  valid  expectedThrowable             errorMessage
-            { "All null",            null,                                                                              null,          false, NullPointerException.class,     null },
-            { "CRN null",            null,                                                                              "",            false, NullPointerException.class,     null },
+            { "All null",            null,                                                                              null,          false, NullPointerException.class,     "CRNs list must not be null." },
+            { "CRN null",            null,                                                                              "",            false, NullPointerException.class,     "CRNs list must not be null." },
             { "One CRN is invalid",  List.of("crn:cdp:iam:us-west-1:1234:user:1", "2"),                                 null,          false, IllegalArgumentException.class, "All CRNs must be valid." },
             { "CRNs are valid",      List.of("crn:cdp:iam:us-west-1:1234:user:1", "crn:cdp:iam:us-west-1:1234:user:2"), null,          true,  null,                           null },
             { "Details is not JSON", List.of("crn:cdp:iam:us-west-1:1234:user:1"),                                      "notJson",     false, IllegalArgumentException.class, "Result Details must be a valid JSON." },
@@ -45,6 +45,6 @@ class ResultServiceEventDataTest {
 
         ThrowingCallable constructor = () -> ResultServiceEventData.builder().build();
 
-        assertConstruction(constructor, false, NullPointerException.class, null);
+        assertConstruction(constructor, false, NullPointerException.class, "CRNs list must not be null.");
     }
 }

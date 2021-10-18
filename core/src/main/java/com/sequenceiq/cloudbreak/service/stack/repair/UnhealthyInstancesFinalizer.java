@@ -64,7 +64,7 @@ public class UnhealthyInstancesFinalizer {
         Set<String> unhealthyInstances = new HashSet<>();
         for (InstanceMetadataView i : candidateUnhealthyInstances) {
             CloudVmInstanceStatus instanceStatus = cloudVmInstanceStatusesById.get(i.getInstanceId());
-            if ((instanceStatus == null) || (instanceStatus.getStatus().equals(InstanceStatus.TERMINATED))) {
+            if (instanceStatus == null || instanceStatus.getStatus().equals(InstanceStatus.TERMINATED)) {
                 unhealthyInstances.add(i.getInstanceId());
             }
         }

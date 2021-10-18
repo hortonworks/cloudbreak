@@ -6,8 +6,8 @@ repositories {
 }
 
 jar {
-  baseName = 'autoscale-api'
-  archiveName = 'autoscale-api.jar'
+  archiveBaseName = 'autoscale-api'
+  archiveFileName = 'autoscale-api.jar'
 }
 
 dependencies {
@@ -36,7 +36,7 @@ dependencies {
 
 
 task testJar(type: Jar, dependsOn: testClasses) {
-  baseName = "test-${project.archivesBaseName}"
+  archiveBaseName = "test-${project.archivesBaseName}"
   from sourceSets.test.output
   from sourceSets.main.output
 }
