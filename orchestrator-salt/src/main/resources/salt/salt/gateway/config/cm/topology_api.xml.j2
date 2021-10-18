@@ -151,6 +151,10 @@
                  <name>{{ aclsauthz_prefix ~ "spark3historyui.acl" }}</name>
                  <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
             </param>
+            <param>
+                 <name>{{ aclsauthz_prefix ~ "cruise-control.acl" }}</name>
+                 <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
+            </param>
         </provider>
 {%- endif %}
 
@@ -288,6 +292,12 @@
             <param>
               <name>SPARK3HISTORYUI</name>
               <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000</value>
+            </param>
+            {%- endif %}
+            {% if 'CRUISE-CONTROL' in exposed and 'CRUISE_CONTROL_SERVER' in salt['pillar.get']('gateway:location') -%}
+            <param>
+                <name>CRUISE-CONTROL</name>
+                <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000</value>
             </param>
             {%- endif %}
         </provider>
