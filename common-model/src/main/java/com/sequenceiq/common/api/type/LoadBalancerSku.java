@@ -5,7 +5,8 @@ import org.apache.commons.lang3.StringUtils;
 
 public enum LoadBalancerSku {
     BASIC("Basic"),
-    STANDARD("Standard");
+    STANDARD("Standard"),
+    NONE("None");
 
     private final String templateName;
 

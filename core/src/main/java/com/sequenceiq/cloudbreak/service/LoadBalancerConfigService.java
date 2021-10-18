@@ -204,6 +204,13 @@ public class LoadBalancerConfigService {
     }
 
     public Set<LoadBalancer> createLoadBalancers(Stack stack, DetailedEnvironmentResponse environment, StackV4Request source) {
+        boolean azureLoadBalancerDisabled = CloudPlatform.AZURE.toString().equalsIgnoreCase(stack.getCloudPlatform()) &&
+                getLoadBalancerSku(source) == LoadBalancerSku.NONE;
+        if (azureLoadBalancerDisabled) {
+            LOGGER.debug("Azure load balancers have been explicitly disabled.");
+            return Collections.emptySet();
+        }
+
         boolean loadBalancerFlagEnabled = source != null && source.isEnableLoadBalancer();
         Set<LoadBalancer> loadBalancers = setupLoadBalancers(stack, environment, false, loadBalancerFlagEnabled);
 
@@ -260,12 +267,15 @@ public class LoadBalancerConfigService {
      * @param loadBalancers The list of load balancers to update.
      */
     public void configureLoadBalancerSku(StackV4Request source, Set<LoadBalancer> loadBalancers) {
-        LoadBalancerSku sku = Optional.ofNullable(source)
+        loadBalancers.forEach(lb -> lb.setSku(getLoadBalancerSku(source)));
+    }
+
+    public LoadBalancerSku getLoadBalancerSku(StackV4Request source) {
+        return Optional.ofNullable(source)
                 .map(StackV4Request::getAzure)
                 .map(AzureStackV4Parameters::getLoadBalancerSku)
                 .map(LoadBalancerSku::getValueOrDefault)
                 .orElse(LoadBalancerSku.getDefault());
-        loadBalancers.forEach(lb -> lb.setSku(sku));
     }
 
     public Set<LoadBalancer> setupLoadBalancers(Stack stack, DetailedEnvironmentResponse environment, boolean dryRun, boolean loadBalancerFlagEnabled) {
