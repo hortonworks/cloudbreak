@@ -45,6 +45,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.AttachRecipeV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.DetachRecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.UpdateRecipesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.RecoveryValidationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeOptionV4Response;
@@ -484,9 +485,9 @@ public class StackOperations implements ResourcePropertyProvider {
         return clusterCommonService.attachRecipe(nameOrCrn, workspaceId, request);
     }
 
-    public void detachRecipe(@NotNull NameOrCrn nameOrCrn, Long workspaceId, DetachRecipeV4Request request) {
+    public DetachRecipeV4Response detachRecipe(@NotNull NameOrCrn nameOrCrn, Long workspaceId, DetachRecipeV4Request request) {
         LOGGER.debug("Detach recipe operation for {}", nameOrCrn);
-        clusterCommonService.detachRecipe(nameOrCrn, workspaceId, request);
+        return clusterCommonService.detachRecipe(nameOrCrn, workspaceId, request);
     }
 
     public RecoveryValidationV4Response validateClusterRecovery(@NotNull NameOrCrn nameOrCrn, Long workspaceId) {

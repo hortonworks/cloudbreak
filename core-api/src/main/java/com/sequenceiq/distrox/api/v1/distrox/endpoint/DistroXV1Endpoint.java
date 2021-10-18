@@ -75,6 +75,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Re
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.AttachRecipeV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.DetachRecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.UpdateRecipesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.RecoveryValidationV4Response;
 import com.sequenceiq.cloudbreak.doc.Notes;
@@ -477,17 +478,17 @@ public interface DistroXV1Endpoint {
     @ApiOperation(value = ATTACH_RECIPE_BY_NAME, nickname = "attachRecipesByName")
     AttachRecipeV4Response attachRecipeByName(@PathParam("name") String name, @Valid AttachRecipeV4Request request);
 
-    @DELETE
+    @POST
     @Path("crn/{crn}/detach_recipe")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DETACH_RECIPE_BY_CRN, nickname = "detachRecipesByCrn")
-    void detachRecipeByCrn(@PathParam("crn") String crn, @Valid DetachRecipeV4Request request);
+    DetachRecipeV4Response detachRecipeByCrn(@PathParam("crn") String crn, @Valid DetachRecipeV4Request request);
 
-    @DELETE
+    @POST
     @Path("name/{name}/detach_recipe")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DETACH_RECIPE_BY_NAME, nickname = "detachRecipesByName")
-    void detachRecipeByName(@PathParam("name") String name, @Valid DetachRecipeV4Request request);
+    DetachRecipeV4Response detachRecipeByName(@PathParam("name") String name, @Valid DetachRecipeV4Request request);
 
     @POST
     @Path("{name}/sync_component_versions_from_cm")

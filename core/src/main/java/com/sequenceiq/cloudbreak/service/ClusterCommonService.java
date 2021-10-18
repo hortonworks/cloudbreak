@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.DetachRec
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.UpdateRecipesV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.CertificatesRotationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.AttachRecipeV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.DetachRecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.UpdateRecipesV4Response;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateValidator;
@@ -317,11 +318,11 @@ public class ClusterCommonService {
         }
     }
 
-    public void detachRecipe(NameOrCrn nameOrCrn, Long workspaceId, DetachRecipeV4Request request) {
+    public DetachRecipeV4Response detachRecipe(NameOrCrn nameOrCrn, Long workspaceId, DetachRecipeV4Request request) {
         Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
         MDCBuilder.buildMdcContext(stack);
         try {
-            updateRecipeService.detachRecipeFromCluster(workspaceId, stack, request.getRecipeName(), request.getHostGroupName());
+            return updateRecipeService.detachRecipeFromCluster(workspaceId, stack, request.getRecipeName(), request.getHostGroupName());
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
         }

@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import com.google.common.base.Joiner;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.UpdateHostGroupRecipes;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.AttachRecipeV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.DetachRecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.UpdateRecipesV4Response;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
@@ -163,9 +164,13 @@ public class UpdateRecipeService {
         return response;
     }
 
-    public void detachRecipeFromCluster(Long workspaceId, Stack stack, String recipeName, String hostGroupName)
+    public DetachRecipeV4Response detachRecipeFromCluster(Long workspaceId, Stack stack, String recipeName, String hostGroupName)
             throws TransactionService.TransactionExecutionException {
         updateRecipeForCluster(workspaceId, stack, recipeName, hostGroupName, true);
+        DetachRecipeV4Response response = new DetachRecipeV4Response();
+        response.setRecipeName(recipeName);
+        response.setHostGroupName(hostGroupName);
+        return response;
     }
 
     private void updateRecipeForCluster(Long workspaceId, Stack stack, String recipeName, String hostGroupName, boolean detach)

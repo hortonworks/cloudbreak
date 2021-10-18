@@ -92,6 +92,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Resp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.dr.BackupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.dr.RestoreV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.AttachRecipeV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.DetachRecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.UpdateRecipesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.RecoveryV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.RecoveryValidationV4Response;
@@ -494,17 +495,17 @@ public interface StackV4Endpoint {
             @PathParam("name") String name, @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 
     @POST
-    @Path("{name}/detach_recipes")
+    @Path("{name}/detach_recipe")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DETACH_RECIPE_IN_WORKSPACE, nickname = "detachStackRecipe")
-    void detachRecipe(@PathParam("workspaceId") Long workspaceId, @Valid DetachRecipeV4Request request,
+    DetachRecipeV4Response detachRecipe(@PathParam("workspaceId") Long workspaceId, @Valid DetachRecipeV4Request request,
             @PathParam("name") String name, @AccountId @QueryParam("accountId") String accountId);
 
     @POST
-    @Path("internal/{name}/detach_recipes")
+    @Path("internal/{name}/detach_recipe")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DETACH_RECIPE_IN_WORKSPACE_INTERNAL, nickname = "detachRecipeInternal")
-    void detachRecipeInternal(@PathParam("workspaceId") Long workspaceId, @Valid DetachRecipeV4Request request,
+    DetachRecipeV4Response detachRecipeInternal(@PathParam("workspaceId") Long workspaceId, @Valid DetachRecipeV4Request request,
             @PathParam("name") String name, @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 
     @PUT
