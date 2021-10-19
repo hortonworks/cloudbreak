@@ -108,8 +108,8 @@ public class RecipeEngine {
         Collection<Recipe> recipes = hostGroupService.getRecipesByHostGroups(hostGroups);
         if (shouldExecuteRecipeOnStack(recipes, POST_CLUSTER_INSTALL)) {
             uploadRecipesIfNeeded(stack, hostGroups);
-            orchestratorRecipeExecutor.postClusterInstall(stack);
         }
+        orchestratorRecipeExecutor.postClusterInstall(stack);
     }
 
     public void executePreTerminationRecipes(Stack stack, Set<HostGroup> hostGroups, boolean forced) throws CloudbreakException {
