@@ -21,12 +21,12 @@ public class CmProductChooserService {
     /**
      * Using the CM parcel versions, will look for a matching product among the provided candidateProducts
      * A product is matching if the name and version both match.
-     * @param installedParcels parcels installed on the CM server
+     * @param activeParcels parcels installed on the CM server
      * @param candidateProducts A list of ClouderaManagerProducts extracted from image catalog
      * @return List of ClouderaManagerProducts installed on the DL / DH
      */
-    Set<ClouderaManagerProduct> chooseParcelProduct(Set<ParcelInfo> installedParcels, Set<ClouderaManagerProduct> candidateProducts) {
-        Set<ClouderaManagerProduct> foundProducts = installedParcels.stream()
+    Set<ClouderaManagerProduct> chooseParcelProduct(Set<ParcelInfo> activeParcels, Set<ClouderaManagerProduct> candidateProducts) {
+        Set<ClouderaManagerProduct> foundProducts = activeParcels.stream()
                 .map(ip -> findMatchingClouderaManagerProduct(candidateProducts, ip))
                 .filter(Optional::isPresent)
                 .map(Optional::get)

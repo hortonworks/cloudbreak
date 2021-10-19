@@ -75,7 +75,7 @@ public class CmInstalledComponentFinderServiceTest {
 
         CmParcelSyncOperationResult cmParcelSyncOperationResult = underTest.findParcelComponents(stack, candidateImages);
 
-        assertThat(cmParcelSyncOperationResult.getInstalledParcels(), hasSize(1));
+        assertThat(cmParcelSyncOperationResult.getActiveParcels(), hasSize(1));
         verify(imageReaderService).getParcels(candidateImages, true);
         verify(cmInfoRetriever).queryActiveParcels(stack);
         verify(cmProductChooserService).chooseParcelProduct(queriedParcelInfo, candidateCmProduct);

@@ -33,9 +33,9 @@ public class CmServerQueryService {
      * @return List of parcels found in the CM
      */
     Set<ParcelInfo> queryActiveParcels(Stack stack) {
-        Map<String, String> installedParcels = apiConnectors.getConnector(stack).gatherInstalledParcels(stack.getName());
-        LOGGER.debug("Reading parcel info from CM server, found parcels: " + installedParcels);
-        return installedParcels.entrySet().stream()
+        Map<String, String> activeParcels = apiConnectors.getConnector(stack).gatherInstalledParcels(stack.getName());
+        LOGGER.debug("Reading parcel info from CM server, found parcels: " + activeParcels);
+        return activeParcels.entrySet().stream()
                 .map(es -> new ParcelInfo(es.getKey(), es.getValue()))
                 .collect(Collectors.toSet());
     }

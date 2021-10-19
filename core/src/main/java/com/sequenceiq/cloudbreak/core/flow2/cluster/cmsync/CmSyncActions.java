@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.cmsync;
 
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -10,7 +12,9 @@ import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
+import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.CmSyncTriggerEvent;
@@ -20,7 +24,13 @@ import com.sequenceiq.flow.core.Flow;
 
 @Configuration
 public class CmSyncActions {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(CmSyncActions.class);
+
+    private static final String EVENT_TYPE = "SYNC_VERSIONS_FROM_CM_TO_DB";
+
+    @Inject
+    private CloudbreakFlowMessageService flowMessageService;
 
     @Bean(name = "CM_SYNC_STATE")
     public Action<?, ?> cmSync() {
@@ -44,6 +54,8 @@ public class CmSyncActions {
 
             @Override
             protected void doExecute(CmSyncContext context, CmSyncResult payload, Map<Object, Object> variables) {
+                flowMessageService.fireEventAndLog(context.getStack().getId(), EVENT_TYPE, ResourceEvent.STACK_SYNC_VERSIONS_FROM_CM_TO_DB_SUCCESS,
+                        payload.getResult());
                 sendEvent(context);
             }
         };
@@ -55,6 +67,8 @@ public class CmSyncActions {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 LOGGER.warn("Error during executing syncing Cloudera Manager and parcels versions from CM.", payload.getException());
+                flowMessageService.fireEventAndLog(context.getStackView().getId(), EVENT_TYPE, ResourceEvent.STACK_SYNC_VERSIONS_FROM_CM_TO_DB_FAILED,
+                        payload.getException().getMessage());
                 Flow flow = getFlow(context.getFlowParameters().getFlowId());
                 flow.setFlowFailed(payload.getException());
                 sendEvent(context);
