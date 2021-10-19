@@ -104,7 +104,7 @@ public class CommandDetails {
                 '}';
     }
 
-    enum CommandStatus {
+    public enum CommandStatus {
         ACTIVE,
         SUCCESS,
         FAILED

@@ -11,17 +11,9 @@ import com.sequenceiq.cloudbreak.cm.exception.CloudStorageConfigurationFailedExc
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
-import com.sequenceiq.cloudbreak.domain.cloudstorage.AccountMapping;
-import com.sequenceiq.cloudbreak.domain.cloudstorage.AdlsGen2Identity;
-import com.sequenceiq.cloudbreak.domain.cloudstorage.CloudIdentity;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.CloudStorage;
-import com.sequenceiq.cloudbreak.domain.cloudstorage.GcsIdentity;
-import com.sequenceiq.cloudbreak.domain.cloudstorage.S3Identity;
-import com.sequenceiq.cloudbreak.domain.cloudstorage.StorageLocation;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.util.DocumentationLinkProvider;
-import com.sequenceiq.common.model.CloudIdentityType;
-import com.sequenceiq.common.model.CloudStorageCdpService;
 
 @Component
 public class ClouderaManagerStorageErrorMapper {
@@ -44,28 +36,28 @@ public class ClouderaManagerStorageErrorMapper {
                 .map(FileSystem::getCloudStorage);
         if (cloudStorage.isPresent() && cloudStorage.get().getCloudIdentities() != null && cloudStorage.get().getAccountMapping() != null
                 && cloudStorage.get().getAccountMapping().getUserMappings() != null) {
-            return mapCloudPlatformSpecificMessage(originalMessage, cloudPlatform, cloudStorage.get());
+            return mapCloudPlatformSpecificMessage(originalMessage, cloudPlatform);
         } else {
             LOGGER.warn(MESSAGE_VALIDATION_ERROR + JsonUtil.writeValueAsStringSilent(cloudStorage.orElse(null)));
             return originalMessage;
         }
     }
 
-    private String mapCloudPlatformSpecificMessage(String originalMessage, String cloudPlatform, CloudStorage cloudStorage) {
+    private String mapCloudPlatformSpecificMessage(String originalMessage, String cloudPlatform) {
         try {
             switch (cloudPlatform) {
                 case CloudConstants.AWS:
-                    return awsError(cloudStorage);
+                    return String.format("%s %s", originalMessage, awsError());
                 case CloudConstants.AZURE:
-                    return azureError(cloudStorage);
+                    return String.format("%s %s", originalMessage, azureError());
                 case CloudConstants.GCP:
-                    return gcpError(cloudStorage);
+                    return String.format("%s %s", originalMessage, gcpError());
                 default:
                     LOGGER.debug("We don't have error message mapper for platform: {}", cloudPlatform);
                     return originalMessage;
             }
         } catch (RuntimeException runtimeException) {
-            LOGGER.error(MESSAGE_VALIDATION_ERROR + JsonUtil.writeValueAsStringSilent(cloudStorage), runtimeException);
+            LOGGER.error(MESSAGE_VALIDATION_ERROR, runtimeException);
             return originalMessage;
         }
     }
@@ -79,103 +71,22 @@ public class ClouderaManagerStorageErrorMapper {
         return sb.append("Ranger RAZ is enabled on this cluster.").toString();
     }
 
-    private String awsError(CloudStorage cloudStorage) {
-
-        String assumerInstanceProfile = "";
-
-        for (CloudIdentity cloudIdentity : cloudStorage.getCloudIdentities()) {
-            if (CloudIdentityType.ID_BROKER == cloudIdentity.getIdentityType()) {
-                assumerInstanceProfile = Optional.ofNullable(cloudIdentity.getS3Identity()).map(S3Identity::getInstanceProfile).orElse("");
-                break;
-            }
-        }
-
-        String auditLocation = getRangerAuditDir(cloudStorage);
-        AccountMapping accountMapping = cloudStorage.getAccountMapping();
-        String dataAccessRole = accountMapping.getUserMappings().get("hive");
-        // There is no ranger in the IDBroker mapping, so we can use solr
-        String rangerAuditRole = accountMapping.getUserMappings().get("solr");
-
-        return String.format("Services running on the cluster were unable to write to %s location. " +
-                        "This problem usually occurs due to cloud storage permission misconfiguration. " +
-                        "Services on the cluster are using Data Access Role (%s) and Ranger Audit Role (%s) to write to the Ranger Audit location (%s), " +
-                        "therefore please verify that these roles have write access to this location. " +
-                        "During Data Lake cluster creation, CDP Control Plane attaches Assumer Instance Profile (%s) to the IDBroker Virtual Machine. " +
-                        "IDBroker will then use it to assume the Data Access Role and Ranger Audit Role, therefore Assumer Instance Profile (%s) " +
-                        "permissions must, at a minimum, allow to assume Data Access Role and Ranger Audit Role." +
-                        "Refer to Cloudera documentation at %s for the required rights.",
-                auditLocation, dataAccessRole, rangerAuditRole, auditLocation, assumerInstanceProfile, assumerInstanceProfile,
+    private String awsError() {
+        return String.format("Services running on the cluster were unable to write to the cloud storage. " +
+                        "Please refer to Cloudera documentation at %s for the required rights.",
                 DocumentationLinkProvider.awsCloudStorageSetupLink());
     }
 
-    private String gcpError(CloudStorage cloudStorage) {
-
-        String serviceAccountEmail = "";
-
-        for (CloudIdentity cloudIdentity : cloudStorage.getCloudIdentities()) {
-            if (CloudIdentityType.ID_BROKER == cloudIdentity.getIdentityType()) {
-                serviceAccountEmail = Optional.ofNullable(cloudIdentity.getGcsIdentity()).map(GcsIdentity::getServiceAccountEmail).orElse("");
-                break;
-            }
-        }
-
-        String auditLocation = getRangerAuditDir(cloudStorage);
-        AccountMapping accountMapping = cloudStorage.getAccountMapping();
-        String dataAccessRole = accountMapping.getUserMappings().get("hive");
-        // There is no ranger in the IDBroker mapping, so we can use solr
-        String rangerAuditRole = accountMapping.getUserMappings().get("solr");
-
-        return String.format("Services running on the cluster were unable to write to %s location. " +
-                        "This problem usually occurs due to cloud storage permission misconfiguration. " +
-                        "Services on the cluster are using Data Access Service Account (%s) and Ranger " +
-                        "Audit Service Account (%s) to write to the Ranger Audit location (%s), " +
-                        "therefore please verify that these roles have write access to this location. " +
-                        "During Data Lake cluster creation, CDP Control Plane attaches Service Account (%s) to the IDBroker Virtual Machine. " +
-                        "IDBroker will then use it to assume the Data Access Service Account and Ranger Audit Service Account, " +
-                        "therefore Assumer Service Account (%s) " +
-                        "permissions must, at a minimum, allow to assume Data Access Service Account and Ranger Audit Service Account." +
-                        "Refer to Cloudera documentation at %s for the required rights.",
-                auditLocation, dataAccessRole, rangerAuditRole, auditLocation, serviceAccountEmail, serviceAccountEmail,
+    private String gcpError() {
+        return String.format("Services running on the cluster were unable to write to the cloud storage. " +
+                        "Please refer to Cloudera documentation at %s for the required rights.",
                 DocumentationLinkProvider.googleCloudStorageSetupLink());
     }
 
-    private String azureError(CloudStorage cloudStorage) {
-
-        String assumerIdentity = "";
-
-        for (CloudIdentity cloudIdentity : cloudStorage.getCloudIdentities()) {
-            if (CloudIdentityType.ID_BROKER == cloudIdentity.getIdentityType()) {
-                assumerIdentity = Optional.ofNullable(cloudIdentity.getAdlsGen2Identity()).map(AdlsGen2Identity::getManagedIdentity).orElse("");
-                break;
-            }
-        }
-
-        String auditLocation = getRangerAuditDir(cloudStorage);
-        AccountMapping accountMapping = cloudStorage.getAccountMapping();
-        String dataAccessIdentity = accountMapping.getUserMappings().get("hive");
-        // There is no ranger in the IDBroker mapping, so we can use solr
-        String rangerAuditIdentity = accountMapping.getUserMappings().get("solr");
-
-        return String.format("Services running on the cluster were unable to write to %s location. " +
-                        "This problem usually occurs due to cloud storage permission misconfiguration. " +
-                        "Services on the cluster are using Data Access Identity (%s) and Ranger Audit Identity (%s) to write to the " +
-                        "Ranger Audit location (%s), therefore please verify that these roles have write access to this location. " +
-                        "During Data Lake cluster creation, CDP Control Plane attaches Assumer Identity (%s) to the IDBroker Virtual Machine. " +
-                        "IDBroker will then use it to attach the other managed identities to the IDBroker Virtual Machine, therefore Assumer Identity (%s) " +
-                        "permissions must, at a minimum, allow to attach the Data Access Identity and Ranger Access Identity. " +
-                        "Refer to Cloudera documentation at %s for the required rights.",
-                auditLocation, dataAccessIdentity, rangerAuditIdentity, auditLocation, assumerIdentity, assumerIdentity,
+    private String azureError() {
+        return String.format("Services running on the cluster were unable to write to the cloud storage. " +
+                        "Please refer to Cloudera documentation at %s for the required rights.",
                 DocumentationLinkProvider.azureCloudStorageSetupLink());
     }
 
-    private String getRangerAuditDir(CloudStorage cloudStorage) {
-        if (cloudStorage.getLocations() != null) {
-            for (StorageLocation location : cloudStorage.getLocations()) {
-                if (CloudStorageCdpService.RANGER_AUDIT == location.getType()) {
-                    return location.getValue();
-                }
-            }
-        }
-        return "";
-    }
 }
