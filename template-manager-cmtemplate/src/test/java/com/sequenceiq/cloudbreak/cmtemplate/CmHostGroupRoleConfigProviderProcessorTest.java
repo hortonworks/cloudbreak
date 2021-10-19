@@ -266,7 +266,7 @@ public class CmHostGroupRoleConfigProviderProcessorTest {
         Map<String, List<ApiClusterTemplateConfig>> roleConfigs = mapRoleConfigs();
         assertEquals(
                 List.of(
-                        config("hbase_bucketcache_ioengine", "files:/hadoopfs/ephfs1/hbase_cache,/hadoopfs/ephfs2/hbase_cache,/hadoopfs/ephfs3/hbase_cache")
+                        config("hbase_bucketcache_ioengine", "file:/hadoopfs/ephfs1/hbase_cache")
                 ),
                 roleConfigs.get("hbase-REGIONSERVER-BASE"));
         assertEquals(
@@ -289,7 +289,11 @@ public class CmHostGroupRoleConfigProviderProcessorTest {
         underTest.process(templateProcessor, templatePreparator);
 
         Map<String, List<ApiClusterTemplateConfig>> roleConfigs = mapRoleConfigs();
-        assertEquals(List.of(), roleConfigs.get("hbase-REGIONSERVER-BASE"));
+        assertEquals(
+                List.of(
+                        config("hbase_bucketcache_ioengine", "offheap")
+                ),
+                roleConfigs.get("hbase-REGIONSERVER-BASE"));
         assertEquals(
                 List.of(
                         config("yarn_nodemanager_local_dirs", "/hadoopfs/fs1/nodemanager,/hadoopfs/fs2/nodemanager"),
