@@ -190,7 +190,7 @@ public class StackCommonService {
         Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
         MDCBuilder.buildMdcContext(stack);
         if (stack.getStackStatus().getStatus().isStopState()) {
-            String message = String.format("Syncing CM and parcel versions from CM cannot be initiated as cluster is in %s state",
+            String message = String.format("Reading CM and parcel versions from CM cannot be initiated as the cluster is in %s state",
                     stack.getStackStatus().getStatus());
             LOGGER.debug(message);
             throw new BadRequestException(message);

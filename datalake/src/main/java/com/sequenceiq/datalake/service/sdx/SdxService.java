@@ -119,7 +119,6 @@ import com.sequenceiq.sdx.api.model.SdxClusterResizeRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxCustomClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxRecipe;
-import com.sequenceiq.sdx.api.model.SdxSyncComponentVersionsFromCmResponse;
 
 @Service
 public class SdxService implements ResourceIdProvider, ResourcePropertyProvider, PayloadContextProvider {
@@ -659,18 +658,17 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
                 stackV4Endpoint.sync(WORKSPACE_ID_DEFAULT, sdxCluster.getClusterName(), Crn.fromString(crn).getAccountId()));
     }
 
-    public SdxSyncComponentVersionsFromCmResponse syncComponentVersionsFromCm(String userCrn, NameOrCrn clusterNameOrCrn) {
+    public FlowIdentifier syncComponentVersionsFromCm(String userCrn, NameOrCrn clusterNameOrCrn) {
         SdxCluster cluster = getByNameOrCrn(userCrn, clusterNameOrCrn);
         MDCBuilder.buildMdcContext(cluster);
         SdxStatusEntity sdxStatus = sdxStatusService.getActualStatusForSdx(cluster);
         if (sdxStatus.getStatus().isStopState()) {
-            String message = "Syncing CM and parcel versions from CM cannot be initiated as the datalake is either stopped or is stopping";
+            String message = String.format("Reading CM and parcel versions from CM cannot be initiated as the datalake is in %s state", sdxStatus.getStatus());
             LOGGER.info(message);
-            return new SdxSyncComponentVersionsFromCmResponse(message);
+            throw new BadRequestException(message);
         } else {
-            String message = "Syncing CM and parcel versions from CM initiated";
-            LOGGER.info(message);
-            return new SdxSyncComponentVersionsFromCmResponse(message, sdxReactorFlowManager.triggerDatalakeSyncComponentVersionsFromCmFlow(cluster));
+            LOGGER.info("Syncing CM and parcel versions from CM initiated");
+            return sdxReactorFlowManager.triggerDatalakeSyncComponentVersionsFromCmFlow(cluster);
         }
     }
 
