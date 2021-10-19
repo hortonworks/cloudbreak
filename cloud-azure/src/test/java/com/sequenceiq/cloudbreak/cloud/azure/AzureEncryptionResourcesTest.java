@@ -43,7 +43,7 @@ import com.microsoft.azure.keyvault.webkey.JsonWebKey;
 import com.microsoft.azure.management.compute.DiskEncryptionSetIdentityType;
 import com.microsoft.azure.management.compute.DiskEncryptionSetType;
 import com.microsoft.azure.management.compute.EncryptionSetIdentity;
-import com.microsoft.azure.management.compute.KeyVaultAndKeyReference;
+import com.microsoft.azure.management.compute.KeyForDiskEncryptionSet;
 import com.microsoft.azure.management.compute.SourceVault;
 import com.microsoft.azure.management.compute.implementation.DiskEncryptionSetInner;
 import com.microsoft.azure.management.resources.ResourceGroup;
@@ -302,7 +302,7 @@ public class AzureEncryptionResourcesTest {
         ReflectionTestUtils.setField(identity, "principalId", DES_PRINCIPAL_ID);
         DiskEncryptionSetInner des = (DiskEncryptionSetInner) new DiskEncryptionSetInner()
                 .withEncryptionType(DiskEncryptionSetType.ENCRYPTION_AT_REST_WITH_CUSTOMER_KEY)
-                .withActiveKey(new KeyVaultAndKeyReference()
+                .withActiveKey(new KeyForDiskEncryptionSet()
                         .withKeyUrl("https://dummyVaultName.vault.azure.net/keys/dummyKeyName/dummyKeyVersion")
                         .withSourceVault(new SourceVault()
                                 .withId("/subscriptions/dummySubs/resourceGroups/dummyResourceGroup/providers/Microsoft.KeyVault/vaults/dummyVaultName")))
@@ -382,7 +382,7 @@ public class AzureEncryptionResourcesTest {
                 .build();
         DiskEncryptionSetInner desInitial = (DiskEncryptionSetInner) new DiskEncryptionSetInner()
                 .withEncryptionType(DiskEncryptionSetType.ENCRYPTION_AT_REST_WITH_CUSTOMER_KEY)
-                .withActiveKey(new KeyVaultAndKeyReference()
+                .withActiveKey(new KeyForDiskEncryptionSet()
                         .withKeyUrl("https://dummyVaultName.vault.azure.net/keys/dummyKeyName/dummyKeyVersion")
                         .withSourceVault(new SourceVault()
                                 .withId("/subscriptions/dummySubs/resourceGroups/dummyResourceGroup/providers/Microsoft.KeyVault/vaults/dummyVaultName")))
@@ -394,7 +394,7 @@ public class AzureEncryptionResourcesTest {
         ReflectionTestUtils.setField(identity, "principalId", DES_PRINCIPAL_ID);
         DiskEncryptionSetInner desAfterPolling = (DiskEncryptionSetInner) new DiskEncryptionSetInner()
                 .withEncryptionType(DiskEncryptionSetType.ENCRYPTION_AT_REST_WITH_CUSTOMER_KEY)
-                .withActiveKey(new KeyVaultAndKeyReference()
+                .withActiveKey(new KeyForDiskEncryptionSet()
                         .withKeyUrl("https://dummyVaultName.vault.azure.net/keys/dummyKeyName/dummyKeyVersion")
                         .withSourceVault(new SourceVault()
                                 .withId("/subscriptions/dummySubs/resourceGroups/dummyResourceGroup/providers/Microsoft.KeyVault/vaults/dummyVaultName")))
@@ -445,7 +445,7 @@ public class AzureEncryptionResourcesTest {
         ReflectionTestUtils.setField(identity, "principalId", DES_PRINCIPAL_ID);
         DiskEncryptionSetInner des = (DiskEncryptionSetInner) new DiskEncryptionSetInner()
                 .withEncryptionType(DiskEncryptionSetType.ENCRYPTION_AT_REST_WITH_CUSTOMER_KEY)
-                .withActiveKey(new KeyVaultAndKeyReference()
+                .withActiveKey(new KeyForDiskEncryptionSet()
                         .withKeyUrl("https://dummyVaultName.vault.azure.net/keys/dummyKeyName/dummyKeyVersion")
                         .withSourceVault(new SourceVault()
                                 .withId("/subscriptions/dummySubs/resourceGroups/dummyResourceGroup/providers/Microsoft.KeyVault/vaults/dummyVaultName")))
@@ -494,7 +494,7 @@ public class AzureEncryptionResourcesTest {
         ReflectionTestUtils.setField(identity, "principalId", DES_PRINCIPAL_ID);
         DiskEncryptionSetInner des = (DiskEncryptionSetInner) new DiskEncryptionSetInner()
                 .withEncryptionType(DiskEncryptionSetType.ENCRYPTION_AT_REST_WITH_CUSTOMER_KEY)
-                .withActiveKey(new KeyVaultAndKeyReference()
+                .withActiveKey(new KeyForDiskEncryptionSet()
                         .withKeyUrl("https://dummyVaultName.vault.azure.net/keys/dummyKeyName/dummyKeyVersion")
                         .withSourceVault(new SourceVault()
                                 .withId("/subscriptions/dummySubs/resourceGroups/dummyResourceGroup/providers/Microsoft.KeyVault/vaults/dummyVaultName")))
@@ -543,7 +543,7 @@ public class AzureEncryptionResourcesTest {
         ReflectionTestUtils.setField(identity, "principalId", DES_PRINCIPAL_ID);
         DiskEncryptionSetInner des = (DiskEncryptionSetInner) new DiskEncryptionSetInner()
                 .withEncryptionType(DiskEncryptionSetType.ENCRYPTION_AT_REST_WITH_CUSTOMER_KEY)
-                .withActiveKey(new KeyVaultAndKeyReference()
+                .withActiveKey(new KeyForDiskEncryptionSet()
                         .withKeyUrl("https://dummyVaultName.vault.azure.net/keys/dummyKeyName/dummyKeyVersion")
                         .withSourceVault(new SourceVault()
                                 .withId("/subscriptions/dummySubs/resourceGroups/dummyVaultResourceGroup/providers/Microsoft.KeyVault/vaults/dummyVaultName")))
@@ -610,7 +610,7 @@ public class AzureEncryptionResourcesTest {
         ReflectionTestUtils.setField(identity, "principalId", DES_PRINCIPAL_ID);
         DiskEncryptionSetInner des = (DiskEncryptionSetInner) new DiskEncryptionSetInner()
                 .withEncryptionType(DiskEncryptionSetType.ENCRYPTION_AT_REST_WITH_CUSTOMER_KEY)
-                .withActiveKey(new KeyVaultAndKeyReference()
+                .withActiveKey(new KeyForDiskEncryptionSet()
                         .withKeyUrl("https://dummyVaultName.vault.azure.net/keys/dummyKeyName/dummyKeyVersion")
                         .withSourceVault(new SourceVault()
                                 .withId("/subscriptions/dummySubs/resourceGroups/dummyResourceGroup/providers/Microsoft.KeyVault/vaults/dummyVaultName")))
@@ -738,7 +738,7 @@ public class AzureEncryptionResourcesTest {
         ReflectionTestUtils.setField(identity, "principalId", DES_PRINCIPAL_ID);
         DiskEncryptionSetInner des = (DiskEncryptionSetInner) new DiskEncryptionSetInner()
                 .withEncryptionType(DiskEncryptionSetType.ENCRYPTION_AT_REST_WITH_CUSTOMER_KEY)
-                .withActiveKey(new KeyVaultAndKeyReference()
+                .withActiveKey(new KeyForDiskEncryptionSet()
                         .withKeyUrl("https://dummyVaultName.vault.azure.net/keys/dummyKeyName/dummyKeyVersion")
                         .withSourceVault(new SourceVault()
                                 .withId("/subscriptions/dummySubs/resourceGroups/dummyResourceGroup/providers/Microsoft.KeyVault/vaults/dummyVaultName")))
@@ -769,7 +769,7 @@ public class AzureEncryptionResourcesTest {
         ReflectionTestUtils.setField(identity, "principalId", DES_PRINCIPAL_ID);
         DiskEncryptionSetInner des = (DiskEncryptionSetInner) new DiskEncryptionSetInner()
                 .withEncryptionType(DiskEncryptionSetType.ENCRYPTION_AT_REST_WITH_CUSTOMER_KEY)
-                .withActiveKey(new KeyVaultAndKeyReference()
+                .withActiveKey(new KeyForDiskEncryptionSet()
                         .withKeyUrl("https://dummyVaultName.vault.azure.net/keys/dummyKeyName/dummyKeyVersion")
                         .withSourceVault(new SourceVault()
                                 .withId("/subscriptions/dummySubs/resourceGroups/dummyVaultResourceGroup/providers/Microsoft.KeyVault/vaults/dummyVaultName")))
@@ -800,7 +800,7 @@ public class AzureEncryptionResourcesTest {
         ReflectionTestUtils.setField(identity, "principalId", DES_PRINCIPAL_ID);
         DiskEncryptionSetInner des = (DiskEncryptionSetInner) new DiskEncryptionSetInner()
                 .withEncryptionType(DiskEncryptionSetType.ENCRYPTION_AT_REST_WITH_CUSTOMER_KEY)
-                .withActiveKey(new KeyVaultAndKeyReference()
+                .withActiveKey(new KeyForDiskEncryptionSet()
                         .withKeyUrl("https://dummyVaultName.vault.azure.net/keys/dummyKeyName/dummyKeyVersion")
                         .withSourceVault(new SourceVault()
                                 .withId("invaildSourceVault")))
@@ -884,7 +884,7 @@ public class AzureEncryptionResourcesTest {
         ReflectionTestUtils.setField(identity, "principalId", DES_PRINCIPAL_ID);
         DiskEncryptionSetInner des = (DiskEncryptionSetInner) new DiskEncryptionSetInner()
                 .withEncryptionType(DiskEncryptionSetType.ENCRYPTION_AT_REST_WITH_CUSTOMER_KEY)
-                .withActiveKey(new KeyVaultAndKeyReference()
+                .withActiveKey(new KeyForDiskEncryptionSet()
                         .withKeyUrl("https://dummyVaultName.vault.azure.net/keys/dummyKeyName/dummyKeyVersion")
                         .withSourceVault(new SourceVault()
                                 .withId("/subscriptions/dummySubs/resourceGroups/dummyVaultResourceGroup/providers/Microsoft.KeyVault/vaults/dummyVaultName")))
@@ -921,7 +921,7 @@ public class AzureEncryptionResourcesTest {
         ReflectionTestUtils.setField(identity, "principalId", DES_PRINCIPAL_ID);
         DiskEncryptionSetInner des = (DiskEncryptionSetInner) new DiskEncryptionSetInner()
                 .withEncryptionType(DiskEncryptionSetType.ENCRYPTION_AT_REST_WITH_CUSTOMER_KEY)
-                .withActiveKey(new KeyVaultAndKeyReference()
+                .withActiveKey(new KeyForDiskEncryptionSet()
                         .withKeyUrl("https://dummyVaultName.vault.azure.net/keys/dummyKeyName/dummyKeyVersion")
                         .withSourceVault(new SourceVault()
                                 .withId("/subscriptions/dummySubs/resourceGroups/dummyVaultResourceGroup/providers/Microsoft.KeyVault/vaults/dummyVaultName")))
