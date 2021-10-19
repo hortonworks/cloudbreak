@@ -7,17 +7,17 @@ import com.sequenceiq.cloudbreak.service.upgrade.sync.common.ParcelInfo;
 
 public class CmParcelSyncOperationResult {
 
-    private final Set<ParcelInfo> installedParcels;
+    private final Set<ParcelInfo> activeParcels;
 
     private final Set<ClouderaManagerProduct> foundCmProducts;
 
-    public CmParcelSyncOperationResult(Set<ParcelInfo> installedParcels, Set<ClouderaManagerProduct> foundCmProducts) {
-        this.installedParcels = installedParcels;
+    public CmParcelSyncOperationResult(Set<ParcelInfo> activeParcels, Set<ClouderaManagerProduct> foundCmProducts) {
+        this.activeParcels = activeParcels;
         this.foundCmProducts = foundCmProducts;
     }
 
-    public Set<ParcelInfo> getInstalledParcels() {
-        return installedParcels;
+    public Set<ParcelInfo> getActiveParcels() {
+        return activeParcels;
     }
 
     public Set<ClouderaManagerProduct> getFoundCmProducts() {
@@ -25,15 +25,14 @@ public class CmParcelSyncOperationResult {
     }
 
     public boolean isEmpty() {
-        return installedParcels.isEmpty();
+        return activeParcels.isEmpty();
     }
 
     @Override
     public String toString() {
         return "CmParcelSyncOperationResult{" +
-                "installedParcels=" + installedParcels +
+                "activeParcels=" + activeParcels +
                 ", foundCmProducts=" + foundCmProducts +
                 '}';
     }
-
 }

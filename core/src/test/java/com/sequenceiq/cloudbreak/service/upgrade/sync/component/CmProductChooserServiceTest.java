@@ -33,10 +33,10 @@ public class CmProductChooserServiceTest {
 
     @Test
     void testChooseParcelProductWhenMatchingNameAndVersionThenReturns() {
-        Set<ParcelInfo> installedParcels = Set.of(new ParcelInfo(PARCEL_NAME_1, PARCEL_VERSION_1));
+        Set<ParcelInfo> activeParcels = Set.of(new ParcelInfo(PARCEL_NAME_1, PARCEL_VERSION_1));
         Set<ClouderaManagerProduct> candidateProducts = Set.of(new ClouderaManagerProduct().withName(PARCEL_NAME_1).withVersion(PARCEL_VERSION_1));
 
-        Set<ClouderaManagerProduct> foundProducts = underTest.chooseParcelProduct(installedParcels, candidateProducts);
+        Set<ClouderaManagerProduct> foundProducts = underTest.chooseParcelProduct(activeParcels, candidateProducts);
 
         assertThat(foundProducts, hasSize(1));
         ClouderaManagerProduct foundProduct = foundProducts.iterator().next();
@@ -46,7 +46,7 @@ public class CmProductChooserServiceTest {
 
     @Test
     void testChooseParcelProductWhenMultipleMatchingNameAndVersionThenReturnsAllMatches() {
-        Set<ParcelInfo> installedParcels = Set.of(
+        Set<ParcelInfo> activeParcels = Set.of(
                 new ParcelInfo(PARCEL_NAME_1, PARCEL_VERSION_1),
                 new ParcelInfo(PARCEL_NAME_2, PARCEL_VERSION_2)
         );
@@ -55,7 +55,7 @@ public class CmProductChooserServiceTest {
                 new ClouderaManagerProduct().withName(PARCEL_NAME_2).withVersion(PARCEL_VERSION_2)
         );
 
-        Set<ClouderaManagerProduct> foundProducts = underTest.chooseParcelProduct(installedParcels, candidateProducts);
+        Set<ClouderaManagerProduct> foundProducts = underTest.chooseParcelProduct(activeParcels, candidateProducts);
 
         assertThat(foundProducts, hasSize(2));
         List<ClouderaManagerProduct> foundProductList = new ArrayList<>(foundProducts);
@@ -68,13 +68,13 @@ public class CmProductChooserServiceTest {
 
     @Test
     void testChooseParcelProductWhenMultipleMatchingNameAndVersionThenReturnsOne() {
-        Set<ParcelInfo> installedParcels = Set.of(new ParcelInfo(PARCEL_NAME_1, PARCEL_VERSION_1));
+        Set<ParcelInfo> activeParcels = Set.of(new ParcelInfo(PARCEL_NAME_1, PARCEL_VERSION_1));
         Set<ClouderaManagerProduct> candidateProducts = Set.of(
                 new ClouderaManagerProduct().withName(PARCEL_NAME_1).withVersion(PARCEL_VERSION_1),
                 new ClouderaManagerProduct().withName(PARCEL_NAME_1).withVersion(PARCEL_VERSION_1)
         );
 
-        Set<ClouderaManagerProduct> foundProducts = underTest.chooseParcelProduct(installedParcels, candidateProducts);
+        Set<ClouderaManagerProduct> foundProducts = underTest.chooseParcelProduct(activeParcels, candidateProducts);
 
         assertThat(foundProducts, hasSize(1));
         ClouderaManagerProduct foundProduct = foundProducts.iterator().next();
@@ -84,20 +84,20 @@ public class CmProductChooserServiceTest {
 
     @Test
     void testChooseParcelProductWhenMatchingNameButDifferentVersionThenEmptyResult() {
-        Set<ParcelInfo> installedParcels = Set.of(new ParcelInfo(PARCEL_NAME_1, PARCEL_VERSION_2));
+        Set<ParcelInfo> activeParcels = Set.of(new ParcelInfo(PARCEL_NAME_1, PARCEL_VERSION_2));
         Set<ClouderaManagerProduct> candidateProducts = Set.of(new ClouderaManagerProduct().withName(PARCEL_NAME_1).withVersion(PARCEL_VERSION_1));
 
-        Set<ClouderaManagerProduct> foundProducts = underTest.chooseParcelProduct(installedParcels, candidateProducts);
+        Set<ClouderaManagerProduct> foundProducts = underTest.chooseParcelProduct(activeParcels, candidateProducts);
 
         assertThat(foundProducts, hasSize(0));
     }
 
     @Test
     void testChooseParcelProductWhenDifferentNameButSameVersionThenEmptyResult() {
-        Set<ParcelInfo> installedParcels = Set.of(new ParcelInfo(PARCEL_NAME_2, PARCEL_VERSION_1));
+        Set<ParcelInfo> activeParcels = Set.of(new ParcelInfo(PARCEL_NAME_2, PARCEL_VERSION_1));
         Set<ClouderaManagerProduct> candidateProducts = Set.of(new ClouderaManagerProduct().withName(PARCEL_NAME_1).withVersion(PARCEL_VERSION_1));
 
-        Set<ClouderaManagerProduct> foundProducts = underTest.chooseParcelProduct(installedParcels, candidateProducts);
+        Set<ClouderaManagerProduct> foundProducts = underTest.chooseParcelProduct(activeParcels, candidateProducts);
 
         assertThat(foundProducts, hasSize(0));
     }

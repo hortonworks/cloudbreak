@@ -157,6 +157,8 @@ public enum ResourceEvent {
     STACK_SYNC_INSTANCE_TERMINATED("stack.sync.instance.terminated"),
     STACK_SYNC_INSTANCE_DELETED_CBMETADATA("stack.sync.instance.deleted.cbmetadata"),
     STACK_SYNC_INSTANCE_DELETED_BY_PROVIDER_CBMETADATA("stack.sync.instance.deletedbyprovider.cbmetadata"),
+    STACK_SYNC_VERSIONS_FROM_CM_TO_DB_SUCCESS("stack.sync.versions.from.cm.to.db.succeeded"),
+    STACK_SYNC_VERSIONS_FROM_CM_TO_DB_FAILED("stack.sync.versions.from.cm.to.db.failed"),
     STACK_DELETE_IN_PROGRESS("stack.delete.in.progress"),
     STACK_ADDING_INSTANCES("stack.adding.instances"),
     STACK_METADATA_EXTEND_WITH_COUNT("stack.metadata.extend.with.count"),

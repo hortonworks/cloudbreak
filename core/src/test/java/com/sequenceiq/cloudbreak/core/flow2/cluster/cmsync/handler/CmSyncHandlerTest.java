@@ -21,7 +21,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.CmSyncRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.CmSyncResult;
@@ -75,14 +74,15 @@ public class CmSyncHandlerTest {
     void testAcceptWhenStackNotFound() {
         Set<String> candidateImageUuids = Set.of(IMAGE_UUID_1);
         HandlerEvent<CmSyncRequest> event = getCmSyncRequestHandlerEvent(candidateImageUuids);
-        Exception exception = new NotFoundException("Stack not found");
+        Exception exception = new CloudbreakServiceException("errordetail");
         when(stackService.getById(STACK_ID)).thenThrow(exception);
 
         CmSyncResult result = (CmSyncResult) underTest.doAccept(event);
 
         assertEquals("CMSYNCRESULT_ERROR", result.selector());
-        assertEquals(exception, result.getErrorDetails());
-        assertEquals("Unexpected error during syncing from CM", result.getStatusReason());
+        assertThat(result.getErrorDetails(), instanceOf(CloudbreakServiceException.class));
+        assertEquals("unexpected error: errordetail", result.getErrorDetails().getMessage());
+        assertEquals("unexpected error: errordetail", result.getStatusReason());
         verify(stackService).getById(STACK_ID);
         verify(cmSyncImageCollectorService, never()).collectImages(anyString(), any(), any());
         verify(cmSyncerService, never()).syncFromCmToDb(any(), any());
@@ -96,15 +96,15 @@ public class CmSyncHandlerTest {
         when(stackService.getById(STACK_ID)).thenReturn(stack);
         Set<Image> foundImages = Set.of(mock(Image.class));
         when(cmSyncImageCollectorService.collectImages(USER_CRN, stack, candidateImageUuids)).thenReturn(foundImages);
-        CmSyncOperationSummary cmSyncOperationSummary = CmSyncOperationSummary.builder().withError("Error").build();
+        CmSyncOperationSummary cmSyncOperationSummary = CmSyncOperationSummary.builder().withError("My error description").build();
         when(cmSyncerService.syncFromCmToDb(stack, foundImages)).thenReturn(cmSyncOperationSummary);
 
         CmSyncResult result = (CmSyncResult) underTest.doAccept(event);
 
         assertEquals("CMSYNCRESULT_ERROR", result.selector());
         assertThat(result.getErrorDetails(), instanceOf(CloudbreakServiceException.class));
-        assertEquals("Syncing CM version and installed parcels encountered failures. Details: Error", result.getErrorDetails().getMessage());
-        assertEquals("Syncing CM version and installed parcels encountered failures. Details: Error", result.getStatusReason());
+        assertEquals("My error description", result.getErrorDetails().getMessage());
+        assertEquals("My error description", result.getStatusReason());
     }
 
     private HandlerEvent<CmSyncRequest> getCmSyncRequestHandlerEvent(Set<String> candidateImageUuids) {

@@ -45,8 +45,9 @@ public class CmSyncHandler extends ExceptionCatcherEventHandler<CmSyncRequest> {
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<CmSyncRequest> event) {
-        LOGGER.debug("CM sync failed with default failure event: ", e);
-        return new CmSyncResult("CM sync failed", e, event.getData());
+        LOGGER.debug("Reading CM and active parcel versions from CM server encountered an unexpected error ", e);
+        String message = String.format("unexpected error: %s", e.getMessage());
+        return new CmSyncResult(message, new CloudbreakServiceException(message, e), event.getData());
     }
 
     @Override
@@ -57,16 +58,15 @@ public class CmSyncHandler extends ExceptionCatcherEventHandler<CmSyncRequest> {
             Set<Image> candidateImages = cmSyncImageCollectorService.collectImages(request.getFlowTriggerUserCrn(), stack, request.getCandidateImageUuids());
             CmSyncOperationSummary cmSyncOperationSummary = cmSyncerService.syncFromCmToDb(stack, candidateImages);
             if (!cmSyncOperationSummary.hasSucceeded()) {
-                String message = String.format("Syncing CM version and installed parcels encountered failures. Details: %s",
-                        cmSyncOperationSummary.getMessage());
-                LOGGER.debug(message);
-                Exception e = new CloudbreakServiceException(message);
-                return new CmSyncResult(message, e, request);
+                LOGGER.debug("Reading CM and active parcel versions from CM server encountered failures. Details: {}", cmSyncOperationSummary.getMessage());
+                Exception e = new CloudbreakServiceException(cmSyncOperationSummary.getMessage());
+                return new CmSyncResult(cmSyncOperationSummary.getMessage(), e, request);
             }
-            return new CmSyncResult(request);
+            return new CmSyncResult(request, cmSyncOperationSummary.getMessage());
         } catch (Exception e) {
-            LOGGER.warn("Error during syncing CM version to DB, syncing skipped.", e);
-            return new CmSyncResult("Unexpected error during syncing from CM", e, request);
+            LOGGER.warn("Reading CM and active parcel versions from CM server resulted in error ", e);
+            String message = String.format("unexpected error: %s", e.getMessage());
+            return new CmSyncResult(message, new CloudbreakServiceException(message, e), request);
         }
     }
 

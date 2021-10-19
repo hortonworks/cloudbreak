@@ -36,9 +36,9 @@ public class CmInstalledComponentFinderService {
 
     public CmParcelSyncOperationResult findParcelComponents(Stack stack, Set<Image> candidateImages) {
         Set<ClouderaManagerProduct> candidateProducts = imageReaderService.getParcels(candidateImages, stack.isDatalake());
-        Set<ParcelInfo> installedParcels = cmServerQueryService.queryActiveParcels(stack);
-        Set<ClouderaManagerProduct> installedProducts = cmProductChooserService.chooseParcelProduct(installedParcels, candidateProducts);
-        return new CmParcelSyncOperationResult(installedParcels, installedProducts);
+        Set<ParcelInfo> activeParcels = cmServerQueryService.queryActiveParcels(stack);
+        Set<ClouderaManagerProduct> activeProducts = cmProductChooserService.chooseParcelProduct(activeParcels, candidateProducts);
+        return new CmParcelSyncOperationResult(activeParcels, activeProducts);
     }
 
 }

@@ -15,9 +15,13 @@ public class CmSyncOperationResultEvaluatorService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CmSyncOperationResultEvaluatorService.class);
 
+    private static final String READING_CM_VERSION = "Reading CM repository version";
+
+    private static final String READING_PARCEL_VERSIONS = "Reading versions of active parcels";
+
     public CmSyncOperationSummary.Builder evaluateParcelSync(CmParcelSyncOperationResult cmParcelSyncOperationResult) {
-        if (cmParcelSyncOperationResult.getInstalledParcels().isEmpty()) {
-            String message = "CM parcel sync failed, it was not possible to retrieve installed parcel versions from the CM server.";
+        if (cmParcelSyncOperationResult.getActiveParcels().isEmpty()) {
+            String message = String.format("%s failed, it was not possible to retrieve versions of active parcels from the CM server.", READING_PARCEL_VERSIONS);
             LOGGER.debug(message);
             return CmSyncOperationSummary.builder().withError(message);
         } else {
@@ -27,7 +31,7 @@ public class CmSyncOperationResultEvaluatorService {
 
     public CmSyncOperationSummary.Builder evaluateCmRepoSync(CmRepoSyncOperationResult cmRepoSyncOperationResult) {
         if (cmRepoSyncOperationResult.getInstalledCmVersion().isEmpty()) {
-            String message = "CM repository sync failed, it was not possible to retrieve CM version from the server.";
+            String message = String.format("%s failed, it was not possible to retrieve CM version from the server.", READING_CM_VERSION);
             LOGGER.debug(message);
             return CmSyncOperationSummary.builder().withError(message);
         } else {
@@ -36,38 +40,46 @@ public class CmSyncOperationResultEvaluatorService {
     }
 
     private CmSyncOperationSummary.Builder evaluateIfAllParcelsWereFound(CmParcelSyncOperationResult cmParcelSyncOperationResult) {
-        Set<String> installedParcelNames = cmParcelSyncOperationResult.getInstalledParcels().stream().map(ParcelInfo::getName).collect(Collectors.toSet());
+        Set<String> activeParcelNames = cmParcelSyncOperationResult.getActiveParcels().stream().map(ParcelInfo::getName).collect(Collectors.toSet());
         Set<String> foundCmProductNames = cmParcelSyncOperationResult.getFoundCmProducts().stream().map(cmp -> cmp.getName()).collect(Collectors.toSet());
-        Set<String> notFoundProductNames = Sets.difference(installedParcelNames, foundCmProductNames);
+        Set<String> notFoundProductNames = Sets.difference(activeParcelNames, foundCmProductNames);
         if (notFoundProductNames.isEmpty()) {
-            String message = String.format("Successfully synced following parcel versions from CM server: %s", installedParcelNames);
+            String message = String.format("%s succeeded, the following active parcels were found on the CM server: %s.", READING_PARCEL_VERSIONS,
+                    activeParcelsToPrintableList(cmParcelSyncOperationResult));
             LOGGER.debug(message);
             return CmSyncOperationSummary.builder().withSuccess(message);
         } else {
-            String message = getParcelErrorMessage(installedParcelNames, foundCmProductNames, notFoundProductNames);
+            String message = getParcelErrorMessage(activeParcelNames, foundCmProductNames, notFoundProductNames);
             LOGGER.debug(message);
             return CmSyncOperationSummary.builder().withError(message);
         }
+    }
+
+    private String activeParcelsToPrintableList(CmParcelSyncOperationResult cmParcelSyncOperationResult) {
+        return cmParcelSyncOperationResult.getActiveParcels().stream()
+                .map(ap -> String.format("%s: %s", ap.getName(), ap.getVersion()))
+                .collect(Collectors.joining(", "));
     }
 
     private CmSyncOperationSummary.Builder evaluateIfCmRepoWasFound(CmRepoSyncOperationResult cmRepoSyncOperationResult) {
         String cmInstalledVersion = cmRepoSyncOperationResult.getInstalledCmVersion().get();
         if (cmRepoSyncOperationResult.getFoundClouderaManagerRepo().isEmpty()) {
-            String message = String.format("CM repository sync failed, no matching component found for CM server version %s.", cmInstalledVersion);
+            String message = String.format("%s failed, no matching component found on images for CM server version %s.", READING_CM_VERSION, cmInstalledVersion);
             LOGGER.debug(message);
             return CmSyncOperationSummary.builder().withError(message);
         } else {
-            String message = String.format("CM repository sync succeeded, CM server version is %s.", cmInstalledVersion);
+            String message = String.format("%s succeeded, the current version of CM is %s.", READING_CM_VERSION, cmInstalledVersion);
             LOGGER.debug(message);
             return CmSyncOperationSummary.builder().withSuccess(message);
         }
     }
 
-    private String getParcelErrorMessage(Set<String> installedParcelNames, Set<String> foundCmProductNames, Set<String> notFoundProductNames) {
-        return notFoundProductNames.size() == installedParcelNames.size()
-                ? String.format("The version of parcels could not be synced from CM server: %s.", notFoundProductNames)
-                : String.format("The version of some parcels could not be synced from CM server: %s. Parcel versions successfully synced: %s ",
-                notFoundProductNames, foundCmProductNames);
+    private String getParcelErrorMessage(Set<String> activeParcelNames, Set<String> foundCmProductNames, Set<String> notFoundProductNames) {
+        return notFoundProductNames.size() == activeParcelNames.size()
+                ? String.format("%s failed, the version of active parcels that could not be retrieved from CM server: %s.",
+                READING_PARCEL_VERSIONS, notFoundProductNames)
+                : String.format("%s failed, the version of some active parcels could not be retrieved from CM server: %s. " +
+                        "Parcel versions successfully read: %s.", READING_PARCEL_VERSIONS, notFoundProductNames, foundCmProductNames);
     }
 
 }
