@@ -77,22 +77,30 @@ class LoadBalancerSANProviderTest {
 
     @Test
     void newerVersionHasLoadBalancerWithDNS() {
-        loadBalancerSetUp("foobar.timbuk2.com");
+        loadBalancerSetUp("foobar.timbuk2.com", null);
         assertEquals("DNS:foobar.timbuk2.com", loadBalancerSANProvider.getLoadBalancerSAN(stack).get());
     }
 
     @Test
-    void newerVersionHasLoadBalancerWithoutDNS() {
-        loadBalancerSetUp(null);
+    void newerVersionHasLoadBalancerWithIP() {
+        loadBalancerSetUp(null, "10.10.10.10");
         assertEquals("IP:10.10.10.10", loadBalancerSANProvider.getLoadBalancerSAN(stack).get());
     }
 
-    private void loadBalancerSetUp(String dns) {
+    @Test
+    void newerVersionHasLoadBalancerWithoutDNSOrIP() {
+        loadBalancerSetUp(null, null);
+        assertTrue(loadBalancerSANProvider.getLoadBalancerSAN(stack).isEmpty());
+    }
+
+    private void loadBalancerSetUp(String dns, String ip) {
         LoadBalancer loadBalancer = new LoadBalancer();
         if (dns != null) {
             loadBalancer.setDns("foobar.timbuk2.com");
         }
-        loadBalancer.setIp("10.10.10.10");
+        if (ip != null) {
+            loadBalancer.setIp("10.10.10.10");
+        }
         Set<LoadBalancer> loadBalancers = new HashSet<>();
         loadBalancers.add(loadBalancer);
         when(loadBalancerPersistenceService.findByStackId(ID)).thenReturn(loadBalancers);
