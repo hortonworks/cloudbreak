@@ -29,7 +29,7 @@ A development version is released after a pull request is merged into the master
 
 The development release also creates and pushes a git tag to the repository with the same version number. If the latest tag before the build is a `dev` tag, the build number will increment the dev number like `0.6.0-dev.13`. If it was an `rc` tag, the minor version is incremented and the dev version starts from 1, like `0.7.0-dev.1`. To create a dev version (and upload it to the repository) run this gradle command on the master:
 
-`./gradlew clean build uploadBootArchives release -Prelease.scope=minor -Prelease.stage=dev`
+`./gradlew clean build publishBootJavaPublicationToMavenRepository release -Prelease.scope=minor -Prelease.stage=dev`
 
 ### Example 3: Release candidates
 
@@ -39,10 +39,10 @@ The first release candidate can be created if the dev version seems stable enoug
 
 The release task also creates a git tag and pushes a git tag with the same version. If this task is completed, the latest tag on the master branch will be a `rc` so the next master build will increment the minor version. After the `rc-<major>.<minor>` branch was created, the new features can go into master, but it is possible that the first `rc` needs to be patched before a final version is released. If a pull request is merged to the `rc-<major>.<minor>` branch the next rc version (`0.6.0-rc.2`) will be released and the gradle task will tag the commit on the `rc` branch with the same version. If the latest tag on the `rc` branch is a `final release`, the patch version will be incremented and the `rc` will start from 1 like `0.6.1-rc.1`. To create a release candidate run this gradle command:
 
-`./gradlew clean build uploadBootArchives release -Prelease.scope=minor -Prelease.stage=rc`
+`./gradlew clean build publishBootJavaPublicationToMavenRepository release -Prelease.scope=minor -Prelease.stage=rc`
 
 ### Example 4: Final releases
 
 When the `rc` branch is considered stable a final version is released. The final release should be created on a new branch named `release-<major.minor>` (e.g.: `release-0.6`) from the latest commit on the `rc` branch. The final version is based on the latest release candidate tag (e.g.: if the latest rc was `0.6.2-rc.2` the final version will be `0.6.2`) and the gradle task also tags the git commit with the final version. To release a final version run this gradle command:
 
-`./gradlew clean build uploadBootArchives release -Prelease.scope=minor -Prelease.stage=final`
+`./gradlew clean build publishBootJavaPublicationToMavenRepository release -Prelease.scope=minor -Prelease.stage=final`

@@ -18,7 +18,7 @@ else
   SCOPE=patch
 fi
 
-./gradlew -Penv=jenkins -b build.gradle build uploadBootArchives :freeipa-client:uploadArchives -Preckon.scope=$SCOPE -Preckon.stage=final --refresh-dependencies --info --stacktrace --parallel -x checkstyleMain -x checkstyleTest -x spotbugsMain -x spotbugsTest
+./gradlew -Penv=jenkins -b build.gradle build publishBootJavaPublicationToMavenRepository :freeipa-client:publishMavenJavaPublicationToMavenRepository -Preckon.scope=$SCOPE -Preckon.stage=final --refresh-dependencies --info --stacktrace --parallel -x checkstyleMain -x checkstyleTest -x spotbugsMain -x spotbugsTest
 RECKONED_VERSION=$(./gradlew -Penv=jenkins -b build.gradle buildInfo -Preckon.scope=$SCOPE -Preckon.stage=final | grep Reckoned)
 VERSION=${RECKONED_VERSION#Reckoned version: }
 
