@@ -42,7 +42,7 @@ import com.microsoft.azure.management.compute.DiskSkuTypes;
 import com.microsoft.azure.management.compute.DiskStorageAccountTypes;
 import com.microsoft.azure.management.compute.Encryption;
 import com.microsoft.azure.management.compute.EncryptionSetIdentity;
-import com.microsoft.azure.management.compute.KeyVaultAndKeyReference;
+import com.microsoft.azure.management.compute.KeyForDiskEncryptionSet;
 import com.microsoft.azure.management.compute.OperatingSystemStateTypes;
 import com.microsoft.azure.management.compute.SourceVault;
 import com.microsoft.azure.management.compute.VirtualMachine;
@@ -957,11 +957,11 @@ public class AzureClient {
 
     private DiskEncryptionSetInner createDiskEncryptionSetInner(String sourceVaultId, String encryptionKeyUrl, String location, Map<String, String> tags) {
         SourceVault sourceVault = new SourceVault().withId(sourceVaultId);
-        KeyVaultAndKeyReference keyUrl = new KeyVaultAndKeyReference().withKeyUrl(encryptionKeyUrl).withSourceVault(sourceVault);
+        KeyForDiskEncryptionSet keyForDiskEncryptionSet = new KeyForDiskEncryptionSet().withKeyUrl(encryptionKeyUrl).withSourceVault(sourceVault);
         EncryptionSetIdentity eSetId = new EncryptionSetIdentity().withType(DiskEncryptionSetIdentityType.SYSTEM_ASSIGNED);
         return (DiskEncryptionSetInner) new DiskEncryptionSetInner()
                 .withEncryptionType(DiskEncryptionSetType.ENCRYPTION_AT_REST_WITH_CUSTOMER_KEY)
-                .withActiveKey(keyUrl)
+                .withActiveKey(keyForDiskEncryptionSet)
                 .withIdentity(eSetId)
                 .withLocation(location)
                 .withTags(tags);
